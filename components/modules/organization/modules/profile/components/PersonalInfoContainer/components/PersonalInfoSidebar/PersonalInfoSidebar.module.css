@@ -1,0 +1,55 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: calc(100vh - var(--space-7));
+  overflow: hidden;
+}
+
+.inner {
+  padding: var(--space-4);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.groupBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-sm);
+  border: var(--border-sm) solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--font-size-base);
+  color: hsl(var(--text-body));
+  transition: background var(--duration-base) var(--easing-standard),
+  border-color var(--duration-base) var(--easing-standard);
+}
+
+.groupBtn:hover {
+  background: hsl(var(--surface-secondary));
+}
+
+.active {
+  background: hsl(var(--surface-secondary));
+  border-color: hsl(var(--border-primary));
+}
+
+.dot {
+  width: var(--size-300);
+  height: var(--size-300);
+  border-radius: 999px;
+  background: hsl(var(--border-disabled));
+  flex-shrink: 0;
+}
+
+.dot[data-active="true"] {
+  background: hsl(var(--surface-action-1));
+}
+
+.label {
+  line-height: var(--line-height-sm);
+}

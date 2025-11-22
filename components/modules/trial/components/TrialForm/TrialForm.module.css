@@ -1,0 +1,117 @@
+.centerWrap {
+  min-height: 85dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8);
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.titleBlock {
+  text-align: center;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.kicker {
+  font-size: var(--font-size-sm);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: hsl(var(--text-disabled));
+}
+
+.title {
+  margin: 0;
+  color: hsl(var(--text-headings));
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.subtitle {
+  margin: 0;
+  color: hsl(var(--text-body) / .85);
+  font-size: var(--font-size-sm);
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.subdomainRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.subdomainInputWrap {
+  min-width: 0;
+}
+
+.subdomainSuffix {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input);
+  background: hsl(var(--surface-secondary));
+  color: hsl(var(--text-disabled));
+  white-space: nowrap;
+}
+
+.hint {
+  margin: 0;
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-xs);
+}
+
+.legal {
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  display: block;
+}
+
+.apiError {
+  margin: 0;
+  color: hsl(var(--text-error));
+  font-size: var(--font-size-sm);
+}
+
+.loginBack {
+  text-align: center;
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-sm);
+}
+
+.loginBack a {
+  color: hsl(var(--text-action));
+}
+
+.successBlock {
+  display: grid;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.successBlock .subtitle {
+  font-size: var(--font-size-base);
+  color: hsl(var(--text-body) / .85);
+}
+
+.successBlock .hint {
+  font-size: var(--font-size-sm);
+  color: hsl(var(--text-disabled));
+}

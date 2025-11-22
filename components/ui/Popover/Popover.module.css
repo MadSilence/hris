@@ -1,0 +1,11 @@
+.content {
+  min-width: 240px;
+  max-width: 480px;
+  background: hsl(var(--surface-primary, 0 0% 100%));
+  border: 1px solid hsl(var(--border-primary, 0 0% 90%));
+  border-radius: var(--radius-card, 8px);
+  box-shadow: var(--shadow-lg, 0 10px 30px rgba(0,0,0,.1));
+  padding: 8px;
+  z-index: 50;
+  will-change: top, left;
+}

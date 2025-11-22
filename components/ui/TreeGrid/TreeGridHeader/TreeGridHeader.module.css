@@ -1,0 +1,44 @@
+.headerRow {
+  display: grid;
+  column-gap: var(--space-6);
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: hsl(var(--surface-primary));
+  padding: var(--space-2) var(--space-6) var(--space-2) 0;
+  border-bottom: 1px solid lightgrey;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.headerCell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: hsl(var(--text-base));
+}
+
+.headerCell:first-child {
+  padding-left: calc(1rem + 22px + var(--space-3));
+}
+
+.headerContent {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.headerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  color: hsl(var(--text-body));
+}

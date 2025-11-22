@@ -1,0 +1,15 @@
+.row {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) 1fr;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-top: 0;
+}
+
+.row:not(:first-child) { border-top: var(--border-sm) solid hsl(var(--border-primary)); }
+
+.label { color: hsl(var(--text-body)); font-size: var(--font-size-sm); }
+.value { color: hsl(var(--text-headings)); font-size: var(--font-size-sm); }
+
+.muted { color: hsl(var(--text-disabled)); }
+.italic { font-style: italic; }

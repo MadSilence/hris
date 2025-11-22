@@ -1,0 +1,88 @@
+.optionsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.textInput {
+  width: 100%;
+  gap: 0;
+  padding: 0;
+}
+
+.textInput :global(input) {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+}
+
+.palette {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: nowrap;
+}
+
+.dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.dot:hover:not(:disabled) {
+  outline: 2px solid hsl(var(--border-focus, 220 85% 60%));
+  outline-offset: 2px;
+}
+
+.selected {
+  box-shadow: 0 0 0 2px hsl(var(--surface-primary)) inset,
+  0 0 0 2px hsl(var(--border-focus, 220 85% 60%));
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 6px);
+  color: hsl(var(--icon-primary));
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: hsl(var(--surface-hover, 0 0% 96%));
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid hsl(var(--border-focus, 220 85% 60%));
+  outline-offset: 2px;
+}
+
+.trashIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.addWrap {
+  display: flex;
+  justify-content: flex-start;
+}

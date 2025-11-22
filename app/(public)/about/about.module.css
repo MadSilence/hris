@@ -1,0 +1,6 @@
+.wrap { max-width: 1120px; margin-inline: auto; padding-inline: var(--space-6); display: grid; gap: var(--space-6); margin-bottom: 200px; }
+.h1 { margin: 0; color: hsl(var(--text-headings)); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
+.card h3 { margin: 0 0 var(--space-2); color: hsl(var(--text-headings)); }
+.card p, .card ul { margin: 0; color: hsl(var(--text-body)); }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }

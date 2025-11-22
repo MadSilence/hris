@@ -1,0 +1,68 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Кнопка-свотч 24px */
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.swatch:hover:not(:disabled) {
+  outline: 2px solid hsl(var(--border-focus, 220 85% 60%));
+  outline-offset: 2px;
+}
+
+.swatch:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Поповер */
+.popover {
+  position: absolute;
+  bottom: calc(100% + 8px); /* всплывает ВВЕРХ от свотча */
+  right: 0;                 /* можно поменять на left:0, если удобнее */
+  background: hsl(var(--surface-primary));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-md, 10px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: var(--space-3);
+  z-index: 50;
+}
+
+/* Палитра в поповере */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(5, 24px);
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.dot:hover {
+  outline: 2px solid hsl(var(--border-focus, 220 85% 60%));
+  outline-offset: 2px;
+}
+
+.selected {
+  box-shadow:
+    0 0 0 2px hsl(var(--surface-primary)) inset,
+    0 0 0 2px hsl(var(--border-focus, 220 85% 60%));
+}

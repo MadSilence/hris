@@ -1,0 +1,125 @@
+.row {
+  display: grid;
+  column-gap: var(--space-6);
+  padding: 0 var(--space-6) 0 0;
+  border-bottom: 1px solid lightgrey;
+  min-height: 1.5rem;
+  align-items: stretch;
+  background: hsl(var(--surface-base));
+  font-weight: 350;
+}
+
+.nameColumn,
+.cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--text-body));
+  text-align: left;
+  padding: var(--space-2) 0;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  line-height: 1;
+  width: 1rem;
+  cursor: grab;
+  color: hsl(var(--text-body));
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.levelGuides {
+  display: flex;
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+.levelGuide {
+  position: relative;
+  width: 22px;
+  flex: 0 0 22px;
+  height: 100%;
+}
+
+.levelGuide::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--space-2) * -1);
+  bottom: calc(var(--space-2) * -1);
+  left: 50%;
+  width: 1px;
+  background: lightgrey;
+  transform: translateX(-50%);
+}
+
+.nodeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toggleButton {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: hsl(var(--surface-primary));
+  color: hsl(var(--text-action));
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.toggleButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toggleButton:hover {
+  background: hsl(var(--surface-action-2-hover));
+}
+
+.togglePlaceholder {
+  width: 22px;
+  height: 22px;
+}
+
+.row:hover {
+  background: hsl(var(--surface-action-2-hover));
+}
+
+.rowDragEnabled {
+  cursor: default;
+}
+
+.rowDragging {
+  background: hsl(var(--surface-primary));
+  outline: 1px solid lightgrey;
+  outline-offset: -1px;
+  opacity: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.rowOver {
+  background: hsl(var(--surface-action-2-hover));
+}

@@ -1,0 +1,11 @@
+/* styles/themes.css
+   Use data attributes for tenant overrides later.
+   Keep empty for now or use as a reference for one sample tenant.
+*/
+
+/* Example (commented):
+html[data-tenant="acme"] {
+  --surface-action-1: #0b5fff;
+  --text-on-action: #ffffff;
+}
+*/

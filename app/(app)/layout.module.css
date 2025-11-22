@@ -1,0 +1,13 @@
+.frame {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-height: 100dvh;
+  background: hsl(var(--surface-page));
+}
+
+.main {
+  min-width: 0;
+  height: 100dvh;
+  overflow: auto;
+  color: hsl(var(--text-body));
+}

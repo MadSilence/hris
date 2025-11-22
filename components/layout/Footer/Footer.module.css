@@ -1,0 +1,26 @@
+.footer {
+    background: hsl(var(--surface-primary));
+    border-top: var(--border-sm) solid hsl(var(--border-primary));
+}
+.inner {
+    max-width: 1120px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-6);
+}
+.copy {
+    color: hsl(var(--text-disabled));
+}
+.links {
+    display: flex;
+    gap: var(--space-6);
+}
+.links a {
+    color: hsl(var(--text-body));
+}
+.links a:hover {
+    color: hsl(var(--text-action));
+}

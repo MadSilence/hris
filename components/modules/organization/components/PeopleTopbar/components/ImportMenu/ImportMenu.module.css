@@ -1,0 +1,29 @@
+.menuPopup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  min-width: 220px;
+  background: hsl(var(--surface-primary));
+  border: 1px solid hsl(var(--border-primary));
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+}
+
+.link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-action);
+  padding: 4px 0;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--text-action-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

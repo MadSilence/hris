@@ -1,0 +1,53 @@
+.wrap {
+  display: grid;
+  gap: var(--space-7);
+  padding: var(--space-5) var(--space-6);
+}
+
+.tablistWrap {
+  position: relative;
+}
+
+.tablist {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 0 var(--space-1);
+  position: relative;
+}
+
+.separator {
+  position: relative;
+  height: 1px;
+  background: hsl(var(--border-primary));
+}
+
+.indicator {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  background: hsl(var(--border-secondary));
+  border-radius: 999px;
+  transform: translateX(0);
+  transition: transform var(--duration-base) var(--easing-standard),
+  width var(--duration-base) var(--easing-standard);
+  z-index: 1;
+}
+
+.description {
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  width: 100%;
+}
+
+.description a {
+  color: hsl(var(--text-action));
+  text-decoration: underline;
+}
+
+.description a:hover {
+  color: hsl(var(--text-action-hover));
+}

@@ -1,0 +1,178 @@
+:root {
+  /* =========================
+     COLORS – PRIMITIVES (HSL triplets)
+     ========================= */
+  /* Greys / Neutrals */
+  --color-grey-darkest: 0 0% 11%;
+  --color-grey-darker: 0 0% 19%;
+  --color-grey-dark: 0 0% 25%;
+  --color-grey: 0 0% 31%;
+  --color-grey-light: 0 0% 60%;
+  --color-grey-lighter: 0 0% 74%;
+  --color-grey-lightest: 60 11% 96%;
+  --color-white: 0 0% 100%;
+  --color-black: 0 0% 0%;
+
+  /* Reds */
+  --color-red-darkest: 7 31% 16%;
+  --color-red-darker: 0 100% 13%;
+  --color-red-dark: 0 100% 25%;
+  --color-red: 0 100% 50%;
+  --color-red-light: 0 100% 63%;
+  --color-red-lighter: 0 100% 87%;
+
+  /* Oranges / Yellows (warning) */
+  --color-orange: 30 93% 45%;
+  --color-yellow-darkest: 43 66% 11%;
+  --color-yellow-darker: 43 78% 21%;
+  --color-yellow-dark: 42 78% 28%;
+  --color-yellow: 45 100% 35%;
+  --color-yellow-light: 45 76% 52%;
+  --color-yellow-lighter: 48 100% 92%;
+
+  /* Greens (success) */
+  --color-green-darkest: 156 18% 17%;
+  --color-green-darker: 157 56% 22%;
+  --color-green-dark: 157 58% 27%;
+  --color-green: 155 65% 39%;
+  --color-green-light: 157 58% 54%;
+  --color-green-lighter: 160 28% 90%;
+
+  /* Teals (secondary) */
+  --color-teal-darker: 185 46% 25%;
+  --color-teal-dark: 187 45% 36%;
+  --color-teal: 187 71% 39%;
+  --color-teal-light: 186 57% 59%;
+  --color-teal-lighter: 186 73% 85%;
+
+  /* Blues (information) */
+  --color-blue-darkest: 214 62% 10%;
+  --color-blue-darker: 214 88% 22%;
+  --color-blue-dark: 214 100% 39%;
+  --color-blue: 215 97% 55%;
+  --color-blue-light: 214 97% 66%;
+  --color-blue-lighter: 214 100% 78%;
+  --color-blue-lightest: 198 74% 95%;
+
+  /* Purples (highlight) */
+  --color-purple-darker: 251 38% 28%;
+  --color-purple-dark: 250 38% 50%;
+  --color-purple: 250 60% 65%;
+  --color-purple-light: 249 71% 75%;
+  --color-purple-lighter: 249 88% 97%;
+
+  /* Magenta (spare accent) */
+  --color-magenta: 323 55% 56%;
+
+  /* =========================
+     TYPOGRAPHY
+     ========================= */
+  --font-sans: var(--font-sans), Helvetica, Arial, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+  monospace;
+
+  /* Sensible type scale (edit later) */
+  --font-size-xs: 0.75rem;
+  --line-height-xs: 1.1rem;
+  --font-size-sm: 0.875rem;
+  --line-height-sm: 1.3rem;
+  --font-size-base: 1rem;
+  --line-height-base: 1.5rem;
+  --font-size-lg: 1.125rem;
+  --line-height-lg: 1.7rem;
+  --font-size-xl: 1.25rem;
+  --line-height-xl: 1.8rem;
+  --font-size-2xl: 1.5rem;
+  --line-height-2xl: 2rem;
+  --font-size-3xl: 2rem;
+  --line-height-3xl: 2.4rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* =========================
+     SPACING & SIZING (rem, 4px base)
+     ========================= */
+  /* Spacing scale */
+  --space-0: 0rem; /* 0px   */
+  --space-1: 0.125rem; /* 2px   */
+  --space-2: 0.25rem; /* 4px   */
+  --space-3: 0.5rem; /* 8px   */
+  --space-4: 0.75rem; /* 12px  */
+  --space-5: 1rem; /* 16px  */
+  --space-6: 1.5rem; /* 24px  */
+  --space-7: 2rem; /* 32px  */
+  --space-8: 3rem; /* 48px  */
+  --space-9: 4rem; /* 64px  */
+
+  /* Component-specific gaps from Figma */
+  --button-lg-icon-gap: 0.625rem; /* 10px */
+  --button-md-icon-gap: var(--space-4); /* 12px */
+  --button-sm-icon-gap: 0.625rem; /* 10px */
+
+  /* Sizing (kept representative set) */
+  --size-0: 0rem; /* 0px  */
+  --size-25: 0.0625rem; /* 1px  */
+  --size-50: 0.125rem; /* 2px  */
+  --size-100: 0.25rem; /* 4px  */
+  --size-200: 0.5rem; /* 8px  */
+  --size-300: 0.75rem; /* 12px */
+  --size-400: 1rem; /* 16px */
+  --size-500: 1.5rem; /* 24px */
+  --size-600: 2rem; /* 32px */
+  --size-700: 4rem; /* 64px */
+
+  /* =========================
+     RADII & BORDERS (rem)
+     ========================= */
+  --radius-none: 0rem;
+  --radius-xs: 0.125rem; /* 2px  */
+  --radius-sm: 0.375rem; /* 6px  */
+  --radius-md: 1.5rem; /* 8px  */
+  --radius-round: 3.125rem; /* 50px */
+
+  /* Component radii defaults */
+  --radius-input: var(--radius-sm);
+  --radius-button: var(--radius-md);
+  --radius-card: var(--radius-md);
+  --radius-alert: var(--radius-sm);
+
+  /* Border widths */
+  --border-none: 0;
+  --border-sm: 0.0625rem; /* 1px */
+  --border-md: 0.125rem; /* 2px */
+  --border-lg: 0.25rem; /* 4px */
+
+  /* Component borders */
+  --border-avatar: 0.09375rem; /* 1.5px */
+  --border-form: var(--border-md);
+  --border-highlight: var(--border-sm);
+
+  /* =========================
+     SHADOWS
+     ========================= */
+  --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.06);
+  --shadow-md: 0 2px 8px 0 hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.16);
+  --shadow-xl: 0 12px 40px -6px hsl(0 0% 0% / 0.18);
+
+  /* =========================
+     OPACITY (0..1)
+     ========================= */
+  --opacity-0: 0;
+  --opacity-25: 0.25;
+  --opacity-50: 0.5;
+  --opacity-75: 0.75;
+  --opacity-100: 1;
+
+  /* =========================
+     MOTION
+     ========================= */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --easing-emphasized: cubic-bezier(0.2, 0, 0, 1.2);
+}

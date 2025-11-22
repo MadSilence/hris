@@ -1,0 +1,114 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.item {
+  background: hsl(var(--surface-primary));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input-sem);
+  box-shadow: var(--shadow-sm-sem);
+  font-size: var(--font-size-base);
+}
+
+.rowHeader {
+  display: flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  min-height: 40px;
+}
+
+.rowLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rowRight {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+  position: relative;
+  padding-left: var(--space-6);
+}
+
+.handle {
+  cursor: grab;
+  user-select: none;
+  font-weight: 700;
+  width: 18px;
+  text-align: center;
+  color: hsl(var(--icon-primary));
+  flex: 0 0 auto;
+}
+
+.label {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--text-body));
+  font-size: var(--font-size-base);
+}
+
+.presetPill {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-xs);
+  border-radius: var(--radius-round);
+  padding: 0.25rem 0.5rem;
+  background: hsl(var(--surface-secondary));
+  color: hsl(var(--text-disabled));
+  white-space: nowrap;
+}
+
+.arrowBtn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: hsl(var(--text-action));
+  cursor: pointer;
+}
+
+.arrowBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.rowDetailsWide {
+  padding: var(--space-5) var(--space-6);
+  border-top: none;
+}
+
+.nameWrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nameInput {
+  width: 100%;
+  gap: 0;
+  padding: 0;
+}
+
+.nameInput :global(input) {
+  padding: var(--space-2) var(--space-3);
+}
+
+.trashBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 var(--space-2);
+  color: hsl(var(--icon-primary));
+}
+
+.trashBtn svg {
+  width: 24px;
+  height: 24px;
+}

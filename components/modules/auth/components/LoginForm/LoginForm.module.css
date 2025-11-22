@@ -1,0 +1,56 @@
+.centerWrap {
+  min-height: calc(100dvh - 20dvh);
+  display: grid;
+  place-items: center;
+  background: hsl(var(--surface-secondary));
+  padding: var(--space-7);
+  overflow: hidden; /* avoid stray scrollbars */
+}
+
+.card {
+  width: min(400px, 100%);
+  background: hsl(var(--surface-primary));
+}
+
+.form {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-bold);
+  color: hsl(var(--text-headings));
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-2xl);
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.apiError {
+  margin: 0;
+  color: hsl(var(--text-error));
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  text-align: left;
+}
+
+.links {
+  display: flex;
+  gap: var(--space-6);
+  justify-content: center;
+}
+
+.links a {
+  color: hsl(var(--text-body));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.links a:hover {
+  color: hsl(var(--text-action));
+}

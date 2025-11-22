@@ -1,0 +1,27 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-input-sem);
+  font-size: var(--font-size-base);
+  color: hsl(var(--text-body));
+  cursor: pointer;
+  transition: background var(--duration-base) var(--easing-standard)
+}
+
+.item:hover {
+  background: hsl(var(--surface-secondary));
+}
+
+.active {
+  background: hsl(var(--surface-secondary));
+  font-weight: var(--font-weight-medium);
+  border: var(--border-sm);
+}
+
+.handle {
+  opacity: var(--opacity-50);
+  user-select: none;
+  cursor: grab;
+}

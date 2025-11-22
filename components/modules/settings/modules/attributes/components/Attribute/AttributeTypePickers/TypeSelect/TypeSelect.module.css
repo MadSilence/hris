@@ -1,0 +1,16 @@
+.selectLabel {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-semibold);
+  color: hsl(var(--text-headings));
+}
+
+.select {
+  width: 100%;
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input-sem);
+  padding: var(--space-3) var(--space-8) var(--space-3) var(--space-4);
+  color: hsl(var(--text-body));
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}

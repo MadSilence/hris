@@ -1,0 +1,64 @@
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: 6px;
+}
+
+.itemRow:hover {
+  background: hsl(var(--surface-secondary));
+}
+
+.itemLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+
+.switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: hsl(var(--surface-secondary));
+  border: 1px solid hsl(var(--border-primary));
+  cursor: pointer;
+  transition: background var(--duration-base) var(--easing-standard), border-color var(--duration-base) var(--easing-standard);
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: hsl(var(--surface-primary));
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.switch:has(input:checked) {
+  background: hsl(var(--border-action));
+  border-color: hsl(var(--border-action));
+}
+
+.switch input:checked + .knob {
+  transform: translateX(14px);
+}
+
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

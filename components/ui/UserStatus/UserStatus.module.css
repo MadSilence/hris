@@ -1,0 +1,24 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.active {
+  background: hsl(var(--surface-success));
+  color: hsl(var(--color-green-dark));
+}
+
+.inactive,
+.suspended {
+  background: hsl(var(--theme-error-light));
+  color: hsl(var(--color-red-dark));
+}
+
+.pending {
+  background: hsl(var(--surface-information));
+  color: hsl(var(--color-blue-lighter));
+}

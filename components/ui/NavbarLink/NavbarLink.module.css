@@ -1,0 +1,21 @@
+.link {
+  color: hsl(var(--text-body));
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+.link:hover {
+  background: hsl(var(--muted, 0 0% 96%));
+}
+
+.active {
+  background: hsl(var(--accent, 222 47% 11%));
+  color: hsl(var(--accent-foreground, 0 0% 100%));
+}

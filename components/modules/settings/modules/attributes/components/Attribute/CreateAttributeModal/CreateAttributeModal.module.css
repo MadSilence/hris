@@ -1,0 +1,9 @@
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.content {
+  margin-top: calc(var(--space-2) * -1);
+}

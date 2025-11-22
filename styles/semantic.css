@@ -1,0 +1,116 @@
+:root {
+  /* Primary & secondary */
+  --theme-primary-dark: var(--color-grey-darker);
+  --theme-primary: var(--color-grey-dark);
+  --theme-primary-light: var(--color-grey-light);
+  --theme-primary-lighter: var(--color-grey-lighter);
+  --theme-primary-lightest: var(--color-grey-lightest);
+
+  --theme-secondary-dark: var(--color-teal-dark);
+  --theme-secondary: var(--color-teal);
+  --theme-secondary-light: var(--color-teal-light);
+
+  /* Neutrals */
+  --theme-black: var(--color-black);
+  --theme-white: var(--color-white);
+  --theme-neutral-darkest: var(--color-grey-darkest);
+  --theme-neutral-darker: var(--color-grey-darker);
+  --theme-neutral-dark: var(--color-grey-dark);
+  --theme-neutral: var(--color-grey);
+  --theme-neutral-light: var(--color-grey-light);
+  --theme-neutral-lighter: var(--color-grey-lighter);
+  --theme-neutral-lightest: var(--color-grey-lightest);
+
+  /* Information / Success / Warning / Error / Highlight */
+  --theme-information-darkest: var(--color-blue-darkest);
+  --theme-information-darker: var(--color-blue-darker);
+  --theme-information: var(--color-blue);
+  --theme-information-light: var(--color-blue-light);
+  --theme-information-lighter: var(--color-blue-lightest);
+
+  --theme-success-darkest: var(--color-green-darkest);
+  --theme-success-dark: var(--color-green-dark);
+  --theme-success: var(--color-green);
+  --theme-success-light: var(--color-green-lighter);
+
+  --theme-warning-darkest: var(--color-yellow-darkest);
+  --theme-warning-darker: var(--color-yellow-darker);
+  --theme-warning-dark: var(--color-yellow-dark);
+  --theme-warning: var(--color-orange);
+  --theme-warning-light: var(--color-yellow-lighter);
+
+  --theme-error-darkest: var(--color-red-darkest);
+  --theme-error-darker: var(--color-red-darker);
+  --theme-error: var(--color-red);
+  --theme-error-light: var(--color-red-lighter);
+
+  --theme-highlight: var(--color-purple);
+
+  /* ===== Application roles (final API) ===== */
+
+  /* Text */
+  --text-headings: var(--theme-black);
+  --text-body: var(--theme-neutral-darkest);
+  --text-action: var(--theme-primary);
+  --text-action-hover: var(--theme-primary-dark);
+  --text-disabled: var(--theme-neutral);
+  --text-highlight: var(--theme-highlight);
+  --text-information: var(--theme-information);
+  --text-success: var(--theme-success-dark);
+  --text-warning: var(--theme-warning-darker);
+  --text-error: var(--theme-error-darker);
+  --text-on-action: var(--theme-white);
+  --text-on-disabled: var(--theme-neutral-darker);
+
+  /* Icons */
+  --icon-primary: var(--theme-neutral-darkest);
+  --icon-information: var(--theme-information);
+  --icon-success: var(--theme-success);
+  --icon-warning: var(--theme-warning);
+  --icon-error: var(--theme-error);
+
+  /* Surfaces */
+  --surface-page: var(--theme-white);
+  --surface-primary: var(--theme-white);
+  --surface-secondary: var(--theme-neutral-lightest);
+  --surface-disabled: var(--theme-neutral-lightest);
+  --surface-success: var(--theme-success-light);
+  --surface-error: var(--theme-error-light);
+  --surface-warning: var(--theme-warning-light);
+  --surface-information: var(--theme-information-lighter);
+  --surface-highlight: var(--theme-highlight);
+
+  /* Action surfaces */
+  --surface-action-1: var(--theme-primary);
+  --surface-action-1-hover: var(--theme-primary-dark);
+  --surface-action-2: 0 0% 0% / 0; /* transparent */
+  --surface-action-2-hover: var(--theme-primary-lightest);
+
+  /* Overlays */
+  --surface-modal: 0 0% 0% / 0.75; /* hsl() alpha-friendly */
+
+  /* Borders */
+  --border-primary: var(--theme-neutral-lighter);
+  --border-secondary: var(--theme-primary);
+  --border-information: var(--theme-information);
+  --border-success: var(--theme-success);
+  --border-warning: var(--theme-warning);
+  --border-error: var(--theme-error);
+  --border-highlight: var(--theme-highlight);
+  --border-disabled: var(--theme-neutral);
+  --border-action: var(--theme-primary);
+  --border-action-hover: var(--theme-primary-dark);
+  --border-focus: var(--theme-neutral-lighter);
+
+  /* Component radii (semantic pass through) */
+  --radius-input-sem: var(--radius-input);
+  --radius-button-sem: var(--radius-button);
+  --radius-card-sem: var(--radius-card);
+  --radius-alert-sem: var(--radius-alert);
+
+  /* Shadows pass through */
+  --shadow-sm-sem: var(--shadow-sm);
+  --shadow-md-sem: var(--shadow-md);
+  --shadow-lg-sem: var(--shadow-lg);
+  --shadow-xl-sem: var(--shadow-xl);
+}

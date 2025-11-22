@@ -1,0 +1,17 @@
+export enum Operator {
+  CONTAINS = "contains",
+  STARTS_WITH = "starts_with",
+  EQUALS = "eq",
+  NOT_EQUALS = "neq",
+  IN = "in",
+  NOT_IN = "not_in",
+  GREATER_THAN = "gt",
+  LESS_THAN = "lt",
+  GREATER_OR_EQUAL = "gte",
+  LESS_OR_EQUAL = "lte",
+  BEFORE = "before",
+  AFTER = "after",
+  BETWEEN = "between",
+  IS_TRUE = "is_true",
+  IS_FALSE = "is_false",
+}
