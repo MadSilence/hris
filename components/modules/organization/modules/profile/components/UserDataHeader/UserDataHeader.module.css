@@ -1,3 +1,9 @@
+.outer {
+  width: 100%;
+  padding-inline: var(--space-6);
+  box-sizing: border-box;
+}
+
 .header {
   padding: var(--space-6) 0 var(--space-5);
 }
@@ -111,13 +117,17 @@
 .iconBtn, .kebab {
   width: 28px;
   height: 28px;
-  border-radius: var(--radius-round);
-  border: var(--border-sm) solid hsl(var(--border-primary));
+  border: none;
   background: hsl(var(--surface-primary));
 }
 
 .iconBtn:hover, .kebab:hover {
   background: hsl(var(--surface-secondary));
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
 }
 
 .menuWrap {
@@ -131,7 +141,7 @@
   min-width: 220px;
   background: hsl(var(--surface-primary));
   border: var(--border-sm) solid hsl(var(--border-primary));
-  border-radius: var(--radius-card-sem);
+  border-radius: var(--radius-input-sem);
   box-shadow: var(--shadow-lg-sem);
   padding: var(--space-2) 0;
   z-index: 20;

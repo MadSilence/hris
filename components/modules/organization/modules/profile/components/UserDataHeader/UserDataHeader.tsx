@@ -5,6 +5,9 @@ import styles from "./UserDataHeader.module.css";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import Pen from "@/public/icons/pen.svg";
+import OrgChart from "@/public/icons/org-chart.svg";
+import Refresh from "@/public/icons/refresh.svg";
+import Kebab from "@/components/ui/Kebab/Kebab";
 
 export type UserDataHeaderProps = {
   userId?: string;
@@ -20,16 +23,18 @@ export function UserDataHeader({ userId, user: userProp, editing = false, onTogg
 
   if (!user) {
     return (
-      <header className={styles.header}>
-        <div className={styles.row}>
-          <div className={styles.avatarSkeleton} />
-          <div className={styles.titles}>
-            <div className={styles.nameSkeleton} />
-            <div className={styles.metaSkeleton} />
+      <div className={styles.outer}>
+        <header className={styles.header}>
+          <div className={styles.row}>
+            <div className={styles.avatarSkeleton}/>
+            <div className={styles.titles}>
+              <div className={styles.nameSkeleton}/>
+              <div className={styles.metaSkeleton}/>
+            </div>
+            <div className={styles.actions}/>
           </div>
-          <div className={styles.actions} />
-        </div>
-      </header>
+        </header>
+      </div>
     );
   }
 
@@ -37,64 +42,72 @@ export function UserDataHeader({ userId, user: userProp, editing = false, onTogg
   const meta = normalizeCustom(user.custom);
 
   return (
-    <header className={styles.header}>
-      <div className={styles.row}>
-        <div className={styles.avatarWrap}>
-          <Avatar src={meta.avatarUrl} name={fullName} color={user.avatarColor} />
-          <button type="button" className={styles.avatarEditBtn} aria-label="Edit photo">
-            <Pen />
-          </button>
-        </div>
+    <div className={styles.outer}>
+      <header className={styles.header}>
+        <div className={styles.row}>
+          <div className={styles.avatarWrap}>
+            <Avatar src={meta.avatarUrl} name={fullName} color={user.avatarColor}/>
+            <button type="button" className={styles.avatarEditBtn} aria-label="Edit photo">
+              <Pen/>
+            </button>
+          </div>
 
-        <div className={styles.titles}>
-          <h1 className={styles.name}>{fullName}</h1>
-          <div className={styles.metaLine}>
-            {user.status && <span className={styles.chip}>{user.status.toLowerCase()}</span>}
+          <div className={styles.titles}>
+            <h1 className={styles.name}>{fullName}</h1>
+            <div className={styles.metaLine}>
+              {user.status && <span className={styles.chip}>{user.status.toLowerCase()}</span>}
+            </div>
+            <div className={styles.badges}>
+              {meta.jobTitle && <span className={styles.badge}>{meta.jobTitle}</span>}
+              {(meta.department || meta.orgUnit) && (
+                <span className={styles.badge}>{meta.department ?? meta.orgUnit}</span>
+              )}
+              {meta.workMode && <span className={styles.badge}>{meta.workMode}</span>}
+              {(meta.country || meta.location) && (
+                <span className={styles.badge}>
+                  {meta.location ? `${meta.location}` : null}
+                  {meta.location && meta.country ? " · " : ""}
+                  {meta.country ?? ""}
+                </span>
+              )}
+            </div>
           </div>
-          <div className={styles.badges}>
-            {meta.jobTitle && <span className={styles.badge}>{meta.jobTitle}</span>}
-            {(meta.department || meta.orgUnit) && (
-              <span className={styles.badge}>{meta.department ?? meta.orgUnit}</span>
-            )}
-            {meta.workMode && <span className={styles.badge}>{meta.workMode}</span>}
-            {(meta.country || meta.location) && (
-              <span className={styles.badge}>
-                {meta.location ? `${meta.location}` : null}
-                {meta.location && meta.country ? " · " : ""}
-                {meta.country ?? ""}
-              </span>
-            )}
-          </div>
-        </div>
 
-        <div className={styles.actions}>
-          <button type="button" className={styles.iconBtn} aria-label="Org chart" />
-          <button type="button" className={styles.iconBtn} aria-label="Activity" />
-          <div className={styles.menuWrap}>
-            <button
-              type="button"
-              className={styles.kebab}
-              aria-haspopup="menu"
-              aria-expanded={open}
-              onClick={() => setOpen((s) => !s)}
-            />
-            {open && (
-              <div role="menu" className={styles.menu} onMouseLeave={() => setOpen(false)}>
-                <button role="menuitem" className={styles.menuItem} onClick={onToggleEdit}>
-                  {editing ? "Exit edit mode" : "Edit profile"}
-                </button>
-                <button role="menuitem" className={styles.menuItem}>Manage account</button>
-                <button role="menuitem" className={styles.menuItem}>Set a reminder</button>
-                <button role="menuitem" className={styles.menuItem}>Schedule leave</button>
-                <button role="menuitem" className={styles.menuItem}>Terminate employment</button>
-                <div className={styles.menuDivider} />
-                <button role="menuitem" className={`${styles.menuItem} ${styles.danger}`}>Delete profile</button>
-              </div>
-            )}
+          <div className={styles.actions}>
+            <button type="button" className={styles.iconBtn} aria-label="Org chart">
+              <OrgChart className={styles.icon}/>
+            </button>
+            <button type="button" className={styles.iconBtn} aria-label="Activity">
+              <Refresh className={styles.icon}/>
+            </button>
+            <div className={styles.menuWrap}>
+              <button
+                type="button"
+                className={styles.kebab}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                onClick={() => setOpen((s) => !s)}
+              >
+                <Kebab className={styles.icon}/>
+              </button>
+              {open && (
+                <div role="menu" className={styles.menu} onMouseLeave={() => setOpen(false)}>
+                  <button role="menuitem" className={styles.menuItem} onClick={onToggleEdit}>
+                    {editing ? "Exit edit mode" : "Edit profile"}
+                  </button>
+                  <button role="menuitem" className={styles.menuItem}>Manage account</button>
+                  <button role="menuitem" className={styles.menuItem}>Set a reminder</button>
+                  <button role="menuitem" className={styles.menuItem}>Schedule leave</button>
+                  <button role="menuitem" className={styles.menuItem}>Terminate employment</button>
+                  <div className={styles.menuDivider}/>
+                  <button role="menuitem" className={`${styles.menuItem} ${styles.danger}`}>Delete profile</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
 
@@ -137,8 +150,8 @@ function Avatar({ src, name, color }: { src?: string | null; name: string; color
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <div className={styles.avatar} style={{ background: color }} >
-      {src ? <img src={src} alt={name} /> : <span>{initials || "?"}</span>}
+    <div className={styles.avatar} style={{ background: color }}>
+      {src ? <img src={src} alt={name}/> : <span>{initials || "?"}</span>}
     </div>
   );
 }

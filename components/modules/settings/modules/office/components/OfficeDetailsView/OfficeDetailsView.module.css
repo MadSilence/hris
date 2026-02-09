@@ -1,0 +1,61 @@
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: hsl(var(--theme-neutral));
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rowTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.subRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-regular);
+  color: hsl(var(--text-headings));
+}
+
+.valueBox {
+  box-sizing: border-box;
+  width: 100%;
+  appearance: none;
+  background: hsl(var(--surface-secondary));
+  color: hsl(var(--text-body));
+  border: var(--border-sm) solid hsl(var(--surface-secondary));
+  border-radius: var(--radius-input-sem);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  font-weight: 350;
+}
+
+.valueMultiline {
+  align-items: flex-start;
+  white-space: pre-wrap;
+}

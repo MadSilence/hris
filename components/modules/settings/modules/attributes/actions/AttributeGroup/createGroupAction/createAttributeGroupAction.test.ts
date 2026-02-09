@@ -1,9 +1,7 @@
 import type {
   CreateAttributeGroupActionInput
-} from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/createGroupAction/createAttributeGroupAction";
-import {
-  createAttributeGroupAction
-} from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/createGroupAction/createAttributeGroupAction";
+} from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/createGroupAction";
+import { createAttributeGroupAction } from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/createGroupAction";
 import { groupsService } from "@/api/modules/groups/services/groupsService";
 import { ActionStatus } from "@/components/models/ActionStatus";
 

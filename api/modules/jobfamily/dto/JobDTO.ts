@@ -5,6 +5,7 @@ export type JobDTO = {
   name: string;
   isSystem: boolean;
   level: JobLevelDTO;
+
   createdAt: string;
   createdBy: string;
   updatedAt: string;

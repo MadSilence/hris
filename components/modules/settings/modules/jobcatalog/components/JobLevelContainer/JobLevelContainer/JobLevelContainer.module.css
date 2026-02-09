@@ -1,0 +1,141 @@
+.layout {
+  box-sizing: border-box;
+  display: grid;
+  padding: 16px;
+  min-height: 100vh;
+  width: 100%;
+  background: hsl(var(--surface-page));
+  grid-template-rows: auto 1fr;
+  row-gap: 24px;
+}
+
+.cardsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* ширина карточек, чтобы они становились в несколько колонок */
+.card {
+  flex: 1 1 220px;
+  max-width: 220px;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  padding: 16px 18px;
+  border-radius: var(--radius-input-sem);
+  background: hsl(var(--surface-primary));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  box-shadow: var(--shadow-sm-sem);
+}
+
+/* спец-стили для карточки добавления */
+.addCard {
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.addCardInner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.addCardCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: var(--border-sm) dashed hsl(var(--border-primary));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: hsl(var(--surface-secondary));
+}
+
+.addCardPlus {
+  font-size: 28px;
+  line-height: 1;
+  color: hsl(var(--accent-primary));
+}
+
+/* hover/focus для доступности */
+.addCard:hover,
+.addCard:focus-visible {
+  outline: none;
+  border-color: hsl(var(--accent-primary));
+}
+
+.cardHeader {
+  margin-bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+  font-weight: var(--font-weight-semibold);
+  color: hsl(var(--text-headings));
+}
+
+/* Levels list */
+
+.levelsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.levelItem {
+  padding: 6px 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: hsl(var(--text-body));
+  border-top: 1px solid lightgray;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* номер слева: теперь будет "1." и т.п. */
+.levelIndex {
+  min-width: 2rem;
+  font-size: var(--font-size-sm);
+  color: hsl(var(--text-disabled));
+}
+
+/* текст уровня */
+.levelName {
+  flex: 1;
+}
+
+/* У первого элемента не рисуем линию сверху */
+.levelItem:first-child {
+  border-top: 0;
+}
+
+/* Немного адаптивности */
+
+@media (max-width: 768px) {
+  .layout {
+    padding: 12px;
+  }
+
+  .cardsGrid {
+    gap: 16px;
+  }
+}

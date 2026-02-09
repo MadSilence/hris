@@ -19,6 +19,7 @@ import { RenameAttributeGroupModal } from "../AttributeGroup/RenameAttributeGrou
 import { AttributesContainer } from "@/components/modules/settings/modules/attributes/components/AttributesContainer";
 import { CreateAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeModal";
 import { useCreateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useCreateAttributeAction";
+import { Loader } from "@/components/ui/Loader";
 
 // @ts-ignore
 export default function AttributeGroupsContainer() {
@@ -124,111 +125,117 @@ export default function AttributeGroupsContainer() {
   );
 
   return (
-    <div className={styles.layout}>
-      <aside className={styles.colf}>
-        <AttributeGroupList
-          groups={groups}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onCreate={() => setIsCreateAttributeGroupModalOpen(true)}
-          onOrderChange={onGroupsOrderChange}
-        />
-      </aside>
-
-      <main className={styles.cols}>
-        <div className={styles.header}>
-          <div className={styles.headerPreset}>
-            <h1 className={styles.h1}>{selected?.name ?? "Attributes"}</h1>
-            {selected?.isSystem && <span className={styles.presetPill}>Preset Section</span>}
-          </div>
-
-          <div className={styles.menuWrap} ref={menuWrapRef}>
-            <Button className={styles.addButton} onClick={() => setIsCreateAttributeModalOpen(true)}>Add Attribute</Button>
-            <Button className={styles.kebabButton} onClick={() => setMenuOpen(v => !v)} variant="ghost">
-              <Kebab
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                aria-label="AttributeGroup actions"
-              />
-            </Button>
-
-            {menuOpen && (
-              <div className={styles.menu} role="menu" aria-label="AttributeGroup actions">
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsRenameAttributeGroupModalOpen(true);
-                    setMenuOpen(false)
-                  }}
-                >
-                  Rename AttributeGroup
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.danger}`}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsDeleteAttributeGroupModalOpen(true);
-                    setMenuOpen(false)
-                  }}
-                >
-                  Delete AttributeGroup
-                </button>
-              </div>
-            )}
-          </div>
-
+    (loading ?
+        <div className={styles.loaderWrapper}>
+          <Loader/>
         </div>
-        <AttributesContainer
-          isLoading={loading}
-          attributes={selected?.attributes ?? []}
-        />
-      </main>
+        :
+        <div className={styles.layout}>
+          <aside className={styles.colf}>
+            <AttributeGroupList
+              groups={groups}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onCreate={() => setIsCreateAttributeGroupModalOpen(true)}
+              onOrderChange={onGroupsOrderChange}
+            />
+          </aside>
 
-      <CreateGroupModal
-        isOpen={isCreateAttributeGroupModalOpen}
-        isLoading={createAttributeGroupAction.isPending}
-        onConfirm={(formValues) => {
-          createAttributeGroupAction.mutate({ name: formValues.name });
-        }}
-        onRequestClose={() => setIsCreateAttributeGroupModalOpen(false)}
-      />
+          <main className={styles.cols}>
+            <div className={styles.header}>
+              <div className={styles.headerPreset}>
+                <h1 className={styles.h1}>{selected?.name ?? "Attributes"}</h1>
+                {selected?.isSystem && <span className={styles.presetPill}>Preset Section</span>}
+              </div>
 
-      <CreateAttributeModal
-        isOpen={isCreateAttributeModalOpen}
-        isLoading={false}
-        onConfirm={(formValues) => {
-          createAttributeAction.mutate({
-            name: formValues.name,
-            groupId: selected.id,
-            type: formValues.type,
-            isUnique: formValues.unique,
-            decScale: formValues.decScale,
-            hideYear: formValues.dateHideYearPublic,
-            options: formValues.options,
-          })
-        }}
-        onRequestClose={() => setIsCreateAttributeModalOpen(false)}
-      />
+              <div className={styles.menuWrap} ref={menuWrapRef}>
+                <Button className={styles.addButton} onClick={() => setIsCreateAttributeModalOpen(true)}>Add Attribute</Button>
+                <Button className={styles.kebabButton} onClick={() => setMenuOpen(v => !v)} variant="ghost">
+                  <Kebab
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    aria-label="AttributeGroup actions"
+                  />
+                </Button>
 
-      <DeleteGroupModal
-        isOpen={isDeleteAttributeGroupModalOpen}
-        isLoading={deleteAttributeGroupAction.isPending}
-        onConfirm={() => deleteAttributeGroupAction.mutate({ id: selected.id })}
-        onRequestClose={() => setIsDeleteAttributeGroupModalOpen(false)}
-        group={selected}
-      />
+                {menuOpen && (
+                  <div className={styles.menu} role="menu" aria-label="AttributeGroup actions">
+                    <button
+                      type="button"
+                      className={styles.menuItem}
+                      role="menuitem"
+                      onClick={() => {
+                        setIsRenameAttributeGroupModalOpen(true);
+                        setMenuOpen(false)
+                      }}
+                    >
+                      Rename AttributeGroup
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.menuItem} ${styles.danger}`}
+                      role="menuitem"
+                      onClick={() => {
+                        setIsDeleteAttributeGroupModalOpen(true);
+                        setMenuOpen(false)
+                      }}
+                    >
+                      Delete AttributeGroup
+                    </button>
+                  </div>
+                )}
+              </div>
 
-      <RenameAttributeGroupModal
-        isOpen={isRenameAttributeGroupModalOpen}
-        isLoading={renameAttributeGroupAction.isPending}
-        onConfirm={(formValues) => {
-          renameAttributeGroupAction.mutate({ id: selected.id, name: formValues.name })
-        }}
-        onRequestClose={() => setIsRenameAttributeGroupModalOpen(false)}
-      />
-    </div>
+            </div>
+            <AttributesContainer
+              isLoading={loading}
+              attributes={selected?.attributes ?? []}
+            />
+          </main>
+
+          <CreateGroupModal
+            isOpen={isCreateAttributeGroupModalOpen}
+            isLoading={createAttributeGroupAction.isPending}
+            onConfirm={(formValues) => {
+              createAttributeGroupAction.mutate({ name: formValues.name });
+            }}
+            onRequestClose={() => setIsCreateAttributeGroupModalOpen(false)}
+          />
+
+          <CreateAttributeModal
+            isOpen={isCreateAttributeModalOpen}
+            isLoading={false}
+            onConfirm={(formValues) => {
+              createAttributeAction.mutate({
+                name: formValues.name,
+                groupId: selected.id,
+                type: formValues.type,
+                isUnique: formValues.unique,
+                decScale: formValues.decScale,
+                hideYear: formValues.dateHideYearPublic,
+                options: formValues.options,
+              })
+            }}
+            onRequestClose={() => setIsCreateAttributeModalOpen(false)}
+          />
+
+          <DeleteGroupModal
+            isOpen={isDeleteAttributeGroupModalOpen}
+            isLoading={deleteAttributeGroupAction.isPending}
+            onConfirm={() => deleteAttributeGroupAction.mutate({ id: selected.id })}
+            onRequestClose={() => setIsDeleteAttributeGroupModalOpen(false)}
+            group={selected}
+          />
+
+          <RenameAttributeGroupModal
+            isOpen={isRenameAttributeGroupModalOpen}
+            isLoading={renameAttributeGroupAction.isPending}
+            onConfirm={(formValues) => {
+              renameAttributeGroupAction.mutate({ id: selected.id, name: formValues.name })
+            }}
+            onRequestClose={() => setIsRenameAttributeGroupModalOpen(false)}
+          />
+        </div>
+    )
   );
 };

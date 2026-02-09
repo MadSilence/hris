@@ -1,14 +1,18 @@
 .loader {
-  color: var(--text-disabled);
-  font-size: 0.875rem;
-  animation: pulse 1.5s ease-in-out infinite;
+  width: 4rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(
+    hsl(var(--theme-primary)) 0 90deg,
+    transparent 90deg
+  );
+  mask-image: radial-gradient(farthest-side, transparent 78%, #000 79%);
+  -webkit-mask-image: radial-gradient(farthest-side, transparent 78%, #000 79%);
+  animation: loader-spin 0.8s linear infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

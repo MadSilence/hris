@@ -16,17 +16,16 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
-  border: var(--border-sm) solid transparent;
+  border: none;
   background: transparent;
   cursor: pointer;
   text-align: left;
   font-size: var(--font-size-base);
   color: hsl(var(--text-body));
-  transition: background var(--duration-base) var(--easing-standard),
-  border-color var(--duration-base) var(--easing-standard);
+  transition: background var(--duration-base) var(--easing-standard);
 }
 
 .groupBtn:hover {
@@ -35,19 +34,6 @@
 
 .active {
   background: hsl(var(--surface-secondary));
-  border-color: hsl(var(--border-primary));
-}
-
-.dot {
-  width: var(--size-300);
-  height: var(--size-300);
-  border-radius: 999px;
-  background: hsl(var(--border-disabled));
-  flex-shrink: 0;
-}
-
-.dot[data-active="true"] {
-  background: hsl(var(--surface-action-1));
 }
 
 .label {

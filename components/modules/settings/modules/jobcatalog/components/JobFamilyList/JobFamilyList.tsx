@@ -3,29 +3,10 @@
 import React from "react";
 import styles from "./JobFamilyList.module.css";
 import { Button } from "@/components/ui/Button";
-
-export type JobLevel = {
-  id: string;
-  name: string;
-  isSystem?: boolean;
-};
-
-export type Job = {
-  id: string;
-  name: string;
-  isSystem?: boolean;
-  level: JobLevel;
-};
-
-export type JobFamily = {
-  id: string;
-  name: string;
-  isSystem?: boolean;
-  jobs: Job[];
-};
+import { JobFamily } from "@/models/job";
 
 export interface JobFamilyListProps {
-  jobFamilies: JobFamily[];
+  jobFamilies: JobFamily[] | undefined;
   selectedId: string;
   onSelect: (id: string) => void;
   onCreate: () => void;

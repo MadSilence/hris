@@ -1,7 +1,10 @@
 "use client";
 
-import React, { ReactNode, useEffect, useMemo, useRef, useState, } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./DataTable.module.css";
+import Search from "@/public/icons/search.svg";
+import ArrowUp from "@/public/icons/arrow-up.svg";
+import ArrowDown from "@/public/icons/arrow-down.svg"
 
 export type SortDirection = "asc" | "desc";
 
@@ -39,6 +42,7 @@ export interface DataTableProps<T> {
     }
       | null
   ) => void;
+  onRowClick?: (row: T) => void;
 }
 
 export function DataTable<T>({
@@ -53,6 +57,7 @@ export function DataTable<T>({
   onSearchChange,
   defaultSort,
   onSortChange,
+  onRowClick,
 }: DataTableProps<T>) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -130,12 +135,6 @@ export function DataTable<T>({
     onSortChange?.(next);
   };
 
-  const clearSort = () => {
-    setSort(null);
-    setOpenSortColumn(null);
-    onSortChange?.(null);
-  };
-
   const handleSearchToggle = () => {
     const next = !searchOpen;
     setSearchOpen(next);
@@ -152,14 +151,13 @@ export function DataTable<T>({
 
   return (
     <div className={styles.root}>
-      {/* Toolbar */}
       <div className={styles.toolbar}>
         <button
           type="button"
           className={styles.filterButton}
           onClick={onFilterClick}
         >
-          <span className={styles.filterIcon}>⚲</span>
+          <span className={`${styles.icon20} ${styles.filterIcon}`}>⚲</span>
           <span>Filter</span>
         </button>
 
@@ -175,7 +173,7 @@ export function DataTable<T>({
                 onClick={handleSearchToggle}
                 aria-label="Toggle search"
               >
-                <span className={styles.searchIcon}>🔍</span>
+                <Search className={styles.icon20} aria-hidden="true"/>
               </button>
               <input
                 className={styles.searchInput}
@@ -227,46 +225,46 @@ export function DataTable<T>({
                     }
                   >
                       <span className={styles.thInner}>
-                        {col.icon && (
-                          <span className={styles.thIcon}>{col.icon}</span>
-                        )}
-                        <span className={styles.thLabel}>{col.header}</span>
+                        <span className={styles.thMain}>
+                          {col.icon && (
+                            <span className={styles.thIcon}>{col.icon}</span>
+                          )}
+                          <span className={styles.thLabel}>{col.header}</span>
+                        </span>
                         {isSorted && (
                           <span className={styles.sortArrow}>
-                            {isSorted === "asc" ? "↑" : "↓"}
+                            {isSorted === "asc" ? (
+                              <ArrowUp className={styles.icon20}/>
+                            ) : (
+                              <ArrowDown className={styles.icon20}/>
+                            )}
                           </span>
                         )}
                       </span>
                   </button>
 
                   {isSortable && openSortColumn === col.id && (
-                    <div
-                      className={styles.sortMenu}
-                      ref={sortMenuRef}
-                    >
+                    <div className={styles.sortMenu} ref={sortMenuRef}>
                       <button
                         type="button"
                         className={styles.sortMenuItem}
                         onClick={() => handleSortChange(col.id, "asc")}
                       >
-                        ↑ Sort ascending
+                          <span className={styles.sortMenuItemInner}>
+                            <ArrowUp className={styles.icon20}/>
+                            <span>Sort ascending</span>
+                          </span>
                       </button>
                       <button
                         type="button"
                         className={styles.sortMenuItem}
                         onClick={() => handleSortChange(col.id, "desc")}
                       >
-                        ↓ Sort descending
+                          <span className={styles.sortMenuItemInner}>
+                            <ArrowDown className={styles.icon20}/>
+                            <span>Sort descending</span>
+                          </span>
                       </button>
-                      {sort && sort.columnId === col.id && (
-                        <button
-                          type="button"
-                          className={`${styles.sortMenuItem} ${styles.sortMenuClear}`}
-                          onClick={clearSort}
-                        >
-                          ✕ Clear sort
-                        </button>
-                      )}
                     </div>
                   )}
                 </th>
@@ -280,7 +278,11 @@ export function DataTable<T>({
             const rowId = getRowId(row);
 
             return (
-              <tr key={rowId} className={styles.tr}>
+              <tr
+                key={rowId}
+                className={styles.tr}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
                 {columns.map((col) => (
                   <td key={col.id} className={styles.td}>
                     {col.accessor(row)}
@@ -292,10 +294,7 @@ export function DataTable<T>({
 
           {sortedData.length === 0 && (
             <tr>
-              <td
-                colSpan={columns.length}
-                className={styles.empty}
-              >
+              <td colSpan={columns.length} className={styles.empty}>
                 No data to display.
               </td>
             </tr>

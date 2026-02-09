@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import Button from "@/components/ui/Button/Button";
-import Loader from "@/components/ui/Loader/Loader";
 import UserChip from "@/components/ui/UserChip/UserChip";
 import UserStatus from "@/components/ui/UserStatus/UserStatus";
 import styles from "./PeopleTable.module.css";
@@ -95,7 +94,7 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
   const renderCell = (row: Row, colId: string) => {
     if (colId === "sys:first_name") {
       const name = [row.firstName, row.lastName].filter(Boolean).join(" ").trim() || row.email;
-      return <UserChip name={name} href={`/organization/people/${row.id}`} color={row.avatarColor} />;
+      return <UserChip name={name} href={`/organization/people/${row.id}`} color={row.avatarColor}/>;
     }
 
     // системные поля
@@ -135,7 +134,7 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
       }
       case "CHECKBOX": {
         const b = typeof val === "boolean" ? val : (val === "true");
-        return <input type="checkbox" checked={!!b} readOnly aria-label="checked" />;
+        return <input type="checkbox" checked={!!b} readOnly aria-label="checked"/>;
       }
       case "NUMBER": {
         const n = typeof val === "number" ? val : Number(val);
@@ -177,7 +176,9 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
                 type="checkbox"
                 aria-label="select all"
                 checked={allChecked}
-                ref={(el) => { if (el) el.indeterminate = someChecked; }}
+                ref={(el) => {
+                  if (el) el.indeterminate = someChecked;
+                }}
                 onChange={(e) => onToggleAllOnPage?.(pageIds, e.target.checked)}
               />
             </th>
@@ -206,7 +207,7 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
             <tr>
               <td className={styles.td} colSpan={visibleColumns.length + 1}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "2.5rem 0" }}>
-                  <Loader />
+                  {/*<Loader />*/}
                   <span>Loading…</span>
                 </div>
               </td>
@@ -214,7 +215,7 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
           ) : data.length === 0 ? (
             <tr>
               <td className={styles.td} colSpan={visibleColumns.length + 1}>
-                <EmptyState />
+                <EmptyState/>
               </td>
             </tr>
           ) : (
@@ -271,6 +272,7 @@ function sysKeyFromId(id: string): string | null {
   const key = id.slice(4); // first_name | last_name | email | ...
   return key || null;
 }
+
 function valueToString(v: unknown): string | null {
   if (v == null) return null;
   if (Array.isArray(v)) return v.map(String).join(", ");

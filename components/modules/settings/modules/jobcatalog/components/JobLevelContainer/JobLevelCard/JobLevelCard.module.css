@@ -1,0 +1,115 @@
+.card {
+  flex: 1 1 220px;
+  max-width: 220px;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  height: 100%; /* одинаковая высота в пределах строки */
+  padding: 16px 18px;
+  border-radius: var(--radius-input-sem);
+  background: hsl(var(--surface-primary));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  box-shadow: var(--shadow-sm-sem);
+  position: relative;
+}
+
+.cardHeader {
+  margin-bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+  font-weight: var(--font-weight-semibold);
+  color: hsl(var(--text-headings));
+}
+
+.kebabButton {
+  padding: 4px;
+  margin-left: auto;
+  border-radius: 999px;
+}
+
+/* Levels list */
+
+.levelsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.levelItem {
+  padding: 6px 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: hsl(var(--text-body));
+  border-top: 1px solid lightgray;
+
+  display: flex;
+  align-items: center;
+  /* gap убираем */
+  gap: 0;
+}
+
+/* номер слева с точкой */
+.levelIndex {
+  min-width: 2rem;
+  font-size: var(--font-size-sm);
+  color: hsl(var(--text-disabled));
+  margin-right: 0.5rem;
+}
+
+.levelName {
+  flex: 1;
+}
+
+/* У первого элемента не рисуем линию сверху */
+.levelItem:first-child {
+  border-top: 0;
+}
+
+/* Меню */
+
+.menu {
+  position: absolute;
+  top: 40px;
+  right: 16px;
+  min-width: 160px;
+  border-radius: var(--radius-input-sem);
+  background: hsl(var(--surface-primary));
+  box-shadow: var(--shadow-md-sem);
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  z-index: 10;
+  padding: 4px 0;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  cursor: pointer;
+  color: hsl(var(--text-body));
+}
+
+.menuItem:hover {
+  background: hsl(var(--surface-secondary));
+}
+
+.danger {
+  color: hsl(var(--danger-primary));
+}

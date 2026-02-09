@@ -14,12 +14,23 @@
   gap: var(--space-4);
 }
 
+/* Общий размер иконок ~20x20 */
+.icon20 {
+  width: 1rem; /* ~20px при 16px базовых */
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Filter с иконкой 20x20 */
 .filterButton {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-button-sem);
+  padding: 0.5em 0.5em;
+  border-radius: var(--radius-input-sem);
   border: var(--border-sm) solid hsl(var(--border-primary));
   background: hsl(var(--surface-primary));
   font-size: var(--font-size-sm);
@@ -36,7 +47,7 @@
 }
 
 .filterIcon {
-  font-size: 0.9em;
+  font-size: 1rem;
 }
 
 .toolbarRight {
@@ -51,7 +62,8 @@
   border-radius: var(--radius-input-sem);
   border: var(--border-sm) solid hsl(var(--border-primary));
   background: hsl(var(--surface-primary));
-  padding: 0;
+  /* было: padding: 0; */
+  padding: 0.5em 0.5em; /* <-- та же вертикаль, что у .addButton */
   overflow: hidden;
   transition: width var(--duration-base) var(--easing-standard),
   border-color var(--duration-base) var(--easing-standard),
@@ -70,21 +82,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--space-3);
+  padding: 0;
   cursor: pointer;
-}
-
-.searchIcon {
-  font-size: 0.9rem;
-  color: hsl(var(--icon-primary));
 }
 
 .searchInput {
   border: none;
   outline: none;
   font-size: var(--font-size-sm);
-  padding-right: var(--space-3);
-  padding-left: 0;
+  padding-right: var(--space-2);
+  padding-left: var(--space-2);
   flex: 1;
   opacity: 0;
   pointer-events: none;
@@ -96,12 +103,13 @@
   pointer-events: auto;
 }
 
+/* Add — размеры кнопки как ты просил */
 .addButton {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-5);
-  border-radius: var(--radius-button-sem);
+  padding: 0.5em 0.5em;
+  border-radius: var(--radius-input-sem);
   border: none;
   background: hsl(var(--surface-action-1));
   color: hsl(var(--text-on-action));
@@ -125,8 +133,6 @@
 }
 
 .tableWrapper {
-  border-radius: var(--radius-card-sem);
-  border: var(--border-sm) solid hsl(var(--border-primary));
   background: hsl(var(--surface-primary));
   overflow: hidden;
 }
@@ -137,12 +143,12 @@
   border-spacing: 0;
 }
 
-th,
-td {
+.table th,
+.table td {
   text-align: left;
 }
 
-thead tr {
+.table thead tr {
   border-bottom: var(--border-sm) solid hsl(var(--border-primary));
 }
 
@@ -169,10 +175,23 @@ thead tr {
   cursor: pointer;
 }
 
+/* стрелка справа */
 .thInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.thMain {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+/* hover по сортируемым колонкам */
+.thSortable:hover {
+  background: hsl(var(--surface-secondary));
 }
 
 .thSortable .thInner:hover .thLabel {
@@ -187,11 +206,14 @@ thead tr {
   letter-spacing: 0.01em;
 }
 
+/* контейнер под иконку стрелки */
 .sortArrow {
-  font-size: 0.7rem;
-  color: hsl(var(--text-action));
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
+/* меню сортировки */
 .sortMenu {
   position: absolute;
   top: 100%;
@@ -199,18 +221,19 @@ thead tr {
   margin-top: var(--space-2);
   min-width: 10rem;
   background: hsl(var(--surface-primary));
-  border-radius: var(--radius-card-sem);
+  border-radius: var(--radius-input-sem);
   box-shadow: var(--shadow-lg-sem);
   border: var(--border-sm) solid hsl(var(--border-primary));
   z-index: 10;
   overflow: hidden;
 }
 
+/* паддинги увеличены */
 .sortMenuItem {
   display: block;
   width: 100%;
   text-align: left;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-5);
   font-size: var(--font-size-sm);
   border: none;
   background: transparent;
@@ -223,25 +246,37 @@ thead tr {
   background: hsl(var(--surface-secondary));
 }
 
-.sortMenuClear {
-  border-top: var(--border-sm) solid hsl(var(--border-primary));
-  color: hsl(var(--text-error));
+/* внутренний флекс с иконкой и текстом */
+.sortMenuItemInner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
+/* строки и хайлайт */
 .tr {
   border-bottom: var(--border-sm) solid hsl(var(--border-primary));
   transition: background var(--duration-base) var(--easing-standard);
 }
 
-.tr:hover {
+.tr:hover .td {
   background: hsl(var(--surface-secondary));
+}
+
+.tr:hover .td:first-child {
+  border-top-left-radius: var(--radius-input-sem);
+  border-bottom-left-radius: var(--radius-input-sem);
+}
+
+.tr:hover .td:last-child {
+  border-top-right-radius: var(--radius-input-sem);
+  border-bottom-right-radius: var(--radius-input-sem);
 }
 
 .td {
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-sm);
 }
-
 
 .td:first-child,
 .th:first-child {
@@ -258,4 +293,13 @@ thead tr {
   padding: var(--space-6);
   font-size: var(--font-size-sm);
   color: hsl(var(--theme-neutral));
+}
+
+.tr {
+  border-bottom: var(--border-sm) solid hsl(var(--border-primary));
+  transition: background var(--duration-base) var(--easing-standard);
+}
+
+.tr:hover {
+  cursor: pointer;
 }

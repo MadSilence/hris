@@ -20,7 +20,6 @@ export const PersonalInfoSidebar: React.FC<Props> = ({ groups, activeId, onSelec
               className={`${styles.groupBtn} ${isActive ? styles.active : ""}`}
               onClick={() => onSelect(g.id)}
             >
-              <span className={styles.dot} data-active={isActive} />
               <span className={styles.label}>{g.name}</span>
             </button>
           );

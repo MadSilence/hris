@@ -10,6 +10,7 @@ import { User } from "@/models/user/User";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
 import { useActiveSectionScroll } from "@/components/modules/organization/modules/profile/hooks/useActiveSectionScroll";
+import { Loader } from "@/components/ui/Loader";
 
 type PersonalInfoContainerProps = { user: User };
 
@@ -19,7 +20,6 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // edit-mode
   const [isEdit, setIsEdit] = useState(false);
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
   const [draftValues, setDraftValues] = useState<Record<string, unknown>>({});
@@ -30,7 +30,6 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     setGroups(normalized);
   }, [fetchedGroups]);
 
-  // valueMap из user.custom: "attr:<id>" -> value
   const valueMap = useMemo<Record<string, unknown>>(() => {
     const src: any = user?.custom ?? {};
     const out: Record<string, unknown> = {};
@@ -41,7 +40,6 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return out;
   }, [user?.custom]);
 
-  // при смене пользователя/данных сбрасываем initial/draft
   useEffect(() => {
     setInitialValues(valueMap);
     setDraftValues(valueMap);
@@ -56,7 +54,6 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   });
 
   const dirty = useMemo(() => {
-    // простая глубокая проверка по ключам, достаточна для примитивов/массивов
     const keys = new Set([...Object.keys(initialValues), ...Object.keys(draftValues)]);
     for (const k of keys) {
       const a = initialValues[k];
@@ -80,43 +77,78 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     setIsEdit(false);
   };
   const onSave = () => {
-    // пока просто логируем payload
     // eslint-disable-next-line no-console
     console.log({ values: draftValues });
     setInitialValues(draftValues);
     setIsEdit(false);
   };
 
-  if (isLoading) return <div style={{ padding: "var(--space-5)" }}>Loading…</div>;
-  if (error) return <div style={{ padding: "var(--space-5)", color: "hsl(var(--text-error))" }}>Failed to load</div>;
-  if (!groups.length) return <div style={{ padding: "var(--space-5)", color: "hsl(var(--text-disabled))" }}>No groups</div>;
+  if (isLoading) {
+    return (
+      <div className={styles.loaderWrapper}>
+        <Loader/>
+      </div>
+    );
+  }
+
+  if (error || !groups.length) {
+    return (
+      <div className={styles.outer}>
+        <div className={styles.container}>
+          <div
+            className={`${styles.stateMessage} ${
+              error ? styles.stateMessageError : ""
+            }`}
+          >
+            {error ? "Failed to load" : "No groups"}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.wrap}>
-      <PersonalInfoSidebar
-        groups={groups}
-        activeId={activeId || groups[0]?.id}
-        onSelect={(id) => scrollToId(id)}
-      />
+    <div className={styles.outer}>
+      <div className={styles.container}>
+        <div className={styles.wrap}>
+          <PersonalInfoSidebar
+            groups={groups}
+            activeId={activeId || groups[0]?.id}
+            onSelect={(id) => scrollToId(id)}
+          />
 
-      <PersonalInfoAttributesList
-        ref={scrollContainerRef}
-        groups={groups}
-        valueMap={isEdit ? draftValues : initialValues}
-        registerSection={registerSection}
-        isEdit={isEdit}
-        onChangeValue={(attrId, v) => setDraftValues((d) => ({ ...d, [attrId]: v }))}
-        headerActions={(
-          !isEdit ? (
-            <button onClick={onEditToggle} className="btn-edit">Edit</button>
-          ) : (
-            <div style={{ display: "flex", gap: "var(--space-4)" }}>
-              <button onClick={onCancel} className="btn-secondary">Cancel</button>
-              <button onClick={onSave} disabled={!dirty} className="btn-primary">Save</button>
-            </div>
-          )
-        )}
-      />
+          <PersonalInfoAttributesList
+            ref={scrollContainerRef}
+            groups={groups}
+            valueMap={isEdit ? draftValues : initialValues}
+            registerSection={registerSection}
+            isEdit={isEdit}
+            onChangeValue={(attrId, v) =>
+              setDraftValues((d) => ({ ...d, [attrId]: v }))
+            }
+            headerActions={
+              !isEdit ? (
+                <button onClick={onEditToggle} className="btn-edit">
+                  Edit
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: "var(--space-4)" }}>
+                  <button onClick={onCancel} className="btn-secondary">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={onSave}
+                    disabled={!dirty}
+                    className="btn-primary"
+                  >
+                    Save
+                  </button>
+                </div>
+              )
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 };

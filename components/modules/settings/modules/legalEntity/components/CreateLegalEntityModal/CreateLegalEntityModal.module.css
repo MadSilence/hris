@@ -1,0 +1,12 @@
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.content {
+  margin-top: calc(var(--space-2) * -1);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}

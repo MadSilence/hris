@@ -7,7 +7,7 @@ export const JOB_FAMILY_QUERY_KEY = "JOB_FAMILY_QUERY_KEY";
 
 const getJobFamily = async (
   apiClient: InternalApiClient
-): Promise<JobFamily[]> => apiClient.get<JobFamily[]>("/job-families");
+): Promise<JobFamily[]> => apiClient.get<JobFamily[]>("/job-family");
 
 export const useJobFamily = () => {
   const { internalApiClient } = useAppDataContext();

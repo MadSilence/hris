@@ -1,0 +1,97 @@
+.layout {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  padding: 16px;
+  min-height: 100vh;
+  background: hsl(var(--surface-page));
+}
+
+.colf {
+  overflow: auto;
+}
+
+.cols {
+  overflow: auto;
+  padding: 12px;
+}
+
+.addButton.addButton {
+  border-radius: var(--radius-input-sem);
+  padding: 0.5em 0.5em;
+}
+
+.kebabButton.kebabButton {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerPreset {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.h1 {
+  font-size: var(--font-size-2xl);
+  color: hsl(var(--text-headings));
+}
+
+.presetPill {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-xs);
+  border-radius: var(--radius-round);
+  padding: 0.25rem 0.5rem;
+  background: hsl(var(--surface-secondary));
+  color: hsl(var(--text-disabled));
+  white-space: nowrap;
+}
+
+.menuWrap {
+  position: relative;
+  display: flex;
+  gap: 1em;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-2);
+  min-width: 180px;
+  padding: var(--space-1);
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-sm);
+  background: hsl(var(--surface-primary));
+  box-shadow: 0 6px 24px hsl(0 0% 0% / 0.12);
+  z-index: 10;
+}
+
+.menuItem {
+  width: 100%;
+  display: block;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: hsl(var(--text-body));
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+}
+
+.menuItem:hover,
+.menuItem:focus {
+  background: hsl(var(--surface-secondary));
+  outline: none;
+}
+
+.danger {
+  color: hsl(var(--text-error));
+}
