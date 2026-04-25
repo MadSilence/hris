@@ -1,7 +1,7 @@
-import { Tabs } from "@/components/layout/Tabs";
 import React, { ReactNode } from "react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
-import styles from "./layout.module.css";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 
 type SettingsLegalEntitiesAndOfficesLayoutProps = {
   children: ReactNode
@@ -28,15 +28,29 @@ export default function SettingsLegalEntitiesAndOfficesLayout({
   ];
 
   return (
-    <div className={styles.shell}>
-      <SettingsPageHeader
-        title={"Legal Entities & Offices"}
-        backHref="/settings"
-      />
-      <nav className={styles.tabs}>
-        <Tabs tabs={tabs}/>
-      </nav>
-      <main className={styles.main}>{children}</main>
-    </div>
+    // <div>
+    //   <SettingsPageHeader
+    //     title={"Legal Entities & Offices"}
+    //     backHref="/settings"
+    //   />
+    //   <nav>
+    //     <Tabs tabs={tabs}/>
+    //   </nav>
+    //   <main>{children}</main>
+    // </div>
+
+    <PermissionGate anyOf={["PERM_ROLES_VIEW"]} fallback={<AccessDenied/>}>
+      <div className="min-h-svh px-8 py-8">
+        <div className="px-8 pt-8">
+          <div className="px-6">
+            <SettingsPageHeader
+              title={"Legal Entities & Offices"}
+              backHref="/settings"
+            />
+          </div>
+        </div>
+        <main>{children}</main>
+      </div>
+    </PermissionGate>
   );
 };

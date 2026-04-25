@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { DataTable, DataTableColumn } from "@/components/ui/DataTable/DataTable";
 import { CreateLegalEntityModal } from "../CreateLegalEntityModal";
 import type { CreateLegalEntityFormValues } from "../CreateLegalEntityForm";
 import { LegalEntityDetailsModal } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsModal";
@@ -14,53 +13,22 @@ import type { UpdateLegalEntityActionInput, } from "@/components/modules/setting
 import type { DeleteLegalEntityActionInput, } from "@/components/modules/settings/modules/legalEntity/actions/deleteLegalEntityAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdateLegalEntityFormValues } from "@/components/modules/settings/modules/legalEntity/components/UpdateLegalEntityForm";
-
-const columns: DataTableColumn<LegalEntity>[] = [
-  {
-    id: "name",
-    header: "Name",
-    sortable: true,
-    icon: <span>Aa</span>,
-    accessor: (e) => e.name,
-    sortValue: (e) => e.name,
-  },
-  {
-    id: "country",
-    header: "Country",
-    sortable: true,
-    accessor: (e) => e.country,
-    sortValue: (e) => e.country,
-  },
-  {
-    id: "address",
-    header: "Address",
-    sortable: false,
-    accessor: (e) =>
-      `${e.street}, ${e.postCode}, ${e.city}, ${e.country}`,
-  },
-  {
-    id: "registrationNumber",
-    header: "Registration number",
-    sortable: false,
-    accessor: (e) => e.registrationNumber,
-  },
-  {
-    id: "taxId",
-    header: "Tax ID",
-    sortable: false,
-    accessor: (e) => e.taxId,
-  },
-];
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 
 type Props = {
-  initialEntities: LegalEntity[] | undefined;
+  initialEntities: LegalEntity[];
+  isLoading: boolean;
 };
 
-export const LegalEntityComponent: React.FC<Props> = ({ initialEntities }) => {
+export const LegalEntityComponent: React.FC<Props> = ({ initialEntities, isLoading }) => {
   const [isCreateLegalEntityModalOpen, setIsCreateLegalEntityModalOpen] =
     useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const createLegalEntityAction = useCreateLegalEntityAction();
   const updateLegalEntityAction = useUpdateLegalEntityAction();
@@ -141,21 +109,90 @@ export const LegalEntityComponent: React.FC<Props> = ({ initialEntities }) => {
     setIsDetailsModalOpen(true);
   };
 
+  const filteredSorted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const rows = q
+      ? initialEntities.filter((e) =>
+          [e.name, e.country, e.city, e.street, e.registrationNumber, e.taxId]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(q)),
+        )
+      : initialEntities;
+    return rows.slice().sort((a, b) => a.name.localeCompare(b.name));
+  }, [initialEntities, query]);
+
+  const SkeletonRows = ({ rows = 5 }: { rows?: number }) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`le-skel-${i}`} className="border-brown-200">
+          <TableCell className="py-3"><Skeleton className="h-4 w-40"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-24"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-64"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-28"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-24"/></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <>
-      <DataTable<LegalEntity>
-        columns={columns}
-        data={initialEntities}
-        getRowId={(e) => e.id}
-        onFilterClick={() => {
-          console.log("Filter legal entities");
-        }}
-        onAddClick={() => setIsCreateLegalEntityModalOpen(true)}
-        addLabel="Add"
-        defaultSort={{ columnId: "name", direction: "asc" }}
-        searchPlaceholder="Search legal entities"
-        onRowClick={handleRowClick}
-      />
+      <div className="p-6 border-b border-brown-200">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative">
+            <Input
+              placeholder="Search legal entities"
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+              className="w-[260px]"
+              inputMode="search"
+            />
+          </div>
+          <Button onClick={() => setIsCreateLegalEntityModalOpen(true)}>Add</Button>
+        </div>
+      </div>
+
+      <div>
+        <Table>
+          <TableHeader className="[&_tr]:border-brown-200">
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Country</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>Registration number</TableHead>
+              <TableHead>Tax ID</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && <SkeletonRows rows={6}/>}
+
+            {!isLoading &&
+              filteredSorted.map((e) => (
+                <TableRow
+                  key={e.id}
+                  className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                  onClick={() => handleRowClick(e)}
+                >
+                  <TableCell className="py-3 font-medium">{e.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.country}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {[e.street, e.postCode, e.city, e.country].filter(Boolean).join(", ")}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{e.registrationNumber}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.taxId}</TableCell>
+                </TableRow>
+              ))}
+
+            {!isLoading && filteredSorted.length === 0 && (
+              <TableRow className="[&_td]:py-3">
+                <TableCell colSpan={5}>
+                  <div className="text-sm text-muted-foreground">No legal entities</div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <CreateLegalEntityModal
         isOpen={isCreateLegalEntityModalOpen}

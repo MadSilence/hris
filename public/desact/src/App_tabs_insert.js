@@ -1,0 +1,1 @@
+// File no longer needed - TabsPage has been successfully added to App.tsx

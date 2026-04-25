@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import styles from "./PersonalInfoContainer.module.css";
 import { PersonalInfoSidebar } from "./components/PersonalInfoSidebar";
 import { PersonalInfoAttributesList } from "./components/PersonalInfoAttributesList";
 import { User } from "@/models/user/User";
@@ -11,6 +10,8 @@ import { useAttributeGroups } from "@/components/modules/settings/modules/attrib
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
 import { useActiveSectionScroll } from "@/components/modules/organization/modules/profile/hooks/useActiveSectionScroll";
 import { Loader } from "@/components/ui/Loader";
+import { Card } from "@/public/desact/src/components/ui/card";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type PersonalInfoContainerProps = { user: User };
 
@@ -85,7 +86,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
   if (isLoading) {
     return (
-      <div className={styles.loaderWrapper}>
+      <div className="flex items-center justify-center w-full h-full">
         <Loader/>
       </div>
     );
@@ -93,24 +94,20 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
   if (error || !groups.length) {
     return (
-      <div className={styles.outer}>
-        <div className={styles.container}>
-          <div
-            className={`${styles.stateMessage} ${
-              error ? styles.stateMessageError : ""
-            }`}
-          >
+      <div className="px-8">
+        <Card className="p-6">
+          <div className={`text-sm ${error ? "text-red-600" : "text-muted-foreground"}`}>
             {error ? "Failed to load" : "No groups"}
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className={styles.outer}>
-      <div className={styles.container}>
-        <div className={styles.wrap}>
+    <div className="px-8">
+      <div className="w-full max-h-[70vh] bg-background overflow-auto">
+        <div className="grid grid-cols-[260px_1fr] gap-7">
           <PersonalInfoSidebar
             groups={groups}
             activeId={activeId || groups[0]?.id}
@@ -128,21 +125,17 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
             }
             headerActions={
               !isEdit ? (
-                <button onClick={onEditToggle} className="btn-edit">
+                <Button variant="outline" onClick={onEditToggle}>
                   Edit
-                </button>
+                </Button>
               ) : (
-                <div style={{ display: "flex", gap: "var(--space-4)" }}>
-                  <button onClick={onCancel} className="btn-secondary">
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={onCancel}>
                     Cancel
-                  </button>
-                  <button
-                    onClick={onSave}
-                    disabled={!dirty}
-                    className="btn-primary"
-                  >
+                  </Button>
+                  <Button onClick={onSave} disabled={!dirty}>
                     Save
-                  </button>
+                  </Button>
                 </div>
               )
             }

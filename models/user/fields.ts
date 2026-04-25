@@ -33,12 +33,18 @@ export type UsersSearchRequest = {
   filters?: FilterDTO[] | null;
 };
 
+export type UserRoleDTO = {
+  id: string;
+  name: string;
+}
+
 export type UsersSearchItemDTO = {
   id: string;
   companyId: string;
   email: string;
   firstName: string;
   lastName: string;
+  roles: UserRoleDTO[];
   status: string;
   isEmailVerified: boolean;
   lastLoginAt?: string | null;

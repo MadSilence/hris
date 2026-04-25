@@ -1,11 +1,40 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./features/**/*.{ts,tsx}"],
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./features/**/*.{ts,tsx}",
+    "./public/desact/src/**/*.{ts,tsx}",
+  ],
   theme: {
     extend: {
       /* Colors (all via HSL triplets; opacity modifiers work) */
       colors: {
+        background: "hsl(var(--surface-page) / <alpha-value>)",
+        foreground: "hsl(var(--text-body) / <alpha-value>)",
+        primary: {
+          DEFAULT: "hsl(var(--surface-action-1) / <alpha-value>)",
+          foreground: "hsl(var(--text-on-action) / <alpha-value>)",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--surface-secondary) / <alpha-value>)",
+          foreground: "hsl(var(--text-body) / <alpha-value>)",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--surface-highlight) / <alpha-value>)",
+          foreground: "hsl(var(--text-body) / <alpha-value>)",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--surface-secondary) / <alpha-value>)",
+          foreground: "hsl(var(--text-body) / <alpha-value>)",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--surface-error) / <alpha-value>)",
+          foreground: "hsl(var(--text-on-action) / <alpha-value>)",
+        },
+        input: "hsl(var(--border-primary) / <alpha-value>)",
+        ring: "hsl(var(--border-focus) / <alpha-value>)",
         text: {
           headings: "hsl(var(--text-headings) / <alpha-value>)",
           body: "hsl(var(--text-body) / <alpha-value>)",

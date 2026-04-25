@@ -1,9 +1,15 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import styles from "./LegalEntityDetailsModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/public/desact/src/components/ui/dialog";
 import { LegalEntityDetailsView } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsView";
 import { LegalEntity } from "@/models/legalEntity";
 import { DeleteLegalEntityModal } from "@/components/modules/settings/modules/legalEntity/components/DeleteLegalEntityModal";
@@ -75,33 +81,43 @@ export const LegalEntityDetailsModal: React.FC<LegalEntityDetailsModalProps> = (
 
   return (
     <>
-      <Modal
-        isLoading={isLoading}
-        isOpen={isOpen}
-        onRequestClose={() => !isLoading && onRequestClose()}
-        title="Legal entity"
-        footer={
-          <div className={styles.actions}>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Legal entity</DialogTitle>
+            <DialogDescription/>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto pr-1">
+            {isEditing ? (
+              <UpdateLegalEntityForm
+                formRef={formRef}
+                initialValues={updateInitialValues}
+                onSubmit={handleAfterSubmit}
+              />
+            ) : (
+              <LegalEntityDetailsView legalEntity={entity}/>
+            )}
+          </div>
+
+          <DialogFooter>
             {!isEditing ? (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => !isLoading && setIsDeleteOpen(true)}
                 >
-                  <Trash className={styles.icon}/>
+                  <Trash className="w-4 h-4 mr-2"/>
                   Delete
                 </Button>
-                <Button
-                  onClick={() => !isLoading && setIsEditing(true)}
-                >
-                  {/* <Pencil className={styles.icon} /> */}
+                <Button onClick={() => !isLoading && setIsEditing(true)}>
                   Edit
                 </Button>
               </>
             ) : (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={handleCancelEdit}
                   disabled={isLoading}
                 >
@@ -112,21 +128,9 @@ export const LegalEntityDetailsModal: React.FC<LegalEntityDetailsModalProps> = (
                 </Button>
               </>
             )}
-          </div>
-        }
-      >
-        <div className={styles.content}>
-          {isEditing ? (
-            <UpdateLegalEntityForm
-              formRef={formRef}
-              initialValues={updateInitialValues}
-              onSubmit={handleAfterSubmit}
-            />
-          ) : (
-            <LegalEntityDetailsView legalEntity={entity}/>
-          )}
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DeleteLegalEntityModal
         isOpen={isDeleteOpen}

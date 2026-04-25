@@ -4,6 +4,10 @@ export type UserDTO = {
   email: string;
   firstName: string;
   lastName: string;
+  roles: {
+    id: string;
+    name: string;
+  }
   status: string;
   isEmailVerified: boolean;
   lastLoginAt: string;

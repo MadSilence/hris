@@ -1,12 +1,13 @@
 "use client";
 
-import styles from "./ConfirmTrialForm.module.css";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import * as yup from "yup";
-import { useFormik } from "formik";
 import React, { useCallback } from "react";
+import { useForm } from "react-hook-form";
+
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/public/desact/src/components/ui/form";
+
+import styles from "./ConfirmTrialForm.module.css";
 
 export type PasswordValues = {
   password: string;
@@ -28,113 +29,159 @@ export enum PasswordMessages {
   Mismatch = "Passwords don’t match.",
 }
 
-const passwordValidationSchema = yup.object({
-  password: yup
-    .string()
-    .required(PasswordMessages.Required)
-    .min(8, PasswordMessages.TooShort)
-    .matches(/[a-z]/, PasswordMessages.Weak)
-    .matches(/[A-Z]/, PasswordMessages.Weak)
-    .matches(/[0-9]/, PasswordMessages.Weak)
-    .matches(/[^A-Za-z0-9]/, PasswordMessages.Weak),
-  confirmPassword: yup
-    .string()
-    .required(PasswordMessages.ConfirmRequired)
-    .oneOf([yup.ref("password")], PasswordMessages.Mismatch),
-});
+function isStrongPassword(value: string) {
+  if (!value) return false;
+  if (value.length < 8) return false;
+  if (!/[a-z]/.test(value)) return false;
+  if (!/[A-Z]/.test(value)) return false;
+  if (!/[0-9]/.test(value)) return false;
+  if (!/[^A-Za-z0-9]/.test(value)) return false;
+  return true;
+}
+
+type ApiErrorProps = { message?: string };
+
+function ApiErrorMessage({ message }: ApiErrorProps) {
+  if (!message) return null;
+  return (
+    <p className={styles.apiError} role="alert">
+      {message}
+    </p>
+  );
+}
+
+type HeaderProps = { className?: string };
+
+function ConfirmHeader({ className }: HeaderProps) {
+  return (
+    <div className={className}>
+      <h1 className={styles.title}>Set your password</h1>
+      <p className={styles.subtitle}>Create a strong password for your SixSoftware account.</p>
+    </div>
+  );
+}
+
+type SuccessProps = { className?: string };
+
+function ConfirmSuccessBlock({ className }: SuccessProps) {
+  return (
+    <div className={className}>
+      <h1 className={styles.title}>Password set</h1>
+      <p className={styles.subtitle}>
+        Your password has been created. You can now sign in and continue setting up your company.
+      </p>
+      <p className={styles.hint}>
+        Head over to the <a href="/login">login page</a> to get started.
+      </p>
+    </div>
+  );
+}
 
 export default function ConfirmTrialForm({
-                                          onSubmit,
-                                          submitting,
-                                          apiError,
-                                          isSuccess,
-                                        }: SetPasswordFormProps) {
-  const handleFormSubmission = useCallback(
-    (values: PasswordValues) => onSubmit(values),
-    [onSubmit]
-  );
-
-  const formik = useFormik<PasswordValues>({
-    initialValues: {
+  onSubmit,
+  submitting,
+  apiError,
+  isSuccess,
+}: SetPasswordFormProps) {
+  const form = useForm<PasswordValues>({
+    defaultValues: {
       password: "",
       confirmPassword: "",
     },
-    validationSchema: passwordValidationSchema,
-    validateOnBlur: false,
-    validateOnChange: false,
-    onSubmit: handleFormSubmission,
+    mode: "onSubmit",
   });
 
-  const busy = submitting ?? formik.isSubmitting;
+  const busy = (submitting ?? false) || form.formState.isSubmitting;
+
+  const submitHandler = useCallback(
+    async (values: PasswordValues) => {
+      await onSubmit(values);
+    },
+    [onSubmit]
+  );
 
   return (
     <div className={styles.centerWrap}>
-      <Card className={styles.card}>
-        {!isSuccess && (
-          <div className={styles.form}>
-            <div className={styles.titleBlock}>
-              <h1 className={styles.title}>Set your password</h1>
-              <p className={styles.subtitle}>
-                Create a strong password for your SixSoftware account.
-              </p>
-            </div>
+      {!isSuccess ? (
+        <div className={styles.form}>
+          <ConfirmHeader className={styles.titleBlock}/>
 
-            <form onSubmit={formik.handleSubmit} className={styles.fields} noValidate>
-              <Input
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-6" noValidate>
+              <FormField
+                control={form.control}
                 name="password"
-                type="password"
-                placeholder="Password*"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.errors.password}
-                disabled={busy}
-                required
-                autoComplete="new-password"
+                rules={{
+                  required: PasswordMessages.Required,
+                  validate: (v) => {
+                    if (!v) return PasswordMessages.Required;
+                    if (v.length < 8) return PasswordMessages.TooShort;
+                    if (!isStrongPassword(v)) return PasswordMessages.Weak;
+                    return true;
+                  },
+                }}
+                render={({ field }) => (
+                  <FormItem className="gap-0 mb-4">
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Password*"
+                        autoComplete="new-password"
+                        disabled={busy}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )}
               />
 
-              <Input
+              <FormField
+                control={form.control}
                 name="confirmPassword"
-                type="password"
-                placeholder="Confirm password*"
-                value={formik.values.confirmPassword}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.errors.confirmPassword}
-                disabled={busy}
-                required
-                autoComplete="new-password"
+                rules={{
+                  required: PasswordMessages.ConfirmRequired,
+                  validate: (v) => {
+                    if (!v) return PasswordMessages.ConfirmRequired;
+                    const password = form.getValues("password");
+                    if (v !== password) return PasswordMessages.Mismatch;
+                    return true;
+                  },
+                }}
+                render={({ field }) => (
+                  <FormItem className="gap-0 mb-4">
+                    <FormLabel>Confirm password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm password*"
+                        autoComplete="new-password"
+                        disabled={busy}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )}
               />
 
               <p className={styles.hint}>
-                Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
+                Use at least 8 characters with upper &amp; lower case letters, a number, and a
+                symbol.
               </p>
 
-              {apiError && (
-                <p className={styles.apiError} role="alert">
-                  {apiError}
-                </p>
-              )}
+              <ApiErrorMessage message={apiError}/>
 
-              <Button type="submit" variant="primary" fullWidth disabled={busy}>
+              <Button type="submit" variant="default" disabled={busy} className="h-11 w-full">
                 {busy ? "Saving…" : "Set password"}
               </Button>
             </form>
-          </div>
-        )}
-
-        {isSuccess && (
-          <div className={styles.successBlock}>
-            <h1 className={styles.title}>Password set</h1>
-            <p className={styles.subtitle}>
-              Your password has been created. You can now sign in and continue setting up your company.
-            </p>
-            <p className={styles.hint}>
-              Head over to the <a href="/login">login page</a> to get started.
-            </p>
-          </div>
-        )}
-      </Card>
+          </Form>
+        </div>
+      ) : (
+        <ConfirmSuccessBlock className={styles.successBlock}/>
+      )}
     </div>
   );
 }

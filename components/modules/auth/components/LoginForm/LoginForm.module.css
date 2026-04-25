@@ -1,23 +1,20 @@
 .centerWrap {
-  min-height: calc(100dvh - 20dvh);
+  height: 75dvh;
   display: grid;
   place-items: center;
-  background: hsl(var(--surface-secondary));
   padding: var(--space-7);
   overflow: hidden; /* avoid stray scrollbars */
-}
-
-.card {
-  width: min(400px, 100%);
-  background: hsl(var(--surface-primary));
 }
 
 .form {
   display: grid;
   gap: var(--space-6);
+  min-width: 30vw;
 }
 
 .title {
+  display: flex;
+  justify-content: center;
   margin: 0;
   font-family: var(--font-sans);
   font-weight: var(--font-weight-bold);

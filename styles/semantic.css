@@ -1,10 +1,15 @@
 :root {
+  /* Font & spacing base for desact compatibility */
+  --font-family-sans: "Helvetica Neue", Arial, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --spacing: 4px;
+
   /* Primary & secondary */
-  --theme-primary-dark: var(--color-grey-darker);
-  --theme-primary: var(--color-grey-dark);
-  --theme-primary-light: var(--color-grey-light);
-  --theme-primary-lighter: var(--color-grey-lighter);
-  --theme-primary-lightest: var(--color-grey-lightest);
+  --theme-primary-dark: var(--color-brown-700-hsl);
+  --theme-primary: var(--color-brown-600-hsl);
+  --theme-primary-light: var(--color-brown-400-hsl);
+  --theme-primary-lighter: var(--color-brown-300-hsl);
+  --theme-primary-lightest: var(--color-brown-200-hsl);
 
   --theme-secondary-dark: var(--color-teal-dark);
   --theme-secondary: var(--color-teal);
@@ -49,11 +54,11 @@
   /* ===== Application roles (final API) ===== */
 
   /* Text */
-  --text-headings: var(--theme-black);
-  --text-body: var(--theme-neutral-darkest);
+  --text-headings: var(--color-brown-900-hsl);
+  --text-body: var(--color-brown-800-hsl);
   --text-action: var(--theme-primary);
   --text-action-hover: var(--theme-primary-dark);
-  --text-disabled: var(--theme-neutral);
+  --text-disabled: var(--color-brown-300-hsl);
   --text-highlight: var(--theme-highlight);
   --text-information: var(--theme-information);
   --text-success: var(--theme-success-dark);
@@ -63,7 +68,7 @@
   --text-on-disabled: var(--theme-neutral-darker);
 
   /* Icons */
-  --icon-primary: var(--theme-neutral-darkest);
+  --icon-primary: var(--theme-primary);
   --icon-information: var(--theme-information);
   --icon-success: var(--theme-success);
   --icon-warning: var(--theme-warning);
@@ -72,13 +77,13 @@
   /* Surfaces */
   --surface-page: var(--theme-white);
   --surface-primary: var(--theme-white);
-  --surface-secondary: var(--theme-neutral-lightest);
+  --surface-secondary: var(--theme-primary-lightest);
   --surface-disabled: var(--theme-neutral-lightest);
   --surface-success: var(--theme-success-light);
   --surface-error: var(--theme-error-light);
   --surface-warning: var(--theme-warning-light);
   --surface-information: var(--theme-information-lighter);
-  --surface-highlight: var(--theme-highlight);
+  --surface-highlight: var(--color-brown-100-hsl);
 
   /* Action surfaces */
   --surface-action-1: var(--theme-primary);
@@ -90,7 +95,7 @@
   --surface-modal: 0 0% 0% / 0.75; /* hsl() alpha-friendly */
 
   /* Borders */
-  --border-primary: var(--theme-neutral-lighter);
+  --border-primary: var(--color-brown-300-hsl);
   --border-secondary: var(--theme-primary);
   --border-information: var(--theme-information);
   --border-success: var(--theme-success);
@@ -113,4 +118,70 @@
   --shadow-md-sem: var(--shadow-md);
   --shadow-lg-sem: var(--shadow-lg);
   --shadow-xl-sem: var(--shadow-xl);
+
+  /* ===== Desact variable aliases mapped to existing semantics ===== */
+  /* Text aliases */
+  --color-text-primary: hsl(var(--color-brown-800-hsl));
+  --color-text-secondary: hsl(var(--color-brown-700-hsl));
+  --color-text-tertiary: hsl(var(--color-brown-600-hsl));
+  --color-text-quaternary: hsl(var(--color-brown-400-hsl));
+  --color-text-placeholder: hsl(var(--color-brown-300-hsl));
+  --color-text-disabled: hsl(var(--color-brown-200-hsl));
+  --color-text-inverse: hsl(var(--theme-white));
+
+  /* Background aliases */
+  --color-bg-primary: hsl(var(--surface-primary));
+  --color-bg-secondary: hsl(var(--surface-secondary));
+  --color-bg-tertiary: hsl(var(--surface-disabled));
+  --color-bg-quaternary: hsl(var(--surface-information));
+  --color-bg-active: hsl(var(--surface-secondary));
+  --color-bg-hover: hsl(var(--surface-secondary));
+  --color-bg-disabled: hsl(var(--surface-disabled));
+
+  /* Border aliases */
+  --color-border-primary: hsl(var(--border-primary));
+  --color-border-secondary: hsl(var(--border-secondary));
+  --color-border-tertiary: hsl(var(--border-highlight));
+  --color-border-disabled: hsl(var(--border-disabled));
+  --color-border-focus: hsl(var(--border-focus));
+
+  /* Shadcn legacy aliases used by Desact pages */
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-bg-primary);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-bg-primary);
+  --popover-foreground: var(--color-text-primary);
+  --primary: hsl(var(--surface-action-1));
+  --primary-foreground: hsl(var(--text-on-action));
+  --secondary: var(--color-bg-secondary);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-bg-secondary);
+  --muted-foreground: var(--color-text-tertiary);
+  --accent: hsl(var(--color-brown-50-hsl));
+  --accent-foreground: hsl(var(--color-brown-700-hsl));
+  --destructive: hsl(var(--surface-error));
+  --destructive-foreground: hsl(var(--text-on-action));
+  --border: hsl(var(--border-primary));
+  --input: hsl(var(--border-primary));
+  --input-background: var(--color-bg-primary);
+  --switch-background: hsl(var(--border-secondary));
+  --ring: hsl(var(--theme-primary-dark));
+
+  /* Sidebar aliases */
+  --sidebar: var(--color-bg-primary);
+  --sidebar-foreground: var(--color-text-primary);
+  --sidebar-primary: hsl(var(--color-brown-600-hsl));
+  --sidebar-primary-foreground: var(--color-text-inverse);
+  --sidebar-accent: hsl(var(--color-brown-50-hsl));
+  --sidebar-accent-foreground: hsl(var(--color-brown-700-hsl));
+  --sidebar-border: hsl(var(--color-brown-300-hsl));
+  --sidebar-ring: hsl(var(--color-brown-700-hsl));
+
+  /* Chart aliases */
+  --chart-1: #947068;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #06b6d4;
 }

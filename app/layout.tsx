@@ -1,4 +1,5 @@
 import "./globals.css";
+import "../public/desact/src/styles/globals.css";
 import { rootMetadata, rootViewport } from "@/components/layout/RootLayout/RootLayout";
 import React from "react";
 import getPublicEnv from "@/app/actions/getPublicEnv";

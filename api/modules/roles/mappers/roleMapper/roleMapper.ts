@@ -7,6 +7,7 @@ export class RoleMapper {
       id: dto.id,
       active: dto.active,
       name: dto.name,
+      description: dto.description || undefined,
       createdAt: dto.createdAt,
       systemOwner: dto.systemOwner,
       updatedAt: dto.updatedAt,

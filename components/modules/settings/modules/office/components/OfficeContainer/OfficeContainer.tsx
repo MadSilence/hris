@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import styles from "./OfficeContainer.module.css";
 import { OfficeComponent } from "@/components/modules/settings/modules/office/components/OfficeComponent";
 import { useOffice } from "@/components/modules/settings/modules/office/hooks/useOffice";
-import { Loader } from "@/components/ui/Loader";
 
 const OfficeContainer: React.FC = () => {
   const {
@@ -14,17 +12,11 @@ const OfficeContainer: React.FC = () => {
   } = useOffice();
 
   return (
-    (officesLoading ?
-        <div className={styles.loaderWrapper}>
-          <Loader/>
-        </div>
-        :
-        <div className={styles.outer}>
-          <div className={styles.container}>
-            <OfficeComponent initialOffices={offices}/>
-          </div>
-        </div>
-    )
+    <div className="w-full px-8">
+      <div className="w-full max-h-[70vh] bg-background overflow-auto">
+        <OfficeComponent initialOffices={offices ?? []} isLoading={officesLoading}/>
+      </div>
+    </div>
   );
 };
 

@@ -1,13 +1,15 @@
 "use client";
 
-import styles from "./TrialForm.module.css";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import * as yup from "yup";
-import { useFormik } from "formik";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
+import { useForm } from "react-hook-form";
+
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/public/desact/src/components/ui/form";
+
 import { InputAddon, InputGroup } from "@/components/ui/InputGroup/InputGroup";
+import styles from "./TrialForm.module.css";
 
 export type TrialValues = {
   email: string;
@@ -32,148 +34,74 @@ function normalizeSubdomain(raw: string) {
   return s;
 }
 
-export default function TrialForm({onSubmit, submitting, apiError, isSuccess}: TrialFormProps) {
-  const handleFormSubmission = useCallback(
-    (values: TrialValues) => onSubmit(values),
-    [onSubmit]
-  );
+function isValidSubdomain(value: string) {
+  return /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(value);
+}
 
-  const formik = useFormik<TrialValues>({
-    initialValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      companyName: "",
-      consent: false,
-    },
-    validationSchema: trialValidationSchema,
-    validateOnBlur: false,
-    validateOnChange: false,
-    onSubmit: handleFormSubmission,
-  });
+type HeaderProps = { className?: string };
 
-  const busy = submitting ?? formik.isSubmitting;
-
-  const handleCompanyChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const normalized = normalizeSubdomain(e.target.value);
-    formik.setFieldValue("companyName", normalized, false);
-  };
-
+function TrialHeader({ className }: HeaderProps) {
   return (
-    <div className={styles.centerWrap}>
-      <Card className={styles.card}>
-        {!isSuccess && <div className={styles.form}>
-          <div className={styles.titleBlock}>
-            <span className={styles.kicker}>Start your free trial</span>
-            <h1 className={styles.title}>Get started for free</h1>
-            <p className={styles.subtitle}>
-              Try SixSoftware for 14 days for free. No credit card, setup or cancellation required.
-            </p>
-          </div>
+    <div className={className}>
+      <span className={styles.kicker}>Start your free trial</span>
+      <h1 className={styles.title}>Get started for free</h1>
+      <p className={styles.subtitle}>
+        Try SixSoftware for 14 days for free. No credit card, setup or cancellation required.
+      </p>
+    </div>
+  );
+}
 
-          <form onSubmit={formik.handleSubmit} className={styles.fields} noValidate>
-            <Input
-              name="email"
-              type="email"
-              placeholder="Business email*"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.errors.email}
-              disabled={busy}
-              required
-            />
+type SuccessBlockProps = { className?: string };
 
-            <div className={styles.row2}>
-              <Input
-                name="firstName"
-                placeholder="First name*"
-                value={formik.values.firstName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.errors.firstName}
-                disabled={busy}
-                required
-              />
-              <Input
-                name="lastName"
-                placeholder="Last name*"
-                value={formik.values.lastName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.errors.lastName}
-                disabled={busy}
-                required
-              />
-            </div>
+function TrialSuccessBlock({ className }: SuccessBlockProps) {
+  return (
+    <div className={className}>
+      <h1 className={styles.title}>Check your inbox</h1>
+      <p className={styles.subtitle}>
+        We’ve sent a verification link to your email address. Please open the email and confirm your
+        account before continuing.
+      </p>
+      <p className={styles.hint}>Didn’t receive it? Be sure to check your spam or promotions folder.</p>
+    </div>
+  );
+}
 
-            <div className={styles.subdomainRow}>
-              <InputGroup>
-                <Input
-                  name="companyName"
-                  placeholder="Company Name*"
-                  value={formik.values.companyName}
-                  onChange={handleCompanyChange}
-                  onBlur={formik.handleBlur}
-                  disabled={busy}
-                  required
-                  error={formik.errors.companyName}
-                  groupPosition="left"
-                  aria-describedby="subdomain-suffix"
-                />
-                <InputAddon>
-                  <span id="subdomain-suffix">.app.sixsoftware.com</span>
-                </InputAddon>
-              </InputGroup>
-            </div>
+type ApiErrorProps = { message?: string };
 
-            <p className={styles.hint}>
-              *For the best experience possible, we ask that you provide all of the required contact details above.
-            </p>
+function ApiErrorMessage({ message }: ApiErrorProps) {
+  if (!message) return null;
+  return (
+    <p className={styles.apiError} role="alert">
+      {message}
+    </p>
+  );
+}
 
-            <label className={styles.legal}>
-              <input
-                type="checkbox"
-                name="consent"
-                checked={formik.values.consent}
-                onChange={formik.handleChange}
-                disabled={busy}
-                style={{marginRight: 8}}
-              />
-              By submitting this form I confirm that I have read the privacy policy and agree to the
-              processing of my personal data by SixSoftware for the stated purposes. In case of consent,
-              I can revoke my consent at any time. Furthermore, by sending the form I agree to the
-              general terms and conditions.
-            </label>
+type SubdomainInputProps = {
+  value: string;
+  disabled: boolean;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+};
 
-            {apiError && (
-              <p className={styles.apiError} role="alert">
-                {apiError}
-              </p>
-            )}
-
-            <Button type="submit" variant="primary" fullWidth disabled={busy}>
-              {busy ? "Starting your trial…" : "Start your free trial"}
-            </Button>
-
-            <p className={styles.loginBack}>
-              You already have an account? <a href="/app/login">Login here</a>
-            </p>
-          </form>
-        </div>}
-        {isSuccess &&
-          <div className={styles.successBlock}>
-            <h1 className={styles.title}>Check your inbox</h1>
-            <p className={styles.subtitle}>
-              We’ve sent a verification link to your email address.
-              Please open the email and confirm your account before continuing.
-            </p>
-            <p className={styles.hint}>
-              Didn’t receive it? Be sure to check your spam or promotions folder.
-            </p>
-          </div>
-        }
-      </Card>
+function SubdomainInput({ value, disabled, onChange }: SubdomainInputProps) {
+  return (
+    <div className={styles.subdomainRow}>
+      <InputGroup>
+        <Input
+          name="companyName"
+          placeholder="Company Name*"
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          required
+          groupPosition="left"
+          aria-describedby="subdomain-suffix"
+        />
+        <InputAddon>
+          <span id="subdomain-suffix">.app.sixsoftware.com</span>
+        </InputAddon>
+      </InputGroup>
     </div>
   );
 }
@@ -188,13 +116,175 @@ export enum TrialMessages {
   ConsentRequired = "Please accept the privacy terms to continue.",
 }
 
-export const trialValidationSchema = yup.object({
-  email: yup.string().email(TrialMessages.InvalidEmail).required(TrialMessages.EmailRequired),
-  firstName: yup.string().required(TrialMessages.FirstRequired),
-  lastName: yup.string().required(TrialMessages.LastRequired),
-  companyName: yup
-    .string()
-    .matches(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, TrialMessages.SubdomainInvalid)
-    .required(TrialMessages.CompanyRequired),
-  consent: yup.boolean().oneOf([true], TrialMessages.ConsentRequired),
-});
+export default function TrialForm({ onSubmit, submitting, apiError, isSuccess }: TrialFormProps) {
+  const form = useForm<TrialValues>({
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      companyName: "",
+      consent: false,
+    },
+    mode: "onSubmit",
+  });
+
+  const busy = (submitting ?? false) || form.formState.isSubmitting;
+
+  const submitHandler = useCallback(
+    async (values: TrialValues) => {
+      await onSubmit(values);
+    },
+    [onSubmit]
+  );
+
+  const handleCompanyChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const normalized = normalizeSubdomain(e.target.value);
+    form.setValue("companyName", normalized, { shouldValidate: false, shouldDirty: true });
+  };
+
+  const consentText = useMemo(
+    () =>
+      "By submitting this form I confirm that I have read the privacy policy and agree to the processing of my personal data by SixSoftware for the stated purposes. In case of consent, I can revoke my consent at any time. Furthermore, by sending the form I agree to the general terms and conditions.",
+    []
+  );
+
+  return (
+    <div className={styles.centerWrap}>
+      {!isSuccess ? (
+        <div className={styles.form}>
+          <TrialHeader className={styles.titleBlock}/>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-8 px-8" noValidate>
+              <FormField
+                control={form.control}
+                name="email"
+                rules={{
+                  required: TrialMessages.EmailRequired,
+                  validate: (v) =>
+                    /^\S+@\S+\.\S+$/.test(v || "") ? true : TrialMessages.InvalidEmail,
+                }}
+                render={({ field }) => (
+                  <FormItem className="gap-0 mb-4">
+                    <FormLabel>Business email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Business email*" disabled={busy} {...field} />
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-0">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  rules={{ required: TrialMessages.FirstRequired }}
+                  render={({ field }) => (
+                    <FormItem className="gap-0 mb-4">
+                      <FormLabel>First name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="First name*" disabled={busy} {...field} />
+                      </FormControl>
+                      <FormMessage/>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  rules={{ required: TrialMessages.LastRequired }}
+                  render={({ field }) => (
+                    <FormItem className="gap-0 mb-4">
+                      <FormLabel>Last name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Last name*" disabled={busy} {...field} />
+                      </FormControl>
+                      <FormMessage/>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="companyName"
+                rules={{
+                  required: TrialMessages.CompanyRequired,
+                  validate: (v) => (isValidSubdomain(v || "") ? true : TrialMessages.SubdomainInvalid),
+                }}
+                render={({ field }) => (
+                  <FormItem className="gap-0 mb-4">
+                    <FormLabel>Company name</FormLabel>
+                    <FormControl>
+                      <SubdomainInput
+                        value={field.value ?? ""}
+                        disabled={busy}
+                        onChange={(e) => {
+                          handleCompanyChange(e);
+                          field.onChange(normalizeSubdomain(e.target.value));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
+
+              <p className={styles.hint}>
+                *For the best experience possible, we ask that you provide all of the required contact
+                details above.
+              </p>
+
+              <FormField
+                control={form.control}
+                name="consent"
+                rules={{
+                  validate: (v) => (v ? true : TrialMessages.ConsentRequired),
+                }}
+                render={({ field }) => (
+                  <FormItem className="gap-0 mb-4">
+                    <div className="flex items-start gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={busy}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm leading-relaxed font-normal cursor-pointer">
+                        {consentText}
+                      </FormLabel>
+                    </div>
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
+
+              <ApiErrorMessage message={apiError}/>
+
+              <div className="flex flex-col gap-4">
+                <Button
+                  type="submit"
+                  variant="default"
+                  disabled={busy}
+                  className="text-white"
+                >
+                  {busy ? "Starting your trial…" : "Start your free trial"}
+                </Button>
+
+                <p className={styles.loginBack}>
+                  You already have an account? <a href="/login">Login here</a>
+                </p>
+              </div>
+            </form>
+          </Form>
+        </div>
+      ) : (
+        <TrialSuccessBlock className={styles.successBlock}/>
+      )}
+    </div>
+  );
+}

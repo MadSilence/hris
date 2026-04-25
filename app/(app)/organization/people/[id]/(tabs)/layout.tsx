@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { UserProvider } from "@/components/providers/UserProvider";
 import { Tabs } from "@/components/layout/Tabs/Tabs";
 import { UserDataHeader } from "@/components/modules/organization/modules/profile/components/UserDataHeader";
-import styles from "./TabsLayout.module.css";
 import { getUserServer } from "@/server/users/users";
 
 export default async function UserTabsLayout({
@@ -10,9 +9,9 @@ export default async function UserTabsLayout({
   params,
 }: {
   children: ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const user = await getUserServer(id);
 
   const tabs = [
@@ -23,14 +22,14 @@ export default async function UserTabsLayout({
 
   return (
     <UserProvider userId={id} initialUser={user}>
-      <div className={styles.shell}>
-        <header className={styles.header}>
-          <UserDataHeader title="User" userId={id} user={user}/>
+      <div className="flex flex-col min-h-0">
+        <header className="px-8 pt-6">
+          <UserDataHeader userId={id} user={user}/>
         </header>
-        <nav className={styles.tabs}>
+        <nav className="px-8">
           <Tabs tabs={tabs}/>
         </nav>
-        <main className={styles.main}>{children}</main>
+        <main className="flex-1 min-h-0">{children}</main>
       </div>
     </UserProvider>
   );

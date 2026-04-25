@@ -1,9 +1,15 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import styles from "./OfficeDetailsModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/public/desact/src/components/ui/dialog";
 import { OfficeDetailsView } from "@/components/modules/settings/modules/office/components/OfficeDetailsView";
 import { Office } from "@/models/office";
 import { DeleteOfficeModal } from "@/components/modules/settings/modules/office/components/DeleteOfficeModal";
@@ -75,33 +81,43 @@ export const OfficeDetailsModal: React.FC<OfficeDetailsModalProps> = ({
 
   return (
     <>
-      <Modal
-        isLoading={isLoading}
-        isOpen={isOpen}
-        onRequestClose={() => !isLoading && onRequestClose()}
-        title="Office"
-        footer={
-          <div className={styles.actions}>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Office</DialogTitle>
+            <DialogDescription/>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto pr-1">
+            {isEditing ? (
+              <UpdateOfficeForm
+                formRef={formRef}
+                initialValues={updateInitialValues}
+                onSubmit={handleAfterSubmit}
+              />
+            ) : (
+              <OfficeDetailsView office={office}/>
+            )}
+          </div>
+
+          <DialogFooter>
             {!isEditing ? (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => !isLoading && setIsDeleteOpen(true)}
                 >
-                  <Trash className={styles.icon}/>
+                  <Trash className="w-4 h-4 mr-2"/>
                   Delete
                 </Button>
-                <Button
-                  onClick={() => !isLoading && setIsEditing(true)}
-                >
-                  {/* <Pencil className={styles.icon} /> */}
+                <Button onClick={() => !isLoading && setIsEditing(true)}>
                   Edit
                 </Button>
               </>
             ) : (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={handleCancelEdit}
                   disabled={isLoading}
                 >
@@ -112,21 +128,9 @@ export const OfficeDetailsModal: React.FC<OfficeDetailsModalProps> = ({
                 </Button>
               </>
             )}
-          </div>
-        }
-      >
-        <div className={styles.content}>
-          {isEditing ? (
-            <UpdateOfficeForm
-              formRef={formRef}
-              initialValues={updateInitialValues}
-              onSubmit={handleAfterSubmit}
-            />
-          ) : (
-            <OfficeDetailsView office={office}/>
-          )}
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DeleteOfficeModal
         isOpen={isDeleteOpen}

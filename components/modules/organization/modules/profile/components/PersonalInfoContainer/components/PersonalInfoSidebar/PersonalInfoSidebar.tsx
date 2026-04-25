@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import styles from "./PersonalInfoSidebar.module.css";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type Props = {
   groups: AttributeGroup[];
@@ -10,18 +10,19 @@ type Props = {
 
 export const PersonalInfoSidebar: React.FC<Props> = ({ groups, activeId, onSelect }) => {
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.inner}>
+    <aside className="sticky top-0 self-start h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="p-4 overflow-y-auto h-full">
         {groups.map((g) => {
           const isActive = g.id === activeId;
           return (
-            <button
+            <Button
               key={g.id}
-              className={`${styles.groupBtn} ${isActive ? styles.active : ""}`}
+              variant={isActive ? "secondary" : "ghost"}
+              className="w-full justify-start mb-2"
               onClick={() => onSelect(g.id)}
             >
-              <span className={styles.label}>{g.name}</span>
-            </button>
+              <span className="leading-tight">{g.name}</span>
+            </Button>
           );
         })}
       </div>

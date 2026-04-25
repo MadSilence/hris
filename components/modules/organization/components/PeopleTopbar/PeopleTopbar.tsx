@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import styles from "./PeopleTopbar.module.css";
+import { Search } from "lucide-react";
+
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+
 import { Filter } from "@/components/models/filters";
-import { ColumnItem } from "@/models/userTable";
-import { countSelectedColumns } from "./utils/utils";
-import { ColumnsMenu } from "./components/ColumnsMenu";
-import { FiltersMenu } from "./components/FiltersMenu";
-import { ImportMenu } from "./components/ImportMenu";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 
 export type FieldMeta = {
-  id: string;               // "sys:*" | "attr:<uuid>"
+  id: string;
   key?: string;
   label?: string;
   type: "TEXT" | "EMAIL" | "URL" | "STATUS" | "SELECT" | "MULTI_SELECT" | "NUMBER" | "DATE" | "CHECKBOX" | "PERSON";
@@ -18,10 +19,18 @@ export type FieldMeta = {
   options?: { id: string; value: string }[];
 };
 
-const MAX_COLUMNS = 25;
+type ColumnItem = {
+  id: string;
+  label: string;
+  checked: boolean;
+  disabled?: boolean;
+  group?: "system" | "other";
+  icon?: React.ReactNode;
+};
 
 type PeopleTopbarProps = {
   totalCount?: number;
+
   query: string;
   onQueryChange: (v: string) => void;
 
@@ -31,99 +40,98 @@ type PeopleTopbarProps = {
   filters: Filter[];
   onFiltersChange: (next: Filter[]) => void;
 
-  fieldsMeta: FieldMeta[];                 // ⬅️ добавили
+  fieldsMeta: FieldMeta[];
   onExport?: () => void;
+
   selectedCount?: number;
 };
 
-const PeopleTopbar: React.FC<PeopleTopbarProps> = ({
+export default function PeopleTopbar({
   totalCount,
   query,
   onQueryChange,
   columns,
-  onColumnsChange,
   filters,
   onFiltersChange,
-  fieldsMeta,
   onExport,
   selectedCount,
-}) => {
-  const [openMenu, setOpenMenu] = useState<null | "columns" | "filters" | "add">(null);
-  const selectedColumns = useMemo(() => countSelectedColumns(columns), [columns]);
-
-  const toggle = (id: typeof openMenu) => setOpenMenu((cur) => (cur === id ? null : id));
-  const closeAll = () => setOpenMenu(null);
+}: PeopleTopbarProps) {
+  const selectedColumns = useMemo(() => columns.filter((c) => c.checked).length, [columns]);
+  const [addAction, setAddAction] = useState<string>("");
 
   return (
-    <div className={styles.root}>
-      <div className={styles.left}>
-        <div className={styles.view}>
-          Default
-          {selectedCount ? <span className={styles.badge} style={{ marginLeft: 8 }}>{selectedCount} selected</span> : null}
-          {filters.length > 0 && (
-            <span className={styles.filterBadge} role="status" aria-live="polite">
-              ⛛ Filtered by {filters.length} {filters.length === 1 ? "rule" : "rules"}
+    <div className="flex items-center justify-between gap-4 py-6">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className="text-foreground font-medium">Default</span>
+          {selectedCount ? (
+            <span className="rounded-md border border-brown-200 bg-brown-50 px-2 py-0.5 text-xs text-muted-foreground">
+              {selectedCount} selected
+            </span>
+          ) : null}
+          {filters.length > 0 ? (
+            <span className="rounded-md border border-brown-200 bg-brown-50 px-2 py-0.5 text-xs text-muted-foreground">
+              Filtered by {filters.length} {filters.length === 1 ? "rule" : "rules"}
               <button
-                className={styles.filterBadgeClose}
+                type="button"
+                className="ml-2 text-foreground/80 hover:text-foreground"
                 aria-label="Clear all filters"
                 onClick={() => onFiltersChange([])}
-              >×</button>
+              >
+                ×
+              </button>
             </span>
-          )}
+          ) : null}
         </div>
 
-        <div className={styles.menu}>
-          <button className={styles.btn} onClick={() => toggle("columns")} aria-haspopup="menu" aria-expanded={openMenu === "columns"}>
-            Columns
-          </button>
-          {openMenu === "columns" && (
-            <ColumnsMenu
-              columns={columns}
-              selectedColumns={selectedColumns}
-              maxColumns={MAX_COLUMNS}
-              onColumnsChange={onColumnsChange}
-              trigger={<button className={styles.btn}>Columns ▾</button>}
-              placement="bottom-start"
-            />
-          )}
-        </div>
+        <Button variant="outline" size="sm">
+          Columns <span className="ml-1 text-muted-foreground">({selectedColumns})</span>
+        </Button>
 
-        <div className={styles.menu}>
-          <button className={styles.btn} onClick={() => toggle("filters")} aria-haspopup="menu" aria-expanded={openMenu === "filters"}>
-            Filter
-          </button>
-          {openMenu === "filters" && (
-            <FiltersMenu
-              fields={fieldsMeta}                  // ⬅️ отдаём все поля
-              filters={filters}
-              onFiltersChange={onFiltersChange}
-              onClose={closeAll}
-            />
-          )}
-        </div>
+        <Button variant="outline" size="sm">
+          Filter
+        </Button>
 
-        <span className={styles.counter}>{totalCount ?? 0}</span>
+        <span className="text-sm text-muted-foreground">{totalCount ?? 0}</span>
       </div>
 
-      <div className={styles.right}>
-        <input
-          className={styles.search}
-          placeholder="Search"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          aria-label="Search"
-        />
-        <button className={styles.btn} onClick={onExport} aria-label="Export">Export</button>
-
-        <div className={styles.menu}>
-          <button className={styles.btn} onClick={() => toggle("add")} aria-haspopup="menu" aria-expanded={openMenu === "add"}>
-            Add people ▾
-          </button>
-          {openMenu === "add" && <ImportMenu onClose={closeAll}/>}
+      <div className="flex items-center gap-3">
+        <div className="relative w-[320px] max-w-[40vw]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 w-4 h-4"/>
+          <Input
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="Search people…"
+            className="pl-10"
+            aria-label="Search people"
+          />
         </div>
+
+        <Button variant="outline" size="sm" onClick={onExport}>
+          Export
+        </Button>
+
+        <PermissionGate anyOf={["PERM_PEOPLE_EDIT"]}>
+          <div className="min-w-[180px]">
+            <Select
+              value={addAction}
+              onValueChange={(v) => {
+                setAddAction(v);
+                if (v) setTimeout(() => setAddAction(""), 0);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Add people"/>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Add manually</SelectItem>
+                <SelectItem value="import">Import CSV</SelectItem>
+                <SelectItem value="invite">Invite by email</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </PermissionGate>
       </div>
     </div>
   );
-};
-
-export default PeopleTopbar;
+}

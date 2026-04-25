@@ -1,7 +1,13 @@
 import React, { useRef } from "react";
-import styles from "./CreateLegalEntityModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/public/desact/src/components/ui/dialog";
 import { CreateLegalEntityForm, CreateLegalEntityFormValues } from "../CreateLegalEntityForm";
 
 type CreateLegalEntityModalProps = {
@@ -23,15 +29,24 @@ export const CreateLegalEntityModal: React.FC<CreateLegalEntityModalProps> = ({
   const formRef = useRef<CreateLegalEntityFormHandle>();
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Create legal entity"
-      footer={
-        <div className={styles.actions}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Create legal entity</DialogTitle>
+          <DialogDescription/>
+        </DialogHeader>
+
+        <div className="max-h-[60vh] overflow-y-auto pr-1">
+          <CreateLegalEntityForm
+            formRef={formRef}
+            initialValues={initialValues}
+            onSubmit={onConfirm}
+          />
+        </div>
+
+        <DialogFooter>
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => !isLoading && onRequestClose()}
           >
             Cancel
@@ -39,16 +54,8 @@ export const CreateLegalEntityModal: React.FC<CreateLegalEntityModalProps> = ({
           <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
             Create
           </Button>
-        </div>
-      }
-    >
-      <div className={styles.content}>
-        <CreateLegalEntityForm
-          formRef={formRef}
-          initialValues={initialValues}
-          onSubmit={onConfirm}
-        />
-      </div>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./LegalEntityDetailsView.module.css";
 import { LegalEntity } from "@/models/legalEntity";
 
 
@@ -11,62 +10,62 @@ export const LegalEntityDetailsView: React.FC<LegalEntityDetailsViewProps> = ({
   legalEntity
 }) => {
   return (
-    <div className={styles.view}>
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Legal entity details</h3>
+    <div className="grid gap-6">
+      <div className="grid gap-4">
+        <h3 className="text-sm font-medium">Legal entity details</h3>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Name</span>
-          <div className={styles.valueBox}>{legalEntity.name}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Name</span>
+          <div className="rounded-md bg-muted px-3 py-2">{legalEntity.name}</div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Description</span>
-          <div className={`${styles.valueBox} ${styles.valueMultiline}`}>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Description</span>
+          <div className="rounded-md bg-muted px-3 py-2 whitespace-pre-wrap">
             {legalEntity.description}
           </div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Registration number</span>
-          <div className={styles.valueBox}>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Registration number</span>
+          <div className="rounded-md bg-muted px-3 py-2">
             {legalEntity.registrationNumber}
           </div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Tax ID</span>
-          <div className={styles.valueBox}>{legalEntity.taxId}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Tax ID</span>
+          <div className="rounded-md bg-muted px-3 py-2">{legalEntity.taxId}</div>
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Address</h3>
+      <div className="grid gap-4">
+        <h3 className="text-sm font-medium">Address</h3>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Country</span>
-          <div className={styles.valueBox}>{legalEntity.country}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Country</span>
+          <div className="rounded-md bg-muted px-3 py-2">{legalEntity.country}</div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>City</span>
-          <div className={styles.valueBox}>{legalEntity.city}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">City</span>
+          <div className="rounded-md bg-muted px-3 py-2">{legalEntity.city}</div>
         </div>
 
-        <div className={styles.rowTwoCols}>
-          <div className={styles.subRow}>
-            <span className={styles.label}>Street</span>
-            <div className={styles.valueBox}>{legalEntity.street}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <span className="text-sm text-muted-foreground">Street</span>
+            <div className="rounded-md bg-muted px-3 py-2">{legalEntity.street}</div>
           </div>
-          <div className={styles.subRow}>
-            <span className={styles.label}>Building</span>
-            <div className={styles.valueBox}>{legalEntity.building}</div>
+          <div className="grid gap-2">
+            <span className="text-sm text-muted-foreground">Building</span>
+            <div className="rounded-md bg-muted px-3 py-2">{legalEntity.building}</div>
           </div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Post code</span>
-          <div className={styles.valueBox}>{legalEntity.postCode}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Post code</span>
+          <div className="rounded-md bg-muted px-3 py-2">{legalEntity.postCode}</div>
         </div>
       </div>
     </div>

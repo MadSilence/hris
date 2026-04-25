@@ -1,13 +1,20 @@
 "use client";
 
 import * as React from "react";
-import styles from "./UserDataHeader.module.css";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
-import Pen from "@/public/icons/pen.svg";
-import OrgChart from "@/public/icons/org-chart.svg";
-import Refresh from "@/public/icons/refresh.svg";
-import Kebab from "@/components/ui/Kebab/Kebab";
+import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/public/desact/src/components/ui/dropdown-menu";
+import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Pencil, Ellipsis, Share2, RefreshCw } from "lucide-react";
 
 export type UserDataHeaderProps = {
   userId?: string;
@@ -19,19 +26,18 @@ export type UserDataHeaderProps = {
 export function UserDataHeader({ userId, user: userProp, editing = false, onToggleEdit }: UserDataHeaderProps) {
   const { data: userFetched } = useUserSafe(userId, !!userProp);
   const user = userProp ?? userFetched;
-  const [open, setOpen] = React.useState(false);
 
   if (!user) {
     return (
-      <div className={styles.outer}>
-        <header className={styles.header}>
-          <div className={styles.row}>
-            <div className={styles.avatarSkeleton}/>
-            <div className={styles.titles}>
-              <div className={styles.nameSkeleton}/>
-              <div className={styles.metaSkeleton}/>
+      <div className="px-8">
+        <header className="py-6">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
+            <div className="w-28 h-28 rounded-full bg-muted animate-pulse"/>
+            <div className="space-y-3">
+              <div className="h-7 w-56 bg-muted rounded-md animate-pulse"/>
+              <div className="h-4 w-72 bg-muted rounded-md animate-pulse"/>
             </div>
-            <div className={styles.actions}/>
+            <div className="h-9 w-28 bg-muted rounded-md animate-pulse"/>
           </div>
         </header>
       </div>
@@ -42,70 +48,64 @@ export function UserDataHeader({ userId, user: userProp, editing = false, onTogg
   const meta = normalizeCustom(user.custom);
 
   return (
-    <div className={styles.outer}>
-      <header className={styles.header}>
-        <div className={styles.row}>
-          <div className={styles.avatarWrap}>
-            <Avatar src={meta.avatarUrl} name={fullName} color={user.avatarColor}/>
-            <button type="button" className={styles.avatarEditBtn} aria-label="Edit photo">
-              <Pen/>
-            </button>
+    <div className="px-8">
+      <header className="py-6">
+        <div className="grid grid-cols-[auto_1fr_auto] items-start gap-6">
+          <div className="relative">
+            <Avatar className="size-28">
+              {meta.avatarUrl ? <AvatarImage src={meta.avatarUrl} alt={fullName}/> : null}
+              <AvatarFallback className="text-2xl">{initialsOf(fullName)}</AvatarFallback>
+            </Avatar>
+            <Button size="icon" variant="outline" className="absolute right-1 bottom-1 rounded-full" aria-label="Edit photo">
+              <Pencil className="w-4 h-4"/>
+            </Button>
           </div>
 
-          <div className={styles.titles}>
-            <h1 className={styles.name}>{fullName}</h1>
-            <div className={styles.metaLine}>
-              {user.status && <span className={styles.chip}>{user.status.toLowerCase()}</span>}
-            </div>
-            <div className={styles.badges}>
-              {meta.jobTitle && <span className={styles.badge}>{meta.jobTitle}</span>}
-              {(meta.department || meta.orgUnit) && (
-                <span className={styles.badge}>{meta.department ?? meta.orgUnit}</span>
-              )}
-              {meta.workMode && <span className={styles.badge}>{meta.workMode}</span>}
+          <div className="min-w-0">
+            <h1 className="text-2xl leading-tight">{fullName}</h1>
+            <div className="flex items-center gap-3 flex-wrap mt-3">
+              {user.status && <Badge>{String(user.status).toLowerCase()}</Badge>}
+              {meta.jobTitle && <Badge variant="outline">{meta.jobTitle}</Badge>}
+              {(meta.department || meta.orgUnit) && <Badge variant="outline">{meta.department ?? meta.orgUnit}</Badge>}
+              {meta.workMode && <Badge variant="outline">{meta.workMode}</Badge>}
               {(meta.country || meta.location) && (
-                <span className={styles.badge}>
+                <Badge variant="outline">
                   {meta.location ? `${meta.location}` : null}
                   {meta.location && meta.country ? " · " : ""}
                   {meta.country ?? ""}
-                </span>
+                </Badge>
               )}
             </div>
           </div>
 
-          <div className={styles.actions}>
-            <button type="button" className={styles.iconBtn} aria-label="Org chart">
-              <OrgChart className={styles.icon}/>
-            </button>
-            <button type="button" className={styles.iconBtn} aria-label="Activity">
-              <Refresh className={styles.icon}/>
-            </button>
-            <div className={styles.menuWrap}>
-              <button
-                type="button"
-                className={styles.kebab}
-                aria-haspopup="menu"
-                aria-expanded={open}
-                onClick={() => setOpen((s) => !s)}
-              >
-                <Kebab className={styles.icon}/>
-              </button>
-              {open && (
-                <div role="menu" className={styles.menu} onMouseLeave={() => setOpen(false)}>
-                  <button role="menuitem" className={styles.menuItem} onClick={onToggleEdit}>
-                    {editing ? "Exit edit mode" : "Edit profile"}
-                  </button>
-                  <button role="menuitem" className={styles.menuItem}>Manage account</button>
-                  <button role="menuitem" className={styles.menuItem}>Set a reminder</button>
-                  <button role="menuitem" className={styles.menuItem}>Schedule leave</button>
-                  <button role="menuitem" className={styles.menuItem}>Terminate employment</button>
-                  <div className={styles.menuDivider}/>
-                  <button role="menuitem" className={`${styles.menuItem} ${styles.danger}`}>Delete profile</button>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" aria-label="Refresh">
+              <RefreshCw className="w-4 h-4"/>
+            </Button>
+            <Button variant="outline" size="icon" aria-label="Share">
+              <Share2 className="w-4 h-4"/>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="More actions">
+                  <Ellipsis className="w-4 h-4"/>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={onToggleEdit}>
+                  {editing ? "Exit edit mode" : "Edit profile"}
+                </DropdownMenuItem>
+                <DropdownMenuItem>Manage account</DropdownMenuItem>
+                <DropdownMenuItem>Set a reminder</DropdownMenuItem>
+                <DropdownMenuItem>Schedule leave</DropdownMenuItem>
+                <DropdownMenuItem>Terminate employment</DropdownMenuItem>
+                <DropdownMenuSeparator/>
+                <DropdownMenuItem className="text-red-600">Delete profile</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
+        <Separator className="mt-6"/>
       </header>
     </div>
   );
@@ -142,16 +142,7 @@ function normalizeCustom(custom: any): CustomMeta {
   };
 }
 
-function Avatar({ src, name, color }: { src?: string | null; name: string; color: string }) {
-  const initials = name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join("");
-  return (
-    <div className={styles.avatar} style={{ background: color }}>
-      {src ? <img src={src} alt={name}/> : <span>{initials || "?"}</span>}
-    </div>
-  );
+function initialsOf(name: string) {
+  const initials = name.split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");
+  return initials || "?";
 }

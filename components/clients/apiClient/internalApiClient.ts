@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError, ServerError } from "@/components/clients/exceptions";
+import { BadRequestError, ForbiddenError, NotFoundError, ServerError, UnauthorizedError } from "@/components/clients/exceptions";
 
 export class InternalApiClient {
   private readonly apiPath = "/api";
@@ -12,10 +12,10 @@ export class InternalApiClient {
     return this.request<T>("POST", path, body);
   }
 
-  public async fetch(path: string): Promise<Response> {
+  public async fetch(path: string, init?: RequestInit): Promise<Response> {
     const url = this.basePath + this.apiPath + path;
-    const response = await fetch(url, { credentials: "same-origin" });
-    await this.throwIfError(response, path);
+    const response = await fetch(url, { ...init, credentials: "same-origin" });
+    await this.throwIfError(response, path, init?.method ?? "GET");
     return response;
   }
 
@@ -33,7 +33,7 @@ export class InternalApiClient {
       credentials: "same-origin",
     });
 
-    await this.throwIfError(response, path);
+    await this.throwIfError(response, path, method);
 
     const text = await response.text();
     if (!text) {
@@ -47,8 +47,8 @@ export class InternalApiClient {
     }
   }
 
-  private async throwIfError(response: Response, path: string) {
-    if (response.ok) return;
+  private async throwIfError(response: Response, path: string, method: string = "GET") {
+    if (response.ok || response.status === 304) return;
 
     let message: string | undefined;
     const ct = response.headers.get("content-type") || "";
@@ -72,7 +72,12 @@ export class InternalApiClient {
       case 404:
         throw new NotFoundError();
       case 401:
+        throw new UnauthorizedError(friendly);
       case 403:
+        if (typeof window !== "undefined" && method !== "GET") {
+          window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: friendly }));
+        }
+        throw new ForbiddenError(friendly);
       case 409:
       case 422:
       case 429:

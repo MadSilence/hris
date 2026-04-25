@@ -9,6 +9,7 @@ export class UserMapper {
       email: dto.email,
       firstName: dto.firstName,
       lastName: dto.lastName,
+      roles: dto.roles,
       status: dto.status,
       isEmailVerified: dto.isEmailVerified,
       lastLoginAt: dto.lastLoginAt,

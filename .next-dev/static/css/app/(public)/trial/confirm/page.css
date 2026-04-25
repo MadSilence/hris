@@ -1,0 +1,114 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./components/modules/trial/components/SetPasswordForm/ConfirmTrialForm.module.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.ConfirmTrialForm_centerWrap__jbHbl {
+  min-height: 75dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8);
+}
+
+.ConfirmTrialForm_card__tbimE {
+  width: 100%;
+  max-width: 480px;
+}
+
+.ConfirmTrialForm_form__tLXt6 {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.ConfirmTrialForm_titleBlock__eSnl1 {
+  text-align: center;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ConfirmTrialForm_title__nwYJg {
+  margin: 0;
+  color: hsl(var(--text-headings));
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.ConfirmTrialForm_subtitle__SUTXo {
+  margin: 0;
+  color: hsl(var(--text-body) / .85);
+  font-size: var(--font-size-sm);
+}
+
+.ConfirmTrialForm_fields__LTK0L {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ConfirmTrialForm_row2__2EnyN {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.ConfirmTrialForm_subdomainRow__z0N3p {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ConfirmTrialForm_subdomainInputWrap__YZje_ {
+  min-width: 0;
+}
+
+.ConfirmTrialForm_subdomainSuffix__uouKi {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input);
+  background: hsl(var(--surface-secondary));
+  color: hsl(var(--text-disabled));
+  white-space: nowrap;
+}
+
+.ConfirmTrialForm_hint__wgGBt {
+  margin: 0;
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-xs);
+}
+
+.ConfirmTrialForm_legal__zYBYN {
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  display: block;
+}
+
+.ConfirmTrialForm_apiError__pu5_O {
+  margin: 0;
+  color: hsl(var(--text-error));
+  font-size: var(--font-size-sm);
+}
+
+.ConfirmTrialForm_loginBack__qTswr {
+  text-align: center;
+  color: hsl(var(--text-disabled));
+  font-size: var(--font-size-sm);
+}
+
+.ConfirmTrialForm_loginBack__qTswr a {
+  color: hsl(var(--text-action));
+}
+
+.ConfirmTrialForm_successBlock__1gy7c {
+  display: grid;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.ConfirmTrialForm_successBlock__1gy7c .ConfirmTrialForm_subtitle__SUTXo {
+  font-size: var(--font-size-base);
+  color: hsl(var(--text-body) / .85);
+}
+
+.ConfirmTrialForm_successBlock__1gy7c .ConfirmTrialForm_hint__wgGBt {
+  font-size: var(--font-size-sm);
+  color: hsl(var(--text-disabled));
+}
+

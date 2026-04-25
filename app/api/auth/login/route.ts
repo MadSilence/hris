@@ -7,11 +7,21 @@ export const POST = withErrorMiddleware(async (req) => {
     const { accessToken } = await authRoutes.login(payload);
 
     const res = NextResponse.json({ ok: true }, { status: 200 });
+    const isProd = process.env.NODE_ENV === "production";
     res.cookies.set({
         name: "access_token",
         value: accessToken,
         httpOnly: true,
         sameSite: "lax",
+        secure: isProd,
+        path: "/",
+    });
+    res.cookies.set({
+        name: "has_session",
+        value: "1",
+        httpOnly: false,
+        sameSite: "lax",
+        secure: isProd,
         path: "/",
     });
     return res;

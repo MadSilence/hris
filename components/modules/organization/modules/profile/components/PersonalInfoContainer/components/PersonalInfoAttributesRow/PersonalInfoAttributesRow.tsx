@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
-import styles from "./PersonalInfoAttributesRow.module.css";
 import UserChip from "@/components/ui/UserChip/UserChip";
 import { Input } from "@/components/ui/Input";
 import { Option } from "@/components/ui/Select";
@@ -22,9 +21,9 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
   onChange,
 }) => {
   return (
-    <div className={styles.row}>
-      <div className={styles.label}>{attribute.name}</div>
-      <div className={styles.value}>
+    <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-5 px-5 py-4">
+      <div className="text-sm text-muted-foreground">{attribute.name}</div>
+      <div className="text-sm">
         {!isEdit ? (
           <ViewValue attribute={attribute} rawValue={rawValue}/>
         ) : (

@@ -1,69 +1,70 @@
 import React from "react";
-import styles from "./OfficeDetailsView.module.css";
 import { Office } from "@/models/office";
 
 export type OfficeDetailsViewProps = {
   office: Office;
 };
 
-export const OfficeDetailsView: React.FC<OfficeDetailsViewProps> = ({
-  office,
-}) => {
+export const OfficeDetailsView: React.FC<OfficeDetailsViewProps> = ({ office }) => {
   return (
-    <div className={styles.view}>
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Office details</h3>
+    <div className="grid gap-6">
+      <div className="grid gap-4">
+        <h3 className="text-sm font-medium">Office details</h3>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Name</span>
-          <div className={styles.valueBox}>{office.name}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Name</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.name}</div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Description</span>
-          <div className={`${styles.valueBox} ${styles.valueMultiline}`}>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Description</span>
+          <div className="rounded-md bg-muted px-3 py-2 whitespace-pre-wrap">
             {office.description}
           </div>
         </div>
+      </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Email</span>
-          <div className={styles.valueBox}>{office.email}</div>
+      <div className="grid gap-4">
+        <h3 className="text-sm font-medium">Contacts</h3>
+
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Email</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.email}</div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Phone</span>
-          <div className={styles.valueBox}>{office.phone}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Phone</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.phone}</div>
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Address</h3>
+      <div className="grid gap-4">
+        <h3 className="text-sm font-medium">Address</h3>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Country</span>
-          <div className={styles.valueBox}>{office.country}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Country</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.country}</div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>City</span>
-          <div className={styles.valueBox}>{office.city}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">City</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.city}</div>
         </div>
 
-        <div className={styles.rowTwoCols}>
-          <div className={styles.subRow}>
-            <span className={styles.label}>Street</span>
-            <div className={styles.valueBox}>{office.street}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <span className="text-sm text-muted-foreground">Street</span>
+            <div className="rounded-md bg-muted px-3 py-2">{office.street}</div>
           </div>
-          <div className={styles.subRow}>
-            <span className={styles.label}>Building</span>
-            <div className={styles.valueBox}>{office.building}</div>
+          <div className="grid gap-2">
+            <span className="text-sm text-muted-foreground">Building</span>
+            <div className="rounded-md bg-muted px-3 py-2">{office.building}</div>
           </div>
         </div>
 
-        <div className={styles.row}>
-          <span className={styles.label}>Post code</span>
-          <div className={styles.valueBox}>{office.postCode}</div>
+        <div className="grid gap-2">
+          <span className="text-sm text-muted-foreground">Post code</span>
+          <div className="rounded-md bg-muted px-3 py-2">{office.postCode}</div>
         </div>
       </div>
     </div>

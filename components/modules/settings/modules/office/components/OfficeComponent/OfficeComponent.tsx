@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { DataTable, DataTableColumn } from "@/components/ui/DataTable/DataTable";
 import { CreateOfficeModal } from "@/components/modules/settings/modules/office/components/CreateOfficeModal";
 import type { CreateOfficeFormValues } from "@/components/modules/settings/modules/office/components/CreateOfficeForm";
 import { OfficeDetailsModal } from "@/components/modules/settings/modules/office/components/OfficeDetailsModal";
@@ -14,53 +13,22 @@ import type { UpdateOfficeActionInput } from "@/components/modules/settings/modu
 import type { DeleteOfficeActionInput } from "@/components/modules/settings/modules/office/actions/deleteOfficeAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { UpdateOfficeFormValues } from "@/components/modules/settings/modules/office/components/UpdateOfficeForm";
-
-const columns: DataTableColumn<Office>[] = [
-  {
-    id: "name",
-    header: "Name",
-    sortable: true,
-    icon: <span>Aa</span>,
-    accessor: (o) => o.name,
-    sortValue: (o) => o.name,
-  },
-  {
-    id: "country",
-    header: "Country",
-    sortable: true,
-    accessor: (o) => o.country,
-    sortValue: (o) => o.country,
-  },
-  {
-    id: "address",
-    header: "Address",
-    sortable: false,
-    accessor: (o) =>
-      `${o.street}, ${o.building}, ${o.postCode}, ${o.city}, ${o.country}`,
-  },
-  {
-    id: "email",
-    header: "Email",
-    sortable: false,
-    accessor: (o) => o.email ?? "",
-  },
-  {
-    id: "phone",
-    header: "Phone",
-    sortable: false,
-    accessor: (o) => o.phone ?? "",
-  },
-];
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 
 type Props = {
-  initialOffices: Office[] | undefined;
+  initialOffices: Office[];
+  isLoading: boolean;
 };
 
-export const OfficeComponent: React.FC<Props> = ({ initialOffices }) => {
+export const OfficeComponent: React.FC<Props> = ({ initialOffices, isLoading }) => {
   const [isCreateOfficeModalOpen, setIsCreateOfficeModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedOfficeId, setSelectedOfficeId] = useState<string | null>(null);
 
+  const [query, setQuery] = useState("");
   const createOfficeAction = useCreateOfficeAction();
   const updateOfficeAction = useUpdateOfficeAction();
   const deleteOfficeAction = useDeleteOfficeAction();
@@ -69,6 +37,7 @@ export const OfficeComponent: React.FC<Props> = ({ initialOffices }) => {
     () => initialOffices.find((o) => o.id === selectedOfficeId) ?? null,
     [initialOffices, selectedOfficeId],
   );
+
 
   useEffect(() => {
     const status = createOfficeAction.data?.status;
@@ -140,21 +109,90 @@ export const OfficeComponent: React.FC<Props> = ({ initialOffices }) => {
     setIsDetailsModalOpen(true);
   };
 
+  const filteredSorted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const rows = q
+      ? initialOffices.filter((o) =>
+          [o.name, o.country, o.city, o.street, o.email ?? "", o.phone ?? ""]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(q)),
+        )
+      : initialOffices;
+    return rows.slice().sort((a, b) => a.name.localeCompare(b.name));
+  }, [initialOffices, query]);
+
+  const SkeletonRows = ({ rows = 5 }: { rows?: number }) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={`off-skel-${i}`} className="border-brown-200">
+          <TableCell className="py-3"><Skeleton className="h-4 w-40"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-24"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-64"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-40"/></TableCell>
+          <TableCell><Skeleton className="h-4 w-28"/></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+
   return (
     <>
-      <DataTable<Office>
-        columns={columns}
-        data={initialOffices}
-        getRowId={(o) => o.id}
-        onFilterClick={() => {
-          console.log("Filter offices");
-        }}
-        onAddClick={() => setIsCreateOfficeModalOpen(true)}
-        addLabel="Add"
-        defaultSort={{ columnId: "name", direction: "asc" }}
-        searchPlaceholder="Search offices"
-        onRowClick={handleRowClick}
-      />
+      <div className="p-6 border-b border-brown-200">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative">
+            <Input
+              placeholder="Search offices"
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+              className="w-[260px]"
+              inputMode="search"
+            />
+          </div>
+          <Button onClick={() => setIsCreateOfficeModalOpen(true)}>Add</Button>
+        </div>
+      </div>
+
+      <div>
+        <Table>
+          <TableHeader className="[&_tr]:border-brown-200">
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Country</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && <SkeletonRows rows={6}/>}
+
+            {!isLoading &&
+              filteredSorted.map((o) => (
+                <TableRow
+                  key={o.id}
+                  className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                  onClick={() => handleRowClick(o)}
+                >
+                  <TableCell className="py-3 font-medium">{o.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{o.country}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {[o.street, o.building, o.postCode, o.city, o.country].filter(Boolean).join(", ")}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{o.email ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{o.phone ?? "—"}</TableCell>
+                </TableRow>
+              ))}
+
+            {!isLoading && filteredSorted.length === 0 && (
+              <TableRow className="[&_td]:py-3">
+                <TableCell colSpan={5}>
+                  <div className="text-sm text-muted-foreground">No offices</div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <CreateOfficeModal
         isOpen={isCreateOfficeModalOpen}

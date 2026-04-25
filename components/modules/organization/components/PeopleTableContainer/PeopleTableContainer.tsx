@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+
 import PeopleTable from "@/components/modules/organization/components/PeopleTable/PeopleTable";
 import PeopleTopbar from "@/components/modules/organization/components/PeopleTopbar/PeopleTopbar";
+
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import { Filter } from "@/components/models/filters";
 import { usePeopleSearch } from "@/components/modules/organization/hooks/usePeopleSearch";
@@ -22,13 +24,7 @@ type ColumnItem = {
   icon?: React.ReactNode;
 };
 
-const DEFAULT_ON = new Set([
-  "sys:first_name",
-  "sys:status",
-  "sys:email",
-  "sys:created_at",
-  "sys:updated_at",
-]);
+const DEFAULT_ON = new Set(["sys:first_name", "sys:status", "sys:email", "sys:created_at", "sys:updated_at"]);
 
 const PeopleTableContainer: React.FC = () => {
   const [cursor, setCursor] = useState<string | null>(null);
@@ -36,17 +32,21 @@ const PeopleTableContainer: React.FC = () => {
   const [sort, setSort] = useState<SortState>({ fieldId: "last_name", dir: "asc" });
   const [filters, setFilters] = useState<Filter[]>([]);
   const [query, setQuery] = useState("");
+
   const debouncedQ = useDebouncedValue(query.trim(), 300);
   const qForApi = debouncedQ.length >= 2 ? debouncedQ : undefined;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const toggleOne = useCallback((id: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (checked) next.add(id); else next.delete(id);
+      if (checked) next.add(id);
+      else next.delete(id);
       return next;
     });
   }, []);
+
   const toggleAllOnPage = useCallback((ids: string[], checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -54,35 +54,30 @@ const PeopleTableContainer: React.FC = () => {
       return next;
     });
   }, []);
+
   useEffect(() => {
     setSelectedIds(new Set());
   }, [cursor, debouncedQ, filters, sort?.fieldId, sort?.dir]);
 
-  // поля (системные + кастомные)
   const { data: fieldsData, isLoading: fieldsLoading, error: fieldsError } = useUserFields();
   if (fieldsError) throw fieldsError;
 
   const [columns, setColumns] = useState<ColumnItem[]>([]);
+
   useEffect(() => {
     if (!fieldsData) return;
+
     const cols: ColumnItem[] = fieldsData.map((f) => ({
       id: f.id,
       label: f.label ?? f.key ?? f.id,
       checked: DEFAULT_ON.has(f.id),
       group: f.isSystem ? "system" : "other",
     }));
+
     const idx = cols.findIndex((c) => c.id === "sys:first_name");
     if (idx >= 0) cols[idx] = { ...cols[idx], checked: true };
-    setColumns(cols);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.debug("[PeopleTableContainer] fields:", {
-        total: cols.length,
-        system: cols.filter((c) => c.group === "system").length,
-        custom: cols.filter((c) => c.group === "other").length,
-        sample: cols.slice(0, 5),
-      });
-    }
+    setColumns(cols);
   }, [fieldsData]);
 
   const onColumnsChange = useCallback((next: ColumnItem[]) => {
@@ -153,7 +148,7 @@ const PeopleTableContainer: React.FC = () => {
   const visibleColumns = useMemo(() => columns.filter((c) => c.checked), [columns]);
 
   return (
-    <>
+    <div className="px-8 py-8">
       <PeopleTopbar
         totalCount={items.length}
         selectedCount={selectedIds.size}
@@ -164,7 +159,8 @@ const PeopleTableContainer: React.FC = () => {
         filters={filters}
         onFiltersChange={onFiltersChange}
         fieldsMeta={fieldsData ?? []}
-        onExport={() => {}}
+        onExport={() => {
+        }}
       />
 
       <PeopleTable
@@ -181,7 +177,7 @@ const PeopleTableContainer: React.FC = () => {
         fieldsMeta={fieldsData ?? []}
         visibleColumns={visibleColumns}
       />
-    </>
+    </div>
   );
 };
 

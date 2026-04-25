@@ -1,5 +1,5 @@
 .centerWrap {
-  min-height: 85dvh;
+  min-height: 75dvh;
   display: grid;
   place-items: center;
   padding: var(--space-8);

@@ -1,10 +1,8 @@
 import * as React from "react";
 import { forwardRef } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import styles from "./PersonalInfoAttributesLists.module.css";
-import {
-  PersonalInfoAttributesRow
-} from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/PersonalInfoAttributesRow";
+import { PersonalInfoAttributesRow } from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/PersonalInfoAttributesRow";
+import { Card } from "@/public/desact/src/components/ui/card";
 
 type Props = {
   groups: AttributeGroup[];
@@ -20,22 +18,22 @@ type Props = {
 export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
   ({ groups, valueMap, registerSection, isEdit, onChangeValue, headerActions }, ref) => {
     return (
-      <section ref={ref} className={styles.content}>
+      <section ref={ref} className="min-h-0">
         {groups.map((group, idx) => (
           <div
             key={group.id}
             ref={(el) => registerSection(group.id, el)}
             data-group-id={group.id}
-            className={styles.groupSection}
+            className="mb-6"
           >
-            <div className={styles.groupTitle} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 className={styles.titleReset}>{group.name}</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base">{group.name}</h2>
               {idx === 0 && headerActions}
             </div>
 
-            <div className={styles.card}>
+            <Card className="p-0">
               {group.attributes.length ? (
-                <div>
+                <div className="divide-y">
                   {group.attributes
                     .slice()
                     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -50,9 +48,9 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
                     ))}
                 </div>
               ) : (
-                <div className={styles.emptyGroup}>No attributes</div>
+                <div className="text-sm text-muted-foreground p-4">No attributes</div>
               )}
-            </div>
+            </Card>
           </div>
         ))}
       </section>

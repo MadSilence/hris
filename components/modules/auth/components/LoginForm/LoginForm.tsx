@@ -1,85 +1,23 @@
 "use client";
 
+import React, { useCallback } from "react";
+import { useForm } from "react-hook-form";
+
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/public/desact/src/components/ui/form";
+
 import styles from "./LoginForm.module.css";
-import { Card } from "@/components/ui/Card";
-import * as yup from "yup";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { useCallback } from "react";
-import { useFormik } from "formik";
+
+export type LoginFormValues = {
+  email: string;
+  password: string;
+};
 
 export interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => void | Promise<void>;
   submitting?: boolean;
   apiError?: string;
-}
-
-export default function LoginForm({ onSubmit, submitting, apiError }: LoginFormProps) {
-  const handleFormSubmission = useCallback(
-    (formValues: LoginFormValues) => {
-      const values = {
-        email: formValues.email,
-        password: formValues.password,
-      };
-
-      return onSubmit(values);
-    },
-    [onSubmit],
-  );
-
-  const formik = useFormik<LoginFormValues>({
-    initialValues: { email: "", password: "" },
-    validationSchema: loginFormValidationSchema,
-    validateOnChange: false,
-    validateOnBlur: false,
-    onSubmit: handleFormSubmission,
-  });
-
-  const busy = submitting ?? formik.isSubmitting;
-
-  return (
-    <div className={styles.centerWrap}>
-      <Card className={styles.card}>
-        <div className={styles.form}>
-          <h1 className={styles.title}>Welcome to SixSoftware</h1>
-
-          <form onSubmit={formik.handleSubmit} className={styles.fields} noValidate>
-            <Input
-              name="email"
-              type="email"
-              placeholder="Email address*"
-              required
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={busy}
-            />
-
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password*"
-              required
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={busy}
-            />
-
-            {apiError && (
-              <p className={styles.apiError} role="alert">
-                {apiError}
-              </p>
-            )}
-
-            <Button type="submit" variant="primary" fullWidth disabled={busy}>
-              {busy ? "Signing in…" : "Sign in"}
-            </Button>
-          </form>
-        </div>
-      </Card>
-    </div>
-  );
 }
 
 export enum LoginFormMessages {
@@ -89,18 +27,96 @@ export enum LoginFormMessages {
   PasswordTooShort = "Password must be at least 8 characters.",
 }
 
-export const loginFormValidationSchema = yup.object({
-  email: yup
-    .string()
-    .email(LoginFormMessages.InvalidEmail)
-    .required(LoginFormMessages.EmailRequired),
-  password: yup
-    .string()
-    .min(8, LoginFormMessages.PasswordTooShort)
-    .required(LoginFormMessages.PasswordRequired),
-});
+type ApiErrorProps = { message?: string };
 
-export type LoginFormValues = {
-  email: string;
-  password: string;
-};
+function ApiErrorMessage({ message }: ApiErrorProps) {
+  if (!message) return null;
+  return (
+    <p className={styles.apiError} role="alert">
+      {message}
+    </p>
+  );
+}
+
+export default function LoginForm({ onSubmit, submitting, apiError }: LoginFormProps) {
+  const form = useForm<LoginFormValues>({
+    defaultValues: { email: "", password: "" },
+    mode: "onSubmit",
+  });
+
+  const busy = (submitting ?? false) || form.formState.isSubmitting;
+
+  const submitHandler = useCallback(
+    async (values: LoginFormValues) => {
+      await onSubmit(values);
+    },
+    [onSubmit]
+  );
+
+  return (
+    <div className={styles.centerWrap}>
+      <div className={styles.form}>
+        <h1 className={styles.title}>Welcome to SixSoftware</h1>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-6" noValidate>
+            <FormField
+              control={form.control}
+              name="email"
+              rules={{
+                required: LoginFormMessages.EmailRequired,
+                validate: (v) =>
+                  /^\S+@\S+\.\S+$/.test(v || "") ? true : LoginFormMessages.InvalidEmail,
+              }}
+              render={({ field }) => (
+                <FormItem className="gap-0 mb-4">
+                  <FormLabel>Email address</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Email address*"
+                      autoComplete="email"
+                      disabled={busy}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              rules={{
+                required: LoginFormMessages.PasswordRequired,
+                minLength: { value: 8, message: LoginFormMessages.PasswordTooShort },
+              }}
+              render={({ field }) => (
+                <FormItem className="gap-0 mb-4">
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Password*"
+                      autoComplete="current-password"
+                      disabled={busy}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <ApiErrorMessage message={apiError}/>
+
+            <Button type="submit" variant="default" disabled={busy} className="h-11 w-full text-white">
+              {busy ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+}

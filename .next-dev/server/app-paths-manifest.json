@@ -1,0 +1,10 @@
+{
+  "/api/me/permissions/route": "app/api/me/permissions/route.js",
+  "/api/users/search/route": "app/api/users/search/route.js",
+  "/api/users/routes/usersRoutes/fields/route": "app/api/users/routes/usersRoutes/fields/route.js",
+  "/(public)/login/page": "app/(public)/login/page.js",
+  "/(public)/trial/page": "app/(public)/trial/page.js",
+  "/(public)/trial/confirm/page": "app/(public)/trial/confirm/page.js",
+  "/(app)/organization/people/page": "app/(app)/organization/people/page.js",
+  "/(app)/organization/people/[id]/(tabs)/personal/page": "app/(app)/organization/people/[id]/(tabs)/personal/page.js"
+}

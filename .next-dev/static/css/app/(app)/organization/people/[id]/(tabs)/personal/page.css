@@ -1,0 +1,360 @@
+/*!**************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./components/ui/UserChip/UserChip.module.css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************/
+.UserChip_chip__EUyEk {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: hsl(var(--text-body));     /* smaller */
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm)
+}
+.UserChip_chip__EUyEk:hover { background: hsl(var(--surface-secondary)); }
+
+.UserChip_avatar__5zfMn {
+    width: 20px; height: 20px;     /* smaller */
+    border-radius: 9999px;
+    display: grid; place-items: center;
+    background: hsl(var(--theme-primary) / 0.15);
+    color: hsl(var(--text-action));
+    font-size: 11px; font-weight: var(--font-weight-semibold);
+}
+
+.UserChip_meta__Ns2GA { display: grid; line-height: 1.05; }
+.UserChip_name__l8w83 { color: hsl(var(--text-headings)); }
+.UserChip_sub__23gjd  { font-size: var(--font-size-xs); color: hsl(var(--text-disabled)); }
+
+/*!********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./components/ui/Input/Input.module.css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************/
+.Input_root__On9vr {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.Input_label__CR3VX {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-regular);
+  color: hsl(var(--text-headings));
+}
+
+.Input_required__i5chP {
+  margin-left: var(--space-1);
+  color: hsl(var(--text-error));
+}
+
+.Input_input__DfZui {
+  box-sizing: border-box;
+  width: 100%;
+  appearance: none;
+  background-color: hsl(var(--surface-primary));
+  color: hsl(var(--text-body));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input-sem);
+  padding: var(--space-2) var(--space-3);;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  transition: background-color var(--duration-base) var(--easing-standard),
+  color var(--duration-base) var(--easing-standard),
+  border-color var(--duration-base) var(--easing-standard),
+  box-shadow var(--duration-base) var(--easing-standard);
+}
+
+.Input_input__DfZui::placeholder {
+  color: hsl(var(--text-disabled));
+  opacity: 1;
+}
+
+.Input_input__DfZui:not(:disabled):hover {
+  border-color: hsl(var(--border-secondary));
+}
+
+.Input_input__DfZui:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-secondary) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.Input_disabled__MvGNT,
+.Input_input__DfZui:disabled {
+  background-color: hsl(var(--surface-disabled));
+  color: hsl(var(--text-on-disabled));
+  border-color: hsl(var(--border-disabled));
+  cursor: not-allowed;
+  box-shadow: none;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.Input_default__XJiNy {
+}
+
+.Input_error__cpLMX {
+  border-color: hsl(var(--text-error));
+  background-color: hsl(var(--surface-primary));
+}
+
+.Input_error__cpLMX:focus {
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-error) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+}
+
+.Input_success__GWKfX {
+  border-color: hsl(var(--border-success));
+  background-color: hsl(var(--surface-primary));
+}
+
+.Input_success__GWKfX:focus {
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-success) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+}
+
+.Input_hint__s2k4R {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: hsl(var(--text-body) / 0.65);
+}
+
+.Input_errorMsg__0_xwF {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: hsl(var(--text-error));
+}
+
+.Input_grouped__ZudJ2 {
+  border-radius: 0;
+}
+
+.Input_left__GSpqa {
+  border-top-left-radius: var(--radius-input-sem);
+  border-bottom-left-radius: var(--radius-input-sem);
+  border-right: 0;
+}
+
+.Input_right__2FRJQ {
+  border-top-right-radius: var(--radius-input-sem);
+  border-bottom-right-radius: var(--radius-input-sem);
+}
+
+/*!**********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./components/ui/Select/Select.module.css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************/
+.Select_root__WAjws {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* Дропдаун теперь в потоке — позиционирование не нужно */
+}
+
+.Select_label__TXo7r {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-semibold);
+  color: hsl(var(--text-headings));
+}
+
+.Select_required__rHOEX {
+  margin-left: var(--space-1);
+  color: hsl(var(--text-error));
+}
+
+/* Триггер стилизован как input, но уменьшили правый паддинг под стрелку */
+.Select_trigger__2xOUx {
+  box-sizing: border-box;
+  width: 100%;
+  appearance: none;
+  background-color: hsl(var(--surface-primary));
+  color: hsl(var(--text-body));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input-sem);
+  /* Было var(--space-8) справа — сделаем компактней */
+  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  transition: background-color var(--duration-base) var(--easing-standard),
+  color var(--duration-base) var(--easing-standard),
+  border-color var(--duration-base) var(--easing-standard),
+  box-shadow var(--duration-base) var(--easing-standard);
+}
+
+.Select_trigger__2xOUx:not(:disabled):hover {
+  border-color: hsl(var(--border-secondary));
+}
+
+.Select_trigger__2xOUx:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-secondary) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+}
+
+.Select_value__XGUYf {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Select_placeholder__yVG_C {
+  color: hsl(var(--text-disabled));
+}
+
+/* Стрелка: меньше и с меньшим внутренним отступом справа */
+.Select_chevron__CwCty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.875rem; /* было 1rem */
+  height: 0.875rem;
+  margin-left: var(--space-3);
+  flex: 0 0 auto;
+  color: hsl(var(--icon-primary) / 0.8);
+}
+
+.Select_disabled__th3Re,
+.Select_trigger__2xOUx:disabled {
+  background-color: hsl(var(--surface-disabled));
+  color: hsl(var(--text-on-disabled));
+  border-color: hsl(var(--border-disabled));
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.Select_default__7Az42 {
+}
+
+.Select_error__yH4KV {
+  border-color: hsl(var(--text-error));
+  background-color: hsl(var(--surface-primary));
+}
+
+.Select_error__yH4KV:focus {
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-error) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+}
+
+.Select_success__5Wp7H {
+  border-color: hsl(var(--border-success));
+  background-color: hsl(var(--surface-primary));
+}
+
+.Select_success__5Wp7H:focus {
+  box-shadow: 0 0 0 var(--border-sm) hsl(var(--border-success) / 1),
+  0 0 0 calc(var(--border-sm) * 2) hsl(var(--border-focus) / 1);
+}
+
+/* Группировка как у Input */
+.Select_grouped__iENRS {
+  border-radius: 0;
+}
+
+.Select_left__HKEVQ {
+  border-top-left-radius: var(--radius-input-sem);
+  border-bottom-left-radius: var(--radius-input-sem);
+  border-right: 0;
+}
+
+.Select_right__lNSxZ {
+  border-top-right-radius: var(--radius-input-sem);
+  border-bottom-right-radius: var(--radius-input-sem);
+}
+
+/* Меню: теперь В ПОТОКЕ, сразу под триггером */
+.Select_menu__nICfk {
+  margin-top: var(--space-2);
+  background-color: hsl(var(--surface-primary));
+  color: hsl(var(--text-body));
+  border: var(--border-sm) solid hsl(var(--border-primary));
+  border-radius: var(--radius-input-sem);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2) 0;
+  max-height: 16rem;
+  overflow: auto;
+  /* Больше никаких position/z-index — это именно dropdown */
+}
+
+.Select_matchWidth__bRsVE {
+  width: 100%;
+}
+
+/* Опции */
+.Select_option__E6U_V {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.Select_option__E6U_V:hover {
+  background-color: hsl(var(--surface-secondary));
+}
+
+.Select_optionActive__aX2IV {
+  background-color: hsl(var(--surface-secondary));
+}
+
+.Select_optionSelected__KQaUm {
+  font-weight: var(--font-weight-semibold);
+}
+
+.Select_optionDisabled__vHK9s {
+  color: hsl(var(--text-disabled));
+  cursor: not-allowed;
+}
+
+.Select_optionLabel___M72m {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Select_hint__F_U0s {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: hsl(var(--text-body) / 0.65);
+}
+
+.Select_errorMsg__uPalf {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: hsl(var(--text-error));
+}
+
+/*!**********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./components/ui/Loader/loader.module.css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************/
+.loader_loader__YwrLV {
+  width: 4rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(
+    hsl(var(--theme-primary)) 0 90deg,
+    transparent 90deg
+  );
+  mask-image: radial-gradient(farthest-side, transparent 78%, #000 79%);
+  -webkit-mask-image: radial-gradient(farthest-side, transparent 78%, #000 79%);
+  animation: loader_loader-spin__8f0Sk 0.8s linear infinite;
+}
+
+@keyframes loader_loader-spin__8f0Sk {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
