@@ -1,5 +1,5 @@
 import styles from "./products.module.css";
-import { Card } from "@/components/ui/Card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
 
 const products = [
@@ -30,13 +30,17 @@ export default function ProductsPage() {
 
       <div className={styles.grid}>
         {products.map((p) => (
-          <Card key={p.id} className={styles.card} id={p.id}>
-            <h3>{p.title}</h3>
-            <p>{p.body}</p>
-            <div className={styles.actions}>
+          <Card key={p.id} id={p.id}>
+            <CardHeader>
+              <CardTitle>{p.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{p.body}</p>
+            </CardContent>
+            <CardFooter>
               <Button>Request demo</Button>
               <Button variant="secondary">Learn more</Button>
-            </div>
+            </CardFooter>
           </Card>
         ))}
       </div>

@@ -1,7 +1,0 @@
-.root {
-  background: hsl(var(--surface-primary));
-  border: var(--border-sm) solid hsl(var(--border-primary));
-  border-radius: var(--radius-card-sem);
-  box-shadow: var(--shadow-sm-sem);
-  padding: var(--space-7); /* 32px */
-}

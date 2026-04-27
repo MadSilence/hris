@@ -1,5 +1,5 @@
 import styles from "./pricing.module.css";
-import { Card } from "@/components/ui/Card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
 
 const tiers = [
@@ -33,15 +33,21 @@ export default function PricingPage() {
 
       <div className={styles.grid}>
         {tiers.map((t) => (
-          <Card key={t.name} className={styles.card}>
-            <h3>{t.name}</h3>
-            <div className={styles.price}>{t.price}</div>
-            <ul className={styles.list}>
-              {t.features.map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-            </ul>
-            <Button>{t.cta}</Button>
+          <Card key={t.name}>
+            <CardHeader>
+              <CardTitle>{t.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>{t.price}</div>
+              <ul>
+                {t.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button>{t.cta}</Button>
+            </CardFooter>
           </Card>
         ))}
       </div>
