@@ -202,16 +202,16 @@ export default function AttributeGroupsContainer() {
       <CreateGroupModal
         isOpen={isCreateAttributeGroupModalOpen}
         isLoading={createAttributeGroupAction.isPending}
-        onConfirm={(formValues) => {
+        onConfirmAction={(formValues) => {
           createAttributeGroupAction.mutate({ name: formValues.name });
         }}
-        onRequestClose={() => setIsCreateAttributeGroupModalOpen(false)}
+        onRequestCloseAction={() => setIsCreateAttributeGroupModalOpen(false)}
       />
 
       <CreateAttributeModal
         isOpen={isCreateAttributeModalOpen}
         isLoading={false}
-        onConfirm={(formValues) => {
+        onConfirmAction={(formValues) => {
           createAttributeAction.mutate({
             name: formValues.name,
             groupId: selected.id,
@@ -222,27 +222,27 @@ export default function AttributeGroupsContainer() {
             options: formValues.options,
           });
         }}
-        onRequestClose={() => setIsCreateAttributeModalOpen(false)}
+        onRequestCloseAction={() => setIsCreateAttributeModalOpen(false)}
       />
 
       <DeleteGroupModal
         isOpen={isDeleteAttributeGroupModalOpen}
         isLoading={deleteAttributeGroupAction.isPending}
-        onConfirm={() => deleteAttributeGroupAction.mutate({ id: selected.id })}
-        onRequestClose={() => setIsDeleteAttributeGroupModalOpen(false)}
+        onConfirmAction={() => deleteAttributeGroupAction.mutate({ id: selected.id })}
+        onRequestCloseAction={() => setIsDeleteAttributeGroupModalOpen(false)}
         group={selected}
       />
 
       <RenameAttributeGroupModal
         isOpen={isRenameAttributeGroupModalOpen}
         isLoading={renameAttributeGroupAction.isPending}
-        onConfirm={(formValues) => {
+        onConfirmAction={(formValues) => {
           renameAttributeGroupAction.mutate({
             id: selected.id,
             name: formValues.name,
           });
         }}
-        onRequestClose={() => setIsRenameAttributeGroupModalOpen(false)}
+        onRequestCloseAction={() => setIsRenameAttributeGroupModalOpen(false)}
       />
     </div>
   );

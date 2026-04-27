@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
-import styles from "./CreateJobFamilyModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/public/desact/src/components/ui/button";
+"use client";
+
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   CreateJobFamilyForm,
   CreateJobFamilyFormValues,
@@ -10,38 +11,68 @@ import {
 type CreateJobFamilyModalProps = {
   isOpen: boolean;
   isLoading: boolean;
-  onConfirm: (submission: CreateJobFamilyFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: CreateJobFamilyFormValues) => void;
+  onRequestCloseAction: () => void;
 };
 
-export const CreateJobFamilyModal: React.FC<CreateJobFamilyModalProps> = ({
+export const CreateJobFamilyModal: FC<CreateJobFamilyModalProps> = ({
   isOpen,
   isLoading = false,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
 }) => {
-  // @ts-ignore
-  const formRef = useRef<{ submitForm: () => Promise<void> }>();
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onRequestCloseAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onRequestCloseAction();
+  };
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Create Job Family"
-      footer={
-        <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
-            Cancel
-          </Button>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
+        >
+          <DialogHeader>
+            <DialogTitle>Create Job Family</DialogTitle>
+            <DialogDescription>
+              Create a new job family to organize jobs.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
-            Create
-          </Button>
-        </div>
-      }
-    >
-      <CreateJobFamilyForm formRef={formRef} onSubmit={onConfirm}/>
-    </Modal>
+          <CreateJobFamilyForm
+            isLoading={isLoading}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

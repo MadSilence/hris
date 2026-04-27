@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./AttributesContainer.module.css";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributesList } from "../AttributesList/AttributesList";
@@ -73,8 +73,8 @@ export const AttributesContainer: React.FC<AttributesContainerProps> = ({
       <DeleteAttributeModal
         isOpen={!!pendingDeleteId}
         isLoading={deleteAttributeAction.isPending}
-        onConfirm={handleConfirmDelete}
-        onRequestClose={() => setPendingDeleteId(null)}
+        onConfirmAction={handleConfirmDelete}
+        onRequestCloseAction={() => setPendingDeleteId(null)}
         attribute={attributeToDelete as Attribute}
       />
     </section>

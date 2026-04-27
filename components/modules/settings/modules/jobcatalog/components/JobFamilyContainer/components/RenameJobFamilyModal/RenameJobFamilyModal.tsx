@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
-import styles from "./RenameJobFamilyModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/public/desact/src/components/ui/button";
+"use client";
+
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   RenameJobFamilyForm,
   RenameJobFamilyFormValues,
@@ -10,38 +11,68 @@ import {
 type RenameJobFamilyModalProps = {
   isOpen: boolean;
   isLoading: boolean;
-  onConfirm: (submission: RenameJobFamilyFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: RenameJobFamilyFormValues) => void;
+  onRequestCloseAction: () => void;
 };
 
-export const RenameJobFamilyModal: React.FC<RenameJobFamilyModalProps> = ({
+export const RenameJobFamilyModal: FC<RenameJobFamilyModalProps> = ({
   isOpen,
   isLoading = false,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
 }) => {
-  // @ts-ignore
-  const formRef = useRef<{ submitForm: () => Promise<void> }>();
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onRequestCloseAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onRequestCloseAction();
+  };
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Rename Job Family"
-      footer={
-        <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
-            Cancel
-          </Button>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
+        >
+          <DialogHeader>
+            <DialogTitle>Rename Job Family</DialogTitle>
+            <DialogDescription>
+              Update the job family name used to organize jobs.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
-            Save
-          </Button>
-        </div>
-      }
-    >
-      <RenameJobFamilyForm formRef={formRef} onSubmit={onConfirm}/>
-    </Modal>
+          <RenameJobFamilyForm
+            isLoading={isLoading}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

@@ -1,11 +1,13 @@
 "use client";
 
+import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
-import type { RefObject } from "react";
-import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
+
+import { Button } from "@/public/desact/src/components/ui/button";
+import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
-import styles from "./CreateOfficeForm.module.css";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 export type CreateOfficeFormValues = {
   name: string;
@@ -19,40 +21,54 @@ export type CreateOfficeFormValues = {
   postCode: string;
 };
 
-export type CreateOfficeFormHandle = {
-  submitForm: () => Promise<void>;
-  isDirty: () => boolean;
-  reset: () => void;
-};
-
 export interface CreateOfficeFormProps {
-  formRef?: RefObject<CreateOfficeFormHandle | undefined>;
-  onSubmit: (values: CreateOfficeFormValues) => void | Promise<void>;
+  isLoading?: boolean;
   initialValues?: Partial<CreateOfficeFormValues>;
+  onCancelAction: () => void;
+  onDirtyChangeAction?: (isDirty: boolean) => void;
+  onSubmitAction: (values: CreateOfficeFormValues) => void | Promise<void>;
 }
 
-export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
-  formRef,
-  onSubmit,
+const getInitialValues = (
+  initialValues?: Partial<CreateOfficeFormValues>,
+): CreateOfficeFormValues => ({
+  name: initialValues?.name ?? "",
+  description: initialValues?.description ?? "",
+  email: initialValues?.email ?? "",
+  phone: initialValues?.phone ?? "",
+  country: initialValues?.country ?? "",
+  city: initialValues?.city ?? "",
+  street: initialValues?.street ?? "",
+  building: initialValues?.building ?? "",
+  postCode: initialValues?.postCode ?? "",
+});
+
+const sanitize = (values: CreateOfficeFormValues): CreateOfficeFormValues => ({
+  name: values.name.trim(),
+  description: values.description.trim(),
+  email: values.email.trim(),
+  phone: values.phone.trim(),
+  country: values.country.trim(),
+  city: values.city.trim(),
+  street: values.street.trim(),
+  building: values.building.trim(),
+  postCode: values.postCode.trim(),
+});
+
+export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
+  isLoading = false,
   initialValues,
+  onCancelAction,
+  onDirtyChangeAction,
+  onSubmitAction,
 }) => {
   const handleFormSubmission = useCallback(
-    (values: CreateOfficeFormValues) => onSubmit(values),
-    [onSubmit],
+    (values: CreateOfficeFormValues) => onSubmitAction(sanitize(values)),
+    [onSubmitAction],
   );
 
   const formik = useFormik<CreateOfficeFormValues>({
-    initialValues: {
-      name: initialValues?.name ?? "",
-      description: initialValues?.description ?? "",
-      email: initialValues?.email ?? "",
-      phone: initialValues?.phone ?? "",
-      country: initialValues?.country ?? "",
-      city: initialValues?.city ?? "",
-      street: initialValues?.street ?? "",
-      building: initialValues?.building ?? "",
-      postCode: initialValues?.postCode ?? "",
-    },
+    initialValues: getInitialValues(initialValues),
     enableReinitialize: true,
     validationSchema: createOfficeSchema,
     validateOnBlur: false,
@@ -61,170 +77,229 @@ export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
   });
 
   useEffect(() => {
-    if (!formRef) return;
+    onDirtyChangeAction?.(formik.dirty);
+  }, [formik.dirty, onDirtyChangeAction]);
 
-    formRef.current = {
-      submitForm: async () => {
-        const errors = await formik.validateForm();
-        await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-        if (errors && Object.keys(errors).length > 0) return;
+    if (isLoading) return;
 
-        await formik.submitForm();
-      },
-      isDirty: () => formik.dirty,
-      reset: () => formik.resetForm(),
-    };
-  }, [formRef, formik]);
+    const errors = await formik.validateForm();
+
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
 
   return (
-    <form
-      className={styles.form}
-      onSubmit={(e) => {
-        e.preventDefault();
-        void formik.submitForm();
-      }}
-    >
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Office details</h3>
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="space-y-8">
+        <section className="space-y-4">
+          <h3 className="text-sm font-medium text-foreground">
+            Office details
+          </h3>
 
-        <div className={styles.row}>
-          <label>
-            Name
+          <div className="space-y-2">
+            <Label htmlFor="office-name">Name</Label>
             <Input
+              id="office-name"
               value={formik.values.name}
-              onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+              onChange={(e) =>
+                formik.setFieldValue("name", e.currentTarget.value)
+              }
               placeholder="e.g., London HQ"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.name}
             />
-          </label>
-          {formik.errors.name && <p>{formik.errors.name}</p>}
-        </div>
+            {formik.errors.name && (
+              <p className="text-sm text-destructive">{formik.errors.name}</p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Description
+          <div className="space-y-2">
+            <Label htmlFor="office-description">Description</Label>
             <Input
+              id="office-description"
               value={formik.values.description}
               onChange={(e) =>
                 formik.setFieldValue("description", e.currentTarget.value)
               }
               placeholder="Optional"
+              disabled={isLoading}
               aria-invalid={!!formik.errors.description}
             />
-          </label>
-          {formik.errors.description && <p>{formik.errors.description}</p>}
-        </div>
+            {formik.errors.description && (
+              <p className="text-sm text-destructive">
+                {formik.errors.description}
+              </p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Email
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="office-email">Email</Label>
+              <Input
+                id="office-email"
+                type="email"
+                value={formik.values.email}
+                onChange={(e) =>
+                  formik.setFieldValue("email", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.email}
+              />
+              {formik.errors.email && (
+                <p className="text-sm text-destructive">
+                  {formik.errors.email}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="office-phone">Phone</Label>
+              <Input
+                id="office-phone"
+                value={formik.values.phone}
+                onChange={(e) =>
+                  formik.setFieldValue("phone", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.phone}
+              />
+              {formik.errors.phone && (
+                <p className="text-sm text-destructive">
+                  {formik.errors.phone}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="text-sm font-medium text-foreground">Address</h3>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="office-country">Country</Label>
+              <Input
+                id="office-country"
+                value={formik.values.country}
+                onChange={(e) =>
+                  formik.setFieldValue("country", e.currentTarget.value)
+                }
+                placeholder="Country"
+                required
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.country}
+              />
+              {formik.errors.country && (
+                <p className="text-sm text-destructive">
+                  {formik.errors.country}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="office-city">City</Label>
+              <Input
+                id="office-city"
+                value={formik.values.city}
+                onChange={(e) =>
+                  formik.setFieldValue("city", e.currentTarget.value)
+                }
+                placeholder="City"
+                required
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.city}
+              />
+              {formik.errors.city && (
+                <p className="text-sm text-destructive">{formik.errors.city}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="office-street">Street</Label>
+              <Input
+                id="office-street"
+                value={formik.values.street}
+                onChange={(e) =>
+                  formik.setFieldValue("street", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.street}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="office-building">Building</Label>
+              <Input
+                id="office-building"
+                value={formik.values.building}
+                onChange={(e) =>
+                  formik.setFieldValue("building", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.building}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="office-post-code">Post code</Label>
             <Input
-              type="email"
-              value={formik.values.email}
-              onChange={(e) => formik.setFieldValue("email", e.currentTarget.value)}
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.email}
-            />
-          </label>
-          {formik.errors.email && <p>{formik.errors.email}</p>}
-        </div>
-
-        <div className={styles.row}>
-          <label>
-            Phone
-            <Input
-              value={formik.values.phone}
-              onChange={(e) => formik.setFieldValue("phone", e.currentTarget.value)}
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.phone}
-            />
-          </label>
-          {formik.errors.phone && <p>{formik.errors.phone}</p>}
-        </div>
-      </div>
-
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Address</h3>
-
-        <div className={styles.row}>
-          <label>
-            Country
-            <Input
-              value={formik.values.country}
-              onChange={(e) =>
-                formik.setFieldValue("country", e.currentTarget.value)
-              }
-              placeholder="Country"
-              required
-              aria-invalid={!!formik.errors.country}
-            />
-          </label>
-          {formik.errors.country && <p>{formik.errors.country}</p>}
-        </div>
-
-        <div className={styles.row}>
-          <label>
-            City
-            <Input
-              value={formik.values.city}
-              onChange={(e) => formik.setFieldValue("city", e.currentTarget.value)}
-              placeholder="City"
-              required
-              aria-invalid={!!formik.errors.city}
-            />
-          </label>
-          {formik.errors.city && <p>{formik.errors.city}</p>}
-        </div>
-
-        <div className={styles.rowTwoCols}>
-          <label>
-            Street
-            <Input
-              value={formik.values.street}
-              onChange={(e) =>
-                formik.setFieldValue("street", e.currentTarget.value)
-              }
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.street}
-            />
-          </label>
-
-          <label>
-            Building
-            <Input
-              value={formik.values.building}
-              onChange={(e) =>
-                formik.setFieldValue("building", e.currentTarget.value)
-              }
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.building}
-            />
-          </label>
-        </div>
-
-        <div className={styles.row}>
-          <label>
-            Post code
-            <Input
+              id="office-post-code"
               value={formik.values.postCode}
               onChange={(e) =>
                 formik.setFieldValue("postCode", e.currentTarget.value)
               }
               placeholder="Optional"
+              disabled={isLoading}
               aria-invalid={!!formik.errors.postCode}
             />
-          </label>
-          {formik.errors.postCode && <p>{formik.errors.postCode}</p>}
-        </div>
+            {formik.errors.postCode && (
+              <p className="text-sm text-destructive">
+                {formik.errors.postCode}
+              </p>
+            )}
+          </div>
+        </section>
       </div>
+
+      <DialogFooter className="mt-8">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isLoading}
+          onClick={onCancelAction}
+        >
+          Cancel
+        </Button>
+
+        <Button type="submit" disabled={isLoading}>
+          Create
+        </Button>
+      </DialogFooter>
     </form>
   );
 };
 
 const createOfficeSchema = yup.object({
-  name: yup.string().trim().required("Please enter an office name.").min(2).max(200),
+  name: yup
+    .string()
+    .trim()
+    .required("Please enter an office name.")
+    .min(2)
+    .max(200),
   description: yup.string().trim().max(1000).optional(),
   email: yup.string().trim().email().max(320).optional(),
   phone: yup.string().trim().max(120).optional(),

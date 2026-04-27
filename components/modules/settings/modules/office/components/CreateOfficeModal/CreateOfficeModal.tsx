@@ -1,57 +1,78 @@
 "use client";
 
-import React, { useRef } from "react";
-import styles from "./CreateOfficeModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/public/desact/src/components/ui/button";
-import {
-  CreateOfficeForm,
-  CreateOfficeFormHandle,
-  CreateOfficeFormValues,
-} from "@/components/modules/settings/modules/office/components/CreateOfficeForm";
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
+import { CreateOfficeForm, CreateOfficeFormValues, } from "@/components/modules/settings/modules/office/components/CreateOfficeForm";
 
 type CreateOfficeModalProps = {
   isOpen: boolean;
   isLoading: boolean;
   initialValues?: Partial<CreateOfficeFormValues>;
-  onConfirm: (submission: CreateOfficeFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: CreateOfficeFormValues) => void;
+  onRequestCloseAction: () => void;
 };
 
-export const CreateOfficeModal: React.FC<CreateOfficeModalProps> = ({
+export const CreateOfficeModal: FC<CreateOfficeModalProps> = ({
   isOpen,
   isLoading = false,
   initialValues,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
 }) => {
-  const formRef = useRef<CreateOfficeFormHandle | undefined>(undefined);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onRequestCloseAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onRequestCloseAction();
+  };
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Create office"
-      footer={
-        <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
-            Cancel
-          </Button>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"
+        >
+          <DialogHeader>
+            <DialogTitle>Create office</DialogTitle>
+            <DialogDescription>
+              Add office details and address information.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
-            Create
-          </Button>
-        </div>
-      }
-    >
-      <div className={styles.content}>
-        <CreateOfficeForm
-          formRef={formRef}
-          initialValues={initialValues}
-          onSubmit={onConfirm}
-        />
-      </div>
-    </Modal>
+          <CreateOfficeForm
+            isLoading={isLoading}
+            initialValues={initialValues}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

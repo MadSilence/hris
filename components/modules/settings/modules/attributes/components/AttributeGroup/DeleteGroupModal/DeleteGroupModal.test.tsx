@@ -1,5 +1,5 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { ComponentProps } from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { DeleteGroupModal } from "./DeleteGroupModal";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 
@@ -14,68 +14,108 @@ const mockGroup: AttributeGroup = {
   attributes: [],
 };
 
-type Props = React.ComponentProps<typeof DeleteGroupModal>;
+const renderModal = (
+  props?: Partial<ComponentProps<typeof DeleteGroupModal>>,
+) => {
+  const defaultProps: ComponentProps<typeof DeleteGroupModal> = {
+    isOpen: true,
+    isLoading: false,
+    onConfirmAction: jest.fn(),
+    onRequestCloseAction: jest.fn(),
+    group: mockGroup,
+  };
 
-const defaultProps: Props = {
-  isOpen: true,
-  isLoading: false,
-  onConfirm: jest.fn(),
-  onRequestClose: jest.fn(),
-  group: mockGroup,
-};
+  const mergedProps = {
+    ...defaultProps,
+    ...props,
+  };
 
-const renderComponent = (override?: Partial<Props>) => {
-  const props: Props = { ...defaultProps, ...override };
   return {
-    ...render(<DeleteGroupModal {...props} />),
-    props,
+    ...render(<DeleteGroupModal {...mergedProps} />),
+    props: mergedProps,
   };
 };
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe("DeleteGroupModal", () => {
-  it("does not render when isOpen = false", () => {
-    renderComponent({ isOpen: false });
-    expect(screen.queryByText(/Delete section/i)).not.toBeInTheDocument();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("renders with group name and content when isOpen = true", () => {
-    renderComponent({ isOpen: true });
-    expect(screen.getByText(/Delete section HR\?/i)).toBeInTheDocument();
+  it("does not render when isOpen is false", () => {
+    renderModal({ isOpen: false });
+
     expect(
-      screen.getByText(/All attributes assigned to this section will also be deleted/i)
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /delete section/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders delete section content", () => {
+    renderModal();
+
     expect(
-      screen.getByText(/All employee data you entered for these attributes will be lost/i)
+      screen.getByRole("heading", { name: /delete section/i }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("HR")).toBeInTheDocument();
+
+    expect(
+      screen.getByText((content) =>
+        content.includes("This action cannot be undone"),
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        /all attributes assigned to this section will also be deleted/i,
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        /all employee data entered for these attributes will be lost/i,
+      ),
     ).toBeInTheDocument();
   });
 
-  it("calls onConfirm when Delete is clicked", () => {
-    const onConfirm = jest.fn();
-    renderComponent({ onConfirm });
-    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+  it("calls confirm action when Delete section is clicked", () => {
+    const onConfirmAction = jest.fn();
+
+    renderModal({ onConfirmAction });
+
+    fireEvent.click(screen.getByRole("button", { name: /delete section/i }));
+
+    expect(onConfirmAction).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onRequestClose when Cancel is clicked", () => {
-    const onRequestClose = jest.fn();
-    renderComponent({ onRequestClose });
-    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
-    expect(onRequestClose).toHaveBeenCalledTimes(1);
+  it("calls request close action when Cancel is clicked", () => {
+    const onRequestCloseAction = jest.fn();
+
+    renderModal({ onRequestCloseAction });
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(onRequestCloseAction).toHaveBeenCalledTimes(1);
   });
 
-  it("does not trigger actions when isLoading = true", () => {
-    const onConfirm = jest.fn();
-    const onRequestClose = jest.fn();
-    renderComponent({ isLoading: true, onConfirm, onRequestClose });
+  it("disables actions while loading", () => {
+    const onConfirmAction = jest.fn();
+    const onRequestCloseAction = jest.fn();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
+    renderModal({
+      isLoading: true,
+      onConfirmAction,
+      onRequestCloseAction,
+    });
 
-    expect(onConfirm).not.toHaveBeenCalled();
-    expect(onRequestClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /delete section/i }),
+    ).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete section/i }));
+
+    expect(onConfirmAction).not.toHaveBeenCalled();
+    expect(onRequestCloseAction).not.toHaveBeenCalled();
   });
 });

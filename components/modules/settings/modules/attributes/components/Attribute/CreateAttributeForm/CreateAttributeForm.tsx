@@ -1,11 +1,13 @@
 "use client";
 
+import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
-import type { RefObject } from "react";
-import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
+
+import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
-import styles from "./CreateAttributeForm.module.css";
+import { Label } from "@/public/desact/src/components/ui/label";
+import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 
 import { ALL_ATTRIBUTE_TYPES, AttributeOption, AttributeType, isOptionsType, isUniqueType, } from "@/models/attribute";
 
@@ -16,8 +18,10 @@ import { DateSettings } from "@/components/modules/settings/modules/attributes/c
 import { UniqueSelect } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/UniqueSelect";
 
 export interface CreateAttributeFormProps {
-  formRef?: RefObject<{ submitForm: () => Promise<void> } | undefined>;
-  onSubmit: (values: CreateAttributeFormValues) => void | Promise<void>;
+  isLoading?: boolean;
+  onCancelAction: () => void;
+  onDirtyChangeAction?: (isDirty: boolean) => void;
+  onSubmitAction: (values: CreateAttributeFormValues) => void | Promise<void>;
 }
 
 export type CreateAttributeFormValues = {
@@ -37,7 +41,10 @@ const schema = yup.object({
     .min(2)
     .max(120)
     .nonNullable(),
-  type: yup.mixed<AttributeType>().oneOf(ALL_ATTRIBUTE_TYPES).required("Select attribute type."),
+  type: yup
+    .mixed<AttributeType>()
+    .oneOf(ALL_ATTRIBUTE_TYPES)
+    .required("Select attribute type."),
   unique: yup.boolean().required(),
   decScale: yup
     .number()
@@ -66,7 +73,7 @@ function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues 
   const type = values.type;
 
   return {
-    name: values.name,
+    name: values.name.trim(),
     type,
     unique: isUniqueType(type) ? values.unique : false,
     decScale: type === AttributeType.NUMBER ? values.decScale : null,
@@ -80,13 +87,15 @@ function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues 
   };
 }
 
-export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({
-  formRef,
-  onSubmit,
+export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
+  isLoading = false,
+  onCancelAction,
+  onDirtyChangeAction,
+  onSubmitAction,
 }) => {
   const handleFormSubmission = useCallback(
-    (values: CreateAttributeFormValues) => onSubmit(sanitize(values)),
-    [onSubmit],
+    (values: CreateAttributeFormValues) => onSubmitAction(sanitize(values)),
+    [onSubmitAction],
   );
 
   const formik = useFormik<CreateAttributeFormValues>({
@@ -105,28 +114,18 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({
   });
 
   useEffect(() => {
-    if (formRef) {
-      formRef.current = {
-        submitForm: async () => {
-          const errors = await formik.validateForm();
+    onDirtyChangeAction?.(formik.dirty);
+  }, [formik.dirty, onDirtyChangeAction]);
 
-          await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
-
-          if (errors && Object.keys(errors).length > 0) return;
-
-          await formik.submitForm();
-        },
-      };
-    }
-  }, [formRef, formik]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const t = formik.values.type;
 
-    if (!isOptionsType(t)) formik.setFieldValue("options", []);
-    if (t !== AttributeType.NUMBER) formik.setFieldValue("decScale", null);
-    if (t !== AttributeType.DATE) formik.setFieldValue("dateHideYearPublic", false);
-    if (!isUniqueType(t)) formik.setFieldValue("unique", false);
+    if (!isOptionsType(t)) void formik.setFieldValue("options", []);
+    if (t !== AttributeType.NUMBER) void formik.setFieldValue("decScale", null);
+    if (t !== AttributeType.DATE) {
+      void formik.setFieldValue("dateHideYearPublic", false);
+    }
+    if (!isUniqueType(t)) void formik.setFieldValue("unique", false);
   }, [formik.values.type]);
 
   const type = formik.values.type;
@@ -135,76 +134,105 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({
   const isNumber = type === AttributeType.NUMBER;
   const isDate = type === AttributeType.DATE;
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isLoading) return;
+
+    const errors = await formik.validateForm();
+
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
+
   return (
-    <form
-      className={styles.form}
-      onSubmit={(e) => {
-        e.preventDefault();
-        void formik.submitForm();
-      }}
-    >
-      <div className={styles.row}>
-        <label>
-          Attribute name
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="attribute-name">Attribute name</Label>
           <Input
+            id="attribute-name"
             value={formik.values.name}
-            onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+            onChange={(e) =>
+              formik.setFieldValue("name", e.currentTarget.value)
+            }
             placeholder="e.g., Salary"
             required
+            disabled={isLoading}
             aria-invalid={!!formik.errors.name}
           />
-        </label>
-        {formik.errors.name && (
-          <div className={styles.errorText}>{formik.errors.name}</div>
+          {formik.errors.name && (
+            <p className="text-sm text-destructive">{formik.errors.name}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <TypeSelect
+            value={type}
+            onChange={(nextType) => {
+              void formik.setFieldValue("type", nextType);
+              formik.setFieldError("options", undefined);
+              formik.setFieldError("decScale", undefined);
+              formik.setFieldError("dateHideYearPublic", undefined);
+            }}
+          />
+          {formik.errors.type && (
+            <p className="text-sm text-destructive">
+              {String(formik.errors.type)}
+            </p>
+          )}
+        </div>
+
+        {showOptions && (
+          <OptionsEditor
+            type={type}
+            options={formik.values.options ?? []}
+            onChange={(options) => formik.setFieldValue("options", options)}
+          />
+        )}
+
+        {isNumber && (
+          <NumberScaleRow
+            value={formik.values.decScale}
+            error={formik.errors.decScale as string | undefined}
+            onChange={(value) => formik.setFieldValue("decScale", value)}
+          />
+        )}
+
+        {isDate && (
+          <DateSettings
+            hideYearPublic={formik.values.dateHideYearPublic ?? false}
+            onChangeHideYearPublic={(value) =>
+              formik.setFieldValue("dateHideYearPublic", value)
+            }
+          />
+        )}
+
+        {showUnique && (
+          <UniqueSelect
+            checked={formik.values.unique}
+            onChangeAction={(value) => formik.setFieldValue("unique", value)}
+          />
         )}
       </div>
 
-      <div className={styles.row}>
-        <TypeSelect
-          value={type}
-          onChange={(nextType) => {
-            formik.setFieldValue("type", nextType);
-            formik.setFieldError("options", undefined);
-            formik.setFieldError("decScale", undefined);
-            formik.setFieldError("dateHideYearPublic", undefined);
-          }}
-        />
-        {formik.errors.type && (
-          <div className={styles.errorText}>{String(formik.errors.type)}</div>
-        )}
-      </div>
+      <DialogFooter className="mt-8">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isLoading}
+          onClick={onCancelAction}
+        >
+          Cancel
+        </Button>
 
-      {showOptions && (
-        <OptionsEditor
-          type={type}
-          options={formik.values.options ?? []}
-          onChange={(options) => formik.setFieldValue("options", options)}
-        />
-      )}
-
-      {isNumber && (
-        <NumberScaleRow
-          value={formik.values.decScale}
-          error={formik.errors.decScale as any}
-          onChange={(value) => formik.setFieldValue("decScale", value)}
-        />
-      )}
-
-      {isDate && (
-        <DateSettings
-          hideYearPublic={formik.values.dateHideYearPublic ?? false}
-          onChangeHideYearPublic={(value) =>
-            formik.setFieldValue("dateHideYearPublic", value)
-          }
-        />
-      )}
-
-      {showUnique && (
-        <UniqueSelect
-          checked={formik.values.unique}
-          onChange={(value) => formik.setFieldValue("unique", value)}
-        />
-      )}
+        <Button type="submit" disabled={isLoading}>
+          Create
+        </Button>
+      </DialogFooter>
     </form>
   );
 };

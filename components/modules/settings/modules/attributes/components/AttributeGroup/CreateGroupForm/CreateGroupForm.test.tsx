@@ -1,12 +1,12 @@
 import { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CreateJobFamilyForm } from "./CreateJobFamilyForm";
+import { CreateGroupForm } from "./CreateGroupForm";
 
 const renderForm = (
-  props?: Partial<ComponentProps<typeof CreateJobFamilyForm>>,
+  props?: Partial<ComponentProps<typeof CreateGroupForm>>,
 ) => {
-  const defaultProps: ComponentProps<typeof CreateJobFamilyForm> = {
+  const defaultProps: ComponentProps<typeof CreateGroupForm> = {
     isLoading: false,
     onCancelAction: jest.fn(),
     onDirtyChangeAction: jest.fn(),
@@ -19,12 +19,12 @@ const renderForm = (
   };
 
   return {
-    ...render(<CreateJobFamilyForm {...mergedProps} />),
+    ...render(<CreateGroupForm {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("CreateJobFamilyForm", () => {
+describe("CreateGroupForm", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -32,8 +32,8 @@ describe("CreateJobFamilyForm", () => {
   it("renders form fields and actions", () => {
     renderForm();
 
-    expect(screen.getByLabelText(/name your job family/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/engineering/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/name your section/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/hr information/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
   });
@@ -49,7 +49,7 @@ describe("CreateJobFamilyForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
 
     expect(
-      await screen.findByText(/please enter a job family name/i),
+      await screen.findByText(/please enter a section name/i),
     ).toBeInTheDocument();
   });
 
@@ -59,7 +59,7 @@ describe("CreateJobFamilyForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/name your job family/i), "HR");
+    await user.type(screen.getByLabelText(/name your section/i), "HR");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
     expect(onSubmitAction).not.toHaveBeenCalled();
@@ -75,16 +75,12 @@ describe("CreateJobFamilyForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(
-      screen.getByLabelText(/name your job family/i),
-      " Engineering ",
-    );
-
+    await user.type(screen.getByLabelText(/name your section/i), " HR Info ");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({
-        name: "Engineering",
+        name: "HR Info",
       });
     });
   });
@@ -95,14 +91,11 @@ describe("CreateJobFamilyForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(
-      screen.getByLabelText(/name your job family/i),
-      "Engineering{enter}",
-    );
+    await user.type(screen.getByLabelText(/name your section/i), "HR Info{enter}");
 
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({
-        name: "Engineering",
+        name: "HR Info",
       });
     });
   });
@@ -124,10 +117,7 @@ describe("CreateJobFamilyForm", () => {
 
     renderForm({ onDirtyChangeAction });
 
-    await user.type(
-      screen.getByLabelText(/name your job family/i),
-      "Engineering",
-    );
+    await user.type(screen.getByLabelText(/name your section/i), "HR Info");
 
     await waitFor(() => {
       expect(onDirtyChangeAction).toHaveBeenCalledWith(true);
@@ -145,7 +135,7 @@ describe("CreateJobFamilyForm", () => {
       onCancelAction,
     });
 
-    expect(screen.getByLabelText(/name your job family/i)).toBeDisabled();
+    expect(screen.getByLabelText(/name your section/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();
 

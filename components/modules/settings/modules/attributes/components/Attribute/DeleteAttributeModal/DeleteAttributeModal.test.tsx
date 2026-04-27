@@ -1,7 +1,8 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { ComponentProps } from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { DeleteAttributeModal } from "./DeleteAttributeModal";
 import { Attribute } from "@/models/attribute/Attribute";
+import { AttributeType } from "@/models/attribute";
 
 const mockAttribute: Attribute = {
   id: "123",
@@ -13,7 +14,7 @@ const mockAttribute: Attribute = {
   version: 1,
   companyId: "c1",
   groupId: "g1",
-  type: "TEXT",
+  type: AttributeType.TEXT,
   sortOrder: 1,
   decScale: null,
   dateHideYear: null,
@@ -21,73 +22,130 @@ const mockAttribute: Attribute = {
   unique: false,
 };
 
+const renderModal = (
+  props?: Partial<ComponentProps<typeof DeleteAttributeModal>>,
+) => {
+  const defaultProps: ComponentProps<typeof DeleteAttributeModal> = {
+    isOpen: true,
+    isLoading: false,
+    onConfirmAction: jest.fn(),
+    onRequestCloseAction: jest.fn(),
+    attribute: mockAttribute,
+  };
+
+  const mergedProps = {
+    ...defaultProps,
+    ...props,
+  };
+
+  return {
+    ...render(<DeleteAttributeModal {...mergedProps} />),
+    props: mergedProps,
+  };
+};
+
 describe("DeleteAttributeModal", () => {
   it("does not render when isOpen is false", () => {
-    render(
-      <DeleteAttributeModal
-        isOpen={false}
-        isLoading={false}
-        onConfirm={jest.fn()}
-        onRequestClose={jest.fn()}
-        attribute={mockAttribute}
-      />
-    );
+    renderModal({ isOpen: false });
 
     expect(
-      screen.queryByText(/Permanently delete/i)
+      screen.queryByRole("heading", { name: /delete attribute/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("renders when isOpen is true", () => {
-    render(
-      <DeleteAttributeModal
-        isOpen={true}
-        isLoading={false}
-        onConfirm={jest.fn()}
-        onRequestClose={jest.fn()}
-        attribute={mockAttribute}
-      />
-    );
+  it("renders delete attribute content", () => {
+    renderModal();
 
     expect(
-      screen.getByText(/Permanently delete Test Attribute attribute/i)
+      screen.getByRole("heading", { name: /delete attribute/i }),
     ).toBeInTheDocument();
+
+    expect(screen.getByText("Test Attribute")).toBeInTheDocument();
+
     expect(
-      screen.getByText(/This attribute will be permanently deleted/i)
+      screen.getByText((content) =>
+        content.includes("This action cannot be undone"),
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/deleted attributes cannot be restored/i),
     ).toBeInTheDocument();
   });
 
-  it("calls onConfirm when Delete is clicked", () => {
-    const onConfirm = jest.fn();
+  it("renders options warning for select-like attributes", () => {
+    renderModal({
+      attribute: {
+        ...mockAttribute,
+        type: AttributeType.SELECT,
+      },
+    });
 
-    render(
-      <DeleteAttributeModal
-        isOpen={true}
-        isLoading={false}
-        onConfirm={onConfirm}
-        onRequestClose={jest.fn()}
-        attribute={mockAttribute}
-      />
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByText(
+        /all options associated with this attribute will also be deleted/i,
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("calls onRequestClose when Cancel is clicked", () => {
-    const onRequestClose = jest.fn();
+  it("does not render options warning for text attribute", () => {
+    renderModal({
+      attribute: {
+        ...mockAttribute,
+        type: AttributeType.TEXT,
+      },
+    });
 
-    render(
-      <DeleteAttributeModal
-        isOpen={true}
-        isLoading={false}
-        onConfirm={jest.fn()}
-        onRequestClose={onRequestClose}
-        attribute={mockAttribute}
-      />
+    expect(
+      screen.queryByText(
+        /all options associated with this attribute will also be deleted/i,
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("calls confirm action when Delete attribute is clicked", () => {
+    const onConfirmAction = jest.fn();
+
+    renderModal({ onConfirmAction });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /delete attribute/i }),
     );
 
-    fireEvent.click(screen.getByText(/Cancel/i));
-    expect(onRequestClose).toHaveBeenCalledTimes(1);
+    expect(onConfirmAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls request close action when Cancel is clicked", () => {
+    const onRequestCloseAction = jest.fn();
+
+    renderModal({ onRequestCloseAction });
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(onRequestCloseAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables actions while loading", () => {
+    const onConfirmAction = jest.fn();
+    const onRequestCloseAction = jest.fn();
+
+    renderModal({
+      isLoading: true,
+      onConfirmAction,
+      onRequestCloseAction,
+    });
+
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /delete attribute/i }),
+    ).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /delete attribute/i }),
+    );
+
+    expect(onRequestCloseAction).not.toHaveBeenCalled();
+    expect(onConfirmAction).not.toHaveBeenCalled();
   });
 });

@@ -1,23 +1,47 @@
 "use client";
 
+import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
-import type { RefObject } from "react";
-import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
+
+import { Button } from "@/public/desact/src/components/ui/button";
+import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 export interface CreateGroupFormProps {
-  formRef?: RefObject<{ submitForm: () => Promise<void> } | undefined>;
-  onSubmit: (values: CreateGroupFormValues) => void | Promise<void>;
+  isLoading?: boolean;
+  onCancelAction: () => void;
+  onDirtyChangeAction?: (isDirty: boolean) => void;
+  onSubmitAction: (values: CreateGroupFormValues) => void | Promise<void>;
 }
 
-export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({
-  formRef,
-  onSubmit,
+export type CreateGroupFormValues = {
+  name: string;
+};
+
+const createGroupFormValidationSchema = yup.object({
+  name: yup
+    .string()
+    .trim()
+    .required("Please enter a section name.")
+    .min(3, "Name must be at least 3 characters long.")
+    .max(120, "Name must be 120 characters or fewer.")
+    .nonNullable("Please enter a section name."),
+});
+
+export const CreateGroupForm: FC<CreateGroupFormProps> = ({
+  isLoading = false,
+  onCancelAction,
+  onDirtyChangeAction,
+  onSubmitAction,
 }) => {
   const handleFormSubmission = useCallback(
-    (values: CreateGroupFormValues) => onSubmit(values),
-    [onSubmit],
+    (values: CreateGroupFormValues) =>
+      onSubmitAction({
+        name: values.name.trim(),
+      }),
+    [onSubmitAction],
   );
 
   const formik = useFormik<CreateGroupFormValues>({
@@ -31,51 +55,57 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({
   });
 
   useEffect(() => {
-    if (formRef) {
-      formRef.current = {
-        submitForm: async () => {
-          const errors = await formik.validateForm();
+    onDirtyChangeAction?.(formik.dirty);
+  }, [formik.dirty, onDirtyChangeAction]);
 
-          await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-          const isValid = errors && Object.keys(errors).length === 0;
+    if (isLoading) return;
 
-          if (!isValid) return;
+    const errors = await formik.validateForm();
 
-          await formik.submitForm();
-        },
-      };
-    }
-  }, [formRef, formik]);
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
 
   return (
-    <form className="space-y-4">
-      <label>
-        Name your section
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="space-y-2">
+        <Label htmlFor="group-name">Name your section</Label>
+
         <Input
+          id="group-name"
           value={formik.values.name}
           onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
           placeholder="e.g., HR information"
           required
+          disabled={isLoading}
           aria-invalid={!!formik.errors.name}
         />
-      </label>
 
-      {formik.errors.name && <p>{formik.errors.name}</p>}
+        {formik.errors.name && (
+          <p className="text-sm text-destructive">{formik.errors.name}</p>
+        )}
+      </div>
+
+      <DialogFooter className="mt-8">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isLoading}
+          onClick={onCancelAction}
+        >
+          Cancel
+        </Button>
+
+        <Button type="submit" disabled={isLoading}>
+          Create
+        </Button>
+      </DialogFooter>
     </form>
   );
-};
-
-const createGroupFormValidationSchema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Please enter a section name.")
-    .min(3, "Name must be at least 3 characters long.")
-    .max(120, "Name must be 120 characters or fewer.")
-    .nonNullable("Please enter a section name."),
-});
-
-export type CreateGroupFormValues = {
-  name: string;
 };

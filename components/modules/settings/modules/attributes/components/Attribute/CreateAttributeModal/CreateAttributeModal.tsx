@@ -1,57 +1,75 @@
 "use client";
 
-import React, { useRef } from "react";
-import styles from "./CreateAttributeModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { CreateAttributeFormValues } from "../CreateAttributeForm";
-import { CreateAttributeForm, } from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeForm";
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import {
+  CreateAttributeForm,
+  CreateAttributeFormValues,
+} from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeForm";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 
 type CreateAttributeModalProps = {
   isOpen: boolean;
   isLoading: boolean;
-  onConfirm: (submission: CreateAttributeFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: CreateAttributeFormValues) => void;
+  onRequestCloseAction: () => void;
 };
 
-export const CreateAttributeModal: React.FC<CreateAttributeModalProps> = ({
+export const CreateAttributeModal: FC<CreateAttributeModalProps> = ({
   isOpen,
   isLoading = false,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
 }) => {
-  // @ts-ignore
-  const formRef = useRef<{ submitForm: () => Promise<void> }>();
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onRequestCloseAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onRequestCloseAction();
+  };
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Create Attribute"
-      footer={
-        <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            onClick={() => !isLoading && onRequestClose()}
-          >
-            Cancel
-          </Button>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent hideClose className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Attribute</DialogTitle>
+            <DialogDescription>
+              Create a custom attribute for your data model.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button
-            onClick={() => !isLoading && formRef.current?.submitForm()}
-          >
-            Create
-          </Button>
-        </div>
-      }
-    >
-      <div className={styles.content}>
-        <CreateAttributeForm
-          formRef={formRef}
-          onSubmit={(values: CreateAttributeFormValues) => onConfirm(values)}
-        />
-      </div>
-    </Modal>
+          <CreateAttributeForm
+            isLoading={isLoading}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

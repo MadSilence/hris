@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
-import styles from "./RenameAttributeGroupModal.module.css";
-import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/public/desact/src/components/ui/button";
+"use client";
+
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   RenameAttributeGroupForm,
   RenameAttributeGroupFormValues,
@@ -10,38 +11,70 @@ import {
 type RenameAttributeGroupModalProps = {
   isOpen: boolean;
   isLoading: boolean;
-  onConfirm: (submission: RenameAttributeGroupFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: RenameAttributeGroupFormValues) => void;
+  onRequestCloseAction: () => void;
 };
 
-export const RenameAttributeGroupModal: React.FC<RenameAttributeGroupModalProps> = ({
+export const RenameAttributeGroupModal: FC<
+  RenameAttributeGroupModalProps
+> = ({
   isOpen,
   isLoading = false,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
 }) => {
-  // @ts-ignore
-  const formRef = useRef<{ submitForm: () => Promise<void> }>();
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onRequestCloseAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onRequestCloseAction();
+  };
 
   return (
-    <Modal
-      isLoading={isLoading}
-      isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose()}
-      title="Rename AttributeGroup"
-      footer={
-        <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
-            Cancel
-          </Button>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
+        >
+          <DialogHeader>
+            <DialogTitle>Rename Attribute Group</DialogTitle>
+            <DialogDescription>
+              Update the section name used to organize attributes.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
-            Create
-          </Button>
-        </div>
-      }
-    >
-      <RenameAttributeGroupForm formRef={formRef} onSubmit={onConfirm}/>
-    </Modal>
+          <RenameAttributeGroupForm
+            isLoading={isLoading}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

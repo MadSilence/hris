@@ -1,19 +1,19 @@
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { CreateJobFamilyModal } from "./CreateJobFamilyModal";
+import { CreateOfficeModal } from "./CreateOfficeModal";
 
-const mockCreateJobFamilyForm = jest.fn();
+const mockCreateOfficeForm = jest.fn();
 
 jest.mock(
-  "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/CreateJobFamilyForm",
+  "@/components/modules/settings/modules/office/components/CreateOfficeForm",
   () => ({
-    CreateJobFamilyForm: (props: any) => {
-      mockCreateJobFamilyForm(props);
+    CreateOfficeForm: (props: any) => {
+      mockCreateOfficeForm(props);
 
       return (
         <div>
           <input
-            aria-label="Job family name"
+            aria-label="Office name"
             disabled={props.isLoading}
             onChange={() => props.onDirtyChangeAction?.(true)}
           />
@@ -31,7 +31,15 @@ jest.mock(
             disabled={props.isLoading}
             onClick={() =>
               props.onSubmitAction({
-                name: "Engineering",
+                name: "London HQ",
+                description: "",
+                email: "",
+                phone: "",
+                country: "United Kingdom",
+                city: "London",
+                street: "",
+                building: "",
+                postCode: "",
               })
             }
           >
@@ -44,9 +52,9 @@ jest.mock(
 );
 
 const renderModal = (
-  props?: Partial<ComponentProps<typeof CreateJobFamilyModal>>,
+  props?: Partial<ComponentProps<typeof CreateOfficeModal>>,
 ) => {
-  const defaultProps: ComponentProps<typeof CreateJobFamilyModal> = {
+  const defaultProps: ComponentProps<typeof CreateOfficeModal> = {
     isOpen: true,
     isLoading: false,
     onConfirmAction: jest.fn(),
@@ -59,12 +67,12 @@ const renderModal = (
   };
 
   return {
-    ...render(<CreateJobFamilyModal {...mergedProps} />),
+    ...render(<CreateOfficeModal {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("CreateJobFamilyModal", () => {
+describe("CreateOfficeModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -73,34 +81,42 @@ describe("CreateJobFamilyModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /create job family/i }),
+      screen.getByRole("heading", { name: /create office/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/create a new job family to organize jobs/i),
+      screen.getByText(/add office details and address information/i),
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/job family name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/office name/i)).toBeInTheDocument();
   });
 
   it("does not render when isOpen is false", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /create job family/i }),
+      screen.queryByRole("heading", { name: /create office/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("passes loading state to form", () => {
-    renderModal({ isLoading: true });
+  it("passes loading and initial values to form", () => {
+    renderModal({
+      isLoading: true,
+      initialValues: {
+        name: "London HQ",
+      },
+    });
 
-    expect(mockCreateJobFamilyForm).toHaveBeenCalledWith(
+    expect(mockCreateOfficeForm).toHaveBeenCalledWith(
       expect.objectContaining({
         isLoading: true,
+        initialValues: {
+          name: "London HQ",
+        },
       }),
     );
 
-    expect(screen.getByLabelText(/job family name/i)).toBeDisabled();
+    expect(screen.getByLabelText(/office name/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();
   });
@@ -113,7 +129,15 @@ describe("CreateJobFamilyModal", () => {
     fireEvent.click(screen.getByRole("button", { name: /create/i }));
 
     expect(onConfirmAction).toHaveBeenCalledWith({
-      name: "Engineering",
+      name: "London HQ",
+      description: "",
+      email: "",
+      phone: "",
+      country: "United Kingdom",
+      city: "London",
+      street: "",
+      building: "",
+      postCode: "",
     });
   });
 
@@ -132,8 +156,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/office name/i), {
+      target: { value: "London HQ" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -150,8 +174,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/office name/i), {
+      target: { value: "London HQ" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -160,7 +184,7 @@ describe("CreateJobFamilyModal", () => {
     expect(onRequestCloseAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /create job family/i }),
+      screen.getByRole("heading", { name: /create office/i }),
     ).toBeInTheDocument();
 
     expect(
@@ -173,8 +197,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/office name/i), {
+      target: { value: "London HQ" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));

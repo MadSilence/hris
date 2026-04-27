@@ -188,34 +188,34 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
       <CreateJobFamilyModal
         isOpen={isCreateJobFamilyModalOpen}
         isLoading={createJobFamilyAction.isPending}
-        onConfirm={(formValues) => {
+        onConfirmAction={(formValues) => {
           createJobFamilyAction.mutate({ name: formValues.name });
         }}
-        onRequestClose={() => setIsCreateJobFamilyModalOpen(false)}
+        onRequestCloseAction={() => setIsCreateJobFamilyModalOpen(false)}
       />
 
       <DeleteJobFamilyModal
         isOpen={isDeleteJobFamilyModalOpen}
         isLoading={deleteJobFamilyAction.isPending}
-        onConfirm={() => {
+        onConfirmAction={() => {
           if (!selected) return;
           deleteJobFamilyAction.mutate({ id: selected.id });
         }}
-        onRequestClose={() => setIsDeleteJobFamilyModalOpen(false)}
+        onRequestCloseAction={() => setIsDeleteJobFamilyModalOpen(false)}
         jobFamily={selected}
       />
 
       <RenameJobFamilyModal
         isOpen={isRenameJobFamilyModalOpen}
         isLoading={renameJobFamilyAction.isPending}
-        onConfirm={(formValues) => {
+        onConfirmAction={(formValues) => {
           if (!selected) return;
           renameJobFamilyAction.mutate({
             id: selected.id,
             name: formValues.name,
           });
         }}
-        onRequestClose={() => setIsRenameJobFamilyModalOpen(false)}
+        onRequestCloseAction={() => setIsRenameJobFamilyModalOpen(false)}
       />
     </div>
   );

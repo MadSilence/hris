@@ -1,12 +1,12 @@
 import { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CreateJobFamilyForm } from "./CreateJobFamilyForm";
+import { RenameJobFamilyForm } from "./RenameJobFamilyForm";
 
 const renderForm = (
-  props?: Partial<ComponentProps<typeof CreateJobFamilyForm>>,
+  props?: Partial<ComponentProps<typeof RenameJobFamilyForm>>,
 ) => {
-  const defaultProps: ComponentProps<typeof CreateJobFamilyForm> = {
+  const defaultProps: ComponentProps<typeof RenameJobFamilyForm> = {
     isLoading: false,
     onCancelAction: jest.fn(),
     onDirtyChangeAction: jest.fn(),
@@ -19,12 +19,12 @@ const renderForm = (
   };
 
   return {
-    ...render(<CreateJobFamilyForm {...mergedProps} />),
+    ...render(<RenameJobFamilyForm {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("CreateJobFamilyForm", () => {
+describe("RenameJobFamilyForm", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -35,7 +35,7 @@ describe("CreateJobFamilyForm", () => {
     expect(screen.getByLabelText(/name your job family/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/engineering/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
   });
 
   it("shows validation error when name is empty", async () => {
@@ -44,7 +44,7 @@ describe("CreateJobFamilyForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /save/i }));
 
     expect(onSubmitAction).not.toHaveBeenCalled();
 
@@ -60,7 +60,7 @@ describe("CreateJobFamilyForm", () => {
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/name your job family/i), "HR");
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /save/i }));
 
     expect(onSubmitAction).not.toHaveBeenCalled();
 
@@ -80,7 +80,7 @@ describe("CreateJobFamilyForm", () => {
       " Engineering ",
     );
 
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({
@@ -147,10 +147,10 @@ describe("CreateJobFamilyForm", () => {
 
     expect(screen.getByLabelText(/name your job family/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: /cancel/i }));
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /save/i }));
 
     expect(onCancelAction).not.toHaveBeenCalled();
     expect(onSubmitAction).not.toHaveBeenCalled();

@@ -1,27 +1,32 @@
 "use client";
 
-import React from "react";
-import styles from "./UniqueSelect.module.css";
+import { FC } from "react";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 type UniqueSelectProps = {
   checked: boolean;
-  onChange: (value: boolean) => void;
+  onChangeAction: (value: boolean) => void;
 };
 
-export const UniqueSelect: React.FC<UniqueSelectProps> = ({
+export const UniqueSelect: FC<UniqueSelectProps> = ({
   checked,
-  onChange
+  onChangeAction,
 }) => {
   return (
-    <div className={styles.rowCheckbox}>
-      <label className={styles.checkboxLabel}>
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.currentTarget.checked)}
-        />
-        <span>Unique</span>
-      </label>
+    <div className="flex items-center gap-3">
+      <Checkbox
+        id="unique-checkbox"
+        checked={checked}
+        onCheckedChange={(value) => onChangeAction(value === true)}
+      />
+
+      <Label
+        htmlFor="unique-checkbox"
+        className="cursor-pointer leading-none mb-0"
+      >
+        Unique
+      </Label>
     </div>
   );
 };

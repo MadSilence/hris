@@ -1,19 +1,19 @@
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { CreateJobFamilyModal } from "./CreateJobFamilyModal";
+import { CreateGroupModal } from "./CreateGroupModal";
 
-const mockCreateJobFamilyForm = jest.fn();
+const mockCreateGroupForm = jest.fn();
 
 jest.mock(
-  "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/CreateJobFamilyForm",
+  "@/components/modules/settings/modules/attributes/components/AttributeGroup/CreateGroupForm",
   () => ({
-    CreateJobFamilyForm: (props: any) => {
-      mockCreateJobFamilyForm(props);
+    CreateGroupForm: (props: any) => {
+      mockCreateGroupForm(props);
 
       return (
         <div>
           <input
-            aria-label="Job family name"
+            aria-label="Group name"
             disabled={props.isLoading}
             onChange={() => props.onDirtyChangeAction?.(true)}
           />
@@ -31,7 +31,7 @@ jest.mock(
             disabled={props.isLoading}
             onClick={() =>
               props.onSubmitAction({
-                name: "Engineering",
+                name: "HR",
               })
             }
           >
@@ -44,9 +44,9 @@ jest.mock(
 );
 
 const renderModal = (
-  props?: Partial<ComponentProps<typeof CreateJobFamilyModal>>,
+  props?: Partial<ComponentProps<typeof CreateGroupModal>>,
 ) => {
-  const defaultProps: ComponentProps<typeof CreateJobFamilyModal> = {
+  const defaultProps: ComponentProps<typeof CreateGroupModal> = {
     isOpen: true,
     isLoading: false,
     onConfirmAction: jest.fn(),
@@ -59,12 +59,12 @@ const renderModal = (
   };
 
   return {
-    ...render(<CreateJobFamilyModal {...mergedProps} />),
+    ...render(<CreateGroupModal {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("CreateJobFamilyModal", () => {
+describe("CreateGroupModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -73,34 +73,34 @@ describe("CreateJobFamilyModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /create job family/i }),
+      screen.getByRole("heading", { name: /create attribute group/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/create a new job family to organize jobs/i),
+      screen.getByText(/create a new section to organize attributes/i),
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/job family name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/group name/i)).toBeInTheDocument();
   });
 
   it("does not render when isOpen is false", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /create job family/i }),
+      screen.queryByRole("heading", { name: /create attribute group/i }),
     ).not.toBeInTheDocument();
   });
 
   it("passes loading state to form", () => {
     renderModal({ isLoading: true });
 
-    expect(mockCreateJobFamilyForm).toHaveBeenCalledWith(
+    expect(mockCreateGroupForm).toHaveBeenCalledWith(
       expect.objectContaining({
         isLoading: true,
       }),
     );
 
-    expect(screen.getByLabelText(/job family name/i)).toBeDisabled();
+    expect(screen.getByLabelText(/group name/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();
   });
@@ -113,7 +113,7 @@ describe("CreateJobFamilyModal", () => {
     fireEvent.click(screen.getByRole("button", { name: /create/i }));
 
     expect(onConfirmAction).toHaveBeenCalledWith({
-      name: "Engineering",
+      name: "HR",
     });
   });
 
@@ -132,8 +132,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/group name/i), {
+      target: { value: "HR" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -150,8 +150,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/group name/i), {
+      target: { value: "HR" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -160,7 +160,7 @@ describe("CreateJobFamilyModal", () => {
     expect(onRequestCloseAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /create job family/i }),
+      screen.getByRole("heading", { name: /create attribute group/i }),
     ).toBeInTheDocument();
 
     expect(
@@ -173,8 +173,8 @@ describe("CreateJobFamilyModal", () => {
 
     renderModal({ onRequestCloseAction });
 
-    fireEvent.change(screen.getByLabelText(/job family name/i), {
-      target: { value: "Engineering" },
+    fireEvent.change(screen.getByLabelText(/group name/i), {
+      target: { value: "HR" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));

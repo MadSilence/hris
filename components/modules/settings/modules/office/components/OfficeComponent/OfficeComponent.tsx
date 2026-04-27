@@ -113,10 +113,10 @@ export const OfficeComponent: React.FC<Props> = ({ initialOffices, isLoading }) 
     const q = query.trim().toLowerCase();
     const rows = q
       ? initialOffices.filter((o) =>
-          [o.name, o.country, o.city, o.street, o.email ?? "", o.phone ?? ""]
-            .filter(Boolean)
-            .some((v) => String(v).toLowerCase().includes(q)),
-        )
+        [o.name, o.country, o.city, o.street, o.email ?? "", o.phone ?? ""]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q)),
+      )
       : initialOffices;
     return rows.slice().sort((a, b) => a.name.localeCompare(b.name));
   }, [initialOffices, query]);
@@ -197,8 +197,8 @@ export const OfficeComponent: React.FC<Props> = ({ initialOffices, isLoading }) 
       <CreateOfficeModal
         isOpen={isCreateOfficeModalOpen}
         isLoading={createOfficeAction.isPending}
-        onConfirm={handleCreate}
-        onRequestClose={() => setIsCreateOfficeModalOpen(false)}
+        onConfirmAction={handleCreate}
+        onRequestCloseAction={() => setIsCreateOfficeModalOpen(false)}
       />
 
       {selectedOffice && (
