@@ -103,7 +103,7 @@ export default function PeopleTable({
             {(name[0] ?? "?").toUpperCase()}
           </div>
           <div className="min-w-0">
-            <a className="font-medium truncate block hover:underline underline-offset-4" href={`/organization/people/${row.id}`}>
+            <a className="font-medium truncate block hover:underline underline-offset-4" href={`/organization/people/${row.id}/personal`}>
               {name}
             </a>
             <div className="text-sm text-muted-foreground truncate">{row.email || "—"}</div>

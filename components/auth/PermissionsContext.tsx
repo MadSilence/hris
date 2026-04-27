@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAppDataContext } from "@/components/providers/AppDataProvider/AppDataProvider";
 import { ForbiddenError, UnauthorizedError } from "@/components/clients/exceptions";
+import { PERMISSIONS_STORAGE_KEY } from "@/components/auth/permissionsStorage";
 
 // --- Types ---
 export type PermissionLevel = "none" | "view" | "edit" | "manage";
@@ -24,8 +25,7 @@ type PermissionsState = {
   canField: (field: string, level?: "view" | "edit" | "manage") => boolean;
 };
 
-// --- Storage Constants ---
-const STORAGE_KEY = "hris_permissions_v1";
+const STORAGE_KEY = PERMISSIONS_STORAGE_KEY;
 
 type StorageSchema = {
   version: number;

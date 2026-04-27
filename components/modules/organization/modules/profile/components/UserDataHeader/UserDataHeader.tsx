@@ -10,11 +10,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/public/desact/src/components/ui/dropdown-menu";
 import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Pencil, Ellipsis, Share2, RefreshCw } from "lucide-react";
+import { Ellipsis, Pencil, RefreshCw, Share2 } from "lucide-react";
+import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 
 export type UserDataHeaderProps = {
   userId?: string;
@@ -26,6 +27,7 @@ export type UserDataHeaderProps = {
 export function UserDataHeader({ userId, user: userProp, editing = false, onToggleEdit }: UserDataHeaderProps) {
   const { data: userFetched } = useUserSafe(userId, !!userProp);
   const user = userProp ?? userFetched;
+  const startImpersonation = useStartImpersonation();
 
   if (!user) {
     return (
@@ -79,7 +81,13 @@ export function UserDataHeader({ userId, user: userProp, editing = false, onTogg
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" aria-label="Refresh">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Login as user"
+              disabled={!user.id || startImpersonation.isPending}
+              onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
+            >
               <RefreshCw className="w-4 h-4"/>
             </Button>
             <Button variant="outline" size="icon" aria-label="Share">

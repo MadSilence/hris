@@ -12,6 +12,8 @@ import styles from "./layout.module.css";
 import { PermissionsProvider, usePermissions, } from "@/components/auth/PermissionsContext";
 import { Toast } from "@/components/ui/Toast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
+import ImpersonationProvider from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -77,7 +79,6 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     const fullName = user
       ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
       : "";
-    console.log(user)
     return {
       id: user?.id ?? "",
       name: fullName || "Loading...",
@@ -96,7 +97,10 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         profile={profile}
       />
 
-      <main className={styles.main}>{children}</main>
+      <div className={styles.content}>
+        <ImpersonationBanner/>
+        <main className={styles.main}>{children}</main>
+      </div>
 
       {toastMsg ? (
         <Toast message={toastMsg} onClose={() => setToastMsg(null)}/>
@@ -109,7 +113,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <PermissionsProvider>
       <CurrentUserProvider>
-        <LayoutContent>{children}</LayoutContent>
+        <ImpersonationProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </ImpersonationProvider>
       </CurrentUserProvider>
     </PermissionsProvider>
   );

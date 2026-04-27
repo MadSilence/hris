@@ -1,13 +1,13 @@
-import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
 
-export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  const { id } = await context.params;
-
+export const GET = apiRequestWrapper(async (
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const { id } = await params;
   const user = await hrisApiUsersService.getUser(id);
 
-  return Response.json(user);
-}
+  return NextResponse.json(user);
+});

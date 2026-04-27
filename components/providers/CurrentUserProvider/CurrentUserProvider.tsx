@@ -4,8 +4,11 @@ import React, { createContext, useContext } from "react";
 import useSWR from "swr";
 import type { User } from "@/models/user/User";
 
-type CurrentUserIdentity = {
+export type CurrentUserIdentity = {
   id: string;
+  impersonating?: boolean;
+  actorId?: string;
+  subjectId?: string;
 };
 
 const fetcher = async <T, >(url: string): Promise<T> => {
@@ -21,10 +24,19 @@ const fetcher = async <T, >(url: string): Promise<T> => {
 type CurrentUserContextValue = {
   user: User | undefined;
   userId: string | undefined;
+
+  impersonating: boolean;
+  actorId?: string;
+  subjectId?: string;
+
   error: unknown;
   isLoading: boolean;
   isValidating: boolean;
+
+  refreshIdentity: () => Promise<CurrentUserIdentity | undefined>;
   refreshUser: () => Promise<User | undefined>;
+  setIdentity: (identity: CurrentUserIdentity) => void;
+  clearCurrentUserCache: () => void;
 };
 
 const CurrentUserContext = createContext<CurrentUserContextValue | null>(null);
@@ -35,8 +47,9 @@ const CurrentUserProvider = ({ children }: { children: React.ReactNode }) => {
     error: identityError,
     isLoading: isIdentityLoading,
     isValidating: isIdentityValidating,
+    mutate: mutateIdentity,
   } = useSWR<CurrentUserIdentity>("/api/users/me", fetcher, {
-    dedupingInterval: 30_000,
+    dedupingInterval: 0,
     revalidateOnFocus: false,
   });
 
@@ -47,25 +60,48 @@ const CurrentUserProvider = ({ children }: { children: React.ReactNode }) => {
     error: userError,
     isLoading: isUserLoading,
     isValidating: isUserValidating,
-    mutate,
-  } = useSWR<User>(
-    userId ? `/api/users/${userId}` : null,
-    fetcher,
-    {
-      dedupingInterval: 30_000,
-      revalidateOnFocus: false,
-    }
-  );
+    mutate: mutateUser,
+  } = useSWR<User>(userId ? `/api/users/${userId}` : null, fetcher, {
+    dedupingInterval: 0,
+    revalidateOnFocus: false,
+  });
+
+  const refreshIdentity = async () => {
+    return mutateIdentity();
+  };
+
+  const refreshUser = async () => {
+    await mutateIdentity();
+    return mutateUser();
+  };
+
+  const setIdentity = (nextIdentity: CurrentUserIdentity) => {
+    mutateIdentity(nextIdentity, false);
+  };
+
+  const clearCurrentUserCache = () => {
+    mutateIdentity(undefined, false);
+    mutateUser(undefined, false);
+  };
 
   return (
     <CurrentUserContext.Provider
       value={{
         user,
         userId,
+
+        impersonating: Boolean(identity?.impersonating),
+        actorId: identity?.actorId,
+        subjectId: identity?.subjectId,
+
         error: identityError ?? userError,
         isLoading: isIdentityLoading || Boolean(userId && isUserLoading),
         isValidating: isIdentityValidating || isUserValidating,
-        refreshUser: () => mutate(),
+
+        refreshIdentity,
+        refreshUser,
+        setIdentity,
+        clearCurrentUserCache,
       }}
     >
       {children}
