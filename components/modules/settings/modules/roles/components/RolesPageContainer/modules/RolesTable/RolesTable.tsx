@@ -9,7 +9,9 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import RolesTableSkeleton from "./RolesTableSkeleton";
 import RolesTableRowActions from "./RolesTableRowActions";
 import UpsertRoleModal from "./modals/UpsertRoleModal";
-import DeleteRoleModal from "./modals/DeleteRoleModal";
+import {
+  DeleteRoleModal
+} from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/DeleteRoleModal";
 
 type RoleActionMode = "rename" | "duplicate";
 
@@ -172,8 +174,8 @@ export default function RolesTable({
         isOpen={deleteOpen}
         isLoading={false}
         roleName={deleteRole?.name}
-        onRequestClose={closeDeleteModal}
-        onConfirm={() => {
+        onRequestCloseAction={closeDeleteModal}
+        onConfirmAction={() => {
           if (!deleteRole) return;
           onDeleteRole?.(deleteRole.id);
           closeDeleteModal();

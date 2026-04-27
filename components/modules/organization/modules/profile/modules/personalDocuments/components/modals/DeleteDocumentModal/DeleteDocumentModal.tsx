@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { FC } from "react";
 import {
   AlertDialog,
@@ -18,37 +17,46 @@ export interface DeleteDocumentModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   documentName?: string;
-  onRequestClose: () => void;
-  onConfirm: () => void;
+  onRequestCloseAction: () => void;
+  onConfirmAction: () => void;
 }
 
 export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
   isOpen,
   isLoading = false,
   documentName,
-  onRequestClose,
-  onConfirm,
+  onRequestCloseAction,
+  onConfirmAction,
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onRequestClose()}>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoading) onRequestCloseAction();
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-            <FileX2 className="w-5 h-5"/>
+            <FileX2 className="h-5 w-5"/>
             Delete document
           </AlertDialogTitle>
+
           <AlertDialogDescription>
-            This action cannot be undone. Document <strong>{documentName ?? "Untitled document"}</strong> will be permanently deleted.
+            This action cannot be undone. Document{" "}
+            <strong>{documentName ?? "Untitled document"}</strong> will be
+            permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5"/>
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
             <div>
-              <h4 className="font-medium text-red-800 mb-1">Warning</h4>
+              <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
-                Deleted files cannot be restored unless your backend supports recovery.
+                Deleted files cannot be restored unless your backend supports
+                recovery.
               </p>
             </div>
           </div>
@@ -58,8 +66,8 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700"
+            onClick={onConfirmAction}
+            className="bg-red-600 text-white hover:bg-red-700"
           >
             Delete document
           </AlertDialogAction>

@@ -1,4 +1,6 @@
-import * as React from "react";
+"use client";
+
+import { FC } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,30 +17,35 @@ export interface DeleteRoleModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   roleName?: string;
-  onConfirm: () => void;
-  onRequestClose: () => void;
+  onConfirmAction: () => void;
+  onRequestCloseAction: () => void;
 }
 
-export default function DeleteRoleModal({
+export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
   isOpen,
   isLoading = false,
   roleName,
-  onConfirm,
-  onRequestClose,
-}: DeleteRoleModalProps) {
+  onConfirmAction,
+  onRequestCloseAction,
+}) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onRequestClose()}>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoading) onRequestCloseAction();
+      }}
+    >
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-            <AlertTriangle className="w-5 h-5"/>
-            Delete Role
+            <AlertTriangle className="h-5 w-5"/>
+            Delete role
           </AlertDialogTitle>
 
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete{" "}
             {roleName ? (
-              <strong>“{roleName}”</strong>
+              <strong>{roleName}</strong>
             ) : (
               <strong>the selected role</strong>
             )}{" "}
@@ -46,33 +53,32 @@ export default function DeleteRoleModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5"/>
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
             <div>
-              <h4 className="font-medium text-red-800 mb-1">Warning</h4>
+              <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
-                Users assigned to this role may lose access to systems and workflows.
+                Users assigned to this role may lose access to systems and
+                workflows.
               </p>
             </div>
           </div>
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading} onClick={onRequestClose}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
 
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700"
+            onClick={onConfirmAction}
+            className="bg-red-600 text-white hover:bg-red-700"
           >
-            <Trash2 className="w-4 h-4 mr-2"/>
-            Delete Role
+            <Trash2 className="mr-2 h-4 w-4"/>
+            Delete role
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};

@@ -1,20 +1,15 @@
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { DeleteLegalEntityModal } from "./DeleteLegalEntityModal";
-import { LegalEntity } from "@/models/legalEntity";
-
-const mockEntity = {
-  id: "le1",
-  name: "Acme Ltd",
-} as LegalEntity;
+import { DeleteDocumentsFolderModal } from "./DeleteDocumentsFolderModal";
 
 const renderModal = (
-  props?: Partial<ComponentProps<typeof DeleteLegalEntityModal>>,
+  props?: Partial<ComponentProps<typeof DeleteDocumentsFolderModal>>,
 ) => {
-  const defaultProps: ComponentProps<typeof DeleteLegalEntityModal> = {
+  const defaultProps: ComponentProps<typeof DeleteDocumentsFolderModal> = {
     isOpen: true,
     isLoading: false,
-    entity: mockEntity,
+    folderName: "Contracts",
+    documentsCount: 3,
     onConfirmAction: jest.fn(),
     onRequestCloseAction: jest.fn(),
   };
@@ -22,33 +17,41 @@ const renderModal = (
   const mergedProps = { ...defaultProps, ...props };
 
   return {
-    ...render(<DeleteLegalEntityModal {...mergedProps} />),
+    ...render(<DeleteDocumentsFolderModal {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("DeleteLegalEntityModal", () => {
+describe("DeleteDocumentsFolderModal", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("does not render when closed", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /delete legal entity/i }),
+      screen.queryByRole("heading", { name: /delete folder/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("renders content", () => {
+  it("renders folder content with documents warning", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /delete legal entity/i }),
+      screen.getByRole("heading", { name: /delete folder/i }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("Acme Ltd")).toBeInTheDocument();
+    expect(screen.getByText("Contracts")).toBeInTheDocument();
 
     expect(
-      screen.getByText(/this legal entity will be permanently removed/i),
+      screen.getByText(/all 3 document\(s\) inside this folder/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders empty folder warning", () => {
+    renderModal({ documentsCount: 0 });
+
+    expect(
+      screen.getByText(/this folder will be removed from the user documents list/i),
     ).toBeInTheDocument();
   });
 
@@ -57,7 +60,7 @@ describe("DeleteLegalEntityModal", () => {
 
     renderModal({ onConfirmAction });
 
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete folder/i }));
 
     expect(onConfirmAction).toHaveBeenCalledTimes(1);
   });
@@ -80,11 +83,11 @@ describe("DeleteLegalEntityModal", () => {
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: /delete legal entity/i }),
+      screen.getByRole("button", { name: /delete folder/i }),
     ).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete folder/i }));
 
     expect(onConfirmAction).not.toHaveBeenCalled();
     expect(onRequestCloseAction).not.toHaveBeenCalled();

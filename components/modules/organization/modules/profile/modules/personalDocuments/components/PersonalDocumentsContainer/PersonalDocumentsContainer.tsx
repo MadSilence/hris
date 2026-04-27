@@ -196,8 +196,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isLoading={isDeletingFolder}
         folderName={deleteFolderState?.name}
         documentsCount={deleteFolderState?.documentsCount ?? 0}
-        onRequestClose={() => setDeleteFolderState(null)}
-        onConfirm={async () => {
+        onRequestCloseAction={() => setDeleteFolderState(null)}
+        onConfirmAction={async () => {
           if (!deleteFolderState) return;
 
           await removeFolder({
@@ -231,8 +231,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isOpen={!!deleteDocumentState}
         isLoading={isDeletingDocument}
         documentName={deleteDocumentState?.name}
-        onRequestClose={() => setDeleteDocumentState(null)}
-        onConfirm={async () => {
+        onRequestCloseAction={() => setDeleteDocumentState(null)}
+        onConfirmAction={async () => {
           if (!deleteDocumentState) return;
 
           await removeDocument({

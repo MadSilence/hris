@@ -1,20 +1,16 @@
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { DeleteLegalEntityModal } from "./DeleteLegalEntityModal";
-import { LegalEntity } from "@/models/legalEntity";
-
-const mockEntity = {
-  id: "le1",
-  name: "Acme Ltd",
-} as LegalEntity;
+import {
+  DeleteRoleModal
+} from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/DeleteRoleModal/DeleteRoleModal";
 
 const renderModal = (
-  props?: Partial<ComponentProps<typeof DeleteLegalEntityModal>>,
+  props?: Partial<ComponentProps<typeof DeleteRoleModal>>,
 ) => {
-  const defaultProps: ComponentProps<typeof DeleteLegalEntityModal> = {
+  const defaultProps: ComponentProps<typeof DeleteRoleModal> = {
     isOpen: true,
     isLoading: false,
-    entity: mockEntity,
+    roleName: "Admin",
     onConfirmAction: jest.fn(),
     onRequestCloseAction: jest.fn(),
   };
@@ -22,34 +18,40 @@ const renderModal = (
   const mergedProps = { ...defaultProps, ...props };
 
   return {
-    ...render(<DeleteLegalEntityModal {...mergedProps} />),
+    ...render(<DeleteRoleModal {...mergedProps} />),
     props: mergedProps,
   };
 };
 
-describe("DeleteLegalEntityModal", () => {
+describe("DeleteRoleModal", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("does not render when closed", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /delete legal entity/i }),
+      screen.queryByRole("heading", { name: /delete role/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("renders content", () => {
+  it("renders role content", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /delete legal entity/i }),
+      screen.getByRole("heading", { name: /delete role/i }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("Acme Ltd")).toBeInTheDocument();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
 
     expect(
-      screen.getByText(/this legal entity will be permanently removed/i),
+      screen.getByText(/users assigned to this role may lose access/i),
     ).toBeInTheDocument();
+  });
+
+  it("renders fallback role name", () => {
+    renderModal({ roleName: undefined });
+
+    expect(screen.getByText(/the selected role/i)).toBeInTheDocument();
   });
 
   it("calls confirm action", () => {
@@ -57,7 +59,7 @@ describe("DeleteLegalEntityModal", () => {
 
     renderModal({ onConfirmAction });
 
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete role/i }));
 
     expect(onConfirmAction).toHaveBeenCalledTimes(1);
   });
@@ -79,12 +81,10 @@ describe("DeleteLegalEntityModal", () => {
     renderModal({ isLoading: true, onConfirmAction, onRequestCloseAction });
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: /delete legal entity/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /delete role/i })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete role/i }));
 
     expect(onConfirmAction).not.toHaveBeenCalled();
     expect(onRequestCloseAction).not.toHaveBeenCalled();

@@ -136,11 +136,11 @@ export const LegalEntityDetailsModal: React.FC<LegalEntityDetailsModalProps> = (
         isOpen={isDeleteOpen}
         isLoading={isDeleteLoading}
         entity={entity}
-        onConfirm={() => {
+        onConfirmAction={() => {
           onDelete();
           setIsDeleteOpen(false);
         }}
-        onRequestClose={() => setIsDeleteOpen(false)}
+        onRequestCloseAction={() => setIsDeleteOpen(false)}
       />
     </>
   );
