@@ -1,5 +1,13 @@
-import { redirect } from "next/navigation";
+import { NextRequest } from "next/server";
+import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
 
-export default function UserIndex({ params }: { params: { id: string } }) {
-  redirect(`${params.id}/personal`);
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+
+  const user = await hrisApiUsersService.getUser(id);
+
+  return Response.json(user);
 }

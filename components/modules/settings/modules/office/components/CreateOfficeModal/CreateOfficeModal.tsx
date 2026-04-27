@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import styles from "./CreateOfficeModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import {
   CreateOfficeForm,
   CreateOfficeFormHandle,
@@ -35,12 +35,10 @@ export const CreateOfficeModal: React.FC<CreateOfficeModalProps> = ({
       title="Create office"
       footer={
         <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            onClick={() => !isLoading && onRequestClose()}
-          >
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
             Cancel
           </Button>
+
           <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
             Create
           </Button>

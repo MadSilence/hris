@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./DeleteGroupModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 
 type DeleteGroupModalProps = {
@@ -17,7 +17,7 @@ export const DeleteGroupModal: React.FC<DeleteGroupModalProps> = ({
   isLoading = false,
   onConfirm,
   onRequestClose,
-  group
+  group,
 }) => {
   return (
     <Modal
@@ -27,8 +27,13 @@ export const DeleteGroupModal: React.FC<DeleteGroupModalProps> = ({
       title={`Delete section ${group?.name ? group?.name : ""}?`}
       footer={
         <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>Cancel</Button>
-          <Button variant="primary" onClick={() => !isLoading && onConfirm()}>Delete</Button>
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
+            Cancel
+          </Button>
+
+          <Button onClick={() => !isLoading && onConfirm()}>
+            Delete
+          </Button>
         </div>
       }
     >

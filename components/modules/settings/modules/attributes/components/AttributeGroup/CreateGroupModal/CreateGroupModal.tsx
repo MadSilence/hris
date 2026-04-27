@@ -1,8 +1,11 @@
 import React, { useRef } from "react";
 import styles from "./CreateGroupModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
-import { CreateGroupForm, CreateGroupFormValues } from "@/components/modules/settings/modules/attributes/components/AttributeGroup/CreateGroupForm";
+import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  CreateGroupForm,
+  CreateGroupFormValues,
+} from "@/components/modules/settings/modules/attributes/components/AttributeGroup/CreateGroupForm";
 
 type CreateGroupModalProps = {
   isOpen: boolean;
@@ -28,15 +31,17 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       title="Create AttributeGroup"
       footer={
         <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>Cancel</Button>
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>Create</Button>
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
+            Cancel
+          </Button>
+
+          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
+            Create
+          </Button>
         </div>
       }
     >
-      <CreateGroupForm
-        formRef={formRef}
-        onSubmit={onConfirm}
-      />
+      <CreateGroupForm formRef={formRef} onSubmit={onConfirm}/>
     </Modal>
   );
 };

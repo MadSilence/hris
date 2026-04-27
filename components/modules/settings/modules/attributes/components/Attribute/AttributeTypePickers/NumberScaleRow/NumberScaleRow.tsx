@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Input from "@/components/ui/Input/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 import styles from "./NumberScaleRow.module.css";
 
 type NumberScaleRowProps = {
@@ -13,22 +13,25 @@ type NumberScaleRowProps = {
 export const NumberScaleRow: React.FC<NumberScaleRowProps> = ({
   value,
   error,
-  onChange
+  onChange,
 }) => {
   return (
     <div className={styles.row}>
-      <Input
-        label="Decimal scale (optional)"
-        type="number"
-        min={0}
-        error={error}
-        value={value ?? ""}
-        onChange={(e) => {
-          const v = (e.currentTarget as HTMLInputElement).value;
-          onChange(v === "" ? null : Number(v));
-        }}
-        placeholder="e.g., 2"
-      />
+      <label>
+        Decimal scale (optional)
+        <Input
+          type="number"
+          min={0}
+          value={value ?? ""}
+          onChange={(e) => {
+            const v = e.currentTarget.value;
+            onChange(v === "" ? null : Number(v));
+          }}
+          placeholder="e.g., 2"
+          aria-invalid={!!error}
+        />
+      </label>
+      {error && <p>{error}</p>}
     </div>
   );
 };

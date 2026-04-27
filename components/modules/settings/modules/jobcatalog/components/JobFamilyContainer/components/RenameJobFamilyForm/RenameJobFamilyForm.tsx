@@ -3,7 +3,7 @@
 import React, { RefObject, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 
 export interface RenameJobFamilyFormProps {
   formRef?: RefObject<{ submitForm: () => Promise<void> } | undefined>;
@@ -30,7 +30,7 @@ export const RenameJobFamilyForm: React.FC<RenameJobFamilyFormProps> = ({
 }) => {
   const handleFormSubmission = useCallback(
     (values: RenameJobFamilyFormValues) => onSubmit(values),
-    [onSubmit]
+    [onSubmit],
   );
 
   const formik = useFormik<RenameJobFamilyFormValues>({
@@ -48,14 +48,15 @@ export const RenameJobFamilyForm: React.FC<RenameJobFamilyFormProps> = ({
       formRef.current = {
         submitForm: async () => {
           const errors = await formik.validateForm();
+
           await formik.setTouched(
             { ...setNestedObjectValues(errors, true) },
-            true
+            true,
           );
+
           const isValid = errors && Object.keys(errors).length === 0;
-          if (!isValid) {
-            return;
-          }
+
+          if (!isValid) return;
 
           await formik.submitForm();
         },
@@ -65,14 +66,18 @@ export const RenameJobFamilyForm: React.FC<RenameJobFamilyFormProps> = ({
 
   return (
     <form>
-      <Input
-        label="Name your job family"
-        error={formik.errors.name}
-        value={formik.values.name}
-        onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-        placeholder="e.g., Engineering"
-        required
-      />
+      <label>
+        Name your job family
+        <Input
+          value={formik.values.name}
+          onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+          placeholder="e.g., Engineering"
+          required
+          aria-invalid={!!formik.errors.name}
+        />
+      </label>
+
+      {formik.errors.name && <p>{formik.errors.name}</p>}
     </form>
   );
 };

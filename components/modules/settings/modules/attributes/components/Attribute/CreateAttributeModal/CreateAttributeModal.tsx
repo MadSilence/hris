@@ -3,10 +3,9 @@
 import React, { useRef } from "react";
 import styles from "./CreateAttributeModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { CreateAttributeFormValues } from "../CreateAttributeForm";
-import { CreateAttributeForm }
-  from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeForm";
+import { CreateAttributeForm, } from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeForm";
 
 type CreateAttributeModalProps = {
   isOpen: boolean;
@@ -24,7 +23,6 @@ export const CreateAttributeModal: React.FC<CreateAttributeModalProps> = ({
   // @ts-ignore
   const formRef = useRef<{ submitForm: () => Promise<void> }>();
 
-  // @ts-ignore
   return (
     <Modal
       isLoading={isLoading}
@@ -33,10 +31,16 @@ export const CreateAttributeModal: React.FC<CreateAttributeModalProps> = ({
       title="Create Attribute"
       footer={
         <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
+          <Button
+            variant="ghost"
+            onClick={() => !isLoading && onRequestClose()}
+          >
             Cancel
           </Button>
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
+
+          <Button
+            onClick={() => !isLoading && formRef.current?.submitForm()}
+          >
             Create
           </Button>
         </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Input from "@/components/ui/Input/Input";
-import { Button } from "@/components/ui/Button";
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
 import Trash from "@/public/icons/trash.svg";
 import styles from "./OptionsEditor.module.css";
 import { AttributeOption, AttributeType, isOptionsType } from "@/models/attribute";
@@ -21,8 +21,9 @@ type OptionsEditorProps = {
 };
 
 function pickNextColor(current: AttributeOptionUpsert[]): string {
-  const used = new Set(current.map(o => o.color).filter(Boolean));
-  const free = SOFT_PALETTE.find(c => !used.has(c));
+  const used = new Set(current.map((o) => o.color).filter(Boolean));
+  const free = SOFT_PALETTE.find((c) => !used.has(c));
+
   return free ?? SOFT_PALETTE[Math.floor(Math.random() * SOFT_PALETTE.length)];
 }
 
@@ -34,33 +35,36 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
 }) => {
   const needsOptions = isOptionsType(type) || type === AttributeType.STATUS;
 
-  // Локально работаем сразу в upsert-модели
   const [local, setLocal] = React.useState<AttributeOptionUpsert[]>(
-    sortBySortOrder(options).map(o => ({
+    sortBySortOrder(options).map((o) => ({
       id: o.id,
       value: o.value,
       color: o.color,
       sortOrder: o.sortOrder,
-    }))
+    })),
   );
 
   React.useEffect(() => {
-    setLocal(sortBySortOrder(options).map(o => ({
-      id: o.id,
-      value: o.value,
-      color: o.color,
-      sortOrder: o.sortOrder,
-    })));
+    setLocal(
+      sortBySortOrder(options).map((o) => ({
+        id: o.id,
+        value: o.value,
+        color: o.color,
+        sortOrder: o.sortOrder,
+      })),
+    );
   }, [options]);
 
   React.useEffect(() => {
     if (!needsOptions) return;
+
     if (local.length === 0) {
       const first: AttributeOptionUpsert = {
         value: "",
         color: SOFT_PALETTE[0],
         sortOrder: 1,
       };
+
       setLocal([first]);
       onChange([first]);
     }
@@ -68,28 +72,37 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
 
   const commit = (next: AttributeOptionUpsert[]) => {
     const reindex = next.map((o, i) => ({ ...o, sortOrder: i + 1 }));
+
     setLocal(reindex);
     onChange(reindex);
   };
 
   const addOption = () => {
     const nextColor = pickNextColor(local);
+
     const next: AttributeOptionUpsert = {
       value: `Option ${local.length + 1}`,
       color: nextColor,
       sortOrder: local.length + 1,
     };
+
     commit([...local, next]);
   };
 
   const updateOption = (index: number, patch: Partial<AttributeOptionUpsert>) => {
     const next = local.map((o, i) => (i === index ? { ...o, ...patch } : o));
+
     commit(next);
   };
 
   const removeOption = (index: number) => {
     const next = local.filter((_, i) => i !== index);
-    commit(next.length === 0 ? [{ value: "", color: SOFT_PALETTE[0], sortOrder: 1 }] : next);
+
+    commit(
+      next.length === 0
+        ? [{ value: "", color: SOFT_PALETTE[0], sortOrder: 1 }]
+        : next,
+    );
   };
 
   if (!needsOptions) return null;
@@ -98,13 +111,14 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
     <div className={styles.optionsBlock}>
       <div className={styles.optionsList}>
         {local.map((option, index) => (
-          <div key={(option.id ?? `new-${index}`)} className={styles.optionRow}>
+          <div key={option.id ?? `new-${index}`} className={styles.optionRow}>
             <Input
-              className={styles.textInput}
               placeholder={`Option ${index + 1}`}
               value={option.value}
               onChange={(e) =>
-                updateOption(index, { value: (e.currentTarget as HTMLInputElement).value })
+                updateOption(index, {
+                  value: e.currentTarget.value,
+                })
               }
               aria-label={`Option ${index + 1}`}
               disabled={disabled}
@@ -132,7 +146,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
       </div>
 
       <div className={styles.addWrap}>
-        <Button variant="ghost" onClick={addOption} type="button" disabled={disabled}>
+        <Button variant="ghost" type="button" onClick={addOption} disabled={disabled}>
           Add option
         </Button>
       </div>

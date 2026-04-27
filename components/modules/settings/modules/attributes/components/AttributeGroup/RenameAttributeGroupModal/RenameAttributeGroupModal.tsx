@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
-import styles from "./RenameAttributeGroupModal.module.css"
+import styles from "./RenameAttributeGroupModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import {
   RenameAttributeGroupForm,
-  RenameAttributeGroupFormValues
+  RenameAttributeGroupFormValues,
 } from "@/components/modules/settings/modules/attributes/components/AttributeGroup/RenameAttributeGroupForm";
 
 type RenameAttributeGroupModalProps = {
@@ -12,7 +12,7 @@ type RenameAttributeGroupModalProps = {
   isLoading: boolean;
   onConfirm: (submission: RenameAttributeGroupFormValues) => void;
   onRequestClose: () => void;
-}
+};
 
 export const RenameAttributeGroupModal: React.FC<RenameAttributeGroupModalProps> = ({
   isOpen,
@@ -27,19 +27,21 @@ export const RenameAttributeGroupModal: React.FC<RenameAttributeGroupModalProps>
     <Modal
       isLoading={isLoading}
       isOpen={isOpen}
-      onRequestClose={() => !isLoading && onRequestClose}
+      onRequestClose={() => !isLoading && onRequestClose()}
       title="Rename AttributeGroup"
       footer={
         <div className={styles.actions}>
-          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>Cancel</Button>
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>Create</Button>
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
+            Cancel
+          </Button>
+
+          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
+            Create
+          </Button>
         </div>
       }
     >
-      <RenameAttributeGroupForm
-        formRef={formRef}
-        onSubmit={onConfirm}
-      />
+      <RenameAttributeGroupForm formRef={formRef} onSubmit={onConfirm}/>
     </Modal>
-  )
-}
+  );
+};

@@ -5,7 +5,7 @@ import styles from "./AttributeOptions.module.css";
 import { AttributeOption, AttributeOptionUpsert, AttributeType } from "@/models/attribute";
 import { Attribute } from "@/models/attribute/Attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
-import { Button } from "@/components/ui/Button/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { OptionsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/OptionsEditor";
 import { SOFT_PALETTE } from "@/models/colors";
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
@@ -20,7 +20,7 @@ interface AttributeOptionsProps {
 
 function pickNextColor(existing: string[]): string {
   const used = new Set(existing.filter(Boolean));
-  const free = SOFT_PALETTE.find(c => !used.has(c));
+  const free = SOFT_PALETTE.find((c) => !used.has(c));
   return free ?? SOFT_PALETTE[Math.floor(Math.random() * SOFT_PALETTE.length)];
 }
 
@@ -29,7 +29,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   onChange,
   onSave,
   onCancel,
-  isPreset = false
+  isPreset = false,
 }) => {
   const [localType, setLocalType] = React.useState<AttributeType>(attribute.type as AttributeType);
   const [uniqueId, setUniqueId] = React.useState<boolean>((attribute as any).uniqueId ?? false);
@@ -47,6 +47,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
         color: o.color ?? SOFT_PALETTE[0],
         sortOrder: o.sortOrder ?? 0,
       }));
+
     setEditorOptions(upsert);
   }, [attribute]);
 
@@ -71,16 +72,19 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   React.useEffect(() => {
     if (needsOptions(localType) && options.length === 0) {
       const nextColor = pickNextColor([]);
-      setOptions([{
-        id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 9),
-        value: "",
-        color: nextColor,
-        sortOrder: 1,
-        createdAt: "",
-        createdBy: "",
-        updatedAt: "",
-        updatedBy: "",
-      }]);
+
+      setOptions([
+        {
+          id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 9),
+          value: "",
+          color: nextColor,
+          sortOrder: 1,
+          createdAt: "",
+          createdBy: "",
+          updatedAt: "",
+          updatedBy: "",
+        },
+      ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localType]);
@@ -92,12 +96,12 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
   const save = () => {
     const patch: any = {};
+
     if (localType === AttributeType.DATE) patch.dateHideYear = hideYear;
     if (localType === AttributeType.TEXT) patch.uniqueId = uniqueId;
 
     if (needsOptions(localType)) {
-      // отправляем ровно upsert-модель (без аудитов, без id у новых)
-      patch.options = editorOptions.map(o => ({
+      patch.options = editorOptions.map((o) => ({
         ...(o.id ? { id: o.id } : {}),
         value: o.value,
         color: o.color,
@@ -183,9 +187,11 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       )}
 
       <div className={styles.actions}>
-        <Button variant="primary" size="md" onClick={save}>Save</Button>
-        <Button variant="secondary" size="md" onClick={cancel}>Cancel</Button>
+        <Button onClick={save}>Save</Button>
+        <Button variant="secondary" onClick={cancel}>
+          Cancel
+        </Button>
       </div>
     </div>
   );
-}
+};

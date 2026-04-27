@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "./JobFamilyList.module.css";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { JobFamily } from "@/models/job";
 
 export interface JobFamilyListProps {
@@ -21,13 +21,11 @@ export const JobFamilyList: React.FC<JobFamilyListProps> = ({
   return (
     <div className={styles.root}>
       <div className={styles.create}>
-        <Button style={{ width: "100%" }} onClick={onCreate}>
-          Create a job family
-        </Button>
+        <Button onClick={onCreate}>Create a job family</Button>
       </div>
 
       <div className={styles.list}>
-        {jobFamilies.map((jobFamily) => (
+        {jobFamilies?.map((jobFamily) => (
           <button
             key={jobFamily.id}
             type="button"

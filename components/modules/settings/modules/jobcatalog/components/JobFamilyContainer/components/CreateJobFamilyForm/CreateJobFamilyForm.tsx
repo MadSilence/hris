@@ -4,7 +4,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import type { RefObject } from "react";
 import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 
 export interface CreateJobFamilyFormProps {
   formRef?: RefObject<{ submitForm: () => Promise<void> } | undefined>;
@@ -31,7 +31,7 @@ export const CreateJobFamilyForm: React.FC<CreateJobFamilyFormProps> = ({
 }) => {
   const handleFormSubmission = useCallback(
     (values: CreateJobFamilyFormValues) => onSubmit(values),
-    [onSubmit]
+    [onSubmit],
   );
 
   const formik = useFormik<CreateJobFamilyFormValues>({
@@ -49,14 +49,15 @@ export const CreateJobFamilyForm: React.FC<CreateJobFamilyFormProps> = ({
       formRef.current = {
         submitForm: async () => {
           const errors = await formik.validateForm();
+
           await formik.setTouched(
             { ...setNestedObjectValues(errors, true) },
-            true
+            true,
           );
+
           const isValid = errors && Object.keys(errors).length === 0;
-          if (!isValid) {
-            return;
-          }
+
+          if (!isValid) return;
 
           await formik.submitForm();
         },
@@ -66,14 +67,18 @@ export const CreateJobFamilyForm: React.FC<CreateJobFamilyFormProps> = ({
 
   return (
     <form className="space-y-4">
-      <Input
-        label="Name your job family"
-        error={formik.errors.name}
-        value={formik.values.name}
-        onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-        placeholder="e.g., Engineering"
-        required
-      />
+      <label>
+        Name your job family
+        <Input
+          value={formik.values.name}
+          onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+          placeholder="e.g., Engineering"
+          required
+          aria-invalid={!!formik.errors.name}
+        />
+      </label>
+
+      {formik.errors.name && <p>{formik.errors.name}</p>}
     </form>
   );
 };

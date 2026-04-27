@@ -3,6 +3,7 @@ import { UserDTO } from "@/api/modules/users/dto";
 import { GetUsersArgs, UsersSearchArgs } from "@/api/modules/users/services/hrisUsersService";
 import { userMapper } from "@/api/modules/users/mappers/userMapper";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
+import { User } from "@/models/user/User";
 
 export class HrisApiUsersClient {
   private readonly BASE_PATH: string = '/users';
@@ -19,7 +20,7 @@ export class HrisApiUsersClient {
 
     const path = `${this.BASE_PATH}${params.toString() ? `?${params.toString()}` : ""}`;
 
-    const res = await hrisApiClient.get<{items: UserDTO[]; nextCursor?: string | null} | UserDTO[]>(path);
+    const res = await hrisApiClient.get<{ items: UserDTO[]; nextCursor?: string | null } | UserDTO[]>(path);
     if (Array.isArray(res)) {
       return res.map((u) => userMapper.mapUserDTOtoUser(u));
     }
@@ -31,6 +32,11 @@ export class HrisApiUsersClient {
 
   public async getUser(id: string) {
     const dto = await hrisApiClient.get<UserDTO>(`${this.BASE_PATH}/${id}`);
+    return userMapper.mapUserDTOtoUser(dto);
+  }
+
+  public async getCurrentUser(): Promise<User> {
+    const dto = await hrisApiClient.get<UserDTO>(`${this.BASE_PATH}/me`);
     return userMapper.mapUserDTOtoUser(dto);
   }
 

@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./DeleteJobFamilyModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type JobFamily = {
   id: string;
@@ -32,16 +32,11 @@ export const DeleteJobFamilyModal: React.FC<DeleteJobFamilyModalProps> = ({
       title={`Delete job family ${jobFamily?.name ? jobFamily.name : ""}?`}
       footer={
         <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            onClick={() => !isLoading && onRequestClose()}
-          >
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => !isLoading && onConfirm()}
-          >
+
+          <Button onClick={() => !isLoading && onConfirm()}>
             Delete
           </Button>
         </div>
@@ -49,9 +44,7 @@ export const DeleteJobFamilyModal: React.FC<DeleteJobFamilyModalProps> = ({
     >
       <ul className={styles.list}>
         <li>All jobs assigned to this job family will also be deleted.</li>
-        <li>
-          Any employee data or structures referencing these jobs may be lost.
-        </li>
+        <li>Any employee data or structures referencing these jobs may be lost.</li>
       </ul>
     </Modal>
   );

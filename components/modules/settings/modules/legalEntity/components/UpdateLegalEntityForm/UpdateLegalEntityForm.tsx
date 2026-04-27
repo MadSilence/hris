@@ -4,7 +4,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import type { RefObject } from "react";
 import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
-import Input from "@/components/ui/Input/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 import styles from "./UpdateLegalEntityForm.module.css";
 
 export type UpdateLegalEntityFormValues = {
@@ -56,11 +56,14 @@ export const UpdateLegalEntityForm: React.FC<UpdateLegalEntityFormProps> = ({
     formRef.current = {
       submitForm: async () => {
         const errors = await formik.validateForm();
+
         await formik.setTouched(
           { ...setNestedObjectValues(errors, true) },
           true,
         );
+
         if (errors && Object.keys(errors).length > 0) return;
+
         await formik.submitForm();
       },
       isDirty: () => formik.dirty,
@@ -80,52 +83,66 @@ export const UpdateLegalEntityForm: React.FC<UpdateLegalEntityFormProps> = ({
         <h3 className={styles.sectionTitle}>Legal entity details</h3>
 
         <div className={styles.row}>
-          <Input
-            label="Name"
-            error={formik.errors.name}
-            value={formik.values.name}
-            onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-            placeholder="e.g., Acme LLC"
-            required
-          />
+          <label>
+            Name
+            <Input
+              value={formik.values.name}
+              onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+              placeholder="e.g., Acme LLC"
+              required
+              aria-invalid={!!formik.errors.name}
+            />
+          </label>
+          {formik.errors.name && <p>{formik.errors.name}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Description"
-            error={formik.errors.description}
-            value={formik.values.description}
-            onChange={(e) =>
-              formik.setFieldValue("description", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Description
+            <Input
+              value={formik.values.description}
+              onChange={(e) =>
+                formik.setFieldValue("description", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.description}
+            />
+          </label>
+          {formik.errors.description && <p>{formik.errors.description}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Registration number"
-            error={formik.errors.registrationNumber}
-            value={formik.values.registrationNumber}
-            onChange={(e) =>
-              formik.setFieldValue("registrationNumber", e.currentTarget.value)
-            }
-            placeholder="Registration number"
-            required
-          />
+          <label>
+            Registration number
+            <Input
+              value={formik.values.registrationNumber}
+              onChange={(e) =>
+                formik.setFieldValue("registrationNumber", e.currentTarget.value)
+              }
+              placeholder="Registration number"
+              required
+              aria-invalid={!!formik.errors.registrationNumber}
+            />
+          </label>
+          {formik.errors.registrationNumber && (
+            <p>{formik.errors.registrationNumber}</p>
+          )}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Tax ID"
-            error={formik.errors.taxId}
-            value={formik.values.taxId}
-            onChange={(e) =>
-              formik.setFieldValue("taxId", e.currentTarget.value)
-            }
-            placeholder="Tax identification number"
-            required
-          />
+          <label>
+            Tax ID
+            <Input
+              value={formik.values.taxId}
+              onChange={(e) =>
+                formik.setFieldValue("taxId", e.currentTarget.value)
+              }
+              placeholder="Tax identification number"
+              required
+              aria-invalid={!!formik.errors.taxId}
+            />
+          </label>
+          {formik.errors.taxId && <p>{formik.errors.taxId}</p>}
         </div>
       </div>
 
@@ -133,62 +150,76 @@ export const UpdateLegalEntityForm: React.FC<UpdateLegalEntityFormProps> = ({
         <h3 className={styles.sectionTitle}>Address</h3>
 
         <div className={styles.row}>
-          <Input
-            label="Country"
-            error={formik.errors.country}
-            value={formik.values.country}
-            onChange={(e) =>
-              formik.setFieldValue("country", e.currentTarget.value)
-            }
-            placeholder="Country"
-            required
-          />
+          <label>
+            Country
+            <Input
+              value={formik.values.country}
+              onChange={(e) =>
+                formik.setFieldValue("country", e.currentTarget.value)
+              }
+              placeholder="Country"
+              required
+              aria-invalid={!!formik.errors.country}
+            />
+          </label>
+          {formik.errors.country && <p>{formik.errors.country}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="City"
-            error={formik.errors.city}
-            value={formik.values.city}
-            onChange={(e) =>
-              formik.setFieldValue("city", e.currentTarget.value)
-            }
-            placeholder="City"
-            required
-          />
+          <label>
+            City
+            <Input
+              value={formik.values.city}
+              onChange={(e) =>
+                formik.setFieldValue("city", e.currentTarget.value)
+              }
+              placeholder="City"
+              required
+              aria-invalid={!!formik.errors.city}
+            />
+          </label>
+          {formik.errors.city && <p>{formik.errors.city}</p>}
         </div>
 
         <div className={styles.rowTwoCols}>
-          <Input
-            label="Street"
-            error={formik.errors.street}
-            value={formik.values.street}
-            onChange={(e) =>
-              formik.setFieldValue("street", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
-          <Input
-            label="Building"
-            error={formik.errors.building}
-            value={formik.values.building}
-            onChange={(e) =>
-              formik.setFieldValue("building", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Street
+            <Input
+              value={formik.values.street}
+              onChange={(e) =>
+                formik.setFieldValue("street", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.street}
+            />
+          </label>
+
+          <label>
+            Building
+            <Input
+              value={formik.values.building}
+              onChange={(e) =>
+                formik.setFieldValue("building", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.building}
+            />
+          </label>
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Post code"
-            error={formik.errors.postCode}
-            value={formik.values.postCode}
-            onChange={(e) =>
-              formik.setFieldValue("postCode", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Post code
+            <Input
+              value={formik.values.postCode}
+              onChange={(e) =>
+                formik.setFieldValue("postCode", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.postCode}
+            />
+          </label>
+          {formik.errors.postCode && <p>{formik.errors.postCode}</p>}
         </div>
       </div>
     </form>

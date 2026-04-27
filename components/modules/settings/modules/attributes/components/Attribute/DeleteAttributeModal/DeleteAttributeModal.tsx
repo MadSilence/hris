@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./DeleteAttributeModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
 
@@ -34,8 +34,8 @@ export const DeleteAttributeModal: React.FC<DeleteAttributeModalProps> = ({
           >
             Cancel
           </Button>
+
           <Button
-            variant="primary"
             onClick={() => !isLoading && onConfirm()}
           >
             Delete
@@ -44,9 +44,14 @@ export const DeleteAttributeModal: React.FC<DeleteAttributeModalProps> = ({
       }
     >
       <ul className={styles.list}>
-        {(attribute?.type === AttributeType.MULTI_SELECT || attribute?.type === AttributeType.SELECT || attribute?.type === AttributeType.STATUS) &&
-          <li>All options associated with this attribute will also be deleted</li>
-        }
+        {(attribute?.type === AttributeType.MULTI_SELECT ||
+          attribute?.type === AttributeType.SELECT ||
+          attribute?.type === AttributeType.STATUS) && (
+          <li>
+            All options associated with this attribute will also be deleted
+          </li>
+        )}
+
         <li>This action cannot be undone.</li>
       </ul>
     </Modal>

@@ -11,16 +11,14 @@ import Settings from "@/public/icons/settings.svg";
 import styles from "./layout.module.css";
 import { PermissionsProvider, usePermissions, } from "@/components/auth/PermissionsContext";
 import { Toast } from "@/components/ui/Toast";
-import { useUser } from "@/components/hooks/useUser/useUser";
-
-const CURRENT_USER_ID = "current-user-id"; // замени на id из auth/session/context
+import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { canModule } = usePermissions();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const { data: user } = useUser(CURRENT_USER_ID);
+  const { user } = useCurrentUser();
 
   useEffect(() => {
     const handleForbidden = (e: Event) => {
@@ -76,15 +74,15 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const bottom = allBottomItems.filter(filterItem);
 
   const profile = useMemo(() => {
-    const name = user
-      ? `${user.firstName} ${user.lastName}`.trim()
-      : "User";
-
+    const fullName = user
+      ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+      : "";
+    console.log(user)
     return {
-      id: user?.id ?? CURRENT_USER_ID,
-      name,
-      role: user?.roles?.name,
-      avatarUrl: user?.avatarUrl,
+      id: user?.id ?? "",
+      name: fullName || "Loading...",
+      role: user?.email || undefined,
+      avatarUrl: user?.avatarUrl ?? null,
     };
   }, [user]);
 
@@ -110,7 +108,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <PermissionsProvider>
-      <LayoutContent>{children}</LayoutContent>
+      <CurrentUserProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </CurrentUserProvider>
     </PermissionsProvider>
   );
 }

@@ -7,7 +7,7 @@ import { SortableApi } from "@/components/utils/SortableRow";
 import ArrowUp from "@/public/icons/arrow-up.svg";
 import ArrowDown from "@/public/icons/arrow-down.svg";
 import Trash from "@/public/icons/trash.svg";
-import Input from "@/components/ui/Input/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 import { AttributeOptions } from "@/components/modules/settings/modules/attributes/components/AttributeOptions";
 
 export interface AttributeRowProps {
@@ -35,11 +35,14 @@ export const AttributeRow: React.FC<AttributeRowProps> = ({
   const [draft, setDraft] = useState<Partial<Attribute>>({});
   const nameValue = (draft.name ?? attribute.name) || "";
 
-  const applyPatch = (patch: Partial<Attribute>) => setDraft((d) => ({ ...d, ...patch }));
+  const applyPatch = (patch: Partial<Attribute>) =>
+    setDraft((d) => ({ ...d, ...patch }));
+
   const handleSave = () => {
     onSave(attribute.id, draft);
     setDraft({});
   };
+
   const handleCancel = () => setDraft({});
 
   const toggle = () => {
@@ -89,15 +92,14 @@ export const AttributeRow: React.FC<AttributeRowProps> = ({
               toggle();
             }}
           >
-            {expanded ? <ArrowUp /> : <ArrowDown />}
+            {expanded ? <ArrowUp/> : <ArrowDown/>}
           </button>
 
           <div className={styles.nameWrap} onClick={(e) => e.stopPropagation()}>
             {expanded && !isPreset ? (
               <Input
-                className={styles.nameInput}
                 value={nameValue}
-                onChange={(e) => applyPatch({ name: (e.target as HTMLInputElement).value })}
+                onChange={(e) => applyPatch({ name: e.currentTarget.value })}
                 aria-label="Attribute name"
                 disabled={isSaving}
               />
@@ -130,7 +132,7 @@ export const AttributeRow: React.FC<AttributeRowProps> = ({
                 }}
                 disabled={isSaving}
               >
-                <Trash />
+                <Trash/>
               </button>
             )
           )}

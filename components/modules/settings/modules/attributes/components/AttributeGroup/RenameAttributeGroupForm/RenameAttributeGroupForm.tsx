@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import React, { RefObject, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 
 export interface RenameAttributeGroupFormProps {
   formRef?: RefObject<{ submitForm: () => Promise<void> } | undefined>;
@@ -16,7 +16,7 @@ export const RenameAttributeGroupForm: React.FC<RenameAttributeGroupFormProps> =
 }) => {
   const handleFormSubmission = useCallback(
     (values: RenameAttributeGroupFormValues) => onSubmit(values),
-    [onSubmit]
+    [onSubmit],
   );
 
   const formik = useFormik<RenameAttributeGroupFormValues>({
@@ -34,11 +34,12 @@ export const RenameAttributeGroupForm: React.FC<RenameAttributeGroupFormProps> =
       formRef.current = {
         submitForm: async () => {
           const errors = await formik.validateForm();
+
           await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
+
           const isValid = errors && Object.keys(errors).length === 0;
-          if (!isValid) {
-            return;
-          }
+
+          if (!isValid) return;
 
           await formik.submitForm();
         },
@@ -48,25 +49,29 @@ export const RenameAttributeGroupForm: React.FC<RenameAttributeGroupFormProps> =
 
   return (
     <form>
-      <Input
-        label="Name your section"
-        error={formik.errors.name}
-        value={formik.values.name}
-        onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-        placeholder="e.g., HR information"
-        required
-      />
+      <label>
+        Name your section
+        <Input
+          value={formik.values.name}
+          onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+          placeholder="e.g., HR information"
+          required
+          aria-invalid={!!formik.errors.name}
+        />
+      </label>
+
+      {formik.errors.name && <p>{formik.errors.name}</p>}
     </form>
-  )
-}
+  );
+};
 
 const renameAttributeGroupFormValidationSchema = yup.object({
   name: yup
     .string()
     .trim()
-    .required('Please enter a section name.')
-    .min(3, 'Name must be at least 3 characters long.')
-    .max(120, 'Name must be 120 characters or fewer.')
+    .required("Please enter a section name.")
+    .min(3, "Name must be at least 3 characters long.")
+    .max(120, "Name must be 120 characters or fewer.")
     .nonNullable("Please enter a section name."),
 });
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./JobFamily.module.css";
 import Kebab from "@/components/ui/Kebab/Kebab";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import {
   CreateJobFamilyModal,
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/CreateJobFamilyModal";
@@ -15,7 +15,6 @@ import {
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/RenameJobFamilyModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { JobFamilyList } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyList";
-
 import {
   useCreateJobFamilyAction,
 } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useCreateJobFamilyAction/useCreateJobFamilyAction";
@@ -31,24 +30,18 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
   const list = jobFamilies ?? [];
 
   const [selectedId, setSelectedId] = useState<string>("");
-
-  const [isCreateJobFamilyModalOpen, setIsCreateJobFamilyModalOpen] =
-    useState(false);
-  const [isDeleteJobFamilyModalOpen, setIsDeleteJobFamilyModalOpen] =
-    useState(false);
-  const [isRenameJobFamilyModalOpen, setIsRenameJobFamilyModalOpen] =
-    useState(false);
+  const [isCreateJobFamilyModalOpen, setIsCreateJobFamilyModalOpen] = useState(false);
+  const [isDeleteJobFamilyModalOpen, setIsDeleteJobFamilyModalOpen] = useState(false);
+  const [isRenameJobFamilyModalOpen, setIsRenameJobFamilyModalOpen] = useState(false);
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
-
   const [menuOpen, setMenuOpen] = useState(false);
+
   const menuWrapRef = useRef<HTMLDivElement>(null);
 
   const createJobFamilyAction = useCreateJobFamilyAction();
   const deleteJobFamilyAction = useDeleteJobFamilyAction();
   const renameJobFamilyAction = useRenameJobFamilyAction();
 
-  // следим за изменением данных и выбираем первый элемент,
-  // если текущий selectedId больше не актуален
   useEffect(() => {
     if (!list.length) {
       setSelectedId("");
@@ -66,7 +59,6 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
       ? list.find((item) => item.id === selectedId) ?? list[0]
       : null;
 
-  // логика закрытия меню по клику вне / Escape
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -94,7 +86,6 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
     };
   }, [menuOpen]);
 
-  // закрываем модалки по статусам экшенов
   useEffect(() => {
     const status = createJobFamilyAction.data?.status;
     if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
@@ -138,16 +129,16 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
 
           <div className={styles.menuWrap} ref={menuWrapRef}>
             <Button
-              className={styles.addButton}
               onClick={() => setIsCreateJobModalOpen(true)}
               disabled={!selected}
             >
               Add Job
             </Button>
+
             <Button
-              className={styles.kebabButton}
-              onClick={() => setMenuOpen((v) => !v)}
               variant="ghost"
+              size="icon"
+              onClick={() => setMenuOpen((v) => !v)}
               disabled={!selected}
             >
               <Kebab
@@ -174,6 +165,7 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
                 >
                   Rename Job Family
                 </button>
+
                 <button
                   type="button"
                   className={`${styles.menuItem} ${styles.danger}`}
@@ -190,11 +182,9 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
           </div>
         </div>
 
-        {/* Временно вместо JobsContainer */}
         <p>Here will be jobs container</p>
       </main>
 
-      {/* Модалки */}
       <CreateJobFamilyModal
         isOpen={isCreateJobFamilyModalOpen}
         isLoading={createJobFamilyAction.isPending}

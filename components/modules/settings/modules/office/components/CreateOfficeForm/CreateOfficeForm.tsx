@@ -4,7 +4,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import type { RefObject } from "react";
 import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
-import Input from "@/components/ui/Input/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 import styles from "./CreateOfficeForm.module.css";
 
 export type CreateOfficeFormValues = {
@@ -66,11 +66,10 @@ export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
     formRef.current = {
       submitForm: async () => {
         const errors = await formik.validateForm();
-        await formik.setTouched(
-          { ...setNestedObjectValues(errors, true) },
-          true,
-        );
+        await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
+
         if (errors && Object.keys(errors).length > 0) return;
+
         await formik.submitForm();
       },
       isDirty: () => formik.dirty,
@@ -90,52 +89,59 @@ export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
         <h3 className={styles.sectionTitle}>Office details</h3>
 
         <div className={styles.row}>
-          <Input
-            label="Name"
-            error={formik.errors.name}
-            value={formik.values.name}
-            onChange={(e) =>
-              formik.setFieldValue("name", e.currentTarget.value)
-            }
-            placeholder="e.g., London HQ"
-            required
-          />
+          <label>
+            Name
+            <Input
+              value={formik.values.name}
+              onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+              placeholder="e.g., London HQ"
+              required
+              aria-invalid={!!formik.errors.name}
+            />
+          </label>
+          {formik.errors.name && <p>{formik.errors.name}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Description"
-            error={formik.errors.description}
-            value={formik.values.description}
-            onChange={(e) =>
-              formik.setFieldValue("description", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Description
+            <Input
+              value={formik.values.description}
+              onChange={(e) =>
+                formik.setFieldValue("description", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.description}
+            />
+          </label>
+          {formik.errors.description && <p>{formik.errors.description}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Email"
-            error={formik.errors.email}
-            value={formik.values.email}
-            onChange={(e) =>
-              formik.setFieldValue("email", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Email
+            <Input
+              type="email"
+              value={formik.values.email}
+              onChange={(e) => formik.setFieldValue("email", e.currentTarget.value)}
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.email}
+            />
+          </label>
+          {formik.errors.email && <p>{formik.errors.email}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Phone"
-            error={formik.errors.phone}
-            value={formik.values.phone}
-            onChange={(e) =>
-              formik.setFieldValue("phone", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Phone
+            <Input
+              value={formik.values.phone}
+              onChange={(e) => formik.setFieldValue("phone", e.currentTarget.value)}
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.phone}
+            />
+          </label>
+          {formik.errors.phone && <p>{formik.errors.phone}</p>}
         </div>
       </div>
 
@@ -143,62 +149,74 @@ export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
         <h3 className={styles.sectionTitle}>Address</h3>
 
         <div className={styles.row}>
-          <Input
-            label="Country"
-            error={formik.errors.country}
-            value={formik.values.country}
-            onChange={(e) =>
-              formik.setFieldValue("country", e.currentTarget.value)
-            }
-            placeholder="Country"
-            required
-          />
+          <label>
+            Country
+            <Input
+              value={formik.values.country}
+              onChange={(e) =>
+                formik.setFieldValue("country", e.currentTarget.value)
+              }
+              placeholder="Country"
+              required
+              aria-invalid={!!formik.errors.country}
+            />
+          </label>
+          {formik.errors.country && <p>{formik.errors.country}</p>}
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="City"
-            error={formik.errors.city}
-            value={formik.values.city}
-            onChange={(e) =>
-              formik.setFieldValue("city", e.currentTarget.value)
-            }
-            placeholder="City"
-            required
-          />
+          <label>
+            City
+            <Input
+              value={formik.values.city}
+              onChange={(e) => formik.setFieldValue("city", e.currentTarget.value)}
+              placeholder="City"
+              required
+              aria-invalid={!!formik.errors.city}
+            />
+          </label>
+          {formik.errors.city && <p>{formik.errors.city}</p>}
         </div>
 
         <div className={styles.rowTwoCols}>
-          <Input
-            label="Street"
-            error={formik.errors.street}
-            value={formik.values.street}
-            onChange={(e) =>
-              formik.setFieldValue("street", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
-          <Input
-            label="Building"
-            error={formik.errors.building}
-            value={formik.values.building}
-            onChange={(e) =>
-              formik.setFieldValue("building", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Street
+            <Input
+              value={formik.values.street}
+              onChange={(e) =>
+                formik.setFieldValue("street", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.street}
+            />
+          </label>
+
+          <label>
+            Building
+            <Input
+              value={formik.values.building}
+              onChange={(e) =>
+                formik.setFieldValue("building", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.building}
+            />
+          </label>
         </div>
 
         <div className={styles.row}>
-          <Input
-            label="Post code"
-            error={formik.errors.postCode}
-            value={formik.values.postCode}
-            onChange={(e) =>
-              formik.setFieldValue("postCode", e.currentTarget.value)
-            }
-            placeholder="Optional"
-          />
+          <label>
+            Post code
+            <Input
+              value={formik.values.postCode}
+              onChange={(e) =>
+                formik.setFieldValue("postCode", e.currentTarget.value)
+              }
+              placeholder="Optional"
+              aria-invalid={!!formik.errors.postCode}
+            />
+          </label>
+          {formik.errors.postCode && <p>{formik.errors.postCode}</p>}
         </div>
       </div>
     </form>
@@ -206,25 +224,12 @@ export const CreateOfficeForm: React.FC<CreateOfficeFormProps> = ({
 };
 
 const createOfficeSchema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Please enter an office name.")
-    .min(2)
-    .max(200),
+  name: yup.string().trim().required("Please enter an office name.").min(2).max(200),
   description: yup.string().trim().max(1000).optional(),
   email: yup.string().trim().email().max(320).optional(),
   phone: yup.string().trim().max(120).optional(),
-  country: yup
-    .string()
-    .trim()
-    .required("Please enter a country.")
-    .max(120),
-  city: yup
-    .string()
-    .trim()
-    .required("Please enter a city.")
-    .max(120),
+  country: yup.string().trim().required("Please enter a country.").max(120),
+  city: yup.string().trim().required("Please enter a city.").max(120),
   street: yup.string().trim().max(200).optional(),
   building: yup.string().trim().max(50).optional(),
   postCode: yup.string().trim().max(50).optional(),

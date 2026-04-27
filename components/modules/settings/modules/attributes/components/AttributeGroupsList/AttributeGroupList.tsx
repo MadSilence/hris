@@ -3,7 +3,7 @@
 import styles from "./AttributeGroupList.module.css";
 import React from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { ReorderableList } from "@/components/utils/ReorderableList";
 import { AttributeGroupRow } from "@/components/modules/settings/modules/attributes/components/AttributeGroupRow";
 
@@ -25,7 +25,7 @@ export const AttributeGroupList: React.FC<AttributeGroupListProps> = ({
   return (
     <div className={styles.root}>
       <div className={styles.create}>
-        <Button style={{ width: "100%" }} onClick={onCreate}>
+        <Button onClick={onCreate}>
           Create a section
         </Button>
       </div>

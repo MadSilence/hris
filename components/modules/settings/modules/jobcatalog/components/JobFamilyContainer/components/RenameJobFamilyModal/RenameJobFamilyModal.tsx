@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
 import styles from "./RenameJobFamilyModal.module.css";
 import Modal from "@/components/ui/Modal/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 import {
   RenameJobFamilyForm,
-  RenameJobFamilyFormValues
+  RenameJobFamilyFormValues,
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/RenameJobFamilyForm/RenameJobFamilyForm";
 
 type RenameJobFamilyModalProps = {
@@ -31,15 +31,11 @@ export const RenameJobFamilyModal: React.FC<RenameJobFamilyModalProps> = ({
       title="Rename Job Family"
       footer={
         <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            onClick={() => !isLoading && onRequestClose()}
-          >
+          <Button variant="ghost" onClick={() => !isLoading && onRequestClose()}>
             Cancel
           </Button>
-          <Button
-            onClick={() => !isLoading && formRef.current?.submitForm()}
-          >
+
+          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
             Save
           </Button>
         </div>

@@ -4,7 +4,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import type { RefObject } from "react";
 import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
-import Input from "@/components/ui/Input/Input";
+import { Input } from "@/public/desact/src/components/ui/input";
 import styles from "./CreateAttributeForm.module.css";
 
 import { ALL_ATTRIBUTE_TYPES, AttributeOption, AttributeType, isOptionsType, isUniqueType, } from "@/models/attribute";
@@ -52,7 +52,7 @@ const schema = yup.object({
       yup.object({
         value: yup.string().required(),
         color: yup.string().required(),
-      })
+      }),
     )
     .when("type", {
       is: (t: AttributeType) => isOptionsType(t),
@@ -64,21 +64,26 @@ const schema = yup.object({
 
 function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues {
   const type = values.type;
+
   return {
     name: values.name,
     type,
     unique: isUniqueType(type) ? values.unique : false,
     decScale: type === AttributeType.NUMBER ? values.decScale : null,
-    dateHideYearPublic: type === AttributeType.DATE ? values.dateHideYearPublic ?? false : false,
+    dateHideYearPublic:
+      type === AttributeType.DATE ? values.dateHideYearPublic ?? false : false,
     options: isOptionsType(type)
       ? (values.options ?? []).filter(
-        (o) => o && o.value.trim() !== "" && o.color.trim() !== ""
+        (o) => o && o.value.trim() !== "" && o.color.trim() !== "",
       )
       : undefined,
   };
 }
 
-export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRef, onSubmit }) => {
+export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({
+  formRef,
+  onSubmit,
+}) => {
   const handleFormSubmission = useCallback(
     (values: CreateAttributeFormValues) => onSubmit(sanitize(values)),
     [onSubmit],
@@ -104,8 +109,11 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRe
       formRef.current = {
         submitForm: async () => {
           const errors = await formik.validateForm();
+
           await formik.setTouched({ ...setNestedObjectValues(errors, true) }, true);
+
           if (errors && Object.keys(errors).length > 0) return;
+
           await formik.submitForm();
         },
       };
@@ -114,6 +122,7 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRe
 
   React.useEffect(() => {
     const t = formik.values.type;
+
     if (!isOptionsType(t)) formik.setFieldValue("options", []);
     if (t !== AttributeType.NUMBER) formik.setFieldValue("decScale", null);
     if (t !== AttributeType.DATE) formik.setFieldValue("dateHideYearPublic", false);
@@ -135,14 +144,19 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRe
       }}
     >
       <div className={styles.row}>
-        <Input
-          label="Attribute name"
-          error={formik.errors.name}
-          value={formik.values.name}
-          onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-          placeholder="e.g., Salary"
-          required
-        />
+        <label>
+          Attribute name
+          <Input
+            value={formik.values.name}
+            onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+            placeholder="e.g., Salary"
+            required
+            aria-invalid={!!formik.errors.name}
+          />
+        </label>
+        {formik.errors.name && (
+          <div className={styles.errorText}>{formik.errors.name}</div>
+        )}
       </div>
 
       <div className={styles.row}>
@@ -155,7 +169,9 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRe
             formik.setFieldError("dateHideYearPublic", undefined);
           }}
         />
-        {formik.errors.type && <div className={styles.errorText}>{String(formik.errors.type)}</div>}
+        {formik.errors.type && (
+          <div className={styles.errorText}>{String(formik.errors.type)}</div>
+        )}
       </div>
 
       {showOptions && (
@@ -177,12 +193,17 @@ export const CreateAttributeForm: React.FC<CreateAttributeFormProps> = ({ formRe
       {isDate && (
         <DateSettings
           hideYearPublic={formik.values.dateHideYearPublic ?? false}
-          onChangeHideYearPublic={(value) => formik.setFieldValue("dateHideYearPublic", value)}
+          onChangeHideYearPublic={(value) =>
+            formik.setFieldValue("dateHideYearPublic", value)
+          }
         />
       )}
 
       {showUnique && (
-        <UniqueSelect checked={formik.values.unique} onChange={(value) => formik.setFieldValue("unique", value)}/>
+        <UniqueSelect
+          checked={formik.values.unique}
+          onChange={(value) => formik.setFieldValue("unique", value)}
+        />
       )}
     </form>
   );

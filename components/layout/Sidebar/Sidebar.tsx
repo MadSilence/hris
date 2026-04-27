@@ -39,14 +39,18 @@ type SidebarProps = {
   profile: SidebarProfile;
 };
 
-const getInitials = (name: string) =>
-  name
+const getInitials = (name: string) => {
+  const initials = name
     .trim()
     .split(/\s+/)
+    .filter(Boolean)
     .map((word) => word[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  return initials || "U";
+};
 
 const AppSidebar: FC<SidebarProps> = ({
   collapsed = false,
@@ -56,6 +60,10 @@ const AppSidebar: FC<SidebarProps> = ({
   profile,
 }) => {
   const pathname = usePathname();
+
+  const profileHref = profile.id
+    ? `/organization/people/${profile.id}/personal`
+    : "/organization/people";
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -81,27 +89,28 @@ const AppSidebar: FC<SidebarProps> = ({
           isActive={active}
           tooltip={item.label}
           aria-current={active ? "page" : undefined}
-          className="
-            relative h-10 px-3 text-sm font-medium
-            text-sidebar-foreground/80
-            hover:bg-sidebar-accent/60
-            hover:text-sidebar-accent-foreground
-            data-[active=true]:bg-sidebar-accent/70
-            data-[active=true]:text-sidebar-accent-foreground
-            data-[active=true]:font-semibold
-            data-[active=true]:before:absolute
-            data-[active=true]:before:left-0
-            data-[active=true]:before:top-2
-            data-[active=true]:before:h-6
-            data-[active=true]:before:w-1
-            data-[active=true]:before:rounded-r-full
-            data-[active=true]:before:bg-sidebar-primary
-            [&_svg]:size-4
-          "
+          className={[
+            "mx-auto h-10 rounded-lg text-sm font-normal",
+            "text-sidebar-foreground/80",
+            "hover:bg-brown-50",
+            "hover:text-brown-700",
+            "data-[active=true]:bg-brown-50",
+            "data-[active=true]:text-brown-700",
+            "data-[active=true]:font-normal",
+            "[&_svg]:size-4",
+            "[&_svg]:text-brown-600",
+            collapsed ? "size-10 px-0" : "w-full px-3",
+          ].join(" ")}
         >
-          <Link href={item.href} className="gap-3 no-underline hover:no-underline">
+          <Link
+            href={item.href}
+            className={[
+              "no-underline hover:no-underline",
+              collapsed ? "justify-center gap-0" : "gap-3",
+            ].join(" ")}
+          >
             {Icon ? <Icon aria-hidden focusable={false}/> : null}
-            <span>{item.label}</span>
+            {!collapsed ? <span>{item.label}</span> : null}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -110,80 +119,85 @@ const AppSidebar: FC<SidebarProps> = ({
 
   return (
     <SidebarProvider open={open} onOpenChange={handleOpenChange}>
-      <DesactSidebar collapsible="icon" className="group/sidebar">
+      <DesactSidebar
+        collapsible="icon"
+        className="
+          group/sidebar
+          [&_[data-sidebar=header]]:p-2
+          [&_[data-sidebar=content]]:px-2
+          [&_[data-sidebar=footer]]:p-2
+          [&_[data-sidebar=menu]]:gap-1
+        "
+      >
         <SidebarRail/>
 
         <SidebarHeader>
-          <div className="relative flex h-14 items-center px-3">
-            <Link
-              href="/organization/people"
-              className="
-                flex min-w-0 items-center gap-3 no-underline hover:no-underline
-                group-data-[collapsible=icon]/sidebar:mx-auto
-              "
+          <div className="relative flex h-12 items-center">
+            <div
+              className={[
+                "group/logo relative flex min-w-0 items-center",
+                collapsed ? "flex-none" : "flex-1",
+              ].join(" ")}
             >
-              <span
-                className="inline-block size-8 shrink-0 rounded-lg"
-                style={{ background: "var(--color-sidebar-primary)" }}
-                aria-hidden
-              />
-
-              <span
-                className="
-                  truncate text-[15px] font-semibold
-                  group-data-[collapsible=icon]/sidebar:hidden
-                "
+              <Link
+                href="/organization/people"
+                className={[
+                  "min-w-0 items-center rounded-lg no-underline hover:no-underline",
+                  collapsed ? "hidden p-0" : "flex flex-1 gap-3 px-2 py-2",
+                ].join(" ")}
               >
-                SixSoftware
-              </span>
-            </Link>
+                <span
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: "var(--color-sidebar-primary)" }}
+                  aria-hidden
+                />
 
-            <SidebarTrigger
-              aria-label="Toggle sidebar"
-              className="
-                ml-auto
-                group-data-[collapsible=icon]/sidebar:absolute
-                group-data-[collapsible=icon]/sidebar:left-1/2
-                group-data-[collapsible=icon]/sidebar:top-1/2
-                group-data-[collapsible=icon]/sidebar:-translate-x-1/2
-                group-data-[collapsible=icon]/sidebar:-translate-y-1/2
-                group-data-[collapsible=icon]/sidebar:opacity-0
-                group-data-[collapsible=icon]/sidebar:hover:opacity-100
-                group-data-[collapsible=icon]/sidebar:group-hover/sidebar:opacity-100
-              "
-            />
+                <span className="truncate text-[15px] font-semibold">
+                  SixSoftware
+                </span>
+              </Link>
+
+              <SidebarTrigger
+                aria-label="Toggle sidebar"
+                className={[
+                  "size-8",
+                  collapsed
+                    ? "absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover/logo:opacity-100"
+                    : "ml-auto",
+                ].join(" ")}
+              />
+            </div>
           </div>
         </SidebarHeader>
 
         <SidebarContent>
-          <SidebarMenu className="px-2">
-            {topItems.map(renderItem)}
-          </SidebarMenu>
+          <SidebarMenu>{topItems.map(renderItem)}</SidebarMenu>
         </SidebarContent>
 
         <SidebarFooter>
-          <SidebarMenu className="px-2">
-            {bottomItems.map(renderItem)}
-          </SidebarMenu>
+          <SidebarMenu>{bottomItems.map(renderItem)}</SidebarMenu>
 
-          <SidebarSeparator className="-mx-2 w-auto"/>
+          <SidebarSeparator className="!mx-[-8px] !w-[calc(100%+16px)] !max-w-none"/>
 
-          <SidebarMenu className="px-2">
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
                 tooltip={profile.name}
-                className="
-                  h-12 px-2
-                  hover:bg-sidebar-accent/60
-                "
+                className={[
+                  "mx-auto hover:bg-sidebar-accent/60 data-[state=open]:bg-sidebar-accent/60",
+                  collapsed ? "size-10 px-0" : "h-12 w-full px-2",
+                ].join(" ")}
               >
                 <Link
-                  href={`/organization/people/${profile.id}/personal`}
+                  href={profileHref}
                   title={profile.name}
-                  className="gap-3 no-underline hover:no-underline"
+                  className={[
+                    "p-0 no-underline hover:no-underline",
+                    collapsed ? "justify-center gap-0" : "gap-3",
+                  ].join(" ")}
                 >
-                  <Avatar className="size-8">
+                  <Avatar className="size-8 shrink-0">
                     <AvatarImage
                       src={profile.avatarUrl ?? undefined}
                       alt={profile.name}
@@ -193,17 +207,19 @@ const AppSidebar: FC<SidebarProps> = ({
                     </AvatarFallback>
                   </Avatar>
 
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium">
-                      {profile.name}
-                    </span>
-
-                    {profile.role ? (
-                      <span className="truncate text-xs text-sidebar-foreground/55">
-                        {profile.role}
+                  {!collapsed ? (
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-medium">
+                        {profile.name}
                       </span>
-                    ) : null}
-                  </span>
+
+                      {profile.role ? (
+                        <span className="truncate text-xs text-sidebar-foreground/55">
+                          {profile.role}
+                        </span>
+                      ) : null}
+                    </span>
+                  ) : null}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

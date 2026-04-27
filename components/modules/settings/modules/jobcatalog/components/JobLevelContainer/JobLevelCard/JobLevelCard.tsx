@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import styles from "./JobLevelCard.module.css";
 import Kebab from "@/components/ui/Kebab/Kebab";
 import { JobLevelGroup } from "@/models/job";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type Props = {
   group: JobLevelGroup;
@@ -23,9 +23,9 @@ export const JobLevelCard: React.FC<Props> = ({ group }) => {
         <h2 className={styles.cardTitle}>{group.name}</h2>
 
         <Button
-          className={styles.kebabButton}
-          onClick={() => setMenuOpen((v) => !v)}
           variant="ghost"
+          size="icon"
+          onClick={() => setMenuOpen((v) => !v)}
         >
           <Kebab
             aria-haspopup="menu"
@@ -45,18 +45,17 @@ export const JobLevelCard: React.FC<Props> = ({ group }) => {
               className={styles.menuItem}
               role="menuitem"
               onClick={() => {
-                // TODO: Edit привязать позже
                 setMenuOpen(false);
               }}
             >
               Edit
             </button>
+
             <button
               type="button"
               className={`${styles.menuItem} ${styles.danger}`}
               role="menuitem"
               onClick={() => {
-                // TODO: Delete привязать позже
                 setMenuOpen(false);
               }}
             >
