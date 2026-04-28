@@ -5,8 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import UsersRolesTableSkeleton from "./UsersRolesTableSkeleton";
 import { Avatar, AvatarFallback } from "@/public/desact/src/components/ui/avatar";
 import { Role } from "@/models/role/Role";
-import AssignRolesModal from "./modals/AssignRolesModal";
 import { UsersSearchItemDTO } from "@/models/user/fields";
+import {
+  AssignRolesModal
+} from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
 
 
 export interface UsersRolesTableProps {
@@ -110,8 +112,8 @@ export default function UsersRolesTable({
         user={selectedUser}
         allRoles={allRoles}
         isLoading={false}
-        onRequestClose={() => setSelectedUser(null)}
-        onApply={(userId, roleIds) => {
+        onCancelAction={() => setSelectedUser(null)}
+        onApplyAction={(userId, roleIds) => {
           onApplyRoles?.(userId, roleIds);
           setSelectedUser(null);
         }}

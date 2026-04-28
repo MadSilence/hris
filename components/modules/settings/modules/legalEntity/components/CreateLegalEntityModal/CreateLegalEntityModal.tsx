@@ -1,61 +1,78 @@
-import React, { useRef } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
+"use client";
+
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { CreateLegalEntityForm, CreateLegalEntityFormValues } from "../CreateLegalEntityForm";
+  CreateLegalEntityForm,
+  CreateLegalEntityFormValues
+} from "@/components/modules/settings/modules/legalEntity/components/CreateLegalEntityForm";
 
 type CreateLegalEntityModalProps = {
   isOpen: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   initialValues?: Partial<CreateLegalEntityFormValues>;
-  onConfirm: (submission: CreateLegalEntityFormValues) => void;
-  onRequestClose: () => void;
+  onConfirmAction: (submission: CreateLegalEntityFormValues) => void;
+  onCancelAction: () => void;
 };
 
-export const CreateLegalEntityModal: React.FC<CreateLegalEntityModalProps> = ({
+export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
   isOpen,
   isLoading = false,
   initialValues,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onCancelAction,
 }) => {
-  // @ts-ignore
-  const formRef = useRef<CreateLegalEntityFormHandle>();
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+
+  const requestClose = () => {
+    if (isLoading) return;
+
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onCancelAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onCancelAction();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Create legal entity</DialogTitle>
-          <DialogDescription/>
-        </DialogHeader>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent hideClose className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Create legal entity</DialogTitle>
+            <DialogDescription>
+              Create a legal entity and fill in its registration details.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="max-h-[60vh] overflow-y-auto pr-1">
           <CreateLegalEntityForm
-            formRef={formRef}
+            isLoading={isLoading}
             initialValues={initialValues}
-            onSubmit={onConfirm}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
           />
-        </div>
+        </DialogContent>
+      </Dialog>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => !isLoading && onRequestClose()}
-          >
-            Cancel
-          </Button>
-          <Button onClick={() => !isLoading && formRef.current?.submitForm()}>
-            Create
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

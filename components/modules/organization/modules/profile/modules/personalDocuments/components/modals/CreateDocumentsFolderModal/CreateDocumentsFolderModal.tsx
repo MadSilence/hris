@@ -1,85 +1,77 @@
 "use client";
 
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { FolderPlus } from "lucide-react";
-import { FC, useEffect, useState } from "react";
+  CreateDocumentsFolderForm,
+  CreateDocumentsFolderFormValues
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/CreateDocumentsFolderForm";
 
 export interface CreateDocumentsFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
-  onRequestClose: () => void;
-  onSubmit: (values: { name: string }) => void;
+  onCancelAction: () => void;
+  onConfirmAction: (values: CreateDocumentsFolderFormValues) => void;
 }
 
-export const CreateDocumentsFolderModal: FC<CreateDocumentsFolderModalProps> = ({
+export const CreateDocumentsFolderModal: FC<
+  CreateDocumentsFolderModalProps
+> = ({
   isOpen,
   isLoading = false,
-  onRequestClose,
-  onSubmit,
+  onCancelAction,
+  onConfirmAction,
 }) => {
-  const [name, setName] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    setName("");
-  }, [isOpen]);
+  const requestClose = () => {
+    if (isLoading) return;
 
-  const canSubmit = name.trim().length >= 2;
+    if (isDirty) {
+      setIsConfirmCancelOpen(true);
+      return;
+    }
+
+    onCancelAction();
+  };
+
+  const confirmClose = () => {
+    setIsConfirmCancelOpen(false);
+    onCancelAction();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onRequestClose()}>
-      <DialogContent className="sm:max-w-lg p-8" hideClose>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FolderPlus className="w-5 h-5 text-brown-600"/>
-            Create folder
-          </DialogTitle>
-          <DialogDescription>
-            Create a new folder to organize personal documents.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent hideClose className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create folder</DialogTitle>
+            <DialogDescription>
+              Create a new folder to organize personal documents.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="mt-6 space-y-2">
-          <Label>Folder name</Label>
-          <Input
-            placeholder="e.g. Contracts"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={isLoading}
+          <CreateDocumentsFolderForm
+            isLoading={isLoading}
+            onCancelAction={requestClose}
+            onDirtyChangeAction={setIsDirty}
+            onSubmitAction={onConfirmAction}
           />
-          <div className="text-xs text-muted-foreground">Minimum 2 characters.</div>
-        </div>
+        </DialogContent>
+      </Dialog>
 
-        <DialogFooter className="mt-8">
-          <DialogClose asChild>
-            <Button variant="outline" disabled={isLoading}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <Button
-            disabled={isLoading || !canSubmit}
-            className="bg-brown-600 text-white hover:bg-brown-700"
-            onClick={() => {
-              if (!canSubmit) return;
-              onSubmit({ name: name.trim() });
-            }}
-          >
-            Create
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelOpen}
+        onCancelAction={() => setIsConfirmCancelOpen(false)}
+        onConfirmAction={confirmClose}
+      />
+    </>
   );
 };

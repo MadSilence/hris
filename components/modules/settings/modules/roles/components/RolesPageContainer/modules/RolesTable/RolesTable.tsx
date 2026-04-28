@@ -8,10 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import RolesTableSkeleton from "./RolesTableSkeleton";
 import RolesTableRowActions from "./RolesTableRowActions";
-import UpsertRoleModal from "./modals/UpsertRoleModal";
 import {
   DeleteRoleModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/DeleteRoleModal";
+import {
+  UpsertRoleNameModal
+} from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/UpsertRoleNameModal";
 
 type RoleActionMode = "rename" | "duplicate";
 
@@ -154,13 +156,13 @@ export default function RolesTable({
         </TableBody>
       </Table>
 
-      <UpsertRoleModal
+      <UpsertRoleNameModal
         isOpen={nameModalOpen}
         isLoading={false}
         mode={nameModalMode}
         initialName={initialNameForModal}
-        onRequestClose={closeNameModal}
-        onConfirm={(values) => {
+        onCancelAction={closeNameModal}
+        onConfirmAction={(values) => {
           if (!nameModalRole) return;
 
           if (nameModalMode === "rename") onRenameRole?.(nameModalRole.id, values);

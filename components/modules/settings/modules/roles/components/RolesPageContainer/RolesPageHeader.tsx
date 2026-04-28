@@ -4,9 +4,8 @@ import * as React from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { ChevronDown, Download, Plus } from "lucide-react";
-
-import AddRoleModal from "./modals/AddRoleModal";
-import ExportRolesModal from "./modals/ExportRolesModal";
+import { AddRoleModal } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modals/AddRoleModal";
+import { ExportRolesModal } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modals/ExportRolesModal";
 
 export interface RolesPageHeaderProps {
   onCreateRole?: (values: { name: string }) => void;
@@ -55,12 +54,12 @@ export default function RolesPageHeader({
         isOpen={addOpen}
         isLoading={isCreatingRole}
         templates={templates}
-        onRequestClose={() => setAddOpen(false)}
-        onCreateBlank={(values) => {
+        onCancelAction={() => setAddOpen(false)}
+        onCreateBlankAction={(values) => {
           onCreateRole?.(values);
           setAddOpen(false);
         }}
-        onCreateFromTemplate={(values) => {
+        onCreateFromTemplateAction={(values) => {
           onCreateRoleFromTemplate?.(values);
           setAddOpen(false);
         }}
@@ -69,8 +68,8 @@ export default function RolesPageHeader({
       <ExportRolesModal
         isOpen={exportOpen}
         isLoading={isExporting}
-        onRequestClose={() => setExportOpen(false)}
-        onExport={(values) => {
+        onCancelAction={() => setExportOpen(false)}
+        onConfirmAction={(values) => {
           onExportRoles?.(values);
           setExportOpen(false);
         }}

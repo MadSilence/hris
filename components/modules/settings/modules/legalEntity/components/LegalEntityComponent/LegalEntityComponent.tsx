@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CreateLegalEntityModal } from "../CreateLegalEntityModal";
 import type { CreateLegalEntityFormValues } from "../CreateLegalEntityForm";
-import { LegalEntityDetailsModal } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsModal";
 import { LegalEntity } from "@/models/legalEntity";
 import { useCreateLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useCreateLegalEntityAction";
 import { useUpdateLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useUpdateLegalEntityAction";
@@ -17,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { LegalEntityDetailsModal } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsModal";
 
 type Props = {
   initialEntities: LegalEntity[];
@@ -113,10 +113,10 @@ export const LegalEntityComponent: React.FC<Props> = ({ initialEntities, isLoadi
     const q = query.trim().toLowerCase();
     const rows = q
       ? initialEntities.filter((e) =>
-          [e.name, e.country, e.city, e.street, e.registrationNumber, e.taxId]
-            .filter(Boolean)
-            .some((v) => String(v).toLowerCase().includes(q)),
-        )
+        [e.name, e.country, e.city, e.street, e.registrationNumber, e.taxId]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q)),
+      )
       : initialEntities;
     return rows.slice().sort((a, b) => a.name.localeCompare(b.name));
   }, [initialEntities, query]);
@@ -197,8 +197,8 @@ export const LegalEntityComponent: React.FC<Props> = ({ initialEntities, isLoadi
       <CreateLegalEntityModal
         isOpen={isCreateLegalEntityModalOpen}
         isLoading={createLegalEntityAction.isPending}
-        onConfirm={handleCreate}
-        onRequestClose={() => setIsCreateLegalEntityModalOpen(false)}
+        onConfirmAction={handleCreate}
+        onCancelAction={() => setIsCreateLegalEntityModalOpen(false)}
       />
 
       {selectedEntity && (
@@ -207,9 +207,9 @@ export const LegalEntityComponent: React.FC<Props> = ({ initialEntities, isLoadi
           isLoading={updateLegalEntityAction.isPending}
           isDeleteLoading={deleteLegalEntityAction.isPending}
           entity={selectedEntity}
-          onRequestClose={() => setIsDetailsModalOpen(false)}
-          onSave={handleUpdate}
-          onDelete={handleDelete}
+          onCancelAction={() => setIsDetailsModalOpen(false)}
+          onSaveAction={handleUpdate}
+          onDeleteAction={handleDelete}
         />
       )}
     </>

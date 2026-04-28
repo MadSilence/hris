@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableHeader from "./AssignedUsersTableHeader";
 import AssignedUsersTableContent from "./AssignedUsersTableContent";
-import ExportAssignedUsersModal from "./modals/ExportAssignedUsersModal";
 import {
   AddRoleRuleModal
-} from "@/components/modules/settings/modules/roles/components/RoleDetailsComponent/modules/AssignedUsers/modals/AddRoleRuleModal";
+} from "@/components/modules/settings/modules/roles/components/RoleDetailsComponent/modules/AssignedUsers/modals/AddRoleRuleModal/AddRoleRuleModal";
+import {
+  ExportAssignedUsersModal
+} from "@/components/modules/settings/modules/roles/components/RoleDetailsContainer/modules/AssignedUsers/modals/ExportAssignedUsersModal";
 
 export interface AssignedUsersTableProps {
   roleId: string;
@@ -46,8 +48,13 @@ export default function AssignedUsersTable({
             onExportClick={() => setExportOpen(true)}
             manageRulesTrigger={
               <AddRoleRuleModal
-                triggerLabel="Manage Rules"
-                onSubmit={() => {
+                isOpen={false}
+                isLoading={false}
+                onCancelAction={() => {
+                  console.log("AddRoleRuleModal: cancel");
+                }}
+                onConfirmAction={(payload) => {
+                  console.log("AddRoleRuleModal: confirm", payload);
                 }}
               />
             }
@@ -63,8 +70,8 @@ export default function AssignedUsersTable({
         isOpen={exportOpen}
         isLoading={false}
         roleName={roleName ?? "Role"}
-        onRequestClose={() => setExportOpen(false)}
-        onExport={(values) => {
+        onCancelAction={() => setExportOpen(false)}
+        onConfirmAction={(values) => {
           onExport(values);
           setExportOpen(false);
         }}

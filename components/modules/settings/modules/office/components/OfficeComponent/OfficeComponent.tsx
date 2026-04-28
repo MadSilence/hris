@@ -207,9 +207,9 @@ export const OfficeComponent: React.FC<Props> = ({ initialOffices, isLoading }) 
           isLoading={updateOfficeAction.isPending}
           isDeleteLoading={deleteOfficeAction.isPending}
           office={selectedOffice}
-          onRequestClose={() => setIsDetailsModalOpen(false)}
-          onSave={handleUpdate}
-          onDelete={handleDelete}
+          onCancelAction={() => setIsDetailsModalOpen(false)}
+          onSaveAction={handleUpdate}
+          onDeleteAction={handleDelete}
         />
       )}
     </>

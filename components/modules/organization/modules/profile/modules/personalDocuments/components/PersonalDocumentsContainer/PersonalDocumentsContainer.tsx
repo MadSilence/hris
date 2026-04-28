@@ -31,7 +31,7 @@ import {
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/DeleteDocumentModal";
 import {
   MoveDocumentModal,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/MoveDocumentModal/MoveDocumentModal";
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/MoveDocumentModal";
 import {
   useCreateDocumentsFolder
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useCreateDocumentsFolder";
@@ -160,8 +160,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
       <CreateDocumentsFolderModal
         isOpen={createFolderOpen}
         isLoading={isCreatingFolder}
-        onRequestClose={() => setCreateFolderOpen(false)}
-        onSubmit={async ({ name }) => {
+        onCancelAction={() => setCreateFolderOpen(false)}
+        onConfirmAction={async ({ name }) => {
           const payload = {
             userId,
             name,
@@ -177,8 +177,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isOpen={!!renameFolderState}
         isLoading={isUpdatingFolder}
         folderName={renameFolderState?.name}
-        onRequestClose={() => setRenameFolderState(null)}
-        onSubmit={async ({ name }) => {
+        onCancelAction={() => setRenameFolderState(null)}
+        onConfirmAction={async ({ name }) => {
           if (!renameFolderState) return;
 
           await updateFolder({
@@ -214,8 +214,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isLoading={isUploadingDocument}
         folders={folderOptions}
         defaultFolderId={currentFolderId ?? undefined}
-        onRequestClose={() => setAddDocumentOpen(false)}
-        onSubmit={async ({ file, folderId }) => {
+        onCancelAction={() => setAddDocumentOpen(false)}
+        onConfirmAction={async ({ file, folderId }) => {
           await uploadDocument({
             userId,
             file,
@@ -249,8 +249,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         documentName={moveDocumentState?.name}
         folders={folderOptions}
         currentFolderId={moveDocumentState?.folderId ?? undefined}
-        onRequestClose={() => setMoveDocumentState(null)}
-        onSubmit={async ({ folderId }) => {
+        onCancelAction={() => setMoveDocumentState(null)}
+        onConfirmAction={async ({ folderId }) => {
           if (!moveDocumentState) return;
 
           console.log("Need move document hook here:", {

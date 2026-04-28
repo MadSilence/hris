@@ -1,134 +1,115 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { FC, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
 import { LegalEntityDetailsView } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsView";
-import { LegalEntity } from "@/models/legalEntity";
 import { DeleteLegalEntityModal } from "@/components/modules/settings/modules/legalEntity/components/DeleteLegalEntityModal";
-// import Pencil from "@/public/icons/pencil.svg";
+import { LegalEntity } from "@/models/legalEntity";
 import Trash from "@/public/icons/trash.svg";
 import {
-  UpdateLegalEntityForm,
-  UpdateLegalEntityFormHandle,
-  UpdateLegalEntityFormValues
-} from "@/components/modules/settings/modules/legalEntity/components/UpdateLegalEntityForm";
+  LegalEntityDetailsForm,
+  LegalEntityDetailsFormValues
+} from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsForm";
 
 type LegalEntityDetailsModalProps = {
   isOpen: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   isDeleteLoading?: boolean;
   entity: LegalEntity;
-  onRequestClose: () => void;
-  onDelete: () => void;
-  onSave: (values: UpdateLegalEntityFormValues) => void;
+  onCancelAction: () => void;
+  onDeleteAction: () => void;
+  onSaveAction: (values: LegalEntityDetailsFormValues) => void;
 };
 
-const mapEntityToUpdateFormValues = (
-  entity: LegalEntity
-): UpdateLegalEntityFormValues => ({
+const mapEntityToFormValues = (
+  entity: LegalEntity,
+): LegalEntityDetailsFormValues => ({
   name: entity.name,
   description: (entity as any).description ?? "",
   registrationNumber: entity.registrationNumber ?? "",
   taxId: entity.taxId ?? "",
   country: entity.country,
   city: entity.city,
-  street: entity.street,
-  building: entity.building,
-  postCode: entity.postCode,
+  street: entity.street ?? "",
+  building: entity.building ?? "",
+  postCode: entity.postCode ?? "",
 });
 
-export const LegalEntityDetailsModal: React.FC<LegalEntityDetailsModalProps> = ({
+export const LegalEntityDetailsModal: FC<LegalEntityDetailsModalProps> = ({
   isOpen,
-  isLoading,
+  isLoading = false,
   isDeleteLoading = false,
   entity,
-  onRequestClose,
-  onDelete,
-  onSave
+  onCancelAction,
+  onDeleteAction,
+  onSaveAction,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const formRef = useRef<UpdateLegalEntityFormHandle | undefined>(undefined);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const handleSaveClick = () => {
-    if (!formRef.current || isLoading) return;
-    void formRef.current.submitForm();
-  };
-
-  const handleAfterSubmit = (values: UpdateLegalEntityFormValues) => {
-    onSave(values);
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
+  const requestClose = () => {
     if (isLoading) return;
-    formRef.current?.reset();
+
     setIsEditing(false);
+    onCancelAction();
   };
 
-  const isSaveDisabled =
-    !isEditing || isLoading || !formRef.current?.isDirty?.();
-
-  const updateInitialValues = mapEntityToUpdateFormValues(entity);
+  const handleSave = (values: LegalEntityDetailsFormValues) => {
+    onSaveAction(values);
+    setIsEditing(false);
+  };
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
-        <DialogContent className="max-w-2xl">
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) requestClose();
+        }}
+      >
+        <DialogContent className="max-w-2xl" hideClose>
           <DialogHeader>
             <DialogTitle>Legal entity</DialogTitle>
-            <DialogDescription/>
+            <DialogDescription>
+              View and manage legal entity details.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="max-h-[60vh] overflow-y-auto pr-1">
             {isEditing ? (
-              <UpdateLegalEntityForm
-                formRef={formRef}
-                initialValues={updateInitialValues}
-                onSubmit={handleAfterSubmit}
+              <LegalEntityDetailsForm
+                isLoading={isLoading}
+                initialValues={mapEntityToFormValues(entity)}
+                onCancelAction={() => {
+                  if (isLoading) return;
+                  setIsEditing(false);
+                }}
+                onDirtyChangeAction={setIsDirty}
+                onSubmitAction={handleSave}
               />
             ) : (
               <LegalEntityDetailsView legalEntity={entity}/>
             )}
           </div>
 
-          <DialogFooter>
-            {!isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => !isLoading && setIsDeleteOpen(true)}
-                >
-                  <Trash className="w-4 h-4 mr-2"/>
-                  Delete
-                </Button>
-                <Button onClick={() => !isLoading && setIsEditing(true)}>
-                  Edit
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleCancelEdit}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveClick} disabled={isSaveDisabled}>
-                  Save
-                </Button>
-              </>
-            )}
-          </DialogFooter>
+          {!isEditing && (
+            <div className="mt-8 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                disabled={isLoading}
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash className="mr-2 h-4 w-4"/>
+                Delete
+              </Button>
+
+              <Button disabled={isLoading} onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -137,7 +118,7 @@ export const LegalEntityDetailsModal: React.FC<LegalEntityDetailsModalProps> = (
         isLoading={isDeleteLoading}
         entity={entity}
         onConfirmAction={() => {
-          onDelete();
+          onDeleteAction();
           setIsDeleteOpen(false);
         }}
         onRequestCloseAction={() => setIsDeleteOpen(false)}

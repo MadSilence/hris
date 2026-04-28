@@ -1,11 +1,12 @@
 "use client";
 
+import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
-import type { RefObject } from "react";
-import React, { useCallback, useEffect } from "react";
 import * as yup from "yup";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
-import styles from "./CreateLegalEntityForm.module.css";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 export type CreateLegalEntityFormValues = {
   name: string;
@@ -19,26 +20,91 @@ export type CreateLegalEntityFormValues = {
   postCode: string;
 };
 
-export type CreateLegalEntityFormHandle = {
-  submitForm: () => Promise<void>;
-  isDirty: () => boolean;
-  reset: () => void;
-};
-
 export interface CreateLegalEntityFormProps {
-  formRef?: RefObject<CreateLegalEntityFormHandle | undefined>;
-  onSubmit: (values: CreateLegalEntityFormValues) => void | Promise<void>;
+  isLoading?: boolean;
   initialValues?: Partial<CreateLegalEntityFormValues>;
+  onCancelAction: () => void;
+  onDirtyChangeAction?: (isDirty: boolean) => void;
+  onSubmitAction: (
+    values: CreateLegalEntityFormValues,
+  ) => void | Promise<void>;
 }
 
-export const CreateLegalEntityForm: React.FC<CreateLegalEntityFormProps> = ({
-  formRef,
-  onSubmit,
+const createSchema = yup.object({
+  name: yup
+    .string()
+    .trim()
+    .required("Please enter a legal entity name.")
+    .min(2, "Legal entity name must be at least 2 characters.")
+    .max(200, "Legal entity name must be at most 200 characters."),
+  description: yup
+    .string()
+    .trim()
+    .max(1000, "Description must be at most 1000 characters.")
+    .optional(),
+  registrationNumber: yup
+    .string()
+    .trim()
+    .required("Please enter a registration number.")
+    .max(120, "Registration number must be at most 120 characters."),
+  taxId: yup
+    .string()
+    .trim()
+    .required("Please enter a tax ID.")
+    .max(120, "Tax ID must be at most 120 characters."),
+  country: yup
+    .string()
+    .trim()
+    .required("Please enter a country.")
+    .max(120, "Country must be at most 120 characters."),
+  city: yup
+    .string()
+    .trim()
+    .required("Please enter a city.")
+    .max(120, "City must be at most 120 characters."),
+  street: yup
+    .string()
+    .trim()
+    .max(200, "Street must be at most 200 characters.")
+    .optional(),
+  building: yup
+    .string()
+    .trim()
+    .max(50, "Building must be at most 50 characters.")
+    .optional(),
+  postCode: yup
+    .string()
+    .trim()
+    .max(50, "Post code must be at most 50 characters.")
+    .optional(),
+});
+
+function sanitize(
+  values: CreateLegalEntityFormValues,
+): CreateLegalEntityFormValues {
+  return {
+    name: values.name.trim(),
+    description: values.description.trim(),
+    registrationNumber: values.registrationNumber.trim(),
+    taxId: values.taxId.trim(),
+    country: values.country.trim(),
+    city: values.city.trim(),
+    street: values.street.trim(),
+    building: values.building.trim(),
+    postCode: values.postCode.trim(),
+  };
+}
+
+export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
+  isLoading = false,
   initialValues,
+  onCancelAction,
+  onDirtyChangeAction,
+  onSubmitAction,
 }) => {
   const handleFormSubmission = useCallback(
-    (values: CreateLegalEntityFormValues) => onSubmit(values),
-    [onSubmit],
+    (values: CreateLegalEntityFormValues) => onSubmitAction(sanitize(values)),
+    [onSubmitAction],
   );
 
   const formik = useFormik<CreateLegalEntityFormValues>({
@@ -61,189 +127,231 @@ export const CreateLegalEntityForm: React.FC<CreateLegalEntityFormProps> = ({
   });
 
   useEffect(() => {
-    if (!formRef) return;
+    onDirtyChangeAction?.(formik.dirty);
+  }, [formik.dirty, onDirtyChangeAction]);
 
-    formRef.current = {
-      submitForm: async () => {
-        const errors = await formik.validateForm();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-        await formik.setTouched(
-          { ...setNestedObjectValues(errors, true) },
-          true,
-        );
+    if (isLoading) return;
 
-        if (errors && Object.keys(errors).length > 0) return;
+    const errors = await formik.validateForm();
 
-        await formik.submitForm();
-      },
-      isDirty: () => formik.dirty,
-      reset: () => formik.resetForm(),
-    };
-  }, [formRef, formik]);
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
 
   return (
-    <form
-      className={styles.form}
-      onSubmit={(e) => {
-        e.preventDefault();
-        void formik.submitForm();
-      }}
-    >
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Legal entity details</h3>
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="max-h-[60vh] space-y-6 overflow-y-auto pr-1">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium">Legal entity details</h3>
 
-        <div className={styles.row}>
-          <label>
-            Name
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-name">Name</Label>
             <Input
+              id="legal-entity-name"
               value={formik.values.name}
-              onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
+              onChange={(e) =>
+                formik.setFieldValue("name", e.currentTarget.value)
+              }
               placeholder="e.g., Acme LLC"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.name}
             />
-          </label>
-          {formik.errors.name && <p>{formik.errors.name}</p>}
-        </div>
+            {formik.errors.name && (
+              <p className="text-sm text-destructive">{formik.errors.name}</p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Description
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-description">Description</Label>
             <Input
+              id="legal-entity-description"
               value={formik.values.description}
               onChange={(e) =>
                 formik.setFieldValue("description", e.currentTarget.value)
               }
               placeholder="Optional"
+              disabled={isLoading}
               aria-invalid={!!formik.errors.description}
             />
-          </label>
-          {formik.errors.description && <p>{formik.errors.description}</p>}
-        </div>
+            {formik.errors.description && (
+              <p className="text-sm text-destructive">
+                {formik.errors.description}
+              </p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Registration number
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-registration-number">
+              Registration number
+            </Label>
             <Input
+              id="legal-entity-registration-number"
               value={formik.values.registrationNumber}
               onChange={(e) =>
-                formik.setFieldValue("registrationNumber", e.currentTarget.value)
+                formik.setFieldValue(
+                  "registrationNumber",
+                  e.currentTarget.value,
+                )
               }
               placeholder="Registration number"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.registrationNumber}
             />
-          </label>
-          {formik.errors.registrationNumber && (
-            <p>{formik.errors.registrationNumber}</p>
-          )}
-        </div>
+            {formik.errors.registrationNumber && (
+              <p className="text-sm text-destructive">
+                {formik.errors.registrationNumber}
+              </p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Tax ID
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-tax-id">Tax ID</Label>
             <Input
+              id="legal-entity-tax-id"
               value={formik.values.taxId}
               onChange={(e) =>
                 formik.setFieldValue("taxId", e.currentTarget.value)
               }
               placeholder="Tax identification number"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.taxId}
             />
-          </label>
-          {formik.errors.taxId && <p>{formik.errors.taxId}</p>}
+            {formik.errors.taxId && (
+              <p className="text-sm text-destructive">{formik.errors.taxId}</p>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Address</h3>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium">Address</h3>
 
-        <div className={styles.row}>
-          <label>
-            Country
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-country">Country</Label>
             <Input
+              id="legal-entity-country"
               value={formik.values.country}
               onChange={(e) =>
                 formik.setFieldValue("country", e.currentTarget.value)
               }
               placeholder="Country"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.country}
             />
-          </label>
-          {formik.errors.country && <p>{formik.errors.country}</p>}
-        </div>
+            {formik.errors.country && (
+              <p className="text-sm text-destructive">
+                {formik.errors.country}
+              </p>
+            )}
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            City
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-city">City</Label>
             <Input
+              id="legal-entity-city"
               value={formik.values.city}
               onChange={(e) =>
                 formik.setFieldValue("city", e.currentTarget.value)
               }
               placeholder="City"
               required
+              disabled={isLoading}
               aria-invalid={!!formik.errors.city}
             />
-          </label>
-          {formik.errors.city && <p>{formik.errors.city}</p>}
-        </div>
+            {formik.errors.city && (
+              <p className="text-sm text-destructive">{formik.errors.city}</p>
+            )}
+          </div>
 
-        <div className={styles.rowTwoCols}>
-          <label>
-            Street
-            <Input
-              value={formik.values.street}
-              onChange={(e) =>
-                formik.setFieldValue("street", e.currentTarget.value)
-              }
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.street}
-            />
-          </label>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="legal-entity-street">Street</Label>
+              <Input
+                id="legal-entity-street"
+                value={formik.values.street}
+                onChange={(e) =>
+                  formik.setFieldValue("street", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.street}
+              />
+            </div>
 
-          <label>
-            Building
-            <Input
-              value={formik.values.building}
-              onChange={(e) =>
-                formik.setFieldValue("building", e.currentTarget.value)
-              }
-              placeholder="Optional"
-              aria-invalid={!!formik.errors.building}
-            />
-          </label>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="legal-entity-building">Building</Label>
+              <Input
+                id="legal-entity-building"
+                value={formik.values.building}
+                onChange={(e) =>
+                  formik.setFieldValue("building", e.currentTarget.value)
+                }
+                placeholder="Optional"
+                disabled={isLoading}
+                aria-invalid={!!formik.errors.building}
+              />
+            </div>
+          </div>
 
-        <div className={styles.row}>
-          <label>
-            Post code
+          {(formik.errors.street || formik.errors.building) && (
+            <div className="space-y-1">
+              {formik.errors.street && (
+                <p className="text-sm text-destructive">
+                  {formik.errors.street}
+                </p>
+              )}
+              {formik.errors.building && (
+                <p className="text-sm text-destructive">
+                  {formik.errors.building}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="legal-entity-post-code">Post code</Label>
             <Input
+              id="legal-entity-post-code"
               value={formik.values.postCode}
               onChange={(e) =>
                 formik.setFieldValue("postCode", e.currentTarget.value)
               }
               placeholder="Optional"
+              disabled={isLoading}
               aria-invalid={!!formik.errors.postCode}
             />
-          </label>
-          {formik.errors.postCode && <p>{formik.errors.postCode}</p>}
+            {formik.errors.postCode && (
+              <p className="text-sm text-destructive">
+                {formik.errors.postCode}
+              </p>
+            )}
+          </div>
         </div>
       </div>
+
+      <DialogFooter className="mt-8">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isLoading}
+          onClick={onCancelAction}
+        >
+          Cancel
+        </Button>
+
+        <Button type="submit" disabled={isLoading}>
+          Create
+        </Button>
+      </DialogFooter>
     </form>
   );
 };
-
-const createSchema = yup.object({
-  name: yup.string().trim().required("Please enter a legal entity name.").min(2).max(200),
-  description: yup.string().trim().max(1000).optional(),
-  registrationNumber: yup.string().trim().required("Please enter a registration number.").max(120),
-  taxId: yup.string().trim().required("Please enter a tax ID.").max(120),
-  country: yup.string().trim().required("Please enter a country.").max(120),
-  city: yup.string().trim().required("Please enter a city.").max(120),
-  street: yup.string().trim().max(200).optional(),
-  building: yup.string().trim().max(50).optional(),
-  postCode: yup.string().trim().max(50).optional(),
-});
