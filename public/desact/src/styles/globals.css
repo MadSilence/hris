@@ -1,13 +1,11 @@
 @import "tailwindcss";
-/* @import "@tailwindcss/typography"; */
 @import "./typography.css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
   /* Base Font Family */
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-family-sans: var(--font-sans);
   --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Inconsolata, "Roboto Mono", monospace;
 
   /* Base Spacing Unit */

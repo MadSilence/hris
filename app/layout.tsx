@@ -15,7 +15,7 @@ const AppRootLayout: React.FC<AppRootLayoutProps> = async ({ children }) => {
 
   return (
     <html lang="en" className={helveticaNeue.variable} suppressHydrationWarning>
-    <body className={helveticaNeue.className}>
+    <body>
     <AppProviders env={env}>{children}</AppProviders>
     </body>
     </html>
