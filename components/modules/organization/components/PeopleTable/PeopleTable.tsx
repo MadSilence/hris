@@ -17,7 +17,6 @@ type Row = {
   status: string | null;
   isEmailVerified: boolean;
   lastLoginAt?: string | null;
-  avatarColor: string;
   avatarUrl: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -97,7 +96,6 @@ export default function PeopleTable({
         <div className="flex items-center gap-3">
           <div
             className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium text-white"
-            style={{ background: row.avatarColor }}
             aria-hidden
           >
             {(name[0] ?? "?").toUpperCase()}

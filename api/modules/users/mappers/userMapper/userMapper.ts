@@ -13,7 +13,6 @@ export class UserMapper {
       status: dto.status,
       isEmailVerified: dto.isEmailVerified,
       lastLoginAt: dto.lastLoginAt,
-      avatarColor: dto.avatarColor,
       avatarUrl: dto.avatarUrl,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,

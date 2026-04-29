@@ -11,7 +11,6 @@ export type UserDTO = {
   status: string;
   isEmailVerified: boolean;
   lastLoginAt: string;
-  avatarColor: string;
   avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
