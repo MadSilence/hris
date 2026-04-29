@@ -1,68 +1,38 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import styles from "./SettingsPageHeader.module.css";
 
-type PageHeaderProps = {
-  title: string | React.ReactNode;
-  subtitle?: string | React.ReactNode;
+type SettingsPageHeaderProps = {
+  title: string;
   backHref?: string;
-  onBack?: () => void;
-  actions?: React.ReactNode;
-  showBack?: boolean;
-  className?: string;
 };
 
 export default function SettingsPageHeader({
   title,
-  subtitle,
   backHref,
-  onBack,
-  actions,
-  showBack = true,
-  className,
-}: PageHeaderProps) {
+}: SettingsPageHeaderProps) {
   const router = useRouter();
 
-  const handleBack = React.useCallback(() => {
-    if (onBack) return onBack();
-    if (backHref) return router.push(backHref);
-    router.back();
-  }, [onBack, backHref, router]);
-
   return (
-    <header className={[styles.header, className ?? ""].join(" ")}>
-      <div className={styles.left}>
-        {showBack ? (
-          backHref ? (
-            <Link
-              href={backHref}
-              aria-label="Go back"
-              className={styles.backBtn}
-            >
-              <ChevronLeft className={styles.chevron} aria-hidden/>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              aria-label="Go back"
-              className={styles.backBtn}
-              onClick={handleBack}
-            >
-              <ChevronLeft className={styles.chevron} aria-hidden/>
-            </button>
-          )
-        ) : null}
+    <header className="flex items-center gap-4">
+      {backHref ? (
+        <Link
+          href={backHref}
+          className="no-underline grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
+        >
+          <ChevronLeft className="h-4 w-4"/>
+        </Link>
+      ) : (
+        <button
+          onClick={() => router.back()}
+          className="grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
+        >
+          <ChevronLeft className="h-4 w-4"/>
+        </button>
+      )}
 
-        <div className={styles.titles}>
-          <h1 className={styles.title}>{title}</h1>
-          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
-        </div>
-      </div>
-
-      {actions ? <div className={styles.actions}>{actions}</div> : null}
+      <h1 className="text-3xl font-semibold">{title}</h1>
     </header>
   );
 }

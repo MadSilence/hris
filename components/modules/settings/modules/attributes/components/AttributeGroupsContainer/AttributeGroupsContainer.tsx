@@ -1,16 +1,17 @@
 "use client";
 
-import styles from "./AttributeGroupsContainer.module.css";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Ellipsis } from "lucide-react";
+
 import { AttributeGroupList } from "@/components/modules/settings/modules/attributes/components/AttributeGroupsList";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CreateGroupModal } from "../AttributeGroup/CreateGroupModal";
 import { useCreateAttributeGroupAction } from "../../hooks/AttributeGroup/useCreateAttributeGroupAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useAttributeGroups } from "../../hooks/AttributeGroup/useAttributeGroups";
 import { useReorderAttributeGroupAction } from "../../hooks/AttributeGroup/useReorderAttributeGroupAction";
 import { applyVerticalReorder, sortBySortOrder } from "../../hooks/utils/useReorderAction";
-import Kebab from "@/components/ui/Kebab/Kebab";
 import { Button } from "@/public/desact/src/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
 import { DeleteGroupModal } from "../AttributeGroup/DeleteGroupModal";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { useDeleteAttributeGroupAction } from "../../hooks/AttributeGroup/useDeleteAttributeGroupAction";
@@ -26,8 +27,6 @@ export default function AttributeGroupsContainer() {
   const [isDeleteAttributeGroupModalOpen, setIsDeleteAttributeGroupModalOpen] = useState(false);
   const [isRenameAttributeGroupModalOpen, setIsRenameAttributeGroupModalOpen] = useState(false);
   const [isCreateAttributeModalOpen, setIsCreateAttributeModalOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuWrapRef = useRef<HTMLDivElement>(null);
 
   const createAttributeGroupAction = useCreateAttributeGroupAction();
   const createAttributeAction = useCreateAttributeAction();
@@ -36,36 +35,9 @@ export default function AttributeGroupsContainer() {
   const renameAttributeGroupAction = useRenameAttributeGroupAction();
 
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
-  const [selectedId, setSelectedId] = useState<string>("");
+  const [selectedId, setSelectedId] = useState("");
 
   const { data: fetchedGroups, isLoading: loading } = useAttributeGroups();
-
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (menuWrapRef.current && !menuWrapRef.current.contains(target)) {
-        setMenuOpen(false);
-      }
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMenuOpen(false);
-        e.preventDefault();
-        (document.activeElement as HTMLElement)?.blur();
-      }
-    };
-
-    document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [menuOpen]);
 
   useEffect(() => {
     if (!fetchedGroups) return;
@@ -123,13 +95,17 @@ export default function AttributeGroupsContainer() {
     [groups, reorderAttributeGroupAction]
   );
 
-  return loading ? (
-    <div className={styles.loaderWrapper}>
-      <Loader/>
-    </div>
-  ) : (
-    <div className={styles.layout}>
-      <aside className={styles.colf}>
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader/>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid min-h-svh grid-cols-[280px_minmax(0,1fr)] gap-6 bg-[var(--color-bg-primary)] p-4">
+      <aside className="min-h-0 overflow-auto">
         <AttributeGroupList
           groups={groups}
           selectedId={selectedId}
@@ -139,57 +115,45 @@ export default function AttributeGroupsContainer() {
         />
       </aside>
 
-      <main className={styles.cols}>
-        <div className={styles.header}>
-          <div className={styles.headerPreset}>
-            <h1 className={styles.h1}>{selected?.name ?? "Attributes"}</h1>
-            {selected?.isSystem && <span className={styles.presetPill}>Preset Section</span>}
+      <main className="min-h-0 overflow-auto p-3">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-4">
+            <h1 className="truncate text-2xl font-semibold text-[var(--color-text-primary)]">
+              {selected?.name ?? "Attributes"}
+            </h1>
+
+            {selected?.isSystem ? (
+              <span className="whitespace-nowrap rounded-full bg-brown-50 px-2 py-1 text-sm text-[var(--color-text-tertiary)]">
+                Preset Section
+              </span>
+            ) : null}
           </div>
 
-          <div className={styles.menuWrap} ref={menuWrapRef}>
+          <div className="flex items-center gap-3">
             <Button onClick={() => setIsCreateAttributeModalOpen(true)}>
               Add Attribute
             </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <Kebab
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                aria-label="AttributeGroup actions"
-              />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Attribute group actions">
+                  <Ellipsis className="h-4 w-4"/>
+                </Button>
+              </DropdownMenuTrigger>
 
-            {menuOpen && (
-              <div className={styles.menu} role="menu" aria-label="AttributeGroup actions">
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsRenameAttributeGroupModalOpen(true);
-                    setMenuOpen(false);
-                  }}
-                >
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsRenameAttributeGroupModalOpen(true)}>
                   Rename AttributeGroup
-                </button>
+                </DropdownMenuItem>
 
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.danger}`}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsDeleteAttributeGroupModalOpen(true);
-                    setMenuOpen(false);
-                  }}
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setIsDeleteAttributeGroupModalOpen(true)}
                 >
                   Delete AttributeGroup
-                </button>
-              </div>
-            )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -202,9 +166,7 @@ export default function AttributeGroupsContainer() {
       <CreateGroupModal
         isOpen={isCreateAttributeGroupModalOpen}
         isLoading={createAttributeGroupAction.isPending}
-        onConfirmAction={(formValues) => {
-          createAttributeGroupAction.mutate({ name: formValues.name });
-        }}
+        onConfirmAction={(formValues) => createAttributeGroupAction.mutate({ name: formValues.name })}
         onRequestCloseAction={() => setIsCreateAttributeGroupModalOpen(false)}
       />
 

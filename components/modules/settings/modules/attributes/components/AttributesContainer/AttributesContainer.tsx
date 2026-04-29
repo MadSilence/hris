@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./AttributesContainer.module.css";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributesList } from "../AttributesList/AttributesList";
 import { DeleteAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/DeleteAttributeModal";
@@ -14,18 +13,18 @@ export interface AttributesContainerProps {
   attributes: Attribute[];
 }
 
-export const AttributesContainer: React.FC<AttributesContainerProps> = ({
+export const AttributesContainer: FC<AttributesContainerProps> = ({
   isLoading,
   attributes,
 }) => {
-  const [selectedId, setSelectedId] = useState<string>("");
+  const [selectedId, setSelectedId] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const deleteAttributeAction = useDeleteAttributeAction();
   const updateAttributeAction = useUpdateAttributeAction();
 
   useEffect(() => {
-    if (selectedId && !attributes.some(a => a.id === selectedId)) {
+    if (selectedId && !attributes.some((a) => a.id === selectedId)) {
       setSelectedId("");
     }
   }, [attributes, selectedId]);
@@ -38,7 +37,7 @@ export const AttributesContainer: React.FC<AttributesContainerProps> = ({
   }, [deleteAttributeAction.data?.status]);
 
   const attributeToDelete = useMemo(
-    () => attributes.find(a => a.id === pendingDeleteId) || null,
+    () => attributes.find((a) => a.id === pendingDeleteId) || null,
     [attributes, pendingDeleteId]
   );
 
@@ -60,7 +59,7 @@ export const AttributesContainer: React.FC<AttributesContainerProps> = ({
   );
 
   return (
-    <section className={styles.section} aria-busy={isLoading}>
+    <section className="min-h-0 w-full" aria-busy={isLoading}>
       <AttributesList
         attributes={attributes}
         selectedId={selectedId}

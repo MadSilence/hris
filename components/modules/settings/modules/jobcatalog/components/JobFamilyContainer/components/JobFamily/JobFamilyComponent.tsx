@@ -1,22 +1,23 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import styles from "./JobFamily.module.css";
-import Kebab from "@/components/ui/Kebab/Kebab";
+import { FC, useEffect, useState } from "react";
+import { Ellipsis } from "lucide-react";
+
 import { Button } from "@/public/desact/src/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
 import {
-  CreateJobFamilyModal,
+  CreateJobFamilyModal
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/CreateJobFamilyModal";
 import {
-  DeleteJobFamilyModal,
+  DeleteJobFamilyModal
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/DeleteJobFamilyModal";
 import {
-  RenameJobFamilyModal,
+  RenameJobFamilyModal
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/RenameJobFamilyModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { JobFamilyList } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyList";
 import {
-  useCreateJobFamilyAction,
+  useCreateJobFamilyAction
 } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useCreateJobFamilyAction/useCreateJobFamilyAction";
 import { useDeleteJobFamilyAction } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useDeleteJobFamilyActon";
 import { useRenameJobFamilyAction } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useRenameJobFamilyAction";
@@ -26,17 +27,14 @@ type JobFamilyProps = {
   jobFamilies: JobFamily[] | null | undefined;
 };
 
-export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) => {
+export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
   const list = jobFamilies ?? [];
 
-  const [selectedId, setSelectedId] = useState<string>("");
+  const [selectedId, setSelectedId] = useState("");
   const [isCreateJobFamilyModalOpen, setIsCreateJobFamilyModalOpen] = useState(false);
   const [isDeleteJobFamilyModalOpen, setIsDeleteJobFamilyModalOpen] = useState(false);
   const [isRenameJobFamilyModalOpen, setIsRenameJobFamilyModalOpen] = useState(false);
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const menuWrapRef = useRef<HTMLDivElement>(null);
 
   const createJobFamilyAction = useCreateJobFamilyAction();
   const deleteJobFamilyAction = useDeleteJobFamilyAction();
@@ -60,33 +58,6 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
       : null;
 
   useEffect(() => {
-    if (!menuOpen) return;
-
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (menuWrapRef.current && !menuWrapRef.current.contains(target)) {
-        setMenuOpen(false);
-      }
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMenuOpen(false);
-        e.preventDefault();
-        (document.activeElement as HTMLElement)?.blur();
-      }
-    };
-
-    document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [menuOpen]);
-
-  useEffect(() => {
     const status = createJobFamilyAction.data?.status;
     if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
       setIsCreateJobFamilyModalOpen(false);
@@ -108,8 +79,8 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
   }, [renameJobFamilyAction.data?.status]);
 
   return (
-    <div className={styles.layout}>
-      <aside className={styles.colf}>
+    <div className="grid min-h-svh grid-cols-[280px_minmax(0,1fr)] gap-6 bg-[var(--color-bg-primary)] p-4">
+      <aside className="min-h-0 overflow-auto">
         <JobFamilyList
           jobFamilies={list}
           selectedId={selectedId}
@@ -118,16 +89,21 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
         />
       </aside>
 
-      <main className={styles.cols}>
-        <div className={styles.header}>
-          <div className={styles.headerPreset}>
-            <h1 className={styles.h1}>{selected?.name ?? "Jobs"}</h1>
-            {selected?.isSystem && (
-              <span className={styles.presetPill}>Preset Job Family</span>
-            )}
+      <main className="min-h-0 overflow-auto p-3">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-4">
+            <h1 className="truncate text-2xl font-semibold text-[var(--color-text-primary)]">
+              {selected?.name ?? "Jobs"}
+            </h1>
+
+            {selected?.isSystem ? (
+              <span className="whitespace-nowrap rounded-full bg-brown-50 px-2 py-1 text-sm text-[var(--color-text-tertiary)]">
+                Preset Job Family
+              </span>
+            ) : null}
           </div>
 
-          <div className={styles.menuWrap} ref={menuWrapRef}>
+          <div className="flex items-center gap-3">
             <Button
               onClick={() => setIsCreateJobModalOpen(true)}
               disabled={!selected}
@@ -135,54 +111,37 @@ export const JobFamilyComponent: React.FC<JobFamilyProps> = ({ jobFamilies }) =>
               Add Job
             </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMenuOpen((v) => !v)}
-              disabled={!selected}
-            >
-              <Kebab
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                aria-label="JobFamilyComponent actions"
-              />
-            </Button>
-
-            {menuOpen && selected && (
-              <div
-                className={styles.menu}
-                role="menu"
-                aria-label="JobFamilyComponent actions"
-              >
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsRenameJobFamilyModalOpen(true);
-                    setMenuOpen(false);
-                  }}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={!selected}
+                  aria-label="Job family actions"
                 >
-                  Rename Job Family
-                </button>
+                  <Ellipsis className="h-4 w-4"/>
+                </Button>
+              </DropdownMenuTrigger>
 
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.danger}`}
-                  role="menuitem"
-                  onClick={() => {
-                    setIsDeleteJobFamilyModalOpen(true);
-                    setMenuOpen(false);
-                  }}
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsRenameJobFamilyModalOpen(true)}>
+                  Rename Job Family
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setIsDeleteJobFamilyModalOpen(true)}
                 >
                   Delete Job Family
-                </button>
-              </div>
-            )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        <p>Here will be jobs container</p>
+        <p className="text-sm text-[var(--color-text-tertiary)]">
+          Here will be jobs container
+        </p>
       </main>
 
       <CreateJobFamilyModal

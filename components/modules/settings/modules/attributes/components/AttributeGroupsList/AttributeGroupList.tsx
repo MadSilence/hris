@@ -1,7 +1,6 @@
 "use client";
 
-import styles from "./AttributeGroupList.module.css";
-import React from "react";
+import { FC } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { ReorderableList } from "@/components/utils/ReorderableList";
@@ -15,7 +14,7 @@ export interface AttributeGroupListProps {
   onOrderChange: (ids: string[], movedId?: string) => void;
 }
 
-export const AttributeGroupList: React.FC<AttributeGroupListProps> = ({
+export const AttributeGroupList: FC<AttributeGroupListProps> = ({
   groups,
   selectedId,
   onSelect,
@@ -23,18 +22,16 @@ export const AttributeGroupList: React.FC<AttributeGroupListProps> = ({
   onOrderChange,
 }) => {
   return (
-    <div className={styles.root}>
-      <div className={styles.create}>
-        <Button onClick={onCreate}>
-          Create a section
-        </Button>
+    <div className="flex min-h-0 flex-col gap-4">
+      <div>
+        <Button onClick={onCreate}>Create a section</Button>
       </div>
 
       <ReorderableList<AttributeGroup>
         items={groups}
         getId={(group) => group.id}
         onReorder={onOrderChange}
-        className={styles.list}
+        className="flex min-h-0 flex-col gap-2"
         RowComponent={({ item, sortable }) => (
           <AttributeGroupRow
             group={item}
