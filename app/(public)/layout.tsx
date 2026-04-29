@@ -1,18 +1,33 @@
- "use client";
+"use client";
+
 import Navbar from "@/components/layout/Navbar/Navbar";
 import { Footer } from "@/components/layout/Footer/Footer";
 import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default function PublicLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const pathname = usePathname();
   const isDesact = pathname?.startsWith("/desact");
+
   return (
-    <>
-      <Navbar />
-      <main className={isDesact ? "px-0 py-0" : "mx-auto max-w-6xl px-4 py-10"}>
+    <div className="flex min-h-screen flex-col">
+      <Navbar/>
+
+      <main
+        className={
+          isDesact
+            ? "flex-1 px-0 py-0"
+            : "mx-auto w-full max-w-6xl flex-1 px-4 py-10"
+        }
+      >
         {children}
       </main>
-      <Footer />
-    </>
+
+      <Footer/>
+    </div>
   );
 }

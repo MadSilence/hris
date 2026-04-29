@@ -1,28 +1,35 @@
 "use client";
 
 import * as React from "react";
-import LoginForm from "@/components/modules/auth/components/LoginForm/LoginForm";
+import { useRouter } from "next/navigation";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
-import {router} from "next/client";
-import {useRouter} from "next/navigation";
+import LoginForm, { LoginFormValues } from "@/components/modules/auth/components/LoginForm/LoginForm";
 
 const LoginContainer: React.FC = () => {
   const loginAction = useLoginAction();
-    const router = useRouter();
+  const router = useRouter();
+
+  const handleSubmit = React.useCallback(
+    async (values: LoginFormValues) => {
+      const res = await loginAction.mutateAsync(values);
+
+      if (res.ok) {
+        router.push("/organization/people");
+        return;
+      }
+
+      throw new Error(res.status.toString());
+    },
+    [loginAction, router],
+  );
 
   return (
     <LoginForm
-      onSubmit={async (values) => {
-        const res = await loginAction.mutateAsync(values);
-          console.log(res);
-            if (res.ok) {
-                router.push("/organization/people");
-            } else {
-                throw new Error(res.status.toString());
-            }
-      }}
-      submitting={loginAction.isPending}
-      apiError={loginAction.error instanceof Error ? loginAction.error.message : undefined}
+      onSubmitAction={handleSubmit}
+      isLoading={loginAction.isPending}
+      apiError={
+        loginAction.error instanceof Error ? loginAction.error.message : undefined
+      }
     />
   );
 };

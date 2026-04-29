@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { useForm } from "react-hook-form";
-
+import { FormEvent, useCallback } from "react";
+import { setNestedObjectValues, useFormik } from "formik";
+import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/public/desact/src/components/ui/form";
-
-import styles from "./LoginForm.module.css";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 export type LoginFormValues = {
   email: string;
@@ -15,8 +13,8 @@ export type LoginFormValues = {
 };
 
 export interface LoginFormProps {
-  onSubmit: (values: LoginFormValues) => void | Promise<void>;
-  submitting?: boolean;
+  onSubmitAction: (values: LoginFormValues) => void | Promise<void>;
+  isLoading?: boolean;
   apiError?: string;
 }
 
@@ -27,95 +25,158 @@ export enum LoginFormMessages {
   PasswordTooShort = "Password must be at least 8 characters.",
 }
 
-type ApiErrorProps = { message?: string };
+const schema = yup.object({
+  email: yup
+    .string()
+    .trim()
+    .required(LoginFormMessages.EmailRequired)
+    .email(LoginFormMessages.InvalidEmail)
+    .nonNullable(),
 
-function ApiErrorMessage({ message }: ApiErrorProps) {
+  password: yup
+    .string()
+    .required(LoginFormMessages.PasswordRequired)
+    .min(8, LoginFormMessages.PasswordTooShort)
+    .nonNullable(),
+});
+
+function sanitize(values: LoginFormValues): LoginFormValues {
+  return {
+    email: values.email.trim(),
+    password: values.password,
+  };
+}
+
+type FieldErrorProps = {
+  message?: string;
+};
+
+function FieldError({ message }: FieldErrorProps) {
   if (!message) return null;
+
   return (
-    <p className={styles.apiError} role="alert">
+    <p className="text-sm text-destructive" role="alert">
       {message}
     </p>
   );
 }
 
-export default function LoginForm({ onSubmit, submitting, apiError }: LoginFormProps) {
-  const form = useForm<LoginFormValues>({
-    defaultValues: { email: "", password: "" },
-    mode: "onSubmit",
-  });
+type ApiErrorProps = {
+  message?: string;
+};
 
-  const busy = (submitting ?? false) || form.formState.isSubmitting;
-
-  const submitHandler = useCallback(
-    async (values: LoginFormValues) => {
-      await onSubmit(values);
-    },
-    [onSubmit]
-  );
+function ApiErrorMessage({ message }: ApiErrorProps) {
+  if (!message) return null;
 
   return (
-    <div className={styles.centerWrap}>
-      <div className={styles.form}>
-        <h1 className={styles.title}>Welcome to SixSoftware</h1>
+    <p
+      className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      role="alert"
+    >
+      {message}
+    </p>
+  );
+}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-6" noValidate>
-            <FormField
-              control={form.control}
+export default function LoginForm({
+  onSubmitAction,
+  isLoading = false,
+  apiError,
+}: LoginFormProps) {
+  const handleFormSubmission = useCallback(
+    async (values: LoginFormValues) => {
+      await onSubmitAction(sanitize(values));
+    },
+    [onSubmitAction],
+  );
+
+  const formik = useFormik<LoginFormValues>({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: schema,
+    validateOnBlur: false,
+    validateOnChange: false,
+    onSubmit: handleFormSubmission,
+  });
+
+  const busy = isLoading || formik.isSubmitting;
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (busy) return;
+
+    const errors = await formik.validateForm();
+
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
+
+  return (
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center py-12">
+      <div className="w-full space-y-8">
+        <div className="space-y-3 text-center">
+          <h1 className="text-4xl font-medium">Welcome to SixSoftware</h1>
+
+          <p className="text-md text-[var(--color-text-tertiary)]">
+            Sign in to continue to your workspace.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <div className="space-y-2">
+            <Label htmlFor="login-email">Email address</Label>
+
+            <Input
+              id="login-email"
               name="email"
-              rules={{
-                required: LoginFormMessages.EmailRequired,
-                validate: (v) =>
-                  /^\S+@\S+\.\S+$/.test(v || "") ? true : LoginFormMessages.InvalidEmail,
-              }}
-              render={({ field }) => (
-                <FormItem className="gap-0 mb-4">
-                  <FormLabel>Email address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Email address*"
-                      autoComplete="email"
-                      disabled={busy}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage/>
-                </FormItem>
-              )}
+              type="email"
+              placeholder="Email address*"
+              autoComplete="email"
+              value={formik.values.email}
+              onChange={(e) =>
+                formik.setFieldValue("email", e.currentTarget.value)
+              }
+              disabled={busy}
+              required
+              aria-invalid={!!formik.errors.email}
             />
 
-            <FormField
-              control={form.control}
+            <FieldError message={formik.errors.email}/>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="login-password">Password</Label>
+
+            <Input
+              id="login-password"
               name="password"
-              rules={{
-                required: LoginFormMessages.PasswordRequired,
-                minLength: { value: 8, message: LoginFormMessages.PasswordTooShort },
-              }}
-              render={({ field }) => (
-                <FormItem className="gap-0 mb-4">
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Password*"
-                      autoComplete="current-password"
-                      disabled={busy}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage/>
-                </FormItem>
-              )}
+              type="password"
+              placeholder="Password*"
+              autoComplete="current-password"
+              value={formik.values.password}
+              onChange={(e) =>
+                formik.setFieldValue("password", e.currentTarget.value)
+              }
+              disabled={busy}
+              required
+              aria-invalid={!!formik.errors.password}
             />
 
-            <ApiErrorMessage message={apiError}/>
+            <FieldError message={formik.errors.password}/>
+          </div>
 
-            <Button type="submit" variant="default" disabled={busy} className="h-11 w-full text-white">
-              {busy ? "Signing in…" : "Sign in"}
-            </Button>
-          </form>
-        </Form>
+          <ApiErrorMessage message={apiError}/>
+
+          <Button type="submit" disabled={busy} className="h-11 w-full">
+            {busy ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
       </div>
     </div>
   );

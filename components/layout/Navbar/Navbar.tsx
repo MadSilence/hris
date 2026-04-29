@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import NavbarLink from "../../ui/NavbarLink/NavbarLink";
-import styles from "./Navbar.module.css";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 const LINKS = [
   { label: "Products", href: "/products" },
@@ -13,27 +13,31 @@ const LINKS = [
 
 export default function Navbar() {
   return (
-    <header className={styles.header}>
-      <div className={styles.inner}>
-        <Link href="/" className={styles.brand}>
+    <header className="sticky top-0 z-40 border-b border-brown-200 bg-white/85 backdrop-blur-md">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3">
+        <Link
+          href="/"
+          className="text-xl font-semibold text-[var(--color-text-primary)] no-underline"
+        >
           Six Software
         </Link>
 
-        <nav className={styles.nav}>
-          {LINKS.map((l) => (
-            <NavbarLink key={l.href} href={l.href}>
-              {l.label}
+        <nav className="hidden items-center justify-center gap-2 md:flex">
+          {LINKS.map((link) => (
+            <NavbarLink key={link.href} href={link.href}>
+              {link.label}
             </NavbarLink>
           ))}
         </nav>
 
-        <div className={styles.actions}>
-          <Link href="/login" className={styles.loginBtn}>
-            Login
-          </Link>
-          <Link href="/trial" className={styles.trialBtn}>
-            Free Trial
-          </Link>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost">
+            <Link href="/login" className="no-underline">Login</Link>
+          </Button>
+
+          <Button asChild>
+            <Link href="/trial" className="no-underline">Free Trial</Link>
+          </Button>
         </div>
       </div>
     </header>

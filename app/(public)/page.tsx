@@ -1,4 +1,3 @@
-import styles from "./home.module.css";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -6,38 +5,50 @@ import { Input } from "@/public/desact/src/components/ui/input";
 
 export default function HomePage() {
   return (
-    <div className={styles.wrap}>
-      <section className={styles.hero}>
-        <div className={styles.heroInner}>
-          <h1>HRIS your team will actually enjoy</h1>
-          <p className={styles.lead}>
-            Centralize employee records, documents, time off and working
-            hours—beautifully simple, tenant-ready, and fast.
-          </p>
-          <div className={styles.heroCtas}>
-            <Button asChild>
-              <Link href="/contact">Request demo</Link>
-            </Button>
+    <div className="flex flex-col gap-20">
 
-            <Button asChild variant="secondary">
-              <Link href="/products">See products</Link>
-            </Button>
-          </div>
+      {/* HERO */}
+      <section className="text-center flex flex-col items-center gap-6 py-10">
+        <h1 className="text-5xl font-medium">
+          HRIS your team will actually enjoy
+        </h1>
+
+        <p className="text-lg text-[var(--color-text-tertiary)] max-w-2xl">
+          Centralize employee records, documents, time off and working
+          hours—beautifully simple, tenant-ready, and fast.
+        </p>
+
+        <div className="flex gap-4">
+          <Button asChild>
+            <Link href="/contact">Request demo</Link>
+          </Button>
+
+          <Button asChild variant="secondary">
+            <Link href="/products">See products</Link>
+          </Button>
         </div>
       </section>
 
-      <section className={styles.trust}>
-        <p className={styles.trustLabel}>Trusted by teams like</p>
-        <div className={styles.trustLogos}>
-          <span className={styles.logoBox}>Acme</span>
-          <span className={styles.logoBox}>Polar</span>
-          <span className={styles.logoBox}>Nimbus</span>
-          <span className={styles.logoBox}>Zento</span>
-          <span className={styles.logoBox}>Volt</span>
+      {/* TRUST */}
+      <section className="flex flex-col items-center gap-6">
+        <p className="text-sm text-[var(--color-text-tertiary)]">
+          Trusted by teams like
+        </p>
+
+        <div className="flex flex-wrap gap-4 justify-center">
+          {["Acme", "Polar", "Nimbus", "Zento", "Volt"].map((name) => (
+            <div
+              key={name}
+              className="px-4 py-2 border rounded-lg text-sm text-[var(--color-text-tertiary)]"
+            >
+              {name}
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className={styles.grid}>
+      {/* FEATURES */}
+      <section className="grid gap-6 md:grid-cols-3">
         {[
           {
             title: "Employee Records",
@@ -59,17 +70,22 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle>{f.title}</CardTitle>
             </CardHeader>
+
             <CardContent>
               <p>{f.body}</p>
             </CardContent>
+
             <CardFooter>
-              <Link href={f.link}>Learn more →</Link>
+              <Link href={f.link} className="text-sm underline">
+                Learn more →
+              </Link>
             </CardFooter>
           </Card>
         ))}
       </section>
 
-      <section className={styles.gridTwo}>
+      {/* SOLUTIONS */}
+      <section className="grid gap-6 md:grid-cols-2">
         {[
           {
             title: "For HR",
@@ -86,61 +102,52 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle>{s.title}</CardTitle>
             </CardHeader>
+
             <CardContent>
               <p>{s.body}</p>
             </CardContent>
+
             <CardFooter>
-              <Link href={s.link}>Explore →</Link>
+              <Link href={s.link} className="text-sm underline">
+                Explore →
+              </Link>
             </CardFooter>
           </Card>
         ))}
       </section>
 
-      <section className={styles.metrics}>
-        <Card>
-          <CardContent>
-            <div>40%</div>
-            <div>less HR admin in month one</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div>99.9%</div>
-            <div>uptime, audited</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div>7 days</div>
-            <div>to go live on average</div>
-          </CardContent>
-        </Card>
+      {/* METRICS */}
+      <section className="grid gap-6 md:grid-cols-3 text-center">
+        {[
+          ["40%", "less HR admin in month one"],
+          ["99.9%", "uptime, audited"],
+          ["7 days", "to go live on average"],
+        ].map(([value, label]) => (
+          <Card key={value}>
+            <CardContent className="flex flex-col items-center gap-2">
+              <div className="text-3xl font-semibold">{value}</div>
+              <div className="text-sm text-[var(--color-text-tertiary)]">
+                {label}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </section>
 
-      <section className={styles.how}>
+      {/* HOW */}
+      <section className="grid gap-6 md:grid-cols-3">
         {[
-          {
-            step: "1",
-            title: "Connect",
-            body: "Import employees and documents securely.",
-          },
-          {
-            step: "2",
-            title: "Configure",
-            body: "Set policies, roles, and approvals per tenant.",
-          },
-          {
-            step: "3",
-            title: "Automate",
-            body: "Use templates and reminders to reduce manual work.",
-          },
+          { step: "1", title: "Connect", body: "Import employees and documents securely." },
+          { step: "2", title: "Configure", body: "Set policies, roles, and approvals per tenant." },
+          { step: "3", title: "Automate", body: "Use templates and reminders to reduce manual work." },
         ].map((h) => (
           <Card key={h.step}>
             <CardHeader>
-              <CardTitle>{h.step}. {h.title}</CardTitle>
+              <CardTitle>
+                {h.step}. {h.title}
+              </CardTitle>
             </CardHeader>
+
             <CardContent>
               <p>{h.body}</p>
             </CardContent>
@@ -148,72 +155,68 @@ export default function HomePage() {
         ))}
       </section>
 
-      <section className={styles.testimonial}>
+      {/* TESTIMONIAL */}
+      <section>
         <Card>
-          <CardContent>
-            <blockquote>
-              “SixSoftware is the first HR system our managers actually like
-              using.”
+          <CardContent className="flex flex-col gap-4">
+            <blockquote className="italic text-lg">
+              “SixSoftware is the first HR system our managers actually like using.”
             </blockquote>
-            <div>— Marta Kowalska, People Ops, Nimbus</div>
+
+            <div className="text-sm text-[var(--color-text-tertiary)]">
+              — Marta Kowalska, People Ops, Nimbus
+            </div>
           </CardContent>
         </Card>
       </section>
 
-      <section className={styles.faq}>
-        <h2>FAQ</h2>
-        <div className={styles.faqGrid}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Can we customize per tenant?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Yes—branding, fields, and policies can be tenant-specific.</p>
-            </CardContent>
-          </Card>
+      {/* FAQ */}
+      <section className="flex flex-col gap-6">
+        <h2 className="text-3xl font-medium">FAQ</h2>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Do you support SSO?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>SAML/OIDC are available on Enterprise.</p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            ["Can we customize per tenant?", "Yes—branding, fields, and policies can be tenant-specific."],
+            ["Do you support SSO?", "SAML/OIDC are available on Enterprise."],
+            ["Where is data hosted?", "EU or US regions—your choice. Backups and encryption by default."],
+          ].map(([title, body]) => (
+            <Card key={title}>
+              <CardHeader>
+                <CardTitle>{title}</CardTitle>
+              </CardHeader>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Where is data hosted?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>
-                EU or US regions—your choice. Backups and encryption by default.
-              </p>
-            </CardContent>
-          </Card>
+              <CardContent>
+                <p>{body}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      <section className={styles.finalCta}>
+      {/* FINAL CTA */}
+      <section>
         <Card>
           <CardHeader>
             <CardTitle>Ready to simplify HR?</CardTitle>
           </CardHeader>
+
           <CardContent>
             <p>Get a guided demo or start a trial with sample data.</p>
           </CardContent>
-          <CardFooter>
+
+          <CardFooter className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Button asChild>
               <Link href="/contact">Request demo</Link>
             </Button>
 
-            <form className={styles.newsletter}>
+            <form className="flex gap-2 w-full md:w-auto">
               <Input name="work-email" placeholder="Work email" type="email"/>
               <Button variant="secondary">Subscribe</Button>
             </form>
           </CardFooter>
         </Card>
       </section>
+
     </div>
   );
 }

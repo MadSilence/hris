@@ -1,4 +1,3 @@
-import styles from "./solutions.module.css";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 
 const solutions = [
@@ -24,19 +23,25 @@ const solutions = [
 
 export default function SolutionsPage() {
   return (
-    <div className={styles.wrap}>
-      <h1>Solutions</h1>
-      <p className={styles.lead}>Role-based value across your organization.</p>
+    <div className="flex flex-col gap-10">
+      <section className="space-y-4">
+        <h1 className="text-5xl font-medium">Solutions</h1>
+        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+          Role-based value across your organization.
+        </p>
+      </section>
 
-      <div className={styles.grid}>
+      <section className="grid gap-6 md:grid-cols-3">
         {solutions.map((s) => (
           <Card key={s.id} id={s.id}>
             <CardHeader>
               <CardTitle>{s.title}</CardTitle>
             </CardHeader>
-            <CardContent>
+
+            <CardContent className="space-y-4">
               <p>{s.body}</p>
-              <ul>
+
+              <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-text-tertiary)]">
                 {s.bullets.map((b) => (
                   <li key={b}>{b}</li>
                 ))}
@@ -44,7 +49,7 @@ export default function SolutionsPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </section>
     </div>
   );
 }

@@ -1,31 +1,32 @@
 "use client";
 
-import TrialForm, { TrialValues } from "../TrialForm/TrialForm";
+import { FC, useCallback, useState } from "react";
 import { useStartTrialAction } from "../../hooks/useStartTrialAction";
-import { useState } from "react";
+import TrialForm, { TrialValues } from "@/components/modules/trial/components/TrialForm/TrialForm";
 
-const StartTrialContainer: React.FC = () => {
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+const StartTrialContainer: FC = () => {
+  const [isSuccess, setIsSuccess] = useState(false);
   const startTrial = useStartTrialAction();
 
-  const handleSubmit = async (values: TrialValues) => {
-    try {
+  const handleSubmit = useCallback(
+    async (values: TrialValues) => {
       const result = await startTrial.mutateAsync(values);
 
       if (result) {
         setIsSuccess(true);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    },
+    [startTrial],
+  );
 
   return (
     <TrialForm
-      submitting={startTrial.isPending}
-      apiError={startTrial.error instanceof Error ? startTrial.error.message : undefined}
-      onSubmit={handleSubmit}
+      isLoading={startTrial.isPending}
+      apiError={
+        startTrial.error instanceof Error ? startTrial.error.message : undefined
+      }
       isSuccess={isSuccess}
+      onSubmitAction={handleSubmit}
     />
   );
 };

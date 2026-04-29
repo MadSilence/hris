@@ -1,4 +1,3 @@
-import styles from "./pricing.module.css";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
 
@@ -25,32 +24,37 @@ const tiers = [
 
 export default function PricingPage() {
   return (
-    <div className={styles.wrap}>
-      <h1>Pricing</h1>
-      <p className={styles.lead}>
-        Simple, transparent pricing that scales with your team.
-      </p>
+    <div className="flex flex-col gap-10">
+      <section className="space-y-4">
+        <h1 className="text-5xl font-medium">Pricing</h1>
+        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+          Simple, transparent pricing that scales with your team.
+        </p>
+      </section>
 
-      <div className={styles.grid}>
+      <section className="grid gap-6 md:grid-cols-3">
         {tiers.map((t) => (
           <Card key={t.name}>
             <CardHeader>
               <CardTitle>{t.name}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div>{t.price}</div>
-              <ul>
+
+            <CardContent className="space-y-5">
+              <div className="text-2xl font-semibold">{t.price}</div>
+
+              <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-text-tertiary)]">
                 {t.features.map((f) => (
                   <li key={f}>{f}</li>
                 ))}
               </ul>
             </CardContent>
+
             <CardFooter>
-              <Button>{t.cta}</Button>
+              <Button className="w-full">{t.cta}</Button>
             </CardFooter>
           </Card>
         ))}
-      </div>
+      </section>
     </div>
   );
 }

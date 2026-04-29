@@ -1,4 +1,3 @@
-import styles from "./products.module.css";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
 
@@ -22,28 +21,32 @@ const products = [
 
 export default function ProductsPage() {
   return (
-    <div className={styles.wrap}>
-      <h1>Products</h1>
-      <p className={styles.lead}>
-        Modular building blocks designed to work beautifully together.
-      </p>
+    <div className="flex flex-col gap-10">
+      <section className="space-y-4">
+        <h1 className="text-5xl font-medium">Products</h1>
+        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+          Modular building blocks designed to work beautifully together.
+        </p>
+      </section>
 
-      <div className={styles.grid}>
+      <section className="grid gap-6 md:grid-cols-3">
         {products.map((p) => (
           <Card key={p.id} id={p.id}>
             <CardHeader>
               <CardTitle>{p.title}</CardTitle>
             </CardHeader>
+
             <CardContent>
               <p>{p.body}</p>
             </CardContent>
-            <CardFooter>
+
+            <CardFooter className="flex flex-col gap-3 sm:flex-row">
               <Button>Request demo</Button>
               <Button variant="secondary">Learn more</Button>
             </CardFooter>
           </Card>
         ))}
-      </div>
+      </section>
     </div>
   );
 }

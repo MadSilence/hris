@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { useForm } from "react-hook-form";
-
+import React, { FormEvent, useCallback } from "react";
+import { setNestedObjectValues, useFormik } from "formik";
+import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/public/desact/src/components/ui/form";
-
-import styles from "./ConfirmTrialForm.module.css";
+import { Label } from "@/public/desact/src/components/ui/label";
 
 export type PasswordValues = {
   password: string;
@@ -15,8 +13,8 @@ export type PasswordValues = {
 };
 
 export interface SetPasswordFormProps {
-  onSubmit: (values: PasswordValues) => void | Promise<void>;
-  submitting?: boolean;
+  onSubmitAction: (values: PasswordValues) => void | Promise<void>;
+  isLoading?: boolean;
   apiError?: string;
   isSuccess: boolean;
 }
@@ -30,158 +28,194 @@ export enum PasswordMessages {
 }
 
 function isStrongPassword(value: string) {
-  if (!value) return false;
-  if (value.length < 8) return false;
-  if (!/[a-z]/.test(value)) return false;
-  if (!/[A-Z]/.test(value)) return false;
-  if (!/[0-9]/.test(value)) return false;
-  if (!/[^A-Za-z0-9]/.test(value)) return false;
-  return true;
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
-type ApiErrorProps = { message?: string };
+const schema = yup.object({
+  password: yup
+    .string()
+    .required(PasswordMessages.Required)
+    .min(8, PasswordMessages.TooShort)
+    .test("strong-password", PasswordMessages.Weak, (value) =>
+      isStrongPassword(value ?? ""),
+    )
+    .nonNullable(),
 
-function ApiErrorMessage({ message }: ApiErrorProps) {
+  confirmPassword: yup
+    .string()
+    .required(PasswordMessages.ConfirmRequired)
+    .oneOf([yup.ref("password")], PasswordMessages.Mismatch)
+    .nonNullable(),
+});
+
+type FieldErrorProps = {
+  message?: string;
+};
+
+function FieldError({ message }: FieldErrorProps) {
   if (!message) return null;
+
   return (
-    <p className={styles.apiError} role="alert">
+    <p className="text-sm text-destructive" role="alert">
       {message}
     </p>
   );
 }
 
-type HeaderProps = { className?: string };
+type ApiErrorProps = {
+  message?: string;
+};
 
-function ConfirmHeader({ className }: HeaderProps) {
+function ApiErrorMessage({ message }: ApiErrorProps) {
+  if (!message) return null;
+
   return (
-    <div className={className}>
-      <h1 className={styles.title}>Set your password</h1>
-      <p className={styles.subtitle}>Create a strong password for your SixSoftware account.</p>
+    <p
+      className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      role="alert"
+    >
+      {message}
+    </p>
+  );
+}
+
+function ConfirmHeader() {
+  return (
+    <div className="space-y-3 text-center">
+      <h1 className="text-4xl font-medium">Set your password</h1>
+
+      <p className="mx-auto max-w-xl text-md text-[var(--color-text-tertiary)]">
+        Create a strong password for your SixSoftware account.
+      </p>
     </div>
   );
 }
 
-type SuccessProps = { className?: string };
-
-function ConfirmSuccessBlock({ className }: SuccessProps) {
+function ConfirmSuccessBlock() {
   return (
-    <div className={className}>
-      <h1 className={styles.title}>Password set</h1>
-      <p className={styles.subtitle}>
-        Your password has been created. You can now sign in and continue setting up your company.
+    <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
+      <h1 className="text-4xl font-medium">Password set</h1>
+
+      <p className="text-md text-[var(--color-text-tertiary)]">
+        Your password has been created. You can now sign in and continue setting
+        up your company.
       </p>
-      <p className={styles.hint}>
-        Head over to the <a href="/login">login page</a> to get started.
+
+      <p className="text-sm text-[var(--color-text-tertiary)]">
+        Head over to the{" "}
+        <a href="/login" className="underline underline-offset-4">
+          login page
+        </a>{" "}
+        to get started.
       </p>
     </div>
   );
 }
 
 export default function ConfirmTrialForm({
-  onSubmit,
-  submitting,
+  onSubmitAction,
+  isLoading = false,
   apiError,
   isSuccess,
 }: SetPasswordFormProps) {
-  const form = useForm<PasswordValues>({
-    defaultValues: {
+  const handleFormSubmission = useCallback(
+    async (values: PasswordValues) => {
+      await onSubmitAction(values);
+    },
+    [onSubmitAction],
+  );
+
+  const formik = useFormik<PasswordValues>({
+    initialValues: {
       password: "",
       confirmPassword: "",
     },
-    mode: "onSubmit",
+    validationSchema: schema,
+    validateOnBlur: false,
+    validateOnChange: false,
+    onSubmit: handleFormSubmission,
   });
 
-  const busy = (submitting ?? false) || form.formState.isSubmitting;
+  const busy = isLoading || formik.isSubmitting;
 
-  const submitHandler = useCallback(
-    async (values: PasswordValues) => {
-      await onSubmit(values);
-    },
-    [onSubmit]
-  );
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (busy) return;
+
+    const errors = await formik.validateForm();
+
+    await formik.setTouched(setNestedObjectValues(errors, true), true);
+
+    if (Object.keys(errors).length > 0) return;
+
+    await formik.submitForm();
+  };
+
+  if (isSuccess) {
+    return <ConfirmSuccessBlock/>;
+  }
 
   return (
-    <div className={styles.centerWrap}>
-      {!isSuccess ? (
-        <div className={styles.form}>
-          <ConfirmHeader className={styles.titleBlock}/>
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-xl items-center justify-center py-12">
+      <div className="w-full space-y-8">
+        <ConfirmHeader/>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-6" noValidate>
-              <FormField
-                control={form.control}
-                name="password"
-                rules={{
-                  required: PasswordMessages.Required,
-                  validate: (v) => {
-                    if (!v) return PasswordMessages.Required;
-                    if (v.length < 8) return PasswordMessages.TooShort;
-                    if (!isStrongPassword(v)) return PasswordMessages.Weak;
-                    return true;
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="gap-0 mb-4">
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password*"
-                        autoComplete="new-password"
-                        disabled={busy}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )}
-              />
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Password</Label>
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                rules={{
-                  required: PasswordMessages.ConfirmRequired,
-                  validate: (v) => {
-                    if (!v) return PasswordMessages.ConfirmRequired;
-                    const password = form.getValues("password");
-                    if (v !== password) return PasswordMessages.Mismatch;
-                    return true;
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="gap-0 mb-4">
-                    <FormLabel>Confirm password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm password*"
-                        autoComplete="new-password"
-                        disabled={busy}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )}
-              />
+            <Input
+              id="confirm-password"
+              name="password"
+              type="password"
+              placeholder="Password*"
+              autoComplete="new-password"
+              value={formik.values.password}
+              onChange={(e) =>
+                formik.setFieldValue("password", e.currentTarget.value)
+              }
+              disabled={busy}
+              required
+              aria-invalid={!!formik.errors.password}
+            />
 
-              <p className={styles.hint}>
-                Use at least 8 characters with upper &amp; lower case letters, a number, and a
-                symbol.
-              </p>
+            <FieldError message={formik.errors.password}/>
+          </div>
 
-              <ApiErrorMessage message={apiError}/>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password-repeat">Confirm password</Label>
 
-              <Button type="submit" variant="default" disabled={busy} className="h-11 w-full">
-                {busy ? "Saving…" : "Set password"}
-              </Button>
-            </form>
-          </Form>
-        </div>
-      ) : (
-        <ConfirmSuccessBlock className={styles.successBlock}/>
-      )}
+            <Input
+              id="confirm-password-repeat"
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm password*"
+              autoComplete="new-password"
+              value={formik.values.confirmPassword}
+              onChange={(e) =>
+                formik.setFieldValue("confirmPassword", e.currentTarget.value)
+              }
+              disabled={busy}
+              required
+              aria-invalid={!!formik.errors.confirmPassword}
+            />
+
+            <FieldError message={formik.errors.confirmPassword}/>
+          </div>
+
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            Use at least 8 characters with upper &amp; lower case letters, a
+            number, and a symbol.
+          </p>
+
+          <ApiErrorMessage message={apiError}/>
+
+          <Button type="submit" disabled={busy} className="h-11 w-full">
+            {busy ? "Saving…" : "Set password"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
