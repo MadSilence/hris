@@ -148,7 +148,7 @@ const PeopleTableContainer: React.FC = () => {
   const visibleColumns = useMemo(() => columns.filter((c) => c.checked), [columns]);
 
   return (
-    <div className="px-8 py-8">
+    <div className="py-8">
       <PeopleTopbar
         totalCount={items.length}
         selectedCount={selectedIds.size}

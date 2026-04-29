@@ -14,7 +14,7 @@ const LoginContainer: React.FC = () => {
       const res = await loginAction.mutateAsync(values);
 
       if (res.ok) {
-        router.push("/organization/people");
+        router.push("/dashboard");
         return;
       }
 

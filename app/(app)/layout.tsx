@@ -33,7 +33,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const allTopItems: (NavItem & { module?: string })[] = [
-    { label: "Home", href: "/home", Icon: Home },
+    { label: "Home", href: "/dashboard", Icon: Home },
     {
       label: "Inbox",
       href: "/inbox",
@@ -114,7 +114,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <PermissionsProvider>
       <CurrentUserProvider>
         <ImpersonationProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <LayoutContent>
+            <div className="px-16 py-16">
+              {children}
+            </div>
+          </LayoutContent>
         </ImpersonationProvider>
       </CurrentUserProvider>
     </PermissionsProvider>

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { ShieldAlert } from "lucide-react";
 
-export function AccessDenied() {
+export default function ForbiddenPage() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center p-8">
+    <div className="flex min-h-svh items-center justify-center p-8">
       <div className="flex max-w-xl flex-col items-center gap-6 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brown-50">
           <ShieldAlert className="h-8 w-8 text-brown-600"/>
@@ -20,11 +20,13 @@ export function AccessDenied() {
           </p>
         </div>
 
-        <Button asChild>
-          <Link href="/dashboard" className="no-underline">
-            Back to dashboard
-          </Link>
-        </Button>
+        <div className="flex gap-3">
+          <Button asChild>
+            <Link href="/dashboard" className="no-underline">
+              Back to dashboard
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

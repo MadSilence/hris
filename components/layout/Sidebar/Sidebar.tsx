@@ -140,7 +140,7 @@ const AppSidebar: FC<SidebarProps> = ({
               ].join(" ")}
             >
               <Link
-                href="/organization/people"
+                href="/dashboard"
                 className={[
                   "min-w-0 items-center rounded-lg no-underline hover:no-underline",
                   collapsed ? "hidden p-0" : "flex flex-1 gap-3 px-2 py-2",
