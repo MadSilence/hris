@@ -48,14 +48,15 @@ export function UserDataHeader({ userId, user: userProp, editing = false, onTogg
 
   const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
   const meta = normalizeCustom(user.custom);
+  const avatarUrl = user.avatarUrl ?? null;
 
   return (
-    <div className="px-8">
-      <header className="py-6">
+    <div>
+      <header className="pb-6">
         <div className="grid grid-cols-[auto_1fr_auto] items-start gap-6">
           <div className="relative">
             <Avatar className="size-28">
-              {meta.avatarUrl ? <AvatarImage src={meta.avatarUrl} alt={fullName}/> : null}
+              {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName}/> : null}
               <AvatarFallback className="text-2xl">{initialsOf(fullName)}</AvatarFallback>
             </Avatar>
             <Button size="icon" variant="outline" className="absolute right-1 bottom-1 rounded-full" aria-label="Edit photo">

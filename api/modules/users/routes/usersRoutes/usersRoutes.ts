@@ -12,6 +12,7 @@ export class UsersRoutes {
     const sortDir = (searchParams.get("sortDir") ?? undefined) as "asc" | "desc" | undefined;
 
     const users = await hrisApiUsersService.getUsers({ limit, cursor, q, sortField, sortDir });
+    console.log(Response.json(users))
     return Response.json(users);
   }
 

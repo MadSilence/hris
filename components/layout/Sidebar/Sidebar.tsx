@@ -5,7 +5,7 @@ import type { ComponentType, FC, SVGProps } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage, } from "@/public/desact/src/components/ui/avatar";
 import {
-  Sidebar as DesactSidebar,
+  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
@@ -17,6 +17,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/public/desact/src/components/ui/sidebar";
+import { Company } from "@/models/company";
 
 export type NavItem = {
   label: string;
@@ -37,6 +38,7 @@ type SidebarProps = {
   topItems: NavItem[];
   bottomItems: NavItem[];
   profile: SidebarProfile;
+  company?: Company;
 };
 
 const getInitials = (name: string) => {
@@ -58,6 +60,7 @@ const AppSidebar: FC<SidebarProps> = ({
   topItems,
   bottomItems,
   profile,
+  company,
 }) => {
   const pathname = usePathname();
 
@@ -119,7 +122,7 @@ const AppSidebar: FC<SidebarProps> = ({
 
   return (
     <SidebarProvider open={open} onOpenChange={handleOpenChange}>
-      <DesactSidebar
+      <Sidebar
         collapsible="icon"
         className="
           group/sidebar
@@ -136,25 +139,33 @@ const AppSidebar: FC<SidebarProps> = ({
             <div
               className={[
                 "group/logo relative flex min-w-0 items-center",
-                collapsed ? "flex-none" : "flex-1",
+                collapsed ? "w-10 justify-center" : "flex-1",
               ].join(" ")}
             >
               <Link
                 href="/dashboard"
                 className={[
                   "min-w-0 items-center rounded-lg no-underline hover:no-underline",
-                  collapsed ? "hidden p-0" : "flex flex-1 gap-3 px-2 py-2",
+                  collapsed
+                    ? "flex size-10 justify-center p-0"
+                    : "flex flex-1 gap-3 px-2 py-2",
                 ].join(" ")}
               >
-                <span
-                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: "var(--color-sidebar-primary)" }}
-                  aria-hidden
-                />
+                <Avatar className="size-8 shrink-0 rounded-lg">
+                  <AvatarImage
+                    src={company?.companyLogo ?? undefined}
+                    alt={company?.name ?? "Company logo"}
+                  />
+                  <AvatarFallback className="rounded-lg text-xs font-semibold">
+                    {getInitials(company?.name ?? "Company")}
+                  </AvatarFallback>
+                </Avatar>
 
-                <span className="truncate text-[15px] font-semibold">
-                  SixSoftware
-                </span>
+                {!collapsed ? (
+                  <span className="truncate text-[15px] font-semibold">
+            {company?.name ?? "Loading..."}
+          </span>
+                ) : null}
               </Link>
 
               <SidebarTrigger
@@ -162,7 +173,7 @@ const AppSidebar: FC<SidebarProps> = ({
                 className={[
                   "size-8",
                   collapsed
-                    ? "absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover/logo:opacity-100"
+                    ? "absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/logo:opacity-100"
                     : "ml-auto",
                 ].join(" ")}
               />
@@ -225,7 +236,7 @@ const AppSidebar: FC<SidebarProps> = ({
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
-      </DesactSidebar>
+      </Sidebar>
     </SidebarProvider>
   );
 };

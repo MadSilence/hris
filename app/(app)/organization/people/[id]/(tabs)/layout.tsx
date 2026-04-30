@@ -23,12 +23,12 @@ export default async function UserTabsLayout({
 
   return (
     <UserProvider userId={id} initialUser={user}>
-      <div className="flex h-full min-h-0 flex-col">
-        <header className="px-8 pt-6">
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
+        <header>
           <UserDataHeader userId={id} user={user}/>
         </header>
 
-        <nav className="px-8 pb-5">
+        <nav className="pb-5">
           <div className="flex gap-1 border-b border-brown-200">
             {tabs.map((tab) => (
               <Button
@@ -45,8 +45,10 @@ export default async function UserTabsLayout({
           </div>
         </nav>
 
-        <main className="flex h-full min-h-0 flex-1 overflow-hidden">
-          {children}
+        <main className="block w-full min-w-0 flex-1 overflow-hidden">
+          <div className="w-full min-w-0">
+            {children}
+          </div>
         </main>
       </div>
     </UserProvider>

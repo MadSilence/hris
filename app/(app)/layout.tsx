@@ -14,6 +14,7 @@ import { Toast } from "@/components/ui/Toast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
 import ImpersonationProvider from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
+import CompanyDataProvider, { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -21,6 +22,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const { user } = useCurrentUser();
+  const { company } = useCompanyData();
 
   useEffect(() => {
     const handleForbidden = (e: Event) => {
@@ -95,6 +97,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         topItems={top}
         bottomItems={bottom}
         profile={profile}
+        company={company}
       />
 
       <div className={styles.content}>
@@ -113,13 +116,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <PermissionsProvider>
       <CurrentUserProvider>
-        <ImpersonationProvider>
-          <LayoutContent>
-            <div className="px-16 py-16">
-              {children}
-            </div>
-          </LayoutContent>
-        </ImpersonationProvider>
+        <CompanyDataProvider>
+          <ImpersonationProvider>
+            <LayoutContent>
+              <div className="px-16 py-16">
+                {children}
+              </div>
+            </LayoutContent>
+          </ImpersonationProvider>
+        </CompanyDataProvider>
       </CurrentUserProvider>
     </PermissionsProvider>
   );

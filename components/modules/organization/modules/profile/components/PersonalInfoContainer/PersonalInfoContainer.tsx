@@ -13,7 +13,7 @@ import { Loader } from "@/components/ui/Loader";
 import { Card } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
 
-type PersonalInfoContainerProps = { user: User };
+type PersonalInfoContainerProps = { user?: User };
 
 export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ user }) => {
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
@@ -94,53 +94,49 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
   if (error || !groups.length) {
     return (
-      <div className="px-8">
-        <Card className="p-6">
-          <div className={`text-sm ${error ? "text-red-600" : "text-muted-foreground"}`}>
-            {error ? "Failed to load" : "No groups"}
-          </div>
-        </Card>
-      </div>
+      <Card className="p-6">
+        <div className={`text-sm ${error ? "text-red-600" : "text-muted-foreground"}`}>
+          {error ? "Failed to load" : "No groups"}
+        </div>
+      </Card>
     );
   }
 
   return (
-    <div className="px-8">
-      <div className="w-full max-h-[70vh] bg-background overflow-auto">
-        <div className="grid grid-cols-[260px_1fr] gap-7">
-          <PersonalInfoSidebar
-            groups={groups}
-            activeId={activeId || groups[0]?.id}
-            onSelect={(id) => scrollToId(id)}
-          />
+    <div className="w-full max-h-[70vh] bg-background overflow-auto">
+      <div className="grid grid-cols-[260px_1fr] gap-7">
+        <PersonalInfoSidebar
+          groups={groups}
+          activeId={activeId || groups[0]?.id}
+          onSelect={(id) => scrollToId(id)}
+        />
 
-          <PersonalInfoAttributesList
-            ref={scrollContainerRef}
-            groups={groups}
-            valueMap={isEdit ? draftValues : initialValues}
-            registerSection={registerSection}
-            isEdit={isEdit}
-            onChangeValue={(attrId, v) =>
-              setDraftValues((d) => ({ ...d, [attrId]: v }))
-            }
-            headerActions={
-              !isEdit ? (
-                <Button variant="outline" onClick={onEditToggle}>
-                  Edit
+        <PersonalInfoAttributesList
+          ref={scrollContainerRef}
+          groups={groups}
+          valueMap={isEdit ? draftValues : initialValues}
+          registerSection={registerSection}
+          isEdit={isEdit}
+          onChangeValue={(attrId, v) =>
+            setDraftValues((d) => ({ ...d, [attrId]: v }))
+          }
+          headerActions={
+            !isEdit ? (
+              <Button variant="outline" onClick={onEditToggle}>
+                Edit
+              </Button>
+            ) : (
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={onCancel}>
+                  Cancel
                 </Button>
-              ) : (
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={onCancel}>
-                    Cancel
-                  </Button>
-                  <Button onClick={onSave} disabled={!dirty}>
-                    Save
-                  </Button>
-                </div>
-              )
-            }
-          />
-        </div>
+                <Button onClick={onSave} disabled={!dirty}>
+                  Save
+                </Button>
+              </div>
+            )
+          }
+        />
       </div>
     </div>
   );

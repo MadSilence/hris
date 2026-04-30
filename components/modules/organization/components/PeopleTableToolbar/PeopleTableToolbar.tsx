@@ -1,6 +1,8 @@
 "use client";
+
 import React from "react";
-import styles from "./PeopleTableToolbar.module.css";
+import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type PeopleTableToolbarProps = {
   query: string;
@@ -13,27 +15,33 @@ const PeopleTableToolbar: React.FC<PeopleTableToolbarProps> = ({
   query,
   onQueryChange,
   rowsCount,
-  isSearching
+  isSearching,
 }) => {
   return (
-    <div className={styles.root}>
-      <input
-        className={styles.input}
-        placeholder="search by name or email"
+    <div className="flex items-center gap-2">
+      <Input
+        placeholder="Search by name or email"
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         inputMode="search"
+        className="h-9 max-w-sm"
       />
-      <button
-        className={styles.clearBtn}
+
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onQueryChange("")}
         disabled={!query}
-        aria-label="clear"
       >
         Clear
-      </button>
-      <div className={styles.meta}>
-        {isSearching ? "searching…" : rowsCount !== undefined ? `${rowsCount} rows` : ""}
+      </Button>
+
+      <div className="ml-auto text-sm text-muted-foreground whitespace-nowrap">
+        {isSearching
+          ? "Searching…"
+          : rowsCount !== undefined
+            ? `${rowsCount} rows`
+            : ""}
       </div>
     </div>
   );

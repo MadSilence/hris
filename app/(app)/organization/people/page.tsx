@@ -40,7 +40,7 @@ export default function OrganizationPeoplePage() {
     <div className="flex flex-col gap-10">
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold">Organisation</h1>
+          <h1 className="text-[40px] font-semibold">Organisation</h1>
 
           <p className="max-w-2xl text-sm text-[var(--color-text-tertiary)]">
             Browse employees, search by name/email, and manage custom attributes.

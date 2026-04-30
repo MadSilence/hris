@@ -39,7 +39,7 @@ describe("TrialForm", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/please enter your first name/i)).toBeInTheDocument();
     expect(screen.getByText(/please enter your last name/i)).toBeInTheDocument();
-    expect(screen.getByText(/please choose a subdomain/i)).toBeInTheDocument();
+    expect(screen.getByText(/please enter your company name/i)).toBeInTheDocument();
     expect(
       screen.getByText(/please accept the privacy terms to continue/i),
     ).toBeInTheDocument();
@@ -64,26 +64,49 @@ describe("TrialForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("normalizes company name into subdomain while typing", async () => {
+  it("allows uppercase letters, spaces and hyphens in company name", async () => {
     const user = userEvent.setup();
 
     renderForm();
 
-    await user.type(screen.getByLabelText(/company name/i), "Acme Company!");
+    await user.type(screen.getByLabelText(/company name/i), "My cool-Company");
 
-    expect(screen.getByLabelText(/company name/i)).toHaveValue("acmecompany");
+    expect(screen.getByLabelText(/company name/i)).toHaveValue("My cool-Company");
   });
 
-  it("submits sanitized values", async () => {
+  it("shows validation error for unsupported company name characters", async () => {
     const user = userEvent.setup();
     const onSubmitAction = jest.fn();
 
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/business email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/first name/i), "John");
+    await user.type(screen.getByLabelText(/last name/i), "Doe");
+    await user.type(screen.getByLabelText(/company name/i), "Acme!");
+    await user.click(screen.getByLabelText(/by submitting this form/i));
+
+    await user.click(
+      screen.getByRole("button", { name: /start your free trial/i }),
+    );
+
+    expect(onSubmitAction).not.toHaveBeenCalled();
+
+    expect(
+      await screen.findByText(/use letters, numbers, spaces and hyphens only/i),
+    ).toBeInTheDocument();
+  });
+
+  it("submits sanitized values without normalizing company name", async () => {
+    const user = userEvent.setup();
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction });
+
+    await user.type(screen.getByLabelText(/business email/i), " test@example.com ");
     await user.type(screen.getByLabelText(/first name/i), " John ");
     await user.type(screen.getByLabelText(/last name/i), " Doe ");
-    await user.type(screen.getByLabelText(/company name/i), "Acme Company");
+    await user.type(screen.getByLabelText(/company name/i), " My cool-Company ");
     await user.click(screen.getByLabelText(/by submitting this form/i));
 
     await user.click(
@@ -95,7 +118,7 @@ describe("TrialForm", () => {
         email: "test@example.com",
         firstName: "John",
         lastName: "Doe",
-        companyName: "acmecompany",
+        companyName: "My cool-Company",
         consent: true,
       });
     });
@@ -110,7 +133,7 @@ describe("TrialForm", () => {
     await user.type(screen.getByLabelText(/business email/i), "test@example.com");
     await user.type(screen.getByLabelText(/first name/i), "John");
     await user.type(screen.getByLabelText(/last name/i), "Doe");
-    await user.type(screen.getByLabelText(/company name/i), "acme");
+    await user.type(screen.getByLabelText(/company name/i), "My cool-Company");
     await user.click(screen.getByLabelText(/by submitting this form/i));
 
     await user.type(screen.getByLabelText(/company name/i), "{enter}");

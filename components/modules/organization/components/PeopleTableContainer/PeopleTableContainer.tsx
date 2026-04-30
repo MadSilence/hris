@@ -148,18 +148,18 @@ const PeopleTableContainer: React.FC = () => {
   const visibleColumns = useMemo(() => columns.filter((c) => c.checked), [columns]);
 
   return (
-    <div className="py-8">
+    <div>
       <PeopleTopbar
         totalCount={items.length}
         selectedCount={selectedIds.size}
         query={query}
-        onQueryChange={onQueryChange}
+        onQueryChangeAction={onQueryChange}
         columns={columns}
-        onColumnsChange={onColumnsChange}
+        onColumnsChangeAction={onColumnsChange}
         filters={filters}
-        onFiltersChange={onFiltersChange}
+        onFiltersChangeAction={onFiltersChange}
         fieldsMeta={fieldsData ?? []}
-        onExport={() => {
+        onExportAction={() => {
         }}
       />
 

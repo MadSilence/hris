@@ -8,8 +8,6 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { Label } from "@/public/desact/src/components/ui/label";
 
-import { InputAddon, InputGroup, } from "@/components/ui/InputGroup/InputGroup";
-
 export type TrialValues = {
   email: string;
   firstName: string;
@@ -30,24 +28,9 @@ export enum TrialMessages {
   InvalidEmail = "Enter a valid email address.",
   FirstRequired = "Please enter your first name.",
   LastRequired = "Please enter your last name.",
-  CompanyRequired = "Please choose a subdomain.",
-  SubdomainInvalid = "Use lowercase letters, numbers and hyphens only. No leading/trailing hyphen.",
+  CompanyRequired = "Please enter your company name.",
+  CompanyInvalid = "Use letters, numbers, spaces and hyphens only.",
   ConsentRequired = "Please accept the privacy terms to continue.",
-}
-
-function normalizeSubdomain(raw: string) {
-  const lower = raw.toLowerCase();
-
-  return lower
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-}
-
-function isValidSubdomain(value: string) {
-  return /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(value);
 }
 
 const schema = yup.object({
@@ -75,9 +58,9 @@ const schema = yup.object({
     .trim()
     .required(TrialMessages.CompanyRequired)
     .test(
-      "valid-subdomain",
-      TrialMessages.SubdomainInvalid,
-      (value) => !!value && isValidSubdomain(value),
+      "valid-company-name",
+      TrialMessages.CompanyInvalid,
+      (value) => !!value && isValidCompanyName(value),
     )
     .nonNullable(),
 
@@ -87,12 +70,16 @@ const schema = yup.object({
     .required(TrialMessages.ConsentRequired),
 });
 
+function isValidCompanyName(value: string) {
+  return /^[a-zA-Z0-9\s-]+$/.test(value);
+}
+
 function sanitize(values: TrialValues): TrialValues {
   return {
     email: values.email.trim(),
     firstName: values.firstName.trim(),
     lastName: values.lastName.trim(),
-    companyName: normalizeSubdomain(values.companyName),
+    companyName: values.companyName.trim(),
     consent: values.consent,
   };
 }
@@ -278,28 +265,18 @@ export default function TrialForm({
           <div className="space-y-2">
             <Label htmlFor="trial-company-name">Company name</Label>
 
-            <InputGroup>
-              <Input
-                id="trial-company-name"
-                name="companyName"
-                placeholder="Company name*"
-                value={formik.values.companyName}
-                onChange={(e) =>
-                  formik.setFieldValue(
-                    "companyName",
-                    normalizeSubdomain(e.currentTarget.value),
-                  )
-                }
-                disabled={busy}
-                required
-                aria-invalid={!!formik.errors.companyName}
-                aria-describedby="subdomain-suffix"
-              />
-
-              <InputAddon>
-                <span id="subdomain-suffix">.app.sixsoftware.com</span>
-              </InputAddon>
-            </InputGroup>
+            <Input
+              id="trial-company-name"
+              name="companyName"
+              placeholder="Company name*"
+              value={formik.values.companyName}
+              onChange={(e) =>
+                formik.setFieldValue("companyName", e.currentTarget.value)
+              }
+              disabled={busy}
+              required
+              aria-invalid={!!formik.errors.companyName}
+            />
 
             <FieldError message={formik.errors.companyName}/>
           </div>
