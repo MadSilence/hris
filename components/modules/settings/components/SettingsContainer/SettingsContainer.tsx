@@ -21,7 +21,7 @@ const SettingsContainer: React.FC = () => {
       </header>
 
       <div className="max-w-screen-xl mx-auto px-6 py-6 grid gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
           {settingsGroups.map((group) => (
             <SettingsCard
               key={group.id}
