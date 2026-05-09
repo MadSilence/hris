@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } 
 import {
   FolderOption,
   UploadDocumentForm,
-  UploadDocumentFormValues
+  UploadDocumentFormValues,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentForm";
 
 export interface UploadDocumentModalProps {
@@ -38,7 +38,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
         if (!open) requestClose();
       }}
     >
-      <DialogContent hideClose className="sm:max-w-xl">
+      <DialogContent hideClose className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Add document</DialogTitle>
           <DialogDescription>

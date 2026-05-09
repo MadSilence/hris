@@ -1,13 +1,14 @@
 "use client";
 
-import { FC, FormEvent, useCallback } from "react";
+import { FC, FormEvent, useCallback, useRef, useState } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Upload } from "lucide-react";
+import { CloudUpload, FileText, Upload, X } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { cn } from "@/public/desact/src/components/ui/utils";
 
 export type FolderOption = {
   id: string;
@@ -33,6 +34,7 @@ export interface UploadDocumentFormProps {
 }
 
 const ROOT_FOLDER_ID = "root";
+const MAX_FILE_NAME_LENGTH = 56;
 
 const schema = yup.object({
   file: yup.mixed<File>().required("Please choose a file."),
@@ -50,6 +52,30 @@ function sanitize(
   };
 }
 
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function shortenFileName(fileName: string) {
+  if (fileName.length <= MAX_FILE_NAME_LENGTH) return fileName;
+
+  const lastDotIndex = fileName.lastIndexOf(".");
+  const hasExtension = lastDotIndex > 0 && lastDotIndex < fileName.length - 1;
+
+  if (!hasExtension) {
+    return `${fileName.slice(0, MAX_FILE_NAME_LENGTH - 3)}...`;
+  }
+
+  const extension = fileName.slice(lastDotIndex);
+  const baseName = fileName.slice(0, lastDotIndex);
+  const availableBaseLength = MAX_FILE_NAME_LENGTH - extension.length - 3;
+
+  return `${baseName.slice(0, availableBaseLength)}...${extension}`;
+}
+
 export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   isLoading = false,
   folders,
@@ -57,6 +83,9 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   onCancelAction,
   onSubmitAction,
 }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleFormSubmission = useCallback(
     (values: UploadDocumentInternalFormValues) => {
       const sanitized = sanitize(values);
@@ -80,10 +109,15 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     onSubmit: handleFormSubmission,
   });
 
+  const setFile = (file: File | null) => {
+    void formik.setFieldValue("file", file);
+    void formik.setFieldTouched("file", true, false);
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading || !formik.values.file) return;
+    if (isLoading) return;
 
     const errors = await formik.validateForm();
 
@@ -94,28 +128,58 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     await formik.submitForm();
   };
 
+  const selectedFile = formik.values.file;
+
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="space-y-2">
           <Label>File</Label>
 
-          <label
-            className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-dashed px-4 py-3 hover:bg-muted/40">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Upload className="h-4 w-4 text-brown-600"/>
-                {formik.values.file
-                  ? formik.values.file.name
-                  : "Choose file from device"}
-              </div>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              if (!isLoading) inputRef.current?.click();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
 
-              <div className="text-xs text-muted-foreground">
-                Supported formats depend on backend validation.
-              </div>
-            </div>
+                if (!isLoading) inputRef.current?.click();
+              }
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
 
+              if (!isLoading) setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+
+              if (isLoading) return;
+
+              const nextFile = e.dataTransfer.files?.[0] ?? null;
+
+              setFile(nextFile);
+            }}
+            className={cn(
+              "flex min-h-[260px] items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-all",
+              isLoading
+                ? "cursor-not-allowed opacity-60"
+                : "cursor-pointer hover:border-brown-300 hover:bg-brown-50/50",
+              isDragging
+                ? "border-brown-400 bg-brown-50"
+                : "border-brown-200",
+            )}
+          >
             <input
+              ref={inputRef}
               aria-label="File"
               type="file"
               className="hidden"
@@ -123,12 +187,106 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
               onChange={(e) => {
                 const nextFile = e.currentTarget.files?.[0] ?? null;
 
-                void formik.setFieldValue("file", nextFile);
+                setFile(nextFile);
               }}
             />
-          </label>
 
-          {formik.errors.file && (
+            <div className="flex w-full max-w-md flex-col items-center">
+              {isDragging ? (
+                <>
+                  <CloudUpload className="mb-4 h-12 w-12 text-brown-600"/>
+                  <p className="mb-2 font-medium text-brown-800">
+                    Drop file to upload
+                  </p>
+                  <p className="text-sm text-brown-600">
+                    Release to choose this file
+                  </p>
+                </>
+              ) : selectedFile ? (
+                <>
+                  <FileText className="mb-4 h-12 w-12 text-brown-500"/>
+
+                  <p
+                    title={selectedFile.name}
+                    className="mb-1 max-w-full break-words text-center font-medium text-stone-900"
+                  >
+                    {shortenFileName(selectedFile.name)}
+                  </p>
+
+                  <p className="mb-4 text-sm text-stone-500">
+                    {formatFileSize(selectedFile.size)}
+                  </p>
+
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isLoading}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        inputRef.current?.click();
+                      }}
+                    >
+                      <Upload className="mr-2 h-4 w-4"/>
+                      Choose another
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={isLoading}
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        if (inputRef.current) {
+                          inputRef.current.value = "";
+                        }
+
+                        setFile(null);
+                      }}
+                    >
+                      <X className="mr-2 h-4 w-4"/>
+                      Remove
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CloudUpload className="mb-4 h-12 w-12 text-brown-400"/>
+
+                  <p className="mb-2 font-medium text-stone-900">
+                    Drag file here to upload
+                  </p>
+
+                  <p className="mb-4 text-sm text-stone-500">
+                    or click to browse files
+                  </p>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      inputRef.current?.click();
+                    }}
+                  >
+                    <Upload className="mr-2 h-4 w-4"/>
+                    Choose file
+                  </Button>
+
+                  <p className="mt-3 text-xs text-stone-500">
+                    Supports PDF, DOC, JPG, PNG files up to 10MB
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {formik.errors.file && formik.touched.file && (
             <p className="text-sm text-destructive">
               {String(formik.errors.file)}
             </p>
@@ -140,7 +298,9 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
 
           <Select
             value={formik.values.folderId}
-            onValueChange={(value) => formik.setFieldValue("folderId", value)}
+            onValueChange={(value) => {
+              void formik.setFieldValue("folderId", value);
+            }}
             disabled={isLoading}
           >
             <SelectTrigger>

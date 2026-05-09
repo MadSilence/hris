@@ -1,4 +1,4 @@
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { UploadDocumentModal } from "./UploadDocumentModal";
@@ -14,33 +14,36 @@ let mockedFormSubmission = {
   folderId: "folder-2",
 };
 
-jest.mock("../UploadDocumentForm/UploadDocumentForm", () => ({
-  UploadDocumentForm: (props: any) => {
-    mockUploadDocumentForm(props);
+jest.mock(
+  "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentForm",
+  () => ({
+    UploadDocumentForm: (props: any) => {
+      mockUploadDocumentForm(props);
 
-    return (
-      <div>
-        <input aria-label="File" disabled={props.isLoading}/>
+      return (
+        <div>
+          <input aria-label="File" disabled={props.isLoading}/>
 
-        <button
-          type="button"
-          disabled={props.isLoading}
-          onClick={props.onCancelAction}
-        >
-          Cancel
-        </button>
+          <button
+            type="button"
+            disabled={props.isLoading}
+            onClick={props.onCancelAction}
+          >
+            Cancel
+          </button>
 
-        <button
-          type="button"
-          disabled={props.isLoading}
-          onClick={() => props.onSubmitAction(mockedFormSubmission)}
-        >
-          Upload
-        </button>
-      </div>
-    );
-  },
-}));
+          <button
+            type="button"
+            disabled={props.isLoading}
+            onClick={() => props.onSubmitAction(mockedFormSubmission)}
+          >
+            Upload
+          </button>
+        </div>
+      );
+    },
+  }),
+);
 
 const folders = [
   {
@@ -150,5 +153,13 @@ describe("UploadDocumentModal", () => {
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
     expect(onCancelAction).not.toHaveBeenCalled();
+  });
+
+  it("does not render content when modal is closed", () => {
+    renderModal({ isOpen: false });
+
+    expect(
+      screen.queryByRole("heading", { name: /add document/i }),
+    ).not.toBeInTheDocument();
   });
 });

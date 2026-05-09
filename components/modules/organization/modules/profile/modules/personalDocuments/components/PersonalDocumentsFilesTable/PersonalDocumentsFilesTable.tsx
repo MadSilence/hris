@@ -27,7 +27,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-muted-foreground">Files</h3>
 
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -44,7 +44,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
               <TableRow key={document.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">
+                    <span className="shrink-0 text-muted-foreground [&_svg]:h-5 [&_svg]:w-5">
                       {getDocumentFileIcon(document.mimeType)}
                     </span>
                     <span className="font-medium">{document.name}</span>
