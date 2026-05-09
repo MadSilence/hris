@@ -2,7 +2,7 @@ import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse } from "@/api/models/misc";
 
 export class HrisApiUserAvatarClient {
-  private readonly BASE_PATH = "/api/users";
+  private readonly BASE_PATH = "/users";
 
   public async uploadAvatar(
     userId: string,

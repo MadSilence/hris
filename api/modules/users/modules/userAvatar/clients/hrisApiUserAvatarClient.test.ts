@@ -22,7 +22,7 @@ describe("HrisApiUserAvatarClient", () => {
     const result = await hrisApiUserAvatarClient.uploadAvatar("user-id", file);
 
     expect(hrisApiClient.postForm).toHaveBeenCalledWith(
-      "/api/users/user-id/avatar",
+      "/users/user-id/avatar",
       expect.any(FormData)
     );
     expect(result).toEqual(response);
@@ -34,7 +34,7 @@ describe("HrisApiUserAvatarClient", () => {
     const result = await hrisApiUserAvatarClient.deleteAvatar("user-id");
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/users/user-id/avatar/delete"
+      "/users/user-id/avatar/delete"
     );
     expect(result).toBeUndefined();
   });
