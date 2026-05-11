@@ -43,9 +43,9 @@ export const settingsGroups: SettingsGroup[] = [
     title: "Time & Time-Off",
     icon: <Calendar/>,
     items: [
-      { label: "Time off", href: "/settings/timeoff" },
-      { label: "Public Holidays", href: "/settings/holidays" },
-      { label: "Attendance", href: "/settings/attendance" },
+      { label: "Time off", href: "/settings/time/time-off" },
+      { label: "Public Holidays", href: "/settings/time/public-holidays" },
+      { label: "Attendance", href: "/settings/time/attendance" },
     ],
   },
   {

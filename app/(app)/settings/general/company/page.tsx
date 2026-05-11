@@ -1,16 +1,8 @@
 "use client";
 
-import * as React from "react";
-import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
+import CompanyProfileSettingsContainer
+  from "@/components/modules/settings/modules/general/companyProfile/components/CompanyProfileSettingsContainer/CompanyProfileSettingsContainer";
 
-export default function DocumentsPage() {
-  return (
-    <>
-      <SettingsPageHeader
-        title={"Company"}
-        backHref="/settings"
-      />
-      <p>Company</p>
-    </>
-  );
+export default function CompanyProfileSettingsPage() {
+  return <CompanyProfileSettingsContainer/>;
 }
