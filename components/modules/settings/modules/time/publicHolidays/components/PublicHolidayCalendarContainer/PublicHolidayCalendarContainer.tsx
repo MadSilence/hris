@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { PublicHolidayCalendarComponent } from "@/components/modules/settings/modules/time/publicHolidays/PublicHolidayCalendarComponent";
+import {
+  PublicHolidayCalendarComponent
+} from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayCalendarComponent";
 
 export type PublicHolidayItem = {
   id: string;

@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { PublicHolidaysSettingsComponent } from "@/components/modules/settings/modules/time/publicHolidays/PublicHolidaysSettingsComponent";
+import {
+  PublicHolidaysSettingsComponent
+} from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidaysSettingsComponent";
 
 export type PublicHolidayCalendarStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 export type PublicHolidayCalendarSource = "MANUAL" | "GOOGLE";

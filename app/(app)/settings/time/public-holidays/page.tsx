@@ -2,7 +2,7 @@
 
 
 import PublicHolidaysSettingsContainer
-  from "@/components/modules/settings/modules/time/publicHolidays/PublicHolidaysSettingsContainer/PublicHolidaysSettingsContainer";
+  from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidaysSettingsContainer/PublicHolidaysSettingsContainer";
 
 export default function PublicHolidaysPage() {
   return <PublicHolidaysSettingsContainer/>;
