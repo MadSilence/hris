@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import DepartmentsPage from "@/components/modules/settings/modules/departments/DepartmentsPage";
+import DepartmentsContainer from "@/components/modules/settings/modules/departments/DepartmentsContainer";
 
-export default function DocumentsPage() {
-  return <DepartmentsPage/>;
+export default function DepartmentsPage() {
+  return <DepartmentsContainer />;
 }
