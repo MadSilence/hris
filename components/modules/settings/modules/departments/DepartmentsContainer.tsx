@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import type { DepartmentNode } from "./components/DepartmentTree";
 import { DepartmentTree } from "./components/DepartmentTree";
 import { DepartmentDetailsPanel } from "./components/DepartmentDetailsPanel";
-import type { DepartmentNode } from "./components/DepartmentTree";
 
 const initialData: DepartmentNode[] = [
   {
@@ -205,8 +205,8 @@ export default function DepartmentsContainer() {
   const selectedDepartment = findNodeById(initialData, selectedId);
 
   return (
-    <div className="flex h-full gap-4 px-6 pb-6 overflow-hidden">
-      {/* Left panel: tree */}
+    <div className="flex gap-4 overflow-hidden h-[calc(68dvh)]">
+
       <div className="w-72 flex-none border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
         <DepartmentTree
           data={initialData}
@@ -216,10 +216,9 @@ export default function DepartmentsContainer() {
         />
       </div>
 
-      {/* Right panel: details */}
-      <div className="flex-1 border border-brown-200 rounded-xl bg-white overflow-hidden min-h-0">
+      <div className="flex-1 border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
         {selectedDepartment ? (
-          <DepartmentDetailsPanel department={selectedDepartment} />
+          <DepartmentDetailsPanel department={selectedDepartment}/>
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-brown-400">
             Select a department to view details.

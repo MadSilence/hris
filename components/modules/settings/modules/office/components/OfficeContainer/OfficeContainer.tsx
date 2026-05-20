@@ -5,18 +5,12 @@ import { OfficeComponent } from "@/components/modules/settings/modules/office/co
 import { useOffice } from "@/components/modules/settings/modules/office/hooks/useOffice";
 
 const OfficeContainer: React.FC = () => {
-  const {
-    data: offices,
-    isLoading: officesLoading,
-    error: officesError,
-  } = useOffice();
+  const { data: offices, isLoading, error } = useOffice();
+
+  if (error) throw error;
 
   return (
-    <div className="w-full px-8">
-      <div className="w-full max-h-[70vh] bg-background overflow-auto">
-        <OfficeComponent initialOffices={offices ?? []} isLoading={officesLoading}/>
-      </div>
-    </div>
+    <OfficeComponent initialOffices={offices ?? []} isLoading={isLoading}/>
   );
 };
 

@@ -17,20 +17,20 @@ import { Office } from "@/models/office";
 type DeleteOfficeModalProps = {
   isOpen: boolean;
   isLoading?: boolean;
-  onConfirm: () => void;
-  onRequestClose: () => void;
+  onConfirmAction: () => void;
+  onRequestCloseAction: () => void;
   office: Office;
 };
 
 export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
   isOpen,
   isLoading = false,
-  onConfirm,
-  onRequestClose,
+  onConfirmAction,
+  onRequestCloseAction,
   office,
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestClose()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestCloseAction()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -42,12 +42,12 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
-            <Button variant="outline" onClick={() => !isLoading && onRequestClose()}>
+            <Button variant="outline" onClick={() => !isLoading && onRequestCloseAction()}>
               Cancel
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Button onClick={() => !isLoading && onConfirm()}>Delete</Button>
+            <Button onClick={() => !isLoading && onConfirmAction()}>Delete</Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -6,7 +6,7 @@ import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCa
 import {
   CreateLegalEntityForm,
   CreateLegalEntityFormValues
-} from "@/components/modules/settings/modules/legalEntity/components/CreateLegalEntityForm";
+} from "@/components/modules/settings/modules/legalEntity/components/modals/CreateLegalEntityModal/CreateLegalEntityForm";
 
 type CreateLegalEntityModalProps = {
   isOpen: boolean;
@@ -50,11 +50,14 @@ export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
           if (!open) requestClose();
         }}
       >
-        <DialogContent hideClose className="max-w-xl">
-          <DialogHeader>
+        <DialogContent
+          hideClose
+          className="max-w-2xl overflow-hidden p-0"
+        >
+          <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
             <DialogTitle>Create legal entity</DialogTitle>
             <DialogDescription>
-              Create a legal entity and fill in its registration details.
+              Add registration and address details for a company legal unit.
             </DialogDescription>
           </DialogHeader>
 

@@ -3,17 +3,20 @@
 import { FC, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
-import { CreateOfficeForm, CreateOfficeFormValues, } from "@/components/modules/settings/modules/office/components/CreateOfficeForm";
+import {
+  CreateOfficeForm,
+  CreateOfficeFormValues,
+} from "@/components/modules/settings/modules/office/components/modals/CreateOfficeModal/CreateOfficeForm";
 
-type CreateOfficeModalProps = {
+type Props = {
   isOpen: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   initialValues?: Partial<CreateOfficeFormValues>;
   onConfirmAction: (submission: CreateOfficeFormValues) => void;
   onRequestCloseAction: () => void;
 };
 
-export const CreateOfficeModal: FC<CreateOfficeModalProps> = ({
+export const CreateOfficeModal: FC<Props> = ({
   isOpen,
   isLoading = false,
   initialValues,
@@ -49,9 +52,9 @@ export const CreateOfficeModal: FC<CreateOfficeModalProps> = ({
       >
         <DialogContent
           hideClose
-          className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"
+          className="max-w-2xl overflow-hidden p-0"
         >
-          <DialogHeader>
+          <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
             <DialogTitle>Create office</DialogTitle>
             <DialogDescription>
               Add office details and address information.

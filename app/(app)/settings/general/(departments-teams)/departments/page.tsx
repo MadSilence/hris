@@ -2,7 +2,25 @@
 
 import * as React from "react";
 import DepartmentsContainer from "@/components/modules/settings/modules/departments/DepartmentsContainer";
+import SettingsDepartmentsAndTeamsLayout from "@/components/ui/SettingsDepartmentsAndTeamsLayout/SettingsDepartmentsAndTeamsLayout";
+import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
+import PageDescription from "@/components/ui/PageDescription/PageDescription";
 
 export default function DepartmentsPage() {
-  return <DepartmentsContainer />;
+  return (
+    <SettingsDepartmentsAndTeamsLayout
+      header={
+        <>
+          <SettingsPageHeader title="Departments" backHref="/settings"/>
+
+          <PageDescription className="text-base text-muted-foreground/90">
+            Departments are smaller groups within departments, used to organize people
+            around specific projects or responsibilities.
+          </PageDescription>
+        </>
+      }
+    >
+      <DepartmentsContainer/>
+    </SettingsDepartmentsAndTeamsLayout>
+  );
 }

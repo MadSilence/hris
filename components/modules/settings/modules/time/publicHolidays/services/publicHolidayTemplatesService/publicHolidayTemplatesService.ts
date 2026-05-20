@@ -2,7 +2,7 @@ import type { PublicHolidayTemplate, PublicHolidayTemplatePreview } from "@/mode
 
 export class PublicHolidayTemplatesService {
   public async list(): Promise<PublicHolidayTemplate[]> {
-    const res = await fetch("/api/public-holiday-templates", {
+    const res = await fetch("/api/public-holiday/templates", {
       method: "GET",
       credentials: "include",
       cache: "no-store",
@@ -16,7 +16,7 @@ export class PublicHolidayTemplatesService {
   }
 
   public async getById(id: string): Promise<PublicHolidayTemplate> {
-    const res = await fetch(`/api/public-holiday-templates/${id}`, {
+    const res = await fetch(`/api/public-holiday/templates/${id}`, {
       method: "GET",
       credentials: "include",
       cache: "no-store",
@@ -33,7 +33,7 @@ export class PublicHolidayTemplatesService {
     id: string,
     year: number
   ): Promise<PublicHolidayTemplatePreview> {
-    const res = await fetch(`/api/public-holiday-templates/${id}/preview`, {
+    const res = await fetch(`/api/public-holiday/templates/${id}/preview`, {
       method: "POST",
       credentials: "include",
       cache: "no-store",

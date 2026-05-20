@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { cn } from "@/public/desact/src/components/ui/utils";
 
 type SettingsPageHeaderProps = {
   title: string;
   backHref?: string;
+  className?: string;
 };
 
 export default function SettingsPageHeader({
   title,
   backHref,
+  className,
 }: SettingsPageHeaderProps) {
   const router = useRouter();
 
   return (
-    <header className="flex items-center gap-4">
+    <header className={cn("flex items-center gap-4", className)}>
       {backHref ? (
         <Link
           href={backHref}
@@ -25,6 +28,7 @@ export default function SettingsPageHeader({
         </Link>
       ) : (
         <button
+          type="button"
           onClick={() => router.back()}
           className="grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
         >

@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import LegalEntityDetailsContainer
-  from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsPage/LegalEntityDetailsContainer";
 
-export default function LegalEntityDetailsPage() {
+import OfficeDetailsContainer from "@/components/modules/settings/modules/office/components/OfficeDetailsContainer/OfficeDetailsContainer";
+
+export default function OfficeDetailsPage() {
   const params = useParams<{ id: string }>();
 
-  return <LegalEntityDetailsContainer legalEntityId={params.id}/>;
+  return <OfficeDetailsContainer officeId={params.id}/>;
 }

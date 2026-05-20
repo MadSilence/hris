@@ -17,7 +17,7 @@ let mockedFormSubmission = {
   postCode: "",
 };
 
-jest.mock("../CreateLegalEntityForm", () => ({
+jest.mock("./CreateLegalEntityForm", () => ({
   CreateLegalEntityForm: (props: any) => {
     mockCreateLegalEntityForm(props);
 
@@ -95,7 +95,7 @@ describe("CreateLegalEntityModal", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/create a legal entity and fill in its registration details/i),
+      screen.getByText(/registration and address details/i),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/legal entity name/i)).toBeInTheDocument();

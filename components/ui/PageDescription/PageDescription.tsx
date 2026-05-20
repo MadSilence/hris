@@ -8,7 +8,7 @@ export interface PageDescriptionProps {
 
 export const PageDescription: React.FC<PageDescriptionProps> = ({ children, className }) => {
   return (
-    <p className={cn("text-muted-foreground/90 text-base leading-relaxed px-8", className)}>
+    <p className={cn("text-muted-foreground/90 text-base leading-relaxed", className)}>
       {children}
     </p>
   );

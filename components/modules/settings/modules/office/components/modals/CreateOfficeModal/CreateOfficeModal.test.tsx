@@ -5,7 +5,7 @@ import { CreateOfficeModal } from "./CreateOfficeModal";
 const mockCreateOfficeForm = jest.fn();
 
 jest.mock(
-  "@/components/modules/settings/modules/office/components/CreateOfficeForm",
+  "@/components/modules/settings/modules/office/components/modals/CreateOfficeModal/CreateOfficeForm",
   () => ({
     CreateOfficeForm: (props: any) => {
       mockCreateOfficeForm(props);

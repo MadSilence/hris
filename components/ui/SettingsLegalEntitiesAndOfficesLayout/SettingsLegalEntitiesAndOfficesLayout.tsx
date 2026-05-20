@@ -57,7 +57,7 @@ export default function SettingsLegalEntitiesAndOfficesLayout({
                     asChild
                     className="flex items-center gap-2"
                   >
-                    <Link href={tab.href}>
+                    <Link href={tab.href} className="no-underline">
                       <Icon className="h-4 w-4"/>
                       {tab.label}
                     </Link>

@@ -29,7 +29,7 @@ describe("CreateOfficeForm", () => {
     jest.clearAllMocks();
   });
 
-  it("renders form fields and actions", () => {
+  it("renders form fields and sections", () => {
     renderForm();
 
     expect(screen.getByText(/office details/i)).toBeInTheDocument();
@@ -67,7 +67,9 @@ describe("CreateOfficeForm", () => {
       await screen.findByText(/please enter a country/i),
     ).toBeInTheDocument();
 
-    expect(await screen.findByText(/please enter a city/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/please enter a city/i),
+    ).toBeInTheDocument();
   });
 
   it("shows validation error for invalid email", async () => {
@@ -85,7 +87,9 @@ describe("CreateOfficeForm", () => {
 
     expect(onSubmitAction).not.toHaveBeenCalled();
 
-    expect(await screen.findByText(/email must be a valid email/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/email must be a valid email/i),
+    ).toBeInTheDocument();
   });
 
   it("submits trimmed values", async () => {
@@ -146,14 +150,26 @@ describe("CreateOfficeForm", () => {
     renderForm({
       initialValues: {
         name: "London HQ",
+        description: "Main office",
+        email: "office@example.com",
+        phone: "+44 123",
         country: "United Kingdom",
         city: "London",
+        street: "Baker Street",
+        building: "221B",
+        postCode: "NW1",
       },
     });
 
     expect(screen.getByLabelText(/^name$/i)).toHaveValue("London HQ");
+    expect(screen.getByLabelText(/description/i)).toHaveValue("Main office");
+    expect(screen.getByLabelText(/email/i)).toHaveValue("office@example.com");
+    expect(screen.getByLabelText(/phone/i)).toHaveValue("+44 123");
     expect(screen.getByLabelText(/country/i)).toHaveValue("United Kingdom");
     expect(screen.getByLabelText(/city/i)).toHaveValue("London");
+    expect(screen.getByLabelText(/street/i)).toHaveValue("Baker Street");
+    expect(screen.getByLabelText(/building/i)).toHaveValue("221B");
+    expect(screen.getByLabelText(/post code/i)).toHaveValue("NW1");
   });
 
   it("calls cancel action", async () => {
@@ -197,6 +213,9 @@ describe("CreateOfficeForm", () => {
     expect(screen.getByLabelText(/phone/i)).toBeDisabled();
     expect(screen.getByLabelText(/country/i)).toBeDisabled();
     expect(screen.getByLabelText(/city/i)).toBeDisabled();
+    expect(screen.getByLabelText(/street/i)).toBeDisabled();
+    expect(screen.getByLabelText(/building/i)).toBeDisabled();
+    expect(screen.getByLabelText(/post code/i)).toBeDisabled();
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();

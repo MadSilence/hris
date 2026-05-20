@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
@@ -142,10 +143,8 @@ export function DepartmentTree({
               toggle(node.id);
             }}
           >
-            {hasChildren && <ChevronIcon open={isExpanded} />}
+            {hasChildren && <ChevronIcon open={isExpanded}/>}
           </span>
-
-          <FolderIcon open={isExpanded && hasChildren} active={isSelected} />
 
           <span className="flex-1 truncate leading-snug">{node.name}</span>
 
@@ -167,23 +166,43 @@ export function DepartmentTree({
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="p-3 border-b border-brown-200 flex-none">
-        <div className="relative">
-          <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brown-400 pointer-events-none"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <svg
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brown-400 pointer-events-none"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <Input
+              placeholder="Search departments..."
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+              className="pl-8 h-9 text-sm"
+            />
+          </div>
+
+          <Button
+            size="icon"
+            aria-label="Add department"
+            className="flex-none h-9 w-9 rounded-lg bg-brown-500 text-white border border-brown-500 hover:bg-brown-600 hover:border-brown-600 active:translate-y-px"
           >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <Input
-            placeholder="Search departments..."
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            className="pl-8 h-9 text-sm"
-          />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </Button>
         </div>
       </div>
 
