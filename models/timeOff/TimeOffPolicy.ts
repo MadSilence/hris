@@ -1,11 +1,11 @@
-import type {
+﻿import type {
   TimeOffPolicyCarryoverExpiryType,
   TimeOffPolicyCarryoverExpiryUnit,
   TimeOffPolicyCarryoverType,
   TimeOffPolicyRenewalType,
   TimeOffPolicyStatus,
   TimeOffPolicyUnit,
-} from "@/api/modules/timeOffPolicies/dto";
+} from "@/api/modules/timeOff/timeOffPolicies/dto";
 
 export interface TimeOffPolicy {
   id: string;

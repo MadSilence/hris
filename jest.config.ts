@@ -1,8 +1,8 @@
 import type { Config } from "jest";
-import nextJest from "next/jest";
+import nextJest from "next/jest.js";
 
 const createJestConfig = nextJest({
-  dir: './'
+  dir: "./",
 });
 
 const config: Config = {
@@ -10,11 +10,11 @@ const config: Config = {
   roots: ["<rootDir>"],
   modulePaths: ["<rootDir>"],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(svg)$': '<rootDir>/test/__mocks__/svgMock.tsx',
+    "^@/(.*)$": "<rootDir>/$1",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+    "\\.(svg)$": "<rootDir>/test/__mocks__/svgMock.tsx",
   },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   testEnvironment: "jsdom",
   watchPlugins: ["jest-watch-typeahead/filename", "jest-watch-typeahead/testname"],
   coverageThreshold: {
