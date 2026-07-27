@@ -2,51 +2,56 @@
 
 import { useState } from "react";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
-import { usePeopleSearch } from "@/components/modules/organization/hooks/usePeopleSearch";
+import { useRoleUsers } from "@/components/modules/settings/modules/roles/hooks/useRoleUsers";
+import {
+  useRemoveUserFromRoleAction
+} from "@/components/modules/settings/modules/roles/hooks/Role/useRemoveUserFromRoleAction/useRemoveUserFromRoleAction";
 import AssignedUsersTable from "./AssignedUsersTable";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 
-const PAGE_SIZE = 100;
-
 export interface AssignedUsersModuleProps {
   roleId: string;
+  roleName?: string;
+  isDefaultRole?: boolean;
   isLoading?: boolean;
 }
 
-export default function AssignedUsersModule({ roleId, isLoading = false }: AssignedUsersModuleProps) {
+export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = false, isLoading = false }: AssignedUsersModuleProps) {
   const [query, setQuery] = useState("");
   const debouncedQ = useDebouncedValue(query.trim(), 300);
   const qForApi = debouncedQ.length >= 2 ? debouncedQ : null;
 
-  const { data, isLoading: usersLoading, error } = usePeopleSearch({
-    limit: PAGE_SIZE,
-    cursor: null,
-    q: qForApi,
-    sortField: "last_name",
-    sortDir: "asc",
-    selectedFields: null,
-    filters: null,
-  } as any);
+  const {
+    items,
+    isLoading: usersLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useRoleUsers(roleId, qForApi);
+  const removeUser = useRemoveUserFromRoleAction();
 
   if (error) throw error;
 
-  const rows: UsersSearchItemDTO[] = data?.items ?? [];
-  const totalCount = (data as any)?.total ?? (data as any)?.totalCount ?? rows.length;
+  const rows: UsersSearchItemDTO[] = items;
   const loading = isLoading || usersLoading;
 
   return (
     <AssignedUsersTable
       roleId={roleId}
+      roleName={roleName}
+      isDefaultRole={isDefaultRole}
       rows={rows}
-      totalCount={totalCount}
       isLoading={loading}
+      hasMore={hasNextPage}
+      isLoadingMore={isFetchingNextPage}
+      onLoadMore={() => void fetchNextPage()}
       query={query}
       onQueryChange={setQuery}
       onExport={() => {
       }}
-      onManageRules={() => {
-      }}
       onRemoveUser={(userId) => {
+        void removeUser.mutateAsync({ userId, roleId });
       }}
     />
   );

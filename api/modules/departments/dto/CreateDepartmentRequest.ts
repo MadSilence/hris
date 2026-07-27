@@ -1,0 +1,6 @@
+export interface CreateDepartmentRequest {
+  name: string;
+  description?: string | null;
+  code?: string | null;
+  parentId?: string | null;
+}

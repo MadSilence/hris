@@ -1,0 +1,1 @@
+export { hrisApiDepartmentsClient } from "./hrisApiDepartmentsClient";

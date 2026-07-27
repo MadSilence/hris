@@ -3,9 +3,12 @@
 import * as React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
 import UsersRolesTableSkeleton from "./UsersRolesTableSkeleton";
-import { Avatar, AvatarFallback } from "@/public/desact/src/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Button } from "@/public/desact/src/components/ui/button";
 import { Role } from "@/models/role/Role";
 import { UsersSearchItemDTO } from "@/models/user/fields";
+import { useCanAccess } from "@/components/auth/useAccess";
 import {
   AssignRolesModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
@@ -15,7 +18,16 @@ export interface UsersRolesTableProps {
   userRows?: UsersSearchItemDTO[];
   usersLoading: boolean;
   allRoles: Role[];
-  onApplyRoles?: (userId: string, roleIds: string[]) => void; // позже сюда подключишь мутацию
+  onApplyRoles?: (
+    userId: string,
+    roleIds: string[],
+    currentRoleIds: string[],
+  ) => void | Promise<void>;
+  isApplyingRoles?: boolean;
+  applyRolesErrorMessage?: string;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 function getInitials(firstName?: string | null, lastName?: string | null, email?: string | null) {
@@ -34,26 +46,31 @@ export default function UsersRolesTable({
   usersLoading,
   allRoles,
   onApplyRoles,
+  isApplyingRoles = false,
+  applyRolesErrorMessage,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
 }: UsersRolesTableProps) {
   const hasUsers = (userRows?.length ?? 0) > 0;
   const [selectedUser, setSelectedUser] =
     React.useState<UsersSearchItemDTO | null>(null);
 
+  // Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE.
+  const canAssignRoles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
+
   return (
     <>
-      <Table>
-        <TableHeader>
+      <Table className="table-fixed">
+        <TableHeader className="sticky top-0 z-10 bg-white">
           <TableRow>
-            <TableHead className="w-1/2">User</TableHead>
-            <TableHead className="w-1/2">Assigned Roles</TableHead>
+            <TableHead className="w-1/3">User</TableHead>
+            <TableHead className="w-1/3">Position</TableHead>
+            <TableHead className="w-1/3">Assigned Roles</TableHead>
           </TableRow>
         </TableHeader>
-      </Table>
 
-      {/* Scrollable body */}
-      <div className="max-h-[580px] overflow-y-auto">
-        <Table>
-          <TableBody>
+        <TableBody>
             {usersLoading && <UsersRolesTableSkeleton rows={5}/>}
 
             {!usersLoading &&
@@ -71,24 +88,37 @@ export default function UsersRolesTable({
                 return (
                   <TableRow
                     key={u.id}
-                    className="border-brown-200 cursor-pointer hover:bg-brown-50"
-                    onClick={() => setSelectedUser(u)}
+                    className={`border-brown-200 ${canAssignRoles ? "cursor-pointer hover:bg-brown-50" : ""}`}
+                    onClick={() => {
+                      if (canAssignRoles) setSelectedUser(u);
+                    }}
                   >
-                    <TableCell className="py-3 w-1/2">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="text-xs">
+                    <TableCell className="py-2 w-1/3">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar className="h-7 w-7 shrink-0">
+                          {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt={fullName}/> : null}
+                          <AvatarFallback className="text-[11px]">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
-                        <p className="font-medium">{fullName}</p>
+                        <span className="truncate text-sm font-medium">{fullName}</span>
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground w-1/2">
-                      {u.roles?.length
-                        ? u.roles.map((r) => r.name).join(", ")
-                        : "—"}
+                    <TableCell className="w-1/3 text-muted-foreground">{u.jobName || "—"}</TableCell>
+
+                    <TableCell className="w-1/3">
+                      {u.roles?.length ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {u.roles.map((r) => (
+                            <Badge key={r.id} variant="secondary" className="font-normal">
+                              {r.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -96,26 +126,40 @@ export default function UsersRolesTable({
 
             {!usersLoading && !hasUsers && (
               <TableRow>
-                <TableCell colSpan={2}>
+                <TableCell colSpan={3}>
                   <div className="text-sm text-muted-foreground">
                     No users yet
                   </div>
                 </TableCell>
               </TableRow>
             )}
-          </TableBody>
-        </Table>
-      </div>
+        </TableBody>
+      </Table>
+
+      {hasMore && (
+        <div className="flex justify-center py-3">
+          <Button variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+            {isLoadingMore ? "Loading…" : "Load more"}
+          </Button>
+        </div>
+      )}
 
       <AssignRolesModal
         isOpen={!!selectedUser}
         user={selectedUser}
         allRoles={allRoles}
-        isLoading={false}
+        isLoading={isApplyingRoles}
+        errorMessage={applyRolesErrorMessage}
         onCancelAction={() => setSelectedUser(null)}
-        onApplyAction={(userId, roleIds) => {
-          onApplyRoles?.(userId, roleIds);
-          setSelectedUser(null);
+        onApplyAction={async (userId, roleIds) => {
+          const currentRoleIds = (selectedUser?.roles ?? []).map((role) => role.id);
+
+          try {
+            await onApplyRoles?.(userId, roleIds, currentRoleIds);
+            setSelectedUser(null);
+          } catch {
+            // The error is surfaced inside the modal via errorMessage.
+          }
         }}
       />
     </>

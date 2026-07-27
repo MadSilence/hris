@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   deleteRoleAction,
   DeleteRoleActionInput,
@@ -9,7 +10,15 @@ export const useDeleteRoleAction = () => {
   const revalidateRolesQuery = useInvalidateRolesQuery();
 
   return useMutation({
-    mutationFn: (payload: DeleteRoleActionInput) => deleteRoleAction(payload),
+    mutationFn: async (payload: DeleteRoleActionInput) => {
+      const result = await deleteRoleAction(payload);
+
+      if (result.status === ActionStatus.ERROR) {
+        throw new Error(result.errorMessage ?? "Failed to delete role");
+      }
+
+      return result;
+    },
     onSuccess: () => {
       revalidateRolesQuery();
     },

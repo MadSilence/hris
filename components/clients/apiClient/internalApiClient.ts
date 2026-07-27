@@ -12,6 +12,10 @@ export class InternalApiClient {
     return this.request<T>("POST", path, body);
   }
 
+  public async put<T, B extends object = Record<string, unknown>>(path: string, body?: B): Promise<T> {
+    return this.request<T>("PUT", path, body);
+  }
+
   public async fetch(path: string, init?: RequestInit): Promise<Response> {
     const url = this.basePath + this.apiPath + path;
     const response = await fetch(url, { ...init, credentials: "same-origin" });

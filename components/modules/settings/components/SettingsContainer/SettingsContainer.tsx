@@ -2,9 +2,25 @@
 
 import SettingsCard from "@/components/modules/settings/components/SettingsCard/SettingsCard";
 import { settingsGroups } from "@/components/modules/settings/config/settings.config";
+import { useAccess } from "@/components/auth/useAccess";
+import { canAccess } from "@/models/access";
 import React from "react";
 
 const SettingsContainer: React.FC = () => {
+  const { access } = useAccess();
+
+  const visibleGroups = settingsGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          !item.resources ||
+          item.resources.length === 0 ||
+          item.resources.some((resource) => canAccess({ access, resource, action: "VIEW" })),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
     <div className="bg-muted/40">
       <header className="pt-3">
@@ -22,7 +38,7 @@ const SettingsContainer: React.FC = () => {
 
       <div className="max-w-screen-xl mx-auto px-6 py-6 grid gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
-          {settingsGroups.map((group) => (
+          {visibleGroups.map((group) => (
             <SettingsCard
               key={group.id}
               title={group.title}

@@ -12,10 +12,11 @@ type Mode = "rename" | "duplicate";
 export interface UpsertRoleNameModalProps {
   isOpen: boolean;
   isLoading?: boolean;
+  errorMessage?: string;
   mode: Mode;
   initialName: string;
   onCancelAction: () => void;
-  onConfirmAction: (values: UpsertRoleNameFormValues) => void;
+  onConfirmAction: (values: UpsertRoleNameFormValues) => void | Promise<void>;
 }
 
 const copyByMode = {
@@ -36,6 +37,7 @@ const copyByMode = {
 export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   mode,
   initialName,
   onCancelAction,
@@ -64,6 +66,10 @@ export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
             {content.description}
           </DialogDescription>
         </DialogHeader>
+
+        {errorMessage && (
+          <p className="text-sm text-red-500">{errorMessage}</p>
+        )}
 
         <UpsertRoleNameForm
           isLoading={isLoading}

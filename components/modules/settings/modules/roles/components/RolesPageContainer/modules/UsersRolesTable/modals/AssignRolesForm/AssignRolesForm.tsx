@@ -1,16 +1,25 @@
 "use client";
 
-import { FC, FormEvent, useEffect, useMemo } from "react";
+import { FC, Fragment, FormEvent, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/public/desact/src/components/ui/tooltip";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 
 import { Role } from "@/models/role/Role";
 import { UsersSearchItemDTO } from "@/models/user/fields";
+import { useAccess } from "@/components/auth/useAccess";
+import { isSystemOwner } from "@/models/access";
 
 export type AssignRolesFormValues = {
   roleIds: string[];
@@ -63,6 +72,9 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const { access } = useAccess();
+  const iAmOwner = isSystemOwner(access);
+
   const initialRoleIds = useMemo(() => getInitialRoleIds(user), [user]);
 
   const formik = useFormik<AssignRolesFormValues>({
@@ -123,10 +135,13 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brown-100">
-          <span className="font-semibold text-brown-700">{initials}</span>
-        </div>
+      <div className="mb-8 mt-4 flex items-center gap-4">
+        <Avatar className="h-16 w-16 shrink-0">
+          {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={fullName} /> : null}
+          <AvatarFallback className="bg-brown-100 font-semibold text-brown-700">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
         <div className="min-w-0">
           <h3 className="truncate font-semibold">{fullName}</h3>
@@ -145,42 +160,65 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        {allRoles.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No roles available
-          </div>
-        ) : (
-          allRoles.map((role) => {
-            const checked = formik.values.roleIds.includes(role.id);
+      <TooltipProvider delayDuration={200}>
+        <div className="space-y-2">
+          {allRoles.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No roles available</div>
+          ) : (
+            allRoles.map((role) => {
+              const checked = formik.values.roleIds.includes(role.id);
+              // Default is always on; System Owner can only be granted/revoked by an owner.
+              const locked = role.isDefault || (role.systemOwner && !iAmOwner);
+              const lockMsg = role.isDefault
+                ? "Default role — always assigned and can’t be removed"
+                : role.systemOwner && !iAmOwner
+                  ? "Only a System Owner can grant or remove this role"
+                  : null;
 
-            return (
-              <label
-                key={role.id}
-                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-brown-50"
-              >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={() => toggleRole(role.id)}
-                  disabled={isLoading}
-                />
+              const row = (
+                <label
+                  className={`flex items-center gap-3 rounded-md px-2 py-2 ${
+                    locked ? "cursor-default" : "cursor-pointer hover:bg-brown-50"
+                  }`}
+                >
+                  <Checkbox
+                    checked={role.isDefault ? true : checked}
+                    onCheckedChange={() => {
+                      if (!locked) toggleRole(role.id);
+                    }}
+                    disabled={isLoading || locked}
+                  />
 
-                <div className="flex min-w-0 items-center gap-2">
-                  <div className="truncate text-sm font-medium">
-                    {role.name}
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="truncate text-sm font-medium">{role.name}</div>
+
+                    {role.systemOwner && (
+                      <Badge variant="secondary" className="shrink-0">System</Badge>
+                    )}
+
+                    {role.isDefault && (
+                      <Badge variant="secondary" className="shrink-0">Default</Badge>
+                    )}
                   </div>
+                </label>
+              );
 
-                  {role.systemOwner && (
-                    <Badge variant="secondary" className="shrink-0">
-                      System
-                    </Badge>
+              return (
+                <Fragment key={role.id}>
+                  {lockMsg ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>{row}</TooltipTrigger>
+                      <TooltipContent>{lockMsg}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    row
                   )}
-                </div>
-              </label>
-            );
-          })
-        )}
-      </div>
+                </Fragment>
+              );
+            })
+          )}
+        </div>
+      </TooltipProvider>
 
       <DialogFooter className="mt-8">
         {hasChanges ? (

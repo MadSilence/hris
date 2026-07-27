@@ -151,7 +151,7 @@ export default function PeopleTopbar({
           Export
         </Button>
 
-        <PermissionGate anyOf={["PERM_PEOPLE_EDIT"]}>
+        <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
           <Select value={addAction} onValueChange={handleAddAction}>
             <SelectTrigger className="h-9 w-[160px]">
               <SelectValue placeholder="Add people"/>

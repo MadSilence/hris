@@ -1,159 +1,34 @@
 "use client";
 
 import React, { useState } from "react";
-import type { TeamNode } from "./components/TeamTree/TeamTree";
-import { TeamTree } from "./components/TeamTree/TeamTree";
-import { TeamDetailsPanel } from "./components/TeamDetailsPanel/TeamDetailsPanel";
+import { useTeamTree } from "@/components/modules/settings/modules/teams/hooks/useTeamTree/useTeamTree";
+import { useArchiveTeam } from "@/components/modules/settings/modules/teams/hooks/useArchiveTeam/useArchiveTeam";
+import { useActivateTeam } from "@/components/modules/settings/modules/teams/hooks/useActivateTeam/useActivateTeam";
+import { TeamTree } from "@/components/modules/settings/modules/teams/components/TeamTree/TeamTree";
+import { TeamDetailsPanel } from "@/components/modules/settings/modules/teams/components/TeamDetailsPanel/TeamDetailsPanel";
+import { TeamTreeSkeleton } from "@/components/modules/settings/modules/teams/components/TeamTreeSkeleton/TeamTreeSkeleton";
+import { CreateTeamModal } from "@/components/modules/settings/modules/teams/components/modals/CreateTeamModal/CreateTeamModal";
+import { EditTeamModal } from "@/components/modules/settings/modules/teams/components/modals/EditTeamModal/EditTeamModal";
+import { DeleteTeamModal } from "@/components/modules/settings/modules/teams/components/modals/DeleteTeamModal/DeleteTeamModal";
+import { AssignTeamMemberModal } from "@/components/modules/settings/modules/teams/components/modals/AssignTeamMemberModal/AssignTeamMemberModal";
+import { SetTeamLeadModal } from "@/components/modules/settings/modules/teams/components/modals/SetTeamLeadModal/SetTeamLeadModal";
+import type { TeamTreeNode } from "@/models/teams";
 
-const initialData: TeamNode[] = [
-  {
-    id: "eng",
-    name: "Engineering",
-    members: 42,
-    about: "Builds and maintains the product, infrastructure, and platform.",
-    founded: "2018",
-    directReports: 6,
-    responsibilities: [
-      "Product development and maintenance",
-      "Infrastructure and reliability",
-      "Technical architecture decisions",
-      "Code quality and engineering standards",
-    ],
-    children: [
-      {
-        id: "eng-backend",
-        name: "Backend",
-        members: 12,
-        about: "Server-side systems, APIs, and data storage.",
-        founded: "2018",
-        responsibilities: ["API development", "Database design", "Service reliability"],
-        children: [
-          { id: "eng-backend-platform", name: "Platform", members: 5 },
-          { id: "eng-backend-billing", name: "Billing & Payments", members: 3 },
-          { id: "eng-backend-integrations", name: "Integrations", members: 4 },
-        ],
-      },
-      {
-        id: "eng-frontend",
-        name: "Frontend",
-        members: 9,
-        about: "Client-side applications and design system.",
-        founded: "2019",
-        responsibilities: ["Web application", "Design system", "Performance"],
-        children: [
-          { id: "eng-frontend-webapp", name: "Web App", members: 5 },
-          { id: "eng-frontend-designsystem", name: "Design System", members: 2 },
-          { id: "eng-frontend-public", name: "Public Site", members: 2 },
-        ],
-      },
-      {
-        id: "eng-mobile",
-        name: "Mobile",
-        members: 5,
-        about: "Native iOS and Android applications.",
-        founded: "2020",
-        children: [
-          { id: "eng-ios", name: "iOS", members: 2 },
-          { id: "eng-android", name: "Android", members: 3 },
-        ],
-      },
-      { id: "eng-devops", name: "DevOps / SRE", members: 6 },
-      { id: "eng-qa", name: "QA / Testing", members: 4 },
-      {
-        id: "eng-data",
-        name: "Data / Analytics",
-        members: 6,
-        children: [
-          { id: "eng-data-eng", name: "Data Engineering", members: 3 },
-          { id: "eng-data-analysts", name: "Product Analytics", members: 3 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "product",
-    name: "Product",
-    members: 8,
-    about: "Defines product strategy, roadmap, and prioritisation.",
-    founded: "2019",
-    responsibilities: [
-      "Product roadmap and strategy",
-      "Cross-functional alignment",
-      "User research and prioritisation",
-    ],
-    children: [
-      { id: "product-core", name: "Core Product", members: 3 },
-      { id: "product-growth", name: "Growth", members: 2 },
-      { id: "product-platform", name: "Platform & Internal Tools", members: 3 },
-    ],
-  },
-  {
-    id: "design",
-    name: "Design",
-    members: 6,
-    about: "User experience, brand identity, and visual design.",
-    founded: "2019",
-    responsibilities: [
-      "UX research and design",
-      "Design system ownership",
-      "Brand and marketing design",
-    ],
-    children: [
-      { id: "design-ux", name: "UX/UI", members: 4 },
-      { id: "design-research", name: "Research", members: 1 },
-      { id: "design-brand", name: "Brand / Marketing Design", members: 1 },
-    ],
-  },
-  {
-    id: "cs",
-    name: "Customer Success",
-    members: 10,
-    about: "Ensures customers achieve their goals with the product.",
-    founded: "2019",
-    responsibilities: [
-      "Customer onboarding",
-      "Support (L1/L2)",
-      "Account management and retention",
-    ],
-    children: [
-      { id: "cs-onboarding", name: "Onboarding", members: 3 },
-      { id: "cs-support", name: "Support (L1/L2)", members: 4 },
-      { id: "cs-account", name: "Account Management", members: 3 },
-    ],
-  },
-  {
-    id: "sales",
-    name: "Sales",
-    members: 7,
-    about: "Drives new revenue through inbound and outbound motions.",
-    founded: "2020",
-    children: [
-      { id: "sales-inbound", name: "Inbound", members: 3 },
-      { id: "sales-outbound", name: "Outbound", members: 3 },
-      { id: "sales-ops", name: "Sales Ops", members: 1 },
-    ],
-  },
-  {
-    id: "marketing",
-    name: "Marketing",
-    members: 5,
-    about: "Grows awareness, pipeline, and community.",
-    founded: "2020",
-    children: [
-      { id: "mkt-content", name: "Content / SEO", members: 2 },
-      { id: "mkt-performance", name: "Performance", members: 2 },
-      { id: "mkt-events", name: "Events / Community", members: 1 },
-    ],
-  },
-];
+function flattenTree(nodes: TeamTreeNode[]): TeamTreeNode[] {
+  const result: TeamTreeNode[] = [];
+  function traverse(node: TeamTreeNode) {
+    result.push(node);
+    node.children?.forEach(traverse);
+  }
+  nodes.forEach(traverse);
+  return result;
+}
 
-const DEFAULT_EXPANDED_IDS = ["eng", "product", "design"];
-
-function findNodeById(nodes: TeamNode[], id: string): TeamNode | null {
+function findById(nodes: TeamTreeNode[], id: string): TeamTreeNode | null {
   for (const node of nodes) {
     if (node.id === id) return node;
-    if (node.children) {
-      const found = findNodeById(node.children, id);
+    if (node.children?.length) {
+      const found = findById(node.children, id);
       if (found) return found;
     }
   }
@@ -161,32 +36,108 @@ function findNodeById(nodes: TeamNode[], id: string): TeamNode | null {
 }
 
 export default function TeamsContainer() {
-  const [selectedId, setSelectedId] = useState<string>(
-    initialData[0]?.id ?? "",
-  );
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const selectedTeam = findNodeById(initialData, selectedId);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editTarget, setEditTarget] = useState<TeamTreeNode | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TeamTreeNode | null>(null);
+  const [addMemberTarget, setAddMemberTarget] = useState<string | null>(null);
+  const [setLeadTarget, setSetLeadTarget] = useState<TeamTreeNode | null>(null);
+
+  const { data: tree = [], isLoading, error } = useTeamTree(includeArchived);
+  const archiveTeam = useArchiveTeam();
+  const activateTeam = useActivateTeam();
+
+  const allFlat = flattenTree(tree);
+  const selected = selectedId ? findById(tree, selectedId) : null;
+  const effectiveSelected = selected ?? (tree[0] ?? null);
 
   return (
-    <div className="flex gap-4 overflow-hidden h-[calc(68dvh)]">
-      <div className="w-72 flex-none border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
-        <TeamTree
-          data={initialData}
-          selectedId={selectedId}
-          defaultExpandedIds={DEFAULT_EXPANDED_IDS}
-          onSelect={setSelectedId}
-        />
+    <>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-end">
+          <label className="flex items-center gap-2 text-sm text-brown-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={includeArchived}
+              onChange={(e) => setIncludeArchived(e.target.checked)}
+              className="rounded"
+            />
+            Show archived
+          </label>
+        </div>
+
+        <div className="flex gap-4 overflow-hidden h-[calc(68dvh)]">
+          <div className="w-72 flex-none border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
+            {isLoading ? (
+              <TeamTreeSkeleton />
+            ) : error ? (
+              <div className="flex items-center justify-center h-20 text-sm text-red-500 px-4 text-center">
+                Failed to load teams.
+              </div>
+            ) : (
+              <TeamTree
+                data={tree}
+                selectedId={selectedId ?? (effectiveSelected?.id ?? null)}
+                defaultExpandedIds={tree.slice(0, 3).map((n) => n.id)}
+                onSelect={setSelectedId}
+                onAdd={() => setShowCreate(true)}
+                onEdit={(node) => setEditTarget(node)}
+                onArchive={(node) => archiveTeam.mutate(node.id)}
+                onActivate={(node) => activateTeam.mutate(node.id)}
+                onDelete={(node) => setDeleteTarget(node)}
+              />
+            )}
+          </div>
+
+          <div className="flex-1 border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
+            {effectiveSelected ? (
+              <TeamDetailsPanel
+                team={effectiveSelected}
+                onEdit={() => setEditTarget(effectiveSelected)}
+                onAddMember={() => setAddMemberTarget(effectiveSelected.id)}
+                onSetLead={() => setSetLeadTarget(effectiveSelected)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-sm text-brown-400">
+                {isLoading ? null : "No teams yet. Create your first team."}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
-        {selectedTeam ? (
-          <TeamDetailsPanel team={selectedTeam} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-sm text-brown-400">
-            Select a team to view details.
-          </div>
-        )}
-      </div>
-    </div>
+      {showCreate && (
+        <CreateTeamModal open onClose={() => setShowCreate(false)} parentOptions={allFlat} />
+      )}
+
+      {editTarget && (
+        <EditTeamModal open onClose={() => setEditTarget(null)} team={editTarget} parentOptions={allFlat} />
+      )}
+
+      {deleteTarget && (
+        <DeleteTeamModal
+          open
+          onClose={() => setDeleteTarget(null)}
+          team={deleteTarget}
+          allTeams={allFlat}
+          onDeleted={() => { if (selectedId === deleteTarget.id) setSelectedId(null); }}
+        />
+      )}
+
+      {addMemberTarget && (
+        <AssignTeamMemberModal open onClose={() => setAddMemberTarget(null)} teamId={addMemberTarget} />
+      )}
+
+      {setLeadTarget && (
+        <SetTeamLeadModal
+          open
+          onClose={() => setSetLeadTarget(null)}
+          teamId={setLeadTarget.id}
+          currentLeadId={setLeadTarget.leadId}
+        />
+      )}
+    </>
   );
 }

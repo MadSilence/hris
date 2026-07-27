@@ -13,15 +13,17 @@ import {
 export interface AssignRolesModalProps {
   isOpen: boolean;
   isLoading?: boolean;
+  errorMessage?: string;
   user: UsersSearchItemDTO | null;
   allRoles: Role[];
   onCancelAction: () => void;
-  onApplyAction: (userId: string, roleIds: string[]) => void;
+  onApplyAction: (userId: string, roleIds: string[]) => void | Promise<void>;
 }
 
 export const AssignRolesModal: FC<AssignRolesModalProps> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   user,
   allRoles,
   onCancelAction,
@@ -49,7 +51,7 @@ export const AssignRolesModal: FC<AssignRolesModalProps> = ({
   const handleSubmit = (values: AssignRolesFormValues) => {
     if (!user) return;
 
-    onApplyAction(user.id, values.roleIds);
+    return onApplyAction(user.id, values.roleIds);
   };
 
   return (
@@ -70,6 +72,10 @@ export const AssignRolesModal: FC<AssignRolesModalProps> = ({
               Select which roles should be assigned to this user.
             </DialogDescription>
           </DialogHeader>
+
+          {errorMessage && (
+            <p className="text-sm text-red-500">{errorMessage}</p>
+          )}
 
           <AssignRolesForm
             isLoading={isLoading}

@@ -7,7 +7,7 @@ import PublicHolidaysSettingsContainer
 
 export default function PublicHolidaysPage() {
   return (
-    <PermissionGate anyOf={["PERM_PUBLIC_HOLIDAYS_MANAGE"]} fallback={<AccessDenied/>}>
+    <PermissionGate resource="ORG.PUBLIC_HOLIDAY_CALENDAR" action="VIEW" fallback={<AccessDenied/>}>
       <PublicHolidaysSettingsContainer/>
     </PermissionGate>
   );

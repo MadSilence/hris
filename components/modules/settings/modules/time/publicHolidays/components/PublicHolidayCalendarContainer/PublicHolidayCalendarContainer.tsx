@@ -1,54 +1,44 @@
 "use client";
 
-import React from "react";
-import {
-  PublicHolidayCalendarComponent
-} from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayCalendarComponent";
-
-export type PublicHolidayItem = {
-  id: string;
-  date: string;
-  name: string;
-  type: "PUBLIC" | "COMPANY";
-  paid: boolean;
-};
-
-export type PublicHolidayAssignmentItem = {
-  id: string;
-  type: "Everyone" | "Location" | "Department" | "Employee";
-  name: string;
-  membersCount: number;
-};
-
-export type PublicHolidayCalendarDetails = {
-  id: string;
-  name: string;
-  country: string;
-  region?: string;
-  year: number;
-  description: string;
-  holidays: PublicHolidayItem[];
-  assignments: PublicHolidayAssignmentItem[];
-};
-
-const calendar: PublicHolidayCalendarDetails = {
-  id: "poland-2026",
-  name: "Poland 2026",
-  country: "Poland",
-  year: 2026,
-  description: "Default public holiday calendar for employees working in Poland.",
-  holidays: [
-    { id: "1", date: "2026-01-01", name: "New Year's Day", type: "PUBLIC", paid: true },
-    { id: "2", date: "2026-01-06", name: "Epiphany", type: "PUBLIC", paid: true },
-    { id: "3", date: "2026-05-01", name: "Labour Day", type: "PUBLIC", paid: true },
-    { id: "4", date: "2026-05-03", name: "Constitution Day", type: "PUBLIC", paid: true },
-  ],
-  assignments: [
-    { id: "1", type: "Location", name: "Poland office", membersCount: 84 },
-    { id: "2", type: "Department", name: "People Operations Poland", membersCount: 12 },
-  ],
-};
+import { useParams } from "next/navigation";
+import { PublicHolidayCalendarDetailsComponent } from "../PublicHolidayCalendarDetailsComponent";
+import { PublicHolidayCalendarDetailsSkeleton } from "../PublicHolidayCalendarDetailsSkeleton";
+import { usePublicHolidayCalendar } from "../../hooks/usePublicHolidayCalendar";
+import { usePublicHolidays } from "../../hooks/usePublicHolidays";
 
 export default function PublicHolidayCalendarContainer() {
-  return <PublicHolidayCalendarComponent calendar={calendar}/>;
+  const params = useParams();
+  const calendarId = params.id as string;
+
+  const {
+    data: calendar,
+    isLoading: isCalendarLoading,
+    error: calendarError,
+  } = usePublicHolidayCalendar({ calendarId });
+
+  const {
+    data: holidays,
+    isLoading: isHolidaysLoading,
+    error: holidaysError,
+  } = usePublicHolidays({ calendarId });
+
+  if (calendarError) throw calendarError;
+  if (holidaysError) throw holidaysError;
+
+  if (isCalendarLoading || isHolidaysLoading || !calendar) {
+    return (
+      <div className="min-h-svh bg-[var(--color-bg-primary)] p-4">
+        <div className="mx-auto max-w-6xl">
+          <PublicHolidayCalendarDetailsSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <PublicHolidayCalendarDetailsComponent
+      calendar={calendar}
+      holidays={holidays ?? []}
+    />
+  );
 }

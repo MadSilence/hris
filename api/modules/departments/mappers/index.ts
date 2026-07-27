@@ -1,0 +1,1 @@
+export { departmentMapper } from "./departmentMapper";

@@ -1,0 +1,1 @@
+export { hrisDepartmentsService } from "./hrisDepartmentsService";

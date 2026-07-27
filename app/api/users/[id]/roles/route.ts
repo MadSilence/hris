@@ -1,7 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisUserRolesService } from "@/api/modules/roles/services/hrisUserRolesService/hrisUserRolesService";
 
-export async function GET(_req: NextRequest, context: { params: { id: string } }) {
-  const roles = await hrisUserRolesService.getUserRoles(context.params.id);
-  return Response.json(roles);
-}
+type RouteContext = { params: Promise<{ id: string }> };
+
+export const GET = apiRequestWrapper(async (_req: Request, context: RouteContext) => {
+  const { id } = await context.params;
+  const roles = await hrisUserRolesService.getUserRoles(id);
+
+  return NextResponse.json(roles);
+});

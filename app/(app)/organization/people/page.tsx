@@ -6,7 +6,7 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import { Building2, GitBranch } from "lucide-react";
 
 import PeopleTableContainer from "@/components/modules/organization/components/PeopleTableContainer/PeopleTableContainer";
-import { usePermissions } from "@/components/auth/PermissionsContext";
+import { useAccess, useCanAccess } from "@/components/auth/useAccess";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -28,13 +28,14 @@ const tabs = [
 ];
 
 export default function OrganizationPeoplePage() {
-  const { canModule, loading } = usePermissions();
+  const { loading } = useAccess();
+  const canViewPeople = useCanAccess("PEOPLE.PROFILE", "VIEW");
   const segment = useSelectedLayoutSegment();
 
   const activeTab = segment ?? "people";
 
   if (loading) return null;
-  if (!canModule("PEOPLE", "view")) return <AccessDenied/>;
+  if (!canViewPeople) return <AccessDenied/>;
 
   return (
     <div className="flex flex-col gap-10">

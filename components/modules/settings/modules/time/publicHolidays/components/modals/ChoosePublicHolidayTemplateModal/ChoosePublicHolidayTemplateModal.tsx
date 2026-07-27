@@ -82,7 +82,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
   const handleGoToPreview = () => {
     if (!selectedTemplate) return;
 
-    router.push(`/settings/time/public-holidays/templates/${selectedTemplate.id}/preview`);
+    router.push(`/settings/time/public-holidays/new?templateId=${selectedTemplate.id}`);
   };
 
   return (
@@ -178,7 +178,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               disabled={isLoading || !selectedTemplate}
               onClick={handleGoToPreview}
             >
-              Go to preview
+              Use this template
             </Button>
           </DialogFooter>
         </div>

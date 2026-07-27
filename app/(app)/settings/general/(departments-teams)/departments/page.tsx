@@ -5,6 +5,8 @@ import DepartmentsContainer from "@/components/modules/settings/modules/departme
 import SettingsDepartmentsAndTeamsLayout from "@/components/ui/SettingsDepartmentsAndTeamsLayout/SettingsDepartmentsAndTeamsLayout";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { AccessDenied } from "@/components/auth/AccessDenied";
 
 export default function DepartmentsPage() {
   return (
@@ -20,7 +22,9 @@ export default function DepartmentsPage() {
         </>
       }
     >
-      <DepartmentsContainer/>
+      <PermissionGate resource="ORG.DEPARTMENT" action="VIEW" fallback={<AccessDenied/>}>
+        <DepartmentsContainer/>
+      </PermissionGate>
     </SettingsDepartmentsAndTeamsLayout>
   );
 }

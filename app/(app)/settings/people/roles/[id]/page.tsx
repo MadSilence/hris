@@ -15,17 +15,12 @@ export default function RolePage() {
   const roleName = (roles ?? []).find((r) => r.id === roleId)?.name ?? "Role";
 
   return (
-    <PermissionGate anyOf={["PERM_ROLES_VIEW"]} fallback={<AccessDenied/>}>
-      <div className="min-h-svh px-8 py-8">
-        <div className="px-8 pt-8">
-          <div className="px-6">
-            <SettingsPageHeader
-              className="px-8"
-              title={roleName}
-              backHref="/settings/people/roles"
-            />
-          </div>
+    <PermissionGate resource="ROLES.ROLE" action="VIEW" fallback={<AccessDenied/>}>
+      <div className="space-y-4">
+        <div className="px-8">
+          <SettingsPageHeader title={roleName} backHref="/settings/people/roles"/>
         </div>
+
         <RoleDetailsContainer roleId={roleId}/>
       </div>
     </PermissionGate>

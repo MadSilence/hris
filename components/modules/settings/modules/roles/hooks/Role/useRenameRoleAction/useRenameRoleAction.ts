@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   renameRoleAction,
   RenameRoleActionInput,
@@ -9,7 +10,15 @@ export const useRenameRoleAction = () => {
   const revalidateRolesQuery = useInvalidateRolesQuery();
 
   return useMutation({
-    mutationFn: (payload: RenameRoleActionInput) => renameRoleAction(payload),
+    mutationFn: async (payload: RenameRoleActionInput) => {
+      const result = await renameRoleAction(payload);
+
+      if (result.status === ActionStatus.ERROR) {
+        throw new Error(result.errorMessage ?? "Failed to rename role");
+      }
+
+      return result;
+    },
     onSuccess: () => {
       revalidateRolesQuery();
     },

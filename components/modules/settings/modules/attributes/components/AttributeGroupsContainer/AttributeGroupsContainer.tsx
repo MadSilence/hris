@@ -21,6 +21,7 @@ import { AttributesContainer } from "@/components/modules/settings/modules/attri
 import { CreateAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeModal";
 import { useCreateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useCreateAttributeAction";
 import { Loader } from "@/components/ui/Loader";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 
 export default function AttributeGroupsContainer() {
   const [isCreateAttributeGroupModalOpen, setIsCreateAttributeGroupModalOpen] = useState(false);
@@ -130,30 +131,43 @@ export default function AttributeGroupsContainer() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button onClick={() => setIsCreateAttributeModalOpen(true)}>
-              Add Attribute
-            </Button>
+            <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+              <Button onClick={() => setIsCreateAttributeModalOpen(true)}>
+                Add Attribute
+              </Button>
+            </PermissionGate>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Attribute group actions">
-                  <Ellipsis className="h-4 w-4"/>
-                </Button>
-              </DropdownMenuTrigger>
+            <PermissionGate
+              anyOf={[
+                { resource: "PEOPLE.ATTRIBUTES", action: "EDIT" },
+                { resource: "PEOPLE.ATTRIBUTES", action: "MANAGE" },
+              ]}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Attribute group actions">
+                    <Ellipsis className="h-4 w-4"/>
+                  </Button>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsRenameAttributeGroupModalOpen(true)}>
-                  Rename AttributeGroup
-                </DropdownMenuItem>
+                <DropdownMenuContent align="end">
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                    <DropdownMenuItem onClick={() => setIsRenameAttributeGroupModalOpen(true)}>
+                      Rename AttributeGroup
+                    </DropdownMenuItem>
+                  </PermissionGate>
 
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setIsDeleteAttributeGroupModalOpen(true)}
-                >
-                  Delete AttributeGroup
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setIsDeleteAttributeGroupModalOpen(true)}
+                    >
+                      Delete AttributeGroup
+                    </DropdownMenuItem>
+                  </PermissionGate>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </PermissionGate>
           </div>
         </div>
 

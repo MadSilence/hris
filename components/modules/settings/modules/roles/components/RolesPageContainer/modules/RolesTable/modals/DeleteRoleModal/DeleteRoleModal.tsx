@@ -16,14 +16,16 @@ import { AlertTriangle, Trash2 } from "lucide-react";
 export interface DeleteRoleModalProps {
   isOpen: boolean;
   isLoading?: boolean;
+  errorMessage?: string;
   roleName?: string;
-  onConfirmAction: () => void;
+  onConfirmAction: () => void | Promise<void>;
   onRequestCloseAction: () => void;
 }
 
 export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   roleName,
   onConfirmAction,
   onRequestCloseAction,
@@ -66,12 +68,20 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
           </div>
         </div>
 
+        {errorMessage && (
+          <p className="text-sm text-red-500">{errorMessage}</p>
+        )}
+
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
 
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirmAction}
+            onClick={(event) => {
+              // Keep the dialog mounted while the mutation runs; the caller closes it on success.
+              event.preventDefault();
+              void onConfirmAction();
+            }}
             className="bg-red-600 text-white hover:bg-red-700"
           >
             <Trash2 className="mr-2 h-4 w-4"/>

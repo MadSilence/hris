@@ -21,20 +21,29 @@ export interface RolesTableProps {
   roleRows: Role[] | undefined;
   rolesLoading: boolean;
   buildRoleHref?: (roleId: string) => string;
-  getRoleUpdatedByName?: (roleId: string) => string | undefined;
-  onRenameRole?: (roleId: string, values: { name: string }) => void;
-  onDuplicateRole?: (roleId: string, values: { name: string }) => void;
-  onDeleteRole?: (roleId: string) => void;
+  onRenameRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
+  onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
+  onDeleteRole?: (roleId: string) => void | Promise<void>;
+  isSavingRoleName?: boolean;
+  isDeletingRole?: boolean;
+  saveRoleNameErrorMessage?: string;
+  deleteRoleErrorMessage?: string;
+  // Clears any stale rename/duplicate/delete error before a new modal opens.
+  onClearErrors?: () => void;
 }
 
 export default function RolesTable({
   roleRows,
   rolesLoading,
   buildRoleHref = (id) => `/settings/people/roles/${id}`,
-  getRoleUpdatedByName,
   onRenameRole,
   onDuplicateRole,
   onDeleteRole,
+  isSavingRoleName = false,
+  isDeletingRole = false,
+  saveRoleNameErrorMessage,
+  deleteRoleErrorMessage,
+  onClearErrors,
 }: RolesTableProps) {
   const router = useRouter();
 
@@ -48,18 +57,21 @@ export default function RolesTable({
   const hasRoles = (roleRows?.length ?? 0) > 0;
 
   const openRename = (role: Role) => {
+    onClearErrors?.();
     setNameModalRole({ id: role.id, name: role.name });
     setNameModalMode("rename");
     setNameModalOpen(true);
   };
 
   const openDuplicate = (role: Role) => {
+    onClearErrors?.();
     setNameModalRole({ id: role.id, name: role.name });
     setNameModalMode("duplicate");
     setNameModalOpen(true);
   };
 
   const openDelete = (role: Role) => {
+    onClearErrors?.();
     setDeleteRole({ id: role.id, name: role.name });
     setDeleteOpen(true);
   };
@@ -82,14 +94,14 @@ export default function RolesTable({
 
   return (
     <>
-      <Table>
-        <TableHeader className="[&_tr]:border-brown-200">
+      <Table className="table-fixed">
+        <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead>Updated By</TableHead>
-            <TableHead className="w-10"/>
+            <TableHead className="w-1/4">Name</TableHead>
+            <TableHead className="w-1/4">Users</TableHead>
+            <TableHead className="w-1/4">Status</TableHead>
+            <TableHead className="w-1/4">Last Updated</TableHead>
+            <TableHead className="w-12"/>
           </TableRow>
         </TableHeader>
 
@@ -107,10 +119,10 @@ export default function RolesTable({
                 <TableCell className="py-3">
                   <Link
                     href={buildRoleHref(r.id)}
-                    className="text-primary hover:no-underline font-medium"
+                    className="text-primary font-medium no-underline hover:no-underline"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {sanitizeRoleName(r.name)}
+                    {r.name}
                   </Link>
 
                   {r.systemOwner && (
@@ -118,11 +130,23 @@ export default function RolesTable({
                       System
                     </Badge>
                   )}
+
+                  {r.isDefault && (
+                    <Badge variant="secondary" className="ml-2">
+                      Default
+                    </Badge>
+                  )}
+                </TableCell>
+
+                <TableCell className="text-muted-foreground">
+                  {r.userCount ?? "—"}
                 </TableCell>
 
                 <TableCell>
                   {r.active ? (
-                    <Badge variant="secondary">Active</Badge>
+                    <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+                      Active
+                    </Badge>
                   ) : (
                     <Badge variant="outline">Inactive</Badge>
                   )}
@@ -130,16 +154,13 @@ export default function RolesTable({
 
                 <TableCell className="text-muted-foreground">{formatDate(r.updatedAt)}</TableCell>
 
-                <TableCell className="text-muted-foreground">
-                  {getRoleUpdatedByName?.(r.id) ?? "—"}
-                </TableCell>
-
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end">
                     <RolesTableRowActions
                       onRename={() => openRename(r)}
                       onDuplicate={() => openDuplicate(r)}
                       onDelete={() => openDelete(r)}
+                      locked={r.systemOwner || r.isDefault}
                     />
                   </div>
                 </TableCell>
@@ -158,38 +179,44 @@ export default function RolesTable({
 
       <UpsertRoleNameModal
         isOpen={nameModalOpen}
-        isLoading={false}
+        isLoading={isSavingRoleName}
+        errorMessage={saveRoleNameErrorMessage}
         mode={nameModalMode}
         initialName={initialNameForModal}
         onCancelAction={closeNameModal}
-        onConfirmAction={(values) => {
+        onConfirmAction={async (values) => {
           if (!nameModalRole) return;
 
-          if (nameModalMode === "rename") onRenameRole?.(nameModalRole.id, values);
-          else onDuplicateRole?.(nameModalRole.id, values);
+          try {
+            if (nameModalMode === "rename") await onRenameRole?.(nameModalRole.id, values);
+            else await onDuplicateRole?.(nameModalRole.id, values);
 
-          closeNameModal();
+            closeNameModal();
+          } catch {
+            // The error is surfaced inside the modal via errorMessage.
+          }
         }}
       />
 
       <DeleteRoleModal
         isOpen={deleteOpen}
-        isLoading={false}
+        isLoading={isDeletingRole}
+        errorMessage={deleteRoleErrorMessage}
         roleName={deleteRole?.name}
         onRequestCloseAction={closeDeleteModal}
-        onConfirmAction={() => {
+        onConfirmAction={async () => {
           if (!deleteRole) return;
-          onDeleteRole?.(deleteRole.id);
-          closeDeleteModal();
+
+          try {
+            await onDeleteRole?.(deleteRole.id);
+            closeDeleteModal();
+          } catch {
+            // The error is surfaced inside the modal via errorMessage.
+          }
         }}
       />
     </>
   );
-}
-
-function sanitizeRoleName(name?: string | null) {
-  if (!name) return "—";
-  return name.replaceAll("_", " ").replace(/\s+/g, " ").trim();
 }
 
 function formatDate(iso?: string | null) {

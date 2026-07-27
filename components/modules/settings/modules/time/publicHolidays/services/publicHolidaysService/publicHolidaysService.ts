@@ -3,7 +3,7 @@ import type { PublicHoliday } from "@/models/publicHolidays/holiday";
 export class PublicHolidaysService {
   public async list(calendarId: string): Promise<PublicHoliday[]> {
     const res = await fetch(
-      `/api/public-holiday-calendars/${calendarId}/holidays`,
+      `/api/public-holiday/calendars/${calendarId}/holidays`,
       {
         method: "GET",
         credentials: "include",

@@ -7,6 +7,8 @@ import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import OfficeContainer from "@/components/modules/settings/modules/office/components/OfficeContainer/OfficeContainer";
 import SettingsLegalEntitiesAndOfficesLayout
   from "@/components/ui/SettingsLegalEntitiesAndOfficesLayout/SettingsLegalEntitiesAndOfficesLayout";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { AccessDenied } from "@/components/auth/AccessDenied";
 
 export default function OfficesPage() {
   return (
@@ -23,7 +25,9 @@ export default function OfficesPage() {
         </>
       }
     >
-      <OfficeContainer/>
+      <PermissionGate resource="ORG.OFFICE" action="VIEW" fallback={<AccessDenied/>}>
+        <OfficeContainer/>
+      </PermissionGate>
     </SettingsLegalEntitiesAndOfficesLayout>
   );
 }

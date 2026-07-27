@@ -5,6 +5,16 @@ import { DuplicateRoleRequest } from "@/api/modules/roles/dto/DuplicateRoleReque
 import { CreateRoleRequest } from "@/api/modules/roles/dto/CreateRoleRequest";
 import { UpdateRoleRequest } from "@/api/modules/roles/dto/UpdateRoleRequest";
 import { NewEntity, UpdatedEntity } from "@/models/misc";
+import {
+  RolePermissionsDTO,
+  UpdateRolePermissionsRequest,
+  UpdateRolePermissionsResponse,
+} from "@/api/modules/roles/dto/RolePermissionsDTO";
+import {
+  RoleFieldAccessDTO,
+  UpdateRoleFieldAccessRequest,
+  UpdateRoleFieldAccessResponse,
+} from "@/api/modules/roles/dto/RoleFieldAccessDTO";
 
 export class HrisApiRolesService {
   public async getRoles(): Promise<Role[]> {
@@ -12,13 +22,26 @@ export class HrisApiRolesService {
     return response.map((role) => roleMapper.mapRoleDTOtoRole(role));
   };
 
-  public async getRoleModulePermissions(roleId: string): Promise<{ modules: Record<string, "NONE" | "VIEW" | "EDIT" | "MANAGE"> }> {
-    return hrisApiRolesClient.getRoleModulePermissions(roleId);
+  public async getRolePermissions(roleId: string): Promise<RolePermissionsDTO> {
+    return hrisApiRolesClient.getRolePermissions(roleId);
   }
 
-  public async updateRoleModulePermissions(roleId: string,
-    payload: { modules: Record<string, "NONE" | "VIEW" | "EDIT" | "MANAGE"> }): Promise<void> {
-    return hrisApiRolesClient.updateRoleModulePermissions(roleId, payload);
+  public async updateRolePermissions(
+    roleId: string,
+    payload: UpdateRolePermissionsRequest,
+  ): Promise<UpdateRolePermissionsResponse> {
+    return hrisApiRolesClient.updateRolePermissions(roleId, payload);
+  }
+
+  public async getRoleFieldAccess(roleId: string): Promise<RoleFieldAccessDTO> {
+    return hrisApiRolesClient.getRoleFieldAccess(roleId);
+  }
+
+  public async updateRoleFieldAccess(
+    roleId: string,
+    payload: UpdateRoleFieldAccessRequest,
+  ): Promise<UpdateRoleFieldAccessResponse> {
+    return hrisApiRolesClient.updateRoleFieldAccess(roleId, payload);
   }
 
   public async createRole(payload: CreateRoleRequest): Promise<NewEntity> {
@@ -46,10 +69,9 @@ export class HrisApiRolesService {
   };
 
   public async deleteRole(id: string): Promise<UpdatedEntity> {
-    const updateResponse = await hrisApiRolesClient.deleteRole(id);
-    return {
-      id: updateResponse.id,
-    };
+    // Backend responds 204 No Content (no body), so don't read from the response.
+    await hrisApiRolesClient.deleteRole(id);
+    return { id };
   }
 }
 

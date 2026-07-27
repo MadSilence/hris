@@ -14,6 +14,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
   useMutation: (config: any) => ({
     mutateAsync: config.mutationFn,
     mutate: async (payload: any) => {

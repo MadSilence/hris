@@ -9,7 +9,9 @@ import People from "@/public/icons/people.svg";
 import Calendar from "@/public/icons/calendar.svg";
 import Settings from "@/public/icons/settings.svg";
 import styles from "./layout.module.css";
-import { PermissionsProvider, usePermissions, } from "@/components/auth/PermissionsContext";
+import { useAccess } from "@/components/auth/useAccess";
+import { canAccess, ResourceCode } from "@/models/access";
+import { settingsGroups } from "@/components/modules/settings/config/settings.config";
 import { Toast } from "@/components/ui/Toast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
@@ -18,7 +20,7 @@ import CompanyDataProvider, { useCompanyData } from "@/components/providers/Comp
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const { canModule } = usePermissions();
+  const { access } = useAccess();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const { user } = useCurrentUser();
@@ -34,7 +36,12 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("hris:forbidden", handleForbidden);
   }, []);
 
-  const allTopItems: (NavItem & { module?: string })[] = [
+  // Settings hub is visible when the user can view at least one settings area.
+  const settingsResources: ResourceCode[] = settingsGroups
+    .flatMap((group) => group.items)
+    .flatMap((item) => item.resources ?? []);
+
+  const allTopItems: (NavItem & { resources?: ResourceCode[] })[] = [
     { label: "Home", href: "/dashboard", Icon: Home },
     {
       label: "Inbox",
@@ -50,28 +57,31 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       label: "Organization",
       href: "/organization/people",
       Icon: People,
-      module: "PEOPLE",
+      resources: ["PEOPLE.PROFILE"],
     },
     {
       label: "Time Off",
       href: "/time-off",
       Icon: Calendar,
-      module: "TIME_OFF",
+      resources: ["PEOPLE.TIME_OFF"],
     },
   ];
 
-  const allBottomItems: (NavItem & { module?: string })[] = [
+  const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = [
     {
       label: "Settings",
       href: "/settings",
       Icon: Settings,
+      resources: settingsResources,
     },
   ];
 
-  const filterItem = (item: NavItem & { module?: string }) => {
-    if (!item.module) return true;
+  const filterItem = (item: NavItem & { resources?: ResourceCode[] }) => {
+    if (!item.resources || item.resources.length === 0) return true;
 
-    return canModule(item.module, "view");
+    return item.resources.some((resource) =>
+      canAccess({ access, resource, action: "VIEW" }),
+    );
   };
 
   const top = allTopItems.filter(filterItem);
@@ -114,18 +124,16 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <PermissionsProvider>
-      <CurrentUserProvider>
-        <CompanyDataProvider>
-          <ImpersonationProvider>
-            <LayoutContent>
-              <div className="px-16 py-16">
-                {children}
-              </div>
-            </LayoutContent>
-          </ImpersonationProvider>
-        </CompanyDataProvider>
-      </CurrentUserProvider>
-    </PermissionsProvider>
+    <CurrentUserProvider>
+      <CompanyDataProvider>
+        <ImpersonationProvider>
+          <LayoutContent>
+            <div className="px-16 pt-16 pb-8">
+              {children}
+            </div>
+          </LayoutContent>
+        </ImpersonationProvider>
+      </CompanyDataProvider>
+    </CurrentUserProvider>
   );
 }

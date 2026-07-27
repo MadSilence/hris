@@ -1,12 +1,18 @@
-import { NextRequest } from "next/server";
+import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisUserRolesService } from "@/api/modules/roles/services/hrisUserRolesService/hrisUserRolesService";
 
-export async function POST(_req: NextRequest, context: { params: { id: string; roleId: string } }) {
-  await hrisUserRolesService.assignRole(context.params.id, context.params.roleId);
-  return new Response(null, { status: 204 });
-}
+type RouteContext = { params: Promise<{ id: string; roleId: string }> };
 
-export async function DELETE(_req: NextRequest, context: { params: { id: string; roleId: string } }) {
-  await hrisUserRolesService.removeRole(context.params.id, context.params.roleId);
+export const POST = apiRequestWrapper(async (_req: Request, context: RouteContext) => {
+  const { id, roleId } = await context.params;
+  await hrisUserRolesService.assignRole(id, roleId);
+
   return new Response(null, { status: 204 });
-}
+});
+
+export const DELETE = apiRequestWrapper(async (_req: Request, context: RouteContext) => {
+  const { id, roleId } = await context.params;
+  await hrisUserRolesService.removeRole(id, roleId);
+
+  return new Response(null, { status: 204 });
+});

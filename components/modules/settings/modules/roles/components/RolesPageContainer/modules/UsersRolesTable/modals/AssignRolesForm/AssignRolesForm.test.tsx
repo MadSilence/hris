@@ -2,6 +2,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { AssignRolesForm } from "./AssignRolesForm";
 
+// AssignRolesForm reads the caller's access (to gate the System Owner role); the real hook
+// needs a QueryClient, so stub it as a System Owner so these form-behaviour tests can freely
+// toggle every role (owner gating is not what they exercise).
+jest.mock("@/components/auth/useAccess", () => ({
+  useAccess: () => ({ access: { systemOwner: true } }),
+}));
+
 beforeAll(() => {
   Object.defineProperty(global, "ResizeObserver", {
     writable: true,

@@ -23,9 +23,10 @@ type Template = {
 type AddRoleModalProps = {
   isOpen: boolean;
   isLoading?: boolean;
+  errorMessage?: string;
   templates: Template[];
   onCancelAction: () => void;
-  onCreateBlankAction: (values: { name: string }) => void;
+  onCreateBlankAction: (values: { name: string }) => void | Promise<void>;
   onCreateFromTemplateAction: (values: {
     templateId: string;
     name?: string;
@@ -35,6 +36,7 @@ type AddRoleModalProps = {
 export const AddRoleModal: FC<AddRoleModalProps> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   templates,
   onCancelAction,
   onCreateBlankAction,
@@ -92,6 +94,10 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
               it later.
             </DialogDescription>
           </DialogHeader>
+
+          {errorMessage && (
+            <p className="text-sm text-red-500">{errorMessage}</p>
+          )}
 
           <AddRoleForm
             isLoading={isLoading}

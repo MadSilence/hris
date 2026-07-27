@@ -10,6 +10,13 @@ export type User = {
   }
   status: string;
   isEmailVerified: boolean;
+  jobId?: string | null;
+  jobName?: string | null;
+  department?: { id: string; name: string } | null;
+  teams?: { id: string; name: string }[];
+  office?: { id: string; name: string } | null;
+  legalEntity?: { id: string; name: string } | null;
+  calendars?: { id: string; name: string; year: number }[];
   lastLoginAt: string;
   avatarUrl: string | null;
   createdAt: string;

@@ -8,8 +8,10 @@ export class RoleMapper {
       active: dto.active,
       name: dto.name,
       description: dto.description || undefined,
+      userCount: dto.userCount,
       createdAt: dto.createdAt,
       systemOwner: dto.systemOwner,
+      isDefault: dto.isDefault,
       updatedAt: dto.updatedAt,
     };
   }

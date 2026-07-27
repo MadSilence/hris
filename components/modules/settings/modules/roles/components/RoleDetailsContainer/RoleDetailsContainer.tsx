@@ -15,5 +15,12 @@ export default function RoleDetailsContainer({ roleId }: RoleDetailsContainerPro
 
   const role = useMemo(() => (roles ?? []).find((r) => r.id === roleId), [roles, roleId]);
 
-  return <RoleDetailsView roleId={roleId} isLoading={isLoading}/>;
+  return (
+    <RoleDetailsView
+      roleId={roleId}
+      roleName={role?.name}
+      isDefaultRole={role?.isDefault ?? false}
+      isLoading={isLoading}
+    />
+  );
 }

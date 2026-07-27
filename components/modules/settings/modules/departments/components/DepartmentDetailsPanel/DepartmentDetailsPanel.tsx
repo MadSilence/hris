@@ -2,64 +2,73 @@
 
 import React, { useState } from "react";
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
+  Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/public/desact/src/components/ui/tabs";
-import type { DepartmentNode } from "../DepartmentTree/DepartmentTree";
+import { Button } from "@/public/desact/src/components/ui/button";
+import type { DepartmentTreeNode } from "@/models/departments";
+import { DepartmentMembersList } from "@/components/modules/settings/modules/departments/components/DepartmentMembersList/DepartmentMembersList";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 
 type Props = {
-  department: DepartmentNode;
+  department: DepartmentTreeNode;
+  onEdit: () => void;
+  onAddMember: () => void;
+  onSetLead: () => void;
 };
 
 function DepartmentIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 16 16" fill="none" className="text-brown-600">
-      <path
-        d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z"
-        fill="currentColor"
-        fillOpacity="0.2"
-      />
-      <path
-        d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-      />
+      <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" fill="currentColor" fillOpacity="0.2" />
+      <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" strokeWidth="1.2" />
     </svg>
   );
 }
 
-export function DepartmentDetailsPanel({ department }: Props) {
+export function DepartmentDetailsPanel({ department, onEdit, onAddMember, onSetLead }: Props) {
   const [activeTab, setActiveTab] = useState("overview");
-
-  const directReports =
-    department.directReports ?? department.children?.length ?? 0;
+  const isArchived = department.status === "ARCHIVED";
 
   return (
     <div className="flex flex-col h-full min-h-0 p-6 gap-5">
       {/* Header */}
-      <div className="flex items-center gap-4 flex-none">
+      <div className="flex items-start gap-4 flex-none">
         <div className="w-11 h-11 rounded-xl bg-brown-100 flex items-center justify-center flex-none">
           <DepartmentIcon />
         </div>
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-brown-900 truncate">
-            {department.name}
-          </h2>
-          {department.about && (
-            <p className="text-sm text-brown-500 truncate">{department.about}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg font-semibold text-brown-900 truncate">{department.name}</h2>
+            {isArchived && (
+              <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-brown-100 text-brown-500">
+                Archived
+              </span>
+            )}
+            {department.code && (
+              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-brown-50 text-brown-500 border border-brown-200">
+                {department.code}
+              </span>
+            )}
+          </div>
+          {department.description && (
+            <p className="text-sm text-brown-500 truncate mt-0.5">{department.description}</p>
           )}
         </div>
+        <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+          {!isArchived && (
+            <Button variant="outline" size="sm" onClick={onEdit} className="flex-none">
+              Edit
+            </Button>
+          )}
+        </PermissionGate>
       </div>
 
       {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="flex-1 flex flex-col min-h-0 gap-0"
-      >
-        <TabsList className="flex-none w-full justify-start bg-transparent border-b border-brown-200 rounded-none h-auto pb-0 px-0 gap-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 gap-0">
+        <TabsList
+          variant="underline"
+          className="flex-none w-full justify-start bg-transparent border-b border-brown-200 rounded-none h-auto pb-0 px-0 gap-0"
+        >
           <TabsTrigger
             value="overview"
             className="rounded-none border-0 border-b-2 border-transparent data-[state=active]:border-brown-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2 px-3 text-sm text-brown-500 data-[state=active]:text-brown-900 font-medium"
@@ -74,69 +83,63 @@ export function DepartmentDetailsPanel({ department }: Props) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent
-          value="overview"
-          className="flex-1 overflow-y-auto mt-5 min-h-0 space-y-5"
-        >
+        <TabsContent value="overview" className="flex-1 overflow-y-auto mt-5 min-h-0 space-y-5">
           {/* Stat cards */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="border border-brown-200 rounded-lg p-3.5">
               <p className="text-xs text-brown-500 mb-1">Members</p>
-              <p className="text-2xl font-semibold text-brown-900 leading-none">
-                {department.members}
-              </p>
+              <p className="text-2xl font-semibold text-brown-900 leading-none">{department.memberCount}</p>
             </div>
             <div className="border border-brown-200 rounded-lg p-3.5">
-              <p className="text-xs text-brown-500 mb-1">Direct reports</p>
+              <p className="text-xs text-brown-500 mb-1">Sub-departments</p>
               <p className="text-2xl font-semibold text-brown-900 leading-none">
-                {directReports}
-              </p>
-            </div>
-            <div className="border border-brown-200 rounded-lg p-3.5">
-              <p className="text-xs text-brown-500 mb-1">Founded</p>
-              <p className="text-2xl font-semibold text-brown-900 leading-none">
-                {department.founded ?? "—"}
+                {department.children?.length ?? 0}
               </p>
             </div>
           </div>
 
-          {/* Description */}
-          {department.about && (
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400 mb-2">
-                Description
-              </h3>
-              <p className="text-sm text-brown-700 leading-relaxed">
-                {department.about}
-              </p>
+          {/* Lead */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400">Lead</h3>
+              <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+                {!isArchived && (
+                  <button
+                    onClick={onSetLead}
+                    className="text-xs text-brown-500 hover:text-brown-800"
+                  >
+                    {department.leadId ? "Change" : "Set lead"}
+                  </button>
+                )}
+              </PermissionGate>
             </div>
-          )}
+            {department.leadId ? (
+              <p className="text-sm text-brown-700 font-mono">{department.leadId}</p>
+            ) : (
+              <p className="text-sm text-brown-400">No lead assigned.</p>
+            )}
+          </div>
 
-          {/* Responsibilities */}
-          {(department.responsibilities?.length ?? 0) > 0 && (
+          {/* Description */}
+          {department.description && (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400 mb-2">
-                Responsibilities
-              </h3>
-              <ul className="space-y-1.5">
-                {department.responsibilities!.map((r, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-brown-700">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-brown-300 flex-none" />
-                    {r}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400 mb-2">Description</h3>
+              <p className="text-sm text-brown-700 leading-relaxed">{department.description}</p>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent
-          value="people"
-          className="flex-1 overflow-y-auto mt-5 min-h-0"
-        >
-          <div className="flex items-center justify-center h-32 text-sm text-brown-400">
-            People list coming soon.
-          </div>
+        <TabsContent value="people" className="flex-1 overflow-y-auto mt-5 min-h-0 flex flex-col gap-3">
+          <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+            {!isArchived && (
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" onClick={onAddMember}>
+                  Add member
+                </Button>
+              </div>
+            )}
+          </PermissionGate>
+          <DepartmentMembersList departmentId={department.id} isArchived={isArchived} />
         </TabsContent>
       </Tabs>
     </div>

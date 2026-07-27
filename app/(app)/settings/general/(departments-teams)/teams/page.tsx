@@ -6,6 +6,8 @@ import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsP
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import SettingsDepartmentsAndTeamsLayout from "@/components/ui/SettingsDepartmentsAndTeamsLayout/SettingsDepartmentsAndTeamsLayout";
 import TeamsContainer from "@/components/modules/settings/modules/teams/TeamsContainer";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { AccessDenied } from "@/components/auth/AccessDenied";
 
 export default function Page() {
   return (
@@ -21,7 +23,9 @@ export default function Page() {
         </>
       }
     >
-      <TeamsContainer />
+      <PermissionGate resource="ORG.TEAM" action="VIEW" fallback={<AccessDenied/>}>
+        <TeamsContainer />
+      </PermissionGate>
     </SettingsDepartmentsAndTeamsLayout>
   );
 }

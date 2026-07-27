@@ -11,13 +11,23 @@ export type FieldDTO = {
   label: string;
   type: AttributeType;
   isSystem: boolean;
-  level: "NONE" | "READ" | "EDIT" | "ADMIN";
+  // The calling user's own level on this field — not the configuration of any role.
+  level: "NONE" | "READ" | "EDIT";
+  // False for locked system fields: their access cannot be restricted (PUT → RF00002).
+  configurable?: boolean;
+  // Scopes at which the caller can VIEW this field. Filtering/columns need "COMPANY".
+  viewScopes?: string[] | null;
   options?: OptionDTO[] | null;
 };
 
 export type FilterDTO = {
   field: string;
-  op: "eq" | "neq" | "contains" | "starts_with" | "in" | "has_any" | "before" | "after" | "between";
+  op:
+    | "eq" | "neq" | "contains" | "starts_with"
+    | "in" | "has_any"
+    | "before" | "after" | "between"
+    // Numeric comparison/range — backend attr:* NUMBER columns (int_value/dec_value).
+    | "gt" | "gte" | "lt" | "lte";
   value?: string | null;
   valueTo?: string | null;
   values?: string[] | null;
@@ -38,6 +48,17 @@ export type UserRoleDTO = {
   name: string;
 }
 
+// Lightweight reference to an org entity — id + name only, not the full object.
+// Follow the id to the entity's own endpoint for details.
+export type RefDTO = {
+  id: string;
+  name: string;
+};
+
+export type CalendarRefDTO = RefDTO & {
+  year: number;
+};
+
 export type UsersSearchItemDTO = {
   id: string;
   companyId: string;
@@ -47,6 +68,22 @@ export type UsersSearchItemDTO = {
   roles: UserRoleDTO[];
   status: string;
   isEmailVerified: boolean;
+  // Current job held by the user (users.job_id → jobs). jobName is the resolved
+  // Position label; null means no job is assigned.
+  jobId?: string | null;
+  jobName?: string | null;
+  // Resolved by the backend; null when the user has no avatar (fall back to initials).
+  avatarUrl?: string | null;
+  // Role-assignment metadata — only populated by GET /roles/{id}/users.
+  assignedAt?: string | null;
+  assignedByName?: string | null;
+  // Org associations — references only. Cardinality matters: department/office/legalEntity
+  // are single-or-null, teams/calendars are arrays (possibly empty). null → not assigned.
+  department?: RefDTO | null;
+  teams?: RefDTO[];
+  office?: RefDTO | null;
+  legalEntity?: RefDTO | null;
+  calendars?: CalendarRefDTO[];
   lastLoginAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
