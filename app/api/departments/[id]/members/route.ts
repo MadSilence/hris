@@ -7,8 +7,3 @@ export const GET = apiRequestWrapper(async (req: Request, context: RouteContext)
   const { id } = await context.params;
   return departmentsRoutes.getMembers(req, id);
 });
-
-export const POST = apiRequestWrapper(async (req: Request, context: RouteContext) => {
-  const { id } = await context.params;
-  return departmentsRoutes.addMember(req, id);
-});

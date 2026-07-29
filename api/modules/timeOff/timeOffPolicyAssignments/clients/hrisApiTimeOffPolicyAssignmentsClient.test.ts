@@ -34,7 +34,7 @@ describe("HrisApiTimeOffPolicyAssignmentsClient", () => {
       await hrisApiTimeOffPolicyAssignmentsClient.listByPolicyId("policy-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/assignments"
+      "/time-off/policies/policy-id/assignments"
     );
     expect(result).toEqual([dto]);
   });
@@ -56,7 +56,7 @@ describe("HrisApiTimeOffPolicyAssignmentsClient", () => {
     );
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/assignments",
+      "/time-off/policies/policy-id/assignments",
       request
     );
     expect(result).toEqual(response);
@@ -73,7 +73,7 @@ describe("HrisApiTimeOffPolicyAssignmentsClient", () => {
     );
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policy-assignments/assignment-id/end",
+      "/time-off/policy-assignments/assignment-id/end",
       { effectiveTo: "2026-06-30" }
     );
     expect(result).toEqual(response);

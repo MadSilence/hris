@@ -13,8 +13,8 @@ import type {
 } from "@/models/timeOff";
 
 export class HrisApiEmployeeTimeOffBalancesClient {
-  private readonly BALANCES_PATH = "/api/time-off/balances";
-  private readonly USERS_PATH = "/api/users";
+  private readonly BALANCES_PATH = "/time-off/balances";
+  private readonly USERS_PATH = "/users";
 
   public async create(
     body: CreateEmployeeTimeOffBalanceRequest

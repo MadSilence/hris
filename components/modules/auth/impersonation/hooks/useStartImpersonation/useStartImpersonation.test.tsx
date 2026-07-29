@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation/useStartImpersonation";
@@ -25,6 +26,10 @@ jest.mock("@tanstack/react-query", () => ({
   }),
 }));
 
+jest.mock("@/components/clients/apiClient", () => ({
+  internalApiClient: { post: jest.fn() },
+}));
+
 jest.mock("@/components/auth/permissionsStorage", () => ({
   clearPermissionsStorage: jest.fn(),
 }));
@@ -33,6 +38,8 @@ jest.mock("@/components/providers/CurrentUserProvider/CurrentUserProvider", () =
   useCurrentUser: jest.fn(),
 }));
 
+const mockPost = internalApiClient.post as jest.Mock;
+
 describe("useStartImpersonation", () => {
   const setIdentity = jest.fn();
   const clearCurrentUserCache = jest.fn();
@@ -40,15 +47,12 @@ describe("useStartImpersonation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    global.fetch = jest.fn().mockResolvedValue({
+    mockPost.mockResolvedValue({
       ok: true,
-      json: async () => ({
-        ok: true,
-        impersonating: true,
-        actorId: "admin-id",
-        subjectId: "target-id",
-      }),
-    }) as jest.Mock;
+      impersonating: true,
+      actorId: "admin-id",
+      subjectId: "target-id",
+    });
 
     jest.mocked(useCurrentUser).mockReturnValue({
       setIdentity,
@@ -63,11 +67,8 @@ describe("useStartImpersonation", () => {
       await result.current.mutate({ targetUserId: "target-id" });
     });
 
-    expect(fetch).toHaveBeenCalledWith("/api/auth/impersonate/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ targetUserId: "target-id" }),
+    expect(mockPost).toHaveBeenCalledWith("/auth/impersonate/start", {
+      targetUserId: "target-id",
     });
 
     expect(clearPermissionsStorage).toHaveBeenCalled();
@@ -85,14 +86,12 @@ describe("useStartImpersonation", () => {
   });
 
   it("throws when request fails", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: false,
-    }) as jest.Mock;
+    mockPost.mockRejectedValue(new Error("Forbidden"));
 
     const { result } = renderHook(() => useStartImpersonation());
 
     await expect(
       result.current.mutateAsync({ targetUserId: "target-id" })
-    ).rejects.toThrow("Failed to start impersonation");
+    ).rejects.toThrow();
   });
 });

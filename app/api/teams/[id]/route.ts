@@ -7,8 +7,3 @@ export const GET = apiRequestWrapper(async (req: Request, context: RouteContext)
   const { id } = await context.params;
   return teamsRoutes.getById(req, id);
 });
-
-export const PATCH = apiRequestWrapper(async (req: Request, context: RouteContext) => {
-  const { id } = await context.params;
-  return teamsRoutes.update(req, id);
-});

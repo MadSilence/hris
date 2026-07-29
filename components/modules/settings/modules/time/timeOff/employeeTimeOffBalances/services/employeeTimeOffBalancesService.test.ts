@@ -1,85 +1,50 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import { employeeTimeOffBalancesService } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/services/employeeTimeOffBalancesService";
+
+jest.mock("@/components/clients/apiClient", () => ({
+  internalApiClient: { get: jest.fn() },
+}));
+
+const mockGet = internalApiClient.get as jest.Mock;
 
 describe("EmployeeTimeOffBalancesService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
   });
 
   it("gets balance by id", async () => {
     const response = { id: "balance-id" };
-
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => response,
-    });
+    mockGet.mockResolvedValue(response);
 
     const result = await employeeTimeOffBalancesService.getById("balance-id");
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/time-off/balances/balance-id",
-      { method: "GET", credentials: "include", cache: "no-store" }
-    );
+    expect(mockGet).toHaveBeenCalledWith("/time-off/balances/balance-id");
     expect(result).toEqual(response);
-  });
-
-  it("throws error when getById fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
-
-    await expect(
-      employeeTimeOffBalancesService.getById("balance-id")
-    ).rejects.toThrow("Failed to load employee time off balance");
   });
 
   it("lists balances by user id", async () => {
     const response = [{ id: "balance-id" }];
+    mockGet.mockResolvedValue(response);
 
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => response,
-    });
+    const result = await employeeTimeOffBalancesService.listByUserId("user-id");
 
-    const result =
-      await employeeTimeOffBalancesService.listByUserId("user-id");
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/users/user-id/time-off-balances",
-      { method: "GET", credentials: "include", cache: "no-store" }
-    );
+    expect(mockGet).toHaveBeenCalledWith("/users/user-id/time-off-balances");
     expect(result).toEqual(response);
-  });
-
-  it("throws error when listByUserId fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
-
-    await expect(
-      employeeTimeOffBalancesService.listByUserId("user-id")
-    ).rejects.toThrow("Failed to load employee time off balances");
   });
 
   it("lists adjustments by balance id", async () => {
     const response = [{ id: "adjustment-id" }];
+    mockGet.mockResolvedValue(response);
 
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => response,
-    });
+    const result = await employeeTimeOffBalancesService.listAdjustments("balance-id");
 
-    const result =
-      await employeeTimeOffBalancesService.listAdjustments("balance-id");
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/time-off/balances/balance-id/adjustments",
-      { method: "GET", credentials: "include", cache: "no-store" }
-    );
+    expect(mockGet).toHaveBeenCalledWith("/time-off/balances/balance-id/adjustments");
     expect(result).toEqual(response);
   });
 
-  it("throws error when listAdjustments fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
+  it("propagates errors from the api client", async () => {
+    mockGet.mockRejectedValue(new Error("boom"));
 
-    await expect(
-      employeeTimeOffBalancesService.listAdjustments("balance-id")
-    ).rejects.toThrow("Failed to load employee time off balance adjustments");
+    await expect(employeeTimeOffBalancesService.getById("balance-id")).rejects.toThrow("boom");
   });
 });

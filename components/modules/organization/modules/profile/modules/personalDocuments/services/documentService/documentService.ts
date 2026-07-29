@@ -1,3 +1,4 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 
 export type UploadPersonalDocumentRequest = {
@@ -34,15 +35,10 @@ export class DocumentService {
       formData.append("categoryId", payload.categoryId);
     }
 
-    const res = await fetch(`/api/documents/users/${payload.userId}/upload`, {
+    const res = await internalApiClient.fetch(`/documents/users/${payload.userId}/upload`, {
       method: "POST",
-      credentials: "include",
       body: formData,
     });
-
-    if (!res.ok) {
-      throw new Error("Failed to upload document");
-    }
 
     return res.json();
   }
@@ -50,40 +46,21 @@ export class DocumentService {
   public async deletePersonalDocument(
     payload: DeletePersonalDocumentRequest
   ): Promise<void> {
-    const res = await fetch(`/api/documents/${payload.documentId}/delete`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to delete document");
-    }
+    await internalApiClient.post<void>(`/documents/${payload.documentId}/delete`);
   }
 
   public async starPersonalDocument(
     payload: StarPersonalDocumentRequest
   ): Promise<void> {
-    const res = await fetch(`/api/documents/${payload.documentId}/star`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to star document");
-    }
+    await internalApiClient.post<void>(`/documents/${payload.documentId}/star`);
   }
 
   public async unstarPersonalDocument(
     payload: UnstarPersonalDocumentRequest
   ): Promise<void> {
-    const res = await fetch(`/api/documents/${payload.documentId}/star`, {
+    await internalApiClient.fetch(`/documents/${payload.documentId}/star`, {
       method: "DELETE",
-      credentials: "include",
     });
-
-    if (!res.ok) {
-      throw new Error("Failed to unstar document");
-    }
   }
 
   public getPersonalDocumentDownloadUrl(documentId: string): string {

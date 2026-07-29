@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
 import UsersRolesTableSkeleton from "./UsersRolesTableSkeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Role } from "@/models/role/Role";
@@ -30,17 +30,6 @@ export interface UsersRolesTableProps {
   onLoadMore?: () => void;
 }
 
-function getInitials(firstName?: string | null, lastName?: string | null, email?: string | null) {
-  const a = (firstName ?? "").trim();
-  const b = (lastName ?? "").trim();
-
-  const initials = (a ? a[0] : "") + (b ? b[0] : "");
-  if (initials) return initials.toUpperCase();
-
-  const e = (email ?? "").trim();
-  return (e[0] ?? "—").toUpperCase();
-}
-
 export default function UsersRolesTable({
   userRows,
   usersLoading,
@@ -56,7 +45,6 @@ export default function UsersRolesTable({
   const [selectedUser, setSelectedUser] =
     React.useState<UsersSearchItemDTO | null>(null);
 
-  // Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE.
   const canAssignRoles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
 
   return (
@@ -79,12 +67,6 @@ export default function UsersRolesTable({
                 const fullName =
                   `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() ||
                   u.email;
-                const initials = getInitials(
-                  u.firstName,
-                  u.lastName,
-                  u.email
-                );
-
                 return (
                   <TableRow
                     key={u.id}
@@ -94,15 +76,14 @@ export default function UsersRolesTable({
                     }}
                   >
                     <TableCell className="py-2 w-1/3">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar className="h-7 w-7 shrink-0">
-                          {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt={fullName}/> : null}
-                          <AvatarFallback className="text-[11px]">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate text-sm font-medium">{fullName}</span>
-                      </div>
+                      <UserChip
+                        id={u.id}
+                        name={fullName}
+                        avatarUrl={u.avatarUrl}
+                        firstName={u.firstName}
+                        lastName={u.lastName}
+                        email={u.email}
+                      />
                     </TableCell>
 
                     <TableCell className="w-1/3 text-muted-foreground">{u.jobName || "—"}</TableCell>
@@ -158,7 +139,6 @@ export default function UsersRolesTable({
             await onApplyRoles?.(userId, roleIds, currentRoleIds);
             setSelectedUser(null);
           } catch {
-            // The error is surfaced inside the modal via errorMessage.
           }
         }}
       />

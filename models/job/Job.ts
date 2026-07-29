@@ -5,4 +5,6 @@ export type Job = {
   name: string;
   isSystem?: boolean;
   level: JobLevel;
+  createdAt?: string;
+  createdBy?: string;
 };

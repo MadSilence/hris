@@ -9,8 +9,8 @@ import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type { TimeOffPolicyAssignment } from "@/models/timeOff";
 
 export class HrisApiTimeOffPolicyAssignmentsClient {
-  private readonly POLICIES_PATH = "/api/time-off/policies";
-  private readonly ASSIGNMENTS_PATH = "/api/time-off/policy-assignments";
+  private readonly POLICIES_PATH = "/time-off/policies";
+  private readonly ASSIGNMENTS_PATH = "/time-off/policy-assignments";
 
   public async listByPolicyId(
     policyId: string

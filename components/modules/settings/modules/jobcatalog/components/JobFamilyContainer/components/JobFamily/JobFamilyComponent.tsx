@@ -1,181 +1,187 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
-import { Ellipsis } from "lucide-react";
+import { FC, useMemo, useState } from "react";
+import { ChevronsDownUp, ChevronsUpDown, Plus, Search } from "lucide-react";
 
+import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
+import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
-  CreateJobFamilyModal
-} from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/CreateJobFamilyModal";
-import {
-  DeleteJobFamilyModal
-} from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/DeleteJobFamilyModal";
-import {
-  RenameJobFamilyModal
-} from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/RenameJobFamilyModal";
-import { ActionStatus } from "@/components/models/ActionStatus";
-import { JobFamilyList } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyList";
-import {
-  useCreateJobFamilyAction
-} from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useCreateJobFamilyAction/useCreateJobFamilyAction";
-import { useDeleteJobFamilyAction } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useDeleteJobFamilyActon";
-import { useRenameJobFamilyAction } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useRenameJobFamilyAction";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/public/desact/src/components/ui/accordion";
 import { JobFamily } from "@/models/job";
 
 type JobFamilyProps = {
   jobFamilies: JobFamily[] | null | undefined;
 };
 
+const GRID = "grid grid-cols-[minmax(0,1fr)_160px_150px_150px_160px] items-center gap-4";
+
+function formatDate(iso?: string | null) {
+  if (!iso) return "—";
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(iso));
+  } catch {
+    return "—";
+  }
+}
+
 export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
-  const list = jobFamilies ?? [];
+  const all = jobFamilies ?? [];
 
-  const [selectedId, setSelectedId] = useState("");
-  const [isCreateJobFamilyModalOpen, setIsCreateJobFamilyModalOpen] = useState(false);
-  const [isDeleteJobFamilyModalOpen, setIsDeleteJobFamilyModalOpen] = useState(false);
-  const [isRenameJobFamilyModalOpen, setIsRenameJobFamilyModalOpen] = useState(false);
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [openIds, setOpenIds] = useState<string[]>(() => all.map((f) => f.id));
 
-  const createJobFamilyAction = useCreateJobFamilyAction();
-  const deleteJobFamilyAction = useDeleteJobFamilyAction();
-  const renameJobFamilyAction = useRenameJobFamilyAction();
+  const needle = query.trim().toLowerCase();
 
-  useEffect(() => {
-    if (!list.length) {
-      setSelectedId("");
-      return;
-    }
+  const families = useMemo(() => {
+    if (!needle) return all;
 
-    const exists = list.some((item) => item.id === selectedId);
-    if (!exists) {
-      setSelectedId(list[0].id);
-    }
-  }, [list, selectedId]);
+    return all
+      .map((family) => {
+        const familyMatches = family.name.toLowerCase().includes(needle);
+        const jobs = familyMatches
+          ? family.jobs
+          : family.jobs.filter(
+              (job) =>
+                job.name.toLowerCase().includes(needle) ||
+                (job.level?.name ?? "").toLowerCase().includes(needle),
+            );
 
-  const selected =
-    list.length > 0
-      ? list.find((item) => item.id === selectedId) ?? list[0]
-      : null;
+        return { ...family, jobs };
+      })
+      .filter((family) => family.name.toLowerCase().includes(needle) || family.jobs.length > 0);
+  }, [all, needle]);
 
-  useEffect(() => {
-    const status = createJobFamilyAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
-      setIsCreateJobFamilyModalOpen(false);
-    }
-  }, [createJobFamilyAction.data?.status]);
-
-  useEffect(() => {
-    const status = deleteJobFamilyAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
-      setIsDeleteJobFamilyModalOpen(false);
-    }
-  }, [deleteJobFamilyAction.data?.status]);
-
-  useEffect(() => {
-    const status = renameJobFamilyAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
-      setIsRenameJobFamilyModalOpen(false);
-    }
-  }, [renameJobFamilyAction.data?.status]);
+  const allOpen = families.length > 0 && openIds.length >= families.length;
+  const toggleAll = () => setOpenIds(allOpen ? [] : families.map((f) => f.id));
 
   return (
-    <div className="grid min-h-svh grid-cols-[280px_minmax(0,1fr)] gap-6 bg-[var(--color-bg-primary)] p-4">
-      <aside className="min-h-0 overflow-auto">
-        <JobFamilyList
-          jobFamilies={list}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onCreate={() => setIsCreateJobFamilyModalOpen(true)}
-        />
-      </aside>
-
-      <main className="min-h-0 overflow-auto p-3">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <h1 className="truncate text-2xl font-semibold text-[var(--color-text-primary)]">
-              {selected?.name ?? "Jobs"}
-            </h1>
-
-            {selected?.isSystem ? (
-              <span className="whitespace-nowrap rounded-full bg-brown-50 px-2 py-1 text-sm text-[var(--color-text-tertiary)]">
-                Preset Job Family
-              </span>
-            ) : null}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setIsCreateJobModalOpen(true)}
-              disabled={!selected}
-            >
-              Add Job
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={!selected}
-                  aria-label="Job family actions"
-                >
-                  <Ellipsis className="h-4 w-4"/>
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsRenameJobFamilyModalOpen(true)}>
-                  Rename Job Family
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setIsDeleteJobFamilyModalOpen(true)}
-                >
-                  Delete Job Family
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+    // Fixed top region (search + column header) stays put; only the list below scrolls.
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative w-[260px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-400"/>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search jobs"
+            className="pl-9 w-[260px] h-9"
+            inputMode="search"
+          />
         </div>
 
-        <p className="text-sm text-[var(--color-text-tertiary)]">
-          Here will be jobs container
-        </p>
-      </main>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-brown-600"
+          onClick={toggleAll}
+          disabled={families.length === 0}
+        >
+          {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
+          {allOpen ? "Collapse all" : "Expand all"}
+        </Button>
+      </div>
 
-      <CreateJobFamilyModal
-        isOpen={isCreateJobFamilyModalOpen}
-        isLoading={createJobFamilyAction.isPending}
-        onConfirmAction={(formValues) => {
-          createJobFamilyAction.mutate({ name: formValues.name });
-        }}
-        onRequestCloseAction={() => setIsCreateJobFamilyModalOpen(false)}
-      />
+      <div className="max-h-[calc(100svh-380px)] overflow-y-auto pr-1">
+        {/* Column header lives inside the scroll box (same width context as the rows → aligned)
+            and sticks to the top so it stays visible while the list scrolls. */}
+        <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
+          <div>Name</div>
+          <div>Level</div>
+          <div>Assigned People</div>
+          <div>Added on</div>
+          <div>Added by</div>
+        </div>
 
-      <DeleteJobFamilyModal
-        isOpen={isDeleteJobFamilyModalOpen}
-        isLoading={deleteJobFamilyAction.isPending}
-        onConfirmAction={() => {
-          if (!selected) return;
-          deleteJobFamilyAction.mutate({ id: selected.id });
-        }}
-        onRequestCloseAction={() => setIsDeleteJobFamilyModalOpen(false)}
-        jobFamily={selected}
-      />
+        <div className="space-y-4 pt-2">
+        {families.length > 0 && (
+          <Accordion type="multiple" value={openIds} onValueChange={setOpenIds} className="w-full space-y-4">
+            {families.map((family) => (
+              <AccordionItem key={family.id} value={family.id} className="border-b-0">
+                <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+                  <span className="flex items-center gap-2">
+                    {family.name}
+                    {/* Total assigned people — placeholder until JOB assignments land. */}
+                    <span className="normal-case tracking-normal text-brown-400">(—)</span>
+                    {family.isSystem ? (
+                      <Badge variant="secondary" className="font-normal normal-case tracking-normal">
+                        Preset
+                      </Badge>
+                    ) : null}
+                  </span>
+                </AccordionTrigger>
 
-      <RenameJobFamilyModal
-        isOpen={isRenameJobFamilyModalOpen}
-        isLoading={renameJobFamilyAction.isPending}
-        onConfirmAction={(formValues) => {
-          if (!selected) return;
-          renameJobFamilyAction.mutate({
-            id: selected.id,
-            name: formValues.name,
-          });
-        }}
-        onRequestCloseAction={() => setIsRenameJobFamilyModalOpen(false)}
-      />
+                <AccordionContent>
+                  <div className="pb-2">
+                    {family.jobs.map((job, index) => (
+                      <div
+                        key={job.id}
+                        className={`${GRID} px-3 py-2 ${
+                          index < family.jobs.length - 1 ? "border-b border-brown-100" : ""
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <span className="inline-flex items-center gap-2">
+                            <span className="truncate text-sm font-medium text-foreground">
+                              {job.name}
+                            </span>
+                            {job.isSystem ? (
+                              <Badge variant="secondary" className="font-normal">
+                                Preset
+                              </Badge>
+                            ) : null}
+                          </span>
+                        </div>
+
+                        <div className="text-sm text-muted-foreground">
+                          {job.level?.name ?? "—"}
+                        </div>
+
+                        {/* Placeholder until JOB assignments land. */}
+                        <div className="text-sm text-muted-foreground">—</div>
+
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(job.createdAt)}
+                        </div>
+
+                        {/* createdBy is a UUID today — name resolution comes with the backend. */}
+                        <div className="text-sm text-muted-foreground">—</div>
+                      </div>
+                    ))}
+
+                    {/* Add-job affordance as a dashed trailing row (inert for now). */}
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
+                    >
+                      <Plus className="h-4 w-4"/>
+                      Add Job
+                    </button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
+
+        {/* Add-family affordance as a dashed light-brown block at the very bottom (inert for now). */}
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-brown-300 bg-brown-50/60 py-3 text-sm font-medium text-brown-600 hover:bg-brown-50"
+        >
+          <Plus className="h-4 w-4"/>
+          Add Job Family
+        </button>
+        </div>
+      </div>
     </div>
   );
 };

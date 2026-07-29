@@ -1,34 +1,32 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import { timeOffPolicyAssignmentsService } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/services/timeOffPolicyAssignmentsService";
+
+jest.mock("@/components/clients/apiClient", () => ({
+  internalApiClient: { get: jest.fn() },
+}));
+
+const mockGet = internalApiClient.get as jest.Mock;
 
 describe("TimeOffPolicyAssignmentsService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
   });
 
   it("lists assignments by policy id", async () => {
     const response = [{ id: "assignment-id" }];
+    mockGet.mockResolvedValue(response);
 
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => response,
-    });
+    const result = await timeOffPolicyAssignmentsService.listByPolicyId("policy-id");
 
-    const result =
-      await timeOffPolicyAssignmentsService.listByPolicyId("policy-id");
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/assignments",
-      { method: "GET", credentials: "include", cache: "no-store" }
-    );
+    expect(mockGet).toHaveBeenCalledWith("/time-off/policies/policy-id/assignments");
     expect(result).toEqual(response);
   });
 
-  it("throws error when listByPolicyId fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
+  it("propagates errors from the api client", async () => {
+    mockGet.mockRejectedValue(new Error("boom"));
 
     await expect(
       timeOffPolicyAssignmentsService.listByPolicyId("policy-id")
-    ).rejects.toThrow("Failed to load time off policy assignments");
+    ).rejects.toThrow("boom");
   });
 });

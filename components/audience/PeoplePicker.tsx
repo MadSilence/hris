@@ -26,9 +26,6 @@ import { useDebouncedValue } from "@/components/modules/organization/modules/pro
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { rolesOf, type Segment, type UserRefDTO } from "@/models/segment/Segment";
 
-// A configurable trailing column. `include` (optional) is the resolver key whose value the
-// column renders from `u.extras` — so each place can show whatever it needs (roles, a custom
-// attribute, …) without hardcoding it into the picker.
 export type PeopleColumn = {
   key: string;
   header: string;
@@ -36,7 +33,6 @@ export type PeopleColumn = {
   render: (user: UserRefDTO) => React.ReactNode;
 };
 
-// Default column: the user's current roles.
 export const rolesColumn: PeopleColumn = {
   key: "roles",
   header: "Current roles",
@@ -49,6 +45,52 @@ export const rolesColumn: PeopleColumn = {
         {roles.map((r) => (
           <Badge key={r.id} variant="secondary" className="font-normal">
             {r.name}
+          </Badge>
+        ))}
+      </div>
+    );
+  },
+};
+
+type OrgRef = { id: string; name: string };
+const orgRefOf = (u: UserRefDTO, key: string): OrgRef | null =>
+  (u.extras?.[key] as OrgRef | undefined) ?? null;
+
+const orgRefColumn = (key: string, header: string): PeopleColumn => ({
+  key,
+  header,
+  include: key,
+  render: (u) => {
+    const ref = orgRefOf(u, key);
+    return ref ? (
+      <Badge variant="secondary" className="font-normal">
+        {ref.name}
+      </Badge>
+    ) : (
+      <span className="text-sm text-muted-foreground">—</span>
+    );
+  },
+});
+
+export const officeColumn: PeopleColumn = orgRefColumn("office", "Current office");
+export const legalEntityColumn: PeopleColumn = orgRefColumn("legalEntity", "Current legal entity");
+export const departmentColumn: PeopleColumn = orgRefColumn("department", "Current department");
+
+const orgRefsOf = (u: UserRefDTO, key: string): OrgRef[] =>
+  (u.extras?.[key] as OrgRef[] | undefined) ?? [];
+
+export const teamColumn: PeopleColumn = {
+  key: "team",
+  header: "Current teams",
+  include: "team",
+  render: (u) => {
+    const teams = orgRefsOf(u, "team");
+    if (!teams.length) return <span className="text-sm text-muted-foreground">—</span>;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {teams.map((t) => (
+          <Badge key={t.id} variant="secondary" className="font-normal">
+            {t.name}
           </Badge>
         ))}
       </div>
@@ -69,6 +111,8 @@ export type PeoplePickerProps = {
   onMetaChange?: (meta: { total: number }) => void;
   /** Trailing columns after the fixed User column. Defaults to the roles column. */
   columns?: PeopleColumn[];
+  /** Hidden filters merged into the resolve segment (e.g. exclude already-assigned people). Not shown in the builder. */
+  extraFilters?: FilterDTO[];
 };
 
 function fullName(u: UserRefDTO) {
@@ -92,6 +136,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   onToggleAllMatching,
   onMetaChange,
   columns = [rolesColumn],
+  extraFilters,
 }) => {
   const [query, setQuery] = React.useState("");
   const q = useDebouncedValue(query.trim(), 300);
@@ -102,7 +147,6 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   );
   const colCount = 2 + columns.length; // checkbox + user + trailing columns
 
-  // Filter dropdown edits a draft; it only hits the table on Apply.
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState<FilterDTO[]>(filters);
   const [seed, setSeed] = React.useState(0); // remounts the builder to reseed from draft
@@ -129,7 +173,10 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
     onFiltersChange([]);
   };
 
-  const segment: Segment = React.useMemo(() => ({ filters, excludeUserIds: [] }), [filters]);
+  const segment: Segment = React.useMemo(
+    () => ({ filters: [...filters, ...(extraFilters ?? [])], excludeUserIds: [] }),
+    [filters, extraFilters],
+  );
   const resolve = useSegmentResolve(segment, true, q, include);
   const matched = resolve.items;
   const total = resolve.total;

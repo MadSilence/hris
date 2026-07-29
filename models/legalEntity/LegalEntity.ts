@@ -10,4 +10,5 @@ export type LegalEntity = {
   street: string;
   building: string;
   postCode: string;
+  assignedUsersCount?: number;
 };

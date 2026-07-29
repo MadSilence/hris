@@ -55,7 +55,7 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
     const result = await hrisApiEmployeeTimeOffBalancesClient.create(request);
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/balances",
+      "/time-off/balances",
       request
     );
     expect(result).toEqual(response);
@@ -68,7 +68,7 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
       await hrisApiEmployeeTimeOffBalancesClient.getById("balance-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/balances/balance-id"
+      "/time-off/balances/balance-id"
     );
     expect(result).toEqual(dto);
   });
@@ -80,7 +80,7 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
       await hrisApiEmployeeTimeOffBalancesClient.listByUserId("user-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/users/user-id/time-off-balances"
+      "/users/user-id/time-off-balances"
     );
     expect(result).toEqual([dto]);
   });
@@ -101,7 +101,7 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
     );
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/balances/balance-id/adjust",
+      "/time-off/balances/balance-id/adjust",
       request
     );
     expect(result).toEqual(response);
@@ -114,7 +114,7 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
       await hrisApiEmployeeTimeOffBalancesClient.listAdjustments("balance-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/balances/balance-id/adjustments"
+      "/time-off/balances/balance-id/adjustments"
     );
     expect(result).toEqual([adjustmentDto]);
   });

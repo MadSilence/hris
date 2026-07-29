@@ -95,7 +95,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const result = await hrisApiTimeOffPoliciesClient.create(request);
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies",
+      "/time-off/policies/create",
       request
     );
     expect(result).toEqual(response);
@@ -106,7 +106,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
     const result = await hrisApiTimeOffPoliciesClient.list();
 
-    expect(hrisApiClient.get).toHaveBeenCalledWith("/api/time-off/policies");
+    expect(hrisApiClient.get).toHaveBeenCalledWith("/time-off/policies");
     expect(result).toEqual([dto]);
   });
 
@@ -116,7 +116,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const result = await hrisApiTimeOffPoliciesClient.getById("policy-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id"
+      "/time-off/policies/policy-id"
     );
     expect(result).toEqual(dto);
   });
@@ -153,7 +153,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const result = await hrisApiTimeOffPoliciesClient.update("policy-id", request);
 
     expect(hrisApiClient.patch).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id",
+      "/time-off/policies/policy-id",
       request
     );
     expect(result).toEqual(response);
@@ -169,7 +169,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     });
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/rename",
+      "/time-off/policies/policy-id/rename",
       { name: "new-name" }
     );
     expect(result).toEqual(response);
@@ -183,7 +183,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const result = await hrisApiTimeOffPoliciesClient.activate("policy-id");
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/activate"
+      "/time-off/policies/policy-id/activate"
     );
     expect(result).toEqual(response);
   });
@@ -196,21 +196,19 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const result = await hrisApiTimeOffPoliciesClient.archive("policy-id");
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/archive"
+      "/time-off/policies/policy-id/archive"
     );
     expect(result).toEqual(response);
   });
 
   it("deletes time off policy", async () => {
-    const response = { id: "policy-id", version: 1 };
-
-    jest.mocked(hrisApiClient.post).mockResolvedValue(response);
+    jest.mocked(hrisApiClient.post).mockResolvedValue(undefined);
 
     const result = await hrisApiTimeOffPoliciesClient.delete("policy-id");
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/delete"
+      "/time-off/policies/policy-id/delete"
     );
-    expect(result).toEqual(response);
+    expect(result).toBeUndefined();
   });
 });

@@ -15,13 +15,12 @@ describe("deleteTimeOffPolicyAction", () => {
   afterEach(() => { jest.restoreAllMocks(); });
 
   it("deletes time off policy", async () => {
-    const response = { id: "policy-id" };
-    jest.mocked(hrisTimeOffPoliciesService.delete).mockResolvedValue(response);
+    jest.mocked(hrisTimeOffPoliciesService.delete).mockResolvedValue(undefined);
 
     const result = await deleteTimeOffPolicyAction({ id: "policy-id" });
 
     expect(hrisTimeOffPoliciesService.delete).toHaveBeenCalledWith("policy-id");
-    expect(result).toEqual({ status: ActionStatus.SUCCESS, data: response });
+    expect(result).toEqual({ status: ActionStatus.SUCCESS });
   });
 
   it("returns error status when delete fails", async () => {

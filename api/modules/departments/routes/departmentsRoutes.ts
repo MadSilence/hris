@@ -56,7 +56,7 @@ export class DepartmentsRoutes {
     await hrisDepartmentsService.delete(id, {
       childrenStrategy: body.childrenStrategy,
       membersStrategy: body.membersStrategy,
-      targetDepartmentId: body.targetDepartmentId ?? null,
+      targetId: body.targetId ?? null,
     });
     return new Response(null, { status: 204 });
   }

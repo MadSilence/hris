@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { accessQueryKeys } from "@/components/auth/accessQueryKeys";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -18,18 +19,7 @@ export function useStartImpersonation() {
 
   return useMutation({
     mutationFn: async ({ targetUserId }: { targetUserId: string }) => {
-      const res = await fetch("/api/auth/impersonate/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ targetUserId }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to start impersonation");
-      }
-
-      return res.json() as Promise<StartResponse>;
+      return internalApiClient.post<StartResponse>("/auth/impersonate/start", { targetUserId });
     },
 
     onSuccess: (result) => {

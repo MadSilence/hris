@@ -1,7 +1,7 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import type { DocumentFolderDTO } from "@/api/modules/documents/dto";
+import type { CreateResponse } from "@/api/models/misc";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
 
 export const createDocumentsFolderAction = async (
@@ -35,6 +35,6 @@ export type CreateDocumentsFolderActionInput = {
 
 export type CreateDocumentsFolderActionOutput = {
   status: ActionStatus;
-  data?: DocumentFolderDTO;
+  data?: CreateResponse;
   errorMessage?: string;
 };

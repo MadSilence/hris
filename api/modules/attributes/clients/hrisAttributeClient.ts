@@ -24,7 +24,7 @@ class HrisAttributeClient {
   }
 
   public async updateAttribute(payload: UpdateAttributeRequest) {
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/${payload.id}/update`, payload)
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, payload)
   }
 
   public async deleteAttribute(payload: DeleteAttributeRequest) {

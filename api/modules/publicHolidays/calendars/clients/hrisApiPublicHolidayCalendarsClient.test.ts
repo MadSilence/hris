@@ -48,7 +48,7 @@ describe("HrisApiPublicHolidayCalendarsClient", () => {
     const result = await hrisApiPublicHolidayCalendarsClient.create(request);
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/public-holiday-calendars",
+      "/public-holiday-calendars/create",
       request
     );
     expect(result).toEqual(response);

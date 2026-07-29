@@ -37,7 +37,7 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
       id: department.id,
       childrenStrategy,
       membersStrategy,
-      targetDepartmentId: hasMoved ? targetDepartmentId : null,
+      targetId: hasMoved ? targetDepartmentId : null,
     });
     onDeleted();
     onClose();

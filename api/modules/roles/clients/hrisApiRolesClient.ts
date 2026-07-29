@@ -50,17 +50,12 @@ class HrisApiRolesClient {
     );
   }
 
-  // public async getRoleDetails(id: string) {
-  //     return hrisApiClient.get<RoleDTO>(`${this.BASE_PATH}/${id}`);
-  // }
-
   public async createRole(requestDTO: CreateRoleRequest) {
     return hrisApiClient.post<CreateResponse>(this.BASE_PATH + "/create", requestDTO);
   }
 
   public async updateRoleName(id: string, requestDTO: UpdateRoleRequest) {
-    // Backend expects { name }, not { newName } — map it here.
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/${id}/update`, {
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, {
       name: requestDTO.newName,
     });
   }

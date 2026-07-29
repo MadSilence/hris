@@ -10,6 +10,7 @@ export type LegalEntityDTO = {
   street: string;
   building: string;
   postCode: string;
+  assignedUsersCount?: number;
 
   createdAt: string;
   updatedAt: string;

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { accessQueryKeys } from "@/components/auth/accessQueryKeys";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -18,16 +19,7 @@ export function useStopImpersonation() {
 
   return useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/auth/impersonate/stop", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to stop impersonation");
-      }
-
-      return res.json() as Promise<StopResponse>;
+      return internalApiClient.post<StopResponse>("/auth/impersonate/stop");
     },
 
     onSuccess: (result) => {

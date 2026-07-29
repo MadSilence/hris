@@ -10,13 +10,13 @@ import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { TimeOffPolicy } from "@/models/timeOff";
 
 export class HrisApiTimeOffPoliciesClient {
-  private readonly BASE_PATH = "/api/time-off/policies";
+  private readonly BASE_PATH = "/time-off/policies";
 
   public async create(
     body: CreateTimeOffPolicyRequest
   ): Promise<CreateResponse> {
     return hrisApiClient.post<CreateResponse>(
-      this.BASE_PATH,
+      `${this.BASE_PATH}/create`,
       body as unknown as Record<string, unknown>
     );
   }
@@ -66,10 +66,8 @@ export class HrisApiTimeOffPoliciesClient {
     );
   }
 
-  public async delete(id: string): Promise<UpdateResponse> {
-    return hrisApiClient.post<UpdateResponse>(
-      `${this.BASE_PATH}/${id}/delete`
-    );
+  public async delete(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/delete`);
   }
 }
 

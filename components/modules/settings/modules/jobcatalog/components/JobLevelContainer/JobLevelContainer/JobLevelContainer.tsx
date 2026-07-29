@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import styles from "./JobLevelContainer.module.css";
 import { JobLevel } from "@/components/modules/settings/modules/jobcatalog/components/JobLevelContainer/JobLevel/JobLevel";
 import { JobLevelGroup } from "@/models/job";
 
@@ -60,9 +59,5 @@ const MOCK_JOB_LEVEL_GROUPS: JobLevelGroup[] = [
 export default function JobLevelContainer() {
   const jobLevelGroups = MOCK_JOB_LEVEL_GROUPS;
 
-  return (
-    <div className={styles.container}>
-      <JobLevel initialGroups={jobLevelGroups}/>
-    </div>
-  );
+  return <JobLevel initialGroups={jobLevelGroups}/>;
 }

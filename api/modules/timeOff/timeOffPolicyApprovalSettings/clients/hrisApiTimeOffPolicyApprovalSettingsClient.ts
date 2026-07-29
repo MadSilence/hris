@@ -5,9 +5,10 @@ import type {
 } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
 import { timeOffPolicyApprovalSettingsMapper } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/mappers";
 import type { TimeOffPolicyApprovalSettings } from "@/models/timeOff";
+import type { UpdateResponse } from "@/api/models/misc";
 
 export class HrisApiTimeOffPolicyApprovalSettingsClient {
-  private readonly BASE_PATH = "/api/time-off/policies";
+  private readonly BASE_PATH = "/time-off/policies";
 
   public async getByPolicyId(
     policyId: string
@@ -24,14 +25,10 @@ export class HrisApiTimeOffPolicyApprovalSettingsClient {
   public async update(
     policyId: string,
     body: UpdateTimeOffPolicyApprovalSettingsRequest
-  ): Promise<TimeOffPolicyApprovalSettings> {
-    const dto = await hrisApiClient.put<
-      TimeOffPolicyApprovalSettingsDTO,
-      UpdateTimeOffPolicyApprovalSettingsRequest
-    >(`${this.BASE_PATH}/${policyId}/approval-settings`, body);
-
-    return timeOffPolicyApprovalSettingsMapper.mapTimeOffPolicyApprovalSettingsDTO(
-      dto
+  ): Promise<UpdateResponse> {
+    return hrisApiClient.put<UpdateResponse, UpdateTimeOffPolicyApprovalSettingsRequest>(
+      `${this.BASE_PATH}/${policyId}/approval-settings`,
+      body
     );
   }
 }

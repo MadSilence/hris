@@ -1,23 +1,13 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import type { TimeOffPolicyAssignment } from "@/models/timeOff";
 
 export class TimeOffPolicyAssignmentsService {
   public async listByPolicyId(
     policyId: string
   ): Promise<TimeOffPolicyAssignment[]> {
-    const res = await fetch(
-      `/api/time-off/policies/${policyId}/assignments`,
-      {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      }
+    return internalApiClient.get<TimeOffPolicyAssignment[]>(
+      `/time-off/policies/${policyId}/assignments`,
     );
-
-    if (!res.ok) {
-      throw new Error("Failed to load time off policy assignments");
-    }
-
-    return res.json();
   }
 }
 

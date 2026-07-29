@@ -39,7 +39,7 @@ describe("HrisApiTimeOffPolicyApprovalSettingsClient", () => {
       );
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/approval-settings"
+      "/time-off/policies/policy-id/approval-settings"
     );
     expect(result).toEqual(dto);
   });
@@ -68,7 +68,7 @@ describe("HrisApiTimeOffPolicyApprovalSettingsClient", () => {
       );
 
     expect(hrisApiClient.put).toHaveBeenCalledWith(
-      "/api/time-off/policies/policy-id/approval-settings",
+      "/time-off/policies/policy-id/approval-settings",
       request
     );
     expect(result).toEqual(dto);

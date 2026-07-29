@@ -1,3 +1,4 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import type { DocumentFolderContentDTO } from "@/api/modules/documents/dto";
 
 export type CreateDocumentsFolderRequest = {
@@ -22,31 +23,15 @@ export class DocumentFolderService {
     userId: string,
     folderId: string
   ): Promise<DocumentFolderContentDTO> {
-    const res = await fetch(`/api/documents/users/${userId}/folders/${folderId}/content`, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to load folder content");
-    }
-
-    return res.json();
+    return internalApiClient.get<DocumentFolderContentDTO>(
+      `/documents/users/${userId}/folders/${folderId}/content`,
+    );
   }
 
   public async getRootDocuments(userId: string): Promise<DocumentFolderContentDTO> {
-    const res = await fetch(`/api/documents/users/${userId}/folders/root`, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to load folder content");
-    }
-
-    return res.json();
+    return internalApiClient.get<DocumentFolderContentDTO>(
+      `/documents/users/${userId}/folders/root`,
+    );
   }
 }
 

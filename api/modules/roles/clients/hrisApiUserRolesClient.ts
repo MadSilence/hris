@@ -11,15 +11,12 @@ export class HrisApiUserRolesClient {
     return hrisApiClient.get<RoleDTO[]>(`${this.USERS_BASE}/${userId}/roles`);
   }
 
-  // Assign and remove are symmetric body-based POSTs — there is no path-based
-  // POST/DELETE /users/{id}/roles/{roleId}. Both are idempotent and gated by
-  // PEOPLE.PROFILE MANAGE (not ROLES.ROLE).
   public async assignRole(userId: string, roleId: string): Promise<void> {
     await hrisApiClient.post<void>(`${this.USERS_BASE}/${userId}/roles/assign`, { roleId });
   }
 
   public async removeRole(userId: string, roleId: string): Promise<void> {
-    await hrisApiClient.post<void>(`${this.USERS_BASE}/${userId}/roles/remove`, { roleId });
+    await hrisApiClient.delete<void>(`${this.USERS_BASE}/${userId}/roles/${roleId}`);
   }
 
   public async getRoleUsers(
@@ -36,8 +33,6 @@ export class HrisApiUserRolesClient {
       `/roles/${roleId}/users${query ? `?${query}` : ""}`,
     );
 
-    // Backend resolves avatars server-side, but resolveBackendAssetUrl is idempotent —
-    // running it again is a no-op for absolute URLs and a safety net for relative paths.
     return {
       ...response,
       items: response.items.map((item) => ({

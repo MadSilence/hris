@@ -52,7 +52,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
     const result = await hrisApiTimeOffRequestsClient.create(request);
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/requests",
+      "/time-off/requests",
       request
     );
     expect(result).toEqual(response);
@@ -64,7 +64,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
     const result = await hrisApiTimeOffRequestsClient.getById("request-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/time-off/requests/request-id"
+      "/time-off/requests/request-id"
     );
     expect(result).toEqual(dto);
   });
@@ -76,7 +76,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
       await hrisApiTimeOffRequestsClient.listByUserId("user-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/api/users/user-id/time-off-requests"
+      "/users/user-id/time-off-requests"
     );
     expect(result).toEqual([dto]);
   });
@@ -91,7 +91,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
     });
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/requests/request-id/cancel",
+      "/time-off/requests/request-id/cancel",
       { cancellationReason: "Plans changed" }
     );
     expect(result).toEqual(response);
@@ -105,7 +105,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
     const result = await hrisApiTimeOffRequestsClient.approve("request-id");
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/requests/request-id/approve"
+      "/time-off/requests/request-id/approve"
     );
     expect(result).toEqual(response);
   });
@@ -120,7 +120,7 @@ describe("HrisApiTimeOffRequestsClient", () => {
     });
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/time-off/requests/request-id/reject",
+      "/time-off/requests/request-id/reject",
       { rejectionReason: "Insufficient notice period" }
     );
     expect(result).toEqual(response);

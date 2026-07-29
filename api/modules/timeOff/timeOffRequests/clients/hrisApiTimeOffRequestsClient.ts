@@ -10,8 +10,8 @@ import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type { TimeOffRequest } from "@/models/timeOff";
 
 export class HrisApiTimeOffRequestsClient {
-  private readonly REQUESTS_PATH = "/api/time-off/requests";
-  private readonly USERS_PATH = "/api/users";
+  private readonly REQUESTS_PATH = "/time-off/requests";
+  private readonly USERS_PATH = "/users";
 
   public async create(
     body: CreateTimeOffRequestRequest

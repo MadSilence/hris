@@ -19,7 +19,7 @@ class HrisJobLevelGroupClient {
   }
 
   public async updateJobLevelGroup(payload: UpdateJobLevelGroupRequest) {
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/${payload.id}/update`, { name: payload.name });
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, { name: payload.name });
   }
 
   public async deleteJobLevelGroup(payload: DeleteJobLevelGroupRequest) {

@@ -1,27 +1,16 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import type { DepartmentTreeNode, DepartmentMembersPage } from "@/models/departments";
 
 export class DepartmentsService {
   public async tree(nested = true, includeArchived = false): Promise<DepartmentTreeNode[]> {
     const params = new URLSearchParams({ nested: String(nested) });
     if (includeArchived) params.set("includeArchived", "true");
-    const res = await fetch(`/api/departments/tree?${params}`, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to load departments tree");
-    return res.json();
+    return internalApiClient.get<DepartmentTreeNode[]>(`/departments/tree?${params}`);
   }
 
   public async getMembers(id: string, page: number, size: number): Promise<DepartmentMembersPage> {
     const params = new URLSearchParams({ page: String(page), size: String(size) });
-    const res = await fetch(`/api/departments/${id}/members?${params}`, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to load department members");
-    return res.json();
+    return internalApiClient.get<DepartmentMembersPage>(`/departments/${id}/members?${params}`);
   }
 }
 

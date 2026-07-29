@@ -72,14 +72,75 @@ migrate or change these unless specifically tasked. Do not mix `swr.mutate` with
 
 ---
 
+# API Communication — Canonical Paths (source of truth)
+
+The frontend talks to the Java backend (`hris-api`) through a BFF layer in `api/`. The BFF is a
+translator, **not** the source of truth — Java owns the data and the authorization.
+
+## The seam: `service`
+
+Everything **at or below the service is shared** by every transport; everything **above the service
+is transport-specific**. Business logic, DTO↔model mapping, and multi-call composition live in the
+**service** and nowhere else.
+
+```
+  RSC (page.tsx) ─────────────────────────────┐  (direct call, no HTTP)
+  client mutation ─▶ server action ────────────┤
+  client read ─▶ InternalApiClient ─▶ route.ts ─▶ controller ─┤
+                                    ══════════ SEAM ══════════
+                                    hrisApi<Domain>Service   ← business logic / mapping / envelope
+                                            hrisApi<Domain>Client   ← domain URLs + DTOs
+                                            hrisApiClient (base)    ← transport, Bearer, authn, error-shape
+                                                    Java (hris-api)
+```
+
+**Always present (shared trunk, below the seam):**
+- `hrisApiClient` (base) — one per app. Transport to Java, cookie→Bearer, auth-token check, error
+  normalization. Cross-cutting authn/error handling lives HERE, so every path inherits it for free.
+- `hrisApi<Domain>Client` — one per domain. Knows backend URLs + DTOs only. No business logic.
+- `hrisApi<Domain>Service` — one per domain. The convergence point of all transports.
+
+**Transport-specific (above the seam):**
+- **Route handler + `*Routes` controller** — exists **only for client-component reads**.
+- **`InternalApiClient`** — the **only** browser→`/api` client for reads. Maps HTTP → typed
+  exceptions and dispatches `hris:forbidden`. Never use raw `fetch` to hit `/api`.
+- **Server action (`"use server"`)** — exists **only for mutations**. It *replaces* the
+  InternalApiClient + route.ts + controller trio; a mutation goes `action → service` directly.
+
+## Transport by purpose (not by domain)
+
+| Scenario | Canonical path |
+|----------|----------------|
+| Mutation (create/update/delete) | **server action** → service → client → base. Returns `{status, data?, errorMessage?}` |
+| Read from a client component | **route handler** + `InternalApiClient` + react-query `useQuery` |
+| Read from an RSC (server component) | **service directly** (no HTTP, no action) |
+| Binary / streaming (documents up/download) | route handler (only transport that can stream) |
+| Auth cookie flows (login/logout/register/impersonate) | route handler (must set cookies) |
+
+**Guard (`apiRequestWrapper` = auth + error-shaping):** every route handler should be wrapped with it
+**except** deliberately-bespoke ones, which stay bare by design: auth cookie flows, `health`, and raw
+proxies that need custom passthrough (`me/access` — ETag/304, `documents/.../upload` — streamed
+multipart). New route handlers default to wrapped.
+
+## Security model (do not add a third check)
+
+- **UI gating** (`PermissionGate`, hide/disable buttons) = **UX only, zero security**. Action and
+  route endpoints are publicly reachable; a crafted request bypasses the UI entirely.
+- **Authentication** (valid token) = cheap fail-fast in the base client. Not authorization.
+- **Authorization** (may this user do this action) = **Java `AccessEngine` only — the single security
+  boundary.** A server action running "on the server" does NOT authorize its caller.
+- Do **not** enforce privileges in the BFF layer. A second copy of the permission model drifts from
+  Java. The gating pair is `PermissionGate` (UX) + Java (enforcement) — nothing in between.
+
+---
+
 # Server Actions
 
-- Always return:
-  { status, data?, errorMessage? }
-
-- Never throw raw errors to UI
-- Handle errors gracefully
-- Use `"use server"` directive
+- Used for **mutations** (see canonical paths above). Go `action → service` directly — do not add a
+  route handler for a mutation.
+- Always return `{ status, data?, errorMessage? }` — **never throw to the UI**
+  (`assignmentActions.ts` currently throws; that is a known deviation, not a pattern to copy).
+- Handle errors gracefully. Use the `"use server"` directive.
 
 ---
 
@@ -214,10 +275,11 @@ When working on a task:
 
 ## Data Feature
 
-1. Create API method (via `InternalApiClient`)
-2. Create React Query hook (`useQuery` / `useMutation`)
-3. Use in container
-4. Connect UI
+1. Pick the transport per the **API Communication — Canonical Paths** section:
+   - read → route handler + `InternalApiClient`; mutation → server action (`action → service`)
+2. Add the BFF pieces below the seam if missing (`hrisApi<Domain>Service` → client → base)
+3. Create React Query hook (`useQuery` for reads / `useMutation` wrapping the action)
+4. Use in container, connect UI
 5. Handle loading + error + empty states
 
 ---

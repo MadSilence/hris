@@ -3,7 +3,7 @@ import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { DeleteOfficeRequest, OfficeDTO } from "@/api/modules/office/dto";
 
 class HrisOfficeClient {
-  private readonly BASE_PATH: string = "/office";
+  private readonly BASE_PATH: string = "/offices";
 
   public async getOffices(): Promise<OfficeDTO[]> {
     return hrisApiClient.get<OfficeDTO[]>(this.BASE_PATH);
@@ -14,7 +14,7 @@ class HrisOfficeClient {
   }
 
   public async updateOffice(payload: UpdateOfficeRequest) {
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/update`, { name: payload.name })
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, { name: payload.name })
   }
 
   public async deleteOffice(payload: DeleteOfficeRequest) {

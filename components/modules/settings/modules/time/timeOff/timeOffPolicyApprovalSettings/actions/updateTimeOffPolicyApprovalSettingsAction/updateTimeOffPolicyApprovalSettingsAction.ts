@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyApprovalSettingsService } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/services";
 import type { UpdateTimeOffPolicyApprovalSettingsRequest } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
-import type { TimeOffPolicyApprovalSettings } from "@/models/timeOff";
+import type { UpdateResponse } from "@/api/models/misc";
 
 export const updateTimeOffPolicyApprovalSettingsAction = async (
   submission: UpdateTimeOffPolicyApprovalSettingsActionInput
@@ -36,6 +36,6 @@ export type UpdateTimeOffPolicyApprovalSettingsActionInput = {
 
 export type UpdateTimeOffPolicyApprovalSettingsActionOutput = {
   status: ActionStatus;
-  data?: TimeOffPolicyApprovalSettings;
+  data?: UpdateResponse;
   errorMessage?: string;
 };

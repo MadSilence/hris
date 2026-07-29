@@ -8,6 +8,7 @@ import {
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import { documentMapper } from "@/api/modules/documents/mappers/documentMapper";
+import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 
 export class HrisApiDocumentsClient {
   private readonly BASE_PATH = "/documents";
@@ -32,24 +33,22 @@ export class HrisApiDocumentsClient {
   public async createFolder(
     userId: string,
     body: CreateDocumentFolderRequest
-  ): Promise<DocumentFolderDTO> {
-    const dto = await hrisApiClient.post<DocumentFolderDTO>(
-      `${this.BASE_PATH}/users/${userId}/folders`,
+  ): Promise<CreateResponse> {
+    return hrisApiClient.post<CreateResponse>(
+      `${this.BASE_PATH}/users/${userId}/folders/create`,
       body
     );
-    return documentMapper.mapFolderDTO(dto);
   }
 
   public async renameFolder(
     userId: string,
     folderId: string,
     body: RenameDocumentFolderRequest
-  ): Promise<DocumentFolderDTO> {
-    const dto = await hrisApiClient.patch<DocumentFolderDTO, RenameDocumentFolderRequest>(
+  ): Promise<UpdateResponse> {
+    return hrisApiClient.patch<UpdateResponse, RenameDocumentFolderRequest>(
       `${this.BASE_PATH}/users/${userId}/folders/${folderId}`,
       body
     );
-    return documentMapper.mapFolderDTO(dto);
   }
 
   public async deleteFolder(userId: string, folderId: string): Promise<void> {

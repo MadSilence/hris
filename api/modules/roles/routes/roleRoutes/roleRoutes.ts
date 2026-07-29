@@ -13,10 +13,6 @@ export class RoleRoutes {
 
         return Response.json(roles);
     }
-    //
-    // public async getRole() {
-    //     return await this.hrisApiRolesService.getRole();
-    // }
 }
 
 export const roleRoutes = new RoleRoutes(hrisApiRolesService);

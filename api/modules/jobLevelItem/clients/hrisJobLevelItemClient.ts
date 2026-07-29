@@ -19,9 +19,9 @@ class HrisJobLevelItemClient {
   }
 
   public async updateJobLevelItem(payload: UpdateJobLevelItemRequest) {
-    return hrisApiClient.put<UpdateResponse>(
-      `${this.BASE_PATH}/${payload.id}/update`,
-      { name: payload.name } // если есть другие поля для обновления — добавь их сюда
+    return hrisApiClient.patch<UpdateResponse>(
+      `${this.BASE_PATH}/${payload.id}`,
+      { name: payload.name }
     );
   }
 

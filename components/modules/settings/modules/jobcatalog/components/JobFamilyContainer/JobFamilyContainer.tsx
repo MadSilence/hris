@@ -1,50 +1,30 @@
 "use client";
 
 import React from "react";
-import styles from "./JobFamilyContainer.module.css";
 import { useJobFamily } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useJobFamily";
 import {
   JobFamilyComponent
 } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/JobFamily/JobFamilyComponent";
 import { Loader } from "@/components/ui/Loader";
 
-export type JobFamilyEntity = {
-  id: string;
-  name: string;
-  isSystem?: boolean;
-};
-
 export default function JobFamilyContainer() {
-  const {
-    data: fetchedJobFamilies,
-    isLoading: isLoading,
-    error: error,
-  } = useJobFamily();
+  const { data, isLoading, error } = useJobFamily();
 
   if (error) {
     return (
-      <div className={styles.layout}>
-        <div className={styles.loaderWrapper}>Failed to load job families</div>
+      <div className="py-10 text-sm text-muted-foreground">
+        Failed to load job families
       </div>
     );
   }
 
-  const jobFamilies = fetchedJobFamilies ?? [];
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <Loader/>
+      </div>
+    );
+  }
 
-  return (
-    (isLoading ?
-        <div className={styles.loaderWrapper}>
-          <Loader/>
-        </div>
-        :
-        <div className={styles.outer}>
-          <div className={styles.container}>
-            <JobFamilyComponent
-              jobFamilies={jobFamilies}
-
-            />
-          </div>
-        </div>
-    )
-  );
+  return <JobFamilyComponent jobFamilies={data ?? []}/>;
 }

@@ -35,7 +35,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
       id: team.id,
       childrenStrategy,
       membersStrategy,
-      targetTeamId: hasMoved ? targetTeamId : null,
+      targetId: hasMoved ? targetTeamId : null,
     });
     onDeleted();
     onClose();

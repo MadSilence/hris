@@ -2,7 +2,7 @@ import { CreateResponse } from "@/api/models/misc";
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 
 export class HrisApiCompanyLogoClient {
-  private readonly BASE_PATH = "/api/companies";
+  private readonly BASE_PATH = "/companies";
 
   public async uploadLogo(file: File): Promise<CreateResponse> {
     const formData = new FormData();

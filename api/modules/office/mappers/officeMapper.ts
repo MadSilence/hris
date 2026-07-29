@@ -15,6 +15,7 @@ export class OfficeMapper {
       street: dto.street,
       building: dto.building,
       postCode: dto.postCode,
+      assignedUsersCount: dto.assignedUsersCount,
     };
   }
 }

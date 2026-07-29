@@ -1,42 +1,32 @@
+import { internalApiClient } from "@/components/clients/apiClient";
 import {
   publicHolidaysService
 } from "@/components/modules/settings/modules/time/publicHolidays/services/publicHolidaysService/publicHolidaysService";
 
+jest.mock("@/components/clients/apiClient", () => ({
+  internalApiClient: { get: jest.fn() },
+}));
+
+const mockGet = internalApiClient.get as jest.Mock;
+
 describe("PublicHolidaysService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
   });
 
   it("lists public holidays", async () => {
     const response = [{ id: "holiday-id" }];
-
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => response,
-    });
+    mockGet.mockResolvedValue(response);
 
     const result = await publicHolidaysService.list("calendar-id");
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/public-holiday-calendars/calendar-id/holidays",
-      {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      }
-    );
-
+    expect(mockGet).toHaveBeenCalledWith("/public-holiday/calendars/calendar-id/holidays");
     expect(result).toEqual(response);
   });
 
-  it("throws error when list fails", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-    });
+  it("propagates errors from the api client", async () => {
+    mockGet.mockRejectedValue(new Error("boom"));
 
-    await expect(
-      publicHolidaysService.list("calendar-id")
-    ).rejects.toThrow("Failed to load public holidays");
+    await expect(publicHolidaysService.list("calendar-id")).rejects.toThrow("boom");
   });
 });

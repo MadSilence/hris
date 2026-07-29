@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useStopImpersonation } from "@/components/modules/auth/impersonation/hooks/useStopImpersonation/useStopImpersonation";
@@ -25,6 +26,10 @@ jest.mock("@tanstack/react-query", () => ({
   }),
 }));
 
+jest.mock("@/components/clients/apiClient", () => ({
+  internalApiClient: { post: jest.fn() },
+}));
+
 jest.mock("@/components/auth/permissionsStorage", () => ({
   clearPermissionsStorage: jest.fn(),
 }));
@@ -33,6 +38,8 @@ jest.mock("@/components/providers/CurrentUserProvider/CurrentUserProvider", () =
   useCurrentUser: jest.fn(),
 }));
 
+const mockPost = internalApiClient.post as jest.Mock;
+
 describe("useStopImpersonation", () => {
   const setIdentity = jest.fn();
   const clearCurrentUserCache = jest.fn();
@@ -40,15 +47,12 @@ describe("useStopImpersonation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    global.fetch = jest.fn().mockResolvedValue({
+    mockPost.mockResolvedValue({
       ok: true,
-      json: async () => ({
-        ok: true,
-        impersonating: false,
-        actorId: "admin-id",
-        subjectId: "admin-id",
-      }),
-    }) as jest.Mock;
+      impersonating: false,
+      actorId: "admin-id",
+      subjectId: "admin-id",
+    });
 
     jest.mocked(useCurrentUser).mockReturnValue({
       setIdentity,
@@ -63,10 +67,7 @@ describe("useStopImpersonation", () => {
       await result.current.mutate();
     });
 
-    expect(fetch).toHaveBeenCalledWith("/api/auth/impersonate/stop", {
-      method: "POST",
-      credentials: "include",
-    });
+    expect(mockPost).toHaveBeenCalledWith("/auth/impersonate/stop");
 
     expect(clearPermissionsStorage).toHaveBeenCalled();
     expect(clearCurrentUserCache).toHaveBeenCalled();
@@ -83,14 +84,10 @@ describe("useStopImpersonation", () => {
   });
 
   it("throws when request fails", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: false,
-    }) as jest.Mock;
+    mockPost.mockRejectedValue(new Error("Forbidden"));
 
     const { result } = renderHook(() => useStopImpersonation());
 
-    await expect(result.current.mutateAsync()).rejects.toThrow(
-      "Failed to stop impersonation"
-    );
+    await expect(result.current.mutateAsync()).rejects.toThrow();
   });
 });

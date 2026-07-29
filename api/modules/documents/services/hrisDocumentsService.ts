@@ -7,6 +7,7 @@ import {
   RenameDocumentFolderRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
+import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 
 export class HrisDocumentsService {
   public async getRootDocuments(userId: string): Promise<DocumentFolderContentDTO> {
@@ -23,8 +24,7 @@ export class HrisDocumentsService {
   public async createFolder(
     userId: string,
     body: CreateDocumentFolderRequest
-  ): Promise<DocumentFolderDTO> {
-    console.log("we are here", body);
+  ): Promise<CreateResponse> {
     return hrisApiDocumentsClient.createFolder(userId, body);
   }
 
@@ -32,7 +32,7 @@ export class HrisDocumentsService {
     userId: string,
     folderId: string,
     body: RenameDocumentFolderRequest
-  ): Promise<DocumentFolderDTO> {
+  ): Promise<UpdateResponse> {
     return hrisApiDocumentsClient.renameFolder(userId, folderId, body);
   }
 

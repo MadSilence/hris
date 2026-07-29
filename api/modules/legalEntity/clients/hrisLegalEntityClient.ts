@@ -19,7 +19,7 @@ class HrisLegalEntityClient {
   }
 
   public async updateLegalEntity(payload: UpdateLegalEntityRequest) {
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/update`, { name: payload.name })
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, { name: payload.name })
   }
 
   public async deleteLegalEntity(payload: DeleteLegalEntityRequest) {

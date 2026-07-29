@@ -22,7 +22,7 @@ describe("HrisApiCompanyLogoClient", () => {
     const result = await hrisApiCompanyLogoClient.uploadLogo(file);
 
     expect(hrisApiClient.postForm).toHaveBeenCalledWith(
-      "/api/companies/logo",
+      "/companies/logo",
       expect.any(FormData)
     );
     expect(result).toEqual(response);
@@ -34,7 +34,7 @@ describe("HrisApiCompanyLogoClient", () => {
     const result = await hrisApiCompanyLogoClient.deleteLogo();
 
     expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/api/companies/logo/delete"
+      "/companies/logo/delete"
     );
     expect(result).toBeUndefined();
   });

@@ -44,7 +44,7 @@ export class HrisTimeOffPoliciesService {
     return hrisApiTimeOffPoliciesClient.archive(id);
   }
 
-  public async delete(id: string): Promise<UpdateResponse> {
+  public async delete(id: string): Promise<void> {
     return hrisApiTimeOffPoliciesClient.delete(id);
   }
 }

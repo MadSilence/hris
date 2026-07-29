@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Mail, MapPin } from "lucide-react";
+import { Building2, Mail, MapPin, Users } from "lucide-react";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -16,6 +16,8 @@ import { useUpdateOfficeAction } from "@/components/modules/settings/modules/off
 import { useDeleteOfficeAction } from "@/components/modules/settings/modules/office/hooks/useDeleteOfficeAction";
 import { DeleteOfficeModal } from "@/components/modules/settings/modules/office/components/modals/DeleteOfficeModal";
 import { OfficeSkeleton } from "@/components/modules/settings/modules/office/components/OfficeDetailsContainer/OfficeSkeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import OfficeAssignedUsersTab from "@/components/modules/settings/modules/office/components/OfficeAssignedUsersTab/OfficeAssignedUsersTab";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { Office } from "@/models/office";
@@ -126,13 +128,26 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   };
 
   return (
-    <div className="space-y-8 px-8">
+    <div className="space-y-6 px-8">
       <SettingsPageHeader
         title={office.name}
         backHref="/settings/general/offices"
       />
 
-      <div className="space-y-5">
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <Building2 className="w-4 h-4"/>
+            General Information
+          </TabsTrigger>
+          <TabsTrigger value="assigned" className="flex items-center gap-2">
+            <Users className="w-4 h-4"/>
+            Assigned Users
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="mt-8 space-y-8">
+          <div className="space-y-5">
         <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -254,6 +269,12 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
           </>
         )}
       </div>
+        </TabsContent>
+
+        <TabsContent value="assigned" className="mt-8">
+          <OfficeAssignedUsersTab office={office}/>
+        </TabsContent>
+      </Tabs>
 
       <DeleteOfficeModal
         isOpen={isDeleteOpen}

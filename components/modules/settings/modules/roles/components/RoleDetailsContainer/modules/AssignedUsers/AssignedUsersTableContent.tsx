@@ -1,15 +1,14 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
-import Link from "next/link";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableSkeleton from "./AssignedUsersTableSkeleton";
 import RemoveAssignedUserDialog from "./modals/RemoveAssignedUserDialog";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 
 export interface AssignedUsersTableContentProps {
   rows: UsersSearchItemDTO[];
@@ -19,15 +18,6 @@ export interface AssignedUsersTableContentProps {
   onLoadMore?: () => void;
   onRemoveUser: (userId: string) => void;
   disableRemove?: boolean;
-}
-
-function getInitials(firstName?: string | null, lastName?: string | null, email?: string | null) {
-  const a = (firstName ?? "").trim();
-  const b = (lastName ?? "").trim();
-  const initials = (a ? a[0] : "") + (b ? b[0] : "");
-  if (initials) return initials.toUpperCase();
-  const e = (email ?? "").trim();
-  return (e[0] ?? "—").toUpperCase();
 }
 
 function StatusBadge({ status }: { status?: string | null }) {
@@ -72,7 +62,7 @@ export default function AssignedUsersTableContent({
 
   return (
     <div className="max-h-[calc(100svh-328px)] overflow-y-auto">
-      <Table>
+      <table className="w-full caption-bottom text-sm">
         <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
           <TableRow>
             <TableHead>User</TableHead>
@@ -91,23 +81,18 @@ export default function AssignedUsersTableContent({
             hasData &&
             rows.map((u) => {
               const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
-              const initials = getInitials(u.firstName, u.lastName, u.email);
 
               return (
                 <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">
                   <TableCell className="py-2">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar className="h-7 w-7 shrink-0">
-                        {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt={fullName}/> : null}
-                        <AvatarFallback className="text-[11px]">{initials}</AvatarFallback>
-                      </Avatar>
-                      <Link
-                        href={`/organization/people/${u.id}/personal`}
-                        className="truncate text-sm font-medium text-foreground no-underline hover:underline"
-                      >
-                        {fullName}
-                      </Link>
-                    </div>
+                    <UserChip
+                      id={u.id}
+                      name={fullName}
+                      avatarUrl={u.avatarUrl}
+                      firstName={u.firstName}
+                      lastName={u.lastName}
+                      email={u.email}
+                    />
                   </TableCell>
 
                   <TableCell className="text-muted-foreground">{u.jobName || "—"}</TableCell>
@@ -118,7 +103,13 @@ export default function AssignedUsersTableContent({
 
                   <TableCell className="text-muted-foreground">{formatDate(u.assignedAt)}</TableCell>
 
-                  <TableCell className="text-muted-foreground">{u.assignedByName || "System"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {u.assignedByName && u.assignedByName !== "System" ? (
+                      <UserChip name={u.assignedByName}/>
+                    ) : (
+                      "System"
+                    )}
+                  </TableCell>
 
                   <TableCell className="text-right">
                     {/* Removing a role is gated by PEOPLE.PROFILE MANAGE on the backend. */}
@@ -166,7 +157,7 @@ export default function AssignedUsersTableContent({
             </TableRow>
           )}
         </TableBody>
-      </Table>
+      </table>
 
       {hasMore && (
         <div className="flex justify-center py-3">

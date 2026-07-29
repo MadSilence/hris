@@ -56,7 +56,7 @@ export class TeamsRoutes {
     await hrisTeamsService.delete(id, {
       childrenStrategy: body.childrenStrategy,
       membersStrategy: body.membersStrategy,
-      targetTeamId: body.targetTeamId ?? null,
+      targetId: body.targetId ?? null,
     });
     return new Response(null, { status: 204 });
   }

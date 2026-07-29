@@ -2,13 +2,15 @@
 
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, Users } from "lucide-react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import LegalEntityAssignedUsersTab from "@/components/modules/settings/modules/legalEntity/components/LegalEntityAssignedUsersTab/LegalEntityAssignedUsersTab";
 import { useLegalEntity } from "@/components/modules/settings/modules/legalEntity/hooks/useLegalEntity";
 import { useUpdateLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useUpdateLegalEntityAction";
 import { useDeleteLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useDeleteLegalEntityAction";
@@ -127,13 +129,26 @@ export default function LegalEntityDetailsContainer({
   };
 
   return (
-    <div className="space-y-8 px-8">
+    <div className="space-y-6 px-8">
       <SettingsPageHeader
         title={entity.name}
         backHref="/settings/general/legal-entities"
       />
 
-      <div className="space-y-5">
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <Building2 className="w-4 h-4"/>
+            General Information
+          </TabsTrigger>
+          <TabsTrigger value="assigned" className="flex items-center gap-2">
+            <Users className="w-4 h-4"/>
+            Assigned Users
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="mt-8 space-y-8">
+          <div className="space-y-5">
         <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -247,6 +262,12 @@ export default function LegalEntityDetailsContainer({
           </>
         )}
       </div>
+        </TabsContent>
+
+        <TabsContent value="assigned" className="mt-8">
+          <LegalEntityAssignedUsersTab entity={entity}/>
+        </TabsContent>
+      </Tabs>
 
       <DeleteLegalEntityModal
         isOpen={isDeleteOpen}

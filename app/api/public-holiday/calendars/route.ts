@@ -4,7 +4,3 @@ import { publicHolidayCalendarsRoutes } from "@/api/modules/publicHolidays/calen
 export const GET = apiRequestWrapper(async (req: Request) =>
   publicHolidayCalendarsRoutes.list(req),
 );
-
-export const POST = apiRequestWrapper(async (req: Request) =>
-  publicHolidayCalendarsRoutes.create(req),
-);

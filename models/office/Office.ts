@@ -10,4 +10,5 @@ export type Office = {
   street: string;
   building: string;
   postCode: string;
+  assignedUsersCount?: number;
 };

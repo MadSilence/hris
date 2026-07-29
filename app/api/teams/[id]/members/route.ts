@@ -7,8 +7,3 @@ export const GET = apiRequestWrapper(async (req: Request, context: RouteContext)
   const { id } = await context.params;
   return teamsRoutes.getMembers(req, id);
 });
-
-export const POST = apiRequestWrapper(async (req: Request, context: RouteContext) => {
-  const { id } = await context.params;
-  return teamsRoutes.addMember(req, id);
-});

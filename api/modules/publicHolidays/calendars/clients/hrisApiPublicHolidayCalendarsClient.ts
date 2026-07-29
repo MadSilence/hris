@@ -16,7 +16,7 @@ export class HrisApiPublicHolidayCalendarsClient {
     body: CreatePublicHolidayCalendarRequest
   ): Promise<CreateResponse> {
     return hrisApiClient.post<CreateResponse>(
-      this.BASE_PATH,
+      `${this.BASE_PATH}/create`,
       body as unknown as Record<string, unknown>
     );
   }
