@@ -1,13 +1,21 @@
 export type DepartmentStatus = "ACTIVE" | "ARCHIVED";
 
+export interface DepartmentLeadDTO {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+}
+
 export interface DepartmentDTO {
   id: string;
+  companyId?: string;
   name: string;
-  description: string | null;
   code: string | null;
-  parentId: string | null;
+  about: string | null;
   status: DepartmentStatus;
-  leadId: string | null;
-  memberCount: number;
-  archivedAt: string | null;
+  sortOrder: number;
+  parentId: string | null;
+  leadUserId: string | null;
+  membersCount: number;
 }

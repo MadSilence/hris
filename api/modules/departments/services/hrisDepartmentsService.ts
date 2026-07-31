@@ -3,14 +3,12 @@ import type {
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
   DeleteDepartmentRequest,
-  AssignDepartmentMemberRequest,
-  AssignDepartmentLeadRequest,
+  ArchiveDepartmentRequest,
 } from "@/api/modules/departments/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type {
   Department,
   DepartmentTreeNode,
-  DepartmentMembersPage,
 } from "@/models/departments";
 
 export class HrisDepartmentsService {
@@ -34,8 +32,8 @@ export class HrisDepartmentsService {
     return hrisApiDepartmentsClient.update(id, body);
   }
 
-  public async archive(id: string): Promise<UpdateResponse> {
-    return hrisApiDepartmentsClient.archive(id);
+  public async archive(id: string, body?: ArchiveDepartmentRequest): Promise<UpdateResponse> {
+    return hrisApiDepartmentsClient.archive(id, body);
   }
 
   public async activate(id: string): Promise<UpdateResponse> {
@@ -44,22 +42,6 @@ export class HrisDepartmentsService {
 
   public async delete(id: string, body: DeleteDepartmentRequest): Promise<void> {
     return hrisApiDepartmentsClient.delete(id, body);
-  }
-
-  public async getMembers(id: string, page: number, size: number): Promise<DepartmentMembersPage> {
-    return hrisApiDepartmentsClient.getMembers(id, page, size);
-  }
-
-  public async addMember(id: string, body: AssignDepartmentMemberRequest): Promise<void> {
-    return hrisApiDepartmentsClient.addMember(id, body);
-  }
-
-  public async removeMember(id: string, userId: string): Promise<void> {
-    return hrisApiDepartmentsClient.removeMember(id, userId);
-  }
-
-  public async setLead(id: string, body: AssignDepartmentLeadRequest): Promise<void> {
-    return hrisApiDepartmentsClient.setLead(id, body);
   }
 }
 

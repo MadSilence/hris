@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,13 +9,23 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/public/desact/src/components/ui/select";
 import { useCreateDepartment } from "@/components/modules/settings/modules/departments/hooks/useCreateDepartment/useCreateDepartment";
+import {
+  UserPickerField,
+  type PickedUser,
+} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
 import type { DepartmentTreeNode } from "@/models/departments";
+
+const ROOT_VALUE = "none";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   parentOptions: DepartmentTreeNode[];
+  defaultParentId?: string | null;
 };
 
 const validationSchema = Yup.object({
@@ -25,11 +35,12 @@ const validationSchema = Yup.object({
   parentId: Yup.string().nullable(),
 });
 
-export function CreateDepartmentModal({ open, onClose, parentOptions }: Props) {
+export function CreateDepartmentModal({ open, onClose, parentOptions, defaultParentId }: Props) {
   const createDepartment = useCreateDepartment();
+  const [lead, setLeadUser] = useState<PickedUser | null>(null);
 
   const formik = useFormik({
-    initialValues: { name: "", code: "", description: "", parentId: "" },
+    initialValues: { name: "", code: "", description: "", parentId: defaultParentId ?? "" },
     validationSchema,
     onSubmit: async (values) => {
       await createDepartment.mutateAsync({
@@ -37,13 +48,18 @@ export function CreateDepartmentModal({ open, onClose, parentOptions }: Props) {
         code: values.code?.trim() || null,
         description: values.description?.trim() || null,
         parentId: values.parentId || null,
+        leadId: lead?.id ?? null,
       });
       onClose();
     },
   });
 
   useEffect(() => {
-    if (open) formik.resetForm();
+    if (open) {
+      formik.resetForm();
+      setLeadUser(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,9 +69,12 @@ export function CreateDepartmentModal({ open, onClose, parentOptions }: Props) {
     }
   };
 
+  const activeOptions = parentOptions.filter((d) => d.status === "ACTIVE");
+  const busy = createDepartment.isPending;
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent onKeyDown={handleKeyDown}>
+      <DialogContent onKeyDown={handleKeyDown} className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Create department</DialogTitle>
         </DialogHeader>
@@ -100,20 +119,25 @@ export function CreateDepartmentModal({ open, onClose, parentOptions }: Props) {
 
           <div className="space-y-1.5">
             <Label htmlFor="dept-parent">Parent department</Label>
-            <select
-              id="dept-parent"
-              name="parentId"
-              value={formik.values.parentId}
-              onChange={formik.handleChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            <Select
+              value={formik.values.parentId || ROOT_VALUE}
+              onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
             >
-              <option value="">None (root)</option>
-              {parentOptions
-                .filter((d) => d.status === "ACTIVE")
-                .map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
+              <SelectTrigger id="dept-parent">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                {activeOptions.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                 ))}
-            </select>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Department lead</Label>
+            <UserPickerField value={lead} onChange={setLeadUser} placeholder="Search for a person" />
           </div>
 
           {createDepartment.isError && (
@@ -124,11 +148,11 @@ export function CreateDepartmentModal({ open, onClose, parentOptions }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={createDepartment.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={createDepartment.isPending}>
-            {createDepartment.isPending ? "Creating…" : "Create"}
+          <Button onClick={() => formik.handleSubmit()} disabled={busy}>
+            {busy ? "Creating…" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

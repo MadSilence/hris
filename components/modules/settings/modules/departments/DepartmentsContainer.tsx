@@ -1,17 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
+
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import { useDepartmentTree } from "@/components/modules/settings/modules/departments/hooks/useDepartmentTree/useDepartmentTree";
-import { useArchiveDepartment } from "@/components/modules/settings/modules/departments/hooks/useArchiveDepartment/useArchiveDepartment";
 import { useActivateDepartment } from "@/components/modules/settings/modules/departments/hooks/useActivateDepartment/useActivateDepartment";
-import { DepartmentTree } from "@/components/modules/settings/modules/departments/components/DepartmentTree/DepartmentTree";
+import { DepartmentCanvas } from "@/components/modules/settings/modules/departments/components/DepartmentCanvas";
+import { COMPANY_NODE_ID } from "@/components/modules/settings/modules/departments/components/DepartmentCanvas/CompanyNode";
 import { DepartmentDetailsPanel } from "@/components/modules/settings/modules/departments/components/DepartmentDetailsPanel/DepartmentDetailsPanel";
-import { DepartmentTreeSkeleton } from "@/components/modules/settings/modules/departments/components/DepartmentTreeSkeleton/DepartmentTreeSkeleton";
+import { CompanyDetailsPanel } from "@/components/modules/settings/modules/departments/components/CompanyDetailsPanel/CompanyDetailsPanel";
 import { CreateDepartmentModal } from "@/components/modules/settings/modules/departments/components/modals/CreateDepartmentModal/CreateDepartmentModal";
 import { EditDepartmentModal } from "@/components/modules/settings/modules/departments/components/modals/EditDepartmentModal/EditDepartmentModal";
 import { DeleteDepartmentModal } from "@/components/modules/settings/modules/departments/components/modals/DeleteDepartmentModal/DeleteDepartmentModal";
-import { AssignDepartmentMemberModal } from "@/components/modules/settings/modules/departments/components/modals/AssignDepartmentMemberModal/AssignDepartmentMemberModal";
-import { SetDepartmentLeadModal } from "@/components/modules/settings/modules/departments/components/modals/SetDepartmentLeadModal/SetDepartmentLeadModal";
+import { ArchiveDepartmentModal } from "@/components/modules/settings/modules/departments/components/modals/ArchiveDepartmentModal/ArchiveDepartmentModal";
 import type { DepartmentTreeNode } from "@/models/departments";
 
 function flattenTree(nodes: DepartmentTreeNode[]): DepartmentTreeNode[] {
@@ -35,87 +40,133 @@ function findById(nodes: DepartmentTreeNode[], id: string): DepartmentTreeNode |
   return null;
 }
 
-export default function DepartmentsContainer() {
-  const [includeArchived, setIncludeArchived] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+function collectParentIds(nodes: DepartmentTreeNode[]): Set<string> {
+  const ids = new Set<string>();
+  function traverse(node: DepartmentTreeNode) {
+    if (node.children?.length) {
+      ids.add(node.id);
+      node.children.forEach(traverse);
+    }
+  }
+  nodes.forEach(traverse);
+  return ids;
+}
 
-  const [showCreate, setShowCreate] = useState(false);
+export default function DepartmentsContainer() {
+  const { company } = useCompanyData();
+
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const [selectedId, setSelectedId] = useState<string>(COMPANY_NODE_ID);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [recenterNonce, setRecenterNonce] = useState(0);
+
+  const [createParentId, setCreateParentId] = useState<string | null | undefined>(undefined);
   const [editTarget, setEditTarget] = useState<DepartmentTreeNode | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentTreeNode | null>(null);
-  const [addMemberTarget, setAddMemberTarget] = useState<string | null>(null);
-  const [setLeadTarget, setSetLeadTarget] = useState<DepartmentTreeNode | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<DepartmentTreeNode | null>(null);
 
   const { data: tree = [], isLoading, error } = useDepartmentTree(includeArchived);
-  const archiveDept = useArchiveDepartment();
   const activateDept = useActivateDepartment();
 
   const allFlat = flattenTree(tree);
-  const selected = selectedId ? findById(tree, selectedId) : null;
-  const effectiveSelected = selected ?? (tree[0] ?? null);
+  const totalMembers = allFlat.reduce((sum, node) => sum + node.memberCount, 0);
+  const selectedDepartment =
+    selectedId === COMPANY_NODE_ID ? null : findById(tree, selectedId);
+  const selectedParentName = selectedDepartment?.parentId
+    ? findById(tree, selectedDepartment.parentId)?.name ?? null
+    : null;
+  const isCreateOpen = createParentId !== undefined;
+
+  const didInitCollapse = useRef(false);
+  useEffect(() => {
+    if (didInitCollapse.current || isLoading) return;
+    didInitCollapse.current = true;
+    setCollapsed(collectParentIds(tree));
+  }, [isLoading, tree]);
+
+  const toggleCollapse = useCallback((id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const companyName = company?.name ?? "Company";
+  const companyLogo = company?.companyLogo ?? null;
 
   return (
     <>
-      <div className="flex flex-col gap-3">
-        {/* Archived toggle */}
-        <div className="flex items-center justify-end">
-          <label className="flex items-center gap-2 text-sm text-brown-600 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={includeArchived}
-              onChange={(e) => setIncludeArchived(e.target.checked)}
-              className="rounded"
-            />
-            Show archived
-          </label>
+      {/* Canvas + docked panel (flush, one unified surface) */}
+      <div className="flex h-[76dvh] overflow-hidden rounded-xl border border-brown-200">
+        <div className="relative min-w-0 flex-1 bg-brown-50/40">
+          {isLoading ? (
+            <CanvasMessage>Loading departments…</CanvasMessage>
+          ) : error ? (
+            <CanvasMessage tone="error">Failed to load departments.</CanvasMessage>
+          ) : tree.length === 0 ? (
+            <CanvasMessage>
+              <span>No departments yet.</span>
+              <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+                <Button size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  Create your first department
+                </Button>
+              </PermissionGate>
+            </CanvasMessage>
+          ) : (
+            <>
+              <DepartmentCanvas
+                tree={tree}
+                company={{ name: companyName, logo: companyLogo, memberCount: totalMembers }}
+                collapsed={collapsed}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onToggleCollapse={toggleCollapse}
+                recenterSignal={recenterNonce}
+              />
+
+              <label className="absolute bottom-4 left-20 z-10 flex cursor-pointer select-none items-center gap-2 rounded-lg border border-brown-200 bg-white px-3 py-1.5 text-sm text-brown-700 shadow-sm">
+                <Checkbox
+                  checked={includeArchived}
+                  onCheckedChange={(v) => setIncludeArchived(v === true)}
+                />
+                Show archived
+              </label>
+            </>
+          )}
         </div>
 
-        <div className="flex gap-4 overflow-hidden h-[calc(68dvh)]">
-          {/* Tree */}
-          <div className="w-72 flex-none border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
-            {isLoading ? (
-              <DepartmentTreeSkeleton />
-            ) : error ? (
-              <div className="flex items-center justify-center h-20 text-sm text-red-500 px-4 text-center">
-                Failed to load departments.
-              </div>
-            ) : (
-              <DepartmentTree
-                data={tree}
-                selectedId={selectedId ?? (effectiveSelected?.id ?? null)}
-                defaultExpandedIds={tree.slice(0, 3).map((n) => n.id)}
-                onSelect={setSelectedId}
-                onAdd={() => setShowCreate(true)}
-                onEdit={(node) => setEditTarget(node)}
-                onArchive={(node) => archiveDept.mutate(node.id)}
-                onActivate={(node) => activateDept.mutate(node.id)}
-                onDelete={(node) => setDeleteTarget(node)}
-              />
-            )}
-          </div>
-
-          {/* Details */}
-          <div className="flex-1 border border-brown-200 rounded-xl bg-white overflow-hidden flex flex-col min-h-0">
-            {effectiveSelected ? (
-              <DepartmentDetailsPanel
-                department={effectiveSelected}
-                onEdit={() => setEditTarget(effectiveSelected)}
-                onAddMember={() => setAddMemberTarget(effectiveSelected.id)}
-                onSetLead={() => setSetLeadTarget(effectiveSelected)}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-sm text-brown-400">
-                {isLoading ? null : "No departments yet. Create your first department."}
-              </div>
-            )}
-          </div>
+        <div className="w-[380px] flex-none overflow-hidden border-l border-brown-200 bg-white">
+          {selectedDepartment ? (
+            <DepartmentDetailsPanel
+              department={selectedDepartment}
+              parentName={selectedParentName}
+              onEdit={() => setEditTarget(selectedDepartment)}
+              onAddChild={() => setCreateParentId(selectedDepartment.id)}
+              onArchive={() => setArchiveTarget(selectedDepartment)}
+              onActivate={() => activateDept.mutate(selectedDepartment.id)}
+              onDelete={() => setDeleteTarget(selectedDepartment)}
+              onRecenter={() => setRecenterNonce((n) => n + 1)}
+            />
+          ) : (
+            <CompanyDetailsPanel
+              name={companyName}
+              logo={companyLogo}
+              topLevelCount={tree.length}
+              totalCount={allFlat.length}
+            />
+          )}
         </div>
       </div>
 
-      {showCreate && (
+      {isCreateOpen && (
         <CreateDepartmentModal
           open
-          onClose={() => setShowCreate(false)}
+          onClose={() => setCreateParentId(undefined)}
           parentOptions={allFlat}
+          defaultParentId={createParentId}
         />
       )}
 
@@ -135,27 +186,40 @@ export default function DepartmentsContainer() {
           department={deleteTarget}
           allDepartments={allFlat}
           onDeleted={() => {
-            if (selectedId === deleteTarget.id) setSelectedId(null);
+            if (selectedId === deleteTarget.id) setSelectedId(COMPANY_NODE_ID);
           }}
         />
       )}
 
-      {addMemberTarget && (
-        <AssignDepartmentMemberModal
+      {archiveTarget && (
+        <ArchiveDepartmentModal
           open
-          onClose={() => setAddMemberTarget(null)}
-          departmentId={addMemberTarget}
-        />
-      )}
-
-      {setLeadTarget && (
-        <SetDepartmentLeadModal
-          open
-          onClose={() => setSetLeadTarget(null)}
-          departmentId={setLeadTarget.id}
-          currentLeadId={setLeadTarget.leadId}
+          onClose={() => setArchiveTarget(null)}
+          department={archiveTarget}
+          allDepartments={allFlat}
+          onArchived={() => {
+            if (selectedId === archiveTarget.id) setSelectedId(COMPANY_NODE_ID);
+          }}
         />
       )}
     </>
+  );
+}
+
+function CanvasMessage({
+  children,
+  tone = "muted",
+}: {
+  children: React.ReactNode;
+  tone?: "muted" | "error";
+}) {
+  return (
+    <div
+      className={`flex h-full flex-col items-center justify-center px-6 text-center text-sm ${
+        tone === "error" ? "text-red-500" : "text-brown-400"
+      }`}
+    >
+      {children}
+    </div>
   );
 }

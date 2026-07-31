@@ -111,6 +111,10 @@ class HrisApiAssignmentsClient {
       `${this.assignmentsBase(basePath, id)}/rules?page=${page}&size=${size}&sort=createdAt,desc`,
     );
   }
+
+  public async unassignUser(basePath: string, id: string, userId: string): Promise<void> {
+    await hrisApiClient.delete<void>(`${this.assignmentsBase(basePath, id)}/users/${userId}`);
+  }
 }
 
 export const hrisApiAssignmentsClient = new HrisApiAssignmentsClient();

@@ -60,31 +60,6 @@ export class DepartmentsRoutes {
     });
     return new Response(null, { status: 204 });
   }
-
-  public async getMembers(req: Request, id: string) {
-    const url = new URL(req.url);
-    const page = Number(url.searchParams.get("page") ?? "0");
-    const size = Number(url.searchParams.get("size") ?? "20");
-    const data = await hrisDepartmentsService.getMembers(id, page, size);
-    return Response.json(data);
-  }
-
-  public async addMember(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-    await hrisDepartmentsService.addMember(id, { userId: body.userId });
-    return new Response(null, { status: 204 });
-  }
-
-  public async removeMember(_req: Request, id: string, userId: string) {
-    await hrisDepartmentsService.removeMember(id, userId);
-    return new Response(null, { status: 204 });
-  }
-
-  public async setLead(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-    await hrisDepartmentsService.setLead(id, { userId: body.userId });
-    return new Response(null, { status: 204 });
-  }
 }
 
 export const departmentsRoutes = new DepartmentsRoutes();

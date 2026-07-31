@@ -1,13 +1,21 @@
 export type TeamStatus = "ACTIVE" | "ARCHIVED";
 
+export interface TeamLeadDTO {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+}
+
 export interface TeamDTO {
   id: string;
+  companyId?: string;
   name: string;
-  description: string | null;
   code: string | null;
-  parentId: string | null;
+  about: string | null;
   status: TeamStatus;
-  leadId: string | null;
-  memberCount: number;
-  archivedAt: string | null;
+  sortOrder: number;
+  parentId: string | null;
+  leadUserId: string | null;
+  membersCount: number;
 }

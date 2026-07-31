@@ -6,6 +6,7 @@ import {
 } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Label } from "@/public/desact/src/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
 import { useDeleteTeam } from "@/components/modules/settings/modules/teams/hooks/useDeleteTeam/useDeleteTeam";
 import type { TeamTreeNode } from "@/models/teams";
 import type { TeamChildrenStrategy, TeamMembersStrategy } from "@/models/teams/DeleteTeamPayload";
@@ -22,20 +23,21 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
   const deleteTeam = useDeleteTeam();
   const [childrenStrategy, setChildrenStrategy] = useState<TeamChildrenStrategy>("PROMOTE");
   const [membersStrategy, setMembersStrategy] = useState<TeamMembersStrategy>("UNASSIGN");
-  const [targetTeamId, setTargetTeamId] = useState("");
 
   const hasChildren = (team.children?.length ?? 0) > 0;
-  const hasMoved = membersStrategy === "MOVE_TO";
-  const canSubmit = !hasMoved || !!targetTeamId;
+  const parent = team.parentId
+    ? allTeams.find((t) => t.id === team.parentId) ?? null
+    : null;
 
-  const moveTargetOptions = allTeams.filter((t) => t.id !== team.id && t.status === "ACTIVE");
+  const effectiveMembersStrategy: TeamMembersStrategy =
+    membersStrategy === "MOVE_TO" && !parent ? "UNASSIGN" : membersStrategy;
 
   const handleDelete = async () => {
     await deleteTeam.mutateAsync({
       id: team.id,
       childrenStrategy,
-      membersStrategy,
-      targetId: hasMoved ? targetTeamId : null,
+      membersStrategy: effectiveMembersStrategy,
+      targetId: effectiveMembersStrategy === "MOVE_TO" ? parent!.id : null,
     });
     onDeleted();
     onClose();
@@ -43,50 +45,72 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent>
-        <DialogHeader><DialogTitle>Delete &ldquo;{team.name}&rdquo;</DialogTitle></DialogHeader>
-        <div className="space-y-4 py-2 text-sm text-brown-700">
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Delete &ldquo;{team.name}&rdquo;</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2 text-sm text-brown-700">
           <p>This action cannot be undone. Choose how to handle existing sub-teams and members.</p>
+
           {hasChildren && (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Sub-teams</Label>
-              <div className="flex flex-col gap-1">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="teamChildrenStrategy" value="PROMOTE" checked={childrenStrategy === "PROMOTE"} onChange={() => setChildrenStrategy("PROMOTE")} />
-                  Promote to parent level
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="teamChildrenStrategy" value="DELETE_CASCADE" checked={childrenStrategy === "DELETE_CASCADE"} onChange={() => setChildrenStrategy("DELETE_CASCADE")} />
-                  Delete all sub-teams
-                </label>
-              </div>
+              <RadioGroup
+                value={childrenStrategy}
+                onValueChange={(v) => setChildrenStrategy(v as TeamChildrenStrategy)}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="PROMOTE" id="tcs-promote" />
+                  <Label htmlFor="tcs-promote" className="mb-0 cursor-pointer font-normal">
+                    Promote to parent level
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="DELETE_CASCADE" id="tcs-cascade" />
+                  <Label htmlFor="tcs-cascade" className="mb-0 cursor-pointer font-normal">
+                    Delete all sub-teams
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           )}
-          <div className="space-y-1.5">
+
+          <div className="space-y-2">
             <Label>Members</Label>
-            <div className="flex flex-col gap-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="teamMembersStrategy" value="UNASSIGN" checked={membersStrategy === "UNASSIGN"} onChange={() => setMembersStrategy("UNASSIGN")} />
-                Unassign (remove from team)
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="teamMembersStrategy" value="MOVE_TO" checked={membersStrategy === "MOVE_TO"} onChange={() => setMembersStrategy("MOVE_TO")} />
-                Move to another team
-              </label>
-            </div>
-            {hasMoved && (
-              <select value={targetTeamId} onChange={(e) => setTargetTeamId(e.target.value)}
-                className="mt-2 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm">
-                <option value="">Select target team…</option>
-                {moveTargetOptions.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-            )}
+            <RadioGroup
+              value={effectiveMembersStrategy}
+              onValueChange={(v) => setMembersStrategy(v as TeamMembersStrategy)}
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="UNASSIGN" id="tms-unassign" />
+                <Label htmlFor="tms-unassign" className="mb-0 cursor-pointer font-normal">
+                  Unassign (remove from team)
+                </Label>
+              </div>
+              {parent && (
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="MOVE_TO" id="tms-move" />
+                  <Label htmlFor="tms-move" className="mb-0 cursor-pointer font-normal">
+                    Move to parent team ({parent.name})
+                  </Label>
+                </div>
+              )}
+            </RadioGroup>
           </div>
-          {deleteTeam.isError && <p className="text-red-500">{(deleteTeam.error as Error)?.message ?? "An error occurred."}</p>}
+
+          {deleteTeam.isError && (
+            <p className="text-red-500">
+              {(deleteTeam.error as Error)?.message ?? "An error occurred."}
+            </p>
+          )}
         </div>
+
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>Cancel</Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending || !canSubmit}>
+          <Button variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending}>
             {deleteTeam.isPending ? "Deleting…" : "Delete"}
           </Button>
         </DialogFooter>

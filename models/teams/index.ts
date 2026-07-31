@@ -1,8 +1,7 @@
 export type { TeamStatus } from "./TeamStatus";
 export type { Team } from "./Team";
+export type { TeamLead } from "./TeamLead";
 export type { TeamTreeNode } from "./TeamTreeNode";
-export type { TeamMember } from "./TeamMember";
-export type { TeamMembersPage } from "./TeamMembersPage";
 export type { CreateTeamPayload } from "./CreateTeamPayload";
 export type { UpdateTeamPayload } from "./UpdateTeamPayload";
 export type {
@@ -10,3 +9,8 @@ export type {
   TeamChildrenStrategy,
   TeamMembersStrategy,
 } from "./DeleteTeamPayload";
+export type {
+  ArchiveTeamPayload,
+  TeamArchiveChildrenStrategy,
+  TeamArchiveMembersStrategy,
+} from "./ArchiveTeamPayload";

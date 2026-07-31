@@ -8,8 +8,6 @@ import Admin from "@/public/icons/admin.svg";
 import Building from "@/public/icons/building.svg";
 
 export type SettingsGroupItem = SettingsLinkItem & {
-  // Item is visible when the user can VIEW at least one of these resources.
-  // Items without resources are always visible.
   resources?: ResourceCode[];
 };
 
@@ -35,9 +33,14 @@ export const settingsGroups: SettingsGroup[] = [
         resources: ["ORG.LEGAL_ENTITY", "ORG.OFFICE"],
       },
       {
-        label: "Departments & Teams",
+        label: "Departments",
         href: "/settings/general/departments",
-        resources: ["ORG.DEPARTMENT", "ORG.TEAM"],
+        resources: ["ORG.DEPARTMENT"],
+      },
+      {
+        label: "Teams",
+        href: "/settings/general/teams",
+        resources: ["ORG.TEAM"],
       },
       {
         label: "Job Catalog",

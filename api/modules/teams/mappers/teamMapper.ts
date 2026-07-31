@@ -1,14 +1,11 @@
 import type {
   TeamDTO,
   TeamTreeNodeDTO,
-  TeamMemberStubDTO,
-  TeamMembersPageDTO,
 } from "@/api/modules/teams/dto";
 import type {
   Team,
+  TeamLead,
   TeamTreeNode,
-  TeamMember,
-  TeamMembersPage,
 } from "@/models/teams";
 
 export class TeamMapper {
@@ -16,13 +13,13 @@ export class TeamMapper {
     return {
       id: dto.id,
       name: dto.name,
-      description: dto.description,
+      description: dto.about,
       code: dto.code,
       parentId: dto.parentId,
       status: dto.status,
-      leadId: dto.leadId,
-      memberCount: dto.memberCount,
-      archivedAt: dto.archivedAt,
+      leadId: dto.leadUserId,
+      memberCount: dto.membersCount,
+      archivedAt: null,
     };
   }
 
@@ -31,34 +28,24 @@ export class TeamMapper {
   }
 
   public mapTreeNodeDTO(dto: TeamTreeNodeDTO): TeamTreeNode {
+    const lead: TeamLead | null = dto.lead
+      ? {
+          id: dto.lead.id,
+          firstName: dto.lead.firstName,
+          lastName: dto.lead.lastName,
+          avatarUrl: dto.lead.avatarUrl,
+        }
+      : null;
+
     return {
       ...this.mapDTO(dto),
+      lead,
       children: (dto.children ?? []).map((c) => this.mapTreeNodeDTO(c)),
     };
   }
 
   public mapTreeNodeDTOs(dtos: TeamTreeNodeDTO[]): TeamTreeNode[] {
     return dtos.map((dto) => this.mapTreeNodeDTO(dto));
-  }
-
-  public mapMemberStubDTO(dto: TeamMemberStubDTO): TeamMember {
-    return {
-      userId: dto.userId,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      email: dto.email,
-      avatarUrl: dto.avatarUrl,
-      jobTitle: dto.jobTitle,
-    };
-  }
-
-  public mapMembersPageDTO(dto: TeamMembersPageDTO): TeamMembersPage {
-    return {
-      items: (dto.items ?? []).map((m) => this.mapMemberStubDTO(m)),
-      total: dto.total,
-      page: dto.page,
-      size: dto.size,
-    };
   }
 }
 

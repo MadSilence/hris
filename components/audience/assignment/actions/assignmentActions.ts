@@ -110,6 +110,20 @@ export async function assignmentRulesAction(
   }
 }
 
+export async function unassignUserAction(
+  basePath: string,
+  id: string,
+  userId: string,
+): Promise<AssignmentActionResult<void>> {
+  try {
+    await hrisApiAssignmentsService.unassignUser(basePath, id, userId);
+    return { status: ActionStatus.SUCCESS };
+  } catch (error) {
+    console.error("unassignUserAction error:", error);
+    return { status: ActionStatus.ERROR, errorMessage: "Failed to remove the person." };
+  }
+}
+
 export async function assignedUsersAction(
   basePath: string,
   id: string,

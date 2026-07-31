@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,8 +9,17 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/public/desact/src/components/ui/select";
 import { useUpdateDepartment } from "@/components/modules/settings/modules/departments/hooks/useUpdateDepartment/useUpdateDepartment";
+import {
+  UserPickerField,
+  type PickedUser,
+} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
 import type { DepartmentTreeNode } from "@/models/departments";
+
+const ROOT_VALUE = "none";
 
 type Props = {
   open: boolean;
@@ -29,6 +38,17 @@ const validationSchema = Yup.object({
 export function EditDepartmentModal({ open, onClose, department, parentOptions }: Props) {
   const updateDepartment = useUpdateDepartment();
 
+  const [lead, setLeadUser] = useState<PickedUser | null>(
+    department.lead
+      ? {
+          id: department.lead.id,
+          firstName: department.lead.firstName,
+          lastName: department.lead.lastName,
+          avatarUrl: department.lead.avatarUrl,
+        }
+      : null,
+  );
+
   const formik = useFormik({
     initialValues: {
       name: department.name,
@@ -45,6 +65,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
         code: values.code?.trim() || null,
         description: values.description?.trim() || null,
         parentId: values.parentId || null,
+        leadId: lead?.id ?? null,
       });
       onClose();
     },
@@ -52,6 +73,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
 
   useEffect(() => {
     if (!open) formik.resetForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -61,11 +83,14 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
     }
   };
 
+  const activeOptions = parentOptions.filter((d) => d.status === "ACTIVE" && d.id !== department.id);
+  const busy = updateDepartment.isPending;
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent onKeyDown={handleKeyDown}>
+      <DialogContent onKeyDown={handleKeyDown} className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit department</DialogTitle>
+          <DialogTitle>Edit {department.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -107,20 +132,25 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
 
           <div className="space-y-1.5">
             <Label htmlFor="edit-dept-parent">Parent department</Label>
-            <select
-              id="edit-dept-parent"
-              name="parentId"
-              value={formik.values.parentId}
-              onChange={formik.handleChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            <Select
+              value={formik.values.parentId || ROOT_VALUE}
+              onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
             >
-              <option value="">None (root)</option>
-              {parentOptions
-                .filter((d) => d.status === "ACTIVE" && d.id !== department.id)
-                .map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
+              <SelectTrigger id="edit-dept-parent">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                {activeOptions.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                 ))}
-            </select>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Department lead</Label>
+            <UserPickerField value={lead} onChange={setLeadUser} placeholder="Search for a person" />
           </div>
 
           {updateDepartment.isError && (
@@ -131,11 +161,11 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={updateDepartment.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={updateDepartment.isPending}>
-            {updateDepartment.isPending ? "Saving…" : "Save"}
+          <Button onClick={() => formik.handleSubmit()} disabled={busy}>
+            {busy ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

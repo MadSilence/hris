@@ -1,14 +1,10 @@
 import type {
   DepartmentDTO,
   DepartmentTreeNodeDTO,
-  DepartmentMemberStubDTO,
-  DepartmentMembersPageDTO,
 } from "@/api/modules/departments/dto";
 import type {
   Department,
   DepartmentTreeNode,
-  DepartmentMember,
-  DepartmentMembersPage,
 } from "@/models/departments";
 
 export class DepartmentMapper {
@@ -16,13 +12,13 @@ export class DepartmentMapper {
     return {
       id: dto.id,
       name: dto.name,
-      description: dto.description,
+      description: dto.about ?? null,
       code: dto.code,
       parentId: dto.parentId,
       status: dto.status,
-      leadId: dto.leadId,
-      memberCount: dto.memberCount,
-      archivedAt: dto.archivedAt,
+      leadId: dto.leadUserId,
+      memberCount: dto.membersCount,
+      archivedAt: dto.status === "ARCHIVED" ? "" : null,
     };
   }
 
@@ -33,32 +29,20 @@ export class DepartmentMapper {
   public mapTreeNodeDTO(dto: DepartmentTreeNodeDTO): DepartmentTreeNode {
     return {
       ...this.mapDTO(dto),
+      lead: dto.lead
+        ? {
+            id: dto.lead.id,
+            firstName: dto.lead.firstName,
+            lastName: dto.lead.lastName,
+            avatarUrl: dto.lead.avatarUrl,
+          }
+        : null,
       children: (dto.children ?? []).map((c) => this.mapTreeNodeDTO(c)),
     };
   }
 
   public mapTreeNodeDTOs(dtos: DepartmentTreeNodeDTO[]): DepartmentTreeNode[] {
     return dtos.map((dto) => this.mapTreeNodeDTO(dto));
-  }
-
-  public mapMemberStubDTO(dto: DepartmentMemberStubDTO): DepartmentMember {
-    return {
-      userId: dto.userId,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      email: dto.email,
-      avatarUrl: dto.avatarUrl,
-      jobTitle: dto.jobTitle,
-    };
-  }
-
-  public mapMembersPageDTO(dto: DepartmentMembersPageDTO): DepartmentMembersPage {
-    return {
-      items: (dto.items ?? []).map((m) => this.mapMemberStubDTO(m)),
-      total: dto.total,
-      page: dto.page,
-      size: dto.size,
-    };
   }
 }
 

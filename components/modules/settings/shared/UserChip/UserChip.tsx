@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { cn } from "@/public/desact/src/components/ui/utils";
 
 export interface UserChipProps {
   id?: string | null;
@@ -10,6 +11,7 @@ export interface UserChipProps {
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;
+  className?: string;
 }
 
 function getInitials(props: {
@@ -36,6 +38,7 @@ export default function UserChip({
   firstName,
   lastName,
   email,
+  className,
 }: UserChipProps) {
   const initials = getInitials({ name, firstName, lastName, email });
 
@@ -52,13 +55,13 @@ export default function UserChip({
   const base = "inline-flex max-w-full items-center gap-2 rounded-md -mx-1.5 px-1.5 py-1";
 
   if (!id) {
-    return <span className={base}>{inner}</span>;
+    return <span className={cn(base, className)}>{inner}</span>;
   }
 
   return (
     <Link
       href={`/organization/people/${id}/personal`}
-      className={`${base} no-underline transition-colors hover:bg-white hover:shadow-sm`}
+      className={cn(base, "no-underline transition-colors hover:bg-white hover:shadow-sm", className)}
       onClick={(e) => e.stopPropagation()}
     >
       {inner}

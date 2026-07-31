@@ -1,5 +1,6 @@
-import type { DepartmentDTO } from "./DepartmentDTO";
+import type { DepartmentDTO, DepartmentLeadDTO } from "./DepartmentDTO";
 
 export interface DepartmentTreeNodeDTO extends DepartmentDTO {
-  children: DepartmentTreeNodeDTO[];
+  lead?: DepartmentLeadDTO | null;
+  children?: DepartmentTreeNodeDTO[];
 }

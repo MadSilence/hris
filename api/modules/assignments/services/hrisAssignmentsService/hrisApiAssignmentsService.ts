@@ -72,6 +72,10 @@ export class HrisApiAssignmentsService {
   ): Promise<AssignedUsersPage> {
     return hrisApiAssignmentsClient.listUsers(basePath, id, params);
   }
+
+  public async unassignUser(basePath: string, id: string, userId: string): Promise<void> {
+    return hrisApiAssignmentsClient.unassignUser(basePath, id, userId);
+  }
 }
 
 export const hrisApiAssignmentsService = new HrisApiAssignmentsService();

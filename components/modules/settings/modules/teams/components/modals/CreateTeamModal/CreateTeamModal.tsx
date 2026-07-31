@@ -9,13 +9,19 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/public/desact/src/components/ui/select";
 import { useCreateTeam } from "@/components/modules/settings/modules/teams/hooks/useCreateTeam/useCreateTeam";
 import type { TeamTreeNode } from "@/models/teams";
+
+const ROOT_VALUE = "none";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   parentOptions: TeamTreeNode[];
+  defaultParentId?: string | null;
 };
 
 const validationSchema = Yup.object({
@@ -25,11 +31,12 @@ const validationSchema = Yup.object({
   parentId: Yup.string().nullable(),
 });
 
-export function CreateTeamModal({ open, onClose, parentOptions }: Props) {
+export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId }: Props) {
   const createTeam = useCreateTeam();
 
   const formik = useFormik({
-    initialValues: { name: "", code: "", description: "", parentId: "" },
+    initialValues: { name: "", code: "", description: "", parentId: defaultParentId ?? "" },
+    enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
       await createTeam.mutateAsync({
@@ -68,13 +75,20 @@ export function CreateTeamModal({ open, onClose, parentOptions }: Props) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-parent">Parent team</Label>
-            <select id="team-parent" name="parentId" value={formik.values.parentId} onChange={formik.handleChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm">
-              <option value="">None (root)</option>
-              {parentOptions.filter((t) => t.status === "ACTIVE").map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
+            <Select
+              value={formik.values.parentId || ROOT_VALUE}
+              onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
+            >
+              <SelectTrigger id="team-parent">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                {parentOptions.filter((t) => t.status === "ACTIVE").map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {createTeam.isError && <p className="text-sm text-red-500">{(createTeam.error as Error)?.message ?? "An error occurred."}</p>}
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { QueryKey } from "@tanstack/react-query";
+import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
@@ -12,13 +12,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/public/desact/src/components/ui/table";
-import { Download, Plus, Search, Users } from "lucide-react";
+import { Download, Plus, Search, Users, X } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import type { ResourceCode } from "@/models/access";
 import type { AssignedUser } from "@/models/assignedUser";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
+import { assignedUsersQueryKey } from "@/components/audience/assignment/hooks/useAssignedUsers";
+import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
+import { ActionStatus } from "@/components/models/ActionStatus";
 
 export interface AssignedUsersPanelProps {
   title?: string;
@@ -28,19 +31,14 @@ export interface AssignedUsersPanelProps {
 
   rows?: AssignedUser[];
   isLoading?: boolean;
-  // Full assigned count (unfiltered) shown in the header.
   total?: number;
-
-  // Controlled server-side search.
   query?: string;
   onQueryChange?: (value: string) => void;
 
-  // Keyset "Load more".
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
 
-  // When present the Assign button opens the generic assignment modal (single-value "move").
   assign?: {
     basePath: string;
     assignableId: string;
@@ -67,14 +65,38 @@ export default function AssignedUsersPanel({
   onLoadMore,
   assign,
 }: AssignedUsersPanelProps) {
+  const queryClient = useQueryClient();
   const [internalQuery, setInternalQuery] = useState("");
   const [assignOpen, setAssignOpen] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const q = query ?? internalQuery;
   const setQuery = onQueryChange ?? setInternalQuery;
   const searching = q.trim().length > 0;
 
   const isEmpty = !isLoading && rows.length === 0;
+  const canRemove = Boolean(assign);
+
+  const handleRemove = async (userId: string) => {
+    if (!assign) return;
+
+    setRemovingId(userId);
+    try {
+      const result = await unassignUserAction(assign.basePath, assign.assignableId, userId);
+      if (result.status === ActionStatus.SUCCESS) {
+        await queryClient.invalidateQueries({
+          queryKey: assignedUsersQueryKey(assign.basePath, assign.assignableId),
+        });
+        await Promise.all(
+          (assign.invalidateKeys ?? []).map((key) =>
+            queryClient.invalidateQueries({ queryKey: key }),
+          ),
+        );
+      }
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   const assignButton = (
     <Button className="gap-1.5" onClick={() => setAssignOpen(true)} disabled={!assign}>
@@ -145,9 +167,10 @@ export default function AssignedUsersPanel({
           <table className="w-full caption-bottom text-sm">
             <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
               <TableRow>
-                <TableHead>User</TableHead>
+                <TableHead className="pl-4">User</TableHead>
                 <TableHead>Position</TableHead>
                 <TableHead>Status</TableHead>
+                {canRemove ? <TableHead className="w-10"/> : null}
               </TableRow>
             </TableHeader>
 
@@ -156,8 +179,8 @@ export default function AssignedUsersPanel({
                 const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
 
                 return (
-                  <TableRow key={u.id} className="border-brown-200 hover:bg-brown-50 [&_td]:py-2">
-                    <TableCell className="py-2">
+                  <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">
+                    <TableCell className="py-2 pl-4">
                       <UserChip
                         id={u.id}
                         name={fullName}
@@ -173,6 +196,26 @@ export default function AssignedUsersPanel({
                     <TableCell>
                       <StatusBadge status={u.status}/>
                     </TableCell>
+
+                    {canRemove ? (
+                      <TableCell className="w-10 pr-2 text-right">
+                        {manageResource ? (
+                          <PermissionGate resource={manageResource} action="EDIT">
+                            <RemoveButton
+                              name={fullName}
+                              disabled={removingId === u.id}
+                              onClick={() => handleRemove(u.id)}
+                            />
+                          </PermissionGate>
+                        ) : (
+                          <RemoveButton
+                            name={fullName}
+                            disabled={removingId === u.id}
+                            onClick={() => handleRemove(u.id)}
+                          />
+                        )}
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 );
               })}
@@ -202,6 +245,28 @@ export default function AssignedUsersPanel({
         />
       ) : null}
     </div>
+  );
+}
+
+function RemoveButton({
+  name,
+  disabled,
+  onClick,
+}: {
+  name: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={`Unassign ${name}`}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+    >
+      <X className="h-4 w-4"/>
+    </button>
   );
 }
 

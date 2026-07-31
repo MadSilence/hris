@@ -1,123 +1,199 @@
 "use client";
 
 import React, { useState } from "react";
+import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/public/desact/src/components/ui/tabs";
-import { Button } from "@/public/desact/src/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/public/desact/src/components/ui/dropdown-menu";
 import type { TeamTreeNode } from "@/models/teams";
-import { TeamMembersList } from "@/components/modules/settings/modules/teams/components/TeamMembersList/TeamMembersList";
+import { TeamPeopleTab } from "@/components/modules/settings/modules/teams/components/TeamPeopleTab/TeamPeopleTab";
+import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
 type Props = {
   team: TeamTreeNode;
+  parentName: string | null;
   onEdit: () => void;
-  onAddMember: () => void;
-  onSetLead: () => void;
+  onAddChild: () => void;
+  onArchive: () => void;
+  onActivate: () => void;
+  onDelete: () => void;
+  onRecenter: () => void;
 };
 
 function TeamIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 16 16" fill="none" className="text-brown-600">
+    <svg width="24" height="24" viewBox="0 0 16 16" fill="none" className="text-brown-600">
       <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" fill="currentColor" fillOpacity="0.2" />
       <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" strokeWidth="1.2" />
     </svg>
   );
 }
 
-export function TeamDetailsPanel({ team, onEdit, onAddMember, onSetLead }: Props) {
+function LeadSection({ team }: { team: TeamTreeNode }) {
+  const lead = team.lead;
+
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Team Lead</h3>
+
+      {lead ? (
+        <UserChip
+          id={lead.id}
+          name={`${lead.firstName ?? ""} ${lead.lastName ?? ""}`.trim() || "Lead"}
+          firstName={lead.firstName}
+          lastName={lead.lastName}
+          avatarUrl={lead.avatarUrl}
+          className="hover:bg-brown-50 hover:shadow-none"
+        />
+      ) : (
+        <p className="text-sm text-brown-400">No lead assigned.</p>
+      )}
+    </div>
+  );
+}
+
+export function TeamDetailsPanel({
+  team,
+  parentName,
+  onEdit,
+  onAddChild,
+  onArchive,
+  onActivate,
+  onDelete,
+  onRecenter,
+}: Props) {
   const [activeTab, setActiveTab] = useState("overview");
   const isArchived = team.status === "ARCHIVED";
 
   return (
-    <div className="flex flex-col h-full min-h-0 p-6 gap-5">
-      <div className="flex items-start gap-4 flex-none">
-        <div className="w-11 h-11 rounded-xl bg-brown-100 flex items-center justify-center flex-none">
+    <div className="flex h-full min-h-0 flex-col gap-5 p-6">
+      {/* Header */}
+      <div className="flex flex-none items-start gap-4">
+        <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-brown-100">
           <TeamIcon />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-lg font-semibold text-brown-900 truncate">{team.name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="truncate text-lg font-semibold text-brown-900">{team.name}</h2>
             {isArchived && (
-              <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-brown-100 text-brown-500">Archived</span>
-            )}
-            {team.code && (
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-brown-50 text-brown-500 border border-brown-200">{team.code}</span>
+              <span className="rounded bg-brown-100 px-1.5 py-0.5 text-xs font-medium text-brown-500">
+                Archived
+              </span>
             )}
           </div>
-          {team.description && (
-            <p className="text-sm text-brown-500 truncate mt-0.5">{team.description}</p>
+          {team.code && (
+            <span className="mt-1 inline-block rounded border border-brown-200 bg-brown-50 px-1.5 py-0.5 font-mono text-xs text-brown-500">
+              {team.code}
+            </span>
           )}
         </div>
-        <PermissionGate resource="ORG.TEAM" action="EDIT">
-          {!isArchived && (
-            <Button variant="outline" size="sm" onClick={onEdit} className="flex-none">Edit</Button>
-          )}
-        </PermissionGate>
+
+        <div className="flex flex-none items-center gap-1">
+          <button
+            type="button"
+            onClick={onRecenter}
+            aria-label="Center on chart"
+            title="Center on chart"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+          >
+            <Crosshair className="h-4 w-4" />
+          </button>
+
+          <PermissionGate
+            anyOf={[
+              { resource: "ORG.TEAM", action: "EDIT" },
+              { resource: "ORG.TEAM", action: "MANAGE" },
+            ]}
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+                  aria-label="Team actions"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <PermissionGate resource="ORG.TEAM" action="EDIT">
+                  {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
+                  {!isArchived && (
+                    <DropdownMenuItem onSelect={onAddChild}>Add sub-team</DropdownMenuItem>
+                  )}
+                  {isArchived ? (
+                    <DropdownMenuItem onSelect={onActivate}>Activate</DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
+                  )}
+                </PermissionGate>
+                <PermissionGate resource="ORG.TEAM" action="MANAGE">
+                  <DropdownMenuItem onSelect={onDelete} className="text-red-600 focus:text-red-600">
+                    Delete
+                  </DropdownMenuItem>
+                </PermissionGate>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </PermissionGate>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 gap-0">
-        <TabsList
-          variant="underline"
-          className="flex-none w-full justify-start bg-transparent border-b border-brown-200 rounded-none h-auto pb-0 px-0 gap-0"
-        >
-          <TabsTrigger value="overview"
-            className="rounded-none border-0 border-b-2 border-transparent data-[state=active]:border-brown-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2 px-3 text-sm text-brown-500 data-[state=active]:text-brown-900 font-medium">
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="grid w-full flex-none grid-cols-2 bg-brown-50">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="people"
-            className="rounded-none border-0 border-b-2 border-transparent data-[state=active]:border-brown-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2 px-3 text-sm text-brown-500 data-[state=active]:text-brown-900 font-medium">
+          <TabsTrigger value="people" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
             People
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="flex-1 overflow-y-auto mt-5 min-h-0 space-y-5">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="border border-brown-200 rounded-lg p-3.5">
-              <p className="text-xs text-brown-500 mb-1">Members</p>
-              <p className="text-2xl font-semibold text-brown-900 leading-none">{team.memberCount}</p>
-            </div>
-            <div className="border border-brown-200 rounded-lg p-3.5">
-              <p className="text-xs text-brown-500 mb-1">Sub-teams</p>
-              <p className="text-2xl font-semibold text-brown-900 leading-none">{team.children?.length ?? 0}</p>
-            </div>
-          </div>
-
+        <TabsContent value="overview" className="mt-5 -mx-1.5 min-h-0 flex-1 space-y-5 overflow-y-auto px-1.5">
+          {/* Description */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400">Lead</h3>
-              <PermissionGate resource="ORG.TEAM" action="EDIT">
-                {!isArchived && (
-                  <button onClick={onSetLead} className="text-xs text-brown-500 hover:text-brown-800">
-                    {team.leadId ? "Change" : "Set lead"}
-                  </button>
-                )}
-              </PermissionGate>
-            </div>
-            {team.leadId ? (
-              <p className="text-sm text-brown-700 font-mono">{team.leadId}</p>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Description</h3>
+            {team.description ? (
+              <p className="text-sm leading-relaxed text-brown-700">{team.description}</p>
             ) : (
-              <p className="text-sm text-brown-400">No lead assigned.</p>
+              <p className="text-sm text-brown-400">No description.</p>
             )}
           </div>
 
-          {team.description && (
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-brown-400 mb-2">Description</h3>
-              <p className="text-sm text-brown-700 leading-relaxed">{team.description}</p>
+          {/* Lead */}
+          <LeadSection team={team} />
+
+          {/* Parent team */}
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Parent team</h3>
+            <p className="text-sm text-brown-700">{parentName ?? "None (top-level)"}</p>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-brown-200 p-3.5">
+              <p className="mb-1 text-xs text-brown-500">Members</p>
+              <p className="text-2xl font-semibold leading-none text-brown-900">{team.memberCount}</p>
             </div>
-          )}
+            <div className="rounded-lg border border-brown-200 p-3.5">
+              <p className="mb-1 text-xs text-brown-500">Sub-teams</p>
+              <p className="text-2xl font-semibold leading-none text-brown-900">
+                {team.children?.length ?? 0}
+              </p>
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="people" className="flex-1 overflow-y-auto mt-5 min-h-0 flex flex-col gap-3">
-          <PermissionGate resource="ORG.TEAM" action="EDIT">
-            {!isArchived && (
-              <div className="flex justify-end">
-                <Button variant="outline" size="sm" onClick={onAddMember}>Add member</Button>
-              </div>
-            )}
-          </PermissionGate>
-          <TeamMembersList teamId={team.id} isArchived={isArchived} />
+        <TabsContent value="people" className="mt-5 flex min-h-0 flex-1 flex-col">
+          <TeamPeopleTab teamId={team.id} teamName={team.name} isArchived={isArchived} />
         </TabsContent>
       </Tabs>
     </div>

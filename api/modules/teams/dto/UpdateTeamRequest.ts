@@ -3,4 +3,5 @@ export interface UpdateTeamRequest {
   description?: string | null;
   code?: string | null;
   parentId?: string | null;
+  leadId?: string | null;
 }

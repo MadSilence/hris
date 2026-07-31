@@ -3,11 +3,10 @@ import type {
   CreateTeamRequest,
   UpdateTeamRequest,
   DeleteTeamRequest,
-  AssignTeamMemberRequest,
-  AssignTeamLeadRequest,
+  ArchiveTeamRequest,
 } from "@/api/modules/teams/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type { Team, TeamTreeNode, TeamMembersPage } from "@/models/teams";
+import type { Team, TeamTreeNode } from "@/models/teams";
 
 export class HrisTeamsService {
   public async list(): Promise<Team[]> {
@@ -30,8 +29,8 @@ export class HrisTeamsService {
     return hrisApiTeamsClient.update(id, body);
   }
 
-  public async archive(id: string): Promise<UpdateResponse> {
-    return hrisApiTeamsClient.archive(id);
+  public async archive(id: string, body?: ArchiveTeamRequest): Promise<UpdateResponse> {
+    return hrisApiTeamsClient.archive(id, body);
   }
 
   public async activate(id: string): Promise<UpdateResponse> {
@@ -40,22 +39,6 @@ export class HrisTeamsService {
 
   public async delete(id: string, body: DeleteTeamRequest): Promise<void> {
     return hrisApiTeamsClient.delete(id, body);
-  }
-
-  public async getMembers(id: string, page: number, size: number): Promise<TeamMembersPage> {
-    return hrisApiTeamsClient.getMembers(id, page, size);
-  }
-
-  public async addMember(id: string, body: AssignTeamMemberRequest): Promise<void> {
-    return hrisApiTeamsClient.addMember(id, body);
-  }
-
-  public async removeMember(id: string, userId: string): Promise<void> {
-    return hrisApiTeamsClient.removeMember(id, userId);
-  }
-
-  public async setLead(id: string, body: AssignTeamLeadRequest): Promise<void> {
-    return hrisApiTeamsClient.setLead(id, body);
   }
 }
 

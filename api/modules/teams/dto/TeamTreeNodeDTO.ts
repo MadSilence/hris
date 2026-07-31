@@ -1,5 +1,6 @@
-import type { TeamDTO } from "./TeamDTO";
+import type { TeamDTO, TeamLeadDTO } from "./TeamDTO";
 
 export interface TeamTreeNodeDTO extends TeamDTO {
-  children: TeamTreeNodeDTO[];
+  lead?: TeamLeadDTO | null;
+  children?: TeamTreeNodeDTO[];
 }

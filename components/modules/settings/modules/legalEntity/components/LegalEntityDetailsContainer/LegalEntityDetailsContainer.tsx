@@ -21,6 +21,8 @@ import {
   LegalEntitySkeleton
 } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityDetailsContainer/LegalEntitySkeleton";
 
+const SCROLL_OFFSET = "calc(100svh - 390px)";
+
 type Props = {
   legalEntityId: string;
 };
@@ -147,8 +149,47 @@ export default function LegalEntityDetailsContainer({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="mt-8 space-y-8">
-          <div className="space-y-5">
+        <TabsContent value="general" className="mt-8">
+          <div className="space-y-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-foreground">General Information</h2>
+                <p className="text-sm text-muted-foreground">
+                  Registration, tax, and address details for this legal entity.
+                </p>
+              </div>
+
+              <div className="flex flex-none items-center gap-3">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={updateAction.isPending}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSave} disabled={updateAction.isPending}>
+                      Save changes
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDeleteOpen(true)}
+                      disabled={deleteAction.isPending}
+                    >
+                      Delete
+                    </Button>
+                    <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-8 overflow-y-auto pr-1" style={{ maxHeight: SCROLL_OFFSET }}>
+              <div className="space-y-5">
         <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -234,34 +275,8 @@ export default function LegalEntityDetailsContainer({
           />
         </div>
       </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        {isEditing ? (
-          <>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={updateAction.isPending}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={updateAction.isPending}>
-              Save changes
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteOpen(true)}
-              disabled={deleteAction.isPending}
-            >
-              Delete
-            </Button>
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
-          </>
-        )}
-      </div>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="assigned" className="mt-8">
