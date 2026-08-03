@@ -1,6 +1,7 @@
 import { User } from "@/models/user/User";
 import { hrisApiUsersClient } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
+import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
 export type GetUsersArgs = {
   limit?: number;
@@ -44,6 +45,10 @@ export class HrisApiUsersService {
 
   async search(body: UsersSearchRequest): Promise<UsersSearchResponseDTO> {
     return hrisApiUsersClient.search(body);
+  }
+
+  async orgChart(): Promise<OrgChartUser[]> {
+    return hrisApiUsersClient.orgChart();
   }
 }
 

@@ -13,4 +13,5 @@ export interface PublicHolidayCalendarDTO {
   sourceLocale: string | null;
   archivedAt: string | null;
   archivedBy: string | null;
+  holidayCount: number;
 }

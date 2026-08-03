@@ -1,11 +1,11 @@
 "use client";
 
-import { FC } from "react";
-import { Clock, FilePlus2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { FC, useMemo, useState } from "react";
+import { Archive, Clock, Download, MoreVertical, Pencil, Play, Plus, Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { CardContent } from "@/public/desact/src/components/ui/card";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Input } from "@/public/desact/src/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/public/desact/src/components/ui/dropdown-menu";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -22,6 +21,7 @@ import {
   TableRow,
 } from "@/public/desact/src/components/ui/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
+import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
 import { TimeOffPoliciesSettingsSkeleton } from "../TimeOffPoliciesSettingsSkeleton";
 import { TimeOffPolicyStatus } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { TimeOffPolicy } from "@/models/timeOff";
@@ -36,31 +36,16 @@ type Props = {
   onDeleteAction: (policy: TimeOffPolicy) => void;
 };
 
-const getStatusBadgeClassName = (status: TimeOffPolicyStatus) => {
+function statusBadge(status: TimeOffPolicyStatus) {
   switch (status) {
     case TimeOffPolicyStatus.Active:
-      return "bg-green-100 text-green-800 border-green-200";
-    case TimeOffPolicyStatus.Draft:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
     case TimeOffPolicyStatus.Archived:
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return { label: "Draft", className: "" };
   }
-};
-
-const getStatusLabel = (status: TimeOffPolicyStatus) => {
-  switch (status) {
-    case TimeOffPolicyStatus.Active:
-      return "Active";
-    case TimeOffPolicyStatus.Draft:
-      return "Draft";
-    case TimeOffPolicyStatus.Archived:
-      return "Archived";
-    default:
-      return status;
-  }
-};
+}
 
 export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   policies,
@@ -71,159 +56,200 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   onArchiveAction,
   onDeleteAction,
 }) => {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return policies;
+    return policies.filter((p) =>
+      [p.displayName, p.description, p.unit, p.paid ? "paid" : "unpaid"]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q)),
+    );
+  }, [policies, query]);
+
   const hasPolicies = policies.length > 0;
 
+  const addPolicyButton = (
+    <Button className="gap-1.5" onClick={onCreateAction}>
+      <Plus className="h-4 w-4" />
+      Add policy
+    </Button>
+  );
+
   return (
-    <div className="min-h-svh bg-[var(--color-bg-primary)] p-4">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <SettingsPageHeader title="Time off" backHref="/settings" />
+    <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+      <div className="shrink-0 px-8 pt-2">
+        <div className="space-y-2">
+          <SettingsPageHeader title="Time off" backHref="/settings" />
+          <PageDescription className="text-base text-muted-foreground/90">
+            Define leave types and quota rules for your organization. Use the table below to review,
+            search and navigate to specific policies.
+          </PageDescription>
+        </div>
 
-        <CardContent className="flex flex-col gap-4 px-0 py-5">
-          <div className="flex flex-col gap-4 py-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
-                Leave policies
-              </h2>
-              <p className="text-sm text-[var(--color-text-tertiary)]">
-                Define leave types and quota rules for your organization.
-              </p>
-            </div>
+        {/* Info block */}
+        <div className="space-y-1 pb-1 pt-5">
+          <h2 className="text-lg font-semibold text-foreground">Leave policies</h2>
+          <p className="text-sm text-muted-foreground">
+            Every leave policy in your company — draft, active and archived.
+          </p>
+        </div>
 
-            <Button onClick={onCreateAction}>
-              <FilePlus2 className="mr-2 h-4 w-4" />
-              Add policy
-            </Button>
+        {/* Toolbar: search (left) + actions (right) */}
+        <div className="flex items-center justify-between gap-4 py-5">
+          <div className="relative w-[260px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+              className="h-9 w-[260px] pl-9"
+              placeholder="Search policies"
+              inputMode="search"
+            />
           </div>
 
-          {isLoading ? (
-            <TimeOffPoliciesSettingsSkeleton />
-          ) : hasPolicies ? (
-            <div className="overflow-hidden rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Policy</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead>Pay type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-12" />
+          <div className="flex items-center gap-3">
+            {addPolicyButton}
+            <Button size="icon" variant="outline" aria-label="Export policies">
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
+        {!isLoading && !hasPolicies ? (
+          <EmptyState action={addPolicyButton} />
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+            <table className="w-full caption-bottom text-sm table-fixed">
+              <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+                <TableRow>
+                  <TableHead className="pl-4">Policy</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead>Pay type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-12" />
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  <TimeOffPoliciesSettingsSkeleton />
+                ) : filtered.length === 0 ? (
+                  <TableRow className="[&_td]:py-2">
+                    <TableCell colSpan={5}>
+                      <div className="py-6 text-center text-sm text-muted-foreground">
+                        No policies match your search.
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {policies.map((policy) => (
-                    <TableRow key={policy.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-[var(--color-text-primary)]">
-                            {policy.displayName}
-                          </p>
-                          {policy.description && (
-                            <p className="text-sm text-[var(--color-text-tertiary)]">
-                              {policy.description}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="capitalize">
-                        {policy.unit === "DAYS" ? "Days" : "Hours"}
-                      </TableCell>
-
-                      <TableCell>
-                        {policy.paid ? "Paid" : "Unpaid"}
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusBadgeClassName(policy.status)}
-                        >
-                          {getStatusLabel(policy.status)}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label="Policy actions"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onSelect={() => onEditAction(policy)}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-
-                            {policy.status === TimeOffPolicyStatus.Draft && (
-                              <DropdownMenuItem
-                                onSelect={() => onActivateAction(policy)}
-                              >
-                                <Clock className="mr-2 h-4 w-4" />
-                                Activate
-                              </DropdownMenuItem>
-                            )}
-
-                            {policy.status === TimeOffPolicyStatus.Active && (
-                              <DropdownMenuItem
-                                onSelect={() => onArchiveAction(policy)}
-                              >
-                                <Clock className="mr-2 h-4 w-4" />
-                                Archive
-                              </DropdownMenuItem>
-                            )}
-
-                            {policy.status === TimeOffPolicyStatus.Draft && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  variant="destructive"
-                                  onSelect={() => onDeleteAction(policy)}
+                ) : (
+                  filtered.map((policy) => {
+                    const badge = statusBadge(policy.status);
+                    return (
+                      <TableRow
+                        key={policy.id}
+                        className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                        onClick={() => onEditAction(policy)}
+                      >
+                        <TableCell className="py-3 pl-4">
+                          <span className="font-medium text-primary">{policy.displayName}</span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {policy.unit === "DAYS" ? "Days" : "Hours"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {policy.paid ? "Paid" : "Unpaid"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={badge.className}>
+                            {badge.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
+                                  aria-label="Policy actions"
                                 >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44 rounded-lg p-1.5">
+                                <DropdownMenuItem
+                                  onClick={() => onEditAction(policy)}
+                                  className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                >
+                                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                                  Edit
                                 </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
-              <div className="mb-4 rounded-2xl bg-brown-50 p-4">
-                <Clock className="h-7 w-7 text-[var(--color-text-primary)]" />
-              </div>
 
-              <h3 className="text-base font-semibold text-[var(--color-text-primary)]">
-                No time off policies yet
-              </h3>
+                                {policy.status === TimeOffPolicyStatus.Draft && (
+                                  <DropdownMenuItem
+                                    onClick={() => onActivateAction(policy)}
+                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                  >
+                                    <Play className="h-4 w-4 text-muted-foreground" />
+                                    Activate
+                                  </DropdownMenuItem>
+                                )}
 
-              <p className="mt-2 max-w-md text-sm text-[var(--color-text-tertiary)]">
-                Create your first leave policy to start managing time off for
-                your team.
-              </p>
+                                {policy.status === TimeOffPolicyStatus.Active && (
+                                  <DropdownMenuItem
+                                    onClick={() => onArchiveAction(policy)}
+                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                  >
+                                    <Archive className="h-4 w-4 text-muted-foreground" />
+                                    Archive
+                                  </DropdownMenuItem>
+                                )}
 
-              <Button className="mt-5" onClick={onCreateAction}>
-                <FilePlus2 className="mr-2 h-4 w-4" />
-                Add policy
-              </Button>
-            </div>
-          )}
-        </CardContent>
+                                {policy.status === TimeOffPolicyStatus.Draft && (
+                                  <>
+                                    <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
+                                    <DropdownMenuItem
+                                      onClick={() => onDeleteAction(policy)}
+                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+function EmptyState({ action }: { action: React.ReactNode }) {
+  return (
+    <div className="flex min-h-72 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
+      <div className="mb-4 rounded-2xl bg-brown-50 p-4">
+        <Clock className="h-7 w-7 text-brown-600" />
+      </div>
+      <h3 className="text-base font-semibold text-foreground">No time off policies yet</h3>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+        Create your first leave policy to start managing time off for your team.
+      </p>
+      <div className="mt-5">{action}</div>
+    </div>
+  );
+}

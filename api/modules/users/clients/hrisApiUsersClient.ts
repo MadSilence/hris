@@ -4,6 +4,7 @@ import { GetUsersArgs, UsersSearchArgs } from "@/api/modules/users/services/hris
 import { userMapper } from "@/api/modules/users/mappers/userMapper";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { User } from "@/models/user/User";
+import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
 export class HrisApiUsersClient {
   private readonly BASE_PATH: string = '/users';
@@ -70,6 +71,10 @@ export class HrisApiUsersClient {
 
   async search(body: UsersSearchRequest): Promise<UsersSearchResponseDTO> {
     return hrisApiClient.post<UsersSearchResponseDTO>(`${this.BASE_PATH}/search`, body);
+  }
+
+  async orgChart(): Promise<OrgChartUser[]> {
+    return hrisApiClient.get<OrgChartUser[]>(`${this.BASE_PATH}/org-chart`);
   }
 }
 

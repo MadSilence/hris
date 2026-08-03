@@ -65,7 +65,7 @@ export default function AssignedUsersTableContent({
       <table className="w-full caption-bottom text-sm">
         <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
           <TableRow>
-            <TableHead>User</TableHead>
+            <TableHead className="pl-4">User</TableHead>
             <TableHead>Position</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Added on</TableHead>
@@ -84,7 +84,7 @@ export default function AssignedUsersTableContent({
 
               return (
                 <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">
-                  <TableCell className="py-2">
+                  <TableCell className="py-2 pl-4">
                     <UserChip
                       id={u.id}
                       name={fullName}

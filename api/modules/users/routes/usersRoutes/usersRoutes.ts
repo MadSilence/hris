@@ -32,6 +32,11 @@ export class UsersRoutes {
     const data = await hrisApiUsersService.search(body);
     return Response.json(data);
   }
+
+  async orgChart(_req: Request) {
+    const data = await hrisApiUsersService.orgChart();
+    return Response.json(data);
+  }
 }
 
 export const usersRoutes = new UsersRoutes();

@@ -1,16 +1,14 @@
 "use client";
 
 import { FC, useCallback, useMemo, useState } from "react";
-import { CalendarDays, Pencil, Users, X } from "lucide-react";
+import { CalendarDays, Pencil, Search, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { CardContent } from "@/public/desact/src/components/ui/card";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -27,7 +25,8 @@ import {
   type DraftHoliday,
   type DraftHolidayErrors,
 } from "../PublicHolidayDaysEditor";
-import { renamePublicHolidayCalendarAction } from "../../actions/renamePublicHolidayCalendarAction";
+import { PublicHolidayCalendarAssignedUsersTab } from "../PublicHolidayCalendarAssignedUsersTab/PublicHolidayCalendarAssignedUsersTab";
+import { updatePublicHolidayCalendarAction } from "../../actions/updatePublicHolidayCalendarAction";
 import { createPublicHolidayAction } from "../../actions/createPublicHolidayAction";
 import { updatePublicHolidayAction } from "../../actions/updatePublicHolidayAction";
 import { deletePublicHolidayAction } from "../../actions/deletePublicHolidayAction";
@@ -38,42 +37,22 @@ type Props = {
   holidays: PublicHoliday[];
 };
 
-const STATUS_BADGE_CLASSES: Record<string, string> = {
-  ACTIVE: "bg-green-100 text-green-800 border-green-200",
-  DRAFT: "bg-gray-100 text-gray-800 border-gray-200",
-  ARCHIVED: "bg-yellow-100 text-yellow-800 border-yellow-200",
-};
-
-const MOCK_ASSIGNED_PEOPLE = [
-  {
-    id: "1",
-    name: "Anna Kowalska",
-    email: "anna.kowalska@example.com",
-    department: "Engineering",
-    assignedSince: "2026-01-01",
-  },
-  {
-    id: "2",
-    name: "Piotr Nowak",
-    email: "piotr.nowak@example.com",
-    department: "People Operations",
-    assignedSince: "2026-01-01",
-  },
-];
-
-function holidaysToDraft(holidays: PublicHoliday[]): DraftHoliday[] {
-  return holidays.map((h) => ({
-    localId: h.id,
-    id: h.id,
-    name: h.name,
-    holidayDate: h.holidayDate,
-  }));
+function statusBadge(status: PublicHolidayCalendarStatus) {
+  switch (status) {
+    case PublicHolidayCalendarStatus.Active:
+      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
+    case PublicHolidayCalendarStatus.Archived:
+      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
+    default:
+      return { label: "Inactive", className: "" };
+  }
 }
 
-export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
-  calendar,
-  holidays,
-}) => {
+function holidaysToDraft(holidays: PublicHoliday[]): DraftHoliday[] {
+  return holidays.map((h) => ({ localId: h.id, id: h.id, name: h.name, holidayDate: h.holidayDate }));
+}
+
+export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, holidays }) => {
   const invalidate = useInvalidatePublicHolidaysQuery();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -81,13 +60,19 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   const [saveError, setSaveError] = useState("");
 
   const [editedName, setEditedName] = useState(calendar.name);
+  const [editedCountry, setEditedCountry] = useState(calendar.sourceCountryCode ?? "");
+  const [editedRegion, setEditedRegion] = useState(calendar.sourceRegionCode ?? "");
   const [editedHolidays, setEditedHolidays] = useState<DraftHoliday[]>([]);
   const [nameError, setNameError] = useState("");
   const [holidayErrors, setHolidayErrors] = useState<DraftHolidayErrors>({});
   const [generalError, setGeneralError] = useState("");
 
+  const [holidaySearch, setHolidaySearch] = useState("");
+
   const enterEditMode = () => {
     setEditedName(calendar.name);
+    setEditedCountry(calendar.sourceCountryCode ?? "");
+    setEditedRegion(calendar.sourceRegionCode ?? "");
     setEditedHolidays(holidaysToDraft(holidays));
     setNameError("");
     setHolidayErrors({});
@@ -123,7 +108,6 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
     for (const h of editedHolidays) {
       const rowErr: { name?: string; holidayDate?: string } = {};
-
       if (!h.name.trim()) {
         rowErr.name = "Name is required.";
         valid = false;
@@ -137,10 +121,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
       } else {
         seenDates.add(h.holidayDate);
       }
-
-      if (rowErr.name || rowErr.holidayDate) {
-        rowErrors[h.localId] = rowErr;
-      }
+      if (rowErr.name || rowErr.holidayDate) rowErrors[h.localId] = rowErr;
     }
 
     setHolidayErrors(rowErrors);
@@ -167,29 +148,35 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
         return orig && (d.name !== orig.name || d.holidayDate !== orig.holidayDate);
       });
 
-      if (editedName.trim() !== calendar.name) {
-        await renamePublicHolidayCalendarAction({
+      const nextCountry = editedCountry.trim() || null;
+      const nextRegion = editedRegion.trim() || null;
+      const metaChanged =
+        editedName.trim() !== calendar.name ||
+        nextCountry !== (calendar.sourceCountryCode ?? null) ||
+        nextRegion !== (calendar.sourceRegionCode ?? null);
+
+      if (metaChanged) {
+        await updatePublicHolidayCalendarAction({
           id: calendar.id,
-          body: { name: editedName.trim() },
+          body: {
+            name: editedName.trim(),
+            year: calendar.year,
+            sourceType: calendar.sourceType,
+            sourceExternalId: calendar.sourceExternalId,
+            sourceCountryCode: nextCountry,
+            sourceRegionCode: nextRegion,
+            sourceLocale: calendar.sourceLocale,
+          },
         });
       }
-
       for (const id of deletedIds) {
         await deletePublicHolidayAction({ id });
       }
-
       for (const d of modified) {
-        await updatePublicHolidayAction({
-          id: d.id!,
-          body: { name: d.name.trim(), holidayDate: d.holidayDate },
-        });
+        await updatePublicHolidayAction({ id: d.id!, body: { name: d.name.trim(), holidayDate: d.holidayDate } });
       }
-
       for (const d of editedWithoutId) {
-        await createPublicHolidayAction({
-          calendarId: calendar.id,
-          body: { name: d.name.trim(), holidayDate: d.holidayDate },
-        });
+        await createPublicHolidayAction({ calendarId: calendar.id, body: { name: d.name.trim(), holidayDate: d.holidayDate } });
       }
 
       invalidate();
@@ -207,94 +194,63 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     return editedHolidays.every((h) => h.name.trim() && h.holidayDate);
   }, [editedName, editedHolidays]);
 
-  const sortedHolidays = useMemo(
-    () => [...holidays].sort((a, b) => a.holidayDate.localeCompare(b.holidayDate)),
-    [holidays],
-  );
+  const visibleHolidays = useMemo(() => {
+    const sorted = [...holidays].sort((a, b) => a.holidayDate.localeCompare(b.holidayDate));
+    const q = holidaySearch.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((h) => h.name.toLowerCase().includes(q) || h.holidayDate.includes(q));
+  }, [holidays, holidaySearch]);
 
-  const statusLabel =
-    calendar.status === PublicHolidayCalendarStatus.Active
-      ? "Active"
-      : calendar.status === PublicHolidayCalendarStatus.Archived
-        ? "Archived"
-        : "Draft";
-
-  const meta = [
-    String(calendar.year),
-    calendar.sourceCountryCode,
-    calendar.sourceRegionCode,
-  ]
+  const badge = statusBadge(calendar.status);
+  const meta = [String(calendar.year), calendar.sourceCountryCode, calendar.sourceRegionCode]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <div className="bg-[var(--color-bg-primary)] p-4">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <SettingsPageHeader
-          title={calendar.name}
-          backHref="/settings/time/public-holidays"
-        />
+    <div className="flex h-[calc(100svh-6rem)] flex-col gap-5 overflow-hidden px-8 pt-2">
+      {/* Header + status + description */}
+      <div className="flex flex-none flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <SettingsPageHeader title={calendar.name} backHref="/settings/time/public-holidays" />
+          <Badge variant="outline" className={badge.className}>
+            {badge.label}
+          </Badge>
+        </div>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          {meta ? `${meta}. ` : ""}This is the holiday-days section for this calendar — review and
+          edit the days below, and manage who this calendar is assigned to.
+        </p>
+      </div>
 
-        <CardContent className="flex flex-col gap-3 rounded-xl border bg-white px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xl font-semibold text-[var(--color-text-primary)]">
-                {calendar.name}
-              </p>
-              {meta && (
-                <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
-                  {meta}
-                </p>
-              )}
-            </div>
-            <Badge
-              variant="outline"
-              className={STATUS_BADGE_CLASSES[calendar.status] ?? "bg-gray-100 text-gray-800"}
-            >
-              {statusLabel}
-            </Badge>
-          </div>
-        </CardContent>
+      <Tabs defaultValue="holidays" className="flex min-h-0 flex-1 flex-col gap-4">
+        <TabsList className="grid w-full flex-none grid-cols-2 bg-brown-50">
+          <TabsTrigger value="holidays" className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            Holidays
+          </TabsTrigger>
+          <TabsTrigger value="assigned" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Assigned people
+          </TabsTrigger>
+        </TabsList>
 
-        <Tabs defaultValue="holidays" className="flex flex-col gap-4">
-          <TabsList className="w-fit">
-            <TabsTrigger value="holidays">
-              <CalendarDays className="mr-2 h-4 w-4" />
-              Holidays
-            </TabsTrigger>
-            <TabsTrigger value="assigned">
-              <Users className="mr-2 h-4 w-4" />
-              Assigned people
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="holidays">
-            {isEditing ? (
-              <CardContent className="flex flex-col gap-6 rounded-xl bg-white px-6 py-5">
-                <div className="flex items-center justify-between gap-4">
-                  <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                    Edit calendar
-                  </h3>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isSaving}
-                      onClick={cancelEditMode}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      disabled={!isEditFormValid || isSaving}
-                      onClick={handleSave}
-                    >
-                      {isSaving ? "Saving…" : "Save changes"}
-                    </Button>
-                  </div>
+        <TabsContent value="holidays" className="min-h-0 flex-1">
+          {isEditing ? (
+            <div className="flex h-full min-h-0 flex-col gap-5">
+              <div className="flex flex-none items-center justify-between gap-4">
+                <h3 className="text-sm font-semibold text-foreground">Edit calendar</h3>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="gap-1.5" disabled={isSaving} onClick={cancelEditMode}>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                  <Button className="gap-1.5" disabled={!isEditFormValid || isSaving} onClick={handleSave}>
+                    {isSaving ? "Saving…" : "Save changes"}
+                  </Button>
                 </div>
+              </div>
 
+              <div className="grid flex-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="edit-calendar-name">Calendar name</Label>
                   <Input
@@ -306,144 +262,122 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     }}
                     disabled={isSaving}
                     aria-invalid={!!nameError}
-                    className="max-w-sm"
                   />
-                  {nameError && (
-                    <p className="text-sm text-destructive">{nameError}</p>
-                  )}
+                  {nameError && <p className="text-sm text-destructive">{nameError}</p>}
                 </div>
 
-                <div>
-                  <p className="mb-3 text-sm font-medium text-[var(--color-text-primary)]">
-                    Holiday days
-                    <span className="ml-2 font-normal text-[var(--color-text-tertiary)]">
-                      {editedHolidays.length}{" "}
-                      {editedHolidays.length === 1 ? "day" : "days"}
-                    </span>
-                  </p>
-                  <div className="max-h-[50vh] overflow-y-auto pr-1">
-                    <PublicHolidayDaysEditor
-                      holidays={editedHolidays}
-                      onChange={setEditedHolidays}
-                      errors={holidayErrors}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  {generalError && (
-                    <p className="mt-2 text-sm text-destructive">{generalError}</p>
-                  )}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-calendar-country">Country</Label>
+                  <Input
+                    id="edit-calendar-country"
+                    value={editedCountry}
+                    onChange={(e) => setEditedCountry(e.currentTarget.value)}
+                    disabled={isSaving}
+                    placeholder="e.g. DE"
+                  />
                 </div>
 
-                {saveError && (
-                  <p className="text-sm text-destructive">{saveError}</p>
-                )}
-              </CardContent>
-            ) : (
-              <CardContent className="flex flex-col gap-4 rounded-xl bg-white px-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-[var(--color-text-tertiary)]">
-                    {sortedHolidays.length}{" "}
-                    {sortedHolidays.length === 1 ? "holiday" : "holidays"}
-                  </p>
-                  <Button variant="outline" size="sm" onClick={enterEditMode}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-calendar-region">Region</Label>
+                  <Input
+                    id="edit-calendar-region"
+                    value={editedRegion}
+                    onChange={(e) => setEditedRegion(e.currentTarget.value)}
+                    disabled={isSaving}
+                    placeholder="Optional"
+                  />
                 </div>
+              </div>
 
-                {sortedHolidays.length > 0 ? (
-                  <div className="max-h-[50vh] overflow-y-auto rounded-lg">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Name</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedHolidays.map((holiday) => (
-                          <TableRow key={holiday.id}>
-                            <TableCell className="font-mono text-sm">
-                              {holiday.holidayDate}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {holiday.name}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-                    <CalendarDays className="mb-3 h-6 w-6 text-[var(--color-text-tertiary)]" />
-                    <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                      No holidays yet
-                    </p>
-                    <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
-                      Click Edit to add holiday days.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            )}
-          </TabsContent>
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                <PublicHolidayDaysEditor
+                  holidays={editedHolidays}
+                  onChange={setEditedHolidays}
+                  errors={holidayErrors}
+                  disabled={isSaving}
+                />
+                {generalError && <p className="mt-2 text-sm text-destructive">{generalError}</p>}
+              </div>
 
-          <TabsContent value="assigned">
-            <CardContent className="flex flex-col gap-4 rounded-xl border bg-white px-6 py-5">
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                  Assigned people
-                </h3>
-                <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
-                  People who have this calendar assigned to them.
+              {saveError && <p className="flex-none text-sm text-destructive">{saveError}</p>}
+            </div>
+          ) : (
+            <div className="flex h-full min-h-0 flex-col gap-6">
+              {/* Info block */}
+              <div className="flex-none space-y-1 pb-1 pt-2">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Holidays{" "}
+                  <span className="font-normal text-brown-400">({holidays.length})</span>
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Public holiday days included in this calendar.
                 </p>
               </div>
 
-              {MOCK_ASSIGNED_PEOPLE.length > 0 ? (
-                <div className="overflow-hidden rounded-lg border">
-                  <Table>
-                    <TableHeader>
+              {/* Toolbar: search (left) + edit (right) */}
+              <div className="flex flex-none items-center justify-between gap-4">
+                <div className="relative w-[260px]">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
+                  <Input
+                    value={holidaySearch}
+                    onChange={(e) => setHolidaySearch(e.currentTarget.value)}
+                    className="h-9 w-[260px] pl-9"
+                    placeholder="Search holidays"
+                    inputMode="search"
+                  />
+                </div>
+                <Button className="gap-1.5" onClick={enterEditMode}>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
+
+              {visibleHolidays.length > 0 ? (
+                <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                  <table className="w-full caption-bottom text-sm table-fixed">
+                    <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Department</TableHead>
-                        <TableHead>Assigned since</TableHead>
+                        <TableHead className="w-1/2 pl-4">Holiday</TableHead>
+                        <TableHead className="w-1/2">Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {MOCK_ASSIGNED_PEOPLE.map((person) => (
-                        <TableRow key={person.id}>
-                          <TableCell className="font-medium">
-                            {person.name}
-                          </TableCell>
-                          <TableCell className="text-[var(--color-text-tertiary)]">
-                            {person.email}
-                          </TableCell>
-                          <TableCell>{person.department}</TableCell>
-                          <TableCell className="text-[var(--color-text-tertiary)]">
-                            {person.assignedSince}
+                      {visibleHolidays.map((holiday) => (
+                        <TableRow key={holiday.id} className="border-brown-200 [&_td]:py-2">
+                          <TableCell className="pl-4 font-medium">{holiday.name}</TableCell>
+                          <TableCell className="font-mono text-sm text-muted-foreground">
+                            {holiday.holidayDate}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>
+                  </table>
+                </div>
+              ) : holidaySearch ? (
+                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
+                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
+                  <p className="text-sm font-medium text-foreground">No holidays match your search</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Try a different name or date.</p>
                 </div>
               ) : (
-                <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-                  <Users className="mb-3 h-6 w-6 text-[var(--color-text-tertiary)]" />
-                  <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                    No one assigned yet
-                  </p>
-                  <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
-                    Assignment management is coming soon.
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={enterEditMode}
+                  className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-brown-300 px-6 py-10 text-center transition-colors hover:border-brown-400 hover:bg-brown-50"
+                >
+                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
+                  <p className="text-sm font-medium text-foreground">Click to start editing</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Add holiday days to this calendar.</p>
+                </button>
               )}
-            </CardContent>
-          </TabsContent>
-        </Tabs>
-      </div>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="assigned" className="min-h-0 flex-1">
+          <PublicHolidayCalendarAssignedUsersTab calendarId={calendar.id} calendarName={calendar.name} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

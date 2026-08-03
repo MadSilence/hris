@@ -48,8 +48,16 @@ export class HrisPublicHolidayCalendarsService {
     return hrisApiPublicHolidayCalendarsClient.archive(id);
   }
 
+  public async restore(id: string): Promise<UpdateResponse> {
+    return hrisApiPublicHolidayCalendarsClient.restore(id);
+  }
+
   public async delete(id: string): Promise<void> {
     return hrisApiPublicHolidayCalendarsClient.delete(id);
+  }
+
+  public async duplicate(id: string, name?: string): Promise<CreateResponse> {
+    return hrisApiPublicHolidayCalendarsClient.duplicate(id, name);
   }
 }
 

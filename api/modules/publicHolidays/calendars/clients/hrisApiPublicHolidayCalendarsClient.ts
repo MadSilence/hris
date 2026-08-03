@@ -75,8 +75,21 @@ export class HrisApiPublicHolidayCalendarsClient {
     );
   }
 
+  public async restore(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/restore`
+    );
+  }
+
   public async delete(id: string): Promise<void> {
     return hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/delete`);
+  }
+
+  public async duplicate(id: string, name?: string): Promise<CreateResponse> {
+    return hrisApiClient.post<CreateResponse>(
+      `${this.BASE_PATH}/${id}/duplicate`,
+      { name: name ?? null } as unknown as Record<string, unknown>
+    );
   }
 }
 

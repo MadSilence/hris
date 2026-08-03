@@ -60,8 +60,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       resources: ["PEOPLE.PROFILE"],
     },
     {
-      label: "Time Off",
-      href: "/time-off",
+      label: "Calendar",
+      href: "/calendar",
       Icon: Calendar,
       resources: ["PEOPLE.TIME_OFF"],
     },

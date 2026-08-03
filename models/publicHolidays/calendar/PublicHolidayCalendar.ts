@@ -12,4 +12,5 @@ export interface PublicHolidayCalendar {
   sourceLocale: string | null;
   archivedAt: string | null;
   archivedBy: string | null;
+  holidayCount: number;
 }

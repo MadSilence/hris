@@ -52,7 +52,7 @@ export default function UsersRolesTable({
       <Table className="table-fixed">
         <TableHeader className="sticky top-0 z-10 bg-white">
           <TableRow>
-            <TableHead className="w-1/3">User</TableHead>
+            <TableHead className="w-1/3 pl-4">User</TableHead>
             <TableHead className="w-1/3">Position</TableHead>
             <TableHead className="w-1/3">Assigned Roles</TableHead>
           </TableRow>
@@ -75,7 +75,7 @@ export default function UsersRolesTable({
                       if (canAssignRoles) setSelectedUser(u);
                     }}
                   >
-                    <TableCell className="py-2 w-1/3">
+                    <TableCell className="py-2 pl-4 w-1/3">
                       <UserChip
                         id={u.id}
                         name={fullName}

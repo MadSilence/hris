@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
-import { accessQueryKeys } from "@/components/auth/accessQueryKeys";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 
 type StopResponse = {
@@ -24,7 +23,7 @@ export function useStopImpersonation() {
 
     onSuccess: (result) => {
       clearPermissionsStorage();
-      void queryClient.invalidateQueries({ queryKey: accessQueryKeys.meAccess() });
+      void queryClient.invalidateQueries();
       clearCurrentUserCache();
 
       setIdentity({

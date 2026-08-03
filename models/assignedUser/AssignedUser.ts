@@ -1,4 +1,5 @@
-// Lean user reference for entity-scoped "assigned people" lists (office, legal entity, …).
+export type AssignedUserCalendarRef = { id: string; name: string };
+
 export type AssignedUser = {
   id: string;
   firstName?: string | null;
@@ -7,6 +8,7 @@ export type AssignedUser = {
   avatarUrl?: string | null;
   jobName?: string | null;
   status: string;
+  calendars?: AssignedUserCalendarRef[] | null;
 };
 
 export type AssignedUsersPage = {

@@ -26,13 +26,7 @@ export default function PublicHolidayCalendarContainer() {
   if (holidaysError) throw holidaysError;
 
   if (isCalendarLoading || isHolidaysLoading || !calendar) {
-    return (
-      <div className="min-h-svh bg-[var(--color-bg-primary)] p-4">
-        <div className="mx-auto max-w-6xl">
-          <PublicHolidayCalendarDetailsSkeleton />
-        </div>
-      </div>
-    );
+    return <PublicHolidayCalendarDetailsSkeleton />;
   }
 
   return (

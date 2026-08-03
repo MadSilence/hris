@@ -21,6 +21,7 @@ import {
   departmentColumn,
   teamColumn,
   rolesColumn,
+  calendarColumn,
   type PeopleColumn,
 } from "@/components/audience/PeoplePicker";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
@@ -45,21 +46,12 @@ type ResultLike = {
 export type AssignPeopleModalProps = {
   isOpen: boolean;
   onCloseAction: () => void;
-  /** Backend domain base, e.g. "/roles", "/teams", "/time-off/policies". */
   basePath: string;
   assignableId: string;
-  /** Display name of the thing people are assigned to. */
   assignableName?: string;
-  /** Lowercase noun for copy: "role", "team", "department", "time-off policy", … */
   noun: string;
-  /**
-   * "add"     — many-to-many membership; assigning only adds (roles, teams, calendars).
-   * "replace" — single-value; assigning moves/overwrites whoever already has one (dept, office, legal, job).
-   */
   semantics: "add" | "replace";
-  /** Temporal domains (time-off policy) require an effective-from date. */
   temporal?: boolean;
-  /** Query keys to invalidate after a successful apply (e.g. the module's members/list query). */
   invalidateKeys?: QueryKey[];
 };
 
@@ -69,6 +61,7 @@ const DOMAIN_CONFIG: Record<string, { column: PeopleColumn; excludeField: string
   "/roles": { column: rolesColumn, excludeField: "sys:role" },
   "/teams": { column: teamColumn, excludeField: "sys:team" },
   "/departments": { column: departmentColumn, excludeField: "sys:department" },
+  "/public-holiday-calendars": { column: calendarColumn, excludeField: "sys:calendar" },
 };
 
 export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({

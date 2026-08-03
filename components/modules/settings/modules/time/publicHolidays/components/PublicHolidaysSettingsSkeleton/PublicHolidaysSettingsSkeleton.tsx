@@ -1,18 +1,34 @@
 import * as React from "react";
+import { TableCell, TableRow } from "@/public/desact/src/components/ui/table";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 
-export const PublicHolidaysSettingsSkeleton: React.FC = () => {
+export const PublicHolidaysSettingsSkeleton: React.FC<{ rows?: number }> = ({
+  rows = 6,
+}) => {
   return (
-    <div className="space-y-4">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="grid grid-cols-5 gap-4">
-          <Skeleton className="h-8 w-full"/>
-          <Skeleton className="h-8 w-full"/>
-          <Skeleton className="h-8 w-full"/>
-          <Skeleton className="h-8 w-full"/>
-          <Skeleton className="h-8 w-10"/>
-        </div>
+    <>
+      {Array.from({ length: rows }).map((_, index) => (
+        <TableRow key={`phc-skel-${index}`} className="border-brown-200 [&_td]:py-2">
+          <TableCell className="py-3 pl-4">
+            <Skeleton className="h-4 w-40" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-8" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-12" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="ml-auto h-8 w-8 rounded-md" />
+          </TableCell>
+        </TableRow>
       ))}
-    </div>
+    </>
   );
 };

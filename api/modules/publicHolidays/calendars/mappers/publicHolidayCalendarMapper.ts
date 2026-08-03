@@ -17,6 +17,7 @@ export class PublicHolidayCalendarMapper {
       sourceLocale: dto.sourceLocale,
       archivedAt: dto.archivedAt,
       archivedBy: dto.archivedBy,
+      holidayCount: dto.holidayCount ?? 0,
     };
   }
 

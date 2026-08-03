@@ -98,6 +98,25 @@ export const teamColumn: PeopleColumn = {
   },
 };
 
+export const calendarColumn: PeopleColumn = {
+  key: "calendar",
+  header: "Holiday calendars",
+  include: "calendar",
+  render: (u) => {
+    const calendars = orgRefsOf(u, "calendar");
+    if (!calendars.length) return <span className="text-sm text-muted-foreground">—</span>;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {calendars.map((c) => (
+          <Badge key={c.id} variant="secondary" className="font-normal">
+            {c.name}
+          </Badge>
+        ))}
+      </div>
+    );
+  },
+};
+
 export type PeoplePickerProps = {
   fields: FieldDTO[] | undefined;
   filters: FilterDTO[];
