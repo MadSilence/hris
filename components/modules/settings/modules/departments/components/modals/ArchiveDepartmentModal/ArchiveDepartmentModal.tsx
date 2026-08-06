@@ -125,7 +125,7 @@ export function ArchiveDepartmentModal({
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="ams-move" />
                     <Label htmlFor="ams-move" className="mb-0 cursor-pointer font-normal">
-                      Move users to parent department ({parent.name})
+                      Promote to parent level ({parent.name})
                     </Label>
                   </div>
                 )}
@@ -150,7 +150,7 @@ export function ArchiveDepartmentModal({
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="asms-move" />
                     <Label htmlFor="asms-move" className="mb-0 cursor-pointer font-normal">
-                      Move all users from sub-departments to parent ({parent.name})
+                      Promote all sub-department users to parent level ({parent.name})
                     </Label>
                   </div>
                 )}

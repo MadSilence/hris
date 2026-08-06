@@ -123,7 +123,7 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="atms-move" />
                     <Label htmlFor="atms-move" className="mb-0 cursor-pointer font-normal">
-                      Move users to parent team ({parent.name})
+                      Promote to parent level ({parent.name})
                     </Label>
                   </div>
                 )}
@@ -148,7 +148,7 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="atsms-move" />
                     <Label htmlFor="atsms-move" className="mb-0 cursor-pointer font-normal">
-                      Move all users from sub-teams to parent ({parent.name})
+                      Promote all sub-team users to parent level ({parent.name})
                     </Label>
                   </div>
                 )}

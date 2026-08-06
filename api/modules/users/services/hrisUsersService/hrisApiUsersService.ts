@@ -57,6 +57,10 @@ export class HrisApiUsersService {
   async orgChart(): Promise<OrgChartUser[]> {
     return hrisApiUsersClient.orgChart();
   }
+
+  async setManager(userId: string, managerId: string | null): Promise<void> {
+    return hrisApiUsersClient.setManager(userId, managerId);
+  }
 }
 
 export const hrisApiUsersService = new HrisApiUsersService();

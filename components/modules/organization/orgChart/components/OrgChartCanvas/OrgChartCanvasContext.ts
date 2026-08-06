@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 
 export type OrgChartCanvasHandlers = {
   onToggleCollapse: (id: string) => void;
+  dropTargetId?: string | null;
 };
 
 const OrgChartCanvasContext = createContext<OrgChartCanvasHandlers | null>(null);

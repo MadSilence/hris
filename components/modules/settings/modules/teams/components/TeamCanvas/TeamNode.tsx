@@ -80,7 +80,7 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{team.memberCount}</span> Members
+          <span className="font-semibold text-brown-700">{team.memberCount}</span> People
         </span>
         <span>
           <span className="font-semibold text-brown-700">{childCount}</span> Subs

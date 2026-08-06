@@ -133,7 +133,15 @@ export function DepartmentPeopleTab({ departmentId, departmentName, isArchived }
         ) : error ? (
           <p className="py-6 text-center text-sm text-red-500">Failed to load members.</p>
         ) : items.length === 0 ? (
-          <p className="py-6 text-center text-sm text-brown-400">No members match your search.</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50 text-brown-500">
+              <Users className="h-5 w-5" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-brown-900">No people match your search</p>
+              <p className="text-sm text-brown-400">Try a different name or email.</p>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col">
             {items.map((member) => (

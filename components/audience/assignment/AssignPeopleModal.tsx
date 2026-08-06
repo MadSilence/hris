@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Check, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
   PeoplePicker,
   officeColumn,
@@ -167,6 +166,11 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const manualDone = applyManual.isSuccess ? applyManual.data : null;
   const segmentDone = jobStatus && isTerminalJobStatus(jobStatus) ? job.data : null;
   const result: ResultLike | null = manualDone ?? segmentDone ?? null;
+  const done = Boolean(result);
+
+  React.useEffect(() => {
+    if (done) onCloseAction();
+  }, [done, onCloseAction]);
 
   const busy = applyManual.isPending || applySegment.isPending;
   const errorMessage =
@@ -216,9 +220,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {result ? (
-            <ResultView result={result} noun={noun} semantics={semantics} />
-          ) : running ? (
+          {running ? (
             <RunningView
               created={job.data?.summary.created ?? 0}
               total={job.data?.summary.total ?? willAffect}
@@ -276,9 +278,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         </div>
 
         <DialogFooter>
-          {result ? (
-            <Button onClick={onCloseAction}>Done</Button>
-          ) : running ? (
+          {running ? (
             <Button disabled>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Adding…
@@ -325,52 +325,3 @@ const RunningView: React.FC<{ created: number; total: number; semantics: "add" |
   );
 };
 
-const ResultView: React.FC<{ result: ResultLike; noun: string; semantics: "add" | "replace" }> = ({
-  result,
-  noun,
-  semantics,
-}) => {
-  const failed = result.failed ?? [];
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="secondary" className="gap-1.5 font-normal">
-          <Check className="h-3.5 w-3.5" />
-          {result.summary.created} added
-        </Badge>
-        <Badge variant="outline" className="font-normal">{result.summary.skipped} skipped</Badge>
-        {result.summary.failed > 0 && (
-          <Badge variant="outline" className="font-normal text-red-600">
-            {result.summary.failed} failed
-          </Badge>
-        )}
-        <Badge variant="outline" className="font-normal">{result.summary.total} matched</Badge>
-      </div>
-
-      {result.summary.created === 0 && failed.length === 0 && (
-        <p className="flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-          {semantics === "add"
-            ? `Nobody new was added — everyone selected already has this ${noun}.`
-            : `Nothing changed — everyone selected already has this ${noun}.`}
-        </p>
-      )}
-
-      {failed.length > 0 && (
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Failed
-          </p>
-          <div className="max-h-[200px] divide-y divide-brown-100 overflow-y-auto rounded-lg border border-brown-200">
-            {failed.map((f) => (
-              <div key={f.userId} className="flex items-center justify-between gap-3 px-3 py-2">
-                <p className="min-w-0 truncate text-sm">{f.email}</p>
-                <span className="flex-none text-xs text-red-600">{f.errorDetail ?? "Error"}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};

@@ -80,7 +80,7 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{department.memberCount}</span> Members
+          <span className="font-semibold text-brown-700">{department.memberCount}</span> People
         </span>
         <span>
           <span className="font-semibold text-brown-700">{childCount}</span> Subs

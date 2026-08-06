@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
+import { Crosshair, Download, Info, MoreHorizontal, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/public/desact/src/components/ui/tabs";
@@ -15,6 +15,8 @@ import type { TeamTreeNode } from "@/models/teams";
 import { TeamPeopleTab } from "@/components/modules/settings/modules/teams/components/TeamPeopleTab/TeamPeopleTab";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { ExportOrgTreeModal } from "@/components/modules/settings/shared/ExportOrgTreeModal";
+import { Button } from "@/public/desact/src/components/ui/button";
 
 type Props = {
   team: TeamTreeNode;
@@ -70,7 +72,9 @@ export function TeamDetailsPanel({
   onRecenter,
 }: Props) {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const isArchived = team.status === "ARCHIVED";
+  const isRoot = !team.parentId;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
@@ -106,43 +110,62 @@ export function TeamDetailsPanel({
             <Crosshair className="h-4 w-4" />
           </button>
 
-          <PermissionGate
-            anyOf={[
-              { resource: "ORG.TEAM", action: "EDIT" },
-              { resource: "ORG.TEAM", action: "MANAGE" },
-            ]}
-          >
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
-                  aria-label="Team actions"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <PermissionGate resource="ORG.TEAM" action="EDIT">
-                  {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
-                  {!isArchived && (
-                    <DropdownMenuItem onSelect={onAddChild}>Add sub-team</DropdownMenuItem>
-                  )}
-                  {isArchived ? (
-                    <DropdownMenuItem onSelect={onActivate}>Activate</DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
-                  )}
-                </PermissionGate>
-                <PermissionGate resource="ORG.TEAM" action="MANAGE">
-                  <DropdownMenuItem onSelect={onDelete} className="text-red-600 focus:text-red-600">
-                    Delete
-                  </DropdownMenuItem>
-                </PermissionGate>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </PermissionGate>
+          {isRoot && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5"
+              onClick={() => setIsExportOpen(true)}
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+                aria-label="Team actions"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isRoot && (
+                <DropdownMenuItem onSelect={() => setIsExportOpen(true)}>Export…</DropdownMenuItem>
+              )}
+              <PermissionGate resource="ORG.TEAM" action="EDIT">
+                {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
+                {!isArchived && (
+                  <DropdownMenuItem onSelect={onAddChild}>Add sub-team</DropdownMenuItem>
+                )}
+                {isArchived ? (
+                  <DropdownMenuItem onSelect={onActivate}>Activate</DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
+                )}
+              </PermissionGate>
+              <PermissionGate resource="ORG.TEAM" action="MANAGE">
+                <DropdownMenuItem onSelect={onDelete} className="text-red-600 focus:text-red-600">
+                  Delete
+                </DropdownMenuItem>
+              </PermissionGate>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      <ExportOrgTreeModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        noun="team"
+        nodeName={team.name}
+        exportUrl={`/api/teams/${team.id}/export`}
+        directSubNodes={team.directSubNodes}
+        memberCount={team.memberCount}
+        totalPeople={team.totalPeople}
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
@@ -180,14 +203,22 @@ export function TeamDetailsPanel({
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Members</p>
+              <p className="mb-1 text-xs text-brown-500">Direct people</p>
               <p className="text-2xl font-semibold leading-none text-brown-900">{team.memberCount}</p>
             </div>
             <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Sub-teams</p>
-              <p className="text-2xl font-semibold leading-none text-brown-900">
-                {team.children?.length ?? 0}
-              </p>
+              <p className="mb-1 text-xs text-brown-500">Direct sub-teams</p>
+              <p className="text-2xl font-semibold leading-none text-brown-900">{team.directSubNodes}</p>
+            </div>
+            <div className="rounded-lg border border-brown-200 p-3.5">
+              <p className="mb-1 text-xs text-brown-500">Total people</p>
+              <p className="text-2xl font-semibold leading-none text-brown-900">{team.totalPeople}</p>
+              <p className="mt-1 text-[10px] leading-none text-brown-400">incl. all sub-teams</p>
+            </div>
+            <div className="rounded-lg border border-brown-200 p-3.5">
+              <p className="mb-1 text-xs text-brown-500">Total sub-teams</p>
+              <p className="text-2xl font-semibold leading-none text-brown-900">{team.totalSubNodes}</p>
+              <p className="mt-1 text-[10px] leading-none text-brown-400">all levels below</p>
             </div>
           </div>
         </TabsContent>

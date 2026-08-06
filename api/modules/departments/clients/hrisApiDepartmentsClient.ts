@@ -69,6 +69,18 @@ export class HrisApiDepartmentsClient {
     );
   }
 
+  public async exportTree(
+    id: string,
+    opts: { format: "csv" | "xlsx"; includeSubNodes: boolean; includePeople: boolean },
+  ): Promise<Response> {
+    const params = new URLSearchParams({
+      format: opts.format,
+      includeSubNodes: String(opts.includeSubNodes),
+      includePeople: String(opts.includePeople),
+    });
+    return hrisApiClient.fetch(`${this.BASE_PATH}/${id}/export?${params}`);
+  }
+
 }
 
 export const hrisApiDepartmentsClient = new HrisApiDepartmentsClient();

@@ -38,11 +38,12 @@ function initials(u: OrgChartUser): string {
 
 export function UserNode({ data }: NodeProps<UserFlowNode>) {
   const { user, childCount, collapsed, selected } = data;
-  const { onToggleCollapse } = useOrgChartCanvas();
+  const { onToggleCollapse, dropTargetId } = useOrgChartCanvas();
 
   const hasChildren = childCount > 0;
   const isActive = user.status === "ACTIVE";
   const name = fullName(user);
+  const isDropTarget = dropTargetId === user.id;
 
   return (
     <div
@@ -51,6 +52,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
         selected
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
+        isDropTarget && "border-green-400 ring-2 ring-green-300",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />

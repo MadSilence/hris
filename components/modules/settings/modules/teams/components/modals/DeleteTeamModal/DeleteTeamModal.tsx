@@ -19,25 +19,44 @@ type Props = {
   onDeleted: () => void;
 };
 
+function sumDescendantMembers(node: TeamTreeNode): number {
+  let total = 0;
+  for (const child of node.children ?? []) {
+    total += child.memberCount + sumDescendantMembers(child);
+  }
+  return total;
+}
+
 export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Props) {
   const deleteTeam = useDeleteTeam();
   const [childrenStrategy, setChildrenStrategy] = useState<TeamChildrenStrategy>("PROMOTE");
   const [membersStrategy, setMembersStrategy] = useState<TeamMembersStrategy>("UNASSIGN");
+  const [subMembersStrategy, setSubMembersStrategy] = useState<TeamMembersStrategy>("UNASSIGN");
 
   const hasChildren = (team.children?.length ?? 0) > 0;
+  const subMembersCount = sumDescendantMembers(team);
   const parent = team.parentId
     ? allTeams.find((t) => t.id === team.parentId) ?? null
     : null;
 
+  const cascading = hasChildren && childrenStrategy === "DELETE_CASCADE";
+
   const effectiveMembersStrategy: TeamMembersStrategy =
     membersStrategy === "MOVE_TO" && !parent ? "UNASSIGN" : membersStrategy;
+  const effectiveSubMembersStrategy: TeamMembersStrategy =
+    subMembersStrategy === "MOVE_TO" && !parent ? "UNASSIGN" : subMembersStrategy;
+
+  const wantsMove =
+    effectiveMembersStrategy === "MOVE_TO" ||
+    (cascading && subMembersCount > 0 && effectiveSubMembersStrategy === "MOVE_TO");
 
   const handleDelete = async () => {
     await deleteTeam.mutateAsync({
       id: team.id,
       childrenStrategy,
       membersStrategy: effectiveMembersStrategy,
-      targetId: effectiveMembersStrategy === "MOVE_TO" ? parent!.id : null,
+      subMembersStrategy: cascading ? effectiveSubMembersStrategy : undefined,
+      targetId: wantsMove && parent ? parent.id : null,
     });
     onDeleted();
     onClose();
@@ -92,12 +111,37 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="MOVE_TO" id="tms-move" />
                   <Label htmlFor="tms-move" className="mb-0 cursor-pointer font-normal">
-                    Move to parent team ({parent.name})
+                    Promote to parent level ({parent.name})
                   </Label>
                 </div>
               )}
             </RadioGroup>
           </div>
+
+          {cascading && subMembersCount > 0 && (
+            <div className="space-y-2">
+              <Label>Members of sub-teams</Label>
+              <RadioGroup
+                value={effectiveSubMembersStrategy}
+                onValueChange={(v) => setSubMembersStrategy(v as TeamMembersStrategy)}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="UNASSIGN" id="tsms-unassign" />
+                  <Label htmlFor="tsms-unassign" className="mb-0 cursor-pointer font-normal">
+                    Unassign from all sub-teams
+                  </Label>
+                </div>
+                {parent && (
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="MOVE_TO" id="tsms-move" />
+                    <Label htmlFor="tsms-move" className="mb-0 cursor-pointer font-normal">
+                      Promote all sub-team users to parent level ({parent.name})
+                    </Label>
+                  </div>
+                )}
+              </RadioGroup>
+            </div>
+          )}
 
           {deleteTeam.isError && (
             <p className="text-red-500">

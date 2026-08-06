@@ -19,25 +19,44 @@ type Props = {
   onDeleted: () => void;
 };
 
+function sumDescendantMembers(node: DepartmentTreeNode): number {
+  let total = 0;
+  for (const child of node.children ?? []) {
+    total += child.memberCount + sumDescendantMembers(child);
+  }
+  return total;
+}
+
 export function DeleteDepartmentModal({ open, onClose, department, allDepartments, onDeleted }: Props) {
   const deleteDepartment = useDeleteDepartment();
   const [childrenStrategy, setChildrenStrategy] = useState<DepartmentChildrenStrategy>("PROMOTE");
   const [membersStrategy, setMembersStrategy] = useState<DepartmentMembersStrategy>("UNASSIGN");
+  const [subMembersStrategy, setSubMembersStrategy] = useState<DepartmentMembersStrategy>("UNASSIGN");
 
   const hasChildren = (department.children?.length ?? 0) > 0;
+  const subMembersCount = sumDescendantMembers(department);
   const parent = department.parentId
     ? allDepartments.find((d) => d.id === department.parentId) ?? null
     : null;
 
+  const cascading = hasChildren && childrenStrategy === "DELETE_CASCADE";
+
   const effectiveMembersStrategy: DepartmentMembersStrategy =
     membersStrategy === "MOVE_TO" && !parent ? "UNASSIGN" : membersStrategy;
+  const effectiveSubMembersStrategy: DepartmentMembersStrategy =
+    subMembersStrategy === "MOVE_TO" && !parent ? "UNASSIGN" : subMembersStrategy;
+
+  const wantsMove =
+    effectiveMembersStrategy === "MOVE_TO" ||
+    (cascading && subMembersCount > 0 && effectiveSubMembersStrategy === "MOVE_TO");
 
   const handleDelete = async () => {
     await deleteDepartment.mutateAsync({
       id: department.id,
       childrenStrategy,
       membersStrategy: effectiveMembersStrategy,
-      targetId: effectiveMembersStrategy === "MOVE_TO" ? parent!.id : null,
+      subMembersStrategy: cascading ? effectiveSubMembersStrategy : undefined,
+      targetId: wantsMove && parent ? parent.id : null,
     });
     onDeleted();
     onClose();
@@ -92,12 +111,37 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="MOVE_TO" id="ms-move" />
                   <Label htmlFor="ms-move" className="mb-0 cursor-pointer font-normal">
-                    Move to parent department ({parent.name})
+                    Promote to parent level ({parent.name})
                   </Label>
                 </div>
               )}
             </RadioGroup>
           </div>
+
+          {cascading && subMembersCount > 0 && (
+            <div className="space-y-2">
+              <Label>Members of sub-departments</Label>
+              <RadioGroup
+                value={effectiveSubMembersStrategy}
+                onValueChange={(v) => setSubMembersStrategy(v as DepartmentMembersStrategy)}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="UNASSIGN" id="sms-unassign" />
+                  <Label htmlFor="sms-unassign" className="mb-0 cursor-pointer font-normal">
+                    Unassign from all sub-departments
+                  </Label>
+                </div>
+                {parent && (
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="MOVE_TO" id="sms-move" />
+                    <Label htmlFor="sms-move" className="mb-0 cursor-pointer font-normal">
+                      Promote all sub-department users to parent level ({parent.name})
+                    </Label>
+                  </div>
+                )}
+              </RadioGroup>
+            </div>
+          )}
 
           {deleteDepartment.isError && (
             <p className="text-red-500">

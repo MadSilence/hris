@@ -43,6 +43,13 @@ export class HrisDepartmentsService {
   public async delete(id: string, body: DeleteDepartmentRequest): Promise<void> {
     return hrisApiDepartmentsClient.delete(id, body);
   }
+
+  public async exportTree(
+    id: string,
+    opts: { format: "csv" | "xlsx"; includeSubNodes: boolean; includePeople: boolean },
+  ): Promise<Response> {
+    return hrisApiDepartmentsClient.exportTree(id, opts);
+  }
 }
 
 export const hrisDepartmentsService = new HrisDepartmentsService();

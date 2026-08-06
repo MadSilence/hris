@@ -29,6 +29,9 @@ export class DepartmentMapper {
   public mapTreeNodeDTO(dto: DepartmentTreeNodeDTO): DepartmentTreeNode {
     return {
       ...this.mapDTO(dto),
+      directSubNodes: dto.directSubNodes,
+      totalPeople: dto.totalPeople,
+      totalSubNodes: dto.totalSubNodes,
       lead: dto.lead
         ? {
             id: dto.lead.id,

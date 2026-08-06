@@ -4,5 +4,6 @@ export type DepartmentMembersStrategy = "UNASSIGN" | "MOVE_TO";
 export interface DeleteDepartmentRequest {
   childrenStrategy: DepartmentChildrenStrategy;
   membersStrategy: DepartmentMembersStrategy;
+  subMembersStrategy?: DepartmentMembersStrategy;
   targetId?: string | null;
 }

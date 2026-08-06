@@ -83,6 +83,10 @@ export class HrisApiUsersClient {
   async orgChart(): Promise<OrgChartUser[]> {
     return hrisApiClient.get<OrgChartUser[]>(`${this.BASE_PATH}/org-chart`);
   }
+
+  async setManager(userId: string, managerId: string | null): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${userId}/manager`, { managerId });
+  }
 }
 
 export const hrisApiUsersClient = new HrisApiUsersClient();

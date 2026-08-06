@@ -39,6 +39,9 @@ export class TeamMapper {
 
     return {
       ...this.mapDTO(dto),
+      directSubNodes: dto.directSubNodes,
+      totalPeople: dto.totalPeople,
+      totalSubNodes: dto.totalSubNodes,
       lead,
       children: (dto.children ?? []).map((c) => this.mapTreeNodeDTO(c)),
     };

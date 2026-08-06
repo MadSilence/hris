@@ -40,6 +40,13 @@ export class HrisTeamsService {
   public async delete(id: string, body: DeleteTeamRequest): Promise<void> {
     return hrisApiTeamsClient.delete(id, body);
   }
+
+  public async exportTree(
+    id: string,
+    opts: { format: "csv" | "xlsx"; includeSubNodes: boolean; includePeople: boolean },
+  ): Promise<Response> {
+    return hrisApiTeamsClient.exportTree(id, opts);
+  }
 }
 
 export const hrisTeamsService = new HrisTeamsService();

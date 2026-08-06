@@ -3,8 +3,10 @@ import { ExportDataFormat } from "@/components/modules/settings/shared/ExportDat
 export const triggerExportDownload = async (
   basePath: string,
   format: ExportDataFormat,
+  extraParams?: Record<string, string>,
 ): Promise<void> => {
-  const response = await fetch(`${basePath}?format=${format}`, {
+  const params = new URLSearchParams({ format, ...(extraParams ?? {}) });
+  const response = await fetch(`${basePath}?${params.toString()}`, {
     method: "GET",
     credentials: "same-origin",
   });

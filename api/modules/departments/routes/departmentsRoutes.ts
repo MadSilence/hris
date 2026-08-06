@@ -56,9 +56,26 @@ export class DepartmentsRoutes {
     await hrisDepartmentsService.delete(id, {
       childrenStrategy: body.childrenStrategy,
       membersStrategy: body.membersStrategy,
+      subMembersStrategy: body.subMembersStrategy,
       targetId: body.targetId ?? null,
     });
     return new Response(null, { status: 204 });
+  }
+
+  public async exportTree(req: Request, id: string) {
+    const url = new URL(req.url);
+    const backendResponse = await hrisDepartmentsService.exportTree(id, {
+      format: url.searchParams.get("format") === "csv" ? "csv" : "xlsx",
+      includeSubNodes: url.searchParams.get("includeSubNodes") === "true",
+      includePeople: url.searchParams.get("includePeople") === "true",
+    });
+    return new Response(backendResponse.body, {
+      status: backendResponse.status,
+      headers: {
+        "Content-Type": backendResponse.headers.get("content-type") ?? "application/octet-stream",
+        "Content-Disposition": backendResponse.headers.get("content-disposition") ?? "attachment",
+      },
+    });
   }
 }
 
