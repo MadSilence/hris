@@ -33,6 +33,25 @@ export class OfficeService {
   ): Promise<Response> {
     return hrisOfficeClient.deleteOffice(payload);
   }
+
+  public async archiveOffice(
+    id: string,
+    strategy: "KEEP" | "UNASSIGN"
+  ): Promise<UpdatedEntity> {
+    return hrisOfficeClient.archiveOffice(id, { assignedUsersStrategy: strategy });
+  }
+
+  public async restoreOffice(id: string): Promise<UpdatedEntity> {
+    return hrisOfficeClient.restoreOffice(id);
+  }
+
+  public async exportOffices(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisOfficeClient.exportOffices(format);
+  }
+
+  public async exportOffice(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisOfficeClient.exportOffice(id, format);
+  }
 }
 
 export const officeService = new OfficeService();

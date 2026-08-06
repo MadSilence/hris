@@ -8,6 +8,11 @@ export class GroupsRoutes {
     const groups = await this.service.getGroups();
     return Response.json(groups)
   }
+
+  public async getGroupImpact(id: string) {
+    const impact = await this.service.getGroupImpact(id);
+    return Response.json(impact);
+  }
 }
 
 export const groupsRoutes = new GroupsRoutes(groupsService);

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import UserChip from "@/components/ui/UserChip/UserChip";
+import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 
@@ -20,9 +21,19 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
   onChange,
 }) => {
   return (
-    <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-5 px-5 py-4">
-      <div className="text-sm text-muted-foreground">{attribute.name}</div>
-      <div className="text-sm">
+    <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-5 py-4">
+      <div className="text-sm text-muted-foreground">
+        <span>{attribute.name}</span>
+        {(attribute as any).required && (
+          <span className="ml-0.5 text-destructive" title="Required">*</span>
+        )}
+        {(attribute as any).description && (
+          <p className="mt-0.5 text-xs text-muted-foreground/80">
+            {(attribute as any).description}
+          </p>
+        )}
+      </div>
+      <div className="text-sm text-foreground">
         {!isEdit ? (
           <ViewValue attribute={attribute} rawValue={rawValue}/>
         ) : (
@@ -50,7 +61,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     case AttributeType.URL: {
       const href = String(rawValue);
       return (
-        <a href={href} target="_blank" rel="noreferrer" className="attrLink">
+        <a href={href} target="_blank" rel="noreferrer" className="text-brown-600 hover:underline break-all">
           {href}
         </a>
       );
@@ -59,7 +70,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     case AttributeType.EMAIL: {
       const email = String(rawValue);
       return (
-        <a href={`mailto:${email}`} className="attrLink">
+        <a href={`mailto:${email}`} className="text-brown-600 hover:underline break-all">
           {email}
         </a>
       );
@@ -78,11 +89,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
         return <span className="text-muted-foreground italic">Not set</span>;
       }
 
-      return (
-        <span style={{ backgroundColor: color, padding: "0 8px", borderRadius: "999px" }}>
-          {label}
-        </span>
-      );
+      return <OptionBadge label={label} color={color}/>;
     }
 
     case AttributeType.MULTI_SELECT: {
@@ -93,14 +100,9 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       }
 
       return (
-        <span style={{ display: "inline-flex", gap: "8px", flexWrap: "wrap" }}>
+        <span className="inline-flex flex-wrap gap-2">
           {parts.map((p) => (
-            <span
-              key={p.key}
-              style={{ backgroundColor: p.color, padding: "0 8px", borderRadius: "999px" }}
-            >
-              {p.label}
-            </span>
+            <OptionBadge key={p.key} label={p.label} color={p.color}/>
           ))}
         </span>
       );
@@ -126,16 +128,33 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       return <span>{String(rawValue)}</span>;
     }
 
-    case AttributeType.NUMBER:
-      return <span>{String(Number(rawValue))}</span>;
+    case AttributeType.NUMBER: {
+      const n = Number(rawValue);
+      return <span>{Number.isFinite(n) ? String(n) : String(rawValue)}</span>;
+    }
 
     case AttributeType.CHECKBOX:
-      return <span>{String(Boolean(rawValue))}</span>;
+      return <span>{rawValue ? "Yes" : "No"}</span>;
 
     case AttributeType.TEXT:
     default:
       return <span>{String(rawValue)}</span>;
   }
+}
+
+function OptionBadge({ label, color }: { label: string; color?: string }) {
+  return (
+    <Badge variant="secondary" className="gap-1.5 font-normal">
+      {color && (
+        <span
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: color }}
+          aria-hidden
+        />
+      )}
+      {label}
+    </Badge>
+  );
 }
 
 /* ---------- Edit ---------- */
@@ -160,6 +179,7 @@ function EditValue({
         <Input
           type={t === AttributeType.NUMBER ? "number" : t === AttributeType.EMAIL ? "email" : "text"}
           value={rawValue == null ? "" : String(rawValue)}
+          placeholder={(attribute as any).defaultValue ?? undefined}
           onChange={(e) => onChange(e.target.value)}
         />
       );

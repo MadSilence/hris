@@ -1,6 +1,9 @@
 import { NewEntity, UpdatedEntity } from "@/models/misc";
 
-import { hrisAttributeClient } from "@/api/modules/attributes/clients/hrisAttributeClient";
+import {
+  hrisAttributeClient,
+  AttributeOptionUpsertRequest,
+} from "@/api/modules/attributes/clients/hrisAttributeClient";
 import {
   CreateAttributeRequest,
   DeleteAttributeRequest,
@@ -8,6 +11,7 @@ import {
   UpdateAttributeRequest
 } from "@/api/modules/attributes/dto";
 import { ReorderItemRequest } from "@/api/modules/groups/dto";
+import { AttributeDeleteImpact } from "@/models/attribute/DeleteImpact";
 
 export class AttributeService {
 
@@ -30,6 +34,17 @@ export class AttributeService {
 
   public async deleteAttribute(payload: DeleteAttributeRequest): Promise<Response> {
     return hrisAttributeClient.deleteAttribute(payload);
+  }
+
+  public async setAttributeOptions(
+    id: string,
+    options: AttributeOptionUpsertRequest[]
+  ): Promise<Response> {
+    return hrisAttributeClient.setAttributeOptions(id, options);
+  }
+
+  public async getAttributeImpact(id: string): Promise<AttributeDeleteImpact> {
+    return hrisAttributeClient.getAttributeImpact(id);
   }
 }
 

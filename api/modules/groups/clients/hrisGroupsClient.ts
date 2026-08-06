@@ -1,5 +1,6 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
+import { GroupDeleteImpact } from "@/models/attribute/DeleteImpact";
 import {
   AttributeGroupDTO,
   CreateGroupRequest,
@@ -29,6 +30,10 @@ class HrisGroupsClient {
 
   public async deleteAttributeGroup(payload: DeleteAttributeGroupRequest) {
     return hrisApiClient.post<Response>(`${this.BASE_PATH}/${payload.id}/delete`)
+  }
+
+  public async getGroupImpact(id: string): Promise<GroupDeleteImpact> {
+    return hrisApiClient.get<GroupDeleteImpact>(`${this.BASE_PATH}/${id}/impact`);
   }
 }
 

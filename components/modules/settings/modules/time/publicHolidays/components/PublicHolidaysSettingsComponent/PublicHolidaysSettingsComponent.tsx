@@ -52,6 +52,11 @@ import { useDuplicatePublicHolidayCalendar } from "@/components/modules/settings
 import { useArchivePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useArchivePublicHolidayCalendar";
 import { useRestorePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useRestorePublicHolidayCalendar";
 import { useDeletePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useDeletePublicHolidayCalendar";
+import {
+  ExportDataModal,
+  ExportDataFormValues,
+  triggerExportDownload,
+} from "@/components/modules/settings/shared/ExportDataModal";
 
 type Props = {
   calendars: PublicHolidayCalendar[];
@@ -79,7 +84,17 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const router = useRouter();
 
   const [isChooseTemplateModalOpen, setIsChooseTemplateModalOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  const handleExport = async ({ format }: ExportDataFormValues) => {
+    try {
+      await triggerExportDownload("/api/public-holiday/calendars/export", format);
+      setIsExportOpen(false);
+    } catch (error) {
+      console.error("Failed to export holiday calendars:", error);
+    }
+  };
 
   const [duplicateTarget, setDuplicateTarget] = useState<PublicHolidayCalendar | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
@@ -118,7 +133,6 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       await duplicate.mutateAsync({ id: duplicateTarget.id, name: duplicateName.trim() });
       setDuplicateTarget(null);
     } catch {
-      /* surfaced via duplicate.isError */
     }
   };
 
@@ -128,7 +142,6 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       await archive.mutateAsync({ id: archiveTarget.id });
       setArchiveTarget(null);
     } catch {
-      /* surfaced via archive.isError */
     }
   };
 
@@ -138,7 +151,6 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       await restore.mutateAsync({ id: restoreTarget.id });
       setRestoreTarget(null);
     } catch {
-      /* surfaced via restore.isError */
     }
   };
 
@@ -148,7 +160,6 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       await remove.mutateAsync({ id: deleteTarget.id });
       setDeleteTarget(null);
     } catch {
-      /* surfaced via remove.isError */
     }
   };
 
@@ -208,7 +219,12 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
 
             <div className="flex items-center gap-3">
               {addCalendarMenu}
-              <Button size="icon" variant="outline" aria-label="Export calendars">
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Export calendars"
+                onClick={() => setIsExportOpen(true)}
+              >
                 <Download className="h-4 w-4" />
               </Button>
             </div>
@@ -340,6 +356,15 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <ChoosePublicHolidayTemplateModal
         isOpen={isChooseTemplateModalOpen}
         onRequestCloseAction={() => setIsChooseTemplateModalOpen(false)}
+      />
+
+      <ExportDataModal
+        isOpen={isExportOpen}
+        title="Export holiday calendars"
+        description="Export all holiday calendars with their day counts and creation details."
+        includedText="Included: name, country, region, days, year, status, created by, created at."
+        onCancelAction={() => setIsExportOpen(false)}
+        onConfirmAction={handleExport}
       />
 
       {/* Duplicate */}

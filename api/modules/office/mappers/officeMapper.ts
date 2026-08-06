@@ -10,6 +10,8 @@ export class OfficeMapper {
       email: dto.email,
       phone: dto.phone,
       isSystem: dto.isSystem,
+      archived: dto.archived,
+      archivedAt: dto.archivedAt,
       country: dto.country,
       city: dto.city,
       street: dto.street,

@@ -59,6 +59,14 @@ export class HrisPublicHolidayCalendarsService {
   public async duplicate(id: string, name?: string): Promise<CreateResponse> {
     return hrisApiPublicHolidayCalendarsClient.duplicate(id, name);
   }
+
+  public async exportCalendars(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiPublicHolidayCalendarsClient.exportCalendars(format);
+  }
+
+  public async exportCalendar(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiPublicHolidayCalendarsClient.exportCalendar(id, format);
+  }
 }
 
 export const hrisPublicHolidayCalendarsService =

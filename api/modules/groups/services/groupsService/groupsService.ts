@@ -8,6 +8,7 @@ import {
 import { groupMapper } from "@/api/modules/groups/mappers/groupMapper";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { DeleteAttributeGroupRequest } from "@/api/modules/groups/dto/DeleteAttributeGroupRequest";
+import { GroupDeleteImpact } from "@/models/attribute/DeleteImpact";
 
 export class GroupsService {
   public async getGroups(): Promise<AttributeGroup[]> {
@@ -33,6 +34,10 @@ export class GroupsService {
 
   public async deleteAttributeGroup(payload: DeleteAttributeGroupRequest): Promise<Response> {
     return hrisGroupsClient.deleteAttributeGroup(payload);
+  }
+
+  public async getGroupImpact(id: string): Promise<GroupDeleteImpact> {
+    return hrisGroupsClient.getGroupImpact(id);
   }
 }
 

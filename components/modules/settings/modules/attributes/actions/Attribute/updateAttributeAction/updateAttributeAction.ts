@@ -25,12 +25,26 @@ export const updateAttributeAction = async (
 
 export type UpdateAttributeActionInput = {
   id: string;
+  groupId?: string;
   name?: string;
   type?: AttributeType;
   unique?: boolean;
   decScale?: number | null;
   dateHideYear?: boolean;
   options?: AttributeOption[];
+  required?: boolean;
+  description?: string | null;
+  defaultValue?: string | null;
+  minValue?: number | null;
+  maxValue?: number | null;
+  onlyPositive?: boolean;
+  minLength?: number | null;
+  maxLength?: number | null;
+  regex?: string | null;
+  minDate?: string | null;
+  maxDate?: string | null;
+  minSelect?: number | null;
+  maxSelect?: number | null;
 };
 
 export type UpdateAttributeActionOutput = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useCallback, useMemo, useState } from "react";
-import { CalendarDays, Pencil, Search, Users, X } from "lucide-react";
+import { CalendarDays, Download, Pencil, Search, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
@@ -31,6 +31,11 @@ import { createPublicHolidayAction } from "../../actions/createPublicHolidayActi
 import { updatePublicHolidayAction } from "../../actions/updatePublicHolidayAction";
 import { deletePublicHolidayAction } from "../../actions/deletePublicHolidayAction";
 import { useInvalidatePublicHolidaysQuery } from "../../hooks/usePublicHolidayCalendars";
+import {
+  ExportDataModal,
+  ExportDataFormValues,
+  triggerExportDownload,
+} from "@/components/modules/settings/shared/ExportDataModal";
 
 type Props = {
   calendar: PublicHolidayCalendar;
@@ -57,7 +62,17 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  const handleExport = async ({ format }: ExportDataFormValues) => {
+    try {
+      await triggerExportDownload(`/api/public-holiday/calendars/${calendar.id}/export`, format);
+      setIsExportOpen(false);
+    } catch (error) {
+      console.error("Failed to export holiday calendar:", error);
+    }
+  };
 
   const [editedName, setEditedName] = useState(calendar.name);
   const [editedCountry, setEditedCountry] = useState(calendar.sourceCountryCode ?? "");
@@ -212,9 +227,19 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
       <div className="flex flex-none flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
           <SettingsPageHeader title={calendar.name} backHref="/settings/time/public-holidays" />
-          <Badge variant="outline" className={badge.className}>
-            {badge.label}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Button
+              size="icon"
+              variant="outline"
+              aria-label="Export calendar"
+              onClick={() => setIsExportOpen(true)}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Badge variant="outline" className={badge.className}>
+              {badge.label}
+            </Badge>
+          </div>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
           {meta ? `${meta}. ` : ""}This is the holiday-days section for this calendar — review and
@@ -378,6 +403,15 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
           <PublicHolidayCalendarAssignedUsersTab calendarId={calendar.id} calendarName={calendar.name} />
         </TabsContent>
       </Tabs>
+
+      <ExportDataModal
+        isOpen={isExportOpen}
+        title={`Export ${calendar.name}`}
+        description="Export this calendar's details, its holiday days, and its assigned users."
+        includedText="Three sheets — General Information (name, country, region, days, year, status, created by, created at), Holidays (name, date) and Assigned Users (first name, last name, email, position)."
+        onCancelAction={() => setIsExportOpen(false)}
+        onConfirmAction={handleExport}
+      />
     </div>
   );
 };

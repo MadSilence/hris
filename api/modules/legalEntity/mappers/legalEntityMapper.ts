@@ -8,6 +8,8 @@ export class LegalEntityMapper {
       name: dto.name,
       description: dto.description,
       isSystem: dto.isSystem,
+      archived: dto.archived,
+      archivedAt: dto.archivedAt,
       registrationNumber: dto.registrationNumber,
       taxId: dto.taxId,
       country: dto.country,

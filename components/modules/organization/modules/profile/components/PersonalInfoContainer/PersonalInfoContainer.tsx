@@ -12,6 +12,9 @@ import { useActiveSectionScroll } from "@/components/modules/organization/module
 import { Loader } from "@/components/ui/Loader";
 import { Card } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
+import { useSWRConfig } from "swr";
+import { ActionStatus } from "@/components/models/ActionStatus";
+import { updateUserAttributesAction } from "@/components/modules/organization/modules/profile/actions/updateUserAttributesAction";
 
 type PersonalInfoContainerProps = { user?: User };
 
@@ -22,8 +25,12 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [isEdit, setIsEdit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
   const [draftValues, setDraftValues] = useState<Record<string, unknown>>({});
+
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!fetchedGroups) return;
@@ -47,11 +54,33 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     setIsEdit(false);
   }, [valueMap]);
 
-  const sectionIds = groups.map((g) => g.id);
+  const visibleGroups = useMemo(() => {
+    const fa = user?.fieldAccess ?? {};
+    return groups
+      .map((g) => ({
+        ...g,
+        attributes: g.attributes.filter((a) => fa[`attr:${a.id}`]),
+      }))
+      .filter((g) => g.attributes.length > 0);
+  }, [groups, user?.fieldAccess]);
+
+  const editableAttrIds = useMemo(() => {
+    const fa = user?.fieldAccess ?? {};
+    const ids = new Set<string>();
+    for (const g of groups) {
+      for (const a of g.attributes) {
+        if (fa[`attr:${a.id}`] === "EDIT") ids.add(a.id);
+      }
+    }
+    return ids;
+  }, [groups, user?.fieldAccess]);
+
+  const hasAnyEditable = editableAttrIds.size > 0;
+
+  const sectionIds = visibleGroups.map((g) => g.id);
   const { activeId, registerSection, scrollToId } = useActiveSectionScroll({
     containerRef: scrollContainerRef,
     sectionIds,
-    offsetTop: 24,
   });
 
   const dirty = useMemo(() => {
@@ -72,16 +101,45 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return false;
   }, [initialValues, draftValues]);
 
-  const onEditToggle = () => setIsEdit(true);
+  const onEditToggle = () => {
+    setSaveError(null);
+    setIsEdit(true);
+  };
   const onCancel = () => {
     setDraftValues(initialValues);
+    setSaveError(null);
     setIsEdit(false);
   };
-  const onSave = () => {
-    // eslint-disable-next-line no-console
-    console.log({ values: draftValues });
-    setInitialValues(draftValues);
-    setIsEdit(false);
+  const onSave = async () => {
+    if (!user?.id) return;
+
+    const values: Record<string, unknown> = {};
+    for (const attrId of Object.keys(draftValues)) {
+      if (!editableAttrIds.has(attrId)) continue;
+      if (JSON.stringify(initialValues[attrId]) !== JSON.stringify(draftValues[attrId])) {
+        values[attrId] = draftValues[attrId] ?? null;
+      }
+    }
+
+    if (Object.keys(values).length === 0) {
+      setIsEdit(false);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const res = await updateUserAttributesAction({ userId: user.id, values });
+      if (res.status === ActionStatus.SUCCESS) {
+        setInitialValues(draftValues);
+        setIsEdit(false);
+        await mutate(`/api/users/${user.id}`);
+      } else {
+        setSaveError(res.errorMessage ?? "Failed to save changes.");
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -92,52 +150,61 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     );
   }
 
-  if (error || !groups.length) {
+  if (error || !groups.length || !visibleGroups.length) {
+    const message = error
+      ? "Failed to load"
+      : !groups.length
+        ? "No groups"
+        : "No attributes you can view";
     return (
       <Card className="p-6">
         <div className={`text-sm ${error ? "text-red-600" : "text-muted-foreground"}`}>
-          {error ? "Failed to load" : "No groups"}
+          {message}
         </div>
       </Card>
     );
   }
 
   return (
-    <div className="w-full max-h-[70vh] bg-background overflow-auto">
-      <div className="grid grid-cols-[260px_1fr] gap-7">
+    <div className="grid h-full min-h-0 w-full grid-cols-[260px_1fr] gap-7 bg-background">
         <PersonalInfoSidebar
-          groups={groups}
-          activeId={activeId || groups[0]?.id}
+          groups={visibleGroups}
+          activeId={activeId || visibleGroups[0]?.id}
           onSelect={(id) => scrollToId(id)}
         />
 
         <PersonalInfoAttributesList
           ref={scrollContainerRef}
-          groups={groups}
+          groups={visibleGroups}
           valueMap={isEdit ? draftValues : initialValues}
           registerSection={registerSection}
           isEdit={isEdit}
+          editableAttrIds={editableAttrIds}
           onChangeValue={(attrId, v) =>
             setDraftValues((d) => ({ ...d, [attrId]: v }))
           }
           headerActions={
             !isEdit ? (
-              <Button variant="outline" onClick={onEditToggle}>
-                Edit
-              </Button>
+              hasAnyEditable ? (
+                <Button variant="outline" onClick={onEditToggle}>
+                  Edit
+                </Button>
+              ) : null
             ) : (
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={onCancel}>
+              <div className="flex items-center gap-3">
+                {saveError && (
+                  <span className="text-sm text-destructive">{saveError}</span>
+                )}
+                <Button variant="outline" onClick={onCancel} disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button onClick={onSave} disabled={!dirty}>
-                  Save
+                <Button onClick={onSave} disabled={!dirty || isSaving}>
+                  {isSaving ? "Saving…" : "Save"}
                 </Button>
               </div>
             )
           }
         />
-      </div>
     </div>
   );
 };

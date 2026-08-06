@@ -33,6 +33,13 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.getUser(id);
   }
 
+  public async updateUserAttributes(
+    id: string,
+    values: Record<string, unknown>
+  ): Promise<void> {
+    return hrisApiUsersClient.updateUserAttributes(id, values);
+  }
+
   public async searchUsers(
     args: UsersSearchArgs
   ): Promise<{ items: User[]; nextCursor?: string | null }> {

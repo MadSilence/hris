@@ -22,4 +22,5 @@ export type User = {
   createdAt: string;
   updatedAt: string;
   custom: Map<string, object>;
+  fieldAccess?: Record<string, "VIEW" | "EDIT">;
 }

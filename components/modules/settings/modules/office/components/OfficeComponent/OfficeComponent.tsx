@@ -8,11 +8,18 @@ import type { CreateOfficeActionInput } from "@/components/modules/settings/modu
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Button } from "@/public/desact/src/components/ui/button";
+import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Download, Plus, Search } from "lucide-react";
+import { Archive, Building2, Download, Plus, Search } from "lucide-react";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { CreateOfficeModal } from "@/components/modules/settings/modules/office/components/modals/CreateOfficeModal";
 import { CreateOfficeFormValues } from "../modals/CreateOfficeModal/CreateOfficeForm";
 import { OfficeSettingsSkeleton } from "./OfficeSettingsSkeleton";
+import {
+  ExportDataModal,
+  ExportDataFormValues,
+  triggerExportDownload,
+} from "@/components/modules/settings/shared/ExportDataModal";
 
 type Props = {
   initialOffices: Office[];
@@ -24,7 +31,9 @@ export const OfficeComponent: FC<Props> = ({
   isLoading,
 }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   const createOfficeAction = useCreateOfficeAction();
   const router = useRouter();
@@ -57,11 +66,29 @@ export const OfficeComponent: FC<Props> = ({
     createOfficeAction.mutate(payload);
   };
 
+  const handleExport = async ({ format }: ExportDataFormValues) => {
+    try {
+      await triggerExportDownload("/api/offices/export", format);
+      setIsExportOpen(false);
+    } catch (error) {
+      console.error("Failed to export offices:", error);
+    }
+  };
+
+  const archivedCount = useMemo(
+    () => initialOffices.filter((o) => o.archived).length,
+    [initialOffices],
+  );
+
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase();
 
+    const base = showArchived
+      ? initialOffices
+      : initialOffices.filter((o) => !o.archived);
+
     const rows = q
-      ? initialOffices.filter((o) =>
+      ? base.filter((o) =>
         [
           o.name,
           o.country,
@@ -73,10 +100,10 @@ export const OfficeComponent: FC<Props> = ({
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(q)),
       )
-      : initialOffices;
+      : base;
 
     return rows.slice().sort((a, b) => a.name.localeCompare(b.name));
-  }, [initialOffices, query]);
+  }, [initialOffices, query, showArchived]);
 
   return (
     <>
@@ -94,20 +121,56 @@ export const OfficeComponent: FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <Button onClick={() => setIsCreateOpen(true)} className="gap-1.5">
-              <Plus className="h-4 w-4"/>
-              Add Office
-            </Button>
+            {archivedCount > 0 && (
+              <Button
+                variant={showArchived ? "secondary" : "outline"}
+                className="gap-1.5"
+                onClick={() => setShowArchived((v) => !v)}
+              >
+                <Archive className="h-4 w-4"/>
+                {showArchived ? "Hide archived" : `Show archived (${archivedCount})`}
+              </Button>
+            )}
 
-            <Button size="icon" variant="outline" aria-label="Export offices">
-              <Download className="h-4 w-4"/>
-            </Button>
+            <PermissionGate resource="ORG.OFFICE" action="EDIT">
+              <Button onClick={() => setIsCreateOpen(true)} className="gap-1.5">
+                <Plus className="h-4 w-4"/>
+                Add Office
+              </Button>
+            </PermissionGate>
+
+            <PermissionGate resource="ORG.OFFICE" action="EDIT">
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Export offices"
+                onClick={() => setIsExportOpen(true)}
+              >
+                <Download className="h-4 w-4"/>
+              </Button>
+            </PermissionGate>
           </div>
         </div>
       </div>
 
       {isLoading ? (
         <OfficeSettingsSkeleton/>
+      ) : filteredSorted.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
+            <Building2 className="h-7 w-7"/>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {query.trim() ? "No offices match your search" : "No offices yet"}
+            </p>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+              {query.trim()
+                ? "Try a different name, country, or address."
+                : "Add an office to get started."}
+            </p>
+          </div>
+        </div>
       ) : (
         <Table className="table-fixed">
           <TableHeader className="[&_tr]:border-brown-200 [&_tr]:border-t-0">
@@ -125,10 +188,22 @@ export const OfficeComponent: FC<Props> = ({
             {filteredSorted.map((o) => (
               <TableRow
                 key={o.id}
-                className="group cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2"
+                className={`group cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2 ${
+                  o.archived ? "opacity-60" : ""
+                }`}
                 onClick={() => handleRowClick(o)}
               >
-                <TableCell className="truncate py-3">{o.name}</TableCell>
+                <TableCell className="truncate py-3">
+                  <span className="inline-flex items-center gap-2">
+                    {o.name}
+                    {o.archived && (
+                      <Badge variant="secondary" className="gap-1 font-normal">
+                        <Archive className="h-3 w-3"/>
+                        Archived
+                      </Badge>
+                    )}
+                  </span>
+                </TableCell>
 
                 <TableCell className="text-muted-foreground">
                   {o.country}
@@ -153,16 +228,6 @@ export const OfficeComponent: FC<Props> = ({
                 </TableCell>
               </TableRow>
             ))}
-
-            {filteredSorted.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6}>
-                  <div className="text-sm text-muted-foreground py-3">
-                    No offices
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       )}
@@ -172,6 +237,15 @@ export const OfficeComponent: FC<Props> = ({
         isLoading={createOfficeAction.isPending}
         onConfirmAction={handleCreate}
         onRequestCloseAction={() => setIsCreateOpen(false)}
+      />
+
+      <ExportDataModal
+        isOpen={isExportOpen}
+        title="Export offices"
+        description="Export all offices with their address, assigned people, and creation details."
+        includedText="Included: name, description, email, phone, address, assigned people, created by, created at."
+        onCancelAction={() => setIsExportOpen(false)}
+        onConfirmAction={handleExport}
       />
     </>
   );

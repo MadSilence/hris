@@ -57,6 +57,9 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
                 This legal entity will be permanently removed from the system.
+                {entity?.assignedUsersCount
+                  ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
+                  : " Anyone currently assigned to it will lose that assignment."}
               </p>
             </div>
           </div>

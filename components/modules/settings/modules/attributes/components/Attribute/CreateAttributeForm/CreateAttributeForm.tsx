@@ -16,6 +16,10 @@ import { OptionsEditor } from "@/components/modules/settings/modules/attributes/
 import { NumberScaleRow } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/NumberScaleRow";
 import { DateSettings } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/DateSettings";
 import { UniqueSelect } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/UniqueSelect";
+import {
+  AttributeConfigFields,
+  AttributeConfig,
+} from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeConfigFields";
 
 export interface CreateAttributeFormProps {
   isLoading?: boolean;
@@ -31,7 +35,32 @@ export type CreateAttributeFormValues = {
   decScale: number | null;
   dateHideYearPublic: boolean;
   options?: AttributeOption[];
+  config: AttributeConfig;
 };
+
+function sanitizeConfig(type: AttributeType, c: AttributeConfig): AttributeConfig {
+  const isNumber = type === AttributeType.NUMBER;
+  const isText =
+    type === AttributeType.TEXT || type === AttributeType.EMAIL || type === AttributeType.URL;
+  const isDate = type === AttributeType.DATE;
+  const isMulti = type === AttributeType.MULTI_SELECT;
+
+  return {
+    required: !!c.required,
+    description: c.description?.trim() ? c.description.trim() : null,
+    defaultValue: (isNumber || isText || isDate) && c.defaultValue ? c.defaultValue : null,
+    minValue: isNumber ? c.minValue ?? null : null,
+    maxValue: isNumber ? c.maxValue ?? null : null,
+    onlyPositive: isNumber ? !!c.onlyPositive : false,
+    minLength: isText ? c.minLength ?? null : null,
+    maxLength: isText ? c.maxLength ?? null : null,
+    regex: isText && c.regex?.trim() ? c.regex.trim() : null,
+    minDate: isDate ? c.minDate ?? null : null,
+    maxDate: isDate ? c.maxDate ?? null : null,
+    minSelect: isMulti ? c.minSelect ?? null : null,
+    maxSelect: isMulti ? c.maxSelect ?? null : null,
+  };
+}
 
 const schema = yup.object({
   name: yup
@@ -84,6 +113,7 @@ function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues 
         (o) => o && o.value.trim() !== "" && o.color.trim() !== "",
       )
       : undefined,
+    config: sanitizeConfig(type, values.config ?? {}),
   };
 }
 
@@ -106,6 +136,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       decScale: null,
       dateHideYearPublic: false,
       options: [],
+      config: {},
     },
     validationSchema: schema,
     validateOnBlur: false,
@@ -217,6 +248,15 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
             onChangeAction={(value) => formik.setFieldValue("unique", value)}
           />
         )}
+
+        <AttributeConfigFields
+          type={type}
+          value={formik.values.config}
+          disabled={isLoading}
+          onChange={(patch) =>
+            formik.setFieldValue("config", { ...formik.values.config, ...patch })
+          }
+        />
       </div>
 
       <DialogFooter className="mt-8">

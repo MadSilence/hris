@@ -7,6 +7,10 @@ import { Attribute } from "@/models/attribute/Attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { OptionsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/OptionsEditor";
+import {
+  AttributeConfigFields,
+  AttributeConfig,
+} from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeConfigFields";
 import { SOFT_PALETTE } from "@/models/colors";
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
 
@@ -32,9 +36,30 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   isPreset = false,
 }) => {
   const [localType, setLocalType] = React.useState<AttributeType>(attribute.type as AttributeType);
-  const [uniqueId, setUniqueId] = React.useState<boolean>((attribute as any).uniqueId ?? false);
+  const [uniqueId, setUniqueId] = React.useState<boolean>((attribute as any).unique ?? false);
   const [hideYear, setHideYear] = React.useState<boolean>((attribute as any).dateHideYear ?? false);
   const [editorOptions, setEditorOptions] = React.useState<AttributeOptionUpsert[]>([]);
+
+  const readConfig = (a: Attribute): AttributeConfig => ({
+    required: (a as any).required ?? false,
+    description: (a as any).description ?? null,
+    defaultValue: (a as any).defaultValue ?? null,
+    minValue: (a as any).minValue ?? null,
+    maxValue: (a as any).maxValue ?? null,
+    onlyPositive: (a as any).onlyPositive ?? false,
+    minLength: (a as any).minLength ?? null,
+    maxLength: (a as any).maxLength ?? null,
+    regex: (a as any).regex ?? null,
+    minDate: (a as any).minDate ?? null,
+    maxDate: (a as any).maxDate ?? null,
+    minSelect: (a as any).minSelect ?? null,
+    maxSelect: (a as any).maxSelect ?? null,
+  });
+  const [config, setConfig] = React.useState<AttributeConfig>(readConfig(attribute));
+
+  React.useEffect(() => {
+    setConfig(readConfig(attribute));
+  }, [attribute]);
 
   React.useEffect(() => {
     const raw = Array.isArray((attribute as any).options) ? (attribute as any).options : [];
@@ -98,7 +123,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
     const patch: any = {};
 
     if (localType === AttributeType.DATE) patch.dateHideYear = hideYear;
-    if (localType === AttributeType.TEXT) patch.uniqueId = uniqueId;
+    if (localType === AttributeType.TEXT) patch.unique = uniqueId;
 
     if (needsOptions(localType)) {
       patch.options = editorOptions.map((o) => ({
@@ -109,13 +134,15 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       }));
     }
 
+    Object.assign(patch, config);
+
     onChange(patch);
     onSave?.();
   };
 
   const cancel = () => {
     setLocalType(attribute.type as AttributeType);
-    setUniqueId((attribute as any).uniqueId ?? false);
+    setUniqueId((attribute as any).unique ?? false);
     setHideYear((attribute as any).dateHideYear ?? false);
     setOptions(initialOptions);
     onCancel?.();
@@ -185,6 +212,13 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
           />
         </div>
       )}
+
+      <AttributeConfigFields
+        type={localType}
+        value={config}
+        disabled={isPreset}
+        onChange={(patch) => setConfig((c) => ({ ...c, ...patch }))}
+      />
 
       <div className={styles.actions}>
         <Button onClick={save}>Save</Button>

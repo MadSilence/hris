@@ -91,6 +91,14 @@ export class HrisApiPublicHolidayCalendarsClient {
       { name: name ?? null } as unknown as Record<string, unknown>
     );
   }
+
+  public async exportCalendars(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/export?format=${format}`);
+  }
+
+  public async exportCalendar(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/${id}/export?format=${format}`);
+  }
 }
 
 export const hrisApiPublicHolidayCalendarsClient =

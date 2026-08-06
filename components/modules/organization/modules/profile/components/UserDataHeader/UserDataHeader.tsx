@@ -7,6 +7,7 @@ import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { Button } from "@/public/desact/src/components/ui/button";
 import {
   DropdownMenu,
@@ -157,10 +158,21 @@ export function UserDataHeader({
           </div>
 
           <div className="min-w-0">
-            <h1 className="text-2xl leading-tight">{fullName}</h1>
+            <h1 className="text-2xl font-semibold leading-tight text-foreground">{fullName}</h1>
 
             <div className="flex items-center gap-3 flex-wrap mt-3">
-              {user.status && <Badge>{String(user.status).toLowerCase()}</Badge>}
+              {user.status && (
+                <Badge
+                  variant="outline"
+                  className={
+                    isActiveStatus(user.status)
+                      ? "border-green-200 bg-green-50 text-green-700"
+                      : ""
+                  }
+                >
+                  {formatUserStatus(user.status)}
+                </Badge>
+              )}
               {meta.jobTitle && <Badge variant="outline">{meta.jobTitle}</Badge>}
 
               {(meta.department || meta.orgUnit) && (

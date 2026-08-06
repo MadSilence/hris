@@ -6,6 +6,7 @@ import { AttributesList } from "../AttributesList/AttributesList";
 import { DeleteAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/DeleteAttributeModal";
 import { useDeleteAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useDeleteAttributeAction";
 import { useUpdateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useUpdateAttributeAction";
+import { useUpdateAttributeOptionsAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useUpdateAttributeOptionsAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
 
 export interface AttributesContainerProps {
@@ -22,6 +23,7 @@ export const AttributesContainer: FC<AttributesContainerProps> = ({
 
   const deleteAttributeAction = useDeleteAttributeAction();
   const updateAttributeAction = useUpdateAttributeAction();
+  const updateOptionsAction = useUpdateAttributeOptionsAction();
 
   useEffect(() => {
     if (selectedId && !attributes.some((a) => a.id === selectedId)) {
@@ -53,20 +55,39 @@ export const AttributesContainer: FC<AttributesContainerProps> = ({
 
   const handleSaveAttribute = useCallback(
     (id: string, patch: Partial<Attribute>) => {
-      updateAttributeAction.mutate({ id, ...patch });
+      const { options, ...rest } = patch as Partial<Attribute> & {
+        options?: { id?: string; value: string; color: string; sortOrder?: number }[];
+      };
+
+      updateAttributeAction.mutate({ id, ...rest });
+
+      if (Array.isArray(options) && options.length > 0) {
+        updateOptionsAction.mutate({ attributeId: id, options });
+      }
     },
-    [updateAttributeAction]
+    [updateAttributeAction, updateOptionsAction]
   );
+
+  const optionsError =
+    updateOptionsAction.data?.status === ActionStatus.ERROR
+      ? updateOptionsAction.data?.errorMessage
+      : null;
 
   return (
     <section className="min-h-0 w-full" aria-busy={isLoading}>
+      {optionsError && (
+        <p className="px-1 pb-3 text-sm text-destructive" role="alert">
+          {optionsError}
+        </p>
+      )}
+
       <AttributesList
         attributes={attributes}
         selectedId={selectedId}
         onSelect={setSelectedId}
         onDeleteRequest={handleDeleteRequest}
         onSave={handleSaveAttribute}
-        isSaving={updateAttributeAction.isPending}
+        isSaving={updateAttributeAction.isPending || updateOptionsAction.isPending}
       />
 
       <DeleteAttributeModal

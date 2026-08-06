@@ -38,6 +38,7 @@ export interface AssignedUsersPanelProps {
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
+  onExport?: () => void;
   fillParent?: boolean;
 
   assign?: {
@@ -65,6 +66,7 @@ export default function AssignedUsersPanel({
   hasMore = false,
   isLoadingMore = false,
   onLoadMore,
+  onExport,
   assign,
   secondaryColumn,
   fillParent = false,
@@ -155,7 +157,12 @@ export default function AssignedUsersPanel({
             assignButton
           )}
 
-          <Button size="icon" variant="outline" aria-label="Export">
+          <Button
+            size="icon"
+            variant="outline"
+            aria-label="Export"
+            onClick={onExport}
+          >
             <Download className="h-4 w-4"/>
           </Button>
         </div>

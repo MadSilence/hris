@@ -33,6 +33,25 @@ export class LegalEntityService {
   ): Promise<Response> {
     return hrisLegalEntityClient.deleteLegalEntity(payload);
   }
+
+  public async archiveLegalEntity(
+    id: string,
+    strategy: "KEEP" | "UNASSIGN"
+  ): Promise<UpdatedEntity> {
+    return hrisLegalEntityClient.archiveLegalEntity(id, { assignedUsersStrategy: strategy });
+  }
+
+  public async restoreLegalEntity(id: string): Promise<UpdatedEntity> {
+    return hrisLegalEntityClient.restoreLegalEntity(id);
+  }
+
+  public async exportLegalEntities(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisLegalEntityClient.exportLegalEntities(format);
+  }
+
+  public async exportLegalEntity(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisLegalEntityClient.exportLegalEntity(id, format);
+  }
 }
 
 export const legalEntityService = new LegalEntityService();

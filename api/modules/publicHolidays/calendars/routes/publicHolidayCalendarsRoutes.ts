@@ -73,7 +73,29 @@ export class PublicHolidayCalendarsRoutes {
     await hrisPublicHolidayCalendarsService.delete(id);
     return new Response(null, { status: 204 });
   }
+
+  public async exportCalendars(req: Request) {
+    const backendResponse = await hrisPublicHolidayCalendarsService.exportCalendars(formatOf(req));
+    return streamBinary(backendResponse);
+  }
+
+  public async exportCalendar(req: Request, id: string) {
+    const backendResponse = await hrisPublicHolidayCalendarsService.exportCalendar(id, formatOf(req));
+    return streamBinary(backendResponse);
+  }
 }
+
+const formatOf = (req: Request): "csv" | "xlsx" =>
+  new URL(req.url).searchParams.get("format") === "csv" ? "csv" : "xlsx";
+
+const streamBinary = (backendResponse: Response) =>
+  new Response(backendResponse.body, {
+    status: backendResponse.status,
+    headers: {
+      "Content-Type": backendResponse.headers.get("content-type") ?? "application/octet-stream",
+      "Content-Disposition": backendResponse.headers.get("content-disposition") ?? "attachment",
+    },
+  });
 
 export const publicHolidayCalendarsRoutes =
   new PublicHolidayCalendarsRoutes();

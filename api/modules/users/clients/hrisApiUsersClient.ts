@@ -41,6 +41,13 @@ export class HrisApiUsersClient {
     return userMapper.mapUserDTOtoUser(dto);
   }
 
+  public async updateUserAttributes(
+    id: string,
+    values: Record<string, unknown>
+  ): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/attributes`, { values });
+  }
+
   public async searchUsers(
     args: UsersSearchArgs
   ): Promise<{ items: any[]; nextCursor?: string | null }> {

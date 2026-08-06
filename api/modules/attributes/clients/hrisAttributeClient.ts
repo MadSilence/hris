@@ -1,5 +1,6 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
+import { AttributeDeleteImpact } from "@/models/attribute/DeleteImpact";
 import { ReorderItemRequest } from "@/api/modules/groups/dto";
 import {
   CreateAttributeRequest,
@@ -30,6 +31,21 @@ class HrisAttributeClient {
   public async deleteAttribute(payload: DeleteAttributeRequest) {
     return hrisApiClient.post<Response>(`${this.BASE_PATH}/${payload.id}/delete`);
   }
+
+  public async setAttributeOptions(id: string, options: AttributeOptionUpsertRequest[]) {
+    return hrisApiClient.put<Response>(`${this.BASE_PATH}/${id}/options`, { options });
+  }
+
+  public async getAttributeImpact(id: string): Promise<AttributeDeleteImpact> {
+    return hrisApiClient.get<AttributeDeleteImpact>(`${this.BASE_PATH}/${id}/impact`);
+  }
 }
+
+export type AttributeOptionUpsertRequest = {
+  id?: string;
+  value: string;
+  color: string;
+  sortOrder?: number;
+};
 
 export const hrisAttributeClient = new HrisAttributeClient();

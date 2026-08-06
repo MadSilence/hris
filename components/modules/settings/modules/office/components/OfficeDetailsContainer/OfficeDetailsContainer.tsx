@@ -2,10 +2,11 @@
 
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Mail, MapPin, Users } from "lucide-react";
+import { Archive, Building2, Download, Mail, MapPin, Users } from "lucide-react";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { Button } from "@/public/desact/src/components/ui/button";
+import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
@@ -14,13 +15,25 @@ import { Separator } from "@/public/desact/src/components/ui/separator";
 import { useOffice } from "@/components/modules/settings/modules/office/hooks/useOffice";
 import { useUpdateOfficeAction } from "@/components/modules/settings/modules/office/hooks/useUpdateOfficeAction";
 import { useDeleteOfficeAction } from "@/components/modules/settings/modules/office/hooks/useDeleteOfficeAction";
+import {
+  useArchiveOfficeAction,
+  useRestoreOfficeAction,
+} from "@/components/modules/settings/modules/office/hooks/useArchiveOfficeAction";
+import type { AssignedUsersStrategy } from "@/components/modules/settings/modules/office/actions/archiveOfficeAction";
 import { DeleteOfficeModal } from "@/components/modules/settings/modules/office/components/modals/DeleteOfficeModal";
+import { ArchiveOfficeModal } from "@/components/modules/settings/modules/office/components/modals/ArchiveOfficeModal";
 import { OfficeSkeleton } from "@/components/modules/settings/modules/office/components/OfficeDetailsContainer/OfficeSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import OfficeAssignedUsersTab from "@/components/modules/settings/modules/office/components/OfficeAssignedUsersTab/OfficeAssignedUsersTab";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import type { Office } from "@/models/office";
+import {
+  ExportDataModal,
+  ExportDataFormValues,
+  triggerExportDownload,
+} from "@/components/modules/settings/shared/ExportDataModal";
 
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
@@ -70,9 +83,13 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   const { data, isLoading, error } = useOffice();
   const updateAction = useUpdateOfficeAction();
   const deleteAction = useDeleteOfficeAction();
+  const archiveAction = useArchiveOfficeAction();
+  const restoreAction = useRestoreOfficeAction();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [values, setValues] = useState<FormValues | null>(null);
 
   const office = useMemo(
@@ -88,9 +105,17 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   }, [updateAction.data?.status]);
 
   useEffect(() => {
+    if (archiveAction.data?.status !== ActionStatus.SUCCESS) return;
+
+    setIsArchiveOpen(false);
+    setIsEditing(false);
+    setValues(null);
+  }, [archiveAction.data?.status]);
+
+  useEffect(() => {
     if (deleteAction.data?.status !== ActionStatus.SUCCESS) return;
 
-    router.push("/settings/legal-entities-and-offices/offices");
+    router.push("/settings/general/offices");
   }, [deleteAction.data?.status, router]);
 
   if (error) throw error;
@@ -108,6 +133,15 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   }
 
   const current = values ?? mapOffice(office);
+  const isArchived = office.archived;
+
+  const handleArchive = (strategy: AssignedUsersStrategy) => {
+    archiveAction.mutate({ id: office.id, assignedUsersStrategy: strategy });
+  };
+
+  const handleRestore = () => {
+    restoreAction.mutate(office.id);
+  };
 
   const updateField = (key: keyof FormValues, value: string) => {
     setValues((prev) => ({
@@ -127,6 +161,15 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   const handleCancel = () => {
     setIsEditing(false);
     setValues(null);
+  };
+
+  const handleExport = async ({ format }: ExportDataFormValues) => {
+    try {
+      await triggerExportDownload(`/api/offices/${office.id}/export`, format);
+      setIsExportOpen(false);
+    } catch (error) {
+      console.error("Failed to export office:", error);
+    }
   };
 
   return (
@@ -152,7 +195,15 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
           <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-foreground">General Information</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-foreground">General Information</h2>
+                  {isArchived && (
+                    <Badge variant="secondary" className="gap-1 font-normal">
+                      <Archive className="h-3 w-3"/>
+                      Archived
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Contact and address details for this office.
                 </p>
@@ -161,6 +212,24 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
               <div className="flex flex-none items-center gap-3">
                 {isEditing ? (
                   <>
+                    <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsArchiveOpen(true)}
+                        disabled={updateAction.isPending || archiveAction.isPending}
+                      >
+                        Archive
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate resource="ORG.OFFICE" action="MANAGE">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsDeleteOpen(true)}
+                        disabled={deleteAction.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </PermissionGate>
                     <Button
                       variant="outline"
                       onClick={handleCancel}
@@ -172,22 +241,54 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                       Save changes
                     </Button>
                   </>
+                ) : isArchived ? (
+                  <>
+                    <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                      <Button onClick={handleRestore} disabled={restoreAction.isPending}>
+                        Restore
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate resource="ORG.OFFICE" action="MANAGE">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsDeleteOpen(true)}
+                        disabled={deleteAction.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        aria-label="Export office"
+                        onClick={() => setIsExportOpen(true)}
+                      >
+                        <Download className="h-4 w-4"/>
+                      </Button>
+                    </PermissionGate>
+                  </>
                 ) : (
                   <>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsDeleteOpen(true)}
-                      disabled={deleteAction.isPending}
-                    >
-                      Delete
-                    </Button>
-                    <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                    <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                      <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                    </PermissionGate>
+                    <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        aria-label="Export office"
+                        onClick={() => setIsExportOpen(true)}
+                      >
+                        <Download className="h-4 w-4"/>
+                      </Button>
+                    </PermissionGate>
                   </>
                 )}
               </div>
             </div>
 
-            <div className="space-y-8 overflow-y-auto pr-1" style={{ maxHeight: SCROLL_OFFSET }}>
+            <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
         <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
 
@@ -297,6 +398,23 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
         office={office}
         onConfirmAction={() => deleteAction.mutate({ id: office.id })}
         onRequestCloseAction={() => setIsDeleteOpen(false)}
+      />
+
+      <ArchiveOfficeModal
+        isOpen={isArchiveOpen}
+        isLoading={archiveAction.isPending}
+        office={office}
+        onConfirmAction={handleArchive}
+        onRequestCloseAction={() => setIsArchiveOpen(false)}
+      />
+
+      <ExportDataModal
+        isOpen={isExportOpen}
+        title={`Export ${office.name}`}
+        description="Export this office's details and its assigned users."
+        includedText="Two sheets — General Information (name, description, email, phone, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+        onCancelAction={() => setIsExportOpen(false)}
+        onConfirmAction={handleExport}
       />
     </div>
   );

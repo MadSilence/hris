@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Filter, Search, Trash2, Users } from "lucide-react";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -264,7 +263,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       {/* Fixed-height table area so the modal keeps a constant size */}
       <div className="h-[380px] overflow-y-auto">
         {resolve.isLoading || matched.length > 0 ? (
-          <Table>
+          <table className="w-full caption-bottom text-sm">
             <TableHeader className="sticky top-0 z-10 bg-white [&_tr]:border-brown-200">
               <TableRow>
                 <TableHead className="w-10">
@@ -336,7 +335,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </table>
         ) : (
           <EmptyState hasFilters={filterCount > 0 || q.length > 0} />
         )}

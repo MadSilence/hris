@@ -14,6 +14,7 @@ import {
 } from "@/public/desact/src/components/ui/alert-dialog";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
+import { useAttributeDeleteImpact } from "@/components/modules/settings/modules/attributes/hooks/useDeleteImpact";
 
 type DeleteAttributeModalProps = {
   isOpen: boolean;
@@ -31,6 +32,8 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
   attribute,
 }) => {
   const attributeName = attribute?.name ?? "Untitled attribute";
+
+  const { data: impact } = useAttributeDeleteImpact(isOpen ? attribute?.id ?? null : null);
 
   const hasOptions =
     attribute?.type === AttributeType.MULTI_SELECT ||
@@ -72,7 +75,20 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
                   </p>
                 )}
 
-                <p>Deleted attributes cannot be restored.</p>
+                {impact && impact.valueCount > 0 && (
+                  <p>
+                    This will permanently delete{" "}
+                    <strong>{impact.valueCount}</strong> value
+                    {impact.valueCount === 1 ? "" : "s"} from{" "}
+                    <strong>{impact.peopleCount}</strong>{" "}
+                    {impact.peopleCount === 1 ? "person" : "people"}.
+                  </p>
+                )}
+
+                <p>
+                  Any saved views or filters referencing this attribute will be
+                  updated. Deleted attributes cannot be restored.
+                </p>
               </div>
             </div>
           </div>

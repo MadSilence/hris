@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
+import { useGroupDeleteImpact } from "@/components/modules/settings/modules/attributes/hooks/useDeleteImpact";
 
 type DeleteGroupModalProps = {
   isOpen: boolean;
@@ -30,6 +31,8 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
   group,
 }) => {
   const groupName = group?.name ?? "Untitled section";
+
+  const { data: impact } = useGroupDeleteImpact(isOpen ? group?.id ?? null : null);
 
   return (
     <AlertDialog
@@ -59,8 +62,28 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
 
               <div className="space-y-1 text-sm text-red-700">
-                <p>All attributes assigned to this section will also be deleted.</p>
-                <p>All employee data entered for these attributes will be lost.</p>
+                {impact && impact.attributeCount > 0 ? (
+                  <p>
+                    <strong>{impact.attributeCount}</strong> attribute
+                    {impact.attributeCount === 1 ? "" : "s"} in this section will
+                    also be deleted
+                    {impact.valueCount > 0 && (
+                      <>
+                        , removing <strong>{impact.valueCount}</strong> value
+                        {impact.valueCount === 1 ? "" : "s"} from{" "}
+                        <strong>{impact.peopleCount}</strong>{" "}
+                        {impact.peopleCount === 1 ? "person" : "people"}
+                      </>
+                    )}
+                    .
+                  </p>
+                ) : (
+                  <p>All attributes assigned to this section will also be deleted.</p>
+                )}
+                <p>
+                  Saved views or filters referencing them will be updated. This
+                  cannot be undone.
+                </p>
               </div>
             </div>
           </div>

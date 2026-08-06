@@ -5,6 +5,8 @@ export type OfficeDTO = {
   email?: string;
   phone?: string;
   isSystem: boolean;
+  archived: boolean;
+  archivedAt?: string | null;
   country: string;
   city: string;
   street: string;

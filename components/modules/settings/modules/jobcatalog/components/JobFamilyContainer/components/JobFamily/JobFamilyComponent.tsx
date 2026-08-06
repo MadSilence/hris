@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { ChevronsDownUp, ChevronsUpDown, Plus, Search } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, Download, Plus, Search } from "lucide-react";
 
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/public/desact/src/components/ui/accordion";
+import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
 import { JobFamily } from "@/models/job";
 
 type JobFamilyProps = {
@@ -38,6 +39,7 @@ export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
 
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<string[]>(() => all.map((f) => f.id));
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const needle = query.trim().toLowerCase();
 
@@ -78,21 +80,31 @@ export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
           />
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-brown-600"
-          onClick={toggleAll}
-          disabled={families.length === 0}
-        >
-          {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
-          {allOpen ? "Collapse all" : "Expand all"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 gap-1.5 text-brown-600"
+            onClick={toggleAll}
+            disabled={families.length === 0}
+          >
+            {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
+            {allOpen ? "Collapse all" : "Expand all"}
+          </Button>
+
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-9 w-9"
+            onClick={() => setIsExportOpen(true)}
+            aria-label="Export job catalog"
+          >
+            <Download className="h-4 w-4"/>
+          </Button>
+        </div>
       </div>
 
       <div className="max-h-[calc(100svh-380px)] overflow-y-auto pr-1">
-        {/* Column header lives inside the scroll box (same width context as the rows → aligned)
-            and sticks to the top so it stays visible while the list scrolls. */}
         <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
           <div>Name</div>
           <div>Level</div>
@@ -109,8 +121,9 @@ export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
                 <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
                   <span className="flex items-center gap-2">
                     {family.name}
-                    {/* Total assigned people — placeholder until JOB assignments land. */}
-                    <span className="normal-case tracking-normal text-brown-400">(—)</span>
+                    <span className="normal-case tracking-normal text-brown-400">
+                      ({family.jobs.length})
+                    </span>
                     {family.isSystem ? (
                       <Badge variant="secondary" className="font-normal normal-case tracking-normal">
                         Preset
@@ -182,6 +195,16 @@ export const JobFamilyComponent: FC<JobFamilyProps> = ({ jobFamilies }) => {
         </button>
         </div>
       </div>
+
+      {/* UI-only for now — no backend export wiring yet. */}
+      <ExportDataModal
+        isOpen={isExportOpen}
+        title="Export job catalog"
+        description="Export all job families with their jobs."
+        includedText="Includes every job family with its jobs and assigned levels."
+        onCancelAction={() => setIsExportOpen(false)}
+        onConfirmAction={() => setIsExportOpen(false)}
+      />
     </div>
   );
 };

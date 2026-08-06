@@ -38,6 +38,9 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
           </AlertDialogTitle>
           <AlertDialogDescription>
             This office will be permanently removed from the system. This action cannot be undone.
+            {office?.assignedUsersCount
+              ? ` ${office.assignedUsersCount} ${office.assignedUsersCount === 1 ? "person" : "people"} currently assigned to this office will lose that assignment.`
+              : " Anyone currently assigned to this office will lose that assignment."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
