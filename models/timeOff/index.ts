@@ -1,3 +1,6 @@
+export * from "./LeaveTypeStatus";
+export * from "./LeaveTypeCategory";
+export * from "./LeaveType";
 export * from "./TimeOffPolicyStatus";
 export * from "./TimeOffPolicyUnit";
 export * from "./TimeOffPolicyRenewalType";
@@ -12,5 +15,4 @@ export * from "./TimeOffPolicyApprover";
 export * from "./TimeOffPolicyApprovalSettings";
 export * from "./TimeOffPolicyAssignment";
 export * from "./EmployeeTimeOffBalance";
-export * from "./EmployeeTimeOffBalanceAdjustment";
 export * from "./TimeOffRequest";

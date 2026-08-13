@@ -8,6 +8,7 @@ describe("PublicHolidayMapper", () => {
     calendarYear: 2026,
     name: "New Year",
     holidayDate: "2026-01-01",
+    endDate: "2026-01-01",
   };
 
   it("maps public holiday dto to model", () => {

@@ -17,6 +17,7 @@ import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/Cur
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
 import ImpersonationProvider from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
 import CompanyDataProvider, { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
+import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -25,6 +26,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
 
   const { user } = useCurrentUser();
   const { company } = useCompanyData();
+  const { data: unreadCount } = useUnreadNotificationsCount();
 
   useEffect(() => {
     const handleForbidden = (e: Event) => {
@@ -47,6 +49,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       label: "Inbox",
       href: "/inbox",
       Icon: Inbox,
+      badge: unreadCount ?? 0,
     },
     {
       label: "Search",

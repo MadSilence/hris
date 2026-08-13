@@ -2,6 +2,8 @@
   TimeOffPolicyCarryoverExpiryType,
   TimeOffPolicyCarryoverExpiryUnit,
   TimeOffPolicyCarryoverType,
+  TimeOffPolicyCountingMode,
+  TimeOffPolicyEntitlementMode,
   TimeOffPolicyRenewalType,
   TimeOffPolicyStatus,
   TimeOffPolicyUnit,
@@ -10,6 +12,7 @@
 export interface TimeOffPolicy {
   id: string;
   companyId: string;
+  leaveTypeId: string;
 
   name: string;
   displayName: string;
@@ -20,6 +23,15 @@ export interface TimeOffPolicy {
 
   paid: boolean;
   hiddenFromEmployees: boolean;
+
+  effectiveDate: string | null;
+
+  countingMode: TimeOffPolicyCountingMode;
+  validWeekdays: number;
+  includePublicHolidays: boolean;
+
+  entitlementGrantingMode: TimeOffPolicyEntitlementMode;
+  allowRequestsInAdvanceOfAccrual: boolean;
 
   yearlyQuota: number | null;
   unlimitedQuota: boolean;
@@ -34,6 +46,13 @@ export interface TimeOffPolicy {
   carryoverExpiryType: TimeOffPolicyCarryoverExpiryType;
   carryoverExpiryValue: number | null;
   carryoverExpiryUnit: TimeOffPolicyCarryoverExpiryUnit | null;
+
+  allowNegativeCarryover: boolean;
+  negativeCarryoverLimit: number | null;
+
+  allowNegativeBalance: boolean;
+  maxNegativeBalance: number | null;
+  negativeBalanceCappedByQuota: boolean;
 
   archivedAt: string | null;
   archivedBy: string | null;

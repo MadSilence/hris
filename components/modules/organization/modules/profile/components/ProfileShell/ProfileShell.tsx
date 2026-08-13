@@ -17,7 +17,7 @@ export function ProfileShell({ userId, user, children }: Props) {
           <UserDataHeader userId={userId} user={user}/>
         </header>
 
-        <nav className="pb-5">
+        <nav className="pb-8">
           <ProfileTabsNav userId={userId}/>
         </nav>
       </div>

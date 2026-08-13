@@ -1,13 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import TimeOffPoliciesSettingsContainer from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/components/TimeOffPoliciesSettingsContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
-
+// Time off policies now live under a leave type: /settings/time/leave-type/{id}/policies
 export default function TimeOffPage() {
-  return (
-    <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW" fallback={<AccessDenied/>}>
-      <TimeOffPoliciesSettingsContainer />
-    </PermissionGate>
-  );
+  redirect("/settings/time/leave-type");
 }

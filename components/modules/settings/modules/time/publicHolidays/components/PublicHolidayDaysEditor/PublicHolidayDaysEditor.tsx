@@ -11,11 +11,13 @@ export type DraftHoliday = {
   id?: string;
   name: string;
   holidayDate: string;
+  /** Inclusive end of the span. Empty → single-day (treated as == holidayDate). */
+  endDate: string;
 };
 
 export type DraftHolidayErrors = Record<
   string,
-  { name?: string; holidayDate?: string }
+  { name?: string; holidayDate?: string; endDate?: string }
 >;
 
 type Props = {
@@ -34,13 +36,13 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
   const handleAdd = () => {
     onChange([
       ...holidays,
-      { localId: crypto.randomUUID(), name: "", holidayDate: "" },
+      { localId: crypto.randomUUID(), name: "", holidayDate: "", endDate: "" },
     ]);
   };
 
   const handleChange = (
     localId: string,
-    field: "name" | "holidayDate",
+    field: "name" | "holidayDate" | "endDate",
     value: string,
   ) => {
     onChange(
@@ -71,7 +73,20 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                     }
                     disabled={disabled}
                     aria-invalid={!!rowErrors?.holidayDate}
-                    className="w-44 shrink-0"
+                    className="w-40 shrink-0"
+                  />
+                  <span className="shrink-0 text-sm text-muted-foreground">→</span>
+                  <Input
+                    type="date"
+                    value={holiday.endDate}
+                    min={holiday.holidayDate || undefined}
+                    onChange={(e) =>
+                      handleChange(holiday.localId, "endDate", e.currentTarget.value)
+                    }
+                    disabled={disabled}
+                    aria-invalid={!!rowErrors?.endDate}
+                    title="End date (leave empty for a single day)"
+                    className="w-40 shrink-0"
                   />
                   <Input
                     value={holiday.name}
@@ -95,11 +110,10 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                {(rowErrors?.holidayDate || rowErrors?.name) && (
+                {(rowErrors?.holidayDate || rowErrors?.endDate || rowErrors?.name) && (
                   <div className="flex gap-2 pl-2 text-xs text-destructive">
-                    {rowErrors?.holidayDate && (
-                      <span>{rowErrors.holidayDate}</span>
-                    )}
+                    {rowErrors?.holidayDate && <span>{rowErrors.holidayDate}</span>}
+                    {rowErrors?.endDate && <span>{rowErrors.endDate}</span>}
                     {rowErrors?.name && <span>{rowErrors.name}</span>}
                   </div>
                 )}

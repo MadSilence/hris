@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, Clock, Download, MoreVertical, Pencil, Play, Plus, Search, Trash2 } from "lucide-react";
+import { Archive, Clock, Download, Eye, MoreVertical, Play, Plus, Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
@@ -29,8 +29,10 @@ import type { TimeOffPolicy } from "@/models/timeOff";
 type Props = {
   policies: TimeOffPolicy[];
   isLoading: boolean;
+  title?: string;
+  backHref?: string;
   onCreateAction: () => void;
-  onEditAction: (policy: TimeOffPolicy) => void;
+  onOpenAction: (policy: TimeOffPolicy) => void;
   onActivateAction: (policy: TimeOffPolicy) => void;
   onArchiveAction: (policy: TimeOffPolicy) => void;
   onDeleteAction: (policy: TimeOffPolicy) => void;
@@ -50,8 +52,10 @@ function statusBadge(status: TimeOffPolicyStatus) {
 export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   policies,
   isLoading,
+  title,
+  backHref,
   onCreateAction,
-  onEditAction,
+  onOpenAction,
   onActivateAction,
   onArchiveAction,
   onDeleteAction,
@@ -81,7 +85,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
     <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
-          <SettingsPageHeader title="Time off" backHref="/settings" />
+          <SettingsPageHeader title={title ?? "Time off"} backHref={backHref ?? "/settings"} />
           <PageDescription className="text-base text-muted-foreground/90">
             Define leave types and quota rules for your organization. Use the table below to review,
             search and navigate to specific policies.
@@ -152,7 +156,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                       <TableRow
                         key={policy.id}
                         className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
-                        onClick={() => onEditAction(policy)}
+                        onClick={() => onOpenAction(policy)}
                       >
                         <TableCell className="py-3 pl-4">
                           <span className="font-medium text-primary">{policy.displayName}</span>
@@ -183,11 +187,11 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-44 rounded-lg p-1.5">
                                 <DropdownMenuItem
-                                  onClick={() => onEditAction(policy)}
+                                  onClick={() => onOpenAction(policy)}
                                   className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
                                 >
-                                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                                  Edit
+                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                  Open
                                 </DropdownMenuItem>
 
                                 {policy.status === TimeOffPolicyStatus.Draft && (

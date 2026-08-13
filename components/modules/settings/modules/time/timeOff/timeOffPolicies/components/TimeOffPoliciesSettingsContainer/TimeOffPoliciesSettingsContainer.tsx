@@ -1,107 +1,84 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { TimeOffPoliciesSettingsComponent } from "../TimeOffPoliciesSettingsComponent";
-import { CreateTimeOffPolicyModal } from "../modals/CreateTimeOffPolicyModal";
-import { EditTimeOffPolicyModal } from "../modals/EditTimeOffPolicyModal";
 import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
+import {
+  PolicyWizardModal,
+  buildApprovalRequest,
+  buildCreatePolicyRequest,
+  buildEditRulesRequest,
+  buildRequestRulesRequest,
+  type PolicyWizardValues,
+} from "../wizard";
 
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useCreateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useCreateTimeOffPolicy";
-import { useUpdateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useUpdateTimeOffPolicy";
-import { useRenameTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useRenameTimeOffPolicy";
 import { useActivateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useActivateTimeOffPolicy";
 import { useArchiveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useArchiveTimeOffPolicy";
 import { useDeleteTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useDeleteTimeOffPolicy";
+import { useUpdateTimeOffPolicyRequestRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRequestRules/hooks/useUpdateTimeOffPolicyRequestRules";
+import { useUpdateTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useUpdateTimeOffPolicyEditRules";
+import { useUpdateTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useUpdateTimeOffPolicyApprovalSettings";
 
 import type { TimeOffPolicy } from "@/models/timeOff";
-import {
-  TimeOffPolicyCarryoverExpiryType,
-  TimeOffPolicyCarryoverType,
-  TimeOffPolicyRenewalType,
-  TimeOffPolicyStatus,
-} from "@/api/modules/timeOff/timeOffPolicies/dto";
-import type { CreateTimeOffPolicyFormValues } from "../modals/CreateTimeOffPolicyModal";
-import type { EditTimeOffPolicyFormValues } from "../modals/EditTimeOffPolicyModal";
 
-export default function TimeOffPoliciesSettingsContainer() {
+type Props = {
+  leaveTypeId?: string;
+  title?: string;
+  backHref?: string;
+};
+
+export default function TimeOffPoliciesSettingsContainer({
+  leaveTypeId,
+  title,
+  backHref,
+}: Props = {}) {
+  const router = useRouter();
   const { data: policies, isLoading, error } = useTimeOffPolicies();
 
+  const visiblePolicies = leaveTypeId
+    ? (policies ?? []).filter((p) => p.leaveTypeId === leaveTypeId)
+    : (policies ?? []);
+
   const createMutation = useCreateTimeOffPolicy();
-  const updateMutation = useUpdateTimeOffPolicy();
-  const renameMutation = useRenameTimeOffPolicy();
   const activateMutation = useActivateTimeOffPolicy();
   const archiveMutation = useArchiveTimeOffPolicy();
   const deleteMutation = useDeleteTimeOffPolicy();
+  const requestRulesMutation = useUpdateTimeOffPolicyRequestRules();
+  const editRulesMutation = useUpdateTimeOffPolicyEditRules();
+  const approvalMutation = useUpdateTimeOffPolicyApprovalSettings();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingPolicy, setEditingPolicy] = useState<TimeOffPolicy | null>(null);
   const [deletingPolicy, setDeletingPolicy] = useState<TimeOffPolicy | null>(null);
 
   if (error) throw error;
 
-  const handleCreate = async (values: CreateTimeOffPolicyFormValues) => {
-    await createMutation.mutateAsync({
-      name: values.name.toLowerCase().replace(/\s+/g, "-"),
-      displayName: values.name,
-      description: values.description || null,
-      status: TimeOffPolicyStatus.Draft,
-      unit: values.unit,
-      paid: values.paid,
-      hiddenFromEmployees: false,
-      unlimitedQuota: true,
-      yearlyQuota: null,
-      renewalType: TimeOffPolicyRenewalType.YearlyFixedDate,
-      renewalFixedDay: 1,
-      renewalFixedMonth: 1,
-      carryoverType: TimeOffPolicyCarryoverType.None,
-      carryoverLimit: null,
-      carryoverExpiryType: TimeOffPolicyCarryoverExpiryType.Never,
-      carryoverExpiryValue: null,
-      carryoverExpiryUnit: null,
-    });
+  const handleCreate = async (values: PolicyWizardValues, activate: boolean) => {
+    const res = await createMutation.mutateAsync(
+      buildCreatePolicyRequest(values, leaveTypeId ?? "", activate),
+    );
+
+    const policyId = res.data?.id;
+    if (policyId) {
+      // Sub-resources are keyed by policyId, so they must be saved after create.
+      await requestRulesMutation.mutateAsync({ policyId, ...buildRequestRulesRequest(values) });
+      await editRulesMutation.mutateAsync({ policyId, ...buildEditRulesRequest(values) });
+
+      const approval = buildApprovalRequest(values);
+      if (approval) {
+        await approvalMutation.mutateAsync({ policyId, ...approval });
+      }
+    }
+
     setIsCreateModalOpen(false);
   };
 
-  const handleEdit = async (values: EditTimeOffPolicyFormValues) => {
-    if (!editingPolicy) return;
-
-    const nameChanged = values.name !== editingPolicy.displayName;
-    const configChanged =
-      values.description !== (editingPolicy.description ?? "") ||
-      values.unit !== editingPolicy.unit ||
-      values.paid !== editingPolicy.paid;
-
-    if (nameChanged) {
-      await renameMutation.mutateAsync({
-        id: editingPolicy.id,
-        name: values.name.toLowerCase().replace(/\s+/g, "-"),
-      });
-    }
-
-    if (configChanged) {
-      await updateMutation.mutateAsync({
-        id: editingPolicy.id,
-        displayName: values.name,
-        description: values.description || null,
-        unit: values.unit,
-        paid: values.paid,
-        hiddenFromEmployees: editingPolicy.hiddenFromEmployees,
-        unlimitedQuota: editingPolicy.unlimitedQuota,
-        yearlyQuota: editingPolicy.yearlyQuota,
-        renewalType: editingPolicy.renewalType,
-        renewalFixedDay: editingPolicy.renewalFixedDay,
-        renewalFixedMonth: editingPolicy.renewalFixedMonth,
-        carryoverType: editingPolicy.carryoverType,
-        carryoverLimit: editingPolicy.carryoverLimit,
-        carryoverExpiryType: editingPolicy.carryoverExpiryType,
-        carryoverExpiryValue: editingPolicy.carryoverExpiryValue,
-        carryoverExpiryUnit: editingPolicy.carryoverExpiryUnit,
-      });
-    }
-
-    setEditingPolicy(null);
+  const handleOpen = (policy: TimeOffPolicy) => {
+    const base = leaveTypeId ?? policy.leaveTypeId;
+    router.push(`/settings/time/leave-type/${base}/policies/${policy.id}`);
   };
 
   const handleActivate = (policy: TimeOffPolicy) => {
@@ -118,34 +95,27 @@ export default function TimeOffPoliciesSettingsContainer() {
     setDeletingPolicy(null);
   };
 
-  const isEditLoading =
-    updateMutation.isPending || renameMutation.isPending;
-
   return (
     <>
       <TimeOffPoliciesSettingsComponent
-        policies={policies ?? []}
+        policies={visiblePolicies}
         isLoading={isLoading}
+        title={title}
+        backHref={backHref}
         onCreateAction={() => setIsCreateModalOpen(true)}
-        onEditAction={(policy) => setEditingPolicy(policy)}
+        onOpenAction={handleOpen}
         onActivateAction={handleActivate}
         onArchiveAction={handleArchive}
         onDeleteAction={(policy) => setDeletingPolicy(policy)}
       />
 
-      <CreateTimeOffPolicyModal
+      <PolicyWizardModal
         isOpen={isCreateModalOpen}
         isLoading={createMutation.isPending}
-        onConfirmAction={handleCreate}
+        mode="create"
+        leaveTypeName={title}
+        onSubmitAction={handleCreate}
         onCancelAction={() => setIsCreateModalOpen(false)}
-      />
-
-      <EditTimeOffPolicyModal
-        isOpen={editingPolicy !== null}
-        isLoading={isEditLoading}
-        policy={editingPolicy}
-        onConfirmAction={handleEdit}
-        onCancelAction={() => setEditingPolicy(null)}
       />
 
       <DeleteTimeOffPolicyModal

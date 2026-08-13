@@ -1,13 +1,11 @@
-﻿import { hrisApiEmployeeTimeOffBalancesClient } from "@/api/modules/timeOff/employeeTimeOffBalances/clients";
+import { hrisApiEmployeeTimeOffBalancesClient } from "@/api/modules/timeOff/employeeTimeOffBalances/clients";
 import type {
   CreateEmployeeTimeOffBalanceRequest,
   AdjustEmployeeTimeOffBalanceRequest,
+  EmployeeTimeOffBalanceTransactionDTO,
 } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type {
-  EmployeeTimeOffBalance,
-  EmployeeTimeOffBalanceAdjustment,
-} from "@/models/timeOff";
+import type { EmployeeTimeOffBalance } from "@/models/timeOff";
 
 export class HrisEmployeeTimeOffBalancesService {
   public async create(
@@ -33,10 +31,10 @@ export class HrisEmployeeTimeOffBalancesService {
     return hrisApiEmployeeTimeOffBalancesClient.adjust(id, body);
   }
 
-  public async listAdjustments(
+  public async listTransactions(
     id: string
-  ): Promise<EmployeeTimeOffBalanceAdjustment[]> {
-    return hrisApiEmployeeTimeOffBalancesClient.listAdjustments(id);
+  ): Promise<EmployeeTimeOffBalanceTransactionDTO[]> {
+    return hrisApiEmployeeTimeOffBalancesClient.listTransactions(id);
   }
 }
 

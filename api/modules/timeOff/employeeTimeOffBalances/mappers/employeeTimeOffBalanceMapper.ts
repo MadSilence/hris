@@ -1,11 +1,5 @@
-﻿import type {
-  EmployeeTimeOffBalanceDTO,
-  EmployeeTimeOffBalanceAdjustmentDTO,
-} from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
-import type {
-  EmployeeTimeOffBalance,
-  EmployeeTimeOffBalanceAdjustment,
-} from "@/models/timeOff";
+import type { EmployeeTimeOffBalanceDTO } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
+import type { EmployeeTimeOffBalance } from "@/models/timeOff";
 
 export class EmployeeTimeOffBalanceMapper {
   public mapEmployeeTimeOffBalanceDTO(
@@ -32,27 +26,6 @@ export class EmployeeTimeOffBalanceMapper {
     dtos: EmployeeTimeOffBalanceDTO[]
   ): EmployeeTimeOffBalance[] {
     return dtos.map((dto) => this.mapEmployeeTimeOffBalanceDTO(dto));
-  }
-
-  public mapEmployeeTimeOffBalanceAdjustmentDTO(
-    dto: EmployeeTimeOffBalanceAdjustmentDTO
-  ): EmployeeTimeOffBalanceAdjustment {
-    return {
-      id: dto.id,
-      balanceId: dto.balanceId,
-      adjustmentAmount: dto.adjustmentAmount,
-      reason: dto.reason,
-      createdAt: dto.createdAt,
-      createdBy: dto.createdBy,
-    };
-  }
-
-  public mapEmployeeTimeOffBalanceAdjustmentDTOs(
-    dtos: EmployeeTimeOffBalanceAdjustmentDTO[]
-  ): EmployeeTimeOffBalanceAdjustment[] {
-    return dtos.map((dto) =>
-      this.mapEmployeeTimeOffBalanceAdjustmentDTO(dto)
-    );
   }
 }
 

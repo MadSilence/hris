@@ -61,6 +61,7 @@ export function PublicHolidayCalendarNewPage() {
           localId: crypto.randomUUID(),
           name: h.name,
           holidayDate: h.holidayDate,
+          endDate: "",
         })),
       );
       setInitialized(true);
@@ -96,7 +97,7 @@ export function PublicHolidayCalendarNewPage() {
     const rowErrors: DraftHolidayErrors = {};
 
     for (const h of draftHolidays) {
-      const rowErr: { name?: string; holidayDate?: string } = {};
+      const rowErr: { name?: string; holidayDate?: string; endDate?: string } = {};
 
       if (!h.name.trim()) {
         rowErr.name = "Name is required.";
@@ -111,8 +112,12 @@ export function PublicHolidayCalendarNewPage() {
       } else {
         seenDates.add(h.holidayDate);
       }
+      if (h.endDate && h.holidayDate && h.endDate < h.holidayDate) {
+        rowErr.endDate = "End must be on or after the start.";
+        valid = false;
+      }
 
-      if (rowErr.name || rowErr.holidayDate) {
+      if (rowErr.name || rowErr.holidayDate || rowErr.endDate) {
         rowErrors[h.localId] = rowErr;
       }
     }
@@ -150,7 +155,7 @@ export function PublicHolidayCalendarNewPage() {
       for (const holiday of draftHolidays) {
         await createPublicHolidayAction({
           calendarId,
-          body: { name: holiday.name.trim(), holidayDate: holiday.holidayDate },
+          body: { name: holiday.name.trim(), holidayDate: holiday.holidayDate, endDate: holiday.endDate || holiday.holidayDate },
         });
       }
 

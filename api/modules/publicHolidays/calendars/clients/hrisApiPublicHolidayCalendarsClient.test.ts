@@ -23,6 +23,7 @@ describe("HrisApiPublicHolidayCalendarsClient", () => {
     sourceLocale: "pl-PL",
     archivedAt: null,
     archivedBy: null,
+    holidayCount: 0,
   };
 
   beforeEach(() => {

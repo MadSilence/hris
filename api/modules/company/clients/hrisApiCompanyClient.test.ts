@@ -19,6 +19,8 @@ describe("HrisApiCompanyClient", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: "/uploads/logo.png",
+      description: null,
+      website: null,
     });
 
     const result = await hrisApiCompanyClient.getCompany();
@@ -29,6 +31,8 @@ describe("HrisApiCompanyClient", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: "http://localhost:8080/uploads/logo.png",
+      description: null,
+      website: null,
     });
   });
 });

@@ -3,6 +3,8 @@ export * from "./TimeOffPolicyCarryoverExpiryType";
 export * from "./TimeOffPolicyCarryoverType";
 export * from "./TimeOffPolicyStatus";
 export * from "./TimeOffPolicyUnit";
+export * from "./TimeOffPolicyCountingMode";
+export * from "./TimeOffPolicyEntitlementMode";
 export * from "./TimeOffPolicyRenewalType";
 export * from "./TimeOffPolicyDTO";
 export * from "./RenameTimeOffPolicyRequest";

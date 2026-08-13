@@ -4,4 +4,5 @@ export interface PublicHolidayDTO {
   calendarYear: number;
   name: string;
   holidayDate: string;
+  endDate: string;
 }

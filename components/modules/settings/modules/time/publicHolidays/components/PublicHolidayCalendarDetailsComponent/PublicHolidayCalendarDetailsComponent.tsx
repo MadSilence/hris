@@ -53,8 +53,21 @@ function statusBadge(status: PublicHolidayCalendarStatus) {
   }
 }
 
+function holidaySpanDays(start: string, end: string): number {
+  const a = Date.parse(`${start}T00:00:00`);
+  const b = Date.parse(`${end}T00:00:00`);
+  if (Number.isNaN(a) || Number.isNaN(b) || b < a) return 1;
+  return Math.floor((b - a) / 86_400_000) + 1;
+}
+
 function holidaysToDraft(holidays: PublicHoliday[]): DraftHoliday[] {
-  return holidays.map((h) => ({ localId: h.id, id: h.id, name: h.name, holidayDate: h.holidayDate }));
+  return holidays.map((h) => ({
+    localId: h.id,
+    id: h.id,
+    name: h.name,
+    holidayDate: h.holidayDate,
+    endDate: h.endDate && h.endDate !== h.holidayDate ? h.endDate : "",
+  }));
 }
 
 export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, holidays }) => {
@@ -122,7 +135,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
     const rowErrors: DraftHolidayErrors = {};
 
     for (const h of editedHolidays) {
-      const rowErr: { name?: string; holidayDate?: string } = {};
+      const rowErr: { name?: string; holidayDate?: string; endDate?: string } = {};
       if (!h.name.trim()) {
         rowErr.name = "Name is required.";
         valid = false;
@@ -136,7 +149,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
       } else {
         seenDates.add(h.holidayDate);
       }
-      if (rowErr.name || rowErr.holidayDate) rowErrors[h.localId] = rowErr;
+      if (h.endDate && h.holidayDate && h.endDate < h.holidayDate) {
+        rowErr.endDate = "End must be on or after the start.";
+        valid = false;
+      }
+      if (rowErr.name || rowErr.holidayDate || rowErr.endDate) rowErrors[h.localId] = rowErr;
     }
 
     setHolidayErrors(rowErrors);
@@ -160,7 +177,8 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
 
       const modified = editedWithId.filter((d) => {
         const orig = originalMap.get(d.id!);
-        return orig && (d.name !== orig.name || d.holidayDate !== orig.holidayDate);
+        const origEnd = orig && orig.endDate !== orig.holidayDate ? orig.endDate : "";
+        return orig && (d.name !== orig.name || d.holidayDate !== orig.holidayDate || d.endDate !== origEnd);
       });
 
       const nextCountry = editedCountry.trim() || null;
@@ -188,10 +206,16 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
         await deletePublicHolidayAction({ id });
       }
       for (const d of modified) {
-        await updatePublicHolidayAction({ id: d.id!, body: { name: d.name.trim(), holidayDate: d.holidayDate } });
+        await updatePublicHolidayAction({
+          id: d.id!,
+          body: { name: d.name.trim(), holidayDate: d.holidayDate, endDate: d.endDate || d.holidayDate },
+        });
       }
       for (const d of editedWithoutId) {
-        await createPublicHolidayAction({ calendarId: calendar.id, body: { name: d.name.trim(), holidayDate: d.holidayDate } });
+        await createPublicHolidayAction({
+          calendarId: calendar.id,
+          body: { name: d.name.trim(), holidayDate: d.holidayDate, endDate: d.endDate || d.holidayDate },
+        });
       }
 
       invalidate();
@@ -363,7 +387,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
                     <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
                       <TableRow>
                         <TableHead className="w-1/2 pl-4">Holiday</TableHead>
-                        <TableHead className="w-1/2">Date</TableHead>
+                        <TableHead className="w-1/2">Dates</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -371,7 +395,16 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({ calendar, hol
                         <TableRow key={holiday.id} className="border-brown-200 [&_td]:py-2">
                           <TableCell className="pl-4 font-medium">{holiday.name}</TableCell>
                           <TableCell className="font-mono text-sm text-muted-foreground">
-                            {holiday.holidayDate}
+                            {holiday.endDate && holiday.endDate !== holiday.holidayDate ? (
+                              <span>
+                                {holiday.holidayDate} → {holiday.endDate}
+                                <span className="ml-2 font-sans text-xs text-brown-400">
+                                  {holidaySpanDays(holiday.holidayDate, holiday.endDate)} days
+                                </span>
+                              </span>
+                            ) : (
+                              holiday.holidayDate
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

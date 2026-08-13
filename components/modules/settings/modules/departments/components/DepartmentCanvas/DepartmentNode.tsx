@@ -80,10 +80,12 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{department.memberCount}</span> People
+          <span className="font-semibold text-brown-700">{department.memberCount}</span>{" "}
+          {department.memberCount === 1 ? "Person" : "People"}
         </span>
         <span>
-          <span className="font-semibold text-brown-700">{childCount}</span> Subs
+          <span className="font-semibold text-brown-700">{childCount}</span>{" "}
+          {childCount === 1 ? "Sub" : "Subs"}
         </span>
       </div>
 

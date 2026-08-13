@@ -6,6 +6,7 @@ export class TimeOffPolicyMapper {
     return {
       id: dto.id,
       companyId: dto.companyId,
+      leaveTypeId: dto.leaveTypeId,
 
       name: dto.name,
       displayName: dto.displayName,
@@ -16,6 +17,15 @@ export class TimeOffPolicyMapper {
 
       paid: dto.paid,
       hiddenFromEmployees: dto.hiddenFromEmployees,
+
+      effectiveDate: dto.effectiveDate,
+
+      countingMode: dto.countingMode,
+      validWeekdays: dto.validWeekdays,
+      includePublicHolidays: dto.includePublicHolidays,
+
+      entitlementGrantingMode: dto.entitlementGrantingMode,
+      allowRequestsInAdvanceOfAccrual: dto.allowRequestsInAdvanceOfAccrual,
 
       yearlyQuota: dto.yearlyQuota,
       unlimitedQuota: dto.unlimitedQuota,
@@ -30,6 +40,13 @@ export class TimeOffPolicyMapper {
       carryoverExpiryType: dto.carryoverExpiryType,
       carryoverExpiryValue: dto.carryoverExpiryValue,
       carryoverExpiryUnit: dto.carryoverExpiryUnit,
+
+      allowNegativeCarryover: dto.allowNegativeCarryover,
+      negativeCarryoverLimit: dto.negativeCarryoverLimit,
+
+      allowNegativeBalance: dto.allowNegativeBalance,
+      maxNegativeBalance: dto.maxNegativeBalance,
+      negativeBalanceCappedByQuota: dto.negativeBalanceCappedByQuota,
 
       archivedAt: dto.archivedAt,
       archivedBy: dto.archivedBy,

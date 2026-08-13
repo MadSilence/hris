@@ -80,10 +80,12 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{team.memberCount}</span> People
+          <span className="font-semibold text-brown-700">{team.memberCount}</span>{" "}
+          {team.memberCount === 1 ? "Person" : "People"}
         </span>
         <span>
-          <span className="font-semibold text-brown-700">{childCount}</span> Subs
+          <span className="font-semibold text-brown-700">{childCount}</span>{" "}
+          {childCount === 1 ? "Sub" : "Subs"}
         </span>
       </div>
 

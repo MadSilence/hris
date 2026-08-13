@@ -22,6 +22,8 @@ describe("companyMapper", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: "/uploads/logo.png",
+      description: "A modern HR platform",
+      website: "https://my-company.com",
     };
 
     const result = companyMapper.mapCompanyDTOtoCompany(dto);
@@ -31,6 +33,8 @@ describe("companyMapper", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: "http://localhost:8080/uploads/logo.png",
+      description: "A modern HR platform",
+      website: "https://my-company.com",
     });
   });
 
@@ -40,6 +44,8 @@ describe("companyMapper", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: null,
+      description: null,
+      website: null,
     };
 
     const result = companyMapper.mapCompanyDTOtoCompany(dto);

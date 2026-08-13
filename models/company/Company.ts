@@ -3,4 +3,6 @@ export type Company = {
   name: string;
   subdomain: string;
   companyLogo: string | null;
+  description: string | null;
+  website: string | null;
 };

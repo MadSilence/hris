@@ -9,6 +9,7 @@ export class PublicHolidayMapper {
       calendarYear: dto.calendarYear,
       name: dto.name,
       holidayDate: dto.holidayDate,
+      endDate: dto.endDate ?? dto.holidayDate,
     };
   }
 

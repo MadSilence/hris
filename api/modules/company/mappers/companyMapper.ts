@@ -8,6 +8,8 @@ export const companyMapper = {
       name: dto.name,
       subdomain: dto.subdomain,
       companyLogo: this.resolveBackendAssetUrl(dto.companyLogo),
+      description: dto.description ?? null,
+      website: dto.website ?? null,
     };
   },
 

@@ -1,16 +1,13 @@
-﻿import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
+import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   EmployeeTimeOffBalanceDTO,
-  EmployeeTimeOffBalanceAdjustmentDTO,
+  EmployeeTimeOffBalanceTransactionDTO,
   CreateEmployeeTimeOffBalanceRequest,
   AdjustEmployeeTimeOffBalanceRequest,
 } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 import { employeeTimeOffBalanceMapper } from "@/api/modules/timeOff/employeeTimeOffBalances/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type {
-  EmployeeTimeOffBalance,
-  EmployeeTimeOffBalanceAdjustment,
-} from "@/models/timeOff";
+import type { EmployeeTimeOffBalance } from "@/models/timeOff";
 
 export class HrisApiEmployeeTimeOffBalancesClient {
   private readonly BALANCES_PATH = "/time-off/balances";
@@ -53,15 +50,11 @@ export class HrisApiEmployeeTimeOffBalancesClient {
     );
   }
 
-  public async listAdjustments(
+  public async listTransactions(
     id: string
-  ): Promise<EmployeeTimeOffBalanceAdjustment[]> {
-    const dtos = await hrisApiClient.get<EmployeeTimeOffBalanceAdjustmentDTO[]>(
-      `${this.BALANCES_PATH}/${id}/adjustments`
-    );
-
-    return employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceAdjustmentDTOs(
-      dtos
+  ): Promise<EmployeeTimeOffBalanceTransactionDTO[]> {
+    return hrisApiClient.get<EmployeeTimeOffBalanceTransactionDTO[]>(
+      `${this.BALANCES_PATH}/${id}/transactions`
     );
   }
 }

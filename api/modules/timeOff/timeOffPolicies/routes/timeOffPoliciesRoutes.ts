@@ -5,6 +5,7 @@ export class TimeOffPoliciesRoutes {
     const body = await req.json().catch(() => ({}));
 
     const data = await hrisTimeOffPoliciesService.create({
+      leaveTypeId: body.leaveTypeId,
       name: body.name,
       displayName: body.displayName,
       description: body.description ?? null,
@@ -14,6 +15,15 @@ export class TimeOffPoliciesRoutes {
 
       paid: body.paid,
       hiddenFromEmployees: body.hiddenFromEmployees,
+
+      effectiveDate: body.effectiveDate ?? null,
+
+      countingMode: body.countingMode,
+      validWeekdays: body.validWeekdays,
+      includePublicHolidays: body.includePublicHolidays,
+
+      entitlementGrantingMode: body.entitlementGrantingMode,
+      allowRequestsInAdvanceOfAccrual: body.allowRequestsInAdvanceOfAccrual,
 
       yearlyQuota: body.yearlyQuota ?? null,
       unlimitedQuota: body.unlimitedQuota,
@@ -28,6 +38,13 @@ export class TimeOffPoliciesRoutes {
       carryoverExpiryType: body.carryoverExpiryType,
       carryoverExpiryValue: body.carryoverExpiryValue ?? null,
       carryoverExpiryUnit: body.carryoverExpiryUnit ?? null,
+
+      allowNegativeCarryover: body.allowNegativeCarryover,
+      negativeCarryoverLimit: body.negativeCarryoverLimit ?? null,
+
+      allowNegativeBalance: body.allowNegativeBalance,
+      maxNegativeBalance: body.maxNegativeBalance ?? null,
+      negativeBalanceCappedByQuota: body.negativeBalanceCappedByQuota,
     });
 
     return Response.json(data);
@@ -55,6 +72,15 @@ export class TimeOffPoliciesRoutes {
       paid: body.paid,
       hiddenFromEmployees: body.hiddenFromEmployees,
 
+      effectiveDate: body.effectiveDate ?? null,
+
+      countingMode: body.countingMode,
+      validWeekdays: body.validWeekdays,
+      includePublicHolidays: body.includePublicHolidays,
+
+      entitlementGrantingMode: body.entitlementGrantingMode,
+      allowRequestsInAdvanceOfAccrual: body.allowRequestsInAdvanceOfAccrual,
+
       yearlyQuota: body.yearlyQuota ?? null,
       unlimitedQuota: body.unlimitedQuota,
 
@@ -68,6 +94,13 @@ export class TimeOffPoliciesRoutes {
       carryoverExpiryType: body.carryoverExpiryType,
       carryoverExpiryValue: body.carryoverExpiryValue ?? null,
       carryoverExpiryUnit: body.carryoverExpiryUnit ?? null,
+
+      allowNegativeCarryover: body.allowNegativeCarryover,
+      negativeCarryoverLimit: body.negativeCarryoverLimit ?? null,
+
+      allowNegativeBalance: body.allowNegativeBalance,
+      maxNegativeBalance: body.maxNegativeBalance ?? null,
+      negativeBalanceCappedByQuota: body.negativeBalanceCappedByQuota,
     });
 
     return Response.json(data);

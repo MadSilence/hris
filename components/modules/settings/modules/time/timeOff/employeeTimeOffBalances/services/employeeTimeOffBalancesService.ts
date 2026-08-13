@@ -1,8 +1,6 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type {
-  EmployeeTimeOffBalance,
-  EmployeeTimeOffBalanceAdjustment,
-} from "@/models/timeOff";
+import type { EmployeeTimeOffBalance } from "@/models/timeOff";
+import type { EmployeeTimeOffBalanceTransactionDTO } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 
 export class EmployeeTimeOffBalancesService {
   public async getById(id: string): Promise<EmployeeTimeOffBalance> {
@@ -13,11 +11,11 @@ export class EmployeeTimeOffBalancesService {
     return internalApiClient.get<EmployeeTimeOffBalance[]>(`/users/${userId}/time-off-balances`);
   }
 
-  public async listAdjustments(
+  public async listTransactions(
     balanceId: string
-  ): Promise<EmployeeTimeOffBalanceAdjustment[]> {
-    return internalApiClient.get<EmployeeTimeOffBalanceAdjustment[]>(
-      `/time-off/balances/${balanceId}/adjustments`,
+  ): Promise<EmployeeTimeOffBalanceTransactionDTO[]> {
+    return internalApiClient.get<EmployeeTimeOffBalanceTransactionDTO[]>(
+      `/time-off/balances/${balanceId}/transactions`,
     );
   }
 }

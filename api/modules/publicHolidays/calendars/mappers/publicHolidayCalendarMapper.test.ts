@@ -18,6 +18,7 @@ describe("PublicHolidayCalendarMapper", () => {
     sourceLocale: "pl-PL",
     archivedAt: null,
     archivedBy: null,
+    holidayCount: 0,
   };
 
   it("maps public holiday calendar dto to model", () => {

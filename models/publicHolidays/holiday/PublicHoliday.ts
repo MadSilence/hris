@@ -4,4 +4,5 @@ export interface PublicHoliday {
   calendarYear: number;
   name: string;
   holidayDate: string;
+  endDate: string;
 }

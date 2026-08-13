@@ -23,6 +23,7 @@ export type NavItem = {
   label: string;
   href: string;
   Icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  badge?: number;
 };
 
 export type SidebarProfile = {
@@ -84,6 +85,8 @@ const AppSidebar: FC<SidebarProps> = ({
   const renderItem = (item: NavItem) => {
     const active = isActive(item.href);
     const Icon = item.Icon;
+    const badge = item.badge && item.badge > 0 ? item.badge : 0;
+    const badgeLabel = badge > 99 ? "99+" : String(badge);
 
     return (
       <SidebarMenuItem key={item.href}>
@@ -108,12 +111,22 @@ const AppSidebar: FC<SidebarProps> = ({
           <Link
             href={item.href}
             className={[
-              "no-underline hover:no-underline",
+              "relative no-underline hover:no-underline",
               collapsed ? "justify-center gap-0" : "gap-3",
             ].join(" ")}
           >
             {Icon ? <Icon aria-hidden focusable={false}/> : null}
             {!collapsed ? <span>{item.label}</span> : null}
+
+            {badge > 0 ? (
+              collapsed ? (
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-brown-600" aria-hidden/>
+              ) : (
+                <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brown-600 px-1.5 text-xs font-medium text-white">
+                  {badgeLabel}
+                </span>
+              )
+            ) : null}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>

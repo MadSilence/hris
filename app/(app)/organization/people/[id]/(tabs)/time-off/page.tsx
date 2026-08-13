@@ -1,15 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
+import { UserTimeOffCalendar } from "@/components/modules/calendar/components/UserTimeOffBalances/UserTimeOffCalendar";
 
 export default function TimeOffPage() {
   const params = useParams();
   const userId = params.id as string;
 
   return (
-    <div className="max-h-[72vh] w-full overflow-auto pb-6">
-      <UserCalendarContainer userId={userId} variant="compact" />
+    <div className="h-[72vh] w-full">
+      <UserTimeOffCalendar userId={userId} />
     </div>
   );
 }

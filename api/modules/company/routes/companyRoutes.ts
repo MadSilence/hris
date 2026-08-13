@@ -5,6 +5,11 @@ export class CompanyRoutes {
     const company = await hrisApiCompanyService.getCompany();
     return Response.json(company);
   }
+
+  public async getSettings() {
+    const settings = await hrisApiCompanyService.getSettings();
+    return Response.json(settings);
+  }
 }
 
 export const companyRoutes = new CompanyRoutes();

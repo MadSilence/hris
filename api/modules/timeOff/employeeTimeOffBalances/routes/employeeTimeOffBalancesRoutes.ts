@@ -38,9 +38,9 @@ export class EmployeeTimeOffBalancesRoutes {
     return Response.json(data);
   }
 
-  public async listAdjustments(_req: Request, id: string) {
+  public async listTransactions(_req: Request, id: string) {
     const data =
-      await hrisEmployeeTimeOffBalancesService.listAdjustments(id);
+      await hrisEmployeeTimeOffBalancesService.listTransactions(id);
     return Response.json(data);
   }
 }

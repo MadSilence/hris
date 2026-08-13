@@ -1,5 +1,13 @@
 export const TIME_OFF_QUERY_KEY = "timeOff";
 
+export const getLeaveTypesQueryKey = () => [TIME_OFF_QUERY_KEY, "leaveTypes"];
+
+export const getLeaveTypeQueryKey = (leaveTypeId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "leaveTypes",
+  leaveTypeId,
+];
+
 export const getTimeOffPoliciesQueryKey = () => [TIME_OFF_QUERY_KEY, "policies"];
 
 export const getTimeOffPolicyQueryKey = (policyId: string) => [
@@ -13,6 +21,20 @@ export const getTimeOffPolicyApprovalSettingsQueryKey = (policyId: string) => [
   "policies",
   policyId,
   "approvalSettings",
+];
+
+export const getTimeOffPolicyRequestRulesQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "requestRules",
+];
+
+export const getTimeOffPolicyEditRulesQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "editRules",
 ];
 
 export const getTimeOffPolicyAssignmentsQueryKey = (policyId: string) => [
@@ -35,9 +57,9 @@ export const getEmployeeTimeOffBalancesByUserQueryKey = (userId: string) => [
   userId,
 ];
 
-export const getEmployeeTimeOffBalanceAdjustmentsQueryKey = (
+export const getEmployeeTimeOffBalanceTransactionsQueryKey = (
   balanceId: string
-) => [TIME_OFF_QUERY_KEY, "balances", balanceId, "adjustments"];
+) => [TIME_OFF_QUERY_KEY, "balances", balanceId, "transactions"];
 
 export const getTimeOffRequestQueryKey = (requestId: string) => [
   TIME_OFF_QUERY_KEY,

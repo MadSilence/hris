@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crosshair, Download, Info, MoreHorizontal, Users } from "lucide-react";
+import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/public/desact/src/components/ui/tabs";
@@ -16,7 +16,6 @@ import { TeamPeopleTab } from "@/components/modules/settings/modules/teams/compo
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ExportOrgTreeModal } from "@/components/modules/settings/shared/ExportOrgTreeModal";
-import { Button } from "@/public/desact/src/components/ui/button";
 
 type Props = {
   team: TeamTreeNode;
@@ -74,7 +73,6 @@ export function TeamDetailsPanel({
   const [activeTab, setActiveTab] = useState("overview");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const isArchived = team.status === "ARCHIVED";
-  const isRoot = !team.parentId;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
@@ -110,18 +108,6 @@ export function TeamDetailsPanel({
             <Crosshair className="h-4 w-4" />
           </button>
 
-          {isRoot && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5"
-              onClick={() => setIsExportOpen(true)}
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
-          )}
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -132,9 +118,7 @@ export function TeamDetailsPanel({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {!isRoot && (
-                <DropdownMenuItem onSelect={() => setIsExportOpen(true)}>Export…</DropdownMenuItem>
-              )}
+              <DropdownMenuItem onSelect={() => setIsExportOpen(true)}>Export…</DropdownMenuItem>
               <PermissionGate resource="ORG.TEAM" action="EDIT">
                 {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
                 {!isArchived && (
