@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
+import { AttributeType } from "@/models/attribute/AttributeType";
 import { PersonalInfoSidebar } from "./components/PersonalInfoSidebar";
 import { PersonalInfoAttributesList } from "./components/PersonalInfoAttributesList";
 import { User } from "@/models/user/User";
@@ -64,6 +65,19 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       .filter((g) => g.attributes.length > 0);
   }, [groups, user?.fieldAccess]);
 
+  // Sensitive fields without VIEW: the server sends them with a masked value and access "MASKED",
+  // so they stay listed but are neither readable nor editable.
+  const maskedAttrIds = useMemo(() => {
+    const fa = user?.fieldAccess ?? {};
+    const ids = new Set<string>();
+    for (const g of groups) {
+      for (const a of g.attributes) {
+        if (fa[`attr:${a.id}`] === "MASKED") ids.add(a.id);
+      }
+    }
+    return ids;
+  }, [groups, user?.fieldAccess]);
+
   const editableAttrIds = useMemo(() => {
     const fa = user?.fieldAccess ?? {};
     const ids = new Set<string>();
@@ -76,6 +90,43 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   }, [groups, user?.fieldAccess]);
 
   const hasAnyEditable = editableAttrIds.size > 0;
+
+  // Client-side validity per field (reported by rows) — blocks Save while invalid.
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const setFieldError = useCallback((attrId: string, err: string | null) => {
+    setFieldErrors((prev) => {
+      if (err) {
+        if (prev[attrId] === err) return prev;
+        return { ...prev, [attrId]: err };
+      }
+      if (!(attrId in prev)) return prev;
+      const { [attrId]: _omit, ...rest } = prev;
+      return rest;
+    });
+  }, []);
+  const hasErrors = Object.keys(fieldErrors).length > 0;
+
+  // Prefill empty, editable, default-capable fields with their configured default on edit.
+  const applyDefaults = (base: Record<string, unknown>): Record<string, unknown> => {
+    const capable = new Set<AttributeType>([
+      AttributeType.TEXT,
+      AttributeType.EMAIL,
+      AttributeType.URL,
+      AttributeType.NUMBER,
+      AttributeType.DATE,
+    ]);
+    const next = { ...base };
+    for (const g of groups) {
+      for (const a of g.attributes) {
+        if (!editableAttrIds.has(a.id) || !capable.has(a.type)) continue;
+        const dv = a.defaultValue;
+        if (dv == null || dv === "") continue;
+        const cur = next[a.id];
+        if (cur === undefined || cur === null || cur === "") next[a.id] = dv;
+      }
+    }
+    return next;
+  };
 
   const sectionIds = visibleGroups.map((g) => g.id);
   const { activeId, registerSection, scrollToId } = useActiveSectionScroll({
@@ -103,11 +154,14 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
   const onEditToggle = () => {
     setSaveError(null);
+    setFieldErrors({});
+    setDraftValues(applyDefaults(initialValues));
     setIsEdit(true);
   };
   const onCancel = () => {
     setDraftValues(initialValues);
     setSaveError(null);
+    setFieldErrors({});
     setIsEdit(false);
   };
   const onSave = async () => {
@@ -180,9 +234,11 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
           registerSection={registerSection}
           isEdit={isEdit}
           editableAttrIds={editableAttrIds}
+          maskedAttrIds={maskedAttrIds}
           onChangeValue={(attrId, v) =>
             setDraftValues((d) => ({ ...d, [attrId]: v }))
           }
+          onValidityChange={setFieldError}
           headerActions={
             !isEdit ? (
               hasAnyEditable ? (
@@ -198,7 +254,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
                 <Button variant="outline" onClick={onCancel} disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button onClick={onSave} disabled={!dirty || isSaving}>
+                <Button onClick={onSave} disabled={!dirty || isSaving || hasErrors}>
                   {isSaving ? "Saving…" : "Save"}
                 </Button>
               </div>

@@ -9,20 +9,29 @@ import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 
-import { ALL_ATTRIBUTE_TYPES, AttributeOption, AttributeType, isOptionsType, isUniqueType, } from "@/models/attribute";
+import {
+  ALL_ATTRIBUTE_TYPES,
+  AttributeOption,
+  AttributeType,
+  isOptionsType,
+  isTextConstrainedType,
+  isUniqueType,
+} from "@/models/attribute";
 
 import { TypeSelect } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/TypeSelect";
 import { OptionsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/OptionsEditor";
-import { NumberScaleRow } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/NumberScaleRow";
-import { DateSettings } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/DateSettings";
-import { UniqueSelect } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/UniqueSelect";
+import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
+import { ObjectFieldsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/ObjectFieldsEditor/ObjectFieldsEditor";
 import {
   AttributeConfigFields,
   AttributeConfig,
 } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeConfigFields";
+import { ObjectFieldDef } from "@/models/attribute/objectFields";
 
 export interface CreateAttributeFormProps {
   isLoading?: boolean;
+  /** Names already used in this section — checked here so the clash shows before a round-trip. */
+  existingNames?: string[];
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
   onSubmitAction: (values: CreateAttributeFormValues) => void | Promise<void>;
@@ -32,16 +41,18 @@ export type CreateAttributeFormValues = {
   name: string;
   type: AttributeType;
   unique: boolean;
+  sensitive: boolean;
   decScale: number | null;
   dateHideYearPublic: boolean;
   options?: AttributeOption[];
+  objectFields?: ObjectFieldDef[];
   config: AttributeConfig;
 };
 
 function sanitizeConfig(type: AttributeType, c: AttributeConfig): AttributeConfig {
   const isNumber = type === AttributeType.NUMBER;
-  const isText =
-    type === AttributeType.TEXT || type === AttributeType.EMAIL || type === AttributeType.URL;
+  const isText = isTextConstrainedType(type);
+  const isLongText = type === AttributeType.LONG_TEXT;
   const isDate = type === AttributeType.DATE;
   const isMulti = type === AttributeType.MULTI_SELECT;
 
@@ -52,8 +63,10 @@ function sanitizeConfig(type: AttributeType, c: AttributeConfig): AttributeConfi
     minValue: isNumber ? c.minValue ?? null : null,
     maxValue: isNumber ? c.maxValue ?? null : null,
     onlyPositive: isNumber ? !!c.onlyPositive : false,
-    minLength: isText ? c.minLength ?? null : null,
-    maxLength: isText ? c.maxLength ?? null : null,
+    // Long text carries length limits too (the editor offers them) — stripping them here silently
+    // dropped what the admin typed.
+    minLength: isText || isLongText ? c.minLength ?? null : null,
+    maxLength: isText || isLongText ? c.maxLength ?? null : null,
     regex: isText && c.regex?.trim() ? c.regex.trim() : null,
     minDate: isDate ? c.minDate ?? null : null,
     maxDate: isDate ? c.maxDate ?? null : null,
@@ -62,19 +75,28 @@ function sanitizeConfig(type: AttributeType, c: AttributeConfig): AttributeConfi
   };
 }
 
-const schema = yup.object({
+const buildSchema = (existingNames: string[]) => {
+  const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
+
+  return yup.object({
   name: yup
     .string()
     .trim()
     .required("Please enter an attribute name.")
     .min(2)
     .max(120)
-    .nonNullable(),
+    .nonNullable()
+    .test(
+      "unique",
+      "An attribute with this name already exists in this section.",
+      (value) => !value || !taken.has(value.trim().toLowerCase()),
+    ),
   type: yup
     .mixed<AttributeType>()
     .oneOf(ALL_ATTRIBUTE_TYPES)
     .required("Select attribute type."),
   unique: yup.boolean().required(),
+  sensitive: yup.boolean().required(),
   decScale: yup
     .number()
     .nullable()
@@ -96,7 +118,8 @@ const schema = yup.object({
       otherwise: (s) => s.strip(),
     })
     .optional(),
-});
+  });
+};
 
 function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues {
   const type = values.type;
@@ -105,6 +128,7 @@ function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues 
     name: values.name.trim(),
     type,
     unique: isUniqueType(type) ? values.unique : false,
+    sensitive: !!values.sensitive,
     decScale: type === AttributeType.NUMBER ? values.decScale : null,
     dateHideYearPublic:
       type === AttributeType.DATE ? values.dateHideYearPublic ?? false : false,
@@ -113,12 +137,14 @@ function sanitize(values: CreateAttributeFormValues): CreateAttributeFormValues 
         (o) => o && o.value.trim() !== "" && o.color.trim() !== "",
       )
       : undefined,
+    objectFields: type === AttributeType.OBJECT ? (values.objectFields ?? []) : undefined,
     config: sanitizeConfig(type, values.config ?? {}),
   };
 }
 
 export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
   isLoading = false,
+  existingNames = [],
   onCancelAction,
   onDirtyChangeAction,
   onSubmitAction,
@@ -133,12 +159,14 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       name: "",
       type: AttributeType.TEXT,
       unique: false,
+      sensitive: false,
       decScale: null,
       dateHideYearPublic: false,
       options: [],
+      objectFields: [],
       config: {},
     },
-    validationSchema: schema,
+    validationSchema: buildSchema(existingNames),
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -157,6 +185,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       void formik.setFieldValue("dateHideYearPublic", false);
     }
     if (!isUniqueType(t)) void formik.setFieldValue("unique", false);
+    if (t !== AttributeType.OBJECT) void formik.setFieldValue("objectFields", []);
   }, [formik.values.type]);
 
   const type = formik.values.type;
@@ -180,8 +209,9 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+      {/* Only the fields scroll — the modal keeps one size whatever type is picked. */}
+      <div className="-mx-1 min-h-0 flex-1 space-y-6 overflow-y-auto px-1 py-1">
         <div className="space-y-2">
           <Label htmlFor="attribute-name">Attribute name</Label>
           <Input
@@ -218,34 +248,71 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
         </div>
 
         {showOptions && (
-          <OptionsEditor
-            type={type}
-            options={formik.values.options ?? []}
-            onChange={(options) => formik.setFieldValue("options", options)}
-          />
+          <div className="space-y-1.5">
+            <Label>Options</Label>
+              <OptionsEditor
+              type={type}
+              options={formik.values.options ?? []}
+              onChange={(options) => formik.setFieldValue("options", options)}
+            />
+          </div>
         )}
 
         {isNumber && (
-          <NumberScaleRow
-            value={formik.values.decScale}
-            error={formik.errors.decScale as string | undefined}
-            onChange={(value) => formik.setFieldValue("decScale", value)}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="attribute-dec-scale">Decimal scale</Label>
+            <Input
+              id="attribute-dec-scale"
+              type="number"
+              min={0}
+              value={formik.values.decScale ?? ""}
+              disabled={isLoading}
+              placeholder="e.g. 2 — leave empty for whole numbers"
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                void formik.setFieldValue("decScale", v === "" ? null : Number(v));
+              }}
+              aria-invalid={!!formik.errors.decScale}
+            />
+            {formik.errors.decScale && (
+              <p className="text-sm text-destructive">{String(formik.errors.decScale)}</p>
+            )}
+          </div>
         )}
 
         {isDate && (
-          <DateSettings
-            hideYearPublic={formik.values.dateHideYearPublic ?? false}
-            onChangeHideYearPublic={(value) =>
-              formik.setFieldValue("dateHideYearPublic", value)
-            }
+          <SettingToggle
+            label="Hide the year"
+            hint="Show only day and month (e.g. for birthdays)."
+            checked={formik.values.dateHideYearPublic ?? false}
+            disabled={isLoading}
+            onCheckedChange={(value) => formik.setFieldValue("dateHideYearPublic", value)}
           />
         )}
 
         {showUnique && (
-          <UniqueSelect
+          <SettingToggle
+            label="Unique value"
+            hint="No two people can have the same value."
             checked={formik.values.unique}
-            onChangeAction={(value) => formik.setFieldValue("unique", value)}
+            disabled={isLoading}
+            onCheckedChange={(value) => formik.setFieldValue("unique", value)}
+          />
+        )}
+
+        <SettingToggle
+          label="Sensitive"
+          hint="Nobody gets access automatically, and people without it see a placeholder instead of the value."
+          checked={formik.values.sensitive}
+          disabled={isLoading}
+          onCheckedChange={(value) => formik.setFieldValue("sensitive", value)}
+        />
+
+        {type === AttributeType.OBJECT && (
+          <ObjectFieldsEditor
+            fields={formik.values.objectFields ?? []}
+            onChange={(f) => formik.setFieldValue("objectFields", f)}
+            disabled={isLoading}
           />
         )}
 
@@ -259,7 +326,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
         />
       </div>
 
-      <DialogFooter className="mt-8">
+      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
         <Button
           type="button"
           variant="outline"

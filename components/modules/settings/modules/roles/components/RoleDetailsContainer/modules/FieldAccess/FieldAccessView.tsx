@@ -240,6 +240,14 @@ export default function FieldAccessView({
                     >
                       <p className="min-w-0 truncate text-sm font-medium">
                         {field.label ?? field.key}
+                        {field.sensitive && (
+                          <span
+                            className="ml-2 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 align-middle text-[10px] font-normal uppercase tracking-wide text-amber-700"
+                            title="Sensitive: access is never granted automatically; without it people see a placeholder"
+                          >
+                            Sensitive
+                          </span>
+                        )}
                       </p>
 
                       <TypeChip type={field.type} />

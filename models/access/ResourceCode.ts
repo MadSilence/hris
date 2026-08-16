@@ -19,6 +19,13 @@ export const RESOURCE_CODES = [
   "JOBS.LEVEL",
   "JOBS.TITLE",
   "ROLES.ROLE",
+  // Per-category "may mute this for myself" right. These are granted to the Default User role
+  // out of the box, so they must exist here — the matrix that doesn't list them can't manage them.
+  "NOTIFICATION.APPROVALS",
+  "NOTIFICATION.ORG_CHANGES",
+  "NOTIFICATION.REMINDERS",
+  "NOTIFICATION.POLICIES",
+  "NOTIFICATION.SYSTEM",
 ] as const;
 
 export type ResourceCode = (typeof RESOURCE_CODES)[number];

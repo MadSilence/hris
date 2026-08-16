@@ -16,3 +16,4 @@ export * from "./TimeOffPolicyApprovalSettings";
 export * from "./TimeOffPolicyAssignment";
 export * from "./EmployeeTimeOffBalance";
 export * from "./TimeOffRequest";
+export * from "./TimeOffRequestDuration";

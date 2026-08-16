@@ -4,6 +4,8 @@ import { roleMapper } from "@/api/modules/roles/mappers/roleMapper";
 import { DuplicateRoleRequest } from "@/api/modules/roles/dto/DuplicateRoleRequest";
 import { CreateRoleRequest } from "@/api/modules/roles/dto/CreateRoleRequest";
 import { UpdateRoleRequest } from "@/api/modules/roles/dto/UpdateRoleRequest";
+import { RoleDeleteImpactDTO } from "@/api/modules/roles/dto/RoleDeleteImpactDTO";
+import { RoleAccessPreviewDTO } from "@/api/modules/roles/dto/RoleAccessPreviewDTO";
 import { NewEntity, UpdatedEntity } from "@/models/misc";
 import {
   RolePermissionsDTO,
@@ -17,10 +19,32 @@ import {
 } from "@/api/modules/roles/dto/RoleFieldAccessDTO";
 
 export class HrisApiRolesService {
-  public async getRoles(): Promise<Role[]> {
-    const response = await hrisApiRolesClient.getRoles();
+  /**
+   * Archived roles are fetched too, like offices and legal entities: the list filters them out
+   * behind a "Show archived" toggle, and the detail page needs the row to be able to restore it.
+   */
+  public async getRoles(includeArchived = true): Promise<Role[]> {
+    const response = await hrisApiRolesClient.getRoles(includeArchived);
     return response.map((role) => roleMapper.mapRoleDTOtoRole(role));
   };
+
+  public async previewRoleAccess(roleIds: string[]): Promise<RoleAccessPreviewDTO> {
+    return hrisApiRolesClient.previewRoleAccess(roleIds);
+  }
+
+  public async getRoleDeleteImpact(roleId: string): Promise<RoleDeleteImpactDTO> {
+    return hrisApiRolesClient.getRoleDeleteImpact(roleId);
+  }
+
+  public async archiveRole(id: string): Promise<UpdatedEntity> {
+    const response = await hrisApiRolesClient.archiveRole(id);
+    return { id: response.id };
+  }
+
+  public async restoreRole(id: string): Promise<UpdatedEntity> {
+    const response = await hrisApiRolesClient.restoreRole(id);
+    return { id: response.id };
+  }
 
   public async getRolePermissions(roleId: string): Promise<RolePermissionsDTO> {
     return hrisApiRolesClient.getRolePermissions(roleId);
@@ -67,6 +91,14 @@ export class HrisApiRolesService {
       id: createResponse.id,
     };
   };
+
+  public async exportRoles(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiRolesClient.exportRoles(format);
+  }
+
+  public async exportRoleUsers(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiRolesClient.exportRoleUsers(id, format);
+  }
 
   public async deleteRole(id: string): Promise<UpdatedEntity> {
     // Backend responds 204 No Content (no body), so don't read from the response.

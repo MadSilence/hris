@@ -14,6 +14,7 @@ import {
   availableScopeChoices,
   isMissingViewAccess,
   RolePermissionsDraft,
+  RoleScopeFilters,
   SCOPE_CHOICE_LABELS,
   ScopeChoice,
   scopesToChoice,
@@ -44,6 +45,8 @@ export interface RolePermissionsViewProps {
   openGroups: string[];
   onOpenGroupsChange: (value: string[]) => void;
   onChangeAction: (resource: ResourceCode, action: AccessAction, choice: ScopeChoice) => void;
+  scopeFilters?: RoleScopeFilters;
+  onEditFilters?: (resource: ResourceCode, action: AccessAction) => void;
 }
 
 export default function RolePermissionsView({
@@ -55,6 +58,8 @@ export default function RolePermissionsView({
   openGroups,
   onOpenGroupsChange,
   onChangeAction,
+  scopeFilters,
+  onEditFilters,
 }: RolePermissionsViewProps) {
   const needle = query.trim().toLowerCase();
 
@@ -141,30 +146,50 @@ export default function RolePermissionsView({
                         const current = scopesToChoice(actions?.[action]);
                         const server = scopesToChoice(serverDraft[resource.code]?.[action]);
 
-                        return (
-                          <Select
-                            key={action}
-                            value={current}
-                            onValueChange={(value) =>
-                              onChangeAction(resource.code, action, value as ScopeChoice)
-                            }
-                            disabled={readOnly}
-                          >
-                            <SelectTrigger className="w-full">
-                              <span className="flex min-w-0 items-center gap-2">
-                                <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass(current, server)}`}/>
-                                <SelectValue/>
-                              </span>
-                            </SelectTrigger>
+                        const conditions = scopeFilters?.[resource.code]?.[action]?.filters.length ?? 0;
 
-                            <SelectContent>
-                              {choices.map((choice) => (
-                                <SelectItem key={choice} value={choice}>
-                                  {SCOPE_CHOICE_LABELS[choice]}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                        return (
+                          <div key={action} className="flex min-w-0 flex-col gap-1">
+                            <Select
+                              value={current}
+                              onValueChange={(value) =>
+                                onChangeAction(resource.code, action, value as ScopeChoice)
+                              }
+                              disabled={readOnly}
+                            >
+                              <SelectTrigger className="w-full">
+                                <span className="flex min-w-0 items-center gap-2">
+                                  <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass(current, server)}`}/>
+                                  <SelectValue/>
+                                </span>
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {choices.map((choice) => (
+                                  <SelectItem key={choice} value={choice}>
+                                    {SCOPE_CHOICE_LABELS[choice]}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
+                            {/* A custom scope means nothing until its filter exists, so the cell
+                                says so rather than looking configured. */}
+                            {current === "CUSTOM" && (
+                              <button
+                                type="button"
+                                disabled={readOnly}
+                                onClick={() => onEditFilters?.(resource.code, action)}
+                                className={`self-start text-xs underline-offset-2 hover:underline ${
+                                  conditions === 0 ? "text-amber-700" : "text-muted-foreground"
+                                }`}
+                              >
+                                {conditions === 0
+                                  ? "Set conditions"
+                                  : `${conditions} ${conditions === 1 ? "condition" : "conditions"}`}
+                              </button>
+                            )}
+                          </div>
                         );
                       })}
                     </div>

@@ -8,11 +8,11 @@ export const renameRoleAction = async (
   submission: RenameRoleActionInput
 ): Promise<RenameRoleActionOutput> => {
   try {
-    // The backend update endpoint replaces the whole payload, so the current
-    // description has to be sent back to avoid wiping it on a rename.
+    // Partial patch: only what the form actually offered is sent, so a rename leaves the
+    // description alone and vice versa.
     const data = await hrisApiRolesService.updateRoleName(submission.id, {
       newName: submission.name,
-      description: submission.description ?? "",
+      description: submission.description,
     });
 
     return {

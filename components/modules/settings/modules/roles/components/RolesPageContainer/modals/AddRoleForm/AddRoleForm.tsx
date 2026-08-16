@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -8,6 +8,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Switch } from "@/public/desact/src/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 
@@ -20,6 +21,7 @@ type Template = {
 export type AddRoleFormValues = {
   useTemplate: boolean;
   name: string;
+  description: string;
   templateId: string;
   templateName: string;
 };
@@ -27,12 +29,17 @@ export type AddRoleFormValues = {
 export interface AddRoleFormProps {
   isLoading?: boolean;
   templates: Template[];
+  /** Every existing role name, so a collision is caught here instead of coming back as R00001. */
+  existingNames?: string[];
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
   onSubmitAction: (values: AddRoleFormValues) => void | Promise<void>;
 }
 
-const schema = yup.object({
+const buildSchema = (existingNames: string[]) => {
+  const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
+
+  return yup.object({
   useTemplate: yup.boolean().required(),
   name: yup.string().when("useTemplate", {
     is: false,
@@ -41,9 +48,15 @@ const schema = yup.object({
         .trim()
         .required("Please enter a role name.")
         .min(2, "Role name must be at least 2 characters.")
-        .max(120, "Role name must be at most 120 characters."),
+        .max(120, "Role name must be at most 120 characters.")
+        .test(
+          "unique",
+          "A role with this name already exists.",
+          (value) => !value || !taken.has(value.trim().toLowerCase()),
+        ),
     otherwise: (s) => s.strip(),
   }),
+  description: yup.string().max(500, "Description must be at most 500 characters."),
   templateId: yup.string().when("useTemplate", {
     is: true,
     then: (s) => s.required("Please select a template."),
@@ -54,13 +67,15 @@ const schema = yup.object({
     then: (s) => s.trim().max(120, "Role name must be at most 120 characters."),
     otherwise: (s) => s.strip(),
   }),
-});
+  });
+};
 
 function sanitize(values: AddRoleFormValues): AddRoleFormValues {
   if (!values.useTemplate) {
     return {
       useTemplate: false,
       name: values.name.trim(),
+      description: values.description.trim(),
       templateId: "",
       templateName: "",
     };
@@ -69,6 +84,7 @@ function sanitize(values: AddRoleFormValues): AddRoleFormValues {
   return {
     useTemplate: true,
     name: "",
+    description: values.description.trim(),
     templateId: values.templateId,
     templateName: values.templateName.trim(),
   };
@@ -77,6 +93,7 @@ function sanitize(values: AddRoleFormValues): AddRoleFormValues {
 export const AddRoleForm: FC<AddRoleFormProps> = ({
   isLoading = false,
   templates,
+  existingNames = [],
   onCancelAction,
   onDirtyChangeAction,
   onSubmitAction,
@@ -86,10 +103,13 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
     [onSubmitAction],
   );
 
+  const schema = useMemo(() => buildSchema(existingNames), [existingNames]);
+
   const formik = useFormik<AddRoleFormValues>({
     initialValues: {
       useTemplate: false,
       name: "",
+      description: "",
       templateId: templates[0]?.id ?? "",
       templateName: "",
     },
@@ -174,6 +194,26 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
             />
             {formik.errors.name && (
               <p className="text-sm text-destructive">{formik.errors.name}</p>
+            )}
+          </div>
+        )}
+
+        {!formik.values.useTemplate && (
+          <div className="space-y-2">
+            <Label htmlFor="role-description">Description optional</Label>
+            <Textarea
+              id="role-description"
+              value={formik.values.description}
+              onChange={(e) =>
+                formik.setFieldValue("description", e.currentTarget.value)
+              }
+              placeholder="What is this role for?"
+              rows={3}
+              disabled={isLoading}
+              aria-invalid={!!formik.errors.description}
+            />
+            {formik.errors.description && (
+              <p className="text-sm text-destructive">{formik.errors.description}</p>
             )}
           </div>
         )}

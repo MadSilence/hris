@@ -62,12 +62,12 @@ describe("UpsertRoleNameModal", () => {
     jest.clearAllMocks();
   });
 
-  it("renders rename mode", () => {
+  it("renders edit mode with the description field", () => {
     renderModal();
 
     expect(
       screen.getByRole("heading", {
-        name: /rename role/i,
+        name: /edit role/i,
       }),
     ).toBeInTheDocument();
 
@@ -75,7 +75,17 @@ describe("UpsertRoleNameModal", () => {
       expect.objectContaining({
         initialName: "Admins",
         submitText: "Save changes",
+        // A description can only be edited here — that is the whole point of the mode.
+        showDescription: true,
       }),
+    );
+  });
+
+  it("hides the description field when duplicating", () => {
+    renderModal({ mode: "duplicate" });
+
+    expect(mockForm).toHaveBeenCalledWith(
+      expect.objectContaining({ showDescription: false }),
     );
   });
 

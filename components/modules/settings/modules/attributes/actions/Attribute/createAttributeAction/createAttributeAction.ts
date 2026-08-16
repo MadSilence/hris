@@ -15,7 +15,7 @@ export const createAttributeAction = async (
       status: ActionStatus.SUCCESS,
       data: createEntity,
     };
-  } catch (e) {
+  } catch {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while creating an Attribute. Please try again.",
@@ -28,6 +28,7 @@ export type CreateAttributeActionInput = {
   groupId: string;
   type: AttributeType;
   isUnique: boolean;
+  sensitive?: boolean;
   decScale: number | null;
   hideYear: boolean;
   options?: AttributeOption[];
@@ -44,6 +45,7 @@ export type CreateAttributeActionInput = {
   maxDate?: string | null;
   minSelect?: number | null;
   maxSelect?: number | null;
+  objectFields?: string | null;
 };
 
 export type CreateAttributeActionOutput = {

@@ -13,6 +13,8 @@ export interface ExportDataModalProps {
   title: string;
   description: string;
   includedText: string;
+  /** Kept in the dialog rather than the console — a failed download is otherwise silent. */
+  errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: ExportDataFormValues) => void;
 }
@@ -23,6 +25,7 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
   title,
   description,
   includedText,
+  errorMessage,
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -44,6 +47,8 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <ExportDataForm
           isLoading={isLoading}

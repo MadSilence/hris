@@ -34,6 +34,8 @@ import {
   ExportDataFormValues,
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
@@ -117,7 +119,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 
     router.push("/settings/general/offices");
   }, [deleteAction.data?.status, router]);
-
+  if (error instanceof ForbiddenError) return <AccessDenied/>;
   if (error) throw error;
 
   if (isLoading) {

@@ -26,10 +26,12 @@ export interface RolesPageViewProps {
   hasMoreUsers?: boolean;
   isLoadingMoreUsers?: boolean;
   onLoadMoreUsers?: () => void;
-  onCreateRole?: (values: { name: string }) => void | Promise<void>;
-  onRenameRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
+  onCreateRole?: (values: { name: string; description?: string }) => void | Promise<void>;
+  onRenameRole?: (roleId: string, values: { name: string; description?: string }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
   onDeleteRole?: (roleId: string) => void | Promise<void>;
+  onArchiveRole?: (roleId: string, archived: boolean) => void | Promise<void>;
+  onExportRoles?: (values: { format: "csv" | "xlsx" }) => void;
   onApplyRoles?: (userId: string, roleIds: string[], currentRoleIds: string[]) => void | Promise<void>;
   isCreatingRole?: boolean;
   isSavingRoleName?: boolean;
@@ -58,6 +60,8 @@ export default function RolesPageView({
   onRenameRole,
   onDuplicateRole,
   onDeleteRole,
+  onArchiveRole,
+  onExportRoles,
   onApplyRoles,
   isCreatingRole = false,
   isSavingRoleName = false,
@@ -100,7 +104,9 @@ export default function RolesPageView({
             </div>
 
             <RolesPageHeader
+              existingRoleNames={(roleRows ?? []).map((role) => role.name)}
               onCreateRole={onCreateRole}
+              onExportRoles={onExportRoles}
               isCreatingRole={isCreatingRole}
               createRoleErrorMessage={createRoleErrorMessage}
             />
@@ -116,6 +122,7 @@ export default function RolesPageView({
             onRenameRole={onRenameRole}
             onDuplicateRole={onDuplicateRole}
             onDeleteRole={onDeleteRole}
+            onArchiveRole={onArchiveRole}
             isSavingRoleName={isSavingRoleName}
             isDeletingRole={isDeletingRole}
             saveRoleNameErrorMessage={saveRoleNameErrorMessage}
@@ -126,6 +133,8 @@ export default function RolesPageView({
           <UsersRolesTable
             userRows={userRows}
             usersLoading={usersLoading}
+            // Archived roles come through too: the form hides the ones nobody holds and keeps the
+            // ones a person still has, so they can at least be taken off.
             allRoles={roleRows ?? []}
             onApplyRoles={onApplyRoles}
             isApplyingRoles={isAssigningRoles}

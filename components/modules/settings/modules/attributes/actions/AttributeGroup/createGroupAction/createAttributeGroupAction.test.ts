@@ -6,7 +6,11 @@ import { groupsService } from "@/api/modules/groups/services/groupsService";
 import { ActionStatus } from "@/components/models/ActionStatus";
 
 jest.mock("next/cache");
-jest.mock("/api/modules/groups/services/groupsService/groupsService.ts");
+jest.mock("@/api/modules/groups/services/groupsService", () => ({
+  groupsService: {
+    createGroup: jest.fn(),
+  },
+}));
 
 describe("createAttributeGroupAction", () => {
   afterEach(() => {

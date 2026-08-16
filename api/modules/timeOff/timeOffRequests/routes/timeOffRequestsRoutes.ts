@@ -14,6 +14,16 @@ export class TimeOffRequestsRoutes {
     return Response.json(data);
   }
 
+  public async previewDuration(req: Request) {
+    const url = new URL(req.url);
+    const data = await hrisTimeOffRequestsService.previewDuration(
+      url.searchParams.get("assignmentId") ?? "",
+      url.searchParams.get("startDate") ?? "",
+      url.searchParams.get("endDate") ?? ""
+    );
+    return Response.json(data);
+  }
+
   public async getById(_req: Request, id: string) {
     const data = await hrisTimeOffRequestsService.getById(id);
     return Response.json(data);

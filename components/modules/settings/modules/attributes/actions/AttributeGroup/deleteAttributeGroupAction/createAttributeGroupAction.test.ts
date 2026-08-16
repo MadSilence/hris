@@ -6,7 +6,11 @@ import {
 } from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/deleteAttributeGroupAction";
 
 jest.mock("next/cache");
-jest.mock("/api/modules/groups/services/groupsService");
+jest.mock("@/api/modules/groups/services/groupsService", () => ({
+  groupsService: {
+    deleteAttributeGroup: jest.fn(),
+  },
+}));
 
 describe("deleteAttributeGroupAction", () => {
   afterEach(() => {

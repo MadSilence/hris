@@ -62,6 +62,19 @@ Object.defineProperty(window, "matchMedia", {
 window.scrollTo = () => {
 };
 
+// jsdom implements neither the Pointer Capture API nor scrollIntoView, both of which Radix (desact
+// Select, Dropdown, Dialog) calls when a listbox opens. Without these, any test that opens one dies
+// with "target.hasPointerCapture is not a function".
+Object.assign(Element.prototype, {
+  hasPointerCapture: Element.prototype.hasPointerCapture ?? (() => false),
+  setPointerCapture: Element.prototype.setPointerCapture ?? (() => {
+  }),
+  releasePointerCapture: Element.prototype.releasePointerCapture ?? (() => {
+  }),
+  scrollIntoView: Element.prototype.scrollIntoView ?? (() => {
+  }),
+});
+
 configure({
   testIdAttribute: "data-test",
 });

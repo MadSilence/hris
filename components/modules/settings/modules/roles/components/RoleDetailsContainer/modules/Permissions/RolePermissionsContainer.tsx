@@ -16,11 +16,14 @@ import {
   diffRolePermissions,
   draftFromPermissions,
   RolePermissionsDraft,
+  RoleScopeFilters,
   ScopeChoice,
+  scopeFiltersFromPermissions,
   scopesToChoice,
 } from "@/components/modules/settings/modules/roles/utils/rolePermissionsPayload";
 import RolePermissionsView from "./RolePermissionsView";
 import { RolePermissionsSummaryModal } from "./RolePermissionsSummaryModal";
+import { ScopeFilterModal } from "./ScopeFilterModal";
 
 function PermissionsSkeleton() {
   return (
@@ -43,6 +46,10 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
   const readOnly = !canEdit || isSystemRole;
 
   const [draft, setDraft] = React.useState<RolePermissionsDraft>({});
+  const [scopeFilters, setScopeFilters] = React.useState<RoleScopeFilters>({});
+  // Which cell's custom filter is being edited, if any.
+  const [editingCell, setEditingCell] =
+    React.useState<{ resource: ResourceCode; action: AccessAction } | null>(null);
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [openGroups, setOpenGroups] = React.useState<string[]>(
@@ -58,14 +65,23 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
     [data],
   );
 
+  const serverFilters = React.useMemo(
+    () => scopeFiltersFromPermissions(data?.permissions ?? []),
+    [data],
+  );
+
   React.useEffect(() => {
     setDraft(serverDraft);
-  }, [serverDraft]);
+    setScopeFilters(serverFilters);
+  }, [serverDraft, serverFilters]);
 
-  const payload = React.useMemo(() => buildRolePermissionsPayload(draft), [draft]);
+  const payload = React.useMemo(
+    () => buildRolePermissionsPayload(draft, scopeFilters),
+    [draft, scopeFilters],
+  );
   const serverPayload = React.useMemo(
-    () => buildRolePermissionsPayload(serverDraft),
-    [serverDraft],
+    () => buildRolePermissionsPayload(serverDraft, serverFilters),
+    [serverDraft, serverFilters],
   );
   const isDirty = JSON.stringify(payload) !== JSON.stringify(serverPayload);
 
@@ -169,9 +185,30 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
                   : undefined
             }
             onChangeAction={handleChange}
+            scopeFilters={scopeFilters}
+            onEditFilters={(resource, action) => setEditingCell({ resource, action })}
           />
         )}
       </CardContent>
+
+      {editingCell && (
+        <ScopeFilterModal
+          isOpen
+          grantLabel={`${editingCell.resource} · ${editingCell.action}`}
+          value={scopeFilters[editingCell.resource]?.[editingCell.action]}
+          onCancelAction={() => setEditingCell(null)}
+          onConfirmAction={(segment) => {
+            setScopeFilters((current) => ({
+              ...current,
+              [editingCell.resource]: {
+                ...(current[editingCell.resource] ?? {}),
+                [editingCell.action]: segment,
+              },
+            }));
+            setEditingCell(null);
+          }}
+        />
+      )}
 
       <RolePermissionsSummaryModal
         isOpen={reviewOpen}

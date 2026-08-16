@@ -18,6 +18,7 @@ export interface AssignedUsersTableContentProps {
   onLoadMore?: () => void;
   onRemoveUser: (userId: string) => void;
   disableRemove?: boolean;
+  emptyText?: string;
 }
 
 function StatusBadge({ status }: { status?: string | null }) {
@@ -57,6 +58,7 @@ export default function AssignedUsersTableContent({
   onLoadMore,
   onRemoveUser,
   disableRemove = false,
+  emptyText = "No users yet",
 }: AssignedUsersTableContentProps) {
   const hasData = rows.length > 0;
 
@@ -152,7 +154,7 @@ export default function AssignedUsersTableContent({
           {!isLoading && !hasData && (
             <TableRow>
               <TableCell colSpan={6}>
-                <div className="text-sm text-muted-foreground">No users yet</div>
+                <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
               </TableCell>
             </TableRow>
           )}

@@ -25,8 +25,9 @@ type AddRoleModalProps = {
   isLoading?: boolean;
   errorMessage?: string;
   templates: Template[];
+  existingNames?: string[];
   onCancelAction: () => void;
-  onCreateBlankAction: (values: { name: string }) => void | Promise<void>;
+  onCreateBlankAction: (values: { name: string; description?: string }) => void | Promise<void>;
   onCreateFromTemplateAction: (values: {
     templateId: string;
     name?: string;
@@ -38,6 +39,7 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
   isLoading = false,
   errorMessage,
   templates,
+  existingNames = [],
   onCancelAction,
   onCreateBlankAction,
   onCreateFromTemplateAction,
@@ -75,6 +77,7 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
 
     onCreateBlankAction({
       name: values.name.trim(),
+      description: (values.description ?? "").trim() || undefined,
     });
   };
 
@@ -102,6 +105,7 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
           <AddRoleForm
             isLoading={isLoading}
             templates={templates}
+            existingNames={existingNames}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}
             onSubmitAction={handleConfirm}

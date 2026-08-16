@@ -13,11 +13,6 @@ describe("attributeTypeUtils", () => {
       expect(result).toEqual("Select");
     });
 
-    it("should return correct label for STATUS", () => {
-      const result = getAttributeTypeLabel(AttributeType.STATUS);
-      expect(result).toEqual("Status");
-    });
-
     it("should return correct label for PERSON", () => {
       const result = getAttributeTypeLabel(AttributeType.PERSON);
       expect(result).toEqual("Person");

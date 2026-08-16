@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { ListPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
   CreateAttributeForm,
@@ -11,6 +12,10 @@ import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCa
 type CreateAttributeModalProps = {
   isOpen: boolean;
   isLoading: boolean;
+  /** Names already used in the target section, for the form's inline check. */
+  existingNames?: string[];
+  /** Server-side failure — shown here instead of the modal closing on its own. */
+  errorMessage?: string | null;
   onConfirmAction: (submission: CreateAttributeFormValues) => void;
   onRequestCloseAction: () => void;
 };
@@ -18,6 +23,8 @@ type CreateAttributeModalProps = {
 export const CreateAttributeModal: FC<CreateAttributeModalProps> = ({
   isOpen,
   isLoading = false,
+  existingNames,
+  errorMessage,
   onConfirmAction,
   onRequestCloseAction,
 }) => {
@@ -48,16 +55,33 @@ export const CreateAttributeModal: FC<CreateAttributeModalProps> = ({
           if (!open) requestClose();
         }}
       >
-        <DialogContent hideClose className="sm:max-w-2xl">
+        <DialogContent hideClose className="flex h-[min(85vh,44rem)] flex-col gap-4 overflow-hidden sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create Attribute</DialogTitle>
-            <DialogDescription>
-              Create a custom attribute for your data model.
-            </DialogDescription>
+            <div className="flex items-center gap-3 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
+                <ListPlus className="h-5 w-5" />
+              </span>
+              <div className="space-y-1">
+                <DialogTitle>Create attribute</DialogTitle>
+                <DialogDescription>
+                  A field people fill in on their profile.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
+
+          {errorMessage && (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              {errorMessage}
+            </p>
+          )}
 
           <CreateAttributeForm
             isLoading={isLoading}
+            existingNames={existingNames}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}
             onSubmitAction={onConfirmAction}

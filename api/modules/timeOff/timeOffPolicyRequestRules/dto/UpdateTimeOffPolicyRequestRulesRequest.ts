@@ -3,11 +3,8 @@ import { TimeOffCertificateRequirementType } from "./TimeOffCertificateRequireme
 
 export interface UpdateTimeOffPolicyRequestRulesRequest {
   minRequestUnit: TimeOffRequestUnit;
-  maxRequestUnit: TimeOffRequestUnit | null;
 
-  allowHalfDay: boolean;
-  allowHourlyRequests: boolean;
-
+  minDurationPerRequest: number | null;
   maxDurationPerRequest: number | null;
   minGapBetweenRequests: number | null;
   allowOverlappingRequests: boolean;

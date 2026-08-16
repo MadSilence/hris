@@ -1,9 +1,9 @@
 import type { FieldDTO } from "@/models/user/fields";
-import type { AttributeType } from "@/models/attribute";
+import { AttributeType } from "@/models/attribute";
 import type { ResourceCode } from "@/models/access";
 import type { BulkOperation } from "@/models/bulkEdit";
 
-export type EditFieldKind = "status" | "association" | "role" | "attr";
+export type EditFieldKind = "status" | "association" | "role" | "attr" | "systemScalar";
 export type EditValueSource = "status" | "departments" | "offices" | "legalEntities" | "jobs" | "roles" | "attribute";
 
 export type EditOption = { id: string; label: string };
@@ -34,6 +34,27 @@ export function buildEditableFields(
 
   if (canEdit("PEOPLE.PROFILE")) {
     out.push({ key: "sys:status", label: "Status", kind: "status", operations: ["SET"], valueSource: "status" });
+
+    // Scalar employment/lifecycle system fields (rendered by attrType in the modal's ValueEditor).
+    const dateOps: BulkOperation[] = ["SET", "CLEAR"];
+    out.push({ key: "sys:hire_date", label: "Hire date", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({ key: "sys:probation_end", label: "Probation end", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({ key: "sys:termination_date", label: "Termination date", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({
+      key: "sys:employment_type",
+      label: "Employment type",
+      kind: "systemScalar",
+      operations: dateOps,
+      valueSource: "attribute",
+      attrType: AttributeType.SELECT,
+      options: [
+        { id: "FULL_TIME", label: "Full-time" },
+        { id: "PART_TIME", label: "Part-time" },
+        { id: "CONTRACTOR", label: "Contractor" },
+        { id: "INTERN", label: "Intern" },
+        { id: "TEMPORARY", label: "Temporary" },
+      ],
+    });
   }
 
   for (const a of ASSOCIATIONS) {

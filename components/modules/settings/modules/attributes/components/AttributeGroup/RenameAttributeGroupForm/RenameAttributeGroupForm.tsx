@@ -96,7 +96,7 @@ export const RenameAttributeGroupForm: FC<
         )}
       </div>
 
-      <DialogFooter className="mt-8">
+      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
         <Button
           type="button"
           variant="outline"

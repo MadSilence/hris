@@ -131,6 +131,9 @@ export type PeoplePickerProps = {
   columns?: PeopleColumn[];
   /** Hidden filters merged into the resolve segment (e.g. exclude already-assigned people). Not shown in the builder. */
   extraFilters?: FilterDTO[];
+  /** Must match what the caller will send on apply, or the preview count lies. */
+  includeInactive?: boolean;
+  onIncludeInactiveChange?: (next: boolean) => void;
 };
 
 function fullName(u: UserRefDTO) {
@@ -155,6 +158,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   onMetaChange,
   columns = [rolesColumn],
   extraFilters,
+  includeInactive = false,
+  onIncludeInactiveChange,
 }) => {
   const [query, setQuery] = React.useState("");
   const q = useDebouncedValue(query.trim(), 300);
@@ -192,8 +197,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   };
 
   const segment: Segment = React.useMemo(
-    () => ({ filters: [...filters, ...(extraFilters ?? [])], excludeUserIds: [] }),
-    [filters, extraFilters],
+    () => ({ filters: [...filters, ...(extraFilters ?? [])], excludeUserIds: [], includeInactive }),
+    [filters, extraFilters, includeInactive],
   );
   const resolve = useSegmentResolve(segment, true, q, include);
   const matched = resolve.items;
@@ -223,7 +228,14 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
-              <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
+              <AudienceBuilder
+                key={seed}
+                fields={fields}
+                value={draft}
+                onChange={setDraft}
+                includeInactive={includeInactive}
+                onIncludeInactiveChange={onIncludeInactiveChange}
+              />
               <div className="mt-3 flex items-center justify-end gap-2 border-t border-brown-100 pt-3">
                 <Button variant="ghost" size="sm" onClick={resetFilters}>
                   Reset

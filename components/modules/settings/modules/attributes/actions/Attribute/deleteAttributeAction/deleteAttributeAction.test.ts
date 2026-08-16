@@ -6,7 +6,11 @@ import {
 import { attributeService } from "@/api/modules/attributes/services/attributeService";
 
 jest.mock("next/cache");
-jest.mock("/api/modules/attributes/services/attributeService");
+jest.mock("@/api/modules/attributes/services/attributeService", () => ({
+  attributeService: {
+    deleteAttribute: jest.fn(),
+  },
+}));
 
 describe("deleteAttributeAction", () => {
   afterEach(() => {

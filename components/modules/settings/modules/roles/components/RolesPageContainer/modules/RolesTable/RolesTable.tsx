@@ -7,6 +7,7 @@ import { Role } from "@/models/role/Role";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import RolesTableSkeleton from "./RolesTableSkeleton";
+import { useRoleDeleteImpact } from "@/components/modules/settings/modules/roles/hooks/useRoleDeleteImpact";
 import RolesTableRowActions from "./RolesTableRowActions";
 import {
   DeleteRoleModal
@@ -21,9 +22,10 @@ export interface RolesTableProps {
   roleRows: Role[] | undefined;
   rolesLoading: boolean;
   buildRoleHref?: (roleId: string) => string;
-  onRenameRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
+  onRenameRole?: (roleId: string, values: { name: string; description?: string }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
   onDeleteRole?: (roleId: string) => void | Promise<void>;
+  onArchiveRole?: (roleId: string, archived: boolean) => void | Promise<void>;
   isSavingRoleName?: boolean;
   isDeletingRole?: boolean;
   saveRoleNameErrorMessage?: string;
@@ -39,6 +41,7 @@ export default function RolesTable({
   onRenameRole,
   onDuplicateRole,
   onDeleteRole,
+  onArchiveRole,
   isSavingRoleName = false,
   isDeletingRole = false,
   saveRoleNameErrorMessage,
@@ -49,16 +52,20 @@ export default function RolesTable({
 
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [nameModalMode, setNameModalMode] = useState<RoleActionMode>("rename");
-  const [nameModalRole, setNameModalRole] = useState<{ id: string; name: string } | null>(null);
+  const [nameModalRole, setNameModalRole] =
+    useState<{ id: string; name: string; description?: string } | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRole, setDeleteRole] = useState<{ id: string; name: string } | null>(null);
+
+  // Only fetched while the dialog is open (the hook is disabled without an id).
+  const deleteImpact = useRoleDeleteImpact(deleteOpen ? deleteRole?.id : null);
 
   const hasRoles = (roleRows?.length ?? 0) > 0;
 
   const openRename = (role: Role) => {
     onClearErrors?.();
-    setNameModalRole({ id: role.id, name: role.name });
+    setNameModalRole({ id: role.id, name: role.name, description: role.description });
     setNameModalMode("rename");
     setNameModalOpen(true);
   };
@@ -143,12 +150,14 @@ export default function RolesTable({
                 </TableCell>
 
                 <TableCell>
-                  {r.active ? (
+                  {r.archived ? (
+                    <Badge variant="outline" className="border-brown-200 bg-brown-50 text-brown-700">
+                      Archived
+                    </Badge>
+                  ) : (
                     <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
                       Active
                     </Badge>
-                  ) : (
-                    <Badge variant="outline">Inactive</Badge>
                   )}
                 </TableCell>
 
@@ -160,7 +169,10 @@ export default function RolesTable({
                       onRename={() => openRename(r)}
                       onDuplicate={() => openDuplicate(r)}
                       onDelete={() => openDelete(r)}
+                      onArchive={() => void onArchiveRole?.(r.id, true)}
+                      onRestore={() => void onArchiveRole?.(r.id, false)}
                       locked={r.systemOwner || r.isDefault}
+                      archived={r.archived}
                     />
                   </div>
                 </TableCell>
@@ -183,6 +195,11 @@ export default function RolesTable({
         errorMessage={saveRoleNameErrorMessage}
         mode={nameModalMode}
         initialName={initialNameForModal}
+        initialDescription={nameModalRole?.description ?? ""}
+        // The role being edited keeps its own name, so it must not collide with itself.
+        takenNames={(roleRows ?? [])
+          .filter((role) => role.id !== nameModalRole?.id)
+          .map((role) => role.name)}
         onCancelAction={closeNameModal}
         onConfirmAction={async (values) => {
           if (!nameModalRole) return;
@@ -203,6 +220,8 @@ export default function RolesTable({
         isLoading={isDeletingRole}
         errorMessage={deleteRoleErrorMessage}
         roleName={deleteRole?.name}
+        impact={deleteImpact.data}
+        isImpactLoading={deleteImpact.isLoading}
         onRequestCloseAction={closeDeleteModal}
         onConfirmAction={async () => {
           if (!deleteRole) return;

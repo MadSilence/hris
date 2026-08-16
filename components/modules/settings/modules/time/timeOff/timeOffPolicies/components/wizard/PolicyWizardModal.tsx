@@ -13,6 +13,7 @@ import {
   PencilLine,
   RefreshCw,
   UserCheck,
+  Users,
 } from "lucide-react";
 
 import {
@@ -25,14 +26,19 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import {
+  AccrualStep,
   ApprovalsStep,
   BasicsStep,
+  BlackoutStep,
   CarryoverStep,
   CountingStep,
+  CoverageStep,
   EditingStep,
+  EligibilityStep,
   EntitlementStep,
   RequestsStep,
   ReviewStep,
+  TenureStep,
 } from "./PolicyWizardSteps";
 import {
   PolicyWizardValues,
@@ -49,10 +55,15 @@ const STEPS: {
 }[] = [
   { id: "basics", title: "Basics", subtitle: "Name, unit, visibility", icon: FileText },
   { id: "entitlement", title: "Entitlement", subtitle: "Quota & renewal", icon: CalendarClock },
+  { id: "accrual", title: "Accrual", subtitle: "Earning over time", icon: RefreshCw },
   { id: "carryover", title: "Carryover & balance", subtitle: "Rollover & negatives", icon: RefreshCw },
   { id: "counting", title: "Counting", subtitle: "How days are counted", icon: CalendarDays },
   { id: "requests", title: "Requests", subtitle: "How employees request", icon: ClipboardList },
   { id: "approvals", title: "Approvals", subtitle: "Who signs off", icon: UserCheck },
+  { id: "tenure", title: "Tenure rewards", subtitle: "Extra days by service", icon: CalendarClock },
+  { id: "eligibility", title: "Eligibility", subtitle: "Waiting period", icon: CalendarClock },
+  { id: "coverage", title: "Coverage", subtitle: "Max people away", icon: Users },
+  { id: "blackout", title: "Blackouts", subtitle: "Frozen periods", icon: CalendarDays },
   { id: "editing", title: "Editing", subtitle: "Who can edit requests", icon: PencilLine },
   { id: "review", title: "Review", subtitle: "Confirm & create", icon: CheckCircle2 },
 ];
@@ -166,6 +177,8 @@ export const PolicyWizardModal: FC<Props> = ({
         return <BasicsStep values={values} set={set} />;
       case "entitlement":
         return <EntitlementStep values={values} set={set} />;
+      case "accrual":
+        return <AccrualStep values={values} set={set} />;
       case "carryover":
         return <CarryoverStep values={values} set={set} />;
       case "counting":
@@ -174,6 +187,14 @@ export const PolicyWizardModal: FC<Props> = ({
         return <RequestsStep values={values} set={set} />;
       case "approvals":
         return <ApprovalsStep values={values} set={set} />;
+      case "tenure":
+        return <TenureStep values={values} set={set} />;
+      case "eligibility":
+        return <EligibilityStep values={values} set={set} />;
+      case "coverage":
+        return <CoverageStep values={values} set={set} />;
+      case "blackout":
+        return <BlackoutStep values={values} set={set} />;
       case "editing":
         return <EditingStep values={values} set={set} />;
       case "review":
@@ -189,8 +210,8 @@ export const PolicyWizardModal: FC<Props> = ({
           if (!open) requestClose();
         }}
       >
-        <DialogContent hideClose className="max-w-4xl gap-0 overflow-hidden p-0">
-          <div className="flex h-[80vh] max-h-[720px]">
+        <DialogContent hideClose className="max-w-5xl gap-0 overflow-hidden p-0">
+          <div className="flex h-[86vh] max-h-[880px]">
             {/* Vertical step sidebar */}
             <aside className="hidden w-64 shrink-0 flex-col border-r border-brown-100 bg-brown-50/40 p-5 sm:flex">
               <DialogHeader className="mb-5 space-y-1 text-left">
@@ -268,7 +289,7 @@ export const PolicyWizardModal: FC<Props> = ({
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-                <div className="mx-auto max-w-xl">{renderStep()}</div>
+                <div className="mx-auto max-w-2xl">{renderStep()}</div>
               </div>
 
               <div className="flex-none space-y-3 border-t border-brown-100 px-6 py-4">

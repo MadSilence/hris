@@ -20,6 +20,10 @@ export class AttributeService {
     return { id: createResponse.id };
   }
 
+  public async exportAttributes(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisAttributeClient.exportAttributes(format);
+  }
+
   public async reorderAttributes(payload: ReorderItemRequest[]): Promise<Response> {
     return hrisAttributeClient.reorderAttributes(payload);
   }

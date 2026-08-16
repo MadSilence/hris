@@ -5,6 +5,7 @@ import { HttpStatusCode } from "@/api/models/http";
 import { BadRequestError } from "@/api/models/errors/BadRequestError";
 import { NotFoundError } from "@/api/models/errors/NotFoundError";
 import {
+  BackendUnavailableError,
   BadRequestError as ClientBadRequestError,
   NotFoundError as ClientNotFoundError,
   UnauthorizedError as ClientUnauthorizedError,
@@ -39,5 +40,6 @@ const getStatusCode = (e: unknown): HttpStatusCode => {
   if (e instanceof ClientForbiddenError) return HttpStatusCode.FORBIDDEN;
   if (e instanceof NotFoundError || e instanceof ClientNotFoundError) return HttpStatusCode.NOT_FOUND;
   if (e instanceof BadRequestError || e instanceof ClientBadRequestError) return HttpStatusCode.BAD_REQUEST;
+  if (e instanceof BackendUnavailableError) return HttpStatusCode.SERVICE_UNAVAILABLE;
   return HttpStatusCode.INTERNAL_SERVER_ERROR;
 }

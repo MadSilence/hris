@@ -43,15 +43,18 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-            <Trash2 className="h-5 w-5"/>
-            Delete section
-          </AlertDialogTitle>
-
-          <AlertDialogDescription>
-            This action cannot be undone. Section <strong>{groupName}</strong>{" "}
-            will be permanently deleted.
-          </AlertDialogDescription>
+          <div className="flex items-center gap-3 text-left">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <Trash2 className="h-5 w-5"/>
+            </span>
+            <div className="space-y-1">
+              <AlertDialogTitle>Delete section</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. Section <strong>{groupName}</strong>{" "}
+                will be permanently deleted.
+              </AlertDialogDescription>
+            </div>
+          </div>
         </AlertDialogHeader>
 
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">

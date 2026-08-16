@@ -7,6 +7,7 @@ import {
   isMissingViewAccess,
   normalizeScopes,
   RolePermissionsDraft,
+  SCOPE_CHOICES,
   scopesToChoice,
 } from "./rolePermissionsPayload";
 
@@ -95,6 +96,24 @@ describe("buildRolePermissionsPayload", () => {
     ]);
   });
 
+  it("keeps rows for resources this build of the UI doesn't know about", () => {
+    // Regression: the builder used to walk only the local catalogue, so anything the backend had
+    // added since (NOTIFICATION.* was the real case) was absent from the PUT body — and the backend
+    // replaces wholesale, so saving a role quietly revoked those grants.
+    const draft = {
+      "ROLES.ROLE": { VIEW: ["COMPANY"] },
+      "FUTURE.RESOURCE": { MANAGE: ["COMPANY"] },
+    } as unknown as Parameters<typeof buildRolePermissionsPayload>[0];
+
+    const payload = buildRolePermissionsPayload(draft);
+
+    expect(payload).toContainEqual({
+      resourceCode: "FUTURE.RESOURCE",
+      action: "MANAGE",
+      scopes: ["COMPANY"],
+    });
+  });
+
   it("round-trips a server response through the draft unchanged", () => {
     const permissions = [
       { resourceCode: "ROLES.ROLE" as const, action: "VIEW" as const, scopes: ["COMPANY" as const] },
@@ -107,7 +126,7 @@ describe("buildRolePermissionsPayload", () => {
 
 describe("scope choices", () => {
   it("round-trips every choice through scopes", () => {
-    for (const choice of ["NONE", "SELF", "DIRECT_REPORTS", "SELF_AND_REPORTS", "COMPANY"] as const) {
+    for (const choice of SCOPE_CHOICES) {
       expect(scopesToChoice(choiceToScopes(choice))).toBe(choice);
     }
   });
@@ -122,8 +141,25 @@ describe("scope choices", () => {
       "SELF",
       "DIRECT_REPORTS",
       "SELF_AND_REPORTS",
+      "MY_TEAM",
+      "MY_TEAM_SUBTREE",
+      "MY_DEPARTMENT",
+      "MY_DEPARTMENT_SUBTREE",
+      "MY_OFFICE",
+      "MY_LEGAL_ENTITY",
       "COMPANY",
+      "CUSTOM",
     ]);
+  });
+
+  // The actor-derived scopes are single values, unlike the SELF/DIRECT_REPORTS pair.
+  it("maps an actor-derived choice to exactly its own scope", () => {
+    expect(choiceToScopes("MY_DEPARTMENT_SUBTREE")).toEqual(["MY_DEPARTMENT_SUBTREE"]);
+    expect(scopesToChoice(["MY_OFFICE"])).toBe("MY_OFFICE");
+  });
+
+  it("still lets COMPANY absorb everything narrower", () => {
+    expect(scopesToChoice(["MY_DEPARTMENT", "COMPANY"])).toBe("COMPANY");
   });
 });
 

@@ -6,7 +6,11 @@ import {
 } from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/reorderAttributeGroupAction/reorderAttributeGroupAction";
 
 jest.mock("next/cache");
-jest.mock("/api/modules/groups/services/groupsService/groupsService.ts");
+jest.mock("@/api/modules/groups/services/groupsService", () => ({
+  groupsService: {
+    reorderAttributeGroups: jest.fn(),
+  },
+}));
 
 describe("reorderAttributeGroupAction", () => {
   afterEach(() => {
@@ -25,12 +29,11 @@ describe("reorderAttributeGroupAction", () => {
   it("calls groupsService.reorderAttributeGroups with correct payload", async () => {
     await reorderAttributeGroupAction(mockInput);
 
-    expect(groupsService.reorderAttributeGroups).toHaveBeenCalledWith({
-      sortOrder: [
-        { id: "a", sortOrder: 1 },
-        { id: "b", sortOrder: 2 },
-      ],
-    });
+    // The service takes a bare ReorderItemRequest[] — the action renumbers by position.
+    expect(groupsService.reorderAttributeGroups).toHaveBeenCalledWith([
+      { id: "a", sortOrder: 1 },
+      { id: "b", sortOrder: 2 },
+    ]);
   });
 
   it("returns SUCCESS when groupsService.reorderAttributeGroups resolves", async () => {

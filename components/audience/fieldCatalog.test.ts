@@ -1,4 +1,9 @@
-import { buildAudienceFields, operatorsForField, ORG_AUDIENCE_FIELDS } from "./fieldCatalog";
+import {
+  buildAudienceFields,
+  isNegativeOperator,
+  operatorsForField,
+  ORG_AUDIENCE_FIELDS,
+} from "./fieldCatalog";
 import type { FieldDTO } from "@/models/user/fields";
 
 const field = (over: Partial<FieldDTO>): FieldDTO => ({
@@ -16,6 +21,7 @@ describe("operatorsForField", () => {
   it("gives custom NUMBER attributes numeric comparison + range operators", () => {
     expect(operatorsForField(field({ type: "NUMBER" }))).toEqual([
       "eq",
+      "neq",
       "gt",
       "gte",
       "lt",
@@ -27,6 +33,7 @@ describe("operatorsForField", () => {
   it("gives custom DATE attributes eq + range operators", () => {
     expect(operatorsForField(field({ type: "DATE" }))).toEqual([
       "eq",
+      "neq",
       "before",
       "after",
       "between",
@@ -40,16 +47,18 @@ describe("operatorsForField", () => {
       "contains",
       "starts_with",
       "in",
+      "not_in",
     ]);
   });
 
-  it("limits multi-select custom attributes to has_any (set intersection)", () => {
-    expect(operatorsForField(field({ type: "MULTI_SELECT" }))).toEqual(["has_any"]);
+  it("lets multi-select custom attributes be matched or excluded by set", () => {
+    expect(operatorsForField(field({ type: "MULTI_SELECT" }))).toEqual(["has_any", "not_has_any"]);
   });
 
   it("gives system date fields eq + range operators", () => {
     expect(operatorsForField(field({ isSystem: true, type: "DATE" }))).toEqual([
       "eq",
+      "neq",
       "before",
       "after",
       "between",
@@ -63,7 +72,37 @@ describe("operatorsForField", () => {
       "contains",
       "starts_with",
       "in",
+      "not_in",
     ]);
+  });
+
+  // The engine resolved these long before the builder offered them; the catalogue is the thing
+  // that was behind, so pin the parity rather than the individual lists.
+  it("offers a negation for every field kind that has one server-side", () => {
+    expect(operatorsForField(field({ type: "SELECT" }))).toContain("not_in");
+    expect(operatorsForField(field({ isSystem: true, type: "SELECT" }))).toContain("not_in");
+
+    const negatable = ["sys:department", "sys:team", "sys:calendar", "sys:office",
+      "sys:legal_entity", "sys:job", "sys:status"];
+    for (const key of negatable) {
+      const orgField = ORG_AUDIENCE_FIELDS.find((f) => f.key === key)!;
+      expect(orgField.operators.some((op) => op === "neq" || op === "not_in" || op === "not_has_any"))
+        .toBe(true);
+    }
+  });
+});
+
+describe("isNegativeOperator", () => {
+  it("marks exactly the operators that exclude", () => {
+    expect(isNegativeOperator("neq")).toBe(true);
+    expect(isNegativeOperator("not_in")).toBe(true);
+    expect(isNegativeOperator("not_has_any")).toBe(true);
+
+    // Only these get the "include people with no value" choice in the UI.
+    expect(isNegativeOperator("eq")).toBe(false);
+    expect(isNegativeOperator("in")).toBe(false);
+    expect(isNegativeOperator("has_any")).toBe(false);
+    expect(isNegativeOperator("between")).toBe(false);
   });
 });
 

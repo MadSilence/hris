@@ -11,6 +11,8 @@ import { Label } from "@/public/desact/src/components/ui/label";
 
 export interface CreateGroupFormProps {
   isLoading?: boolean;
+  /** Names already taken — checked here so the clash is shown before a round-trip. */
+  existingNames?: string[];
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
   onSubmitAction: (values: CreateGroupFormValues) => void | Promise<void>;
@@ -20,18 +22,28 @@ export type CreateGroupFormValues = {
   name: string;
 };
 
-const createGroupFormValidationSchema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Please enter a section name.")
-    .min(3, "Name must be at least 3 characters long.")
-    .max(120, "Name must be 120 characters or fewer.")
-    .nonNullable("Please enter a section name."),
-});
+const buildValidationSchema = (existingNames: string[]) => {
+  const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
+
+  return yup.object({
+    name: yup
+      .string()
+      .trim()
+      .required("Please enter a section name.")
+      .min(3, "Name must be at least 3 characters long.")
+      .max(120, "Name must be 120 characters or fewer.")
+      .nonNullable("Please enter a section name.")
+      .test(
+        "unique",
+        "A section with this name already exists.",
+        (value) => !value || !taken.has(value.trim().toLowerCase()),
+      ),
+  });
+};
 
 export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   isLoading = false,
+  existingNames = [],
   onCancelAction,
   onDirtyChangeAction,
   onSubmitAction,
@@ -48,7 +60,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
     initialValues: {
       name: "",
     },
-    validationSchema: createGroupFormValidationSchema,
+    validationSchema: buildValidationSchema(existingNames),
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -92,7 +104,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
         )}
       </div>
 
-      <DialogFooter className="mt-8">
+      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
         <Button
           type="button"
           variant="outline"

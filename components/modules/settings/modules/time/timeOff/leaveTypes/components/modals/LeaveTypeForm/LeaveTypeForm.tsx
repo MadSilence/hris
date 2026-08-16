@@ -12,6 +12,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
+import { PRESET_COLORS } from "@/models/colors";
 
 export type LeaveTypeFormValues = {
   name: string;
@@ -21,17 +22,6 @@ export type LeaveTypeFormValues = {
 };
 
 const DEFAULT_COLOR = "#b08968";
-
-const PRESET_COLORS = [
-  "#b08968",
-  "#a8674f",
-  "#c9a24b",
-  "#6f8f6a",
-  "#5b7fa6",
-  "#9a6f9c",
-  "#c07b7b",
-  "#7c8590",
-];
 
 type CategoryChip = {
   value: LeaveTypeCategory | "";

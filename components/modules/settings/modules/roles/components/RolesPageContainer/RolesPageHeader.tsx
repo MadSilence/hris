@@ -8,7 +8,8 @@ import { ExportRolesModal } from "@/components/modules/settings/modules/roles/co
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
 export interface RolesPageHeaderProps {
-  onCreateRole?: (values: { name: string }) => void | Promise<void>;
+  existingRoleNames?: string[];
+  onCreateRole?: (values: { name: string; description?: string }) => void | Promise<void>;
   onCreateRoleFromTemplate?: (values: { templateId: string; name?: string }) => void;
   onExportRoles?: (values: { format: "csv" | "xlsx" }) => void;
   isCreatingRole?: boolean;
@@ -18,6 +19,7 @@ export interface RolesPageHeaderProps {
 }
 
 export default function RolesPageHeader({
+  existingRoleNames = [],
   onCreateRole,
   onCreateRoleFromTemplate,
   onExportRoles,
@@ -54,6 +56,7 @@ export default function RolesPageHeader({
         isLoading={isCreatingRole}
         errorMessage={createRoleErrorMessage}
         templates={templates}
+        existingNames={existingRoleNames}
         onCancelAction={() => setAddOpen(false)}
         onCreateBlankAction={async (values) => {
           try {

@@ -1,4 +1,5 @@
 import { RolePermissionDTO } from "@/api/modules/roles/dto/RolePermissionsDTO";
+import type { Segment } from "@/models/segment/Segment";
 import {
   ACCESS_ACTION_RANK,
   AccessAction,
@@ -31,6 +32,20 @@ export function normalizeScopes(scopes: AccessScope[]): AccessScope[] {
   return unique;
 }
 
+/** The filters that came back with the grants, in the shape the editor keeps them. */
+export function scopeFiltersFromPermissions(permissions: RolePermissionDTO[]): RoleScopeFilters {
+  const filters: RoleScopeFilters = {};
+
+  for (const permission of permissions) {
+    if (!permission.scopeFilters) continue;
+    const resource = filters[permission.resourceCode] ?? {};
+    resource[permission.action] = permission.scopeFilters;
+    filters[permission.resourceCode] = resource;
+  }
+
+  return filters;
+}
+
 export function draftFromPermissions(permissions: RolePermissionDTO[]): RolePermissionsDraft {
   const draft: RolePermissionsDraft = {};
 
@@ -50,22 +65,56 @@ export function draftFromPermissions(permissions: RolePermissionDTO[]): RolePerm
 // Rows are dropped when the combination is unsupported (422 RA00001/RA00002/RA00003)
 // or the scope list is empty. An empty list is NOT sent as a row: the backend would keep
 // the row and let can() pass, which reads as access rather than as a denial.
-export function buildRolePermissionsPayload(draft: RolePermissionsDraft): RolePermissionDTO[] {
+//
+// It walks the draft's own resources as well as the catalogue's. The draft is built from what
+// the server returned, so a resource this build of the UI doesn't know about still gets written
+// back. Iterating the catalogue alone made every save a silent purge of anything newer than the
+// frontend — that is how roles lost their NOTIFICATION.* grants.
+/**
+ * Filters behind CUSTOM grants, keyed the same way as the draft. Kept alongside rather than inside
+ * it so every existing reader of the draft keeps working unchanged.
+ */
+export type RoleScopeFilters = Partial<
+  Record<ResourceCode, Partial<Record<AccessAction, Segment>>>
+>;
+
+export function buildRolePermissionsPayload(
+  draft: RolePermissionsDraft,
+  scopeFilters?: RoleScopeFilters,
+): RolePermissionDTO[] {
   const payload: RolePermissionDTO[] = [];
 
+  const known = new Set<string>(RESOURCE_ORDER);
+  const resourceCodes: ResourceCode[] = [
+    ...RESOURCE_ORDER,
+    ...(Object.keys(draft) as ResourceCode[]).filter((code) => !known.has(code)),
+  ];
+
   // One row per resource/action pair at most — a duplicate pair is a 422 RA00004.
-  for (const resourceCode of RESOURCE_ORDER) {
+  for (const resourceCode of resourceCodes) {
     const actions = draft[resourceCode];
     if (!actions) continue;
 
     for (const action of ACTIONS_IN_ORDER) {
-      const scopes = normalizeScopes(actions[action] ?? []).filter((scope) =>
-        isSupportedPermission(resourceCode, action, scope),
+      // Unknown resources keep whatever the server sent: we have no local definition to
+      // validate them against, and dropping them is exactly the bug this guards.
+      const scopes = normalizeScopes(actions[action] ?? []).filter(
+        (scope) => !known.has(resourceCode) || isSupportedPermission(resourceCode, action, scope),
       );
 
       if (scopes.length === 0) continue;
 
-      payload.push({ resourceCode, action, scopes });
+      // CUSTOM without filters is rejected (RA00006) and filters without CUSTOM too (RA00007), so
+      // they are only ever sent together.
+      const filters = scopes.includes("CUSTOM")
+        ? scopeFilters?.[resourceCode]?.[action]
+        : undefined;
+
+      payload.push(
+        filters && filters.filters.length > 0
+          ? { resourceCode, action, scopes, scopeFilters: filters }
+          : { resourceCode, action, scopes },
+      );
     }
   }
 
@@ -79,7 +128,17 @@ export const SCOPE_CHOICES = [
   "SELF",
   "DIRECT_REPORTS",
   "SELF_AND_REPORTS",
+  // Derived from the actor's own record — one role serves every manager. Listed after the personal
+  // ones and before COMPANY, roughly in order of how far they reach.
+  "MY_TEAM",
+  "MY_TEAM_SUBTREE",
+  "MY_DEPARTMENT",
+  "MY_DEPARTMENT_SUBTREE",
+  "MY_OFFICE",
+  "MY_LEGAL_ENTITY",
   "COMPANY",
+  // Last: it is the escape hatch, and it needs a filter configured next to the cell.
+  "CUSTOM",
 ] as const;
 
 export type ScopeChoice = (typeof SCOPE_CHOICES)[number];
@@ -89,13 +148,34 @@ export const SCOPE_CHOICE_LABELS: Record<ScopeChoice, string> = {
   SELF: "Own record",
   DIRECT_REPORTS: "Direct reports",
   SELF_AND_REPORTS: "Own record + direct reports",
+  MY_TEAM: "My team",
+  MY_TEAM_SUBTREE: "My team and sub-teams",
+  MY_DEPARTMENT: "My department",
+  MY_DEPARTMENT_SUBTREE: "My department and sub-departments",
+  MY_OFFICE: "My office",
+  MY_LEGAL_ENTITY: "My legal entity",
   COMPANY: "Whole company",
+  CUSTOM: "Custom filter…",
 };
+
+/** The one-to-one choices; SELF/DIRECT_REPORTS are the only pair the matrix combines. */
+const DIRECT_CHOICES: ScopeChoice[] = [
+  "MY_TEAM",
+  "MY_TEAM_SUBTREE",
+  "MY_DEPARTMENT",
+  "MY_DEPARTMENT_SUBTREE",
+  "MY_OFFICE",
+  "MY_LEGAL_ENTITY",
+  "CUSTOM",
+];
 
 export function scopesToChoice(scopes: AccessScope[] | undefined): ScopeChoice {
   const normalized = normalizeScopes(scopes ?? []);
 
   if (normalized.includes("COMPANY")) return "COMPANY";
+
+  const direct = DIRECT_CHOICES.find((choice) => normalized.includes(choice as AccessScope));
+  if (direct) return direct;
 
   const hasSelf = normalized.includes("SELF");
   const hasReports = normalized.includes("DIRECT_REPORTS");
@@ -117,8 +197,10 @@ export function choiceToScopes(choice: ScopeChoice): AccessScope[] {
       return ["DIRECT_REPORTS"];
     case "SELF":
       return ["SELF"];
-    default:
+    case "NONE":
       return [];
+    default:
+      return [choice as AccessScope];
   }
 }
 

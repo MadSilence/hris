@@ -15,15 +15,17 @@ export interface UpsertRoleNameModalProps {
   errorMessage?: string;
   mode: Mode;
   initialName: string;
+  initialDescription?: string;
+  takenNames?: string[];
   onCancelAction: () => void;
   onConfirmAction: (values: UpsertRoleNameFormValues) => void | Promise<void>;
 }
 
 const copyByMode = {
   rename: {
-    title: "Rename Role",
+    title: "Edit Role",
     description:
-      "Update the role name to keep your access model organized.",
+      "Update the role name and description to keep your access model organized.",
     submitText: "Save changes",
   },
   duplicate: {
@@ -40,6 +42,8 @@ export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
   errorMessage,
   mode,
   initialName,
+  initialDescription,
+  takenNames = [],
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -74,6 +78,12 @@ export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
         <UpsertRoleNameForm
           isLoading={isLoading}
           initialName={initialName}
+          initialDescription={initialDescription}
+          // A duplicate carries the source description over untouched, so the field is only
+          // offered when editing an existing role.
+          showDescription={mode === "rename"}
+          takenNames={takenNames}
+          blockUnchanged={mode === "rename"}
           submitText={content.submitText}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}

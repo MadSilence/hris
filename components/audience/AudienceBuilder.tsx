@@ -28,12 +28,13 @@ import {
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import {
-  AudienceField,
   AudienceOperator,
   AudienceValueSource,
   OPERATOR_LABELS,
   buildAudienceFields,
+  isNegativeOperator,
 } from "@/components/audience/fieldCatalog";
 import {
   AudienceOption,
@@ -44,6 +45,12 @@ type Props = {
   fields: FieldDTO[] | undefined;
   value: FilterDTO[];
   onChange: (next: FilterDTO[]) => void;
+  /**
+   * Segment-level, so it lives above the rows rather than on one of them. Omit the handler and the
+   * control is not rendered at all — for callers where the population is not theirs to choose.
+   */
+  includeInactive?: boolean;
+  onIncludeInactiveChange?: (next: boolean) => void;
 };
 
 type Row = {
@@ -53,9 +60,11 @@ type Row = {
   value: string;
   valueTo: string;
   values: string[];
+  includeEmpty: boolean;
 };
 
-const isMultiOp = (op: AudienceOperator) => op === "in" || op === "has_any";
+const isMultiOp = (op: AudienceOperator) =>
+  op === "in" || op === "has_any" || op === "not_in" || op === "not_has_any";
 const isRangeOp = (op: AudienceOperator) => op === "between";
 
 const optionsForKey = (key: string, fields: FieldDTO[] | undefined): OptionDTO[] | null =>
@@ -69,9 +78,13 @@ const rowComplete = (r: Row): boolean => {
 };
 
 const toFilter = (r: Row): FilterDTO => {
-  const base: FilterDTO = { field: r.key, op: r.op as AudienceOperator };
-  if (isMultiOp(r.op as AudienceOperator)) return { ...base, values: r.values };
-  if (isRangeOp(r.op as AudienceOperator)) return { ...base, value: r.value, valueTo: r.valueTo };
+  const op = r.op as AudienceOperator;
+  // Only sent where it means something, so a positive filter's payload stays as it was.
+  const base: FilterDTO = isNegativeOperator(op)
+    ? { field: r.key, op, includeEmpty: r.includeEmpty }
+    : { field: r.key, op };
+  if (isMultiOp(op)) return { ...base, values: r.values };
+  if (isRangeOp(op)) return { ...base, value: r.value, valueTo: r.valueTo };
   return { ...base, value: r.value };
 };
 
@@ -82,12 +95,21 @@ const fromFilter = (f: FilterDTO, id: number): Row => ({
   value: f.value ?? "",
   valueTo: f.valueTo ?? "",
   values: f.values ?? [],
+  includeEmpty: f.includeEmpty === true,
 });
 
 let SEQ = 1;
-const blankRow = (): Row => ({ id: SEQ++, key: "", op: null, value: "", valueTo: "", values: [] });
+const blankRow = (): Row => ({
+  id: SEQ++, key: "", op: null, value: "", valueTo: "", values: [], includeEmpty: false,
+});
 
-export const AudienceBuilder: React.FC<Props> = ({ fields, value, onChange }) => {
+export const AudienceBuilder: React.FC<Props> = ({
+  fields,
+  value,
+  onChange,
+  includeInactive = false,
+  onIncludeInactiveChange,
+}) => {
   const { access } = useAccess();
   // Only offer fields the caller can actually see (e.g. no JOBS.TITLE VIEW → no Job filter).
   const catalog = useMemo(
@@ -124,6 +146,16 @@ export const AudienceBuilder: React.FC<Props> = ({ fields, value, onChange }) =>
 
   return (
     <div className="flex flex-col gap-2">
+      {onIncludeInactiveChange && (
+        <label className="flex cursor-pointer items-center gap-2 self-end text-xs text-muted-foreground">
+          <Checkbox
+            checked={includeInactive}
+            onCheckedChange={(checked) => onIncludeInactiveChange(checked === true)}
+          />
+          Include non-active people
+        </label>
+      )}
+
       {rows.map((r) => {
         const field = catalog.find((f) => f.key === r.key) ?? null;
         return (
@@ -167,6 +199,17 @@ export const AudienceBuilder: React.FC<Props> = ({ fields, value, onChange }) =>
                   onValueTo={(v) => patch(r.id, { valueTo: v })}
                   onValues={(v) => patch(r.id, { values: v })}
                 />
+
+                {/* Only an exclusion has an opinion about people with no value at all. */}
+                {isNegativeOperator(r.op) && (
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                    <Checkbox
+                      checked={r.includeEmpty}
+                      onCheckedChange={(checked) => patch(r.id, { includeEmpty: checked === true })}
+                    />
+                    Include people with no value
+                  </label>
+                )}
               </>
             )}
 

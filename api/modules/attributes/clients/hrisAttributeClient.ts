@@ -16,6 +16,10 @@ class HrisAttributeClient {
     return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, payload);
   }
 
+  public async exportAttributes(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/export?format=${format}`);
+  }
+
   public async reorderAttributes(payload: ReorderItemRequest[]) {
     return hrisApiClient.put<Response>(`${this.BASE_PATH}/reorder`, payload);
   }

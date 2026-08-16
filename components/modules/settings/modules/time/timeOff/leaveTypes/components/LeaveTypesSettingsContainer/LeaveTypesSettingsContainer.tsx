@@ -14,6 +14,8 @@ import { useArchiveLeaveType } from "@/components/modules/settings/modules/time/
 
 import type { LeaveType } from "@/models/timeOff";
 import type { LeaveTypeFormValues } from "../modals/LeaveTypeForm";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 export default function LeaveTypesSettingsContainer() {
   const router = useRouter();
@@ -25,7 +27,7 @@ export default function LeaveTypesSettingsContainer() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(null);
-
+  if (error instanceof ForbiddenError) return <AccessDenied/>;
   if (error) throw error;
 
   const toPayload = (values: LeaveTypeFormValues) => ({

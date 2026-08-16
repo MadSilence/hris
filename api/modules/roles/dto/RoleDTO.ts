@@ -4,7 +4,8 @@ export type RoleDTO = {
   description?: string;
   systemOwner: boolean;
   isDefault: boolean;
-  active: boolean;
+  archived: boolean;
+  archivedAt?: string | null;
   userCount?: number;
   createdAt: string;
   updatedAt: string;

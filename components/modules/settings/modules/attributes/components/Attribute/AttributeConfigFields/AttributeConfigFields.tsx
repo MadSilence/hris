@@ -4,7 +4,8 @@ import React from "react";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { AttributeType } from "@/models/attribute";
+import { AttributeType, isTextConstrainedType } from "@/models/attribute";
+import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
 
 export type AttributeConfig = {
   required?: boolean;
@@ -31,10 +32,11 @@ type Props = {
 
 const num = (v: string): number | null => (v.trim() === "" ? null : Number(v));
 
+
 export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, disabled }) => {
   const isNumber = type === AttributeType.NUMBER;
-  const isText =
-    type === AttributeType.TEXT || type === AttributeType.EMAIL || type === AttributeType.URL;
+  const isText = isTextConstrainedType(type);
+  const isLongText = type === AttributeType.LONG_TEXT;
   const isDate = type === AttributeType.DATE;
   const isMulti = type === AttributeType.MULTI_SELECT;
   const hasDefault = isNumber || isText || isDate;
@@ -42,34 +44,36 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
   const defaultInputType = isNumber ? "number" : isDate ? "date" : "text";
 
   return (
-    <div className="space-y-4 rounded-lg border border-brown-200 p-4">
-      <div className="text-sm font-medium text-foreground">Validation &amp; rules</div>
+    <div className="space-y-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-brown-400">
+        Validation &amp; rules
+      </p>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={!!value.required}
-          disabled={disabled}
-          onChange={(e) => onChange({ required: e.target.checked })}
-        />
-        Required
-      </label>
+      <SettingToggle
+        label="Required"
+        hint="Must be filled in on the person's profile."
+        checked={!!value.required}
+        onCheckedChange={(v) => onChange({ required: v })}
+        disabled={disabled}
+      />
 
       <div className="space-y-1.5">
-        <Label>Description (help text)</Label>
+        <Label htmlFor="attr-cfg-description">Description</Label>
         <Textarea
+          id="attr-cfg-description"
           value={value.description ?? ""}
           disabled={disabled}
           onChange={(e) => onChange({ description: e.currentTarget.value })}
-          placeholder="Shown under the field on the profile"
+          placeholder="Help text shown under the field on the profile"
           className="min-h-16"
         />
       </div>
 
       {hasDefault && (
         <div className="space-y-1.5">
-          <Label>Default value</Label>
+          <Label htmlFor="attr-cfg-default">Default value</Label>
           <Input
+            id="attr-cfg-default"
             type={defaultInputType}
             value={value.defaultValue ?? ""}
             disabled={disabled}
@@ -82,85 +86,95 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
         <>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Min</Label>
+              <Label htmlFor="attr-cfg-min">Min</Label>
               <Input
                 type="number"
+                id="attr-cfg-min"
                 value={value.minValue ?? ""}
                 disabled={disabled}
                 onChange={(e) => onChange({ minValue: num(e.currentTarget.value) })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Max</Label>
+              <Label htmlFor="attr-cfg-max">Max</Label>
               <Input
                 type="number"
+                id="attr-cfg-max"
                 value={value.maxValue ?? ""}
                 disabled={disabled}
                 onChange={(e) => onChange({ maxValue: num(e.currentTarget.value) })}
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={!!value.onlyPositive}
-              disabled={disabled}
-              onChange={(e) => onChange({ onlyPositive: e.target.checked })}
-            />
-            Only positive numbers
-          </label>
+          <SettingToggle
+            label="Only positive numbers"
+            checked={!!value.onlyPositive}
+            onCheckedChange={(v) => onChange({ onlyPositive: v })}
+            disabled={disabled}
+          />
         </>
       )}
 
-      {isText && (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Min length</Label>
-              <Input
-                type="number"
-                value={value.minLength ?? ""}
-                disabled={disabled}
-                onChange={(e) => onChange({ minLength: num(e.currentTarget.value) })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Max length</Label>
-              <Input
-                type="number"
-                value={value.maxLength ?? ""}
-                disabled={disabled}
-                onChange={(e) => onChange({ maxLength: num(e.currentTarget.value) })}
-              />
-            </div>
-          </div>
+      {(isText || isLongText) && (
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Pattern (regex)</Label>
+            <Label htmlFor="attr-cfg-min-length">Min length</Label>
             <Input
-              value={value.regex ?? ""}
+              type="number"
+              id="attr-cfg-min-length"
+              value={value.minLength ?? ""}
               disabled={disabled}
-              onChange={(e) => onChange({ regex: e.currentTarget.value })}
-              placeholder="e.g. ^[A-Z]{2}\\d{4}$"
+              onChange={(e) => onChange({ minLength: num(e.currentTarget.value) })}
             />
           </div>
-        </>
+          <div className="space-y-1.5">
+            <Label htmlFor="attr-cfg-max-length">Max length</Label>
+            <Input
+              type="number"
+              id="attr-cfg-max-length"
+              value={value.maxLength ?? ""}
+              disabled={disabled}
+              onChange={(e) => onChange({ maxLength: num(e.currentTarget.value) })}
+            />
+          </div>
+        </div>
+      )}
+
+      {isText && (
+        <div className="space-y-1.5">
+          <Label htmlFor="attr-cfg-regex">Pattern (regex)</Label>
+          <Input
+            id="attr-cfg-regex"
+            value={value.regex ?? ""}
+            disabled={disabled}
+            onChange={(e) => onChange({ regex: e.currentTarget.value })}
+            placeholder="e.g. ^[A-Z]{2}\\d{4}$"
+          />
+          {type === AttributeType.PHONE && (
+            <p className="text-xs text-muted-foreground">
+              Phone numbers are always checked for 7–15 digits. A pattern adds a stricter format on top.
+            </p>
+          )}
+        </div>
       )}
 
       {isDate && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Earliest</Label>
+            <Label htmlFor="attr-cfg-min-date">Earliest</Label>
             <Input
               type="date"
+              id="attr-cfg-min-date"
               value={value.minDate ?? ""}
               disabled={disabled}
               onChange={(e) => onChange({ minDate: e.currentTarget.value || null })}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Latest</Label>
+            <Label htmlFor="attr-cfg-max-date">Latest</Label>
             <Input
               type="date"
+              id="attr-cfg-max-date"
               value={value.maxDate ?? ""}
               disabled={disabled}
               onChange={(e) => onChange({ maxDate: e.currentTarget.value || null })}
@@ -172,18 +186,20 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {isMulti && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Min selected</Label>
+            <Label htmlFor="attr-cfg-min-select">Min selected</Label>
             <Input
               type="number"
+              id="attr-cfg-min-select"
               value={value.minSelect ?? ""}
               disabled={disabled}
               onChange={(e) => onChange({ minSelect: num(e.currentTarget.value) })}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Max selected</Label>
+            <Label htmlFor="attr-cfg-max-select">Max selected</Label>
             <Input
               type="number"
+              id="attr-cfg-max-select"
               value={value.maxSelect ?? ""}
               disabled={disabled}
               onChange={(e) => onChange({ maxSelect: num(e.currentTarget.value) })}

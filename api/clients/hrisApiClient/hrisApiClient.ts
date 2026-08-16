@@ -1,4 +1,10 @@
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/components/clients/exceptions";
+import {
+  BackendUnavailableError,
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/components/clients/exceptions";
 import { cookies } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { isPublicBackendPath } from "@/config/security/publicBackendPaths";
@@ -39,7 +45,7 @@ export class HrisApiClient {
     const headers = await this.prepareHeaders(path);
     headers.set("Accept", "application/json");
 
-    const response = await fetch(this.BASE_URL + path, {
+    const response = await this.send(path, {
       headers,
       cache: "no-store",
     });
@@ -47,6 +53,21 @@ export class HrisApiClient {
     await this.checkResponseStatus(response);
 
     return response;
+  }
+
+  /**
+   * The only place `fetch` is called. A throw here means the request never reached the backend —
+   * it is down, the port is wrong, DNS failed — which is not a 500 from the API.
+   */
+  private async send(path: string, init: RequestInit): Promise<Response> {
+    try {
+      return await fetch(this.BASE_URL + path, init);
+    } catch (cause) {
+      throw new BackendUnavailableError(
+        `Cannot reach the API at ${this.BASE_URL} — is the backend running?`,
+        { cause },
+      );
+    }
   }
 
   private async request<T, B = unknown>(
@@ -58,7 +79,7 @@ export class HrisApiClient {
     headers.set("Content-Type", "application/json");
     headers.set("Accept", "application/json");
 
-    const response = await fetch(this.BASE_URL + path, {
+    const response = await this.send(path, {
       method,
       body: body ? JSON.stringify(body) : undefined,
       headers,
@@ -92,7 +113,7 @@ export class HrisApiClient {
     const headers = await this.prepareHeaders(path);
     headers.set("Accept", "application/json");
 
-    const response = await fetch(this.BASE_URL + path, {
+    const response = await this.send(path, {
       method,
       body: formData,
       headers,

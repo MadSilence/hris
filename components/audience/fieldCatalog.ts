@@ -32,14 +32,23 @@ export type AudienceField = {
 // PEOPLE.PROFILE resource (not field-access), so they are always offered when the tab is.
 // Matching is by id, so contains/text operators are intentionally absent.
 export const ORG_AUDIENCE_FIELDS: AudienceField[] = [
-  { key: "sys:department", label: "Department", operators: ["eq", "in", "has_any"], valueSource: "departments", group: "Org" },
-  { key: "sys:team", label: "Team", operators: ["eq", "in", "has_any"], valueSource: "teams", group: "Org" },
-  { key: "sys:calendar", label: "Calendar", operators: ["eq", "in", "has_any"], valueSource: "calendars", group: "Org" },
-  { key: "sys:office", label: "Office", operators: ["eq", "neq", "in"], valueSource: "offices", group: "Org" },
-  { key: "sys:legal_entity", label: "Legal entity", operators: ["eq", "neq", "in"], valueSource: "legalEntities", group: "Org" },
-  { key: "sys:job", label: "Job", operators: ["eq", "neq", "in"], valueSource: "jobs", group: "Org" },
-  { key: "sys:status", label: "Status", operators: ["eq", "neq", "in"], valueSource: "status", group: "Org" },
+  { key: "sys:department", label: "Department", operators: ["eq", "in", "has_any", "not_in"], valueSource: "departments", group: "Org" },
+  { key: "sys:team", label: "Team", operators: ["eq", "in", "has_any", "not_has_any"], valueSource: "teams", group: "Org" },
+  { key: "sys:calendar", label: "Calendar", operators: ["eq", "in", "has_any", "not_has_any"], valueSource: "calendars", group: "Org" },
+  { key: "sys:office", label: "Office", operators: ["eq", "neq", "in", "not_in"], valueSource: "offices", group: "Org" },
+  { key: "sys:legal_entity", label: "Legal entity", operators: ["eq", "neq", "in", "not_in"], valueSource: "legalEntities", group: "Org" },
+  { key: "sys:job", label: "Job", operators: ["eq", "neq", "in", "not_in"], valueSource: "jobs", group: "Org" },
+  { key: "sys:status", label: "Status", operators: ["eq", "neq", "in", "not_in"], valueSource: "status", group: "Org" },
 ];
+
+/** Operators that exclude rather than select — they get the "include people with no value" choice. */
+const NEGATIVE_OPERATORS: ReadonlySet<AudienceOperator> = new Set<AudienceOperator>([
+  "neq",
+  "not_in",
+  "not_has_any",
+]);
+
+export const isNegativeOperator = (op: AudienceOperator): boolean => NEGATIVE_OPERATORS.has(op);
 
 // Operators allowed for a catalogue field, aligned 1:1 with what the backend segment engine
 // (UserRepositoryImpl.appendAttrPredicate / appendSegmentPredicates) actually resolves.
@@ -54,29 +63,27 @@ export function operatorsForField(field: FieldDTO): AudienceOperator[] {
   if (!field.isSystem) {
     switch (field.type) {
       case "NUMBER":
-        return ["eq", "gt", "gte", "lt", "lte", "between"];
+        return ["eq", "neq", "gt", "gte", "lt", "lte", "between"];
       case "DATE":
-        return ["eq", "before", "after", "between"];
+        return ["eq", "neq", "before", "after", "between"];
       case "SELECT":
-      case "STATUS":
-        return ["eq", "in"];
+        return ["eq", "neq", "in", "not_in"];
       case "MULTI_SELECT":
-        return ["has_any"];
+        return ["has_any", "not_has_any"];
       default:
-        return ["eq", "neq", "contains", "starts_with", "in"];
+        return ["eq", "neq", "contains", "starts_with", "in", "not_in"];
     }
   }
 
   switch (field.type) {
     case "DATE":
-      return ["eq", "before", "after", "between"];
+      return ["eq", "neq", "before", "after", "between"];
     case "SELECT":
-    case "STATUS":
-      return ["eq", "neq", "in"];
+      return ["eq", "neq", "in", "not_in"];
     case "MULTI_SELECT":
-      return ["has_any"];
+      return ["has_any", "not_has_any"];
     default:
-      return ["eq", "neq", "contains", "starts_with", "in"];
+      return ["eq", "neq", "contains", "starts_with", "in", "not_in"];
   }
 }
 
@@ -90,7 +97,9 @@ export const OPERATOR_LABELS: Record<AudienceOperator, string> = {
   contains: "Contains",
   starts_with: "Starts with",
   in: "Is any of",
+  not_in: "Is none of",
   has_any: "Has any of",
+  not_has_any: "Has none of",
   before: "Before",
   after: "After",
   between: "Between",
@@ -103,8 +112,20 @@ export const OPERATOR_LABELS: Record<AudienceOperator, string> = {
 // Custom CHECKBOX/PERSON attributes have no meaningful segment predicate yet, so they are
 // dropped from the builder rather than offered as a filter that returns nothing.
 function isFilterableField(field: FieldDTO): boolean {
+  // A PERSON field matches on a user id, so it needs a people-picker as its value source. Until
+  // that exists the filter could only be used by typing a raw UUID — offer nothing rather than that.
+  // (This is what currently keeps `sys:manager` out of the builder; the backend predicate is ready.)
+  if (field.type === "PERSON") return false;
   if (field.isSystem) return true;
-  return field.type !== "CHECKBOX" && field.type !== "PERSON";
+  // LONG_TEXT lives in multiline_value and OBJECT is a repeatable record set — neither is read by the
+  // segment engine's attr filter, so they're not filterable.
+  return (
+    field.type !== "CHECKBOX" &&
+    field.type !== "LONG_TEXT" &&
+    field.type !== "OBJECT" &&
+    field.type !== "ADDRESS" &&
+    field.type !== "MONEY"
+  );
 }
 
 function valueSourceForField(field: FieldDTO): AudienceValueSource {
@@ -120,7 +141,6 @@ function valueSourceForField(field: FieldDTO): AudienceValueSource {
     case "CHECKBOX":
       return "boolean";
     case "SELECT":
-    case "STATUS":
     case "MULTI_SELECT":
       return "attributeOptions";
     default:

@@ -78,6 +78,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const queryClient = useQueryClient();
 
   const [filters, setFilters] = React.useState<FilterDTO[]>([]);
+  const [includeInactive, setIncludeInactive] = React.useState(false);
   const [mode, setMode] = React.useState<"manual" | "all">("manual");
   const [manual, setManual] = React.useState<Set<string>>(new Set());
   const [excluded, setExcluded] = React.useState<Set<string>>(new Set());
@@ -88,8 +89,11 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const domain = DOMAIN_CONFIG[basePath];
   const pickerColumns = domain ? [domain.column] : undefined;
+  // "Not already assigned to this one" — which must keep people who are assigned to nothing at all,
+  // hence includeEmpty. Without it the default negation semantics would hide exactly the people a
+  // first assignment is usually aimed at.
   const exclusionFilters: FilterDTO[] = domain
-    ? [{ field: domain.excludeField, op: "neq", value: assignableId }]
+    ? [{ field: domain.excludeField, op: "neq", value: assignableId, includeEmpty: true }]
     : [];
 
   const applyManual = useApplyAssignment(basePath, assignableId, invalidateKeys);
@@ -187,6 +191,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         const segment: Segment = {
           filters: [...filters, ...exclusionFilters],
           excludeUserIds: [...excluded],
+          includeInactive,
         };
         const res = await applySegment.mutateAsync({ segment, effectiveFrom: from, effectiveTo: to });
         setJobId(res.jobId);
@@ -262,6 +267,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 allMatchingSelected={mode === "all"}
                 onToggleAllMatching={onToggleAllMatching}
                 onMetaChange={onMetaChange}
+                includeInactive={includeInactive}
+                onIncludeInactiveChange={setIncludeInactive}
               />
 
               {overCap && (

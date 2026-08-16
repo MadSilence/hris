@@ -23,6 +23,7 @@ import {
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
 import { LeaveTypesSettingsSkeleton } from "../LeaveTypesSettingsSkeleton";
+import { LeaveTypeCategoryChip } from "../LeaveTypeCategoryChip/LeaveTypeCategoryChip";
 import { LeaveTypeCategory, LeaveTypeStatus } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { LeaveType } from "@/models/timeOff";
 
@@ -85,7 +86,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
     <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
-          <SettingsPageHeader title="Leave types" backHref="/settings" />
+          <SettingsPageHeader title="Time off" backHref="/settings" />
           <PageDescription className="text-base text-muted-foreground/90">
             Leave types are the categories of time off in your organization — Vacation, Sick,
             Parental and more. Each type holds one or more policies with the actual rules.
@@ -94,7 +95,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
 
         {/* Info block */}
         <div className="space-y-1 pb-1 pt-5">
-          <h2 className="text-lg font-semibold text-foreground">Types</h2>
+          <h2 className="text-lg font-semibold text-foreground">Leave types</h2>
           <p className="text-sm text-muted-foreground">
             Open a type to manage its policies (quotas, accrual, carryover and approvals).
           </p>
@@ -136,11 +137,9 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                 {isLoading ? (
                   <LeaveTypesSettingsSkeleton />
                 ) : filtered.length === 0 ? (
-                  <TableRow className="[&_td]:py-2">
+                  <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={4}>
-                      <div className="py-6 text-center text-sm text-muted-foreground">
-                        No leave types match your search.
-                      </div>
+                      <SearchEmptyState query={query} noun="leave types" />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -168,8 +167,8 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {leaveType.category ? CATEGORY_LABELS[leaveType.category] : "—"}
+                        <TableCell>
+                          <LeaveTypeCategoryChip category={leaveType.category} />
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={badge.className}>
@@ -226,6 +225,20 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
     </div>
   );
 };
+
+function SearchEmptyState({ query, noun }: { query: string; noun: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div className="mb-3 rounded-2xl bg-brown-50 p-3">
+        <Search className="h-6 w-6 text-brown-500" />
+      </div>
+      <h3 className="text-sm font-semibold text-foreground">No {noun} found</h3>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Nothing matches{query.trim() ? ` “${query.trim()}”` : " your search"}. Try a different term.
+      </p>
+    </div>
+  );
+}
 
 function EmptyState({ action }: { action: React.ReactNode }) {
   return (

@@ -11,11 +11,14 @@ import { useReorderAttributesAction } from "../../hooks/Attribute/useReorderAttr
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
 import { DeleteGroupModal } from "../AttributeGroup/DeleteGroupModal";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import { Attribute } from "@/models/attribute/Attribute";
+import { Attribute, AttributePatch } from "@/models/attribute/Attribute";
+import { AttributeType } from "@/models/attribute/AttributeType";
+import { serializeObjectFields } from "@/models/attribute/objectFields";
 import { useDeleteAttributeGroupAction } from "../../hooks/AttributeGroup/useDeleteAttributeGroupAction";
 import { useRenameAttributeGroupAction } from "../../hooks/AttributeGroup/useRenameAttributeGroupAction";
 import { RenameAttributeGroupModal } from "../AttributeGroup/RenameAttributeGroupModal";
 import { CreateAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeModal";
+import { EditAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/EditAttributeModal";
 import { DeleteAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/DeleteAttributeModal";
 import { useCreateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useCreateAttributeAction";
 import { useDeleteAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useDeleteAttributeAction";
@@ -31,7 +34,10 @@ export default function AttributeGroupsContainer() {
   const [activeGroup, setActiveGroup] = useState<AttributeGroup | null>(null);
   const [renameGroup, setRenameGroup] = useState<AttributeGroup | null>(null);
   const [deleteGroup, setDeleteGroup] = useState<AttributeGroup | null>(null);
+  const [attributeToEdit, setAttributeToEdit] = useState<Attribute | null>(null);
   const [attributeToDelete, setAttributeToDelete] = useState<Attribute | null>(null);
+  // Group just created — the list scrolls to it and opens it (it lands at the very end).
+  const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
 
   const createAttributeGroupAction = useCreateAttributeGroupAction();
   const createAttributeAction = useCreateAttributeAction();
@@ -51,16 +57,17 @@ export default function AttributeGroupsContainer() {
     [fetchedGroups]
   );
 
+  // Close only on success. Closing on ERROR too is what made a duplicate name look like a no-op:
+  // the request failed, the message existed, and the modal was already gone.
   useEffect(() => {
-    const status = createAttributeGroupAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
+    if (createAttributeGroupAction.data?.status === ActionStatus.SUCCESS) {
       setIsCreateGroupModalOpen(false);
+      setFocusGroupId(createAttributeGroupAction.data?.data?.id ?? null);
     }
-  }, [createAttributeGroupAction.data?.status]);
+  }, [createAttributeGroupAction.data]);
 
   useEffect(() => {
-    const status = createAttributeAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
+    if (createAttributeAction.data?.status === ActionStatus.SUCCESS) {
       setIsCreateAttributeModalOpen(false);
     }
   }, [createAttributeAction.data?.status]);
@@ -73,8 +80,7 @@ export default function AttributeGroupsContainer() {
   }, [deleteAttributeGroupAction.data?.status]);
 
   useEffect(() => {
-    const status = renameAttributeGroupAction.data?.status;
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
+    if (renameAttributeGroupAction.data?.status === ActionStatus.SUCCESS) {
       setRenameGroup(null);
     }
   }, [renameAttributeGroupAction.data?.status]);
@@ -87,18 +93,21 @@ export default function AttributeGroupsContainer() {
   }, [deleteAttributeAction.data?.status]);
 
   const handleSaveAttribute = useCallback(
-    (id: string, patch: Partial<Attribute>) => {
-      const { options, ...rest } = patch as Partial<Attribute> & {
-        options?: { id?: string; value: string; color: string; sortOrder?: number }[];
-      };
+    (id: string, patch: AttributePatch) => {
+      const { options, ...rest } = patch;
 
-      updateAttributeAction.mutate({ id, ...rest });
+      // The list is driven by the *groups* query; the update hook only invalidates `attributes`,
+      // so without this the saved change (a group move in particular) wouldn't show up.
+      updateAttributeAction.mutate({ id, ...rest }, { onSuccess: () => invalidateGroups() });
 
       if (Array.isArray(options) && options.length > 0) {
-        updateOptionsAction.mutate({ attributeId: id, options });
+        updateOptionsAction.mutate(
+          { attributeId: id, options },
+          { onSuccess: () => invalidateGroups() }
+        );
       }
     },
-    [updateAttributeAction, updateOptionsAction]
+    [updateAttributeAction, updateOptionsAction, invalidateGroups]
   );
 
   const handleReorderGroups = useCallback(
@@ -162,9 +171,11 @@ export default function AttributeGroupsContainer() {
           setActiveGroup(group);
           setIsCreateAttributeModalOpen(true);
         }}
+        onEditAttribute={setAttributeToEdit}
         onDeleteAttribute={setAttributeToDelete}
-        onSaveAttribute={handleSaveAttribute}
         isSavingAttribute={updateAttributeAction.isPending || updateOptionsAction.isPending}
+        focusGroupId={focusGroupId}
+        onFocusGroupHandled={() => setFocusGroupId(null)}
         onReorderGroups={handleReorderGroups}
         onReorderAttributes={handleReorderAttributes}
         onMoveAttribute={handleMoveAttribute}
@@ -173,13 +184,28 @@ export default function AttributeGroupsContainer() {
       <CreateGroupModal
         isOpen={isCreateGroupModalOpen}
         isLoading={createAttributeGroupAction.isPending}
+        existingNames={groups.map((g) => g.name)}
+        errorMessage={
+          createAttributeGroupAction.data?.status === ActionStatus.ERROR
+            ? createAttributeGroupAction.data?.errorMessage
+            : null
+        }
         onConfirmAction={(formValues) => createAttributeGroupAction.mutate({ name: formValues.name })}
-        onRequestCloseAction={() => setIsCreateGroupModalOpen(false)}
+        onRequestCloseAction={() => {
+          createAttributeGroupAction.reset();
+          setIsCreateGroupModalOpen(false);
+        }}
       />
 
       <CreateAttributeModal
         isOpen={isCreateAttributeModalOpen}
         isLoading={createAttributeAction.isPending}
+        existingNames={(activeGroup?.attributes ?? []).map((a) => a.name)}
+        errorMessage={
+          createAttributeAction.data?.status === ActionStatus.ERROR
+            ? createAttributeAction.data?.errorMessage
+            : null
+        }
         onConfirmAction={(formValues) => {
           if (!activeGroup) return;
           createAttributeAction.mutate({
@@ -187,13 +213,29 @@ export default function AttributeGroupsContainer() {
             groupId: activeGroup.id,
             type: formValues.type,
             isUnique: formValues.unique,
+            sensitive: formValues.sensitive,
             decScale: formValues.decScale,
             hideYear: formValues.dateHideYearPublic,
             options: formValues.options,
+            objectFields:
+              formValues.type === AttributeType.OBJECT
+                ? serializeObjectFields(formValues.objectFields ?? [])
+                : undefined,
             ...formValues.config,
           });
         }}
-        onRequestCloseAction={() => setIsCreateAttributeModalOpen(false)}
+        onRequestCloseAction={() => {
+          createAttributeAction.reset();
+          setIsCreateAttributeModalOpen(false);
+        }}
+      />
+
+      <EditAttributeModal
+        attribute={attributeToEdit}
+        groups={groups}
+        isOpen={!!attributeToEdit}
+        onSaveAction={handleSaveAttribute}
+        onRequestCloseAction={() => setAttributeToEdit(null)}
       />
 
       <RenameAttributeGroupModal

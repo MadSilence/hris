@@ -1,7 +1,7 @@
 "use server"
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { attributeService } from "@/api/modules/attributes/services/attributeService/attributeService";
+import { attributeService } from "@/api/modules/attributes/services/attributeService";
 
 export const deleteAttributeAction = async (
   submission: DeleteAttributeActionInput
@@ -12,7 +12,7 @@ export const deleteAttributeAction = async (
     return {
       status: ActionStatus.SUCCESS,
     }
-  } catch (e) {
+  } catch {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while deleting the attribute. Please try again."

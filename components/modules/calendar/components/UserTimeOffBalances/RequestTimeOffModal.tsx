@@ -27,7 +27,9 @@ import { Calendar } from "@/public/desact/src/components/ui/calendar";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
 import { useCreateTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCreateTimeOffRequest";
+import { useTimeOffRequestDuration } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestDuration";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
+import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 
 type Props = {
@@ -79,7 +81,12 @@ export const RequestTimeOffModal: FC<Props> = ({
   const unit = policy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
   const unlimited = policy?.unlimitedQuota ?? false;
 
-  const days = inclusiveDays(startDate, endDate);
+  // Authoritative counted duration from the backend (working days minus holidays, per policy counting
+  // mode). Fall back to a plain inclusive-day estimate while it loads / for an invalid range.
+  const { data: durationPreview } = useTimeOffRequestDuration(assignmentId || undefined, startDate, endDate);
+  const estimatedDays = inclusiveDays(startDate, endDate);
+  const days = durationPreview?.amount ?? estimatedDays;
+  const isWorkingDays = durationPreview?.countingMode === TimeOffPolicyCountingMode.WorkingDays;
   const remainingAfter = selected ? selected.currentBalance - days : 0;
   const insufficient = !unlimited && days > 0 && remainingAfter < 0;
 
@@ -236,7 +243,9 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Duration</span>
+              <span className="text-muted-foreground">
+                Duration{isWorkingDays ? <span className="text-xs"> · working days</span> : null}
+              </span>
               <span className="font-medium text-brown-900">
                 {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "—"}
               </span>

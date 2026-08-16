@@ -7,10 +7,15 @@ import { TimeOffPoliciesSettingsComponent } from "../TimeOffPoliciesSettingsComp
 import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
 import {
   PolicyWizardModal,
+  buildAccrualRequest,
   buildApprovalRequest,
+  buildBlackoutsRequest,
+  buildCoverageRequest,
   buildCreatePolicyRequest,
   buildEditRulesRequest,
+  buildEligibilityRequest,
   buildRequestRulesRequest,
+  buildTenureRulesRequest,
   type PolicyWizardValues,
 } from "../wizard";
 
@@ -22,8 +27,15 @@ import { useDeleteTimeOffPolicy } from "@/components/modules/settings/modules/ti
 import { useUpdateTimeOffPolicyRequestRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRequestRules/hooks/useUpdateTimeOffPolicyRequestRules";
 import { useUpdateTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useUpdateTimeOffPolicyEditRules";
 import { useUpdateTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useUpdateTimeOffPolicyApprovalSettings";
+import { useUpdateTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useUpdateTimeOffPolicyEligibility";
+import { useUpdateTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useUpdateTimeOffPolicyCoverage";
+import { useUpdateTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useUpdateTimeOffPolicyAccrual";
+import { useUpdateTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useUpdateTimeOffPolicyBlackouts";
+import { useUpdateTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useUpdateTimeOffPolicyTenureRules";
 
 import type { TimeOffPolicy } from "@/models/timeOff";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 type Props = {
   leaveTypeId?: string;
@@ -50,10 +62,15 @@ export default function TimeOffPoliciesSettingsContainer({
   const requestRulesMutation = useUpdateTimeOffPolicyRequestRules();
   const editRulesMutation = useUpdateTimeOffPolicyEditRules();
   const approvalMutation = useUpdateTimeOffPolicyApprovalSettings();
+  const eligibilityMutation = useUpdateTimeOffPolicyEligibility();
+  const coverageMutation = useUpdateTimeOffPolicyCoverage();
+  const accrualMutation = useUpdateTimeOffPolicyAccrual();
+  const blackoutsMutation = useUpdateTimeOffPolicyBlackouts();
+  const tenureRulesMutation = useUpdateTimeOffPolicyTenureRules();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deletingPolicy, setDeletingPolicy] = useState<TimeOffPolicy | null>(null);
-
+  if (error instanceof ForbiddenError) return <AccessDenied/>;
   if (error) throw error;
 
   const handleCreate = async (values: PolicyWizardValues, activate: boolean) => {
@@ -66,6 +83,11 @@ export default function TimeOffPoliciesSettingsContainer({
       // Sub-resources are keyed by policyId, so they must be saved after create.
       await requestRulesMutation.mutateAsync({ policyId, ...buildRequestRulesRequest(values) });
       await editRulesMutation.mutateAsync({ policyId, ...buildEditRulesRequest(values) });
+      await eligibilityMutation.mutateAsync({ policyId, ...buildEligibilityRequest(values) });
+      await coverageMutation.mutateAsync({ policyId, ...buildCoverageRequest(values) });
+      await accrualMutation.mutateAsync({ policyId, ...buildAccrualRequest(values) });
+      await blackoutsMutation.mutateAsync({ policyId, ...buildBlackoutsRequest(values) });
+      await tenureRulesMutation.mutateAsync({ policyId, ...buildTenureRulesRequest(values) });
 
       const approval = buildApprovalRequest(values);
       if (approval) {

@@ -3,6 +3,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { DeleteGroupModal } from "./DeleteGroupModal";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 
+// The delete modals fetch an impact preview (values / people affected). That needs a QueryClient and
+// the app-data context, neither of which belongs in a modal rendering test — stub the hook instead.
+jest.mock("@/components/modules/settings/modules/attributes/hooks/useDeleteImpact", () => ({
+  useAttributeDeleteImpact: () => ({ data: undefined }),
+  useGroupDeleteImpact: () => ({ data: undefined }),
+}));
+
 const mockGroup: AttributeGroup = {
   id: "g1",
   name: "HR",
@@ -70,10 +77,9 @@ describe("DeleteGroupModal", () => {
       ),
     ).toBeInTheDocument();
 
+    // The warning now talks about what happens to references, not about "employee data".
     expect(
-      screen.getByText(
-        /all employee data entered for these attributes will be lost/i,
-      ),
+      screen.getByText(/saved views or filters referencing them will be updated/i),
     ).toBeInTheDocument();
   });
 

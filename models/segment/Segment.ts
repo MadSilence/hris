@@ -5,6 +5,12 @@ import type { FilterDTO } from "@/models/user/fields";
 export type Segment = {
   filters: FilterDTO[];
   excludeUserIds: string[];
+  /**
+   * A segment resolves to active people only unless this is set. It used to be an unnamed rule
+   * inside the query builder — visible now, and off by default, because "everyone" quietly meaning
+   * "everyone who still works here" is fine as a default but not as a secret.
+   */
+  includeInactive?: boolean;
 };
 
 export type UserRoleRefDTO = {

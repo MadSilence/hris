@@ -19,6 +19,10 @@ import {
 import {
   useAssignUserRolesAction
 } from "@/components/modules/settings/modules/roles/hooks/Role/useAssignUserRolesAction/useAssignUserRolesAction";
+import {
+  useArchiveRoleAction
+} from "@/components/modules/settings/modules/roles/hooks/Role/useArchiveRoleAction/useArchiveRoleAction";
+import { triggerExportDownload } from "@/components/modules/settings/shared/ExportDataModal";
 import RolesPageView, { RolesTableView } from "./RolesPageView";
 
 const PAGE_SIZE = 50;
@@ -56,16 +60,22 @@ const RolesPageContainer: React.FC = () => {
   const renameRole = useRenameRoleAction();
   const duplicateRole = useDuplicateRoleAction();
   const deleteRole = useDeleteRoleAction();
+  const archiveRole = useArchiveRoleAction();
   const assignUserRoles = useAssignUserRolesAction();
 
   if (rolesError) throw rolesError;
   if (peopleError) throw peopleError;
 
-  // Roles are fully loaded, so filter them on the client by name.
+  // Archived roles are listed alongside active ones, marked with a badge rather than hidden behind
+  // a switch: a role that still grants nothing to the people holding it is exactly the thing an
+  // admin needs to notice.
   const filteredRoles = React.useMemo(() => {
-    if (view !== "roles" || trimmedQuery.length < 1) return roles;
-    const needle = trimmedQuery.toLowerCase();
-    return (roles ?? []).filter((role) => role.name.toLowerCase().includes(needle));
+    let rows = roles ?? [];
+    if (view === "roles" && trimmedQuery.length >= 1) {
+      const needle = trimmedQuery.toLowerCase();
+      rows = rows.filter((role) => role.name.toLowerCase().includes(needle));
+    }
+    return rows;
   }, [roles, view, trimmedQuery]);
 
   return (
@@ -82,13 +92,13 @@ const RolesPageContainer: React.FC = () => {
       isLoadingMoreUsers={isLoadingMoreUsers}
       onLoadMoreUsers={() => void fetchMoreUsers()}
       onCreateRole={async (values) => {
-        await createRole.mutateAsync({ name: values.name });
+        await createRole.mutateAsync({ name: values.name, description: values.description });
       }}
       onRenameRole={async (roleId, values) => {
         await renameRole.mutateAsync({
           id: roleId,
           name: values.name,
-          description: roles?.find((role) => role.id === roleId)?.description,
+          description: values.description,
         });
       }}
       onDuplicateRole={async (roleId, values) => {
@@ -96,6 +106,12 @@ const RolesPageContainer: React.FC = () => {
       }}
       onDeleteRole={async (roleId) => {
         await deleteRole.mutateAsync({ id: roleId });
+      }}
+      onArchiveRole={async (roleId, archived) => {
+        await archiveRole.mutateAsync({ id: roleId, archived });
+      }}
+      onExportRoles={({ format }) => {
+        void triggerExportDownload("/api/roles/export", format);
       }}
       onApplyRoles={async (userId, roleIds, currentRoleIds) => {
         await assignUserRoles.mutateAsync({ userId, roleIds, currentRoleIds });

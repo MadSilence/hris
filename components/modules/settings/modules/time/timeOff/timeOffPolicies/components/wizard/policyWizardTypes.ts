@@ -26,6 +26,31 @@ import {
   TimeOffPolicyApproverType,
   type UpdateTimeOffPolicyApprovalSettingsRequest,
 } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
+import {
+  TimeOffEligibilityDelayUnit,
+  TimeOffEligibilityReference,
+  type TimeOffPolicyEligibilityDTO,
+  type UpdateTimeOffPolicyEligibilityRequest,
+} from "@/api/modules/timeOff/timeOffPolicyEligibility/dto";
+import {
+  TimeOffCoverageBehavior,
+  TimeOffCoverageScope,
+  type TimeOffPolicyCoverageDTO,
+  type UpdateTimeOffPolicyCoverageRequest,
+} from "@/api/modules/timeOff/timeOffPolicyCoverage/dto";
+import {
+  TimeOffAccrualFrequency,
+  type TimeOffPolicyAccrualDTO,
+  type UpdateTimeOffPolicyAccrualRequest,
+} from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
+import type {
+  TimeOffPolicyBlackoutDTO,
+  UpdateTimeOffPolicyBlackoutsRequest,
+} from "@/api/modules/timeOff/timeOffPolicyBlackouts/dto";
+import type {
+  TimeOffPolicyTenureRuleDTO,
+  UpdateTimeOffPolicyTenureRulesRequest,
+} from "@/api/modules/timeOff/timeOffPolicyTenureRules/dto";
 import type { TimeOffPolicy, TimeOffPolicyApprovalSettings } from "@/models/timeOff";
 
 // Weekday bitmask: Mon=1, Tue=2, Wed=4, Thu=8, Fri=16, Sat=32, Sun=64
@@ -39,7 +64,32 @@ export const WEEKDAY_BITS: { bit: number; label: string }[] = [
   { bit: 64, label: "Sun" },
 ];
 
-export type WizardApprover = { required: boolean };
+/** Minimal user shape carried by a specific-user approval step. Structurally compatible with
+ *  UserPickerField's PickedUser; on edit-prefill only `id` is known (name resolved in the UI). */
+export type WizardApproverUser = {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  avatarUrl?: string | null;
+};
+
+export type WizardApprover = {
+  type: TimeOffPolicyApproverType;
+  user: WizardApproverUser | null;
+  required: boolean;
+};
+
+export type WizardBlackout = {
+  name: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type WizardTenureRule = {
+  yearsOfService: string;
+  bonusDays: string;
+};
 
 export type PolicyWizardValues = {
   // Basics
@@ -77,9 +127,7 @@ export type PolicyWizardValues = {
 
   // Requests (request-rules)
   reqMinRequestUnit: TimeOffRequestUnit;
-  reqMaxRequestUnit: TimeOffRequestUnit | "";
-  reqAllowHalfDay: boolean;
-  reqAllowHourly: boolean;
+  reqMinDurationPerRequest: string;
   reqMaxDurationPerRequest: string;
   reqMinGapBetweenRequests: string;
   reqAllowOverlapping: boolean;
@@ -97,6 +145,29 @@ export type PolicyWizardValues = {
   apprApprovalOrderStrict: boolean;
   apprAllowSubstitutes: boolean;
   apprApprovers: WizardApprover[];
+
+  // Eligibility (eligibility)
+  eligEnabled: boolean;
+  eligDelayValue: string;
+  eligDelayUnit: TimeOffEligibilityDelayUnit;
+  eligReference: TimeOffEligibilityReference;
+
+  // Coverage (coverage)
+  covEnabled: boolean;
+  covMaxUsers: string;
+  covScope: TimeOffCoverageScope;
+  covBehavior: TimeOffCoverageBehavior;
+
+  // Accrual (accrual) — applies only when entitlementGrantingMode === ACCRUED
+  accrualFrequency: TimeOffAccrualFrequency;
+  accrualAmount: string;
+  accrualCap: string;
+
+  // Blackout (blackouts)
+  blackouts: WizardBlackout[];
+
+  // Tenure rewards (tenure-rules)
+  tenureRules: WizardTenureRule[];
 
   // Editing (edit-rules)
   editEmployeeCanEditOwn: boolean;
@@ -139,9 +210,7 @@ export const defaultPolicyWizardValues: PolicyWizardValues = {
   includePublicHolidays: false,
 
   reqMinRequestUnit: TimeOffRequestUnit.FullDay,
-  reqMaxRequestUnit: "",
-  reqAllowHalfDay: false,
-  reqAllowHourly: false,
+  reqMinDurationPerRequest: "",
   reqMaxDurationPerRequest: "",
   reqMinGapBetweenRequests: "",
   reqAllowOverlapping: false,
@@ -157,7 +226,25 @@ export const defaultPolicyWizardValues: PolicyWizardValues = {
   apprAllApprovalsRequired: true,
   apprApprovalOrderStrict: false,
   apprAllowSubstitutes: false,
-  apprApprovers: [{ required: true }],
+  apprApprovers: [{ type: TimeOffPolicyApproverType.Manager, user: null, required: true }],
+
+  eligEnabled: false,
+  eligDelayValue: "",
+  eligDelayUnit: TimeOffEligibilityDelayUnit.Months,
+  eligReference: TimeOffEligibilityReference.HireDate,
+
+  covEnabled: false,
+  covMaxUsers: "",
+  covScope: TimeOffCoverageScope.Team,
+  covBehavior: TimeOffCoverageBehavior.Block,
+
+  accrualFrequency: TimeOffAccrualFrequency.Monthly,
+  accrualAmount: "",
+  accrualCap: "",
+
+  blackouts: [],
+
+  tenureRules: [],
 
   editEmployeeCanEditOwn: true,
   editAllowEditApproved: false,
@@ -183,10 +270,15 @@ export const toggleWeekday = (mask: number, bit: number) =>
 export type WizardStepId =
   | "basics"
   | "entitlement"
+  | "accrual"
   | "carryover"
   | "counting"
   | "requests"
   | "approvals"
+  | "eligibility"
+  | "coverage"
+  | "blackout"
+  | "tenure"
   | "editing"
   | "review";
 
@@ -245,9 +337,73 @@ export function validatePolicyStep(
     case "approvals": {
       if (v.apprRequiresApproval) {
         if (v.apprApprovers.length < 1) return "Add at least one approval step.";
+        if (
+          v.apprApprovers.some(
+            (a) => a.type === TimeOffPolicyApproverType.SpecificUser && !a.user,
+          )
+        ) {
+          return "Pick a person for each specific-user approval step.";
+        }
         if (v.apprApprovalOrderStrict && !v.apprAllApprovalsRequired) {
           return "Strict order requires all approvals to be required.";
         }
+      }
+      return null;
+    }
+    case "eligibility": {
+      if (v.eligEnabled) {
+        const n = toNumber(v.eligDelayValue);
+        if (n === null || n < 0) {
+          return "Please enter a non-negative waiting-period value.";
+        }
+      }
+      return null;
+    }
+    case "coverage": {
+      if (v.covEnabled) {
+        const n = toNumber(v.covMaxUsers);
+        if (n === null || n < 0) {
+          return "Please enter a non-negative max-people-away value.";
+        }
+      }
+      return null;
+    }
+    case "accrual": {
+      if (v.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued) {
+        const amount = toNumber(v.accrualAmount);
+        if (amount !== null && amount < 0) {
+          return "Accrual amount must be non-negative.";
+        }
+        const cap = toNumber(v.accrualCap);
+        if (cap !== null && cap < 0) {
+          return "Accrual cap must be non-negative.";
+        }
+      }
+      return null;
+    }
+    case "blackout": {
+      for (const b of v.blackouts) {
+        if (!b.startDate || !b.endDate) {
+          return "Each blackout period needs a start and end date.";
+        }
+        if (b.endDate < b.startDate) {
+          return "A blackout's end date must be on or after its start date.";
+        }
+      }
+      return null;
+    }
+    case "tenure": {
+      const seenYears = new Set<number>();
+      for (const t of v.tenureRules) {
+        const years = toNumber(t.yearsOfService);
+        const bonus = toNumber(t.bonusDays);
+        if (years === null || years < 0 || bonus === null || bonus < 0) {
+          return "Each tenure tier needs non-negative years and bonus days.";
+        }
+        if (seenYears.has(years)) {
+          return "Tenure tiers must have distinct years of service.";
+        }
+        seenYears.add(years);
       }
       return null;
     }
@@ -265,7 +421,7 @@ export function buildCreatePolicyRequest(
   const isAfterPeriod =
     v.carryoverType !== TimeOffPolicyCarryoverType.None &&
     v.carryoverExpiryType === TimeOffPolicyCarryoverExpiryType.AfterPeriod;
-  const isManual = v.renewalType === TimeOffPolicyRenewalType.Manual;
+  const usesFixedDate = v.renewalType === TimeOffPolicyRenewalType.YearlyFixedDate;
 
   return {
     leaveTypeId,
@@ -293,8 +449,8 @@ export function buildCreatePolicyRequest(
     unlimitedQuota: v.unlimitedQuota,
 
     renewalType: v.renewalType,
-    renewalFixedDay: isManual ? null : toNumber(v.renewalFixedDay),
-    renewalFixedMonth: isManual ? null : toNumber(v.renewalFixedMonth),
+    renewalFixedDay: usesFixedDate ? toNumber(v.renewalFixedDay) : null,
+    renewalFixedMonth: usesFixedDate ? toNumber(v.renewalFixedMonth) : null,
 
     carryoverType: v.carryoverType,
     carryoverLimit: isLimited ? toNumber(v.carryoverLimit) : null,
@@ -321,9 +477,7 @@ export function buildRequestRulesRequest(
     v.reqCertificateRequirementType === TimeOffCertificateRequirementType.FromDuration;
   return {
     minRequestUnit: v.reqMinRequestUnit,
-    maxRequestUnit: v.reqMaxRequestUnit === "" ? null : v.reqMaxRequestUnit,
-    allowHalfDay: v.reqAllowHalfDay,
-    allowHourlyRequests: v.reqAllowHourly,
+    minDurationPerRequest: toNumber(v.reqMinDurationPerRequest),
     maxDurationPerRequest: toNumber(v.reqMaxDurationPerRequest),
     minGapBetweenRequests: toNumber(v.reqMinGapBetweenRequests),
     allowOverlappingRequests: v.reqAllowOverlapping,
@@ -362,11 +516,71 @@ export function buildApprovalRequest(
     approvalOrderStrict: v.apprApprovalOrderStrict,
     allowSubstituteApprovers: v.apprAllowSubstitutes,
     approvers: v.apprApprovers.map((a, i) => ({
-      approverType: TimeOffPolicyApproverType.Manager,
-      approverUserId: null,
+      approverType: a.type,
+      approverUserId:
+        a.type === TimeOffPolicyApproverType.SpecificUser ? a.user?.id ?? null : null,
       approvalOrder: i + 1,
       required: a.required,
     })),
+  };
+}
+
+export function buildEligibilityRequest(
+  v: PolicyWizardValues,
+): UpdateTimeOffPolicyEligibilityRequest {
+  return {
+    eligibilityDelayEnabled: v.eligEnabled,
+    eligibilityDelayValue: v.eligEnabled ? toNumber(v.eligDelayValue) : null,
+    eligibilityDelayUnit: v.eligDelayUnit,
+    eligibilityReference: v.eligReference,
+  };
+}
+
+export function buildTenureRulesRequest(
+  v: PolicyWizardValues,
+): UpdateTimeOffPolicyTenureRulesRequest {
+  return {
+    tenureRules: v.tenureRules
+      .filter((t) => toNumber(t.yearsOfService) !== null && toNumber(t.bonusDays) !== null)
+      .map((t) => ({
+        yearsOfService: toNumber(t.yearsOfService) as number,
+        bonusDays: toNumber(t.bonusDays) as number,
+      })),
+  };
+}
+
+export function buildBlackoutsRequest(
+  v: PolicyWizardValues,
+): UpdateTimeOffPolicyBlackoutsRequest {
+  return {
+    blackouts: v.blackouts
+      .filter((b) => b.startDate && b.endDate)
+      .map((b) => ({
+        name: b.name.trim() || null,
+        startDate: b.startDate,
+        endDate: b.endDate,
+      })),
+  };
+}
+
+export function buildAccrualRequest(
+  v: PolicyWizardValues,
+): UpdateTimeOffPolicyAccrualRequest {
+  return {
+    accrualFrequency: v.accrualFrequency,
+    accrualAmount: toNumber(v.accrualAmount),
+    accrualCap: toNumber(v.accrualCap),
+  };
+}
+
+export function buildCoverageRequest(
+  v: PolicyWizardValues,
+): UpdateTimeOffPolicyCoverageRequest {
+  return {
+    maxUsersAwayEnabled: v.covEnabled,
+    maxUsersAway: v.covEnabled ? toNumber(v.covMaxUsers) : null,
+    limitScope: v.covScope,
+    maxUsersAwayBehavior: v.covBehavior,
   };
 }
 
@@ -375,7 +589,7 @@ export function buildUpdatePolicyRequest(v: PolicyWizardValues): UpdateTimeOffPo
   const isAfterPeriod =
     v.carryoverType !== TimeOffPolicyCarryoverType.None &&
     v.carryoverExpiryType === TimeOffPolicyCarryoverExpiryType.AfterPeriod;
-  const isManual = v.renewalType === TimeOffPolicyRenewalType.Manual;
+  const usesFixedDate = v.renewalType === TimeOffPolicyRenewalType.YearlyFixedDate;
 
   return {
     displayName: v.name.trim(),
@@ -399,8 +613,8 @@ export function buildUpdatePolicyRequest(v: PolicyWizardValues): UpdateTimeOffPo
     unlimitedQuota: v.unlimitedQuota,
 
     renewalType: v.renewalType,
-    renewalFixedDay: isManual ? null : toNumber(v.renewalFixedDay),
-    renewalFixedMonth: isManual ? null : toNumber(v.renewalFixedMonth),
+    renewalFixedDay: usesFixedDate ? toNumber(v.renewalFixedDay) : null,
+    renewalFixedMonth: usesFixedDate ? toNumber(v.renewalFixedMonth) : null,
 
     carryoverType: v.carryoverType,
     carryoverLimit: isLimited ? toNumber(v.carryoverLimit) : null,
@@ -429,6 +643,11 @@ export function policyToWizardValues(
   requestRules?: TimeOffPolicyRequestRulesDTO,
   editRules?: TimeOffPolicyEditRulesDTO,
   approval?: TimeOffPolicyApprovalSettings,
+  eligibility?: TimeOffPolicyEligibilityDTO,
+  coverage?: TimeOffPolicyCoverageDTO,
+  accrual?: TimeOffPolicyAccrualDTO,
+  blackouts?: TimeOffPolicyBlackoutDTO[],
+  tenureRules?: TimeOffPolicyTenureRuleDTO[],
 ): PolicyWizardValues {
   const d = defaultPolicyWizardValues;
   const hasApprovers = (approval?.approvers.length ?? 0) > 0;
@@ -472,9 +691,7 @@ export function policyToWizardValues(
 
     // Requests
     reqMinRequestUnit: requestRules?.minRequestUnit ?? d.reqMinRequestUnit,
-    reqMaxRequestUnit: requestRules?.maxRequestUnit ?? "",
-    reqAllowHalfDay: requestRules?.allowHalfDay ?? d.reqAllowHalfDay,
-    reqAllowHourly: requestRules?.allowHourlyRequests ?? d.reqAllowHourly,
+    reqMinDurationPerRequest: numToStr(requestRules?.minDurationPerRequest),
     reqMaxDurationPerRequest: numToStr(requestRules?.maxDurationPerRequest),
     reqMinGapBetweenRequests: numToStr(requestRules?.minGapBetweenRequests),
     reqAllowOverlapping: requestRules?.allowOverlappingRequests ?? d.reqAllowOverlapping,
@@ -493,8 +710,42 @@ export function policyToWizardValues(
     apprApprovalOrderStrict: approval?.approvalOrderStrict ?? d.apprApprovalOrderStrict,
     apprAllowSubstitutes: approval?.allowSubstituteApprovers ?? d.apprAllowSubstitutes,
     apprApprovers: hasApprovers
-      ? approval!.approvers.map((a) => ({ required: a.required }))
+      ? approval!.approvers.map((a) => ({
+          type: a.approverType,
+          user: a.approverUserId ? { id: a.approverUserId } : null,
+          required: a.required,
+        }))
       : d.apprApprovers,
+
+    // Eligibility
+    eligEnabled: eligibility?.eligibilityDelayEnabled ?? d.eligEnabled,
+    eligDelayValue: numToStr(eligibility?.eligibilityDelayValue),
+    eligDelayUnit: eligibility?.eligibilityDelayUnit ?? d.eligDelayUnit,
+    eligReference: eligibility?.eligibilityReference ?? d.eligReference,
+
+    // Coverage
+    covEnabled: coverage?.maxUsersAwayEnabled ?? d.covEnabled,
+    covMaxUsers: numToStr(coverage?.maxUsersAway),
+    covScope: coverage?.limitScope ?? d.covScope,
+    covBehavior: coverage?.maxUsersAwayBehavior ?? d.covBehavior,
+
+    // Accrual
+    accrualFrequency: accrual?.accrualFrequency ?? d.accrualFrequency,
+    accrualAmount: numToStr(accrual?.accrualAmount),
+    accrualCap: numToStr(accrual?.accrualCap),
+
+    // Blackout
+    blackouts: (blackouts ?? []).map((b) => ({
+      name: b.name ?? "",
+      startDate: b.startDate,
+      endDate: b.endDate,
+    })),
+
+    // Tenure rewards
+    tenureRules: (tenureRules ?? []).map((t) => ({
+      yearsOfService: numToStr(t.yearsOfService),
+      bonusDays: numToStr(t.bonusDays),
+    })),
 
     // Editing
     editEmployeeCanEditOwn: editRules?.employeeCanEditOwnRequests ?? d.editEmployeeCanEditOwn,

@@ -1,43 +1,80 @@
 import * as React from "react";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
+import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
+import { parseCheckboxValue, parsePersonValue } from "@/models/attribute/attributeValue";
+import { getObjectSchema } from "@/models/attribute/objectFields";
+import {
+  ObjectRecordsView,
+  ObjectRecordsEditor,
+  SingleRecordView,
+  SingleRecordEditor,
+} from "./ObjectAttributeField";
 import UserChip from "@/components/ui/UserChip/UserChip";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 
 export type PersonalInfoAttributesRowProps = {
   attribute: Attribute;
   rawValue: unknown;
 
+  /** Sensitive field the caller may not view: the server already replaced the value with a mask. */
+  masked?: boolean;
   isEdit?: boolean;
   onChange?: (v: unknown) => void;
+  onValidityChange?: (error: string | null) => void;
 };
 
 export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps> = ({
   attribute,
   rawValue,
+  masked = false,
   isEdit = false,
   onChange,
+  onValidityChange,
 }) => {
+  const error = isEdit ? fieldError(attribute, rawValue) : null;
+
+  // Report this field's validity up so the container can block Save.
+  const onValidityChangeRef = React.useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  React.useEffect(() => {
+    onValidityChangeRef.current?.(error);
+  }, [error]);
+  React.useEffect(() => () => onValidityChangeRef.current?.(null), []);
+
   return (
     <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-5 py-4">
       <div className="text-sm text-muted-foreground">
         <span>{attribute.name}</span>
-        {(attribute as any).required && (
+        {attribute.required && (
           <span className="ml-0.5 text-destructive" title="Required">*</span>
         )}
-        {(attribute as any).description && (
+        {attribute.description && (
           <p className="mt-0.5 text-xs text-muted-foreground/80">
-            {(attribute as any).description}
+            {attribute.description}
           </p>
         )}
       </div>
       <div className="text-sm text-foreground">
-        {!isEdit ? (
+        {masked ? (
+          // The server sent a placeholder, not a value — render it as-is. Going through the
+          // type-specific renderers would turn "••••" into "Not set" for options and dates.
+          <span
+            className="text-muted-foreground"
+            title="You don't have access to this field's value"
+          >
+            {rawValue == null ? "—" : String(rawValue)}
+          </span>
+        ) : !isEdit ? (
           <ViewValue attribute={attribute} rawValue={rawValue}/>
         ) : (
-          <EditValue attribute={attribute} rawValue={rawValue} onChange={onChange!}/>
+          <>
+            <EditValue attribute={attribute} rawValue={rawValue} onChange={onChange!}/>
+            {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+          </>
         )}
       </div>
     </div>
@@ -76,13 +113,21 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       );
     }
 
+    case AttributeType.PHONE: {
+      const phone = String(rawValue);
+      return (
+        <a href={`tel:${phone.replace(/\s+/g, "")}`} className="text-brown-600 hover:underline">
+          {phone}
+        </a>
+      );
+    }
+
     case AttributeType.DATE: {
       const s = formatDate(rawValue, !!attribute.dateHideYear);
       return <span>{s}</span>;
     }
 
-    case AttributeType.SELECT:
-    case AttributeType.STATUS: {
+    case AttributeType.SELECT: {
       const { label, color } = resolveSingleOption(attribute, rawValue);
 
       if (!label) {
@@ -109,20 +154,16 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     }
 
     case AttributeType.PERSON: {
-      if (rawValue && typeof rawValue === "object") {
-        const rv = rawValue as any;
-
-        if (rv.name && rv.href) {
-          return (
-            <UserChip
-              name={rv.name}
-              href={rv.href}
-              initials={rv.initials}
-              color={rv.color}
-              subtitle={rv.subtitle}
-            />
-          );
-        }
+      // The backend resolves the stored user id into {id, name}; an id it can't resolve (deleted
+      // user, or free text written before values were validated) falls through as raw text.
+      const person = parsePersonValue(rawValue);
+      if (person) {
+        return (
+          <UserChip
+            name={person.name}
+            href={`/organization/people/${person.id}/personal`}
+          />
+        );
       }
 
       return <span>{String(rawValue)}</span>;
@@ -134,7 +175,20 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     }
 
     case AttributeType.CHECKBOX:
-      return <span>{rawValue ? "Yes" : "No"}</span>;
+      // Values arrive as strings, so a stored `false` is the truthy string "false".
+      return <span>{parseCheckboxValue(rawValue) ? "Yes" : "No"}</span>;
+
+    case AttributeType.OBJECT:
+      return (
+        <ObjectRecordsView fields={getObjectSchema(t, attribute.objectFields)} value={rawValue} />
+      );
+
+    case AttributeType.ADDRESS:
+    case AttributeType.MONEY:
+      return <SingleRecordView fields={getObjectSchema(t)} value={rawValue} />;
+
+    case AttributeType.LONG_TEXT:
+      return <p className="whitespace-pre-wrap break-words">{String(rawValue)}</p>;
 
     case AttributeType.TEXT:
     default:
@@ -174,13 +228,84 @@ function EditValue({
     case AttributeType.TEXT:
     case AttributeType.URL:
     case AttributeType.EMAIL:
-    case AttributeType.NUMBER:
+    case AttributeType.PHONE:
+    case AttributeType.NUMBER: {
+      const isNum = t === AttributeType.NUMBER;
       return (
         <Input
-          type={t === AttributeType.NUMBER ? "number" : t === AttributeType.EMAIL ? "email" : "text"}
+          type={
+            isNum
+              ? "number"
+              : t === AttributeType.EMAIL
+                ? "email"
+                : t === AttributeType.PHONE
+                  ? "tel"
+                  : "text"
+          }
           value={rawValue == null ? "" : String(rawValue)}
-          placeholder={(attribute as any).defaultValue ?? undefined}
+          placeholder={attribute.defaultValue ?? undefined}
           onChange={(e) => onChange(e.target.value)}
+          min={isNum ? attribute.minValue ?? undefined : undefined}
+          max={isNum ? attribute.maxValue ?? undefined : undefined}
+          step={isNum ? (attribute.decScale != null ? String(Math.pow(10, -attribute.decScale)) : "1") : undefined}
+          minLength={!isNum ? attribute.minLength ?? undefined : undefined}
+          maxLength={!isNum ? attribute.maxLength ?? undefined : undefined}
+          pattern={!isNum ? attribute.regex ?? undefined : undefined}
+        />
+      );
+    }
+
+    case AttributeType.LONG_TEXT:
+      return (
+        <Textarea
+          value={rawValue == null ? "" : String(rawValue)}
+          onChange={(e) => onChange(e.currentTarget.value)}
+          minLength={attribute.minLength ?? undefined}
+          maxLength={attribute.maxLength ?? undefined}
+          className="min-h-24"
+        />
+      );
+
+    case AttributeType.COUNTRY:
+    case AttributeType.LANGUAGE:
+    case AttributeType.TIMEZONE:
+    case AttributeType.CURRENCY: {
+      const options = getCatalogOptions(t);
+      const cur = rawValue == null || rawValue === "" ? undefined : String(rawValue);
+
+      return (
+        <Select value={cur} onValueChange={(v) => onChange(v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select…"/>
+          </SelectTrigger>
+
+          <SelectContent className="max-h-72">
+            {options.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    case AttributeType.OBJECT:
+      return (
+        <ObjectRecordsEditor
+          fields={getObjectSchema(t, attribute.objectFields)}
+          value={rawValue}
+          onChange={(records) => onChange(records)}
+        />
+      );
+
+    case AttributeType.ADDRESS:
+    case AttributeType.MONEY:
+      return (
+        <SingleRecordEditor
+          fields={getObjectSchema(t)}
+          value={rawValue}
+          onChange={(records) => onChange(records)}
         />
       );
 
@@ -191,13 +316,14 @@ function EditValue({
         <Input
           type="date"
           value={iso}
+          min={attribute.minDate ?? undefined}
+          max={attribute.maxDate ?? undefined}
           onChange={(e) => onChange(e.target.value)}
         />
       );
     }
 
-    case AttributeType.SELECT:
-    case AttributeType.STATUS: {
+    case AttributeType.SELECT: {
       const options = attribute.options ?? [];
       const cur = normalizeIdOrValue(attribute, rawValue);
 
@@ -257,18 +383,24 @@ function EditValue({
       return (
         <input
           type="checkbox"
-          checked={Boolean(rawValue)}
+          checked={parseCheckboxValue(rawValue)}
           onChange={(e) => onChange(e.target.checked)}
         />
       );
 
-    case AttributeType.PERSON:
+    case AttributeType.PERSON: {
+      // A PERSON value is a user id, which the server now validates. Until this field gets a real
+      // people-picker, editing is disabled rather than offering a text box that can only fail.
+      const person = parsePersonValue(rawValue);
       return (
-        <Input
-          value={rawValue == null ? "" : String(rawValue)}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <div className="space-y-1">
+          <Input value={person?.name ?? ""} disabled readOnly placeholder="No one selected" />
+          <p className="text-xs text-muted-foreground">
+            Choosing a person isn&apos;t available here yet.
+          </p>
+        </div>
       );
+    }
 
     default:
       return (
@@ -277,6 +409,99 @@ function EditValue({
           onChange={(e) => onChange(e.target.value)}
         />
       );
+  }
+}
+
+/* ---------- validation (mirrors server-side UserAttributeValueWriter) ---------- */
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const URL_RE = /^https?:\/\/\S+$/i;
+
+function isEmptyValue(raw: unknown): boolean {
+  return (
+    raw === null ||
+    raw === undefined ||
+    (typeof raw === "string" && raw.trim() === "") ||
+    (Array.isArray(raw) && raw.length === 0)
+  );
+}
+
+/** Client-side pre-validation for a single attribute value. Returns an error string or null.
+ *  The server (UserAttributeValueWriter) remains authoritative; this is just inline feedback. */
+function fieldError(attribute: Attribute, raw: unknown): string | null {
+  if (attribute.required && isEmptyValue(raw)) return "This field is required.";
+  if (isEmptyValue(raw)) return null;
+
+  switch (attribute.type) {
+    case AttributeType.NUMBER: {
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return "Must be a number.";
+      if (attribute.onlyPositive && n < 0) return "Must be a positive number.";
+      if (attribute.minValue != null && n < attribute.minValue) return `Must be ≥ ${attribute.minValue}.`;
+      if (attribute.maxValue != null && n > attribute.maxValue) return `Must be ≤ ${attribute.maxValue}.`;
+      return null;
+    }
+    case AttributeType.TEXT:
+    case AttributeType.EMAIL:
+    case AttributeType.URL: {
+      const s = String(raw);
+      if (attribute.minLength != null && s.length < attribute.minLength)
+        return `Must be at least ${attribute.minLength} characters.`;
+      if (attribute.maxLength != null && s.length > attribute.maxLength)
+        return `Must be at most ${attribute.maxLength} characters.`;
+      if (attribute.type === AttributeType.EMAIL && !EMAIL_RE.test(s)) return "Enter a valid email address.";
+      if (attribute.type === AttributeType.URL && !URL_RE.test(s))
+        return "Enter a valid URL (starting with http:// or https://).";
+      if (attribute.regex) {
+        try {
+          if (!new RegExp(attribute.regex).test(s)) return "Doesn't match the required format.";
+        } catch {
+          /* invalid pattern configured — let the server decide */
+        }
+      }
+      return null;
+    }
+    case AttributeType.LONG_TEXT: {
+      const s = String(raw);
+      if (attribute.minLength != null && s.length < attribute.minLength)
+        return `Must be at least ${attribute.minLength} characters.`;
+      if (attribute.maxLength != null && s.length > attribute.maxLength)
+        return `Must be at most ${attribute.maxLength} characters.`;
+      return null;
+    }
+    case AttributeType.PHONE: {
+      const s = String(raw);
+      const digits = s.replace(/[^0-9]/g, "");
+      if (digits.length < 7 || digits.length > 15) return "Enter a valid phone number.";
+      if (attribute.minLength != null && s.length < attribute.minLength)
+        return `Must be at least ${attribute.minLength} characters.`;
+      if (attribute.maxLength != null && s.length > attribute.maxLength)
+        return `Must be at most ${attribute.maxLength} characters.`;
+      if (attribute.regex) {
+        try {
+          if (!new RegExp(attribute.regex).test(s)) return "Doesn't match the required format.";
+        } catch {
+          /* invalid pattern configured — let the server decide */
+        }
+      }
+      return null;
+    }
+    case AttributeType.DATE: {
+      const s = String(raw);
+      if (attribute.minDate && s < attribute.minDate) return `Must be on or after ${attribute.minDate}.`;
+      if (attribute.maxDate && s > attribute.maxDate) return `Must be on or before ${attribute.maxDate}.`;
+      return null;
+    }
+    case AttributeType.MULTI_SELECT: {
+      const arr = Array.isArray(raw) ? raw : [raw];
+      if (attribute.minSelect != null && arr.length < attribute.minSelect)
+        return `Select at least ${attribute.minSelect}.`;
+      if (attribute.maxSelect != null && arr.length > attribute.maxSelect)
+        return `Select at most ${attribute.maxSelect}.`;
+      return null;
+    }
+    default:
+      return null;
   }
 }
 

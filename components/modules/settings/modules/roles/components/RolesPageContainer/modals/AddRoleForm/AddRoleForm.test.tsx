@@ -50,6 +50,7 @@ describe("AddRoleForm", () => {
       expect(onSubmitAction).toHaveBeenCalledWith({
         useTemplate: false,
         name: "HR Manager",
+        description: "",
         templateId: "",
         templateName: "",
       });
@@ -103,6 +104,7 @@ describe("AddRoleForm", () => {
       expect(onSubmitAction).toHaveBeenCalledWith({
         useTemplate: true,
         name: "",
+        description: "",
         templateId: "admin",
         templateName: "Custom Admin",
       });
@@ -127,6 +129,7 @@ describe("AddRoleForm", () => {
       expect(onSubmitAction).toHaveBeenCalledWith({
         useTemplate: true,
         name: "",
+        description: "",
         templateId: "admin",
         templateName: "",
       });

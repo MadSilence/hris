@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
@@ -55,10 +56,17 @@ export const RenameAttributeGroupModal: FC<
           className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
         >
           <DialogHeader>
-            <DialogTitle>Rename Attribute Group</DialogTitle>
-            <DialogDescription>
-              Update the section name used to organize attributes.
-            </DialogDescription>
+            <div className="flex items-center gap-3 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
+                <Pencil className="h-5 w-5" />
+              </span>
+              <div className="space-y-1">
+                <DialogTitle>Rename section</DialogTitle>
+                <DialogDescription>
+                  Update the section name used to organize attributes.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
           <RenameAttributeGroupForm

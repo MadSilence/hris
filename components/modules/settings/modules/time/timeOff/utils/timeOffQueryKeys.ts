@@ -37,6 +37,41 @@ export const getTimeOffPolicyEditRulesQueryKey = (policyId: string) => [
   "editRules",
 ];
 
+export const getTimeOffPolicyEligibilityQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "eligibility",
+];
+
+export const getTimeOffPolicyCoverageQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "coverage",
+];
+
+export const getTimeOffPolicyAccrualQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "accrual",
+];
+
+export const getTimeOffPolicyBlackoutsQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "blackouts",
+];
+
+export const getTimeOffPolicyTenureRulesQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "tenureRules",
+];
+
 export const getTimeOffPolicyAssignmentsQueryKey = (policyId: string) => [
   TIME_OFF_QUERY_KEY,
   "policies",

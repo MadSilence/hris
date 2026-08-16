@@ -8,6 +8,8 @@ import { PermissionGate } from "@/components/auth/PermissionGate";
 export interface AssignedUsersTableHeaderProps {
   query: string;
   onQueryChange: (v: string) => void;
+  /** Set to turn Assign off and say why; the backend refuses these cases anyway (R00009). */
+  assignDisabledReason?: string;
   onAssignClick?: () => void;
   onExportClick: () => void;
 }
@@ -15,6 +17,7 @@ export interface AssignedUsersTableHeaderProps {
 export default function AssignedUsersTableHeader({
   query,
   onQueryChange,
+  assignDisabledReason,
   onAssignClick,
   onExportClick,
 }: AssignedUsersTableHeaderProps) {
@@ -34,7 +37,12 @@ export default function AssignedUsersTableHeader({
       <div className="flex items-center gap-3">
         {/* Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE. */}
         <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-          <Button onClick={onAssignClick} className="gap-1.5">
+          <Button
+            onClick={onAssignClick}
+            disabled={!!assignDisabledReason}
+            title={assignDisabledReason}
+            className="gap-1.5"
+          >
             <Plus className="h-4 w-4"/>
             Assign
           </Button>

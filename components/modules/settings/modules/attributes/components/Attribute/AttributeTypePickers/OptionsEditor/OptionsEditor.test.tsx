@@ -1,19 +1,13 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import OptionsEditor from "./OptionsEditor";
-import { AttributeOption, AttributeType } from "@/models/attribute";
+import { OptionsEditor } from "./OptionsEditor";
+import { AttributeOption, AttributeOptionUpsert, AttributeType } from "@/models/attribute";
+import { PRESET_COLORS } from "@/models/colors";
 
-jest.mock("@/components/ui/Button", () => ({
-  __esModule: true,
-  Button: (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => <button {...props} />,
-}));
-
-jest.mock("@/components/ui/Input/Input", () => ({
-  __esModule: true,
-  default: (props: any) => <input {...props} />,
-}));
-
+// The desact Button/Input render fine in jsdom and need no stubs. The SVG one does: the global
+// svgMock isn't flagged `__esModule`, so the default import arrives as a module object and React
+// refuses to render it.
 jest.mock("@/public/icons/trash.svg", () => ({
   __esModule: true,
   default: () => <svg data-testid="trash-icon"/>,
@@ -41,16 +35,20 @@ describe("OptionsEditor", () => {
     expect(screen.getByLabelText("Color for option 2")).toBeInTheDocument();
   });
 
-  it("adds a new empty option when clicking Add option", async () => {
+  it("adds an option on top of the auto-seeded first one", async () => {
     const user = userEvent.setup();
     const { onChange } = setup([]);
 
+    // An options-type attribute can't have zero options, so the editor seeds one on mount and
+    // reports it — clicking Add is therefore the second call, not the first.
+    expect(onChange).toHaveBeenCalledTimes(1);
+
     await user.click(screen.getByRole("button", { name: /add option/i }));
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const next = onChange.mock.calls[0][0] as AttributeOption[];
-    expect(next).toHaveLength(1);
-    expect(next[0]).toEqual({ value: "", color: "#4F46E5" });
+    const next = onChange.mock.calls[onChange.mock.calls.length - 1][0] as AttributeOptionUpsert[];
+    expect(next).toHaveLength(2);
+    expect(next[1].value).toBe("Option 2");
+    expect(next.map((o) => o.sortOrder)).toEqual([1, 2]);
   });
 
   it("updates option value when typing", async () => {
@@ -63,14 +61,16 @@ describe("OptionsEditor", () => {
     expect(last[0].value).toBe("Hello");
   });
 
-  it("updates option color", async () => {
-    const { onChange } = setup([{ value: "Red", color: "#4F46E5" }]);
+  it("updates option color through the swatch picker", async () => {
+    const user = userEvent.setup();
+    const { onChange } = setup([{ value: "Red", color: PRESET_COLORS[0] }]);
 
-    const color = screen.getByLabelText("Color for option 1") as HTMLInputElement;
-    fireEvent.input(color, { target: { value: "#ff0000" } });
+    // The colour input became a swatch popover: open it, then pick a colour from the palette.
+    await user.click(screen.getByLabelText("Color for option 1"));
+    await user.click(screen.getByLabelText(`Choose ${PRESET_COLORS[1]}`));
 
-    const last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as AttributeOption[];
-    expect(last[0].color.toLowerCase()).toBe("#ff0000");
+    const last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as AttributeOptionUpsert[];
+    expect(last[0].color).toBe(PRESET_COLORS[1]);
   });
 
   it("removes an option", async () => {
@@ -90,15 +90,4 @@ describe("OptionsEditor", () => {
     expect(result[0].value).toBe("Two");
   });
 
-  it("uses status aria-label when type is STATUS", () => {
-    const onChange = jest.fn();
-    render(
-      <OptionsEditor
-        type={AttributeType.STATUS}
-        options={[{ value: "Active", color: "#00ff00" }]}
-        onChange={onChange}
-      />
-    );
-    expect(screen.getByLabelText("Status option 1")).toBeInTheDocument();
-  });
 });

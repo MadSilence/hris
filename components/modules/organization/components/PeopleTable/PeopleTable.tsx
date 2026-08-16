@@ -6,6 +6,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/publi
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
 
 type SortDir = "asc" | "desc";
@@ -23,6 +24,10 @@ type Row = {
   avatarUrl: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  hireDate?: string | null;
+  employmentType?: string | null;
+  probationEnd?: string | null;
+  terminationDate?: string | null;
   custom?: Record<string, unknown>;
 };
 
@@ -140,6 +145,14 @@ export default function PeopleTable({
           return <span>{row.lastName || "—"}</span>;
         case "first_name":
           return <span>{row.firstName || "—"}</span>;
+        case "hire_date":
+          return <span className="text-muted-foreground">{formatDate(row.hireDate)}</span>;
+        case "employment_type":
+          return <span>{row.employmentType || "—"}</span>;
+        case "probation_end":
+          return <span className="text-muted-foreground">{formatDate(row.probationEnd)}</span>;
+        case "termination_date":
+          return <span className="text-muted-foreground">{formatDate(row.terminationDate)}</span>;
         default:
           return <span>—</span>;
       }
@@ -153,15 +166,12 @@ export default function PeopleTable({
       case "TEXT":
       case "EMAIL":
       case "URL":
-      case "STATUS":
       case "PERSON":
       case "SELECT":
         return <span>{valueToString(val) ?? "—"}</span>;
 
-      case "CHECKBOX": {
-        const checked = typeof val === "boolean" ? val : val === "true";
-        return <Checkbox checked={checked} disabled aria-label="checked" />;
-      }
+      case "CHECKBOX":
+        return <Checkbox checked={parseCheckboxValue(val)} disabled aria-label="checked" />;
 
       case "NUMBER": {
         const n = typeof val === "number" ? val : Number(val);

@@ -142,11 +142,9 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                 {isLoading ? (
                   <TimeOffPoliciesSettingsSkeleton />
                 ) : filtered.length === 0 ? (
-                  <TableRow className="[&_td]:py-2">
+                  <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={5}>
-                      <div className="py-6 text-center text-sm text-muted-foreground">
-                        No policies match your search.
-                      </div>
+                      <SearchEmptyState query={query} noun="policies" />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -242,6 +240,20 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
     </div>
   );
 };
+
+function SearchEmptyState({ query, noun }: { query: string; noun: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div className="mb-3 rounded-2xl bg-brown-50 p-3">
+        <Search className="h-6 w-6 text-brown-500" />
+      </div>
+      <h3 className="text-sm font-semibold text-foreground">No {noun} found</h3>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Nothing matches{query.trim() ? ` “${query.trim()}”` : " your search"}. Try a different term.
+      </p>
+    </div>
+  );
+}
 
 function EmptyState({ action }: { action: React.ReactNode }) {
   return (

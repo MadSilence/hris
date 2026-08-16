@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { Layers } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
   CreateGroupForm,
@@ -11,6 +12,10 @@ import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCa
 type CreateGroupModalProps = {
   isOpen: boolean;
   isLoading: boolean;
+  /** Names already taken, for the form's inline check. */
+  existingNames?: string[];
+  /** Server-side failure — the modal stays open and shows it instead of closing silently. */
+  errorMessage?: string | null;
   onConfirmAction: (submission: CreateGroupFormValues) => void;
   onRequestCloseAction: () => void;
 };
@@ -18,6 +23,8 @@ type CreateGroupModalProps = {
 export const CreateGroupModal: FC<CreateGroupModalProps> = ({
   isOpen,
   isLoading = false,
+  existingNames,
+  errorMessage,
   onConfirmAction,
   onRequestCloseAction,
 }) => {
@@ -50,17 +57,34 @@ export const CreateGroupModal: FC<CreateGroupModalProps> = ({
       >
         <DialogContent
           hideClose
-          className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
+          className="gap-5 sm:max-w-xl"
         >
           <DialogHeader>
-            <DialogTitle>Create Attribute Group</DialogTitle>
-            <DialogDescription>
-              Create a new section to organize attributes.
-            </DialogDescription>
+            <div className="flex items-center gap-3 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
+                <Layers className="h-5 w-5" />
+              </span>
+              <div className="space-y-1">
+                <DialogTitle>Create section</DialogTitle>
+                <DialogDescription>
+                  Group related attributes into a section on the profile.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
+
+          {errorMessage && (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              {errorMessage}
+            </p>
+          )}
 
           <CreateGroupForm
             isLoading={isLoading}
+            existingNames={existingNames}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}
             onSubmitAction={onConfirmAction}

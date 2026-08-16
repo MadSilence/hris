@@ -10,4 +10,6 @@ export const rolesQueryKeys = {
     [ROLES_QUERY_KEY, "assignment-job", roleId, jobId] as const,
   roleUsers: (roleId: string, q: string | null) =>
     [ROLES_QUERY_KEY, "users", roleId, q ?? ""] as const,
+  roleDeleteImpact: (roleId: string) => [ROLES_QUERY_KEY, "delete-impact", roleId] as const,
+  roleAccessPreview: (roleIds: string[]) => [ROLES_QUERY_KEY, "access-preview", roleIds.join("|")] as const,
 };

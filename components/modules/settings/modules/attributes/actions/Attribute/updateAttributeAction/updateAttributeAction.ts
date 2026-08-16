@@ -15,7 +15,7 @@ export const updateAttributeAction = async (
       status: ActionStatus.SUCCESS,
       data: data,
     };
-  } catch (e) {
+  } catch {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while updating attribute. Please try again."
@@ -29,6 +29,7 @@ export type UpdateAttributeActionInput = {
   name?: string;
   type?: AttributeType;
   unique?: boolean;
+  sensitive?: boolean;
   decScale?: number | null;
   dateHideYear?: boolean;
   options?: AttributeOption[];
@@ -45,6 +46,9 @@ export type UpdateAttributeActionInput = {
   maxDate?: string | null;
   minSelect?: number | null;
   maxSelect?: number | null;
+  objectFields?: string | null;
+  /** Nullable config fields to reset — a null above means "leave as is", not "clear". */
+  clearFields?: string[];
 };
 
 export type UpdateAttributeActionOutput = {

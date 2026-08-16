@@ -9,6 +9,12 @@ jest.mock("@/components/auth/useAccess", () => ({
   useAccess: () => ({ access: { systemOwner: true } }),
 }));
 
+// The resolved-access tabs query the backend through react-query; these tests cover the role
+// picker, so the preview is stubbed rather than dragging a QueryClient into every render.
+jest.mock("@/components/modules/settings/modules/roles/hooks/useRoleAccessPreview", () => ({
+  useRoleAccessPreview: () => ({ data: undefined, isLoading: false }),
+}));
+
 beforeAll(() => {
   Object.defineProperty(global, "ResizeObserver", {
     writable: true,

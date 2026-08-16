@@ -28,49 +28,8 @@ jest.mock(
   }),
 );
 
-jest.mock(
-  "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/NumberScaleRow",
-  () => ({
-    NumberScaleRow: ({ value, onChange, error }: any) => (
-      <div>
-        <input
-          aria-label="Decimal scale"
-          value={value ?? ""}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
-        {error && <p>{error}</p>}
-      </div>
-    ),
-  }),
-);
-
-jest.mock(
-  "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/DateSettings",
-  () => ({
-    DateSettings: ({ hideYearPublic, onChangeHideYearPublic }: any) => (
-      <input
-        aria-label="Hide year public"
-        type="checkbox"
-        checked={hideYearPublic}
-        onChange={(e) => onChangeHideYearPublic(e.target.checked)}
-      />
-    ),
-  }),
-);
-
-jest.mock(
-  "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/UniqueSelect",
-  () => ({
-    UniqueSelect: ({ checked, onChange }: any) => (
-      <input
-        aria-label="Unique"
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-    ),
-  }),
-);
+// Decimal scale is a plain inline field and the two flags are SettingToggle switches, so all three
+// render for real here instead of being mocked like the pickers above.
 
 const renderForm = (
   props?: Partial<ComponentProps<typeof CreateAttributeForm>>,
@@ -207,7 +166,7 @@ describe("CreateAttributeForm", () => {
       AttributeType.DATE,
     );
 
-    expect(screen.getByLabelText(/hide year public/i)).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: /hide the year/i })).toBeInTheDocument();
   });
 
   it("sanitizes number-specific fields when type is not NUMBER", async () => {

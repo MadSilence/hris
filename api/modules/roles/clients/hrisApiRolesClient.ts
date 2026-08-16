@@ -1,5 +1,7 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { RoleDTO } from "@/api/modules/roles/dto/RoleDTO";
+import { RoleDeleteImpactDTO } from "@/api/modules/roles/dto/RoleDeleteImpactDTO";
+import { RoleAccessPreviewDTO } from "@/api/modules/roles/dto/RoleAccessPreviewDTO";
 import { CreateRoleRequest } from "@/api/modules/roles/dto/CreateRoleRequest";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { DuplicateRoleRequest } from "@/api/modules/roles/dto/DuplicateRoleRequest";
@@ -18,8 +20,28 @@ import {
 class HrisApiRolesClient {
   private readonly BASE_PATH: string = '/roles';
 
-  public async getRoles(): Promise<RoleDTO[]> {
-    return hrisApiClient.get<RoleDTO[]>(this.BASE_PATH);
+  public async getRoles(includeArchived = false): Promise<RoleDTO[]> {
+    const suffix = includeArchived ? "?includeArchived=true" : "";
+    return hrisApiClient.get<RoleDTO[]>(`${this.BASE_PATH}${suffix}`);
+  }
+
+  public async previewRoleAccess(roleIds: string[]): Promise<RoleAccessPreviewDTO> {
+    return hrisApiClient.post<RoleAccessPreviewDTO, { roleIds: string[] }>(
+      `${this.BASE_PATH}/preview`,
+      { roleIds },
+    );
+  }
+
+  public async getRoleDeleteImpact(roleId: string): Promise<RoleDeleteImpactDTO> {
+    return hrisApiClient.get<RoleDeleteImpactDTO>(`${this.BASE_PATH}/${roleId}/impact`);
+  }
+
+  public async archiveRole(id: string) {
+    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/archive`);
+  }
+
+  public async restoreRole(id: string) {
+    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/restore`);
   }
 
   public async getRolePermissions(roleId: string): Promise<RolePermissionsDTO> {
@@ -55,9 +77,13 @@ class HrisApiRolesClient {
   }
 
   public async updateRoleName(id: string, requestDTO: UpdateRoleRequest) {
-    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, {
-      name: requestDTO.newName,
-    });
+    // Undefined fields are dropped so the backend leaves them alone — that is what makes editing
+    // the description without touching the name (and vice versa) possible.
+    const payload: Record<string, string> = {};
+    if (requestDTO.newName !== undefined) payload.name = requestDTO.newName;
+    if (requestDTO.description !== undefined) payload.description = requestDTO.description;
+
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, payload);
   }
 
   public async duplicateRole(id: string, requestDTO: DuplicateRoleRequest) {
@@ -66,6 +92,14 @@ class HrisApiRolesClient {
 
   public async deleteRole(id: string) {
     return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/delete`);
+  }
+
+  public async exportRoles(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/export?format=${format}`);
+  }
+
+  public async exportRoleUsers(id: string, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/${id}/users/export?format=${format}`);
   }
 }
 

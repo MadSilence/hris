@@ -50,8 +50,9 @@ export function useAudienceFieldOptions(
   }
 
   if (source === "attributeOptions") {
-    // Backend matches attr filters on the option's value string, not its id.
-    const options = (attributeOptions ?? []).map((o) => ({ id: o.value, label: o.value }));
+    // Backend matches attr filters on the option's value string, not its id. Enum-like system
+    // fields send a separate label because their value is a code (FULL_TIME → "Full-time").
+    const options = (attributeOptions ?? []).map((o) => ({ id: o.value, label: o.label ?? o.value }));
     return { options, isLoading: false, hasOptions: true };
   }
 

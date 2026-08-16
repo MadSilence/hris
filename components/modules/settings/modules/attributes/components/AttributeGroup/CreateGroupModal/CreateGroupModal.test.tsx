@@ -73,11 +73,11 @@ describe("CreateGroupModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /create attribute group/i }),
+      screen.getByRole("heading", { name: /create section/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/create a new section to organize attributes/i),
+      screen.getByText(/group related attributes into a section on the profile/i),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/group name/i)).toBeInTheDocument();
@@ -87,7 +87,7 @@ describe("CreateGroupModal", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /create attribute group/i }),
+      screen.queryByRole("heading", { name: /create section/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe("CreateGroupModal", () => {
     expect(onRequestCloseAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /create attribute group/i }),
+      screen.getByRole("heading", { name: /create section/i }),
     ).toBeInTheDocument();
 
     expect(

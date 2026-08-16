@@ -4,6 +4,7 @@ import type {
   CreateTimeOffRequestRequest,
   CancelTimeOffRequestRequest,
   RejectTimeOffRequestRequest,
+  TimeOffRequestDurationDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -20,6 +21,15 @@ export class HrisApiTimeOffRequestsClient {
       this.REQUESTS_PATH,
       body as unknown as Record<string, unknown>
     );
+  }
+
+  public async previewDuration(
+    assignmentId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<TimeOffRequestDurationDTO> {
+    const qs = new URLSearchParams({ assignmentId, startDate, endDate }).toString();
+    return hrisApiClient.get<TimeOffRequestDurationDTO>(`${this.REQUESTS_PATH}/duration?${qs}`);
   }
 
   public async getById(id: string): Promise<TimeOffRequest> {

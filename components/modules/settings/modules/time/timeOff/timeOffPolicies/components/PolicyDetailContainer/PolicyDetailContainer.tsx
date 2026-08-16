@@ -19,9 +19,14 @@ import { PolicyAssignmentsTab } from "./PolicyAssignmentsTab";
 import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
 import {
   PolicyWizardModal,
+  buildAccrualRequest,
   buildApprovalRequest,
+  buildBlackoutsRequest,
+  buildCoverageRequest,
   buildEditRulesRequest,
+  buildEligibilityRequest,
   buildRequestRulesRequest,
+  buildTenureRulesRequest,
   buildUpdatePolicyRequest,
   policyToWizardValues,
   type PolicyWizardValues,
@@ -39,9 +44,21 @@ import { useUpdateTimeOffPolicyEditRules } from "@/components/modules/settings/m
 import { useTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useTimeOffPolicyEditRules";
 import { useUpdateTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useUpdateTimeOffPolicyApprovalSettings";
 import { useTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useTimeOffPolicyApprovalSettings";
+import { useUpdateTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useUpdateTimeOffPolicyEligibility";
+import { useTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useTimeOffPolicyEligibility";
+import { useUpdateTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useUpdateTimeOffPolicyCoverage";
+import { useTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useTimeOffPolicyCoverage";
+import { useUpdateTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useUpdateTimeOffPolicyAccrual";
+import { useTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useTimeOffPolicyAccrual";
+import { useUpdateTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useUpdateTimeOffPolicyBlackouts";
+import { useTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useTimeOffPolicyBlackouts";
+import { useUpdateTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useUpdateTimeOffPolicyTenureRules";
+import { useTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useTimeOffPolicyTenureRules";
 import { useLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useLeaveType";
 
 import { TimeOffPolicyStatus } from "@/api/modules/timeOff/timeOffPolicies/dto";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 type Props = {
   leaveTypeId: string;
@@ -69,6 +86,11 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   const requestRulesQuery = useTimeOffPolicyRequestRules(policyId);
   const editRulesQuery = useTimeOffPolicyEditRules(policyId);
   const approvalQuery = useTimeOffPolicyApprovalSettings({ policyId });
+  const eligibilityQuery = useTimeOffPolicyEligibility(policyId);
+  const coverageQuery = useTimeOffPolicyCoverage(policyId);
+  const accrualQuery = useTimeOffPolicyAccrual(policyId);
+  const blackoutsQuery = useTimeOffPolicyBlackouts(policyId);
+  const tenureRulesQuery = useTimeOffPolicyTenureRules(policyId);
 
   const updateMutation = useUpdateTimeOffPolicy();
   const renameMutation = useRenameTimeOffPolicy();
@@ -78,14 +100,28 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   const requestRulesMutation = useUpdateTimeOffPolicyRequestRules();
   const editRulesMutation = useUpdateTimeOffPolicyEditRules();
   const approvalMutation = useUpdateTimeOffPolicyApprovalSettings();
+  const eligibilityMutation = useUpdateTimeOffPolicyEligibility();
+  const coverageMutation = useUpdateTimeOffPolicyCoverage();
+  const accrualMutation = useUpdateTimeOffPolicyAccrual();
+  const blackoutsMutation = useUpdateTimeOffPolicyBlackouts();
+  const tenureRulesMutation = useUpdateTimeOffPolicyTenureRules();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
-  if (error) throw error;
+  if (error && !(error instanceof ForbiddenError)) throw error;
 
   const editInitialValues = useMemo(() => {
-    if (!policy || !requestRulesQuery.data || !editRulesQuery.data || !approvalQuery.data) {
+    if (
+      !policy ||
+      !requestRulesQuery.data ||
+      !editRulesQuery.data ||
+      !approvalQuery.data ||
+      !eligibilityQuery.data ||
+      !coverageQuery.data ||
+      !accrualQuery.data ||
+      !blackoutsQuery.data ||
+      !tenureRulesQuery.data
+    ) {
       return undefined;
     }
     return policyToWizardValues(
@@ -93,8 +129,23 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       requestRulesQuery.data,
       editRulesQuery.data,
       approvalQuery.data,
+      eligibilityQuery.data,
+      coverageQuery.data,
+      accrualQuery.data,
+      blackoutsQuery.data,
+      tenureRulesQuery.data,
     );
-  }, [policy, requestRulesQuery.data, editRulesQuery.data, approvalQuery.data]);
+  }, [
+    policy,
+    requestRulesQuery.data,
+    editRulesQuery.data,
+    approvalQuery.data,
+    eligibilityQuery.data,
+    coverageQuery.data,
+    accrualQuery.data,
+    blackoutsQuery.data,
+    tenureRulesQuery.data,
+  ]);
 
   const handleEditSave = async (values: PolicyWizardValues) => {
     if (!policy) return;
@@ -108,6 +159,11 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     await updateMutation.mutateAsync({ id, ...buildUpdatePolicyRequest(values) });
     await requestRulesMutation.mutateAsync({ policyId: id, ...buildRequestRulesRequest(values) });
     await editRulesMutation.mutateAsync({ policyId: id, ...buildEditRulesRequest(values) });
+    await eligibilityMutation.mutateAsync({ policyId: id, ...buildEligibilityRequest(values) });
+    await coverageMutation.mutateAsync({ policyId: id, ...buildCoverageRequest(values) });
+    await accrualMutation.mutateAsync({ policyId: id, ...buildAccrualRequest(values) });
+    await blackoutsMutation.mutateAsync({ policyId: id, ...buildBlackoutsRequest(values) });
+    await tenureRulesMutation.mutateAsync({ policyId: id, ...buildTenureRulesRequest(values) });
 
     const approval = buildApprovalRequest(values);
     if (approval) {
@@ -123,6 +179,9 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     setIsDeleteOpen(false);
     router.push(listHref);
   };
+
+  // Below the hooks: an early return above them would render fewer hooks than the previous pass.
+  if (error instanceof ForbiddenError) return <AccessDenied/>;
 
   if (isLoading || !policy) {
     return (

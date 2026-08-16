@@ -81,7 +81,7 @@ describe("CreateAttributeModal", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/create a custom attribute for your data model/i),
+      screen.getByText(/a field people fill in on their profile/i),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/attribute name/i)).toBeInTheDocument();

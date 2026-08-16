@@ -2,7 +2,11 @@ import { AttributeType } from "@/models/attribute";
 
 export type OptionDTO = {
   id: string;
+  // What a filter on this field matches against.
   value: string;
+  // Display text when it differs from `value` — enum-like system fields store a code
+  // ("FULL_TIME") but read as "Full-time". Absent for attribute options.
+  label?: string | null;
 };
 
 export type FieldDTO = {
@@ -11,6 +15,8 @@ export type FieldDTO = {
   label: string;
   type: AttributeType;
   isSystem: boolean;
+  // Sensitive custom attribute: never auto-granted, and masked for anyone without VIEW.
+  sensitive?: boolean;
   // The calling user's own level on this field — not the configuration of any role.
   level: "NONE" | "READ" | "EDIT";
   // False for locked system fields: their access cannot be restricted (PUT → RF00002).
@@ -25,12 +31,21 @@ export type FilterDTO = {
   op:
     | "eq" | "neq" | "contains" | "starts_with"
     | "in" | "has_any"
+    // Negations. `not_in` / `not_has_any` were resolved by the backend long before the UI offered
+    // them; see DECISIONS.md "The filter UI must offer what the engine supports".
+    | "not_in" | "not_has_any"
     | "before" | "after" | "between"
     // Numeric comparison/range — backend attr:* NUMBER columns (int_value/dec_value).
     | "gt" | "gte" | "lt" | "lte";
   value?: string | null;
   valueTo?: string | null;
   values?: string[] | null;
+  /**
+   * Negative operators only. By default "is not X" skips people who have no value at all; set this
+   * to include them. Silence would otherwise widen the set, which matters most when the same filter
+   * defines an access scope.
+   */
+  includeEmpty?: boolean | null;
 };
 
 export type UsersSearchRequest = {

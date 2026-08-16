@@ -73,7 +73,7 @@ describe("RenameAttributeGroupModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /rename attribute group/i }),
+      screen.getByRole("heading", { name: /rename section/i }),
     ).toBeInTheDocument();
 
     expect(
@@ -87,7 +87,7 @@ describe("RenameAttributeGroupModal", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /rename attribute group/i }),
+      screen.queryByRole("heading", { name: /rename section/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe("RenameAttributeGroupModal", () => {
     expect(onRequestCloseAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /rename attribute group/i }),
+      screen.getByRole("heading", { name: /rename section/i }),
     ).toBeInTheDocument();
 
     expect(

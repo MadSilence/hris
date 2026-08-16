@@ -5,6 +5,7 @@ export type CreateAttributeRequest = {
   groupId: string,
   type: AttributeType,
   isUnique: boolean,
+  sensitive?: boolean,
   decScale: number | null,
   hideYear: boolean,
   options?: AttributeOption[],
@@ -21,4 +22,5 @@ export type CreateAttributeRequest = {
   maxDate?: string | null,
   minSelect?: number | null,
   maxSelect?: number | null,
+  objectFields?: string | null,
 };

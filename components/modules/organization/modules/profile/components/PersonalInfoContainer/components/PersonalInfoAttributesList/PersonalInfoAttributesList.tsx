@@ -9,12 +9,15 @@ type Props = {
   registerSection: (id: string, el: HTMLElement | null) => void;
   isEdit: boolean;
   editableAttrIds: Set<string>;
+  /** Attributes the caller may only see masked (sensitive + no VIEW) — rendered as a placeholder. */
+  maskedAttrIds?: Set<string>;
   onChangeValue: (attributeId: string, v: unknown) => void;
+  onValidityChange?: (attributeId: string, error: string | null) => void;
   headerActions?: React.ReactNode;
 };
 
 export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
-  ({ groups, valueMap, registerSection, isEdit, editableAttrIds, onChangeValue, headerActions }, ref) => {
+  ({ groups, valueMap, registerSection, isEdit, editableAttrIds, maskedAttrIds, onChangeValue, onValidityChange, headerActions }, ref) => {
     return (
       <section ref={ref} className="relative h-full min-h-0 overflow-y-auto pr-1">
         {groups.map((group, idx) => (
@@ -39,8 +42,10 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
                       key={attr.id}
                       attribute={attr}
                       rawValue={valueMap[attr.id]}
+                      masked={maskedAttrIds?.has(attr.id)}
                       isEdit={isEdit && editableAttrIds.has(attr.id)}
                       onChange={(v) => onChangeValue(attr.id, v)}
+                      onValidityChange={(err) => onValidityChange?.(attr.id, err)}
                     />
                   ))}
               </div>

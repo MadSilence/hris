@@ -4,10 +4,10 @@ export const getAttributeTypeLabel = (attributeType: AttributeType): string => {
   switch (attributeType) {
     case AttributeType.TEXT:
       return "Text";
+    case AttributeType.LONG_TEXT:
+      return "Long text";
     case AttributeType.SELECT:
       return "Select";
-    case AttributeType.STATUS:
-      return "Status";
     case AttributeType.PERSON:
       return "Person";
     case AttributeType.CHECKBOX:
@@ -22,6 +22,22 @@ export const getAttributeTypeLabel = (attributeType: AttributeType): string => {
       return "Email";
     case AttributeType.URL:
       return "URL";
+    case AttributeType.PHONE:
+      return "Phone";
+    case AttributeType.COUNTRY:
+      return "Country";
+    case AttributeType.LANGUAGE:
+      return "Language";
+    case AttributeType.TIMEZONE:
+      return "Timezone";
+    case AttributeType.CURRENCY:
+      return "Currency";
+    case AttributeType.OBJECT:
+      return "Object";
+    case AttributeType.ADDRESS:
+      return "Address";
+    case AttributeType.MONEY:
+      return "Money";
     default:
       return String(attributeType);
   }

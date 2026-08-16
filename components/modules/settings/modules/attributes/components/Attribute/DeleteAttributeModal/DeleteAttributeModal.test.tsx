@@ -4,6 +4,13 @@ import { DeleteAttributeModal } from "./DeleteAttributeModal";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
 
+// The delete modals fetch an impact preview (values / people affected). That needs a QueryClient and
+// the app-data context, neither of which belongs in a modal rendering test — stub the hook instead.
+jest.mock("@/components/modules/settings/modules/attributes/hooks/useDeleteImpact", () => ({
+  useAttributeDeleteImpact: () => ({ data: undefined }),
+  useGroupDeleteImpact: () => ({ data: undefined }),
+}));
+
 const mockAttribute: Attribute = {
   id: "123",
   name: "Test Attribute",

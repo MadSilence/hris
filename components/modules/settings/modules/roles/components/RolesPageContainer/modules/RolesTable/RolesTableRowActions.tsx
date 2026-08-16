@@ -9,22 +9,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/public/desact/src/components/ui/dropdown-menu";
-import { Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
 export interface RolesTableRowActionsProps {
   onRename: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
-  // System owner / default roles can't be renamed or deleted.
+  onArchive: () => void;
+  onRestore: () => void;
+  // System owner / default roles can't be renamed, archived or deleted.
   locked?: boolean;
+  archived?: boolean;
 }
 
 export default function RolesTableRowActions({
   onRename,
   onDuplicate,
   onDelete,
+  onArchive,
+  onRestore,
   locked = false,
+  archived = false,
 }: RolesTableRowActionsProps) {
   return (
     <DropdownMenu>
@@ -54,6 +60,22 @@ export default function RolesTableRowActions({
             <Copy className="h-4 w-4 text-muted-foreground"/>
             Duplicate
           </DropdownMenuItem>
+
+          {archived ? (
+            <DropdownMenuItem onClick={onRestore} className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer">
+              <ArchiveRestore className="h-4 w-4 text-muted-foreground"/>
+              Restore
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              onClick={onArchive}
+              disabled={locked}
+              className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+            >
+              <Archive className="h-4 w-4 text-muted-foreground"/>
+              Archive
+            </DropdownMenuItem>
+          )}
         </PermissionGate>
 
         <PermissionGate resource="ROLES.ROLE" action="MANAGE">

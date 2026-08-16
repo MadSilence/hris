@@ -27,7 +27,7 @@ import {
 import { USER_STATUSES, formatUserStatus } from "@/models/user/status";
 import type { FieldDTO } from "@/models/user/fields";
 import { canAccess, type ResourceCode } from "@/models/access";
-import type { BulkEditRequest, BulkOperation } from "@/models/bulkEdit";
+import type { BulkEditRequest, BulkEditResult, BulkOperation } from "@/models/bulkEdit";
 import { useAccess } from "@/components/auth/useAccess";
 import { useAudienceFieldOptions } from "@/components/audience/hooks/useAudienceFieldOptions";
 import {
@@ -77,6 +77,8 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
   const [bool, setBool] = useState<boolean>(false);
   const [confirming, setConfirming] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
+  // Set when the backend refuses to write because some targets fall outside the actor's access.
+  const [outOfScope, setOutOfScope] = useState<BulkEditResult | null>(null);
 
   const field = editableFields.find((f) => f.key === fieldKey) ?? null;
   const bulkEdit = useBulkEdit();
@@ -124,15 +126,27 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
 
   const canSubmit = !!field && valueReady && !bulkEdit.isPending && !jobId;
 
-  const doSubmit = () => {
+  const doSubmit = (confirmPartial = false) => {
     if (!field) return;
     const base: BulkEditRequest =
       target.kind === "ids"
-        ? { userIds: target.userIds, field: field.key, operation, value: buildValue() }
-        : { segment: { filters: target.filters }, field: field.key, operation, value: buildValue() };
+        ? { userIds: target.userIds, field: field.key, operation, value: buildValue(), confirmPartial }
+        : {
+            segment: { filters: target.filters },
+            field: field.key,
+            operation,
+            value: buildValue(),
+            confirmPartial,
+          };
 
     bulkEdit.mutate(base, {
       onSuccess: (res) => {
+        if (res.mode === "out_of_scope") {
+          // Nothing was written: the backend is asking whether to proceed without the people this
+          // account cannot reach.
+          setOutOfScope(res);
+          return;
+        }
         if (res.mode === "async" && res.jobId) {
           setJobId(res.jobId);
         } else {
@@ -151,6 +165,9 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
     doSubmit();
   };
 
+  const fullName = (b: { firstName?: string | null; lastName?: string | null; email: string }) =>
+    `${b.firstName ?? ""} ${b.lastName ?? ""}`.trim() || b.email;
+
   const targetLabel = count == null ? "all people matching the current filters" : `${count} ${count === 1 ? "person" : "people"}`;
   const busy = bulkEdit.isPending || !!jobId;
 
@@ -162,7 +179,33 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
           <DialogDescription>Apply a change to {targetLabel}.</DialogDescription>
         </DialogHeader>
 
-        {jobId ? (
+        {outOfScope ? (
+          <div className="flex flex-col gap-3 py-1">
+            <p className="text-sm">
+              {outOfScope.blocked?.length}{" "}
+              {outOfScope.blocked?.length === 1 ? "person is" : "people are"} outside your access
+              scope and will not be changed.
+            </p>
+
+            <div className="max-h-56 overflow-y-auto rounded-md border border-brown-200">
+              <table className="w-full text-sm">
+                <tbody>
+                  {outOfScope.blocked?.map((b) => (
+                    <tr key={b.userId} className="border-b border-brown-100 last:border-0">
+                      <td className="px-3 py-2">
+                        <div className="font-medium">{fullName(b)}</div>
+                        <div className="text-xs text-muted-foreground">{b.email}</div>
+                      </td>
+                      <td className="px-3 py-2 text-right text-xs text-muted-foreground">
+                        Outside your access
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : jobId ? (
           <div className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             Applying… {job.data ? `(${job.data.summary?.created ?? 0}/${job.data.summary?.total ?? "?"})` : ""}
@@ -238,12 +281,28 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={busy}>
-            Cancel
-          </Button>
-          <Button onClick={onApply} disabled={!canSubmit}>
-            {bulkEdit.isPending ? "Applying…" : isStatus && confirming ? "Confirm" : "Apply"}
-          </Button>
+          {outOfScope ? (
+            <>
+              {/* Back to the selection, rather than a dead end. */}
+              <Button variant="ghost" onClick={() => setOutOfScope(null)} disabled={bulkEdit.isPending}>
+                Back to selection
+              </Button>
+              <Button onClick={() => doSubmit(true)} disabled={bulkEdit.isPending || !outOfScope.allowedCount}>
+                {bulkEdit.isPending
+                  ? "Applying…"
+                  : `Apply to ${outOfScope.allowedCount} allowed`}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={onClose} disabled={busy}>
+                Cancel
+              </Button>
+              <Button onClick={onApply} disabled={!canSubmit}>
+                {bulkEdit.isPending ? "Applying…" : isStatus && confirming ? "Confirm" : "Apply"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

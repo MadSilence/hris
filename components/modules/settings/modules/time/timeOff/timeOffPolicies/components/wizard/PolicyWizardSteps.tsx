@@ -1,13 +1,13 @@
 "use client";
 
 import { FC, ReactNode } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Check, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Switch } from "@/public/desact/src/components/ui/switch";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { cn } from "@/public/desact/src/components/ui/utils";
 import {
   Select,
   SelectContent,
@@ -28,14 +28,31 @@ import {
   TimeOffCertificateRequirementType,
   TimeOffRequestUnit,
 } from "@/api/modules/timeOff/timeOffPolicyRequestRules/dto";
+import { TimeOffPolicyApproverType } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
+import {
+  TimeOffEligibilityDelayUnit,
+  TimeOffEligibilityReference,
+} from "@/api/modules/timeOff/timeOffPolicyEligibility/dto";
+import {
+  TimeOffCoverageBehavior,
+  TimeOffCoverageScope,
+} from "@/api/modules/timeOff/timeOffPolicyCoverage/dto";
+import { TimeOffAccrualFrequency } from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
+import {
+  UserPickerField,
+  type PickedUser,
+} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+import { useUser } from "@/components/hooks/useUser/useUser";
 import {
   PolicyWizardValues,
   WEEKDAY_BITS,
+  WizardApprover,
+  WizardApproverUser,
+  WizardBlackout,
+  WizardTenureRule,
   hasWeekday,
   toggleWeekday,
 } from "./policyWizardTypes";
-
-const NO_MAX = "NONE";
 
 export type WizardSetter = <K extends keyof PolicyWizardValues>(
   key: K,
@@ -85,12 +102,12 @@ function ToggleField({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-1">
-      <div className="min-w-0">
+    <div className="py-1">
+      <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-medium text-foreground">{label}</p>
-        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+        <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
       </div>
-      <Switch className="mt-0.5" checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
+      {hint && <p className="mt-0.5 max-w-[85%] text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -168,6 +185,54 @@ export const BasicsStep: FC<StepProps> = ({ values, set }) => (
 
 // ── Step 2: Entitlement & renewal ────────────────────────────────────
 
+// The renewal Select offers two UI-only presets on top of the backend enum:
+// "Year start" and "Custom date" both map to YEARLY_FIXED_DATE (year start = 1 Jan).
+const RENEWAL_YEAR_START = "YEAR_START";
+const RENEWAL_FIXED_DATE = "FIXED_DATE";
+
+const isYearStart = (v: PolicyWizardValues) =>
+  v.renewalFixedDay.trim() === "1" && v.renewalFixedMonth.trim() === "1";
+
+function renewalSelectValue(v: PolicyWizardValues): string {
+  if (v.renewalType === TimeOffPolicyRenewalType.Anniversary)
+    return TimeOffPolicyRenewalType.Anniversary;
+  if (v.renewalType === TimeOffPolicyRenewalType.Manual)
+    return TimeOffPolicyRenewalType.Manual;
+  return isYearStart(v) ? RENEWAL_YEAR_START : RENEWAL_FIXED_DATE;
+}
+
+function setRenewalMode(set: WizardSetter, mode: string) {
+  switch (mode) {
+    case RENEWAL_YEAR_START:
+      set("renewalType", TimeOffPolicyRenewalType.YearlyFixedDate);
+      set("renewalFixedDay", "1");
+      set("renewalFixedMonth", "1");
+      break;
+    case RENEWAL_FIXED_DATE:
+      set("renewalType", TimeOffPolicyRenewalType.YearlyFixedDate);
+      break;
+    case TimeOffPolicyRenewalType.Anniversary:
+      set("renewalType", TimeOffPolicyRenewalType.Anniversary);
+      break;
+    case TimeOffPolicyRenewalType.Manual:
+      set("renewalType", TimeOffPolicyRenewalType.Manual);
+      break;
+  }
+}
+
+function renewalSummary(v: PolicyWizardValues): string {
+  switch (v.renewalType) {
+    case TimeOffPolicyRenewalType.Manual:
+      return "Manual";
+    case TimeOffPolicyRenewalType.Anniversary:
+      return "On hire date";
+    default:
+      return isYearStart(v)
+        ? "Year start (1 Jan)"
+        : `${v.renewalFixedDay}/${v.renewalFixedMonth} yearly`;
+  }
+}
+
 export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
   <div className="space-y-6">
     <StepIntro>How much time off employees get each year, and when the balance resets.</StepIntro>
@@ -198,7 +263,7 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
       </Reveal>
     )}
 
-    <Field label="Granting mode" htmlFor="wiz-grant" hint="Accrual (earning over time) arrives with the accrual engine.">
+    <Field label="Granting mode" htmlFor="wiz-grant" hint="Upfront grants the full amount; accrued earns it over time (configure in the Accrual step).">
       <Select
         value={values.entitlementGrantingMode}
         onValueChange={(v) => set("entitlementGrantingMode", v as TimeOffPolicyEntitlementMode)}
@@ -208,29 +273,30 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={TimeOffPolicyEntitlementMode.Upfront}>Upfront (full amount)</SelectItem>
-          <SelectItem value={TimeOffPolicyEntitlementMode.Accrued} disabled>
-            Accrued (coming soon)
+          <SelectItem value={TimeOffPolicyEntitlementMode.Accrued}>
+            Accrued (earned over time)
           </SelectItem>
         </SelectContent>
       </Select>
     </Field>
 
     <Field label="Renewal" htmlFor="wiz-renewal" hint="When the balance resets each year.">
-      <Select
-        value={values.renewalType}
-        onValueChange={(v) => set("renewalType", v as TimeOffPolicyRenewalType)}
-      >
+      <Select value={renewalSelectValue(values)} onValueChange={(v) => setRenewalMode(set, v)}>
         <SelectTrigger id="wiz-renewal">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={TimeOffPolicyRenewalType.YearlyFixedDate}>Yearly on a fixed date</SelectItem>
+          <SelectItem value={RENEWAL_YEAR_START}>Year start (1 Jan)</SelectItem>
+          <SelectItem value={RENEWAL_FIXED_DATE}>Yearly on a custom date</SelectItem>
+          <SelectItem value={TimeOffPolicyRenewalType.Anniversary}>
+            On the employee&apos;s hire date
+          </SelectItem>
           <SelectItem value={TimeOffPolicyRenewalType.Manual}>Manual</SelectItem>
         </SelectContent>
       </Select>
     </Field>
 
-    {values.renewalType === TimeOffPolicyRenewalType.YearlyFixedDate && (
+    {renewalSelectValue(values) === RENEWAL_FIXED_DATE && (
       <Reveal>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Renewal day" htmlFor="wiz-rday">
@@ -255,6 +321,12 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
           </Field>
         </div>
       </Reveal>
+    )}
+
+    {values.renewalType === TimeOffPolicyRenewalType.Anniversary && (
+      <p className="text-xs text-muted-foreground">
+        The balance renews on each employee&apos;s work anniversary (their hire date).
+      </p>
     )}
   </div>
 );
@@ -429,7 +501,17 @@ export const CountingStep: FC<StepProps> = ({ values, set }) => (
                   : "border-brown-200 text-brown-500 hover:bg-brown-50")
               }
             >
-              <Checkbox checked={active} className="pointer-events-none" />
+              <span
+                aria-hidden
+                className={cn(
+                  "flex size-4 shrink-0 items-center justify-center rounded-[4px] border",
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-brown-300 bg-input-background",
+                )}
+              >
+                {active && <Check className="size-3.5" />}
+              </span>
               {label}
             </button>
           );
@@ -453,7 +535,11 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
     <StepIntro>Rules for how employees may request time off under this policy.</StepIntro>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Field label="Minimum request unit" htmlFor="wiz-minunit">
+      <Field
+        label="Minimum request unit"
+        htmlFor="wiz-minunit"
+        hint="Smallest bookable unit. Hours ⇒ hourly; Half day ⇒ half-days; Full day ⇒ whole days."
+      >
         <Select
           value={values.reqMinRequestUnit}
           onValueChange={(v) => set("reqMinRequestUnit", v as TimeOffRequestUnit)}
@@ -469,35 +555,18 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
         </Select>
       </Field>
 
-      <Field label="Maximum request unit" htmlFor="wiz-maxunit" hint="Optional upper bound.">
-        <Select
-          value={values.reqMaxRequestUnit === "" ? NO_MAX : values.reqMaxRequestUnit}
-          onValueChange={(v) => set("reqMaxRequestUnit", v === NO_MAX ? "" : (v as TimeOffRequestUnit))}
-        >
-          <SelectTrigger id="wiz-maxunit">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NO_MAX}>No maximum</SelectItem>
-            <SelectItem value={TimeOffRequestUnit.FullDay}>Full day</SelectItem>
-            <SelectItem value={TimeOffRequestUnit.HalfDay}>Half day</SelectItem>
-            <SelectItem value={TimeOffRequestUnit.Hours}>Hours</SelectItem>
-          </SelectContent>
-        </Select>
+      <Field label="Min duration per request" htmlFor="wiz-mindur" hint="Optional (e.g. minimum a week).">
+        <Input
+          id="wiz-mindur"
+          type="number"
+          min={0}
+          value={values.reqMinDurationPerRequest}
+          onChange={(e) => set("reqMinDurationPerRequest", e.currentTarget.value)}
+        />
       </Field>
     </div>
 
     <div className="space-y-1">
-      <ToggleField
-        label="Allow half-day requests"
-        checked={values.reqAllowHalfDay}
-        onCheckedChange={(v) => set("reqAllowHalfDay", v)}
-      />
-      <ToggleField
-        label="Allow hourly requests"
-        checked={values.reqAllowHourly}
-        onCheckedChange={(v) => set("reqAllowHourly", v)}
-      />
       <ToggleField
         label="Allow overlapping requests"
         hint="Let an employee have two requests on the same dates."
@@ -619,12 +688,49 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
 
 // ── Step 6: Approvals ────────────────────────────────────────────────
 
+const hasApproverName = (u: WizardApproverUser) =>
+  Boolean(u.firstName || u.lastName || u.email);
+
+/** Resolves a prefilled approver (id-only) to a display name via the global user cache, so the
+ *  picker shows the person rather than "Unknown" when editing an existing policy. */
+const ResolvingApproverField: FC<{
+  user: WizardApproverUser;
+  onChange: (u: PickedUser | null) => void;
+}> = ({ user, onChange }) => {
+  const { data } = useUser(user.id);
+  const value: PickedUser = data
+    ? {
+        id: user.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        avatarUrl: data.avatarUrl,
+      }
+    : user;
+  return <UserPickerField value={value} onChange={onChange} placeholder="Select approver" allowClear={false} />;
+};
+
+const ApproverUserField: FC<{
+  user: WizardApproverUser | null;
+  onChange: (u: PickedUser | null) => void;
+}> = ({ user, onChange }) =>
+  user && !hasApproverName(user) ? (
+    <ResolvingApproverField user={user} onChange={onChange} />
+  ) : (
+    <UserPickerField value={user} onChange={onChange} placeholder="Select approver" allowClear={false} />
+  );
+
 export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
-  const setApprover = (index: number, required: boolean) => {
-    const next = values.apprApprovers.map((a, i) => (i === index ? { required } : a));
-    set("apprApprovers", next);
-  };
-  const addApprover = () => set("apprApprovers", [...values.apprApprovers, { required: true }]);
+  const patchApprover = (index: number, patch: Partial<WizardApprover>) =>
+    set(
+      "apprApprovers",
+      values.apprApprovers.map((a, i) => (i === index ? { ...a, ...patch } : a)),
+    );
+  const addApprover = () =>
+    set("apprApprovers", [
+      ...values.apprApprovers,
+      { type: TimeOffPolicyApproverType.Manager, user: null, required: true },
+    ]);
   const removeApprover = (index: number) =>
     set(
       "apprApprovers",
@@ -650,29 +756,64 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
               {values.apprApprovers.map((approver, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-brown-200 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-brown-200 px-3 py-2"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brown-100 text-xs font-semibold text-brown-700">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm text-foreground">Manager</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      Required
-                      <Switch checked={approver.required} onCheckedChange={(v) => setApprover(index, v)} />
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => removeApprover(index)}
-                      disabled={values.apprApprovers.length <= 1}
-                      className="text-brown-400 hover:text-red-600 disabled:opacity-40"
-                      aria-label="Remove step"
+                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brown-100 text-xs font-semibold text-brown-700">
+                    {index + 1}
+                  </span>
+
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <Select
+                      value={approver.type}
+                      onValueChange={(v) =>
+                        patchApprover(index, {
+                          type: v as TimeOffPolicyApproverType,
+                          // clear the picked user when switching back to Manager
+                          user: v === TimeOffPolicyApproverType.SpecificUser ? approver.user : null,
+                        })
+                      }
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                      <SelectTrigger className="h-9 w-[150px] flex-none">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={TimeOffPolicyApproverType.Manager}>Manager</SelectItem>
+                        <SelectItem value={TimeOffPolicyApproverType.SpecificUser}>
+                          Specific user
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {approver.type === TimeOffPolicyApproverType.SpecificUser ? (
+                      <div className="min-w-0 flex-1">
+                        <ApproverUserField
+                          user={approver.user}
+                          onChange={(u) => patchApprover(index, { user: u })}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        The employee&apos;s manager
+                      </span>
+                    )}
                   </div>
+
+                  <label className="flex flex-none items-center gap-1.5 text-xs text-muted-foreground">
+                    Required
+                    <Switch
+                      checked={approver.required}
+                      onCheckedChange={(v) => patchApprover(index, { required: v })}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeApprover(index)}
+                    disabled={values.apprApprovers.length <= 1}
+                    className="flex-none text-brown-400 hover:text-red-600 disabled:opacity-40"
+                    aria-label="Remove step"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -681,7 +822,8 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
               Add approval step
             </Button>
             <p className="text-xs text-muted-foreground">
-              Specific-user approvers can be added later; the wizard uses the employee&apos;s manager for now.
+              Manager steps route to each employee&apos;s manager; specific-user steps always go to the
+              chosen person.
             </p>
           </div>
 
@@ -709,6 +851,359 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
     </div>
   );
 };
+
+// ── Step: Eligibility ────────────────────────────────────────────────
+
+export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
+  <div className="space-y-6">
+    <StepIntro>When a newly-eligible employee can start using this policy.</StepIntro>
+
+    <ToggleField
+      label="Require a waiting period"
+      hint="Employees can't take this leave until a delay after their reference date."
+      checked={values.eligEnabled}
+      onCheckedChange={(v) => set("eligEnabled", v)}
+    />
+
+    {values.eligEnabled && (
+      <Reveal>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>Waiting period</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                className="w-24"
+                value={values.eligDelayValue}
+                onChange={(e) => set("eligDelayValue", e.target.value)}
+              />
+              <Select
+                value={values.eligDelayUnit}
+                onValueChange={(v) => set("eligDelayUnit", v as TimeOffEligibilityDelayUnit)}
+              >
+                <SelectTrigger className="h-9 w-[130px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Days}>Days</SelectItem>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Months}>Months</SelectItem>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Years}>Years</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Counted from</Label>
+            <Select
+              value={values.eligReference}
+              onValueChange={(v) => set("eligReference", v as TimeOffEligibilityReference)}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TimeOffEligibilityReference.HireDate}>Hire date</SelectItem>
+                <SelectItem value={TimeOffEligibilityReference.ProbationEnd}>
+                  Probation end (not enforced yet)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Probation-end isn&apos;t enforced yet (no probation date on employees) — requests against it
+          are allowed until that exists.
+        </p>
+      </Reveal>
+    )}
+  </div>
+);
+
+// ── Step: Accrual ────────────────────────────────────────────────────
+
+export const AccrualStep: FC<StepProps> = ({ values, set }) => {
+  const isAccrued =
+    values.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued;
+
+  if (!isAccrued) {
+    return (
+      <div className="space-y-6">
+        <StepIntro>How entitlement is earned over time.</StepIntro>
+        <p className="rounded-lg border border-brown-200 bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
+          This policy grants its entitlement upfront, so there&apos;s nothing to accrue. Switch the
+          granting mode to <span className="font-medium text-foreground">Accrued</span> in the
+          Entitlement step to configure how it&apos;s earned.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <StepIntro>How the yearly entitlement is earned over the year.</StepIntro>
+
+      <Field label="Accrual frequency" htmlFor="wiz-accrual-freq">
+        <Select
+          value={values.accrualFrequency}
+          onValueChange={(v) => set("accrualFrequency", v as TimeOffAccrualFrequency)}
+        >
+          <SelectTrigger id="wiz-accrual-freq">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={TimeOffAccrualFrequency.Weekly}>Weekly</SelectItem>
+            <SelectItem value={TimeOffAccrualFrequency.Monthly}>Monthly</SelectItem>
+            <SelectItem value={TimeOffAccrualFrequency.Annually}>Annually</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Amount per period" htmlFor="wiz-accrual-amount" hint="Leave blank to spread the yearly quota evenly.">
+          <Input
+            id="wiz-accrual-amount"
+            type="number"
+            min={0}
+            step="0.01"
+            inputMode="decimal"
+            placeholder="Auto from quota"
+            value={values.accrualAmount}
+            onChange={(e) => set("accrualAmount", e.target.value)}
+          />
+        </Field>
+
+        <Field label="Accrual cap" htmlFor="wiz-accrual-cap" hint="Max earned per year. Blank = the yearly quota.">
+          <Input
+            id="wiz-accrual-cap"
+            type="number"
+            min={0}
+            step="0.01"
+            inputMode="decimal"
+            placeholder="Yearly quota"
+            value={values.accrualCap}
+            onChange={(e) => set("accrualCap", e.target.value)}
+          />
+        </Field>
+      </div>
+    </div>
+  );
+};
+
+// ── Step: Tenure ─────────────────────────────────────────────────────
+
+export const TenureStep: FC<StepProps> = ({ values, set }) => {
+  const patchRow = (index: number, patch: Partial<WizardTenureRule>) =>
+    set(
+      "tenureRules",
+      values.tenureRules.map((t, i) => (i === index ? { ...t, ...patch } : t)),
+    );
+  const addRow = () =>
+    set("tenureRules", [...values.tenureRules, { yearsOfService: "", bonusDays: "" }]);
+  const removeRow = (index: number) =>
+    set("tenureRules", values.tenureRules.filter((_, i) => i !== index));
+
+  return (
+    <div className="space-y-6">
+      <StepIntro>Extra days once an employee reaches a length-of-service tier (highest tier wins).</StepIntro>
+
+      <div className="space-y-2">
+        {values.tenureRules.length === 0 && (
+          <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
+            No tenure rewards. Everyone gets the base entitlement.
+          </p>
+        )}
+
+        {values.tenureRules.map((row, index) => (
+          <div key={index} className="flex items-end gap-2.5">
+            <span className="pb-2 text-sm text-muted-foreground">After</span>
+            <div className="space-y-1">
+              <Label className="text-xs">Years of service</Label>
+              <Input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                className="w-28"
+                value={row.yearsOfService}
+                onChange={(e) => patchRow(index, { yearsOfService: e.target.value })}
+              />
+            </div>
+            <span className="pb-2 text-sm text-muted-foreground">grant</span>
+            <div className="space-y-1">
+              <Label className="text-xs">Bonus days</Label>
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                className="w-28"
+                value={row.bonusDays}
+                onChange={(e) => patchRow(index, { bonusDays: e.target.value })}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => removeRow(index)}
+              className="pb-2 flex-none text-brown-400 hover:text-red-600"
+              aria-label="Remove tenure tier"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={addRow}>
+        <Plus className="h-4 w-4" />
+        Add tenure tier
+      </Button>
+    </div>
+  );
+};
+
+// ── Step: Blackout ───────────────────────────────────────────────────
+
+export const BlackoutStep: FC<StepProps> = ({ values, set }) => {
+  const patchRow = (index: number, patch: Partial<WizardBlackout>) =>
+    set(
+      "blackouts",
+      values.blackouts.map((b, i) => (i === index ? { ...b, ...patch } : b)),
+    );
+  const addRow = () =>
+    set("blackouts", [...values.blackouts, { name: "", startDate: "", endDate: "" }]);
+  const removeRow = (index: number) =>
+    set("blackouts", values.blackouts.filter((_, i) => i !== index));
+
+  return (
+    <div className="space-y-6">
+      <StepIntro>Periods when requests against this policy are blocked (e.g. a year-end freeze).</StepIntro>
+
+      <div className="space-y-2">
+        {values.blackouts.length === 0 && (
+          <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
+            No blackout periods. Requests are allowed all year.
+          </p>
+        )}
+
+        {values.blackouts.map((row, index) => (
+          <div
+            key={index}
+            className="flex items-end gap-2 rounded-lg border border-brown-200 px-3 py-2"
+          >
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs">Name (optional)</Label>
+              <Input
+                placeholder="Year-end freeze"
+                value={row.name}
+                onChange={(e) => patchRow(index, { name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">From</Label>
+              <Input
+                type="date"
+                value={row.startDate}
+                onChange={(e) => patchRow(index, { startDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">To</Label>
+              <Input
+                type="date"
+                value={row.endDate}
+                onChange={(e) => patchRow(index, { endDate: e.target.value })}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => removeRow(index)}
+              className="mb-1.5 flex-none text-brown-400 hover:text-red-600"
+              aria-label="Remove blackout period"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={addRow}>
+        <Plus className="h-4 w-4" />
+        Add blackout period
+      </Button>
+    </div>
+  );
+};
+
+// ── Step: Coverage ───────────────────────────────────────────────────
+
+export const CoverageStep: FC<StepProps> = ({ values, set }) => (
+  <div className="space-y-6">
+    <StepIntro>Cap how many people can be away at the same time.</StepIntro>
+
+    <ToggleField
+      label="Limit how many people are away"
+      hint="Block or warn when too many people in the scope overlap."
+      checked={values.covEnabled}
+      onCheckedChange={(v) => set("covEnabled", v)}
+    />
+
+    {values.covEnabled && (
+      <Reveal>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>Max people away</Label>
+            <Input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              className="w-24"
+              value={values.covMaxUsers}
+              onChange={(e) => set("covMaxUsers", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label>Within</Label>
+            <Select
+              value={values.covScope}
+              onValueChange={(v) => set("covScope", v as TimeOffCoverageScope)}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TimeOffCoverageScope.Team}>The same team</SelectItem>
+                <SelectItem value={TimeOffCoverageScope.Department}>The same department</SelectItem>
+                <SelectItem value={TimeOffCoverageScope.Company}>The whole company</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label>When the limit is reached</Label>
+          <Select
+            value={values.covBehavior}
+            onValueChange={(v) => set("covBehavior", v as TimeOffCoverageBehavior)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TimeOffCoverageBehavior.Block}>Block the request</SelectItem>
+              <SelectItem value={TimeOffCoverageBehavior.Warn}>Warn only (advisory)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Warn is advisory for now — the request still goes through.
+          </p>
+        </div>
+      </Reveal>
+    )}
+  </div>
+);
 
 // ── Step 7: Editing ──────────────────────────────────────────────────
 
@@ -802,14 +1297,7 @@ export const ReviewStep: FC<{ values: PolicyWizardValues; leaveTypeName?: string
         <Summary label="Unit" value={values.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
         <Summary label="Pay type" value={values.paid ? "Paid" : "Unpaid"} />
         <Summary label="Quota" value={quota} />
-        <Summary
-          label="Renewal"
-          value={
-            values.renewalType === TimeOffPolicyRenewalType.Manual
-              ? "Manual"
-              : `${values.renewalFixedDay}/${values.renewalFixedMonth} yearly`
-          }
-        />
+        <Summary label="Renewal" value={renewalSummary(values)} />
         <Summary label="Carryover" value={carryover} />
         <Summary
           label="Counting"

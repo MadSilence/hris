@@ -3,4 +3,5 @@ export * from "./AttributeType";
 export * from "./AttributeOption";
 export * from "./AttributeGroup";
 export * from "./attributeTypeMeta";
+export * from "./attributeValue";
 export * from "./AttributeOptionUpsert";

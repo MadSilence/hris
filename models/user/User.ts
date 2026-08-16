@@ -17,6 +17,7 @@ export type User = {
   office?: { id: string; name: string } | null;
   legalEntity?: { id: string; name: string } | null;
   calendars?: { id: string; name: string; year: number }[];
+  hireDate?: string | null;
   lastLoginAt: string;
   avatarUrl: string | null;
   createdAt: string;

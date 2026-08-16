@@ -11,15 +11,28 @@ export type ResourceDefinition = {
 };
 
 export type ResourceGroup = {
-  id: "settings" | "people" | "organization" | "jobs" | "roles";
+  id: "settings" | "people" | "organization" | "jobs" | "roles" | "notifications";
   label: string;
   resources: ResourceDefinition[];
 };
 
 const ALL_ACTIONS: AccessAction[] = ["VIEW", "EDIT", "MANAGE"];
+const MANAGE_ONLY: AccessAction[] = ["MANAGE"];
 const COMPANY_ONLY: AccessScope[] = ["COMPANY"];
-// Backend does not support CUSTOM for any current resource (PUT with CUSTOM → 422 RA00003).
-const PERSONAL_SCOPES: AccessScope[] = ["SELF", "DIRECT_REPORTS", "COMPANY"];
+// Mirrors ResourceRegistry.ALL_SCOPES on the backend — resourceRegistry.test.ts fails if they drift.
+// CUSTOM must arrive with its filters (RA00006), and filters without CUSTOM are rejected (RA00007).
+const PERSONAL_SCOPES: AccessScope[] = [
+  "SELF",
+  "DIRECT_REPORTS",
+  "COMPANY",
+  "MY_DEPARTMENT",
+  "MY_DEPARTMENT_SUBTREE",
+  "MY_TEAM",
+  "MY_TEAM_SUBTREE",
+  "MY_OFFICE",
+  "MY_LEGAL_ENTITY",
+  "CUSTOM",
+];
 
 export const RESOURCE_GROUPS: ResourceGroup[] = [
   {
@@ -188,6 +201,49 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         label: "Roles",
         description: "Roles and their permissions.",
         supportedActions: ALL_ACTIONS,
+        supportedScopes: COMPANY_ONLY,
+      },
+    ],
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    resources: [
+      {
+        code: "NOTIFICATION.APPROVALS",
+        label: "Approvals",
+        description:
+          "May mute approval notifications for themselves. Off by default: a muted approver stalls other people's requests.",
+        supportedActions: MANAGE_ONLY,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "NOTIFICATION.ORG_CHANGES",
+        label: "Org changes",
+        description: "May mute notifications about departments, teams and reporting changes.",
+        supportedActions: MANAGE_ONLY,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "NOTIFICATION.REMINDERS",
+        label: "Reminders",
+        description: "May mute reminder notifications for themselves.",
+        supportedActions: MANAGE_ONLY,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "NOTIFICATION.POLICIES",
+        label: "Policies",
+        description: "May mute notifications about policy changes.",
+        supportedActions: MANAGE_ONLY,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "NOTIFICATION.SYSTEM",
+        label: "System messages",
+        description:
+          "May mute system messages. Off by default: these are the ones people must not be able to silence.",
+        supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
     ],

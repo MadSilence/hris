@@ -3,10 +3,9 @@
 import React from "react";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import Trash from "@/public/icons/trash.svg";
-import styles from "./OptionsEditor.module.css";
+import { Plus, Trash2 } from "lucide-react";
 import { AttributeOption, AttributeType, isOptionsType } from "@/models/attribute";
-import { SOFT_PALETTE } from "@/models/colors";
+import { PRESET_COLORS } from "@/models/colors";
 import {
   ColorSwatchPicker
 } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/ColorSwatchPicker";
@@ -22,9 +21,9 @@ type OptionsEditorProps = {
 
 function pickNextColor(current: AttributeOptionUpsert[]): string {
   const used = new Set(current.map((o) => o.color).filter(Boolean));
-  const free = SOFT_PALETTE.find((c) => !used.has(c));
+  const free = PRESET_COLORS.find((c) => !used.has(c));
 
-  return free ?? SOFT_PALETTE[Math.floor(Math.random() * SOFT_PALETTE.length)];
+  return free ?? PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)];
 }
 
 export const OptionsEditor: React.FC<OptionsEditorProps> = ({
@@ -33,7 +32,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
   onChange,
   disabled = false,
 }) => {
-  const needsOptions = isOptionsType(type) || type === AttributeType.STATUS;
+  const needsOptions = isOptionsType(type);
 
   const [local, setLocal] = React.useState<AttributeOptionUpsert[]>(
     sortBySortOrder(options).map((o) => ({
@@ -61,7 +60,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
     if (local.length === 0) {
       const first: AttributeOptionUpsert = {
         value: "",
-        color: SOFT_PALETTE[0],
+        color: PRESET_COLORS[0],
         sortOrder: 1,
       };
 
@@ -100,7 +99,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
 
     commit(
       next.length === 0
-        ? [{ value: "", color: SOFT_PALETTE[0], sortOrder: 1 }]
+        ? [{ value: "", color: PRESET_COLORS[0], sortOrder: 1 }]
         : next,
     );
   };
@@ -108,10 +107,10 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
   if (!needsOptions) return null;
 
   return (
-    <div className={styles.optionsBlock}>
-      <div className={styles.optionsList}>
+    <div className="space-y-2">
+      <div className="-mx-1 max-h-64 space-y-2 overflow-y-auto px-1 py-1">
         {local.map((option, index) => (
-          <div key={option.id ?? `new-${index}`} className={styles.optionRow}>
+          <div key={option.id ?? `new-${index}`} className="flex items-center gap-2">
             <Input
               placeholder={`Option ${index + 1}`}
               value={option.value}
@@ -131,25 +130,31 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
               disabled={disabled}
             />
 
-            <button
+            <Button
               type="button"
-              className={styles.iconBtn}
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 text-brown-500 hover:text-destructive"
               onClick={() => removeOption(index)}
               aria-label={`Remove option ${index + 1}`}
               title="Remove option"
               disabled={disabled}
             >
-              <Trash className={styles.trashIcon}/>
-            </button>
+              <Trash2 className="h-4 w-4"/>
+            </Button>
           </div>
         ))}
       </div>
 
-      <div className={styles.addWrap}>
-        <Button variant="ghost" type="button" onClick={addOption} disabled={disabled}>
-          Add option
-        </Button>
-      </div>
+      <button
+        type="button"
+        onClick={addOption}
+        disabled={disabled}
+        className="flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Plus className="h-4 w-4"/>
+        Add option
+      </button>
     </div>
   );
 };

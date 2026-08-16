@@ -6,6 +6,7 @@ export type UpdateAttributeRequest = {
   name?: string,
   type?: AttributeType,
   unique?: boolean,
+  sensitive?: boolean,
   decScale?: number | null,
   dateHideYear?: boolean,
   options?: AttributeOption[],
@@ -22,4 +23,7 @@ export type UpdateAttributeRequest = {
   maxDate?: string | null,
   minSelect?: number | null,
   maxSelect?: number | null,
+  objectFields?: string | null,
+  /** Nullable config fields to reset — a null above means "leave as is", not "clear". */
+  clearFields?: string[],
 };

@@ -10,10 +10,14 @@ import { useCreateAttributeGroupAction } from "./useCreateAttributeGroupAction";
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
 }));
-jest.mock('components/modules/settings/modules/attributes/actions/createGroupAction', () => ({
+// Both paths were wrong: no `@/` prefix, and the modules live under AttributeGroup/ — jest resolved
+// neither, so the suite died before running.
+jest.mock('@/components/modules/settings/modules/attributes/actions/AttributeGroup/createGroupAction', () => ({
   createAttributeGroupAction: jest.fn(),
 }));
-jest.mock('components/modules/settings/modules/attributes/hooks/useAttributeGroups');
+jest.mock('@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups', () => ({
+  useInvalidateAttributeGroupsQuery: jest.fn(),
+}));
 
 describe('useCreateAttributeGroupAction', () => {
   beforeEach(() => {

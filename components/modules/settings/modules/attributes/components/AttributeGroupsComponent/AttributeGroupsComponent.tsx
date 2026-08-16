@@ -2,16 +2,16 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Check,
   ChevronsDownUp,
   ChevronsUpDown,
-  ChevronDown,
-  ChevronUp,
   Download,
   Ellipsis,
   GripVertical,
+  Lock,
+  Pencil,
   Plus,
   Search,
-  Trash2,
 } from "lucide-react";
 import {
   closestCorners,
@@ -49,10 +49,15 @@ import {
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { Attribute } from "@/models/attribute/Attribute";
+import { AttributeType } from "@/models/attribute";
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
-import { AttributeOptions } from "@/components/modules/settings/modules/attributes/components/AttributeOptions";
+import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
+import {
+  ExportDataFormValues,
+  triggerExportDownload,
+} from "@/components/modules/settings/shared/ExportDataModal";
 
 type AttributeGroupsComponentProps = {
   groups: AttributeGroup[] | null | undefined;
@@ -60,30 +65,121 @@ type AttributeGroupsComponentProps = {
   onRenameGroup: (group: AttributeGroup) => void;
   onDeleteGroup: (group: AttributeGroup) => void;
   onCreateAttribute: (group: AttributeGroup) => void;
+  onEditAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
-  onSaveAttribute: (id: string, patch: Partial<Attribute>) => void;
   isSavingAttribute?: boolean;
+  /** A section to reveal after creation — it is appended at the very end of a long list. */
+  focusGroupId?: string | null;
+  onFocusGroupHandled?: () => void;
   onReorderGroups: (orderedIds: string[]) => void;
   onReorderAttributes: (groupId: string, orderedIds: string[]) => void;
   onMoveAttribute: (attributeId: string, targetGroupId: string, targetOrderedIds: string[]) => void;
 };
 
 const GRID =
-  "grid grid-cols-[minmax(0,1fr)_150px_110px_150px_120px] items-center gap-4";
+  "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_48px] items-center gap-4";
 
 const DROP_PREFIX = "dropzone:";
 
-function formatDate(iso?: string | null) {
-  if (!iso) return "—";
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "—";
+/** Compact summary of the most important type-specific settings, shown in the Details column. */
+function attributeDetails(a: Attribute): string {
+  const x = a as unknown as Record<string, unknown>;
+  const parts: string[] = [];
+
+  const range = (min: unknown, max: unknown, fmt: (v: unknown) => string): string | null => {
+    const hasMin = min !== null && min !== undefined && min !== "";
+    const hasMax = max !== null && max !== undefined && max !== "";
+    if (hasMin && hasMax) return `${fmt(min)} – ${fmt(max)}`;
+    if (hasMin) return `≥ ${fmt(min)}`;
+    if (hasMax) return `≤ ${fmt(max)}`;
+    return null;
+  };
+  const asIs = (v: unknown) => String(v);
+  const asYear = (v: unknown) => {
+    const d = new Date(String(v));
+    return Number.isNaN(d.getTime()) ? String(v) : String(d.getFullYear());
+  };
+  const optionCount = () => (Array.isArray(x.options) ? x.options.length : 0);
+
+  switch (a.type) {
+    case AttributeType.NUMBER: {
+      const r = range(x.minValue, x.maxValue, asIs);
+      if (r) parts.push(r);
+      if (x.onlyPositive) parts.push("positive");
+      if (x.decScale === 0) parts.push("integer");
+      else if (typeof x.decScale === "number" && x.decScale > 0) parts.push(`${x.decScale} dp`);
+      break;
+    }
+    case AttributeType.TEXT:
+    case AttributeType.EMAIL:
+    case AttributeType.URL: {
+      if (x.unique) parts.push("Unique");
+      const r = range(x.minLength, x.maxLength, asIs);
+      if (r) parts.push(`${r} chars`);
+      if (x.regex) parts.push("pattern");
+      break;
+    }
+    case AttributeType.LONG_TEXT: {
+      const r = range(x.minLength, x.maxLength, asIs);
+      if (r) parts.push(`${r} chars`);
+      break;
+    }
+    case AttributeType.PHONE: {
+      if (x.unique) parts.push("Unique");
+      break;
+    }
+    case AttributeType.COUNTRY:
+      parts.push("Country list");
+      break;
+    case AttributeType.LANGUAGE:
+      parts.push("Language list");
+      break;
+    case AttributeType.TIMEZONE:
+      parts.push("Timezone list");
+      break;
+    case AttributeType.CURRENCY:
+      parts.push("Currency list");
+      break;
+    case AttributeType.OBJECT: {
+      let count = 0;
+      try {
+        const arr = JSON.parse(String(x.objectFields ?? "[]"));
+        count = Array.isArray(arr) ? arr.length : 0;
+      } catch {
+        count = 0;
+      }
+      parts.push(`${count} field${count === 1 ? "" : "s"}`);
+      break;
+    }
+    case AttributeType.ADDRESS:
+      parts.push("Address");
+      break;
+    case AttributeType.MONEY:
+      parts.push("Amount + currency");
+      break;
+    case AttributeType.DATE: {
+      const r = range(x.minDate, x.maxDate, asYear);
+      if (r) parts.push(r);
+      if (x.dateHideYear) parts.push("hide year");
+      break;
+    }
+    case AttributeType.SELECT: {
+      const n = optionCount();
+      parts.push(`${n} option${n === 1 ? "" : "s"}`);
+      break;
+    }
+    case AttributeType.MULTI_SELECT: {
+      const n = optionCount();
+      parts.push(`${n} option${n === 1 ? "" : "s"}`);
+      const sel = range(x.minSelect, x.maxSelect, asIs);
+      if (sel) parts.push(`${sel} selected`);
+      break;
+    }
+    default:
+      break;
   }
+
+  return parts.join(" · ") || "—";
 }
 
 function normalize(groups: AttributeGroup[]): AttributeGroup[] {
@@ -99,9 +195,11 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
   onRenameGroup,
   onDeleteGroup,
   onCreateAttribute,
+  onEditAttribute,
   onDeleteAttribute,
-  onSaveAttribute,
   isSavingAttribute,
+  focusGroupId,
+  onFocusGroupHandled,
   onReorderGroups,
   onReorderAttributes,
   onMoveAttribute,
@@ -110,19 +208,51 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
 
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<string[]>(() => propGroups.map((g) => g.id));
-  const [expandedAttrId, setExpandedAttrId] = useState<string>("");
+  // Only one section can be in edit mode at a time — two open toolbars made it unclear which
+  // section an action belonged to.
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExport = async ({ format }: ExportDataFormValues) => {
+    try {
+      await triggerExportDownload("/api/attributes/export", format);
+      setExportError(null);
+      setIsExportOpen(false);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : "Export failed");
+    }
+  };
+
+  // Per-group edit mode: reveals the per-attribute actions menu + add-attribute affordance.
+  // Entering it on one section leaves any other.
+  const toggleGroupEditing = (id: string) =>
+    setEditingGroupId((cur) => (cur === id ? null : id));
 
   const [localGroups, setLocalGroups] = useState<AttributeGroup[]>(() => normalize(propGroups));
   const [activeId, setActiveId] = useState<string | null>(null);
   const draggingRef = useRef(false);
   const dragSourceGroupRef = useRef<string | null>(null);
-  const draftRef = useRef<Partial<Attribute>>({});
 
   useEffect(() => {
     if (draggingRef.current) return;
     setLocalGroups(normalize(groups ?? []));
   }, [groups]);
+
+  // A newly created section lands at the end of the list, off-screen. Open it, put it in edit mode
+  // (that's what you want next — adding attributes) and scroll it into view.
+  useEffect(() => {
+    if (!focusGroupId) return;
+    if (!localGroups.some((g) => g.id === focusGroupId)) return;
+
+    setOpenIds((cur) => (cur.includes(focusGroupId) ? cur : [...cur, focusGroupId]));
+    setEditingGroupId(focusGroupId);
+
+    const el = document.querySelector(`[data-group-id="${focusGroupId}"]`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    onFocusGroupHandled?.();
+  }, [focusGroupId, localGroups, onFocusGroupHandled]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -156,11 +286,6 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
 
   const allOpen = display.length > 0 && openIds.length >= display.length;
   const toggleAll = () => setOpenIds(allOpen ? [] : display.map((g) => g.id));
-
-  const toggleAttr = (id: string) => {
-    draftRef.current = {};
-    setExpandedAttrId((current) => (current === id ? "" : id));
-  };
 
   // --- DnD helpers ---------------------------------------------------------
 
@@ -344,14 +469,13 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
       </div>
 
       {/* Reserve less than job-catalog's 380px: Person Information has no tabs row above the list. */}
-      <div className="max-h-[calc(100svh-300px)] overflow-y-auto pr-1">
+      <div className="-mx-1 max-h-[calc(100svh-300px)] overflow-y-auto px-1">
         {/* Column header lives inside the scroll box (same width context as the rows → aligned)
             and sticks to the top so it stays visible while the list scrolls. */}
         <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
           <div>Name</div>
           <div>Type</div>
-          <div>Required</div>
-          <div>Added on</div>
+          <div>Details</div>
           <div/>
         </div>
 
@@ -379,16 +503,14 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
                       key={group.id}
                       group={group}
                       dndEnabled={dndEnabled}
-                      expandedAttrId={expandedAttrId}
-                      onToggleAttr={toggleAttr}
+                      editing={editingGroupId === group.id}
+                      onToggleEditing={() => toggleGroupEditing(group.id)}
                       onRenameGroup={onRenameGroup}
                       onDeleteGroup={onDeleteGroup}
                       onCreateAttribute={onCreateAttribute}
+                      onEditAttribute={onEditAttribute}
                       onDeleteAttribute={onDeleteAttribute}
-                      onSaveAttribute={onSaveAttribute}
                       isSavingAttribute={isSavingAttribute}
-                      draftRef={draftRef}
-                      setExpandedAttrId={setExpandedAttrId}
                     />
                   ))}
                 </Accordion>
@@ -417,14 +539,17 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
         </DndContext>
       </div>
 
-      {/* UI-only for now — no backend export wiring yet. */}
       <ExportDataModal
         isOpen={isExportOpen}
         title="Export attributes"
         description="Export all sections and their attributes."
-        includedText="Includes every section with its attributes, types, and validation settings."
-        onCancelAction={() => setIsExportOpen(false)}
-        onConfirmAction={() => setIsExportOpen(false)}
+        includedText="Includes every section with its attributes, types, validation settings, and option sets."
+        errorMessage={exportError}
+        onCancelAction={() => {
+          setExportError(null);
+          setIsExportOpen(false);
+        }}
+        onConfirmAction={handleExport}
       />
     </div>
   );
@@ -435,33 +560,33 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
 type SortableGroupProps = {
   group: AttributeGroup;
   dndEnabled: boolean;
-  expandedAttrId: string;
-  onToggleAttr: (id: string) => void;
+  editing: boolean;
+  onToggleEditing: () => void;
   onRenameGroup: (group: AttributeGroup) => void;
   onDeleteGroup: (group: AttributeGroup) => void;
   onCreateAttribute: (group: AttributeGroup) => void;
+  onEditAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
-  onSaveAttribute: (id: string, patch: Partial<Attribute>) => void;
   isSavingAttribute?: boolean;
-  draftRef: React.MutableRefObject<Partial<Attribute>>;
-  setExpandedAttrId: (id: string) => void;
 };
 
 const SortableGroup: FC<SortableGroupProps> = ({
   group,
   dndEnabled,
-  expandedAttrId,
-  onToggleAttr,
+  editing,
+  onToggleEditing,
   onRenameGroup,
   onDeleteGroup,
   onCreateAttribute,
+  onEditAttribute,
   onDeleteAttribute,
-  onSaveAttribute,
   isSavingAttribute,
-  draftRef,
-  setExpandedAttrId,
 }) => {
   const attributes = group.attributes ?? [];
+
+  const handleCreateAttribute = () => onCreateAttribute(group);
+  const handleEditAttribute = (attribute: Attribute) => onEditAttribute(attribute);
+  const handleDeleteAttribute = (attribute: Attribute) => onDeleteAttribute(attribute);
 
   const { setNodeRef, attributes: dragAttrs, listeners, transform, transition, isDragging } =
     useSortable({ id: group.id, disabled: !dndEnabled });
@@ -474,9 +599,15 @@ const SortableGroup: FC<SortableGroupProps> = ({
   };
 
   return (
-    <AccordionItem ref={setNodeRef} style={style} value={group.id} className="border-b-0">
+    <AccordionItem
+      ref={setNodeRef}
+      style={style}
+      value={group.id}
+      data-group-id={group.id}
+      className="border-b-0"
+    >
       <div className="relative">
-        <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 pr-20 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+        <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 pr-9 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
           <span className="flex items-center gap-2">
             <span
               {...(dndEnabled ? dragAttrs : {})}
@@ -493,7 +624,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
             </span>
             {group.isSystem ? (
               <Badge variant="secondary" className="font-normal normal-case tracking-normal">
-                Preset
+                System
               </Badge>
             ) : null}
           </span>
@@ -506,34 +637,70 @@ const SortableGroup: FC<SortableGroupProps> = ({
             { resource: "PEOPLE.ATTRIBUTES", action: "MANAGE" },
           ]}
         >
-          <div className="absolute right-9 top-1/2 -translate-y-1/2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-brown-600 hover:bg-brown-100"
-                  aria-label="Section actions"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Ellipsis className="h-4 w-4"/>
-                </Button>
-              </DropdownMenuTrigger>
+          <div className="absolute right-[54px] top-1/2 flex -translate-y-1/2 items-center">
+            {editing ? (
+              <>
+              {/* Section rename/delete live behind the edit affordance now. Preset sections ship with
+                  the product, so the menu is disabled rather than failing on save. */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild disabled={group.isSystem}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-brown-600 hover:bg-brown-100 disabled:opacity-40"
+                    aria-label="Section actions"
+                    disabled={group.isSystem}
+                    title={group.isSystem ? "System sections can't be renamed or deleted" : undefined}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Ellipsis className="h-4 w-4"/>
+                  </Button>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end">
-                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-                  <DropdownMenuItem onClick={() => onRenameGroup(group)}>
-                    Rename section
-                  </DropdownMenuItem>
-                </PermissionGate>
+                <DropdownMenuContent align="end">
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                    <DropdownMenuItem onClick={() => onRenameGroup(group)}>
+                      Rename section
+                    </DropdownMenuItem>
+                  </PermissionGate>
 
-                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
-                  <DropdownMenuItem variant="destructive" onClick={() => onDeleteGroup(group)}>
-                    Delete section
-                  </DropdownMenuItem>
-                </PermissionGate>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
+                    <DropdownMenuItem variant="destructive" onClick={() => onDeleteGroup(group)}>
+                      Delete section
+                    </DropdownMenuItem>
+                  </PermissionGate>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+                aria-label="Done editing section"
+                title="Done"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleEditing();
+                }}
+              >
+                <Check className="h-4 w-4"/>
+              </Button>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+                aria-label="Edit section"
+                title="Edit section"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleEditing();
+                }}
+              >
+                <Pencil className="h-4 w-4"/>
+              </Button>
+            )}
           </div>
         </PermissionGate>
       </div>
@@ -550,28 +717,30 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 attribute={attr}
                 notLast={index < attributes.length - 1}
                 dndEnabled={dndEnabled}
-                expanded={attr.id === expandedAttrId}
-                onToggle={() => onToggleAttr(attr.id)}
-                onDeleteAttribute={onDeleteAttribute}
-                onSaveAttribute={onSaveAttribute}
+                editing={editing}
+                onEditAttribute={handleEditAttribute}
+                onDeleteAttribute={handleDeleteAttribute}
                 isSavingAttribute={isSavingAttribute}
-                draftRef={draftRef}
-                setExpandedAttrId={setExpandedAttrId}
               />
             ))}
           </SortableContext>
 
-          {/* Add-attribute affordance as a dashed trailing row. */}
-          <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-            <button
-              type="button"
-              className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
-              onClick={() => onCreateAttribute(group)}
-            >
-              <Plus className="h-4 w-4"/>
-              Add Attribute
-            </button>
-          </PermissionGate>
+          {/* Add-attribute affordance (edit mode only) as a dashed trailing row. */}
+          {editing && (
+            <>
+              <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                <button
+                  type="button"
+                  className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
+                  onClick={handleCreateAttribute}
+                >
+                  <Plus className="h-4 w-4"/>
+                  Add Attribute
+                </button>
+              </PermissionGate>
+
+            </>
+          )}
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -584,28 +753,23 @@ type SortableAttributeRowProps = {
   attribute: Attribute;
   notLast: boolean;
   dndEnabled: boolean;
-  expanded: boolean;
-  onToggle: () => void;
+  editing: boolean;
+  onEditAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
-  onSaveAttribute: (id: string, patch: Partial<Attribute>) => void;
   isSavingAttribute?: boolean;
-  draftRef: React.MutableRefObject<Partial<Attribute>>;
-  setExpandedAttrId: (id: string) => void;
 };
 
 const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
   attribute,
   notLast,
   dndEnabled,
-  expanded,
-  onToggle,
+  editing,
+  onEditAttribute,
   onDeleteAttribute,
-  onSaveAttribute,
   isSavingAttribute,
-  draftRef,
-  setExpandedAttrId,
 }) => {
   const isPreset = !!attribute.system;
+  const details = attributeDetails(attribute);
 
   const { setNodeRef, attributes: dragAttrs, listeners, transform, transition, isDragging } =
     useSortable({ id: attribute.id, disabled: !dndEnabled });
@@ -618,95 +782,89 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
 
   return (
     <div ref={setNodeRef} style={style} className={notLast ? "border-b border-brown-100" : ""}>
-      <div
-        className={`${GRID} px-3 py-2 cursor-pointer hover:bg-brown-50/50`}
-        onClick={onToggle}
-        role="button"
-        tabIndex={0}
-        aria-expanded={expanded}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onToggle();
-          }
-        }}
-      >
+      <div className={`${GRID} min-h-11 px-3 py-1.5`}>
         <div className="flex min-w-0 items-center gap-2">
           <span
             {...(dndEnabled ? dragAttrs : {})}
             {...(dndEnabled ? listeners : {})}
-            onClick={(e) => e.stopPropagation()}
             className={`inline-flex ${dndEnabled ? "cursor-grab" : "cursor-default"}`}
             aria-label="Drag to reorder attribute"
           >
             <GripVertical className="h-4 w-4 shrink-0 text-brown-300"/>
           </span>
-          {expanded ? (
-            <ChevronUp className="h-4 w-4 shrink-0 text-brown-400"/>
-          ) : (
-            <ChevronDown className="h-4 w-4 shrink-0 text-brown-400"/>
-          )}
           <span className="truncate text-sm font-medium text-foreground" title={attribute.name}>
             {attribute.name}
           </span>
+          {attribute.required && (
+            <span className="shrink-0 text-red-500" title="Required" aria-label="Required">
+              *
+            </span>
+          )}
+          {isPreset && (
+            <Badge variant="secondary" className="shrink-0 font-normal">
+              System
+            </Badge>
+          )}
+          {attribute.sensitive && (
+            <Badge
+              variant="outline"
+              className="shrink-0 gap-1 border-amber-300 bg-amber-50 font-normal text-amber-700"
+              title="Access isn't granted automatically; people without it see a placeholder"
+            >
+              <Lock className="h-3 w-3" />
+              Sensitive
+            </Badge>
+          )}
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          {getAttributeTypeLabel(attribute.type)}
+        <div className="min-w-0">
+          <AttributeTypeChip type={attribute.type} />
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          {attribute.required ? "Yes" : "—"}
-        </div>
-
-        <div className="text-sm text-muted-foreground">
-          {formatDate(attribute.createdAt)}
+        <div className="truncate text-sm text-muted-foreground" title={details}>
+          {details}
         </div>
 
         <div className="flex items-center justify-end">
-          {isPreset ? (
-            <Badge variant="secondary" className="font-normal">
-              Preset
-            </Badge>
-          ) : (
-            <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
-              <button
-                type="button"
-                className="rounded-md p-1.5 text-brown-500 hover:bg-brown-50 hover:text-red-600"
-                aria-label="Delete attribute"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteAttribute(attribute);
-                }}
-                disabled={isSavingAttribute}
-              >
-                <Trash2 className="h-4 w-4"/>
-              </button>
+          {editing && (
+            <PermissionGate
+              anyOf={[
+                { resource: "PEOPLE.ATTRIBUTES", action: "EDIT" },
+                { resource: "PEOPLE.ATTRIBUTES", action: "MANAGE" },
+              ]}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-brown-500 hover:bg-brown-100"
+                    aria-label="Attribute actions"
+                    title={isPreset ? "System attributes can't be edited" : undefined}
+                    disabled={isPreset || isSavingAttribute}
+                  >
+                    <Ellipsis className="h-4 w-4"/>
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end">
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                    <DropdownMenuItem onClick={() => onEditAttribute(attribute)}>
+                      Edit
+                    </DropdownMenuItem>
+                  </PermissionGate>
+
+                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
+                    <DropdownMenuItem variant="destructive" onClick={() => onDeleteAttribute(attribute)}>
+                      Delete
+                    </DropdownMenuItem>
+                  </PermissionGate>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </PermissionGate>
           )}
         </div>
       </div>
-
-      {expanded && (
-        <div className="px-3 pb-3" onClick={(e) => e.stopPropagation()}>
-          <AttributeOptions
-            attribute={attribute}
-            isPreset={isPreset}
-            onChange={(patch) => {
-              draftRef.current = { ...draftRef.current, ...patch };
-            }}
-            onSave={() => {
-              onSaveAttribute(attribute.id, draftRef.current);
-              draftRef.current = {};
-              setExpandedAttrId("");
-            }}
-            onCancel={() => {
-              draftRef.current = {};
-              setExpandedAttrId("");
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };

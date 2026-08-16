@@ -125,6 +125,7 @@ describe("AddRoleModal", () => {
 
     expect(onCreateBlankAction).toHaveBeenCalledWith({
       name: "HR Manager",
+      description: undefined,
     });
   });
 

@@ -6,7 +6,11 @@ import {
 } from "@/components/modules/settings/modules/attributes/actions/AttributeGroup/renameAttributeGroupAction/renameAttributeGroupAction";
 
 jest.mock("next/cache");
-jest.mock("/api/modules/groups/services/groupsService/groupsService.ts");
+jest.mock("@/api/modules/groups/services/groupsService", () => ({
+  groupsService: {
+    renameAttributeGroup: jest.fn(),
+  },
+}));
 
 describe("renameAttributeGroupAction", () => {
   afterEach(() => {

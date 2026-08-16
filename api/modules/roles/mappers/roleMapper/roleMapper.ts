@@ -5,7 +5,8 @@ export class RoleMapper {
   public mapRoleDTOtoRole(dto: RoleDTO): Role {
     return {
       id: dto.id,
-      active: dto.active,
+      archived: dto.archived,
+      archivedAt: dto.archivedAt ?? null,
       name: dto.name,
       description: dto.description || undefined,
       userCount: dto.userCount,
