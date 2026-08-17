@@ -187,8 +187,10 @@ export const UserCalendar: FC<Props> = ({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Toolbar — month name + navigation grouped on the left; optional action on the right. */}
-      <div className="flex flex-none items-center justify-between gap-4 pb-4">
+      {/* Toolbar — month name + navigation grouped on the left; optional action on the right.
+          Wraps: the action slot holds up to four buttons and below ~1100px the last one used to
+          run off the right edge instead of dropping to a second row. */}
+      <div className="flex flex-none flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-4">
         <div className="flex items-center gap-3">
           <h2 className={compact ? "text-base font-semibold text-foreground" : "text-lg font-semibold text-foreground"}>
             {MONTHS[cursor.month]} {cursor.year}
@@ -205,7 +207,9 @@ export const UserCalendar: FC<Props> = ({
             </Button>
           </div>
         </div>
-        {headerAction ? <div className="flex items-center gap-2">{headerAction}</div> : null}
+        {headerAction ? (
+          <div className="flex flex-wrap items-center gap-2">{headerAction}</div>
+        ) : null}
       </div>
 
       {/* Grid — light dividers, no outer border. */}

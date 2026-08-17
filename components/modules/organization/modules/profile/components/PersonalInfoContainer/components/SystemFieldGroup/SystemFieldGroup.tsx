@@ -21,6 +21,14 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import UserChip from "@/components/ui/UserChip/UserChip";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
+import {
+  useAssignUserRolesAction,
+} from "@/components/modules/settings/modules/roles/hooks/Role/useAssignUserRolesAction/useAssignUserRolesAction";
+import {
+  AssignRolesModal,
+} from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
 import {
   UserPickerField,
   type PickedUser,
@@ -331,6 +339,50 @@ const RefChips: React.FC<{ values?: { id: string; name: string }[] }> = ({ value
     <NotSet />
   );
 
+/**
+ * Roles are the one system field with a write path that is not a plain input: the same
+ * `AssignRolesModal` the roles settings page uses is reused here, so role management lives on the
+ * person as well as in settings. Gated on PROFILE MANAGE — Java enforces it regardless.
+ */
+const RolesCell: React.FC<{ user: User }> = ({ user }) => {
+  const { mutate } = useSWRConfig();
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: allRoles } = useRoles();
+  const assignRoles = useAssignUserRolesAction();
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <RefChips values={user.roles}/>
+
+      <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
+        <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
+          Manage
+        </Button>
+      </PermissionGate>
+
+      <AssignRolesModal
+        isOpen={isOpen}
+        user={isOpen ? user : null}
+        allRoles={allRoles ?? []}
+        isLoading={assignRoles.isPending}
+        errorMessage={
+          assignRoles.error instanceof Error ? assignRoles.error.message : undefined
+        }
+        onCancelAction={() => setIsOpen(false)}
+        onApplyAction={async (userId, roleIds) => {
+          await assignRoles.mutateAsync({
+            userId,
+            roleIds,
+            currentRoleIds: (user.roles ?? []).map((role) => role.id),
+          });
+          setIsOpen(false);
+          await mutate(`/api/users/${user.id}`);
+        }}
+      />
+    </div>
+  );
+};
+
 /** Reads a system field's value off the user object. The one place that knows the mapping. */
 const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, field }) => {
   switch (field.id) {
@@ -359,7 +411,7 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
     case "sys:team":
       return <RefChips values={user.teams} />;
     case "sys:role":
-      return <RefChips values={user.roles} />;
+      return <RolesCell user={user}/>;
     case "sys:calendar":
       return (
         <RefChips

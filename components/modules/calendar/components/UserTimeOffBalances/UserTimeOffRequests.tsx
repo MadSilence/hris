@@ -13,7 +13,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import type { TimeOffRequest } from "@/models/timeOff";
 
 type Props = { userId: string };
@@ -49,8 +49,8 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
 
   // Deciding on a request is a manager action on someone else — never on your own request, and the
   // backend re-checks the approver against the policy's approval settings anyway.
-  const { data: currentUser } = useCurrentUser();
-  const canDecide = useCanAccess("PEOPLE.TIME_OFF", "EDIT") && currentUser?.id !== userId;
+  const { userId: currentUserId } = useCurrentUser();
+  const canDecide = useCanAccess("PEOPLE.TIME_OFF", "EDIT") && currentUserId !== userId;
 
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");

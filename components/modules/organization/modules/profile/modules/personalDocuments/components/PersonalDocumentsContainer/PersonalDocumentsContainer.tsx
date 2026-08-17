@@ -12,7 +12,7 @@ import { PersonalDocumentsEmptyState } from "../PersonalDocumentsEmptyState/Pers
 import { PersonalDocumentsSkeleton } from "../PersonalDocumentsSkeleton/PersonalDocumentsSkeleton";
 import { documentService } from "../../services/documentService/documentService";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import {
   usePersonalDocuments,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/usePersonalDocuments";
@@ -117,8 +117,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
   // Mirrors what the backend allows: your own document space is always yours to manage, anyone
   // else's needs the role permission. Pure UX — the storage authorization layer is the real gate.
-  const { data: currentUser } = useCurrentUser();
-  const isOwnSpace = currentUser?.id === userId;
+  const { userId: currentUserId } = useCurrentUser();
+  const isOwnSpace = currentUserId === userId;
   const hasEditPermission = useCanAccess("PEOPLE.DOCUMENTS", "EDIT");
   const hasManagePermission = useCanAccess("PEOPLE.DOCUMENTS", "MANAGE");
   const canEdit = isOwnSpace || hasEditPermission;

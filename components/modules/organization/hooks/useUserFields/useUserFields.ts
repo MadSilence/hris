@@ -11,7 +11,7 @@ export const useUserFields = () => {
 
   return useQuery<FieldDTO[]>({
     queryKey: USER_FIELDS_QK,
-    queryFn: () => internalApiClient.get<FieldDTO[]>("/users/routes/usersRoutes/fields"),
+    queryFn: () => internalApiClient.get<FieldDTO[]>("/users/fields"),
     staleTime: 5 * 60 * 1000,
   });
 };

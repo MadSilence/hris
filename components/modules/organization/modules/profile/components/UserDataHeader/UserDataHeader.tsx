@@ -31,7 +31,7 @@ import {
 import { CalendarPlus, Ellipsis, Pencil, RefreshCw } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 import {
@@ -57,7 +57,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const { data: userFetched } = useUser(userId);
   const user = userFetched ?? userProp;
 
-  const { data: currentUser } = useCurrentUser();
+  const { userId: currentUserId } = useCurrentUser();
   const router = useRouter();
 
   // Booking someone else's leave is a time-off action, not a profile one.
@@ -151,7 +151,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   }
 
   const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
-  const isOwnProfile = currentUser?.id === user.id;
+  const isOwnProfile = currentUserId === user.id;
   const isTerminated = !!user.terminationDate;
 
   const rawAvatarUrl =
