@@ -26,6 +26,9 @@ import {
   CommandList,
 } from "@/public/desact/src/components/ui/command";
 import { useAccess } from "@/components/auth/useAccess";
+import {
+  UserPickerField,
+} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
 import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
@@ -265,6 +268,19 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
   onValues,
 }) => {
   const { options, isLoading, hasOptions } = useAudienceFieldOptions(source, attributeOptions);
+
+  // People are searched, not enumerated — a company-wide dropdown of employees is unusable.
+  if (source === "people") {
+    return (
+      <div className="w-56">
+        <UserPickerField
+          value={value ? { id: value } : null}
+          onChange={(user) => onValue(user?.id ?? "")}
+          placeholder="Select a person"
+        />
+      </div>
+    );
+  }
 
   if (hasOptions) {
     if (isMultiOp(op)) {

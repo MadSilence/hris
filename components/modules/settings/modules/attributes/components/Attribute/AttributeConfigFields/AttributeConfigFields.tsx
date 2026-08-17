@@ -4,7 +4,7 @@ import React from "react";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { AttributeType, isTextConstrainedType } from "@/models/attribute";
+import { AttributeType, hasDefaultValueSupport, isTextConstrainedType } from "@/models/attribute";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
 
 export type AttributeConfig = {
@@ -39,7 +39,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
   const isLongText = type === AttributeType.LONG_TEXT;
   const isDate = type === AttributeType.DATE;
   const isMulti = type === AttributeType.MULTI_SELECT;
-  const hasDefault = isNumber || isText || isDate;
+  const hasDefault = hasDefaultValueSupport(type);
 
   const defaultInputType = isNumber ? "number" : isDate ? "date" : "text";
 

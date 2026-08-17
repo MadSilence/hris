@@ -30,9 +30,18 @@ export type AssignRolesFormValues = {
 
 type AssignRolesTab = "roles" | "permissions" | "fields";
 
+/**
+ * Only the identity bits the form actually renders. Narrower than `UsersSearchItemDTO` so the
+ * person profile — which carries a `User`, not a search row — can open the same dialog.
+ */
+export type AssignRolesTarget = Pick<
+  UsersSearchItemDTO,
+  "id" | "firstName" | "lastName" | "email" | "status" | "avatarUrl" | "roles"
+>;
+
 export interface AssignRolesFormProps {
   isLoading?: boolean;
-  user: UsersSearchItemDTO | null;
+  user: AssignRolesTarget | null;
   allRoles: Role[];
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
@@ -63,7 +72,7 @@ function getInitials(
   return (normalizedEmail[0] ?? "—").toUpperCase();
 }
 
-function getInitialRoleIds(user: UsersSearchItemDTO | null) {
+function getInitialRoleIds(user: AssignRolesTarget | null) {
   if (!user) return [];
 
   return (user.roles ?? []).map((role) => role.id);

@@ -9,7 +9,6 @@ const renderModal = (
     isOpen: true,
     isLoading: false,
     folderName: "Contracts",
-    documentsCount: 3,
     onConfirmAction: jest.fn(),
     onRequestCloseAction: jest.fn(),
   };
@@ -43,15 +42,15 @@ describe("DeleteDocumentsFolderModal", () => {
     expect(screen.getByText("Contracts")).toBeInTheDocument();
 
     expect(
-      screen.getByText(/all 3 document\(s\) inside this folder/i),
+      screen.getByText(/any documents inside this folder are affected too/i),
     ).toBeInTheDocument();
   });
 
-  it("renders empty folder warning", () => {
-    renderModal({ documentsCount: 0 });
+  it("shows a failed delete inside the dialog", () => {
+    renderModal({ errorMessage: "You cannot delete this folder." });
 
     expect(
-      screen.getByText(/this folder will be removed from the user documents list/i),
+      screen.getByText("You cannot delete this folder."),
     ).toBeInTheDocument();
   });
 

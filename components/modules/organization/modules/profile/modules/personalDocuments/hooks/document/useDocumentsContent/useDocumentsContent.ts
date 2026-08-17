@@ -38,12 +38,19 @@ export const useDocumentsContent = ({
   });
 };
 
+/**
+ * Invalidates one person's document tree, or every cached tree when no user is given.
+ * The key is `[PERSONAL_DOCUMENTS_QUERY_KEY, userId, folderId]`, so passing the user narrows it to
+ * that person's folders instead of refetching everyone's.
+ */
 export const useInvalidateDocumentsContentQuery = () => {
   const queryClient = useQueryClient();
 
-  return () => {
+  return (userId?: string) => {
     void queryClient.invalidateQueries({
-      queryKey: [PERSONAL_DOCUMENTS_QUERY_KEY],
+      queryKey: userId
+        ? [PERSONAL_DOCUMENTS_QUERY_KEY, userId]
+        : [PERSONAL_DOCUMENTS_QUERY_KEY],
     });
   };
 };

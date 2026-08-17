@@ -4,18 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import type { AudienceValueSource } from "@/components/audience/fieldCatalog";
 import type { OptionDTO } from "@/models/user/fields";
-import { USER_STATUSES, formatUserStatus } from "@/models/user/status";
 
 export type AudienceOption = { id: string; label: string };
 
-// Status options come from the single source of truth (models/user/status).
-const STATUS_OPTIONS: AudienceOption[] = USER_STATUSES.map((s) => ({
-  id: s,
-  label: formatUserStatus(s),
-}));
-
 // Sources backed by a flat reference endpoint returning { id, name, year? }.
 // The chosen option's id (a UUID) is what the segment filter matches on.
+// `people` is absent on purpose: the value editor renders a searchable people-picker instead of
+// loading every employee into a dropdown.
 const REMOTE_ENDPOINTS: Partial<Record<AudienceValueSource, string>> = {
   departments: "/departments",
   teams: "/teams",
@@ -23,6 +18,7 @@ const REMOTE_ENDPOINTS: Partial<Record<AudienceValueSource, string>> = {
   legalEntities: "/legal-entity",
   calendars: "/public-holiday/calendars",
   jobs: "/jobs",
+  roles: "/roles",
 };
 
 type RefRow = { id: string; name: string; year?: number };
@@ -44,10 +40,6 @@ export function useAudienceFieldOptions(
     staleTime: 5 * 60 * 1000,
     queryFn: () => internalApiClient.get<RefRow[]>(endpoint as string),
   });
-
-  if (source === "status") {
-    return { options: STATUS_OPTIONS, isLoading: false, hasOptions: true };
-  }
 
   if (source === "attributeOptions") {
     // Backend matches attr filters on the option's value string, not its id. Enum-like system

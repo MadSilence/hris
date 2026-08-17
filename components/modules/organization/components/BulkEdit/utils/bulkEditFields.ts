@@ -1,7 +1,8 @@
-import type { FieldDTO } from "@/models/user/fields";
+import { isReferenceField, type FieldDTO, type ReferenceValueSource } from "@/models/user/fields";
 import { AttributeType } from "@/models/attribute";
 import type { ResourceCode } from "@/models/access";
 import type { BulkOperation } from "@/models/bulkEdit";
+import { EMPLOYMENT_TYPES } from "@/models/user/employmentType";
 
 export type EditFieldKind = "status" | "association" | "role" | "attr" | "systemScalar";
 export type EditValueSource = "status" | "departments" | "offices" | "legalEntities" | "jobs" | "roles" | "attribute";
@@ -18,12 +19,18 @@ export type EditField = {
   options?: EditOption[];
 };
 
-const ASSOCIATIONS: { key: string; label: string; resource: ResourceCode; source: EditValueSource }[] = [
-  { key: "sys:department", label: "Department", resource: "ORG.DEPARTMENT", source: "departments" },
-  { key: "sys:office", label: "Office", resource: "ORG.OFFICE", source: "offices" },
-  { key: "sys:legal_entity", label: "Legal entity", resource: "ORG.LEGAL_ENTITY", source: "legalEntities" },
-  { key: "sys:job", label: "Job", resource: "JOBS.TITLE", source: "jobs" },
-];
+/**
+ * Reference catalogues that bulk edit can actually write — `BulkEditService.ASSIGNABLE` knows
+ * department, office, legal entity and job. Team, calendar, manager and role are references too,
+ * but there is no bulk write path for them, so they are not offered here.
+ * The labels come from the field catalogue; only this permission mapping stays local.
+ */
+const BULK_ASSIGNABLE_SOURCES: Partial<Record<ReferenceValueSource, ResourceCode>> = {
+  departments: "ORG.DEPARTMENT",
+  offices: "ORG.OFFICE",
+  legalEntities: "ORG.LEGAL_ENTITY",
+  jobs: "JOBS.TITLE",
+};
 
 export function buildEditableFields(
   fields: FieldDTO[] | undefined,
@@ -47,20 +54,24 @@ export function buildEditableFields(
       operations: dateOps,
       valueSource: "attribute",
       attrType: AttributeType.SELECT,
-      options: [
-        { id: "FULL_TIME", label: "Full-time" },
-        { id: "PART_TIME", label: "Part-time" },
-        { id: "CONTRACTOR", label: "Contractor" },
-        { id: "INTERN", label: "Intern" },
-        { id: "TEMPORARY", label: "Temporary" },
-      ],
+      options: EMPLOYMENT_TYPES.map((t) => ({ id: t.id, label: t.label })),
     });
   }
 
-  for (const a of ASSOCIATIONS) {
-    if (canEdit(a.resource)) {
-      out.push({ key: a.key, label: a.label, kind: "association", operations: ["SET"], valueSource: a.source });
-    }
+  for (const f of fields ?? []) {
+    if (!isReferenceField(f)) continue;
+
+    const source = f.valueSource as ReferenceValueSource;
+    const resource = BULK_ASSIGNABLE_SOURCES[source];
+    if (!resource || !canEdit(resource)) continue;
+
+    out.push({
+      key: f.id,
+      label: f.label ?? f.key,
+      kind: "association",
+      operations: ["SET"],
+      valueSource: source as EditValueSource,
+    });
   }
 
   if (canManage("PEOPLE.PROFILE")) {
@@ -68,6 +79,7 @@ export function buildEditableFields(
   }
 
   for (const f of fields ?? []) {
+    // System fields are handled above; references included.
     if (f.isSystem || f.level !== "EDIT" || f.type === "PERSON") continue;
     if (!(f.viewScopes ?? []).includes("COMPANY")) continue;
     out.push({

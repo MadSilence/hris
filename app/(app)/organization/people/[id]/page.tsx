@@ -1,13 +1,16 @@
-import { NextRequest } from "next/server";
-import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
+import { redirect } from "next/navigation";
 
-export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  const { id } = await context.params;
+/**
+ * The profile always lives on a tab. This entry point used to be a route handler exported from a
+ * page file, which made `/organization/people/{id}` a broken route — now it just lands on the
+ * default tab.
+ */
+export default async function PersonPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-  const user = await hrisApiUsersService.getUser(id);
-
-  return Response.json(user);
+  redirect(`/organization/people/${id}/personal`);
 }

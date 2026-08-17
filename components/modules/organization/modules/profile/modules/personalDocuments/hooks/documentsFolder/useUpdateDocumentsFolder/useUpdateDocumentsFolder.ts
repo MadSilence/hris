@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   useInvalidateDocumentsContentQuery
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useDocumentsContent";
@@ -11,8 +12,15 @@ export const useUpdateDocumentsFolder = () => {
   const invalidateDocuments = useInvalidateDocumentsContentQuery();
 
   return useMutation({
-    mutationFn: (payload: UpdateDocumentsFolderActionInput) =>
-      updateDocumentsFolderAction(payload),
+    mutationFn: async (payload: UpdateDocumentsFolderActionInput) => {
+      const result = await updateDocumentsFolderAction(payload);
+
+      if (result.status === ActionStatus.ERROR) {
+        throw new Error(result.errorMessage || "Failed to rename folder");
+      }
+
+      return result;
+    },
     onSuccess: (_data, variables) => {
       invalidateDocuments(variables.userId);
     },

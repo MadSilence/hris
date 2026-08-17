@@ -24,7 +24,30 @@ export type FieldDTO = {
   // Scopes at which the caller can VIEW this field. Filtering/columns need "COMPANY".
   viewScopes?: string[] | null;
   options?: OptionDTO[] | null;
+  // Section the field belongs to: a registry group for system fields ("Account", "Employment",
+  // "Organisation"), the attribute group's name for custom ones.
+  group?: string | null;
+  // REFERENCE only — which catalogue supplies the values, and how many a person can hold.
+  valueSource?: ReferenceValueSource | null;
+  cardinality?: "ONE" | "MANY" | null;
 };
+
+/**
+ * Catalogues a REFERENCE field can point at. These are entities with their own CRUD and their own
+ * permissions, not option lists owned by the field.
+ */
+export type ReferenceValueSource =
+  | "offices"
+  | "legalEntities"
+  | "jobs"
+  | "departments"
+  | "teams"
+  | "calendars"
+  | "roles"
+  | "people";
+
+export const isReferenceField = (field: FieldDTO): boolean =>
+  field.type === AttributeType.REFERENCE && !!field.valueSource;
 
 export type FilterDTO = {
   field: string;
@@ -99,6 +122,12 @@ export type UsersSearchItemDTO = {
   office?: RefDTO | null;
   legalEntity?: RefDTO | null;
   calendars?: CalendarRefDTO[];
+  manager?: RefDTO | null;
+  // Employment lifecycle columns on `users`.
+  hireDate?: string | null;
+  employmentType?: string | null;
+  probationEnd?: string | null;
+  terminationDate?: string | null;
   lastLoginAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;

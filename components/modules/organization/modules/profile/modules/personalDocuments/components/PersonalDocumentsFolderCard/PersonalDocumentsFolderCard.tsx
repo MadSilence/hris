@@ -8,7 +8,7 @@ type PersonalDocumentsFolderCardProps = {
   folder: DocumentFolderDTO;
   onOpen: (folder: DocumentFolderDTO) => void;
   onRename?: (folder: DocumentFolderDTO) => void;
-  onDelete?: (folderId: string) => Promise<void> | void;
+  onDelete?: (folder: DocumentFolderDTO) => void;
 };
 
 export const PersonalDocumentsFolderCard: React.FC<PersonalDocumentsFolderCardProps> = ({
@@ -46,7 +46,7 @@ export const PersonalDocumentsFolderCard: React.FC<PersonalDocumentsFolderCardPr
             </DropdownMenuItem>
           ) : null}
           {onDelete ? (
-            <DropdownMenuItem onClick={() => onDelete(folder.id)}>
+            <DropdownMenuItem onClick={() => onDelete(folder)}>
               Delete
             </DropdownMenuItem>
           ) : null}

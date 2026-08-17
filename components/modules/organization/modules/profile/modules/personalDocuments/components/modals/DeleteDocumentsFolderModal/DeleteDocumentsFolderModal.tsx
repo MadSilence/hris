@@ -17,7 +17,8 @@ export interface DeleteDocumentsFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   folderName?: string;
-  documentsCount?: number;
+  /** Kept in the dialog rather than the console — a failed delete is otherwise silent. */
+  errorMessage?: string | null;
   onRequestCloseAction: () => void;
   onConfirmAction: () => void;
 }
@@ -28,7 +29,7 @@ export const DeleteDocumentsFolderModal: FC<
   isOpen,
   isLoading = false,
   folderName,
-  documentsCount = 0,
+  errorMessage,
   onRequestCloseAction,
   onConfirmAction,
 }) => {
@@ -59,13 +60,14 @@ export const DeleteDocumentsFolderModal: FC<
             <div>
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
-                {documentsCount > 0
-                  ? `All ${documentsCount} document(s) inside this folder may also be affected. Make sure they are moved before deletion.`
-                  : "This folder will be removed from the user documents list."}
+                Any documents inside this folder are affected too. Move out what you want to keep
+                before deleting.
               </p>
             </div>
           </div>
         </div>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

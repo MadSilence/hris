@@ -1,4 +1,4 @@
-import type { FieldDTO, FilterDTO } from "@/models/user/fields";
+import { isReferenceField, type FieldDTO, type FilterDTO, type ReferenceValueSource } from "@/models/user/fields";
 import type { ResourceCode } from "@/models/access";
 
 export type AudienceOperator = FilterDTO["op"];
@@ -10,13 +10,7 @@ export type AudienceValueSource =
   | "date"
   | "boolean"
   | "attributeOptions"
-  | "departments"
-  | "teams"
-  | "offices"
-  | "legalEntities"
-  | "calendars"
-  | "jobs"
-  | "status";
+  | ReferenceValueSource;
 
 export type AudienceFieldGroup = "Org" | "System" | "Custom";
 
@@ -27,19 +21,6 @@ export type AudienceField = {
   valueSource: AudienceValueSource;
   group: AudienceFieldGroup;
 };
-
-// Organisation associations. Backend-confirmed keys and operators — these are gated by the
-// PEOPLE.PROFILE resource (not field-access), so they are always offered when the tab is.
-// Matching is by id, so contains/text operators are intentionally absent.
-export const ORG_AUDIENCE_FIELDS: AudienceField[] = [
-  { key: "sys:department", label: "Department", operators: ["eq", "in", "has_any", "not_in"], valueSource: "departments", group: "Org" },
-  { key: "sys:team", label: "Team", operators: ["eq", "in", "has_any", "not_has_any"], valueSource: "teams", group: "Org" },
-  { key: "sys:calendar", label: "Calendar", operators: ["eq", "in", "has_any", "not_has_any"], valueSource: "calendars", group: "Org" },
-  { key: "sys:office", label: "Office", operators: ["eq", "neq", "in", "not_in"], valueSource: "offices", group: "Org" },
-  { key: "sys:legal_entity", label: "Legal entity", operators: ["eq", "neq", "in", "not_in"], valueSource: "legalEntities", group: "Org" },
-  { key: "sys:job", label: "Job", operators: ["eq", "neq", "in", "not_in"], valueSource: "jobs", group: "Org" },
-  { key: "sys:status", label: "Status", operators: ["eq", "neq", "in", "not_in"], valueSource: "status", group: "Org" },
-];
 
 /** Operators that exclude rather than select — they get the "include people with no value" choice. */
 const NEGATIVE_OPERATORS: ReadonlySet<AudienceOperator> = new Set<AudienceOperator>([
@@ -60,6 +41,20 @@ export const isNegativeOperator = (op: AudienceOperator): boolean => NEGATIVE_OP
 //   TEXT/EMAIL/URL/STATUS -> string_value: eq/contains/is-any-of
 // CHECKBOX/PERSON custom attrs are intentionally not filterable yet (see isFilterableField).
 export function operatorsForField(field: FieldDTO): AudienceOperator[] {
+  // References match on an entity id. What the backend resolves:
+  //   FK columns (office/legal entity/job/manager) — eq, neq, in, not_in
+  //   membership tables (department/team/calendar/role) — all six, including has_any
+  // Offered by cardinality rather than by storage: `has_any` on a single-valued field says the
+  // same thing as `in`, so it would only be a second name for one behaviour.
+  if (isReferenceField(field)) {
+    // No multi people-picker yet, so manager stays on the single-value operators.
+    if (field.valueSource === "people") return ["eq", "neq"];
+
+    return field.cardinality === "MANY"
+      ? ["eq", "in", "has_any", "not_has_any"]
+      : ["eq", "neq", "in", "not_in"];
+  }
+
   if (!field.isSystem) {
     switch (field.type) {
       case "NUMBER":
@@ -112,9 +107,11 @@ export const OPERATOR_LABELS: Record<AudienceOperator, string> = {
 // Custom CHECKBOX/PERSON attributes have no meaningful segment predicate yet, so they are
 // dropped from the builder rather than offered as a filter that returns nothing.
 function isFilterableField(field: FieldDTO): boolean {
-  // A PERSON field matches on a user id, so it needs a people-picker as its value source. Until
-  // that exists the filter could only be used by typing a raw UUID — offer nothing rather than that.
-  // (This is what currently keeps `sys:manager` out of the builder; the backend predicate is ready.)
+  // References always resolve — the value is an entity id picked from a catalogue.
+  if (isReferenceField(field)) return true;
+  // A *custom* PERSON attribute matches on a user id but has no people-picker of its own, so the
+  // filter could only be used by typing a raw UUID. (`sys:manager` is a REFERENCE now and does
+  // have a picker, so it is no longer caught here.)
   if (field.type === "PERSON") return false;
   if (field.isSystem) return true;
   // LONG_TEXT lives in multiline_value and OBJECT is a repeatable record set — neither is read by the
@@ -129,6 +126,8 @@ function isFilterableField(field: FieldDTO): boolean {
 }
 
 function valueSourceForField(field: FieldDTO): AudienceValueSource {
+  if (isReferenceField(field)) return field.valueSource as ReferenceValueSource;
+
   if (!field.isSystem) {
     return field.options && field.options.length > 0 ? "attributeOptions" : "freeText";
   }
@@ -148,51 +147,50 @@ function valueSourceForField(field: FieldDTO): AudienceValueSource {
   }
 }
 
-// Permission each org field requires to even be offered as a filter. If the caller can't
-// view the underlying resource, the field is dropped from the builder entirely.
-export const ORG_FIELD_RESOURCE: Record<string, ResourceCode> = {
-  "sys:department": "ORG.DEPARTMENT",
-  "sys:team": "ORG.TEAM",
-  "sys:office": "ORG.OFFICE",
-  "sys:legal_entity": "ORG.LEGAL_ENTITY",
-  "sys:calendar": "ORG.PUBLIC_HOLIDAY_CALENDAR",
-  "sys:job": "JOBS.TITLE",
-  "sys:status": "PEOPLE.PROFILE",
+/**
+ * Permission required to *read the catalogue* a reference points at. Distinct from field access,
+ * which answers whether you may see the value on a given person: picking "Office = Berlin" needs
+ * the office list, seeing that Petya sits in Berlin needs the field. Both, not either.
+ */
+export const REFERENCE_RESOURCE: Partial<Record<ReferenceValueSource, ResourceCode>> = {
+  departments: "ORG.DEPARTMENT",
+  teams: "ORG.TEAM",
+  offices: "ORG.OFFICE",
+  legalEntities: "ORG.LEGAL_ENTITY",
+  calendars: "ORG.PUBLIC_HOLIDAY_CALENDAR",
+  jobs: "JOBS.TITLE",
+  roles: "ROLES.ROLE",
+  people: "PEOPLE.PROFILE",
 };
 
-// Builds the filterable field list for the audience builder.
-// - Custom attributes the caller cannot view (level === "NONE") are dropped (backend rejects
-//   them with SG00001, and they must not be offered).
-// - Org fields are dropped unless `canViewResource` says the caller can see them (e.g. no
-//   JOBS.TITLE VIEW → no Job filter). When the predicate is omitted, all org fields are kept
-//   (callers that don't gate).
+const groupOf = (field: FieldDTO): AudienceFieldGroup => {
+  if (isReferenceField(field)) return "Org";
+  return field.isSystem ? "System" : "Custom";
+};
+
+// Builds the filterable field list for the audience builder, entirely from the server catalogue —
+// there is no second hardcoded list of org fields any more.
+// - Custom attributes the caller cannot view at COMPANY scope are dropped (backend rejects them
+//   with SG00001, and they must not be offered).
+// - A reference is dropped unless `canViewResource` says the caller can read its catalogue (no
+//   JOBS.TITLE VIEW → no Job filter). Without the predicate, nothing is gated.
 export function buildAudienceFields(
   fields: FieldDTO[] | undefined,
   canViewResource?: (resource: ResourceCode) => boolean,
 ): AudienceField[] {
-  const orgFields = canViewResource
-    ? ORG_AUDIENCE_FIELDS.filter((f) => {
-        const resource = ORG_FIELD_RESOURCE[f.key];
-        return !resource || canViewResource(resource);
-      })
-    : ORG_AUDIENCE_FIELDS;
-
-  const userFields: AudienceField[] = (fields ?? [])
-    // Filtering scans the whole company, so a custom attribute is only offerable when the
-    // caller can view it at COMPANY scope (SELF/DIRECT_REPORTS-only fields aren't filterable).
-    // System fields are resource-gated, not field-access gated, so they stay.
+  return (fields ?? [])
     .filter((field) => field.isSystem || (field.viewScopes ?? []).includes("COMPANY"))
-    // Drop types with no working segment predicate (custom CHECKBOX/PERSON).
     .filter(isFilterableField)
-    // Org associations are provided as fixed keys above; avoid duplicating them from the catalogue.
-    .filter((field) => !ORG_AUDIENCE_FIELDS.some((org) => org.key === field.id))
+    .filter((field) => {
+      if (!canViewResource || !isReferenceField(field)) return true;
+      const resource = REFERENCE_RESOURCE[field.valueSource as ReferenceValueSource];
+      return !resource || canViewResource(resource);
+    })
     .map((field) => ({
       key: field.id,
       label: field.label ?? field.key,
       operators: operatorsForField(field),
       valueSource: valueSourceForField(field),
-      group: field.isSystem ? ("System" as const) : ("Custom" as const),
+      group: groupOf(field),
     }));
-
-  return [...orgFields, ...userFields];
 }

@@ -1,4 +1,4 @@
-import { AttributeDTO } from "@/api/modules/groups/dto";
+import { AttributeDTO } from "@/api/modules/attributes/dto";
 
 export type AttributeGroupDTO = {
   id: string;

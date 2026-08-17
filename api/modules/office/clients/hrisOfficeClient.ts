@@ -1,6 +1,11 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import { DeleteOfficeRequest, OfficeDTO } from "@/api/modules/office/dto";
+import {
+  CreateOfficeRequest,
+  DeleteOfficeRequest,
+  OfficeDTO,
+  UpdateOfficeRequest,
+} from "@/api/modules/office/dto";
 
 class HrisOfficeClient {
   private readonly BASE_PATH: string = "/offices";

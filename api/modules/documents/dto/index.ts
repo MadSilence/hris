@@ -16,6 +16,16 @@ export type DocumentDTO = {
   createdAt: string;
   folderId: string | null;
   isStarred: boolean;
+  categoryId: string | null;
+  categoryName: string | null;
+};
+
+export type DocumentCategoryDTO = {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  isSystem: boolean;
 };
 
 export type DocumentFolderContentDTO = {
@@ -38,5 +48,16 @@ export type UploadDocumentArgs = {
   file: File;
   folderId?: string | null;
   categoryId?: string | null;
+};
+
+export type RenameDocumentRequest = {
+  name: string;
+};
+
+export type MoveDocumentRequest = {
+  /** Owner of the document — the backend rejects a folder belonging to anyone else. */
+  targetUserId: string;
+  /** `null` moves the document out of any folder, to the root. */
+  folderId: string | null;
 };
 

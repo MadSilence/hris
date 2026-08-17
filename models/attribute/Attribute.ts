@@ -42,7 +42,7 @@ export type Attribute = {
  * option set (persisted through a separate endpoint) and `clearFields` — the names of nullable
  * config fields to reset, since the update is a partial patch where null means "leave as is".
  */
-export type AttributePatch = Partial<Attribute> & {
+export type AttributePatch = Omit<Partial<Attribute>, "options"> & {
   options?: AttributeOptionUpsert[];
   clearFields?: string[];
 };

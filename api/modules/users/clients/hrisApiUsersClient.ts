@@ -6,6 +6,14 @@ import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/u
 import { User } from "@/models/user/User";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
+/** Partial patch: an omitted field is left as is (the backend never clears from here). */
+export type UpdateUserPayload = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  hireDate?: string;
+};
+
 export class HrisApiUsersClient {
   private readonly BASE_PATH: string = '/users';
 
@@ -39,6 +47,10 @@ export class HrisApiUsersClient {
   public async getCurrentUser(): Promise<User> {
     const dto = await hrisApiClient.get<UserDTO>(`${this.BASE_PATH}/me`);
     return userMapper.mapUserDTOtoUser(dto);
+  }
+
+  public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/update`, { ...payload });
   }
 
   public async updateUserAttributes(

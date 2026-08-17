@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TypeSelect } from "./TypeSelect";
-import { ALL_ATTRIBUTE_TYPES, AttributeType } from "@/models/attribute";
+import { ATTRIBUTE_TYPES_CREATABLE, AttributeType } from "@/models/attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 
 // This is a Radix Select, not a native <select>: there is no <option> in the DOM until the listbox
@@ -22,7 +22,7 @@ describe("TypeSelect", () => {
 
     await user.click(screen.getByRole("combobox"));
 
-    expect(screen.getAllByRole("option")).toHaveLength(ALL_ATTRIBUTE_TYPES.length);
+    expect(screen.getAllByRole("option")).toHaveLength(ATTRIBUTE_TYPES_CREATABLE.length);
     expect(
       screen.getByRole("option", { name: getAttributeTypeLabel(AttributeType.EMAIL) })
     ).toBeInTheDocument();

@@ -55,9 +55,11 @@ describe("PublicHolidaysRoutes", () => {
     const res = await publicHolidaysRoutes.create(req, "calendar-id");
     const result = await res.json();
 
+    // A single-day holiday still spans a range: endDate defaults to the start date rather than
+    // being dropped, which is what used to happen before multi-day holidays existed.
     expect(hrisPublicHolidaysService.create).toHaveBeenCalledWith(
       "calendar-id",
-      body
+      { ...body, endDate: body.holidayDate }
     );
     expect(result).toEqual(response);
   });
@@ -102,7 +104,7 @@ describe("PublicHolidaysRoutes", () => {
 
     expect(hrisPublicHolidaysService.update).toHaveBeenCalledWith(
       "holiday-id",
-      body
+      { ...body, endDate: body.holidayDate }
     );
     expect(result).toEqual(response);
   });

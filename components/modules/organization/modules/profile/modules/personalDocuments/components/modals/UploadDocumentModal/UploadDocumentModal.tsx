@@ -3,6 +3,7 @@
 import { FC } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
+  CategoryOption,
   FolderOption,
   UploadDocumentForm,
   UploadDocumentFormValues,
@@ -12,7 +13,10 @@ export interface UploadDocumentModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   folders: FolderOption[];
+  categories?: CategoryOption[];
   defaultFolderId?: string;
+  /** Kept in the dialog rather than the console — a failed upload is otherwise silent. */
+  errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: UploadDocumentFormValues) => void;
 }
@@ -21,7 +25,9 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
   isOpen,
   isLoading = false,
   folders,
+  categories,
   defaultFolderId,
+  errorMessage,
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -46,9 +52,12 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+
         <UploadDocumentForm
           isLoading={isLoading}
           folders={folders}
+          categories={categories}
           defaultFolderId={defaultFolderId}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}

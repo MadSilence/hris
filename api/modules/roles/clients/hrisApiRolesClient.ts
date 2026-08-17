@@ -26,7 +26,7 @@ class HrisApiRolesClient {
   }
 
   public async previewRoleAccess(roleIds: string[]): Promise<RoleAccessPreviewDTO> {
-    return hrisApiClient.post<RoleAccessPreviewDTO, { roleIds: string[] }>(
+    return hrisApiClient.post<RoleAccessPreviewDTO>(
       `${this.BASE_PATH}/preview`,
       { roleIds },
     );

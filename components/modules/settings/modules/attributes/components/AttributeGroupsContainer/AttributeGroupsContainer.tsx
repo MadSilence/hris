@@ -94,11 +94,28 @@ export default function AttributeGroupsContainer() {
 
   const handleSaveAttribute = useCallback(
     (id: string, patch: AttributePatch) => {
-      const { options, ...rest } = patch;
+      // Server-owned fields ride along in the patch (it is a `Partial<Attribute>`) but are not part
+      // of the update contract — drop them instead of putting them on the wire.
+      const {
+        options,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        createdBy: _createdBy,
+        updatedBy: _updatedBy,
+        version: _version,
+        companyId: _companyId,
+        sortOrder: _sortOrder,
+        system: _system,
+        dateHideYear,
+        ...rest
+      } = patch;
 
       // The list is driven by the *groups* query; the update hook only invalidates `attributes`,
       // so without this the saved change (a group move in particular) wouldn't show up.
-      updateAttributeAction.mutate({ id, ...rest }, { onSuccess: () => invalidateGroups() });
+      updateAttributeAction.mutate(
+        { id, ...rest, ...(dateHideYear == null ? {} : { dateHideYear }) },
+        { onSuccess: () => invalidateGroups() }
+      );
 
       if (Array.isArray(options) && options.length > 0) {
         updateOptionsAction.mutate(

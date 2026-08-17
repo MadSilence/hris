@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ALL_ATTRIBUTE_TYPES, AttributeType } from "@/models/attribute";
+import { ATTRIBUTE_TYPES_CREATABLE, AttributeType } from "@/models/attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 
@@ -10,7 +10,7 @@ type TypeSelectProps = {
   onChange: (type: AttributeType) => void;
 };
 
-const options = ALL_ATTRIBUTE_TYPES.map((type) => ({
+const options = ATTRIBUTE_TYPES_CREATABLE.map((type) => ({
   value: type,
   label: getAttributeTypeLabel(type),
 }));

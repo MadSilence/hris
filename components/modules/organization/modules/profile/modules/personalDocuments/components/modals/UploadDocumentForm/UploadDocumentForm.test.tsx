@@ -26,6 +26,9 @@ beforeAll(() => {
   });
 });
 
+// The real Select renders through a portal; a plain <select> keeps the assertions readable. The
+// two of them are told apart by position (folder first, category second) — a label baked into the
+// mock would have to be recomputed on every re-render, which is a race, not a fixture.
 jest.mock("@/public/desact/src/components/ui/select", () => ({
   Select: ({
     value,
@@ -39,7 +42,6 @@ jest.mock("@/public/desact/src/components/ui/select", () => ({
     children: ReactNode;
   }) => (
     <select
-      aria-label="Folder"
       value={value}
       disabled={disabled}
       onChange={(e) => onValueChange(e.currentTarget.value)}
@@ -59,276 +61,209 @@ jest.mock("@/public/desact/src/components/ui/select", () => ({
   }) => <option value={value}>{children}</option>,
 }));
 
+const folderSelect = () => screen.getAllByRole("combobox")[0];
+const categorySelect = () => screen.getAllByRole("combobox")[1];
+
 const folders = [
-  {
-    id: "folder-1",
-    name: "Contracts",
-  },
-  {
-    id: "folder-2",
-    name: "Payslips",
-  },
+  { id: "folder-1", name: "Contracts" },
+  { id: "folder-2", name: "Payslips" },
 ];
 
-const file = new File(["content"], "contract.pdf", {
-  type: "application/pdf",
-});
+const categories = [
+  { id: "category-1", name: "Employment" },
+];
+
+const file = new File(["content"], "contract.pdf", { type: "application/pdf" });
+const secondFile = new File(["more"], "payslip.pdf", { type: "application/pdf" });
 
 const longFile = new File(
   ["content"],
   "573100011_840662625139539_2498625148756301642_n_extra_extra_extra.jpg",
-  {
-    type: "image/jpeg",
-  },
+  { type: "image/jpeg" },
 );
 
 function getUploadZone() {
-  return screen
-    .getByText(/drag file here to upload/i)
-    .closest('[role="button"]')!;
+  return screen.getByText(/drag files here to upload/i).closest('[role="button"]')!;
 }
 
 function getActiveUploadZone() {
-  return screen
-    .getByText(/drop file to upload/i)
-    .closest('[role="button"]')!;
+  return screen.getByText(/drop files to upload/i).closest('[role="button"]')!;
 }
 
 function getInnerButton(name: RegExp) {
   return screen.getByText(name).closest("button")!;
 }
 
+function renderForm(props: Partial<React.ComponentProps<typeof UploadDocumentForm>> = {}) {
+  return render(
+    <UploadDocumentForm
+      folders={folders}
+      defaultFolderId="folder-1"
+      onCancelAction={jest.fn()}
+      onSubmitAction={jest.fn()}
+      {...props}
+    />,
+  );
+}
+
 describe("UploadDocumentForm", () => {
   it("renders form content", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+    renderForm();
 
-    expect(screen.getByLabelText(/^file$/i)).toBeInTheDocument();
-    expect(screen.getByText(/drag file here to upload/i)).toBeInTheDocument();
-    expect(screen.getByText(/or click to browse files/i)).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/supports pdf, doc, jpg, png files up to 10mb/i),
-    ).toBeInTheDocument();
-
-    expect(getInnerButton(/^choose file$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^folder$/i)).toHaveValue("folder-1");
+    expect(screen.getByLabelText(/^files$/i)).toBeInTheDocument();
+    expect(screen.getByText(/drag files here to upload/i)).toBeInTheDocument();
+    expect(getInnerButton(/^choose files$/i)).toBeInTheDocument();
+    expect(folderSelect()).toHaveValue("folder-1");
     expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
   });
 
-  it("shows selected file after file input change", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+  it("hides the category picker when the company has none", () => {
+    renderForm();
 
-    fireEvent.change(screen.getByLabelText(/^file$/i), {
-      target: {
-        files: [file],
-      },
-    });
+    expect(screen.queryAllByRole("combobox")).toHaveLength(1);
+  });
+
+  it("shows selected file after file input change", () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
 
     expect(screen.getByText("contract.pdf")).toBeInTheDocument();
-    expect(screen.getByText("7 B")).toBeInTheDocument();
-    expect(getInnerButton(/^choose another$/i)).toBeInTheDocument();
-    expect(getInnerButton(/^remove$/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^upload$/i })).toBeEnabled();
   });
 
-  it("shortens long selected file name and keeps full name in title", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+  it("queues several files and labels the submit with the count", () => {
+    renderForm();
 
-    fireEvent.change(screen.getByLabelText(/^file$/i), {
-      target: {
-        files: [longFile],
-      },
+    fireEvent.change(screen.getByLabelText(/^files$/i), {
+      target: { files: [file, secondFile] },
     });
 
-    const fileName = screen.getByTitle(longFile.name);
+    expect(screen.getByText("contract.pdf")).toBeInTheDocument();
+    expect(screen.getByText("payslip.pdf")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /upload 2 files/i })).toBeEnabled();
+  });
 
-    expect(fileName).toBeInTheDocument();
+  it("does not queue the same file twice", () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+
+    expect(screen.getAllByText("contract.pdf")).toHaveLength(1);
+  });
+
+  it("shortens a long file name and keeps the full name in the title", () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [longFile] } });
+
+    const fileName = screen.getByTitle(longFile.name);
 
     expect(fileName).toHaveTextContent(
       /^573100011_840662625139539_2498625148756301642_n_e\.\.\.\.jpg$/,
     );
   });
 
-  it("removes selected file", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+  it("removes a queued file", () => {
+    renderForm();
 
-    fireEvent.change(screen.getByLabelText(/^file$/i), {
-      target: {
-        files: [file],
-      },
-    });
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
 
-    expect(screen.getByText("contract.pdf")).toBeInTheDocument();
-
-    fireEvent.click(getInnerButton(/^remove$/i));
+    fireEvent.click(screen.getByRole("button", { name: /remove contract\.pdf/i }));
 
     expect(screen.queryByText("contract.pdf")).not.toBeInTheDocument();
-    expect(screen.getByText(/drag file here to upload/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
   });
 
   it("shows active drag state", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+    renderForm();
 
     fireEvent.dragOver(getUploadZone());
 
-    expect(screen.getByText(/drop file to upload/i)).toBeInTheDocument();
-    expect(screen.getByText(/release to choose this file/i)).toBeInTheDocument();
+    expect(screen.getByText(/drop files to upload/i)).toBeInTheDocument();
 
     fireEvent.dragLeave(getActiveUploadZone());
 
-    expect(screen.getByText(/drag file here to upload/i)).toBeInTheDocument();
+    expect(screen.getByText(/drag files here to upload/i)).toBeInTheDocument();
   });
 
-  it("selects file by drag and drop", () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+  it("accepts files by drag and drop", () => {
+    renderForm();
 
-    fireEvent.drop(getUploadZone(), {
-      dataTransfer: {
-        files: [file],
-      },
-    });
+    fireEvent.drop(getUploadZone(), { dataTransfer: { files: [file, secondFile] } });
 
     expect(screen.getByText("contract.pdf")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^upload$/i })).toBeEnabled();
+    expect(screen.getByText("payslip.pdf")).toBeInTheDocument();
   });
 
-  it("submits selected file and default folder", async () => {
+  it("submits the queued files and the default folder", async () => {
     const onSubmitAction = jest.fn();
 
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={onSubmitAction}
-      />,
-    );
+    renderForm({ onSubmitAction });
 
-    fireEvent.change(screen.getByLabelText(/^file$/i), {
-      target: {
-        files: [file],
-      },
-    });
-
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
     fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
 
-    await waitFor(() => {
-      expect(onSubmitAction).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() => expect(onSubmitAction).toHaveBeenCalledTimes(1));
 
     expect(onSubmitAction.mock.calls[0][0]).toEqual({
-      file,
+      files: [file],
       folderId: "folder-1",
+      categoryId: undefined,
     });
   });
 
   it("submits undefined folder for root", async () => {
     const onSubmitAction = jest.fn();
 
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={onSubmitAction}
-      />,
-    );
+    renderForm({ onSubmitAction });
 
-    fireEvent.change(screen.getByLabelText(/^file$/i), {
-      target: {
-        files: [file],
-      },
-    });
-
-    fireEvent.change(screen.getByLabelText(/^folder$/i), {
-      target: {
-        value: "root",
-      },
-    });
-
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+    fireEvent.change(folderSelect(), { target: { value: "root" } });
     fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
 
-    await waitFor(() => {
-      expect(onSubmitAction).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() => expect(onSubmitAction).toHaveBeenCalledTimes(1));
 
     expect(onSubmitAction.mock.calls[0][0]).toEqual({
-      file,
+      files: [file],
       folderId: undefined,
+      categoryId: undefined,
     });
   });
 
-  it("shows validation error when submitting without file", async () => {
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+  it("submits the chosen category", async () => {
+    const onSubmitAction = jest.fn();
 
-    fireEvent.submit(
-      screen.getByRole("button", { name: /^upload$/i }).closest("form")!,
-    );
+    renderForm({ onSubmitAction, categories });
 
-    expect(await screen.findByText(/please choose a file/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+    fireEvent.change(categorySelect(), { target: { value: "category-1" } });
+    fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
+
+    await waitFor(() => expect(onSubmitAction).toHaveBeenCalledTimes(1));
+
+    expect(onSubmitAction.mock.calls[0][0]).toEqual({
+      files: [file],
+      folderId: "folder-1",
+      categoryId: "category-1",
+    });
+  });
+
+  it("shows a validation error when submitting with nothing queued", async () => {
+    renderForm();
+
+    fireEvent.submit(screen.getByRole("button", { name: /^upload$/i }).closest("form")!);
+
+    expect(
+      await screen.findByText(/please choose at least one file/i),
+    ).toBeInTheDocument();
   });
 
   it("calls onCancelAction", () => {
     const onCancelAction = jest.fn();
 
-    render(
-      <UploadDocumentForm
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={onCancelAction}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+    renderForm({ onCancelAction });
 
     fireEvent.click(screen.getByRole("button", { name: /^cancel$/i }));
 
@@ -336,19 +271,11 @@ describe("UploadDocumentForm", () => {
   });
 
   it("disables fields while loading", () => {
-    render(
-      <UploadDocumentForm
-        isLoading
-        folders={folders}
-        defaultFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
-      />,
-    );
+    renderForm({ isLoading: true });
 
-    expect(screen.getByLabelText(/^file$/i)).toBeDisabled();
-    expect(screen.getByLabelText(/^folder$/i)).toBeDisabled();
-    expect(getInnerButton(/^choose file$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^files$/i)).toBeDisabled();
+    expect(folderSelect()).toBeDisabled();
+    expect(getInnerButton(/^choose files$/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /^cancel$/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
   });

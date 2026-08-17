@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ChevronRight } from "lucide-react";
-import type { BreadcrumbItem } from "../../types/personalDocuments.types";
+import type { BreadcrumbItem } from "@/components/modules/organization/modules/profile/modules/personalDocuments/types/personalDocuments.types";
 
 type PersonalDocumentsBreadcrumbsProps = {
   items: BreadcrumbItem[];

@@ -11,6 +11,8 @@ export interface RenameDocumentsFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   folderName?: string;
+  /** Kept in the dialog rather than the console — a failed rename is otherwise silent. */
+  errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: RenameDocumentsFolderFormValues) => void;
 }
@@ -21,6 +23,7 @@ export const RenameDocumentsFolderModal: FC<
   isOpen,
   isLoading = false,
   folderName,
+  errorMessage,
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -44,6 +47,8 @@ export const RenameDocumentsFolderModal: FC<
             Update the folder name. All documents inside will stay in place.
           </DialogDescription>
         </DialogHeader>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <RenameDocumentsFolderForm
           isLoading={isLoading}

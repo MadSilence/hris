@@ -16,8 +16,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
 import { useEmployeeTimeOffBalanceTransactions } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalanceTransactions";
-import { useAdjustEmployeeTimeOffBalance } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useAdjustEmployeeTimeOffBalance";
-import { getEmployeeTimeOffBalanceTransactionsQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
+import { BalanceAdjustmentForm } from "./BalanceAdjustmentForm";
 import { TimeOffBalanceTransactionType } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
@@ -43,15 +42,9 @@ const TYPE_LABEL: Record<TimeOffBalanceTransactionType, string> = {
 };
 
 export const BalanceDetailModal: FC<Props> = ({ isOpen, userId, balance, policy, onCloseAction }) => {
-  const queryClient = useQueryClient();
   const { data: transactions, isLoading } = useEmployeeTimeOffBalanceTransactions({
     balanceId: balance.id,
   });
-  const adjustMutation = useAdjustEmployeeTimeOffBalance();
-
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const unit = policy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
   const name = policy?.displayName ?? "Time off";
@@ -71,34 +64,6 @@ export const BalanceDetailModal: FC<Props> = ({ isOpen, userId, balance, policy,
     return chronological.reverse();
   }, [transactions]);
 
-  const handleAdjust = async () => {
-    const value = Number(amount);
-    if (!amount.trim() || !Number.isFinite(value) || value === 0) {
-      setError("Enter a non-zero amount (use a minus for a deduction).");
-      return;
-    }
-    if (!reason.trim()) {
-      setError("Please add a reason.");
-      return;
-    }
-    setError(null);
-    try {
-      await adjustMutation.mutateAsync({
-        balanceId: balance.id,
-        userId,
-        adjustmentAmount: value,
-        reason: reason.trim(),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: getEmployeeTimeOffBalanceTransactionsQueryKey(balance.id),
-      });
-      setAmount("");
-      setReason("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to adjust the balance.");
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
       <DialogContent hideClose className="max-w-lg overflow-hidden p-0">
@@ -112,40 +77,7 @@ export const BalanceDetailModal: FC<Props> = ({ isOpen, userId, balance, policy,
         </DialogHeader>
 
         <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-5">
-          {/* Manual adjustment */}
-          <div className="space-y-3 rounded-lg border border-brown-200 p-3.5">
-            <p className="text-sm font-medium text-foreground">Manual adjustment</p>
-            <div className="flex items-end gap-2">
-              <div className="w-28 space-y-1.5">
-                <Label htmlFor="adj-amount" className="text-xs">Amount ({unit})</Label>
-                <Input
-                  id="adj-amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.currentTarget.value)}
-                  placeholder="e.g. -1"
-                  disabled={adjustMutation.isPending}
-                />
-              </div>
-              <div className="flex-1 space-y-1.5">
-                <Label htmlFor="adj-reason" className="text-xs">Reason</Label>
-                <Input
-                  id="adj-reason"
-                  value={reason}
-                  onChange={(e) => setReason(e.currentTarget.value)}
-                  placeholder="Why?"
-                  disabled={adjustMutation.isPending}
-                />
-              </div>
-              <Button onClick={handleAdjust} disabled={adjustMutation.isPending}>
-                Apply
-              </Button>
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <p className="text-xs text-muted-foreground">
-              Use a negative amount to deduct. This adds an entry to the ledger.
-            </p>
-          </div>
+          <BalanceAdjustmentForm userId={userId} balanceId={balance.id} unit={unit}/>
 
           {/* Ledger history */}
           <div className="space-y-2">
@@ -183,7 +115,7 @@ export const BalanceDetailModal: FC<Props> = ({ isOpen, userId, balance, policy,
         </div>
 
         <div className="flex justify-end border-t border-brown-100 px-6 py-4">
-          <Button variant="outline" onClick={onCloseAction} disabled={adjustMutation.isPending}>
+          <Button variant="outline" onClick={onCloseAction}>
             Close
           </Button>
         </div>

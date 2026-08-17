@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { Card } from "@/public/desact/src/components/ui/card";
+import type { DocumentDTO, DocumentFolderDTO } from "@/api/modules/documents/dto";
 import { PersonalDocumentsBreadcrumbs } from "../PersonalDocumentsBreadcrumbs/PersonalDocumentsBreadcrumbs";
 import { PersonalDocumentsToolbar } from "../PersonalDocumentsToolbar/PersonalDocumentsToolbar";
 import { PersonalDocumentsFoldersSection } from "../PersonalDocumentsFoldersSection/PersonalDocumentsFoldersSection";
@@ -10,6 +11,8 @@ import { PersonalDocumentsFilesTable } from "../PersonalDocumentsFilesTable/Pers
 import { PersonalDocumentsEmptyState } from "../PersonalDocumentsEmptyState/PersonalDocumentsEmptyState";
 import { PersonalDocumentsSkeleton } from "../PersonalDocumentsSkeleton/PersonalDocumentsSkeleton";
 import { documentService } from "../../services/documentService/documentService";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
 import {
   usePersonalDocuments,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/usePersonalDocuments";
@@ -33,37 +36,21 @@ import {
   MoveDocumentModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/MoveDocumentModal";
 import {
-  useCreateDocumentsFolder
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useCreateDocumentsFolder";
+  RenameDocumentModal,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/RenameDocumentModal";
 import {
-  useUpdateDocumentsFolder
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useUpdateDocumentsFolder";
+  PreviewDocumentModal,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/PreviewDocumentModal";
 import {
-  useDeleteDocumentsFolder
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useDeleteDocumentsFolder";
-import {
-  useUploadPersonalDocument
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useUploadPersonalDocument";
-import {
-  useDeletePersonalDocument
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useDeletePersonalDocument";
-
+  useDocumentCategories,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 
 type PersonalDocumentsContainerProps = {
   userId: string;
 };
 
-type FolderEntity = {
-  id: string;
-  name: string;
-  documentsCount?: number;
-};
-
-type DocumentEntity = {
-  id: string;
-  name: string;
-  folderId?: string | null;
-};
+const messageOf = (error: unknown): string | null =>
+  error instanceof Error ? error.message : error ? String(error) : null;
 
 export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProps> = ({
   userId,
@@ -71,52 +58,131 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const {
     search,
     setSearch,
+    starredOnly,
+    setStarredOnly,
+    sort,
+    setSort,
     isLoading,
+    error,
     isEmpty,
     breadcrumbs,
+    currentFolderId,
     folders,
     documents,
     openFolder,
     goToBreadcrumb,
     toggleStar,
+
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    uploadFiles,
+    deleteDocument,
+    moveDocument,
+    renameDocument,
+
+    isCreatingFolder,
+    isRenamingFolder,
+    isDeletingFolder,
+    isUploadingFile,
+    isDeletingDocument,
+    isMovingDocument,
+    isRenamingDocument,
+
+    createFolderError,
+    renameFolderError,
+    deleteFolderError,
+    uploadFileError,
+    deleteDocumentError,
+    moveDocumentError,
+    renameDocumentError,
+
+    resetCreateFolder,
+    resetRenameFolder,
+    resetDeleteFolder,
+    resetUploadFile,
+    resetDeleteDocument,
+    resetMoveDocument,
+    resetRenameDocument,
   } = usePersonalDocuments({ userId });
 
-  const { mutateAsync: createFolder, isPending: isCreatingFolder } = useCreateDocumentsFolder();
-  const { mutateAsync: updateFolder, isPending: isUpdatingFolder } = useUpdateDocumentsFolder();
-  const { mutateAsync: removeFolder, isPending: isDeletingFolder } = useDeleteDocumentsFolder();
-  const { mutateAsync: uploadDocument, isPending: isUploadingDocument } = useUploadPersonalDocument();
-  const { mutateAsync: removeDocument, isPending: isDeletingDocument } = useDeletePersonalDocument();
+  const { data: categories } = useDocumentCategories();
+
+  // Mirrors what the backend allows: your own document space is always yours to manage, anyone
+  // else's needs the role permission. Pure UX — the storage authorization layer is the real gate.
+  const { data: currentUser } = useCurrentUser();
+  const isOwnSpace = currentUser?.id === userId;
+  const hasEditPermission = useCanAccess("PEOPLE.DOCUMENTS", "EDIT");
+  const hasManagePermission = useCanAccess("PEOPLE.DOCUMENTS", "MANAGE");
+  const canEdit = isOwnSpace || hasEditPermission;
+  const canManage = isOwnSpace || hasManagePermission;
 
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [addDocumentOpen, setAddDocumentOpen] = useState(false);
 
-  const [renameFolderState, setRenameFolderState] = useState<FolderEntity | null>(null);
-  const [deleteFolderState, setDeleteFolderState] = useState<FolderEntity | null>(null);
-  const [deleteDocumentState, setDeleteDocumentState] = useState<DocumentEntity | null>(null);
-  const [moveDocumentState, setMoveDocumentState] = useState<DocumentEntity | null>(null);
+  const [renameFolderState, setRenameFolderState] = useState<DocumentFolderDTO | null>(null);
+  const [deleteFolderState, setDeleteFolderState] = useState<DocumentFolderDTO | null>(null);
+  const [deleteDocumentState, setDeleteDocumentState] = useState<DocumentDTO | null>(null);
+  const [moveDocumentState, setMoveDocumentState] = useState<DocumentDTO | null>(null);
+  const [renameDocumentState, setRenameDocumentState] = useState<DocumentDTO | null>(null);
+  const [previewState, setPreviewState] = useState<DocumentDTO | null>(null);
+
+  // Dropping anywhere on the tab uploads into the folder currently open, which is what people
+  // expect from a file browser. The modal stays for picking a folder or a category explicitly.
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const dragDepth = React.useRef(0);
 
   const folderOptions = useMemo(
     () => folders.map((folder) => ({ id: folder.id, name: folder.name })),
     [folders]
   );
 
-  const currentFolderId = React.useMemo(() => {
-    const current = breadcrumbs[breadcrumbs.length - 1];
-    if (!current) return null;
-
-    if ("id" in current) {
-      return current.id ?? null;
+  // Every modal closes on success only. A rejected call (no permission, duplicate name, size limit)
+  // keeps the dialog open with the message in it, instead of looking like nothing happened.
+  const runAndClose = async (action: Promise<unknown>, close: () => void) => {
+    try {
+      await action;
+      close();
+    } catch {
+      // Surfaced through the mutation's error, rendered inside the dialog.
     }
-
-    return null;
-  }, [breadcrumbs]);
-
-  const isAnyFolderMutationLoading =
-    isCreatingFolder || isUpdatingFolder || isDeletingFolder;
+  };
 
   return (
     <>
-      <Card className="border-0 px-8 pt-8 pb-8">
+      <Card
+        className="relative border-0 px-8 pt-8 pb-8"
+        onDragEnter={(e) => {
+          if (!canEdit || !e.dataTransfer.types.includes("Files")) return;
+          dragDepth.current += 1;
+          setIsDraggingOver(true);
+        }}
+        onDragOver={(e) => {
+          if (canEdit && e.dataTransfer.types.includes("Files")) e.preventDefault();
+        }}
+        onDragLeave={() => {
+          // Dragging over a child fires leave on the parent; count depth instead of flickering.
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setIsDraggingOver(false);
+        }}
+        onDrop={(e) => {
+          if (!canEdit) return;
+          e.preventDefault();
+          dragDepth.current = 0;
+          setIsDraggingOver(false);
+
+          const dropped = Array.from(e.dataTransfer.files ?? []);
+          if (dropped.length > 0) void uploadFiles(dropped);
+        }}
+      >
+        {isDraggingOver && (
+          <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-brown-400 bg-brown-50/90">
+            <p className="font-medium text-brown-800">
+              Drop to upload into this folder
+            </p>
+          </div>
+        )}
+
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4">
             <PersonalDocumentsBreadcrumbs
@@ -127,13 +193,24 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
             <PersonalDocumentsToolbar
               search={search}
               onSearchChange={setSearch}
+              starredOnly={starredOnly}
+              onStarredOnlyChange={setStarredOnly}
               onUploadFromLocal={() => setAddDocumentOpen(true)}
               onCreateFolder={() => setCreateFolderOpen(true)}
+              canEdit={canEdit}
             />
           </div>
 
           {isLoading ? (
             <PersonalDocumentsSkeleton/>
+          ) : error ? (
+            <div className="rounded-lg border bg-white p-10 text-center">
+              <h3 className="text-lg font-medium">Documents unavailable</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You don&apos;t have access to this person&apos;s documents, or they could not be
+                loaded.
+              </p>
+            </div>
           ) : isEmpty ? (
             <PersonalDocumentsEmptyState/>
           ) : (
@@ -141,15 +218,19 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               <PersonalDocumentsFoldersSection
                 folders={folders}
                 onOpen={openFolder}
-                onRename={(folder) => setRenameFolderState(folder)}
-                onDelete={(folder) => setDeleteFolderState(folder)}
+                onRename={canEdit ? (folder) => setRenameFolderState(folder) : undefined}
+                onDelete={canManage ? (folder) => setDeleteFolderState(folder) : undefined}
               />
 
               <PersonalDocumentsFilesTable
                 documents={documents}
+                sort={sort}
+                onSortChange={setSort}
                 onToggleStar={toggleStar}
-                onDelete={(document) => setDeleteDocumentState(document)}
-                onMove={(document) => setMoveDocumentState(document)}
+                onDelete={canManage ? (document) => setDeleteDocumentState(document) : undefined}
+                onMove={canEdit ? (document) => setMoveDocumentState(document) : undefined}
+                onRename={canEdit ? (document) => setRenameDocumentState(document) : undefined}
+                onPreview={(document) => setPreviewState(document)}
                 getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
               />
             </div>
@@ -160,34 +241,35 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
       <CreateDocumentsFolderModal
         isOpen={createFolderOpen}
         isLoading={isCreatingFolder}
-        onCancelAction={() => setCreateFolderOpen(false)}
-        onConfirmAction={async ({ name }) => {
-          const payload = {
-            userId,
-            name,
-            parentId: currentFolderId ?? null,
-          };
-
-          await createFolder(payload);
+        errorMessage={messageOf(createFolderError)}
+        onCancelAction={() => {
           setCreateFolderOpen(false);
+          resetCreateFolder();
         }}
+        onConfirmAction={({ name }) =>
+          runAndClose(createFolder(name), () => {
+            setCreateFolderOpen(false);
+            resetCreateFolder();
+          })
+        }
       />
 
       <RenameDocumentsFolderModal
         isOpen={!!renameFolderState}
-        isLoading={isUpdatingFolder}
+        isLoading={isRenamingFolder}
         folderName={renameFolderState?.name}
-        onCancelAction={() => setRenameFolderState(null)}
-        onConfirmAction={async ({ name }) => {
+        errorMessage={messageOf(renameFolderError)}
+        onCancelAction={() => {
+          setRenameFolderState(null);
+          resetRenameFolder();
+        }}
+        onConfirmAction={({ name }) => {
           if (!renameFolderState) return;
 
-          await updateFolder({
-            userId,
-            folderId: renameFolderState.id,
-            name,
+          void runAndClose(renameFolder(renameFolderState.id, name), () => {
+            setRenameFolderState(null);
+            resetRenameFolder();
           });
-
-          setRenameFolderState(null);
         }}
       />
 
@@ -195,72 +277,104 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isOpen={!!deleteFolderState}
         isLoading={isDeletingFolder}
         folderName={deleteFolderState?.name}
-        documentsCount={deleteFolderState?.documentsCount ?? 0}
-        onRequestCloseAction={() => setDeleteFolderState(null)}
-        onConfirmAction={async () => {
+        errorMessage={messageOf(deleteFolderError)}
+        onRequestCloseAction={() => {
+          setDeleteFolderState(null);
+          resetDeleteFolder();
+        }}
+        onConfirmAction={() => {
           if (!deleteFolderState) return;
 
-          await removeFolder({
-            userId,
-            folderId: deleteFolderState,
+          void runAndClose(deleteFolder(deleteFolderState.id), () => {
+            setDeleteFolderState(null);
+            resetDeleteFolder();
           });
-
-          setDeleteFolderState(null);
         }}
       />
 
       <UploadDocumentModal
         isOpen={addDocumentOpen}
-        isLoading={isUploadingDocument}
+        isLoading={isUploadingFile}
         folders={folderOptions}
+        categories={categories?.filter((c) => c.isActive)}
         defaultFolderId={currentFolderId ?? undefined}
-        onCancelAction={() => setAddDocumentOpen(false)}
-        onConfirmAction={async ({ file, folderId }) => {
-          await uploadDocument({
-            userId,
-            file,
-            folderId: folderId ?? null,
-            categoryId: null,
-          });
-
+        errorMessage={messageOf(uploadFileError)}
+        onCancelAction={() => {
           setAddDocumentOpen(false);
+          resetUploadFile();
         }}
+        onConfirmAction={({ files, folderId, categoryId }) =>
+          runAndClose(uploadFiles(files, folderId ?? null, categoryId ?? null), () => {
+            setAddDocumentOpen(false);
+            resetUploadFile();
+          })
+        }
       />
 
       <DeleteDocumentModal
         isOpen={!!deleteDocumentState}
         isLoading={isDeletingDocument}
         documentName={deleteDocumentState?.name}
-        onRequestCloseAction={() => setDeleteDocumentState(null)}
-        onConfirmAction={async () => {
+        errorMessage={messageOf(deleteDocumentError)}
+        onRequestCloseAction={() => {
+          setDeleteDocumentState(null);
+          resetDeleteDocument();
+        }}
+        onConfirmAction={() => {
           if (!deleteDocumentState) return;
 
-          await removeDocument({
-            documentId: deleteDocumentState,
+          void runAndClose(deleteDocument(deleteDocumentState.id), () => {
+            setDeleteDocumentState(null);
+            resetDeleteDocument();
           });
-
-          setDeleteDocumentState(null);
         }}
       />
 
       <MoveDocumentModal
         isOpen={!!moveDocumentState}
-        isLoading={false}
+        isLoading={isMovingDocument}
         documentName={moveDocumentState?.name}
         folders={folderOptions}
         currentFolderId={moveDocumentState?.folderId ?? undefined}
-        onCancelAction={() => setMoveDocumentState(null)}
-        onConfirmAction={async ({ folderId }) => {
+        errorMessage={messageOf(moveDocumentError)}
+        onCancelAction={() => {
+          setMoveDocumentState(null);
+          resetMoveDocument();
+        }}
+        onConfirmAction={({ folderId }) => {
           if (!moveDocumentState) return;
 
-          console.log("Need move document hook here:", {
-            userId,
-            documentId: moveDocumentState.id,
-            folderId,
+          void runAndClose(moveDocument(moveDocumentState.id, folderId ?? null), () => {
+            setMoveDocumentState(null);
+            resetMoveDocument();
           });
-
-          setMoveDocumentState(null);
         }}
+      />
+
+      <RenameDocumentModal
+        isOpen={!!renameDocumentState}
+        isLoading={isRenamingDocument}
+        documentName={renameDocumentState?.name}
+        errorMessage={messageOf(renameDocumentError)}
+        onCancelAction={() => {
+          setRenameDocumentState(null);
+          resetRenameDocument();
+        }}
+        onConfirmAction={(name) => {
+          if (!renameDocumentState) return;
+
+          void runAndClose(renameDocument(renameDocumentState.id, name), () => {
+            setRenameDocumentState(null);
+            resetRenameDocument();
+          });
+        }}
+      />
+
+      <PreviewDocumentModal
+        isOpen={!!previewState}
+        document={previewState}
+        getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
+        onCloseAction={() => setPreviewState(null)}
       />
     </>
   );

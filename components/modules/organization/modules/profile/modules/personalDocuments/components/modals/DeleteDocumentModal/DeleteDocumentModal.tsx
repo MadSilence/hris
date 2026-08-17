@@ -17,6 +17,8 @@ export interface DeleteDocumentModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   documentName?: string;
+  /** Kept in the dialog rather than the console — a failed delete is otherwise silent. */
+  errorMessage?: string | null;
   onRequestCloseAction: () => void;
   onConfirmAction: () => void;
 }
@@ -25,6 +27,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
   isOpen,
   isLoading = false,
   documentName,
+  errorMessage,
   onRequestCloseAction,
   onConfirmAction,
 }) => {
@@ -61,6 +64,8 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
             </div>
           </div>
         </div>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

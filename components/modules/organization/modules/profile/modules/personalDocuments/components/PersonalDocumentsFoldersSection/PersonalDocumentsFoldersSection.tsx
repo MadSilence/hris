@@ -6,7 +6,7 @@ type PersonalDocumentsFoldersSectionProps = {
   folders: DocumentFolderDTO[];
   onOpen: (folder: DocumentFolderDTO) => void;
   onRename?: (folder: DocumentFolderDTO) => void;
-  onDelete?: (folderId: string) => Promise<void> | void;
+  onDelete?: (folder: DocumentFolderDTO) => void;
 };
 
 export const PersonalDocumentsFoldersSection: React.FC<PersonalDocumentsFoldersSectionProps> = ({

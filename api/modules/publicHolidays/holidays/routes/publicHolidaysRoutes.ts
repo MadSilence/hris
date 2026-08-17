@@ -7,6 +7,7 @@ export class PublicHolidaysRoutes {
     const data = await hrisPublicHolidaysService.create(calendarId, {
       name: body.name,
       holidayDate: body.holidayDate,
+      endDate: body.endDate ?? body.holidayDate,
     });
 
     return Response.json(data);
@@ -28,6 +29,7 @@ export class PublicHolidaysRoutes {
     const data = await hrisPublicHolidaysService.update(id, {
       name: body.name,
       holidayDate: body.holidayDate,
+      endDate: body.endDate ?? body.holidayDate,
     });
 
     return Response.json(data);

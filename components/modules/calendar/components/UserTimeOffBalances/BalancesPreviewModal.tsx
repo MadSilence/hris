@@ -16,9 +16,12 @@ import { cn } from "@/public/desact/src/components/ui/utils";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { BalanceLedger } from "./BalanceLedger";
+import { BalanceAdjustmentForm } from "./BalanceAdjustmentForm";
+import { useCanAccess } from "@/components/auth/useAccess";
 
 type Props = {
   isOpen: boolean;
+  userId: string;
   balances: EmployeeTimeOffBalance[];
   policyMap: Map<string, TimeOffPolicy>;
   onCloseAction: () => void;
@@ -80,8 +83,16 @@ const BalanceItem: FC<{
  * deduction ledger of the selected policy on the right. Re-homes the balances + history that used to
  * live inline on the tab, now behind a toolbar button.
  */
-export const BalancesPreviewModal: FC<Props> = ({ isOpen, balances, policyMap, onCloseAction }) => {
+export const BalancesPreviewModal: FC<Props> = ({
+  isOpen,
+  userId,
+  balances,
+  policyMap,
+  onCloseAction,
+}) => {
   const [selectedId, setSelectedId] = useState(balances[0]?.id ?? "");
+  // Crediting or deducting days by hand is a MANAGE action — same gate the endpoint applies.
+  const canAdjust = useCanAccess("PEOPLE.TIME_OFF", "MANAGE");
 
   const selected = useMemo(
     () => balances.find((b) => b.id === selectedId) ?? balances[0],
@@ -133,6 +144,16 @@ export const BalancesPreviewModal: FC<Props> = ({ isOpen, balances, policyMap, o
                       : `${fmt(selected.currentBalance)} ${unit} left of ${fmt(grantedOf(selected))} · ${selected.year}`}
                   </p>
                 </div>
+                {canAdjust && (
+                  <div className="mb-4">
+                    <BalanceAdjustmentForm
+                      userId={userId}
+                      balanceId={selected.id}
+                      unit={unit}
+                    />
+                  </div>
+                )}
+
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">History</p>
                 <BalanceLedger balanceId={selected.id} />
               </>

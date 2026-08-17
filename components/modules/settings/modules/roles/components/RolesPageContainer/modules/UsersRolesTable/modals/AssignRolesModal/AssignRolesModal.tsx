@@ -3,18 +3,18 @@
 import { FC, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Role } from "@/models/role/Role";
-import { UsersSearchItemDTO } from "@/models/user/fields";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   AssignRolesForm,
-  AssignRolesFormValues
+  AssignRolesFormValues,
+  AssignRolesTarget
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesForm";
 
 export interface AssignRolesModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   errorMessage?: string;
-  user: UsersSearchItemDTO | null;
+  user: AssignRolesTarget | null;
   allRoles: Role[];
   onCancelAction: () => void;
   onApplyAction: (userId: string, roleIds: string[]) => void | Promise<void>;

@@ -9,15 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/compone
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { Button } from "@/public/desact/src/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
 import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Ellipsis, Pencil, RefreshCw, Share2 } from "lucide-react";
+import { Pencil, RefreshCw } from "lucide-react";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 import {
   UpdateUserAvatarModal,
@@ -27,21 +22,15 @@ import { useUploadUserAvatar } from "@/components/modules/organization/modules/p
 import { useDeleteUserAvatar } from "@/components/modules/organization/modules/profile/hooks/useDeleteUserAvatar";
 
 export type UserDataHeaderProps = {
-  userId?: string;
+  userId: string;
   user?: User;
-  editing?: boolean;
-  onToggleEdit?: () => void;
 };
 
-export function UserDataHeader({
-  userId,
-  user: userProp,
-  editing = false,
-  onToggleEdit,
-}: UserDataHeaderProps) {
-  const resolvedUserId = userId ?? userProp?.id;
-  const { data: userFetched } = useUserSafe(resolvedUserId);
+export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) {
+  const { data: userFetched } = useUser(userId);
   const user = userFetched ?? userProp;
+
+  const { data: currentUser } = useCurrentUser();
 
   const localAvatarUrlRef = useRef<string | null>(null);
 
@@ -126,7 +115,7 @@ export function UserDataHeader({
   }
 
   const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
-  const meta = normalizeCustom(user.custom);
+  const isOwnProfile = currentUser?.id === user.id;
 
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
@@ -145,20 +134,30 @@ export function UserDataHeader({
               </AvatarFallback>
             </Avatar>
 
-            <Button
-              size="icon"
-              variant="outline"
-              className="absolute right-1 bottom-1 rounded-full"
-              aria-label="Edit photo"
-              disabled={isAvatarLoading}
-              onClick={() => setIsAvatarModalOpen(true)}
+            {/* Own photo is always editable; someone else's needs profile EDIT. */}
+            <PermissionGate
+              resource={isOwnProfile ? undefined : "PEOPLE.PROFILE"}
+              action="EDIT"
             >
-              <Pencil className="w-4 h-4"/>
-            </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                className="absolute right-1 bottom-1 rounded-full"
+                aria-label="Edit photo"
+                disabled={isAvatarLoading}
+                onClick={() => setIsAvatarModalOpen(true)}
+              >
+                <Pencil className="w-4 h-4"/>
+              </Button>
+            </PermissionGate>
           </div>
 
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold leading-tight text-foreground">{fullName}</h1>
+
+            {user.email && (
+              <p className="mt-1 truncate text-sm text-muted-foreground">{user.email}</p>
+            )}
 
             <div className="flex items-center gap-3 flex-wrap mt-3">
               {user.status && (
@@ -173,60 +172,37 @@ export function UserDataHeader({
                   {formatUserStatus(user.status)}
                 </Badge>
               )}
-              {meta.jobTitle && <Badge variant="outline">{meta.jobTitle}</Badge>}
 
-              {(meta.department || meta.orgUnit) && (
-                <Badge variant="outline">{meta.department ?? meta.orgUnit}</Badge>
+              {user.jobName && <Badge variant="outline">{user.jobName}</Badge>}
+
+              {user.department?.name && (
+                <Badge variant="outline">{user.department.name}</Badge>
               )}
 
-              {meta.workMode && <Badge variant="outline">{meta.workMode}</Badge>}
-
-              {(meta.country || meta.location) && (
-                <Badge variant="outline">
-                  {meta.location ? `${meta.location}` : null}
-                  {meta.location && meta.country ? " · " : ""}
-                  {meta.country ?? ""}
-                </Badge>
-              )}
+              {user.office?.name && <Badge variant="outline">{user.office.name}</Badge>}
             </div>
           </div>
 
+          {/*
+            Impersonation is the only header action that is actually wired. The rest of what used to
+            live here (Share, Manage account, Set a reminder, Schedule leave, Terminate employment,
+            Delete profile) had no handlers at all — they come back one by one as their features land.
+          */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Login as user"
-              disabled={!user.id || startImpersonation.isPending}
-              onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
-            >
-              <RefreshCw className="w-4 h-4"/>
-            </Button>
-
-            <Button variant="outline" size="icon" aria-label="Share">
-              <Share2 className="w-4 h-4"/>
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="More actions">
-                  <Ellipsis className="w-4 h-4"/>
+            {!isOwnProfile && (
+              <PermissionGate resource="SETTINGS.IMPERSONATION" action="MANAGE">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Login as user"
+                  title="Login as user"
+                  disabled={startImpersonation.isPending}
+                  onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
+                >
+                  <RefreshCw className="w-4 h-4"/>
                 </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={onToggleEdit}>
-                  {editing ? "Exit edit mode" : "Edit profile"}
-                </DropdownMenuItem>
-                <DropdownMenuItem>Manage account</DropdownMenuItem>
-                <DropdownMenuItem>Set a reminder</DropdownMenuItem>
-                <DropdownMenuItem>Schedule leave</DropdownMenuItem>
-                <DropdownMenuItem>Terminate employment</DropdownMenuItem>
-                <DropdownMenuSeparator/>
-                <DropdownMenuItem className="text-red-600">
-                  Delete profile
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PermissionGate>
+            )}
           </div>
         </div>
 
@@ -243,38 +219,6 @@ export function UserDataHeader({
       />
     </div>
   );
-}
-
-function useUserSafe(userId?: string) {
-  try {
-    return userId ? useUser(userId) : { data: undefined };
-  } catch {
-    return { data: undefined as User | undefined };
-  }
-}
-
-type CustomMeta = {
-  avatarUrl?: string | null;
-  jobTitle?: string | null;
-  department?: string | null;
-  orgUnit?: string | null;
-  location?: string | null;
-  country?: string | null;
-  workMode?: string | null;
-};
-
-function normalizeCustom(custom: any): CustomMeta {
-  const c = (custom ?? {}) as CustomMeta;
-
-  return {
-    avatarUrl: c.avatarUrl ?? null,
-    jobTitle: c.jobTitle ?? null,
-    department: c.department ?? null,
-    orgUnit: c.orgUnit ?? null,
-    location: c.location ?? null,
-    country: c.country ?? null,
-    workMode: c.workMode ?? null,
-  };
 }
 
 function initialsOf(name: string) {

@@ -19,5 +19,10 @@ export enum AttributeType {
   OBJECT = "OBJECT",
   ADDRESS = "ADDRESS",
   MONEY = "MONEY",
+  /**
+   * A pointer to another entity (office, department, job, person…). System fields only — see
+   * ATTRIBUTE_TYPES_CREATABLE: a custom attribute cannot be a REFERENCE.
+   */
+  REFERENCE = "REFERENCE",
 }
 

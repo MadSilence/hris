@@ -4,3 +4,4 @@ export * from "./documentsSearch";
 export * from "./getDocumentFileIcon"
 export * from "./formatDocumentDate";
 export * from "./formatBytes";
+export * from "./isPreviewable";

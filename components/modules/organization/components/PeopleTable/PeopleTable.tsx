@@ -28,8 +28,19 @@ type Row = {
   employmentType?: string | null;
   probationEnd?: string | null;
   terminationDate?: string | null;
+  // Org references. The search response has always carried these; until now nothing rendered them.
+  jobName?: string | null;
+  department?: Ref | null;
+  teams?: Ref[];
+  office?: Ref | null;
+  legalEntity?: Ref | null;
+  manager?: Ref | null;
+  calendars?: { id: string; name: string; year?: number }[];
+  roles?: Ref[];
   custom?: Record<string, unknown>;
 };
+
+type Ref = { id: string; name: string };
 
 type ColumnItem = {
   id: string;
@@ -153,6 +164,36 @@ export default function PeopleTable({
           return <span className="text-muted-foreground">{formatDate(row.probationEnd)}</span>;
         case "termination_date":
           return <span className="text-muted-foreground">{formatDate(row.terminationDate)}</span>;
+
+        // ── References to other entities ────────────────────────────────────────────────
+        case "job":
+          return <span>{row.jobName || "—"}</span>;
+        case "department":
+          return <RefValue value={row.department} />;
+        case "office":
+          return <RefValue value={row.office} />;
+        case "legal_entity":
+          return <RefValue value={row.legalEntity} />;
+        case "team":
+          return <RefList values={row.teams} />;
+        case "role":
+          return <RefList values={row.roles} />;
+        case "calendar":
+          return (
+            <RefList
+              values={row.calendars?.map((c) => ({
+                id: c.id,
+                name: c.year ? `${c.name} · ${c.year}` : c.name,
+              }))}
+            />
+          );
+        case "manager":
+          return row.manager ? (
+            <UserChip id={row.manager.id} name={row.manager.name} />
+          ) : (
+            <span>—</span>
+          );
+
         default:
           return <span>—</span>;
       }
@@ -215,7 +256,7 @@ export default function PeopleTable({
 
             {visibleColumns.map((column) => {
               const sysKey = sysKeyFromId(column.id);
-              const isSortable = !!sysKey;
+              const isSortable = !!sysKey && SORTABLE_SYS_KEYS.has(sysKey);
               const isActive = !!active && !!sysKey && active.fieldId === sysKey;
 
               return (
@@ -322,10 +363,47 @@ const EmptyState: React.FC = () => (
   </div>
 );
 
+/**
+ * Columns the backend can actually order by (`UserRepositoryImpl.searchUsersKeysetWithFilters`).
+ * Anything else would be accepted by the API and silently fall back to last_name, so its header
+ * stays inert rather than pretending. Extend together with the backend sort switch.
+ */
+const SORTABLE_SYS_KEYS = new Set([
+  "first_name",
+  "last_name",
+  "email",
+  "status",
+  "created_at",
+  "updated_at",
+  "hire_date",
+  "employment_type",
+  "probation_end",
+  "termination_date",
+]);
+
 function sysKeyFromId(id: string): string | null {
   if (!id.startsWith("sys:")) return null;
   return id.slice(4) || null;
 }
+
+/** A single-valued reference (office, department, legal entity). */
+const RefValue: React.FC<{ value?: Ref | null }> = ({ value }) =>
+  value ? <span>{value.name}</span> : <span>—</span>;
+
+/** A multi-valued reference (teams, roles, calendars) — chips, so a long list stays scannable. */
+const RefList: React.FC<{ values?: Ref[] }> = ({ values }) => {
+  if (!values?.length) return <span>—</span>;
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {values.map((v) => (
+        <Badge key={v.id} variant="secondary" className="font-normal">
+          {v.name}
+        </Badge>
+      ))}
+    </div>
+  );
+};
 
 function valueToString(v: unknown): string | null {
   if (v == null) return null;

@@ -11,6 +11,8 @@ import {
 export interface CreateDocumentsFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
+  /** Kept in the dialog rather than the console — a failed create is otherwise silent. */
+  errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: CreateDocumentsFolderFormValues) => void;
 }
@@ -20,6 +22,7 @@ export const CreateDocumentsFolderModal: FC<
 > = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -57,6 +60,8 @@ export const CreateDocumentsFolderModal: FC<
               Create a new folder to organize personal documents.
             </DialogDescription>
           </DialogHeader>
+
+          {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
           <CreateDocumentsFolderForm
             isLoading={isLoading}

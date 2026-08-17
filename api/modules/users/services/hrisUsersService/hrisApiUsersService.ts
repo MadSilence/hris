@@ -1,5 +1,5 @@
 import { User } from "@/models/user/User";
-import { hrisApiUsersClient } from "@/api/modules/users/clients/hrisApiUsersClient";
+import { hrisApiUsersClient, UpdateUserPayload } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
@@ -31,6 +31,10 @@ export class HrisApiUsersService {
 
   public async getUser(id: string): Promise<User> {
     return hrisApiUsersClient.getUser(id);
+  }
+
+  public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
+    return hrisApiUsersClient.updateUser(id, payload);
   }
 
   public async updateUserAttributes(

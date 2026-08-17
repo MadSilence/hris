@@ -38,6 +38,8 @@ export const getAttributeTypeLabel = (attributeType: AttributeType): string => {
       return "Address";
     case AttributeType.MONEY:
       return "Money";
+    case AttributeType.REFERENCE:
+      return "Reference";
     default:
       return String(attributeType);
   }

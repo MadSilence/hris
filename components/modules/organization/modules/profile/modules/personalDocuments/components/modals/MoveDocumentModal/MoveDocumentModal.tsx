@@ -14,6 +14,8 @@ export interface MoveDocumentModalProps {
   documentName?: string;
   folders: MoveDocumentFolderOption[];
   currentFolderId?: string;
+  /** Kept in the dialog rather than the console — a rejected move is otherwise silent. */
+  errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: MoveDocumentFormValues) => void;
 }
@@ -24,6 +26,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
   documentName,
   folders,
   currentFolderId,
+  errorMessage,
   onCancelAction,
   onConfirmAction,
 }) => {
@@ -48,6 +51,8 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
             folder.
           </DialogDescription>
         </DialogHeader>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <MoveDocumentForm
           isLoading={isLoading}

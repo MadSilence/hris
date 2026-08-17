@@ -3,8 +3,11 @@ import {
   CreateDocumentFolderRequest,
   DocumentDTO,
   DocumentFolderContentDTO,
+  DocumentCategoryDTO,
   DocumentFolderDTO,
+  MoveDocumentRequest,
   RenameDocumentFolderRequest,
+  RenameDocumentRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import { documentMapper } from "@/api/modules/documents/mappers/documentMapper";
@@ -67,6 +70,24 @@ export class HrisApiDocumentsClient {
 
   public async deleteDocument(documentId: string): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/delete`);
+  }
+
+  public async moveDocument(
+    documentId: string,
+    body: MoveDocumentRequest
+  ): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/move`, body);
+  }
+
+  public async renameDocument(
+    documentId: string,
+    body: RenameDocumentRequest
+  ): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/rename`, body);
+  }
+
+  public async getCategories(): Promise<DocumentCategoryDTO[]> {
+    return hrisApiClient.get<DocumentCategoryDTO[]>(`${this.BASE_PATH}/categories`);
   }
 
   public async downloadDocument(documentId: string): Promise<Response> {

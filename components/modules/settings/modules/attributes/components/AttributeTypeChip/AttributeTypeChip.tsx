@@ -12,6 +12,7 @@ import {
   Hash,
   Languages,
   Link,
+  Link2,
   List,
   ListChecks,
   Mail,
@@ -45,6 +46,7 @@ const TYPE_ICONS: Record<AttributeType, FC<{ className?: string }>> = {
   [AttributeType.OBJECT]: Boxes,
   [AttributeType.ADDRESS]: MapPin,
   [AttributeType.MONEY]: Coins,
+  [AttributeType.REFERENCE]: Link2,
 };
 
 /** Attribute type shown as a chip — mirrors the leave-type category chip (icon + soft outline). */

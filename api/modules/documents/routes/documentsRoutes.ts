@@ -48,6 +48,11 @@ export class DocumentsRoutes {
     return new Response(null, { status: 204 });
   }
 
+  public async getCategories() {
+    const data = await hrisDocumentsService.getCategories();
+    return Response.json(data);
+  }
+
   public async downloadDocument(_req: Request, documentId: string) {
     const backendResponse = await hrisDocumentsService.downloadDocument(documentId);
 

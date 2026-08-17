@@ -3,13 +3,20 @@
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import { AttributeType } from "@/models/attribute/AttributeType";
+import { hasDefaultValueSupport } from "@/models/attribute";
 import { PersonalInfoSidebar } from "./components/PersonalInfoSidebar";
 import { PersonalInfoAttributesList } from "./components/PersonalInfoAttributesList";
+import {
+  SystemFieldGroup,
+  PROFILE_HIDDEN_SYSTEM_FIELDS,
+} from "./components/SystemFieldGroup";
 import { User } from "@/models/user/User";
+import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
+import { useCanAccess } from "@/components/auth/useAccess";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
 import { useActiveSectionScroll } from "@/components/modules/organization/modules/profile/hooks/useActiveSectionScroll";
+import { useProfileEditGuard } from "@/components/modules/organization/modules/profile/context/ProfileEditGuard";
 import { Loader } from "@/components/ui/Loader";
 import { Card } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -22,6 +29,8 @@ type PersonalInfoContainerProps = { user?: User };
 export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ user }) => {
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
   const { data: fetchedGroups, isLoading, error } = useAttributeGroups();
+  const { data: catalogue } = useUserFields();
+  const canEditProfile = useCanAccess("PEOPLE.PROFILE", "EDIT");
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,6 +41,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   const [draftValues, setDraftValues] = useState<Record<string, unknown>>({});
 
   const { mutate } = useSWRConfig();
+  const { setDirty: setGuardDirty } = useProfileEditGuard();
 
   useEffect(() => {
     if (!fetchedGroups) return;
@@ -107,18 +117,13 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   const hasErrors = Object.keys(fieldErrors).length > 0;
 
   // Prefill empty, editable, default-capable fields with their configured default on edit.
+  // The capable set comes from the same helper the attribute editor uses, so a type that offers a
+  // default in settings always applies it here (PHONE used to be offered but never applied).
   const applyDefaults = (base: Record<string, unknown>): Record<string, unknown> => {
-    const capable = new Set<AttributeType>([
-      AttributeType.TEXT,
-      AttributeType.EMAIL,
-      AttributeType.URL,
-      AttributeType.NUMBER,
-      AttributeType.DATE,
-    ]);
     const next = { ...base };
     for (const g of groups) {
       for (const a of g.attributes) {
-        if (!editableAttrIds.has(a.id) || !capable.has(a.type)) continue;
+        if (!editableAttrIds.has(a.id) || !hasDefaultValueSupport(a.type)) continue;
         const dv = a.defaultValue;
         if (dv == null || dv === "") continue;
         const cur = next[a.id];
@@ -128,7 +133,34 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return next;
   };
 
-  const sectionIds = visibleGroups.map((g) => g.id);
+  // System groups come from the field registry, in the order it declares; custom groups follow.
+  // Nothing about them is hardcoded here, so registering a field on the backend shows it up here.
+  const systemGroups = useMemo(() => {
+    const systemFields = (catalogue ?? [])
+      .filter((f) => f.isSystem && !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id));
+
+    const byGroup = new Map<string, typeof systemFields>();
+    for (const field of systemFields) {
+      const key = field.group ?? "Other";
+      byGroup.set(key, [...(byGroup.get(key) ?? []), field]);
+    }
+
+    return [...byGroup.entries()].map(([name, fields]) => ({
+      id: `sys-group:${name}`,
+      name,
+      fields,
+    }));
+  }, [catalogue]);
+
+  const sections = useMemo(
+    () => [
+      ...systemGroups.map((g) => ({ id: g.id, name: g.name })),
+      ...visibleGroups.map((g) => ({ id: g.id, name: g.name })),
+    ],
+    [systemGroups, visibleGroups]
+  );
+
+  const sectionIds = sections.map((s) => s.id);
   const { activeId, registerSection, scrollToId } = useActiveSectionScroll({
     containerRef: scrollContainerRef,
     sectionIds,
@@ -151,6 +183,27 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     }
     return false;
   }, [initialValues, draftValues]);
+
+  // Two ways to lose a draft: leaving the app (beforeunload) and switching profile tabs, which the
+  // App Router cannot block — hence the shared guard the tab bar reads.
+  const hasUnsavedDraft = isEdit && dirty;
+
+  useEffect(() => {
+    setGuardDirty(hasUnsavedDraft);
+    return () => setGuardDirty(false);
+  }, [hasUnsavedDraft, setGuardDirty]);
+
+  useEffect(() => {
+    if (!hasUnsavedDraft) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [hasUnsavedDraft]);
 
   const onEditToggle = () => {
     setSaveError(null);
@@ -204,32 +257,49 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     );
   }
 
-  if (error || !groups.length || !visibleGroups.length) {
-    const message = error
-      ? "Failed to load"
-      : !groups.length
-        ? "No groups"
-        : "No attributes you can view";
+  if (error) {
     return (
       <Card className="p-6">
-        <div className={`text-sm ${error ? "text-red-600" : "text-muted-foreground"}`}>
-          {message}
-        </div>
+        <div className="text-sm text-red-600">Failed to load</div>
       </Card>
     );
   }
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Loader/>
+      </div>
+    );
+  }
+
+  // Three different silences that used to look identical: nothing configured yet, configured but
+  // not visible to this reader, and everything fine.
+  const attributesNotice = !groups.length
+    ? "No custom fields have been set up for this company yet."
+    : !visibleGroups.length
+      ? "You don't have access to any of this person's custom fields."
+      : null;
+
   return (
     <div className="grid h-full min-h-0 w-full grid-cols-[260px_1fr] gap-7 bg-background">
         <PersonalInfoSidebar
-          groups={visibleGroups}
-          activeId={activeId || visibleGroups[0]?.id}
+          sections={sections}
+          activeId={activeId || sections[0]?.id}
           onSelect={(id) => scrollToId(id)}
         />
 
         <PersonalInfoAttributesList
           ref={scrollContainerRef}
           groups={visibleGroups}
+          leadingSections={systemGroups.map((g) => ({
+            id: g.id,
+            title: g.name,
+            content: (
+              <SystemFieldGroup user={user} fields={g.fields} canEdit={canEditProfile}/>
+            ),
+          }))}
+          attributesNotice={attributesNotice}
           valueMap={isEdit ? draftValues : initialValues}
           registerSection={registerSection}
           isEdit={isEdit}

@@ -10,7 +10,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 
 import {
-  ALL_ATTRIBUTE_TYPES,
+  ATTRIBUTE_TYPES_CREATABLE,
   AttributeOption,
   AttributeType,
   isOptionsType,
@@ -93,7 +93,7 @@ const buildSchema = (existingNames: string[]) => {
     ),
   type: yup
     .mixed<AttributeType>()
-    .oneOf(ALL_ATTRIBUTE_TYPES)
+    .oneOf(ATTRIBUTE_TYPES_CREATABLE)
     .required("Select attribute type."),
   unique: yup.boolean().required(),
   sensitive: yup.boolean().required(),
