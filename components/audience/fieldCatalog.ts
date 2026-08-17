@@ -179,7 +179,13 @@ export function buildAudienceFields(
   canViewResource?: (resource: ResourceCode) => boolean,
 ): AudienceField[] {
   return (fields ?? [])
-    .filter((field) => field.isSystem || (field.viewScopes ?? []).includes("COMPANY"))
+    // Filtering scans the whole company, so the caller needs COMPANY-scope visibility. Identity
+    // fields are non-configurable and always available.
+    .filter(
+      (field) =>
+        (field.isSystem && field.configurable === false) ||
+        (field.viewScopes ?? []).includes("COMPANY"),
+    )
     .filter(isFilterableField)
     .filter((field) => {
       if (!canViewResource || !isReferenceField(field)) return true;

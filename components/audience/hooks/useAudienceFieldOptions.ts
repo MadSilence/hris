@@ -1,45 +1,31 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import type { AudienceValueSource } from "@/components/audience/fieldCatalog";
-import type { OptionDTO } from "@/models/user/fields";
+import type { OptionDTO, ReferenceValueSource } from "@/models/user/fields";
+import {
+  REFERENCE_ENDPOINTS,
+  useReferenceOptions,
+} from "@/components/hooks/useReferenceOptions";
 
 export type AudienceOption = { id: string; label: string };
 
-// Sources backed by a flat reference endpoint returning { id, name, year? }.
-// The chosen option's id (a UUID) is what the segment filter matches on.
-// `people` is absent on purpose: the value editor renders a searchable people-picker instead of
-// loading every employee into a dropdown.
-const REMOTE_ENDPOINTS: Partial<Record<AudienceValueSource, string>> = {
-  departments: "/departments",
-  teams: "/teams",
-  offices: "/office",
-  legalEntities: "/legal-entity",
-  calendars: "/public-holiday/calendars",
-  jobs: "/jobs",
-  roles: "/roles",
-};
+const isReferenceSource = (source: AudienceValueSource): source is ReferenceValueSource =>
+  source in REFERENCE_ENDPOINTS || source === "people";
 
-type RefRow = { id: string; name: string; year?: number };
-
-// Normalises the value options for a picked field's source to { id, label }.
-// - status / attributeOptions are resolved locally (no request);
-// - org sources hit their flat endpoint;
-// - freeText/number/date/jobs have no option list (picker falls back to a raw input).
+/**
+ * Normalises the value options for a picked field's source to { id, label }.
+ * - attributeOptions resolve locally (no request);
+ * - reference catalogues go through the shared `useReferenceOptions`;
+ * - freeText/number/date and `people` have no option list — the picker falls back to an input or,
+ *   for people, to a searchable picker rendered by the value editor.
+ */
 export function useAudienceFieldOptions(
   source: AudienceValueSource,
   attributeOptions?: OptionDTO[] | null,
 ) {
-  const { internalApiClient } = useAppDataContext();
-  const endpoint = REMOTE_ENDPOINTS[source];
-
-  const query = useQuery<RefRow[]>({
-    queryKey: ["AUDIENCE_OPTIONS", source],
-    enabled: Boolean(endpoint),
-    staleTime: 5 * 60 * 1000,
-    queryFn: () => internalApiClient.get<RefRow[]>(endpoint as string),
-  });
+  const referenceSource = isReferenceSource(source) ? source : undefined;
+  const { options: referenceOptions, isLoading, hasEndpoint } =
+    useReferenceOptions(referenceSource);
 
   if (source === "attributeOptions") {
     // Backend matches attr filters on the option's value string, not its id. Enum-like system
@@ -48,14 +34,9 @@ export function useAudienceFieldOptions(
     return { options, isLoading: false, hasOptions: true };
   }
 
-  if (!endpoint) {
+  if (!hasEndpoint) {
     return { options: [] as AudienceOption[], isLoading: false, hasOptions: false };
   }
 
-  const options: AudienceOption[] = (query.data ?? []).map((r) => ({
-    id: r.id,
-    label: r.year != null ? `${r.name} (${r.year})` : r.name,
-  }));
-
-  return { options, isLoading: query.isLoading, hasOptions: true };
+  return { options: referenceOptions, isLoading, hasOptions: true };
 }

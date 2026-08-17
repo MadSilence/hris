@@ -35,8 +35,10 @@ type SortState = { fieldId: string; dir: SortDir } | null;
 
 const DEFAULT_ON = new Set(["sys:first_name", "sys:status", "sys:email", "sys:created_at", "sys:updated_at"]);
 
+// A column shows the value for everyone in the list, so it needs COMPANY-scope visibility.
+// Non-configurable system fields (identity) bypass field access entirely — see FieldRegistry.
 const isColumnVisible = (f: FieldDTO): boolean =>
-  f.isSystem || (f.viewScopes ?? []).includes("COMPANY");
+  (f.isSystem && f.configurable === false) || (f.viewScopes ?? []).includes("COMPANY");
 
 const PeopleTableContainer: React.FC = () => {
   const [sort, setSort] = useState<SortState>({ fieldId: "last_name", dir: "asc" });

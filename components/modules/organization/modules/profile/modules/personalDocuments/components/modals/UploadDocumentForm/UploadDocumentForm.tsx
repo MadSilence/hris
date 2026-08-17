@@ -8,6 +8,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { formatBytes } from "../../../utils/formatBytes";
+import type { DocumentVisibility } from "@/api/modules/documents/dto";
 
 export type FolderOption = {
   id: string;
@@ -23,6 +24,7 @@ export type UploadDocumentFormValues = {
   files: File[];
   folderId?: string;
   categoryId?: string;
+  visibility: DocumentVisibility;
 };
 
 export interface UploadDocumentFormProps {
@@ -30,6 +32,8 @@ export interface UploadDocumentFormProps {
   folders: FolderOption[];
   categories?: CategoryOption[];
   defaultFolderId?: string;
+  /** Own space defaults to employee-visible; filing into someone else's defaults to HR-only. */
+  defaultVisibility?: DocumentVisibility;
   onCancelAction: () => void;
   onSubmitAction: (values: UploadDocumentFormValues) => void | Promise<void>;
 }
@@ -60,6 +64,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   folders,
   categories = [],
   defaultFolderId,
+  defaultVisibility = "HR_ONLY",
   onCancelAction,
   onSubmitAction,
 }) => {
@@ -68,6 +73,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   const [files, setFiles] = useState<File[]>([]);
   const [folderId, setFolderId] = useState(defaultFolderId ?? ROOT_FOLDER_ID);
   const [categoryId, setCategoryId] = useState(NO_CATEGORY_ID);
+  const [visibility, setVisibility] = useState<DocumentVisibility>(defaultVisibility);
   const [error, setError] = useState<string | null>(null);
 
   const addFiles = (incoming: FileList | null) => {
@@ -108,6 +114,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
       files,
       folderId: folderId === ROOT_FOLDER_ID ? undefined : folderId,
       categoryId: categoryId === NO_CATEGORY_ID ? undefined : categoryId,
+      visibility,
     });
   };
 
@@ -244,6 +251,27 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
                   {folder.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Who can see this</Label>
+
+          <Select
+            value={visibility}
+            onValueChange={(v) => setVisibility(v as DocumentVisibility)}
+            disabled={isLoading}
+          >
+            <SelectTrigger>
+              <SelectValue/>
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="HR_ONLY">HR only — hidden from the employee</SelectItem>
+              <SelectItem value="VISIBLE_TO_EMPLOYEE">
+                Visible to the employee — read-only for them
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

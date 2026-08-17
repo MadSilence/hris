@@ -26,9 +26,10 @@ beforeAll(() => {
   });
 });
 
-// The real Select renders through a portal; a plain <select> keeps the assertions readable. The
-// two of them are told apart by position (folder first, category second) — a label baked into the
-// mock would have to be recomputed on every re-render, which is a race, not a fixture.
+// The real Select renders through a portal; a plain <select> keeps the assertions readable. They
+// are told apart by position (folder, visibility, category — the order they are rendered in) — a
+// label baked into the mock would have to be recomputed on every re-render, which is a race, not
+// a fixture.
 jest.mock("@/public/desact/src/components/ui/select", () => ({
   Select: ({
     value,
@@ -62,7 +63,8 @@ jest.mock("@/public/desact/src/components/ui/select", () => ({
 }));
 
 const folderSelect = () => screen.getAllByRole("combobox")[0];
-const categorySelect = () => screen.getAllByRole("combobox")[1];
+const visibilitySelect = () => screen.getAllByRole("combobox")[1];
+const categorySelect = () => screen.getAllByRole("combobox")[2];
 
 const folders = [
   { id: "folder-1", name: "Contracts" },
@@ -120,7 +122,22 @@ describe("UploadDocumentForm", () => {
   it("hides the category picker when the company has none", () => {
     renderForm();
 
-    expect(screen.queryAllByRole("combobox")).toHaveLength(1);
+    // Folder and visibility remain; the category picker is the only conditional one.
+    expect(screen.queryAllByRole("combobox")).toHaveLength(2);
+  });
+
+  it("submits the chosen visibility", async () => {
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction });
+
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+    fireEvent.change(visibilitySelect(), { target: { value: "VISIBLE_TO_EMPLOYEE" } });
+    fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
+
+    await waitFor(() => expect(onSubmitAction).toHaveBeenCalledTimes(1));
+
+    expect(onSubmitAction.mock.calls[0][0].visibility).toBe("VISIBLE_TO_EMPLOYEE");
   });
 
   it("shows selected file after file input change", () => {
@@ -211,6 +228,7 @@ describe("UploadDocumentForm", () => {
       files: [file],
       folderId: "folder-1",
       categoryId: undefined,
+      visibility: "HR_ONLY",
     });
   });
 
@@ -229,6 +247,7 @@ describe("UploadDocumentForm", () => {
       files: [file],
       folderId: undefined,
       categoryId: undefined,
+      visibility: "HR_ONLY",
     });
   });
 
@@ -247,6 +266,7 @@ describe("UploadDocumentForm", () => {
       files: [file],
       folderId: "folder-1",
       categoryId: "category-1",
+      visibility: "HR_ONLY",
     });
   });
 

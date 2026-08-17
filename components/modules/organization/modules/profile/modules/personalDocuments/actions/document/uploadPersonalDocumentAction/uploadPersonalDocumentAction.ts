@@ -1,7 +1,7 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import type { DocumentDTO } from "@/api/modules/documents/dto";
+import type { DocumentDTO, DocumentVisibility } from "@/api/modules/documents/dto";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
 
 export const uploadPersonalDocumentAction = async (
@@ -12,6 +12,7 @@ export const uploadPersonalDocumentAction = async (
       file: submission.file,
       folderId: submission.folderId ?? null,
       categoryId: submission.categoryId ?? null,
+      visibility: submission.visibility ?? null,
     });
 
     return {
@@ -33,6 +34,7 @@ export type UploadPersonalDocumentActionInput = {
   file: File;
   folderId?: string | null;
   categoryId?: string | null;
+  visibility?: DocumentVisibility | null;
 };
 
 export type UploadPersonalDocumentActionOutput = {

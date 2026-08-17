@@ -8,6 +8,7 @@ import {
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
+  SaveDocumentCategoryRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -69,8 +70,35 @@ export class HrisDocumentsService {
     return hrisApiDocumentsClient.renameDocument(documentId, body);
   }
 
+  public async listTrash(userId: string): Promise<DocumentDTO[]> {
+    return hrisApiDocumentsClient.listTrash(userId);
+  }
+
+  public async restoreDocument(documentId: string): Promise<void> {
+    return hrisApiDocumentsClient.restoreDocument(documentId);
+  }
+
+  public async purgeDocument(documentId: string): Promise<void> {
+    return hrisApiDocumentsClient.purgeDocument(documentId);
+  }
+
   public async getCategories(): Promise<DocumentCategoryDTO[]> {
     return hrisApiDocumentsClient.getCategories();
+  }
+
+  public async createCategory(body: SaveDocumentCategoryRequest): Promise<CreateResponse> {
+    return hrisApiDocumentsClient.createCategory(body);
+  }
+
+  public async updateCategory(
+    id: string,
+    body: SaveDocumentCategoryRequest
+  ): Promise<UpdateResponse> {
+    return hrisApiDocumentsClient.updateCategory(id, body);
+  }
+
+  public async deleteCategory(id: string): Promise<void> {
+    return hrisApiDocumentsClient.deleteCategory(id);
   }
 
   public async downloadDocument(documentId: string): Promise<Response> {

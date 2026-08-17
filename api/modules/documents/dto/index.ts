@@ -18,7 +18,11 @@ export type DocumentDTO = {
   isStarred: boolean;
   categoryId: string | null;
   categoryName: string | null;
+  /** HR_ONLY — the employee does not see it; VISIBLE_TO_EMPLOYEE — they can read it. */
+  visibility: DocumentVisibility;
 };
+
+export type DocumentVisibility = "HR_ONLY" | "VISIBLE_TO_EMPLOYEE";
 
 export type DocumentCategoryDTO = {
   id: string;
@@ -26,6 +30,12 @@ export type DocumentCategoryDTO = {
   description: string | null;
   isActive: boolean;
   isSystem: boolean;
+};
+
+export type SaveDocumentCategoryRequest = {
+  name: string;
+  description?: string | null;
+  isActive?: boolean;
 };
 
 export type DocumentFolderContentDTO = {
@@ -48,6 +58,8 @@ export type UploadDocumentArgs = {
   file: File;
   folderId?: string | null;
   categoryId?: string | null;
+  /** Omitted → the backend picks by who uploads (own space → visible, HR → HR-only). */
+  visibility?: DocumentVisibility | null;
 };
 
 export type RenameDocumentRequest = {

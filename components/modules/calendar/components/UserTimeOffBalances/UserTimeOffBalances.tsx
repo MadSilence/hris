@@ -133,6 +133,7 @@ export const UserTimeOffBalances: FC<Props> = ({ userId }) => {
       {requesting && (
         <RequestTimeOffModal
           isOpen={requesting}
+          userId={userId}
           balances={balances}
           policyMap={policyMap}
           onCloseAction={() => setRequesting(false)}

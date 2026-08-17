@@ -8,12 +8,39 @@ import { useUser } from "@/components/hooks/useUser/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import { useRouter } from "next/navigation";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Pencil, RefreshCw } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/public/desact/src/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/public/desact/src/components/ui/alert-dialog";
+import { CalendarPlus, Ellipsis, Pencil, RefreshCw } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/hooks/useCurrentUser/useCurrentUser";
+import { ActionStatus } from "@/components/models/ActionStatus";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
+import {
+  deleteUserAction,
+  terminateUserAction,
+} from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
+import {
+  TerminateEmploymentModal,
+} from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/TerminateEmploymentModal";
 import {
   UpdateUserAvatarModal,
   UpdateUserAvatarSubmission,
@@ -31,6 +58,15 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const user = userFetched ?? userProp;
 
   const { data: currentUser } = useCurrentUser();
+  const router = useRouter();
+
+  // Booking someone else's leave is a time-off action, not a profile one.
+  const canScheduleLeave = useCanAccess("PEOPLE.TIME_OFF_POLICIES", "EDIT");
+
+  const [isTerminateOpen, setIsTerminateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isLifecycleBusy, setIsLifecycleBusy] = useState(false);
+  const [lifecycleError, setLifecycleError] = useState<string | null>(null);
 
   const localAvatarUrlRef = useRef<string | null>(null);
 
@@ -116,6 +152,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
   const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
   const isOwnProfile = currentUser?.id === user.id;
+  const isTerminated = !!user.terminationDate;
 
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
@@ -184,9 +221,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
           </div>
 
           {/*
-            Impersonation is the only header action that is actually wired. The rest of what used to
-            live here (Share, Manage account, Set a reminder, Schedule leave, Terminate employment,
-            Delete profile) had no handlers at all — they come back one by one as their features land.
+            Only actions with something behind them. Share and "Set a reminder" were removed with
+            the other stubs and deliberately not brought back — there is no feature under them.
           */}
           <div className="flex items-center gap-2">
             {!isOwnProfile && (
@@ -203,6 +239,43 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 </Button>
               </PermissionGate>
             )}
+
+            {canScheduleLeave && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/organization/people/${user.id}/time-off?request=1`)}
+              >
+                <CalendarPlus className="mr-2 h-4 w-4"/>
+                Schedule leave
+              </Button>
+            )}
+
+            <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="More actions">
+                    <Ellipsis className="w-4 h-4"/>
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem
+                    disabled={isTerminated}
+                    onClick={() => setIsTerminateOpen(true)}
+                  >
+                    {isTerminated ? "Already terminated" : "Terminate employment"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator/>
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={() => setIsDeleteOpen(true)}
+                  >
+                    Delete profile
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </PermissionGate>
           </div>
         </div>
 
@@ -217,6 +290,81 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         onConfirmAction={handleAvatarConfirm}
         onRequestCloseAction={() => setIsAvatarModalOpen(false)}
       />
+
+      <TerminateEmploymentModal
+        isOpen={isTerminateOpen}
+        userId={user.id}
+        fullName={fullName}
+        isLoading={isLifecycleBusy}
+        errorMessage={lifecycleError}
+        onCancelAction={() => {
+          setIsTerminateOpen(false);
+          setLifecycleError(null);
+        }}
+        onConfirmAction={async (values) => {
+          setIsLifecycleBusy(true);
+          setLifecycleError(null);
+          try {
+            const res = await terminateUserAction({ userId: user.id, ...values });
+            if (res.status === ActionStatus.SUCCESS) {
+              setIsTerminateOpen(false);
+              await refreshUser(user.id);
+            } else {
+              setLifecycleError(res.errorMessage ?? "Failed to terminate employment.");
+            }
+          } finally {
+            setIsLifecycleBusy(false);
+          }
+        }}
+      />
+
+      <AlertDialog
+        open={isDeleteOpen}
+        onOpenChange={(open) => {
+          if (!open && !isLifecycleBusy) {
+            setIsDeleteOpen(false);
+            setLifecycleError(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600">Delete profile</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes <strong>{fullName}</strong> and everything attached to them. To keep the
+              record and only revoke access, terminate the employment instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {lifecycleError && <p className="text-sm text-destructive">{lifecycleError}</p>}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLifecycleBusy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLifecycleBusy}
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={async (e) => {
+                e.preventDefault();
+                setIsLifecycleBusy(true);
+                setLifecycleError(null);
+                try {
+                  const res = await deleteUserAction({ userId: user.id });
+                  if (res.status === ActionStatus.SUCCESS) {
+                    setIsDeleteOpen(false);
+                    router.push("/organization/people");
+                  } else {
+                    setLifecycleError(res.errorMessage ?? "Failed to delete the profile.");
+                  }
+                } finally {
+                  setIsLifecycleBusy(false);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

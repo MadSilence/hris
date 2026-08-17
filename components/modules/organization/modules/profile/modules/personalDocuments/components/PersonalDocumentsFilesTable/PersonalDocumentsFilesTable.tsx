@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ArrowDown, ArrowUp, MoreHorizontal, Star } from "lucide-react";
+import { ArrowDown, ArrowUp, EyeOff, MoreHorizontal, Star } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
@@ -82,6 +82,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
             <TableRow>
               <SortableHead field="name" label="Name" sort={sort} onSortChange={onSortChange}/>
               <TableHead>Category</TableHead>
+              <TableHead>Visibility</TableHead>
               <SortableHead field="size" label="Size" sort={sort} onSortChange={onSortChange}/>
               <SortableHead
                 field="createdAt"
@@ -111,6 +112,17 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                     <Badge variant="secondary">{document.categoryName}</Badge>
                   ) : (
                     <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  {document.visibility === "HR_ONLY" ? (
+                    <Badge variant="outline" className="gap-1 font-normal">
+                      <EyeOff className="h-3 w-3"/>
+                      HR only
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground">Visible</span>
                   )}
                 </TableCell>
 

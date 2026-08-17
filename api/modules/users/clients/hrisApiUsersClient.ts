@@ -6,12 +6,30 @@ import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/u
 import { User } from "@/models/user/User";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
+export type TerminationReason = "VOLUNTARY" | "INVOLUNTARY" | "END_OF_CONTRACT";
+
+export type TerminatePayload = {
+  lastWorkingDay?: string | null;
+  reason?: TerminationReason | null;
+  rehireEligible?: boolean | null;
+  note?: string | null;
+};
+
+/** What terminating will change — shown in the confirmation before anything happens. */
+export type TerminationImpactDTO = {
+  rolesToRevoke: number;
+  policyAssignmentsToEnd: number;
+  directReportsToReassign: number;
+  reportsMoveTo: { id: string; name: string } | null;
+};
+
 /** Partial patch: an omitted field is left as is (the backend never clears from here). */
 export type UpdateUserPayload = {
   firstName?: string;
   lastName?: string;
   email?: string;
   hireDate?: string;
+  probationEnd?: string;
 };
 
 export class HrisApiUsersClient {
@@ -51,6 +69,22 @@ export class HrisApiUsersClient {
 
   public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/update`, { ...payload });
+  }
+
+  public async changeStatus(id: string, status: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/status`, { status });
+  }
+
+  public async getTerminationImpact(id: string): Promise<TerminationImpactDTO> {
+    return hrisApiClient.get<TerminationImpactDTO>(`${this.BASE_PATH}/${id}/termination-impact`);
+  }
+
+  public async terminate(id: string, payload: TerminatePayload): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/terminate`, { ...payload });
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/delete`);
   }
 
   public async updateUserAttributes(
@@ -98,6 +132,34 @@ export class HrisApiUsersClient {
 
   async setManager(userId: string, managerId: string | null): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${userId}/manager`, { managerId });
+  }
+
+  /**
+   * Org associations. Each has an assign (PUT) and a clear (DELETE) endpoint rather than a nullable
+   * body, so `null` here means "clear" and maps onto the DELETE.
+   */
+  async setJob(userId: string, jobId: string | null): Promise<void> {
+    if (jobId === null) {
+      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/job`);
+      return;
+    }
+    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/job`, { jobId });
+  }
+
+  async setOffice(userId: string, officeId: string | null): Promise<void> {
+    if (officeId === null) {
+      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/office`);
+      return;
+    }
+    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/office`, { officeId });
+  }
+
+  async setLegalEntity(userId: string, legalEntityId: string | null): Promise<void> {
+    if (legalEntityId === null) {
+      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/legal-entity`);
+      return;
+    }
+    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/legal-entity`, { legalEntityId });
   }
 }
 

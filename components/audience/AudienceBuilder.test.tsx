@@ -24,8 +24,16 @@ beforeAll(() => {
   });
 });
 
+// Mirrors what the registry actually reports for identity: a system field that field access
+// cannot restrict (`configurable: false`), which is why it needs no COMPANY view scope to be offered.
 const fields: FieldDTO[] = [
-  { id: "sys:first_name", label: "First name", isSystem: true, type: "TEXT" } as FieldDTO,
+  {
+    id: "sys:first_name",
+    label: "First name",
+    isSystem: true,
+    configurable: false,
+    type: "TEXT",
+  } as FieldDTO,
 ];
 
 describe("AudienceBuilder", () => {

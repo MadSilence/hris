@@ -5,7 +5,15 @@ import { useState } from "react";
 import { useSWRConfig } from "swr";
 
 import type { User } from "@/models/user/User";
-import { isReferenceField, type FieldDTO } from "@/models/user/fields";
+import { isReferenceField, type FieldDTO, type ReferenceValueSource } from "@/models/user/fields";
+import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/public/desact/src/components/ui/select";
 import { formatEmploymentType } from "@/models/user/employmentType";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { updateUserAction } from "@/components/modules/organization/modules/profile/actions/updateUserAction";
@@ -28,14 +36,21 @@ export const PROFILE_HIDDEN_SYSTEM_FIELDS = new Set([
   "sys:updated_at",
 ]);
 
-/** The only system fields with a write path from the profile today (`POST /users/{id}/update`). */
+/** System fields with a write path from the profile. Everything else here is read-only. */
 const EDITABLE_SYSTEM_FIELDS = new Set([
   "sys:first_name",
   "sys:last_name",
   "sys:email",
   "sys:hire_date",
+  "sys:probation_end",
   "sys:manager",
+  "sys:job",
+  "sys:office",
+  "sys:legal_entity",
 ]);
+
+/** Sentinel for "no value" in a Select — Radix cannot hold an empty string as an item value. */
+const NONE = "__none__";
 
 const formatDate = (iso?: string | null) => (iso ? iso.slice(0, 10) : null);
 
@@ -44,7 +59,11 @@ type Draft = {
   lastName: string;
   email: string;
   hireDate: string;
+  probationEnd: string;
   manager: PickedUser | null;
+  jobId: string;
+  officeId: string;
+  legalEntityId: string;
 };
 
 const draftOf = (user: User): Draft => ({
@@ -52,8 +71,15 @@ const draftOf = (user: User): Draft => ({
   lastName: user.lastName ?? "",
   email: user.email ?? "",
   hireDate: formatDate(user.hireDate) ?? "",
+  probationEnd: formatDate(user.probationEnd) ?? "",
   manager: user.manager ? { id: user.manager.id, firstName: user.manager.name } : null,
+  jobId: user.jobId ?? NONE,
+  officeId: user.office?.id ?? NONE,
+  legalEntityId: user.legalEntity?.id ?? NONE,
 });
+
+/** `NONE` back to the wire value: `null` clears the association. */
+const idOrNull = (value: string): string | null => (value === NONE ? null : value);
 
 type Props = {
   user: User;
@@ -86,7 +112,11 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
     draft.lastName !== initial.lastName ||
     draft.email !== initial.email ||
     draft.hireDate !== initial.hireDate ||
-    (draft.manager?.id ?? null) !== (initial.manager?.id ?? null);
+    draft.probationEnd !== initial.probationEnd ||
+    (draft.manager?.id ?? null) !== (initial.manager?.id ?? null) ||
+    draft.jobId !== initial.jobId ||
+    draft.officeId !== initial.officeId ||
+    draft.legalEntityId !== initial.legalEntityId;
 
   const cancel = () => {
     setDraft(draftOf(user));
@@ -105,9 +135,17 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
         lastName: draft.lastName !== initial.lastName ? draft.lastName : undefined,
         email: draft.email !== initial.email ? draft.email : undefined,
         hireDate: draft.hireDate !== initial.hireDate ? draft.hireDate : undefined,
+        probationEnd:
+          draft.probationEnd !== initial.probationEnd ? draft.probationEnd : undefined,
         managerId:
           (draft.manager?.id ?? null) !== (initial.manager?.id ?? null)
             ? draft.manager?.id ?? null
+            : undefined,
+        jobId: draft.jobId !== initial.jobId ? idOrNull(draft.jobId) : undefined,
+        officeId: draft.officeId !== initial.officeId ? idOrNull(draft.officeId) : undefined,
+        legalEntityId:
+          draft.legalEntityId !== initial.legalEntityId
+            ? idOrNull(draft.legalEntityId)
             : undefined,
       });
 
@@ -154,12 +192,47 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
             onChange={(e) => setDraft((d) => ({ ...d, hireDate: e.currentTarget.value }))}
           />
         );
+      case "sys:probation_end":
+        return (
+          <Input
+            type="date"
+            value={draft.probationEnd}
+            onChange={(e) => setDraft((d) => ({ ...d, probationEnd: e.currentTarget.value }))}
+          />
+        );
       case "sys:manager":
         return (
           <UserPickerField
             value={draft.manager}
             onChange={(manager) => setDraft((d) => ({ ...d, manager }))}
             placeholder="No manager"
+          />
+        );
+      case "sys:job":
+        return (
+          <ReferenceSelect
+            source="jobs"
+            value={draft.jobId}
+            placeholder="No job"
+            onChange={(jobId) => setDraft((d) => ({ ...d, jobId }))}
+          />
+        );
+      case "sys:office":
+        return (
+          <ReferenceSelect
+            source="offices"
+            value={draft.officeId}
+            placeholder="No office"
+            onChange={(officeId) => setDraft((d) => ({ ...d, officeId }))}
+          />
+        );
+      case "sys:legal_entity":
+        return (
+          <ReferenceSelect
+            source="legalEntities"
+            value={draft.legalEntityId}
+            placeholder="No legal entity"
+            onChange={(legalEntityId) => setDraft((d) => ({ ...d, legalEntityId }))}
           />
         );
       default:
@@ -216,6 +289,32 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
         })}
       </div>
     </div>
+  );
+};
+
+/** Picker for a single-valued reference, backed by the shared catalogue hook. */
+const ReferenceSelect: React.FC<{
+  source: ReferenceValueSource;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}> = ({ source, value, placeholder, onChange }) => {
+  const { options, isLoading } = useReferenceOptions(source);
+
+  return (
+    <Select value={value} onValueChange={onChange} disabled={isLoading}>
+      <SelectTrigger>
+        <SelectValue placeholder={isLoading ? "Loading…" : placeholder}/>
+      </SelectTrigger>
+      <SelectContent className="max-h-72">
+        <SelectItem value={NONE}>{placeholder}</SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option.id} value={option.id}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 

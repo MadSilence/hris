@@ -4,6 +4,7 @@ import type {
   CancelTimeOffRequestRequest,
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
+  TimeOffOverlapDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type { TimeOffRequest } from "@/models/timeOff";
@@ -21,6 +22,14 @@ export class HrisTimeOffRequestsService {
     endDate: string
   ): Promise<TimeOffRequestDurationDTO> {
     return hrisApiTimeOffRequestsClient.previewDuration(assignmentId, startDate, endDate);
+  }
+
+  public async listOverlaps(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<TimeOffOverlapDTO[]> {
+    return hrisApiTimeOffRequestsClient.listOverlaps(userId, startDate, endDate);
   }
 
   public async getById(id: string): Promise<TimeOffRequest> {

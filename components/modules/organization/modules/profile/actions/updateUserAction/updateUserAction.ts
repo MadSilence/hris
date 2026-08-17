@@ -11,15 +11,19 @@ export const updateUserAction = async (
   submission: UpdateUserActionInput
 ): Promise<UpdateUserActionOutput> => {
   try {
-    const { userId, managerId, ...fields } = submission;
+    const { userId, managerId, jobId, officeId, legalEntityId, ...fields } = submission;
 
     const hasFieldChanges = Object.values(fields).some((v) => v !== undefined);
     if (hasFieldChanges) {
       await hrisApiUsersService.updateUser(userId, fields);
     }
 
-    if (managerId !== undefined) {
-      await hrisApiUsersService.setManager(userId, managerId);
+    // Each association has its own endpoint; `undefined` means untouched, `null` means clear.
+    if (managerId !== undefined) await hrisApiUsersService.setManager(userId, managerId);
+    if (jobId !== undefined) await hrisApiUsersService.setJob(userId, jobId);
+    if (officeId !== undefined) await hrisApiUsersService.setOffice(userId, officeId);
+    if (legalEntityId !== undefined) {
+      await hrisApiUsersService.setLegalEntity(userId, legalEntityId);
     }
 
     return { status: ActionStatus.SUCCESS };
@@ -39,8 +43,12 @@ export type UpdateUserActionInput = {
   lastName?: string;
   email?: string;
   hireDate?: string;
-  /** `undefined` = untouched, `null` = clear the manager. */
+  probationEnd?: string;
+  /** `undefined` = untouched, `null` = clear. Same convention for every association below. */
   managerId?: string | null;
+  jobId?: string | null;
+  officeId?: string | null;
+  legalEntityId?: string | null;
 };
 
 export type UpdateUserActionOutput = {

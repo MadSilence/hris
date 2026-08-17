@@ -1,15 +1,18 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
-import { CalendarClock, Plus, Wallet } from "lucide-react";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { CalendarClock, Plus, ShieldCheck, Wallet } from "lucide-react";
 
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { RequestTimeOffModal } from "./RequestTimeOffModal";
 import { BalancesPreviewModal } from "./BalancesPreviewModal";
 import { RequestsPreviewModal } from "./RequestsPreviewModal";
+import { AssignTimeOffPolicyModal } from "./AssignTimeOffPolicyModal";
 
 type Props = { userId: string };
 
@@ -27,6 +30,7 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
   const [modal, setModal] = useState<ModalState>({ open: false });
   const [previewOpen, setPreviewOpen] = useState(false);
   const [requestsOpen, setRequestsOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const policyMap = useMemo(
     () => new Map((policies ?? []).map((p) => [p.id, p])),
@@ -38,6 +42,16 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
   const open = (start?: string, end?: string) => setModal({ open: true, start, end });
   const close = () => setModal({ open: false });
 
+  // "Schedule leave" in the profile header lands here with ?request=1 — the request modal lives on
+  // this tab (it needs the person's balances), so the header sends people to it rather than
+  // duplicating the flow.
+  const searchParams = useSearchParams();
+  const requestedFromHeader = searchParams.get("request") === "1";
+
+  useEffect(() => {
+    if (requestedFromHeader && hasBalances) setModal({ open: true });
+  }, [requestedFromHeader, hasBalances]);
+
   return (
     <>
       <UserCalendarContainer
@@ -46,6 +60,15 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
         onSelectRange={hasBalances ? (start, end) => open(start, end) : undefined}
         headerAction={
           <>
+            {/* Without an assignment there is no balance and no way to request — so the people who
+                manage policies get the entry point here, on the person, not only in settings. */}
+            <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
+              <Button variant="outline" size="sm" onClick={() => setAssignOpen(true)}>
+                <ShieldCheck className="h-4 w-4" />
+                Assign policy
+              </Button>
+            </PermissionGate>
+
             {/* Request history + Cancel: the calendar alone cannot undo a booked absence. */}
             <Button variant="outline" size="sm" onClick={() => setRequestsOpen(true)}>
               <CalendarClock className="h-4 w-4" />
@@ -71,6 +94,7 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
       {modal.open && balances && (
         <RequestTimeOffModal
           isOpen={modal.open}
+          userId={userId}
           balances={balances}
           policyMap={policyMap}
           initialStartDate={modal.start}
@@ -86,6 +110,16 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           balances={balances}
           policyMap={policyMap}
           onCloseAction={() => setPreviewOpen(false)}
+        />
+      )}
+
+      {assignOpen && (
+        <AssignTimeOffPolicyModal
+          isOpen={assignOpen}
+          userId={userId}
+          policies={policies ?? []}
+          balances={balances ?? []}
+          onCloseAction={() => setAssignOpen(false)}
         />
       )}
 

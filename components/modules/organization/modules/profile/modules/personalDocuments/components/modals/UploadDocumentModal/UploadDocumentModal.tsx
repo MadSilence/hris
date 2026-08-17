@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import {
   CategoryOption,
   FolderOption,
@@ -15,6 +16,7 @@ export interface UploadDocumentModalProps {
   folders: FolderOption[];
   categories?: CategoryOption[];
   defaultFolderId?: string;
+  defaultVisibility?: DocumentVisibility;
   /** Kept in the dialog rather than the console — a failed upload is otherwise silent. */
   errorMessage?: string | null;
   onCancelAction: () => void;
@@ -27,6 +29,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
   folders,
   categories,
   defaultFolderId,
+  defaultVisibility,
   errorMessage,
   onCancelAction,
   onConfirmAction,
@@ -59,6 +62,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
           folders={folders}
           categories={categories}
           defaultFolderId={defaultFolderId}
+          defaultVisibility={defaultVisibility}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
         />

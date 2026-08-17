@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { CalendarDays, CalendarPlus } from "lucide-react";
+import { CalendarDays, CalendarPlus, Users } from "lucide-react";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
@@ -28,12 +28,14 @@ import { cn } from "@/public/desact/src/components/ui/utils";
 
 import { useCreateTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCreateTimeOffRequest";
 import { useTimeOffRequestDuration } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestDuration";
+import { useTimeOffOverlaps } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffOverlaps";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 
 type Props = {
   isOpen: boolean;
+  userId: string;
   balances: EmployeeTimeOffBalance[];
   policyMap: Map<string, TimeOffPolicy>;
   initialStartDate?: string;
@@ -58,6 +60,7 @@ const inclusiveDays = (start: string, end: string): number => {
 
 export const RequestTimeOffModal: FC<Props> = ({
   isOpen,
+  userId,
   balances,
   policyMap,
   initialStartDate,
@@ -89,6 +92,23 @@ export const RequestTimeOffModal: FC<Props> = ({
   const isWorkingDays = durationPreview?.countingMode === TimeOffPolicyCountingMode.WorkingDays;
   const remainingAfter = selected ? selected.currentBalance - days : 0;
   const insufficient = !unlimited && days > 0 && remainingAfter < 0;
+
+  // Who else from the team/department is already out then. Advisory: the policy's coverage rules are
+  // what can actually reject the request — this just stops people booking blind.
+  const { data: overlaps } = useTimeOffOverlaps(userId, startDate, endDate);
+  const overlapPeople = useMemo(() => {
+    const byUser = new Map<string, { name: string; start: string; end: string }>();
+    for (const o of overlaps ?? []) {
+      const existing = byUser.get(o.userId);
+      // One row per person even when they have several requests in the window.
+      byUser.set(o.userId, {
+        name: `${o.firstName} ${o.lastName}`.trim(),
+        start: existing && existing.start < o.startDate ? existing.start : o.startDate,
+        end: existing && existing.end > o.endDate ? existing.end : o.endDate,
+      });
+    }
+    return [...byUser.values()];
+  }, [overlaps]);
 
   const canSubmit = Boolean(assignmentId) && days > 0 && !createMutation.isPending;
 
@@ -222,6 +242,32 @@ export const RequestTimeOffModal: FC<Props> = ({
                 disabled={createMutation.isPending}
               />
             </div>
+
+            {days > 0 && overlapPeople.length > 0 && (
+              <div className="rounded-lg border border-brown-200 bg-brown-50/40 p-3">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-brown-900">
+                  <Users className="h-3.5 w-3.5" />
+                  {overlapPeople.length === 1
+                    ? "1 colleague is already away then"
+                    : `${overlapPeople.length} colleagues are already away then`}
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {overlapPeople.slice(0, 5).map((p) => (
+                    <li key={p.name} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="truncate text-brown-900">{p.name}</span>
+                      <span className="shrink-0 text-muted-foreground">
+                        {p.start === p.end ? prettyISO(p.start) : `${prettyISO(p.start)} – ${prettyISO(p.end)}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {overlapPeople.length > 5 && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    and {overlapPeople.length - 5} more
+                  </p>
+                )}
+              </div>
+            )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>

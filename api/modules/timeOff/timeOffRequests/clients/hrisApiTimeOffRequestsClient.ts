@@ -5,6 +5,7 @@ import type {
   CancelTimeOffRequestRequest,
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
+  TimeOffOverlapDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -12,6 +13,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 
 export class HrisApiTimeOffRequestsClient {
   private readonly REQUESTS_PATH = "/time-off/requests";
+  private readonly OVERLAPS_PATH = "/time-off/overlaps";
   private readonly USERS_PATH = "/users";
 
   public async create(
@@ -30,6 +32,15 @@ export class HrisApiTimeOffRequestsClient {
   ): Promise<TimeOffRequestDurationDTO> {
     const qs = new URLSearchParams({ assignmentId, startDate, endDate }).toString();
     return hrisApiClient.get<TimeOffRequestDurationDTO>(`${this.REQUESTS_PATH}/duration?${qs}`);
+  }
+
+  public async listOverlaps(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<TimeOffOverlapDTO[]> {
+    const qs = new URLSearchParams({ userId, startDate, endDate }).toString();
+    return hrisApiClient.get<TimeOffOverlapDTO[]>(`${this.OVERLAPS_PATH}?${qs}`);
   }
 
   public async getById(id: string): Promise<TimeOffRequest> {

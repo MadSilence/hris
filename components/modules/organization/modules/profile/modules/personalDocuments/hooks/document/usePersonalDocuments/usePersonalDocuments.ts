@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { DocumentDTO, DocumentFolderDTO } from "@/api/modules/documents/dto";
+import type { DocumentDTO, DocumentFolderDTO, DocumentVisibility } from "@/api/modules/documents/dto";
 import type { BreadcrumbItem } from "@/components/modules/organization/modules/profile/modules/personalDocuments/types/personalDocuments.types";
 import { useDocumentsContent } from "../useDocumentsContent/useDocumentsContent";
 import { useUploadPersonalDocument } from "../useUploadPersonalDocument/useUploadPersonalDocument";
@@ -52,6 +52,7 @@ const compareDocuments = (a: DocumentDTO, b: DocumentDTO, sort: DocumentSort) =>
 export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
   const [search, setSearch] = React.useState("");
   const [starredOnly, setStarredOnly] = React.useState(false);
+  const [hrOnly, setHrOnly] = React.useState(false);
   const [sort, setSort] = React.useState<DocumentSort>({ field: "createdAt", dir: "desc" });
   const [currentFolderId, setCurrentFolderId] = React.useState<string | null>(null);
   const [breadcrumbs, setBreadcrumbs] = React.useState<BreadcrumbItem[]>([
@@ -79,11 +80,11 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
   );
 
   const documents = React.useMemo(() => {
-    const filtered = filterDocumentsFiles(data?.documents ?? [], search).filter(
-      (doc) => !starredOnly || doc.isStarred
-    );
+    const filtered = filterDocumentsFiles(data?.documents ?? [], search)
+      .filter((doc) => !starredOnly || doc.isStarred)
+      .filter((doc) => !hrOnly || doc.visibility === "HR_ONLY");
     return [...filtered].sort((a, b) => compareDocuments(a, b, sort));
-  }, [data?.documents, search, starredOnly, sort]);
+  }, [data?.documents, search, starredOnly, hrOnly, sort]);
 
   const openFolder = React.useCallback((folder: DocumentFolderDTO) => {
     setCurrentFolderId(folder.id);
@@ -128,7 +129,12 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
    * to find that out the hard way. The first failure stops the batch and surfaces.
    */
   const uploadFiles = React.useCallback(
-    async (files: File[], folderId?: string | null, categoryId?: string | null) => {
+    async (
+      files: File[],
+      folderId?: string | null,
+      categoryId?: string | null,
+      visibility?: DocumentVisibility | null,
+    ) => {
       const target = folderId === undefined ? currentFolderId : folderId;
 
       for (const file of files) {
@@ -137,6 +143,7 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
           file,
           folderId: target,
           categoryId: categoryId ?? null,
+          visibility: visibility ?? null,
         });
       }
     },
@@ -179,6 +186,8 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
     setSearch,
     starredOnly,
     setStarredOnly,
+    hrOnly,
+    setHrOnly,
     sort,
     setSort,
     isLoading,

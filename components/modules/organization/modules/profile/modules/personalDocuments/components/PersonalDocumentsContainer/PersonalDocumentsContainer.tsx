@@ -44,6 +44,11 @@ import {
 import {
   useDocumentCategories,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
+import {
+  PersonalDocumentsTrash,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsTrash";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 type PersonalDocumentsContainerProps = {
   userId: string;
@@ -60,6 +65,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     setSearch,
     starredOnly,
     setStarredOnly,
+    hrOnly,
+    setHrOnly,
     sort,
     setSort,
     isLoading,
@@ -117,6 +124,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const canEdit = isOwnSpace || hasEditPermission;
   const canManage = isOwnSpace || hasManagePermission;
 
+  const [showTrash, setShowTrash] = useState(false);
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [addDocumentOpen, setAddDocumentOpen] = useState(false);
 
@@ -195,13 +203,31 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               onSearchChange={setSearch}
               starredOnly={starredOnly}
               onStarredOnlyChange={setStarredOnly}
+              hrOnly={hrOnly}
+              onHrOnlyChange={setHrOnly}
+              showHrOnlyFilter={canManage}
               onUploadFromLocal={() => setAddDocumentOpen(true)}
               onCreateFolder={() => setCreateFolderOpen(true)}
               canEdit={canEdit}
             />
+
+            {canManage && (
+              <Button
+                variant={showTrash ? "secondary" : "outline"}
+                size="icon"
+                aria-label="Trash"
+                aria-pressed={showTrash}
+                title="Trash"
+                onClick={() => setShowTrash((v) => !v)}
+              >
+                <Trash2 className="h-4 w-4"/>
+              </Button>
+            )}
           </div>
 
-          {isLoading ? (
+          {showTrash ? (
+            <PersonalDocumentsTrash userId={userId}/>
+          ) : isLoading ? (
             <PersonalDocumentsSkeleton/>
           ) : error ? (
             <div className="rounded-lg border bg-white p-10 text-center">
@@ -298,13 +324,14 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         folders={folderOptions}
         categories={categories?.filter((c) => c.isActive)}
         defaultFolderId={currentFolderId ?? undefined}
+        defaultVisibility={isOwnSpace ? "VISIBLE_TO_EMPLOYEE" : "HR_ONLY"}
         errorMessage={messageOf(uploadFileError)}
         onCancelAction={() => {
           setAddDocumentOpen(false);
           resetUploadFile();
         }}
-        onConfirmAction={({ files, folderId, categoryId }) =>
-          runAndClose(uploadFiles(files, folderId ?? null, categoryId ?? null), () => {
+        onConfirmAction={({ files, folderId, categoryId, visibility }) =>
+          runAndClose(uploadFiles(files, folderId ?? null, categoryId ?? null, visibility), () => {
             setAddDocumentOpen(false);
             resetUploadFile();
           })

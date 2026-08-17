@@ -8,6 +8,7 @@ import {
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
+  SaveDocumentCategoryRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import { documentMapper } from "@/api/modules/documents/mappers/documentMapper";
@@ -86,8 +87,38 @@ export class HrisApiDocumentsClient {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/rename`, body);
   }
 
+  public async listTrash(userId: string): Promise<DocumentDTO[]> {
+    return hrisApiClient.get<DocumentDTO[]>(`${this.BASE_PATH}/users/${userId}/trash`);
+  }
+
+  public async restoreDocument(documentId: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/restore`);
+  }
+
+  public async purgeDocument(documentId: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/purge`);
+  }
+
   public async getCategories(): Promise<DocumentCategoryDTO[]> {
     return hrisApiClient.get<DocumentCategoryDTO[]>(`${this.BASE_PATH}/categories`);
+  }
+
+  public async createCategory(body: SaveDocumentCategoryRequest): Promise<CreateResponse> {
+    return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/categories/create`, body);
+  }
+
+  public async updateCategory(
+    id: string,
+    body: SaveDocumentCategoryRequest
+  ): Promise<UpdateResponse> {
+    return hrisApiClient.patch<UpdateResponse, SaveDocumentCategoryRequest>(
+      `${this.BASE_PATH}/categories/${id}`,
+      body
+    );
+  }
+
+  public async deleteCategory(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/categories/${id}/delete`);
   }
 
   public async downloadDocument(documentId: string): Promise<Response> {
@@ -108,6 +139,10 @@ export class HrisApiDocumentsClient {
 
     if (payload.categoryId) {
       formData.append("categoryId", payload.categoryId);
+    }
+
+    if (payload.visibility) {
+      formData.append("visibility", payload.visibility);
     }
 
     return hrisApiClient.postForm<DocumentDTO>(

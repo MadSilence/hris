@@ -136,8 +136,13 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   // System groups come from the field registry, in the order it declares; custom groups follow.
   // Nothing about them is hardcoded here, so registering a field on the backend shows it up here.
   const systemGroups = useMemo(() => {
+    // Which system fields this caller may see *on this person* — resolved per target by the server
+    // and delivered in `fieldAccess`, the same map custom attributes use.
+    const access = user?.fieldAccess ?? {};
+
     const systemFields = (catalogue ?? [])
-      .filter((f) => f.isSystem && !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id));
+      .filter((f) => f.isSystem && !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id))
+      .filter((f) => Boolean(access[f.id]));
 
     const byGroup = new Map<string, typeof systemFields>();
     for (const field of systemFields) {
@@ -150,7 +155,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       name,
       fields,
     }));
-  }, [catalogue]);
+  }, [catalogue, user?.fieldAccess]);
 
   const sections = useMemo(
     () => [

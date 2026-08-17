@@ -1,5 +1,10 @@
 import { User } from "@/models/user/User";
-import { hrisApiUsersClient, UpdateUserPayload } from "@/api/modules/users/clients/hrisApiUsersClient";
+import {
+  hrisApiUsersClient,
+  type TerminatePayload,
+  type TerminationImpactDTO,
+  type UpdateUserPayload,
+} from "@/api/modules/users/clients/hrisApiUsersClient";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
@@ -37,6 +42,22 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.updateUser(id, payload);
   }
 
+  public async changeStatus(id: string, status: string): Promise<void> {
+    return hrisApiUsersClient.changeStatus(id, status);
+  }
+
+  public async getTerminationImpact(id: string): Promise<TerminationImpactDTO> {
+    return hrisApiUsersClient.getTerminationImpact(id);
+  }
+
+  public async terminate(id: string, payload: TerminatePayload): Promise<void> {
+    return hrisApiUsersClient.terminate(id, payload);
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    return hrisApiUsersClient.deleteUser(id);
+  }
+
   public async updateUserAttributes(
     id: string,
     values: Record<string, unknown>
@@ -64,6 +85,18 @@ export class HrisApiUsersService {
 
   async setManager(userId: string, managerId: string | null): Promise<void> {
     return hrisApiUsersClient.setManager(userId, managerId);
+  }
+
+  async setJob(userId: string, jobId: string | null): Promise<void> {
+    return hrisApiUsersClient.setJob(userId, jobId);
+  }
+
+  async setOffice(userId: string, officeId: string | null): Promise<void> {
+    return hrisApiUsersClient.setOffice(userId, officeId);
+  }
+
+  async setLegalEntity(userId: string, legalEntityId: string | null): Promise<void> {
+    return hrisApiUsersClient.setLegalEntity(userId, legalEntityId);
   }
 }
 

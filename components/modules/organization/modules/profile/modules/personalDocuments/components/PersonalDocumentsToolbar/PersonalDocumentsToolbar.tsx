@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FolderPlus, Plus, Search, Star, Upload } from "lucide-react";
+import { EyeOff, FolderPlus, Plus, Search, Star, Upload } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
@@ -12,6 +12,10 @@ type PersonalDocumentsToolbarProps = {
   onSearchChange: (value: string) => void;
   starredOnly: boolean;
   onStarredOnlyChange: (value: boolean) => void;
+  hrOnly: boolean;
+  onHrOnlyChange: (value: boolean) => void;
+  /** The filter is pointless for someone who can only see documents shared with them. */
+  showHrOnlyFilter?: boolean;
   onUploadFromLocal: () => void;
   onCreateFolder: () => void;
   /** Hides the Add menu for a reader — the backend would reject the call anyway. */
@@ -23,6 +27,9 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
   onSearchChange,
   starredOnly,
   onStarredOnlyChange,
+  hrOnly,
+  onHrOnlyChange,
+  showHrOnlyFilter = false,
   onUploadFromLocal,
   onCreateFolder,
   canEdit = true,
@@ -50,6 +57,20 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       >
         <Star className={cn("h-4 w-4", starredOnly && "fill-current text-yellow-500")}/>
       </Button>
+
+      {showHrOnlyFilter && (
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Show HR-only documents"
+          aria-pressed={hrOnly}
+          title="Show HR-only documents"
+          onClick={() => onHrOnlyChange(!hrOnly)}
+          className={cn(hrOnly && "border-brown-300 bg-brown-50")}
+        >
+          <EyeOff className={cn("h-4 w-4", hrOnly && "text-brown-700")}/>
+        </Button>
+      )}
 
       {canEdit && (
         <DropdownMenu>
