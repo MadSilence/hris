@@ -2,8 +2,11 @@ import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   DepartmentDTO,
   DepartmentTreeNodeDTO,
+  DepartmentSummaryDTO,
+  DepartmentPersonDTO,
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
+  MoveDepartmentRequest,
   DeleteDepartmentRequest,
   ArchiveDepartmentRequest,
 } from "@/api/modules/departments/dto";
@@ -12,6 +15,8 @@ import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type {
   Department,
   DepartmentTreeNode,
+  DepartmentSummary,
+  DepartmentPerson,
 } from "@/models/departments";
 
 function toBackendBody(
@@ -38,6 +43,24 @@ export class HrisApiDepartmentsClient {
     return departmentMapper.mapTreeNodeDTOs(dtos);
   }
 
+  public async summary(includeArchived = false): Promise<DepartmentSummary> {
+    const params = new URLSearchParams();
+    if (includeArchived) params.set("includeArchived", "true");
+    const dto = await hrisApiClient.get<DepartmentSummaryDTO>(
+      `${this.BASE_PATH}/summary?${params}`
+    );
+    return { peopleAssigned: dto.peopleAssigned, unitsTotal: dto.unitsTotal };
+  }
+
+  public async people(q?: string): Promise<DepartmentPerson[]> {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    const dtos = await hrisApiClient.get<DepartmentPersonDTO[]>(
+      `${this.BASE_PATH}/people?${params}`
+    );
+    return dtos;
+  }
+
   public async getById(id: string): Promise<Department> {
     const dto = await hrisApiClient.get<DepartmentDTO>(`${this.BASE_PATH}/${id}`);
     return departmentMapper.mapDTO(dto);
@@ -49,6 +72,13 @@ export class HrisApiDepartmentsClient {
 
   public async update(id: string, body: UpdateDepartmentRequest): Promise<UpdateResponse> {
     return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, toBackendBody(body));
+  }
+
+  public async move(id: string, body: MoveDepartmentRequest): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/move`,
+      body as unknown as Record<string, unknown>,
+    );
   }
 
   public async archive(id: string, body?: ArchiveDepartmentRequest): Promise<UpdateResponse> {

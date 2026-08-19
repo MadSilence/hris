@@ -14,52 +14,23 @@ export class TeamsRoutes {
     return Response.json(data);
   }
 
+  public async people(req: Request) {
+    const url = new URL(req.url);
+    const q = url.searchParams.get("q") ?? undefined;
+    const data = await hrisTeamsService.people(q);
+    return Response.json(data);
+  }
+
+  public async summary(req: Request) {
+    const url = new URL(req.url);
+    const includeArchived = url.searchParams.get("includeArchived") === "true";
+    const data = await hrisTeamsService.summary(includeArchived);
+    return Response.json(data);
+  }
+
   public async getById(_req: Request, id: string) {
     const data = await hrisTeamsService.getById(id);
     return Response.json(data);
-  }
-
-  public async create(req: Request) {
-    const body = await req.json().catch(() => ({}));
-    const data = await hrisTeamsService.create({
-      name: body.name,
-      description: body.description ?? null,
-      code: body.code ?? null,
-      parentId: body.parentId ?? null,
-    });
-    return Response.json(data, { status: 201 });
-  }
-
-  public async update(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-    const data = await hrisTeamsService.update(id, {
-      name: body.name,
-      description: body.description ?? null,
-      code: body.code ?? null,
-      parentId: body.parentId ?? null,
-    });
-    return Response.json(data);
-  }
-
-  public async archive(_req: Request, id: string) {
-    const data = await hrisTeamsService.archive(id);
-    return Response.json(data);
-  }
-
-  public async activate(_req: Request, id: string) {
-    const data = await hrisTeamsService.activate(id);
-    return Response.json(data);
-  }
-
-  public async delete(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-    await hrisTeamsService.delete(id, {
-      childrenStrategy: body.childrenStrategy,
-      membersStrategy: body.membersStrategy,
-      subMembersStrategy: body.subMembersStrategy,
-      targetId: body.targetId ?? null,
-    });
-    return new Response(null, { status: 204 });
   }
 
   public async exportTree(req: Request, id: string) {

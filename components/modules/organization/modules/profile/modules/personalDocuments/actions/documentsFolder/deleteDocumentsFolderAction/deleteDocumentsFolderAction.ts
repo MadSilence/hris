@@ -1,6 +1,9 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
+import {
+  documentActionErrorMessage,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/documentActionError";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
 
 export const deleteDocumentsFolderAction = async (
@@ -20,7 +23,7 @@ export const deleteDocumentsFolderAction = async (
 
     return {
       status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting a folder. Please try again.",
+      errorMessage: documentActionErrorMessage(error, "An error occurred while deleting a folder. Please try again."),
     };
   }
 };

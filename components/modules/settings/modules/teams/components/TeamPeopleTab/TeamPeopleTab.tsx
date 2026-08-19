@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Search, UserPlus, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
@@ -24,17 +25,35 @@ type Props = {
   teamId: string;
   teamName: string;
   isArchived: boolean;
+  /** Only then is the sub-node toggle worth showing. */
+  hasChildren: boolean;
+  /** Seeded from a people search so the person is visible without scrolling the roster. */
+  initialQuery?: string;
+  highlightUserId?: string | null;
 };
 
-export function TeamPeopleTab({ teamId, teamName, isArchived }: Props) {
+export function TeamPeopleTab({
+  teamId,
+  teamName,
+  isArchived,
+  hasChildren,
+  initialQuery,
+  highlightUserId,
+}: Props) {
   const queryClient = useQueryClient();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
+
+  useEffect(() => {
+    if (initialQuery !== undefined) setQuery(initialQuery);
+  }, [initialQuery]);
   const debouncedQuery = useDebouncedValue(query, 300);
   const [assignOpen, setAssignOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  const [includeSubNodes, setIncludeSubNodes] = useState(false);
+
   const { items, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useAssignedUsers(BASE_PATH, teamId, debouncedQuery);
+    useAssignedUsers(BASE_PATH, teamId, debouncedQuery, includeSubNodes);
 
   const handleRemove = async (userId: string) => {
     setRemovingId(userId);
@@ -118,6 +137,16 @@ export function TeamPeopleTab({ teamId, teamName, isArchived }: Props) {
         </PermissionGate>
       </div>
 
+      {hasChildren && (
+        <label className="flex flex-none cursor-pointer select-none items-center gap-2 text-xs text-brown-600">
+          <Checkbox
+            checked={includeSubNodes}
+            onCheckedChange={(v) => setIncludeSubNodes(v === true)}
+          />
+          Show also from sub-teams
+        </label>
+      )}
+
       {/* List (the only scroll area) */}
       <div ref={listRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
@@ -146,7 +175,9 @@ export function TeamPeopleTab({ teamId, teamName, isArchived }: Props) {
             {items.map((member) => (
               <div
                 key={member.id}
-                className="group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50"
+                className={`group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50 ${
+                  member.id === highlightUserId ? "bg-amber-50 ring-1 ring-amber-200" : ""
+                }`}
               >
                 <UserChip
                   id={member.id}

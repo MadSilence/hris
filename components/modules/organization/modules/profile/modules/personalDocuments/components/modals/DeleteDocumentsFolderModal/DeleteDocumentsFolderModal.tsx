@@ -60,8 +60,8 @@ export const DeleteDocumentsFolderModal: FC<
             <div>
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
-                Any documents inside this folder are affected too. Move out what you want to keep
-                before deleting.
+                The folder has to be empty. Move or delete the documents inside it first — deleting
+                a folder never removes its contents.
               </p>
             </div>
           </div>
@@ -73,7 +73,12 @@ export const DeleteDocumentsFolderModal: FC<
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirmAction}
+            // AlertDialogAction closes the dialog on click by default, which threw away the
+            // failure message before it could render — the refusal only reached the console.
+            onClick={(event) => {
+              event.preventDefault();
+              onConfirmAction();
+            }}
             className="bg-red-600 text-white hover:bg-red-700"
           >
             Delete folder

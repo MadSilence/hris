@@ -17,6 +17,8 @@ export type TeamNodeData = {
   childCount: number;
   collapsed: boolean;
   selected: boolean;
+  matched?: boolean;
+  dimmed?: boolean;
 };
 
 export type TeamFlowNode = Node<TeamNodeData, "team">;
@@ -24,11 +26,12 @@ export type TeamFlowNode = Node<TeamNodeData, "team">;
 const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 
 export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
-  const { team, childCount, collapsed, selected } = data;
-  const { onToggleCollapse } = useTeamCanvas();
+  const { team, childCount, collapsed, selected, matched, dimmed } = data;
+  const { onToggleCollapse, dropTargetId } = useTeamCanvas();
 
   const isArchived = team.status === "ARCHIVED";
   const hasChildren = childCount > 0;
+  const isDropTarget = dropTargetId === team.id;
 
   return (
     <div
@@ -38,6 +41,9 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
         isArchived && "border-dashed opacity-50",
+        matched && "border-amber-400 ring-2 ring-amber-300",
+        dimmed && "opacity-35",
+        isDropTarget && "border-emerald-400 ring-2 ring-emerald-300",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />

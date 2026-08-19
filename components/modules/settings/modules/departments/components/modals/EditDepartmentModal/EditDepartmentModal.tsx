@@ -16,7 +16,7 @@ import { useUpdateDepartment } from "@/components/modules/settings/modules/depar
 import {
   UserPickerField,
   type PickedUser,
-} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { DepartmentTreeNode } from "@/models/departments";
 
 const ROOT_VALUE = "none";

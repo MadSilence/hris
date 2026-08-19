@@ -133,15 +133,15 @@ export const UserCalendar: FC<Props> = ({
 
   useEffect(() => {
     if (!drag) return;
+    // The range used to be reported from inside the setDrag updater. React runs updaters during
+    // the render phase, so calling the parent's setState from there warned about updating one
+    // component while rendering another. The effect re-subscribes whenever `drag` changes, so the
+    // closure already holds the current value — no updater needed.
     const finish = () => {
-      setDrag((d) => {
-        if (d && onSelectRange) {
-          const start = d.anchor <= d.hover ? d.anchor : d.hover;
-          const end = d.anchor <= d.hover ? d.hover : d.anchor;
-          onSelectRange(start, end);
-        }
-        return null;
-      });
+      const start = drag.anchor <= drag.hover ? drag.anchor : drag.hover;
+      const end = drag.anchor <= drag.hover ? drag.hover : drag.anchor;
+      setDrag(null);
+      onSelectRange?.(start, end);
     };
     window.addEventListener("pointerup", finish);
     return () => window.removeEventListener("pointerup", finish);

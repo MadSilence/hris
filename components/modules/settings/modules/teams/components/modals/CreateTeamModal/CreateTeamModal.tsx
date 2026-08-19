@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -13,6 +13,10 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/public/desact/src/components/ui/select";
 import { useCreateTeam } from "@/components/modules/settings/modules/teams/hooks/useCreateTeam/useCreateTeam";
+import {
+  UserPickerField,
+  type PickedUser,
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
 
 const ROOT_VALUE = "none";
@@ -33,6 +37,7 @@ const validationSchema = Yup.object({
 
 export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId }: Props) {
   const createTeam = useCreateTeam();
+  const [lead, setLead] = useState<PickedUser | null>(null);
 
   const formik = useFormik({
     initialValues: { name: "", code: "", description: "", parentId: defaultParentId ?? "" },
@@ -44,12 +49,19 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
         code: values.code?.trim() || null,
         description: values.description?.trim() || null,
         parentId: values.parentId || null,
+        leadId: lead?.id ?? null,
       });
       onClose();
     },
   });
 
-  useEffect(() => { if (open) formik.resetForm(); }, [open]);
+  useEffect(() => {
+    if (open) {
+      formik.resetForm();
+      setLead(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); formik.handleSubmit(); }
@@ -89,6 +101,11 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Team lead</Label>
+            <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
           {createTeam.isError && <p className="text-sm text-red-500">{(createTeam.error as Error)?.message ?? "An error occurred."}</p>}
         </div>

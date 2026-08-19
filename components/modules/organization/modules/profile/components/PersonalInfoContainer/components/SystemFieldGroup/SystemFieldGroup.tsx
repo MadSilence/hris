@@ -32,7 +32,7 @@ import {
 import {
   UserPickerField,
   type PickedUser,
-} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 
 /**
  * System fields that already live somewhere better on this page: the header shows the name badge
@@ -174,14 +174,24 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
         return (
           <Input
             value={draft.firstName}
-            onChange={(e) => setDraft((d) => ({ ...d, firstName: e.currentTarget.value }))}
+            onChange={(e) => {
+              // Snapshot before the updater runs: React nulls `currentTarget` once the
+              // handler returns, and the functional setState body executes after that.
+              const value = e.target.value;
+              setDraft((d) => ({ ...d, firstName: value }));
+            }}
           />
         );
       case "sys:last_name":
         return (
           <Input
             value={draft.lastName}
-            onChange={(e) => setDraft((d) => ({ ...d, lastName: e.currentTarget.value }))}
+            onChange={(e) => {
+              // Snapshot before the updater runs: React nulls `currentTarget` once the
+              // handler returns, and the functional setState body executes after that.
+              const value = e.target.value;
+              setDraft((d) => ({ ...d, lastName: value }));
+            }}
           />
         );
       case "sys:email":
@@ -189,7 +199,12 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
           <Input
             type="email"
             value={draft.email}
-            onChange={(e) => setDraft((d) => ({ ...d, email: e.currentTarget.value }))}
+            onChange={(e) => {
+              // Snapshot before the updater runs: React nulls `currentTarget` once the
+              // handler returns, and the functional setState body executes after that.
+              const value = e.target.value;
+              setDraft((d) => ({ ...d, email: value }));
+            }}
           />
         );
       case "sys:hire_date":
@@ -197,7 +212,12 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
           <Input
             type="date"
             value={draft.hireDate}
-            onChange={(e) => setDraft((d) => ({ ...d, hireDate: e.currentTarget.value }))}
+            onChange={(e) => {
+              // Snapshot before the updater runs: React nulls `currentTarget` once the
+              // handler returns, and the functional setState body executes after that.
+              const value = e.target.value;
+              setDraft((d) => ({ ...d, hireDate: value }));
+            }}
           />
         );
       case "sys:probation_end":
@@ -205,7 +225,12 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
           <Input
             type="date"
             value={draft.probationEnd}
-            onChange={(e) => setDraft((d) => ({ ...d, probationEnd: e.currentTarget.value }))}
+            onChange={(e) => {
+              // Snapshot before the updater runs: React nulls `currentTarget` once the
+              // handler returns, and the functional setState body executes after that.
+              const value = e.target.value;
+              setDraft((d) => ({ ...d, probationEnd: value }));
+            }}
           />
         );
       case "sys:manager":

@@ -17,6 +17,7 @@ export type CompanyNodeData = {
   teamCount: number;
   collapsed: boolean;
   selected: boolean;
+  dimmed?: boolean;
 };
 
 export type CompanyFlowNode = Node<CompanyNodeData, "company">;
@@ -24,8 +25,8 @@ export type CompanyFlowNode = Node<CompanyNodeData, "company">;
 const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 
 export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
-  const { name, logo, memberCount, teamCount, collapsed, selected } = data;
-  const { onToggleCollapse } = useTeamCanvas();
+  const { name, logo, memberCount, teamCount, collapsed, selected, dimmed } = data;
+  const { onToggleCollapse, dropTargetId } = useTeamCanvas();
 
   const hasChildren = teamCount > 0;
 
@@ -36,6 +37,8 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
         selected
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
+        dimmed && "opacity-35",
+        dropTargetId === COMPANY_NODE_ID && "border-emerald-400 ring-2 ring-emerald-300",
       )}
     >
       <div className="flex flex-none items-center">
@@ -67,7 +70,8 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{memberCount}</span> Members
+          <span className="font-semibold text-brown-700">{memberCount}</span>{" "}
+          {memberCount === 1 ? "Person" : "People"}
         </span>
         <span>
           <span className="font-semibold text-brown-700">{teamCount}</span> Subs

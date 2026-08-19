@@ -93,8 +93,15 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
     }
   };
 
+  /**
+   * Two refreshes on purpose. The SWR key backs client consumers, but the header itself renders the
+   * user object handed down from the server layout — so without re-running the server render a
+   * successful termination just closed the modal and left the old data on screen.
+   */
   const refreshUser = async (targetUserId: string) => {
-    return mutate<User>(`/api/users/${targetUserId}`);
+    const result = await mutate<User>(`/api/users/${targetUserId}`);
+    router.refresh();
+    return result;
   };
 
   const handleAvatarConfirm = async (submission: UpdateUserAvatarSubmission) => {

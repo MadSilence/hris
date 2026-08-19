@@ -32,6 +32,9 @@ type Args = {
   company: CompanyInfo;
   collapsed: Set<string>;
   selectedId: string | null;
+  /** Search hits. While a search is running, everything else is dimmed. */
+  matchedIds?: Set<string>;
+  searchActive?: boolean;
 };
 
 type FlowGraph = {
@@ -39,7 +42,14 @@ type FlowGraph = {
   edges: Edge[];
 };
 
-export function useDepartmentFlow({ tree: data, company, collapsed, selectedId }: Args): FlowGraph {
+export function useDepartmentFlow({
+  tree: data,
+  company,
+  collapsed,
+  selectedId,
+  matchedIds,
+  searchActive = false,
+}: Args): FlowGraph {
   return useMemo(() => {
     const nodes: OrgFlowNode[] = [];
     const edges: Edge[] = [];
@@ -70,6 +80,7 @@ export function useDepartmentFlow({ tree: data, company, collapsed, selectedId }
             departmentCount: data.length,
             collapsed: collapsed.has(COMPANY_NODE_ID),
             selected: selectedId === COMPANY_NODE_ID,
+            dimmed: searchActive,
           },
         });
       } else {
@@ -83,6 +94,8 @@ export function useDepartmentFlow({ tree: data, company, collapsed, selectedId }
             childCount: department.children?.length ?? 0,
             collapsed: collapsed.has(department.id),
             selected: selectedId === department.id,
+            matched: matchedIds?.has(department.id) ?? false,
+            dimmed: searchActive && !(matchedIds?.has(department.id) ?? false),
           },
         });
       }
@@ -100,5 +113,5 @@ export function useDepartmentFlow({ tree: data, company, collapsed, selectedId }
     });
 
     return { nodes, edges };
-  }, [data, company.name, company.logo, company.memberCount, collapsed, selectedId]);
+  }, [data, company.name, company.logo, company.memberCount, collapsed, selectedId, matchedIds, searchActive]);
 }

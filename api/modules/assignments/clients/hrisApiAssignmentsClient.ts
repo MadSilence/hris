@@ -16,7 +16,13 @@ import type {
 import type { AssignedUsersPage } from "@/models/assignedUser";
 import { resolveBackendAssetUrl } from "@/api/modules/users/mappers/userMapper/resolveBackendAssetUrl";
 
-export type AssignedUsersParams = { q?: string | null; cursor?: string | null; limit?: number };
+export type AssignedUsersParams = {
+  q?: string | null;
+  cursor?: string | null;
+  limit?: number;
+  /** Roster of the whole branch instead of just this unit. */
+  includeSubNodes?: boolean;
+};
 
 class HrisApiAssignmentsClient {
   private assignmentsBase(basePath: string, id: string): string {
@@ -32,6 +38,7 @@ class HrisApiAssignmentsClient {
     if (params.q) search.set("q", params.q);
     if (params.cursor) search.set("cursor", params.cursor);
     if (params.limit != null) search.set("limit", String(params.limit));
+    if (params.includeSubNodes) search.set("includeSubNodes", "true");
     const query = search.toString();
 
     const response = await hrisApiClient.get<AssignedUsersPage>(

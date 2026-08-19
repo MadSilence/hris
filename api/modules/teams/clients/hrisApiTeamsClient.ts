@@ -2,14 +2,17 @@ import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   TeamDTO,
   TeamTreeNodeDTO,
+  TeamSummaryDTO,
+  TeamPersonDTO,
   CreateTeamRequest,
   UpdateTeamRequest,
+  MoveTeamRequest,
   DeleteTeamRequest,
   ArchiveTeamRequest,
 } from "@/api/modules/teams/dto";
 import { teamMapper } from "@/api/modules/teams/mappers";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type { Team, TeamTreeNode } from "@/models/teams";
+import type { Team, TeamTreeNode, TeamSummary, TeamPerson } from "@/models/teams";
 
 function toBackendBody(
   body: CreateTeamRequest | UpdateTeamRequest,
@@ -35,6 +38,20 @@ export class HrisApiTeamsClient {
     return teamMapper.mapTreeNodeDTOs(dtos);
   }
 
+  public async summary(includeArchived = false): Promise<TeamSummary> {
+    const params = new URLSearchParams();
+    if (includeArchived) params.set("includeArchived", "true");
+    const dto = await hrisApiClient.get<TeamSummaryDTO>(`${this.BASE_PATH}/summary?${params}`);
+    return { peopleAssigned: dto.peopleAssigned, unitsTotal: dto.unitsTotal };
+  }
+
+  public async people(q?: string): Promise<TeamPerson[]> {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    const dtos = await hrisApiClient.get<TeamPersonDTO[]>(`${this.BASE_PATH}/people?${params}`);
+    return dtos;
+  }
+
   public async getById(id: string): Promise<Team> {
     const dto = await hrisApiClient.get<TeamDTO>(`${this.BASE_PATH}/${id}`);
     return teamMapper.mapDTO(dto);
@@ -46,6 +63,13 @@ export class HrisApiTeamsClient {
 
   public async update(id: string, body: UpdateTeamRequest): Promise<UpdateResponse> {
     return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, toBackendBody(body));
+  }
+
+  public async move(id: string, body: MoveTeamRequest): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/move`,
+      body as unknown as Record<string, unknown>,
+    );
   }
 
   public async archive(id: string, body?: ArchiveTeamRequest): Promise<UpdateResponse> {

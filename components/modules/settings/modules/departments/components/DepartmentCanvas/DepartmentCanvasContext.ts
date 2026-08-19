@@ -4,6 +4,8 @@ import { createContext, useContext } from "react";
 
 export type DepartmentCanvasHandlers = {
   onToggleCollapse: (id: string) => void;
+  /** Node currently under the dragged one and accepting it. */
+  dropTargetId?: string | null;
 };
 
 const DepartmentCanvasContext = createContext<DepartmentCanvasHandlers | null>(null);

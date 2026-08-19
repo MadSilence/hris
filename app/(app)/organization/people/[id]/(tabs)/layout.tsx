@@ -3,7 +3,8 @@ import { UserProvider } from "@/components/providers/UserProvider";
 import { ProfileShell } from "@/components/modules/organization/modules/profile/components/ProfileShell/ProfileShell";
 import { getUserServer } from "@/server/users/users";
 import { AccessDenied } from "@/components/auth/AccessDenied";
-import { ForbiddenError } from "@/components/clients/exceptions";
+import { ForbiddenError, UnauthorizedError } from "@/components/clients/exceptions";
+import { redirect } from "next/navigation";
 
 export default async function UserTabsLayout({
   children,
@@ -21,6 +22,10 @@ export default async function UserTabsLayout({
     user = await getUserServer(id);
   } catch (e) {
     if (e instanceof ForbiddenError) return <AccessDenied/>;
+    // An expired or invalidated token (changing someone's roles or field access rotates the
+    // perm-hash and cuts their session) surfaced here as a raw Next error page. Send them to log
+    // in again instead.
+    if (e instanceof UnauthorizedError) redirect("/login");
     throw e;
   }
 

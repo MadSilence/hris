@@ -42,8 +42,8 @@ function saveToStorage(etag: string, payload: EffectiveAccess) {
   }
 }
 
-// Clears cached access and forces re-login. Used on 401 (incl. PERM_HASH_MISMATCH),
-// both from the /me/access fetch and from mutations that can invalidate perm_hash.
+// Clears cached access and forces re-login. Only for places that know the session is gone —
+// ordinary 401s are judged by the API client, which probes before throwing anyone out.
 export function forceReauthRedirect() {
   clearPermissionsStorage();
   if (typeof window !== "undefined" && window.location.pathname !== "/login") {
@@ -81,9 +81,11 @@ async function fetchMeAccess(internalApiClient: InternalApiClient): Promise<Effe
     }
     return payload;
   } catch (err) {
-    // 401 (including PERM_HASH_MISMATCH) → session/permissions are stale: drop cache, re-login.
+    // 401 here means the cached snapshot is worthless — drop it and answer "no access yet". Whether
+    // this is a dead session or just a rotated perm-hash is decided in one place, the API client,
+    // which redirects only after confirming the session is actually gone.
     if (err instanceof UnauthorizedError) {
-      forceReauthRedirect();
+      clearPermissionsStorage();
       return null;
     }
     throw err;

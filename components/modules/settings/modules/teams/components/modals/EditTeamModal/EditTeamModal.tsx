@@ -16,7 +16,7 @@ import { useUpdateTeam } from "@/components/modules/settings/modules/teams/hooks
 import {
   UserPickerField,
   type PickedUser,
-} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
 
 const ROOT_VALUE = "none";

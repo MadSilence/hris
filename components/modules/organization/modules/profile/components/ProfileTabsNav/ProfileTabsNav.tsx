@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
-import { useCanAccess } from "@/components/auth/useAccess";
+import { useAccess } from "@/components/auth/useAccess";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { canAccess, isSystemOwner } from "@/models/access";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   useProfileEditGuard,
@@ -34,14 +36,28 @@ export function ProfileTabsNav({ userId }: Props) {
   const { isDirty } = useProfileEditGuard();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
-  const canViewDocuments = useCanAccess("PEOPLE.DOCUMENTS", "VIEW");
-  const canViewTimeOff = useCanAccess("PEOPLE.TIME_OFF", "VIEW");
+  const { access } = useAccess();
+  const { userId: currentUserId } = useCurrentUser();
+  const isOwnProfile = currentUserId === userId;
 
-  const visibleTabs = TABS.filter((tab) => {
-    if (tab.resource === "PEOPLE.DOCUMENTS") return canViewDocuments;
-    if (tab.resource === "PEOPLE.TIME_OFF") return canViewTimeOff;
-    return true;
-  });
+  /**
+   * Scope matters here, not just the grant. An ordinary employee holds DOCUMENTS and TIME_OFF at
+   * SELF, so checking the permission alone put both tabs on *everyone's* profile — where they then
+   * rendered an empty list or a row of disabled buttons. On someone else's page the grant only
+   * counts if it reaches past the person's own record.
+   */
+  const canSeeTab = (resource: ResourceCode) => {
+    if (!canAccess({ access, resource, action: "VIEW" })) return false;
+    if (isOwnProfile) return true;
+    // The owner passes canAccess without any scopes listed — don't let the check below hide
+    // everything from them.
+    if (isSystemOwner(access)) return true;
+
+    const scopes = access?.permissions?.[resource]?.VIEW ?? [];
+    return scopes.some((scope) => scope !== "SELF");
+  };
+
+  const visibleTabs = TABS.filter((tab) => !tab.resource || canSeeTab(tab.resource));
 
   const active =
     visibleTabs.find((tab) => pathname === `${base}/${tab.id}`)?.id ?? "personal";

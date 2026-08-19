@@ -18,9 +18,14 @@ function unwrap<T>(result: AssignmentActionResult<T>): T {
   return result.data;
 }
 
-export const useAssignedUsers = (basePath: string, id: string, q: string) => {
+export const useAssignedUsers = (
+  basePath: string,
+  id: string,
+  q: string,
+  includeSubNodes = false,
+) => {
   const query = useInfiniteQuery<AssignedUsersPage>({
-    queryKey: [...assignedUsersQueryKey(basePath, id), q],
+    queryKey: [...assignedUsersQueryKey(basePath, id), q, includeSubNodes],
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) =>
       unwrap(
@@ -28,6 +33,7 @@ export const useAssignedUsers = (basePath: string, id: string, q: string) => {
           q: q || null,
           cursor: pageParam as string | null,
           limit: PAGE_SIZE,
+          includeSubNodes,
         }),
       ),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,

@@ -2,11 +2,12 @@ import { hrisApiTeamsClient } from "@/api/modules/teams/clients";
 import type {
   CreateTeamRequest,
   UpdateTeamRequest,
+  MoveTeamRequest,
   DeleteTeamRequest,
   ArchiveTeamRequest,
 } from "@/api/modules/teams/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type { Team, TeamTreeNode } from "@/models/teams";
+import type { Team, TeamTreeNode, TeamSummary, TeamPerson } from "@/models/teams";
 
 export class HrisTeamsService {
   public async list(): Promise<Team[]> {
@@ -15,6 +16,14 @@ export class HrisTeamsService {
 
   public async tree(nested: boolean, includeArchived?: boolean): Promise<TeamTreeNode[]> {
     return hrisApiTeamsClient.tree(nested, includeArchived);
+  }
+
+  public async summary(includeArchived?: boolean): Promise<TeamSummary> {
+    return hrisApiTeamsClient.summary(includeArchived);
+  }
+
+  public async people(q?: string): Promise<TeamPerson[]> {
+    return hrisApiTeamsClient.people(q);
   }
 
   public async getById(id: string): Promise<Team> {
@@ -27,6 +36,10 @@ export class HrisTeamsService {
 
   public async update(id: string, body: UpdateTeamRequest): Promise<UpdateResponse> {
     return hrisApiTeamsClient.update(id, body);
+  }
+
+  public async move(id: string, body: MoveTeamRequest): Promise<UpdateResponse> {
+    return hrisApiTeamsClient.move(id, body);
   }
 
   public async archive(id: string, body?: ArchiveTeamRequest): Promise<UpdateResponse> {

@@ -1,5 +1,40 @@
 import { BadRequestError, ForbiddenError, NotFoundError, ServerError, UnauthorizedError } from "@/components/clients/exceptions";
 
+/**
+ * A 401 does not always mean the session is gone. Editing role permissions and starting or stopping
+ * impersonation rotate the user's perm-hash, and every request that was already in flight still
+ * carries the previous token — those land after the new cookie is in place and come back 401. The
+ * cure used to be a hard redirect to /login, which threw people out of a perfectly good session
+ * (pressing Back put them right back where they were).
+ *
+ * So: ask once whether the session is actually dead before redirecting. The probe is a fresh
+ * request, so it carries whatever cookie is current — exactly the thing the stale request lacked.
+ * Single-flight, and the answer is dropped after a second so a real logout is noticed promptly.
+ */
+const SESSION_PROBE_PATH = "/api/users/me";
+let sessionProbe: Promise<boolean> | null = null;
+
+/** Wrapped so tests can observe the redirect: jsdom's location is read-only. */
+export const sessionNavigation = {
+  redirectToLogin() {
+    window.location.assign("/login");
+  },
+};
+
+async function isSessionAlive(): Promise<boolean> {
+  if (!sessionProbe) {
+    sessionProbe = fetch(SESSION_PROBE_PATH, { credentials: "same-origin", cache: "no-store" })
+      .then((response) => response.ok)
+      .catch(() => false);
+    void sessionProbe.finally(() => {
+      setTimeout(() => {
+        sessionProbe = null;
+      }, 1000);
+    });
+  }
+  return sessionProbe;
+}
+
 export class InternalApiClient {
   private readonly apiPath = "/api";
   public constructor(private readonly basePath: string) {}
@@ -75,8 +110,17 @@ export class InternalApiClient {
         throw new BadRequestError(friendly);
       case 404:
         throw new NotFoundError();
-      case 401:
+      case 401: {
+        // Redirect only if the session is really dead (see the note above isSessionAlive). A stale
+        // in-flight request still throws, so the caller can refetch with the current token.
+        const onLoginPage =
+          typeof window === "undefined" || window.location.pathname.startsWith("/login");
+        const isProbe = path === SESSION_PROBE_PATH.replace("/api", "");
+        if (!onLoginPage && !isProbe && !(await isSessionAlive())) {
+          sessionNavigation.redirectToLogin();
+        }
         throw new UnauthorizedError(friendly);
+      }
       case 403:
         if (typeof window !== "undefined" && method !== "GET") {
           window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: friendly }));

@@ -17,6 +17,8 @@ export type DepartmentNodeData = {
   childCount: number;
   collapsed: boolean;
   selected: boolean;
+  matched?: boolean;
+  dimmed?: boolean;
 };
 
 export type DepartmentFlowNode = Node<DepartmentNodeData, "department">;
@@ -24,11 +26,12 @@ export type DepartmentFlowNode = Node<DepartmentNodeData, "department">;
 const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 
 export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
-  const { department, childCount, collapsed, selected } = data;
-  const { onToggleCollapse } = useDepartmentCanvas();
+  const { department, childCount, collapsed, selected, matched, dimmed } = data;
+  const { onToggleCollapse, dropTargetId } = useDepartmentCanvas();
 
   const isArchived = department.status === "ARCHIVED";
   const hasChildren = childCount > 0;
+  const isDropTarget = dropTargetId === department.id;
 
   return (
     <div
@@ -38,6 +41,9 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
         isArchived && "border-dashed opacity-50",
+        matched && "border-amber-400 ring-2 ring-amber-300",
+        dimmed && "opacity-35",
+        isDropTarget && "border-emerald-400 ring-2 ring-emerald-300",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />

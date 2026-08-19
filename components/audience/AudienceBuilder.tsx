@@ -28,7 +28,7 @@ import {
 import { useAccess } from "@/components/auth/useAccess";
 import {
   UserPickerField,
-} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";

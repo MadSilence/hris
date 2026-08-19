@@ -71,7 +71,12 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirmAction}
+            // AlertDialogAction closes the dialog on click by default, which threw away the
+            // failure message before it could render — the refusal only reached the console.
+            onClick={(event) => {
+              event.preventDefault();
+              onConfirmAction();
+            }}
             className="bg-red-600 text-white hover:bg-red-700"
           >
             Delete document

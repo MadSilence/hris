@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
@@ -20,6 +20,8 @@ import { ExportOrgTreeModal } from "@/components/modules/settings/shared/ExportO
 type Props = {
   team: TeamTreeNode;
   parentName: string | null;
+  /** Set when a people-search hit points into this team: opens the People tab on them. */
+  peopleFocus?: { userId: string; name: string } | null;
   onEdit: () => void;
   onAddChild: () => void;
   onArchive: () => void;
@@ -63,6 +65,7 @@ function LeadSection({ team }: { team: TeamTreeNode }) {
 export function TeamDetailsPanel({
   team,
   parentName,
+  peopleFocus,
   onEdit,
   onAddChild,
   onArchive,
@@ -71,6 +74,10 @@ export function TeamDetailsPanel({
   onRecenter,
 }: Props) {
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    if (peopleFocus) setActiveTab("people");
+  }, [peopleFocus]);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const isArchived = team.status === "ARCHIVED";
 
@@ -208,7 +215,14 @@ export function TeamDetailsPanel({
         </TabsContent>
 
         <TabsContent value="people" className="mt-5 flex min-h-0 flex-1 flex-col">
-          <TeamPeopleTab teamId={team.id} teamName={team.name} isArchived={isArchived} />
+          <TeamPeopleTab
+            teamId={team.id}
+            teamName={team.name}
+            isArchived={isArchived}
+            hasChildren={(team.children?.length ?? 0) > 0}
+            initialQuery={peopleFocus?.name}
+            highlightUserId={peopleFocus?.userId ?? null}
+          />
         </TabsContent>
       </Tabs>
     </div>

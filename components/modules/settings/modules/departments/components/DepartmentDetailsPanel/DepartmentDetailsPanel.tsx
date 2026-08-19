@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
@@ -20,6 +20,8 @@ import { ExportOrgTreeModal } from "@/components/modules/settings/shared/ExportO
 type Props = {
   department: DepartmentTreeNode;
   parentName: string | null;
+  /** Set when a people-search hit points into this department: opens the People tab on them. */
+  peopleFocus?: { userId: string; name: string } | null;
   onEdit: () => void;
   onAddChild: () => void;
   onArchive: () => void;
@@ -63,6 +65,7 @@ function LeadSection({ department }: { department: DepartmentTreeNode }) {
 export function DepartmentDetailsPanel({
   department,
   parentName,
+  peopleFocus,
   onEdit,
   onAddChild,
   onArchive,
@@ -71,6 +74,10 @@ export function DepartmentDetailsPanel({
   onRecenter,
 }: Props) {
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    if (peopleFocus) setActiveTab("people");
+  }, [peopleFocus]);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const isArchived = department.status === "ARCHIVED";
 
@@ -212,6 +219,9 @@ export function DepartmentDetailsPanel({
             departmentId={department.id}
             departmentName={department.name}
             isArchived={isArchived}
+            hasChildren={(department.children?.length ?? 0) > 0}
+            initialQuery={peopleFocus?.name}
+            highlightUserId={peopleFocus?.userId ?? null}
           />
         </TabsContent>
       </Tabs>

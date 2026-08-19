@@ -2,6 +2,7 @@ import { hrisApiDepartmentsClient } from "@/api/modules/departments/clients";
 import type {
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
+  MoveDepartmentRequest,
   DeleteDepartmentRequest,
   ArchiveDepartmentRequest,
 } from "@/api/modules/departments/dto";
@@ -9,6 +10,8 @@ import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type {
   Department,
   DepartmentTreeNode,
+  DepartmentSummary,
+  DepartmentPerson,
 } from "@/models/departments";
 
 export class HrisDepartmentsService {
@@ -18,6 +21,14 @@ export class HrisDepartmentsService {
 
   public async tree(nested: boolean, includeArchived?: boolean): Promise<DepartmentTreeNode[]> {
     return hrisApiDepartmentsClient.tree(nested, includeArchived);
+  }
+
+  public async summary(includeArchived?: boolean): Promise<DepartmentSummary> {
+    return hrisApiDepartmentsClient.summary(includeArchived);
+  }
+
+  public async people(q?: string): Promise<DepartmentPerson[]> {
+    return hrisApiDepartmentsClient.people(q);
   }
 
   public async getById(id: string): Promise<Department> {
@@ -30,6 +41,10 @@ export class HrisDepartmentsService {
 
   public async update(id: string, body: UpdateDepartmentRequest): Promise<UpdateResponse> {
     return hrisApiDepartmentsClient.update(id, body);
+  }
+
+  public async move(id: string, body: MoveDepartmentRequest): Promise<UpdateResponse> {
+    return hrisApiDepartmentsClient.move(id, body);
   }
 
   public async archive(id: string, body?: ArchiveDepartmentRequest): Promise<UpdateResponse> {

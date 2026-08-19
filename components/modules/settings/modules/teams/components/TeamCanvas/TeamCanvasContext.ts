@@ -4,6 +4,8 @@ import { createContext, useContext } from "react";
 
 export type TeamCanvasHandlers = {
   onToggleCollapse: (id: string) => void;
+  /** Node currently under the dragged one and accepting it. */
+  dropTargetId?: string | null;
 };
 
 const TeamCanvasContext = createContext<TeamCanvasHandlers | null>(null);

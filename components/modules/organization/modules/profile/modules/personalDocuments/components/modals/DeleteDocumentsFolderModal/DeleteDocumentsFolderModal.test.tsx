@@ -32,7 +32,7 @@ describe("DeleteDocumentsFolderModal", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders folder content with documents warning", () => {
+  it("tells the user the folder must be emptied first", () => {
     renderModal();
 
     expect(
@@ -41,8 +41,9 @@ describe("DeleteDocumentsFolderModal", () => {
 
     expect(screen.getByText("Contracts")).toBeInTheDocument();
 
+    // The backend refuses to delete a non-empty folder, so the warning must not imply a cascade.
     expect(
-      screen.getByText(/any documents inside this folder are affected too/i),
+      screen.getByText(/the folder has to be empty/i),
     ).toBeInTheDocument();
   });
 

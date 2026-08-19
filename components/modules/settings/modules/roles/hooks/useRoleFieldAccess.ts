@@ -5,7 +5,7 @@ import {
   UpdateRoleFieldAccessRequest,
 } from "@/api/modules/roles/dto/RoleFieldAccessDTO";
 import { rolesQueryKeys } from "@/components/modules/settings/modules/roles/utils/rolesQueryKeys";
-import { forceReauthRedirect, useInvalidateAccessQuery } from "@/components/auth/useAccess";
+import { useInvalidateAccessQuery } from "@/components/auth/useAccess";
 import { UnauthorizedError } from "@/components/clients/exceptions";
 
 export function useRoleFieldAccess(roleId: string) {
@@ -31,9 +31,12 @@ export function useRoleFieldAccess(roleId: string) {
       // Go through useInvalidateAccessQuery so the cached ETag is dropped too.
       await invalidateAccess();
     },
-    onError: (error) => {
+    onError: async (error) => {
+      // 401 PERM_HASH_MISMATCH means our own snapshot is stale, not that the session died — the
+      // route already swapped the token cookie. Re-read access; the API client decides whether a
+      // 401 is worth a logout.
       if (error instanceof UnauthorizedError) {
-        forceReauthRedirect();
+        await invalidateAccess();
       }
     },
   });

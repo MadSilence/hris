@@ -41,7 +41,7 @@ import { TimeOffAccrualFrequency } from "@/api/modules/timeOff/timeOffPolicyAccr
 import {
   UserPickerField,
   type PickedUser,
-} from "@/components/modules/settings/modules/departments/components/UserPickerField/UserPickerField";
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import {
   PolicyWizardValues,

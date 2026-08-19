@@ -214,7 +214,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const description =
     semantics === "add"
       ? `This only adds the ${noun} — nobody is removed. The audience is captured once, now.`
-      : `This sets the ${noun} for the selected people. Anyone who already has one is reassigned.`;
+      : `A person can belong to one ${noun} only, so anyone who already has one leaves it — this is a move, not an addition.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeGuarded(); }}>
