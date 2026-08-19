@@ -25,7 +25,7 @@ export const settingsGroups: SettingsGroup[] = [
     icon: <Building/>,
     items: [
       { label: "Company", href: "/settings/general/company", resources: ["SETTINGS.GENERAL"] },
-      // Customisation (appearance/theme) deferred — nothing consumes theme yet; re-add at redesign (block 4).
+      { label: "Appearance", href: "/settings/general/customisation", resources: ["SETTINGS.GENERAL"] },
       { label: "Dashboard", href: "/settings/general/dashboard", resources: ["SETTINGS.GENERAL"] },
       {
         label: "Legal Entities & Offices",

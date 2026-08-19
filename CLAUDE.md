@@ -150,8 +150,8 @@ The following areas are incomplete or inconsistent. Do not use them as reference
 
 - **`features/` directory** — `features/accounts/` is an orphan module. It bypasses `InternalApiClient`, uses raw `fetch`, has no skeleton
   loader, and its `AccountCard.tsx` is empty. The folder name even has a typo (`componenets/`). Ignore it entirely.
-- **Mock data in containers** — `CompanyProfileSettingsContainer` and `CompanyAppearanceSettingsContainer` render hardcoded mock objects
-  instead of real API data. Do not copy this pattern.
+- **Mock data in containers** — `CompanyProfileSettingsContainer` renders a hardcoded mock object instead of real API data. Do not copy
+  this pattern. (`CompanyAppearanceSettingsContainer` was rebuilt on the real API and is now a fine reference.)
 - **Duplicate roles folders** — `components/modules/settings/modules/roles/components/` contains both `RoleDetailsComponent/` and
   `RoleDetailsContainer/`. The active implementation is `RoleDetailsContainer/`. Do not copy from `RoleDetailsComponent/`.
 - **`ErrorBoundary.tsx` is currently empty** — `components/feedback/ErrorBoundary.tsx` has no implementation. Containers that do
