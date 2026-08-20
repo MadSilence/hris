@@ -427,6 +427,10 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
       return <>{formatDate(user.terminationDate) ?? <NotSet />}</>;
     case "sys:job":
       return <>{user.jobName || <NotSet />}</>;
+    // Not in EDITABLE_SYSTEM_FIELDS on purpose: the grade follows the position, so it changes by
+    // changing the job, never on its own.
+    case "sys:level":
+      return <>{user.level?.name || <NotSet />}</>;
     case "sys:department":
       return <>{user.department?.name || <NotSet />}</>;
     case "sys:office":

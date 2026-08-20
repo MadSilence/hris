@@ -1,3 +1,4 @@
+import { partialMock } from "@/test/types";
 ﻿import { hrisApiTimeOffPolicyApprovalSettingsClient } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/clients";
 import { hrisTimeOffPolicyApprovalSettingsService } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/services";
 import { TimeOffPolicyApproverType } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
@@ -10,6 +11,8 @@ jest.mock("@/api/modules/timeOff/timeOffPolicyApprovalSettings/clients", () => (
 }));
 
 describe("HrisTimeOffPolicyApprovalSettingsService", () => {
+  const updateResponse = { id: "policy-id" };
+
   const settings = {
     policyId: "policy-id",
     allApprovalsRequired: true,
@@ -33,7 +36,7 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
   it("delegates getByPolicyId to client", async () => {
     jest
       .mocked(hrisApiTimeOffPolicyApprovalSettingsClient.getByPolicyId)
-      .mockResolvedValue(settings as any);
+      .mockResolvedValue(partialMock(settings));
 
     const result =
       await hrisTimeOffPolicyApprovalSettingsService.getByPolicyId("policy-id");
@@ -46,8 +49,9 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
 
   it("delegates update to client", async () => {
     jest
+      // update resolves an UpdateResponse, not the settings — the old mock returned the wrong shape.
       .mocked(hrisApiTimeOffPolicyApprovalSettingsClient.update)
-      .mockResolvedValue(settings as any);
+      .mockResolvedValue(updateResponse);
 
     const request = {
       allApprovalsRequired: true,
@@ -71,6 +75,6 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
     expect(
       hrisApiTimeOffPolicyApprovalSettingsClient.update
     ).toHaveBeenCalledWith("policy-id", request);
-    expect(result).toEqual(settings);
+    expect(result).toEqual(updateResponse);
   });
 });

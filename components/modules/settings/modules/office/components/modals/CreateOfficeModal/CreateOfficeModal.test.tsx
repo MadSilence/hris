@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { CreateOfficeModal } from "./CreateOfficeModal";
@@ -7,7 +8,7 @@ const mockCreateOfficeForm = jest.fn();
 jest.mock(
   "@/components/modules/settings/modules/office/components/modals/CreateOfficeModal/CreateOfficeForm",
   () => ({
-    CreateOfficeForm: (props: any) => {
+    CreateOfficeForm: (props: MockedFormProps) => {
       mockCreateOfficeForm(props);
 
       return (

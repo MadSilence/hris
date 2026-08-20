@@ -21,7 +21,7 @@ export const archiveLegalEntityAction = async (
   try {
     await legalEntityService.archiveLegalEntity(id, assignedUsersStrategy);
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while archiving the legal entity. Please try again.",
@@ -35,7 +35,7 @@ export const restoreLegalEntityAction = async (
   try {
     await legalEntityService.restoreLegalEntity(id);
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while restoring the legal entity. Please try again.",

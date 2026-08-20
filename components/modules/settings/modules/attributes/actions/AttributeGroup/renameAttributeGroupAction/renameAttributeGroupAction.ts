@@ -14,7 +14,7 @@ export const renameAttributeGroupAction = async (
       status: ActionStatus.SUCCESS,
       data: data
     }
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while renaming group. Please try again."

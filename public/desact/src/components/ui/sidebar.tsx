@@ -1,29 +1,29 @@
 "use client";
 
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import * as React from"react";
+import { Slot } from"@radix-ui/react-slot";
+import { VariantProps, cva } from"class-variance-authority";
+import { PanelLeftIcon } from"lucide-react";
 
-import { useIsMobile } from "./use-mobile";
-import { cn } from "./utils";
-import { Button } from "./button";
-import { Input } from "./input";
-import { Separator } from "./separator";
+import { useIsMobile } from"./use-mobile";
+import { cn } from"./utils";
+import { Button } from"./button";
+import { Input } from"./input";
+import { Separator } from"./separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "./sheet";
-import { Skeleton } from "./skeleton";
+} from"./sheet";
+import { Skeleton } from"./skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./tooltip";
+} from"./tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -109,7 +109,7 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
+  // We add a state so that we can do data-state="expanded" or"collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed";
 

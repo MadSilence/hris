@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { RenameAttributeGroupModal } from "./RenameAttributeGroupModal";
@@ -7,7 +8,7 @@ const mockRenameAttributeGroupForm = jest.fn();
 jest.mock(
   "@/components/modules/settings/modules/attributes/components/AttributeGroup/RenameAttributeGroupForm",
   () => ({
-    RenameAttributeGroupForm: (props: any) => {
+    RenameAttributeGroupForm: (props: MockedFormProps) => {
       mockRenameAttributeGroupForm(props);
 
       return (

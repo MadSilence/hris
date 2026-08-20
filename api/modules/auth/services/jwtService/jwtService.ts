@@ -55,7 +55,7 @@ export class JwtService {
   }
 
   private async getPublicKeyFromToken(jwt: Jwt) {
-    const signingKey = await jwksClient.getSigningKey((jwt.header as any).kid);
+    const signingKey = await jwksClient.getSigningKey(jwt.header.kid);
     return signingKey.getPublicKey();
   }
 

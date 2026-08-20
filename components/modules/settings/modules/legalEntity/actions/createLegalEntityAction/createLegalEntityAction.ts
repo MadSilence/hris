@@ -14,7 +14,7 @@ export const createLegalEntityAction = async (
       status: ActionStatus.SUCCESS,
       data: created,
     };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage:

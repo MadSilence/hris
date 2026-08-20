@@ -527,7 +527,7 @@ function parseDate(raw: unknown): Date | null {
     return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  const d = new Date(raw as any);
+  const d = new Date(raw as string | number | Date);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 

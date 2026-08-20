@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from"react";
+import * as TabsPrimitive from"@radix-ui/react-tabs";
 
-import { cn } from "./utils";
+import { cn } from"./utils";
 
 function Tabs({
   className,
@@ -140,7 +140,7 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         // No active background here: the sliding indicator in TabsList paints it.
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:text-foreground text-foreground dark:text-muted-foreground relative z-10 inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-[11px] border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground relative z-10 inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-[11px] border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from '@testing-library/react';
 import { useMutation } from '@tanstack/react-query';
 import {
@@ -30,8 +31,8 @@ describe('useCreateAttributeGroupAction', () => {
     (useInvalidateAttributeGroupsQuery as jest.Mock).mockReturnValue(mockRevalidate);
     (createAttributeGroupAction as jest.Mock).mockResolvedValue({ id: '1' });
 
-    let capturedOpts: any;
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return { mutate: jest.fn(), mutateAsync: opts.mutationFn };
     });

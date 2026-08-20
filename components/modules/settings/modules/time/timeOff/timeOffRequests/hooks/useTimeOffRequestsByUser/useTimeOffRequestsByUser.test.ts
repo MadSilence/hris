@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { renderHook } from "@testing-library/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { timeOffRequestsService } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/services/timeOffRequestsService";
@@ -26,8 +27,8 @@ describe("useTimeOffRequestsByUser", () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
   it("calls useQuery with requests query config", async () => {
-    let capturedOpts: any;
-    (useQuery as jest.Mock).mockImplementation((opts: any) => { capturedOpts = opts; return {}; });
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useQuery as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => { capturedOpts = opts; return {}; });
 
     renderHook(() => useTimeOffRequestsByUser({ userId: "user-id" }));
 

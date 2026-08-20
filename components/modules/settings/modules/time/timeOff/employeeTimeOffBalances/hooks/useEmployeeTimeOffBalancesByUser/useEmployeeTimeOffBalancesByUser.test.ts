@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { renderHook } from "@testing-library/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { employeeTimeOffBalancesService } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/services/employeeTimeOffBalancesService";
@@ -26,8 +27,8 @@ describe("useEmployeeTimeOffBalancesByUser", () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
   it("calls useQuery with balances query config", async () => {
-    let capturedOpts: any;
-    (useQuery as jest.Mock).mockImplementation((opts: any) => { capturedOpts = opts; return {}; });
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useQuery as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => { capturedOpts = opts; return {}; });
 
     renderHook(() => useEmployeeTimeOffBalancesByUser({ userId: "user-id" }));
 

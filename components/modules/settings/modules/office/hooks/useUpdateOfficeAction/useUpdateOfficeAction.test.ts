@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import type { UpdateOfficeActionInput } from "@/components/modules/settings/modules/office/actions/updateOfficeAction";
@@ -50,9 +51,9 @@ describe("useUpdateOfficeAction", () => {
       status: "SUCCESS",
     });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {
         mutate: jest.fn(),

@@ -42,10 +42,10 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Archive className="h-5 w-5"/>
-            Archive "{office?.name ?? ""}"?
+            Archive &quot;{office?.name ?? ""}&quot;?
           </DialogTitle>
           <DialogDescription>
-            Archived offices are hidden from the active list and can't be edited or assigned to, but
+            Archived offices are hidden from the active list and can&apos;t be edited or assigned to, but
             you can restore them at any time.
           </DialogDescription>
         </DialogHeader>

@@ -14,7 +14,7 @@ export const updateLegalEntityAction = async (
       status: ActionStatus.SUCCESS,
       data: updated,
     };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage:

@@ -21,7 +21,7 @@ export const archiveOfficeAction = async (
   try {
     await officeService.archiveOffice(id, assignedUsersStrategy);
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while archiving the office. Please try again.",
@@ -35,7 +35,7 @@ export const restoreOfficeAction = async (
   try {
     await officeService.restoreOffice(id);
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while restoring the office. Please try again.",

@@ -36,7 +36,7 @@ import {
 } from "@/components/modules/organization/components/BulkEdit/utils/bulkEditFields";
 import { useBulkEdit, useBulkEditJob } from "@/components/modules/organization/components/BulkEdit/hooks/useBulkEdit";
 import { isTerminalJobStatus } from "@/api/modules/assignments/dto/SegmentAssignmentDTO";
-import type { FilterDTO } from "@/models/user/fields";
+import { isReferenceValueSource, type FilterDTO, type ReferenceValueSource } from "@/models/user/fields";
 
 export type BulkEditTarget =
   | { kind: "ids"; userIds: string[] }
@@ -341,7 +341,9 @@ function ValueEditor({
     return <RoleSelect value={single} onChange={setSingle} />;
   }
 
-  if (field.kind === "association") {
+  // The guard is what tells the compiler what the "association" kind already guarantees: its source
+  // is a reference catalogue, never "status" or "attribute".
+  if (field.kind === "association" && isReferenceValueSource(field.valueSource)) {
     return <RemoteSelect source={field.valueSource} value={single} onChange={setSingle} />;
   }
 
@@ -421,11 +423,11 @@ function RemoteSelect({
   value,
   onChange,
 }: {
-  source: EditField["valueSource"];
+  source: ReferenceValueSource;
   value: string;
   onChange: (v: string) => void;
 }) {
-  const { options, isLoading } = useAudienceFieldOptions(source as any);
+  const { options, isLoading } = useAudienceFieldOptions(source);
   return (
     <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select value"} />
   );

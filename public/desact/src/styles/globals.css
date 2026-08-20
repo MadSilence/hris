@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "./typography.css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   /* Base Font Family */
   --font-family-sans: var(--font-sans);
@@ -215,84 +213,6 @@
   --sidebar-primary-foreground: var(--color-text-inverse);
   --sidebar-accent: var(--color-bg-hover);
   --sidebar-accent-foreground: var(--color-text-secondary);
-  --sidebar-border: var(--color-border-primary);
-  --sidebar-ring: var(--color-focus-ring);
-}
-
-.dark {
-  /* Text Colors - Dark with Warmer Tones */
-  --color-text-primary: #fefefe;
-  --color-text-secondary: #f3f1ee;
-  --color-text-tertiary: #e8e4df;
-  --color-text-quaternary: #b5a99c;
-  --color-text-placeholder: #8a7f73;
-  --color-text-disabled: #6b6058;
-  --color-text-inverse: #2c2420;
-
-  /* Background Colors - Dark with Warmer Tones */
-  --color-bg-primary: #1c1816;
-  --color-bg-secondary: #2c2420;
-  --color-bg-tertiary: #544d47;
-  --color-bg-quaternary: #6b6058;
-  --color-bg-active: #2c2420;
-  --color-bg-hover: #25221f;
-  --color-bg-disabled: #2c2420;
-
-  /* Border Colors - Dark with Warmer Tones */
-  --color-border-primary: #6b6058;
-  --color-border-secondary: #8a7f73;
-  --color-border-tertiary: #b5a99c;
-  --color-border-disabled: #544d47;
-
-  /* Text Selection & Caret Colors - Dark Mode */
-  --color-selection-bg: #544d47; /* Darker brown background for text selection in dark mode */
-  --color-caret: var(--brown-400); /* Brand-tinted caret color for dark mode */
-
-  /* Status Colors - Dark Mode Variants */
-  --color-success: var(--success-400);
-  --color-success-muted: var(--success-900);
-  --color-success-muted-foreground: var(--success-300);
-
-  --color-danger: var(--danger-400);
-  --color-danger-muted: var(--danger-900);
-  --color-danger-muted-foreground: var(--danger-300);
-
-  --color-warning: var(--warning-400);
-  --color-warning-muted: var(--warning-900);
-  --color-warning-muted-foreground: var(--warning-300);
-
-  --color-info: var(--info-400);
-  --color-info-muted: var(--info-900);
-  --color-info-muted-foreground: var(--info-300);
-
-  /* Legacy colors for dark mode */
-  --background: var(--color-bg-primary);
-  --foreground: var(--color-text-primary);
-  --card: var(--color-bg-primary);
-  --card-foreground: var(--color-text-primary);
-  --popover: var(--color-bg-primary);
-  --popover-foreground: var(--color-text-primary);
-  --primary: var(--brown-400);
-  --primary-foreground: var(--color-text-inverse);
-  --secondary: var(--color-bg-secondary);
-  --secondary-foreground: var(--color-text-primary);
-  --muted: var(--color-bg-secondary);
-  --muted-foreground: var(--color-text-tertiary);
-  --accent: var(--brown-800);
-  --accent-foreground: var(--brown-200);
-  --destructive: var(--danger-400);
-  --destructive-foreground: var(--color-text-primary);
-  --border: var(--color-border-primary);
-  --input: var(--color-border-primary);
-  --input-background: var(--color-bg-primary);
-  --ring: var(--color-focus-ring);
-
-  --sidebar: var(--color-bg-secondary);
-  --sidebar-foreground: var(--color-text-primary);
-  --sidebar-primary: var(--brown-500);
-  --sidebar-primary-foreground: var(--color-text-primary);
-  --sidebar-accent: var(--color-bg-primary);
-  --sidebar-accent-foreground: var(--color-text-primary);
   --sidebar-border: var(--color-border-primary);
   --sidebar-ring: var(--color-focus-ring);
 }
@@ -820,29 +740,10 @@
   }
 
   /* Dark mode adjustments for calendar */
-  .dark .themed-calendar .rdp-day_today {
-    background: var(--brown-800);
-    color: var(--brown-200);
-  }
 
-  .dark .themed-calendar .rdp-day_selected {
-    background: var(--brown-500) !important;
-    color: var(--color-text-inverse) !important;
-  }
 
-  .dark .themed-calendar .rdp-day_selected:hover {
-    background: var(--brown-400) !important;
-  }
 
-  .dark .themed-calendar .rdp-button:hover {
-    background: var(--brown-800);
-    color: var(--brown-200);
-  }
 
-  .dark .themed-calendar .rdp-nav_button:hover {
-    background: var(--brown-800);
-    color: var(--brown-300);
-  }
 }
 
 /* Typography System with Inter Font */

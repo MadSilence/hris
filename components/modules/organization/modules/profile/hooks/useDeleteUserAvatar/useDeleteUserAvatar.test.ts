@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { DeleteUserAvatarActionInput } from "@/components/modules/organization/modules/profile/actions/deleteUserAvatarAction";
@@ -36,9 +37,9 @@ describe("useDeleteUserAvatar", () => {
       status: "SUCCESS",
     });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
 
       return {

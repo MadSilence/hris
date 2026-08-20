@@ -159,6 +159,7 @@ export const REFERENCE_RESOURCE: Partial<Record<ReferenceValueSource, ResourceCo
   legalEntities: "ORG.LEGAL_ENTITY",
   calendars: "ORG.PUBLIC_HOLIDAY_CALENDAR",
   jobs: "JOBS.TITLE",
+  levels: "JOBS.LEVEL",
   roles: "ROLES.ROLE",
   people: "PEOPLE.PROFILE",
 };

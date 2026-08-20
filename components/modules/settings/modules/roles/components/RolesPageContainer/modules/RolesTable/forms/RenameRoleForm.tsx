@@ -16,7 +16,8 @@ export interface RenameRoleFormProps {
 
 export default function RenameRoleForm({
   initialName,
-  isLoading = false,
+  // Accepted for parity with the other forms; this one has nothing to disable.
+  isLoading: _isLoading = false,
   onSubmit,
   autoFocus = true,
 }: RenameRoleFormProps) {

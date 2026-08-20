@@ -2,30 +2,31 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
-import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services/jobLevelGroupService";
+import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services";
+import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
 
 export const createJobLevelGroupAction = async (
   submission: CreateJobLevelGroupActionInput
 ): Promise<CreateJobLevelGroupActionOutput> => {
   try {
-    const createEntity = await jobLevelGroupService.createJobLevelGroup(submission);
+    const data = await jobLevelGroupService.createJobLevelGroup(submission);
 
     return {
       status: ActionStatus.SUCCESS,
-      data: createEntity,
+      data,
     };
-  } catch (e) {
+  } catch (error) {
     return {
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating a Job Level Group. Please try again.",
+      errorMessage: jobCatalogErrorMessage(
+        error,
+        "An error occurred while creating a job level group. Please try again."
+      ),
     };
   }
 };
 
-export type CreateJobLevelGroupActionInput = {
-  name: string;
-};
+export type CreateJobLevelGroupActionInput = { name: string };
 
 export type CreateJobLevelGroupActionOutput = {
   status: ActionStatus;

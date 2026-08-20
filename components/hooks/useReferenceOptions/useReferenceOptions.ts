@@ -18,6 +18,7 @@ export const REFERENCE_ENDPOINTS: Partial<Record<ReferenceValueSource, string>> 
   legalEntities: "/legal-entity",
   calendars: "/public-holiday/calendars",
   jobs: "/jobs",
+  levels: "/job-levels",
   roles: "/roles",
 };
 

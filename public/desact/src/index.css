@@ -944,29 +944,10 @@
     color: var(--brown-700);
   }
 
-  .dark .themed-calendar .rdp-day_today {
-    background: var(--brown-800);
-    color: var(--brown-200);
-  }
 
-  .dark .themed-calendar .rdp-day_selected {
-    background: var(--brown-500) !important;
-    color: var(--color-text-inverse) !important;
-  }
 
-  .dark .themed-calendar .rdp-day_selected:hover {
-    background: var(--brown-400) !important;
-  }
 
-  .dark .themed-calendar .rdp-button:hover {
-    background: var(--brown-800);
-    color: var(--brown-200);
-  }
 
-  .dark .themed-calendar .rdp-nav_button:hover {
-    background: var(--brown-800);
-    color: var(--brown-300);
-  }
 
   .display-2xl, [data-size="display-2xl"] {
     font-family: var(--font-family-sans);
@@ -7711,136 +7692,55 @@
     }
   }
 
-  .dark\:border-input:is(.dark *) {
-    border-color: var(--input);
-  }
 
-  .dark\:bg-destructive\/60:is(.dark *) {
-    background-color: var(--destructive);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:bg-destructive\/60:is(.dark *) {
-      background-color: color-mix(in oklab, var(--destructive) 60%, transparent);
-    }
   }
 
-  .dark\:bg-input\/30:is(.dark *) {
-    background-color: var(--input);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:bg-input\/30:is(.dark *) {
-      background-color: color-mix(in oklab, var(--input) 30%, transparent);
-    }
   }
 
-  .dark\:text-muted-foreground:is(.dark *) {
-    color: var(--muted-foreground);
-  }
 
   @media (hover: hover) {
-    .dark\:hover\:bg-accent\/50:is(.dark *):hover {
-      background-color: var(--accent);
-    }
 
     @supports (color: color-mix(in lab, red, red)) {
-      .dark\:hover\:bg-accent\/50:is(.dark *):hover {
-        background-color: color-mix(in oklab, var(--accent) 50%, transparent);
-      }
     }
   }
 
   @media (hover: hover) {
-    .dark\:hover\:bg-input\/50:is(.dark *):hover {
-      background-color: var(--input);
-    }
 
     @supports (color: color-mix(in lab, red, red)) {
-      .dark\:hover\:bg-input\/50:is(.dark *):hover {
-        background-color: color-mix(in oklab, var(--input) 50%, transparent);
-      }
     }
   }
 
-  .dark\:focus-visible\:ring-destructive\/40:is(.dark *):focus-visible {
-    --tw-ring-color: var(--destructive);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:focus-visible\:ring-destructive\/40:is(.dark *):focus-visible {
-      --tw-ring-color: color-mix(in oklab, var(--destructive) 40%, transparent);
-    }
   }
 
-  .dark\:aria-invalid\:ring-destructive\/40:is(.dark *)[aria-invalid="true"] {
-    --tw-ring-color: var(--destructive);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:aria-invalid\:ring-destructive\/40:is(.dark *)[aria-invalid="true"] {
-      --tw-ring-color: color-mix(in oklab, var(--destructive) 40%, transparent);
-    }
   }
 
-  .dark\:data-\[active\=true\]\:aria-invalid\:ring-destructive\/40:is(.dark *)[data-active="true"][aria-invalid="true"] {
-    --tw-ring-color: var(--destructive);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:data-\[active\=true\]\:aria-invalid\:ring-destructive\/40:is(.dark *)[data-active="true"][aria-invalid="true"] {
-      --tw-ring-color: color-mix(in oklab, var(--destructive) 40%, transparent);
-    }
   }
 
-  .dark\:data-\[state\=active\]\:border-input:is(.dark *)[data-state="active"] {
-    border-color: var(--input);
-  }
 
-  .dark\:data-\[state\=active\]\:bg-input\/30:is(.dark *)[data-state="active"] {
-    background-color: var(--input);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:data-\[state\=active\]\:bg-input\/30:is(.dark *)[data-state="active"] {
-      background-color: color-mix(in oklab, var(--input) 30%, transparent);
-    }
   }
 
-  .dark\:data-\[state\=active\]\:text-foreground:is(.dark *)[data-state="active"] {
-    color: var(--foreground);
-  }
 
-  .dark\:data-\[state\=checked\]\:bg-primary:is(.dark *)[data-state="checked"] {
-    background-color: var(--primary);
-  }
 
-  .dark\:data-\[state\=checked\]\:bg-primary-foreground:is(.dark *)[data-state="checked"] {
-    background-color: var(--primary-foreground);
-  }
 
-  .dark\:data-\[state\=unchecked\]\:bg-card-foreground:is(.dark *)[data-state="unchecked"] {
-    background-color: var(--card-foreground);
-  }
 
-  .dark\:data-\[state\=unchecked\]\:bg-input\/80:is(.dark *)[data-state="unchecked"] {
-    background-color: var(--input);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:data-\[state\=unchecked\]\:bg-input\/80:is(.dark *)[data-state="unchecked"] {
-      background-color: color-mix(in oklab, var(--input) 80%, transparent);
-    }
   }
 
-  .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20:is(.dark *)[data-variant="destructive"]:focus {
-    background-color: var(--destructive);
-  }
 
   @supports (color: color-mix(in lab, red, red)) {
-    .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20:is(.dark *)[data-variant="destructive"]:focus {
-      background-color: color-mix(in oklab, var(--destructive) 20%, transparent);
-    }
   }
 
   .\[\&_\.recharts-cartesian-axis-tick_text\]\:fill-muted-foreground .recharts-cartesian-axis-tick text {
@@ -8407,68 +8307,6 @@
   --sidebar-ring: var(--color-focus-ring);
 }
 
-.dark {
-  --color-text-primary: #fefefe;
-  --color-text-secondary: #f3f1ee;
-  --color-text-tertiary: #e8e4df;
-  --color-text-quaternary: #b5a99c;
-  --color-text-placeholder: #8a7f73;
-  --color-text-disabled: #6b6058;
-  --color-text-inverse: #2c2420;
-  --color-bg-primary: #1c1816;
-  --color-bg-secondary: #2c2420;
-  --color-bg-tertiary: #544d47;
-  --color-bg-quaternary: #6b6058;
-  --color-bg-active: #2c2420;
-  --color-bg-hover: #25221f;
-  --color-bg-disabled: #2c2420;
-  --color-border-primary: #6b6058;
-  --color-border-secondary: #8a7f73;
-  --color-border-tertiary: #b5a99c;
-  --color-border-disabled: #544d47;
-  --color-selection-bg: #544d47;
-  --color-caret: #b5978c;
-  --color-success: var(--success-400);
-  --color-success-muted: var(--success-900);
-  --color-success-muted-foreground: var(--success-300);
-  --color-danger: var(--danger-400);
-  --color-danger-muted: var(--danger-900);
-  --color-danger-muted-foreground: var(--danger-300);
-  --color-warning: var(--warning-400);
-  --color-warning-muted: var(--warning-900);
-  --color-warning-muted-foreground: var(--warning-300);
-  --color-info: var(--info-400);
-  --color-info-muted: var(--info-900);
-  --color-info-muted-foreground: var(--info-300);
-  --background: var(--color-bg-primary);
-  --foreground: var(--color-text-primary);
-  --card: var(--color-bg-primary);
-  --card-foreground: var(--color-text-primary);
-  --popover: var(--color-bg-primary);
-  --popover-foreground: var(--color-text-primary);
-  --primary: var(--brown-400);
-  --primary-foreground: var(--color-text-inverse);
-  --secondary: var(--color-bg-secondary);
-  --secondary-foreground: var(--color-text-primary);
-  --muted: var(--color-bg-secondary);
-  --muted-foreground: var(--color-text-tertiary);
-  --accent: var(--brown-800);
-  --accent-foreground: var(--brown-200);
-  --destructive: var(--danger-400);
-  --destructive-foreground: var(--color-text-primary);
-  --border: var(--color-border-primary);
-  --input: var(--color-border-primary);
-  --input-background: var(--color-bg-primary);
-  --ring: var(--color-focus-ring);
-  --sidebar: var(--color-bg-secondary);
-  --sidebar-foreground: var(--color-text-primary);
-  --sidebar-primary: #947068;
-  --sidebar-primary-foreground: var(--color-text-primary);
-  --sidebar-accent: var(--color-bg-primary);
-  --sidebar-accent-foreground: var(--color-text-primary);
-  --sidebar-border: var(--color-border-primary);
-  --sidebar-ring: var(--color-focus-ring);
-}
 
 @property --tw-translate-x {
   syntax: "*";

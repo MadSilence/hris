@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import type { DeleteOfficeActionInput } from "@/components/modules/settings/modules/office/actions/deleteOfficeAction";
@@ -36,9 +37,9 @@ describe("useDeleteOfficeAction", () => {
     (useInvalidateOfficeQuery as jest.Mock).mockReturnValue(mockRevalidate);
     (deleteOfficeAction as jest.Mock).mockResolvedValue({ status: "SUCCESS" });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {
         mutate: jest.fn(),

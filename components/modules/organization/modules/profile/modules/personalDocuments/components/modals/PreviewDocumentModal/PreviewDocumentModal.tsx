@@ -90,6 +90,9 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
 
           {!isLoading && !error && objectUrl && document && (
             isImage ? (
+              /* A blob URL for a user-uploaded file of unknown dimensions — next/image cannot
+                 optimise it and would need a remote pattern it will never match. */
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={objectUrl}
                 alt={document.name}

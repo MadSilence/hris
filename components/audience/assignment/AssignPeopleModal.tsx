@@ -128,13 +128,21 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
       if (mode === "all") {
         setExcluded((s) => {
           const next = new Set(s);
-          next.has(u.id) ? next.delete(u.id) : next.add(u.id);
+          if (next.has(u.id)) {
+            next.delete(u.id);
+          } else {
+            next.add(u.id);
+          }
           return next;
         });
       } else {
         setManual((s) => {
           const next = new Set(s);
-          next.has(u.id) ? next.delete(u.id) : next.add(u.id);
+          if (next.has(u.id)) {
+            next.delete(u.id);
+          } else {
+            next.add(u.id);
+          }
           return next;
         });
       }
@@ -165,6 +173,9 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
       for (const key of invalidateKeys) void queryClient.invalidateQueries({ queryKey: key });
       void queryClient.invalidateQueries({ queryKey: [PEOPLE_SEARCH_QK] });
     }
+    // invalidateKeys is a prop array rebuilt by the parent each render; depending on it would
+    // re-run this on every render. The job status is what should drive the invalidation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobStatus, queryClient]);
 
   const manualDone = applyManual.isSuccess ? applyManual.data : null;

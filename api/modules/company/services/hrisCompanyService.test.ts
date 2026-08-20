@@ -14,6 +14,8 @@ describe("HrisApiCompanyService", () => {
       name: "My Company",
       subdomain: "my-company",
       companyLogo: null,
+      description: null,
+      website: null,
     };
 
     jest.mocked(hrisApiCompanyClient.getCompany).mockResolvedValue(company);

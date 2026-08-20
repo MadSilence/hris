@@ -1,3 +1,5 @@
+import type { UpdatePublicHolidayCalendarRequest } from "@/api/modules/publicHolidays/calendars/dto";
+import { partialMock } from "@/test/types";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import {
@@ -24,7 +26,7 @@ describe("updatePublicHolidayCalendarAction", () => {
 
   it("updates public holiday calendar", async () => {
     const response = { id: "calendar-id", version: 1 };
-    const body = { name: "Updated calendar" } as any;
+    const body = partialMock<UpdatePublicHolidayCalendarRequest>({ name: "Updated calendar" });
 
     jest
       .mocked(hrisPublicHolidayCalendarsService.update)
@@ -53,7 +55,7 @@ describe("updatePublicHolidayCalendarAction", () => {
 
     const result = await updatePublicHolidayCalendarAction({
       id: "calendar-id",
-      body: {} as any,
+      body: partialMock<UpdatePublicHolidayCalendarRequest>({}),
     });
 
     expect(result).toEqual({

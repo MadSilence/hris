@@ -1,3 +1,6 @@
+import { partialMock } from "@/test/types";
+import type { Role } from "@/models/role/Role";
+import type { AssignRolesTarget } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesForm/AssignRolesForm";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { AssignRolesForm } from "./AssignRolesForm";
@@ -32,16 +35,16 @@ beforeAll(() => {
   });
 });
 
-const user = {
+const user = partialMock<AssignRolesTarget>({
   id: "user-1",
   firstName: "John",
   lastName: "Doe",
   email: "john@example.com",
   status: "ACTIVE",
   roles: [{ id: "role-1", name: "Admin" }],
-} as any;
+});
 
-const allRoles = [
+const allRoles: Role[] = [
   {
     id: "role-1",
     name: "Admin",
@@ -52,7 +55,7 @@ const allRoles = [
     name: "HR",
     systemOwner: true,
   },
-] as any;
+] as Role[];
 
 describe("AssignRolesForm", () => {
   it("renders user and roles", () => {

@@ -12,7 +12,7 @@ export const deleteLegalEntityAction = async (
     return {
       status: ActionStatus.SUCCESS,
     };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage:

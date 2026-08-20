@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
-import * as RechartsPrimitive from "recharts";
+import * as React from"react";
+import * as RechartsPrimitive from"recharts";
 
-import { cn } from "./utils";
+import { cn } from"./utils";
 
-// Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const;
+// Format: { THEME_NAME: CSS_SELECTOR }. Single-theme app — see DECISIONS.md"Dark mode was removed".
+const THEMES = { light: "" } as const;
 
 export type ChartConfig = {
   [k in string]: {
@@ -208,7 +208,7 @@ function ChartTooltipContent({
                             "w-1": indicator === "line",
                             "w-0 border-[1.5px] border-dashed bg-transparent":
                               indicator === "dashed",
-                            "my-0.5": nestLabel && indicator === "dashed",
+                              "my-0.5": nestLabel && indicator === "dashed",
                           },
                         )}
                         style={

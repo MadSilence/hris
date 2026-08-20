@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -17,7 +18,7 @@ let mockedFormSubmission = {
 jest.mock(
   "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentForm",
   () => ({
-    UploadDocumentForm: (props: any) => {
+    UploadDocumentForm: (props: MockedFormProps) => {
       mockUploadDocumentForm(props);
 
       return (

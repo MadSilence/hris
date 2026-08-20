@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -51,9 +52,9 @@ describe("useDeactivatePublicHolidayCalendar", () => {
       data: { id: "calendar-id", version: 1 },
     });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
 
       return {
@@ -89,9 +90,9 @@ describe("useDeactivatePublicHolidayCalendar", () => {
       errorMessage: "Failed",
     });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
 
       return {

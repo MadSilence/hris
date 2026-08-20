@@ -1,6 +1,5 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { RoleDTO } from "@/api/modules/roles/dto/RoleDTO";
-import { roleMapper } from "@/api/modules/roles/mappers/roleMapper";
 import { UsersSearchResponseDTO } from "@/models/user/fields";
 import { resolveBackendAssetUrl } from "@/api/modules/users/mappers/userMapper/resolveBackendAssetUrl";
 

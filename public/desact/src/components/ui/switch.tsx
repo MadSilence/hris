@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import * as SwitchPrimitive from "@radix-ui/react-switch";
+import * as React from"react";
+import * as SwitchPrimitive from"@radix-ui/react-switch";
 
-import { cn } from "./utils";
+import { cn } from"./utils";
 
 function Switch({
   className,
@@ -17,7 +17,7 @@ function Switch({
         // heights leave a sub-pixel gap and the thumb renders a hair off depending on where the
         // switch lands on screen. It also makes the checked travel exact — 30px inner − 16px thumb
         // = 14px, the translate on the thumb below.
-        "peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent p-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        "peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent p-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}
@@ -25,7 +25,7 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "bg-card dark:data-[state=unchecked]:bg-card-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0",
+          "bg-card pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0",
         )}
       />
     </SwitchPrimitive.Root>

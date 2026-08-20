@@ -8,39 +8,15 @@ import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
+import type { RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
 
-type Row = {
-  id: string;
-  companyId: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  status: string | null;
-  isEmailVerified: boolean;
-  lastLoginAt?: string | null;
-  avatarUrl: string | null;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-  hireDate?: string | null;
-  employmentType?: string | null;
-  probationEnd?: string | null;
-  terminationDate?: string | null;
-  // Org references. The search response has always carried these; until now nothing rendered them.
-  jobName?: string | null;
-  department?: Ref | null;
-  teams?: Ref[];
-  office?: Ref | null;
-  legalEntity?: Ref | null;
-  manager?: Ref | null;
-  calendars?: { id: string; name: string; year?: number }[];
-  roles?: Ref[];
-  custom?: Record<string, unknown>;
-};
+// One search result. Aliased rather than redeclared: the local copy had drifted from the DTO
+// (nullability of the name fields), which is what forced the `as any` at the call site.
+type Row = UsersSearchItemDTO;
 
-type Ref = { id: string; name: string };
 
 type ColumnItem = {
   id: string;
@@ -168,6 +144,9 @@ export default function PeopleTable({
         // ── References to other entities ────────────────────────────────────────────────
         case "job":
           return <span>{row.jobName || "—"}</span>;
+        // Derived from the position the person holds — there is no grade on a person.
+        case "job_level":
+          return <RefValue value={row.level} />;
         case "department":
           return <RefValue value={row.department} />;
         case "office":
@@ -387,11 +366,11 @@ function sysKeyFromId(id: string): string | null {
 }
 
 /** A single-valued reference (office, department, legal entity). */
-const RefValue: React.FC<{ value?: Ref | null }> = ({ value }) =>
+const RefValue: React.FC<{ value?: RefDTO | null }> = ({ value }) =>
   value ? <span>{value.name}</span> : <span>—</span>;
 
 /** A multi-valued reference (teams, roles, calendars) — chips, so a long list stays scannable. */
-const RefList: React.FC<{ values?: Ref[] }> = ({ values }) => {
+const RefList: React.FC<{ values?: RefDTO[] }> = ({ values }) => {
   if (!values?.length) return <span>—</span>;
 
   return (

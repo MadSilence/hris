@@ -1,4 +1,4 @@
-import { hrisApiUsersService } from "../../services/hrisUsersService";
+import { hrisApiUsersService, UsersSearchArgs } from "../../services/hrisUsersService";
 import { UsersSearchRequest } from "@/models/user/fields";
 
 export class UsersRoutes {
@@ -12,12 +12,11 @@ export class UsersRoutes {
     const sortDir = (searchParams.get("sortDir") ?? undefined) as "asc" | "desc" | undefined;
 
     const users = await hrisApiUsersService.getUsers({ limit, cursor, q, sortField, sortDir });
-    console.log(Response.json(users))
     return Response.json(users);
   }
 
   public async searchUsers(req: Request) {
-    const body = await req.json().catch(() => ({} as any));
+    const body = (await req.json().catch(() => ({}))) as UsersSearchArgs;
     const result = await hrisApiUsersService.searchUsers(body);
     return Response.json(result);
   }

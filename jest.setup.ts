@@ -1,10 +1,12 @@
+import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from "util";
+
 import "@testing-library/jest-dom";
 import { configure } from "@testing-library/react";
 
+// jsdom does not provide these; some code under test (and undici) needs them.
 if (typeof TextEncoder === "undefined") {
-  const { TextEncoder, TextDecoder } = require("util");
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
+  global.TextEncoder = NodeTextEncoder as typeof global.TextEncoder;
+  global.TextDecoder = NodeTextDecoder as typeof global.TextDecoder;
 }
 
 class ResizeObserverMock {

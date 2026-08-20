@@ -1,3 +1,4 @@
+import type { UpdateResponse } from "@/api/models/misc";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyApprovalSettingsService } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/services";
 import { updateTimeOffPolicyApprovalSettingsAction } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/actions/updateTimeOffPolicyApprovalSettingsAction/updateTimeOffPolicyApprovalSettingsAction";
@@ -24,7 +25,8 @@ describe("updateTimeOffPolicyApprovalSettingsAction", () => {
   };
 
   it("updates approval settings", async () => {
-    const response = { policyId: "policy-id", approvers: [] } as any;
+    // update resolves an UpdateResponse — the old mock returned a settings-shaped object.
+    const response: UpdateResponse = { id: "policy-id" };
     jest.mocked(hrisTimeOffPolicyApprovalSettingsService.update).mockResolvedValue(response);
 
     const result = await updateTimeOffPolicyApprovalSettingsAction(submission);

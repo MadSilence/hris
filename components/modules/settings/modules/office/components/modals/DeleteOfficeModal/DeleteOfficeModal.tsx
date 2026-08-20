@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +33,7 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Permanently delete "{office?.name ?? ""}" office?
+            Permanently delete &quot;{office?.name ?? ""}&quot; office?
           </AlertDialogTitle>
           <AlertDialogDescription>
             This office will be permanently removed from the system. This action cannot be undone.
@@ -44,13 +43,11 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel asChild>
-            <Button variant="outline" onClick={() => !isLoading && onRequestCloseAction()}>
-              Cancel
-            </Button>
-          </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button onClick={() => !isLoading && onConfirmAction()}>Delete</Button>
+          {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires
+              onOpenChange — adding a handler here called onRequestCloseAction twice per click. */}
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction disabled={isLoading} onClick={onConfirmAction}>
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

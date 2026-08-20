@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ComponentProps } from "react";
 
@@ -13,7 +14,7 @@ let mockedFormSubmission = {
 };
 
 jest.mock("../AddRoleForm/AddRoleForm", () => ({
-  AddRoleForm: (props: any) => {
+  AddRoleForm: (props: MockedFormProps) => {
     mockAddRoleForm(props);
 
     return (

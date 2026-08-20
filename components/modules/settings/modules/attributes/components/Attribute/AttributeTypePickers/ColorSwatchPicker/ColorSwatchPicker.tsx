@@ -54,7 +54,7 @@ export const ColorSwatchPicker: React.FC<ColorSwatchPickerProps> = ({
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
             <DialogTitle>Pick a colour</DialogTitle>
-            <DialogDescription>Used for this option's badge.</DialogDescription>
+            <DialogDescription>Used for this option&apos;s badge.</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-wrap gap-2" role="listbox" aria-label="Color palette">

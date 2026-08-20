@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { renderHook } from "@testing-library/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { timeOffPolicyApprovalSettingsService } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/services/timeOffPolicyApprovalSettingsService";
@@ -23,8 +24,8 @@ describe("useTimeOffPolicyApprovalSettings", () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
   it("calls useQuery with approval settings query config", async () => {
-    let capturedOpts: any;
-    (useQuery as jest.Mock).mockImplementation((opts: any) => { capturedOpts = opts; return {}; });
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useQuery as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => { capturedOpts = opts; return {}; });
 
     renderHook(() => useTimeOffPolicyApprovalSettings({ policyId: "policy-id" }));
 

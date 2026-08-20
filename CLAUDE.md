@@ -216,6 +216,14 @@ The following areas are incomplete or inconsistent. Do not use them as reference
   - useMutation
   - useQueryClient
   - server actions
+- **No `any`, in tests either.** `test/types.ts` covers the usual mock boundaries:
+  `CapturedReactQueryOptions` (the options a hook hands react-query), `MockedFormProps` (a form
+  double), and `partialMock<T>({...})` for a stand-in that fills in only the fields under test —
+  unlike `any` it still checks the fields you do write.
+- Build fat request/response fixtures from `test/fixtures/` rather than inline literals. Types like
+  `CreateTimeOffPolicyRequest` carry ~25 required fields and grow; inline copies rot silently.
+- `jest.mock("<path>")` must name the **same specifier the test imports from**. A near-miss (casing,
+  a missing path segment) silently applies no mock and the suite fails somewhere unrelated.
 
 ---
 

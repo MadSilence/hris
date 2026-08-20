@@ -1,3 +1,7 @@
+import { partialMock } from "@/test/types";
+import type { Role } from "@/models/role/Role";
+import type { AssignRolesTarget } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesForm/AssignRolesForm";
+import type { MockedFormProps } from "@/test/types";
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -10,7 +14,7 @@ let mockedFormSubmission = {
 };
 
 jest.mock("../AssignRolesForm/AssignRolesForm", () => ({
-  AssignRolesForm: (props: any) => {
+  AssignRolesForm: (props: MockedFormProps) => {
     mockAssignRolesForm(props);
 
     return (
@@ -41,16 +45,16 @@ jest.mock("../AssignRolesForm/AssignRolesForm", () => ({
   },
 }));
 
-const user = {
+const user = partialMock<AssignRolesTarget>({
   id: "user-1",
   firstName: "John",
   lastName: "Doe",
   email: "john@example.com",
   status: "ACTIVE",
   roles: [{ id: "role-1", name: "Admin" }],
-} as any;
+});
 
-const allRoles = [
+const allRoles: Role[] = [
   {
     id: "role-1",
     name: "Admin",
@@ -61,7 +65,7 @@ const allRoles = [
     name: "HR",
     systemOwner: true,
   },
-] as any;
+] as Role[];
 
 const renderModal = (
   props?: Partial<ComponentProps<typeof AssignRolesModal>>,

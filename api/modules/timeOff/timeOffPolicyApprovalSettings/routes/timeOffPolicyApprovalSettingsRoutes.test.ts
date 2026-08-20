@@ -1,9 +1,10 @@
+import { partialMock } from "@/test/types";
 ﻿class MockResponse {
   public status: number;
 
   constructor(
     private body: unknown,
-    public init?: any
+    public init?: ResponseInit
   ) {
     this.status = init?.status ?? 200;
   }
@@ -12,7 +13,7 @@
     return this.body;
   }
 
-  static json(body: unknown, init?: any) {
+  static json(body: unknown, init?: ResponseInit) {
     return new MockResponse(body, init);
   }
 }
@@ -37,6 +38,8 @@ jest.mock(
 );
 
 describe("TimeOffPolicyApprovalSettingsRoutes", () => {
+  const updateResponse = { id: "policy-id" };
+
   const settings = {
     policyId: "policy-id",
     allApprovalsRequired: true,
@@ -60,7 +63,7 @@ describe("TimeOffPolicyApprovalSettingsRoutes", () => {
   it("gets approval settings by policy id", async () => {
     jest
       .mocked(hrisTimeOffPolicyApprovalSettingsService.getByPolicyId)
-      .mockResolvedValue(settings as any);
+      .mockResolvedValue(partialMock(settings));
 
     const res = await timeOffPolicyApprovalSettingsRoutes.getByPolicyId(
       {} as Request,
@@ -76,8 +79,9 @@ describe("TimeOffPolicyApprovalSettingsRoutes", () => {
 
   it("updates approval settings", async () => {
     jest
+      // update resolves an UpdateResponse, not the settings — the old mock returned the wrong shape.
       .mocked(hrisTimeOffPolicyApprovalSettingsService.update)
-      .mockResolvedValue(settings as any);
+      .mockResolvedValue(updateResponse);
 
     const body = {
       allApprovalsRequired: true,
@@ -104,6 +108,6 @@ describe("TimeOffPolicyApprovalSettingsRoutes", () => {
     expect(
       hrisTimeOffPolicyApprovalSettingsService.update
     ).toHaveBeenCalledWith("policy-id", body);
-    expect(result).toEqual(settings);
+    expect(result).toEqual(updateResponse);
   });
 });

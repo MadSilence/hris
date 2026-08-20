@@ -15,6 +15,7 @@ export class UserMapper {
       isEmailVerified: dto.isEmailVerified,
       jobId: dto.jobId,
       jobName: dto.jobName,
+      level: dto.level,
       department: dto.department,
       teams: dto.teams,
       office: dto.office,

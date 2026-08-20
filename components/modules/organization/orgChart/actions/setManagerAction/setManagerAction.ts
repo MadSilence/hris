@@ -15,7 +15,7 @@ export const setManagerAction = async (
   try {
     await hrisApiUsersService.setManager(userId, managerId);
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "Couldn't update the reporting line. Please try again.",

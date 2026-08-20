@@ -35,9 +35,10 @@ export type UpdateUserPayload = {
 export class HrisApiUsersClient {
   private readonly BASE_PATH: string = '/users';
 
+  // Returns mapped models, not DTOs — the signature used to say DTO and was papered over with a cast.
   public async getUsers(
     args?: GetUsersArgs
-  ): Promise<UserDTO[] | { items: UserDTO[]; nextCursor?: string | null }> {
+  ): Promise<User[] | { items: User[]; nextCursor?: string | null }> {
     const params = new URLSearchParams();
     if (args?.limit) params.set("limit", String(args.limit));
     if (args?.cursor) params.set("cursor", args.cursor);
@@ -54,7 +55,7 @@ export class HrisApiUsersClient {
     return {
       items: res.items.map((u) => userMapper.mapUserDTOtoUser(u)),
       nextCursor: res.nextCursor ?? null,
-    } as any;
+    };
   }
 
   public async getUser(id: string) {
@@ -96,7 +97,7 @@ export class HrisApiUsersClient {
 
   public async searchUsers(
     args: UsersSearchArgs
-  ): Promise<{ items: any[]; nextCursor?: string | null }> {
+  ): Promise<{ items: User[]; nextCursor?: string | null }> {
     const body = {
       limit: args.limit ?? 100,
       cursor: args.cursor ?? null,

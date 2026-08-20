@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -10,7 +11,7 @@ let mockedFormSubmission = {
 };
 
 jest.mock("../ExportAssignedUsersForm/ExportAssignedUsersForm", () => ({
-  ExportAssignedUsersForm: (props: any) => {
+  ExportAssignedUsersForm: (props: MockedFormProps) => {
     mockExportAssignedUsersForm(props);
 
     return (

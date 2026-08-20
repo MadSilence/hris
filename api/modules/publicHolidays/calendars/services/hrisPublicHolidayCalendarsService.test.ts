@@ -1,3 +1,5 @@
+import type { PublicHolidayCalendar } from "@/models/publicHolidays/calendar";
+import { partialMock } from "@/test/types";
 import { hrisApiPublicHolidayCalendarsClient } from "@/api/modules/publicHolidays/calendars/clients";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import { PublicHolidayCalendarSourceType, PublicHolidayCalendarStatus, } from "@/api/modules/publicHolidays/calendars/dto";
@@ -43,7 +45,7 @@ describe("HrisPublicHolidayCalendarsService", () => {
   });
 
   it("delegates list to client", async () => {
-    const response: any[] = [];
+    const response: never[] = [];
 
     jest.mocked(hrisApiPublicHolidayCalendarsClient.list).mockResolvedValue(response);
 
@@ -54,7 +56,7 @@ describe("HrisPublicHolidayCalendarsService", () => {
   });
 
   it("delegates getById to client", async () => {
-    const response = { id: "calendar-id" } as any;
+    const response = partialMock<PublicHolidayCalendar>({ id: "calendar-id" });
 
     jest.mocked(hrisApiPublicHolidayCalendarsClient.getById).mockResolvedValue(response);
 

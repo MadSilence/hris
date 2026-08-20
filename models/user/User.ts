@@ -10,6 +10,11 @@ export type User = {
   isEmailVerified: boolean;
   jobId?: string | null;
   jobName?: string | null;
+  /**
+   * Grade of the position the person holds. Read-only everywhere: it is inherited from the job,
+   * so there is no write path and no bulk-edit entry for it.
+   */
+  level?: { id: string; name: string } | null;
   department?: { id: string; name: string } | null;
   teams?: { id: string; name: string }[];
   office?: { id: string; name: string } | null;

@@ -1,3 +1,5 @@
+import type { User } from "@/models/user/User";
+import { partialMock } from "@/test/types";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useImpersonationContext } from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
@@ -22,20 +24,20 @@ describe("ImpersonationBanner", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.mocked(useStopImpersonation).mockReturnValue({
+    jest.mocked(useStopImpersonation).mockReturnValue(partialMock({
       mutate,
       isPending: false,
-    } as any);
+    }));
   });
 
   it("does not render when not impersonating", () => {
-    jest.mocked(useImpersonationContext).mockReturnValue({
+    jest.mocked(useImpersonationContext).mockReturnValue(partialMock({
       isImpersonating: false,
-    } as any);
+    }));
 
-    jest.mocked(useCurrentUser).mockReturnValue({
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
       user: undefined,
-    } as any);
+    }));
 
     const { container } = render(<ImpersonationBanner/>);
 
@@ -43,17 +45,17 @@ describe("ImpersonationBanner", () => {
   });
 
   it("renders impersonation user name", () => {
-    jest.mocked(useImpersonationContext).mockReturnValue({
+    jest.mocked(useImpersonationContext).mockReturnValue(partialMock({
       isImpersonating: true,
-    } as any);
+    }));
 
-    jest.mocked(useCurrentUser).mockReturnValue({
-      user: {
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
+      user: partialMock<User>({
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
-      },
-    } as any);
+      }),
+    }));
 
     render(<ImpersonationBanner/>);
 
@@ -65,17 +67,17 @@ describe("ImpersonationBanner", () => {
   });
 
   it("calls stop impersonation on button click", () => {
-    jest.mocked(useImpersonationContext).mockReturnValue({
+    jest.mocked(useImpersonationContext).mockReturnValue(partialMock({
       isImpersonating: true,
-    } as any);
+    }));
 
-    jest.mocked(useCurrentUser).mockReturnValue({
-      user: {
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
+      user: partialMock<User>({
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
-      },
-    } as any);
+      }),
+    }));
 
     render(<ImpersonationBanner/>);
 
@@ -85,20 +87,20 @@ describe("ImpersonationBanner", () => {
   });
 
   it("disables button while pending", () => {
-    jest.mocked(useStopImpersonation).mockReturnValue({
+    jest.mocked(useStopImpersonation).mockReturnValue(partialMock({
       mutate,
       isPending: true,
-    } as any);
+    }));
 
-    jest.mocked(useImpersonationContext).mockReturnValue({
+    jest.mocked(useImpersonationContext).mockReturnValue(partialMock({
       isImpersonating: true,
-    } as any);
+    }));
 
-    jest.mocked(useCurrentUser).mockReturnValue({
-      user: {
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
+      user: partialMock<User>({
         email: "john@example.com",
-      },
-    } as any);
+      }),
+    }));
 
     render(<ImpersonationBanner/>);
 

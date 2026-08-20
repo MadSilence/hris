@@ -40,11 +40,28 @@ export type ReferenceValueSource =
   | "offices"
   | "legalEntities"
   | "jobs"
+  | "levels"
   | "departments"
   | "teams"
   | "calendars"
   | "roles"
   | "people";
+
+/** Runtime companion to {@link ReferenceValueSource} — keep both in step. */
+export const REFERENCE_VALUE_SOURCES = [
+  "offices",
+  "legalEntities",
+  "jobs",
+  "levels",
+  "departments",
+  "teams",
+  "calendars",
+  "roles",
+  "people",
+] as const satisfies readonly ReferenceValueSource[];
+
+export const isReferenceValueSource = (source: string): source is ReferenceValueSource =>
+  (REFERENCE_VALUE_SOURCES as readonly string[]).includes(source);
 
 export const isReferenceField = (field: FieldDTO): boolean =>
   field.type === AttributeType.REFERENCE && !!field.valueSource;
@@ -110,6 +127,8 @@ export type UsersSearchItemDTO = {
   // Position label; null means no job is assigned.
   jobId?: string | null;
   jobName?: string | null;
+  // Grade of that job. Derived, not stored on the person — a column and a filter, never a write.
+  level?: RefDTO | null;
   // Resolved by the backend; null when the user has no avatar (fall back to initials).
   avatarUrl?: string | null;
   // Role-assignment metadata — only populated by GET /roles/{id}/users.

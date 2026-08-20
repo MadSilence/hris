@@ -9,6 +9,8 @@ export type UserDTO = {
   isEmailVerified: boolean;
   jobId?: string | null;
   jobName?: string | null;
+  /** Grade of the held position — derived by the backend, never written from here. */
+  level?: { id: string; name: string } | null;
   department?: { id: string; name: string } | null;
   teams?: { id: string; name: string }[];
   office?: { id: string; name: string } | null;

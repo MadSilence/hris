@@ -25,7 +25,6 @@ describe("createOfficeAction", () => {
     description: "",
     email: "",
     phone: "",
-    isSystem: false,
     country: "Germany",
     city: "Berlin",
     street: "Unter den Linden",

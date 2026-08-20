@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import forms from "@tailwindcss/forms";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   content: [
@@ -10,11 +12,9 @@ const config: Config = {
   theme: {
     extend: {},
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-  ],
+  // `tailwindcss-animate` used to be listed here but is not a dependency — loading this file
+  // would have thrown. Nothing imports it: Tailwind v4 is configured from globals.css.
+  plugins: [forms, typography],
 };
 
 export default config;

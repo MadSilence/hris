@@ -1,3 +1,4 @@
+import { partialMock } from "@/test/types";
 ﻿import { hrisApiTimeOffRequestsClient } from "@/api/modules/timeOff/timeOffRequests/clients";
 import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
@@ -64,7 +65,7 @@ describe("HrisTimeOffRequestsService", () => {
   it("delegates getById to client", async () => {
     jest
       .mocked(hrisApiTimeOffRequestsClient.getById)
-      .mockResolvedValue(request as any);
+      .mockResolvedValue(partialMock(request));
 
     const result = await hrisTimeOffRequestsService.getById("request-id");
 
@@ -77,7 +78,7 @@ describe("HrisTimeOffRequestsService", () => {
   it("delegates listByUserId to client", async () => {
     jest
       .mocked(hrisApiTimeOffRequestsClient.listByUserId)
-      .mockResolvedValue([request] as any);
+      .mockResolvedValue(partialMock([request]));
 
     const result = await hrisTimeOffRequestsService.listByUserId("user-id");
 

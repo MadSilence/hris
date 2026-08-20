@@ -6,7 +6,7 @@ class MockResponse {
 
   constructor(
     private body: unknown,
-    public init?: any
+    public init?: ResponseInit
   ) {
     this.status = init?.status ?? 200;
   }
@@ -15,7 +15,7 @@ class MockResponse {
     return this.body;
   }
 
-  static json(body: unknown, init?: any) {
+  static json(body: unknown, init?: ResponseInit) {
     return new MockResponse(body, init);
   }
 }

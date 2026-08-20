@@ -12,7 +12,7 @@ export const deleteAttributeGroupAction = async (
     return {
       status: ActionStatus.SUCCESS,
     }
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while deleting groups. Please try again."

@@ -1,7 +1,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPoliciesService } from "@/api/modules/timeOff/timeOffPolicies/services";
 import { createTimeOffPolicyAction } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/actions/createTimeOffPolicyAction/createTimeOffPolicyAction";
-import { TimeOffPolicyStatus, TimeOffPolicyUnit, TimeOffPolicyRenewalType, TimeOffPolicyCarryoverType, TimeOffPolicyCarryoverExpiryType } from "@/api/modules/timeOff/timeOffPolicies/dto";
+import { timeOffPolicyCreateRequest } from "@/test/fixtures/timeOffPolicy";
 
 jest.mock("@/api/modules/timeOff/timeOffPolicies/services", () => ({
   hrisTimeOffPoliciesService: { create: jest.fn() },
@@ -15,25 +15,7 @@ describe("createTimeOffPolicyAction", () => {
 
   afterEach(() => { jest.restoreAllMocks(); });
 
-  const submission = {
-    name: "vacation",
-    displayName: "Vacation",
-    description: null,
-    status: TimeOffPolicyStatus.Draft,
-    unit: TimeOffPolicyUnit.Days,
-    paid: true,
-    hiddenFromEmployees: false,
-    yearlyQuota: 20,
-    unlimitedQuota: false,
-    renewalType: TimeOffPolicyRenewalType.YearlyFixedDate,
-    renewalFixedDay: 1,
-    renewalFixedMonth: 1,
-    carryoverType: TimeOffPolicyCarryoverType.None,
-    carryoverLimit: null,
-    carryoverExpiryType: TimeOffPolicyCarryoverExpiryType.Never,
-    carryoverExpiryValue: null,
-    carryoverExpiryUnit: null,
-  };
+  const submission = timeOffPolicyCreateRequest();
 
   it("creates time off policy", async () => {
     const response = { id: "policy-id" };

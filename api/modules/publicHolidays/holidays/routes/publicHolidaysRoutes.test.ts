@@ -1,3 +1,5 @@
+import type { PublicHoliday } from "@/models/publicHolidays/holiday";
+import { partialMock } from "@/test/types";
 import { publicHolidaysRoutes } from "@/api/modules/publicHolidays/holidays/routes";
 import { hrisPublicHolidaysService } from "@/api/modules/publicHolidays/holidays/services";
 
@@ -6,7 +8,7 @@ class MockResponse {
 
   constructor(
     private body: unknown,
-    public init?: any
+    public init?: ResponseInit
   ) {
     this.status = init?.status ?? 200;
   }
@@ -15,7 +17,7 @@ class MockResponse {
     return this.body;
   }
 
-  static json(body: unknown, init?: any) {
+  static json(body: unknown, init?: ResponseInit) {
     return new MockResponse(body, init);
   }
 }
@@ -65,7 +67,7 @@ describe("PublicHolidaysRoutes", () => {
   });
 
   it("lists public holidays by calendar", async () => {
-    const response: any[] = [];
+    const response: never[] = [];
 
     jest.mocked(hrisPublicHolidaysService.list).mockResolvedValue(response);
 
@@ -77,7 +79,7 @@ describe("PublicHolidaysRoutes", () => {
   });
 
   it("gets public holiday by id", async () => {
-    const response = { id: "holiday-id" } as any;
+    const response = partialMock<PublicHoliday>({ id: "holiday-id" });
 
     jest.mocked(hrisPublicHolidaysService.getById).mockResolvedValue(response);
 

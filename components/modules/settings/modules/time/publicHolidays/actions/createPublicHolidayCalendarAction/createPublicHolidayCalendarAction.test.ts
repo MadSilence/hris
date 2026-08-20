@@ -1,3 +1,9 @@
+import { partialMock } from "@/test/types";
+import {
+  PublicHolidayCalendarSourceType,
+  PublicHolidayCalendarStatus,
+} from "@/api/modules/publicHolidays/calendars/dto";
+import type { CreatePublicHolidayCalendarActionInput } from "@/components/modules/settings/modules/time/publicHolidays/actions/createPublicHolidayCalendarAction/createPublicHolidayCalendarAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import {
@@ -27,13 +33,13 @@ describe("createPublicHolidayCalendarAction", () => {
     const submission = {
       name: "Poland 2026",
       year: 2026,
-      status: "ACTIVE",
-      sourceType: "MANUAL",
+      status: PublicHolidayCalendarStatus.Active,
+      sourceType: PublicHolidayCalendarSourceType.Manual,
       sourceExternalId: null,
       sourceCountryCode: "PL",
       sourceRegionCode: null,
       sourceLocale: "pl-PL",
-    } as any;
+    };
 
     jest
       .mocked(hrisPublicHolidayCalendarsService.create)
@@ -56,7 +62,7 @@ describe("createPublicHolidayCalendarAction", () => {
       .mocked(hrisPublicHolidayCalendarsService.create)
       .mockRejectedValue(new Error("Failed"));
 
-    const result = await createPublicHolidayCalendarAction({} as any);
+    const result = await createPublicHolidayCalendarAction(partialMock<CreatePublicHolidayCalendarActionInput>({}));
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,

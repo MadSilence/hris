@@ -9,7 +9,9 @@ export const endTimeOffPolicyAssignmentAction = async (
   submission: EndTimeOffPolicyAssignmentActionInput
 ): Promise<EndTimeOffPolicyAssignmentActionOutput> => {
   try {
-    const { assignmentId, ...body } = submission;
+    // policyId only rides along so the calling hook knows which cache to invalidate — it is not part
+    // of the request, and forwarding it sent the backend a field its DTO does not declare.
+    const { assignmentId, policyId: _policyId, ...body } = submission;
     const data = await hrisTimeOffPolicyAssignmentsService.end(
       assignmentId,
       body

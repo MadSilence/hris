@@ -9,7 +9,8 @@ export const cancelTimeOffRequestAction = async (
   submission: CancelTimeOffRequestActionInput
 ): Promise<CancelTimeOffRequestActionOutput> => {
   try {
-    const { requestId, userId, ...body } = submission;
+    // userId only rides along so the calling hook knows which cache to invalidate.
+    const { requestId, userId: _userId, ...body } = submission;
     const data = await hrisTimeOffRequestsService.cancel(requestId, body);
 
     return {

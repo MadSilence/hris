@@ -1,10 +1,12 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
+import { JobLevelDTO } from "@/api/modules/jobfamily/dto";
 import {
   CreateJobLevelGroupRequest,
-  DeleteJobLevelGroupRequest,
   JobLevelGroupDTO,
-  UpdateJobLevelGroupRequest
+  JobLevelGroupIdRequest,
+  ReorderJobLevelsRequest,
+  UpdateJobLevelGroupRequest,
 } from "@/api/modules/jobLevelGroup/dto";
 
 class HrisJobLevelGroupClient {
@@ -18,12 +20,20 @@ class HrisJobLevelGroupClient {
     return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, payload);
   }
 
-  public async updateJobLevelGroup(payload: UpdateJobLevelGroupRequest) {
-    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, { name: payload.name });
+  public async updateJobLevelGroup({ id, ...body }: UpdateJobLevelGroupRequest) {
+    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, body);
   }
 
-  public async deleteJobLevelGroup(payload: DeleteJobLevelGroupRequest) {
-    return hrisApiClient.post<Response>(`${this.BASE_PATH}/${payload.id}/delete`);
+  public async deleteJobLevelGroup({ id }: JobLevelGroupIdRequest) {
+    return hrisApiClient.post<Response>(`${this.BASE_PATH}/${id}/delete`);
+  }
+
+  /** The whole ladder at once — see JobLevelReorderService for why it is not per level. */
+  public async reorderJobLevels({ groupId, levelIds }: ReorderJobLevelsRequest) {
+    return hrisApiClient.post<JobLevelDTO[]>(
+      `${this.BASE_PATH}/${groupId}/levels/reorder`,
+      { levelIds },
+    );
   }
 }
 

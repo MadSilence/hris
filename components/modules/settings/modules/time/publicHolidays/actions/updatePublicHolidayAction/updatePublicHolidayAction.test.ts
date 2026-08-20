@@ -1,3 +1,5 @@
+import { partialMock } from "@/test/types";
+import type { UpdatePublicHolidayRequest } from "@/api/modules/publicHolidays/holidays/dto";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidaysService } from "@/api/modules/publicHolidays/holidays/services";
 import {
@@ -26,7 +28,8 @@ describe("updatePublicHolidayAction", () => {
     const body = {
       name: "Updated New Year",
       holidayDate: "2026-01-01",
-    } as any;
+      endDate: "2026-01-01",
+    };
 
     jest.mocked(hrisPublicHolidaysService.update).mockResolvedValue(response);
 
@@ -52,7 +55,7 @@ describe("updatePublicHolidayAction", () => {
 
     const result = await updatePublicHolidayAction({
       id: "holiday-id",
-      body: {} as any,
+      body: partialMock<UpdatePublicHolidayRequest>({}),
     });
 
     expect(result).toEqual({

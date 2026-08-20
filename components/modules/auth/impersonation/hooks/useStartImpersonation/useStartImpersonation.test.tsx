@@ -1,3 +1,5 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
+import { partialMock } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
@@ -16,9 +18,9 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
-  useMutation: (config: any) => ({
+  useMutation: (config: CapturedReactQueryOptions) => ({
     mutateAsync: config.mutationFn,
-    mutate: async (payload: any) => {
+    mutate: async (payload: unknown) => {
       const result = await config.mutationFn(payload);
       config.onSuccess?.(result);
       return result;
@@ -54,10 +56,10 @@ describe("useStartImpersonation", () => {
       subjectId: "target-id",
     });
 
-    jest.mocked(useCurrentUser).mockReturnValue({
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
       setIdentity,
       clearCurrentUserCache,
-    } as any);
+    }));
   });
 
   it("starts impersonation and updates current user state", async () => {

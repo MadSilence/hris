@@ -13,6 +13,25 @@ jest.mock("@/public/icons/trash.svg", () => ({
   default: () => <svg data-testid="trash-icon"/>,
 }));
 
+// The editor takes stored options, which carry ids and audit columns the tests never look at. Built
+// here so the suite states only what it is about — value and colour.
+let optionSeq = 0;
+
+function option(value: string, color: string): AttributeOption {
+  optionSeq += 1;
+
+  return {
+    id: `option-${optionSeq}`,
+    value,
+    color,
+    sortOrder: optionSeq,
+    createdAt: "2026-01-01T00:00:00Z",
+    createdBy: "user-id",
+    updatedAt: "2026-01-01T00:00:00Z",
+    updatedBy: "user-id",
+  };
+}
+
 function setup(initial: AttributeOption[] = [], type: AttributeType = AttributeType.SELECT) {
   const onChange = jest.fn();
   render(<OptionsEditor type={type} options={initial} onChange={onChange}/>);
@@ -23,8 +42,8 @@ describe("OptionsEditor", () => {
   it("renders existing options with placeholders and values", () => {
     setup(
       [
-        { value: "Option A", color: "#111111" },
-        { value: "Option B", color: "#222222" },
+        option("Option A", "#111111"),
+        option("Option B", "#222222"),
       ],
       AttributeType.SELECT
     );
@@ -52,7 +71,7 @@ describe("OptionsEditor", () => {
   });
 
   it("updates option value when typing", async () => {
-    const { onChange } = setup([{ value: "", color: "#4F46E5" }]);
+    const { onChange } = setup([option("", "#4F46E5")]);
 
     const input = screen.getByPlaceholderText("Option 1");
     fireEvent.change(input, { target: { value: "Hello" } });
@@ -63,7 +82,7 @@ describe("OptionsEditor", () => {
 
   it("updates option color through the swatch picker", async () => {
     const user = userEvent.setup();
-    const { onChange } = setup([{ value: "Red", color: PRESET_COLORS[0] }]);
+    const { onChange } = setup([option("Red", PRESET_COLORS[0])]);
 
     // The colour input became a swatch popover: open it, then pick a colour from the palette.
     await user.click(screen.getByLabelText("Color for option 1"));
@@ -77,8 +96,8 @@ describe("OptionsEditor", () => {
     const user = userEvent.setup();
     const { onChange } = setup(
       [
-        { value: "One", color: "#000000" },
-        { value: "Two", color: "#ffffff" },
+        option("One", "#000000"),
+        option("Two", "#ffffff"),
       ],
       AttributeType.SELECT
     );

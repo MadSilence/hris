@@ -32,13 +32,13 @@ describe("EmployeeTimeOffBalancesService", () => {
     expect(result).toEqual(response);
   });
 
-  it("lists adjustments by balance id", async () => {
-    const response = [{ id: "adjustment-id" }];
+  it("lists transactions by balance id", async () => {
+    const response = [{ id: "transaction-id" }];
     mockGet.mockResolvedValue(response);
 
-    const result = await employeeTimeOffBalancesService.listAdjustments("balance-id");
+    const result = await employeeTimeOffBalancesService.listTransactions("balance-id");
 
-    expect(mockGet).toHaveBeenCalledWith("/time-off/balances/balance-id/adjustments");
+    expect(mockGet).toHaveBeenCalledWith("/time-off/balances/balance-id/transactions");
     expect(result).toEqual(response);
   });
 

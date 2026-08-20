@@ -14,7 +14,15 @@ jest.mock("next/server", () => {
   class MockNextResponse {
     headers = new MockHeaders();
     cookies = {
-      set: jest.fn((cookie: any) => {
+      set: jest.fn((cookie: {
+        name: string;
+        value: string;
+        httpOnly?: boolean;
+        sameSite?: string;
+        secure?: boolean;
+        path?: string;
+        maxAge?: number;
+      }) => {
         const current = this.headers.get("set-cookie");
 
         const serialized = [
@@ -34,14 +42,14 @@ jest.mock("next/server", () => {
       }),
     };
 
-    constructor(private body: any, public init?: any) {
+    constructor(private body: unknown, public init?: ResponseInit) {
     }
 
     async json() {
       return this.body;
     }
 
-    static json(body: any, init?: any) {
+    static json(body: unknown, init?: ResponseInit) {
       return new MockNextResponse(body, init);
     }
   }

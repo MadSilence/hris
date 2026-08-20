@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import type { CreateOfficeActionInput } from "@/components/modules/settings/modules/office/actions/createOfficeAction";
@@ -34,7 +35,6 @@ describe("useCreateOfficeAction", () => {
       description: "",
       email: "",
       phone: "",
-      isSystem: false,
       country: "Germany",
       city: "Berlin",
       street: "Unter den Linden",
@@ -47,9 +47,9 @@ describe("useCreateOfficeAction", () => {
     (useInvalidateOfficeQuery as jest.Mock).mockReturnValue(mockRevalidate);
     (createOfficeAction as jest.Mock).mockResolvedValue({ id: "1" });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {
         mutate: jest.fn(),

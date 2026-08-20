@@ -42,10 +42,10 @@ export const ArchiveLegalEntityModal: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Archive className="h-5 w-5"/>
-            Archive "{entity?.name ?? ""}"?
+            Archive &quot;{entity?.name ?? ""}&quot;?
           </DialogTitle>
           <DialogDescription>
-            Archived legal entities are hidden from the active list and can't be edited or assigned
+            Archived legal entities are hidden from the active list and can&apos;t be edited or assigned
             to, but you can restore them at any time.
           </DialogDescription>
         </DialogHeader>

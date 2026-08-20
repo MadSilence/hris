@@ -3,12 +3,13 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import type { DraggableAttributes } from "@dnd-kit/core";
+import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { CSS } from "@dnd-kit/utilities";
 
 export type SortableApi = {
   setNodeRef: (node: HTMLElement | null) => void;
   attributes: DraggableAttributes;
-  listeners?: Record<string, any>;
+  listeners?: SyntheticListenerMap;
   style: React.CSSProperties;
   isDragging: boolean;
 };

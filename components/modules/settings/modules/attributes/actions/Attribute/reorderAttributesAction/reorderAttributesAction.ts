@@ -26,7 +26,7 @@ export const reorderAttributesAction = async (
     await attributeService.reorderAttributes(payload);
 
     return { status: ActionStatus.SUCCESS };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while reordering attributes. Please try again.",

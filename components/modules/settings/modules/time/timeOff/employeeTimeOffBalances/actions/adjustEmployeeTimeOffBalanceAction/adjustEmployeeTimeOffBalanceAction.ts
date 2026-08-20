@@ -9,7 +9,9 @@ export const adjustEmployeeTimeOffBalanceAction = async (
   submission: AdjustEmployeeTimeOffBalanceActionInput
 ): Promise<AdjustEmployeeTimeOffBalanceActionOutput> => {
   try {
-    const { balanceId, ...body } = submission;
+    // userId only rides along so the calling hook knows which cache to invalidate — it is not part of
+    // the request, and forwarding it sent the backend a field its DTO does not declare.
+    const { balanceId, userId: _userId, ...body } = submission;
     const data = await hrisEmployeeTimeOffBalancesService.adjust(
       balanceId,
       body

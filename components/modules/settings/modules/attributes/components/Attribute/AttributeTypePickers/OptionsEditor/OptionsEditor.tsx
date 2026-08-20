@@ -67,6 +67,9 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
       setLocal([first]);
       onChange([first]);
     }
+    // Seeds the first row when the type starts needing options. Depending on local.length or
+    // onChange would re-seed (or loop) as the user edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsOptions]);
 
   const commit = (next: AttributeOptionUpsert[]) => {

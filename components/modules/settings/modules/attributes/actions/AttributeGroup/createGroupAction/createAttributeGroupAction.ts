@@ -14,7 +14,7 @@ export const createAttributeGroupAction = async (
       status: ActionStatus.SUCCESS,
       data: createEntity,
     };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage: "An error occurred while creating a AttributeGroup. Please try again.",

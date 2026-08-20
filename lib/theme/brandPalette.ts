@@ -128,11 +128,9 @@ export const buildBrandPalette = (brandColor: string): BrandPalette | null => {
 /**
  * The `<style>` body that rebrands the app, or an empty string to keep the shipped brown.
  *
- * Selectors are deliberate. `html:root` outranks the `:root` in globals.css, so the override wins no
- * matter which order Next emits the stylesheet and this tag in. The brand scale needs no theme guard
- * because `.dark` never redefines `--brown-*`. The neutrals do: `.dark` *does* redefine them, so they
- * are scoped `:not(.dark)` — an unguarded block would silently break dark mode the day it is switched
- * on. Dark-mode neutrals are not branded yet (see TECH_DEBT).
+ * `html:root` outranks the `:root` in globals.css, so the override wins no matter which order Next
+ * emits the stylesheet and this tag in. One block covers everything: the app is single-theme (dark
+ * mode was removed — see DECISIONS.md), so there is no second token set to guard against.
  */
 export const buildBrandStyleSheet = (brandColor: string | null | undefined): string => {
   if (!brandColor || !isValidHex(brandColor)) return "";
@@ -146,5 +144,5 @@ export const buildBrandStyleSheet = (brandColor: string | null | undefined): str
     .map(([token, value]) => `${token}:${value}`)
     .join(";");
 
-  return `html:root{${scale}}html:root:not(.dark){${neutrals}}`;
+  return `html:root{${scale}${neutrals ? ";" + neutrals : ""}}`;
 };

@@ -108,10 +108,12 @@ describe("buildBrandStyleSheet", () => {
     expect(buildBrandStyleSheet("#nope")).toBe("");
   });
 
-  it("scopes neutrals away from dark mode but not the brand scale", () => {
+  it("emits one block that outranks the palette in globals.css", () => {
     const sheet = buildBrandStyleSheet("#2563eb");
 
     expect(sheet).toContain("html:root{--brown-50:");
-    expect(sheet).toContain("html:root:not(.dark){--color-text-primary:");
+    expect(sheet).toContain(";--color-text-primary:");
+    // A single rule — the app is single-theme, there is no second token set to scope around.
+    expect(sheet.match(/html:root/g)).toHaveLength(1);
   });
 });

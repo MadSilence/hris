@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { applyBrandTheme } from "@/lib/theme/applyBrandTheme";
 import { companyAppearanceService } from "@/components/modules/settings/modules/general/companyAppearance/services/companyAppearanceService";
 import {
   deleteLoginImageAction,
@@ -20,21 +20,23 @@ export const useCompanyAppearance = () =>
   });
 
 /**
- * Shared success path for every appearance mutation. Besides refreshing the query, it calls
- * `router.refresh()` — the palette lives in a `<style>` rendered by the root *server* layout, so
- * without re-running the server render the saved colour would only appear on a full reload.
+ * Shared success path for every appearance mutation.
+ *
+ * The palette is rendered by a server component, so the saved colour has to be pushed into the live
+ * document somehow. `applyBrandTheme` rewrites that one `<style>` element directly instead of
+ * `router.refresh()`, which would refetch the entire route tree to change ten CSS variables.
  */
 const useAppearanceMutationSuccess = () => {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return (data: CompanyAppearance | undefined) => {
-    if (data) {
-      queryClient.setQueryData(COMPANY_APPEARANCE_QUERY_KEY, data);
+    if (!data) {
+      void queryClient.invalidateQueries({ queryKey: COMPANY_APPEARANCE_QUERY_KEY });
+      return;
     }
 
-    void queryClient.invalidateQueries({ queryKey: COMPANY_APPEARANCE_QUERY_KEY });
-    router.refresh();
+    queryClient.setQueryData(COMPANY_APPEARANCE_QUERY_KEY, data);
+    applyBrandTheme(data.brandColor);
   };
 };
 

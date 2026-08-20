@@ -20,6 +20,9 @@ export const ErrorPageBase: React.FC<ErrorPageBaseProps> = ({
     addError(error);
 
     return removeErrorOnUnmount ? () => removeError(error) : () => null;
+    // Mount-only on purpose: this registers the error once. Re-running on every render of the
+    // context value would re-add the same error endlessly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return children;

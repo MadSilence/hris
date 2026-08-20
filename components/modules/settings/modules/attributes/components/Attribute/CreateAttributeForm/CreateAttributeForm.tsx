@@ -186,6 +186,9 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
     }
     if (!isUniqueType(t)) void formik.setFieldValue("unique", false);
     if (t !== AttributeType.OBJECT) void formik.setFieldValue("objectFields", []);
+    // Reacts to the picked type only. `formik` is a new object every render, so depending on it
+    // would clear these fields continuously.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.type]);
 
   const type = formik.values.type;

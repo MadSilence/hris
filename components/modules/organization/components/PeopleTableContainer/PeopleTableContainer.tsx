@@ -10,7 +10,7 @@ import BulkActionBar from "@/components/modules/organization/components/BulkEdit
 import BulkEditModal, { type BulkEditTarget } from "@/components/modules/organization/components/BulkEdit/BulkEditModal";
 
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
-import type { FieldDTO, FilterDTO } from "@/models/user/fields";
+import type { FieldDTO, FilterDTO, UsersSearchRequest } from "@/models/user/fields";
 import type { ColumnItem } from "@/models/userTable";
 import type { PeopleView, ViewPayload } from "@/models/peopleView";
 import { usePeopleSearchInfinite } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchInfinite";
@@ -109,7 +109,7 @@ const PeopleTableContainer: React.FC = () => {
     [columns]
   );
 
-  const params = useMemo(
+  const params = useMemo<Omit<UsersSearchRequest, "cursor">>(
     () => ({
       limit: PAGE_SIZE,
       q: qForApi ?? null,
@@ -128,7 +128,7 @@ const PeopleTableContainer: React.FC = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = usePeopleSearchInfinite(params as any);
+  } = usePeopleSearchInfinite(params);
   if (error && !(error instanceof ForbiddenError)) throw error;
 
   const onSortChange = useCallback((next: SortState) => {
@@ -353,7 +353,7 @@ const PeopleTableContainer: React.FC = () => {
         ) : null}
 
         <PeopleTable
-          data={items as any}
+          data={items}
           isLoading={isLoading || fieldsLoading}
           hasMore={Boolean(hasNextPage)}
           isLoadingMore={isFetchingNextPage}

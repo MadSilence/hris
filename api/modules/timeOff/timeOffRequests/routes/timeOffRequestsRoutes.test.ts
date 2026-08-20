@@ -1,9 +1,10 @@
+import { partialMock } from "@/test/types";
 ﻿class MockResponse {
   public status: number;
 
   constructor(
     private body: unknown,
-    public init?: any
+    public init?: ResponseInit
   ) {
     this.status = init?.status ?? 200;
   }
@@ -12,7 +13,7 @@
     return this.body;
   }
 
-  static json(body: unknown, init?: any) {
+  static json(body: unknown, init?: ResponseInit) {
     return new MockResponse(body, init);
   }
 }
@@ -91,7 +92,7 @@ describe("TimeOffRequestsRoutes", () => {
   it("gets time off request by id", async () => {
     jest
       .mocked(hrisTimeOffRequestsService.getById)
-      .mockResolvedValue(requestDto as any);
+      .mockResolvedValue(partialMock(requestDto));
 
     const res = await timeOffRequestsRoutes.getById(
       {} as Request,
@@ -108,7 +109,7 @@ describe("TimeOffRequestsRoutes", () => {
   it("lists time off requests by user id", async () => {
     jest
       .mocked(hrisTimeOffRequestsService.listByUserId)
-      .mockResolvedValue([requestDto] as any);
+      .mockResolvedValue(partialMock([requestDto]));
 
     const res = await timeOffRequestsRoutes.listByUserId(
       {} as Request,

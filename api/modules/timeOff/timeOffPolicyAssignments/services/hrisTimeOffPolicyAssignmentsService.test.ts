@@ -1,3 +1,4 @@
+import { partialMock } from "@/test/types";
 ﻿import { hrisApiTimeOffPolicyAssignmentsClient } from "@/api/modules/timeOff/timeOffPolicyAssignments/clients";
 import { hrisTimeOffPolicyAssignmentsService } from "@/api/modules/timeOff/timeOffPolicyAssignments/services";
 import { TimeOffPolicyAssignmentStatus } from "@/api/modules/timeOff/timeOffPolicyAssignments/dto";
@@ -31,7 +32,7 @@ describe("HrisTimeOffPolicyAssignmentsService", () => {
   it("delegates listByPolicyId to client", async () => {
     jest
       .mocked(hrisApiTimeOffPolicyAssignmentsClient.listByPolicyId)
-      .mockResolvedValue([assignment] as any);
+      .mockResolvedValue(partialMock([assignment]));
 
     const result =
       await hrisTimeOffPolicyAssignmentsService.listByPolicyId("policy-id");

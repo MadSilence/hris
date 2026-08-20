@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UploadUserAvatarActionInput } from "@/components/modules/organization/modules/profile/actions/uploadUserAvatarAction";
@@ -41,9 +42,9 @@ describe("useUploadUserAvatar", () => {
       status: "SUCCESS",
     });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
 
       return {

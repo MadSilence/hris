@@ -1,3 +1,5 @@
+import type { PublicHoliday } from "@/models/publicHolidays/holiday";
+import { partialMock } from "@/test/types";
 import { hrisApiPublicHolidaysClient } from "@/api/modules/publicHolidays/holidays/clients";
 import { hrisPublicHolidaysService } from "@/api/modules/publicHolidays/holidays/services";
 
@@ -21,7 +23,7 @@ describe("HrisPublicHolidaysService", () => {
     const response = { id: "holiday-id" };
     const request = {
       name: "New Year",
-      holidayDate: "2026-01-01",
+      holidayDate: "2026-01-01", endDate: "2026-01-01",
     };
 
     jest.mocked(hrisApiPublicHolidaysClient.create).mockResolvedValue(response);
@@ -36,7 +38,7 @@ describe("HrisPublicHolidaysService", () => {
   });
 
   it("delegates list to client", async () => {
-    const response: any[] = [];
+    const response: never[] = [];
 
     jest.mocked(hrisApiPublicHolidaysClient.list).mockResolvedValue(response);
 
@@ -47,7 +49,7 @@ describe("HrisPublicHolidaysService", () => {
   });
 
   it("delegates getById to client", async () => {
-    const response = { id: "holiday-id" } as any;
+    const response = partialMock<PublicHoliday>({ id: "holiday-id" });
 
     jest.mocked(hrisApiPublicHolidaysClient.getById).mockResolvedValue(response);
 
@@ -61,7 +63,7 @@ describe("HrisPublicHolidaysService", () => {
     const response = { id: "holiday-id", version: 1 };
     const request = {
       name: "Updated holiday",
-      holidayDate: "2026-01-02",
+      holidayDate: "2026-01-02", endDate: "2026-01-02",
     };
 
     jest.mocked(hrisApiPublicHolidaysClient.update).mockResolvedValue(response);

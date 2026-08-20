@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -25,15 +26,15 @@ describe("useCreateTimeOffPolicy", () => {
     (useInvalidateTimeOffPoliciesQuery as jest.Mock).mockReturnValue(invalidate);
     (createTimeOffPolicyAction as jest.Mock).mockResolvedValue({ status: ActionStatus.SUCCESS, data: { id: "policy-id" } });
 
-    let capturedOpts: any;
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return { mutate: jest.fn() };
     });
 
     renderHook(() => useCreateTimeOffPolicy());
 
-    await act(async () => { await capturedOpts.mutationFn({} as any); });
+    await act(async () => { await capturedOpts.mutationFn({}); });
 
     capturedOpts.onSuccess?.();
 
@@ -44,11 +45,11 @@ describe("useCreateTimeOffPolicy", () => {
     (useInvalidateTimeOffPoliciesQuery as jest.Mock).mockReturnValue(jest.fn());
     (createTimeOffPolicyAction as jest.Mock).mockResolvedValue({ status: ActionStatus.ERROR, errorMessage: "Failed" });
 
-    let capturedOpts: any;
-    (useMutation as jest.Mock).mockImplementation((opts: any) => { capturedOpts = opts; return {}; });
+    let capturedOpts!: CapturedReactQueryOptions;
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => { capturedOpts = opts; return {}; });
 
     renderHook(() => useCreateTimeOffPolicy());
 
-    await expect(capturedOpts.mutationFn({} as any)).rejects.toThrow("Failed");
+    await expect(capturedOpts.mutationFn({})).rejects.toThrow("Failed");
   });
 });

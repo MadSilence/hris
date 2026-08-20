@@ -2,31 +2,31 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
-import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services/jobLevelGroupService";
+import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services";
+import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
 
 export const updateJobLevelGroupAction = async (
   submission: UpdateJobLevelGroupActionInput
 ): Promise<UpdateJobLevelGroupActionOutput> => {
   try {
-    const updated = await jobLevelGroupService.updateJobLevelGroup(submission);
+    const data = await jobLevelGroupService.updateJobLevelGroup(submission);
 
     return {
       status: ActionStatus.SUCCESS,
-      data: updated,
+      data,
     };
-  } catch (e) {
+  } catch (error) {
     return {
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the Job Level Group. Please try again.",
+      errorMessage: jobCatalogErrorMessage(
+        error,
+        "An error occurred while updating a job level group. Please try again."
+      ),
     };
   }
 };
 
-export type UpdateJobLevelGroupActionInput = {
-  id: string;
-  name?: string;
-};
+export type UpdateJobLevelGroupActionInput = { id: string; name: string };
 
 export type UpdateJobLevelGroupActionOutput = {
   status: ActionStatus;

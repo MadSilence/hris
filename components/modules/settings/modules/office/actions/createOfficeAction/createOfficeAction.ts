@@ -14,7 +14,7 @@ export const createOfficeAction = async (
       status: ActionStatus.SUCCESS,
       data: created,
     };
-  } catch (e) {
+  } catch (_error) {
     return {
       status: ActionStatus.ERROR,
       errorMessage:

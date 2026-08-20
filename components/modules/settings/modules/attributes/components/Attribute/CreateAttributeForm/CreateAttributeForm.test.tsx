@@ -7,7 +7,7 @@ import { AttributeType } from "@/models/attribute";
 jest.mock(
   "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/TypeSelect",
   () => ({
-    TypeSelect: ({ value, onChange }: any) => (
+    TypeSelect: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
       <select
         aria-label="Attribute type"
         value={value}

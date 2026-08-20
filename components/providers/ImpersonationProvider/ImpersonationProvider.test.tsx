@@ -1,3 +1,4 @@
+import { partialMock } from "@/test/types";
 import { render, screen } from "@testing-library/react";
 import ImpersonationProvider, { useImpersonationContext, } from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -20,11 +21,11 @@ function Consumer() {
 
 describe("ImpersonationProvider", () => {
   it("provides impersonation state from current user", () => {
-    jest.mocked(useCurrentUser).mockReturnValue({
+    jest.mocked(useCurrentUser).mockReturnValue(partialMock({
       impersonating: true,
       actorId: "admin-id",
       subjectId: "target-id",
-    } as any);
+    }));
 
     render(
       <ImpersonationProvider>

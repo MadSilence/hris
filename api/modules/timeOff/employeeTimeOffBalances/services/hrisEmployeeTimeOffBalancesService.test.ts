@@ -1,5 +1,10 @@
+import { partialMock } from "@/test/types";
 ﻿import { hrisApiEmployeeTimeOffBalancesClient } from "@/api/modules/timeOff/employeeTimeOffBalances/clients";
 import { hrisEmployeeTimeOffBalancesService } from "@/api/modules/timeOff/employeeTimeOffBalances/services";
+import {
+  EmployeeTimeOffBalanceTransactionDTO,
+  TimeOffBalanceTransactionType,
+} from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 
 jest.mock("@/api/modules/timeOff/employeeTimeOffBalances/clients", () => ({
   hrisApiEmployeeTimeOffBalancesClient: {
@@ -7,7 +12,7 @@ jest.mock("@/api/modules/timeOff/employeeTimeOffBalances/clients", () => ({
     getById: jest.fn(),
     listByUserId: jest.fn(),
     adjust: jest.fn(),
-    listAdjustments: jest.fn(),
+    listTransactions: jest.fn(),
   },
 }));
 
@@ -28,11 +33,15 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
     updatedAt: "2026-06-01T10:00:00",
   };
 
-  const adjustment = {
-    id: "adjustment-id",
+  const transaction: EmployeeTimeOffBalanceTransactionDTO = {
+    id: "transaction-id",
     balanceId: "balance-id",
-    adjustmentAmount: -2,
+    type: TimeOffBalanceTransactionType.Adjustment,
+    amount: -2,
+    effectiveDate: "2026-06-01",
     reason: "Correction for unauthorized absence",
+    sourceRef: null,
+    policyVersionId: null,
     createdAt: "2026-06-01T10:00:00",
     createdBy: "admin-id",
   };
@@ -68,7 +77,7 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
   it("delegates getById to client", async () => {
     jest
       .mocked(hrisApiEmployeeTimeOffBalancesClient.getById)
-      .mockResolvedValue(balance as any);
+      .mockResolvedValue(partialMock(balance));
 
     const result =
       await hrisEmployeeTimeOffBalancesService.getById("balance-id");
@@ -82,7 +91,7 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
   it("delegates listByUserId to client", async () => {
     jest
       .mocked(hrisApiEmployeeTimeOffBalancesClient.listByUserId)
-      .mockResolvedValue([balance] as any);
+      .mockResolvedValue(partialMock([balance]));
 
     const result =
       await hrisEmployeeTimeOffBalancesService.listByUserId("user-id");
@@ -117,17 +126,17 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
     expect(result).toEqual(response);
   });
 
-  it("delegates listAdjustments to client", async () => {
+  it("delegates listTransactions to client", async () => {
     jest
-      .mocked(hrisApiEmployeeTimeOffBalancesClient.listAdjustments)
-      .mockResolvedValue([adjustment] as any);
+      .mocked(hrisApiEmployeeTimeOffBalancesClient.listTransactions)
+      .mockResolvedValue([transaction]);
 
     const result =
-      await hrisEmployeeTimeOffBalancesService.listAdjustments("balance-id");
+      await hrisEmployeeTimeOffBalancesService.listTransactions("balance-id");
 
     expect(
-      hrisApiEmployeeTimeOffBalancesClient.listAdjustments
+      hrisApiEmployeeTimeOffBalancesClient.listTransactions
     ).toHaveBeenCalledWith("balance-id");
-    expect(result).toEqual([adjustment]);
+    expect(result).toEqual([transaction]);
   });
 });

@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import type { CreateLegalEntityActionInput } from "@/components/modules/settings/modules/legalEntity/actions/createLegalEntityAction";
@@ -34,8 +35,6 @@ describe("useCreateLegalEntityAction", () => {
       description: "",
       registrationNumber: "123",
       taxId: "TAX",
-      email: "",
-      phone: "",
       country: "UK",
       city: "London",
       street: "Baker",
@@ -50,9 +49,9 @@ describe("useCreateLegalEntityAction", () => {
     );
     (createLegalEntityAction as jest.Mock).mockResolvedValue({ id: "1" });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {
         mutate: jest.fn(),

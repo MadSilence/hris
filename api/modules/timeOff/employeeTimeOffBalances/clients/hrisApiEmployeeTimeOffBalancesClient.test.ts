@@ -1,5 +1,9 @@
 ﻿import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { hrisApiEmployeeTimeOffBalancesClient } from "@/api/modules/timeOff/employeeTimeOffBalances/clients";
+import {
+  EmployeeTimeOffBalanceTransactionDTO,
+  TimeOffBalanceTransactionType,
+} from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 
 jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
   hrisApiClient: {
@@ -25,11 +29,15 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
     updatedAt: "2026-06-01T10:00:00",
   };
 
-  const adjustmentDto = {
-    id: "adjustment-id",
+  const transactionDto: EmployeeTimeOffBalanceTransactionDTO = {
+    id: "transaction-id",
     balanceId: "balance-id",
-    adjustmentAmount: -2,
+    type: TimeOffBalanceTransactionType.Adjustment,
+    amount: -2,
+    effectiveDate: "2026-06-01",
     reason: "Correction for unauthorized absence",
+    sourceRef: null,
+    policyVersionId: null,
     createdAt: "2026-06-01T10:00:00",
     createdBy: "admin-id",
   };
@@ -107,15 +115,15 @@ describe("HrisApiEmployeeTimeOffBalancesClient", () => {
     expect(result).toEqual(response);
   });
 
-  it("lists adjustments", async () => {
-    jest.mocked(hrisApiClient.get).mockResolvedValue([adjustmentDto]);
+  it("lists transactions", async () => {
+    jest.mocked(hrisApiClient.get).mockResolvedValue([transactionDto]);
 
     const result =
-      await hrisApiEmployeeTimeOffBalancesClient.listAdjustments("balance-id");
+      await hrisApiEmployeeTimeOffBalancesClient.listTransactions("balance-id");
 
     expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/time-off/balances/balance-id/adjustments"
+      "/time-off/balances/balance-id/transactions"
     );
-    expect(result).toEqual([adjustmentDto]);
+    expect(result).toEqual([transactionDto]);
   });
 });

@@ -1,119 +1,96 @@
-import React from "react";
+import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { DeleteOfficeModal } from "./DeleteOfficeModal";
 import { Office } from "@/models/office";
 
-jest.mock("@/components/ui/Modal/Modal", () => {
-  return ({ title, footer, children, onRequestClose }: any) => (
-    <div data-testid="modal">
-      <h1>{title}</h1>
-      <button onClick={onRequestClose}>outer-close</button>
-      <div data-testid="modal-content">{children}</div>
-      <div data-testid="modal-footer">{footer}</div>
-    </div>
-  );
-});
-
-jest.mock("@/components/ui/Button", () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-}));
-
-const mockOffice: Office = {
+// Rewritten to match the modal as it stands: it moved to the desact AlertDialog and renamed its
+// callbacks to *Action, so the old hand-rolled Modal/Button mocks pointed at modules that are gone.
+const mockOffice = {
   id: "1",
   name: "Berlin Office",
   description: "Main DE office",
-  email: "berlin@example.com",
-  phone: "+49 30 123456",
-  isSystem: false,
   country: "Germany",
   city: "Berlin",
-  street: "Unter den Linden 10",
-  building: "10",
-  postCode: "10117",
+} as Office;
+
+const renderModal = (props?: Partial<ComponentProps<typeof DeleteOfficeModal>>) => {
+  const defaultProps: ComponentProps<typeof DeleteOfficeModal> = {
+    isOpen: true,
+    isLoading: false,
+    office: mockOffice,
+    onConfirmAction: jest.fn(),
+    onRequestCloseAction: jest.fn(),
+  };
+
+  const mergedProps = { ...defaultProps, ...props };
+
+  return {
+    ...render(<DeleteOfficeModal {...mergedProps} />),
+    props: mergedProps,
+  };
 };
 
 describe("DeleteOfficeModal", () => {
-  it("renders title with office name and content text", () => {
-    render(
-      <DeleteOfficeModal
-        isOpen
-        office={mockOffice}
-        isLoading={false}
-        onConfirm={jest.fn()}
-        onRequestClose={jest.fn()}
-      />,
-    );
+  afterEach(() => jest.clearAllMocks());
+
+  it("does not render when closed", () => {
+    renderModal({ isOpen: false });
 
     expect(
-      screen.getByText('Permanently delete "Berlin Office" office?'),
+      screen.queryByRole("heading", { name: /permanently delete/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the office name in the title and explains the consequence", () => {
+    renderModal();
+
+    expect(
+      screen.getByRole("heading", { name: /permanently delete "berlin office" office\?/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(
-        "This office will be permanently removed from the system.",
-      ),
+      screen.getByText(/this office will be permanently removed from the system/i),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByText("This action cannot be undone."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/this action cannot be undone/i)).toBeInTheDocument();
   });
 
-  it("calls onRequestClose when Cancel is clicked and not loading", () => {
-    const onRequestClose = jest.fn();
+  it("warns how many people lose the assignment when the office has any", () => {
+    renderModal({ office: { ...mockOffice, assignedUsersCount: 3 } as Office });
 
-    render(
-      <DeleteOfficeModal
-        isOpen
-        office={mockOffice}
-        isLoading={false}
-        onConfirm={jest.fn()}
-        onRequestClose={onRequestClose}
-      />,
-    );
-
-    fireEvent.click(screen.getByText("Cancel"));
-
-    expect(onRequestClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(/3 people currently assigned/i)).toBeInTheDocument();
   });
 
-  it("calls onConfirm when Delete is clicked and not loading", () => {
-    const onConfirm = jest.fn();
+  it("calls confirm action", () => {
+    const onConfirmAction = jest.fn();
 
-    render(
-      <DeleteOfficeModal
-        isOpen
-        office={mockOffice}
-        isLoading={false}
-        onConfirm={onConfirm}
-        onRequestClose={jest.fn()}
-      />,
-    );
+    renderModal({ onConfirmAction });
 
-    fireEvent.click(screen.getByText("Delete"));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
 
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onConfirmAction).toHaveBeenCalledTimes(1);
   });
 
-  it("does not call onConfirm or onRequestClose when loading", () => {
-    const onConfirm = jest.fn();
-    const onRequestClose = jest.fn();
+  it("calls request close action", () => {
+    const onRequestCloseAction = jest.fn();
 
-    render(
-      <DeleteOfficeModal
-        isOpen
-        office={mockOffice}
-        isLoading={true}
-        onConfirm={onConfirm}
-        onRequestClose={onRequestClose}
-      />,
-    );
+    renderModal({ onRequestCloseAction });
 
-    fireEvent.click(screen.getByText("Cancel"));
-    fireEvent.click(screen.getByText("Delete"));
-    fireEvent.click(screen.getByText("outer-close"));
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-    expect(onConfirm).not.toHaveBeenCalled();
-    expect(onRequestClose).not.toHaveBeenCalled();
+    expect(onRequestCloseAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores both actions while loading", () => {
+    const onConfirmAction = jest.fn();
+    const onRequestCloseAction = jest.fn();
+
+    renderModal({ isLoading: true, onConfirmAction, onRequestCloseAction });
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    expect(onConfirmAction).not.toHaveBeenCalled();
+    expect(onRequestCloseAction).not.toHaveBeenCalled();
   });
 });

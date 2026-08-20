@@ -1,13 +1,30 @@
-import { JobLevelItemDTO } from "@/api/modules/jobLevelGroup/dto/JobLevelItemDTO";
+import { JobLevelDTO } from "@/api/modules/jobfamily/dto";
 
 export type JobLevelGroupDTO = {
   id: string;
   name: string;
-  levels: JobLevelItemDTO[];
   isSystem: boolean;
+  levels: JobLevelDTO[];
+  assignedJobsCount: number;
+  assignedUsersCount: number;
+};
 
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  updatedBy: string;
-}
+export type CreateJobLevelGroupRequest = {
+  name: string;
+};
+
+export type UpdateJobLevelGroupRequest = {
+  id: string;
+  name: string;
+};
+
+export type ReorderJobLevelsRequest = {
+  groupId: string;
+  /** Every level of the group, top rung first — the backend rejects a partial list. */
+  levelIds: string[];
+};
+
+/** Delete takes nothing but the id. */
+export type JobLevelGroupIdRequest = {
+  id: string;
+};

@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { CreateAttributeModal } from "./CreateAttributeModal";
 import { ComponentProps } from "react";
@@ -7,7 +8,7 @@ const mockCreateAttributeForm = jest.fn();
 jest.mock(
   "@/components/modules/settings/modules/attributes/components/Attribute/CreateAttributeForm",
   () => ({
-    CreateAttributeForm: (props: any) => {
+    CreateAttributeForm: (props: MockedFormProps) => {
       mockCreateAttributeForm(props);
 
       return (

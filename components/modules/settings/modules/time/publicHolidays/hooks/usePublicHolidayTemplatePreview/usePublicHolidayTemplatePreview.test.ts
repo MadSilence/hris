@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { renderHook } from "@testing-library/react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -29,9 +30,9 @@ describe("usePublicHolidayTemplatePreview", () => {
   });
 
   it("calls useQuery with preview query config", async () => {
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useQuery as jest.Mock).mockImplementation((opts: any) => {
+    (useQuery as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {};
     });

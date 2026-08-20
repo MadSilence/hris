@@ -138,6 +138,9 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
     if (!formik.values.templateId && templates[0]?.id) {
       void formik.setFieldValue("templateId", templates[0].id);
     }
+    // Reacts to the template toggle only. `formik` is a new object every render, and `templates`
+    // is refetched — depending on either would reset the user's typing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.useTemplate]);
 
   const selectedTemplate = templates.find(

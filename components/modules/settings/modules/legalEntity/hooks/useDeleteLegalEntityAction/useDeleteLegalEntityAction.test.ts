@@ -1,3 +1,4 @@
+import type { CapturedReactQueryOptions } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import type { DeleteLegalEntityActionInput } from "@/components/modules/settings/modules/legalEntity/actions/deleteLegalEntityAction";
@@ -33,9 +34,9 @@ describe("useDeleteLegalEntityAction", () => {
     (useInvalidateLegalEntityQuery as jest.Mock).mockReturnValue(mockRevalidate);
     (deleteLegalEntityAction as jest.Mock).mockResolvedValue({ status: "SUCCESS" });
 
-    let capturedOpts: any;
+    let capturedOpts!: CapturedReactQueryOptions;
 
-    (useMutation as jest.Mock).mockImplementation((opts: any) => {
+    (useMutation as jest.Mock).mockImplementation((opts: CapturedReactQueryOptions) => {
       capturedOpts = opts;
       return {
         mutate: jest.fn(),

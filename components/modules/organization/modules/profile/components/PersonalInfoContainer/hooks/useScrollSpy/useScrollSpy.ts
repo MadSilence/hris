@@ -10,6 +10,8 @@ export function useScrollSpy({ containerRef, sectionIds }: Options) {
   const sectionsRef = useRef<Record<string, HTMLElement | null>>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  const sectionKey = sectionIds.join("|");
+
   const connectObserver = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -35,7 +37,9 @@ export function useScrollSpy({ containerRef, sectionIds }: Options) {
       const el = sectionsRef.current[id];
       if (el) observerRef.current!.observe(el);
     });
-  }, [containerRef, sectionIds.join("|"), activeId]);
+    // Keyed by the ids' contents, not the array identity, which the caller rebuilds each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [containerRef, sectionKey, activeId]);
 
   const registerSection = useCallback((id: string, el: HTMLElement | null) => {
     sectionsRef.current[id] = el;

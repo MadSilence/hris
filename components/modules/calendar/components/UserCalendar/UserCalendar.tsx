@@ -122,7 +122,8 @@ export const UserCalendar: FC<Props> = ({
 }) => {
   const compact = variant === "compact";
   const selectable = Boolean(onSelectRange);
-  const today = new Date();
+  // Memoised so the month grid's useMemo does not see a new Date identity on every render.
+  const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState({ year: today.getFullYear(), month: today.getMonth() });
 
   // In-progress drag selection ({anchor, hover}); resolved to a range on pointer-up.

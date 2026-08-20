@@ -1,3 +1,4 @@
+import type { MockedFormProps } from "@/test/types";
 import { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { CreateGroupModal } from "./CreateGroupModal";
@@ -7,7 +8,7 @@ const mockCreateGroupForm = jest.fn();
 jest.mock(
   "@/components/modules/settings/modules/attributes/components/AttributeGroup/CreateGroupForm",
   () => ({
-    CreateGroupForm: (props: any) => {
+    CreateGroupForm: (props: MockedFormProps) => {
       mockCreateGroupForm(props);
 
       return (

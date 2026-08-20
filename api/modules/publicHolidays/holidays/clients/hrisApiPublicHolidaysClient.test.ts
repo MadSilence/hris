@@ -27,7 +27,7 @@ describe("HrisApiPublicHolidaysClient", () => {
     const response = { id: "holiday-id" };
     const request = {
       name: "New Year",
-      holidayDate: "2026-01-01",
+      holidayDate: "2026-01-01", endDate: "2026-01-01",
     };
 
     jest.mocked(hrisApiClient.post).mockResolvedValue(response);
@@ -65,7 +65,7 @@ describe("HrisApiPublicHolidaysClient", () => {
     const response = { id: "holiday-id", version: 1 };
     const request = {
       name: "Updated holiday",
-      holidayDate: "2026-01-02",
+      holidayDate: "2026-01-02", endDate: "2026-01-02",
     };
 
     jest.mocked(hrisApiClient.patch).mockResolvedValue(response);

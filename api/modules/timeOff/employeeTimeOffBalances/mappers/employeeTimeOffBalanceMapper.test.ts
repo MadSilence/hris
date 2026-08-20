@@ -1,9 +1,8 @@
-﻿import { employeeTimeOffBalanceMapper } from "@/api/modules/timeOff/employeeTimeOffBalances/mappers";
-import type {
-  EmployeeTimeOffBalanceDTO,
-  EmployeeTimeOffBalanceAdjustmentDTO,
-} from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
+import { employeeTimeOffBalanceMapper } from "@/api/modules/timeOff/employeeTimeOffBalances/mappers";
+import type { EmployeeTimeOffBalanceDTO } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 
+// Adjustments became one kind of balance *transaction* and stopped having a mapper of their own —
+// transactions travel as raw DTOs. The two suites that covered the old adjustment mapper went with it.
 describe("EmployeeTimeOffBalanceMapper", () => {
   const balanceDto: EmployeeTimeOffBalanceDTO = {
     id: "balance-id",
@@ -21,15 +20,6 @@ describe("EmployeeTimeOffBalanceMapper", () => {
     updatedAt: "2026-06-01T10:00:00",
   };
 
-  const adjustmentDto: EmployeeTimeOffBalanceAdjustmentDTO = {
-    id: "adjustment-id",
-    balanceId: "balance-id",
-    adjustmentAmount: -2,
-    reason: "Correction for unauthorized absence",
-    createdAt: "2026-06-01T10:00:00",
-    createdBy: "admin-id",
-  };
-
   it("maps employee time off balance dto to model", () => {
     expect(
       employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceDTO(balanceDto)
@@ -40,21 +30,5 @@ describe("EmployeeTimeOffBalanceMapper", () => {
     expect(
       employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceDTOs([balanceDto])
     ).toEqual([balanceDto]);
-  });
-
-  it("maps employee time off balance adjustment dto to model", () => {
-    expect(
-      employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceAdjustmentDTO(
-        adjustmentDto
-      )
-    ).toEqual(adjustmentDto);
-  });
-
-  it("maps employee time off balance adjustment dto array to models", () => {
-    expect(
-      employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceAdjustmentDTOs([
-        adjustmentDto,
-      ])
-    ).toEqual([adjustmentDto]);
   });
 });

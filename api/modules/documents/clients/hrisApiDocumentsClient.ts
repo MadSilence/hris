@@ -4,7 +4,6 @@ import {
   DocumentDTO,
   DocumentFolderContentDTO,
   DocumentCategoryDTO,
-  DocumentFolderDTO,
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
   RenameDocumentRequest,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { closestCenter, DndContext, DragEndEvent, DragOverlay, PointerSensor, useSensor, useSensors, } from "@dnd-kit/core";
+import { closestCenter, DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { SortableApi, SortableRow } from "@/components/utils/SortableRow";
 
@@ -41,7 +41,7 @@ export function ReorderableList<T>({
     [activeId, local, getId]
   );
 
-  function handleDragStart(e: any) {
+  function handleDragStart(e: DragStartEvent) {
     setActiveId(String(e.active.id));
   }
 

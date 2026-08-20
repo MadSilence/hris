@@ -1,13 +1,15 @@
-﻿import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
+import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { hrisApiTimeOffPoliciesClient } from "@/api/modules/timeOff/timeOffPolicies/clients/";
 import {
   TimeOffPolicyCarryoverExpiryType,
   TimeOffPolicyCarryoverExpiryUnit,
   TimeOffPolicyCarryoverType,
-  TimeOffPolicyRenewalType,
-  TimeOffPolicyStatus,
-  TimeOffPolicyUnit,
 } from "@/api/modules/timeOff/timeOffPolicies/dto";
+import {
+  timeOffPolicyCreateRequest,
+  timeOffPolicyDto,
+  timeOffPolicyUpdateRequest,
+} from "@/test/fixtures/timeOffPolicy";
 
 jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
   hrisApiClient: {
@@ -18,44 +20,16 @@ jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
 }));
 
 describe("HrisApiTimeOffPoliciesClient", () => {
-  const dto = {
-    id: "policy-id",
-    companyId: "company-id",
-
-    name: "vacation",
-    displayName: "Vacation",
+  const dto = timeOffPolicyDto({
     description: "Vacation policy",
-
-    status: TimeOffPolicyStatus.Active,
-    unit: TimeOffPolicyUnit.Days,
-
-    paid: true,
-    hiddenFromEmployees: false,
-
-    yearlyQuota: 20,
-    unlimitedQuota: false,
-
-    renewalType: TimeOffPolicyRenewalType.YearlyFixedDate,
-    renewalFixedDay: 1,
-    renewalFixedMonth: 1,
-
     carryoverType: TimeOffPolicyCarryoverType.Limited,
     carryoverLimit: 5,
-
     carryoverExpiryType: TimeOffPolicyCarryoverExpiryType.AfterPeriod,
     carryoverExpiryValue: 3,
     carryoverExpiryUnit: TimeOffPolicyCarryoverExpiryUnit.Months,
-
-    archivedAt: null,
-    archivedBy: null,
-
-    createdAt: "2026-05-08T10:00:00",
-    updatedAt: "2026-05-08T10:00:00",
     createdBy: "user-id",
     updatedBy: "user-id",
-
-    version: 0,
-  };
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,51 +37,14 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
   it("creates time off policy", async () => {
     const response = { id: "policy-id" };
-
-    const request = {
-      name: "vacation",
-      displayName: "Vacation",
-      description: null,
-
-      status: TimeOffPolicyStatus.Draft,
-      unit: TimeOffPolicyUnit.Days,
-
-      paid: true,
-      hiddenFromEmployees: false,
-
-      yearlyQuota: 20,
-      unlimitedQuota: false,
-
-      renewalType: TimeOffPolicyRenewalType.YearlyFixedDate,
-      renewalFixedDay: 1,
-      renewalFixedMonth: 1,
-
-      carryoverType: TimeOffPolicyCarryoverType.None,
-      carryoverLimit: null,
-
-      carryoverExpiryType: TimeOffPolicyCarryoverExpiryType.Never,
-      carryoverExpiryValue: null,
-      carryoverExpiryUnit: null,
-    };
+    const request = timeOffPolicyCreateRequest();
 
     jest.mocked(hrisApiClient.post).mockResolvedValue(response);
 
     const result = await hrisApiTimeOffPoliciesClient.create(request);
 
-    expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/time-off/policies/create",
-      request
-    );
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/time-off/policies/create", request);
     expect(result).toEqual(response);
-  });
-
-  it("lists time off policies", async () => {
-    jest.mocked(hrisApiClient.get).mockResolvedValue([dto]);
-
-    const result = await hrisApiTimeOffPoliciesClient.list();
-
-    expect(hrisApiClient.get).toHaveBeenCalledWith("/time-off/policies");
-    expect(result).toEqual([dto]);
   });
 
   it("gets time off policy by id", async () => {
@@ -115,63 +52,28 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
     const result = await hrisApiTimeOffPoliciesClient.getById("policy-id");
 
-    expect(hrisApiClient.get).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id"
-    );
+    expect(hrisApiClient.get).toHaveBeenCalledWith("/time-off/policies/policy-id");
     expect(result).toEqual(dto);
   });
 
   it("updates time off policy", async () => {
     const response = { id: "policy-id", version: 1 };
 
-    const request = {
+    const request = timeOffPolicyUpdateRequest({
       displayName: "Vacation updated",
-      description: null,
-
-      unit: TimeOffPolicyUnit.Days,
-
-      paid: true,
-      hiddenFromEmployees: false,
-
       yearlyQuota: 25,
-      unlimitedQuota: false,
-
-      renewalType: TimeOffPolicyRenewalType.YearlyFixedDate,
-      renewalFixedDay: 1,
-      renewalFixedMonth: 1,
-
       carryoverType: TimeOffPolicyCarryoverType.Limited,
       carryoverLimit: 5,
-
       carryoverExpiryType: TimeOffPolicyCarryoverExpiryType.AfterPeriod,
       carryoverExpiryValue: 3,
       carryoverExpiryUnit: TimeOffPolicyCarryoverExpiryUnit.Months,
-    };
+    });
 
     jest.mocked(hrisApiClient.patch).mockResolvedValue(response);
 
     const result = await hrisApiTimeOffPoliciesClient.update("policy-id", request);
 
-    expect(hrisApiClient.patch).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id",
-      request
-    );
-    expect(result).toEqual(response);
-  });
-
-  it("renames time off policy", async () => {
-    const response = { id: "policy-id", version: 1 };
-
-    jest.mocked(hrisApiClient.post).mockResolvedValue(response);
-
-    const result = await hrisApiTimeOffPoliciesClient.rename("policy-id", {
-      name: "new-name",
-    });
-
-    expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id/rename",
-      { name: "new-name" }
-    );
+    expect(hrisApiClient.patch).toHaveBeenCalledWith("/time-off/policies/policy-id", request);
     expect(result).toEqual(response);
   });
 
@@ -182,9 +84,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
     const result = await hrisApiTimeOffPoliciesClient.activate("policy-id");
 
-    expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id/activate"
-    );
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/time-off/policies/policy-id/activate");
     expect(result).toEqual(response);
   });
 
@@ -195,9 +95,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
     const result = await hrisApiTimeOffPoliciesClient.archive("policy-id");
 
-    expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id/archive"
-    );
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/time-off/policies/policy-id/archive");
     expect(result).toEqual(response);
   });
 
@@ -206,9 +104,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
 
     const result = await hrisApiTimeOffPoliciesClient.delete("policy-id");
 
-    expect(hrisApiClient.post).toHaveBeenCalledWith(
-      "/time-off/policies/policy-id/delete"
-    );
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/time-off/policies/policy-id/delete");
     expect(result).toBeUndefined();
   });
 });

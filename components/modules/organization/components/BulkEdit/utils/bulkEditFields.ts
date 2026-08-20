@@ -5,7 +5,7 @@ import type { BulkOperation } from "@/models/bulkEdit";
 import { EMPLOYMENT_TYPES } from "@/models/user/employmentType";
 
 export type EditFieldKind = "status" | "association" | "role" | "attr" | "systemScalar";
-export type EditValueSource = "status" | "departments" | "offices" | "legalEntities" | "jobs" | "roles" | "attribute";
+export type EditValueSource = "status" | "attribute" | ReferenceValueSource;
 
 export type EditOption = { id: string; label: string };
 
@@ -70,7 +70,7 @@ export function buildEditableFields(
       label: f.label ?? f.key,
       kind: "association",
       operations: ["SET"],
-      valueSource: source as EditValueSource,
+      valueSource: source,
     });
   }
 

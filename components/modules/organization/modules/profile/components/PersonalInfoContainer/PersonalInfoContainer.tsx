@@ -50,7 +50,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   }, [fetchedGroups]);
 
   const valueMap = useMemo<Record<string, unknown>>(() => {
-    const src: any = user?.custom ?? {};
+    const src: Record<string, unknown> = user?.custom ?? {};
     const out: Record<string, unknown> = {};
     for (const k in src) {
       if (!Object.prototype.hasOwnProperty.call(src, k)) continue;
