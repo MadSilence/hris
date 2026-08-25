@@ -15,6 +15,7 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 export type PersonalInfoAttributesRowProps = {
   attribute: Attribute;
@@ -313,12 +314,11 @@ function EditValue({
       const iso = toInputDateValue(rawValue);
 
       return (
-        <Input
-          type="date"
+        <DatePicker
           value={iso}
           min={attribute.minDate ?? undefined}
           max={attribute.maxDate ?? undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
         />
       );
     }

@@ -45,7 +45,7 @@ describe("usePublicHolidays", () => {
 
     await capturedOpts.queryFn();
 
-    expect(publicHolidaysService.list).toHaveBeenCalledWith("calendar-id");
+    expect(publicHolidaysService.list).toHaveBeenCalledWith("calendar-id", undefined);
   });
 
   it("disables query when calendarId is empty", () => {

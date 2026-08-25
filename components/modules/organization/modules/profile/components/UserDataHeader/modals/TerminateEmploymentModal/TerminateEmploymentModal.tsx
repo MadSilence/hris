@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Switch } from "@/public/desact/src/components/ui/switch";
@@ -29,6 +28,7 @@ import type {
   TerminationImpactDTO,
   TerminationReason,
 } from "@/api/modules/users/clients/hrisApiUsersClient";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 const REASONS: { id: TerminationReason; label: string }[] = [
   { id: "VOLUNTARY", label: "Voluntary — the person resigned" },
@@ -125,12 +125,11 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="last-working-day">Last working day</Label>
-              <Input
+              <DatePicker
                 id="last-working-day"
-                type="date"
                 value={lastWorkingDay}
                 disabled={isLoading}
-                onChange={(e) => setLastWorkingDay(e.currentTarget.value)}
+                onChange={setLastWorkingDay}
               />
             </div>
 

@@ -1,5 +1,10 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { hrisApiPublicHolidaysClient } from "@/api/modules/publicHolidays/holidays/clients";
+import {
+  PublicHolidayDayPart,
+  PublicHolidayOrigin,
+  PublicHolidayType,
+} from "@/api/modules/publicHolidays/holidays/dto";
 
 jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
   hrisApiClient: {
@@ -17,6 +22,11 @@ describe("HrisApiPublicHolidaysClient", () => {
     name: "New Year",
     holidayDate: "2026-01-01",
     endDate: "2026-01-01",
+    observedDate: null,
+    origin: PublicHolidayOrigin.Source,
+    sourceEventId: "src-1",
+    dayPart: PublicHolidayDayPart.FullDay,
+    type: PublicHolidayType.Public,
   };
 
   beforeEach(() => {

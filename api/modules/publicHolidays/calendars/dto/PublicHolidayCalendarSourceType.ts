@@ -1,5 +1,6 @@
+/** Mirrors {@code PublicHolidayCalendarSourceType} on the backend. */
 export enum PublicHolidayCalendarSourceType {
   Manual = "MANUAL",
-  GoogleCalendar = "GOOGLE_CALENDAR",
-  External = "EXTERNAL",
+  Google = "GOOGLE",
+  Nager = "NAGER",
 }

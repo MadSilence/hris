@@ -50,8 +50,7 @@ describe("PublicHolidayCalendarsRoutes", () => {
   it("creates public holiday calendar", async () => {
     const response = { id: "calendar-id" };
     const body = {
-      name: "Poland 2026",
-      year: 2026,
+      name: "Poland",
       status: PublicHolidayCalendarStatus.Active,
       sourceType: PublicHolidayCalendarSourceType.Manual,
       sourceExternalId: undefined,
@@ -103,7 +102,6 @@ describe("PublicHolidayCalendarsRoutes", () => {
     const response = { id: "calendar-id", version: 1 };
     const body = {
       name: "Poland updated",
-      year: 2026,
       sourceType: PublicHolidayCalendarSourceType.Manual,
       sourceExternalId: undefined,
       sourceCountryCode: "PL",

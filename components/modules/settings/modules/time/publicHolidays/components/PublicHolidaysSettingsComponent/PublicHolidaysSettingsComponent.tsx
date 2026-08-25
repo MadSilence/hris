@@ -43,6 +43,7 @@ import {
   TableRow,
 } from "@/public/desact/src/components/ui/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
+import { CountryFlag } from "@/components/ui/CountryFlag";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
 import { PublicHolidaysSettingsSkeleton } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidaysSettingsSkeleton";
 import { PublicHolidayCalendarStatus } from "@/api/modules/publicHolidays/calendars/dto";
@@ -74,6 +75,18 @@ function statusBadge(status: PublicHolidayCalendarStatus) {
   }
 }
 
+/** "2025–2027" for a run of years, "2025, 2027" when there is a gap. */
+function formatYears(years: number[]) {
+  if (!years || years.length === 0) return "—";
+
+  const sorted = [...years].sort((a, b) => a - b);
+  const isContiguous = sorted.every((y, i) => i === 0 || y === sorted[i - 1] + 1);
+
+  if (sorted.length === 1) return String(sorted[0]);
+  if (isContiguous) return `${sorted[0]}–${sorted[sorted.length - 1]}`;
+  return sorted.join(", ");
+}
+
 function formatCountryRegion(calendar: PublicHolidayCalendar) {
   const { sourceCountryCode: c, sourceRegionCode: r } = calendar;
   if (c && r) return `${c} / ${r}`;
@@ -86,6 +99,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const [isChooseTemplateModalOpen, setIsChooseTemplateModalOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
     try {
@@ -107,17 +121,26 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const restore = useRestorePublicHolidayCalendar();
   const remove = useDeletePublicHolidayCalendar();
 
+  /** Archived calendars stay out of the list until the toggle asks for them. */
+  const visible = useMemo(
+    () =>
+      showArchived
+        ? calendars
+        : calendars.filter((c) => c.status !== PublicHolidayCalendarStatus.Archived),
+    [calendars, showArchived],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return calendars;
-    return calendars.filter((c) =>
-      [c.name, c.sourceCountryCode, c.sourceRegionCode, String(c.year)]
+    if (!q) return visible;
+    return visible.filter((c) =>
+      [c.name, c.sourceCountryCode, c.sourceRegionCode, c.years.join(" ")]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q)),
     );
-  }, [calendars, query]);
+  }, [visible, query]);
 
-  const hasCalendars = calendars.length > 0;
+  const hasCalendars = visible.length > 0;
 
   const openDetail = (id: string) => router.push(`/settings/time/public-holidays/${id}`);
   const handleCreateManually = () => router.push("/settings/time/public-holidays/new");
@@ -172,13 +195,13 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={handleCreateManually}>
-          <FilePlus2 className="mr-2 h-4 w-4" />
-          Create manually
-        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setIsChooseTemplateModalOpen(true)}>
           <DownloadCloud className="mr-2 h-4 w-4" />
           Choose from template
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleCreateManually}>
+          <FilePlus2 className="mr-2 h-4 w-4" />
+          Create manually
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -191,30 +214,34 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           <div className="space-y-2">
             <SettingsPageHeader title="Public holidays" backHref="/settings" />
             <PageDescription className="text-base text-muted-foreground/90">
-              Manage public holiday calendars and assign them to employees, locations or groups. Use
-              the table below to review, search and navigate to specific calendars.
+              Manage public holiday calendars and assign them to employees, locations or groups.
             </PageDescription>
-          </div>
-
-          {/* Info block */}
-          <div className="space-y-1 pb-1 pt-5">
-            <h2 className="text-lg font-semibold text-foreground">Holiday calendars</h2>
-            <p className="text-sm text-muted-foreground">
-              Every calendar in your company — active, inactive and archived.
-            </p>
           </div>
 
           {/* Toolbar: search (left) + actions (right) */}
           <div className="flex items-center justify-between gap-4 py-5">
-            <div className="relative w-[260px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.currentTarget.value)}
-                className="h-9 w-[260px] pl-9"
-                placeholder="Search calendars"
-                inputMode="search"
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative w-[260px]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
+                  className="h-9 w-[260px] pl-9"
+                  placeholder="Search calendars"
+                  inputMode="search"
+                />
+              </div>
+
+              <Button
+                type="button"
+                variant={showArchived ? "default" : "outline"}
+                className="h-9 gap-1.5"
+                aria-pressed={showArchived}
+                onClick={() => setShowArchived((current) => !current)}
+              >
+                <Archive className="h-4 w-4" />
+                Show archived
+              </Button>
             </div>
 
             <div className="flex items-center gap-3">
@@ -246,7 +273,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                     <TableHead className="pl-4">Calendar</TableHead>
                     <TableHead>Country / Region</TableHead>
                     <TableHead>Days</TableHead>
-                    <TableHead>Year</TableHead>
+                    <TableHead>Years</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
@@ -274,19 +301,24 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                           onClick={() => openDetail(calendar.id)}
                         >
                           <TableCell className="py-3 pl-4">
-                            <Link
-                              href={`/settings/time/public-holidays/${calendar.id}`}
-                              className="text-primary font-medium no-underline hover:no-underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {calendar.name}
-                            </Link>
+                            <span className="flex min-w-0 items-center gap-2">
+                              <CountryFlag countryCode={calendar.sourceCountryCode} />
+                              <Link
+                                href={`/settings/time/public-holidays/${calendar.id}`}
+                                className="text-primary truncate font-medium no-underline hover:no-underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {calendar.name}
+                              </Link>
+                            </span>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {formatCountryRegion(calendar)}
                           </TableCell>
                           <TableCell className="text-muted-foreground">{calendar.holidayCount}</TableCell>
-                          <TableCell className="text-muted-foreground">{calendar.year}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {formatYears(calendar.years)}
+                          </TableCell>
                           <TableCell>
                             <Badge variant="outline" className={badge.className}>
                               {badge.label}

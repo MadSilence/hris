@@ -4,14 +4,16 @@ import { publicHolidaysService } from "@/components/modules/settings/modules/tim
 
 type UsePublicHolidaysArgs = {
   calendarId: string;
+  /** Omit for every year the calendar holds. */
+  year?: number;
 };
 
-export const usePublicHolidays = ({ calendarId }: UsePublicHolidaysArgs) => {
+export const usePublicHolidays = ({ calendarId, year }: UsePublicHolidaysArgs) => {
   return useQuery({
-    queryKey: getPublicHolidaysQueryKey(calendarId),
+    queryKey: getPublicHolidaysQueryKey(calendarId, year),
     queryFn: () => {
       assertPublicHolidayId(calendarId, "calendarId");
-      return publicHolidaysService.list(calendarId);
+      return publicHolidaysService.list(calendarId, year);
     },
     enabled: Boolean(calendarId && calendarId !== "undefined"),
   });

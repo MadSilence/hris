@@ -1,5 +1,6 @@
 import { publicHolidayTemplateMapper } from "@/api/modules/publicHolidays/templates/mappers";
 import { PublicHolidayTemplateProvider } from "@/api/modules/publicHolidays/templates/dto";
+import { PublicHolidayType } from "@/api/modules/publicHolidays/holidays/dto";
 
 describe("PublicHolidayTemplateMapper", () => {
   it("maps public holiday template dto", () => {
@@ -28,11 +29,14 @@ describe("PublicHolidayTemplateMapper", () => {
       templateId: "template-id",
       templateName: "Poland holidays",
       year: 2026,
+      regionCode: null,
       holidays: [
         {
           sourceEventId: "event-id",
           name: "Nowy Rok",
           holidayDate: "2026-01-01",
+          endDate: "2026-01-01",
+          type: PublicHolidayType.Public,
         },
       ],
     };

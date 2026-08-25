@@ -3,3 +3,4 @@ export * from "./PublicHolidayTemplateDTO";
 export * from "./PublicHolidayTemplatePreviewDTO";
 export * from "./PublicHolidayTemplatePreviewItemDTO";
 export * from "./PublicHolidayTemplateProvider";
+export * from "./PublicHolidayTemplateRegionDTO";

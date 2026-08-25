@@ -2,7 +2,19 @@ export class ServerError extends Error {}
 
 export class NotFoundError extends Error {}
 
-export class BadRequestError extends Error {}
+/**
+ * A 400 from the API. `fieldErrors` is the backend's per-field map when it sent one — the year
+ * editor saves the whole year at once, so "which row collided" is the difference between a usable
+ * message and a shrug.
+ */
+export class BadRequestError extends Error {
+  public readonly fieldErrors?: Record<string, string>;
+
+  public constructor(message: string, fieldErrors?: Record<string, string>) {
+    super(message);
+    this.fieldErrors = fieldErrors;
+  }
+}
 
 export class UnauthorizedError extends Error {}
 

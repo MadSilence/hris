@@ -71,10 +71,12 @@ describe("PublicHolidaysRoutes", () => {
 
     jest.mocked(hrisPublicHolidaysService.list).mockResolvedValue(response);
 
-    const res = await publicHolidaysRoutes.list({} as Request, "calendar-id");
+    // The jsdom env has no global Request; the route only reads `url`, so a stub is enough.
+    const req = { url: "http://localhost/api/public-holiday/calendars/calendar-id/holidays" } as Request;
+    const res = await publicHolidaysRoutes.list(req, "calendar-id");
     const result = await res.json();
 
-    expect(hrisPublicHolidaysService.list).toHaveBeenCalledWith("calendar-id");
+    expect(hrisPublicHolidaysService.list).toHaveBeenCalledWith("calendar-id", undefined);
     expect(result).toEqual(response);
   });
 

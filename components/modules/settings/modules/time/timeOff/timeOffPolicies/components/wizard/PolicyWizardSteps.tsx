@@ -53,6 +53,7 @@ import {
   hasWeekday,
   toggleWeekday,
 } from "./policyWizardTypes";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 export type WizardSetter = <K extends keyof PolicyWizardValues>(
   key: K,
@@ -157,11 +158,10 @@ export const BasicsStep: FC<StepProps> = ({ values, set }) => (
       </Field>
 
       <Field label="Effective date" htmlFor="wiz-eff" hint="Optional. When it takes effect.">
-        <Input
+        <DatePicker
           id="wiz-eff"
-          type="date"
           value={values.effectiveDate}
-          onChange={(e) => set("effectiveDate", e.currentTarget.value)}
+          onChange={(next) => set("effectiveDate", next)}
         />
       </Field>
     </div>
@@ -1102,18 +1102,21 @@ export const BlackoutStep: FC<StepProps> = ({ values, set }) => {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">From</Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={row.startDate}
-                onChange={(e) => patchRow(index, { startDate: e.target.value })}
+                ariaLabel="Blackout start"
+                className="w-40"
+                onChange={(next) => patchRow(index, { startDate: next })}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">To</Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={row.endDate}
-                onChange={(e) => patchRow(index, { endDate: e.target.value })}
+                ariaLabel="Blackout end"
+                className="w-40"
+                min={row.startDate || undefined}
+                onChange={(next) => patchRow(index, { endDate: next })}
               />
             </div>
             <button

@@ -8,11 +8,9 @@ import { AccessDenied } from "@/components/auth/AccessDenied";
 
 function PageFallback() {
   return (
-    <div className="min-h-svh bg-[var(--color-bg-primary)] p-4">
-      <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+    <div className="flex h-[calc(100svh-6rem)] flex-col gap-6 px-8 pt-2">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-64 w-full" />
     </div>
   );
 }

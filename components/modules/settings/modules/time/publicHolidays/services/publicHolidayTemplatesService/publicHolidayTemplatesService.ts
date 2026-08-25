@@ -1,5 +1,9 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type { PublicHolidayTemplate, PublicHolidayTemplatePreview } from "@/models/publicHolidays/template";
+import type {
+  PublicHolidayTemplate,
+  PublicHolidayTemplatePreview,
+  PublicHolidayTemplateRegion,
+} from "@/models/publicHolidays/template";
 
 export class PublicHolidayTemplatesService {
   public async list(): Promise<PublicHolidayTemplate[]> {
@@ -12,11 +16,18 @@ export class PublicHolidayTemplatesService {
 
   public async preview(
     id: string,
-    year: number
+    year: number,
+    regionCode?: string | null
   ): Promise<PublicHolidayTemplatePreview> {
     return internalApiClient.post<PublicHolidayTemplatePreview>(
       `/public-holiday/templates/${id}/preview`,
-      { year },
+      { year, regionCode: regionCode ?? null },
+    );
+  }
+
+  public async regions(id: string, year: number): Promise<PublicHolidayTemplateRegion[]> {
+    return internalApiClient.get<PublicHolidayTemplateRegion[]>(
+      `/public-holiday/templates/${id}/regions?year=${year}`,
     );
   }
 }

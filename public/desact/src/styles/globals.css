@@ -215,6 +215,19 @@
   --sidebar-accent-foreground: var(--color-text-secondary);
   --sidebar-border: var(--color-border-primary);
   --sidebar-ring: var(--color-focus-ring);
+
+  /*
+   * Sidebar navigation items. Split out from --sidebar-accent because the nav has always painted
+   * its hover/active state in brown-50, not in the near-white bg-hover the accent token carries.
+   * They exist as tokens so the contrast sidebar (lib/theme/brandPalette.ts) can swap them.
+   */
+  --sidebar-item-hover-bg: var(--brown-50);
+  --sidebar-item-hover-fg: var(--brown-700);
+  --sidebar-item-active-bg: var(--brown-50);
+  --sidebar-item-active-fg: var(--brown-700);
+  --sidebar-item-icon: var(--brown-600);
+  --sidebar-badge-bg: var(--brown-600);
+  --sidebar-badge-fg: #ffffff;
 }
 
 @theme inline {

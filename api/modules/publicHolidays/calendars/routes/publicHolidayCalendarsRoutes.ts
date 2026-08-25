@@ -6,13 +6,14 @@ export class PublicHolidayCalendarsRoutes {
 
     const data = await hrisPublicHolidayCalendarsService.create({
       name: body.name,
-      year: body.year,
       status: body.status,
       sourceType: body.sourceType,
       sourceExternalId: body.sourceExternalId ?? null,
       sourceCountryCode: body.sourceCountryCode ?? null,
       sourceRegionCode: body.sourceRegionCode ?? null,
       sourceLocale: body.sourceLocale ?? null,
+      weekendSubstitution: body.weekendSubstitution,
+      autoFillEnabled: body.autoFillEnabled,
     });
 
     return Response.json(data);
@@ -33,12 +34,13 @@ export class PublicHolidayCalendarsRoutes {
 
     const data = await hrisPublicHolidayCalendarsService.update(id, {
       name: body.name,
-      year: body.year,
       sourceType: body.sourceType,
       sourceExternalId: body.sourceExternalId ?? null,
       sourceCountryCode: body.sourceCountryCode ?? null,
       sourceRegionCode: body.sourceRegionCode ?? null,
       sourceLocale: body.sourceLocale ?? null,
+      weekendSubstitution: body.weekendSubstitution,
+      autoFillEnabled: body.autoFillEnabled,
     });
 
     return Response.json(data);

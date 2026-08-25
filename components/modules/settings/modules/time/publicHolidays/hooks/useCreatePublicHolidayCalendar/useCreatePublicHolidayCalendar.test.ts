@@ -38,8 +38,7 @@ describe("useCreatePublicHolidayCalendar", () => {
 
   it("calls createPublicHolidayCalendarAction and invalidates queries on success", async () => {
     const mockPayload = {
-      name: "Poland 2026",
-      year: 2026,
+      name: "Poland",
     } as CreatePublicHolidayCalendarActionInput;
 
     const invalidatePublicHolidays = jest.fn();

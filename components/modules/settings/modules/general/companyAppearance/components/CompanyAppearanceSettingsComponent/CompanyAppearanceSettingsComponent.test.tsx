@@ -13,6 +13,9 @@ const defaults: CompanyAppearance = {
   loginImageUrl: null,
   loginHeadline: null,
   loginSubheadline: null,
+  useImageOnLogin: false,
+  useImageOnDashboard: false,
+  sidebarContrast: false,
 };
 
 const renderComponent = (
@@ -37,17 +40,20 @@ const renderComponent = (
 };
 
 const saveButton = () => screen.getByRole("button", { name: /save changes/i });
+const querySaveButton = () => screen.queryByRole("button", { name: /save changes/i });
 const hexInput = () => screen.getByLabelText(/custom colour/i);
 
 describe("CompanyAppearanceSettingsComponent", () => {
-  it("cannot be saved until something changes", () => {
+  it("offers no Save or Cancel until something changes", () => {
     renderComponent();
 
-    expect(saveButton()).toBeDisabled();
+    expect(querySaveButton()).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
 
     expect(saveButton()).toBeEnabled();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
   it("sends the picked preset colour and trims empty copy to null", () => {
@@ -60,6 +66,9 @@ describe("CompanyAppearanceSettingsComponent", () => {
       brandColor: "#2563eb",
       loginHeadline: null,
       loginSubheadline: null,
+      useImageOnLogin: false,
+      useImageOnDashboard: false,
+      sidebarContrast: false,
     });
   });
 
@@ -77,6 +86,8 @@ describe("CompanyAppearanceSettingsComponent", () => {
   it("blocks saving while the typed colour is not a valid hex", () => {
     renderComponent();
 
+    // Something else has to be dirty first, or there would be no Save button to disable.
+    fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
     fireEvent.change(hexInput(), { target: { value: "not-a-colour" } });
 
     expect(screen.getByText(/enter a hex colour/i)).toBeInTheDocument();
@@ -92,7 +103,7 @@ describe("CompanyAppearanceSettingsComponent", () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ brandColor: null }));
   });
 
-  it("previews the draft colour by overriding the palette on the page", () => {
+  it("keeps the draft colour inside the preview instead of repainting the page", () => {
     const { container } = render(
       <CompanyAppearanceSettingsComponent
         appearance={defaults}
@@ -107,24 +118,52 @@ describe("CompanyAppearanceSettingsComponent", () => {
       />,
     );
 
-    expect(container.querySelector("style[data-brand-theme-preview]")).toBeNull();
+    const sheetOf = () =>
+      container.querySelector("style[data-brand-theme-preview]")?.innerHTML ?? "";
+
+    const shipped = sheetOf();
+    expect(shipped).toContain("[data-appearance-preview]{");
+    expect(shipped).not.toContain("html:root");
 
     fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
 
-    const style = container.querySelector("style[data-brand-theme-preview]");
-    expect(style?.innerHTML).toContain("--brown-600:");
+    const drafted = sheetOf();
+    expect(drafted).toContain("[data-appearance-preview]{");
+    expect(drafted).toContain("--brown-600:");
+    expect(drafted).not.toEqual(shipped);
   });
 
-  it("reset returns every field to the saved state", () => {
+  it("cancel returns every field to the saved state", () => {
     renderComponent({ brandColor: "#2563eb" });
 
     fireEvent.click(screen.getByRole("button", { name: /^Rose$/ }));
     expect(saveButton()).toBeEnabled();
 
-    fireEvent.click(screen.getByRole("button", { name: /reset/i }));
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-    expect(saveButton()).toBeDisabled();
+    expect(querySaveButton()).not.toBeInTheDocument();
     expect(hexInput()).toHaveValue("#2563eb");
+  });
+
+  it("keeps the image placement switches off-limits until an image exists", () => {
+    renderComponent();
+
+    expect(screen.getByLabelText(/use as login background/i)).toBeDisabled();
+    expect(screen.getByLabelText(/use as company dashboard background/i)).toBeDisabled();
+  });
+
+  it("sends the placement and sidebar switches with the rest of the draft", () => {
+    const { onSave } = renderComponent({
+      loginImageUrl: "http://api.test/uploads/c/u/splash.png",
+    });
+
+    fireEvent.click(screen.getByLabelText(/use as company dashboard background/i));
+    fireEvent.click(screen.getByLabelText(/make sidebar contrast/i));
+    fireEvent.click(saveButton());
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ useImageOnDashboard: true, sidebarContrast: true }),
+    );
   });
 
   it("offers replace and remove once an image exists", () => {

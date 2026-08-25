@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/public/desact/src/components/ui/select";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Label } from "@/public/desact/src/components/ui/label";
 import { Switch } from "@/public/desact/src/components/ui/switch";
 import {
   triggerExportDownload,
@@ -15,49 +19,80 @@ import {
 
 type Noun = "department" | "team";
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  noun: Noun;
-  nodeName: string;
-  exportUrl: string;
+/** One selectable export target. `depth` is 0 for a root node and only drives the indentation. */
+export type ExportOrgTreeNode = {
+  id: string;
+  name: string;
+  depth: number;
   directSubNodes: number;
   memberCount: number;
   totalPeople: number;
 };
 
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  noun: Noun;
+  /** Everything that can be exported, in tree order. */
+  nodes: ExportOrgTreeNode[];
+  /** Pre-selected target — usually whatever the canvas has selected. */
+  defaultNodeId?: string | null;
+  buildExportUrl: (nodeId: string) => string;
+};
+
 export function ExportOrgTreeModal({
-  isOpen, onClose, noun, nodeName, exportUrl, directSubNodes, memberCount, totalPeople,
+  isOpen, onClose, noun, nodes, defaultNodeId, buildExportUrl,
 }: Props) {
   const subLabel = noun === "department" ? "sub-departments" : "sub-teams";
+  const nounLabel = noun === "department" ? "Department" : "Team";
 
+  const [nodeId, setNodeId] = useState<string>("");
   const [format, setFormat] = useState<ExportDataFormat>("xlsx");
   const [includeSubNodes, setIncludeSubNodes] = useState(false);
   const [includePeople, setIncludePeople] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hasSubNodes = directSubNodes > 0;
-  const peopleAvailable = includeSubNodes ? totalPeople > 0 : memberCount > 0;
+  const selected = useMemo(
+    () => nodes.find((node) => node.id === nodeId) ?? null,
+    [nodes, nodeId],
+  );
+
+  const hasSubNodes = (selected?.directSubNodes ?? 0) > 0;
+  const peopleAvailable = includeSubNodes
+    ? (selected?.totalPeople ?? 0) > 0
+    : (selected?.memberCount ?? 0) > 0;
 
   useEffect(() => {
     if (isOpen) {
+      setNodeId(defaultNodeId ?? nodes[0]?.id ?? "");
       setFormat("xlsx");
       setIncludeSubNodes(false);
       setIncludePeople(false);
       setError(null);
     }
+    // Re-running on every `nodes` identity change would reset a choice mid-dialog.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  // The scope options belong to a node; switching target has to drop whatever was ticked for the
+  // previous one, since it may not offer the same scopes at all.
+  useEffect(() => {
+    setIncludeSubNodes(false);
+    setIncludePeople(false);
+  }, [nodeId]);
 
   useEffect(() => {
     if (includePeople && !peopleAvailable) setIncludePeople(false);
   }, [includePeople, peopleAvailable]);
 
   const handleExport = async () => {
+    if (!selected) return;
+
     setIsLoading(true);
     setError(null);
     try {
-      await triggerExportDownload(exportUrl, format, {
+      await triggerExportDownload(buildExportUrl(selected.id), format, {
         includeSubNodes: String(includeSubNodes),
         includePeople: String(includePeople),
       });
@@ -73,11 +108,30 @@ export function ExportOrgTreeModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
       <DialogContent hideClose className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Export &ldquo;{nodeName}&rdquo;</DialogTitle>
-          <DialogDescription>Download this {noun} as a spreadsheet.</DialogDescription>
+          <DialogTitle>Export {noun}</DialogTitle>
+          <DialogDescription>
+            Pick a {noun} and download it as a spreadsheet.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
+          {/* Target */}
+          <div className="space-y-1.5">
+            <Label htmlFor="export-node">{nounLabel}</Label>
+            <Select value={nodeId} onValueChange={setNodeId} disabled={nodes.length === 0}>
+              <SelectTrigger id="export-node" className="w-full">
+                <SelectValue placeholder={`Select a ${noun}`} />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {nodes.map((node) => (
+                  <SelectItem key={node.id} value={node.id}>
+                    <span style={{ paddingLeft: node.depth * 12 }}>{node.name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Format */}
           <div className="space-y-3">
             <div className="text-sm font-medium">Format</div>
@@ -137,7 +191,7 @@ export function ExportOrgTreeModal({
           <Button
             type="button"
             onClick={handleExport}
-            disabled={isLoading}
+            disabled={isLoading || !selected}
             className="bg-brown-600 text-white hover:bg-brown-700"
           >
             {isLoading ? "Exporting…" : "Export"}

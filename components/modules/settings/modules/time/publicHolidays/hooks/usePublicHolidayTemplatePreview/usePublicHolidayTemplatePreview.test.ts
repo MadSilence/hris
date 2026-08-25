@@ -54,7 +54,8 @@ describe("usePublicHolidayTemplatePreview", () => {
 
     expect(publicHolidayTemplatesService.preview).toHaveBeenCalledWith(
       "template-id",
-      2026
+      2026,
+      undefined
     );
   });
 

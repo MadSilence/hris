@@ -1,4 +1,9 @@
-import type { PublicHolidayDTO } from "@/api/modules/publicHolidays/holidays/dto";
+import {
+  PublicHolidayDayPart,
+  PublicHolidayOrigin,
+  PublicHolidayType,
+  type PublicHolidayDTO,
+} from "@/api/modules/publicHolidays/holidays/dto";
 import { PublicHoliday } from "@/models/publicHolidays/holiday";
 
 export class PublicHolidayMapper {
@@ -10,6 +15,11 @@ export class PublicHolidayMapper {
       name: dto.name,
       holidayDate: dto.holidayDate,
       endDate: dto.endDate ?? dto.holidayDate,
+      observedDate: dto.observedDate ?? null,
+      origin: dto.origin ?? PublicHolidayOrigin.Manual,
+      sourceEventId: dto.sourceEventId ?? null,
+      dayPart: dto.dayPart ?? PublicHolidayDayPart.FullDay,
+      type: dto.type ?? PublicHolidayType.Public,
     };
   }
 

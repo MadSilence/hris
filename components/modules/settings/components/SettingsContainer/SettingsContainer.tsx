@@ -22,7 +22,7 @@ const SettingsContainer: React.FC = () => {
     .filter((group) => group.items.length > 0);
 
   return (
-    <div className="bg-muted/40">
+    <div>
       <header className="pt-3">
         <div className="max-w-screen-xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between gap-4">

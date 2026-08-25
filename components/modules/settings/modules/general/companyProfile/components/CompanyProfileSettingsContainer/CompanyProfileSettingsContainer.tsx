@@ -21,9 +21,9 @@ export default function CompanyProfileSettingsContainer() {
 
   if (isLoading || !company || !settings) {
     return (
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-6 py-6">
+      <div className="grid h-[calc(100svh-6rem)] grid-cols-2 gap-16 px-12">
         {[...Array(2)].map((_, i) => (
-          <div key={i} className="h-48 animate-pulse rounded-xl border border-brown-200 bg-brown-50" />
+          <div key={i} className="h-full animate-pulse rounded-xl bg-brown-50"/>
         ))}
       </div>
     );

@@ -1,6 +1,7 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { hrisApiPublicHolidayTemplatesClient } from "@/api/modules/publicHolidays/templates/clients";
 import { PublicHolidayTemplateProvider } from "@/api/modules/publicHolidays/templates/dto";
+import { PublicHolidayType } from "@/api/modules/publicHolidays/holidays/dto";
 
 jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
   hrisApiClient: {
@@ -29,11 +30,14 @@ describe("HrisApiPublicHolidayTemplatesClient", () => {
     templateId: "template-id",
     templateName: "Poland holidays",
     year: 2026,
+    regionCode: null,
     holidays: [
       {
         sourceEventId: "event-id",
         name: "Nowy Rok",
         holidayDate: "2026-01-01",
+        endDate: "2026-01-01",
+        type: PublicHolidayType.Public,
       },
     ],
   };

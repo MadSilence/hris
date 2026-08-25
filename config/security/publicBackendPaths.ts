@@ -13,6 +13,9 @@ export const PUBLIC_BACKEND_EXACT_PATHS = [
 
 export const PUBLIC_BACKEND_PREFIX_PATHS = [
   "/auth/password/",
+  // ICS subscription feeds: a calendar client fetches a bare URL with no session, so the token in
+  // the path is the credential and no Bearer must be attached.
+  "/calendar-feeds/ics/",
 ] as const;
 
 export const isPublicBackendPath = (path: string): boolean => {

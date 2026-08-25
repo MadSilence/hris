@@ -160,10 +160,7 @@ export default function PeopleTable({
         case "calendar":
           return (
             <RefList
-              values={row.calendars?.map((c) => ({
-                id: c.id,
-                name: c.year ? `${c.name} · ${c.year}` : c.name,
-              }))}
+              values={row.calendars?.map((c) => ({ id: c.id, name: c.name }))}
             />
           );
         case "manager":

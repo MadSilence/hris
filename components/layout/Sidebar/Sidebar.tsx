@@ -98,13 +98,13 @@ const AppSidebar: FC<SidebarProps> = ({
           className={[
             "mx-auto h-10 rounded-lg text-sm font-normal",
             "text-sidebar-foreground/80",
-            "hover:bg-brown-50",
-            "hover:text-brown-700",
-            "data-[active=true]:bg-brown-50",
-            "data-[active=true]:text-brown-700",
+            "hover:bg-(--sidebar-item-hover-bg)",
+            "hover:text-(--sidebar-item-hover-fg)",
+            "data-[active=true]:bg-(--sidebar-item-active-bg)",
+            "data-[active=true]:text-(--sidebar-item-active-fg)",
             "data-[active=true]:font-normal",
             "[&_svg]:size-4",
-            "[&_svg]:text-brown-600",
+            "[&_svg]:text-(--sidebar-item-icon)",
             collapsed ? "size-10 px-0" : "w-full px-3",
           ].join(" ")}
         >
@@ -120,9 +120,9 @@ const AppSidebar: FC<SidebarProps> = ({
 
             {badge > 0 ? (
               collapsed ? (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-brown-600" aria-hidden/>
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-(--sidebar-badge-bg)" aria-hidden/>
               ) : (
-                <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brown-600 px-1.5 text-xs font-medium text-white">
+                <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-(--sidebar-badge-bg) px-1.5 text-xs font-medium text-(--sidebar-badge-fg)">
                   {badgeLabel}
                 </span>
               )

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { FC, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Globe2, Languages, MapPin, Search } from "lucide-react";
+import { CalendarDays, Globe2, Languages, MapPin } from "lucide-react";
 
 import {
   Dialog,
@@ -15,13 +15,31 @@ import {
 } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Label } from "@/public/desact/src/components/ui/label";
 import { Separator } from "@/public/desact/src/components/ui/separator";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/public/desact/src/components/ui/select";
 
+import { CountryFlag } from "@/components/ui/CountryFlag";
 import type { PublicHolidayTemplate } from "@/models/publicHolidays/template";
 import { usePublicHolidayTemplates } from "@/components/modules/settings/modules/time/publicHolidays/hooks/usePublicHolidayTemplates";
+import {
+  usePublicHolidayTemplateRegions
+} from "@/components/modules/settings/modules/time/publicHolidays/hooks/usePublicHolidayTemplateRegions";
+import {
+  PublicHolidayTemplatePicker,
+  templateDisplayName,
+} from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayTemplatePicker";
+
+/** Radix Select cannot hold an empty value, so "no subdivision" needs a sentinel. */
+const NATIONAL = "__national__";
+const CURRENT_YEAR = new Date().getFullYear();
 
 type Props = {
   isOpen: boolean;
@@ -41,31 +59,16 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
   } = usePublicHolidayTemplates();
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const [search, setSearch] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState<string>(NATIONAL);
+
+  const { data: regions = [], isFetching: isRegionsFetching } =
+    usePublicHolidayTemplateRegions({
+      templateId: selectedTemplateId,
+      year: CURRENT_YEAR,
+      enabled: Boolean(selectedTemplateId),
+    });
 
   if (error) throw error;
-
-  const filteredTemplates = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    if (!normalizedSearch) {
-      return templates;
-    }
-
-    return templates.filter((template) =>
-      [
-        template.name,
-        template.countryName,
-        template.countryCode,
-        template.regionName,
-        template.regionCode,
-        template.languageCode,
-        template.description,
-      ]
-        .filter(Boolean)
-        .some((value) => value!.toLowerCase().includes(normalizedSearch)),
-    );
-  }, [templates, search]);
 
   const selectedTemplate = useMemo(() => {
     return templates.find((template) => template.id === selectedTemplateId) ?? null;
@@ -75,14 +78,24 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
     if (isLoading) return;
 
     setSelectedTemplateId("");
-    setSearch("");
+    setSelectedRegion(NATIONAL);
     onRequestCloseAction();
+  };
+
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    // Subdivisions belong to a country; keeping the old one would carry it across borders.
+    setSelectedRegion(NATIONAL);
   };
 
   const handleGoToPreview = () => {
     if (!selectedTemplate) return;
 
-    router.push(`/settings/time/public-holidays/new?templateId=${selectedTemplate.id}`);
+    const region = selectedRegion !== NATIONAL
+      ? `&region=${encodeURIComponent(selectedRegion)}`
+      : "";
+
+    router.push(`/settings/time/public-holidays/new?templateId=${selectedTemplate.id}${region}`);
   };
 
   return (
@@ -109,45 +122,14 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
             </p>
 
             {isLoading ? (
-              <Skeleton className="h-11 w-full"/>
+              <Skeleton className="h-9 w-full"/>
             ) : (
-              <Select
+              <PublicHolidayTemplatePicker
+                templates={templates}
                 value={selectedTemplateId}
-                onValueChange={setSelectedTemplateId}
+                onChange={handleTemplateChange}
                 disabled={templates.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose from template..."/>
-                </SelectTrigger>
-
-                <SelectContent className="max-h-80 p-0">
-                  <div className="sticky top-0 z-10 bg-popover rounded-lg">
-                    <div className="relative p-1">
-                      <Search
-                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-text-tertiary)]"/>
-                      <Input
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        onKeyDown={(event) => event.stopPropagation()}
-                        placeholder="Search templates..."
-                        className="h-9 pl-9"
-                      />
-                    </div>
-                  </div>
-
-                  {filteredTemplates.length > 0 ? (
-                    filteredTemplates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
-                      No templates found
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+              />
             )}
 
             {!isLoading && templates.length === 0 ? (
@@ -156,6 +138,38 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               </p>
             ) : null}
           </div>
+
+          {/*
+            * Only shown when the source actually has subdivisions. Google publishes country-level
+            * calendars only, so its templates answer with an empty list and the field stays hidden.
+            */}
+          {selectedTemplate && (isRegionsFetching || regions.length > 0) ? (
+            <div className="space-y-2">
+              <Label htmlFor="template-region">Region</Label>
+
+              {isRegionsFetching ? (
+                <Skeleton className="h-9 w-full"/>
+              ) : (
+                <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                  <SelectTrigger id="template-region" className="w-full">
+                    <SelectValue/>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value={NATIONAL}>National holidays only</SelectItem>
+                    {regions.map((region) => (
+                      <SelectItem key={region.code} value={region.code}>
+                        {region.name} ({region.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <p className="text-xs text-[var(--color-text-tertiary)]">
+                A region adds the days that apply only there on top of the national ones.
+              </p>
+            </div>
+          ) : null}
 
           <TemplateSummary template={selectedTemplate}/>
         </div>
@@ -207,11 +221,15 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
   }
 
   return (
-    <div className="rounded-lg border p-5">
+    // No frame: the summary is the only thing in this half of the dialog, and a box around it just
+    // draws a second border inside the dialog's own.
+    <div>
       <div>
         <div className="flex flex-wrap items-center gap-2">
+          <CountryFlag countryCode={template.countryCode}/>
+
           <p className="text-sm font-semibold text-[var(--color-text-primary)]">
-            {template.name}
+            {templateDisplayName(template)}
           </p>
 
           {template.regional ? (

@@ -15,7 +15,6 @@ import type { DepartmentTreeNode } from "@/models/departments";
 import { DepartmentPeopleTab } from "@/components/modules/settings/modules/departments/components/DepartmentPeopleTab/DepartmentPeopleTab";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
-import { ExportOrgTreeModal } from "@/components/modules/settings/shared/ExportOrgTreeModal";
 
 type Props = {
   department: DepartmentTreeNode;
@@ -23,7 +22,6 @@ type Props = {
   /** Set when a people-search hit points into this department: opens the People tab on them. */
   peopleFocus?: { userId: string; name: string } | null;
   onEdit: () => void;
-  onAddChild: () => void;
   onArchive: () => void;
   onActivate: () => void;
   onDelete: () => void;
@@ -67,7 +65,6 @@ export function DepartmentDetailsPanel({
   parentName,
   peopleFocus,
   onEdit,
-  onAddChild,
   onArchive,
   onActivate,
   onDelete,
@@ -78,7 +75,6 @@ export function DepartmentDetailsPanel({
   useEffect(() => {
     if (peopleFocus) setActiveTab("people");
   }, [peopleFocus]);
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const isArchived = department.status === "ARCHIVED";
 
   return (
@@ -125,12 +121,8 @@ export function DepartmentDetailsPanel({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setIsExportOpen(true)}>Export…</DropdownMenuItem>
               <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
                 {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
-                {!isArchived && (
-                  <DropdownMenuItem onSelect={onAddChild}>Add sub-department</DropdownMenuItem>
-                )}
                 {isArchived ? (
                   <DropdownMenuItem onSelect={onActivate}>Activate</DropdownMenuItem>
                 ) : (
@@ -146,17 +138,6 @@ export function DepartmentDetailsPanel({
           </DropdownMenu>
         </div>
       </div>
-
-      <ExportOrgTreeModal
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-        noun="department"
-        nodeName={department.name}
-        exportUrl={`/api/departments/${department.id}/export`}
-        directSubNodes={department.directSubNodes}
-        memberCount={department.memberCount}
-        totalPeople={department.totalPeople}
-      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">

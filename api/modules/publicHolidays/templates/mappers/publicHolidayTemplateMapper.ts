@@ -42,6 +42,7 @@ export class PublicHolidayTemplateMapper {
       templateId: dto.templateId,
       templateName: dto.templateName,
       year: dto.year,
+      regionCode: dto.regionCode ?? null,
       holidays: this.mapPublicHolidayTemplatePreviewItemDTOs(dto.holidays),
     };
   }
@@ -53,6 +54,8 @@ export class PublicHolidayTemplateMapper {
       sourceEventId: dto.sourceEventId,
       name: dto.name,
       holidayDate: dto.holidayDate,
+      endDate: dto.endDate ?? dto.holidayDate,
+      type: dto.type,
     }));
   }
 }

@@ -43,7 +43,7 @@ describe("PublicHolidayTemplatesService", () => {
 
     expect(mockPost).toHaveBeenCalledWith(
       "/public-holiday/templates/template-id/preview",
-      { year: 2026 },
+      { year: 2026, regionCode: null },
     );
     expect(result).toEqual(response);
   });

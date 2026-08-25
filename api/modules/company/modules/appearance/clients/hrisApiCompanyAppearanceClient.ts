@@ -41,6 +41,11 @@ export class HrisApiCompanyAppearanceClient {
       loginImageUrl: companyMapper.resolveBackendAssetUrl(dto.loginImageUrl),
       loginHeadline: dto.loginHeadline ?? null,
       loginSubheadline: dto.loginSubheadline ?? null,
+      // Defaulted rather than trusted: a backend older than V23 omits them, and an unplaced image is
+      // shown nowhere.
+      useImageOnLogin: dto.useImageOnLogin ?? false,
+      useImageOnDashboard: dto.useImageOnDashboard ?? false,
+      sidebarContrast: dto.sidebarContrast ?? false,
     };
   }
 }

@@ -33,6 +33,7 @@ import { PEOPLE_SEARCH_QK } from "@/components/modules/organization/hooks/usePeo
 import { isTerminalJobStatus } from "@/api/modules/assignments/dto/SegmentAssignmentDTO";
 import type { FilterDTO } from "@/models/user/fields";
 import type { Segment, UserRefDTO } from "@/models/segment/Segment";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 const MANUAL_CAP = 300;
 
@@ -248,20 +249,20 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 <div className="flex flex-wrap gap-4 rounded-md border border-brown-200 px-4 py-3">
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="text-muted-foreground">Effective from *</span>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={effectiveFrom}
-                      onChange={(e) => setEffectiveFrom(e.target.value)}
-                      className="rounded-md border border-brown-200 px-2 py-1"
+                      onChange={setEffectiveFrom}
+                      ariaLabel="Effective from"
+                      className="w-44"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="text-muted-foreground">Effective to</span>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={effectiveTo}
-                      onChange={(e) => setEffectiveTo(e.target.value)}
-                      className="rounded-md border border-brown-200 px-2 py-1"
+                      onChange={setEffectiveTo}
+                      ariaLabel="Effective to"
+                      className="w-44"
                     />
                   </label>
                 </div>

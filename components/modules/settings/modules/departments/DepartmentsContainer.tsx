@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LayoutGrid, Network, Pencil, Plus } from "lucide-react";
+import {
+  Archive,
+  Download,
+  LayoutGrid,
+  Network,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Plus,
+} from "lucide-react";
 import {
   DndContext,
   PointerSensor,
@@ -11,7 +20,6 @@ import {
 } from "@dnd-kit/core";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
@@ -50,12 +58,28 @@ import { DraggablePersonChip } from "@/components/modules/settings/modules/depar
 import { DroppableBlockZone } from "@/components/modules/settings/modules/departments/components/DepartmentBlocksView/DroppableBlockZone";
 import { underPointer } from "@/components/modules/settings/modules/departments/utils/blockCollision";
 import { personDisplayName } from "@/components/modules/settings/modules/departments/utils/personDisplay";
+import {
+  ExportOrgTreeModal,
+  type ExportOrgTreeNode,
+} from "@/components/modules/settings/shared/ExportOrgTreeModal";
 import type { DepartmentPerson, DepartmentTreeNode } from "@/models/departments";
 
 /** Mirrors MAX_DEPTH on the backend: a deeper drop is refused before the request is made. */
 const MAX_DEPTH = 10;
 /** Drop id of the Unassigned panel: dropping there takes the person out of the structure. */
 const UNASSIGNED_DROP_ID = "unassigned";
+/**
+ * The Blocks view is parked, not deleted: the chart is the only view for now. Everything it needs is
+ * still here, so flipping this back to `true` brings back both the view and its person drag-and-drop.
+ */
+const BLOCKS_VIEW_ENABLED: boolean = false;
+/**
+ * Search is departments-only for now, so the units/people switch is not drawn. The people
+ * branch behind it is untouched — flip this back to `true` to offer the mode again.
+ */
+const PEOPLE_SEARCH_ENABLED: boolean = false;
+/** Same deal for the panel's Unassigned tab: hidden for now, Details is the only view. */
+const UNASSIGNED_TAB_ENABLED: boolean = false;
 
 type ViewMode = "chart" | "blocks";
 type PanelMode = "details" | "unassigned";
@@ -100,7 +124,9 @@ export default function DepartmentsContainer() {
   const canSeePeople = canAccess({ access, resource: "PEOPLE.PROFILE", action: "VIEW" });
   const canEdit = canAccess({ access, resource: "ORG.DEPARTMENT", action: "EDIT" });
 
-  const [view, setView] = useState<ViewMode>(params.get("view") === "blocks" ? "blocks" : "chart");
+  const [view, setView] = useState<ViewMode>(
+    BLOCKS_VIEW_ENABLED && params.get("view") === "blocks" ? "blocks" : "chart",
+  );
   const [includeArchived, setIncludeArchived] = useState(params.get("archived") === "1");
   const [selectedId, setSelectedId] = useState<string>(params.get("node") ?? COMPANY_NODE_ID);
   const [selectedPerson, setSelectedPerson] = useState<DepartmentPerson | null>(null);
@@ -129,7 +155,9 @@ export default function DepartmentsContainer() {
   const [recenterNonce, setRecenterNonce] = useState(0);
 
   const [searchMode, setSearchMode] = useState<DepartmentSearchMode>(
-    params.get("mode") === "people" && canSeePeople ? "people" : "units",
+    PEOPLE_SEARCH_ENABLED && params.get("mode") === "people" && canSeePeople
+      ? "people"
+      : "units",
   );
   const [query, setQuery] = useState(params.get("q") ?? "");
   const debouncedQuery = useDebouncedValue(query, 250);
@@ -140,6 +168,8 @@ export default function DepartmentsContainer() {
   const [editTarget, setEditTarget] = useState<DepartmentTreeNode | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentTreeNode | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<DepartmentTreeNode | null>(null);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const { data: tree = [], isLoading, error } = useDepartmentTree(includeArchived);
   const { data: summary } = useDepartmentSummary(includeArchived);
@@ -328,7 +358,7 @@ export default function DepartmentsContainer() {
 
   const handlePersonSearchSelect = useCallback(
     (person: DepartmentPerson) => {
-      if (view === "blocks") {
+      if (BLOCKS_VIEW_ENABLED && view === "blocks") {
         setSelectedPerson(person);
         setPanelMode("details");
         return;
@@ -427,6 +457,23 @@ export default function DepartmentsContainer() {
     ],
   );
 
+  /**
+   * What the toolbar Add button pre-fills as the parent. An archived department is not offered as a
+   * parent in the dialog, so selecting one falls back to the root.
+   */
+  const defaultNewParentId =
+    selectedDepartment && selectedDepartment.status === "ACTIVE" ? selectedDepartment.id : null;
+
+  /** Flat, tree-ordered targets for the toolbar export dialog. */
+  const exportNodes: ExportOrgTreeNode[] = allFlat.map((node) => ({
+    id: node.id,
+    name: node.name,
+    depth: (treeShape.depth.get(node.id) ?? 1) - 1,
+    directSubNodes: node.directSubNodes,
+    memberCount: node.memberCount,
+    totalPeople: node.totalPeople,
+  }));
+
   const companyName = company?.name ?? "Company";
   const companyLogo = company?.companyLogo ?? null;
   const searchActive = searchMode === "units" && debouncedQuery.trim().length > 0;
@@ -449,7 +496,7 @@ export default function DepartmentsContainer() {
       );
     }
 
-    if (view === "blocks") {
+    if (BLOCKS_VIEW_ENABLED && view === "blocks") {
       return (
         <DepartmentBlocksView
           tree={tree}
@@ -551,7 +598,6 @@ export default function DepartmentsContainer() {
           parentName={selectedParentName}
           peopleFocus={peopleFocus}
           onEdit={() => setEditTarget(selectedDepartment)}
-          onAddChild={() => setCreateParentId(selectedDepartment.id)}
           onArchive={() => setArchiveTarget(selectedDepartment)}
           onActivate={() => activateDept.mutate(selectedDepartment.id)}
           onDelete={() => setDeleteTarget(selectedDepartment)}
@@ -572,22 +618,22 @@ export default function DepartmentsContainer() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Toolbar: view on the left, search in the middle, actions on the right */}
+      {/* Toolbar: search and the archived toggle on the left, actions on the right */}
       <div className="mb-3 flex flex-none items-center gap-3">
-        <Tabs value={view} onValueChange={(next) => setView(next as ViewMode)}>
-          <TabsList className="grid h-9 w-[220px] grid-cols-2 bg-brown-50">
-            <TabsTrigger value="chart" className="flex items-center gap-2">
-              <Network className="h-4 w-4" />
-              Chart
-            </TabsTrigger>
-            <TabsTrigger value="blocks" className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              Blocks
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="flex min-w-0 flex-1 justify-center">
+        {BLOCKS_VIEW_ENABLED && (
+          <Tabs value={view} onValueChange={(next) => setView(next as ViewMode)}>
+            <TabsList className="grid h-9 w-[220px] grid-cols-2 bg-brown-50">
+              <TabsTrigger value="chart" className="flex items-center gap-2">
+                <Network className="h-4 w-4" />
+                Chart
+              </TabsTrigger>
+              <TabsTrigger value="blocks" className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Blocks
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
 
         <DepartmentSearchBar
           mode={searchMode}
@@ -602,30 +648,61 @@ export default function DepartmentsContainer() {
           peopleLoading={peopleLoading}
           onPersonSelect={handlePersonSearchSelect}
           departmentNameById={departmentNameById}
-          canSearchPeople={canSeePeople}
-          />
-        </div>
+          canSearchPeople={canSeePeople && PEOPLE_SEARCH_ENABLED}
+        />
 
-        <div className="flex flex-none items-center gap-3">
+        <Button
+          type="button"
+          variant={includeArchived ? "default" : "outline"}
+          className="h-9 flex-none gap-1.5"
+          aria-pressed={includeArchived}
+          onClick={() => setIncludeArchived((current) => !current)}
+        >
+          <Archive className="h-4 w-4" />
+          Show archived
+        </Button>
+
+        <div className="ml-auto flex flex-none items-center gap-3">
+          <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+            <Button
+              type="button"
+              className="h-9 gap-1.5"
+              onClick={() => setCreateParentId(defaultNewParentId)}
+            >
+              <Plus className="h-4 w-4" />
+              Add
+            </Button>
+          </PermissionGate>
+
           {canEdit && (
             <Button
               type="button"
+              variant="outline"
               onClick={() => setEditMode(!editMode)}
-              variant={editMode ? "outline" : "default"}
-              className="h-9 gap-1.5"
+              className={[
+                "h-9 gap-1.5",
+                // Outline either way — Add is the only primary button here — so edit mode has to
+                // announce itself some other way.
+                editMode ? "border-brown-400 bg-brown-50 text-brown-700" : "",
+              ].join(" ")}
             >
               <Pencil className="h-4 w-4" />
               {editMode ? "Done" : "Edit"}
             </Button>
           )}
 
-          <label className="flex h-9 cursor-pointer select-none items-center gap-2 text-sm text-brown-700">
-            <Checkbox
-              checked={includeArchived}
-              onCheckedChange={(v) => setIncludeArchived(v === true)}
-            />
-            Show archived
-          </label>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            className="h-9 w-9"
+            aria-label="Export a department"
+            title="Export a department"
+            disabled={allFlat.length === 0}
+            onClick={() => setIsExportOpen(true)}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -635,26 +712,57 @@ export default function DepartmentsContainer() {
         collisionDetection={underPointer}
         onDragEnd={handlePersonDragEnd}
       >
-        <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-brown-200">
+        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-xl border border-brown-200">
           <div className="relative min-w-0 flex-1 bg-brown-50/40">{renderCanvasArea()}</div>
 
-          <div className="flex w-[380px] flex-none flex-col overflow-hidden border-l border-brown-200 bg-white">
-            {canSeePeople && (
+          {/*
+            * The collapse control is a tab on the panel's edge rather than a row inside it: a header
+            * that exists only to hold one button leaves a band of empty space above the content.
+            */}
+          <button
+            type="button"
+            onClick={() => setIsPanelCollapsed((current) => !current)}
+            aria-label={isPanelCollapsed ? "Expand the panel" : "Collapse the panel"}
+            aria-expanded={!isPanelCollapsed}
+            title={isPanelCollapsed ? "Expand the panel" : "Collapse the panel"}
+            className={[
+              "absolute top-1/2 z-10 flex h-14 w-5 -translate-y-1/2 items-center justify-center",
+              "rounded-l-md border border-r-0 border-brown-200 bg-white text-brown-400 shadow-sm",
+              "hover:bg-brown-50 hover:text-brown-700",
+              isPanelCollapsed ? "right-0" : "right-[380px]",
+            ].join(" ")}
+          >
+            {isPanelCollapsed ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+
+          <div
+            className={[
+              "flex flex-none flex-col overflow-hidden border-brown-200 bg-white",
+              "transition-[width] duration-150",
+              isPanelCollapsed ? "w-0 border-l-0" : "w-[380px] border-l",
+            ].join(" ")}
+          >
+            {UNASSIGNED_TAB_ENABLED && canSeePeople && (
               <div className="flex-none border-b border-brown-200 px-4 py-2.5">
-              <Tabs value={panelMode} onValueChange={(next) => setPanelMode(next as PanelMode)}>
-                <TabsList className="grid h-9 w-full grid-cols-2 bg-brown-50">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="unassigned" className="flex items-center gap-1.5">
-                    Unassigned
-                    <span className="rounded bg-brown-200/60 px-1 text-[10px] leading-4 tabular-nums text-brown-600">
-                      {membership.unassigned.length}
-                    </span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                <Tabs value={panelMode} onValueChange={(next) => setPanelMode(next as PanelMode)}>
+                  <TabsList className="grid h-9 w-full grid-cols-2 bg-brown-50">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="unassigned" className="flex items-center gap-1.5">
+                      Unassigned
+                      <span className="rounded bg-brown-200/60 px-1 text-[10px] leading-4 tabular-nums text-brown-600">
+                        {membership.unassigned.length}
+                      </span>
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             )}
-            <div className="min-h-0 flex-1 overflow-hidden">
+
+            <div className="min-h-0 w-[380px] flex-1 overflow-hidden">
               {dndEnabled && panelMode === "unassigned" ? (
                 <DroppableBlockZone id={UNASSIGNED_DROP_ID} className="h-full">
                   {renderPanel()}
@@ -666,6 +774,15 @@ export default function DepartmentsContainer() {
           </div>
         </div>
       </DndContext>
+
+      <ExportOrgTreeModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        noun="department"
+        nodes={exportNodes}
+        defaultNodeId={selectedDepartment?.id ?? null}
+        buildExportUrl={(id) => `/api/departments/${id}/export`}
+      />
 
       {isCreateOpen && (
         <CreateDepartmentModal

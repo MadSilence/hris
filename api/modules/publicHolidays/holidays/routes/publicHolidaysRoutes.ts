@@ -13,8 +13,14 @@ export class PublicHolidaysRoutes {
     return Response.json(data);
   }
 
-  public async list(_req: Request, calendarId: string) {
-    const data = await hrisPublicHolidaysService.list(calendarId);
+  public async list(req: Request, calendarId: string) {
+    const year = new URL(req.url).searchParams.get("year");
+
+    const data = await hrisPublicHolidaysService.list(
+      calendarId,
+      year ? Number(year) : undefined
+    );
+
     return Response.json(data);
   }
 

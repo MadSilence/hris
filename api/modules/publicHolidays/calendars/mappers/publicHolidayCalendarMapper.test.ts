@@ -3,22 +3,25 @@ import {
   type PublicHolidayCalendarDTO,
   PublicHolidayCalendarSourceType,
   PublicHolidayCalendarStatus,
+  PublicHolidayCalendarWeekendSubstitution,
 } from "@/api/modules/publicHolidays/calendars/dto";
 
 describe("PublicHolidayCalendarMapper", () => {
   const dto: PublicHolidayCalendarDTO = {
     id: "calendar-id",
-    name: "Poland 2026",
-    year: 2026,
+    name: "Poland",
     status: PublicHolidayCalendarStatus.Active,
     sourceType: PublicHolidayCalendarSourceType.Manual,
     sourceExternalId: null,
     sourceCountryCode: "PL",
     sourceRegionCode: null,
     sourceLocale: "pl-PL",
+    weekendSubstitution: PublicHolidayCalendarWeekendSubstitution.None,
+    autoFillEnabled: true,
     archivedAt: null,
     archivedBy: null,
     holidayCount: 0,
+    years: [2026, 2027],
   };
 
   it("maps public holiday calendar dto to model", () => {

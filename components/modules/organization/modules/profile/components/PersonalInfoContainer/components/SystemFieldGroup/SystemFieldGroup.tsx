@@ -33,6 +33,7 @@ import {
   UserPickerField,
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 /**
  * System fields that already live somewhere better on this page: the header shows the name badge
@@ -209,28 +210,18 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
         );
       case "sys:hire_date":
         return (
-          <Input
-            type="date"
+          <DatePicker
             value={draft.hireDate}
-            onChange={(e) => {
-              // Snapshot before the updater runs: React nulls `currentTarget` once the
-              // handler returns, and the functional setState body executes after that.
-              const value = e.target.value;
-              setDraft((d) => ({ ...d, hireDate: value }));
-            }}
+            ariaLabel="Hire date"
+            onChange={(value) => setDraft((d) => ({ ...d, hireDate: value }))}
           />
         );
       case "sys:probation_end":
         return (
-          <Input
-            type="date"
+          <DatePicker
             value={draft.probationEnd}
-            onChange={(e) => {
-              // Snapshot before the updater runs: React nulls `currentTarget` once the
-              // handler returns, and the functional setState body executes after that.
-              const value = e.target.value;
-              setDraft((d) => ({ ...d, probationEnd: value }));
-            }}
+            ariaLabel="Probation end"
+            onChange={(value) => setDraft((d) => ({ ...d, probationEnd: value }))}
           />
         );
       case "sys:manager":
@@ -444,7 +435,7 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
     case "sys:calendar":
       return (
         <RefChips
-          values={user.calendars?.map((c) => ({ id: c.id, name: `${c.name} · ${c.year}` }))}
+          values={user.calendars?.map((c) => ({ id: c.id, name: c.name }))}
         />
       );
     case "sys:manager":

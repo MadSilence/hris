@@ -1,17 +1,18 @@
 "use client";
 
-import { ChangeEvent, FC, useMemo, useRef, useState } from "react";
-import { Check, ImageIcon, Palette, Type } from "lucide-react";
+import { ChangeEvent, FC, ReactNode, useMemo, useRef, useState } from "react";
+import { Check, ImageIcon, ImagePlus, Palette } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/public/desact/src/components/ui/card";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Switch } from "@/public/desact/src/components/ui/switch";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
-import { BRAND_STEPS, buildBrandPalette, buildBrandStyleSheet } from "@/lib/theme/brandPalette";
+import PageDescription from "@/components/ui/PageDescription/PageDescription";
+import { BRAND_STEPS, buildBrandPalette } from "@/lib/theme/brandPalette";
 import { isValidHex } from "@/lib/theme/oklch";
+import { AppearancePreview } from "@/components/modules/settings/modules/general/companyAppearance/components/AppearancePreview";
 import {
   BRAND_PRESETS,
   DEFAULT_BRAND_SWATCH,
@@ -29,6 +30,7 @@ type Props = {
   removingImage: boolean;
   saveError: string | null;
   imageError: string | null;
+  companyName?: string | null;
 };
 
 const MAX_HEADLINE = 120;
@@ -38,6 +40,50 @@ const normaliseHex = (value: string) => {
   const trimmed = value.trim();
   return (trimmed.startsWith("#") ? trimmed : `#${trimmed}`).toLowerCase();
 };
+
+const Section: FC<{
+  icon: ReactNode;
+  title: string;
+  description: string;
+  children: ReactNode;
+}> = ({ icon, title, description, children }) => (
+  <section className="flex flex-col gap-5">
+    <div>
+      <h2 className="m-0 flex items-center gap-2 text-sm font-semibold text-foreground">
+        {icon}
+        {title}
+      </h2>
+
+      <p className="m-0 mt-1.5 text-sm text-muted-foreground">{description}</p>
+    </div>
+
+    {children}
+  </section>
+);
+
+const ToggleRow: FC<{
+  id: string;
+  label: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}> = ({ id, label, checked, disabled, onChange }) => (
+  <div className="flex items-center gap-3">
+    <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onChange}/>
+
+    {/* The shared Label carries `mb-2` for stacked fields; in a row it pushes the text off the
+        switch's centre line. `leading-5` matches the 20px track, so the two centre together. */}
+    <Label
+      htmlFor={id}
+      className={cn(
+        "mb-0 text-sm font-normal leading-5",
+        disabled && "text-muted-foreground",
+      )}
+    >
+      {label}
+    </Label>
+  </div>
+);
 
 export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   appearance,
@@ -49,30 +95,27 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   removingImage,
   saveError,
   imageError,
+  companyName,
 }) => {
   const [brandColor, setBrandColor] = useState<string | null>(appearance.brandColor);
   const [customHex, setCustomHex] = useState(appearance.brandColor ?? "");
   const [headline, setHeadline] = useState(appearance.loginHeadline ?? "");
   const [subheadline, setSubheadline] = useState(appearance.loginSubheadline ?? "");
+  const [imageOnLogin, setImageOnLogin] = useState(appearance.useImageOnLogin);
+  const [imageOnDashboard, setImageOnDashboard] = useState(appearance.useImageOnDashboard);
+  const [sidebarContrast, setSidebarContrast] = useState(appearance.sidebarContrast);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dirty =
     brandColor !== appearance.brandColor ||
     headline !== (appearance.loginHeadline ?? "") ||
-    subheadline !== (appearance.loginSubheadline ?? "");
+    subheadline !== (appearance.loginSubheadline ?? "") ||
+    imageOnLogin !== appearance.useImageOnLogin ||
+    imageOnDashboard !== appearance.useImageOnDashboard ||
+    sidebarContrast !== appearance.sidebarContrast;
 
   const customHexInvalid = customHex.trim().length > 0 && !isValidHex(normaliseHex(customHex));
-
-  /**
-   * Repaints this whole page with the unsaved colour. Rendered after the root layout's server-side
-   * block, so it wins on source order — which makes the entire settings screen the preview, not just
-   * a swatch strip. Reverting the draft drops it and the saved theme comes back.
-   */
-  const previewStyleSheet = useMemo(
-    () => (brandColor === appearance.brandColor ? "" : buildBrandStyleSheet(brandColor)),
-    [brandColor, appearance.brandColor],
-  );
 
   const generatedScale = useMemo(
     () => (brandColor ? buildBrandPalette(brandColor)?.scale ?? null : null),
@@ -99,11 +142,14 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
     }
   };
 
-  const handleReset = () => {
+  const handleCancel = () => {
     setBrandColor(appearance.brandColor);
     setCustomHex(appearance.brandColor ?? "");
     setHeadline(appearance.loginHeadline ?? "");
     setSubheadline(appearance.loginSubheadline ?? "");
+    setImageOnLogin(appearance.useImageOnLogin);
+    setImageOnDashboard(appearance.useImageOnDashboard);
+    setSidebarContrast(appearance.sidebarContrast);
   };
 
   const handleSave = () =>
@@ -111,6 +157,9 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
       brandColor,
       loginHeadline: headline.trim() || null,
       loginSubheadline: subheadline.trim() || null,
+      useImageOnLogin: imageOnLogin,
+      useImageOnDashboard: imageOnDashboard,
+      sidebarContrast,
     });
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -124,31 +173,30 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
     }
   };
 
+  const hasImage = Boolean(appearance.loginImageUrl);
+
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-6">
-      {previewStyleSheet ? (
-        <style data-brand-theme-preview dangerouslySetInnerHTML={{ __html: previewStyleSheet }}/>
-      ) : null}
+    <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6 overflow-hidden px-12">
+      <div className="flex flex-col gap-4">
+        <SettingsPageHeader title="Appearance" backHref="/settings"/>
 
-      <SettingsPageHeader title="Appearance" backHref="/settings"/>
+        <PageDescription>
+          How the workspace looks to everyone in your company: one seed colour generates the whole
+          palette the app paints with, and one uploaded image can back the login screen, the
+          dashboard, or both. The preview on the right shows the result before anyone else sees it.
+        </PageDescription>
+      </div>
 
-      <p className="-mt-2 text-sm text-muted-foreground">
-        One colour drives the whole workspace. Everything on this page repaints as you choose — nothing
-        is stored until you save.
-      </p>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5"/>
-            Brand colour
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="flex flex-col gap-6">
-          <div className="grid gap-3">
-            <Label>Presets</Label>
-
+      <div className="grid min-h-0 flex-1 grid-cols-2 gap-10">
+        {/* `overflow-y-auto` also clips horizontally, which ate the focus ring off the fields
+           sitting at the left edge. The padding gives the ring its 3px, the negative margin
+           takes it back off the layout. */}
+        <div className="-mx-1 flex min-h-0 flex-col gap-7 overflow-y-auto px-1">
+          <Section
+            icon={<Palette className="h-4 w-4"/>}
+            title="Brand colour"
+            description="Surfaces stay near-grey and only actions carry the full colour, whichever you pick."
+          >
             <div className="flex flex-wrap gap-3">
               {BRAND_PRESETS.map((preset) => {
                 const selected = brandColor === preset.color;
@@ -158,39 +206,26 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                     key={preset.id}
                     type="button"
                     onClick={() => handlePresetClick(preset.color)}
+                    aria-label={preset.label}
                     aria-pressed={selected}
+                    title={preset.label}
                     disabled={saving}
                     className={cn(
-                      "flex w-20 flex-col items-center gap-2 rounded-xl border p-2 transition-colors",
+                      "grid h-9 w-9 place-items-center rounded-full transition-shadow",
                       selected
-                        ? "border-brown-500 bg-brown-50"
-                        : "border-brown-200 hover:bg-brown-50/60",
+                        ? "ring-2 ring-brown-600 ring-offset-2"
+                        : "ring-1 ring-black/10 hover:ring-black/25",
                     )}
+                    style={{ backgroundColor: preset.color ?? DEFAULT_BRAND_SWATCH }}
                   >
-                    <span
-                      className="flex h-9 w-9 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: preset.color ?? DEFAULT_BRAND_SWATCH }}
-                    >
-                      {selected ? <Check className="h-4 w-4 text-white"/> : null}
-                    </span>
-
-                    <span className="text-xs text-[var(--color-text-secondary)]">{preset.label}</span>
+                    {selected ? <Check className="h-4 w-4 text-white"/> : null}
                   </button>
                 );
               })}
             </div>
-          </div>
-
-          <Separator/>
-
-          <div className="grid gap-2 md:max-w-xs">
-            <Label htmlFor="brand-hex">Custom colour</Label>
 
             <div className="flex items-center gap-3">
-              <span
-                className="h-10 w-10 shrink-0 rounded-xl border border-brown-200"
-                style={{ backgroundColor: brandColor ?? DEFAULT_BRAND_SWATCH }}
-              />
+              <Label htmlFor="brand-hex" className="mb-0 shrink-0 leading-5">Custom colour</Label>
 
               <Input
                 id="brand-hex"
@@ -199,108 +234,133 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                 onChange={(e) => handleCustomHexChange(e.currentTarget.value)}
                 aria-invalid={customHexInvalid}
                 disabled={saving}
+                className="w-28 shrink-0"
+              />
+
+              {generatedScale ? (
+                <div className="flex h-9 flex-1 overflow-hidden rounded-lg">
+                  {BRAND_STEPS.map((step) => (
+                    <span
+                      key={step}
+                      className="h-full flex-1"
+                      style={{ backgroundColor: generatedScale[step] }}
+                      title={`${step} — ${generatedScale[step]}`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="m-0 text-xs text-muted-foreground">
+                  Leave empty to keep the default palette.
+                </p>
+              )}
+            </div>
+
+            {customHexInvalid ? (
+              <p className="m-0 -mt-2 text-xs text-destructive">
+                Enter a hex colour such as #2563eb.
+              </p>
+            ) : null}
+
+            <ToggleRow
+              id="sidebar-contrast"
+              label="Make sidebar contrast"
+              checked={sidebarContrast}
+              disabled={saving}
+              onChange={setSidebarContrast}
+            />
+          </Section>
+
+          <div className="border-t border-brown-200"/>
+
+          <Section
+            icon={<ImageIcon className="h-4 w-4"/>}
+            title="Sign in experience"
+            description="The artwork and the words people meet before they are signed in."
+          >
+            <div className="flex items-start gap-5">
+              <button
+                type="button"
+                aria-label="Choose a background image"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage || removingImage}
+                className={cn(
+                  "relative h-32 w-64 shrink-0 overflow-hidden rounded-xl transition-colors",
+                  hasImage
+                    ? "hover:opacity-90"
+                    : "grid place-items-center border border-dashed border-brown-200 bg-brown-50/60 px-3 text-center text-xs text-muted-foreground hover:bg-brown-50",
+                )}
+              >
+                {appearance.loginImageUrl ? (
+                  <>
+                    {/* Backend-hosted upload of unknown dimensions; next/image would need a remote
+                        pattern for the API origin in next.config. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={appearance.loginImageUrl}
+                      alt="Login background"
+                      className="h-full w-full object-cover"
+                    />
+                  </>
+                ) : (
+                  <span className="flex flex-col items-center gap-1.5">
+                    <ImagePlus className="h-5 w-5 text-brown-400"/>
+                    Click to choose an image
+                  </span>
+                )}
+              </button>
+
+              <div className="flex min-w-0 flex-col items-start gap-2.5">
+                <p className="m-0 text-sm font-medium">Login screen</p>
+
+                <p className="m-0 text-sm text-muted-foreground">
+                  PNG, JPEG or WebP, up to 10 MB. The image is stored as soon as it is uploaded.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage || removingImage}
+                  >
+                    {uploadingImage ? "Uploading…" : hasImage ? "Replace image" : "Upload image"}
+                  </Button>
+
+                  {hasImage ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onRemoveLoginImage()}
+                      disabled={uploadingImage || removingImage}
+                    >
+                      {removingImage ? "Removing…" : "Remove"}
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <ToggleRow
+                id="image-on-login"
+                label="Use as login background"
+                checked={imageOnLogin}
+                disabled={saving || !hasImage}
+                onChange={setImageOnLogin}
+              />
+
+              <ToggleRow
+                id="image-on-dashboard"
+                label="Use as company dashboard background"
+                checked={imageOnDashboard}
+                disabled={saving || !hasImage}
+                onChange={setImageOnDashboard}
               />
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              {customHexInvalid
-                ? "Enter a hex colour such as #2563eb."
-                : "Leave empty to keep the default palette."}
-            </p>
-          </div>
-
-          {generatedScale ? (
-            <div className="grid gap-2">
-              <Label>Generated palette</Label>
-
-              <div className="flex overflow-hidden rounded-xl border border-brown-200">
-                {BRAND_STEPS.map((step) => (
-                  <span
-                    key={step}
-                    className="h-10 flex-1"
-                    style={{ backgroundColor: generatedScale[step] }}
-                    title={`${step} — ${generatedScale[step]}`}
-                  />
-                ))}
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                Surfaces stay near-grey and only actions carry the full colour, so the interface keeps
-                the contrast it was designed with whichever colour you pick.
-              </p>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ImageIcon className="h-5 w-5"/>
-            Login screen
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="flex flex-col gap-6">
-          <p className="text-sm text-muted-foreground">
-            Stored and ready, but not shown yet — the login page picks these up when it moves to
-            two-step sign-in.
-          </p>
-
-          <div className="grid gap-3">
-            <Label>Background image</Label>
-
-            {appearance.loginImageUrl ? (
-              <div className="overflow-hidden rounded-2xl border border-brown-200">
-                {/* Backend-hosted upload of unknown dimensions; next/image would need a remote pattern
-                    for the API origin in next.config. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={appearance.loginImageUrl}
-                  alt="Login background"
-                  className="h-48 w-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex min-h-32 items-center justify-center rounded-2xl border border-dashed border-brown-200 bg-brown-50/40 p-6 text-center">
-                <div>
-                  <p className="text-sm font-medium">No background image</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    PNG, JPEG or WebP, up to 10 MB. 1920 x 1080 px works best.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImage || removingImage}
-              >
-                {uploadingImage
-                  ? "Uploading…"
-                  : appearance.loginImageUrl
-                    ? "Replace image"
-                    : "Upload image"}
-              </Button>
-
-              {appearance.loginImageUrl ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onRemoveLoginImage()}
-                  disabled={uploadingImage || removingImage}
-                >
-                  {removingImage ? "Removing…" : "Remove"}
-                </Button>
-              ) : null}
-
-              <span className="text-xs text-muted-foreground">Image changes apply immediately.</span>
-            </div>
-
-            {imageError ? <p className="text-sm text-destructive">{imageError}</p> : null}
+            {imageError ? <p className="m-0 text-sm text-destructive">{imageError}</p> : null}
 
             <input
               ref={fileInputRef}
@@ -309,53 +369,61 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
               className="hidden"
               onChange={handleFileChange}
             />
-          </div>
 
-          <Separator/>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="login-headline">Headline</Label>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="login-headline" className="flex items-center gap-2">
-                <Type className="h-4 w-4"/>
-                Headline
-              </Label>
+                <Input
+                  id="login-headline"
+                  value={headline}
+                  maxLength={MAX_HEADLINE}
+                  placeholder="Welcome to SixSoftware"
+                  onChange={(e) => setHeadline(e.currentTarget.value)}
+                  disabled={saving}
+                />
+              </div>
 
-              <Input
-                id="login-headline"
-                value={headline}
-                maxLength={MAX_HEADLINE}
-                placeholder="Welcome to SixSoftware"
-                onChange={(e) => setHeadline(e.currentTarget.value)}
-                disabled={saving}
-              />
+              <div className="grid gap-2">
+                <Label htmlFor="login-subheadline">Sub-heading</Label>
+
+                <Input
+                  id="login-subheadline"
+                  value={subheadline}
+                  maxLength={MAX_SUBHEADLINE}
+                  placeholder="Sign in to continue to your workspace."
+                  onChange={(e) => setSubheadline(e.currentTarget.value)}
+                  disabled={saving}
+                />
+              </div>
             </div>
+          </Section>
 
-            <div className="grid gap-2">
-              <Label htmlFor="login-subheadline">Sub-heading</Label>
+          {saveError ? <p className="m-0 text-sm text-destructive">{saveError}</p> : null}
 
-              <Input
-                id="login-subheadline"
-                value={subheadline}
-                maxLength={MAX_SUBHEADLINE}
-                placeholder="Sign in to continue to your workspace."
-                onChange={(e) => setSubheadline(e.currentTarget.value)}
-                disabled={saving}
-              />
+          {dirty ? (
+            <div className="mt-auto flex items-center justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={saving}>
+                Cancel
+              </Button>
+
+              <Button type="button" onClick={handleSave} disabled={saving || customHexInvalid}>
+                {saving ? "Saving…" : "Save changes"}
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          ) : null}
+        </div>
 
-      {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
-
-      <div className="sticky bottom-0 -mx-6 flex items-center justify-end gap-3 border-t border-brown-200 bg-[var(--color-bg-primary)] px-6 py-4">
-        <Button type="button" variant="outline" onClick={handleReset} disabled={!dirty || saving}>
-          Reset
-        </Button>
-
-        <Button type="button" onClick={handleSave} disabled={!dirty || saving || customHexInvalid}>
-          {saving ? "Saving…" : "Save changes"}
-        </Button>
+        <AppearancePreview
+          brandColor={brandColor}
+          loginImageUrl={appearance.loginImageUrl}
+          headline={headline}
+          subheadline={subheadline}
+          companyName={companyName}
+          imageOnLogin={imageOnLogin}
+          imageOnDashboard={imageOnDashboard}
+          sidebarContrast={sidebarContrast}
+        />
       </div>
     </div>
   );

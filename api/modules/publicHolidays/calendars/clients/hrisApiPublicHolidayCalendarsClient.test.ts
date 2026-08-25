@@ -1,6 +1,10 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { hrisApiPublicHolidayCalendarsClient } from "@/api/modules/publicHolidays/calendars/clients";
-import { PublicHolidayCalendarSourceType, PublicHolidayCalendarStatus, } from "@/api/modules/publicHolidays/calendars/dto";
+import {
+  PublicHolidayCalendarSourceType,
+  PublicHolidayCalendarStatus,
+  PublicHolidayCalendarWeekendSubstitution,
+} from "@/api/modules/publicHolidays/calendars/dto";
 
 jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
   hrisApiClient: {
@@ -13,17 +17,19 @@ jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
 describe("HrisApiPublicHolidayCalendarsClient", () => {
   const dto = {
     id: "calendar-id",
-    name: "Poland 2026",
-    year: 2026,
+    name: "Poland",
     status: PublicHolidayCalendarStatus.Active,
     sourceType: PublicHolidayCalendarSourceType.Manual,
     sourceExternalId: null,
     sourceCountryCode: "PL",
     sourceRegionCode: null,
     sourceLocale: "pl-PL",
+    weekendSubstitution: PublicHolidayCalendarWeekendSubstitution.None,
+    autoFillEnabled: true,
     archivedAt: null,
     archivedBy: null,
     holidayCount: 0,
+    years: [2026],
   };
 
   beforeEach(() => {
@@ -34,8 +40,7 @@ describe("HrisApiPublicHolidayCalendarsClient", () => {
     const response = { id: "calendar-id" };
 
     const request = {
-      name: "Poland 2026",
-      year: 2026,
+      name: "Poland",
       status: PublicHolidayCalendarStatus.Active,
       sourceType: PublicHolidayCalendarSourceType.Manual,
       sourceExternalId: null,
@@ -80,7 +85,6 @@ describe("HrisApiPublicHolidayCalendarsClient", () => {
 
     const request = {
       name: "Poland updated",
-      year: 2026,
       sourceType: PublicHolidayCalendarSourceType.Manual,
       sourceExternalId: null,
       sourceCountryCode: "PL",

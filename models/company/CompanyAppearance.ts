@@ -10,4 +10,10 @@ export type CompanyAppearance = {
   loginImageUrl: string | null;
   loginHeadline: string | null;
   loginSubheadline: string | null;
+  /** Whether the uploaded image backs the login screen. Off until someone places it there. */
+  useImageOnLogin: boolean;
+  /** Whether the same image also backs the in-app dashboard. */
+  useImageOnDashboard: boolean;
+  /** True paints the sidebar in the brand colour instead of leaving it neutral. */
+  sidebarContrast: boolean;
 };

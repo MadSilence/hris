@@ -26,7 +26,7 @@ const BrandThemeStyle: React.FC = async () => {
 
   try {
     const appearance = await hrisCompanyAppearanceService.getAppearance();
-    styleSheet = buildBrandStyleSheet(appearance.brandColor);
+    styleSheet = buildBrandStyleSheet(appearance.brandColor, appearance.sidebarContrast);
   } catch {
     return null;
   }

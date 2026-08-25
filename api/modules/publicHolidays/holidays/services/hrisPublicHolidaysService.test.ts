@@ -44,7 +44,7 @@ describe("HrisPublicHolidaysService", () => {
 
     const result = await hrisPublicHolidaysService.list("calendar-id");
 
-    expect(hrisApiPublicHolidaysClient.list).toHaveBeenCalledWith("calendar-id");
+    expect(hrisApiPublicHolidaysClient.list).toHaveBeenCalledWith("calendar-id", undefined);
     expect(result).toEqual(response);
   });
 

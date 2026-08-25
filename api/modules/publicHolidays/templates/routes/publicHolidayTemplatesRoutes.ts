@@ -16,7 +16,20 @@ export class PublicHolidayTemplatesRoutes {
 
     const data = await hrisPublicHolidayTemplatesService.preview(id, {
       year: body.year,
+      regionCode: body.regionCode ?? null,
+      extraTypes: body.extraTypes,
     });
+
+    return Response.json(data);
+  }
+
+  public async regions(req: Request, id: string) {
+    const year = new URL(req.url).searchParams.get("year");
+
+    const data = await hrisPublicHolidayTemplatesService.regions(
+      id,
+      year ? Number(year) : undefined
+    );
 
     return Response.json(data);
   }

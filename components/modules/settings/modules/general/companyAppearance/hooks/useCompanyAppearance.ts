@@ -36,7 +36,7 @@ const useAppearanceMutationSuccess = () => {
     }
 
     queryClient.setQueryData(COMPANY_APPEARANCE_QUERY_KEY, data);
-    applyBrandTheme(data.brandColor);
+    applyBrandTheme(data.brandColor, data.sidebarContrast);
   };
 };
 

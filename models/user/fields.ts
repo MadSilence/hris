@@ -110,9 +110,8 @@ export type RefDTO = {
   name: string;
 };
 
-export type CalendarRefDTO = RefDTO & {
-  year: number;
-};
+/** A holiday calendar is a place ("Germany"), so there is no year to show beside the name. */
+export type CalendarRefDTO = RefDTO;
 
 export type UsersSearchItemDTO = {
   id: string;

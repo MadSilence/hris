@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
 type SettingsPageHeaderProps = {
   title: string;
   backHref?: string;
+  /** Sits between the back button and the title — a flag, an avatar, an icon for the thing named. */
+  leading?: ReactNode;
   className?: string;
 };
 
 export default function SettingsPageHeader({
   title,
   backHref,
+  leading,
   className,
 }: SettingsPageHeaderProps) {
   const router = useRouter();
@@ -35,6 +39,8 @@ export default function SettingsPageHeader({
           <ChevronLeft className="h-4 w-4"/>
         </button>
       )}
+
+      {leading}
 
       <h1 className="text-3xl font-semibold">{title}</h1>
     </header>

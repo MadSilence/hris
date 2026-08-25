@@ -92,7 +92,7 @@ describe("PublicHolidayTemplatesRoutes", () => {
 
     expect(hrisPublicHolidayTemplatesService.preview).toHaveBeenCalledWith(
       "template-id",
-      { year: 2026 }
+      { year: 2026, regionCode: null, extraTypes: undefined }
     );
     expect(result).toEqual(response);
   });

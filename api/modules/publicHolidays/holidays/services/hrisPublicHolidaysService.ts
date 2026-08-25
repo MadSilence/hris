@@ -2,6 +2,7 @@ import { hrisApiPublicHolidaysClient } from "@/api/modules/publicHolidays/holida
 import type {
   CreatePublicHolidayRequest,
   RenamePublicHolidayRequest,
+  ReplaceYearHolidaysRequest,
   UpdatePublicHolidayRequest,
 } from "@/api/modules/publicHolidays/holidays/dto";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -15,8 +16,16 @@ export class HrisPublicHolidaysService {
     return hrisApiPublicHolidaysClient.create(calendarId, body);
   }
 
-  public async list(calendarId: string): Promise<PublicHoliday[]> {
-    return hrisApiPublicHolidaysClient.list(calendarId);
+  public async list(calendarId: string, year?: number): Promise<PublicHoliday[]> {
+    return hrisApiPublicHolidaysClient.list(calendarId, year);
+  }
+
+  public async replaceYear(
+    calendarId: string,
+    year: number,
+    body: ReplaceYearHolidaysRequest
+  ): Promise<PublicHoliday[]> {
+    return hrisApiPublicHolidaysClient.replaceYear(calendarId, year, body);
   }
 
   public async getById(id: string): Promise<PublicHoliday> {

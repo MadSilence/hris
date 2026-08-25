@@ -11,11 +11,12 @@ export const getPublicHolidayCalendarQueryKey = (calendarId: string) => [
   calendarId,
 ];
 
-export const getPublicHolidaysQueryKey = (calendarId: string) => [
+export const getPublicHolidaysQueryKey = (calendarId: string, year?: number) => [
   PUBLIC_HOLIDAYS_QUERY_KEY,
   "calendars",
   calendarId,
   "holidays",
+  ...(year ? [year] : []),
 ];
 
 export const getPublicHolidayTemplatesQueryKey = () => [
@@ -31,11 +32,24 @@ export const getPublicHolidayTemplateQueryKey = (templateId: string) => [
 
 export const getPublicHolidayTemplatePreviewQueryKey = (
   templateId: string,
-  year: number
+  year: number,
+  regionCode?: string | null
 ) => [
   PUBLIC_HOLIDAYS_QUERY_KEY,
   "templates",
   templateId,
   "preview",
+  year,
+  regionCode ?? "national",
+];
+
+export const getPublicHolidayTemplateRegionsQueryKey = (
+  templateId: string,
+  year: number
+) => [
+  PUBLIC_HOLIDAYS_QUERY_KEY,
+  "templates",
+  templateId,
+  "regions",
   year,
 ];

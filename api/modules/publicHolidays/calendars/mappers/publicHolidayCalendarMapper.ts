@@ -8,16 +8,18 @@ export class PublicHolidayCalendarMapper {
     return {
       id: dto.id,
       name: dto.name,
-      year: dto.year,
       status: dto.status,
       sourceType: dto.sourceType,
       sourceExternalId: dto.sourceExternalId,
       sourceCountryCode: dto.sourceCountryCode,
       sourceRegionCode: dto.sourceRegionCode,
       sourceLocale: dto.sourceLocale,
+      weekendSubstitution: dto.weekendSubstitution,
+      autoFillEnabled: dto.autoFillEnabled ?? true,
       archivedAt: dto.archivedAt,
       archivedBy: dto.archivedBy,
       holidayCount: dto.holidayCount ?? 0,
+      years: dto.years ?? [],
     };
   }
 

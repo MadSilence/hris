@@ -11,14 +11,18 @@ const BRAND_STYLE_SELECTOR = "style[data-brand-theme]";
  * position in the head, same precedence, no refetch. A reload still gets the colour from the server.
  *
  * Clearing the colour removes the element rather than emptying it, so the palette in `globals.css`
- * takes over again.
+ * takes over again. The same element also carries the contrast-sidebar tokens, so turning the
+ * sidebar dark or light lands without a reload too.
  */
-export const applyBrandTheme = (brandColor: string | null | undefined): void => {
+export const applyBrandTheme = (
+  brandColor: string | null | undefined,
+  sidebarContrast = false,
+): void => {
   if (typeof document === "undefined") {
     return;
   }
 
-  const sheet = buildBrandStyleSheet(brandColor);
+  const sheet = buildBrandStyleSheet(brandColor, sidebarContrast);
   const existing = document.head.querySelector<HTMLStyleElement>(BRAND_STYLE_SELECTOR);
 
   if (!sheet) {

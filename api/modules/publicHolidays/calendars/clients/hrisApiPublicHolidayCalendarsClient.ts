@@ -8,6 +8,7 @@ import type {
 import { publicHolidayCalendarMapper } from "@/api/modules/publicHolidays/calendars/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { PublicHolidayCalendar } from "@/models/publicHolidays/calendar";
+import type { PublicHolidayYearFillResult } from "@/api/modules/publicHolidays/calendars/dto";
 
 export class HrisApiPublicHolidayCalendarsClient {
   private readonly BASE_PATH = "/public-holiday-calendars";
@@ -89,6 +90,13 @@ export class HrisApiPublicHolidayCalendarsClient {
     return hrisApiClient.post<CreateResponse>(
       `${this.BASE_PATH}/${id}/duplicate`,
       { name: name ?? null } as unknown as Record<string, unknown>
+    );
+  }
+
+  /** Materialises one year from the calendar's provider. */
+  public async fillYear(id: string, year: number): Promise<PublicHolidayYearFillResult> {
+    return hrisApiClient.post<PublicHolidayYearFillResult>(
+      `${this.BASE_PATH}/${id}/years/${year}/fill`
     );
   }
 

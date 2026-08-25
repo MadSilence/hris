@@ -48,6 +48,10 @@ export class HrisPublicHolidayCalendarsService {
     return hrisApiPublicHolidayCalendarsClient.archive(id);
   }
 
+  public async fillYear(id: string, year: number) {
+    return hrisApiPublicHolidayCalendarsClient.fillYear(id, year);
+  }
+
   public async restore(id: string): Promise<UpdateResponse> {
     return hrisApiPublicHolidayCalendarsClient.restore(id);
   }

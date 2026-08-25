@@ -125,24 +125,81 @@ export const buildBrandPalette = (brandColor: string): BrandPalette | null => {
   return { scale, neutrals };
 };
 
-/**
- * The `<style>` body that rebrands the app, or an empty string to keep the shipped brown.
- *
- * `html:root` outranks the `:root` in globals.css, so the override wins no matter which order Next
- * emits the stylesheet and this tag in. One block covers everything: the app is single-theme (dark
- * mode was removed — see DECISIONS.md), so there is no second token set to guard against.
- */
-export const buildBrandStyleSheet = (brandColor: string | null | undefined): string => {
-  if (!brandColor || !isValidHex(brandColor)) return "";
+/** The palette the app ships with, used as the explicit fallback inside a scoped preview. */
+const SHIPPED_PALETTE: BrandPalette = { scale: BROWN_SCALE, neutrals: NEUTRAL_TOKENS };
 
-  const palette = buildBrandPalette(brandColor);
-  if (!palette) return "";
-
+const renderTokens = (palette: BrandPalette): string => {
   const scale = BRAND_STEPS.map((step) => `--brown-${step}:${palette.scale[step]}`).join(";");
 
   const neutrals = Object.entries(palette.neutrals)
     .map(([token, value]) => `${token}:${value}`)
     .join(";");
 
-  return `html:root{${scale}${neutrals ? ";" + neutrals : ""}}`;
+  return neutrals ? `${scale};${neutrals}` : scale;
+};
+
+/**
+ * The contrast sidebar: the same brand, but the navigation is a dark brand surface instead of a
+ * white one. Only the `--sidebar-*` tokens move — every sidebar colour is painted through them, so
+ * nothing else in the app notices. Values mirror the Appearance preview.
+ */
+const SIDEBAR_CONTRAST_TOKENS = [
+  "--sidebar:var(--brown-700)",
+  "--sidebar-foreground:#ffffff",
+  "--sidebar-border:rgba(255,255,255,0.18)",
+  "--sidebar-accent:rgba(255,255,255,0.14)",
+  "--sidebar-accent-foreground:#ffffff",
+  "--sidebar-ring:rgba(255,255,255,0.5)",
+  "--sidebar-item-hover-bg:rgba(255,255,255,0.12)",
+  "--sidebar-item-hover-fg:#ffffff",
+  "--sidebar-item-active-bg:rgba(255,255,255,0.2)",
+  "--sidebar-item-active-fg:#ffffff",
+  "--sidebar-item-icon:#ffffff",
+  "--sidebar-badge-bg:#ffffff",
+  "--sidebar-badge-fg:var(--brown-700)",
+].join(";");
+
+/**
+ * The `<style>` body that rebrands the app, or an empty string to keep the shipped brown.
+ *
+ * `html:root` outranks the `:root` in globals.css, so the override wins no matter which order Next
+ * emits the stylesheet and this tag in. One block covers everything: the app is single-theme (dark
+ * mode was removed — see DECISIONS.md), so there is no second token set to guard against.
+ *
+ * The contrast sidebar rides along in the same block on purpose. It is a token swap like the palette
+ * is, and keeping both in one server-rendered element means the sidebar is already dark on the first
+ * paint instead of flashing white while a client query resolves.
+ */
+export const buildBrandStyleSheet = (
+  brandColor: string | null | undefined,
+  sidebarContrast = false,
+): string => {
+  const palette = brandColor && isValidHex(brandColor) ? buildBrandPalette(brandColor) : null;
+
+  const blocks: string[] = [];
+  if (palette) blocks.push(renderTokens(palette));
+  if (sidebarContrast) blocks.push(SIDEBAR_CONTRAST_TOKENS);
+
+  if (blocks.length === 0) return "";
+
+  return `html:root{${blocks.join(";")}}`;
+};
+
+/**
+ * The same palette, confined to one subtree — for the Appearance preview, which has to wear a colour
+ * the rest of the app has not been saved into yet.
+ *
+ * Two differences from the global sheet. It never returns an empty string: clearing the draft has to
+ * actively repaint the preview with the shipped brown, otherwise it would inherit whichever colour is
+ * currently saved. And only `--brown-*` and the flat neutral tokens can travel this way — the aliases
+ * in globals.css (`--primary: var(--brown-600)`) substitute against `:root`, so anything inside a
+ * scoped preview must paint with `brown-*` utilities directly.
+ */
+export const buildScopedBrandStyleSheet = (
+  selector: string,
+  brandColor: string | null | undefined,
+): string => {
+  const drafted = brandColor && isValidHex(brandColor) ? buildBrandPalette(brandColor) : null;
+
+  return `${selector}{${renderTokens(drafted ?? SHIPPED_PALETTE)}}`;
 };

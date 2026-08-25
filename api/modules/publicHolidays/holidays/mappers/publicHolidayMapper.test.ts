@@ -1,5 +1,10 @@
 import { publicHolidayMapper } from "@/api/modules/publicHolidays/holidays/mappers";
-import type { PublicHolidayDTO } from "@/api/modules/publicHolidays/holidays/dto";
+import {
+  PublicHolidayDayPart,
+  PublicHolidayOrigin,
+  PublicHolidayType,
+  type PublicHolidayDTO,
+} from "@/api/modules/publicHolidays/holidays/dto";
 
 describe("PublicHolidayMapper", () => {
   const dto: PublicHolidayDTO = {
@@ -9,6 +14,11 @@ describe("PublicHolidayMapper", () => {
     name: "New Year",
     holidayDate: "2026-01-01",
     endDate: "2026-01-01",
+    observedDate: null,
+    origin: PublicHolidayOrigin.Source,
+    sourceEventId: "src-1",
+    dayPart: PublicHolidayDayPart.FullDay,
+    type: PublicHolidayType.Public,
   };
 
   it("maps public holiday dto to model", () => {

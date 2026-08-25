@@ -116,4 +116,24 @@ describe("buildBrandStyleSheet", () => {
     // A single rule — the app is single-theme, there is no second token set to scope around.
     expect(sheet.match(/html:root/g)).toHaveLength(1);
   });
+
+  it("paints the contrast sidebar even for a company on the shipped brown", () => {
+    const sheet = buildBrandStyleSheet(null, true);
+
+    expect(sheet).toContain("--sidebar:var(--brown-700)");
+    expect(sheet).toContain("--sidebar-item-active-bg:");
+    expect(sheet).not.toContain("--brown-50:");
+  });
+
+  it("carries brand and contrast in the same block", () => {
+    const sheet = buildBrandStyleSheet("#2563eb", true);
+
+    expect(sheet).toContain("--brown-600:");
+    expect(sheet).toContain("--sidebar-foreground:#ffffff");
+    expect(sheet.match(/html:root/g)).toHaveLength(1);
+  });
+
+  it("leaves the sidebar alone when contrast is off", () => {
+    expect(buildBrandStyleSheet("#2563eb")).not.toContain("--sidebar");
+  });
 });

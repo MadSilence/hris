@@ -6,6 +6,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { AttributeType, hasDefaultValueSupport, isTextConstrainedType } from "@/models/attribute";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 export type AttributeConfig = {
   required?: boolean;
@@ -162,22 +163,21 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="attr-cfg-min-date">Earliest</Label>
-            <Input
-              type="date"
+            <DatePicker
               id="attr-cfg-min-date"
               value={value.minDate ?? ""}
               disabled={disabled}
-              onChange={(e) => onChange({ minDate: e.currentTarget.value || null })}
+              onChange={(next) => onChange({ minDate: next || null })}
             />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="attr-cfg-max-date">Latest</Label>
-            <Input
-              type="date"
+            <DatePicker
               id="attr-cfg-max-date"
               value={value.maxDate ?? ""}
               disabled={disabled}
-              onChange={(e) => onChange({ maxDate: e.currentTarget.value || null })}
+              min={value.minDate ?? undefined}
+              onChange={(next) => onChange({ maxDate: next || null })}
             />
           </div>
         </div>

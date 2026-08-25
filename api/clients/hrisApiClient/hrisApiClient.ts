@@ -41,9 +41,15 @@ export class HrisApiClient {
     return this.request<T, B>("PATCH", path, body);
   }
 
-  public async fetch(path: string): Promise<Response> {
+  /**
+   * Raw passthrough for endpoints that do not return JSON — exports, ICS feeds.
+   *
+   * `accept` matters: an endpoint declaring `produces = "text/calendar"` answers 406 to a request
+   * that only accepts JSON, and the failure surfaces as a confusing 404 further up.
+   */
+  public async fetch(path: string, accept = "application/json"): Promise<Response> {
     const headers = await this.prepareHeaders(path);
-    headers.set("Accept", "application/json");
+    headers.set("Accept", accept);
 
     const response = await this.send(path, {
       headers,
@@ -144,7 +150,10 @@ export class HrisApiClient {
 
     if (response.status === 400) {
       const errorResponse = await response.json().catch(() => ({}));
-      throw new BadRequestError(errorResponse?.message ?? "Bad Request");
+      throw new BadRequestError(
+        errorResponse?.message ?? "Bad Request",
+        errorResponse?.fieldErrors ?? undefined,
+      );
     }
 
     if (response.status === 401) {
