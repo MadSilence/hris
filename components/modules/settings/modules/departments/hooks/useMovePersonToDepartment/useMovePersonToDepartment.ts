@@ -7,6 +7,7 @@ import {
   assignmentApplyAction,
   unassignUserAction,
 } from "@/components/audience/assignment/actions/assignmentActions";
+import { assignmentSkippedEverything } from "@/components/audience/assignment/assignmentSkips";
 import { DEPARTMENTS_QUERY_KEY } from "@/components/modules/settings/modules/departments/utils/departmentQueryKeys";
 
 const BASE_PATH = "/departments";
@@ -35,6 +36,12 @@ export const useMovePersonToDepartment = () => {
         if (result.status === ActionStatus.ERROR) {
           throw new Error(result.errorMessage ?? "Failed to move the person");
         }
+
+        // The engine answers 200 while quietly assigning nobody — an archived person, someone
+        // already there. Without this the dialog closed on "success" and the chip never moved.
+        const skipped = assignmentSkippedEverything(result.data);
+        if (skipped) throw new Error(skipped);
+
         return;
       }
 

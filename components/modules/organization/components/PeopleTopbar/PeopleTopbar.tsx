@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Columns3, Filter as FilterIcon, Plus, Search } from "lucide-react";
+import { Columns3, Filter as FilterIcon, Pencil, Plus, Search } from "lucide-react";
 
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -36,6 +36,7 @@ type PeopleTopbarProps = {
   onFiltersChangeAction: (next: FilterDTO[]) => void;
   fields: FieldDTO[];
   selectedCount?: number;
+  onEditSelectedAction?: () => void;
   onAddManuallyAction?: () => void;
   onImportCsvAction?: () => void;
   onInviteByEmailAction?: () => void;
@@ -50,6 +51,7 @@ export default function PeopleTopbar({
   onFiltersChangeAction,
   fields,
   selectedCount = 0,
+  onEditSelectedAction,
   onAddManuallyAction,
   onImportCsvAction,
   onInviteByEmailAction,
@@ -74,12 +76,6 @@ export default function PeopleTopbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 bg-background py-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        {selectedCount > 0 ? (
-          <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs text-muted-foreground">
-            {selectedCount} selected
-          </span>
-        ) : null}
-
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5">
@@ -105,7 +101,7 @@ export default function PeopleTopbar({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
             <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
-            <div className="mt-3 flex items-center justify-end gap-2 border-t pt-3">
+            <div className="mt-3 flex items-center justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={resetFilters}>
                 Reset
               </Button>
@@ -115,6 +111,20 @@ export default function PeopleTopbar({
             </div>
           </PopoverContent>
         </Popover>
+
+        {/*
+          * Only here while something is selected: its appearance is the signal that a selection
+          * exists, which is what the "n selected" chip and the separate action bar used to say in
+          * three places at once. Clearing goes through the header checkbox.
+          */}
+        {selectedCount > 0 ? (
+          <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
+            <Button size="sm" className="gap-1.5" onClick={() => onEditSelectedAction?.()}>
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Button>
+          </PermissionGate>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

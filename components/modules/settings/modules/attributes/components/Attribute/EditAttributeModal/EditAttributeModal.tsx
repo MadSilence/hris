@@ -64,7 +64,7 @@ export const EditAttributeModal: FC<EditAttributeModalProps> = ({
             key={attribute.id}
             attribute={attribute}
             groups={groups}
-            isPreset={!!attribute.system}
+            isPreset={!!attribute.isSystem}
             onChange={(patch) => {
               draftRef.current = { ...draftRef.current, ...patch };
             }}

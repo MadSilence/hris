@@ -25,8 +25,8 @@ const mockAttribute: Attribute = {
   sortOrder: 1,
   decScale: null,
   dateHideYear: null,
-  system: false,
-  unique: false,
+  isSystem: false,
+  isUnique: false,
 };
 
 const renderModal = (

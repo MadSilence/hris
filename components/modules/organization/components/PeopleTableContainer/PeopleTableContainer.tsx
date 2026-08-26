@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import PeopleTable from "@/components/modules/organization/components/PeopleTable/PeopleTable";
 import PeopleTopbar from "@/components/modules/organization/components/PeopleTopbar/PeopleTopbar";
 import PeopleViewsPanel from "@/components/modules/organization/components/PeopleViews/PeopleViewsPanel";
-import BulkActionBar from "@/components/modules/organization/components/BulkEdit/BulkActionBar";
 import BulkEditModal, { type BulkEditTarget } from "@/components/modules/organization/components/BulkEdit/BulkEditModal";
 
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
@@ -35,13 +34,29 @@ type SortState = { fieldId: string; dir: SortDir } | null;
 
 const DEFAULT_ON = new Set(["sys:first_name", "sys:status", "sys:email", "sys:created_at", "sys:updated_at"]);
 
+/**
+ * The name column carries both names — the cell renders "First Last" as one chip — so the table
+ * offers a single **Name** column and drops the separate Last name one. Only the *column* list is
+ * trimmed: filters, bulk edit and the profile still address the two fields separately, which is what
+ * their labels in the field registry are for.
+ */
+const NAME_COLUMN_ID = "sys:first_name";
+const LAST_NAME_FIELD_ID = "sys:last_name";
+
+const isColumnOffered = (f: FieldDTO): boolean => f.id !== LAST_NAME_FIELD_ID;
+
+const columnLabel = (f: FieldDTO): string =>
+  f.id === NAME_COLUMN_ID ? "Name" : f.label ?? f.key ?? f.id;
+
 // A column shows the value for everyone in the list, so it needs COMPANY-scope visibility.
 // Non-configurable system fields (identity) bypass field access entirely — see FieldRegistry.
 const isColumnVisible = (f: FieldDTO): boolean =>
   (f.isSystem && f.configurable === false) || (f.viewScopes ?? []).includes("COMPANY");
 
 const PeopleTableContainer: React.FC = () => {
-  const [sort, setSort] = useState<SortState>({ fieldId: "last_name", dir: "asc" });
+  // First name, not last: the table shows one Name column and it sorts by first name, so a default
+  // of last_name left the list in an order no header could explain or undo.
+  const [sort, setSort] = useState<SortState>({ fieldId: "first_name", dir: "asc" });
   const [filters, setFilters] = useState<FilterDTO[]>([]);
   const [query, setQuery] = useState("");
 
@@ -79,11 +94,11 @@ const PeopleTableContainer: React.FC = () => {
   useEffect(() => {
     if (!fieldsData) return;
 
-    const visible = fieldsData.filter(isColumnVisible);
+    const visible = fieldsData.filter(isColumnVisible).filter(isColumnOffered);
     const toColumn = (f: FieldDTO): ColumnItem => ({
       id: f.id,
-      label: f.label ?? f.key ?? f.id,
-      checked: DEFAULT_ON.has(f.id) || f.id === "sys:first_name",
+      label: columnLabel(f),
+      checked: DEFAULT_ON.has(f.id) || f.id === NAME_COLUMN_ID,
       group: f.isSystem ? "system" : "other",
     });
 
@@ -93,7 +108,7 @@ const PeopleTableContainer: React.FC = () => {
       const visibleById = new Map(visible.map((f) => [f.id, f]));
       const kept = prev
         .filter((c) => visibleById.has(c.id))
-        .map((c) => ({ ...c, label: visibleById.get(c.id)!.label ?? c.label }));
+        .map((c) => ({ ...c, label: columnLabel(visibleById.get(c.id)!) }));
       const known = new Set(kept.map((c) => c.id));
       const added = visible.filter((f) => !known.has(f.id)).map(toColumn);
       return [...kept, ...added];
@@ -175,7 +190,7 @@ const PeopleTableContainer: React.FC = () => {
 
   const applyConfig = useCallback(
     (payload: ViewPayload): ViewPayload => {
-      const visible = (fieldsData ?? []).filter(isColumnVisible);
+      const visible = (fieldsData ?? []).filter(isColumnVisible).filter(isColumnOffered);
       const applied = applyPayload(payload, visible);
       setColumns(applied.columns);
       setFilters(applied.filters);
@@ -204,13 +219,13 @@ const PeopleTableContainer: React.FC = () => {
   );
 
   const onApplyDefault = useCallback(() => {
-    const visible = (fieldsData ?? []).filter(isColumnVisible);
+    const visible = (fieldsData ?? []).filter(isColumnVisible).filter(isColumnOffered);
     applyConfig({
       columns: visible
-        .filter((f) => DEFAULT_ON.has(f.id) || f.id === "sys:first_name")
+        .filter((f) => DEFAULT_ON.has(f.id) || f.id === NAME_COLUMN_ID)
         .map((f) => f.id),
       filters: [],
-      sort: { fieldId: "last_name", dir: "asc" },
+      sort: { fieldId: "first_name", dir: "asc" },
     });
     setActiveView(null);
     setIsShared(false);
@@ -291,22 +306,14 @@ const PeopleTableContainer: React.FC = () => {
   const viewsBusy = viewMutations.create.isPending || viewMutations.update.isPending;
 
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [selectAllMatching, setSelectAllMatching] = useState(false);
-  const filterActive = filters.length > 0;
-  const barActive = selectedIds.size > 0 || selectAllMatching;
 
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-    setSelectAllMatching(false);
-  }, []);
-
-  const bulkTarget: BulkEditTarget = selectAllMatching
-    ? { kind: "segment", filters }
-    : { kind: "ids", userIds: Array.from(selectedIds) };
+  // Selection lives in one place now: the header checkbox picks everyone up or puts everyone down,
+  // and the Edit button in the topbar appears while anyone is held. The old action bar said the same
+  // thing a third time and cost a row of screen.
+  const bulkTarget: BulkEditTarget = { kind: "ids", userIds: Array.from(selectedIds) };
 
   const onBulkApplied = useCallback(() => {
     setSelectedIds(new Set());
-    setSelectAllMatching(false);
   }, []);
 
   // Below every hook on purpose: an early return here would render fewer hooks than the previous
@@ -332,6 +339,7 @@ const PeopleTableContainer: React.FC = () => {
 
         <PeopleTopbar
           selectedCount={selectedIds.size}
+          onEditSelectedAction={() => setBulkOpen(true)}
           query={query}
           onQueryChangeAction={onQueryChange}
           columns={columns}
@@ -340,17 +348,6 @@ const PeopleTableContainer: React.FC = () => {
           onFiltersChangeAction={onFiltersChange}
           fields={fieldsData ?? []}
         />
-
-        {barActive ? (
-          <BulkActionBar
-            selectedCount={selectedIds.size}
-            allMatching={selectAllMatching}
-            filterActive={filterActive}
-            onEdit={() => setBulkOpen(true)}
-            onClear={clearSelection}
-            onSelectAllMatching={() => setSelectAllMatching(true)}
-          />
-        ) : null}
 
         <PeopleTable
           data={items}
@@ -391,7 +388,7 @@ const PeopleTableContainer: React.FC = () => {
         isOpen={bulkOpen}
         onClose={() => setBulkOpen(false)}
         target={bulkTarget}
-        count={selectAllMatching ? null : selectedIds.size}
+        count={selectedIds.size}
         fields={fieldsData ?? []}
         onApplied={onBulkApplied}
       />

@@ -8,6 +8,7 @@ import {
   unassignUserAction,
 } from "@/components/audience/assignment/actions/assignmentActions";
 import { TEAMS_QUERY_KEY } from "@/components/modules/settings/modules/teams/utils/teamQueryKeys";
+import { assignmentSkippedEverything } from "@/components/audience/assignment/assignmentSkips";
 
 const BASE_PATH = "/teams";
 
@@ -46,6 +47,11 @@ export const useMovePersonToTeam = () => {
       if (added.status === ActionStatus.ERROR) {
         throw new Error(added.errorMessage ?? "Failed to add the person to the team");
       }
+
+      // A 200 that assigned nobody is still a failure from where the person is standing; the engine
+      // says why in `skipped`, and saying nothing left them staring at an unchanged board.
+      const skipped = assignmentSkippedEverything(added.data);
+      if (skipped) throw new Error(skipped);
 
       if (mode === "move" && sourceTeamId && sourceTeamId !== targetTeamId) {
         const removed = await unassignUserAction(BASE_PATH, sourceTeamId, userId);

@@ -12,6 +12,8 @@ import {
   FilePlus2,
   MoreVertical,
   Plus,
+  Power,
+  PowerOff,
   RotateCcw,
   Search,
   Trash2,
@@ -53,6 +55,8 @@ import { useDuplicatePublicHolidayCalendar } from "@/components/modules/settings
 import { useArchivePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useArchivePublicHolidayCalendar";
 import { useRestorePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useRestorePublicHolidayCalendar";
 import { useDeletePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useDeletePublicHolidayCalendar";
+import { useActivatePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useActivatePublicHolidayCalendar";
+import { useDeactivatePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useDeactivatePublicHolidayCalendar";
 import {
   ExportDataModal,
   ExportDataFormValues,
@@ -114,12 +118,15 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const [duplicateName, setDuplicateName] = useState("");
   const [archiveTarget, setArchiveTarget] = useState<PublicHolidayCalendar | null>(null);
   const [restoreTarget, setRestoreTarget] = useState<PublicHolidayCalendar | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PublicHolidayCalendar | null>(null);
 
   const duplicate = useDuplicatePublicHolidayCalendar();
   const archive = useArchivePublicHolidayCalendar();
   const restore = useRestorePublicHolidayCalendar();
   const remove = useDeletePublicHolidayCalendar();
+  const activate = useActivatePublicHolidayCalendar();
+  const deactivate = useDeactivatePublicHolidayCalendar();
 
   /** Archived calendars stay out of the list until the toggle asks for them. */
   const visible = useMemo(
@@ -173,6 +180,27 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
     try {
       await restore.mutateAsync({ id: restoreTarget.id });
       setRestoreTarget(null);
+    } catch {
+    }
+  };
+
+  /**
+   * Switching a calendar on only ever gives people days, and the row shows the new status straight
+   * away — asking "are you sure" for that is noise. Switching one off is the opposite: everyone
+   * assigned silently starts working those days again, so that one gets a dialog saying so.
+   */
+  const handleActivate = async (calendar: PublicHolidayCalendar) => {
+    try {
+      await activate.mutateAsync({ id: calendar.id });
+    } catch {
+    }
+  };
+
+  const confirmDeactivate = async () => {
+    if (!deactivateTarget) return;
+    try {
+      await deactivate.mutateAsync({ id: deactivateTarget.id });
+      setDeactivateTarget(null);
     } catch {
     }
   };
@@ -294,6 +322,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                     filtered.map((calendar) => {
                       const badge = statusBadge(calendar.status);
                       const isArchived = calendar.status === PublicHolidayCalendarStatus.Archived;
+                      const isActive = calendar.status === PublicHolidayCalendarStatus.Active;
                       return (
                         <TableRow
                           key={calendar.id}
@@ -354,13 +383,32 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                                       Restore
                                     </DropdownMenuItem>
                                   ) : (
-                                    <DropdownMenuItem
-                                      onClick={() => setArchiveTarget(calendar)}
-                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                    >
-                                      <Archive className="h-4 w-4 text-muted-foreground" />
-                                      Archive
-                                    </DropdownMenuItem>
+                                    <>
+                                      {isActive ? (
+                                        <DropdownMenuItem
+                                          onClick={() => setDeactivateTarget(calendar)}
+                                          className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                        >
+                                          <PowerOff className="h-4 w-4 text-muted-foreground" />
+                                          Deactivate
+                                        </DropdownMenuItem>
+                                      ) : (
+                                        <DropdownMenuItem
+                                          onClick={() => handleActivate(calendar)}
+                                          className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                        >
+                                          <Power className="h-4 w-4 text-muted-foreground" />
+                                          Activate
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() => setArchiveTarget(calendar)}
+                                        className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                      >
+                                        <Archive className="h-4 w-4 text-muted-foreground" />
+                                        Archive
+                                      </DropdownMenuItem>
+                                    </>
                                   )}
                                   <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
                                   <DropdownMenuItem
@@ -471,6 +519,35 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             </Button>
             <Button onClick={confirmRestore} disabled={restore.isPending}>
               {restore.isPending ? "Restoring…" : "Restore"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deactivate */}
+      <Dialog open={!!deactivateTarget} onOpenChange={(v) => !v && setDeactivateTarget(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Deactivate &ldquo;{deactivateTarget?.name}&rdquo;</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-sm text-brown-700">
+            An inactive calendar stops applying: the people assigned to it keep the assignment, but
+            its days no longer count as holidays, so new leave requests over those dates will be one
+            day longer. Assignments and holiday days are kept — activate it again at any time.
+            {deactivate.isError && (
+              <p className="mt-2 text-red-500">Failed to deactivate the calendar.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeactivateTarget(null)}
+              disabled={deactivate.isPending}
+            >
+              Cancel
+            </Button>
+            <Button onClick={confirmDeactivate} disabled={deactivate.isPending}>
+              {deactivate.isPending ? "Deactivating…" : "Deactivate"}
             </Button>
           </DialogFooter>
         </DialogContent>

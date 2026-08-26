@@ -15,8 +15,8 @@ const attribute = (over: Partial<Attribute> = {}): Attribute => ({
   sortOrder: 1,
   decScale: null,
   dateHideYear: null,
-  system: false,
-  unique: false,
+  isSystem: false,
+  isUnique: false,
   createdAt: "",
   updatedAt: "",
   createdBy: null,
@@ -142,7 +142,7 @@ describe("AttributeOptions", () => {
 
   it("locks every control for a system attribute", () => {
     render(
-      <AttributeOptions attribute={attribute({ system: true })} onChange={jest.fn()} isPreset />
+      <AttributeOptions attribute={attribute({ isSystem: true })} onChange={jest.fn()} isPreset />
     );
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();

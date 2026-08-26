@@ -113,7 +113,7 @@ function attributeDetails(a: Attribute): string {
     case AttributeType.TEXT:
     case AttributeType.EMAIL:
     case AttributeType.URL: {
-      if (x.unique) parts.push("Unique");
+      if (x.isUnique) parts.push("Unique");
       const r = range(x.minLength, x.maxLength, asIs);
       if (r) parts.push(`${r} chars`);
       if (x.regex) parts.push("pattern");
@@ -125,7 +125,7 @@ function attributeDetails(a: Attribute): string {
       break;
     }
     case AttributeType.PHONE: {
-      if (x.unique) parts.push("Unique");
+      if (x.isUnique) parts.push("Unique");
       break;
     }
     case AttributeType.COUNTRY:
@@ -768,7 +768,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
   onDeleteAttribute,
   isSavingAttribute,
 }) => {
-  const isPreset = !!attribute.system;
+  const isPreset = !!attribute.isSystem;
   const details = attributeDetails(attribute);
 
   const { setNodeRef, attributes: dragAttrs, listeners, transform, transition, isDragging } =

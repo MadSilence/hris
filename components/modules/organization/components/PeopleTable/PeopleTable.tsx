@@ -5,10 +5,11 @@ import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
+import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
-import type { RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
+import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
@@ -49,7 +50,7 @@ export default function PeopleTable({
   hasMore = false,
   isLoadingMore = false,
   onLoadMore,
-  sort = { fieldId: "last_name", dir: "asc" },
+  sort = { fieldId: "first_name", dir: "asc" },
   onSortChange,
   selectedIds = new Set(),
   onToggleOne,
@@ -101,6 +102,7 @@ export default function PeopleTable({
   };
 
   const renderCell = (row: Row, colId: string) => {
+    // The name column carries both names; there is no separate Last name column any more.
     if (colId === "sys:first_name") {
       const name =
         [row.firstName, row.lastName].filter(Boolean).join(" ").trim() || row.email;
@@ -164,11 +166,7 @@ export default function PeopleTable({
             />
           );
         case "manager":
-          return row.manager ? (
-            <UserChip id={row.manager.id} name={row.manager.name} />
-          ) : (
-            <span>—</span>
-          );
+          return <PersonValue value={row.manager} />;
 
         default:
           return <span>—</span>;
@@ -180,10 +178,14 @@ export default function PeopleTable({
     if (!meta) return <span>—</span>;
 
     switch (meta.type) {
+      // A PERSON attribute stores a user id and the backend resolves it to {id, name, avatarUrl};
+      // it is a person like any other, so it gets the same chip as the Name and Manager columns.
+      case "PERSON":
+        return <PersonValue value={asPersonRef(val)} raw={val} />;
+
       case "TEXT":
       case "EMAIL":
       case "URL":
-      case "PERSON":
       case "SELECT":
         return <span>{valueToString(val) ?? "—"}</span>;
 
@@ -213,6 +215,14 @@ export default function PeopleTable({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-0 flex-1 overflow-hidden bg-background">
+        <PeopleTableSkeleton columns={visibleColumns} />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={scrollRef}
@@ -226,7 +236,7 @@ export default function PeopleTable({
                 checked={allChecked ? true : someChecked ? "indeterminate" : false}
                 onCheckedChange={(checked) => onToggleAllOnPage?.(pageIds, checked === true)}
                 aria-label="select all"
-                disabled={isLoading || pageIds.length === 0}
+                disabled={pageIds.length === 0}
               />
             </TableHead>
 
@@ -257,20 +267,7 @@ export default function PeopleTable({
         </TableHeader>
 
         <TableBody>
-          {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => (
-                <TableRow key={`skeleton-${i}`} className="border-brown-200 [&_td]:py-2">
-                  <TableCell className="w-12" />
-                  {visibleColumns.map((c) => (
-                    <TableCell key={c.id}>
-                      <div className="h-4 w-2/3 animate-pulse rounded bg-brown-100" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            : null}
-
-          {!isLoading && data.length === 0 ? (
+          {data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={visibleColumns.length + 1}>
                 <EmptyState />
@@ -278,32 +275,30 @@ export default function PeopleTable({
             </TableRow>
           ) : null}
 
-          {!isLoading
-            ? data.map((row) => {
-                const checked = selectedIds.has(row.id);
-                return (
-                  <TableRow
-                    key={row.id}
-                    data-state={checked ? "selected" : undefined}
-                    className="border-brown-200 hover:bg-brown-50 [&_td]:py-2"
-                  >
-                    <TableCell className="w-12">
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(v) => onToggleOne?.(row.id, v === true)}
-                        aria-label="select row"
-                      />
-                    </TableCell>
+          {data.map((row) => {
+            const checked = selectedIds.has(row.id);
+            return (
+              <TableRow
+                key={row.id}
+                data-state={checked ? "selected" : undefined}
+                className="border-brown-200 hover:bg-brown-50 [&_td]:py-2"
+              >
+                <TableCell className="w-12">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => onToggleOne?.(row.id, v === true)}
+                    aria-label="select row"
+                  />
+                </TableCell>
 
-                    {visibleColumns.map((column) => (
-                      <TableCell key={column.id} className="truncate">
-                        {renderCell(row, column.id)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })
-            : null}
+                {visibleColumns.map((column) => (
+                  <TableCell key={column.id} className="truncate">
+                    {renderCell(row, column.id)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </table>
 
@@ -360,6 +355,36 @@ const SORTABLE_SYS_KEYS = new Set([
 function sysKeyFromId(id: string): string | null {
   if (!id.startsWith("sys:")) return null;
   return id.slice(4) || null;
+}
+
+/**
+ * A person in a cell: chip with avatar and a link to the profile, like the Name column.
+ *
+ * `raw` is the fallback for a value the backend could not resolve — a deleted user, or free text
+ * typed before the attribute validated its input. Showing it beats showing a dash: at least the
+ * person editing can see what is in there.
+ */
+const PersonValue: React.FC<{ value?: PersonRefDTO | null; raw?: unknown }> = ({ value, raw }) => {
+  if (value) {
+    return <UserChip id={value.id} name={value.name} avatarUrl={value.avatarUrl} />;
+  }
+
+  const fallback = raw == null ? null : valueToString(raw);
+  return <span className={fallback ? "text-muted-foreground" : ""}>{fallback ?? "—"}</span>;
+};
+
+/** The resolved shape the backend sends for a PERSON attribute, or null if it is still raw. */
+function asPersonRef(value: unknown): PersonRefDTO | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+
+  const candidate = value as { id?: unknown; name?: unknown; avatarUrl?: unknown };
+  if (typeof candidate.id !== "string" || typeof candidate.name !== "string") return null;
+
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    avatarUrl: typeof candidate.avatarUrl === "string" ? candidate.avatarUrl : null,
+  };
 }
 
 /** A single-valued reference (office, department, legal entity). */

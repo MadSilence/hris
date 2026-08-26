@@ -15,7 +15,7 @@ export type AttributeDTO = {
   sortOrder: number,
   decScale: number | null,
   dateHideYear: boolean | null,
-  system: boolean,
-  unique: boolean
+  isSystem: boolean,
+  isUnique: boolean
   options?: AttributeOptionDTO[],
 };

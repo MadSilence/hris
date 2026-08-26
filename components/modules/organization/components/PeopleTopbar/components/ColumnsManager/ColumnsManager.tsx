@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { GripVertical, Search } from "lucide-react";
 
 import { Input } from "@/public/desact/src/components/ui/input";
@@ -10,6 +10,10 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import { ReorderableList } from "@/components/utils/ReorderableList/ReorderableList";
 import type { SortableApi } from "@/components/utils/SortableRow";
 import type { ColumnItem } from "@/models/userTable";
+import {
+  reorderChecked,
+  toggleColumn,
+} from "@/components/modules/organization/components/PeopleTopbar/components/ColumnsManager/columnOrder";
 
 type ColumnsManagerProps = {
   columns: ColumnItem[];
@@ -17,27 +21,40 @@ type ColumnsManagerProps = {
   pinnedId?: string;
 };
 
+/**
+ * Chosen columns sit at the top, in the order the table uses, and only they can be dragged: order
+ * means nothing for a column that is not shown, and a grip handle on one is an invitation to a
+ * change that does not happen.
+ */
 export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChange, pinnedId }) => {
   const [q, setQ] = useState("");
 
   const toggle = (id: string, checked: boolean) =>
-    onChange(columns.map((c) => (c.id === id ? { ...c, checked } : c)));
+    onChange(toggleColumn(columns, id, checked, pinnedId));
 
-  const reorder = (orderedIds: string[]) => {
-    const byId = new Map(columns.map((c) => [c.id, c]));
-    onChange(orderedIds.map((id) => byId.get(id)).filter(Boolean) as ColumnItem[]);
-  };
+  const reorder = (orderedIds: string[]) =>
+    onChange(reorderChecked(columns, orderedIds, pinnedId));
 
   const query = q.trim().toLowerCase();
-  const filtered = query
-    ? columns.filter((c) => c.label.toLowerCase().includes(query))
-    : columns;
+  const matches = (c: ColumnItem) => !query || c.label.toLowerCase().includes(query);
 
-  const selectedCount = columns.filter((c) => c.checked).length;
+  const { pinned, draggable, hidden } = useMemo(() => {
+    const shown = columns.filter((c) => c.checked);
+    return {
+      pinned: shown.filter((c) => c.id === pinnedId),
+      draggable: shown.filter((c) => c.id !== pinnedId),
+      hidden: columns.filter((c) => !c.checked),
+    };
+  }, [columns, pinnedId]);
+
+  const selectedCount = pinned.length + draggable.length;
+
+  const visibleDraggable = draggable.filter(matches);
+  const visibleHidden = hidden.filter(matches);
+  const nothingFound = query && !pinned.some(matches) && !visibleDraggable.length && !visibleHidden.length;
 
   const renderRow = (item: ColumnItem, sortable?: SortableApi) => {
     const isPinned = item.id === pinnedId;
-    const canDrag = !!sortable && !isPinned;
 
     return (
       <div
@@ -45,13 +62,13 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         style={sortable?.style}
         className="flex items-center gap-2 rounded-md px-1.5 py-1.5 hover:bg-muted/60"
       >
-        {canDrag ? (
+        {sortable ? (
           <button
             type="button"
             className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
             aria-label="Drag to reorder"
-            {...sortable!.attributes}
-            {...sortable!.listeners}
+            {...sortable.attributes}
+            {...sortable.listeners}
           >
             <GripVertical className="h-4 w-4" />
           </button>
@@ -87,27 +104,46 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
       </div>
 
       <div className="flex items-center justify-between px-1 text-xs font-medium text-muted-foreground">
-        <span>Columns</span>
+        <span>Shown</span>
         <Badge variant="secondary" className="font-normal">
           {selectedCount}
         </Badge>
       </div>
 
       <div className="max-h-[320px] overflow-y-auto">
+        {pinned.filter(matches).map((c) => (
+          <React.Fragment key={c.id}>{renderRow(c)}</React.Fragment>
+        ))}
+
+        {/*
+          * Dragging is disabled while searching: the list on screen is a subset, and dropping a row
+          * inside it would reorder against neighbours the person cannot see.
+          */}
         {query ? (
-          filtered.length ? (
-            filtered.map((c) => <React.Fragment key={c.id}>{renderRow(c)}</React.Fragment>)
-          ) : (
-            <div className="px-2 py-6 text-center text-sm text-muted-foreground">No columns found</div>
-          )
+          visibleDraggable.map((c) => <React.Fragment key={c.id}>{renderRow(c)}</React.Fragment>)
         ) : (
           <ReorderableList<ColumnItem>
-            items={columns}
+            items={draggable}
             getId={(c) => c.id}
             onReorder={reorder}
             RowComponent={({ item, sortable }) => renderRow(item, sortable)}
           />
         )}
+
+        {visibleHidden.length ? (
+          <>
+            <div className="mt-2 px-1 pb-1 pt-2 text-xs font-medium text-muted-foreground">
+              Available
+            </div>
+            {visibleHidden.map((c) => (
+              <React.Fragment key={c.id}>{renderRow(c)}</React.Fragment>
+            ))}
+          </>
+        ) : null}
+
+        {nothingFound ? (
+          <div className="px-2 py-6 text-center text-sm text-muted-foreground">No columns found</div>
+        ) : null}
       </div>
     </div>
   );

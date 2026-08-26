@@ -113,6 +113,14 @@ export type RefDTO = {
 /** A holiday calendar is a place ("Germany"), so there is no year to show beside the name. */
 export type CalendarRefDTO = RefDTO;
 
+/**
+ * A reference to a person rather than to a thing: it carries a face. Used by the manager column and
+ * by PERSON attributes ("Mentor", "Buddy"), both of which render as a user chip.
+ */
+export type PersonRefDTO = RefDTO & {
+  avatarUrl?: string | null;
+};
+
 export type UsersSearchItemDTO = {
   id: string;
   companyId: string;
@@ -140,7 +148,7 @@ export type UsersSearchItemDTO = {
   office?: RefDTO | null;
   legalEntity?: RefDTO | null;
   calendars?: CalendarRefDTO[];
-  manager?: RefDTO | null;
+  manager?: PersonRefDTO | null;
   // Employment lifecycle columns on `users`.
   hireDate?: string | null;
   employmentType?: string | null;

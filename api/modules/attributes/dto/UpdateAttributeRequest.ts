@@ -5,7 +5,7 @@ export type UpdateAttributeRequest = {
   groupId?: string,
   name?: string,
   type?: AttributeType,
-  unique?: boolean,
+  isUnique?: boolean,
   sensitive?: boolean,
   decScale?: number | null,
   dateHideYear?: boolean,

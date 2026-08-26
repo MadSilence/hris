@@ -78,7 +78,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
   const [name, setName] = React.useState<string>(attribute.name);
   const [groupId, setGroupId] = React.useState<string>(attribute.groupId);
-  const [uniqueId, setUniqueId] = React.useState<boolean>((attribute as { unique?: boolean }).unique ?? false);
+  const [uniqueId, setUniqueId] = React.useState<boolean>(attribute.isUnique ?? false);
   const [sensitive, setSensitive] = React.useState<boolean>(attribute.sensitive ?? false);
   const [hideYear, setHideYear] = React.useState<boolean>(
     (attribute as { dateHideYear?: boolean }).dateHideYear ?? false,
@@ -176,7 +176,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
     if (trimmedName && trimmedName !== attribute.name) patch.name = trimmedName;
     if (groupId && groupId !== attribute.groupId) patch.groupId = groupId;
     if (type === AttributeType.DATE) patch.dateHideYear = hideYear;
-    if (isUniqueType(type)) patch.unique = uniqueId;
+    if (isUniqueType(type)) patch.isUnique = uniqueId;
     patch.sensitive = sensitive;
     if (type === AttributeType.NUMBER) patch.decScale = decScale;
     if (type === AttributeType.OBJECT) patch.objectFields = serializeObjectFields(objectFields);
@@ -209,7 +209,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   const cancel = () => {
     setName(attribute.name);
     setGroupId(attribute.groupId);
-    setUniqueId((attribute as { unique?: boolean }).unique ?? false);
+    setUniqueId(attribute.isUnique ?? false);
     setSensitive(attribute.sensitive ?? false);
     setHideYear((attribute as { dateHideYear?: boolean }).dateHideYear ?? false);
     setDecScale(attribute.decScale ?? null);

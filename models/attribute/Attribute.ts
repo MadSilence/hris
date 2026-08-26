@@ -16,8 +16,8 @@ export type Attribute = {
   sortOrder: number,
   decScale: number | null,
   dateHideYear: boolean | null,
-  system: boolean,
-  unique: boolean,
+  isSystem: boolean,
+  isUnique: boolean,
   /** Sensitive: no auto-granted access on create; masked for viewers without access. */
   sensitive?: boolean,
   options?: AttributeOption[],

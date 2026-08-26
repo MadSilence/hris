@@ -105,7 +105,7 @@ export default function AttributeGroupsContainer() {
         version: _version,
         companyId: _companyId,
         sortOrder: _sortOrder,
-        system: _system,
+        isSystem: _isSystem,
         dateHideYear,
         ...rest
       } = patch;
