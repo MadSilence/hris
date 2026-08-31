@@ -18,3 +18,4 @@ export * from "./EmployeeTimeOffBalance";
 export * from "./TimeOffRequest";
 export * from "./TimeOffRequestDuration";
 export * from "./TimeOffOverlap";
+export * from "./formatDayAmount";

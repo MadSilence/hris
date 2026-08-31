@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
 import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createJobLevelGroupAction = async (
   submission: CreateJobLevelGroupActionInput
@@ -16,13 +16,7 @@ export const createJobLevelGroupAction = async (
       data,
     };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while creating a job level group. Please try again."
-      ),
-    };
+    return toActionError(error, "createJobLevelGroupAction");
   }
 };
 

@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
-import { AlertTriangle, FileX2 } from "lucide-react";
+import { FileX2 } from "lucide-react";
 
 export interface DeleteDocumentModalProps {
   isOpen: boolean;
@@ -46,24 +46,10 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            This action cannot be undone. Document{" "}
-            <strong>{documentName ?? "Untitled document"}</strong> will be
-            permanently deleted.
+            <strong>{documentName ?? "Untitled document"}</strong> will be moved to the trash, where
+            it can be restored until the retention period ends.
           </AlertDialogDescription>
         </AlertDialogHeader>
-
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
-            <div>
-              <h4 className="mb-1 font-medium text-red-800">Warning</h4>
-              <p className="text-sm text-red-700">
-                Deleted files cannot be restored unless your backend supports
-                recovery.
-              </p>
-            </div>
-          </div>
-        </div>
 
         {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 

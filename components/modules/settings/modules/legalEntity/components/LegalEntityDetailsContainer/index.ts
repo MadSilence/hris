@@ -1,1 +1,2 @@
-export * from "./LegalEntityDetailsContainer";
+export { default } from "./LegalEntityDetailsContainer";
+export * from "./LegalEntitySkeleton";

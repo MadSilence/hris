@@ -1,3 +1,4 @@
+import { formatOf, streamBinary } from "@/api/utils/exportResponse";
 import type {HrisApiRolesService} from "@/api/modules/roles/services/hrisRolesService";
 import {hrisApiRolesService} from "@/api/modules/roles/services/hrisRolesService";
 
@@ -37,17 +38,6 @@ export class RoleRoutes {
     }
 }
 
-const formatOf = (req: Request): "csv" | "xlsx" =>
-    new URL(req.url).searchParams.get("format") === "csv" ? "csv" : "xlsx";
-
 // Export is the one transport that has to stream a binary through untouched.
-const streamBinary = (backendResponse: Response) =>
-    new Response(backendResponse.body, {
-        status: backendResponse.status,
-        headers: {
-            "Content-Type": backendResponse.headers.get("content-type") ?? "application/octet-stream",
-            "Content-Disposition": backendResponse.headers.get("content-disposition") ?? "attachment",
-        },
-    });
 
 export const roleRoutes = new RoleRoutes(hrisApiRolesService);

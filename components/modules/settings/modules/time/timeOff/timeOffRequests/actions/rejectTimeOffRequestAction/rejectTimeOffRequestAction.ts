@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
 import type { RejectTimeOffRequestRequest } from "@/api/modules/timeOff/timeOffRequests/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const rejectTimeOffRequestAction = async (
   submission: RejectTimeOffRequestActionInput
@@ -17,13 +18,7 @@ export const rejectTimeOffRequestAction = async (
       data,
     };
   } catch (error) {
-    console.error("rejectTimeOffRequestAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while rejecting the time off request. Please try again.",
-    };
+    return toActionError(error, "rejectTimeOffRequestAction");
   }
 };
 

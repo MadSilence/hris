@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDepartmentsService } from "@/api/modules/departments/services";
 import type { UpdateDepartmentRequest } from "@/api/modules/departments/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateDepartmentAction = async (
   id: string,
@@ -13,11 +14,7 @@ export const updateDepartmentAction = async (
     const data = await hrisDepartmentsService.update(id, submission);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("updateDepartmentAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while updating the department. Please try again.",
-    };
+    return toActionError(error, "updateDepartmentAction");
   }
 };
 

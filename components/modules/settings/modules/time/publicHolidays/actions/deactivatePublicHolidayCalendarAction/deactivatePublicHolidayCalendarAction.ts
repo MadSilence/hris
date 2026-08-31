@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deactivatePublicHolidayCalendarAction = async (
   submission: DeactivatePublicHolidayCalendarActionInput
@@ -17,13 +18,7 @@ export const deactivatePublicHolidayCalendarAction = async (
       data,
     };
   } catch (error) {
-    console.error("deactivatePublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deactivating the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "deactivatePublicHolidayCalendarAction");
   }
 };
 

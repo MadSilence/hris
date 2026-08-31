@@ -2,8 +2,9 @@ import * as React from "react";
 import {
   PersonalDocumentsContainer,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsContainer/PersonalDocumentsContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import {
+  ProfileCapabilityGate,
+} from "@/components/modules/organization/modules/profile/components/ProfileCapabilityGate";
 
 export default async function DocumentsPage({
   params,
@@ -13,8 +14,8 @@ export default async function DocumentsPage({
   const { id } = await params;
 
   return (
-    <PermissionGate resource="PEOPLE.DOCUMENTS" action="VIEW" fallback={<AccessDenied/>}>
+    <ProfileCapabilityGate userId={id} resource="PEOPLE.DOCUMENTS">
       <PersonalDocumentsContainer userId={id}/>
-    </PermissionGate>
+    </ProfileCapabilityGate>
   );
 }

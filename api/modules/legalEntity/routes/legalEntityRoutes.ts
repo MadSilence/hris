@@ -1,3 +1,4 @@
+import { formatOf, streamBinary } from "@/api/utils/exportResponse";
 import { legalEntityService, LegalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
 
 export class LegalEntityRoutes {
@@ -19,17 +20,5 @@ export class LegalEntityRoutes {
     return streamBinary(backendResponse);
   };
 }
-
-const formatOf = (req: Request): "csv" | "xlsx" =>
-  new URL(req.url).searchParams.get("format") === "csv" ? "csv" : "xlsx";
-
-const streamBinary = (backendResponse: Response) =>
-  new Response(backendResponse.body, {
-    status: backendResponse.status,
-    headers: {
-      "Content-Type": backendResponse.headers.get("content-type") ?? "application/octet-stream",
-      "Content-Disposition": backendResponse.headers.get("content-disposition") ?? "attachment",
-    },
-  });
 
 export const legalEntityRoutes = new LegalEntityRoutes(legalEntityService);

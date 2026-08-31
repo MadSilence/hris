@@ -1,1 +1,1 @@
-export * from "./OfficeContainer";
+export { default } from "./OfficeContainer";

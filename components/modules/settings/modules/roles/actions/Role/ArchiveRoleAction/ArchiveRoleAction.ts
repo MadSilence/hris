@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService/hrisApiRolesService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 /**
  * Archive takes a role out of circulation without destroying it: assignments are kept, but the
@@ -18,13 +19,8 @@ export const archiveRoleAction = async (
       await hrisApiRolesService.restoreRole(submission.id);
     }
     return { status: ActionStatus.SUCCESS };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: submission.archived
-        ? "An error occurred while archiving the role. Please try again."
-        : "An error occurred while restoring the role. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "archiveRoleAction");
   }
 };
 

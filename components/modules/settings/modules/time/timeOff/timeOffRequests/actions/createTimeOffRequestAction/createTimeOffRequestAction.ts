@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
 import type { CreateTimeOffRequestRequest } from "@/api/modules/timeOff/timeOffRequests/dto";
 import type { CreateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createTimeOffRequestAction = async (
   submission: CreateTimeOffRequestActionInput
@@ -16,13 +17,7 @@ export const createTimeOffRequestAction = async (
       data,
     };
   } catch (error) {
-    console.error("createTimeOffRequestAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while submitting the time off request. Please try again.",
-    };
+    return toActionError(error, "createTimeOffRequestAction");
   }
 };
 

@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { jobFamilyService } from "@/api/modules/jobfamily/services/jobFamilyService";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateJobFamilyAction = async (
   submission: UpdateJobFamilyActionInput
@@ -16,13 +16,7 @@ export const updateJobFamilyAction = async (
       data,
     };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while updating a job family. Please try again."
-      ),
-    };
+    return toActionError(error, "updateJobFamilyAction");
   }
 };
 

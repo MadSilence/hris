@@ -1,8 +1,8 @@
-import { hrisApiCompanyLogoClient } from "@/api/modules/company/modules/companyLogo/clients";
+import { hrisApiCompanyLogoClient } from "@/api/modules/company/modules/companyLogo/clients/hrisApiCompanyLogoClient";
 import { hrisCompanyLogoService } from "@/api/modules/company/modules/companyLogo/services/hrisCompanyLogoService";
 
 
-jest.mock("@/api/modules/company/modules/companyLogo/clients", () => ({
+jest.mock("@/api/modules/company/modules/companyLogo/clients/hrisApiCompanyLogoClient", () => ({
   hrisApiCompanyLogoClient: {
     uploadLogo: jest.fn(),
     deleteLogo: jest.fn(),

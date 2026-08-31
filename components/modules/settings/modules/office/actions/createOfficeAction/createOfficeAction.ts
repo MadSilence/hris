@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
 import { officeService } from "@/api/modules/office/services/officeService";
+import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 
 export const createOfficeAction = async (
   submission: CreateOfficeActionInput
@@ -14,12 +15,8 @@ export const createOfficeAction = async (
       status: ActionStatus.SUCCESS,
       data: created,
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating an office. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "createOfficeAction");
   }
 };
 
@@ -35,8 +32,8 @@ export type CreateOfficeActionInput = {
   postCode: string;
 };
 
-export type CreateOfficeActionOutput = {
-  status: ActionStatus;
-  data?: NewEntity;
-  errorMessage?: string;
-};
+/**
+ * The full envelope, not a narrowed copy of it: `toActionError` already returns `fieldErrors`, and
+ * declaring only three of the fields is what hid them from every caller.
+ */
+export type CreateOfficeActionOutput = ActionResult<NewEntity>;

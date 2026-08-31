@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyApprovalSettingsService } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/services";
 import type { UpdateTimeOffPolicyApprovalSettingsRequest } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyApprovalSettingsAction = async (
   submission: UpdateTimeOffPolicyApprovalSettingsActionInput
@@ -20,13 +21,7 @@ export const updateTimeOffPolicyApprovalSettingsAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyApprovalSettingsAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the approval settings. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyApprovalSettingsAction");
   }
 };
 

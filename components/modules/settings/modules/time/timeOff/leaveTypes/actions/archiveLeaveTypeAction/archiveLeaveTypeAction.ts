@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisLeaveTypesService } from "@/api/modules/timeOff/leaveTypes/services";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const archiveLeaveTypeAction = async (
   submission: ArchiveLeaveTypeActionInput
@@ -15,13 +16,7 @@ export const archiveLeaveTypeAction = async (
       data,
     };
   } catch (error) {
-    console.error("archiveLeaveTypeAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while archiving the leave type. Please try again.",
-    };
+    return toActionError(error, "archiveLeaveTypeAction");
   }
 };
 

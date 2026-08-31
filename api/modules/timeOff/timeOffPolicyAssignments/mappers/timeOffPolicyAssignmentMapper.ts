@@ -9,6 +9,7 @@ export class TimeOffPolicyAssignmentMapper {
       id: dto.id,
       policyId: dto.policyId,
       userId: dto.userId,
+      person: dto.person ?? null,
       status: dto.status,
       effectiveFrom: dto.effectiveFrom,
       effectiveTo: dto.effectiveTo,

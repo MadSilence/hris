@@ -1,12 +1,17 @@
 import {
   hrisApiCompanyCalendarClient,
-  type CompanyCalendarQuery,
+  type CompanyCalendarMarksQuery,
+  type CompanyCalendarPeopleQuery,
 } from "@/api/modules/calendar/clients";
-import type { CompanyCalendarPage } from "@/models/calendar";
+import type { CompanyCalendarMark, CompanyCalendarPeoplePage } from "@/models/calendar";
 
 export class HrisCompanyCalendarService {
-  public async company(params: CompanyCalendarQuery): Promise<CompanyCalendarPage> {
-    return hrisApiCompanyCalendarClient.company(params);
+  public async people(params: CompanyCalendarPeopleQuery): Promise<CompanyCalendarPeoplePage> {
+    return hrisApiCompanyCalendarClient.people(params);
+  }
+
+  public async marks(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarMark[]> {
+    return hrisApiCompanyCalendarClient.marks(params);
   }
 }
 

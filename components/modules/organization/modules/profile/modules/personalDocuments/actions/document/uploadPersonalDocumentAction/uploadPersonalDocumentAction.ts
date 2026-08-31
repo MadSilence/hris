@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { DocumentDTO, DocumentVisibility } from "@/api/modules/documents/dto";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const uploadPersonalDocumentAction = async (
   submission: UploadPersonalDocumentActionInput
@@ -20,12 +21,7 @@ export const uploadPersonalDocumentAction = async (
       data: document,
     };
   } catch (error) {
-    console.error("uploadPersonalDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while uploading a document. Please try again.",
-    };
+    return toActionError(error, "uploadPersonalDocumentAction");
   }
 };
 

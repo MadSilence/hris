@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { legalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateLegalEntityAction = async (
   submission: UpdateLegalEntityActionInput
@@ -14,12 +15,8 @@ export const updateLegalEntityAction = async (
       status: ActionStatus.SUCCESS,
       data: updated,
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the legal entity. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "updateLegalEntityAction");
   }
 };
 

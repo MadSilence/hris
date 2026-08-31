@@ -18,9 +18,7 @@ export const PersonalDocumentsFoldersSection: React.FC<PersonalDocumentsFoldersS
   if (!folders.length) return null;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">Folders</h3>
-
+    <div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {folders.map((folder) => (
           <PersonalDocumentsFolderCard

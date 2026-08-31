@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyBlackoutsService } from "@/api/modules/timeOff/timeOffPolicyBlackouts/services";
 import type { UpdateTimeOffPolicyBlackoutsRequest } from "@/api/modules/timeOff/timeOffPolicyBlackouts/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyBlackoutsAction = async (
   submission: UpdateTimeOffPolicyBlackoutsActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyBlackoutsAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyBlackoutsAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating blackout periods. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyBlackoutsAction");
   }
 };
 

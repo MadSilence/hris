@@ -19,12 +19,12 @@ describe("TimeOffPolicyAssignmentMapper", () => {
   it("maps time off policy assignment dto to model", () => {
     expect(
       timeOffPolicyAssignmentMapper.mapTimeOffPolicyAssignmentDTO(dto)
-    ).toEqual(dto);
+    ).toEqual({ ...dto, person: null });
   });
 
   it("maps time off policy assignment dto array to models", () => {
     expect(
       timeOffPolicyAssignmentMapper.mapTimeOffPolicyAssignmentDTOs([dto])
-    ).toEqual([dto]);
+    ).toEqual([{ ...dto, person: null }]);
   });
 });

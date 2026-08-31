@@ -1,1 +1,1 @@
-export * from "./ArchiveRoleAction";
+export * from "./archiveRoleAction";

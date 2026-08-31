@@ -1,1 +1,1 @@
-export * from "./LegalEntityContainer";
+export { default } from "./LegalEntityContainer";

@@ -1,1 +1,1 @@
-export { DepartmentDetailsPanel } from "./DepartmentDetailsPanel";
+export * from "./DepartmentDetailsPanel";

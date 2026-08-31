@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { CreateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const duplicatePublicHolidayCalendarAction = async (
   submission: DuplicatePublicHolidayCalendarActionInput
@@ -15,13 +16,7 @@ export const duplicatePublicHolidayCalendarAction = async (
 
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("duplicatePublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while duplicating the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "duplicatePublicHolidayCalendarAction");
   }
 };
 

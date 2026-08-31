@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
 import { legalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
+import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 
 export const createLegalEntityAction = async (
   submission: CreateLegalEntityActionInput
@@ -14,12 +15,8 @@ export const createLegalEntityAction = async (
       status: ActionStatus.SUCCESS,
       data: created,
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating a legal entity. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "createLegalEntityAction");
   }
 };
 
@@ -35,8 +32,8 @@ export type CreateLegalEntityActionInput = {
   postCode: string;
 };
 
-export type CreateLegalEntityActionOutput = {
-  status: ActionStatus;
-  data?: NewEntity;
-  errorMessage?: string;
-};
+/**
+ * The full envelope, not a narrowed copy of it: `toActionError` already returns `fieldErrors`, and
+ * declaring only three of the fields is what hid them from every caller.
+ */
+export type CreateLegalEntityActionOutput = ActionResult<NewEntity>;

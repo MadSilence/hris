@@ -97,7 +97,10 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
 
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirmAction}
+            onClick={(event) => {
+              event.preventDefault();
+              onConfirmAction();
+            }}
             className="bg-red-600 text-white hover:bg-red-700"
           >
             Delete section

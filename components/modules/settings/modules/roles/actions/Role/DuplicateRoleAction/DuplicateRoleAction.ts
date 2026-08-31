@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
 import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService/hrisApiRolesService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const duplicateRoleAction = async (
   submission: DuplicateRoleActionInput
@@ -14,11 +15,8 @@ export const duplicateRoleAction = async (
       status: ActionStatus.SUCCESS,
       data,
     };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while duplicating role. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "duplicateRoleAction");
   }
 };
 

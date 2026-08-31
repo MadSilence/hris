@@ -1,7 +1,9 @@
 import { cookies, headers } from "next/headers";
 import jsonwebtoken, { JsonWebTokenError, Jwt, JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import { jwksClient } from "@/api/clients/auth/jwksClient/jwksClient";
+import publicConfig from "@/config/publicConfig";
 import { AuthErrorMessage, UnauthorizedError } from "@/api/modules/auth/services/jwtService/unauthorizedError";
+import { SigningKeyUnavailableError } from "@/api/modules/auth/services/jwtService/signingKeyUnavailableError";
 
 export type TokenPayload = JwtPayload & {
   email?: string;
@@ -19,6 +21,11 @@ export class JwtService {
 
       return jsonwebtoken.verify(encodedToken, publicKey) as TokenPayload;
     } catch (e) {
+      // Not everything that goes wrong here is a token problem. An unreachable JWKS endpoint has
+      // to keep its own class all the way out, or `withAuthMiddleware` cannot tell an outage from
+      // a dead session — see SigningKeyUnavailableError.
+      if (e instanceof SigningKeyUnavailableError) throw e;
+
       throw e instanceof UnauthorizedError ? e : new UnauthorizedError(this.getErrorMessage(e), e);
     }
   }
@@ -54,9 +61,27 @@ export class JwtService {
     return payload.email;
   }
 
+  /**
+   * Two very different failures come out of one call here, and they must not be merged.
+   *
+   * `SigningKeyNotFoundError` means the JWKS answered and does not know this `kid` — a fact about
+   * the token, so it stays a 401. Anything else (connection refused, timeout, a non-JSON answer)
+   * means the key source could not be read at all, which says nothing about the token.
+   */
   private async getPublicKeyFromToken(jwt: Jwt) {
-    const signingKey = await jwksClient.getSigningKey(jwt.header.kid);
-    return signingKey.getPublicKey();
+    try {
+      const signingKey = await jwksClient.getSigningKey(jwt.header.kid);
+      return signingKey.getPublicKey();
+    } catch (e) {
+      if (e instanceof Error && e.name === "SigningKeyNotFoundError") {
+        throw new UnauthorizedError(AuthErrorMessage.INVALID, e);
+      }
+
+      throw new SigningKeyUnavailableError(
+        `Cannot read the signing key from ${publicConfig.auth.issuerUri} — is the backend running?`,
+        e,
+      );
+    }
   }
 
   private getErrorMessage(e: unknown): AuthErrorMessage {

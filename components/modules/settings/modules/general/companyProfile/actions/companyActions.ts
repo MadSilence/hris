@@ -1,5 +1,6 @@
 "use server";
 
+import { toActionError } from "@/lib/errors/withActionError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiCompanyService } from "@/api/modules/company/services";
 import type { Company } from "@/models/company/Company";
@@ -22,8 +23,7 @@ export async function updateCompanyAction(
     const data = await hrisApiCompanyService.updateCompany(body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("Failed to update company:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to update company profile." };
+    return toActionError(error, "companyActions");
   }
 }
 
@@ -34,7 +34,6 @@ export async function updateCompanySettingsAction(
     const data = await hrisApiCompanyService.updateSettings(body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("Failed to update company settings:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to update company settings." };
+    return toActionError(error, "companyActions");
   }
 }

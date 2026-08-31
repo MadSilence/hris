@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyEligibilityService } from "@/api/modules/timeOff/timeOffPolicyEligibility/services";
 import type { UpdateTimeOffPolicyEligibilityRequest } from "@/api/modules/timeOff/timeOffPolicyEligibility/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyEligibilityAction = async (
   submission: UpdateTimeOffPolicyEligibilityActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyEligibilityAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyEligibilityAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating eligibility. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyEligibilityAction");
   }
 };
 

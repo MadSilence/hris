@@ -39,6 +39,9 @@ describe("useTimeOffPolicies", () => {
     expect(useQuery).toHaveBeenCalledWith({
       queryKey: getTimeOffPoliciesQueryKey(),
       queryFn: expect.any(Function),
+      // Three observers mount on the profile's Time Off tab; without a stale window each one that
+      // arrives after the data is cached refetches it.
+      staleTime: 5 * 60 * 1000,
     });
 
     await capturedOpts.queryFn();

@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { jobLevelsService } from "@/api/modules/jobLevels/services";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateJobLevelAction = async (
   submission: UpdateJobLevelActionInput
@@ -16,13 +16,7 @@ export const updateJobLevelAction = async (
       data,
     };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while updating a job level. Please try again."
-      ),
-    };
+    return toActionError(error, "updateJobLevelAction");
   }
 };
 

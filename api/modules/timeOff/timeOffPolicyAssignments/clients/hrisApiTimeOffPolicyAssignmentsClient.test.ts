@@ -36,7 +36,7 @@ describe("HrisApiTimeOffPolicyAssignmentsClient", () => {
     expect(hrisApiClient.get).toHaveBeenCalledWith(
       "/time-off/policies/policy-id/assignments"
     );
-    expect(result).toEqual([dto]);
+    expect(result).toEqual([{ ...dto, person: null }]);
   });
 
   it("creates assignment", async () => {

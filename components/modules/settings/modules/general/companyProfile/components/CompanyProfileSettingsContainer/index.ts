@@ -1,1 +1,1 @@
-export * from "./CompanyProfileSettingsContainer";
+export { default } from "./CompanyProfileSettingsContainer";

@@ -1,3 +1,4 @@
+import { formatOf } from "@/api/utils/exportResponse";
 import { jobFamilyService, JobFamilyService } from "@/api/modules/jobfamily/services/jobFamilyService";
 
 export class JobFamilyRoutes {
@@ -21,8 +22,5 @@ export class JobFamilyRoutes {
     });
   }
 }
-
-const formatOf = (req: Request): "csv" | "xlsx" =>
-  new URL(req.url).searchParams.get("format") === "csv" ? "csv" : "xlsx";
 
 export const jobFamilyRoutes = new JobFamilyRoutes(jobFamilyService);

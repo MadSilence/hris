@@ -4,6 +4,7 @@ import { attributeService } from "@/api/modules/attributes/services/attributeSer
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { AttributeOption, AttributeType } from "@/models/attribute";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateAttributeAction = async (
   submission: UpdateAttributeActionInput
@@ -15,11 +16,8 @@ export const updateAttributeAction = async (
       status: ActionStatus.SUCCESS,
       data: data,
     };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while updating attribute. Please try again."
-    };
+  } catch (error) {
+    return toActionError(error, "updateAttributeAction");
   }
 };
 

@@ -8,6 +8,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import { FormError } from "@/components/feedback/FormError";
 
 export type CreateOfficeFormValues = {
   name: string;
@@ -23,6 +24,10 @@ export type CreateOfficeFormValues = {
 
 export interface CreateOfficeFormProps {
   isLoading?: boolean;
+  /** Why the last attempt was refused. Keeps the dialog open with what was typed still in it. */
+  errorMessage?: string | null;
+  /** Per-field refusals from the backend, keyed by field name — what "the highlighted fields" means. */
+  fieldErrors?: Record<string, string> | null;
   initialValues?: Partial<CreateOfficeFormValues>;
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
@@ -41,9 +46,12 @@ const createOfficeSchema = yup.object({
   phone: yup.string().trim().max(120).optional(),
   country: yup.string().trim().required("Please enter a country.").max(120),
   city: yup.string().trim().required("Please enter a city.").max(120),
-  street: yup.string().trim().max(200).optional(),
-  building: yup.string().trim().max(50).optional(),
-  postCode: yup.string().trim().max(50).optional(),
+  // Required because the backend requires them: `OfficeCreateRequest` marks the whole address
+  // `@NotBlank`. They used to be optional here and labelled "Optional", so a submit without a
+  // building number came back as "check the highlighted fields" with nothing highlighted.
+  street: yup.string().trim().required("Please enter a street.").max(200),
+  building: yup.string().trim().required("Please enter a building number.").max(50),
+  postCode: yup.string().trim().required("Please enter a post code.").max(50),
 });
 
 const getInitialValues = (
@@ -76,6 +84,8 @@ const sanitize = (
 
 export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
   isLoading = false,
+  errorMessage,
+  fieldErrors,
   initialValues,
   onCancelAction,
   onDirtyChangeAction,
@@ -98,6 +108,16 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
   useEffect(() => {
     onDirtyChangeAction?.(formik.dirty);
   }, [formik.dirty, onDirtyChangeAction]);
+
+  /**
+   * What each field shows: this form's own validation first, then whatever the backend said about
+   * that field. Without the second half a refusal could name a field ("check the highlighted
+   * fields") while nothing on screen was highlighted.
+   */
+  const shownErrors: Partial<Record<keyof CreateOfficeFormValues, string>> = {
+    ...(fieldErrors ?? {}),
+    ...formik.errors,
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,11 +156,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 }
                 placeholder="e.g., London HQ"
                 disabled={isLoading}
-                aria-invalid={!!formik.errors.name}
+                aria-invalid={!!shownErrors.name}
               />
-              {formik.errors.name && (
+              {shownErrors.name && (
                 <p className="text-sm text-destructive">
-                  {formik.errors.name}
+                  {shownErrors.name}
                 </p>
               )}
             </div>
@@ -169,11 +189,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   }
                   placeholder="Optional"
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.email}
+                  aria-invalid={!!shownErrors.email}
                 />
-                {formik.errors.email && (
+                {shownErrors.email && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.email}
+                    {shownErrors.email}
                   </p>
                 )}
               </div>
@@ -212,11 +232,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                     formik.setFieldValue("country", e.currentTarget.value)
                   }
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.country}
+                  aria-invalid={!!shownErrors.country}
                 />
-                {formik.errors.country && (
+                {shownErrors.country && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.country}
+                    {shownErrors.country}
                   </p>
                 )}
               </div>
@@ -230,11 +250,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                     formik.setFieldValue("city", e.currentTarget.value)
                   }
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.city}
+                  aria-invalid={!!shownErrors.city}
                 />
-                {formik.errors.city && (
+                {shownErrors.city && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.city}
+                    {shownErrors.city}
                   </p>
                 )}
               </div>
@@ -249,9 +269,14 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("street", e.currentTarget.value)
                   }
-                  placeholder="Optional"
+                  placeholder="e.g., Baker Street"
+                  required
                   disabled={isLoading}
+                  aria-invalid={!!shownErrors.street}
                 />
+                {shownErrors.street && (
+                  <p className="text-sm text-destructive">{shownErrors.street}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -262,9 +287,14 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("building", e.currentTarget.value)
                   }
-                  placeholder="Optional"
+                  placeholder="e.g., 221B"
+                  required
                   disabled={isLoading}
+                  aria-invalid={!!shownErrors.building}
                 />
+                {shownErrors.building && (
+                  <p className="text-sm text-destructive">{shownErrors.building}</p>
+                )}
               </div>
             </div>
 
@@ -276,13 +306,20 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 onChange={(e) =>
                   formik.setFieldValue("postCode", e.currentTarget.value)
                 }
-                placeholder="Optional"
+                placeholder="e.g., NW1 6XE"
+                required
                 disabled={isLoading}
+                aria-invalid={!!shownErrors.postCode}
               />
+              {shownErrors.postCode && (
+                <p className="text-sm text-destructive">{shownErrors.postCode}</p>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <FormError message={errorMessage} className="mx-6 mb-4"/>
 
       <DialogFooter className="border-t border-brown-100 bg-white px-6 py-4">
         <Button

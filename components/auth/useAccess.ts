@@ -106,6 +106,14 @@ export function useAccess() {
     access: query.data ?? null,
     loading: query.isLoading,
     error: query.error,
+    /**
+     * We do not know what this person may do, as opposed to knowing they may not.
+     *
+     * Without this the two are the same value — `access: null` — and every gate concluded "no
+     * permission". With the backend down that put "403 Access denied" on every page, which is a
+     * confident answer to a question we could not ask.
+     */
+    unavailable: !!query.error && !query.data,
     refresh: query.refetch,
   };
 }

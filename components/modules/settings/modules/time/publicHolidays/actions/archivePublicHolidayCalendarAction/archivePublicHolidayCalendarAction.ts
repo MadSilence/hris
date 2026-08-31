@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const archivePublicHolidayCalendarAction = async (
   submission: ArchivePublicHolidayCalendarActionInput
@@ -15,13 +16,7 @@ export const archivePublicHolidayCalendarAction = async (
       data,
     };
   } catch (error) {
-    console.error("archivePublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while archiving the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "archivePublicHolidayCalendarAction");
   }
 };
 

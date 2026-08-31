@@ -34,6 +34,11 @@ import {
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { formatDisplayDate } from "@/lib/date";
+import {
+  ProfileSectionCard,
+  SectionEditButton,
+} from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/ProfileSectionCard";
 
 /**
  * System fields that already live somewhere better on this page: the header shows the name badge
@@ -45,8 +50,13 @@ export const PROFILE_HIDDEN_SYSTEM_FIELDS = new Set([
   "sys:updated_at",
 ]);
 
-/** System fields with a write path from the profile. Everything else here is read-only. */
-const EDITABLE_SYSTEM_FIELDS = new Set([
+/**
+ * System fields this form knows how to edit — a statement about the editors below, not about
+ * permissions. Whether the caller may write one is `fieldAccess`, resolved by the server per field
+ * and per person; a field absent from this set has no write path from the profile at all, which is
+ * why `sys:level` is not here (a grade follows the position and changes with it).
+ */
+const FIELDS_WITH_AN_EDITOR = new Set([
   "sys:first_name",
   "sys:last_name",
   "sys:email",
@@ -61,7 +71,11 @@ const EDITABLE_SYSTEM_FIELDS = new Set([
 /** Sentinel for "no value" in a Select — Radix cannot hold an empty string as an item value. */
 const NONE = "__none__";
 
-const formatDate = (iso?: string | null) => (iso ? iso.slice(0, 10) : null);
+/** The `yyyy-MM-dd` the date field speaks — a transport shape, not something anyone reads. */
+const toDateInput = (iso?: string | null) => (iso ? iso.slice(0, 10) : null);
+
+/** The same date as a person reads it. One formatter, no locale here — see `lib/date.ts`. */
+const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : null);
 
 type Draft = {
   firstName: string;
@@ -79,8 +93,8 @@ const draftOf = (user: User): Draft => ({
   firstName: user.firstName ?? "",
   lastName: user.lastName ?? "",
   email: user.email ?? "",
-  hireDate: formatDate(user.hireDate) ?? "",
-  probationEnd: formatDate(user.probationEnd) ?? "",
+  hireDate: toDateInput(user.hireDate) ?? "",
+  probationEnd: toDateInput(user.probationEnd) ?? "",
   manager: user.manager ? { id: user.manager.id, firstName: user.manager.name } : null,
   jobId: user.jobId ?? NONE,
   officeId: user.office?.id ?? NONE,
@@ -93,15 +107,19 @@ const idOrNull = (value: string): string | null => (value === NONE ? null : valu
 type Props = {
   user: User;
   fields: FieldDTO[];
-  /** PEOPLE.PROFILE EDIT on this person. Field-level rights arrive with the field-access pass. */
-  canEdit: boolean;
+  /** The block's name, shown in the card header the pencil sits in. */
+  title: string;
 };
 
 /**
  * One section of built-in fields, rendered from the server catalogue rather than a hand-written
  * list — adding a field to `FieldRegistry` makes it appear here without touching this file.
+ *
+ * Editability is per field and comes from `user.fieldAccess`, the same map custom attributes read.
+ * It used to be one module-level flag for the whole section, which meant anyone who could edit a
+ * person could edit every field about them.
  */
-export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => {
+export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
   const { mutate } = useSWRConfig();
 
   const [isEdit, setIsEdit] = useState(false);
@@ -110,8 +128,11 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
   const [draft, setDraft] = useState<Draft>(() => draftOf(user));
 
   const visible = fields.filter((f) => !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id));
-  const editableHere = visible.filter((f) => EDITABLE_SYSTEM_FIELDS.has(f.id));
-  const canEditSection = canEdit && editableHere.length > 0;
+  /** Editable here = this form has an editor for it *and* the server says the caller may write it. */
+  const canEditField = (fieldId: string) =>
+    FIELDS_WITH_AN_EDITOR.has(fieldId) && user.fieldAccess?.[fieldId] === "EDIT";
+  const editableHere = visible.filter((f) => canEditField(f.id));
+  const canEditSection = editableHere.length > 0;
 
   if (visible.length === 0) return null;
 
@@ -138,24 +159,34 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
     setSaveError(null);
 
     try {
+      // Changed *and* writable. The server refuses a request carrying a field the caller may not
+      // write — whole, not partly — so sending one is not a rejected field, it is a rejected save.
+      const changed = <T,>(fieldId: string, isDirty: boolean, value: T): T | undefined =>
+        canEditField(fieldId) && isDirty ? value : undefined;
+
       const res = await updateUserAction({
         userId: user.id,
-        firstName: draft.firstName !== initial.firstName ? draft.firstName : undefined,
-        lastName: draft.lastName !== initial.lastName ? draft.lastName : undefined,
-        email: draft.email !== initial.email ? draft.email : undefined,
-        hireDate: draft.hireDate !== initial.hireDate ? draft.hireDate : undefined,
-        probationEnd:
-          draft.probationEnd !== initial.probationEnd ? draft.probationEnd : undefined,
-        managerId:
-          (draft.manager?.id ?? null) !== (initial.manager?.id ?? null)
-            ? draft.manager?.id ?? null
-            : undefined,
-        jobId: draft.jobId !== initial.jobId ? idOrNull(draft.jobId) : undefined,
-        officeId: draft.officeId !== initial.officeId ? idOrNull(draft.officeId) : undefined,
-        legalEntityId:
-          draft.legalEntityId !== initial.legalEntityId
-            ? idOrNull(draft.legalEntityId)
-            : undefined,
+        firstName: changed("sys:first_name", draft.firstName !== initial.firstName, draft.firstName),
+        lastName: changed("sys:last_name", draft.lastName !== initial.lastName, draft.lastName),
+        email: changed("sys:email", draft.email !== initial.email, draft.email),
+        hireDate: changed("sys:hire_date", draft.hireDate !== initial.hireDate, draft.hireDate),
+        probationEnd: changed(
+          "sys:probation_end",
+          draft.probationEnd !== initial.probationEnd,
+          draft.probationEnd
+        ),
+        managerId: changed(
+          "sys:manager",
+          (draft.manager?.id ?? null) !== (initial.manager?.id ?? null),
+          draft.manager?.id ?? null
+        ),
+        jobId: changed("sys:job", draft.jobId !== initial.jobId, idOrNull(draft.jobId)),
+        officeId: changed("sys:office", draft.officeId !== initial.officeId, idOrNull(draft.officeId)),
+        legalEntityId: changed(
+          "sys:legal_entity",
+          draft.legalEntityId !== initial.legalEntityId,
+          idOrNull(draft.legalEntityId)
+        ),
       });
 
       if (res.status === ActionStatus.SUCCESS) {
@@ -265,13 +296,13 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
   };
 
   return (
-    <div>
-      {canEditSection && (
-        <div className="mb-3 flex items-center justify-end gap-3">
-          {saveError && <span className="text-sm text-destructive">{saveError}</span>}
-
-          {isEdit ? (
+    <ProfileSectionCard
+      title={title}
+      actions={
+        canEditSection ? (
+          isEdit ? (
             <>
+              {saveError && <span className="text-sm text-destructive">{saveError}</span>}
               <Button variant="outline" size="sm" onClick={cancel} disabled={isSaving}>
                 Cancel
               </Button>
@@ -280,29 +311,26 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
               </Button>
             </>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
+            <SectionEditButton
+              label={`Edit ${title}`}
               onClick={() => {
                 setDraft(draftOf(user));
                 setSaveError(null);
                 setIsEdit(true);
               }}
-            >
-              Edit
-            </Button>
-          )}
-        </div>
-      )}
-
-      <div className="divide-y divide-brown-200 border-t border-brown-200">
+            />
+          )
+        ) : null
+      }
+    >
+      <div className="divide-y divide-brown-100">
         {visible.map((field) => {
-          const editing = isEdit && EDITABLE_SYSTEM_FIELDS.has(field.id);
+          const editing = isEdit && canEditField(field.id);
 
           return (
             <div
               key={field.id}
-              className="grid grid-cols-[minmax(14rem,18rem)_1fr] items-center gap-5 py-4"
+              className="grid grid-cols-[minmax(14rem,18rem)_1fr] items-center gap-5 py-3.5"
             >
               <div className="text-sm text-muted-foreground">{field.label}</div>
               <div className="text-sm text-foreground">
@@ -312,7 +340,7 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, canEdit }) => 
           );
         })}
       </div>
-    </div>
+    </ProfileSectionCard>
   );
 };
 
@@ -378,7 +406,7 @@ const RolesCell: React.FC<{ user: User }> = ({ user }) => {
 
       <AssignRolesModal
         isOpen={isOpen}
-        user={isOpen ? user : null}
+        user={isOpen ? { ...user, roles: user.roles ?? [] } : null}
         allRoles={allRoles ?? []}
         isLoading={assignRoles.isPending}
         errorMessage={
@@ -418,7 +446,7 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
       return <>{formatDate(user.terminationDate) ?? <NotSet />}</>;
     case "sys:job":
       return <>{user.jobName || <NotSet />}</>;
-    // Not in EDITABLE_SYSTEM_FIELDS on purpose: the grade follows the position, so it changes by
+    // Not in FIELDS_WITH_AN_EDITOR on purpose: the grade follows the position, so it changes by
     // changing the job, never on its own.
     case "sys:level":
       return <>{user.level?.name || <NotSet />}</>;

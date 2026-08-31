@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiPeopleViewsService } from "@/api/modules/peopleViews/services/hrisApiPeopleViewsService";
 import type { PeopleView, ViewPayload } from "@/models/peopleView";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type ViewActionResult<T> = {
   status: ActionStatus;
@@ -18,8 +19,7 @@ export async function createViewAction(
     const data = await hrisApiPeopleViewsService.create({ name, payload });
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("createViewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to save the view." };
+    return toActionError(error, "peopleViewActions");
   }
 }
 
@@ -32,8 +32,7 @@ export async function updateViewAction(
     const data = await hrisApiPeopleViewsService.update(id, { name, payload });
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("updateViewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to update the view." };
+    return toActionError(error, "peopleViewActions");
   }
 }
 
@@ -42,8 +41,7 @@ export async function duplicateViewAction(id: string): Promise<ViewActionResult<
     const data = await hrisApiPeopleViewsService.duplicate(id);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("duplicateViewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to duplicate the view." };
+    return toActionError(error, "peopleViewActions");
   }
 }
 
@@ -52,8 +50,7 @@ export async function deleteViewAction(id: string): Promise<ViewActionResult<voi
     await hrisApiPeopleViewsService.remove(id);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("deleteViewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to delete the view." };
+    return toActionError(error, "peopleViewActions");
   }
 }
 
@@ -62,7 +59,6 @@ export async function shareViewAction(payload: ViewPayload): Promise<ViewActionR
     const data = await hrisApiPeopleViewsService.share(payload);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("shareViewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to create a share link." };
+    return toActionError(error, "peopleViewActions");
   }
 }

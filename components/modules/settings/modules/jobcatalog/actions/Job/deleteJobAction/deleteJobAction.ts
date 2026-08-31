@@ -2,7 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { jobsService } from "@/api/modules/jobs/services/jobsService";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteJobAction = async (
   submission: DeleteJobActionInput
@@ -12,13 +12,7 @@ export const deleteJobAction = async (
 
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while deleting a job. Please try again."
-      ),
-    };
+    return toActionError(error, "deleteJobAction");
   }
 };
 

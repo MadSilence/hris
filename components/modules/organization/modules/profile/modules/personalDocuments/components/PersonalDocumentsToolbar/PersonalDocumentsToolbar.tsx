@@ -35,7 +35,10 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
   canEdit = true,
 }) => {
   return (
-    <div className="flex items-center gap-3">
+    // Search leads the row — it is what the reader reaches for first — and the primary action is
+    // pushed to the far end, next to Trash. The row used to open with the word "Documents" above a
+    // tab already called Documents.
+    <div className="flex flex-1 items-center gap-3">
       <div className="relative w-[280px]">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"/>
         <Input
@@ -75,7 +78,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       {canEdit && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-brown-600 text-white hover:bg-brown-700">
+            <Button className="ml-auto bg-brown-600 text-white hover:bg-brown-700">
               <Plus className="mr-2 h-4 w-4"/>
               Add
             </Button>

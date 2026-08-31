@@ -47,8 +47,7 @@ describe("deleteOfficeAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deleting the office. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

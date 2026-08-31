@@ -60,8 +60,7 @@ describe("updatePublicHolidayCalendarAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the public holiday calendar. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

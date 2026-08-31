@@ -1,5 +1,7 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -71,7 +73,7 @@ export default function TimeOffPoliciesSettingsContainer({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deletingPolicy, setDeletingPolicy] = useState<TimeOffPolicy | null>(null);
   if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) throw error;
+  if (error) return <ErrorState error={error} />;
 
   const handleCreate = async (values: PolicyWizardValues, activate: boolean) => {
     const res = await createMutation.mutateAsync(
@@ -104,7 +106,7 @@ export default function TimeOffPoliciesSettingsContainer({
   };
 
   const handleActivate = (policy: TimeOffPolicy) => {
-    activateMutation.mutate({ id: policy.id });
+    activateMutation.mutateAsync({ id: policy.id }).catch(showError);
   };
 
   const handleArchive = (policy: TimeOffPolicy) => {
@@ -113,8 +115,13 @@ export default function TimeOffPoliciesSettingsContainer({
 
   const handleDelete = async () => {
     if (!deletingPolicy) return;
-    await deleteMutation.mutateAsync({ id: deletingPolicy.id });
-    setDeletingPolicy(null);
+    try {
+      await deleteMutation.mutateAsync({ id: deletingPolicy.id });
+      setDeletingPolicy(null);
+    } catch (error) {
+      // Only a draft can be deleted; the dialog stays up so the refusal has somewhere to be read.
+      showError(error);
+    }
   };
 
   return (

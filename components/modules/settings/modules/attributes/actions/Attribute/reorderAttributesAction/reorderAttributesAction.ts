@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { ReorderItemRequest } from "@/api/modules/groups/dto";
 import { attributeService } from "@/api/modules/attributes/services/attributeService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type ReorderAttributesActionInput = {
   id: string;
@@ -26,10 +27,7 @@ export const reorderAttributesAction = async (
     await attributeService.reorderAttributes(payload);
 
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while reordering attributes. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "reorderAttributesAction");
   }
 };

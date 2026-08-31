@@ -72,6 +72,40 @@ describe("CreateOfficeForm", () => {
     ).toBeInTheDocument();
   });
 
+  /**
+   * `OfficeCreateRequest` marks the whole address `@NotBlank`. While this form called street,
+   * building and post code optional — and labelled them "Optional" — a submit without a building
+   * number left here happily and came back as "check the highlighted fields" with nothing
+   * highlighted, because the client had found nothing wrong.
+   */
+  it("requires the whole address, as the API does", async () => {
+    const user = userEvent.setup();
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction });
+
+    await user.type(screen.getByLabelText(/^name$/i), "London HQ");
+    await user.type(screen.getByLabelText(/country/i), "United Kingdom");
+    await user.type(screen.getByLabelText(/city/i), "London");
+    await user.type(screen.getByLabelText(/street/i), "Baker Street");
+    await user.type(screen.getByLabelText(/post code/i), "NW1");
+
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    expect(
+      await screen.findByText(/please enter a building number/i),
+    ).toBeInTheDocument();
+    expect(onSubmitAction).not.toHaveBeenCalled();
+  });
+
+  it("shows a refusal the backend attached to a field, next to that field", async () => {
+    renderForm({ fieldErrors: { name: "An office with this name already exists." } });
+
+    expect(
+      await screen.findByText(/an office with this name already exists/i),
+    ).toBeInTheDocument();
+  });
+
   it("shows validation error for invalid email", async () => {
     const user = userEvent.setup();
     const onSubmitAction = jest.fn();
@@ -131,8 +165,13 @@ describe("CreateOfficeForm", () => {
 
     renderForm({ onSubmitAction });
 
+    // The whole address is filled because the whole address is required — the backend marks it
+    // `@NotBlank`, and this test used to submit a payload the API would have refused.
     await user.type(screen.getByLabelText(/^name$/i), "London HQ");
     await user.type(screen.getByLabelText(/country/i), "United Kingdom");
+    await user.type(screen.getByLabelText(/street/i), "Baker Street");
+    await user.type(screen.getByLabelText(/building/i), "221B");
+    await user.type(screen.getByLabelText(/post code/i), "NW1");
     await user.type(screen.getByLabelText(/city/i), "London{enter}");
 
     await waitFor(() => {

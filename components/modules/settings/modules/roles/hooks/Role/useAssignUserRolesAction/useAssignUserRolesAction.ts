@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { assignUserRolesAction } from "@/components/modules/settings/modules/roles/actions/Role/AssignUserRolesAction/AssignUserRolesAction";
+import { assignUserRolesAction } from "@/components/modules/settings/modules/roles/actions/Role/assignUserRolesAction/assignUserRolesAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import { PEOPLE_SEARCH_QK } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearch";
 import { accessQueryKeys } from "@/components/auth/accessQueryKeys";

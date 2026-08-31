@@ -1,26 +1,38 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
-import type { CompanyCalendarPage } from "@/models/calendar";
+import type { CompanyCalendarMark, CompanyCalendarPeoplePage } from "@/models/calendar";
+import type { FilterDTO } from "@/models/user/fields";
 
-export type CompanyCalendarQuery = {
-  from: string;
-  to: string;
+export type CompanyCalendarPeopleQuery = {
   cursor?: string;
   limit?: number;
   q?: string;
+  filters?: FilterDTO[] | null;
+};
+
+export type CompanyCalendarMarksQuery = {
+  from: string;
+  to: string;
+  userIds: string[];
 };
 
 export class HrisApiCompanyCalendarClient {
   private readonly BASE_PATH = "/calendar/company";
 
-  public async company(params: CompanyCalendarQuery): Promise<CompanyCalendarPage> {
-    const qs = new URLSearchParams();
-    qs.set("from", params.from);
-    qs.set("to", params.to);
-    if (params.cursor) qs.set("cursor", params.cursor);
-    if (params.limit) qs.set("limit", String(params.limit));
-    if (params.q) qs.set("q", params.q);
+  public async people(params: CompanyCalendarPeopleQuery): Promise<CompanyCalendarPeoplePage> {
+    return hrisApiClient.post<CompanyCalendarPeoplePage>(`${this.BASE_PATH}/people`, {
+      cursor: params.cursor ?? null,
+      limit: params.limit ?? null,
+      q: params.q ?? null,
+      filters: params.filters ?? null,
+    });
+  }
 
-    return hrisApiClient.get<CompanyCalendarPage>(`${this.BASE_PATH}?${qs.toString()}`);
+  public async marks(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarMark[]> {
+    return hrisApiClient.post<CompanyCalendarMark[]>(`${this.BASE_PATH}/marks`, {
+      from: params.from,
+      to: params.to,
+      userIds: params.userIds,
+    });
   }
 }
 

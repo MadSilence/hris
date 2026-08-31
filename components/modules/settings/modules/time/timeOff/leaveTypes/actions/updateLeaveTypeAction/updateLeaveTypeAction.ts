@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisLeaveTypesService } from "@/api/modules/timeOff/leaveTypes/services";
 import type { UpdateLeaveTypeRequest } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateLeaveTypeAction = async (
   submission: UpdateLeaveTypeActionInput
@@ -17,13 +18,7 @@ export const updateLeaveTypeAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateLeaveTypeAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the leave type. Please try again.",
-    };
+    return toActionError(error, "updateLeaveTypeAction");
   }
 };
 

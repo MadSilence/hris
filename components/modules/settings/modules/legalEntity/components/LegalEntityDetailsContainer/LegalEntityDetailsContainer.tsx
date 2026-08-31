@@ -1,5 +1,7 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, Building2, Download, MapPin, Users } from "lucide-react";
@@ -121,7 +123,7 @@ export default function LegalEntityDetailsContainer({
     router.push("/settings/general/legal-entities");
   }, [deleteAction.data?.status, router]);
   if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) throw error;
+  if (error) return <ErrorState error={error} />;
 
   if (isLoading) {
     return (
@@ -391,7 +393,14 @@ export default function LegalEntityDetailsContainer({
         isOpen={isDeleteOpen}
         isLoading={deleteAction.isPending}
         entity={entity}
-        onConfirmAction={() => deleteAction.mutate({ id: entity.id })}
+        onConfirmAction={async () => {
+          try {
+            await deleteAction.mutateAsync({ id: entity.id });
+            setIsDeleteOpen(false);
+          } catch (error) {
+            showError(error);
+          }
+        }}
         onRequestCloseAction={() => setIsDeleteOpen(false)}
       />
 

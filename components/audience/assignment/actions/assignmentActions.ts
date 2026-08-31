@@ -1,5 +1,6 @@
 "use server";
 
+import { toActionError } from "@/lib/errors/withActionError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiAssignmentsService } from "@/api/modules/assignments/services/hrisAssignmentsService";
 import type { AssignedUsersParams } from "@/api/modules/assignments/clients/hrisApiAssignmentsClient";
@@ -34,8 +35,7 @@ export async function assignmentPreviewAction(
     const data = await hrisApiAssignmentsService.preview(basePath, id, body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentPreviewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to preview assignment." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -48,8 +48,7 @@ export async function assignmentApplyAction(
     const data = await hrisApiAssignmentsService.apply(basePath, id, body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentApplyAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to apply assignment." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -62,8 +61,7 @@ export async function assignmentSegmentPreviewAction(
     const data = await hrisApiAssignmentsService.segmentPreview(basePath, id, body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentSegmentPreviewAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to preview segment." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -76,8 +74,7 @@ export async function assignmentSegmentApplyAction(
     const data = await hrisApiAssignmentsService.segmentApply(basePath, id, body);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentSegmentApplyAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to apply segment." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -90,8 +87,7 @@ export async function assignmentJobStatusAction(
     const data = await hrisApiAssignmentsService.jobStatus(basePath, id, jobId);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentJobStatusAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to load job status." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -105,8 +101,7 @@ export async function assignmentRulesAction(
     const data = await hrisApiAssignmentsService.getRules(basePath, id, page, size);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignmentRulesAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to load assignment rules." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -119,8 +114,7 @@ export async function unassignUserAction(
     await hrisApiAssignmentsService.unassignUser(basePath, id, userId);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("unassignUserAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to remove the person." };
+    return toActionError(error, "assignmentActions");
   }
 }
 
@@ -133,7 +127,6 @@ export async function assignedUsersAction(
     const data = await hrisApiAssignmentsService.listUsers(basePath, id, params);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("assignedUsersAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Failed to load assigned users." };
+    return toActionError(error, "assignmentActions");
   }
 }

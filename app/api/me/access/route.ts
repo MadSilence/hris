@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import { BACKEND_UNAVAILABLE_CODE } from "@/components/clients/exceptions";
 
 export const dynamic = "force-dynamic";
 
@@ -50,10 +51,20 @@ export async function GET(req: NextRequest) {
     if (etag) out.headers.set("ETag", etag);
     return out;
   } catch (err) {
+    // Being a raw proxy costs this route the shared error shape, so it has to say the same thing by
+    // hand. Without `code` the client builds an error the dictionary cannot read, and the region
+    // shows "An error occurred. Please try again." for what is plainly an unreachable backend —
+    // 502 with a bare `error` field was doing exactly that.
     const isDev = process.env.NODE_ENV !== "production";
     return Response.json(
-      { error: "Backend unavailable", ...(isDev ? { detail: String(err) } : {}) },
-      { status: 502 },
+      {
+        status: 503,
+        error: "BackendUnavailableError",
+        code: BACKEND_UNAVAILABLE_CODE,
+        message: `Cannot reach the API at ${process.env.BACKEND_URL} — is the backend running?`,
+        ...(isDev ? { detail: String(err) } : {}),
+      },
+      { status: 503 },
     );
   }
 }

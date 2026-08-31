@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Trash2 } from "lucide-react";
 
@@ -16,8 +16,14 @@ import {
   useInvalidateDocumentsContentQuery,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useDocumentsContent";
 import { formatBytes } from "../../utils/formatBytes";
-import { formatDocumentDate } from "../../utils/formatDocumentDate";
+import { formatDisplayDate } from "@/lib/date";
 import { getDocumentFileIcon } from "../../utils/getDocumentFileIcon";
+import {
+  PurgeDocumentModal,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/PurgeDocumentModal";
+import {
+  PersonalDocumentsEmptyState,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsEmptyState";
 
 const trashKey = (userId: string) => ["DOCUMENTS_TRASH", userId];
 
@@ -65,7 +71,11 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     onSuccess: refresh,
   });
 
-  const actionError = messageOf(restore.error) ?? messageOf(purge.error);
+  // Purging is irreversible, so it is confirmed — and its failure belongs in the dialog that asked,
+  // not in a line above a list the reader has already left.
+  const [pendingPurge, setPendingPurge] = useState<DocumentDTO | null>(null);
+
+  const actionError = messageOf(restore.error);
   const isBusy = restore.isPending || purge.isPending;
 
   if (isLoading) {
@@ -87,9 +97,11 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-brown-200 px-4 py-10 text-center text-sm text-muted-foreground">
-        Nothing in the trash.
-      </div>
+      <PersonalDocumentsEmptyState
+        icon={<Trash2 className="h-6 w-6"/>}
+        title="Nothing in the trash"
+        description="Deleted documents wait here until they are restored or permanently removed."
+      />
     );
   }
 
@@ -107,7 +119,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{document.name}</p>
               <p className="text-xs text-muted-foreground">
-                {formatBytes(document.sizeBytes)} · uploaded {formatDocumentDate(document.createdAt)}
+                {formatBytes(document.sizeBytes)} · uploaded {formatDisplayDate(document.createdAt)}
               </p>
             </div>
 
@@ -126,7 +138,10 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               size="sm"
               className="text-muted-foreground hover:text-destructive"
               disabled={isBusy}
-              onClick={() => purge.mutate(document.id)}
+              onClick={() => {
+                purge.reset();
+                setPendingPurge(document);
+              }}
             >
               <Trash2 className="mr-2 h-4 w-4"/>
               Delete forever
@@ -134,6 +149,21 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
           </div>
         ))}
       </div>
+
+      <PurgeDocumentModal
+        isOpen={pendingPurge !== null}
+        isLoading={purge.isPending}
+        documentName={pendingPurge?.name}
+        errorMessage={messageOf(purge.error)}
+        onRequestCloseAction={() => {
+          purge.reset();
+          setPendingPurge(null);
+        }}
+        onConfirmAction={() => {
+          if (!pendingPurge) return;
+          purge.mutate(pendingPurge.id, { onSuccess: () => setPendingPurge(null) });
+        }}
+      />
     </div>
   );
 };

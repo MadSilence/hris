@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 /**
  * Job & Employment writes that land on `POST /users/{id}/update` plus, when it changed, the
@@ -28,12 +29,7 @@ export const updateUserAction = async (
 
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("updateUserAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while saving. Please try again.",
-    };
+    return toActionError(error, "updateUserAction");
   }
 };
 

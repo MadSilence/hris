@@ -1,3 +1,4 @@
+import { formatOf } from "@/api/utils/exportResponse";
 import { attributeService } from "@/api/modules/attributes/services/attributeService";
 
 export class AttributesRoutes {
@@ -18,8 +19,5 @@ export class AttributesRoutes {
     });
   }
 }
-
-const formatOf = (req: Request): "csv" | "xlsx" =>
-  new URL(req.url).searchParams.get("format") === "csv" ? "csv" : "xlsx";
 
 export const attributesRoutes = new AttributesRoutes();

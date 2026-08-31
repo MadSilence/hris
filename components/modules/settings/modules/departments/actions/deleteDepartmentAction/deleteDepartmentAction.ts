@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDepartmentsService } from "@/api/modules/departments/services";
 import type { DeleteDepartmentRequest } from "@/api/modules/departments/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteDepartmentAction = async (
   id: string,
@@ -12,11 +13,7 @@ export const deleteDepartmentAction = async (
     await hrisDepartmentsService.delete(id, submission);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("deleteDepartmentAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting the department. Please try again.",
-    };
+    return toActionError(error, "deleteDepartmentAction");
   }
 };
 

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const unstarPersonalDocumentAction = async (
   submission: UnstarPersonalDocumentActionInput
@@ -13,12 +14,7 @@ export const unstarPersonalDocumentAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("unstarPersonalDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while unstarring a document. Please try again.",
-    };
+    return toActionError(error, "unstarPersonalDocumentAction");
   }
 };
 

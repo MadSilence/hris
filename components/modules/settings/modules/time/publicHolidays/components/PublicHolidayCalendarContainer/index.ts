@@ -1,1 +1,1 @@
-export * from "./PublicHolidayCalendarContainer";
+export { default } from "./PublicHolidayCalendarContainer";

@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { groupsService } from "@/api/modules/groups/services/groupsService";
 import { ReorderItemRequest } from "@/api/modules/groups/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const reorderAttributeGroupAction = async (
   submission: ReorderAttributeGroupActionInput[]
@@ -18,11 +19,8 @@ export const reorderAttributeGroupAction = async (
     return {
       status: ActionStatus.SUCCESS
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while reordering groups. Please try again."
-    };
+  } catch (error) {
+    return toActionError(error, "reorderAttributeGroupAction");
   }
 };
 

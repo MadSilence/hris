@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { groupsService } from "@/api/modules/groups/services/groupsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const renameAttributeGroupAction = async (
   submission: RenameAttributeGroupActionInput
@@ -14,11 +15,8 @@ export const renameAttributeGroupAction = async (
       status: ActionStatus.SUCCESS,
       data: data
     }
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while renaming group. Please try again."
-    };
+  } catch (error) {
+    return toActionError(error, "renameAttributeGroupAction");
   }
 };
 

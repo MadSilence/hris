@@ -5,6 +5,9 @@ export type CompanyDTO = {
   companyLogo: string | null;
   description: string | null;
   website: string | null;
+  /** See `models/company/Company.ts` for why the working week rides on the app-shell read. */
+  workingDays?: string[];
+  weekStartDay?: string;
 };
 
 export type CompanySettingsDTO = {

@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   deleteRoleAction,
   DeleteRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/DeleteRoleAction/DeleteRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/deleteRoleAction/deleteRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 
 export const useDeleteRoleAction = () => {

@@ -13,6 +13,7 @@ import {
 } from "@/public/desact/src/components/ui/alert-dialog";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { RoleDeleteImpactDTO } from "@/api/modules/roles/dto/RoleDeleteImpactDTO";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 export interface DeleteRoleModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export interface DeleteRoleModalProps {
   /** Null while the impact is still loading. */
   impact?: RoleDeleteImpactDTO | null;
   isImpactLoading?: boolean;
+  /** Set when the impact could not be read at all — see the note where it is rendered. */
+  impactError?: unknown;
   onConfirmAction: () => void | Promise<void>;
   onRequestCloseAction: () => void;
 }
@@ -33,6 +36,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
   roleName,
   impact,
   isImpactLoading = false,
+  impactError,
   onConfirmAction,
   onRequestCloseAction,
 }) => {
@@ -71,7 +75,19 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
                 <p className="text-sm text-red-700">Checking what depends on this role…</p>
               )}
 
-              {!isImpactLoading && !impact && (
+              {/*
+                "We could not ask" is not the same as "there is nothing to say". When the impact
+                request fails the counts are unknown, and the smoke run of 2026-08-28 found the
+                dialog quietly showing the generic sentence below instead — the reader had no way
+                to tell an empty role from an unreachable API before pressing Delete.
+              */}
+              {!isImpactLoading && !impact && !!impactError && (
+                <p className="text-sm text-red-700">
+                  {messageForError(impactError)} Until then, how many people this affects is unknown.
+                </p>
+              )}
+
+              {!isImpactLoading && !impact && !impactError && (
                 <p className="text-sm text-red-700">
                   Users assigned to this role may lose access to systems and workflows.
                 </p>

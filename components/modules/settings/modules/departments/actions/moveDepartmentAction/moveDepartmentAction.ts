@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDepartmentsService } from "@/api/modules/departments/services";
 import type { MoveDepartmentRequest } from "@/api/modules/departments/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const moveDepartmentAction = async (
   id: string,
@@ -13,11 +14,7 @@ export const moveDepartmentAction = async (
     const data = await hrisDepartmentsService.move(id, submission);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("moveDepartmentAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while moving the department. Please try again.",
-    };
+    return toActionError(error, "moveDepartmentAction");
   }
 };
 

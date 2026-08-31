@@ -50,8 +50,7 @@ describe("archivePublicHolidayCalendarAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while archiving the public holiday calendar. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

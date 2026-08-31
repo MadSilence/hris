@@ -1,10 +1,8 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import {
-  documentActionErrorMessage,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/documentActionError";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deletePersonalDocumentAction = async (
   submission: DeletePersonalDocumentActionInput
@@ -16,12 +14,7 @@ export const deletePersonalDocumentAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("deletePersonalDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: documentActionErrorMessage(error, "An error occurred while deleting a document. Please try again."),
-    };
+    return toActionError(error, "deletePersonalDocumentAction");
   }
 };
 

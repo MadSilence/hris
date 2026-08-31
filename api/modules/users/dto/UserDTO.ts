@@ -27,4 +27,10 @@ export type UserDTO = {
   updatedAt: string;
   custom: Record<string, unknown>;
   fieldAccess?: Record<string, "VIEW" | "EDIT" | "MASKED">;
+  /**
+   * What the caller may do to *this* person, per resource. Profile-only — the directory does not
+   * carry it. Must be mapped through: the tabs and their gate read nothing else, so dropping it
+   * here hides Documents and Time Off from everyone, own profile included.
+   */
+  capabilities?: Record<string, ("VIEW" | "EDIT" | "MANAGE")[]>;
 }

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { officeService } from "@/api/modules/office/services/officeService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteOfficeAction = async (
   submission: DeleteOfficeActionInput
@@ -12,12 +13,8 @@ export const deleteOfficeAction = async (
     return {
       status: ActionStatus.SUCCESS,
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deleting the office. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "deleteOfficeAction");
   }
 };
 

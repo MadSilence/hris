@@ -1,4 +1,13 @@
-import { BadRequestError, ForbiddenError, NotFoundError, ServerError, UnauthorizedError } from "@/components/clients/exceptions";
+import {
+  ApiErrorInit,
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  ServerError,
+  UnauthorizedError,
+  ValidationError,
+} from "@/components/clients/exceptions";
 
 /**
  * A 401 does not always mean the session is gone. Editing role permissions and starting or stopping
@@ -14,6 +23,40 @@ import { BadRequestError, ForbiddenError, NotFoundError, ServerError, Unauthoriz
 const SESSION_PROBE_PATH = "/api/users/me";
 let sessionProbe: Promise<boolean> | null = null;
 
+const REFRESH_PATH = "/api/auth/refresh";
+let refreshInFlight: Promise<boolean> | null = null;
+
+/**
+ * Trades the refresh token for a new access token, once.
+ *
+ * Access tokens last 150 minutes; before this, every request after that simply failed and the user
+ * was sent to /login with weeks of refresh validity unused. Single-flight on purpose: a page renders
+ * a dozen queries at once, they all get 401 together, and a dozen concurrent refreshes would race —
+ * the losers arriving with a token that has already been rotated away.
+ *
+ * A failure here is an answer, not an error: it means the refresh token is gone or no longer valid,
+ * which is the case the login redirect is for.
+ */
+async function refreshSession(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = fetch(REFRESH_PATH, {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+    })
+      .then((response) => response.ok)
+      .catch(() => false)
+      .finally(() => {
+        // Cleared immediately rather than on a timer: the next 401 after a *failed* refresh should
+        // try again on its own merits, and after a successful one there is nothing to reuse.
+        setTimeout(() => {
+          refreshInFlight = null;
+        }, 0);
+      });
+  }
+  return refreshInFlight;
+}
+
 /** Wrapped so tests can observe the redirect: jsdom's location is read-only. */
 export const sessionNavigation = {
   redirectToLogin() {
@@ -21,11 +64,18 @@ export const sessionNavigation = {
   },
 };
 
+/**
+ * Answers "is the session definitely gone", not "did the probe succeed".
+ *
+ * The difference matters: the probe fails when the backend is down too, and reading that as a dead
+ * session logged people out of a perfectly good one every time the API blinked. A network failure
+ * is not an answer, so we keep them where they are — a 401 on the probe is.
+ */
 async function isSessionAlive(): Promise<boolean> {
   if (!sessionProbe) {
     sessionProbe = fetch(SESSION_PROBE_PATH, { credentials: "same-origin", cache: "no-store" })
-      .then((response) => response.ok)
-      .catch(() => false);
+      .then((response) => response.ok || response.status !== 401)
+      .catch(() => true);
     void sessionProbe.finally(() => {
       setTimeout(() => {
         sessionProbe = null;
@@ -53,9 +103,27 @@ export class InternalApiClient {
 
   public async fetch(path: string, init?: RequestInit): Promise<Response> {
     const url = this.basePath + this.apiPath + path;
-    const response = await fetch(url, { ...init, credentials: "same-origin" });
+    let response = await fetch(url, { ...init, credentials: "same-origin" });
+
+    if (response.status === 401 && (await this.shouldRetryAfterRefresh(path))) {
+      response = await fetch(url, { ...init, credentials: "same-origin" });
+    }
+
     await this.throwIfError(response, path, init?.method ?? "GET");
     return response;
+  }
+
+  /**
+   * Whether this 401 is worth one renewal and a replay.
+   *
+   * Not on the login page, and never for the refresh call itself — a refresh that 401s is the end of
+   * the line, and retrying it would be a loop.
+   */
+  private async shouldRetryAfterRefresh(path: string): Promise<boolean> {
+    if (typeof window === "undefined") return false;
+    if (window.location.pathname.startsWith("/login")) return false;
+    if (path.startsWith("/auth/")) return false;
+    return refreshSession();
   }
 
   private async request<T>(method: string, path: string, body?: object): Promise<T> {
@@ -65,12 +133,21 @@ export class InternalApiClient {
     const hasBody = body !== undefined;
     if (hasBody) headers["Content-Type"] = "application/json";
 
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: hasBody ? JSON.stringify(body) : undefined,
-      credentials: "same-origin",
-    });
+    const send = () =>
+      fetch(url, {
+        method,
+        headers,
+        body: hasBody ? JSON.stringify(body) : undefined,
+        credentials: "same-origin",
+      });
+
+    let response = await send();
+
+    // An expired access token is not a dead session — it is a token that needs renewing. Try once,
+    // then replay; only if the renewal itself fails does the 401 mean what it used to mean.
+    if (response.status === 401 && (await this.shouldRetryAfterRefresh(path))) {
+      response = await send();
+    }
 
     await this.throwIfError(response, path, method);
 
@@ -90,11 +167,15 @@ export class InternalApiClient {
     if (response.ok || response.status === 304) return;
 
     let message: string | undefined;
+    let code: string | undefined;
+    let fieldErrors: Record<string, string> | undefined;
     const ct = response.headers.get("content-type") || "";
     try {
       if (ct.includes("application/json")) {
         const data = await response.json().catch(() => ({}));
         message = (data && (data.message || data.error)) ?? undefined;
+        code = data?.code ?? undefined;
+        fieldErrors = data?.fieldErrors ?? undefined;
       } else {
         const text = await response.text().catch(() => "");
         message = text?.trim();
@@ -104,12 +185,18 @@ export class InternalApiClient {
     }
 
     const friendly = message || `HTTP ${response.status} while fetching ${path}`;
+    const init: ApiErrorInit = {
+      status: response.status,
+      code,
+      fieldErrors,
+      requestId: response.headers.get("X-Request-Id") ?? undefined,
+    };
 
     switch (response.status) {
       case 400:
-        throw new BadRequestError(friendly);
+        throw new BadRequestError(friendly, init);
       case 404:
-        throw new NotFoundError();
+        throw new NotFoundError(friendly, init);
       case 401: {
         // Redirect only if the session is really dead (see the note above isSessionAlive). A stale
         // in-flight request still throws, so the caller can refetch with the current token.
@@ -119,21 +206,23 @@ export class InternalApiClient {
         if (!onLoginPage && !isProbe && !(await isSessionAlive())) {
           sessionNavigation.redirectToLogin();
         }
-        throw new UnauthorizedError(friendly);
+        throw new UnauthorizedError(friendly, init);
       }
       case 403:
         if (typeof window !== "undefined" && method !== "GET") {
           window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: friendly }));
         }
-        throw new ForbiddenError(friendly);
+        throw new ForbiddenError(friendly, init);
       case 409:
+        throw new ConflictError(friendly, init);
       case 422:
+        throw new ValidationError(friendly, init);
       case 429:
       case 500:
       case 502:
       case 503:
       default:
-        throw new ServerError(friendly);
+        throw new ServerError(friendly, init);
     }
   }
 }

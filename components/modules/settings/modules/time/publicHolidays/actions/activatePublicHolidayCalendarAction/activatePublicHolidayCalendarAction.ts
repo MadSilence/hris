@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const activatePublicHolidayCalendarAction = async (
   submission: ActivatePublicHolidayCalendarActionInput
@@ -15,13 +16,7 @@ export const activatePublicHolidayCalendarAction = async (
       data,
     };
   } catch (error) {
-    console.error("activatePublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while activating the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "activatePublicHolidayCalendarAction");
   }
 };
 

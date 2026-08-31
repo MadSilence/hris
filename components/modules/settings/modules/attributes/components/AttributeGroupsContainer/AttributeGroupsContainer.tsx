@@ -1,5 +1,6 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CreateGroupModal } from "../AttributeGroup/CreateGroupModal";
@@ -268,9 +269,14 @@ export default function AttributeGroupsContainer() {
       <DeleteGroupModal
         isOpen={!!deleteGroup}
         isLoading={deleteAttributeGroupAction.isPending}
-        onConfirmAction={() => {
+        onConfirmAction={async () => {
           if (!deleteGroup) return;
-          deleteAttributeGroupAction.mutate({ id: deleteGroup.id });
+          try {
+            await deleteAttributeGroupAction.mutateAsync({ id: deleteGroup.id });
+            setDeleteGroup(null);
+          } catch (error) {
+            showError(error);
+          }
         }}
         onRequestCloseAction={() => setDeleteGroup(null)}
         group={deleteGroup as AttributeGroup}
@@ -279,9 +285,14 @@ export default function AttributeGroupsContainer() {
       <DeleteAttributeModal
         isOpen={!!attributeToDelete}
         isLoading={deleteAttributeAction.isPending}
-        onConfirmAction={() => {
+        onConfirmAction={async () => {
           if (!attributeToDelete) return;
-          deleteAttributeAction.mutate({ id: attributeToDelete.id });
+          try {
+            await deleteAttributeAction.mutateAsync({ id: attributeToDelete.id });
+            setAttributeToDelete(null);
+          } catch (error) {
+            showError(error);
+          }
         }}
         onRequestCloseAction={() => setAttributeToDelete(null)}
         attribute={attributeToDelete as Attribute}

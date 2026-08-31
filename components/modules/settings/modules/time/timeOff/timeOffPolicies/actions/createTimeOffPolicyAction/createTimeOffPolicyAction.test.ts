@@ -34,7 +34,7 @@ describe("createTimeOffPolicyAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while creating the time off policy. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

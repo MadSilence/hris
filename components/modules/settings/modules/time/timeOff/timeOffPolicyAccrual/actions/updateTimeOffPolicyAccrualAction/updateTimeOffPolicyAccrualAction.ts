@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyAccrualService } from "@/api/modules/timeOff/timeOffPolicyAccrual/services";
 import type { UpdateTimeOffPolicyAccrualRequest } from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyAccrualAction = async (
   submission: UpdateTimeOffPolicyAccrualActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyAccrualAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyAccrualAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating accrual. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyAccrualAction");
   }
 };
 

@@ -32,6 +32,7 @@ export class UserMapper {
       updatedAt: dto.updatedAt,
       custom: dto.custom,
       fieldAccess: dto.fieldAccess,
+      capabilities: dto.capabilities,
     };
   }
 }

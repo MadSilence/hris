@@ -1,5 +1,6 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
 import * as React from "react";
 import {
   AlertDialog,
@@ -21,10 +22,26 @@ export default function RemoveAssignedUserDialog({
 }: {
   trigger: React.ReactNode;
   userLabel: string;
-  onConfirm: () => void;
+  onConfirm: () => Promise<unknown> | void;
 }) {
+  const [open, setOpen] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+
+  const confirm = async () => {
+    setBusy(true);
+    try {
+      await onConfirm();
+      setOpen(false);
+    } catch (error) {
+      // Stays open: the card explains why, and the button is still there to try again.
+      showError(error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
 
       <AlertDialogContent>
@@ -52,8 +69,15 @@ export default function RemoveAssignedUserDialog({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={onConfirm}>
+          <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-600 hover:bg-red-700"
+            disabled={busy}
+            onClick={(event) => {
+              event.preventDefault();
+              void confirm();
+            }}
+          >
             Remove
           </AlertDialogAction>
         </AlertDialogFooter>

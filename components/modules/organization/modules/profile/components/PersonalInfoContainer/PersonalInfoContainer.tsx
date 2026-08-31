@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import { hasDefaultValueSupport } from "@/models/attribute";
+import { AttributeType, hasDefaultValueSupport } from "@/models/attribute";
 import { PersonalInfoSidebar } from "./components/PersonalInfoSidebar";
 import { PersonalInfoAttributesList } from "./components/PersonalInfoAttributesList";
 import {
@@ -12,7 +12,6 @@ import {
 } from "./components/SystemFieldGroup";
 import { User } from "@/models/user/User";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
-import { useCanAccess } from "@/components/auth/useAccess";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
 import { useActiveSectionScroll } from "@/components/modules/organization/modules/profile/hooks/useActiveSectionScroll";
@@ -20,21 +19,59 @@ import { useProfileEditGuard } from "@/components/modules/organization/modules/p
 import { Loader } from "@/components/ui/Loader";
 import { Card } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
+import { SectionEditButton } from "./components/ProfileSectionCard";
 import { useSWRConfig } from "swr";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { updateUserAttributesAction } from "@/components/modules/organization/modules/profile/actions/updateUserAttributesAction";
 
 type PersonalInfoContainerProps = { user?: User };
 
+/**
+ * Has this value changed?
+ *
+ * Multi-value fields are **sets, not sequences** — the order the options were ticked in is not part
+ * of the value. Comparing element by element reported a change where there was none, so reordering
+ * a multi-select armed Save and re-submitted an identical selection.
+ */
+/**
+ * An option's id, from either shape it can arrive in.
+ *
+ * Unknown text is returned unchanged rather than dropped: an option deleted after the value was
+ * written should show as itself, not vanish into "Not set".
+ */
+const toOptionId = (attribute: AttributeGroup["attributes"][number], raw: unknown): unknown => {
+  if (raw == null) return raw;
+  const s = String(raw);
+  const byId = attribute.options?.find((o) => o.id === s);
+  if (byId) return byId.id;
+  const byValue = attribute.options?.find((o) => o.value === s);
+  return byValue ? byValue.id : raw;
+};
+
+const sameValue = (a: unknown, b: unknown): boolean => {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    const norm = (v: unknown) =>
+      (Array.isArray(v) ? v : [v]).map((x) => JSON.stringify(x)).sort();
+    const aa = norm(a);
+    const bb = norm(b);
+    return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
+  }
+  return JSON.stringify(a) === JSON.stringify(b);
+};
+
 export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ user }) => {
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
   const { data: fetchedGroups, isLoading, error } = useAttributeGroups();
-  const { data: catalogue } = useUserFields();
-  const canEditProfile = useCanAccess("PEOPLE.PROFILE", "EDIT");
+  const { data: catalogue, isLoading: isCatalogueLoading } = useUserFields();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const [isEdit, setIsEdit] = useState(false);
+  /**
+   * The one custom group open for editing, or null. It used to be a single page-wide flag, which
+   * armed every field at once and put Save far from what it saved; each block owns its own edit
+   * now, the way the system blocks already did.
+   */
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
@@ -56,13 +93,31 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       if (!Object.prototype.hasOwnProperty.call(src, k)) continue;
       if (k.startsWith("attr:")) out[k.slice(5)] = src[k];
     }
+
+    // Option values arrive as the option's *text* — the read query resolves `option_id` through
+    // `ao.value` — while the writer accepts only an option **id**. Normalising here, once, is what
+    // lets everything downstream speak one language: the select editor can match its items, the
+    // dirty check compares like with like, and Save sends what the API takes. Doing it per consumer
+    // is what left a single-select showing an empty control for a field that had a value.
+    for (const group of groups) {
+      for (const attribute of group.attributes) {
+        if (!(attribute.id in out)) continue;
+        const raw = out[attribute.id];
+        if (attribute.type === AttributeType.SELECT) {
+          out[attribute.id] = toOptionId(attribute, raw);
+        } else if (attribute.type === AttributeType.MULTI_SELECT) {
+          const list = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+          out[attribute.id] = list.map((v) => toOptionId(attribute, v));
+        }
+      }
+    }
     return out;
-  }, [user?.custom]);
+  }, [user?.custom, groups]);
 
   useEffect(() => {
     setInitialValues(valueMap);
     setDraftValues(valueMap);
-    setIsEdit(false);
+    setEditingGroupId(null);
   }, [valueMap]);
 
   const visibleGroups = useMemo(() => {
@@ -99,7 +154,16 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return ids;
   }, [groups, user?.fieldAccess]);
 
-  const hasAnyEditable = editableAttrIds.size > 0;
+  const editingGroup = useMemo(
+    () => visibleGroups.find((g) => g.id === editingGroupId) ?? null,
+    [visibleGroups, editingGroupId]
+  );
+
+  /** The attributes the open block holds — what "dirty" and Save are measured over. */
+  const editingAttrIds = useMemo(
+    () => new Set((editingGroup?.attributes ?? []).map((a) => a.id)),
+    [editingGroup]
+  );
 
   // Client-side validity per field (reported by rows) — blocks Save while invalid.
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -119,16 +183,17 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   // Prefill empty, editable, default-capable fields with their configured default on edit.
   // The capable set comes from the same helper the attribute editor uses, so a type that offers a
   // default in settings always applies it here (PHONE used to be offered but never applied).
-  const applyDefaults = (base: Record<string, unknown>): Record<string, unknown> => {
+  const applyDefaults = (
+    base: Record<string, unknown>,
+    group: AttributeGroup
+  ): Record<string, unknown> => {
     const next = { ...base };
-    for (const g of groups) {
-      for (const a of g.attributes) {
-        if (!editableAttrIds.has(a.id) || !hasDefaultValueSupport(a.type)) continue;
-        const dv = a.defaultValue;
-        if (dv == null || dv === "") continue;
-        const cur = next[a.id];
-        if (cur === undefined || cur === null || cur === "") next[a.id] = dv;
-      }
+    for (const a of group.attributes) {
+      if (!editableAttrIds.has(a.id) || !hasDefaultValueSupport(a.type)) continue;
+      const dv = a.defaultValue;
+      if (dv == null || dv === "") continue;
+      const cur = next[a.id];
+      if (cur === undefined || cur === null || cur === "") next[a.id] = dv;
     }
     return next;
   };
@@ -171,27 +236,14 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     sectionIds,
   });
 
-  const dirty = useMemo(() => {
-    const keys = new Set([...Object.keys(initialValues), ...Object.keys(draftValues)]);
-    for (const k of keys) {
-      const a = initialValues[k];
-      const b = draftValues[k];
-      if (Array.isArray(a) || Array.isArray(b)) {
-        const aa = Array.isArray(a) ? a : [a];
-        const bb = Array.isArray(b) ? b : [b];
-        if (aa.length !== bb.length) return true;
-        const same = aa.every((v, i) => JSON.stringify(v) === JSON.stringify(bb[i]));
-        if (!same) return true;
-      } else if (JSON.stringify(a) !== JSON.stringify(b)) {
-        return true;
-      }
-    }
-    return false;
-  }, [initialValues, draftValues]);
+  const dirty = useMemo(
+    () => [...editingAttrIds].some((k) => !sameValue(initialValues[k], draftValues[k])),
+    [editingAttrIds, initialValues, draftValues]
+  );
 
   // Two ways to lose a draft: leaving the app (beforeunload) and switching profile tabs, which the
   // App Router cannot block — hence the shared guard the tab bar reads.
-  const hasUnsavedDraft = isEdit && dirty;
+  const hasUnsavedDraft = editingGroupId !== null && dirty;
 
   useEffect(() => {
     setGuardDirty(hasUnsavedDraft);
@@ -210,31 +262,31 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [hasUnsavedDraft]);
 
-  const onEditToggle = () => {
+  const onEditGroup = (group: AttributeGroup) => {
     setSaveError(null);
     setFieldErrors({});
-    setDraftValues(applyDefaults(initialValues));
-    setIsEdit(true);
+    setDraftValues(applyDefaults(initialValues, group));
+    setEditingGroupId(group.id);
   };
   const onCancel = () => {
     setDraftValues(initialValues);
     setSaveError(null);
     setFieldErrors({});
-    setIsEdit(false);
+    setEditingGroupId(null);
   };
   const onSave = async () => {
     if (!user?.id) return;
 
     const values: Record<string, unknown> = {};
-    for (const attrId of Object.keys(draftValues)) {
+    for (const attrId of editingAttrIds) {
       if (!editableAttrIds.has(attrId)) continue;
-      if (JSON.stringify(initialValues[attrId]) !== JSON.stringify(draftValues[attrId])) {
+      if (!sameValue(initialValues[attrId], draftValues[attrId])) {
         values[attrId] = draftValues[attrId] ?? null;
       }
     }
 
     if (Object.keys(values).length === 0) {
-      setIsEdit(false);
+      setEditingGroupId(null);
       return;
     }
 
@@ -244,7 +296,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       const res = await updateUserAttributesAction({ userId: user.id, values });
       if (res.status === ActionStatus.SUCCESS) {
         setInitialValues(draftValues);
-        setIsEdit(false);
+        setEditingGroupId(null);
         await mutate(`/api/users/${user.id}`);
       } else {
         setSaveError(res.errorMessage ?? "Failed to save changes.");
@@ -254,7 +306,10 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     }
   };
 
-  if (isLoading) {
+  // Both queries, not just the groups: the field catalogue produces the system-field sections and
+  // half the sidebar, so painting before it lands showed a profile that looked like it had neither.
+  // The same defect was fixed in the People table — the flag was fetched and never read.
+  if (isLoading || isCatalogueLoading) {
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Loader/>
@@ -299,42 +354,47 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
           groups={visibleGroups}
           leadingSections={systemGroups.map((g) => ({
             id: g.id,
-            title: g.name,
             content: (
-              <SystemFieldGroup user={user} fields={g.fields} canEdit={canEditProfile}/>
+              <SystemFieldGroup user={user} fields={g.fields} title={g.name}/>
             ),
           }))}
           attributesNotice={attributesNotice}
-          valueMap={isEdit ? draftValues : initialValues}
+          valueMap={editingGroupId ? draftValues : initialValues}
+          initialValueMap={initialValues}
           registerSection={registerSection}
-          isEdit={isEdit}
+          editingGroupId={editingGroupId}
           editableAttrIds={editableAttrIds}
           maskedAttrIds={maskedAttrIds}
           onChangeValue={(attrId, v) =>
             setDraftValues((d) => ({ ...d, [attrId]: v }))
           }
           onValidityChange={setFieldError}
-          headerActions={
-            !isEdit ? (
-              hasAnyEditable ? (
-                <Button variant="outline" onClick={onEditToggle}>
-                  Edit
-                </Button>
-              ) : null
-            ) : (
-              <div className="flex items-center gap-3">
-                {saveError && (
-                  <span className="text-sm text-destructive">{saveError}</span>
-                )}
-                <Button variant="outline" onClick={onCancel} disabled={isSaving}>
-                  Cancel
-                </Button>
-                <Button onClick={onSave} disabled={!dirty || isSaving || hasErrors}>
-                  {isSaving ? "Saving…" : "Save"}
-                </Button>
-              </div>
-            )
-          }
+          renderGroupActions={(groupId) => {
+            if (editingGroupId === groupId) {
+              return (
+                <>
+                  {saveError && <span className="text-sm text-destructive">{saveError}</span>}
+                  <Button variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={onSave} disabled={!dirty || isSaving || hasErrors}>
+                    {isSaving ? "Saving…" : "Save"}
+                  </Button>
+                </>
+              );
+            }
+
+            // While one block is open its draft is the only one that exists, so the other pencils
+            // step aside rather than offering a click that would discard it.
+            if (editingGroupId !== null) return null;
+
+            const group = visibleGroups.find((g) => g.id === groupId);
+            if (!group || !group.attributes.some((a) => editableAttrIds.has(a.id))) return null;
+
+            return (
+              <SectionEditButton label={`Edit ${group.name}`} onClick={() => onEditGroup(group)}/>
+            );
+          }}
         />
     </div>
   );

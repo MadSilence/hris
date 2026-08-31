@@ -56,8 +56,7 @@ describe("updateLegalEntityAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the legal entity. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

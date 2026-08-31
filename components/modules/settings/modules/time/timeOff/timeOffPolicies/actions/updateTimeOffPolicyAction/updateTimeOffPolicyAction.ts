@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPoliciesService } from "@/api/modules/timeOff/timeOffPolicies/services";
 import type { UpdateTimeOffPolicyRequest } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyAction = async (
   submission: UpdateTimeOffPolicyActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the time off policy. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyAction");
   }
 };
 

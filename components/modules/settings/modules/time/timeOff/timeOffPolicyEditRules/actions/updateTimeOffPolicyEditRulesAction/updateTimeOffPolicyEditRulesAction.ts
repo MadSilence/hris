@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyEditRulesService } from "@/api/modules/timeOff/timeOffPolicyEditRules/services";
 import type { UpdateTimeOffPolicyEditRulesRequest } from "@/api/modules/timeOff/timeOffPolicyEditRules/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyEditRulesAction = async (
   submission: UpdateTimeOffPolicyEditRulesActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyEditRulesAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyEditRulesAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the edit rules. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyEditRulesAction");
   }
 };
 

@@ -1,1 +1,1 @@
-export * from "./CompanyAppearanceSettingsContainer";
+export { default } from "./CompanyAppearanceSettingsContainer";

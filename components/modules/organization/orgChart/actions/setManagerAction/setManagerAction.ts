@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type SetManagerActionOutput = {
   status: ActionStatus;
@@ -15,10 +16,7 @@ export const setManagerAction = async (
   try {
     await hrisApiUsersService.setManager(userId, managerId);
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "Couldn't update the reporting line. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "setManagerAction");
   }
 };

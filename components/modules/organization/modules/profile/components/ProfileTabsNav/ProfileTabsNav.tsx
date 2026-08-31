@@ -4,9 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
-import { useAccess } from "@/components/auth/useAccess";
-import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
-import { canAccess, isSystemOwner } from "@/models/access";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   useProfileEditGuard,
@@ -26,9 +23,17 @@ const TABS: TabDef[] = [
   { id: "time-off", label: "Time Off", resource: "PEOPLE.TIME_OFF" },
 ];
 
-type Props = { userId: string };
+type Props = {
+  userId: string;
+  /**
+   * What the caller may do to *this* person, straight from the server. The client used to work it
+   * out from the scope names on its own permissions, which answered "may I, at all" and not "may I,
+   * on them" — and was a second copy of the permission model besides.
+   */
+  capabilities?: Record<string, string[]>;
+};
 
-export function ProfileTabsNav({ userId }: Props) {
+export function ProfileTabsNav({ userId, capabilities }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const base = `/organization/people/${userId}`;
@@ -36,26 +41,12 @@ export function ProfileTabsNav({ userId }: Props) {
   const { isDirty } = useProfileEditGuard();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
-  const { access } = useAccess();
-  const { userId: currentUserId } = useCurrentUser();
-  const isOwnProfile = currentUserId === userId;
-
   /**
-   * Scope matters here, not just the grant. An ordinary employee holds DOCUMENTS and TIME_OFF at
-   * SELF, so checking the permission alone put both tabs on *everyone's* profile — where they then
-   * rendered an empty list or a row of disabled buttons. On someone else's page the grant only
-   * counts if it reaches past the person's own record.
+   * One lookup, no reasoning. Own profile, System Owner and every scope shape are already accounted
+   * for by the server, which resolved the answer against this person.
    */
-  const canSeeTab = (resource: ResourceCode) => {
-    if (!canAccess({ access, resource, action: "VIEW" })) return false;
-    if (isOwnProfile) return true;
-    // The owner passes canAccess without any scopes listed — don't let the check below hide
-    // everything from them.
-    if (isSystemOwner(access)) return true;
-
-    const scopes = access?.permissions?.[resource]?.VIEW ?? [];
-    return scopes.some((scope) => scope !== "SELF");
-  };
+  const canSeeTab = (resource: ResourceCode) =>
+    (capabilities?.[resource] ?? []).includes("VIEW");
 
   const visibleTabs = TABS.filter((tab) => !tab.resource || canSeeTab(tab.resource));
 

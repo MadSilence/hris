@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { JobLevel } from "@/models/job";
 import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const reorderJobLevelsAction = async (
   submission: ReorderJobLevelsActionInput
@@ -16,13 +16,7 @@ export const reorderJobLevelsAction = async (
       data,
     };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while reordering job levels. Please try again."
-      ),
-    };
+    return toActionError(error, "reorderJobLevelsAction");
   }
 };
 

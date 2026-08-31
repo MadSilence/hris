@@ -1,1 +1,1 @@
-export * from "./AttributeGroupsContainer";
+export { default } from "./AttributeGroupsContainer";

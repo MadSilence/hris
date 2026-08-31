@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { CreatePublicHolidayCalendarRequest } from "@/api/modules/publicHolidays/calendars/dto";
 import type { CreateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createPublicHolidayCalendarAction = async (
   submission: CreatePublicHolidayCalendarActionInput
@@ -16,13 +17,7 @@ export const createPublicHolidayCalendarAction = async (
       data,
     };
   } catch (error) {
-    console.error("createPublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "createPublicHolidayCalendarAction");
   }
 };
 

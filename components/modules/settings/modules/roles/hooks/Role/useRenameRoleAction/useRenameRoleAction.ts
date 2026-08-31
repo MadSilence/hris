@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   renameRoleAction,
   RenameRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/RenameRoleAction/RenameRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/renameRoleAction/renameRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 
 export const useRenameRoleAction = () => {

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { legalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type AssignedUsersStrategy = "KEEP" | "UNASSIGN";
 
@@ -21,11 +22,8 @@ export const archiveLegalEntityAction = async (
   try {
     await legalEntityService.archiveLegalEntity(id, assignedUsersStrategy);
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while archiving the legal entity. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "archiveLegalEntityAction");
   }
 };
 
@@ -35,10 +33,7 @@ export const restoreLegalEntityAction = async (
   try {
     await legalEntityService.restoreLegalEntity(id);
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while restoring the legal entity. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "archiveLegalEntityAction");
   }
 };

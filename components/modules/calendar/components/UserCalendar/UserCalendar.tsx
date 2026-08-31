@@ -1,5 +1,9 @@
 "use client";
 
+import { partsToISO as toISO } from "@/lib/date";
+import { nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
+import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
+
 import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -40,8 +44,6 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const toISO = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 const weekdayOffset = (jsDay: number) => (jsDay + 6) % 7;
 
 type DayCell = {
@@ -122,6 +124,10 @@ export const UserCalendar: FC<Props> = ({
 }) => {
   const compact = variant === "compact";
   const selectable = Boolean(onSelectRange);
+  // The company's own week, not a hardcoded Saturday/Sunday — shared with the company board so the
+  // two calendars cannot drift apart, and matching what the backend counts.
+  const { company } = useCompanyData();
+  const isNonWorkingDay = useMemo(() => nonWorkingDayTest(company?.workingDays), [company?.workingDays]);
   // Memoised so the month grid's useMemo does not see a new Date identity on every render.
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState({ year: today.getFullYear(), month: today.getMonth() });
@@ -169,14 +175,13 @@ export const UserCalendar: FC<Props> = ({
       const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
       const date = new Date(year, month, dayNum);
       const iso = toISO(date.getFullYear(), date.getMonth(), date.getDate());
-      const jsDay = date.getDay();
-      const isWeekend = jsDay === 0 || jsDay === 6;
+      const isWeekend = isNonWorkingDay(date);
       const isToday = iso === toISO(today.getFullYear(), today.getMonth(), today.getDate());
       return { iso, dayNumber: date.getDate(), inMonth, isWeekend, isToday, dayHolidays: holidaysByDay.get(iso) ?? [] };
     });
 
     return Array.from({ length: 6 }).map((_, w) => cells.slice(w * 7, w * 7 + 7));
-  }, [cursor, holidaysByDay, today]);
+  }, [cursor, holidaysByDay, today, isNonWorkingDay]);
 
   const goPrev = () =>
     setCursor((c) => (c.month === 0 ? { year: c.year - 1, month: 11 } : { ...c, month: c.month - 1 }));

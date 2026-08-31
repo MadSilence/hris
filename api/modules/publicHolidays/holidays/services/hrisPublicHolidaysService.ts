@@ -1,21 +1,13 @@
 import { hrisApiPublicHolidaysClient } from "@/api/modules/publicHolidays/holidays/clients";
-import type {
-  CreatePublicHolidayRequest,
-  RenamePublicHolidayRequest,
-  ReplaceYearHolidaysRequest,
-  UpdatePublicHolidayRequest,
-} from "@/api/modules/publicHolidays/holidays/dto";
-import { CreateResponse, UpdateResponse } from "@/api/models/misc";
+import type { ReplaceYearHolidaysRequest } from "@/api/modules/publicHolidays/holidays/dto";
 import { PublicHoliday } from "@/models/publicHolidays/holiday";
 
+/**
+ * Дни праздников читаются списком и пишутся целым годом. Поштучных create/update/rename/delete
+ * здесь нет намеренно: редактор года сохраняет всё одним запросом (`PUBLIC_HOLIDAYS_DESIGN.md`,
+ * фаза 0 шаг 5), а старый путь из N последовательных запросов удалён клинапом 2026-08-25.
+ */
 export class HrisPublicHolidaysService {
-  public async create(
-    calendarId: string,
-    body: CreatePublicHolidayRequest
-  ): Promise<CreateResponse> {
-    return hrisApiPublicHolidaysClient.create(calendarId, body);
-  }
-
   public async list(calendarId: string, year?: number): Promise<PublicHoliday[]> {
     return hrisApiPublicHolidaysClient.list(calendarId, year);
   }
@@ -26,28 +18,6 @@ export class HrisPublicHolidaysService {
     body: ReplaceYearHolidaysRequest
   ): Promise<PublicHoliday[]> {
     return hrisApiPublicHolidaysClient.replaceYear(calendarId, year, body);
-  }
-
-  public async getById(id: string): Promise<PublicHoliday> {
-    return hrisApiPublicHolidaysClient.getById(id);
-  }
-
-  public async update(
-    id: string,
-    body: UpdatePublicHolidayRequest
-  ): Promise<UpdateResponse> {
-    return hrisApiPublicHolidaysClient.update(id, body);
-  }
-
-  public async rename(
-    id: string,
-    body: RenamePublicHolidayRequest
-  ): Promise<UpdateResponse> {
-    return hrisApiPublicHolidaysClient.rename(id, body);
-  }
-
-  public async delete(id: string): Promise<void> {
-    return hrisApiPublicHolidaysClient.delete(id);
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { attributeService } from "@/api/modules/attributes/services/attributeService";
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type UpdateAttributeOptionsActionInput = {
   attributeId: string;
@@ -20,12 +21,6 @@ export const updateAttributeOptionsAction = async (
     await attributeService.setAttributeOptions(input.attributeId, input.options);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        error instanceof Error && error.message
-          ? error.message
-          : "Failed to update options. Please try again.",
-    };
+    return toActionError(error, "updateAttributeOptionsAction");
   }
 };

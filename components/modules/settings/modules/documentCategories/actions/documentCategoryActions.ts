@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type DocumentCategoryActionOutput = {
   status: ActionStatus;
@@ -33,12 +34,7 @@ export const saveDocumentCategoryAction = async (
 
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("saveDocumentCategoryAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while saving the category. Please try again.",
-    };
+    return toActionError(error, "documentCategoryActions");
   }
 };
 
@@ -49,11 +45,6 @@ export const deleteDocumentCategoryAction = async (
     await hrisDocumentsService.deleteCategory(id);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("deleteDocumentCategoryAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting the category. Please try again.",
-    };
+    return toActionError(error, "documentCategoryActions");
   }
 };

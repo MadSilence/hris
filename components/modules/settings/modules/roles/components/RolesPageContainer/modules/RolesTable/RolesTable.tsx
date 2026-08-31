@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Role } from "@/models/role/Role";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
+import { formatDisplayDate } from "@/lib/date";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import RolesTableSkeleton from "./RolesTableSkeleton";
 import { useRoleDeleteImpact } from "@/components/modules/settings/modules/roles/hooks/useRoleDeleteImpact";
@@ -222,6 +223,7 @@ export default function RolesTable({
         roleName={deleteRole?.name}
         impact={deleteImpact.data}
         isImpactLoading={deleteImpact.isLoading}
+        impactError={deleteImpact.error}
         onRequestCloseAction={closeDeleteModal}
         onConfirmAction={async () => {
           if (!deleteRole) return;
@@ -239,14 +241,5 @@ export default function RolesTable({
 }
 
 function formatDate(iso?: string | null) {
-  if (!iso) return "—";
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "—";
-  }
+  return iso ? formatDisplayDate(iso, { style: "medium" }) || "—" : "—";
 }

@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const approveTimeOffRequestAction = async (
   submission: ApproveTimeOffRequestActionInput
@@ -15,13 +16,7 @@ export const approveTimeOffRequestAction = async (
       data,
     };
   } catch (error) {
-    console.error("approveTimeOffRequestAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while approving the time off request. Please try again.",
-    };
+    return toActionError(error, "approveTimeOffRequestAction");
   }
 };
 

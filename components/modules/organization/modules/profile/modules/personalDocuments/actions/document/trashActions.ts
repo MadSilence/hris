@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type TrashActionInput = {
   userId: string;
@@ -20,11 +21,7 @@ export const restoreDocumentAction = async (
     await hrisDocumentsService.restoreDocument(submission.documentId);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("restoreDocumentAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while restoring the document. Please try again.",
-    };
+    return toActionError(error, "trashActions");
   }
 };
 
@@ -35,10 +32,6 @@ export const purgeDocumentAction = async (
     await hrisDocumentsService.purgeDocument(submission.documentId);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("purgeDocumentAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting the document. Please try again.",
-    };
+    return toActionError(error, "trashActions");
   }
 };

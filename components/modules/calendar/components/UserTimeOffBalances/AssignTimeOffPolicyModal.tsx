@@ -1,5 +1,7 @@
 "use client";
 
+import { dateToISO, isoToDate } from "@/lib/date";
+
 import { FC, useMemo, useState } from "react";
 import { CalendarDays, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
@@ -38,9 +40,6 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const dateToISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const isoToDate = (iso: string) => new Date(`${iso}T00:00:00`);
 const prettyISO = (iso: string) => format(isoToDate(iso), "MMM d, yyyy");
 
 /**

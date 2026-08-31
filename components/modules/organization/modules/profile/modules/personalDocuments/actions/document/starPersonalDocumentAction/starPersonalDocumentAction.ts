@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const starPersonalDocumentAction = async (
   submission: StarPersonalDocumentActionInput
@@ -13,12 +14,7 @@ export const starPersonalDocumentAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("starPersonalDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while starring a document. Please try again.",
-    };
+    return toActionError(error, "starPersonalDocumentAction");
   }
 };
 

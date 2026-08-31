@@ -6,7 +6,6 @@ import { UserPlus, Users, X } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
-import { useUser } from "@/components/hooks/useUser/useUser";
 
 import { useTimeOffPolicyAssignments } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffPolicyAssignments";
 import { useEndTimeOffPolicyAssignment } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useEndTimeOffPolicyAssignment";
@@ -31,10 +30,9 @@ function AssignmentRow({
   ending: boolean;
   disabled: boolean;
 }) {
-  const { data: user } = useUser(assignment.userId);
-  const name = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email
-    : "Loading…";
+  // The person arrives with the assignment. Fetching them per row meant one request per assignee
+  // and the word "Loading…" where a name belongs — on a policy with fifty people, fifty requests.
+  const name = assignment.person?.name ?? "Unnamed";
 
   return (
     <div className="group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50">
@@ -42,10 +40,7 @@ function AssignmentRow({
         <UserChip
           id={assignment.userId}
           name={name}
-          firstName={user?.firstName}
-          lastName={user?.lastName}
-          email={user?.email}
-          avatarUrl={user?.avatarUrl}
+          avatarUrl={assignment.person?.avatarUrl}
         />
         <span className="hidden text-xs text-muted-foreground sm:inline">
           from {assignment.effectiveFrom}

@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisLeaveTypesService } from "@/api/modules/timeOff/leaveTypes/services";
 import type { CreateLeaveTypeRequest } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { CreateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createLeaveTypeAction = async (
   submission: CreateLeaveTypeActionInput
@@ -16,13 +17,7 @@ export const createLeaveTypeAction = async (
       data,
     };
   } catch (error) {
-    console.error("createLeaveTypeAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating the leave type. Please try again.",
-    };
+    return toActionError(error, "createLeaveTypeAction");
   }
 };
 

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisUserAvatarService } from "@/api/modules/users/modules/userAvatar/services/hrisUserAvatarService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteUserAvatarAction = async (
   submission: DeleteUserAvatarActionInput
@@ -13,12 +14,7 @@ export const deleteUserAvatarAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("deleteUserAvatarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting the avatar. Please try again.",
-    };
+    return toActionError(error, "deleteUserAvatarAction");
   }
 };
 

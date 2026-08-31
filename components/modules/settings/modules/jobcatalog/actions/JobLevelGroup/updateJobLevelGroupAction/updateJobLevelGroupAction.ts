@@ -3,7 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { jobLevelGroupService } from "@/api/modules/jobLevelGroup/services";
-import { jobCatalogErrorMessage } from "@/components/modules/settings/modules/jobcatalog/actions/shared";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateJobLevelGroupAction = async (
   submission: UpdateJobLevelGroupActionInput
@@ -16,13 +16,7 @@ export const updateJobLevelGroupAction = async (
       data,
     };
   } catch (error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: jobCatalogErrorMessage(
-        error,
-        "An error occurred while updating a job level group. Please try again."
-      ),
-    };
+    return toActionError(error, "updateJobLevelGroupAction");
   }
 };
 

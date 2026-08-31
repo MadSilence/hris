@@ -3,6 +3,7 @@
 import { FC, ReactNode, useMemo } from "react";
 
 import { useUserPublicHolidays } from "@/components/modules/calendar/hooks/useUserPublicHolidays";
+import { expandSpanToDays } from "@/components/modules/calendar/lib/dateRange";
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
@@ -24,27 +25,21 @@ export const UserCalendarContainer: FC<Props> = ({ userId, variant = "full", hea
   const { data: requests, isLoading: requestsLoading } = useTimeOffRequestsByUser({ userId });
   const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
 
-  // Expand each holiday's [holidayDate, endDate] span into one per-day event so multi-day holidays
-  // mark every day they cover on the month grid.
-  const holidayEvents = useMemo<CalendarHolidayEvent[]>(() => {
-    const out: CalendarHolidayEvent[] = [];
-    for (const h of holidays ?? []) {
-      const start = h.holidayDate;
-      const end = h.endDate && h.endDate >= h.holidayDate ? h.endDate : h.holidayDate;
-      const cursor = new Date(`${start}T00:00:00`);
-      const last = new Date(`${end}T00:00:00`);
-      if (Number.isNaN(cursor.getTime()) || Number.isNaN(last.getTime())) {
-        out.push({ id: h.id, name: h.name, date: start, calendarName: h.calendarName });
-        continue;
-      }
-      while (cursor <= last) {
-        const iso = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(cursor.getDate()).padStart(2, "0")}`;
-        out.push({ id: `${h.id}:${iso}`, name: h.name, date: iso, calendarName: h.calendarName });
-        cursor.setDate(cursor.getDate() + 1);
-      }
-    }
-    return out;
-  }, [holidays]);
+  // The month grid marks single days, so each holiday's span is expanded — through the shared
+  // expander, not a local loop. There were three copies of this walk and they had already drifted;
+  // see `expandSpanToDays`. The dates arriving here are observed, resolved server-side.
+  const holidayEvents = useMemo<CalendarHolidayEvent[]>(
+    () =>
+      (holidays ?? []).flatMap((h) =>
+        expandSpanToDays(h.holidayDate, h.endDate).map((iso) => ({
+          id: `${h.id}:${iso}`,
+          name: h.name,
+          date: iso,
+          calendarName: h.calendarName,
+        })),
+      ),
+    [holidays],
+  );
 
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
     const policyName = new Map((policies ?? []).map((p) => [p.id, p.displayName]));

@@ -28,8 +28,15 @@ export class DocumentsRoutes {
     return Response.json(data);
   }
 
+  public async getFolderDeleteImpact(_req: Request, userId: string, folderId: string) {
+    const data = await hrisDocumentsService.getFolderDeleteImpact(userId, folderId);
+    return Response.json(data);
+  }
+
   public async deleteFolder(_req: Request, userId: string, folderId: string) {
-    await hrisDocumentsService.deleteFolder(userId, folderId);
+    // Contents move up rather than disappear — the choice belongs to the dialog, which goes through
+    // the server action; this passthrough keeps the outcome that loses nothing.
+    await hrisDocumentsService.deleteFolder(userId, folderId, "MOVE_TO_PARENT");
     return new Response(null, { status: 204 });
   }
 

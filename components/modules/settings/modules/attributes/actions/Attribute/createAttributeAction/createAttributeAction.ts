@@ -4,6 +4,7 @@ import { attributeService } from "@/api/modules/attributes/services/attributeSer
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { NewEntity } from "@/models/misc";
 import { AttributeOption, AttributeType } from "@/models/attribute";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createAttributeAction = async (
   submission: CreateAttributeActionInput
@@ -15,11 +16,8 @@ export const createAttributeAction = async (
       status: ActionStatus.SUCCESS,
       data: createEntity,
     };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while creating an Attribute. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "createAttributeAction");
   }
 };
 

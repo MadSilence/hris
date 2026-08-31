@@ -10,7 +10,7 @@ import type {
   DocumentSortField,
 } from "../../hooks/document/usePersonalDocuments/usePersonalDocuments";
 import { formatBytes } from "../../utils/formatBytes";
-import { formatDocumentDate } from "../../utils/formatDocumentDate";
+import { formatDisplayDate } from "@/lib/date";
 import { getDocumentFileIcon } from "../../utils/getDocumentFileIcon";
 import { isPreviewable } from "../../utils/isPreviewable";
 
@@ -73,9 +73,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
   if (!documents.length) return null;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">Files</h3>
-
+    <div>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -128,7 +126,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
 
                 <TableCell>{formatBytes(document.sizeBytes)}</TableCell>
 
-                <TableCell>{formatDocumentDate(document.createdAt)}</TableCell>
+                <TableCell>{formatDisplayDate(document.createdAt)}</TableCell>
 
                 <TableCell className="text-center">
                   <button

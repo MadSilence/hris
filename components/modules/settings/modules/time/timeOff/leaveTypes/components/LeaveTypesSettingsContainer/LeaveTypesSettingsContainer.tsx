@@ -1,5 +1,7 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +30,7 @@ export default function LeaveTypesSettingsContainer() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(null);
   if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) throw error;
+  if (error) return <ErrorState error={error} />;
 
   const toPayload = (values: LeaveTypeFormValues) => ({
     name: values.name,
@@ -38,18 +40,27 @@ export default function LeaveTypesSettingsContainer() {
   });
 
   const handleCreate = async (values: LeaveTypeFormValues) => {
-    await createMutation.mutateAsync(toPayload(values));
-    setIsCreateModalOpen(false);
+    try {
+      await createMutation.mutateAsync(toPayload(values));
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      // The modal stays open on purpose: whatever was typed is still there to correct.
+      showError(error);
+    }
   };
 
   const handleEdit = async (values: LeaveTypeFormValues) => {
     if (!editingLeaveType) return;
-    await updateMutation.mutateAsync({ id: editingLeaveType.id, ...toPayload(values) });
-    setEditingLeaveType(null);
+    try {
+      await updateMutation.mutateAsync({ id: editingLeaveType.id, ...toPayload(values) });
+      setEditingLeaveType(null);
+    } catch (error) {
+      showError(error);
+    }
   };
 
   const handleArchive = (leaveType: LeaveType) => {
-    archiveMutation.mutate({ id: leaveType.id });
+    archiveMutation.mutateAsync({ id: leaveType.id }).catch(showError);
   };
 
   const handleOpen = (leaveType: LeaveType) => {

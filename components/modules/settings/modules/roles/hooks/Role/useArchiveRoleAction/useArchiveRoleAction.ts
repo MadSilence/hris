@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   archiveRoleAction,
   ArchiveRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/ArchiveRoleAction/ArchiveRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/archiveRoleAction/archiveRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 
 export const useArchiveRoleAction = () => {

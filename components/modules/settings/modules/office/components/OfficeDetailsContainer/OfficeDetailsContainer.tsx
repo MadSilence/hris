@@ -1,5 +1,7 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, Building2, Download, Mail, MapPin, Users } from "lucide-react";
@@ -120,7 +122,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
     router.push("/settings/general/offices");
   }, [deleteAction.data?.status, router]);
   if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) throw error;
+  if (error) return <ErrorState error={error} />;
 
   if (isLoading) {
     return <OfficeSkeleton/>;
@@ -398,7 +400,14 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
         isOpen={isDeleteOpen}
         isLoading={deleteAction.isPending}
         office={office}
-        onConfirmAction={() => deleteAction.mutate({ id: office.id })}
+        onConfirmAction={async () => {
+          try {
+            await deleteAction.mutateAsync({ id: office.id });
+            setIsDeleteOpen(false);
+          } catch (error) {
+            showError(error);
+          }
+        }}
         onRequestCloseAction={() => setIsDeleteOpen(false)}
       />
 

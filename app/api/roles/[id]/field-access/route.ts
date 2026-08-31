@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService";
-import { BadRequestError } from "@/api/models/errors/BadRequestError";
+import { BadRequestError } from "@/components/clients/exceptions";
 import { UpdateRoleFieldAccessRequest } from "@/api/modules/roles/dto/RoleFieldAccessDTO";
 
 type RouteContext = { params: Promise<{ id: string }> };

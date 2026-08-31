@@ -1,3 +1,3 @@
-export * from "./RolesPageContainer";
+export { default } from "./RolesPageContainer";
 export * from "./RolesPageHeader";
 export * from "./RolesPageView";

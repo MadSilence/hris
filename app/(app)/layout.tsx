@@ -12,26 +12,33 @@ import styles from "./layout.module.css";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, ResourceCode } from "@/models/access";
 import { settingsGroups } from "@/components/modules/settings/config/settings.config";
-import { Toast } from "@/components/ui/Toast";
+import { Toaster } from "@/public/desact/src/components/ui/sonner";
+import { showError } from "@/lib/errors/errorToast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
 import ImpersonationProvider from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
 import CompanyDataProvider, { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { access } = useAccess();
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const { user } = useCurrentUser();
   const { company } = useCompanyData();
   const { data: unreadCount } = useUnreadNotificationsCount();
 
+  // Reads still announce a refusal this way: InternalApiClient dispatches the event, and only it
+  // can — a server action runs on the server and has no window. Mutations reach the same cards
+  // through showActionError instead.
   useEffect(() => {
     const handleForbidden = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      setToastMsg(typeof detail === "string" ? detail : "Permission denied");
+      showError(new ForbiddenError(typeof detail === "string" ? detail : undefined, {
+        code: "E00403",
+        status: 403,
+      }));
     };
 
     window.addEventListener("hris:forbidden", handleForbidden);
@@ -118,9 +125,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         <main className={styles.main}>{children}</main>
       </div>
 
-      {toastMsg ? (
-        <Toast message={toastMsg} onClose={() => setToastMsg(null)}/>
-      ) : null}
+      <Toaster/>
     </div>
   );
 };

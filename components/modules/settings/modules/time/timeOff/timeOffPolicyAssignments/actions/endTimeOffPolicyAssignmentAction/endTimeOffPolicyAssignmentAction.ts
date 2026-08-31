@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyAssignmentsService } from "@/api/modules/timeOff/timeOffPolicyAssignments/services";
 import type { EndTimeOffPolicyAssignmentRequest } from "@/api/modules/timeOff/timeOffPolicyAssignments/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const endTimeOffPolicyAssignmentAction = async (
   submission: EndTimeOffPolicyAssignmentActionInput
@@ -22,13 +23,7 @@ export const endTimeOffPolicyAssignmentAction = async (
       data,
     };
   } catch (error) {
-    console.error("endTimeOffPolicyAssignmentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while ending the policy assignment. Please try again.",
-    };
+    return toActionError(error, "endTimeOffPolicyAssignmentAction");
   }
 };
 

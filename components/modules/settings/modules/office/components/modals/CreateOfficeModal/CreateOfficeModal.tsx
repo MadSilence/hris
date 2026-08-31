@@ -11,6 +11,9 @@ import {
 type Props = {
   isOpen: boolean;
   isLoading?: boolean;
+  /** A refusal from the last attempt — rendered in the form, which stays open with it. */
+  errorMessage?: string | null;
+  fieldErrors?: Record<string, string> | null;
   initialValues?: Partial<CreateOfficeFormValues>;
   onConfirmAction: (submission: CreateOfficeFormValues) => void;
   onRequestCloseAction: () => void;
@@ -19,6 +22,8 @@ type Props = {
 export const CreateOfficeModal: FC<Props> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
+  fieldErrors,
   initialValues,
   onConfirmAction,
   onRequestCloseAction,
@@ -63,6 +68,8 @@ export const CreateOfficeModal: FC<Props> = ({
 
           <CreateOfficeForm
             isLoading={isLoading}
+            errorMessage={errorMessage}
+            fieldErrors={fieldErrors}
             initialValues={initialValues}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}

@@ -1,28 +1,15 @@
 import { NextResponse } from "next/server";
 import { withErrorMiddleware } from "@/api/middleware/errorMiddleware";
 import { authRoutes } from "@/api/modules/auth/routes/authRoutes";
+import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
 
 export const POST = withErrorMiddleware(async (req) => {
     const payload = await req.json();
-    const { accessToken } = await authRoutes.login(payload);
+    // Both tokens, not just the access one: the refresh token arrives as a `Set-Cookie` addressed to
+    // this server, and dropping it here is what left the browser unable to renew anything.
+    const tokens = await authRoutes.login(payload);
 
     const res = NextResponse.json({ ok: true }, { status: 200 });
-    const isProd = process.env.NODE_ENV === "production";
-    res.cookies.set({
-        name: "access_token",
-        value: accessToken,
-        httpOnly: true,
-        sameSite: "lax",
-        secure: isProd,
-        path: "/",
-    });
-    res.cookies.set({
-        name: "has_session",
-        value: "1",
-        httpOnly: false,
-        sameSite: "lax",
-        secure: isProd,
-        path: "/",
-    });
+    setSessionCookies(res, tokens);
     return res;
 });

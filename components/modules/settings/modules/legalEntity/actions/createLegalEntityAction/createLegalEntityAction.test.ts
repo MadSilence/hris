@@ -60,8 +60,7 @@ describe("createLegalEntityAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating a legal entity. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

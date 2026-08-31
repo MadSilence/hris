@@ -45,9 +45,8 @@ Architecture:
   - providers/ → global providers (auth, permissions, etc.)
   - hooks/ → global hooks (useCurrentUser, useUser)
   - clients/ → InternalApiClient (typed HTTP wrapper)
-  - feedback/ → EmptyState, ErrorBoundary (see Known Issues)
-- features/ → **legacy/orphan area — do not use as a reference or add new code here**
-- lib/ → utilities (cn, env, fetcher)
+  - ui/Canvas → shared canvas states for the org-structure screens (`CanvasLoading`, `CanvasMessage`)
+- lib/ → shared utilities (`cn`, `date`, `formatBytes`)
 - models/ → domain TypeScript types
 - api/ → server-side HRIS API client
 
@@ -138,9 +137,25 @@ multipart). New route handlers default to wrapped.
 
 - Used for **mutations** (see canonical paths above). Go `action → service` directly — do not add a
   route handler for a mutation.
-- Always return `{ status, data?, errorMessage? }` — **never throw to the UI**
-  (`assignmentActions.ts` currently throws; that is a known deviation, not a pattern to copy).
-- Handle errors gracefully. Use the `"use server"` directive.
+- Always return `{ status, data?, errorMessage? }` — **never throw to the UI**. Throwing belongs in
+  the react-query hook that wraps the action, not in the action itself (see
+  `audience/assignment/hooks/useAssignment.ts` — `unwrap()` turns an ERROR envelope into a rejected
+  mutation, which is what react-query needs).
+- **Do not write your own `catch`.** `lib/errors/withActionError` is the middle for mutations, the
+  mirror of `withErrorMiddleware` on the read path. Wrap the body, or call `toActionError(error)`
+  from a catch that has to exist for another reason:
+
+```ts
+export const archiveOfficeAction = withActionError(
+  (input: ArchiveOfficeActionInput) => officeService.archive(input),
+);
+```
+
+- The envelope it returns is the old one plus `code`, `fieldErrors` and `requestId`. The extra
+  fields are optional, so a caller that only reads `status` and `errorMessage` keeps working.
+- **Never write a user-facing sentence in an action.** `errorMessage` is filled from
+  `lib/errors/errorMessages` by the backend's error code; the backend's own `message` is technical
+  and is not shown. Adding an error: `DECISIONS.md` → "Как заводится новая ошибка".
 
 ---
 
@@ -148,18 +163,62 @@ multipart). New route handlers default to wrapped.
 
 The following areas are incomplete or inconsistent. Do not use them as references:
 
-- **`features/` directory** — `features/accounts/` is an orphan module. It bypasses `InternalApiClient`, uses raw `fetch`, has no skeleton
-  loader, and its `AccountCard.tsx` is empty. The folder name even has a typo (`componenets/`). Ignore it entirely.
-- **Mock data in containers** — `CompanyProfileSettingsContainer` renders a hardcoded mock object instead of real API data. Do not copy
-  this pattern. (`CompanyAppearanceSettingsContainer` was rebuilt on the real API and is now a fine reference.)
-- **Duplicate roles folders** — `components/modules/settings/modules/roles/components/` contains both `RoleDetailsComponent/` and
-  `RoleDetailsContainer/`. The active implementation is `RoleDetailsContainer/`. Do not copy from `RoleDetailsComponent/`.
-- **`ErrorBoundary.tsx` is currently empty** — `components/feedback/ErrorBoundary.tsx` has no implementation. Containers that do
-  `if (error) throw error` have no boundary catching them. Until this is fixed, prefer surfacing errors inline rather than throwing.
-- **Stub UI actions** — Some dropdown items (e.g. "Duplicate", "Archive" in public holidays) have no handlers. Do not copy these as working
-  examples.
-- **Leftover `console.log`** — Several production files contain debug logs (`PersonalInfoContainer`, `PersonalDocumentsContainer`,
-  `DepartmentsPage`, `AssignedUsersTable`). Do not add new ones.
+- **Dead export buttons.** `Export policies` in `TimeOffPoliciesSettingsComponent` has no `onClick`,
+  and the Download button in `AssignedUsersPanel` renders even when the caller passes no `onExport`
+  (public-holiday calendars). Do not copy either as a working example.
+- **Two components named `DeleteUserAvatarModal`.** The shared one was deleted in the cleanup; the
+  live one is declared **inside** `UpdateUserAvatarModal.tsx`. Do not add a second component with the
+  name of an existing one — module resolution will not warn you.
+- **A file and a folder with the same name shadow each other.** `models/userTable.ts` won over
+  `models/userTable/` (both declared `ColumnItem`); the folder was unreachable and is gone. TypeScript
+  resolves the file first and says nothing.
+
+Fixed by the cleanup of 2026-08-25 and no longer true (kept here so the entries are not re-added):
+the `features/` orphan directory, mock data in `CompanyProfileSettingsContainer`, the duplicate
+`RoleDetailsComponent/` folder, leftover `console.log`, and the Duplicate/Archive stubs in public
+holidays.
+
+---
+
+# Conventions Confirmed by the 2026-08-25 Cleanup
+
+- **Imports go through the folder when it has an `index.ts`.** 460 imports already do; the barrels
+  that were missing or empty have been filled in. Do not import a file directly past an existing
+  barrel, and do not leave an `index.ts` empty — an empty barrel makes `import … from "@/…/Folder"`
+  silently resolve to nothing.
+- **Binary upload/download is a server action + BFF service.** There is no route-handler layer for
+  avatars or the company logo; the ones that existed were never wired to a `route.ts` and were
+  removed. (Document up/download is the exception and keeps its route handler — it streams.)
+- **Holiday days are read as a list and written a whole year at a time.** Per-day
+  create/update/rename/delete was removed on both sides of the stack; use
+  `replacePublicHolidayYearAction`. See `(claude)/technical_documentation/PUBLIC_HOLIDAYS.md` — step 5.
+- **Shared helpers live in `lib/`.** `lib/date.ts` (`dateToISO` / `isoToDate` / `partsToISO` — all
+  local-time, never `toISOString()`), `lib/formatBytes.ts`, `models/timeOff/formatDayAmount.ts`.
+  Check there before writing another one-line formatter.
+- **`@typescript-eslint/no-unused-vars` is an `error`.** A binding that is deliberately unused gets a
+  leading underscore.
+
+---
+
+# Showing a failure
+
+The rule is in `DECISIONS.md` → "Ошибки — единая политика". In practice:
+
+| What happened | Where it goes |
+|---|---|
+| Input the user can fix | `<FormError>` inside the form — it stays open, with what was typed |
+| A refusal on an action whose dialog has closed | `showError(error)` / `showActionError(result)` — the sliding card |
+| A read that failed (a list, a panel, a tab) | `<ErrorState error={error} />` in the region that did not load |
+| A 403 on a whole page | `<AccessDenied/>` |
+| Anything thrown during render | `app/(app)/error.tsx`, or `<ErrorBoundary>` around a subtree |
+
+Two things that are easy to get wrong:
+
+- **Validation never goes in a card.** It belongs next to its field; a card slides away before the
+  reader works out which field it meant.
+- **An early `return` for an error must sit below every hook.** React counts hooks per render, so an
+  error return above them changes the count and breaks their order. `PeopleTableContainer` carries
+  the comment that explains it.
 
 ---
 

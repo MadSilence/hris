@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPoliciesService } from "@/api/modules/timeOff/timeOffPolicies/services";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteTimeOffPolicyAction = async (
   submission: DeleteTimeOffPolicyActionInput
@@ -13,13 +14,7 @@ export const deleteTimeOffPolicyAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("deleteTimeOffPolicyAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deleting the time off policy. Please try again.",
-    };
+    return toActionError(error, "deleteTimeOffPolicyAction");
   }
 };
 

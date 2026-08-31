@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   duplicateRoleAction,
   DuplicateRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/DuplicateRoleAction/DuplicateRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/duplicateRoleAction/duplicateRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 
 export const useDuplicateRoleAction = () => {

@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { UpdateResponse } from "@/api/models/misc";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateDocumentsFolderAction = async (
   submission: UpdateDocumentsFolderActionInput
@@ -21,12 +22,7 @@ export const updateDocumentsFolderAction = async (
       data: folder,
     };
   } catch (error) {
-    console.error("updateDocumentsFolderAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while renaming a folder. Please try again.",
-    };
+    return toActionError(error, "updateDocumentsFolderAction");
   }
 };
 

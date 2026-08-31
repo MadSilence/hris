@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo } from "react";
 
 import { cn } from "@/public/desact/src/components/ui/utils";
@@ -8,8 +9,7 @@ import { TimeOffBalanceTransactionType } from "@/api/modules/timeOff/employeeTim
 
 type Props = { balanceId: string };
 
-const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
-const signed = (n: number) => `${n > 0 ? "+" : ""}${fmt(n)}`;
+const signed = (n: number) => `${n > 0 ? "+" : ""}${formatDayAmount(n)}`;
 
 const TYPE_LABEL: Record<TimeOffBalanceTransactionType, string> = {
   [TimeOffBalanceTransactionType.Accrual]: "Accrual",
@@ -65,7 +65,7 @@ export const BalanceLedger: FC<Props> = ({ balanceId }) => {
             <span className={cn("text-sm font-medium", t.amount < 0 ? "text-red-600" : "text-green-700")}>
               {signed(t.amount)}
             </span>
-            <span className="w-12 text-xs text-muted-foreground">{fmt(running)}</span>
+            <span className="w-12 text-xs text-muted-foreground">{formatDayAmount(running)}</span>
           </div>
         </div>
       ))}

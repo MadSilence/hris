@@ -26,7 +26,7 @@ export interface AssignedUsersTableProps {
   query: string;
   onQueryChange: (v: string) => void;
   onExport: (values: { format: "csv" | "xlsx" }) => void;
-  onRemoveUser: (userId: string) => void;
+  onRemoveUser: (userId: string) => Promise<unknown> | void;
 }
 
 export default function AssignedUsersTable({

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const renameDocumentAction = async (
   submission: RenameDocumentActionInput
@@ -13,12 +14,7 @@ export const renameDocumentAction = async (
 
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("renameDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while renaming a document. Please try again.",
-    };
+    return toActionError(error, "renameDocumentAction");
   }
 };
 

@@ -2,6 +2,10 @@ import type { HrisApiAuthService } from "@/api/modules/auth/services/hrisAuthSer
 import { hrisApiAuthService } from "@/api/modules/auth/services/hrisAuthService";
 import { CompleteRegisterRequest, LoginRequest, RegisterRequest } from "@/api/modules/auth/dto";
 import { BadRequestError } from "@/components/clients/exceptions";
+import {
+  hrisAuthSessionService,
+  type SessionTokens,
+} from "@/api/modules/auth/services/hrisAuthSessionService";
 
 export class AuthRoutes {
   private readonly hrisApiAuthService: HrisApiAuthService;
@@ -10,14 +14,16 @@ export class AuthRoutes {
     this.hrisApiAuthService = service;
   }
 
-  public async login(payload: LoginRequest) {
+  /**
+   * Returns both tokens. The refresh one comes back as a `Set-Cookie` addressed to this server, so
+   * it has to be read off the response — see `hrisAuthSessionService`.
+   */
+  public async login(payload: LoginRequest): Promise<SessionTokens> {
     if (!payload?.email || !payload?.password) {
       throw new BadRequestError("Missing email or password");
     }
 
-    const {accessToken} = await this.hrisApiAuthService.login(payload);
-
-    return {accessToken};
+    return hrisAuthSessionService.login(payload);
   }
 
   public async register(payload: RegisterRequest) {

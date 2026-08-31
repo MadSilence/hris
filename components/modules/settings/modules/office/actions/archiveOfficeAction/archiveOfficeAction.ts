@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { officeService } from "@/api/modules/office/services/officeService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type AssignedUsersStrategy = "KEEP" | "UNASSIGN";
 
@@ -21,11 +22,8 @@ export const archiveOfficeAction = async (
   try {
     await officeService.archiveOffice(id, assignedUsersStrategy);
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while archiving the office. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "archiveOfficeAction");
   }
 };
 
@@ -35,10 +33,7 @@ export const restoreOfficeAction = async (
   try {
     await officeService.restoreOffice(id);
     return { status: ActionStatus.SUCCESS };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while restoring the office. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "archiveOfficeAction");
   }
 };

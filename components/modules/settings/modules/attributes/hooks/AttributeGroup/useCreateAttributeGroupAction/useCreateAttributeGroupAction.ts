@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { createAttributeGroupAction, CreateAttributeGroupActionInput } from "../../../actions/AttributeGroup/createGroupAction";
+import { createAttributeGroupAction, CreateAttributeGroupActionInput } from "../../../actions/AttributeGroup/createAttributeGroupAction";
 import { useInvalidateAttributeGroupsQuery } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 
 export const useCreateAttributeGroupAction = () => {

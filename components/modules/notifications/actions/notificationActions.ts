@@ -1,41 +1,47 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { toActionError } from "@/lib/errors/withActionError";
 import { hrisNotificationsService } from "@/api/modules/notifications/services";
 
 type ActionResult = {
   status: ActionStatus;
   errorMessage?: string;
+  code?: string;
+  requestId?: string;
 };
 
-const run = async (fn: () => Promise<unknown>, errorMessage: string): Promise<ActionResult> => {
+/**
+ * `context` used to double as the message shown to the user; it is now only a label for the log.
+ * What a person reads comes from the error code via the dictionary.
+ */
+const run = async (fn: () => Promise<unknown>, context: string): Promise<ActionResult> => {
   try {
     await fn();
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error(`${errorMessage}:`, error);
-    return { status: ActionStatus.ERROR, errorMessage };
+    return toActionError(error, context);
   }
 };
 
 export async function markNotificationReadAction(id: string): Promise<ActionResult> {
-  return run(() => hrisNotificationsService.markRead(id), "Failed to mark notification as read");
+  return run(() => hrisNotificationsService.markRead(id), "markNotificationReadAction");
 }
 
 export async function markAllNotificationsReadAction(): Promise<ActionResult> {
-  return run(() => hrisNotificationsService.markAllRead(), "Failed to mark all notifications as read");
+  return run(() => hrisNotificationsService.markAllRead(), "markAllNotificationsReadAction");
 }
 
 export async function markAllNotificationsSeenAction(): Promise<ActionResult> {
-  return run(() => hrisNotificationsService.markAllSeen(), "Failed to update notifications");
+  return run(() => hrisNotificationsService.markAllSeen(), "markAllNotificationsSeenAction");
 }
 
 export async function setNotificationStarredAction(id: string, starred: boolean): Promise<ActionResult> {
-  return run(() => hrisNotificationsService.setStarred(id, starred), "Failed to update notification");
+  return run(() => hrisNotificationsService.setStarred(id, starred), "setNotificationStarredAction");
 }
 
 export async function deleteNotificationAction(id: string): Promise<ActionResult> {
-  return run(() => hrisNotificationsService.remove(id), "Failed to delete notification");
+  return run(() => hrisNotificationsService.remove(id), "deleteNotificationAction");
 }
 
 export async function setNotificationPreferenceAction(
@@ -44,6 +50,6 @@ export async function setNotificationPreferenceAction(
 ): Promise<ActionResult> {
   return run(
     () => hrisNotificationsService.setPreference(category, enabled),
-    "Failed to update notification preference",
+    "setNotificationPreferenceAction",
   );
 }

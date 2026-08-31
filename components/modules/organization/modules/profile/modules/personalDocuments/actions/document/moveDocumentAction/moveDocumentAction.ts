@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const moveDocumentAction = async (
   submission: MoveDocumentActionInput
@@ -16,12 +17,7 @@ export const moveDocumentAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("moveDocumentAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while moving a document. Please try again.",
-    };
+    return toActionError(error, "moveDocumentAction");
   }
 };
 

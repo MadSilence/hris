@@ -11,6 +11,9 @@ import {
 type CreateLegalEntityModalProps = {
   isOpen: boolean;
   isLoading?: boolean;
+  /** A refusal from the last attempt — rendered in the form, which stays open with it. */
+  errorMessage?: string | null;
+  fieldErrors?: Record<string, string> | null;
   initialValues?: Partial<CreateLegalEntityFormValues>;
   onConfirmAction: (submission: CreateLegalEntityFormValues) => void;
   onCancelAction: () => void;
@@ -19,6 +22,8 @@ type CreateLegalEntityModalProps = {
 export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
+  fieldErrors,
   initialValues,
   onConfirmAction,
   onCancelAction,
@@ -63,6 +68,8 @@ export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
 
           <CreateLegalEntityForm
             isLoading={isLoading}
+            errorMessage={errorMessage}
+            fieldErrors={fieldErrors}
             initialValues={initialValues}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}

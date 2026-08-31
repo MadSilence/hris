@@ -1,5 +1,8 @@
 "use client";
 
+import { dateToISO, isoToDate } from "@/lib/date";
+
+import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
 import { CalendarDays, CalendarPlus, Users } from "lucide-react";
 import { format } from "date-fns";
@@ -43,10 +46,6 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
-const pad = (n: number) => String(n).padStart(2, "0");
-const dateToISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const isoToDate = (iso: string) => new Date(`${iso}T00:00:00`);
 const prettyISO = (iso: string) => format(isoToDate(iso), "MMM d, yyyy");
 
 // Inclusive calendar-day count, matching the backend duration (ChronoUnit.DAYS + 1).
@@ -189,7 +188,7 @@ export const RequestTimeOffModal: FC<Props> = ({
                     const p = policyMap.get(b.policyId);
                     const left = p?.unlimitedQuota
                       ? "Unlimited"
-                      : `${fmt(b.currentBalance)} ${p?.unit === TimeOffPolicyUnit.Hours ? "h" : "d"} left`;
+                      : `${formatDayAmount(b.currentBalance)} ${p?.unit === TimeOffPolicyUnit.Hours ? "h" : "d"} left`;
                     return (
                       <SelectItem key={b.assignmentId} value={b.assignmentId}>
                         {(p?.displayName ?? "Time off")} · {left}
@@ -284,7 +283,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Available</span>
               <span className="font-medium text-brown-900">
-                {selected ? (unlimited ? "Unlimited" : `${fmt(selected.currentBalance)} ${unit}`) : "—"}
+                {selected ? (unlimited ? "Unlimited" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : "—"}
               </span>
             </div>
 
@@ -301,7 +300,7 @@ export const RequestTimeOffModal: FC<Props> = ({
               <div className="flex items-center justify-between border-t border-brown-200 pt-3 text-sm">
                 <span className="text-muted-foreground">Balance after</span>
                 <span className={cn("font-medium", insufficient ? "text-red-600" : "text-brown-900")}>
-                  {fmt(remainingAfter)} {unit}
+                  {formatDayAmount(remainingAfter)} {unit}
                 </span>
               </div>
             )}

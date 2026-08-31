@@ -2,20 +2,32 @@ import { NextRequestHandler } from "@/api/utils/apiRequestWrapper";
 import { NextRequest, NextResponse } from "next/server";
 import { UnauthorizedError as JwtUnauthorizedError } from "@/api/modules/auth/services/jwtService";
 import { HttpStatusCode } from "@/api/models/http";
-import { BadRequestError } from "@/api/models/errors/BadRequestError";
-import { NotFoundError } from "@/api/models/errors/NotFoundError";
 import {
+  ApiError,
   BackendUnavailableError,
-  BadRequestError as ClientBadRequestError,
-  NotFoundError as ClientNotFoundError,
-  UnauthorizedError as ClientUnauthorizedError,
-  ForbiddenError as ClientForbiddenError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ValidationError,
 } from "@/components/clients/exceptions";
 
+/**
+ * What a route handler answers when it fails.
+ *
+ * `code` is what the frontend dictionary looks up — it, not `message`, is the user-facing key.
+ * `message` stays the backend's technical English, kept for logs and diagnosis. Both `fieldErrors`
+ * and `requestId` used to be dropped here: the type had only three fields, so anything richer the
+ * backend sent could not survive the trip even though it arrived intact.
+ */
 export type ErrorResponse = {
   status: HttpStatusCode;
   error?: string;
+  code?: string;
   message?: string;
+  fieldErrors?: Record<string, string>;
+  requestId?: string;
 }
 
 export const withErrorMiddleware =
@@ -32,14 +44,19 @@ export const withErrorMiddleware =
 const getErrorResponse = (e: unknown): ErrorResponse => ({
   status: getStatusCode(e),
   error: e instanceof Error ? e.name : "",
+  code: e instanceof ApiError ? e.code : undefined,
   message: e instanceof Error ? e.message : "",
+  fieldErrors: e instanceof ApiError ? e.fieldErrors : undefined,
+  requestId: e instanceof ApiError ? e.requestId : undefined,
 });
 
 const getStatusCode = (e: unknown): HttpStatusCode => {
-  if (e instanceof JwtUnauthorizedError || e instanceof ClientUnauthorizedError) return HttpStatusCode.UNAUTHORIZED;
-  if (e instanceof ClientForbiddenError) return HttpStatusCode.FORBIDDEN;
-  if (e instanceof NotFoundError || e instanceof ClientNotFoundError) return HttpStatusCode.NOT_FOUND;
-  if (e instanceof BadRequestError || e instanceof ClientBadRequestError) return HttpStatusCode.BAD_REQUEST;
+  if (e instanceof JwtUnauthorizedError || e instanceof UnauthorizedError) return HttpStatusCode.UNAUTHORIZED;
+  if (e instanceof ForbiddenError) return HttpStatusCode.FORBIDDEN;
+  if (e instanceof NotFoundError) return HttpStatusCode.NOT_FOUND;
+  if (e instanceof ConflictError) return HttpStatusCode.CONFLICT;
+  if (e instanceof ValidationError) return HttpStatusCode.UNPROCESSABLE_ENTITY;
+  if (e instanceof BadRequestError) return HttpStatusCode.BAD_REQUEST;
   if (e instanceof BackendUnavailableError) return HttpStatusCode.SERVICE_UNAVAILABLE;
   return HttpStatusCode.INTERNAL_SERVER_ERROR;
 }

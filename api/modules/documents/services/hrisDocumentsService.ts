@@ -2,6 +2,8 @@ import { hrisApiDocumentsClient } from "@/api/modules/documents/clients/hrisApiD
 import {
   CreateDocumentFolderRequest,
   DocumentDTO,
+  DocumentFolderDeleteImpactDTO,
+  DocumentFolderDeleteStrategy,
   DocumentFolderContentDTO,
   DocumentCategoryDTO,
   MoveDocumentRequest,
@@ -39,8 +41,19 @@ export class HrisDocumentsService {
     return hrisApiDocumentsClient.renameFolder(userId, folderId, body);
   }
 
-  public async deleteFolder(userId: string, folderId: string): Promise<void> {
-    return hrisApiDocumentsClient.deleteFolder(userId, folderId);
+  public async getFolderDeleteImpact(
+    userId: string,
+    folderId: string
+  ): Promise<DocumentFolderDeleteImpactDTO> {
+    return hrisApiDocumentsClient.getFolderDeleteImpact(userId, folderId);
+  }
+
+  public async deleteFolder(
+    userId: string,
+    folderId: string,
+    strategy: DocumentFolderDeleteStrategy
+  ): Promise<void> {
+    return hrisApiDocumentsClient.deleteFolder(userId, folderId, strategy);
   }
 
   public async starDocument(documentId: string): Promise<void> {

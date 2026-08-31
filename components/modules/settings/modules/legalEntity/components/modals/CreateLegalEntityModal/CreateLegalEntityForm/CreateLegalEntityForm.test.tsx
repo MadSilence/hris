@@ -151,6 +151,65 @@ describe("CreateLegalEntityForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
+  /**
+   * `LegalEntityCreateRequest` marks the whole registered address `@NotBlank`. While this form
+   * called those three fields optional — and labelled them "Optional" — a submit without a building
+   * number left here happily and came back as "Some of the details are not valid. Check the
+   * highlighted fields", with nothing highlighted, because the client had found nothing wrong.
+   */
+  it("requires the whole address, as the API does", async () => {
+    const onSubmitAction = jest.fn();
+
+    render(
+      <CreateLegalEntityForm
+        onCancelAction={jest.fn()}
+        onSubmitAction={onSubmitAction}
+      />,
+    );
+
+    fillValidForm();
+    fireEvent.change(screen.getByLabelText(/building/i), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /create/i }));
+
+    expect(
+      await screen.findByText(/please enter a building number/i),
+    ).toBeInTheDocument();
+    expect(onSubmitAction).not.toHaveBeenCalled();
+  });
+
+  it("shows a refusal the backend attached to a field, next to that field", async () => {
+    render(
+      <CreateLegalEntityForm
+        onCancelAction={jest.fn()}
+        onSubmitAction={jest.fn()}
+        fieldErrors={{ name: "A legal entity with this name already exists." }}
+      />,
+    );
+
+    expect(
+      await screen.findByText(/a legal entity with this name already exists/i),
+    ).toBeInTheDocument();
+  });
+
+  it("lets this form's own validation win over a stale backend message", async () => {
+    render(
+      <CreateLegalEntityForm
+        onCancelAction={jest.fn()}
+        onSubmitAction={jest.fn()}
+        fieldErrors={{ name: "A legal entity with this name already exists." }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /create/i }));
+
+    expect(
+      await screen.findByText(/please enter a legal entity name/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/a legal entity with this name already exists/i),
+    ).not.toBeInTheDocument();
+  });
+
   it("calls onDirtyChangeAction", async () => {
     const onDirtyChangeAction = jest.fn();
 

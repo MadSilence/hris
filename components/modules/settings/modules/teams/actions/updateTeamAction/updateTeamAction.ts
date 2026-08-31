@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTeamsService } from "@/api/modules/teams/services";
 import type { UpdateTeamRequest } from "@/api/modules/teams/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTeamAction = async (
   id: string,
@@ -13,11 +14,7 @@ export const updateTeamAction = async (
     const data = await hrisTeamsService.update(id, submission);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("updateTeamAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while updating the team. Please try again.",
-    };
+    return toActionError(error, "updateTeamAction");
   }
 };
 

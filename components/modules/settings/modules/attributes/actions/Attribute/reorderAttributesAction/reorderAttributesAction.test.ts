@@ -53,7 +53,7 @@ describe("reorderAttributesAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while reordering attributes. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

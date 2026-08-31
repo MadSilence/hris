@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
 import type { PublicHolidayYearFillResult } from "@/api/modules/publicHolidays/calendars/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 /**
  * Pulls one year from the calendar's provider.
@@ -21,12 +22,7 @@ export const fillPublicHolidayYearAction = async (
 
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("fillPublicHolidayYearAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "Could not load holidays for that year. Please try again.",
-    };
+    return toActionError(error, "fillPublicHolidayYearAction");
   }
 };
 

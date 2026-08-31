@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisUserRolesService } from "@/api/modules/roles/services/hrisUserRolesService/hrisUserRolesService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const removeUserFromRoleAction = async (
   submission: RemoveUserFromRoleActionInput
@@ -9,11 +10,8 @@ export const removeUserFromRoleAction = async (
   try {
     await hrisUserRolesService.removeRole(submission.userId, submission.roleId);
     return { status: ActionStatus.SUCCESS };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while removing the user from this role. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "removeUserFromRoleAction");
   }
 };
 

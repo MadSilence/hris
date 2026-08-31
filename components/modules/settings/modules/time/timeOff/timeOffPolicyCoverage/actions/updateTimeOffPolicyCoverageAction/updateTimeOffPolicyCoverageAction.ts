@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyCoverageService } from "@/api/modules/timeOff/timeOffPolicyCoverage/services";
 import type { UpdateTimeOffPolicyCoverageRequest } from "@/api/modules/timeOff/timeOffPolicyCoverage/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyCoverageAction = async (
   submission: UpdateTimeOffPolicyCoverageActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyCoverageAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyCoverageAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating coverage. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyCoverageAction");
   }
 };
 

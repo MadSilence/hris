@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisUserRolesService } from "@/api/modules/roles/services/hrisUserRolesService/hrisUserRolesService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const assignUserRolesAction = async (
   submission: AssignUserRolesActionInput
@@ -16,11 +17,8 @@ export const assignUserRolesAction = async (
     }
 
     return { status: ActionStatus.SUCCESS };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while updating assigned roles. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "assignUserRolesAction");
   }
 };
 

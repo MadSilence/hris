@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import {
   DeleteRoleModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/DeleteRoleModal/DeleteRoleModal";
+import { BackendUnavailableError } from "@/components/clients/exceptions";
 
 const renderModal = (
   props?: Partial<ComponentProps<typeof DeleteRoleModal>>,
@@ -88,5 +89,28 @@ describe("DeleteRoleModal", () => {
 
     expect(onConfirmAction).not.toHaveBeenCalled();
     expect(onRequestCloseAction).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The dialog used to render the same vague sentence whether the role had no holders or the API
+   * could not be reached. Deleting on that basis is a decision made blind, which is what the smoke
+   * run of 2026-08-28 caught.
+   */
+  it("says the impact is unknown when it could not be read", () => {
+    renderModal({ impact: null, impactError: new BackendUnavailableError("boom") });
+
+    expect(screen.getByText(/could not reach the server/i)).toBeInTheDocument();
+    expect(screen.getByText(/unknown/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/may lose access to systems and workflows/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the generic warning when there is simply no impact yet", () => {
+    renderModal({ impact: null });
+
+    expect(
+      screen.getByText(/may lose access to systems and workflows/i),
+    ).toBeInTheDocument();
   });
 });

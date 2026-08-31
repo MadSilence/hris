@@ -63,8 +63,7 @@ describe("updateOfficeAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating the office. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

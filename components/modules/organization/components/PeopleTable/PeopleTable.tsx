@@ -7,6 +7,7 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import { formatDisplayDate } from "@/lib/date";
 import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
@@ -41,8 +42,9 @@ type PeopleTableProps = {
   visibleColumns: ColumnItem[];
 };
 
-const formatDate = (iso?: string | null) =>
-  iso ? new Date(iso).toISOString().slice(0, 10) : "—";
+// Was `toISOString().slice(0,10)`, which converts to UTC and therefore showed Created/Updated as a
+// different day to different readers.
+const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : "—");
 
 export default function PeopleTable({
   data = [],
@@ -105,7 +107,7 @@ export default function PeopleTable({
     // The name column carries both names; there is no separate Last name column any more.
     if (colId === "sys:first_name") {
       const name =
-        [row.firstName, row.lastName].filter(Boolean).join(" ").trim() || row.email;
+        [row.firstName, row.lastName].filter(Boolean).join(" ").trim() || row.email || "Unnamed";
 
       return (
         <UserChip

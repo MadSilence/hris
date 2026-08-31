@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   createRoleAction,
   CreateRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/CreateRoleAction/CreateRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/createRoleAction/createRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 
 export const useCreateRoleAction = () => {

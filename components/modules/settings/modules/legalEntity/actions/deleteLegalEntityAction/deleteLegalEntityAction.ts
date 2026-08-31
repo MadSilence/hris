@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { legalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteLegalEntityAction = async (
   submission: DeleteLegalEntityActionInput
@@ -12,12 +13,8 @@ export const deleteLegalEntityAction = async (
     return {
       status: ActionStatus.SUCCESS,
     };
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deleting the legal entity. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "deleteLegalEntityAction");
   }
 };
 

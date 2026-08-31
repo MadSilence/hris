@@ -1,5 +1,10 @@
 "use client";
 
+import { messageForError } from "@/lib/errors/errorMessages";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import {
+  useDocumentsFolderDeleteImpact,
+} from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useDocumentsFolderDeleteImpact";
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { Card } from "@/public/desact/src/components/ui/card";
@@ -54,8 +59,9 @@ type PersonalDocumentsContainerProps = {
   userId: string;
 };
 
+/** The dialogs show what the dictionary says, not the backend's technical wording. */
 const messageOf = (error: unknown): string | null =>
-  error instanceof Error ? error.message : error ? String(error) : null;
+  error ? messageForError(error) : null;
 
 export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProps> = ({
   userId,
@@ -130,6 +136,9 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
   const [renameFolderState, setRenameFolderState] = useState<DocumentFolderDTO | null>(null);
   const [deleteFolderState, setDeleteFolderState] = useState<DocumentFolderDTO | null>(null);
+  // Counted when the dialog opens, not carried along with the listing: a folder that was empty two
+  // minutes ago is not a promise about now.
+  const folderImpact = useDocumentsFolderDeleteImpact(userId, deleteFolderState?.id ?? null);
   const [deleteDocumentState, setDeleteDocumentState] = useState<DocumentDTO | null>(null);
   const [moveDocumentState, setMoveDocumentState] = useState<DocumentDTO | null>(null);
   const [renameDocumentState, setRenameDocumentState] = useState<DocumentDTO | null>(null);
@@ -159,7 +168,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   return (
     <>
       <Card
-        className="relative border-0 px-8 pt-8 pb-8"
+        className="relative flex h-full flex-col border-0 px-8 pt-8 pb-8"
         onDragEnter={(e) => {
           if (!canEdit || !e.dataTransfer.types.includes("Files")) return;
           dragDepth.current += 1;
@@ -191,13 +200,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
           </div>
         )}
 
-        <div className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <PersonalDocumentsBreadcrumbs
-              items={breadcrumbs}
-              onNavigate={goToBreadcrumb}
-            />
-
+        <div className="flex min-h-0 flex-1 flex-col gap-6">
+          <div className="flex flex-none items-center gap-4">
             <PersonalDocumentsToolbar
               search={search}
               onSearchChange={setSearch}
@@ -211,56 +215,69 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               canEdit={canEdit}
             />
 
-            {canManage && (
-              <Button
-                variant={showTrash ? "secondary" : "outline"}
-                size="icon"
-                aria-label="Trash"
-                aria-pressed={showTrash}
-                title="Trash"
-                onClick={() => setShowTrash((v) => !v)}
-              >
-                <Trash2 className="h-4 w-4"/>
-              </Button>
-            )}
+            <div className="ml-auto flex items-center gap-3">
+              {canManage && (
+                <Button
+                  variant={showTrash ? "secondary" : "outline"}
+                  size="icon"
+                  aria-label="Trash"
+                  aria-pressed={showTrash}
+                  title="Trash"
+                  onClick={() => setShowTrash((v) => !v)}
+                >
+                  <Trash2 className="h-4 w-4"/>
+                </Button>
+              )}
+            </div>
           </div>
 
-          {showTrash ? (
-            <PersonalDocumentsTrash userId={userId}/>
-          ) : isLoading ? (
-            <PersonalDocumentsSkeleton/>
-          ) : error ? (
-            <div className="rounded-lg border bg-white p-10 text-center">
-              <h3 className="text-lg font-medium">Documents unavailable</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                You don&apos;t have access to this person&apos;s documents, or they could not be
-                loaded.
-              </p>
-            </div>
-          ) : isEmpty ? (
-            <PersonalDocumentsEmptyState/>
-          ) : (
-            <div className="space-y-8">
-              <PersonalDocumentsFoldersSection
-                folders={folders}
-                onOpen={openFolder}
-                onRename={canEdit ? (folder) => setRenameFolderState(folder) : undefined}
-                onDelete={canManage ? (folder) => setDeleteFolderState(folder) : undefined}
-              />
-
-              <PersonalDocumentsFilesTable
-                documents={documents}
-                sort={sort}
-                onSortChange={setSort}
-                onToggleStar={toggleStar}
-                onDelete={canManage ? (document) => setDeleteDocumentState(document) : undefined}
-                onMove={canEdit ? (document) => setMoveDocumentState(document) : undefined}
-                onRename={canEdit ? (document) => setRenameDocumentState(document) : undefined}
-                onPreview={(document) => setPreviewState(document)}
-                getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
+          {/*
+            The trail is the only thing that says which folder is open, so it appears once there is
+            one. At the root it said "Documents" above a tab already called Documents.
+          */}
+          {!showTrash && breadcrumbs.length > 1 && (
+            <div className="flex-none">
+              <PersonalDocumentsBreadcrumbs
+                items={breadcrumbs}
+                onNavigate={goToBreadcrumb}
               />
             </div>
           )}
+
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {showTrash ? (
+              <PersonalDocumentsTrash userId={userId}/>
+            ) : isLoading ? (
+              <PersonalDocumentsSkeleton/>
+            ) : error ? (
+              <div className="rounded-lg border bg-white">
+                <ErrorState error={error} compact/>
+              </div>
+            ) : isEmpty ? (
+              <PersonalDocumentsEmptyState/>
+            ) : (
+              <div className="space-y-8">
+                <PersonalDocumentsFoldersSection
+                  folders={folders}
+                  onOpen={openFolder}
+                  onRename={canEdit ? (folder) => setRenameFolderState(folder) : undefined}
+                  onDelete={canManage ? (folder) => setDeleteFolderState(folder) : undefined}
+                />
+
+                <PersonalDocumentsFilesTable
+                  documents={documents}
+                  sort={sort}
+                  onSortChange={setSort}
+                  onToggleStar={toggleStar}
+                  onDelete={canManage ? (document) => setDeleteDocumentState(document) : undefined}
+                  onMove={canEdit ? (document) => setMoveDocumentState(document) : undefined}
+                  onRename={canEdit ? (document) => setRenameDocumentState(document) : undefined}
+                  onPreview={(document) => setPreviewState(document)}
+                  getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </Card>
 
@@ -303,15 +320,17 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isOpen={!!deleteFolderState}
         isLoading={isDeletingFolder}
         folderName={deleteFolderState?.name}
+        impact={folderImpact.data ?? null}
+        isImpactLoading={folderImpact.isLoading}
         errorMessage={messageOf(deleteFolderError)}
         onRequestCloseAction={() => {
           setDeleteFolderState(null);
           resetDeleteFolder();
         }}
-        onConfirmAction={() => {
+        onConfirmAction={(strategy) => {
           if (!deleteFolderState) return;
 
-          void runAndClose(deleteFolder(deleteFolderState.id), () => {
+          void runAndClose(deleteFolder(deleteFolderState.id, strategy), () => {
             setDeleteFolderState(null);
             resetDeleteFolder();
           });

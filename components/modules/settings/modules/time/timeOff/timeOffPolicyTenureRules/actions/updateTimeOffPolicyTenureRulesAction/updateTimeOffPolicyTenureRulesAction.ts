@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPolicyTenureRulesService } from "@/api/modules/timeOff/timeOffPolicyTenureRules/services";
 import type { UpdateTimeOffPolicyTenureRulesRequest } from "@/api/modules/timeOff/timeOffPolicyTenureRules/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const updateTimeOffPolicyTenureRulesAction = async (
   submission: UpdateTimeOffPolicyTenureRulesActionInput
@@ -17,13 +18,7 @@ export const updateTimeOffPolicyTenureRulesAction = async (
       data,
     };
   } catch (error) {
-    console.error("updateTimeOffPolicyTenureRulesAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while updating tenure rewards. Please try again.",
-    };
+    return toActionError(error, "updateTimeOffPolicyTenureRulesAction");
   }
 };
 

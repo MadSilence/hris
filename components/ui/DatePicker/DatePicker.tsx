@@ -1,5 +1,7 @@
 "use client";
 
+import { dateToISO, isoToDate } from "@/lib/date";
+
 import { useState, type FC } from "react";
 import { format } from "date-fns";
 import type { Matcher } from "react-day-picker";
@@ -9,14 +11,7 @@ import { Calendar } from "@/public/desact/src/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
-/** `Date` → `yyyy-MM-dd`, read in local time so the day never slips across a timezone. */
-export const dateToISO = (date: Date): string =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-/** `yyyy-MM-dd` → local midnight. `new Date("2026-01-01")` would parse as UTC and drift a day. */
-export const isoToDate = (iso: string): Date => new Date(`${iso}T00:00:00`);
+export { dateToISO, isoToDate } from "@/lib/date";
 
 const isValidISO = (iso: string) =>
   /^\d{4}-\d{2}-\d{2}$/.test(iso) && !Number.isNaN(isoToDate(iso).getTime());

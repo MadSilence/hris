@@ -42,9 +42,8 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
   const open = (start?: string, end?: string) => setModal({ open: true, start, end });
   const close = () => setModal({ open: false });
 
-  // "Schedule leave" in the profile header lands here with ?request=1 — the request modal lives on
-  // this tab (it needs the person's balances), so the header sends people to it rather than
-  // duplicating the flow.
+  // `?request=1` opens the request modal on arrival — the entry point a link or a redirect uses,
+  // since the modal needs this person's balances and therefore lives on this tab.
   const searchParams = useSearchParams();
   const requestedFromHeader = searchParams.get("request") === "1";
 

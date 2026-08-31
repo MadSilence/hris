@@ -7,6 +7,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
+import { FormError } from "@/components/feedback/FormError";
 
 export type CreateLegalEntityFormValues = {
   name: string;
@@ -22,6 +23,10 @@ export type CreateLegalEntityFormValues = {
 
 export interface CreateLegalEntityFormProps {
   isLoading?: boolean;
+  /** Why the last attempt was refused. Keeps the dialog open with what was typed still in it. */
+  errorMessage?: string | null;
+  /** Per-field refusals from the backend, keyed by field name — what "the highlighted fields" means. */
+  fieldErrors?: Record<string, string> | null;
   initialValues?: Partial<CreateLegalEntityFormValues>;
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
@@ -62,21 +67,25 @@ const createSchema = yup.object({
     .trim()
     .required("Please enter a city.")
     .max(120, "City must be at most 120 characters."),
+  // Required because the backend requires them: `LegalEntityCreateRequest` marks the whole
+  // registered address `@NotBlank`. They used to be optional here and labelled "Optional", so a
+  // submit without a building number came back as "check the highlighted fields" with nothing
+  // highlighted — the form was promising something the API would refuse.
   street: yup
     .string()
     .trim()
-    .max(200, "Street must be at most 200 characters.")
-    .optional(),
+    .required("Please enter a street.")
+    .max(200, "Street must be at most 200 characters."),
   building: yup
     .string()
     .trim()
-    .max(50, "Building must be at most 50 characters.")
-    .optional(),
+    .required("Please enter a building number.")
+    .max(50, "Building must be at most 50 characters."),
   postCode: yup
     .string()
     .trim()
-    .max(50, "Post code must be at most 50 characters.")
-    .optional(),
+    .required("Please enter a post code.")
+    .max(50, "Post code must be at most 50 characters."),
 });
 
 function sanitize(
@@ -97,6 +106,8 @@ function sanitize(
 
 export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
   isLoading = false,
+  errorMessage,
+  fieldErrors,
   initialValues,
   onCancelAction,
   onDirtyChangeAction,
@@ -129,6 +140,16 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
   useEffect(() => {
     onDirtyChangeAction?.(formik.dirty);
   }, [formik.dirty, onDirtyChangeAction]);
+
+  /**
+   * What each field shows: this form's own validation first, then whatever the backend said about
+   * that field. Without the second half a refusal could name a field ("check the highlighted
+   * fields") while nothing on screen was highlighted.
+   */
+  const shownErrors: Partial<Record<keyof CreateLegalEntityFormValues, string>> = {
+    ...(fieldErrors ?? {}),
+    ...formik.errors,
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -167,10 +188,10 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 placeholder="e.g., Acme LLC"
                 required
                 disabled={isLoading}
-                aria-invalid={!!formik.errors.name}
+                aria-invalid={!!shownErrors.name}
               />
-              {formik.errors.name && (
-                <p className="text-sm text-destructive">{formik.errors.name}</p>
+              {shownErrors.name && (
+                <p className="text-sm text-destructive">{shownErrors.name}</p>
               )}
             </div>
 
@@ -184,11 +205,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 }
                 placeholder="Optional"
                 disabled={isLoading}
-                aria-invalid={!!formik.errors.description}
+                aria-invalid={!!shownErrors.description}
               />
-              {formik.errors.description && (
+              {shownErrors.description && (
                 <p className="text-sm text-destructive">
-                  {formik.errors.description}
+                  {shownErrors.description}
                 </p>
               )}
             </div>
@@ -210,11 +231,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   placeholder="Registration number"
                   required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.registrationNumber}
+                  aria-invalid={!!shownErrors.registrationNumber}
                 />
-                {formik.errors.registrationNumber && (
+                {shownErrors.registrationNumber && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.registrationNumber}
+                    {shownErrors.registrationNumber}
                   </p>
                 )}
               </div>
@@ -230,11 +251,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   placeholder="Tax identification number"
                   required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.taxId}
+                  aria-invalid={!!shownErrors.taxId}
                 />
-                {formik.errors.taxId && (
+                {shownErrors.taxId && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.taxId}
+                    {shownErrors.taxId}
                   </p>
                 )}
               </div>
@@ -261,11 +282,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   placeholder="Country"
                   required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.country}
+                  aria-invalid={!!shownErrors.country}
                 />
-                {formik.errors.country && (
+                {shownErrors.country && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.country}
+                    {shownErrors.country}
                   </p>
                 )}
               </div>
@@ -281,11 +302,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   placeholder="City"
                   required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.city}
+                  aria-invalid={!!shownErrors.city}
                 />
-                {formik.errors.city && (
+                {shownErrors.city && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.city}
+                    {shownErrors.city}
                   </p>
                 )}
               </div>
@@ -300,13 +321,14 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("street", e.currentTarget.value)
                   }
-                  placeholder="Optional"
+                  placeholder="e.g., Baker Street"
+                  required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.street}
+                  aria-invalid={!!shownErrors.street}
                 />
-                {formik.errors.street && (
+                {shownErrors.street && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.street}
+                    {shownErrors.street}
                   </p>
                 )}
               </div>
@@ -319,13 +341,14 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("building", e.currentTarget.value)
                   }
-                  placeholder="Optional"
+                  placeholder="e.g., 221B"
+                  required
                   disabled={isLoading}
-                  aria-invalid={!!formik.errors.building}
+                  aria-invalid={!!shownErrors.building}
                 />
-                {formik.errors.building && (
+                {shownErrors.building && (
                   <p className="text-sm text-destructive">
-                    {formik.errors.building}
+                    {shownErrors.building}
                   </p>
                 )}
               </div>
@@ -339,19 +362,22 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 onChange={(e) =>
                   formik.setFieldValue("postCode", e.currentTarget.value)
                 }
-                placeholder="Optional"
+                placeholder="e.g., NW1 6XE"
+                required
                 disabled={isLoading}
-                aria-invalid={!!formik.errors.postCode}
+                aria-invalid={!!shownErrors.postCode}
               />
-              {formik.errors.postCode && (
+              {shownErrors.postCode && (
                 <p className="text-sm text-destructive">
-                  {formik.errors.postCode}
+                  {shownErrors.postCode}
                 </p>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      <FormError message={errorMessage} className="mx-6 mb-4"/>
 
       <DialogFooter className="border-t border-brown-100 bg-white px-6 py-4">
         <Button

@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisEmployeeTimeOffBalancesService } from "@/api/modules/timeOff/employeeTimeOffBalances/services";
 import type { AdjustEmployeeTimeOffBalanceRequest } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const adjustEmployeeTimeOffBalanceAction = async (
   submission: AdjustEmployeeTimeOffBalanceActionInput
@@ -22,13 +23,7 @@ export const adjustEmployeeTimeOffBalanceAction = async (
       data,
     };
   } catch (error) {
-    console.error("adjustEmployeeTimeOffBalanceAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while adjusting the time off balance. Please try again.",
-    };
+    return toActionError(error, "adjustEmployeeTimeOffBalanceAction");
   }
 };
 

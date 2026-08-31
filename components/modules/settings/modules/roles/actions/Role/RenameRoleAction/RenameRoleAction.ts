@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UpdatedEntity } from "@/models/misc";
 import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService/hrisApiRolesService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const renameRoleAction = async (
   submission: RenameRoleActionInput
@@ -19,11 +20,8 @@ export const renameRoleAction = async (
       status: ActionStatus.SUCCESS,
       data,
     };
-  } catch {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while renaming role. Please try again.",
-    };
+  } catch (error) {
+    return toActionError(error, "renameRoleAction");
   }
 };
 

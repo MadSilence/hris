@@ -8,6 +8,7 @@ import AssignedUsersTableSkeleton from "./AssignedUsersTableSkeleton";
 import RemoveAssignedUserDialog from "./modals/RemoveAssignedUserDialog";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import { formatDisplayDate } from "@/lib/date";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 
 export interface AssignedUsersTableContentProps {
@@ -16,7 +17,7 @@ export interface AssignedUsersTableContentProps {
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
-  onRemoveUser: (userId: string) => void;
+  onRemoveUser: (userId: string) => Promise<unknown> | void;
   disableRemove?: boolean;
   emptyText?: string;
 }
@@ -38,16 +39,7 @@ function StatusBadge({ status }: { status?: string | null }) {
 }
 
 function formatDate(iso?: string | null) {
-  if (!iso) return "—";
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "—";
-  }
+  return iso ? formatDisplayDate(iso, { style: "medium" }) || "—" : "—";
 }
 
 export default function AssignedUsersTableContent({
@@ -82,7 +74,8 @@ export default function AssignedUsersTableContent({
           {!isLoading &&
             hasData &&
             rows.map((u) => {
-              const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
+              const fullName =
+                `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Unnamed";
 
               return (
                 <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">

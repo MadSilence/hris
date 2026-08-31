@@ -3,6 +3,11 @@ import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
 import { parseCheckboxValue, parsePersonValue } from "@/models/attribute/attributeValue";
+import { formatDisplayDate } from "@/lib/date";
+import {
+  UserPickerField,
+  type PickedUser,
+} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { getObjectSchema } from "@/models/attribute/objectFields";
 import {
   ObjectRecordsView,
@@ -24,6 +29,12 @@ export type PersonalInfoAttributesRowProps = {
   /** Sensitive field the caller may not view: the server already replaced the value with a mask. */
   masked?: boolean;
   isEdit?: boolean;
+  /**
+   * Did this field have a value before the edit started? `required` means "you may not clear it",
+   * not "you may not save while it is empty" — a field that arrived empty must not hold the whole
+   * profile hostage for everyone who opens it.
+   */
+  wasFilled?: boolean;
   onChange?: (v: unknown) => void;
   onValidityChange?: (error: string | null) => void;
 };
@@ -33,10 +44,11 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
   rawValue,
   masked = false,
   isEdit = false,
+  wasFilled = false,
   onChange,
   onValidityChange,
 }) => {
-  const error = isEdit ? fieldError(attribute, rawValue) : null;
+  const error = isEdit ? fieldError(attribute, rawValue, wasFilled) : null;
 
   // Report this field's validity up so the container can block Save.
   const onValidityChangeRef = React.useRef(onValidityChange);
@@ -325,7 +337,7 @@ function EditValue({
 
     case AttributeType.SELECT: {
       const options = attribute.options ?? [];
-      const cur = normalizeIdOrValue(attribute, rawValue);
+      const cur = rawValue == null ? null : String(rawValue);
 
       return (
         <Select value={cur ?? undefined} onValueChange={(v) => onChange(v)}>
@@ -346,12 +358,14 @@ function EditValue({
 
     case AttributeType.MULTI_SELECT: {
       const opts = attribute.options ?? [];
-      const curSet = new Set<string>(normalizeArrayIdsOrValues(attribute, rawValue));
+      const curSet = new Set<string>(
+        (rawValue == null ? [] : Array.isArray(rawValue) ? rawValue : [rawValue]).map(String)
+      );
 
       return (
         <div style={{ display: "grid", gap: "6px" }}>
           {opts.map((o) => {
-            const checked = curSet.has(o.id) || curSet.has(o.value);
+            const checked = curSet.has(o.id);
 
             return (
               <label key={o.id} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -388,19 +402,8 @@ function EditValue({
         />
       );
 
-    case AttributeType.PERSON: {
-      // A PERSON value is a user id, which the server now validates. Until this field gets a real
-      // people-picker, editing is disabled rather than offering a text box that can only fail.
-      const person = parsePersonValue(rawValue);
-      return (
-        <div className="space-y-1">
-          <Input value={person?.name ?? ""} disabled readOnly placeholder="No one selected" />
-          <p className="text-xs text-muted-foreground">
-            Choosing a person isn&apos;t available here yet.
-          </p>
-        </div>
-      );
-    }
+    case AttributeType.PERSON:
+      return <PersonEditor rawValue={rawValue} onChange={onChange}/>;
 
     default:
       return (
@@ -417,7 +420,7 @@ function EditValue({
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const URL_RE = /^https?:\/\/\S+$/i;
 
-function isEmptyValue(raw: unknown): boolean {
+export function isEmptyValue(raw: unknown): boolean {
   return (
     raw === null ||
     raw === undefined ||
@@ -427,9 +430,57 @@ function isEmptyValue(raw: unknown): boolean {
 }
 
 /** Client-side pre-validation for a single attribute value. Returns an error string or null.
- *  The server (UserAttributeValueWriter) remains authoritative; this is just inline feedback. */
-function fieldError(attribute: Attribute, raw: unknown): string | null {
-  if (attribute.required && isEmptyValue(raw)) return "This field is required.";
+ *  The server (UserAttributeValueWriter) remains authoritative; this is just inline feedback.
+ *
+ *  `required` is enforced as "cannot be cleared", which is the rule the server applies
+ *  (`clear && attr.isRequired()`). Enforcing "must be filled" here instead made the client stricter
+ *  than the API: one required attribute nobody had ever filled in disabled Save for the whole
+ *  profile, and every other edit on the page with it. */
+/**
+ * The PERSON editor.
+ *
+ * The value is **read** as the `{id, name}` the backend resolves and **written** as the bare id,
+ * which is what `UserAttributeValueWriter` accepts — so the moment someone picks, the draft holds an
+ * id that can no longer name anybody. Hence the memory of the last selection: the displayed person
+ * is derived from the value plus that memory, never stored in place of it, so Cancel and a landed
+ * save both put the row back where the server says it should be.
+ *
+ * Candidates come from the audience engine, which resolves them against the caller's scope — the
+ * picker cannot offer people this caller is not allowed to see.
+ */
+function PersonEditor({
+  rawValue,
+  onChange,
+}: {
+  rawValue: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  const [lastPicked, setLastPicked] = React.useState<PickedUser | null>(null);
+
+  const resolved = parsePersonValue(rawValue);
+  const id = resolved?.id ?? (typeof rawValue === "string" && rawValue ? rawValue : null);
+  const picked: PickedUser | null = resolved
+    ? { id: resolved.id, firstName: resolved.name }
+    : id
+      ? lastPicked?.id === id
+        ? lastPicked
+        : { id }
+      : null;
+
+  return (
+    <UserPickerField
+      value={picked}
+      onChange={(u) => {
+        setLastPicked(u);
+        onChange(u?.id ?? null);
+      }}
+      placeholder="No one selected"
+    />
+  );
+}
+
+function fieldError(attribute: Attribute, raw: unknown, wasFilled: boolean): string | null {
+  if (attribute.required && wasFilled && isEmptyValue(raw)) return "This field cannot be cleared.";
   if (isEmptyValue(raw)) return null;
 
   switch (attribute.type) {
@@ -534,12 +585,7 @@ function parseDate(raw: unknown): Date | null {
 function formatDate(raw: unknown, hideYear: boolean): string {
   const d = parseDate(raw);
   if (!d) return String(raw ?? "");
-
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-
-  return hideYear ? `${dd}.${mm}` : `${dd}.${mm}.${yyyy}`;
+  return formatDisplayDate(d, { hideYear });
 }
 
 function toInputDateValue(raw: unknown): string {
@@ -553,6 +599,13 @@ function toInputDateValue(raw: unknown): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+/*
+ * Option values reach this component as option **ids** — `PersonalInfoContainer` normalises them
+ * once, on the way in, because the API reads an option as its text and writes it as an id. Matching
+ * on the option's text as well used to happen here, in three places, each half-written; the
+ * conversion belongs at the boundary, not in every consumer.
+ */
+
 function resolveSingleOption(
   attribute: Attribute,
   raw: unknown,
@@ -560,47 +613,25 @@ function resolveSingleOption(
   if (!attribute.options?.length) {
     return { label: raw ? String(raw) : null, color: undefined };
   }
+  if (raw == null) return { label: null, color: undefined };
 
-  const idOrValue = normalizeIdOrValue(attribute, raw);
-  const found = attribute.options.find((o) => o.id === idOrValue || o.value === idOrValue);
+  const found = attribute.options.find((o) => o.id === String(raw));
 
-  return { label: found?.value ?? null, color: found?.color };
+  // An id with no option behind it — deleted after the value was written — shows as itself rather
+  // than as "Not set": the value exists, and pretending otherwise loses it silently.
+  return { label: found?.value ?? String(raw), color: found?.color };
 }
 
 function resolveMultiOptions(
   attribute: Attribute,
   raw: unknown,
 ): Array<{ key: string; label: string; color?: string }> {
-  const res: Array<{ key: string; label: string; color?: string }> = [];
-  const arr = normalizeArrayIdsOrValues(attribute, raw);
+  const arr = raw == null ? [] : Array.isArray(raw) ? raw : [raw];
 
-  if (!arr.length) return res;
-
-  for (const val of arr) {
-    const found = attribute.options?.find((o) => o.id === val || o.value === val);
-
-    if (found) {
-      res.push({ key: found.id, label: found.value, color: found.color });
-    } else {
-      res.push({ key: String(val), label: String(val) });
-    }
-  }
-
-  return res;
-}
-
-function normalizeIdOrValue(attribute: Attribute, raw: unknown): string | null {
-  if (raw == null) return null;
-
-  const s = String(raw);
-  const ids = new Set((attribute.options ?? []).map((o) => o.id));
-
-  return ids.has(s) ? s : s;
-}
-
-function normalizeArrayIdsOrValues(attribute: Attribute, raw: unknown): string[] {
-  if (raw == null) return [];
-  if (Array.isArray(raw)) return raw.map(String);
-
-  return [String(raw)];
+  return arr.map((val) => {
+    const found = attribute.options?.find((o) => o.id === String(val));
+    return found
+      ? { key: found.id, label: found.value, color: found.color }
+      : { key: String(val), label: String(val) };
+  });
 }

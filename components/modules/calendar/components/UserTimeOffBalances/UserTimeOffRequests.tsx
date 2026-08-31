@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
 import { CalendarX2 } from "lucide-react";
 
@@ -18,11 +19,11 @@ import type { TimeOffRequest } from "@/models/timeOff";
 
 type Props = { userId: string };
 
-const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 const STATUS_STYLE: Record<TimeOffRequestStatus, string> = {
   [TimeOffRequestStatus.Pending]: "border-amber-200 bg-amber-50 text-amber-700",
   [TimeOffRequestStatus.Approved]: "border-green-200 bg-green-50 text-green-700",
+  [TimeOffRequestStatus.CancellationPending]: "border-amber-200 bg-amber-50 text-amber-700",
   [TimeOffRequestStatus.Rejected]: "border-red-200 bg-red-50 text-red-700",
   [TimeOffRequestStatus.Cancelled]: "border-brown-200 bg-brown-50 text-brown-500",
 };
@@ -30,12 +31,21 @@ const STATUS_STYLE: Record<TimeOffRequestStatus, string> = {
 const STATUS_LABEL: Record<TimeOffRequestStatus, string> = {
   [TimeOffRequestStatus.Pending]: "Pending",
   [TimeOffRequestStatus.Approved]: "Approved",
+  [TimeOffRequestStatus.CancellationPending]: "Cancellation requested",
   [TimeOffRequestStatus.Rejected]: "Rejected",
   [TimeOffRequestStatus.Cancelled]: "Cancelled",
 };
 
 const canCancel = (status: TimeOffRequestStatus) =>
   status === TimeOffRequestStatus.Pending || status === TimeOffRequestStatus.Approved;
+
+/**
+ * Cancelling something already approved is asking to undo an agreement, so the approver answers it —
+ * unless the policy says otherwise, which only the server knows. Saying so on the button is the
+ * difference between "it did nothing" and "somebody has to look at it".
+ */
+const cancelLabel = (status: TimeOffRequestStatus, isOwnRequest: boolean) =>
+  isOwnRequest && status === TimeOffRequestStatus.Approved ? "Request cancellation" : "Cancel";
 
 // Newest first, by start date.
 const byStartDesc = (a: TimeOffRequest, b: TimeOffRequest) => b.startDate.localeCompare(a.startDate);
@@ -144,9 +154,24 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {request.startDate} → {request.endDate} · {fmt(request.requestedAmount)} d
+                    {request.startDate} → {request.endDate} · {formatDayAmount(request.requestedAmount)} d
                     {request.reason ? <span> · {request.reason}</span> : null}
                   </p>
+
+                  {/* The reason travelled from the backend all along and nothing rendered it, so a
+                      rejection read as a bare red badge and the requester had to go and ask. */}
+                  {request.status === TimeOffRequestStatus.Rejected && request.rejectionReason && (
+                    <p className="mt-1 text-xs text-red-700">
+                      <span className="font-medium">Reason:</span> {request.rejectionReason}
+                    </p>
+                  )}
+
+                  {request.status === TimeOffRequestStatus.CancellationPending && (
+                    <p className="mt-1 text-xs text-amber-700">
+                      Waiting for the approver to confirm the cancellation
+                      {request.cancellationReason ? ` · ${request.cancellationReason}` : ""}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-none items-center gap-1">
@@ -184,7 +209,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       onClick={() => handleCancel(request)}
                       disabled={cancelMutation.isPending}
                     >
-                      Cancel
+                      {cancelLabel(request.status, !canDecide)}
                     </Button>
                   )}
                 </div>

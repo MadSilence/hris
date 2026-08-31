@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTeamsService } from "@/api/modules/teams/services";
 import type { DeleteTeamRequest } from "@/api/modules/teams/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteTeamAction = async (
   id: string,
@@ -12,11 +13,7 @@ export const deleteTeamAction = async (
     await hrisTeamsService.delete(id, submission);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("deleteTeamAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting the team. Please try again.",
-    };
+    return toActionError(error, "deleteTeamAction");
   }
 };
 

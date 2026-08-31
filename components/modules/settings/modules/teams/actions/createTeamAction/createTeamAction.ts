@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTeamsService } from "@/api/modules/teams/services";
 import type { CreateTeamRequest } from "@/api/modules/teams/dto";
 import type { CreateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createTeamAction = async (
   submission: CreateTeamActionInput,
@@ -12,11 +13,7 @@ export const createTeamAction = async (
     const data = await hrisTeamsService.create(submission);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("createTeamAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while creating the team. Please try again.",
-    };
+    return toActionError(error, "createTeamAction");
   }
 };
 

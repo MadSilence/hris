@@ -53,7 +53,7 @@ describe("renameAttributeGroupAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while renaming group. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

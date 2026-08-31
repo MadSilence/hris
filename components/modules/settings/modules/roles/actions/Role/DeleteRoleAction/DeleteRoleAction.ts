@@ -1,4 +1,5 @@
  "use server";
+import { toActionError } from "@/lib/errors/withActionError";
  
  import { ActionStatus } from "@/components/models/ActionStatus";
  import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService/hrisApiRolesService";
@@ -9,11 +10,8 @@
    try {
      await hrisApiRolesService.deleteRole(submission.id);
      return { status: ActionStatus.SUCCESS };
-   } catch {
-     return {
-       status: ActionStatus.ERROR,
-       errorMessage: "An error occurred while deleting role. Please try again.",
-     };
+   } catch (error) {
+     return toActionError(error, "deleteRoleAction");
    }
  };
  

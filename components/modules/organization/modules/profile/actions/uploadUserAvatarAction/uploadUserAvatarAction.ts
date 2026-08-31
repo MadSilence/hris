@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { CreateResponse } from "@/api/models/misc";
 import { hrisUserAvatarService } from "@/api/modules/users/modules/userAvatar/services/hrisUserAvatarService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const uploadUserAvatarAction = async (
   submission: UploadUserAvatarActionInput
@@ -18,12 +19,7 @@ export const uploadUserAvatarAction = async (
       data: response,
     };
   } catch (error) {
-    console.error("uploadUserAvatarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while uploading the avatar. Please try again.",
-    };
+    return toActionError(error, "uploadUserAvatarAction");
   }
 };
 

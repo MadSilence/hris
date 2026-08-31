@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisSegmentsService } from "@/api/modules/segments/services/hrisSegmentsService/hrisSegmentsService";
-import { BadRequestError } from "@/api/models/errors/BadRequestError";
+import { BadRequestError } from "@/components/clients/exceptions";
 import { Segment } from "@/models/segment/Segment";
 
 type ResolveBody = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -144,7 +145,6 @@ const PeopleTableContainer: React.FC = () => {
     hasNextPage,
     isFetchingNextPage,
   } = usePeopleSearchInfinite(params);
-  if (error && !(error instanceof ForbiddenError)) throw error;
 
   const onSortChange = useCallback((next: SortState) => {
     setSort(next);
@@ -319,6 +319,7 @@ const PeopleTableContainer: React.FC = () => {
   // Below every hook on purpose: an early return here would render fewer hooks than the previous
   // pass and break their order. A refusal is still an answer, so it gets a screen, not a crash.
   if (error instanceof ForbiddenError) return <AccessDenied/>;
+  if (error) return <ErrorState error={error} />;
 
   return (
     <div className="flex min-h-0 flex-1 gap-4">

@@ -1,1 +1,1 @@
-export * from "./TrialContainer";
+export { default } from "./TrialContainer";

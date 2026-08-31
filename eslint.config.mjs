@@ -32,8 +32,10 @@ const eslintConfig = [
       // The codebase already marks a deliberately-unused binding with a leading underscore —
       // route handlers that ignore `req`, destructures that drop audit columns. Honour that
       // convention so the rule reports only the genuinely leftover ones.
+      // Поднято до error клинапом 2026-08-25: на тот момент находок было ноль, значит переход
+      // бесплатный, а мёртвые импорты больше не накапливаются молча.
       "@typescript-eslint/no-unused-vars": [
-        "warn",
+        "error",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",

@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { groupsService } from "@/api/modules/groups/services/groupsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deleteAttributeGroupAction = async (
   submission: DeleteAttributeGroupActionInput
@@ -12,11 +13,8 @@ export const deleteAttributeGroupAction = async (
     return {
       status: ActionStatus.SUCCESS,
     }
-  } catch (_error) {
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while deleting groups. Please try again."
-    };
+  } catch (error) {
+    return toActionError(error, "deleteAttributeGroupAction");
   }
 };
 

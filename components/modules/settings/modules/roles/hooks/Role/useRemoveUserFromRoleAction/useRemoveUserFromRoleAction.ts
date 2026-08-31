@@ -3,7 +3,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   removeUserFromRoleAction,
   RemoveUserFromRoleActionInput,
-} from "@/components/modules/settings/modules/roles/actions/Role/RemoveUserFromRoleAction/RemoveUserFromRoleAction";
+} from "@/components/modules/settings/modules/roles/actions/Role/removeUserFromRoleAction/removeUserFromRoleAction";
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import { PEOPLE_SEARCH_QK } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearch";
 

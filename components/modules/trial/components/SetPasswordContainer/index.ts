@@ -1,1 +1,1 @@
-export * from "./ConfirmTrialContainer";
+export { default } from "./ConfirmTrialContainer";

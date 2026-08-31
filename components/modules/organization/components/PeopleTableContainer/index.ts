@@ -1,1 +1,1 @@
-export * from "./PeopleTableContainer";
+export { default } from "./PeopleTableContainer";

@@ -121,15 +121,22 @@ export type PersonRefDTO = RefDTO & {
   avatarUrl?: string | null;
 };
 
+/**
+ * A row as the API returns it.
+ *
+ * **A missing field means "withheld", not "empty".** Directory columns answer to field access at
+ * company scope — all-or-nothing per column, because hiding a value per row would make a keyset
+ * page a different length for different callers. Only identity is guaranteed.
+ */
 export type UsersSearchItemDTO = {
   id: string;
   companyId: string;
-  email: string;
+  email?: string;
   firstName: string;
   lastName: string;
-  roles: UserRoleDTO[];
-  status: string;
-  isEmailVerified: boolean;
+  roles?: UserRoleDTO[];
+  status?: string;
+  isEmailVerified?: boolean;
   // Current job held by the user (users.job_id → jobs). jobName is the resolved
   // Position label; null means no job is assigned.
   jobId?: string | null;

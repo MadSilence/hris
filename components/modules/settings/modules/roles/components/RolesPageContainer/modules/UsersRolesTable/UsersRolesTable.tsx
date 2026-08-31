@@ -66,7 +66,8 @@ export default function UsersRolesTable({
               userRows!.map((u) => {
                 const fullName =
                   `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() ||
-                  u.email;
+                  u.email ||
+                  "Unnamed";
                 return (
                   <TableRow
                     key={u.id}

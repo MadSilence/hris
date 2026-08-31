@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useMemo } from "react";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import RoleDetailsView from "./RoleDetailsView";
@@ -12,12 +13,14 @@ export interface RoleDetailsContainerProps {
 
 export default function RoleDetailsContainer({ roleId }: RoleDetailsContainerProps) {
   const { data: roles, isLoading, error } = useRoles();
-  if (error && !(error instanceof ForbiddenError)) throw error;
 
   const role = useMemo(() => (roles ?? []).find((r) => r.id === roleId), [roles, roleId]);
 
   // Below the hooks: an early return above them would render fewer hooks than the previous pass.
+  // Below every hook on purpose: an early return above them would change how many hooks
+  // this render calls. A failed read is still an answer, so it gets a region, not a crash.
   if (error instanceof ForbiddenError) return <AccessDenied/>;
+  if (error) return <ErrorState error={error} />;
 
   return (
     <RoleDetailsView

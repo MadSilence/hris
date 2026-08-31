@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisCalendarFeedsService } from "@/api/modules/calendarFeeds/services";
 import type { CalendarFeedDTO, CalendarFeedKind } from "@/api/modules/calendarFeeds/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export type CalendarFeedActionOutput = {
   status: ActionStatus;
@@ -18,8 +19,7 @@ export const issueCalendarFeedAction = async (
     const data = await hrisCalendarFeedsService.issue(submission.kind, submission.calendarId);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("issueCalendarFeedAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Could not create the subscription link." };
+    return toActionError(error, "calendarFeedActions");
   }
 };
 
@@ -31,8 +31,7 @@ export const rotateCalendarFeedAction = async (
     const data = await hrisCalendarFeedsService.rotate(submission.kind, submission.calendarId);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("rotateCalendarFeedAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Could not reset the subscription link." };
+    return toActionError(error, "calendarFeedActions");
   }
 };
 
@@ -43,7 +42,6 @@ export const revokeCalendarFeedAction = async (
     await hrisCalendarFeedsService.revoke(submission.kind, submission.calendarId);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("revokeCalendarFeedAction error:", error);
-    return { status: ActionStatus.ERROR, errorMessage: "Could not turn off the subscription." };
+    return toActionError(error, "calendarFeedActions");
   }
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useState } from "react";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import { useRoleUsers } from "@/components/modules/settings/modules/roles/hooks/useRoleUsers";
@@ -35,7 +36,7 @@ export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = 
   } = useRoleUsers(roleId, qForApi);
   const removeUser = useRemoveUserFromRoleAction();
   if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) throw error;
+  if (error) return <ErrorState error={error} compact />;
 
   const rows: UsersSearchItemDTO[] = items;
   const loading = isLoading || usersLoading;
@@ -56,9 +57,7 @@ export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = 
       onExport={({ format }) => {
         void triggerExportDownload(`/api/roles/${roleId}/users/export`, format);
       }}
-      onRemoveUser={(userId) => {
-        void removeUser.mutateAsync({ userId, roleId });
-      }}
+      onRemoveUser={(userId) => removeUser.mutateAsync({ userId, roleId })}
     />
   );
 }

@@ -1,24 +1,43 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type { CompanyCalendarPage } from "@/models/calendar";
+import type { CompanyCalendarMark, CompanyCalendarPeoplePage } from "@/models/calendar";
+import type { FilterDTO } from "@/models/user/fields";
 
-export type CompanyCalendarQuery = {
-  from: string;
-  to: string;
+export type CompanyCalendarPeopleQuery = {
   cursor?: string;
   limit?: number;
   q?: string;
+  filters?: FilterDTO[];
 };
 
-export class CompanyCalendarService {
-  public async company(params: CompanyCalendarQuery): Promise<CompanyCalendarPage> {
-    const qs = new URLSearchParams();
-    qs.set("from", params.from);
-    qs.set("to", params.to);
-    if (params.cursor) qs.set("cursor", params.cursor);
-    if (params.limit) qs.set("limit", String(params.limit));
-    if (params.q) qs.set("q", params.q);
+export type CompanyCalendarMarksQuery = {
+  from: string;
+  to: string;
+  userIds: string[];
+};
 
-    return internalApiClient.get<CompanyCalendarPage>(`/calendar/company?${qs.toString()}`);
+/**
+ * Rows and marks are two calls on purpose: they change for different reasons, and one combined
+ * response tied the roster's paging to the date window — so moving the month silently dropped every
+ * page the reader had already scrolled past.
+ */
+export class CompanyCalendarService {
+  /** POST for a read: it carries filter rows, which do not belong in a query string. */
+  public async people(params: CompanyCalendarPeopleQuery): Promise<CompanyCalendarPeoplePage> {
+    return internalApiClient.post<CompanyCalendarPeoplePage>("/calendar/company/people", {
+      cursor: params.cursor ?? null,
+      limit: params.limit ?? null,
+      q: params.q ?? null,
+      filters: params.filters?.length ? params.filters : null,
+    });
+  }
+
+  /** A read with a body: the id list is as long as the reader has scrolled. */
+  public async marks(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarMark[]> {
+    return internalApiClient.post<CompanyCalendarMark[]>("/calendar/company/marks", {
+      from: params.from,
+      to: params.to,
+      userIds: params.userIds,
+    });
   }
 }
 

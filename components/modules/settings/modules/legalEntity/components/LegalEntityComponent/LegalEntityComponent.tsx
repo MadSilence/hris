@@ -41,10 +41,11 @@ export const LegalEntityComponent: React.FC<Props> = ({
   const createLegalEntityAction = useCreateLegalEntityAction();
   const router = useRouter();
 
+  // Success closes the dialog; a refusal keeps it open with the reason in it. Closing on ERROR too
+  // is what made a rejected create look like a create that worked — the action answers 200 either
+  // way, so the envelope was the only thing that ever said no, and nothing read it.
   useEffect(() => {
-    const status = createLegalEntityAction.data?.status;
-
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
+    if (createLegalEntityAction.data?.status === ActionStatus.SUCCESS) {
       setIsCreateLegalEntityModalOpen(false);
     }
   }, [createLegalEntityAction.data?.status]);
@@ -136,7 +137,13 @@ export const LegalEntityComponent: React.FC<Props> = ({
             )}
 
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-              <Button onClick={() => setIsCreateLegalEntityModalOpen(true)} className="gap-1.5">
+              <Button
+                onClick={() => {
+                  createLegalEntityAction.reset();
+                  setIsCreateLegalEntityModalOpen(true);
+                }}
+                className="gap-1.5"
+              >
                 <Plus className="h-4 w-4"/>
                 Add Legal Entity
               </Button>
@@ -240,8 +247,21 @@ export const LegalEntityComponent: React.FC<Props> = ({
       <CreateLegalEntityModal
         isOpen={isCreateLegalEntityModalOpen}
         isLoading={createLegalEntityAction.isPending}
+        errorMessage={
+          createLegalEntityAction.data?.status === ActionStatus.ERROR
+            ? createLegalEntityAction.data.errorMessage
+            : null
+        }
+        fieldErrors={
+          createLegalEntityAction.data?.status === ActionStatus.ERROR
+            ? createLegalEntityAction.data.fieldErrors
+            : null
+        }
         onConfirmAction={handleCreate}
-        onCancelAction={() => setIsCreateLegalEntityModalOpen(false)}
+        onCancelAction={() => {
+          setIsCreateLegalEntityModalOpen(false);
+          createLegalEntityAction.reset();
+        }}
       />
 
       <ExportDataModal

@@ -1,5 +1,6 @@
 "use client";
 
+
 import * as React from "react";
 import { FC, useEffect, useRef, useState } from "react";
 import {
@@ -39,6 +40,8 @@ type UpdateUserAvatarModalProps = {
   isLoading?: boolean;
   fullName: string;
   avatarUrl?: string | null;
+  /** A refused or failed avatar change, shown where the reader asked for it. */
+  errorMessage?: string | null;
   onConfirmAction: (submission: UpdateUserAvatarSubmission) => void | Promise<void>;
   onRequestCloseAction: () => void;
 };
@@ -48,6 +51,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
   isLoading = false,
   fullName,
   avatarUrl,
+  errorMessage,
   onConfirmAction,
   onRequestCloseAction,
 }) => {
@@ -289,6 +293,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
         isOpen={isDeleteConfirmOpen}
         isLoading={isLoading}
         fullName={fullName}
+        errorMessage={errorMessage}
         onRequestCloseAction={() => setIsDeleteConfirmOpen(false)}
         onConfirmAction={handleDeleteConfirm}
       />
@@ -300,6 +305,8 @@ type DeleteUserAvatarModalProps = {
   isOpen: boolean;
   isLoading?: boolean;
   fullName?: string;
+  /** Kept in the dialog rather than the console — a failed delete is otherwise silent. */
+  errorMessage?: string | null;
   onRequestCloseAction: () => void;
   onConfirmAction: () => void | Promise<void>;
 };
@@ -308,6 +315,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
   isOpen,
   isLoading = false,
   fullName,
+  errorMessage,
   onRequestCloseAction,
   onConfirmAction,
 }) => {
@@ -346,11 +354,18 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
           </div>
         </div>
 
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
-            onClick={onConfirmAction}
+            // AlertDialogAction closes its dialog on click by default, which threw the failure away
+            // before it could render — the third place this pattern has cost a visible error.
+            onClick={(event) => {
+              event.preventDefault();
+              void onConfirmAction();
+            }}
             className="bg-red-600 text-white hover:bg-red-700"
           >
             Remove avatar
@@ -388,6 +403,10 @@ function shortenFileName(fileName: string, maxLength = 24) {
   return `${start}.....${end}${extension}`;
 }
 
+/**
+ * Размер выбранного аватара. Намеренно НЕ `lib/formatBytes`: тот покажет «347 B», а здесь нижняя
+ * граница — «1 KB», чтобы подпись под превью не прыгала между единицами. Разошлось осознанно.
+ */
 function formatFileSize(size: number) {
   if (size < 1024 * 1024) {
     return `${Math.max(1, Math.round(size / 1024))} KB`;

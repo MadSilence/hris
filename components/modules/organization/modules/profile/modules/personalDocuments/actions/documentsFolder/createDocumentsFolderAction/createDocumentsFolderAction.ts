@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { CreateResponse } from "@/api/models/misc";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const createDocumentsFolderAction = async (
   submission: CreateDocumentsFolderActionInput
@@ -18,12 +19,7 @@ export const createDocumentsFolderAction = async (
       data: folder,
     };
   } catch (error) {
-    console.error("createDocumentsFolderAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while creating a folder. Please try again.",
-    };
+    return toActionError(error, "createDocumentsFolderAction");
   }
 };
 

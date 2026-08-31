@@ -1,5 +1,5 @@
 import { CreateResponse } from "@/api/models/misc";
-import { hrisApiCompanyLogoClient } from "@/api/modules/company/modules/companyLogo/clients";
+import { hrisApiCompanyLogoClient } from "@/api/modules/company/modules/companyLogo/clients/hrisApiCompanyLogoClient";
 
 export class HrisCompanyLogoService {
   public async uploadLogo(file: File): Promise<CreateResponse> {

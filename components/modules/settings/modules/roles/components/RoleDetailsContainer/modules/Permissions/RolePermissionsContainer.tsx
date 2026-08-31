@@ -1,5 +1,7 @@
 "use client";
 
+import { messageForError } from "@/lib/errors/errorMessages";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
@@ -168,7 +170,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
         {isLoading ? (
           <PermissionsSkeleton/>
         ) : error ? (
-          <p className="text-sm text-red-600">Failed to load role permissions.</p>
+          <ErrorState error={error} title="Permissions did not load" compact/>
         ) : (
           <RolePermissionsView
             draft={draft}
@@ -213,7 +215,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
       <RolePermissionsSummaryModal
         isOpen={reviewOpen}
         isSaving={saving}
-        errorMessage={saveError?.message}
+        errorMessage={saveError ? messageForError(saveError) : undefined}
         changes={changes}
         onCancelAction={() => setReviewOpen(false)}
         onConfirmAction={handleSave}

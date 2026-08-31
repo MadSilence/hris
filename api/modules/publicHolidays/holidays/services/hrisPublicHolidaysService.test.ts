@@ -5,36 +5,14 @@ import { hrisPublicHolidaysService } from "@/api/modules/publicHolidays/holidays
 
 jest.mock("@/api/modules/publicHolidays/holidays/clients", () => ({
   hrisApiPublicHolidaysClient: {
-    create: jest.fn(),
     list: jest.fn(),
-    getById: jest.fn(),
-    update: jest.fn(),
-    rename: jest.fn(),
-    delete: jest.fn(),
+    replaceYear: jest.fn(),
   },
 }));
 
 describe("HrisPublicHolidaysService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it("delegates create to client", async () => {
-    const response = { id: "holiday-id" };
-    const request = {
-      name: "New Year",
-      holidayDate: "2026-01-01", endDate: "2026-01-01",
-    };
-
-    jest.mocked(hrisApiPublicHolidaysClient.create).mockResolvedValue(response);
-
-    const result = await hrisPublicHolidaysService.create("calendar-id", request);
-
-    expect(hrisApiPublicHolidaysClient.create).toHaveBeenCalledWith(
-      "calendar-id",
-      request
-    );
-    expect(result).toEqual(response);
   });
 
   it("delegates list to client", async () => {
@@ -48,57 +26,27 @@ describe("HrisPublicHolidaysService", () => {
     expect(result).toEqual(response);
   });
 
-  it("delegates getById to client", async () => {
-    const response = partialMock<PublicHoliday>({ id: "holiday-id" });
+  it("passes the year through to the client", async () => {
+    jest.mocked(hrisApiPublicHolidaysClient.list).mockResolvedValue([]);
 
-    jest.mocked(hrisApiPublicHolidaysClient.getById).mockResolvedValue(response);
+    await hrisPublicHolidaysService.list("calendar-id", 2026);
 
-    const result = await hrisPublicHolidaysService.getById("holiday-id");
-
-    expect(hrisApiPublicHolidaysClient.getById).toHaveBeenCalledWith("holiday-id");
-    expect(result).toEqual(response);
+    expect(hrisApiPublicHolidaysClient.list).toHaveBeenCalledWith("calendar-id", 2026);
   });
 
-  it("delegates update to client", async () => {
-    const response = { id: "holiday-id", version: 1 };
-    const request = {
-      name: "Updated holiday",
-      holidayDate: "2026-01-02", endDate: "2026-01-02",
-    };
+  it("delegates replaceYear to client", async () => {
+    const response = [partialMock<PublicHoliday>({ id: "holiday-id" })];
+    const request = { holidays: [] };
 
-    jest.mocked(hrisApiPublicHolidaysClient.update).mockResolvedValue(response);
+    jest.mocked(hrisApiPublicHolidaysClient.replaceYear).mockResolvedValue(response);
 
-    const result = await hrisPublicHolidaysService.update("holiday-id", request);
+    const result = await hrisPublicHolidaysService.replaceYear("calendar-id", 2026, request);
 
-    expect(hrisApiPublicHolidaysClient.update).toHaveBeenCalledWith(
-      "holiday-id",
+    expect(hrisApiPublicHolidaysClient.replaceYear).toHaveBeenCalledWith(
+      "calendar-id",
+      2026,
       request
     );
     expect(result).toEqual(response);
-  });
-
-  it("delegates rename to client", async () => {
-    const response = { id: "holiday-id", version: 1 };
-
-    jest.mocked(hrisApiPublicHolidaysClient.rename).mockResolvedValue(response);
-
-    const result = await hrisPublicHolidaysService.rename("holiday-id", {
-      name: "New name",
-    });
-
-    expect(hrisApiPublicHolidaysClient.rename).toHaveBeenCalledWith(
-      "holiday-id",
-      { name: "New name" }
-    );
-    expect(result).toEqual(response);
-  });
-
-  it("delegates delete to client", async () => {
-    jest.mocked(hrisApiPublicHolidaysClient.delete).mockResolvedValue(undefined);
-
-    const result = await hrisPublicHolidaysService.delete("holiday-id");
-
-    expect(hrisApiPublicHolidaysClient.delete).toHaveBeenCalledWith("holiday-id");
-    expect(result).toBeUndefined();
   });
 });

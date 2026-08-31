@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
 import { Wallet } from "lucide-react";
 
@@ -27,7 +28,6 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 const grantedOf = (b: EmployeeTimeOffBalance) =>
   b.openingBalance + b.accruedBalance + b.carriedOverBalance + b.adjustedBalance;
@@ -64,7 +64,7 @@ const BalanceItem: FC<{
           <span className="font-semibold text-brown-900">Unlimited</span>
         ) : (
           <>
-            <span className="font-semibold text-brown-900">{fmt(balance.currentBalance)}</span>
+            <span className="font-semibold text-brown-900">{formatDayAmount(balance.currentBalance)}</span>
             <span className="text-muted-foreground"> {unit} left</span>
           </>
         )}
@@ -140,8 +140,8 @@ export const BalancesPreviewModal: FC<Props> = ({
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {selectedPolicy?.unlimitedQuota
-                      ? `${fmt(selected.usedBalance)} ${unit} used · ${selected.year}`
-                      : `${fmt(selected.currentBalance)} ${unit} left of ${fmt(grantedOf(selected))} · ${selected.year}`}
+                      ? `${formatDayAmount(selected.usedBalance)} ${unit} used · ${selected.year}`
+                      : `${formatDayAmount(selected.currentBalance)} ${unit} left of ${formatDayAmount(grantedOf(selected))} · ${selected.year}`}
                   </p>
                 </div>
                 {canAdjust && (

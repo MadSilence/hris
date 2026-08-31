@@ -1,5 +1,7 @@
 "use client";
 
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, Pencil, Play, Trash2, Users } from "lucide-react";
@@ -108,7 +110,6 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  if (error && !(error instanceof ForbiddenError)) throw error;
 
   const editInitialValues = useMemo(() => {
     if (
@@ -173,15 +174,37 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     setIsEditOpen(false);
   };
 
+  /**
+   * The wizard saves through nine calls in a row, so a refusal partway leaves the policy
+   * half-written — all the more reason to say which step refused instead of closing the wizard on
+   * a rejected promise nobody sees.
+   */
+  const handleEditSaveSafely = async (values: PolicyWizardValues) => {
+    try {
+      await handleEditSave(values);
+    } catch (error) {
+      showError(error);
+    }
+  };
+
   const handleDelete = async () => {
     if (!policy) return;
-    await deleteMutation.mutateAsync({ id: policy.id });
-    setIsDeleteOpen(false);
-    router.push(listHref);
+    try {
+      await deleteMutation.mutateAsync({ id: policy.id });
+      setIsDeleteOpen(false);
+      router.push(listHref);
+    } catch (error) {
+      // Deleting an active policy is refused by the backend; the dialog stays open so the reason
+      // has somewhere to be read.
+      showError(error);
+    }
   };
 
   // Below the hooks: an early return above them would render fewer hooks than the previous pass.
+  // Below every hook on purpose: an early return above them would change how many hooks
+  // this render calls. A failed read is still an answer, so it gets a region, not a crash.
   if (error instanceof ForbiddenError) return <AccessDenied/>;
+  if (error) return <ErrorState error={error} />;
 
   if (isLoading || !policy) {
     return (
@@ -228,7 +251,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => archiveMutation.mutate({ id: policy.id })}
+                onClick={() => archiveMutation.mutateAsync({ id: policy.id }).catch(showError)}
               >
                 <Archive className="h-4 w-4" />
                 Archive
@@ -283,7 +306,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
         mode="edit"
         leaveTypeName={leaveType?.name}
         initialValues={editInitialValues}
-        onSubmitAction={handleEditSave}
+        onSubmitAction={handleEditSaveSafely}
         onCancelAction={() => setIsEditOpen(false)}
       />
 

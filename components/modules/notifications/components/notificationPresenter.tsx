@@ -1,3 +1,5 @@
+import { formatDisplayDate } from "@/lib/date";
+import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import type { ComponentType } from "react";
 import { Bell, CalendarClock, CheckCircle2, XCircle } from "lucide-react";
 import type { Notification } from "@/models/notifications";
@@ -14,8 +16,7 @@ const str = (v: unknown): string => (v == null ? "" : String(v));
 const dayCount = (amount: string): string => {
   const n = Number(amount);
   if (!Number.isFinite(n)) return amount;
-  const label = Number.isInteger(n) ? String(n) : n.toFixed(1);
-  return `${label} ${n === 1 ? "day" : "days"}`;
+  return `${formatDayAmount(n)} ${n === 1 ? "day" : "days"}`;
 };
 
 /**
@@ -104,5 +105,6 @@ export const timeAgo = (iso: string): string => {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+  // Older than a week: an actual date, through the one formatter.
+  return formatDisplayDate(iso);
 };

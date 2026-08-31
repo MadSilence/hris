@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/feedback/ErrorState";
 import * as React from "react";
 import { FC, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -68,8 +69,6 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
       enabled: Boolean(selectedTemplateId),
     });
 
-  if (error) throw error;
-
   const selectedTemplate = useMemo(() => {
     return templates.find((template) => template.id === selectedTemplateId) ?? null;
   }, [templates, selectedTemplateId]);
@@ -97,6 +96,10 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
     router.push(`/settings/time/public-holidays/new?templateId=${selectedTemplate.id}${region}`);
   };
+
+  // Below every hook on purpose: an early return above them would change how many hooks
+  // this render calls. A failed read is still an answer, so it gets a region, not a crash.
+  if (error) return <ErrorState error={error} compact />;
 
   return (
     <Dialog

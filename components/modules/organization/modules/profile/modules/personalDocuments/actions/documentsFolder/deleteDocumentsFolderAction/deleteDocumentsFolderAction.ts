@@ -1,10 +1,9 @@
 "use server";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import {
-  documentActionErrorMessage,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/documentActionError";
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
+import { toActionError } from "@/lib/errors/withActionError";
+import type { DocumentFolderDeleteStrategy } from "@/api/modules/documents/dto";
 
 export const deleteDocumentsFolderAction = async (
   submission: DeleteDocumentsFolderActionInput
@@ -12,25 +11,23 @@ export const deleteDocumentsFolderAction = async (
   try {
     await hrisDocumentsService.deleteFolder(
       submission.userId,
-      submission.folderId
+      submission.folderId,
+      submission.strategy ?? "MOVE_TO_PARENT"
     );
 
     return {
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("deleteDocumentsFolderAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: documentActionErrorMessage(error, "An error occurred while deleting a folder. Please try again."),
-    };
+    return toActionError(error, "deleteDocumentsFolderAction");
   }
 };
 
 export type DeleteDocumentsFolderActionInput = {
   userId: string;
   folderId: string;
+  /** What happens to the contents. Absent means the outcome that loses nothing. */
+  strategy?: DocumentFolderDeleteStrategy;
 };
 
 export type DeleteDocumentsFolderActionOutput = {

@@ -1,3 +1,4 @@
+export * from "./DocumentFolderDeleteImpactDTO";
 export type DocumentFolderDTO = {
   id: string;
   name: string;

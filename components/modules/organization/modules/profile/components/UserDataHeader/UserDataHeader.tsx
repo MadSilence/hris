@@ -28,10 +28,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
-import { CalendarPlus, Ellipsis, Pencil, RefreshCw } from "lucide-react";
+import { Ellipsis, Pencil, RefreshCw } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
-import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 import {
@@ -61,10 +61,10 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const router = useRouter();
 
   // Booking someone else's leave is a time-off action, not a profile one.
-  const canScheduleLeave = useCanAccess("PEOPLE.TIME_OFF_POLICIES", "EDIT");
 
   const [isTerminateOpen, setIsTerminateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isLifecycleBusy, setIsLifecycleBusy] = useState(false);
   const [lifecycleError, setLifecycleError] = useState<string | null>(null);
 
@@ -107,37 +107,47 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const handleAvatarConfirm = async (submission: UpdateUserAvatarSubmission) => {
     if (!user?.id) return;
 
-    if (submission.action === "upload") {
-      revokeLocalAvatarUrl();
+    // The dialog stays open on failure and says why. Before this, a refused avatar change closed the
+    // dialog and reached the console only — the same defect fixed twice already elsewhere.
+    setAvatarError(null);
 
-      const localAvatarUrl = URL.createObjectURL(submission.file);
-      localAvatarUrlRef.current = localAvatarUrl;
+    try {
+      if (submission.action === "upload") {
+        revokeLocalAvatarUrl();
 
-      await uploadAvatar({
+        const localAvatarUrl = URL.createObjectURL(submission.file);
+        localAvatarUrlRef.current = localAvatarUrl;
+
+        await uploadAvatar({
+          userId: user.id,
+          file: submission.file,
+        });
+
+        setAvatarOverrideUrl(localAvatarUrl);
+        setAvatarVersion(Date.now());
+
+        await refreshUser(user.id);
+
+        setIsAvatarModalOpen(false);
+        return;
+      }
+
+      await deleteAvatar({
         userId: user.id,
-        file: submission.file,
       });
 
-      setAvatarOverrideUrl(localAvatarUrl);
+      revokeLocalAvatarUrl();
+      setAvatarOverrideUrl(null);
       setAvatarVersion(Date.now());
 
       await refreshUser(user.id);
 
       setIsAvatarModalOpen(false);
-      return;
+    } catch (error) {
+      revokeLocalAvatarUrl();
+      setAvatarOverrideUrl(undefined);
+      setAvatarError(messageForError(error));
     }
-
-    await deleteAvatar({
-      userId: user.id,
-    });
-
-    revokeLocalAvatarUrl();
-    setAvatarOverrideUrl(null);
-    setAvatarVersion(Date.now());
-
-    await refreshUser(user.id);
-
-    setIsAvatarModalOpen(false);
   };
 
   if (!user) {
@@ -157,7 +167,10 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
     );
   }
 
-  const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
+  // Identity always arrives; the email may be withheld by field access, so it cannot be the last
+  // resort. An unnamed person is a data problem, not a permission one.
+  const fullName =
+    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "Unnamed";
   const isOwnProfile = currentUserId === user.id;
   const isTerminated = !!user.terminationDate;
 
@@ -247,17 +260,6 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               </PermissionGate>
             )}
 
-            {canScheduleLeave && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(`/organization/people/${user.id}/time-off?request=1`)}
-              >
-                <CalendarPlus className="mr-2 h-4 w-4"/>
-                Schedule leave
-              </Button>
-            )}
-
             <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -294,8 +296,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         isLoading={isAvatarLoading}
         fullName={fullName}
         avatarUrl={avatarUrl}
+        errorMessage={avatarError}
         onConfirmAction={handleAvatarConfirm}
-        onRequestCloseAction={() => setIsAvatarModalOpen(false)}
+        onRequestCloseAction={() => {
+          setAvatarError(null);
+          setIsAvatarModalOpen(false);
+        }}
       />
 
       <TerminateEmploymentModal

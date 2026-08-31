@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffPoliciesService } from "@/api/modules/timeOff/timeOffPolicies/services";
 import type { RenameTimeOffPolicyRequest } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const renameTimeOffPolicyAction = async (
   submission: RenameTimeOffPolicyActionInput
@@ -17,13 +18,7 @@ export const renameTimeOffPolicyAction = async (
       data,
     };
   } catch (error) {
-    console.error("renameTimeOffPolicyAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while renaming the time off policy. Please try again.",
-    };
+    return toActionError(error, "renameTimeOffPolicyAction");
   }
 };
 

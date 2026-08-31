@@ -1,7 +1,7 @@
 import { BadRequestError, ForbiddenError } from "@/components/clients/exceptions";
 import { jobCatalogErrorMessage } from "./jobCatalogActionError";
 
-const FALLBACK = "An error occurred while creating a job. Please try again.";
+const FALLBACK = "An error occurred. Please try again.";
 
 describe("jobCatalogErrorMessage", () => {
   it("passes a business rule from Java through to the user", () => {

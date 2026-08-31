@@ -56,6 +56,25 @@ describe("InternalApiClient", () => {
     await expect(client.post("/things")).rejects.toBeInstanceOf(ForbiddenError);
   });
 
+  // An expired access token is not a dead session. Tokens last 150 minutes and the refresh token
+  // 30 days, so a working day used to end in a login screen with weeks of validity unused.
+  it("renews the session on 401 and replays the request", async () => {
+    const assign = mockLocation("/settings/general/departments");
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401)) // expired access token
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true })) // refresh
+      .mockResolvedValueOnce(jsonResponse(200, { id: "42" })); // the replay
+
+    await expect(client.get<{ id: string }>("/things")).resolves.toEqual({ id: "42" });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/auth/refresh",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(assign).not.toHaveBeenCalled();
+  });
+
   // Rotating perm-hash (role edits, impersonation) leaves in-flight requests holding the previous
   // token. They come back 401 even though the session is fine, and throwing the user out of it was
   // the bug this covers.
@@ -63,18 +82,20 @@ describe("InternalApiClient", () => {
     const assign = mockLocation("/settings/general/departments");
     fetchMock
       .mockResolvedValueOnce(jsonResponse(401, { code: "PERM_HASH_MISMATCH" })) // stale request
+      .mockResolvedValueOnce(jsonResponse(401)) // renewal is not the answer here
       .mockResolvedValueOnce(jsonResponse(200, { id: "me" })); // probe: session is fine
 
     await expect(client.get("/departments/tree")).rejects.toBeInstanceOf(UnauthorizedError);
 
-    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/users/me", expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/users/me", expect.any(Object));
     expect(assign).not.toHaveBeenCalled();
   });
 
-  it("redirects to /login when the probe confirms the session is gone", async () => {
+  it("redirects to /login when neither the renewal nor the probe helps", async () => {
     const assign = mockLocation("/settings/general/departments");
     fetchMock
       .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(401)) // refresh: the token is gone too
       .mockResolvedValueOnce(jsonResponse(401)); // probe fails too
 
     await expect(client.get("/departments/tree")).rejects.toBeInstanceOf(UnauthorizedError);
@@ -82,13 +103,13 @@ describe("InternalApiClient", () => {
     expect(assign).toHaveBeenCalled();
   });
 
-  it("never redirects while already on the login page", async () => {
+  it("never redirects or renews while already on the login page", async () => {
     const assign = mockLocation("/login");
     fetchMock.mockResolvedValueOnce(jsonResponse(401));
 
     await expect(client.post("/auth/login")).rejects.toBeInstanceOf(UnauthorizedError);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1); // no probe either
+    expect(fetchMock).toHaveBeenCalledTimes(1); // no renewal, no probe
     expect(assign).not.toHaveBeenCalled();
   });
 });

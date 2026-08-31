@@ -41,9 +41,9 @@ describe("DeleteDocumentModal", () => {
 
     expect(screen.getByText("Contract.pdf")).toBeInTheDocument();
 
-    expect(
-      screen.getByText(/deleted files cannot be restored/i),
-    ).toBeInTheDocument();
+    // Delete moves the document to the trash; the dialog used to call that permanent, which is the
+    // opposite of what happens and left the real permanent action with no dialog at all.
+    expect(screen.getByText(/moved to the trash/i)).toBeInTheDocument();
   });
 
   it("calls confirm action", () => {

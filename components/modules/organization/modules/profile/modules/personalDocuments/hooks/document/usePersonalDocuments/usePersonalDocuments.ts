@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import type { DocumentDTO, DocumentFolderDTO, DocumentVisibility } from "@/api/modules/documents/dto";
+import type {
+  DocumentDTO,
+  DocumentFolderDeleteStrategy,
+  DocumentFolderDTO,
+  DocumentVisibility,
+} from "@/api/modules/documents/dto";
 import type { BreadcrumbItem } from "@/components/modules/organization/modules/profile/modules/personalDocuments/types/personalDocuments.types";
 import { useDocumentsContent } from "../useDocumentsContent/useDocumentsContent";
 import { useUploadPersonalDocument } from "../useUploadPersonalDocument/useUploadPersonalDocument";
@@ -119,7 +124,8 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
   );
 
   const deleteFolder = React.useCallback(
-    (folderId: string) => deleteFolderMutation.mutateAsync({ userId, folderId }),
+    (folderId: string, strategy: DocumentFolderDeleteStrategy = "MOVE_TO_PARENT") =>
+      deleteFolderMutation.mutateAsync({ userId, folderId, strategy }),
     [deleteFolderMutation, userId]
   );
 

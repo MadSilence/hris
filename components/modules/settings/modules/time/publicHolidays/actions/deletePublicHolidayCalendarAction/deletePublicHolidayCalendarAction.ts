@@ -2,6 +2,7 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const deletePublicHolidayCalendarAction = async (
   submission: DeletePublicHolidayCalendarActionInput
@@ -13,13 +14,7 @@ export const deletePublicHolidayCalendarAction = async (
       status: ActionStatus.SUCCESS,
     };
   } catch (error) {
-    console.error("deletePublicHolidayCalendarAction error:", error);
-
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while deleting the public holiday calendar. Please try again.",
-    };
+    return toActionError(error, "deletePublicHolidayCalendarAction");
   }
 };
 

@@ -38,10 +38,11 @@ export const OfficeComponent: FC<Props> = ({
   const createOfficeAction = useCreateOfficeAction();
   const router = useRouter();
 
+  // Success closes the dialog; a refusal keeps it open with the reason in it. Closing on ERROR too
+  // is what made a rejected create look like a create that worked — the action answers 200 either
+  // way, so the envelope was the only thing that ever said no, and nothing read it.
   useEffect(() => {
-    const status = createOfficeAction.data?.status;
-
-    if (status === ActionStatus.SUCCESS || status === ActionStatus.ERROR) {
+    if (createOfficeAction.data?.status === ActionStatus.SUCCESS) {
       setIsCreateOpen(false);
     }
   }, [createOfficeAction.data?.status]);
@@ -133,7 +134,13 @@ export const OfficeComponent: FC<Props> = ({
             )}
 
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
-              <Button onClick={() => setIsCreateOpen(true)} className="gap-1.5">
+              <Button
+                onClick={() => {
+                  createOfficeAction.reset();
+                  setIsCreateOpen(true);
+                }}
+                className="gap-1.5"
+              >
                 <Plus className="h-4 w-4"/>
                 Add Office
               </Button>
@@ -235,8 +242,21 @@ export const OfficeComponent: FC<Props> = ({
       <CreateOfficeModal
         isOpen={isCreateOpen}
         isLoading={createOfficeAction.isPending}
+        errorMessage={
+          createOfficeAction.data?.status === ActionStatus.ERROR
+            ? createOfficeAction.data.errorMessage
+            : null
+        }
+        fieldErrors={
+          createOfficeAction.data?.status === ActionStatus.ERROR
+            ? createOfficeAction.data.fieldErrors
+            : null
+        }
         onConfirmAction={handleCreate}
-        onRequestCloseAction={() => setIsCreateOpen(false)}
+        onRequestCloseAction={() => {
+          setIsCreateOpen(false);
+          createOfficeAction.reset();
+        }}
       />
 
       <ExportDataModal

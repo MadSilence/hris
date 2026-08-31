@@ -4,6 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTeamsService } from "@/api/modules/teams/services";
 import type { MoveTeamRequest } from "@/api/modules/teams/dto";
 import type { UpdateResponse } from "@/api/models/misc";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const moveTeamAction = async (
   id: string,
@@ -13,11 +14,7 @@ export const moveTeamAction = async (
     const data = await hrisTeamsService.move(id, submission);
     return { status: ActionStatus.SUCCESS, data };
   } catch (error) {
-    console.error("moveTeamAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while moving the team. Please try again.",
-    };
+    return toActionError(error, "moveTeamAction");
   }
 };
 

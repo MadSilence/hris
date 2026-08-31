@@ -66,8 +66,7 @@ describe("createPublicHolidayCalendarAction", () => {
 
     expect(result).toEqual({
       status: ActionStatus.ERROR,
-      errorMessage:
-        "An error occurred while creating the public holiday calendar. Please try again.",
+      errorMessage: "An error occurred. Please try again.",
     });
   });
 });

@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTeamsService } from "@/api/modules/teams/services";
 import type { ArchiveTeamRequest } from "@/api/modules/teams/dto";
+import { toActionError } from "@/lib/errors/withActionError";
 
 export const archiveTeamAction = async (
   id: string,
@@ -12,11 +13,7 @@ export const archiveTeamAction = async (
     await hrisTeamsService.archive(id, submission);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
-    console.error("archiveTeamAction error:", error);
-    return {
-      status: ActionStatus.ERROR,
-      errorMessage: "An error occurred while archiving the team. Please try again.",
-    };
+    return toActionError(error, "archiveTeamAction");
   }
 };
 
