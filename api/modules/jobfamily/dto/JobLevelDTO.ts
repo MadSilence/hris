@@ -2,7 +2,6 @@ export type JobLevelDTO = {
   id: string;
   name: string;
   sortOrder?: number;
-  isSystem?: boolean;
 
   /** Which track the grade belongs to — present on the flat list, absent when nested in a job. */
   groupId?: string;

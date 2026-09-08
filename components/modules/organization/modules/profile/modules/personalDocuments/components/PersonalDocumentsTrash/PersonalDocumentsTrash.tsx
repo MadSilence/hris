@@ -6,6 +6,9 @@ import { RotateCcw, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 import {
@@ -82,15 +85,15 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     return <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>;
   }
 
+  // Every failure used to read "You don't have access to this person's deleted documents." — the
+  // inverse of the usual defect: an outage or a timeout accused the reader of lacking a permission
+  // they have. Only a 403 is a refusal; anything else gets the sentence its code carries.
+  if (error instanceof ForbiddenError) {
+    return <AccessDenied compact/>;
+  }
+
   if (error) {
-    return (
-      <div className="rounded-lg border bg-white p-10 text-center">
-        <h3 className="text-lg font-medium">Trash unavailable</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          You don&apos;t have access to this person&apos;s deleted documents.
-        </p>
-      </div>
-    );
+    return <ErrorState error={error} title="Trash unavailable" compact/>;
   }
 
   const rows = data ?? [];

@@ -14,6 +14,7 @@ import {
 } from "@/public/desact/src/components/ui/alert-dialog";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { useGroupDeleteImpact } from "@/components/modules/settings/modules/attributes/hooks/useDeleteImpact";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 type DeleteGroupModalProps = {
   isOpen: boolean;
@@ -32,7 +33,11 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
 }) => {
   const groupName = group?.name ?? "Untitled section";
 
-  const { data: impact } = useGroupDeleteImpact(isOpen ? group?.id ?? null : null);
+  const {
+    data: impact,
+    isLoading: isImpactLoading,
+    error: impactError,
+  } = useGroupDeleteImpact(isOpen ? group?.id ?? null : null);
 
   return (
     <AlertDialog
@@ -65,7 +70,21 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
 
               <div className="space-y-1 text-sm text-red-700">
-                {impact && impact.attributeCount > 0 ? (
+                {/*
+                  The `else` branch used to catch three different situations \u2014 still loading, failed
+                  to load, and genuinely empty \u2014 and told the reader the same vague sentence for all
+                  three. Split, following `DeleteRoleModal`.
+                */}
+                {isImpactLoading && <p>Checking what this section contains\u2026</p>}
+
+                {!isImpactLoading && !impact && !!impactError && (
+                  <p>
+                    {messageForError(impactError)} Until then, what this section contains is
+                    unknown.
+                  </p>
+                )}
+
+                {!isImpactLoading && impact && impact.attributeCount > 0 && (
                   <p>
                     <strong>{impact.attributeCount}</strong> attribute
                     {impact.attributeCount === 1 ? "" : "s"} in this section will
@@ -80,7 +99,14 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
                     )}
                     .
                   </p>
-                ) : (
+                )}
+
+                {!isImpactLoading && impact && impact.attributeCount === 0 && (
+                  <p>This section is empty \u2014 no attributes will be deleted with it.</p>
+                )}
+
+                {/* Nothing asked yet, and nothing to report: the sentence this block always had. */}
+                {!isImpactLoading && !impact && !impactError && (
                   <p>All attributes assigned to this section will also be deleted.</p>
                 )}
                 <p>
@@ -95,8 +121,9 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
 
+          {/* Disabled only while the question is still open \u2014 see `DeleteAttributeModal`. */}
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={isLoading || isImpactLoading}
             onClick={(event) => {
               event.preventDefault();
               onConfirmAction();

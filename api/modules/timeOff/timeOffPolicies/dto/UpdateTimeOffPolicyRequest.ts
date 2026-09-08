@@ -18,7 +18,6 @@ export interface UpdateTimeOffPolicyRequest {
   effectiveDate: string | null;
 
   countingMode: TimeOffPolicyCountingMode;
-  validWeekdays: number;
   includePublicHolidays: boolean;
 
   entitlementGrantingMode: TimeOffPolicyEntitlementMode;

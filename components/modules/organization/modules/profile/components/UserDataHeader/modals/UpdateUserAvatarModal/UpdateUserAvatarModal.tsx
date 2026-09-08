@@ -2,6 +2,7 @@
 
 
 import * as React from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { FC, useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -354,7 +355,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
           </div>
         </div>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

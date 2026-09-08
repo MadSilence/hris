@@ -33,14 +33,17 @@ describe("useTimeOffRequestsByUser", () => {
     renderHook(() => useTimeOffRequestsByUser({ userId: "user-id" }));
 
     expect(useQuery).toHaveBeenCalledWith({
-      queryKey: getTimeOffRequestsByUserQueryKey("user-id"),
+      queryKey: getTimeOffRequestsByUserQueryKey("user-id", { year: null, status: null }),
       queryFn: expect.any(Function),
       enabled: true,
     });
 
     await capturedOpts.queryFn();
 
-    expect(timeOffRequestsService.listByUserId).toHaveBeenCalledWith("user-id");
+    expect(timeOffRequestsService.listByUserId).toHaveBeenCalledWith("user-id", {
+      year: null,
+      status: null,
+    });
   });
 });
 

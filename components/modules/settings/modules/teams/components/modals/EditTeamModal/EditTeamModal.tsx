@@ -104,7 +104,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
               onBlur={formik.handleBlur}
             />
             {formik.touched.name && formik.errors.name && (
-              <p className="text-xs text-red-500">{formik.errors.name}</p>
+              <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>
             )}
           </div>
 

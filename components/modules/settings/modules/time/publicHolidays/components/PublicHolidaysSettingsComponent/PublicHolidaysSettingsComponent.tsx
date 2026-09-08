@@ -1,6 +1,11 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo, useRef, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
+// Five of these dialogs printed a sentence they wrote themselves — "Failed to archive the calendar."
+// — over a refusal that already said why (in use, already archived, last of its kind). The rule is
+// the dictionary by `code`; the module does not get its own vocabulary.
+import { messageForError } from "@/lib/errors/errorMessages";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,7 +25,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import {
@@ -57,6 +61,7 @@ import { useRestorePublicHolidayCalendar } from "@/components/modules/settings/m
 import { useDeletePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useDeletePublicHolidayCalendar";
 import { useActivatePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useActivatePublicHolidayCalendar";
 import { useDeactivatePublicHolidayCalendar } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useDeactivatePublicHolidayCalendar";
+import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
 import {
   ExportDataModal,
   ExportDataFormValues,
@@ -68,16 +73,16 @@ type Props = {
   isLoading: boolean;
 };
 
-function statusBadge(status: PublicHolidayCalendarStatus) {
+const calendarStatus = (status: PublicHolidayCalendarStatus): EntityStatus => {
   switch (status) {
     case PublicHolidayCalendarStatus.Active:
-      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
+      return "active";
     case PublicHolidayCalendarStatus.Archived:
-      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
+      return "archived";
     default:
-      return { label: "Inactive", className: "" };
+      return "inactive";
   }
-}
+};
 
 /** "2025–2027" for a run of years, "2025, 2027" when there is a gap. */
 function formatYears(years: number[]) {
@@ -120,6 +125,22 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const [restoreTarget, setRestoreTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PublicHolidayCalendar | null>(null);
+
+  /**
+   * The name a confirmation dialog shows, kept alive while the dialog closes.
+   *
+   * Every one of these dialogs reads `target?.name` and every handler clears the target on success —
+   * so the heading became `Deactivate ""` for the length of the close animation, which is exactly
+   * when the reader is still looking at it. Observed on the calendar run of 2026-08-29.
+   *
+   * The last non-empty name is retained instead: while the dialog is open it is the current one, and
+   * while it closes it is the one the dialog was about.
+   */
+  const retainedNames = useRef<Record<string, string>>({});
+  const dialogName = (key: string, target: PublicHolidayCalendar | null) => {
+    if (target?.name) retainedNames.current[key] = target.name;
+    return target?.name ?? retainedNames.current[key] ?? "";
+  };
 
   const duplicate = useDuplicatePublicHolidayCalendar();
   const archive = useArchivePublicHolidayCalendar();
@@ -320,7 +341,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                     </TableRow>
                   ) : (
                     filtered.map((calendar) => {
-                      const badge = statusBadge(calendar.status);
+                      const status = calendarStatus(calendar.status);
                       const isArchived = calendar.status === PublicHolidayCalendarStatus.Archived;
                       const isActive = calendar.status === PublicHolidayCalendarStatus.Active;
                       return (
@@ -349,9 +370,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                             {formatYears(calendar.years)}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={badge.className}>
-                              {badge.label}
-                            </Badge>
+                            <StatusBadge status={status}/>
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end">
@@ -380,7 +399,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                                       className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
                                     >
                                       <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                                      Restore
+                                      Unarchive
                                     </DropdownMenuItem>
                                   ) : (
                                     <>
@@ -441,6 +460,8 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <ExportDataModal
         isOpen={isExportOpen}
         title="Export holiday calendars"
+        rowCount={calendars.length}
+        rowNoun="calendars"
         description="Export all holiday calendars with their day counts and creation details."
         includedText="Included: name, country, region, days, year, status, created by, created at."
         onCancelAction={() => setIsExportOpen(false)}
@@ -465,7 +486,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               Creates an inactive copy with all holiday days from &ldquo;{duplicateTarget?.name}&rdquo;.
             </p>
             {duplicate.isError && (
-              <p className="text-sm text-red-500">Failed to duplicate the calendar.</p>
+              <FormError message={duplicate.error ? messageForError(duplicate.error) : null} />
             )}
           </div>
           <DialogFooter>
@@ -483,13 +504,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!archiveTarget} onOpenChange={(v) => !v && setArchiveTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Archive &ldquo;{archiveTarget?.name}&rdquo;</DialogTitle>
+            <DialogTitle>Archive &ldquo;{dialogName("archive", archiveTarget)}&rdquo;</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm text-brown-700">
-            Archiving removes this calendar from <strong>everyone it is currently assigned to</strong> —
-            those people will no longer have it. The calendar can no longer be assigned while archived,
-            but you can restore it later (it comes back with no one assigned).
-            {archive.isError && <p className="mt-2 text-red-500">Failed to archive the calendar.</p>}
+            An archived calendar <strong>stops applying to everyone assigned to it</strong> — its days
+            no longer count as holidays for them — and it cannot be assigned to anybody new. The
+            assignments themselves are kept, so restoring brings the calendar back with the same
+            people still on it.
+            <FormError message={archive.error ? messageForError(archive.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setArchiveTarget(null)} disabled={archive.isPending}>
@@ -502,23 +524,24 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
         </DialogContent>
       </Dialog>
 
-      {/* Restore */}
+      {/* Unarchive */}
       <Dialog open={!!restoreTarget} onOpenChange={(v) => !v && setRestoreTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Restore &ldquo;{restoreTarget?.name}&rdquo;</DialogTitle>
+            <DialogTitle>Unarchive &ldquo;{dialogName("restore", restoreTarget)}&rdquo;</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm text-brown-700">
-            This brings the calendar back as inactive. Its holiday days are kept, but no one is
-            assigned to it — you can assign people again after restoring.
-            {restore.isError && <p className="mt-2 text-red-500">Failed to restore the calendar.</p>}
+            This brings the calendar back <strong>as inactive</strong>, which is deliberate rather than
+            a half-finished restore: nothing starts applying to anybody until you activate it. Its
+            holiday days and the people assigned to it are both kept.
+            <FormError message={restore.error ? messageForError(restore.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRestoreTarget(null)} disabled={restore.isPending}>
               Cancel
             </Button>
             <Button onClick={confirmRestore} disabled={restore.isPending}>
-              {restore.isPending ? "Restoring…" : "Restore"}
+              {restore.isPending ? "Unarchiving…" : "Unarchive"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -528,14 +551,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!deactivateTarget} onOpenChange={(v) => !v && setDeactivateTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Deactivate &ldquo;{deactivateTarget?.name}&rdquo;</DialogTitle>
+            <DialogTitle>Deactivate &ldquo;{dialogName("deactivate", deactivateTarget)}&rdquo;</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm text-brown-700">
             An inactive calendar stops applying: the people assigned to it keep the assignment, but
             its days no longer count as holidays, so new leave requests over those dates will be one
             day longer. Assignments and holiday days are kept — activate it again at any time.
             {deactivate.isError && (
-              <p className="mt-2 text-red-500">Failed to deactivate the calendar.</p>
+              <FormError message={deactivate.error ? messageForError(deactivate.error) : null} className="mt-2" />
             )}
           </div>
           <DialogFooter>
@@ -557,12 +580,12 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete &ldquo;{deleteTarget?.name}&rdquo;</DialogTitle>
+            <DialogTitle>Delete &ldquo;{dialogName("delete", deleteTarget)}&rdquo;</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm text-brown-700">
             This permanently deletes the calendar and all its holiday days. People assigned to it will
             lose it. This action cannot be undone.
-            {remove.isError && <p className="mt-2 text-red-500">Failed to delete the calendar.</p>}
+            <FormError message={remove.error ? messageForError(remove.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={remove.isPending}>

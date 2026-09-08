@@ -14,14 +14,16 @@ const BASE_PATH = "/public-holiday-calendars";
 type Props = {
   calendarId: string;
   calendarName: string;
+  /** An archived calendar takes nobody new — the engine refuses it, so the button says so first. */
+  isArchived?: boolean;
 };
 
-export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName }: Props) {
+export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName, isArchived }: Props) {
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
-  const { items, total, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { items, total, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, calendarId, q);
 
   return (
@@ -35,6 +37,8 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
       rows={items}
       total={total}
       isLoading={isLoading}
+      error={error}
+      isArchived={isArchived}
       hasMore={hasNextPage}
       isLoadingMore={isFetchingNextPage}
       onLoadMore={() => void fetchNextPage()}

@@ -249,7 +249,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button onClick={handleRestore} disabled={restoreAction.isPending}>
-                        Restore
+                        Unarchive
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">

@@ -118,6 +118,8 @@ export const calendarColumn: PeopleColumn = {
 
 export type PeoplePickerProps = {
   fields: FieldDTO[] | undefined;
+  /** Passed straight through to the builder — see its own note on why the two look alike. */
+  isLoadingFields?: boolean;
   filters: FilterDTO[];
   onFiltersChange: (next: FilterDTO[]) => void;
   /** Whether a given row is selected (lets the parent model manual sets or all-minus-excluded). */
@@ -149,6 +151,7 @@ function initials(u: UserRefDTO) {
 
 export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   fields,
+  isLoadingFields,
   filters,
   onFiltersChange,
   isSelected,
@@ -231,6 +234,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               <AudienceBuilder
                 key={seed}
                 fields={fields}
+                isLoadingFields={isLoadingFields}
                 value={draft}
                 onChange={setDraft}
                 includeInactive={includeInactive}

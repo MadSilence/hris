@@ -250,7 +250,7 @@ export default function LegalEntityDetailsContainer({
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button onClick={handleRestore} disabled={restoreAction.isPending}>
-                        Restore
+                        Unarchive
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">

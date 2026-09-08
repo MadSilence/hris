@@ -23,6 +23,9 @@ import {
   useArchiveRoleAction
 } from "@/components/modules/settings/modules/roles/hooks/Role/useArchiveRoleAction/useArchiveRoleAction";
 import { triggerExportDownload } from "@/components/modules/settings/shared/ExportDataModal";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import RolesPageView, { RolesTableView } from "./RolesPageView";
 
 const PAGE_SIZE = 50;
@@ -63,9 +66,6 @@ const RolesPageContainer: React.FC = () => {
   const archiveRole = useArchiveRoleAction();
   const assignUserRoles = useAssignUserRolesAction();
 
-  if (rolesError) throw rolesError;
-  if (peopleError) throw peopleError;
-
   // Archived roles are listed alongside active ones, marked with a badge rather than hidden behind
   // a switch: a role that still grants nothing to the people holding it is exactly the thing an
   // admin needs to notice.
@@ -77,6 +77,13 @@ const RolesPageContainer: React.FC = () => {
     }
     return rows;
   }, [roles, view, trimmedQuery]);
+
+  // Below the hooks, and rendered rather than thrown. These two were `throw rolesError` /
+  // `throw peopleError` higher up: the boundary they reached replaces the page and discards the
+  // message, so a 403 on the people list and a dead backend produced the same generic sentence.
+  const failure = rolesError ?? peopleError;
+  if (failure instanceof ForbiddenError) return <AccessDenied/>;
+  if (failure) return <ErrorState error={failure} title="Roles could not be loaded"/>;
 
   return (
     <RolesPageView

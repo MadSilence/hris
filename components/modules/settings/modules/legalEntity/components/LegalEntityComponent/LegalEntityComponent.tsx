@@ -267,6 +267,8 @@ export const LegalEntityComponent: React.FC<Props> = ({
       <ExportDataModal
         isOpen={isExportModalOpen}
         title="Export legal entities"
+        rowCount={initialEntities.length}
+        rowNoun="legal entities"
         description="Export all legal entities with their address, assigned people, and creation details."
         includedText="Included: name, description, registration number, tax ID, address, assigned people, created by, created at."
         onCancelAction={() => setIsExportModalOpen(false)}

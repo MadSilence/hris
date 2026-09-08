@@ -40,6 +40,11 @@ export class HrisApiLeaveTypesClient {
     );
   }
 
+  /** Archive is reversible — the verb pair is Archive / Unarchive, as everywhere else. */
+  public async restore(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/restore`);
+  }
+
   public async archive(id: string): Promise<UpdateResponse> {
     return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/archive`);
   }

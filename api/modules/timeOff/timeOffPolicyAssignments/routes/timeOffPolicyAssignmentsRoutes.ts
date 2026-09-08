@@ -19,6 +19,17 @@ export class TimeOffPolicyAssignmentsRoutes {
     return Response.json(data);
   }
 
+  public async impact(req: Request, policyId: string) {
+    const body = await req.json().catch(() => ({}));
+
+    const data = await hrisTimeOffPolicyAssignmentsService.impact(
+      policyId,
+      Array.isArray(body.userIds) ? body.userIds : []
+    );
+
+    return Response.json(data);
+  }
+
   public async end(req: Request, assignmentId: string) {
     const body = await req.json().catch(() => ({}));
 

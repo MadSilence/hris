@@ -20,5 +20,10 @@ export const useRoleDeleteImpact = (roleId: string | null | undefined) => {
     enabled: Boolean(roleId),
     staleTime: 0,
     gcTime: 0,
+    // One retry, not the default three. With exponential backoff the dialog sat on "checking what
+    // depends on this role\u2026" for about seven seconds against a dead endpoint, and Delete was live
+    // the whole time \u2014 which is the "presses Delete blind" the 2026-08-28 run reported, one layer
+    // below where it was looked for.
+    retry: 1,
   });
 };

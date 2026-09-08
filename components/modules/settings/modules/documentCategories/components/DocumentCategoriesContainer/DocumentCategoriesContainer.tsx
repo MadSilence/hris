@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Lock, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Badge } from "@/public/desact/src/components/ui/badge";
@@ -174,7 +175,7 @@ export const DocumentCategoriesContainer: FC = () => {
           </AlertDialogHeader>
 
           {messageOf(remove.error) && (
-            <p className="text-sm text-destructive">{messageOf(remove.error)}</p>
+            <FormError message={remove.error ? messageOf(remove.error) : null} />
           )}
 
           <AlertDialogFooter>
@@ -243,7 +244,7 @@ const CategoryFormModal: FC<{
           </DialogDescription>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="space-y-2">

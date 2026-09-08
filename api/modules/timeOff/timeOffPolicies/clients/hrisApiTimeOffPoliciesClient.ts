@@ -3,6 +3,8 @@ import type {
   CreateTimeOffPolicyRequest,
   RenameTimeOffPolicyRequest,
   TimeOffPolicyDTO,
+  SaveTimeOffPolicyRequest,
+  TimeOffPolicyEditImpactDTO,
   UpdateTimeOffPolicyRequest,
 } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { timeOffPolicyMapper } from "@/api/modules/timeOff/timeOffPolicies/mappers/";
@@ -44,6 +46,35 @@ export class HrisApiTimeOffPoliciesClient {
     );
   }
 
+  /** The whole policy in one call. See SaveTimeOffPolicyRequest for why. */
+  public async save(
+    id: string,
+    body: SaveTimeOffPolicyRequest
+  ): Promise<TimeOffPolicyDTO> {
+    return hrisApiClient.put<TimeOffPolicyDTO, SaveTimeOffPolicyRequest>(
+      `${this.BASE_PATH}/${id}`,
+      body
+    );
+  }
+
+  /** The catalogue as a file. Raw, because the body is a spreadsheet rather than JSON. */
+  /** Copy a policy and everything hanging off it, as a draft. */
+  public async duplicate(id: string, name: string): Promise<CreateResponse> {
+    return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/${id}/duplicate`, {
+      name,
+    });
+  }
+
+  public async exportPolicies(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiClient.fetch(`${this.BASE_PATH}/export?format=${format}`);
+  }
+
+  public async editImpact(id: string): Promise<TimeOffPolicyEditImpactDTO> {
+    return hrisApiClient.get<TimeOffPolicyEditImpactDTO>(
+      `${this.BASE_PATH}/${id}/edit-impact`
+    );
+  }
+
   public async rename(
     id: string,
     body: RenameTimeOffPolicyRequest
@@ -63,6 +94,13 @@ export class HrisApiTimeOffPoliciesClient {
   public async archive(id: string): Promise<UpdateResponse> {
     return hrisApiClient.post<UpdateResponse>(
       `${this.BASE_PATH}/${id}/archive`
+    );
+  }
+
+  /** The inverse of {@link archive}. Brings the policy back as a DRAFT, never straight to ACTIVE. */
+  public async unarchive(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/unarchive`
     );
   }
 

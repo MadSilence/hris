@@ -8,7 +8,6 @@ export class JobLevelGroupMapper {
       id: dto.id,
       name: dto.name,
       sortOrder: dto.sortOrder,
-      isSystem: dto.isSystem,
       groupId: dto.groupId,
       groupName: dto.groupName,
       assignedJobsCount: dto.assignedJobsCount,
@@ -20,7 +19,6 @@ export class JobLevelGroupMapper {
     return {
       id: dto.id,
       name: dto.name,
-      isSystem: dto.isSystem,
       assignedJobsCount: dto.assignedJobsCount,
       assignedUsersCount: dto.assignedUsersCount,
       levels: (dto.levels ?? []).map((level) => this.mapJobLevelDtoToJobLevel(level)),

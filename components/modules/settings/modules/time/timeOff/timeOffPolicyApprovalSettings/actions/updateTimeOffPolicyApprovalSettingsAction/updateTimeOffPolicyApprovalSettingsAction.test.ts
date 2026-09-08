@@ -18,8 +18,9 @@ describe("updateTimeOffPolicyApprovalSettingsAction", () => {
 
   const submission = {
     policyId: "policy-id",
-    allApprovalsRequired: true,
-    approvalOrderStrict: false,
+    approvalRequired: true,
+    approvalMode: "ALL" as const,
+    requiredApprovalsCount: null,
     allowSubstituteApprovers: false,
     approvers: [{ approverType: TimeOffPolicyApproverType.SpecificUser, approverUserId: "user-id", approvalOrder: 1, required: true }],
   };

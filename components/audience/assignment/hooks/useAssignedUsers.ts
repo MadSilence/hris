@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   assignedUsersAction,
@@ -26,6 +26,9 @@ export const useAssignedUsers = (
 ) => {
   const query = useInfiniteQuery<AssignedUsersPage>({
     queryKey: [...assignedUsersQueryKey(basePath, id), q, includeSubNodes],
+    // `q` is a debounced search box: without this, every pause in typing emptied the roster and
+    // redrew it. The rows that are already right stay while the narrower answer arrives.
+    placeholderData: keepPreviousData,
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) =>
       unwrap(

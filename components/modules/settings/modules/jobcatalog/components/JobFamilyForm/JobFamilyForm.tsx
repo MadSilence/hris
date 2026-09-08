@@ -113,7 +113,7 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
           />
 
           {formik.errors.name && (
-            <p className="text-sm text-destructive">{formik.errors.name}</p>
+            <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
           )}
         </div>
 
@@ -132,7 +132,7 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
           />
 
           <div className="flex items-center justify-between">
-            <p className="text-sm text-destructive">{formik.errors.description ?? ""}</p>
+            <p role="alert" className="text-sm text-destructive">{formik.errors.description ?? ""}</p>
             <p className="text-xs text-muted-foreground">{remaining} characters left</p>
           </div>
         </div>

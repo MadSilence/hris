@@ -98,7 +98,7 @@ describe("AudienceBuilder", () => {
     const { rerender } = render(
       <AudienceBuilder fields={fields} value={[]} onChange={jest.fn()} />,
     );
-    expect(screen.queryByText(/include non-active people/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/also search non-active people/i)).not.toBeInTheDocument();
 
     rerender(
       <AudienceBuilder
@@ -109,6 +109,6 @@ describe("AudienceBuilder", () => {
         onIncludeInactiveChange={jest.fn()}
       />,
     );
-    expect(screen.getByText(/include non-active people/i)).toBeInTheDocument();
+    expect(screen.getByText(/also search non-active people/i)).toBeInTheDocument();
   });
 });

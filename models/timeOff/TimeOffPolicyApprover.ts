@@ -5,5 +5,4 @@ export interface TimeOffPolicyApprover {
   approverType: TimeOffPolicyApproverType;
   approverUserId: string | null;
   approvalOrder: number;
-  required: boolean;
 }

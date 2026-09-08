@@ -88,7 +88,6 @@ const PeopleTableContainer: React.FC = () => {
   }, [debouncedQ, filters, sort?.fieldId, sort?.dir]);
 
   const { data: fieldsData, isLoading: fieldsLoading, error: fieldsError } = useUserFields();
-  if (fieldsError) throw fieldsError;
 
   const [columns, setColumns] = useState<ColumnItem[]>([]);
 
@@ -318,8 +317,13 @@ const PeopleTableContainer: React.FC = () => {
 
   // Below every hook on purpose: an early return here would render fewer hooks than the previous
   // pass and break their order. A refusal is still an answer, so it gets a screen, not a crash.
-  if (error instanceof ForbiddenError) return <AccessDenied/>;
-  if (error) return <ErrorState error={error} />;
+  //
+  // `fieldsError` used to `throw` from the middle of this function instead \u2014 which reaches
+  // `app/(app)/error.tsx`, a boundary that ignores the message on purpose, so a coded refusal about
+  // the column set arrived as "Something went wrong" and took the whole page with it.
+  const failure = error ?? fieldsError;
+  if (failure instanceof ForbiddenError) return <AccessDenied/>;
+  if (failure) return <ErrorState error={failure} />;
 
   return (
     <div className="flex min-h-0 flex-1 gap-4">

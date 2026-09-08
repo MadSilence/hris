@@ -3,8 +3,7 @@
 import { useParams } from "next/navigation";
 
 import PolicyDetailContainer from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/components/PolicyDetailContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function PolicyDetailPage() {
   const params = useParams();
@@ -12,8 +11,8 @@ export default function PolicyDetailPage() {
   const policyId = params.policyId as string;
 
   return (
-    <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW" fallback={<AccessDenied />}>
+    <PageGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW">
       <PolicyDetailContainer leaveTypeId={leaveTypeId} policyId={policyId} />
-    </PermissionGate>
+    </PageGate>
   );
 }

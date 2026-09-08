@@ -33,6 +33,8 @@ import { useUpdateJobAction } from "@/components/modules/settings/modules/jobcat
 import { useArchiveJobAction } from "@/components/modules/settings/modules/jobcatalog/hooks/Job/useArchiveJobAction";
 import { useActivateJobAction } from "@/components/modules/settings/modules/jobcatalog/hooks/Job/useActivateJobAction";
 import { useDeleteJobAction } from "@/components/modules/settings/modules/jobcatalog/hooks/Job/useDeleteJobAction";
+import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
+import { JOB_FAMILY_QUERY_KEY } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useJobFamily";
 
 /** What the family dialog is currently doing, and to which family. */
 type FamilyDialog = { mode: JobFamilyModalMode; family: JobFamily | null };
@@ -54,6 +56,8 @@ export default function JobFamilyContainer() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // Family just created — the list scrolls to it once the refetched data contains it.
   const [focusFamilyId, setFocusFamilyId] = useState<string | null>(null);
+  /** The position whose assignment modal is open, if any. */
+  const [assignJob, setAssignJob] = useState<Job | null>(null);
 
   // The grade picker is only needed once a job dialog is open; fetching it with the page would
   // cost every visitor a request for a list most of them never see.
@@ -231,6 +235,24 @@ export default function JobFamilyContainer() {
 
   return (
     <>
+      {/*
+        The catalog's way into the assignment engine, which has existed on the backend since it was
+        built. `semantics: "replace"` because a person holds one position — assigning them here is a
+        move, and the modal says so.
+      */}
+      {assignJob && (
+        <AssignPeopleModal
+          isOpen
+          onCloseAction={() => setAssignJob(null)}
+          basePath="/jobs"
+          assignableId={assignJob.id}
+          assignableName={assignJob.name}
+          noun="position"
+          semantics="replace"
+          invalidateKeys={[[JOB_FAMILY_QUERY_KEY]]}
+        />
+      )}
+
       <JobFamilyComponent
         jobFamilies={families}
         onCreateFamily={() => setFamilyDialog({ mode: "create", family: null })}
@@ -242,6 +264,7 @@ export default function JobFamilyContainer() {
         onCreateJob={(family) => setJobDialog({ mode: "create", job: null, family })}
         onEditJob={(job) => setJobDialog({ mode: "edit", job, family: null })}
         onDuplicateJob={(job) => setJobDialog({ mode: "duplicate", job, family: null })}
+        onAssignJob={setAssignJob}
         onArchiveJob={(job) => setImpactDialog({ action: "archive", kind: "job", job })}
         onActivateJob={restoreJob}
         onDeleteJob={(job) => setImpactDialog({ action: "delete", kind: "job", job })}

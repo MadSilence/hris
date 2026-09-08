@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { showError } from "@/lib/errors/errorToast";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useMemo, useState } from "react";
@@ -7,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { Archive, Pencil, Play, Trash2, Users } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
   Tabs,
   TabsContent,
@@ -23,8 +23,7 @@ import {
   PolicyWizardModal,
   buildAccrualRequest,
   buildApprovalRequest,
-  buildBlackoutsRequest,
-  buildCoverageRequest,
+  buildRestrictionsRequest,
   buildEditRulesRequest,
   buildEligibilityRequest,
   buildRequestRulesRequest,
@@ -35,48 +34,40 @@ import {
 } from "../wizard";
 
 import { useTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicy";
-import { useUpdateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useUpdateTimeOffPolicy";
-import { useRenameTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useRenameTimeOffPolicy";
+import { useSaveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useSaveTimeOffPolicy";
 import { useActivateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useActivateTimeOffPolicy";
 import { useArchiveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useArchiveTimeOffPolicy";
 import { useDeleteTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useDeleteTimeOffPolicy";
-import { useUpdateTimeOffPolicyRequestRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRequestRules/hooks/useUpdateTimeOffPolicyRequestRules";
 import { useTimeOffPolicyRequestRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRequestRules/hooks/useTimeOffPolicyRequestRules";
-import { useUpdateTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useUpdateTimeOffPolicyEditRules";
 import { useTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useTimeOffPolicyEditRules";
-import { useUpdateTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useUpdateTimeOffPolicyApprovalSettings";
 import { useTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useTimeOffPolicyApprovalSettings";
-import { useUpdateTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useUpdateTimeOffPolicyEligibility";
 import { useTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useTimeOffPolicyEligibility";
-import { useUpdateTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useUpdateTimeOffPolicyCoverage";
-import { useTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useTimeOffPolicyCoverage";
-import { useUpdateTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useUpdateTimeOffPolicyAccrual";
+import { useTimeOffPolicyEditImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicyEditImpact";
+import { useTimeOffPolicyRestrictions } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRestrictions/hooks/useTimeOffPolicyRestrictions";
 import { useTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useTimeOffPolicyAccrual";
-import { useUpdateTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useUpdateTimeOffPolicyBlackouts";
-import { useTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useTimeOffPolicyBlackouts";
-import { useUpdateTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useUpdateTimeOffPolicyTenureRules";
 import { useTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useTimeOffPolicyTenureRules";
 import { useLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useLeaveType";
 
 import { TimeOffPolicyStatus } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
+import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
 
 type Props = {
   leaveTypeId: string;
   policyId: string;
 };
 
-function statusBadge(status: TimeOffPolicyStatus) {
+const policyStatus = (status: TimeOffPolicyStatus): EntityStatus => {
   switch (status) {
     case TimeOffPolicyStatus.Active:
-      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
+      return "active";
     case TimeOffPolicyStatus.Archived:
-      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
+      return "archived";
     default:
-      return { label: "Draft", className: "" };
+      return "draft";
   }
-}
+};
 
 export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) {
   const router = useRouter();
@@ -89,27 +80,22 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   const editRulesQuery = useTimeOffPolicyEditRules(policyId);
   const approvalQuery = useTimeOffPolicyApprovalSettings({ policyId });
   const eligibilityQuery = useTimeOffPolicyEligibility(policyId);
-  const coverageQuery = useTimeOffPolicyCoverage(policyId);
   const accrualQuery = useTimeOffPolicyAccrual(policyId);
-  const blackoutsQuery = useTimeOffPolicyBlackouts(policyId);
+  const restrictionsQuery = useTimeOffPolicyRestrictions(policyId);
   const tenureRulesQuery = useTimeOffPolicyTenureRules(policyId);
 
-  const updateMutation = useUpdateTimeOffPolicy();
-  const renameMutation = useRenameTimeOffPolicy();
+  // One mutation for the whole policy. The per-section hooks still exist and are still what a
+  // screen editing one section on its own would use; the wizard edits all of them at once.
+  const saveMutation = useSaveTimeOffPolicy();
   const activateMutation = useActivateTimeOffPolicy();
   const archiveMutation = useArchiveTimeOffPolicy();
   const deleteMutation = useDeleteTimeOffPolicy();
-  const requestRulesMutation = useUpdateTimeOffPolicyRequestRules();
-  const editRulesMutation = useUpdateTimeOffPolicyEditRules();
-  const approvalMutation = useUpdateTimeOffPolicyApprovalSettings();
-  const eligibilityMutation = useUpdateTimeOffPolicyEligibility();
-  const coverageMutation = useUpdateTimeOffPolicyCoverage();
-  const accrualMutation = useUpdateTimeOffPolicyAccrual();
-  const blackoutsMutation = useUpdateTimeOffPolicyBlackouts();
-  const tenureRulesMutation = useUpdateTimeOffPolicyTenureRules();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+  // Asked while the editor is open, so the count is on the Review step before the save.
+  const editImpactQuery = useTimeOffPolicyEditImpact(policyId, isEditOpen);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editInitialValues = useMemo(() => {
     if (
@@ -118,9 +104,8 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       !editRulesQuery.data ||
       !approvalQuery.data ||
       !eligibilityQuery.data ||
-      !coverageQuery.data ||
       !accrualQuery.data ||
-      !blackoutsQuery.data ||
+      !restrictionsQuery.data ||
       !tenureRulesQuery.data
     ) {
       return undefined;
@@ -131,9 +116,8 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       editRulesQuery.data,
       approvalQuery.data,
       eligibilityQuery.data,
-      coverageQuery.data,
       accrualQuery.data,
-      blackoutsQuery.data,
+      restrictionsQuery.data,
       tenureRulesQuery.data,
     );
   }, [
@@ -142,43 +126,42 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     editRulesQuery.data,
     approvalQuery.data,
     eligibilityQuery.data,
-    coverageQuery.data,
     accrualQuery.data,
-    blackoutsQuery.data,
+    restrictionsQuery.data,
     tenureRulesQuery.data,
   ]);
 
+  /**
+   * One call, one transaction.
+   *
+   * This used to be ten `mutateAsync` calls in a row — rename, policy, request rules, edit rules,
+   * eligibility, coverage, accrual, blackouts, tenure rules, approval. A refusal on the seventh left
+   * the first six written and the last three not, in a state nobody chose and no screen could
+   * describe. The sections are unchanged; only who owns the transaction is.
+   */
   const handleEditSave = async (values: PolicyWizardValues) => {
     if (!policy) return;
     const id = policy.id;
 
     const newSlug = values.name.trim().toLowerCase().replace(/\s+/g, "-");
-    if (newSlug !== policy.name) {
-      await renameMutation.mutateAsync({ id, name: newSlug });
-    }
 
-    await updateMutation.mutateAsync({ id, ...buildUpdatePolicyRequest(values) });
-    await requestRulesMutation.mutateAsync({ policyId: id, ...buildRequestRulesRequest(values) });
-    await editRulesMutation.mutateAsync({ policyId: id, ...buildEditRulesRequest(values) });
-    await eligibilityMutation.mutateAsync({ policyId: id, ...buildEligibilityRequest(values) });
-    await coverageMutation.mutateAsync({ policyId: id, ...buildCoverageRequest(values) });
-    await accrualMutation.mutateAsync({ policyId: id, ...buildAccrualRequest(values) });
-    await blackoutsMutation.mutateAsync({ policyId: id, ...buildBlackoutsRequest(values) });
-    await tenureRulesMutation.mutateAsync({ policyId: id, ...buildTenureRulesRequest(values) });
-
-    const approval = buildApprovalRequest(values);
-    if (approval) {
-      await approvalMutation.mutateAsync({ policyId: id, ...approval });
-    }
+    await saveMutation.mutateAsync({
+      id,
+      name: newSlug !== policy.name ? newSlug : null,
+      policy: buildUpdatePolicyRequest(values),
+      requestRules: buildRequestRulesRequest(values),
+      editRules: buildEditRulesRequest(values),
+      eligibility: buildEligibilityRequest(values),
+      accrual: buildAccrualRequest(values),
+      restrictions: buildRestrictionsRequest(values),
+      tenureRules: buildTenureRulesRequest(values),
+      approval: buildApprovalRequest(values),
+    });
 
     setIsEditOpen(false);
   };
 
-  /**
-   * The wizard saves through nine calls in a row, so a refusal partway leaves the policy
-   * half-written — all the more reason to say which step refused instead of closing the wizard on
-   * a rejected promise nobody sees.
-   */
+  /** A refused save leaves the policy untouched now, but the person still has to be told why. */
   const handleEditSaveSafely = async (values: PolicyWizardValues) => {
     try {
       await handleEditSave(values);
@@ -194,9 +177,9 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       setIsDeleteOpen(false);
       router.push(listHref);
     } catch (error) {
-      // Deleting an active policy is refused by the backend; the dialog stays open so the reason
-      // has somewhere to be read.
-      showError(error);
+      // Deleting an active policy is refused by the backend; the dialog stays open and now has
+      // somewhere to print the reason, which is what made TIME_OFF_POLICY_IN_USE invisible.
+      setDeleteError(error instanceof Error ? error.message : "The policy could not be deleted.");
     }
   };
 
@@ -210,12 +193,12 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     return (
       <div className="px-8 pt-2">
         <SettingsPageHeader title="Policy" backHref={listHref} />
-        <div className="mt-6 h-40 animate-pulse rounded-lg bg-brown-50" />
+        <Skeleton className="mt-6 h-40 w-full rounded-lg" />
       </div>
     );
   }
 
-  const badge = statusBadge(policy.status);
+  const status = policyStatus(policy.status);
   const isArchived = policy.status === TimeOffPolicyStatus.Archived;
   const isDraft = policy.status === TimeOffPolicyStatus.Draft;
 
@@ -226,9 +209,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
           <div className="flex items-center gap-2.5">
-            <Badge variant="outline" className={badge.className}>
-              {badge.label}
-            </Badge>
+            <StatusBadge status={status}/>
             {leaveType && (
               <span className="text-sm text-muted-foreground">in {leaveType.name}</span>
             )}
@@ -302,10 +283,11 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
 
       <PolicyWizardModal
         isOpen={isEditOpen && Boolean(editInitialValues)}
-        isLoading={updateMutation.isPending || renameMutation.isPending}
+        isLoading={saveMutation.isPending}
         mode="edit"
         leaveTypeName={leaveType?.name}
         initialValues={editInitialValues}
+        editImpact={editImpactQuery.data}
         onSubmitAction={handleEditSaveSafely}
         onCancelAction={() => setIsEditOpen(false)}
       />
@@ -313,9 +295,13 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       <DeleteTimeOffPolicyModal
         isOpen={isDeleteOpen}
         isLoading={deleteMutation.isPending}
+        errorMessage={deleteError}
         policy={policy}
         onConfirmAction={handleDelete}
-        onRequestCloseAction={() => setIsDeleteOpen(false)}
+        onRequestCloseAction={() => {
+          setIsDeleteOpen(false);
+          setDeleteError(null);
+        }}
       />
     </div>
   );

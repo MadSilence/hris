@@ -111,7 +111,7 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
         </Select>
 
         {formik.errors.folderId && (
-          <p className="text-sm text-destructive">{formik.errors.folderId}</p>
+          <p role="alert" className="text-sm text-destructive">{formik.errors.folderId}</p>
         )}
       </div>
 

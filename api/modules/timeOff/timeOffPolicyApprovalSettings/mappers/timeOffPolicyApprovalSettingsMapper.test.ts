@@ -7,8 +7,10 @@ import { TimeOffPolicyApproverType } from "@/api/modules/timeOff/timeOffPolicyAp
 describe("TimeOffPolicyApprovalSettingsMapper", () => {
   const dto: TimeOffPolicyApprovalSettingsDTO = {
     policyId: "policy-id",
-    allApprovalsRequired: true,
-    approvalOrderStrict: false,
+    configured: true,
+    approvalRequired: true,
+    approvalMode: "ALL" as const,
+    requiredApprovalsCount: null,
     allowSubstituteApprovers: false,
     approvers: [
       {
@@ -16,14 +18,12 @@ describe("TimeOffPolicyApprovalSettingsMapper", () => {
         approverType: TimeOffPolicyApproverType.SpecificUser,
         approverUserId: "user-id",
         approvalOrder: 1,
-        required: true,
       },
       {
         id: "approver-id-2",
         approverType: TimeOffPolicyApproverType.Manager,
         approverUserId: null,
         approvalOrder: 2,
-        required: false,
       },
     ],
   };
@@ -34,8 +34,10 @@ describe("TimeOffPolicyApprovalSettingsMapper", () => {
 
     expect(result).toEqual({
       policyId: "policy-id",
-      allApprovalsRequired: true,
-      approvalOrderStrict: false,
+      configured: true,
+      approvalRequired: true,
+      approvalMode: "ALL" as const,
+      requiredApprovalsCount: null,
       allowSubstituteApprovers: false,
       approvers: [
         {
@@ -43,14 +45,12 @@ describe("TimeOffPolicyApprovalSettingsMapper", () => {
           approverType: TimeOffPolicyApproverType.SpecificUser,
           approverUserId: "user-id",
           approvalOrder: 1,
-          required: true,
         },
         {
           id: "approver-id-2",
           approverType: TimeOffPolicyApproverType.Manager,
           approverUserId: null,
           approvalOrder: 2,
-          required: false,
         },
       ],
     });
@@ -66,7 +66,6 @@ describe("TimeOffPolicyApprovalSettingsMapper", () => {
       approverType: TimeOffPolicyApproverType.SpecificUser,
       approverUserId: "user-id",
       approvalOrder: 1,
-      required: true,
     });
   });
 });

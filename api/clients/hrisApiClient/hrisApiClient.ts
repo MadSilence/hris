@@ -178,7 +178,8 @@ export class HrisApiClient {
   }
 
   /**
-   * One parse, one shape. Every branch below gets `code`, `fieldErrors` and the request id, because
+   * One parse, one shape. Every branch below gets `code`, `fieldErrors`, `params` and the request id,
+   * because
    * losing any of them here means it cannot be recovered further up: this is the narrowest point of
    * the pipe between Java and the browser.
    */
@@ -195,6 +196,7 @@ export class HrisApiClient {
       status: response.status,
       code: body?.code ?? undefined,
       fieldErrors: body?.fieldErrors ?? undefined,
+      params: Array.isArray(body?.params) ? body.params : undefined,
       requestId: response.headers.get("X-Request-Id") ?? undefined,
     };
     const message = body?.message ?? `HTTP ${response.status}`;

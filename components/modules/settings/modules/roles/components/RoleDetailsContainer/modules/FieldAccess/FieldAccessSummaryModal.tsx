@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { ArrowRight } from "lucide-react";
 import {
   Dialog,
@@ -63,7 +64,7 @@ export const FieldAccessSummaryModal: FC<FieldAccessSummaryModalProps> = ({
           ))}
         </div>
 
-        {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancelAction} disabled={isSaving}>

@@ -229,7 +229,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
             aria-invalid={!!formik.errors.name}
           />
           {formik.errors.name && (
-            <p className="text-sm text-destructive">{formik.errors.name}</p>
+            <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
           )}
         </div>
 

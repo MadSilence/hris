@@ -140,7 +140,7 @@ describe("PublicHolidaysSettingsComponent — activating and deactivating", () =
     expect(mutations.deactivate).toHaveBeenCalledWith({ id: "cal-1" });
   });
 
-  it("shows neither on an archived calendar — it has to be restored first", async () => {
+  it("shows neither on an archived calendar — it has to be unarchived first", async () => {
     render(
       <PublicHolidaysSettingsComponent
         calendars={[calendar({ status: PublicHolidayCalendarStatus.Archived })]}
@@ -152,7 +152,7 @@ describe("PublicHolidaysSettingsComponent — activating and deactivating", () =
     await user.click(screen.getByRole("button", { name: "Show archived" }));
     await openRowMenu("Germany");
 
-    expect(screen.getByRole("menuitem", { name: "Restore" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Unarchive" })).toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Activate" })).not.toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Deactivate" })).not.toBeInTheDocument();
   });

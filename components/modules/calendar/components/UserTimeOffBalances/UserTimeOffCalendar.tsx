@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CalendarClock, Plus, ShieldCheck, Wallet } from "lucide-react";
@@ -24,8 +25,9 @@ type ModalState = { open: boolean; start?: string; end?: string };
  * click/drag on the calendar (which presets the request's start/end to the picked day-range).
  */
 export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
-  const { data: balances } = useEmployeeTimeOffBalancesByUser({ userId });
-  const { data: policies } = useTimeOffPolicies();
+  const { data: balances, isLoading: balancesLoading } =
+    useEmployeeTimeOffBalancesByUser({ userId });
+  const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
 
   const [modal, setModal] = useState<ModalState>({ open: false });
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -50,6 +52,17 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
   useEffect(() => {
     if (requestedFromHeader && hasBalances) setModal({ open: true });
   }, [requestedFromHeader, hasBalances]);
+
+  // The tab rendered nothing at all while these were in flight, so it flashed "no policies" at
+  // somebody who has several — the same shape the shared Skeleton solves in thirteen other modules.
+  if (balancesLoading || policiesLoading) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+    );
+  }
 
   return (
     <>

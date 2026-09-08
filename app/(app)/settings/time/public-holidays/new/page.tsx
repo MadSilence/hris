@@ -3,8 +3,7 @@
 import { Suspense } from "react";
 import { PublicHolidayCalendarNewPage } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayCalendarNewPage";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 function PageFallback() {
   return (
@@ -17,10 +16,10 @@ function PageFallback() {
 
 export default function NewPublicHolidayCalendarPage() {
   return (
-    <PermissionGate resource="ORG.PUBLIC_HOLIDAY_CALENDAR" action="MANAGE" fallback={<AccessDenied/>}>
+    <PageGate resource="ORG.PUBLIC_HOLIDAY_CALENDAR" action="MANAGE">
       <Suspense fallback={<PageFallback />}>
         <PublicHolidayCalendarNewPage />
       </Suspense>
-    </PermissionGate>
+    </PageGate>
   );
 }

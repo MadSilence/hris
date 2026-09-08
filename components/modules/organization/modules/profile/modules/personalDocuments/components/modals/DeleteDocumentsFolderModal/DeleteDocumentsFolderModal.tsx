@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,16 +32,24 @@ export interface DeleteDocumentsFolderModalProps {
   onConfirmAction: (strategy: DocumentFolderDeleteStrategy) => void;
 }
 
-const countLine = (impact: DocumentFolderDeleteImpactDTO): string | null => {
+const countLine = (documents: number, folders: number): string | null => {
   const parts: string[] = [];
-  if (impact.documents > 0) {
-    parts.push(`${impact.documents} ${impact.documents === 1 ? "document" : "documents"}`);
+  if (documents > 0) {
+    parts.push(`${documents} ${documents === 1 ? "document" : "documents"}`);
   }
-  if (impact.subfolders > 0) {
-    parts.push(`${impact.subfolders} ${impact.subfolders === 1 ? "folder" : "folders"}`);
+  if (folders > 0) {
+    parts.push(`${folders} ${folders === 1 ? "folder" : "folders"}`);
   }
   return parts.length ? parts.join(" and ") : null;
 };
+
+/** What the folder holds directly — what "keep the contents" lifts one level up. */
+const directContents = (impact: DocumentFolderDeleteImpactDTO) =>
+  countLine(impact.documents, impact.subfolders);
+
+/** Everything beneath it at any depth — what "delete the contents too" actually takes. */
+const subtreeContents = (impact: DocumentFolderDeleteImpactDTO) =>
+  countLine(impact.documentsInSubtree, impact.subfoldersInSubtree);
 
 /**
  * Deleting a folder, with a choice about what is inside it.
@@ -49,6 +58,11 @@ const countLine = (impact: DocumentFolderDeleteImpactDTO): string | null => {
  * The deletion policy does not allow that answer: a container with contents is deleted **with a
  * strategy**, shown alongside the counts the server reports at the moment of asking. Moving the
  * contents up is the default, because unassigning into nowhere is more often data loss than intent.
+ *
+ * **Each option states its own number.** Both used to read from the direct counts, which describe
+ * "keep the contents" correctly and understate "delete the contents too" — that one takes the whole
+ * subtree. On a four-level tree the dialog said "1 document and 1 folder" and the delete trashed four
+ * documents and three folders. Choosing between two outcomes needs both of them on screen.
  */
 export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = ({
   isOpen,
@@ -67,7 +81,10 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
     if (isOpen) setStrategy("MOVE_TO_PARENT");
   }, [isOpen]);
 
-  const contents = impact ? countLine(impact) : null;
+  const contents = impact ? directContents(impact) : null;
+  const deepContents = impact ? subtreeContents(impact) : null;
+  // Nested folders are the only reason the two answers differ; without them, saying so twice is noise.
+  const goesDeeper = Boolean(impact && impact.subfoldersInSubtree > 0);
 
   return (
     <AlertDialog
@@ -107,7 +124,9 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
               <span className="text-sm">
                 <span className="font-medium">Keep the contents</span>
                 <span className="block text-muted-foreground">
-                  Everything inside moves one level up and stays where it can be found.
+                  {contents
+                    ? `${contents} move one level up and stay where they can be found.`
+                    : "Everything inside moves one level up and stays where it can be found."}
                 </span>
               </span>
             </label>
@@ -124,15 +143,16 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
               <span className="text-sm">
                 <span className="font-medium">Delete the contents too</span>
                 <span className="block text-muted-foreground">
-                  Documents go to the trash, where they can be restored until the retention period
-                  ends.
+                  {deepContents
+                    ? `${deepContents}${goesDeeper ? ", including everything nested inside them," : ""} go to the trash, where they can be restored until the retention period ends.`
+                    : "Documents go to the trash, where they can be restored until the retention period ends."}
                 </span>
               </span>
             </label>
           </div>
         )}
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

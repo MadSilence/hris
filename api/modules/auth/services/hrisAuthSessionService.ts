@@ -18,7 +18,7 @@ export type SessionTokens = {
  * refresh token and `POST /auth/refresh` had no possible caller. Pulling the value out here is what
  * lets the route set it as a cookie of our own.
  */
-const refreshTokenFrom = (response: Response): string | undefined => {
+export const refreshTokenFrom = (response: Response): string | undefined => {
   const header = response.headers.get("set-cookie");
   if (!header) return undefined;
 

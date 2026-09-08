@@ -39,8 +39,18 @@ export class TimeOffRequestsRoutes {
     return Response.json(data);
   }
 
-  public async listByUserId(_req: Request, userId: string) {
-    const data = await hrisTimeOffRequestsService.listByUserId(userId);
+  public async listAwaitingMe(_req: Request) {
+    const data = await hrisTimeOffRequestsService.listAwaitingMe();
+    return Response.json(data);
+  }
+
+  public async listByUserId(req: Request, userId: string) {
+    const params = new URL(req.url).searchParams;
+    const yearParam = params.get("year");
+    const data = await hrisTimeOffRequestsService.listByUserId(userId, {
+      year: yearParam ? Number(yearParam) : null,
+      status: params.get("status"),
+    });
     return Response.json(data);
   }
 

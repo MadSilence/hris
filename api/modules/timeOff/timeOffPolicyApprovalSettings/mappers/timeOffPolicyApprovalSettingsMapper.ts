@@ -16,7 +16,6 @@ export class TimeOffPolicyApprovalSettingsMapper {
       approverType: dto.approverType,
       approverUserId: dto.approverUserId,
       approvalOrder: dto.approvalOrder,
-      required: dto.required,
     };
   }
 
@@ -25,8 +24,10 @@ export class TimeOffPolicyApprovalSettingsMapper {
   ): TimeOffPolicyApprovalSettings {
     return {
       policyId: dto.policyId,
-      allApprovalsRequired: dto.allApprovalsRequired,
-      approvalOrderStrict: dto.approvalOrderStrict,
+      configured: dto.configured,
+      approvalRequired: dto.approvalRequired,
+      approvalMode: dto.approvalMode,
+      requiredApprovalsCount: dto.requiredApprovalsCount,
       allowSubstituteApprovers: dto.allowSubstituteApprovers,
       approvers: dto.approvers.map((approver) =>
         this.mapTimeOffPolicyApproverDTO(approver)

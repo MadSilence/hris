@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { AlertTriangle, Clock } from "lucide-react";
 import {
   AlertDialog,
@@ -18,6 +19,13 @@ type Props = {
   isOpen: boolean;
   isLoading?: boolean;
   policy: TimeOffPolicy | null;
+  /**
+   * Why the deletion was refused, shown inside the dialog.
+   *
+   * <p>Without it TIME_OFF_POLICY_IN_USE was invisible: the modal did not accept a message, so a
+   * policy that could not be deleted simply did not get deleted and said nothing about why.
+   */
+  errorMessage?: string | null;
   onConfirmAction: () => void;
   onRequestCloseAction: () => void;
 };
@@ -25,6 +33,7 @@ type Props = {
 export const DeleteTimeOffPolicyModal: FC<Props> = ({
   isOpen,
   isLoading = false,
+  errorMessage,
   policy,
   onConfirmAction,
   onRequestCloseAction,
@@ -64,6 +73,10 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
             </div>
           </div>
         </div>
+
+        {errorMessage && (
+          <FormError message={errorMessage} />
+        )}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

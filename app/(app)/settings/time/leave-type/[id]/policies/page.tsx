@@ -4,8 +4,7 @@ import { useParams } from "next/navigation";
 
 import TimeOffPoliciesSettingsContainer from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/components/TimeOffPoliciesSettingsContainer";
 import { useLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useLeaveType";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function LeaveTypePoliciesPage() {
   const params = useParams();
@@ -14,12 +13,12 @@ export default function LeaveTypePoliciesPage() {
   const { data: leaveType } = useLeaveType(leaveTypeId);
 
   return (
-    <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW" fallback={<AccessDenied />}>
+    <PageGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW">
       <TimeOffPoliciesSettingsContainer
         leaveTypeId={leaveTypeId}
         title={leaveType?.name ?? "Policies"}
         backHref="/settings/time/leave-type"
       />
-    </PermissionGate>
+    </PageGate>
   );
 }

@@ -8,16 +8,22 @@ import { timeOffRequestsService } from "@/components/modules/settings/modules/ti
 
 type UseTimeOffRequestsByUserArgs = {
   userId: string;
+  /** Only requests touching this year. */
+  year?: number | null;
+  /** Only requests in this status. */
+  status?: string | null;
 };
 
 export const useTimeOffRequestsByUser = ({
   userId,
+  year = null,
+  status = null,
 }: UseTimeOffRequestsByUserArgs) => {
   return useQuery({
-    queryKey: getTimeOffRequestsByUserQueryKey(userId),
+    queryKey: getTimeOffRequestsByUserQueryKey(userId, { year, status }),
     queryFn: () => {
       assertTimeOffId(userId, "userId");
-      return timeOffRequestsService.listByUserId(userId);
+      return timeOffRequestsService.listByUserId(userId, { year, status });
     },
     enabled: Boolean(userId && userId !== "undefined"),
   });

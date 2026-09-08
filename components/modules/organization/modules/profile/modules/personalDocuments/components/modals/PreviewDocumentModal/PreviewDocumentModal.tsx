@@ -4,11 +4,14 @@ import { FC, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 export interface PreviewDocumentModalProps {
   isOpen: boolean;
   document: DocumentDTO | null;
   getDownloadUrl: (documentId: string) => string;
+  /** Reads the bytes through the shared client; see documentService.fetchPersonalDocument. */
+  fetchDocument: (documentId: string) => Promise<Blob>;
   onCloseAction: () => void;
 }
 
@@ -21,6 +24,7 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
   isOpen,
   document,
   getDownloadUrl,
+  fetchDocument,
   onCloseAction,
 }) => {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
@@ -36,11 +40,7 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
     setIsLoading(true);
     setError(null);
 
-    fetch(getDownloadUrl(document.id))
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
-        return res.blob();
-      })
+    fetchDocument(document.id)
       .then((blob) => {
         if (cancelled) return;
         created = URL.createObjectURL(blob);
@@ -48,7 +48,8 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
       })
       .catch((e: unknown) => {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : "Failed to load the document.");
+        // The dictionary, by code — the raw fetch could only ever produce "Failed to load (403)".
+        setError(messageForError(e));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -59,7 +60,7 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
       setObjectUrl(null);
       if (created) URL.revokeObjectURL(created);
     };
-  }, [isOpen, document, getDownloadUrl]);
+  }, [isOpen, document, fetchDocument]);
 
   const isImage = document?.mimeType?.startsWith("image/") ?? false;
 

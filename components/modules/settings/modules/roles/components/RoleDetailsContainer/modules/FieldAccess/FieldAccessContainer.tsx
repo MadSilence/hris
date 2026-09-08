@@ -39,12 +39,14 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
   const { data: attributeGroups, isLoading: groupsLoading } = useAttributeGroups();
   const { data, isLoading: accessLoading, error: accessError, save, saving, saveError } =
     useRoleFieldAccess(roleId);
-  const { data: roles } = useRoles();
+  const { data: roles, isLoading: rolesLoading } = useRoles();
 
   const canEdit = useCanAccess("ROLES.ROLE", "EDIT");
   const isSystemRole = (roles ?? []).find((role) => role.id === roleId)?.systemOwner ?? false;
   // Backend rejects field-access edits on a system role with RF00005.
-  const readOnly = !canEdit || isSystemRole;
+  // `rolesLoading` is read-only for the same reason as in `RolePermissionsContainer`: an unanswered
+  // question defaulted to "not a system role", so the panel was briefly editable when it never is.
+  const readOnly = !canEdit || isSystemRole || rolesLoading;
 
   const [draft, setDraft] = React.useState<FieldAccessDraft>({});
   const [query, setQuery] = React.useState("");

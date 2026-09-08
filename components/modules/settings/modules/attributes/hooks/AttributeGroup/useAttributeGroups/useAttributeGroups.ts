@@ -14,6 +14,16 @@ export const useAttributeGroups = () => {
   return useQuery<AttributeGroup[]>({
     queryKey: [ATTRIBUTE_GROUPS_QUERY_KEY],
     queryFn: () => getAttributeGroups(internalApiClient),
+    /**
+     * Reference data several components read at once, with an explicit invalidator beside it.
+     *
+     * Without a `staleTime` the default is 0, so each component that mounts and reads this hook
+     * finds the cache stale and refetches — the profile's Time Off tab fetched its policies three
+     * times per render for exactly this reason. The role detail page has the same shape: the
+     * container and both of its panels read this list. Every mutation invalidates the key, so
+     * holding it fresh for five minutes cannot serve a stale answer after a change.
+     */
+    staleTime: 5 * 60 * 1000,
   });
 };
 

@@ -64,7 +64,7 @@ export default function RolesTableRowActions({
           {archived ? (
             <DropdownMenuItem onClick={onRestore} className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer">
               <ArchiveRestore className="h-4 w-4 text-muted-foreground"/>
-              Restore
+              Unarchive
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem

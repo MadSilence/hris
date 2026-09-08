@@ -15,6 +15,9 @@ import {
 } from "@/public/desact/src/components/ui/table";
 import { Download, Plus, Search, Users, X } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import type { ResourceCode } from "@/models/access";
 import type { AssignedUser } from "@/models/assignedUser";
 import { formatUserStatus, isActiveStatus } from "@/models/user/status";
@@ -23,6 +26,7 @@ import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeople
 import { assignedUsersQueryKey } from "@/components/audience/assignment/hooks/useAssignedUsers";
 import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { showActionError } from "@/lib/errors/errorToast";
 
 export interface AssignedUsersPanelProps {
   title?: string;
@@ -31,6 +35,12 @@ export interface AssignedUsersPanelProps {
   manageResource?: ResourceCode;
   rows?: AssignedUser[];
   isLoading?: boolean;
+  /**
+   * The fetch that failed, if it did. Every caller had one and none of them passed it, so a
+   * refusal or an outage rendered as "No people assigned yet" — the panel could not tell an empty
+   * list from a list it was not allowed to read, and invited the reader to assign people into it.
+   */
+  error?: unknown;
   total?: number;
   query?: string;
   onQueryChange?: (value: string) => void;
@@ -40,6 +50,14 @@ export interface AssignedUsersPanelProps {
   onLoadMore?: () => void;
   onExport?: () => void;
   fillParent?: boolean;
+  /**
+   * Whether the thing people are assigned to is archived.
+   *
+   * The engine refuses these now (`INVALID_TARGET`), which is the enforcement; this is the half that
+   * stops the refusal being a surprise. Offering an action that is guaranteed to be skipped is the
+   * same defect as the dead Download button, one screen along.
+   */
+  isArchived?: boolean;
 
   assign?: {
     basePath: string;
@@ -60,6 +78,7 @@ export default function AssignedUsersPanel({
   manageResource,
   rows = [],
   isLoading = false,
+  error,
   total,
   query,
   onQueryChange,
@@ -70,6 +89,7 @@ export default function AssignedUsersPanel({
   assign,
   secondaryColumn,
   fillParent = false,
+  isArchived = false,
 }: AssignedUsersPanelProps) {
   const secondary = secondaryColumn ?? {
     header: "Position",
@@ -84,7 +104,7 @@ export default function AssignedUsersPanel({
   const setQuery = onQueryChange ?? setInternalQuery;
   const searching = q.trim().length > 0;
 
-  const isEmpty = !isLoading && rows.length === 0;
+  const isEmpty = !isLoading && !error && rows.length === 0;
   const canRemove = Boolean(assign);
 
   const handleRemove = async (userId: string) => {
@@ -102,6 +122,12 @@ export default function AssignedUsersPanel({
             queryClient.invalidateQueries({ queryKey: key }),
           ),
         );
+      } else {
+      // A row action whose context is the row itself: by the time the answer arrives there is no
+      // dialog left to put it in, so it goes to the card. This branch did not exist — a refused
+      // removal invalidated nothing, said nothing, and left the person on screen looking as though
+      // the click had missed.
+        showActionError(result);
       }
     } finally {
       setRemovingId(null);
@@ -109,7 +135,12 @@ export default function AssignedUsersPanel({
   };
 
   const assignButton = (
-    <Button className="gap-1.5" onClick={() => setAssignOpen(true)} disabled={!assign}>
+    <Button
+      className="gap-1.5"
+      onClick={() => setAssignOpen(true)}
+      disabled={!assign || isArchived}
+      title={isArchived ? "This record is archived, so nobody new can be assigned to it." : undefined}
+    >
       <Plus className="h-4 w-4"/>
       Assign
     </Button>
@@ -125,15 +156,30 @@ export default function AssignedUsersPanel({
   const emptyClass = fillParent ? "min-h-0 flex-1" : "";
   const emptyStyle = fillParent ? undefined : { minHeight: SCROLL_OFFSET };
 
+  const infoBlock = (
+    <div className="flex-none space-y-1 pt-2 pb-1">
+      <h2 className="text-lg font-semibold text-foreground">
+        {title}
+        {error ? null : <span className="font-normal text-brown-400"> ({total ?? rows.length})</span>}
+      </h2>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </div>
+  );
+
+  // A count of nothing and a toolbar for data we could not read are both lies. The heading stays so
+  // the reader knows which panel failed; everything that acts on the list goes.
+  if (error) {
+    return (
+      <div className={rootClass}>
+        {infoBlock}
+        {error instanceof ForbiddenError ? <AccessDenied compact/> : <ErrorState error={error} compact/>}
+      </div>
+    );
+  }
+
   return (
     <div className={rootClass}>
-      {/* Info block */}
-      <div className="flex-none space-y-1 pt-2 pb-1">
-        <h2 className="text-lg font-semibold text-foreground">
-          {title} <span className="font-normal text-brown-400">({total ?? rows.length})</span>
-        </h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
+      {infoBlock}
 
       {/* Toolbar */}
       <div className="flex flex-none items-center justify-between gap-4">
@@ -157,14 +203,22 @@ export default function AssignedUsersPanel({
             assignButton
           )}
 
-          <Button
-            size="icon"
-            variant="outline"
-            aria-label="Export"
-            onClick={onExport}
-          >
-            <Download className="h-4 w-4"/>
-          </Button>
+          {/*
+            * No handler, no button. This rendered unconditionally, so the holiday-calendar tab —
+            * the one caller that passes no `onExport` — showed a Download button that did nothing
+            * when pressed. A control that is offered and does not work is worse than an absent one:
+            * the reader concludes the export is broken rather than that it is not offered here.
+            */}
+          {onExport ? (
+            <Button
+              size="icon"
+              variant="outline"
+              aria-label="Export"
+              onClick={onExport}
+            >
+              <Download className="h-4 w-4"/>
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -187,8 +241,8 @@ export default function AssignedUsersPanel({
         ) : (
           <button
             type="button"
-            onClick={() => assign && setAssignOpen(true)}
-            disabled={!assign}
+            onClick={() => assign && !isArchived && setAssignOpen(true)}
+            disabled={!assign || isArchived}
             className={`flex w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-brown-300 text-center transition-colors enabled:hover:border-brown-400 enabled:hover:bg-brown-50 disabled:cursor-default ${emptyClass}`}
             style={emptyStyle}
           >

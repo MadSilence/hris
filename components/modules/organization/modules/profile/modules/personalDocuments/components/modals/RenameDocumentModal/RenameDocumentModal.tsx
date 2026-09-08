@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
@@ -53,7 +54,7 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-2">

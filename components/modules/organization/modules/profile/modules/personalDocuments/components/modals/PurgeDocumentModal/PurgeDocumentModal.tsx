@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,7 +72,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
           </div>
         </div>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

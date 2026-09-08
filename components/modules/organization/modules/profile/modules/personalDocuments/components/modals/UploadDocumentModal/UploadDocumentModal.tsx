@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import {
@@ -55,7 +56,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <UploadDocumentForm
           isLoading={isLoading}

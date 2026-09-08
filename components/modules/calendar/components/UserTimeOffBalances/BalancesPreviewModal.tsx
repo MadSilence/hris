@@ -69,6 +69,22 @@ const BalanceItem: FC<{
           </>
         )}
       </div>
+
+      {/* What the number is made of. "20 left" used to mean the same thing whether the missing days
+          were taken or merely asked for, and whether five of them expire in March. */}
+      {!unlimited && (balance.pendingBalance > 0 || balance.remainingCarryover > 0) && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {balance.pendingBalance > 0 && (
+            <>
+              {formatDayAmount(balance.pendingBalance)} awaiting a decision
+            </>
+          )}
+          {balance.pendingBalance > 0 && balance.remainingCarryover > 0 && " · "}
+          {balance.remainingCarryover > 0 && (
+            <>{formatDayAmount(balance.remainingCarryover)} carried over</>
+          )}
+        </p>
+      )}
       {!unlimited && (
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-brown-100">
           <div className="h-full rounded-full bg-brown-400" style={{ width: `${pct}%` }} />
@@ -155,7 +171,7 @@ export const BalancesPreviewModal: FC<Props> = ({
                 )}
 
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">History</p>
-                <BalanceLedger balanceId={selected.id} />
+                <BalanceLedger balanceId={selected.id} periodEnd={selected.periodEnd} />
               </>
             ) : (
               <p className="py-6 text-center text-sm text-muted-foreground">No balances to show.</p>

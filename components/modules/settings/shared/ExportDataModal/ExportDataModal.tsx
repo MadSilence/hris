@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
   ExportDataForm,
@@ -13,6 +14,9 @@ export interface ExportDataModalProps {
   title: string;
   description: string;
   includedText: string;
+  /** Passed straight through — see `ExportDataFormProps.rowCount`. */
+  rowCount?: number;
+  rowNoun?: string;
   /** Kept in the dialog rather than the console — a failed download is otherwise silent. */
   errorMessage?: string | null;
   onCancelAction: () => void;
@@ -25,6 +29,8 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
   title,
   description,
   includedText,
+  rowCount,
+  rowNoun,
   errorMessage,
   onCancelAction,
   onConfirmAction,
@@ -48,11 +54,13 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <ExportDataForm
           isLoading={isLoading}
           includedText={includedText}
+          rowCount={rowCount}
+          rowNoun={rowNoun}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
         />

@@ -6,8 +6,7 @@ import { Suspense } from "react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import TeamsContainer from "@/components/modules/settings/modules/teams/TeamsContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function TeamsPage() {
   // The page owns the viewport height so the canvas can fill what is left instead of pushing the
@@ -23,11 +22,11 @@ export default function TeamsPage() {
       </div>
 
       <div className="min-h-0 flex-1">
-        <PermissionGate resource="ORG.TEAM" action="VIEW" fallback={<AccessDenied />}>
+        <PageGate resource="ORG.TEAM" action="VIEW">
           <Suspense fallback={null}>
             <TeamsContainer />
           </Suspense>
-        </PermissionGate>
+        </PageGate>
       </div>
     </div>
   );

@@ -14,10 +14,37 @@ describe("messageForCode", () => {
     );
   });
 
-  it("keeps the server text for codes whose message carries values", () => {
-    const code = SERVER_TEXT_CODES.values().next().value as string;
+  /**
+   * The set is empty now, and that is the point of this test.
+   *
+   * Forty-six codes used to live on the backend's own wording because their message carries values
+   * ("Unknown attribute: {0}") and the values were only available inside the formatted sentence.
+   * They travel as `params` since 2026-09-07, so every one of those codes has a real entry and the
+   * escape hatch has nothing in it. Keeping the mechanism under test means the next code that needs
+   * it still works.
+   */
+  it("has nothing left on the server's own wording", () => {
+    expect(SERVER_TEXT_CODES.size).toBe(0);
+  });
 
-    expect(messageForCode(code, "Unknown attribute: hireDate")).toBe("Unknown attribute: hireDate");
+  it("fills the values the backend sent into our own sentence", () => {
+    expect(messageForCode("AV0001", "Unknown attribute: hireDate", ["Hire date"])).toBe(
+      "That field no longer exists (Hire date). Refresh the page.",
+    );
+  });
+
+  it("fills more than one, in order", () => {
+    expect(messageForCode("AV0014", "x must be between 1 and 5", ["Age", "18", "65"])).toBe(
+      "Age must be between 18 and 65.",
+    );
+  });
+
+  /**
+   * A placeholder with no value stays visible. "must be at least " reads as a sentence somebody
+   * wrote badly; "must be at least {1}" reads as unfinished, which is what it is.
+   */
+  it("leaves a placeholder alone when its value is missing", () => {
+    expect(messageForCode("AV0006", "x must be at least 3", ["Age"])).toBe("Age must be at least {1}.");
   });
 
   it("falls back for a code the dictionary does not know", () => {

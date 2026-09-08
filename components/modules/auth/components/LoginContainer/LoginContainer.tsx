@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
 import LoginForm, { LoginFormValues } from "@/components/modules/auth/components/LoginForm/LoginForm";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 const LoginContainer: React.FC = () => {
   const loginAction = useLoginAction();
@@ -23,7 +24,9 @@ const LoginContainer: React.FC = () => {
         return;
       }
 
-      throw new Error(res.status.toString());
+      // The client throws for every failing status, so reaching here means a 2xx that was not a
+      // sign-in. There is no code to look up and nothing specific to say.
+      throw new Error(`Login answered ${res.status} without a session`);
     },
     [loginAction],
   );
@@ -32,9 +35,14 @@ const LoginContainer: React.FC = () => {
     <LoginForm
       onSubmitAction={handleSubmit}
       isLoading={loginAction.isPending}
-      apiError={
-        loginAction.error instanceof Error ? loginAction.error.message : undefined
-      }
+      /*
+        The dictionary, not the exception's own text. This read `error.message` directly, which is
+        the backend's English on a good day \u2014 and on a bad one is a sentence written for whoever has
+        to debug it: the login screen showed "Cannot reach the API at http://localhost:8081 \u2014 is the
+        backend running?" to anybody who tried to sign in while the API was down. The refusal for a
+        wrong password (`AUTH00001`) went the same way, in the server's wording rather than ours.
+      */
+      apiError={loginAction.error ? messageForError(loginAction.error) : undefined}
     />
   );
 };

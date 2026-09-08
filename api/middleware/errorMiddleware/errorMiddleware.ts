@@ -27,6 +27,8 @@ export type ErrorResponse = {
   code?: string;
   message?: string;
   fieldErrors?: Record<string, string>;
+  /** The values the backend interpolated into its own message, so the dictionary can use them. */
+  params?: string[];
   requestId?: string;
 }
 
@@ -47,6 +49,7 @@ const getErrorResponse = (e: unknown): ErrorResponse => ({
   code: e instanceof ApiError ? e.code : undefined,
   message: e instanceof Error ? e.message : "",
   fieldErrors: e instanceof ApiError ? e.fieldErrors : undefined,
+  params: e instanceof ApiError ? e.params : undefined,
   requestId: e instanceof ApiError ? e.requestId : undefined,
 });
 

@@ -26,6 +26,10 @@ export class HrisLeaveTypesService {
     return hrisApiLeaveTypesClient.update(id, body);
   }
 
+  public async restore(id: string): Promise<UpdateResponse> {
+    return hrisApiLeaveTypesClient.restore(id);
+  }
+
   public async archive(id: string): Promise<UpdateResponse> {
     return hrisApiLeaveTypesClient.archive(id);
   }

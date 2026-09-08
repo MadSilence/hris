@@ -43,7 +43,7 @@ describe("HrisTimeOffRequestsService", () => {
   });
 
   it("delegates create to client", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisApiTimeOffRequestsClient.create)
@@ -83,13 +83,14 @@ describe("HrisTimeOffRequestsService", () => {
     const result = await hrisTimeOffRequestsService.listByUserId("user-id");
 
     expect(hrisApiTimeOffRequestsClient.listByUserId).toHaveBeenCalledWith(
-      "user-id"
+      "user-id",
+      undefined
     );
     expect(result).toEqual([request]);
   });
 
   it("delegates cancel to client", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisApiTimeOffRequestsClient.cancel)
@@ -107,7 +108,7 @@ describe("HrisTimeOffRequestsService", () => {
   });
 
   it("delegates approve to client", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisApiTimeOffRequestsClient.approve)
@@ -122,7 +123,7 @@ describe("HrisTimeOffRequestsService", () => {
   });
 
   it("delegates reject to client", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisApiTimeOffRequestsClient.reject)

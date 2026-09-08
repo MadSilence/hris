@@ -6,7 +6,8 @@ export class EmployeeTimeOffBalancesRoutes {
 
     const data = await hrisEmployeeTimeOffBalancesService.create({
       assignmentId: body.assignmentId,
-      year: body.year,
+      periodStart: body.periodStart,
+      periodEnd: body.periodEnd ?? null,
       openingBalance: body.openingBalance ?? 0,
       accruedBalance: body.accruedBalance ?? 0,
       carriedOverBalance: body.carriedOverBalance ?? 0,
@@ -35,6 +36,12 @@ export class EmployeeTimeOffBalancesRoutes {
       reason: body.reason,
     });
 
+    return Response.json(data);
+  }
+
+  public async balanceAsOf(req: Request, id: string) {
+    const date = new URL(req.url).searchParams.get("date") ?? "";
+    const data = await hrisEmployeeTimeOffBalancesService.balanceAsOf(id, date);
     return Response.json(data);
   }
 

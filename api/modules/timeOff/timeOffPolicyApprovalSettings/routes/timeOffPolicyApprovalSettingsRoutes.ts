@@ -13,8 +13,9 @@ export class TimeOffPolicyApprovalSettingsRoutes {
     const data = await hrisTimeOffPolicyApprovalSettingsService.update(
       policyId,
       {
-        allApprovalsRequired: body.allApprovalsRequired,
-        approvalOrderStrict: body.approvalOrderStrict,
+        approvalRequired: body.approvalRequired,
+        approvalMode: body.approvalMode,
+        requiredApprovalsCount: body.requiredApprovalsCount,
         allowSubstituteApprovers: body.allowSubstituteApprovers,
         approvers: body.approvers,
       }

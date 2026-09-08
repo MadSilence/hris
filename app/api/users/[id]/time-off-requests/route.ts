@@ -4,9 +4,14 @@ import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequest
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export const GET = apiRequestWrapper(async (_req: Request, context: RouteContext) => {
+export const GET = apiRequestWrapper(async (req: Request, context: RouteContext) => {
   const { id } = await context.params;
-  const requests = await hrisTimeOffRequestsService.listByUserId(id);
+  const params = new URL(req.url).searchParams;
+  const yearParam = params.get("year");
+  const requests = await hrisTimeOffRequestsService.listByUserId(id, {
+    year: yearParam ? Number(yearParam) : null,
+    status: params.get("status"),
+  });
 
   return NextResponse.json(requests);
 });

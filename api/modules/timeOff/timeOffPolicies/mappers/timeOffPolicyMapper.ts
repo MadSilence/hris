@@ -21,7 +21,6 @@ export class TimeOffPolicyMapper {
       effectiveDate: dto.effectiveDate,
 
       countingMode: dto.countingMode,
-      validWeekdays: dto.validWeekdays,
       includePublicHolidays: dto.includePublicHolidays,
 
       entitlementGrantingMode: dto.entitlementGrantingMode,

@@ -59,7 +59,7 @@ export default function AssignedUsersTable({
               <p className="font-medium">This role is archived</p>
               <p>
                 It grants nothing to the people below and cannot be assigned to anyone else.
-                Restore it to start using it again.
+                Unarchive it to start using it again.
               </p>
             </div>
           </div>

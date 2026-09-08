@@ -38,7 +38,6 @@ export const timeOffPolicyCreateRequest = (
   effectiveDate: null,
 
   countingMode: TimeOffPolicyCountingMode.WorkingDays,
-  validWeekdays: 62,
   includePublicHolidays: false,
 
   entitlementGrantingMode: TimeOffPolicyEntitlementMode.Upfront,

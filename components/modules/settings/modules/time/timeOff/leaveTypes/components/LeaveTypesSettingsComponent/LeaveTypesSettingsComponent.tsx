@@ -1,10 +1,9 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, Layers, MoreVertical, Pencil, Plus, Search } from "lucide-react";
+import { Archive, ArchiveRestore, Layers, MoreVertical, Pencil, Plus, Search } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import {
   DropdownMenu,
@@ -26,6 +25,7 @@ import { LeaveTypesSettingsSkeleton } from "../LeaveTypesSettingsSkeleton";
 import { LeaveTypeCategoryChip } from "../LeaveTypeCategoryChip/LeaveTypeCategoryChip";
 import { LeaveTypeCategory, LeaveTypeStatus } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { LeaveType } from "@/models/timeOff";
+import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
 
 type Props = {
   leaveTypes: LeaveType[];
@@ -34,16 +34,11 @@ type Props = {
   onOpenAction: (leaveType: LeaveType) => void;
   onEditAction: (leaveType: LeaveType) => void;
   onArchiveAction: (leaveType: LeaveType) => void;
+  onRestoreAction: (leaveType: LeaveType) => void;
 };
 
-function statusBadge(status: LeaveTypeStatus) {
-  switch (status) {
-    case LeaveTypeStatus.Archived:
-      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
-    default:
-      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
-  }
-}
+const leaveTypeStatus = (status: LeaveTypeStatus): EntityStatus =>
+  status === LeaveTypeStatus.Archived ? "archived" : "active";
 
 const CATEGORY_LABELS: Record<LeaveTypeCategory, string> = {
   [LeaveTypeCategory.Vacation]: "Vacation",
@@ -60,6 +55,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
   onOpenAction,
   onEditAction,
   onArchiveAction,
+  onRestoreAction,
 }) => {
   const [query, setQuery] = useState("");
 
@@ -144,7 +140,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                   </TableRow>
                 ) : (
                   filtered.map((leaveType) => {
-                    const badge = statusBadge(leaveType.status);
+                    const status = leaveTypeStatus(leaveType.status);
                     return (
                       <TableRow
                         key={leaveType.id}
@@ -171,9 +167,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                           <LeaveTypeCategoryChip category={leaveType.category} />
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={badge.className}>
-                            {badge.label}
-                          </Badge>
+                          <StatusBadge status={status}/>
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
@@ -197,7 +191,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                                   Edit
                                 </DropdownMenuItem>
 
-                                {leaveType.status === LeaveTypeStatus.Active && (
+                                {leaveType.status === LeaveTypeStatus.Active ? (
                                   <>
                                     <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
                                     <DropdownMenuItem
@@ -206,6 +200,20 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                                     >
                                       <Archive className="h-4 w-4 text-muted-foreground" />
                                       Archive
+                                    </DropdownMenuItem>
+                                  </>
+                                ) : (
+                                  <>
+                                    {/* Every archive in this product is reversible. This one was
+                                        not: a type archived by mistake could be neither restored
+                                        nor deleted. */}
+                                    <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
+                                    <DropdownMenuItem
+                                      onClick={() => onRestoreAction(leaveType)}
+                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                    >
+                                      <ArchiveRestore className="h-4 w-4 text-muted-foreground" />
+                                      Unarchive
                                     </DropdownMenuItem>
                                   </>
                                 )}

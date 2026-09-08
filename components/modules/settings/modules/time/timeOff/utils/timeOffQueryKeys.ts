@@ -72,11 +72,45 @@ export const getTimeOffPolicyTenureRulesQueryKey = (policyId: string) => [
   "tenureRules",
 ];
 
+export const getBalanceAsOfQueryKey = (balanceId: string, date: string) => [
+  TIME_OFF_QUERY_KEY,
+  "balances",
+  balanceId,
+  "asOf",
+  date,
+];
+
+export const getTimeOffPolicyEditImpactQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "editImpact",
+];
+
+export const getTimeOffPolicyRestrictionsQueryKey = (policyId: string) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "restrictions",
+];
+
 export const getTimeOffPolicyAssignmentsQueryKey = (policyId: string) => [
   TIME_OFF_QUERY_KEY,
   "policies",
   policyId,
   "assignments",
+];
+
+export const getTimeOffAssignmentImpactQueryKey = (
+  policyId: string,
+  userIds: string[],
+) => [
+  TIME_OFF_QUERY_KEY,
+  "policies",
+  policyId,
+  "assignments",
+  "impact",
+  [...userIds].sort().join(","),
 ];
 
 export const getEmployeeTimeOffBalanceQueryKey = (balanceId: string) => [
@@ -102,9 +136,22 @@ export const getTimeOffRequestQueryKey = (requestId: string) => [
   requestId,
 ];
 
-export const getTimeOffRequestsByUserQueryKey = (userId: string) => [
+export const getTimeOffRequestsByUserQueryKey = (
+  userId: string,
+  filters?: { year?: number | null; status?: string | null },
+) => [
   TIME_OFF_QUERY_KEY,
   "requests",
   "user",
   userId,
+  // In the key, so changing a filter refetches rather than showing the previous answer. Invalidating
+  // by the prefix above still clears every filtered variant at once.
+  filters?.year ?? null,
+  filters?.status ?? null,
+];
+
+export const getTimeOffRequestsAwaitingMeQueryKey = () => [
+  TIME_OFF_QUERY_KEY,
+  "requests",
+  "awaitingMe",
 ];

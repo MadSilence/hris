@@ -184,7 +184,11 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
 
     case AttributeType.NUMBER: {
       const n = Number(rawValue);
-      return <span>{Number.isFinite(n) ? String(n) : String(rawValue)}</span>;
+      if (!Number.isFinite(n)) return <span>{String(rawValue)}</span>;
+      // `decScale` picked the storage column and nothing else, so a salary declared to two decimals
+      // was stored as 1200.50 and displayed as 1200.5. It is a property of the field, so it decides
+      // how the value reads as well as where it lives.
+      return <span>{attribute.decScale != null ? n.toFixed(attribute.decScale) : String(n)}</span>;
     }
 
     case AttributeType.CHECKBOX:

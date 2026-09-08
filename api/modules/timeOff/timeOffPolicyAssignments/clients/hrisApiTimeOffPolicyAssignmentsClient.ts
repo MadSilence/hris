@@ -2,6 +2,7 @@
 import type {
   TimeOffPolicyAssignmentDTO,
   CreateTimeOffPolicyAssignmentRequest,
+  TimeOffAssignmentImpactDTO,
   EndTimeOffPolicyAssignmentRequest,
 } from "@/api/modules/timeOff/timeOffPolicyAssignments/dto";
 import { timeOffPolicyAssignmentMapper } from "@/api/modules/timeOff/timeOffPolicyAssignments/mappers";
@@ -29,6 +30,16 @@ export class HrisApiTimeOffPolicyAssignmentsClient {
     return hrisApiClient.post<CreateResponse>(
       `${this.POLICIES_PATH}/${policyId}/assignments`,
       body as unknown as Record<string, unknown>
+    );
+  }
+
+  public async impact(
+    policyId: string,
+    userIds: string[]
+  ): Promise<TimeOffAssignmentImpactDTO> {
+    return hrisApiClient.post<TimeOffAssignmentImpactDTO>(
+      `${this.POLICIES_PATH}/${policyId}/assignments/impact`,
+      { userIds }
     );
   }
 

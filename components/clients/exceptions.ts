@@ -10,6 +10,15 @@ export type ApiErrorInit = ErrorOptions & {
   code?: string;
   fieldErrors?: Record<string, string>;
   requestId?: string;
+  /**
+   * The values the backend interpolated into its own message, sent separately.
+   *
+   * Forty-six codes carry data in their text ("Unknown attribute: {0}"), and while the parameters
+   * were only available inside the formatted sentence the dictionary could not own those messages —
+   * a fixed entry would have dropped the part that says *which* attribute. With these, the entry can
+   * carry the placeholders and we write the wording.
+   */
+  params?: string[];
 };
 
 /** Base for every failure that came back from an API — ours or the backend's. */
@@ -18,6 +27,7 @@ export class ApiError extends Error {
   public readonly code?: string;
   public readonly fieldErrors?: Record<string, string>;
   public readonly requestId?: string;
+  public readonly params?: string[];
 
   public constructor(message?: string, init: ApiErrorInit = {}) {
     super(message, init);
@@ -26,6 +36,7 @@ export class ApiError extends Error {
     this.code = init.code;
     this.fieldErrors = init.fieldErrors;
     this.requestId = init.requestId;
+    this.params = init.params;
   }
 }
 

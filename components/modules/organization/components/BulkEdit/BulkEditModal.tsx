@@ -29,6 +29,8 @@ import type { FieldDTO } from "@/models/user/fields";
 import { canAccess, type ResourceCode } from "@/models/access";
 import type { BulkEditRequest, BulkEditResult, BulkOperation } from "@/models/bulkEdit";
 import { useAccess } from "@/components/auth/useAccess";
+import { FormError } from "@/components/feedback/FormError";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { useAudienceFieldOptions } from "@/components/audience/hooks/useAudienceFieldOptions";
 import {
   buildEditableFields,
@@ -274,9 +276,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
               </div>
             ) : null}
 
-            {bulkEdit.isError ? (
-              <p className="text-xs text-red-600">{bulkEdit.error?.message ?? "Something went wrong."}</p>
-            ) : null}
+            {bulkEdit.isError ? <FormError message={messageForError(bulkEdit.error)}/> : null}
           </div>
         )}
 

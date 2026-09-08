@@ -1,5 +1,6 @@
 "use client";
 
+import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact";
 import { dateToISO, isoToDate } from "@/lib/date";
 
 import { FC, useMemo, useState } from "react";
@@ -79,6 +80,16 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
   const selected = available.find((p) => p.id === policyId);
 
+  // What this assignment would produce, asked before it is made. Two things can be wrong with the
+  // pair while both halves look right: the approval chain resolves to nobody for this person, and an
+  // anniversary policy has no hire date to anchor on. Neither is visible on the policy screen.
+  const { data: impact } = useTimeOffAssignmentImpact({
+    policyId: policyId || null,
+    userIds: useMemo(() => [userId], [userId]),
+  });
+  const chainWontResolve = (impact?.withoutApprover.length ?? 0) > 0;
+  const noHireDate = (impact?.withoutHireDate.length ?? 0) > 0;
+
   const quotaLabel = selected
     ? selected.unlimitedQuota
       ? "Unlimited"
@@ -152,6 +163,22 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
                   </SelectContent>
                 </Select>
               </div>
+
+              {noHireDate && (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                  This policy renews on the hire anniversary and this person has no hire date, so the
+                  balance would never renew. Set a hire date first — the assignment will be refused
+                  until then.
+                </p>
+              )}
+
+              {chainWontResolve && !noHireDate && (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  This policy&apos;s approval chain has nobody to sign for this person — it asks for a
+                  manager, and none is set. The assignment will work; their requests will be refused
+                  until somebody can approve them.
+                </p>
+              )}
 
               <div className="space-y-1.5">
                 <Label className="text-xs">Effective from</Label>

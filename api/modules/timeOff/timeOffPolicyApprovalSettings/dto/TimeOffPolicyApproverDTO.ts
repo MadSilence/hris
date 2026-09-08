@@ -5,5 +5,4 @@ export interface TimeOffPolicyApproverDTO {
   approverType: TimeOffPolicyApproverType;
   approverUserId: string | null;
   approvalOrder: number;
-  required: boolean;
 }

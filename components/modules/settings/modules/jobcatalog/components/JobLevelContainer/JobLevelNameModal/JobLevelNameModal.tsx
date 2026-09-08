@@ -156,7 +156,7 @@ export const JobLevelNameModal: FC<Props> = ({
               />
 
               {formik.errors.name && (
-                <p className="text-sm text-destructive">{formik.errors.name}</p>
+                <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
               )}
             </div>
 

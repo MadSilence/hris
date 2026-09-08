@@ -33,20 +33,19 @@ import {
   type UpdateTimeOffPolicyEligibilityRequest,
 } from "@/api/modules/timeOff/timeOffPolicyEligibility/dto";
 import {
-  TimeOffCoverageBehavior,
-  TimeOffCoverageScope,
-  type TimeOffPolicyCoverageDTO,
-  type UpdateTimeOffPolicyCoverageRequest,
-} from "@/api/modules/timeOff/timeOffPolicyCoverage/dto";
+  TimeOffRestrictionBehavior,
+  TimeOffRestrictionRecurrence,
+  TimeOffRestrictionScope,
+  TimeOffRestrictionType,
+  type TimeOffPolicyRestrictionDTO,
+  type UpdateTimeOffPolicyRestrictionsRequest,
+} from "@/api/modules/timeOff/timeOffPolicyRestrictions/dto";
 import {
   TimeOffAccrualFrequency,
+  TimeOffAccrualTiming,
   type TimeOffPolicyAccrualDTO,
   type UpdateTimeOffPolicyAccrualRequest,
 } from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
-import type {
-  TimeOffPolicyBlackoutDTO,
-  UpdateTimeOffPolicyBlackoutsRequest,
-} from "@/api/modules/timeOff/timeOffPolicyBlackouts/dto";
 import type {
   TimeOffPolicyTenureRuleDTO,
   UpdateTimeOffPolicyTenureRulesRequest,
@@ -54,16 +53,6 @@ import type {
 import type { TimeOffPolicy, TimeOffPolicyApprovalSettings } from "@/models/timeOff";
 
 // Weekday bitmask: Mon=1, Tue=2, Wed=4, Thu=8, Fri=16, Sat=32, Sun=64
-export const WEEKDAY_BITS: { bit: number; label: string }[] = [
-  { bit: 1, label: "Mon" },
-  { bit: 2, label: "Tue" },
-  { bit: 4, label: "Wed" },
-  { bit: 8, label: "Thu" },
-  { bit: 16, label: "Fri" },
-  { bit: 32, label: "Sat" },
-  { bit: 64, label: "Sun" },
-];
-
 /** Minimal user shape carried by a specific-user approval step. Structurally compatible with
  *  UserPickerField's PickedUser; on edit-prefill only `id` is known (name resolved in the UI). */
 export type WizardApproverUser = {
@@ -77,13 +66,26 @@ export type WizardApproverUser = {
 export type WizardApprover = {
   type: TimeOffPolicyApproverType;
   user: WizardApproverUser | null;
-  required: boolean;
 };
 
-export type WizardBlackout = {
+/**
+ * One row of the Restrictions step: a blackout or a coverage cap.
+ *
+ * Two different rules, one editor — they share a scope, a block-or-warn outcome and the moment they
+ * are evaluated, and keeping them in two steps meant the scope existed on one of them and the
+ * warning on the other.
+ */
+export type WizardRestriction = {
+  type: TimeOffRestrictionType;
+  scope: TimeOffRestrictionScope;
+  behavior: TimeOffRestrictionBehavior;
   name: string;
+  /** BLACKOUT */
   startDate: string;
   endDate: string;
+  recurrence: TimeOffRestrictionRecurrence;
+  /** COVERAGE_CAP */
+  maxUsersAway: string;
 };
 
 export type WizardTenureRule = {
@@ -122,7 +124,6 @@ export type PolicyWizardValues = {
 
   // Counting
   countingMode: TimeOffPolicyCountingMode;
-  validWeekdays: number;
   includePublicHolidays: boolean;
 
   // Requests (request-rules)
@@ -141,9 +142,14 @@ export type PolicyWizardValues = {
 
   // Approvals (approval-settings)
   apprRequiresApproval: boolean;
-  apprAllApprovalsRequired: boolean;
-  apprApprovalOrderStrict: boolean;
-  apprAllowSubstitutes: boolean;
+  /**
+   * How a set of approvers decides. Replaced `allApprovalsRequired` + `approvalOrderStrict`, which
+   * described one mechanism in two overlapping switches and could not express "any two of these
+   * three" at all.
+   */
+  apprMode: "SEQUENTIAL" | "ALL" | "N_OF_M";
+  /** Only for N_OF_M: how many of the listed approvers have to sign. */
+  apprRequiredCount: string;
   apprApprovers: WizardApprover[];
 
   // Eligibility (eligibility)
@@ -152,19 +158,18 @@ export type PolicyWizardValues = {
   eligDelayUnit: TimeOffEligibilityDelayUnit;
   eligReference: TimeOffEligibilityReference;
 
-  // Coverage (coverage)
-  covEnabled: boolean;
-  covMaxUsers: string;
-  covScope: TimeOffCoverageScope;
-  covBehavior: TimeOffCoverageBehavior;
 
   // Accrual (accrual) — applies only when entitlementGrantingMode === ACCRUED
   accrualFrequency: TimeOffAccrualFrequency;
   accrualAmount: string;
   accrualCap: string;
+  /** When a period's days land: as it opens, or once it has been lived through. */
+  accrualTiming: TimeOffAccrualTiming;
+  /** Whether days accumulate during a waiting period the person cannot yet take leave in. */
+  accrueDuringWaiting: boolean;
 
-  // Blackout (blackouts)
-  blackouts: WizardBlackout[];
+  // Restrictions: blackouts and coverage caps together
+  restrictions: WizardRestriction[];
 
   // Tenure rewards (tenure-rules)
   tenureRules: WizardTenureRule[];
@@ -206,7 +211,6 @@ export const defaultPolicyWizardValues: PolicyWizardValues = {
   negativeBalanceCappedByQuota: false,
 
   countingMode: TimeOffPolicyCountingMode.CalendarDays,
-  validWeekdays: 31,
   includePublicHolidays: false,
 
   reqMinRequestUnit: TimeOffRequestUnit.FullDay,
@@ -223,26 +227,23 @@ export const defaultPolicyWizardValues: PolicyWizardValues = {
   reqCertificateRequiredFromDuration: "",
 
   apprRequiresApproval: false,
-  apprAllApprovalsRequired: true,
-  apprApprovalOrderStrict: false,
-  apprAllowSubstitutes: false,
-  apprApprovers: [{ type: TimeOffPolicyApproverType.Manager, user: null, required: true }],
+  apprMode: "ALL",
+  apprRequiredCount: "1",
+  apprApprovers: [{ type: TimeOffPolicyApproverType.Manager, user: null }],
 
   eligEnabled: false,
   eligDelayValue: "",
   eligDelayUnit: TimeOffEligibilityDelayUnit.Months,
   eligReference: TimeOffEligibilityReference.HireDate,
 
-  covEnabled: false,
-  covMaxUsers: "",
-  covScope: TimeOffCoverageScope.Team,
-  covBehavior: TimeOffCoverageBehavior.Block,
 
   accrualFrequency: TimeOffAccrualFrequency.Monthly,
   accrualAmount: "",
   accrualCap: "",
+  accrualTiming: TimeOffAccrualTiming.EndOfPeriod,
+  accrueDuringWaiting: true,
 
-  blackouts: [],
+  restrictions: [],
 
   tenureRules: [],
 
@@ -262,10 +263,7 @@ const toNumber = (s: string): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-export const hasWeekday = (mask: number, bit: number) => (mask & bit) !== 0;
 
-export const toggleWeekday = (mask: number, bit: number) =>
-  hasWeekday(mask, bit) ? mask & ~bit : mask | bit;
 
 export type WizardStepId =
   | "basics"
@@ -276,8 +274,7 @@ export type WizardStepId =
   | "requests"
   | "approvals"
   | "eligibility"
-  | "coverage"
-  | "blackout"
+  | "restrictions"
   | "tenure"
   | "editing"
   | "review";
@@ -344,8 +341,14 @@ export function validatePolicyStep(
         ) {
           return "Pick a person for each specific-user approval step.";
         }
-        if (v.apprApprovalOrderStrict && !v.apprAllApprovalsRequired) {
-          return "Strict order requires all approvals to be required.";
+        if (v.apprMode === "N_OF_M") {
+          // The same rule the API enforces: "any 3 of these 2" is a policy nothing can ever approve,
+          // which is the dead end the empty chain already had.
+          const n = toNumber(v.apprRequiredCount);
+          if (n === null || n < 1) return "Enter how many approvals are needed.";
+          if (n > v.apprApprovers.length) {
+            return `Only ${v.apprApprovers.length} approver${v.apprApprovers.length === 1 ? " is" : "s are"} listed, so ${n} approvals can never be collected.`;
+          }
         }
       }
       return null;
@@ -359,15 +362,7 @@ export function validatePolicyStep(
       }
       return null;
     }
-    case "coverage": {
-      if (v.covEnabled) {
-        const n = toNumber(v.covMaxUsers);
-        if (n === null || n < 0) {
-          return "Please enter a non-negative max-people-away value.";
-        }
-      }
-      return null;
-    }
+
     case "accrual": {
       if (v.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued) {
         const amount = toNumber(v.accrualAmount);
@@ -381,13 +376,20 @@ export function validatePolicyStep(
       }
       return null;
     }
-    case "blackout": {
-      for (const b of v.blackouts) {
-        if (!b.startDate || !b.endDate) {
-          return "Each blackout period needs a start and end date.";
-        }
-        if (b.endDate < b.startDate) {
-          return "A blackout's end date must be on or after its start date.";
+    case "restrictions": {
+      for (const r of v.restrictions) {
+        if (r.type === TimeOffRestrictionType.Blackout) {
+          if (!r.startDate || !r.endDate) {
+            return "Each blackout needs a start and an end date.";
+          }
+          if (r.endDate < r.startDate && r.recurrence !== TimeOffRestrictionRecurrence.Yearly) {
+            return "A blackout's end date must be on or after its start date.";
+          }
+        } else {
+          const n = toNumber(r.maxUsersAway);
+          if (n === null || n < 0) {
+            return "Each coverage cap needs a non-negative number of people.";
+          }
         }
       }
       return null;
@@ -439,7 +441,6 @@ export function buildCreatePolicyRequest(
     effectiveDate: v.effectiveDate || null,
 
     countingMode: v.countingMode,
-    validWeekdays: v.validWeekdays,
     includePublicHolidays: v.includePublicHolidays,
 
     entitlementGrantingMode: v.entitlementGrantingMode,
@@ -509,18 +510,24 @@ export function buildEditRulesRequest(
 
 export function buildApprovalRequest(
   v: PolicyWizardValues,
-): UpdateTimeOffPolicyApprovalSettingsRequest | null {
-  if (!v.apprRequiresApproval) return null;
+): UpdateTimeOffPolicyApprovalSettingsRequest {
+  // "Approval off" is now a value the policy carries rather than the absence of a settings row.
+  // Returning null used to mean the call was skipped: no row was written, requests still went to
+  // PENDING, and reopening the wizard showed the toggle back on.
   return {
-    allApprovalsRequired: v.apprAllApprovalsRequired,
-    approvalOrderStrict: v.apprApprovalOrderStrict,
-    allowSubstituteApprovers: v.apprAllowSubstitutes,
+    approvalRequired: v.apprRequiresApproval,
+    approvalMode: v.apprMode,
+    requiredApprovalsCount:
+      v.apprMode === "N_OF_M" ? toNumber(v.apprRequiredCount) ?? 1 : null,
+    // Substitutes need a delegation model that does not exist, so the setting is carried unchanged
+    // rather than offered: the wizard no longer shows a switch for it. See DECISIONS.md
+  // "A setting that is offered must work — and the corollary".
+    allowSubstituteApprovers: false,
     approvers: v.apprApprovers.map((a, i) => ({
       approverType: a.type,
       approverUserId:
         a.type === TimeOffPolicyApproverType.SpecificUser ? a.user?.id ?? null : null,
       approvalOrder: i + 1,
-      required: a.required,
     })),
   };
 }
@@ -549,17 +556,25 @@ export function buildTenureRulesRequest(
   };
 }
 
-export function buildBlackoutsRequest(
+export function buildRestrictionsRequest(
   v: PolicyWizardValues,
-): UpdateTimeOffPolicyBlackoutsRequest {
+): UpdateTimeOffPolicyRestrictionsRequest {
   return {
-    blackouts: v.blackouts
-      .filter((b) => b.startDate && b.endDate)
-      .map((b) => ({
-        name: b.name.trim() || null,
-        startDate: b.startDate,
-        endDate: b.endDate,
-      })),
+    restrictions: v.restrictions.map((r) => {
+      const blackout = r.type === TimeOffRestrictionType.Blackout;
+      return {
+        restrictionType: r.type,
+        scope: r.scope,
+        behavior: r.behavior,
+        name: r.name.trim() || null,
+        // Each type carries its own payload and not the other's — the API refuses a mixture, and
+        // sending the other half is how the two used to drift apart.
+        startDate: blackout ? r.startDate : null,
+        endDate: blackout ? r.endDate : null,
+        recurrence: blackout ? r.recurrence : TimeOffRestrictionRecurrence.None,
+        maxUsersAway: blackout ? null : toNumber(r.maxUsersAway),
+      };
+    }),
   };
 }
 
@@ -570,17 +585,8 @@ export function buildAccrualRequest(
     accrualFrequency: v.accrualFrequency,
     accrualAmount: toNumber(v.accrualAmount),
     accrualCap: toNumber(v.accrualCap),
-  };
-}
-
-export function buildCoverageRequest(
-  v: PolicyWizardValues,
-): UpdateTimeOffPolicyCoverageRequest {
-  return {
-    maxUsersAwayEnabled: v.covEnabled,
-    maxUsersAway: v.covEnabled ? toNumber(v.covMaxUsers) : null,
-    limitScope: v.covScope,
-    maxUsersAwayBehavior: v.covBehavior,
+    accrualTiming: v.accrualTiming,
+    accrueDuringWaitingPeriod: v.accrueDuringWaiting,
   };
 }
 
@@ -603,7 +609,6 @@ export function buildUpdatePolicyRequest(v: PolicyWizardValues): UpdateTimeOffPo
     effectiveDate: v.effectiveDate || null,
 
     countingMode: v.countingMode,
-    validWeekdays: v.validWeekdays,
     includePublicHolidays: v.includePublicHolidays,
 
     entitlementGrantingMode: v.entitlementGrantingMode,
@@ -644,13 +649,19 @@ export function policyToWizardValues(
   editRules?: TimeOffPolicyEditRulesDTO,
   approval?: TimeOffPolicyApprovalSettings,
   eligibility?: TimeOffPolicyEligibilityDTO,
-  coverage?: TimeOffPolicyCoverageDTO,
   accrual?: TimeOffPolicyAccrualDTO,
-  blackouts?: TimeOffPolicyBlackoutDTO[],
+  restrictions?: TimeOffPolicyRestrictionDTO[],
   tenureRules?: TimeOffPolicyTenureRuleDTO[],
 ): PolicyWizardValues {
   const d = defaultPolicyWizardValues;
   const hasApprovers = (approval?.approvers.length ?? 0) > 0;
+  // "Requires approval" is the policy's own answer, not a guess from whether anyone is listed.
+  // Reading it off the approver list is what made the toggle come back on when the wizard was
+  // reopened: turning it off wrote nothing, so the next read saw the old chain and inferred "yes".
+  // `configured` distinguishes "nobody has set this up" from "set up, and the answer is no".
+  const requiresApproval = approval?.configured
+    ? approval.approvalRequired
+    : hasApprovers;
 
   return {
     ...d,
@@ -686,7 +697,6 @@ export function policyToWizardValues(
 
     // Counting
     countingMode: policy.countingMode,
-    validWeekdays: policy.validWeekdays,
     includePublicHolidays: policy.includePublicHolidays,
 
     // Requests
@@ -705,15 +715,16 @@ export function policyToWizardValues(
     reqCertificateRequiredFromDuration: numToStr(requestRules?.certificateRequiredFromDuration),
 
     // Approvals
-    apprRequiresApproval: hasApprovers,
-    apprAllApprovalsRequired: approval?.allApprovalsRequired ?? d.apprAllApprovalsRequired,
-    apprApprovalOrderStrict: approval?.approvalOrderStrict ?? d.apprApprovalOrderStrict,
-    apprAllowSubstitutes: approval?.allowSubstituteApprovers ?? d.apprAllowSubstitutes,
+    apprRequiresApproval: requiresApproval,
+    apprMode: approval?.approvalMode ?? d.apprMode,
+    apprRequiredCount:
+      approval?.requiredApprovalsCount != null
+        ? numToStr(approval.requiredApprovalsCount)
+        : d.apprRequiredCount,
     apprApprovers: hasApprovers
       ? approval!.approvers.map((a) => ({
           type: a.approverType,
           user: a.approverUserId ? { id: a.approverUserId } : null,
-          required: a.required,
         }))
       : d.apprApprovers,
 
@@ -724,21 +735,24 @@ export function policyToWizardValues(
     eligReference: eligibility?.eligibilityReference ?? d.eligReference,
 
     // Coverage
-    covEnabled: coverage?.maxUsersAwayEnabled ?? d.covEnabled,
-    covMaxUsers: numToStr(coverage?.maxUsersAway),
-    covScope: coverage?.limitScope ?? d.covScope,
-    covBehavior: coverage?.maxUsersAwayBehavior ?? d.covBehavior,
 
     // Accrual
     accrualFrequency: accrual?.accrualFrequency ?? d.accrualFrequency,
     accrualAmount: numToStr(accrual?.accrualAmount),
     accrualCap: numToStr(accrual?.accrualCap),
+    accrualTiming: accrual?.accrualTiming ?? d.accrualTiming,
+    accrueDuringWaiting: accrual?.accrueDuringWaitingPeriod ?? d.accrueDuringWaiting,
 
-    // Blackout
-    blackouts: (blackouts ?? []).map((b) => ({
-      name: b.name ?? "",
-      startDate: b.startDate,
-      endDate: b.endDate,
+    // Restrictions: blackouts and coverage caps, one list
+    restrictions: (restrictions ?? []).map((r) => ({
+      type: r.restrictionType,
+      scope: r.scope,
+      behavior: r.behavior,
+      name: r.name ?? "",
+      startDate: r.startDate ?? "",
+      endDate: r.endDate ?? "",
+      recurrence: r.recurrence,
+      maxUsersAway: numToStr(r.maxUsersAway),
     })),
 
     // Tenure rewards

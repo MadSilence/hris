@@ -1,13 +1,12 @@
 "use client";
 
 import { FC, ReactNode } from "react";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Switch } from "@/public/desact/src/components/ui/switch";
-import { cn } from "@/public/desact/src/components/ui/utils";
 import {
   Select,
   SelectContent,
@@ -34,10 +33,15 @@ import {
   TimeOffEligibilityReference,
 } from "@/api/modules/timeOff/timeOffPolicyEligibility/dto";
 import {
-  TimeOffCoverageBehavior,
-  TimeOffCoverageScope,
-} from "@/api/modules/timeOff/timeOffPolicyCoverage/dto";
-import { TimeOffAccrualFrequency } from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
+  TimeOffRestrictionBehavior,
+  TimeOffRestrictionRecurrence,
+  TimeOffRestrictionScope,
+  TimeOffRestrictionType,
+} from "@/api/modules/timeOff/timeOffPolicyRestrictions/dto";
+import {
+  TimeOffAccrualFrequency,
+  TimeOffAccrualTiming,
+} from "@/api/modules/timeOff/timeOffPolicyAccrual/dto";
 import {
   UserPickerField,
   type PickedUser,
@@ -45,13 +49,10 @@ import {
 import { useUser } from "@/components/hooks/useUser/useUser";
 import {
   PolicyWizardValues,
-  WEEKDAY_BITS,
   WizardApprover,
   WizardApproverUser,
-  WizardBlackout,
+  WizardRestriction,
   WizardTenureRule,
-  hasWeekday,
-  toggleWeekday,
 } from "./policyWizardTypes";
 import { DatePicker } from "@/components/ui/DatePicker";
 
@@ -223,7 +224,9 @@ function setRenewalMode(set: WizardSetter, mode: string) {
 function renewalSummary(v: PolicyWizardValues): string {
   switch (v.renewalType) {
     case TimeOffPolicyRenewalType.Manual:
-      return "Manual";
+      // "Manual" implied an action somebody performs. There is none: the balance simply never
+      // renews, and an administrator adjusts it when they mean to.
+      return "Never — adjusted by hand";
     case TimeOffPolicyRenewalType.Anniversary:
       return "On hire date";
     default:
@@ -291,7 +294,9 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
           <SelectItem value={TimeOffPolicyRenewalType.Anniversary}>
             On the employee&apos;s hire date
           </SelectItem>
-          <SelectItem value={TimeOffPolicyRenewalType.Manual}>Manual</SelectItem>
+          <SelectItem value={TimeOffPolicyRenewalType.Manual}>
+            Never — the balance is kept by hand
+          </SelectItem>
         </SelectContent>
       </Select>
     </Field>
@@ -483,41 +488,10 @@ export const CountingStep: FC<StepProps> = ({ values, set }) => (
       </Select>
     </Field>
 
-    <div className="space-y-2">
-      <Label>Working weekdays</Label>
-      <p className="text-xs text-muted-foreground">Weekdays that consume balance.</p>
-      <div className="flex flex-wrap gap-2 pt-1">
-        {WEEKDAY_BITS.map(({ bit, label }) => {
-          const active = hasWeekday(values.validWeekdays, bit);
-          return (
-            <button
-              key={bit}
-              type="button"
-              onClick={() => set("validWeekdays", toggleWeekday(values.validWeekdays, bit))}
-              className={
-                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors " +
-                (active
-                  ? "border-brown-300 bg-brown-100 text-brown-800"
-                  : "border-brown-200 text-brown-500 hover:bg-brown-50")
-              }
-            >
-              <span
-                aria-hidden
-                className={cn(
-                  "flex size-4 shrink-0 items-center justify-center rounded-[4px] border",
-                  active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-brown-300 bg-input-background",
-                )}
-              >
-                {active && <Check className="size-3.5" />}
-              </span>
-              {label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    {/* The weekday picker is gone on purpose. Which days a person works is a fact about the
+        person, not about the policy: it now comes from their own work schedule, falling back to the
+        company week. A third per-policy layer meant a company whose week is Sun–Thu got Mon–Fri
+        charges from a policy that looked correctly configured. */}
 
     <ToggleField
       label="Public holidays consume balance"
@@ -609,7 +583,12 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
       <ToggleField
         label="Allow requests in the past"
         checked={values.reqAllowPastRequests}
-        onCheckedChange={(v) => set("reqAllowPastRequests", v)}
+        onCheckedChange={(v) => {
+          set("reqAllowPastRequests", v);
+          // Turning this on clears the rule it contradicts, rather than leaving a switch that says
+          // "on" and does nothing.
+          if (v) set("reqNoticeRequiredEnabled", false);
+        }}
       />
       {values.reqAllowPastRequests && (
         <Reveal>
@@ -626,9 +605,18 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
       )}
 
       <div className="pt-1">
+        {/* The two are mutually exclusive, and the API refuses the combination — a past date always
+            falls before today + N, so notice would refuse everything "allow in the past" allows.
+            Greyed rather than hidden: a disappearing switch reads as a bug. */}
         <ToggleField
           label="Require advance notice"
-          checked={values.reqNoticeRequiredEnabled}
+          hint={
+            values.reqAllowPastRequests
+              ? "Not available while requests in the past are allowed — a past date can never meet a notice period."
+              : undefined
+          }
+          disabled={values.reqAllowPastRequests}
+          checked={values.reqNoticeRequiredEnabled && !values.reqAllowPastRequests}
           onCheckedChange={(v) => set("reqNoticeRequiredEnabled", v)}
         />
         {values.reqNoticeRequiredEnabled && (
@@ -729,7 +717,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
   const addApprover = () =>
     set("apprApprovers", [
       ...values.apprApprovers,
-      { type: TimeOffPolicyApproverType.Manager, user: null, required: true },
+      { type: TimeOffPolicyApproverType.Manager, user: null },
     ]);
   const removeApprover = (index: number) =>
     set(
@@ -798,13 +786,6 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                     )}
                   </div>
 
-                  <label className="flex flex-none items-center gap-1.5 text-xs text-muted-foreground">
-                    Required
-                    <Switch
-                      checked={approver.required}
-                      onCheckedChange={(v) => patchApprover(index, { required: v })}
-                    />
-                  </label>
                   <button
                     type="button"
                     onClick={() => removeApprover(index)}
@@ -827,24 +808,43 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
             </p>
           </div>
 
-          <div className="space-y-1 border-t border-brown-100 pt-4">
-            <ToggleField
-              label="All approvals required"
-              hint="Every step must approve (vs. any one)."
-              checked={values.apprAllApprovalsRequired}
-              onCheckedChange={(v) => set("apprAllApprovalsRequired", v)}
-            />
-            <ToggleField
-              label="Strict order"
-              hint="Steps approve in sequence. Requires all approvals."
-              checked={values.apprApprovalOrderStrict}
-              onCheckedChange={(v) => set("apprApprovalOrderStrict", v)}
-            />
-            <ToggleField
-              label="Allow substitute approvers"
-              checked={values.apprAllowSubstitutes}
-              onCheckedChange={(v) => set("apprAllowSubstitutes", v)}
-            />
+          {/* One question with three answers, replacing two switches that described the same
+              mechanism twice and could not express "any two of these three" between them. */}
+          <div className="space-y-2 border-t border-brown-100 pt-4">
+            <Label>How do they decide?</Label>
+            <Select
+              value={values.apprMode}
+              onValueChange={(v) => set("apprMode", v as PolicyWizardValues["apprMode"])}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SEQUENTIAL">In order — each one signs in turn</SelectItem>
+                <SelectItem value="ALL">All of them, in any order</SelectItem>
+                <SelectItem value="N_OF_M">Any number of them</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {values.apprMode === "N_OF_M" && (
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-sm text-muted-foreground">Any</span>
+                {/* The sentence "Any [N] of the 3 listed" reads well on screen and reaches a screen
+                    reader as an unnamed spinbutton, so the field carries its own name. */}
+                <Input
+                  type="number"
+                  min={1}
+                  max={values.apprApprovers.length}
+                  value={values.apprRequiredCount}
+                  onChange={(e) => set("apprRequiredCount", e.currentTarget.value)}
+                  className="h-9 w-20"
+                  aria-label={`How many approvals are required, out of the ${values.apprApprovers.length} listed`}
+                />
+                <span className="text-sm text-muted-foreground">
+                  of the {values.apprApprovers.length} listed
+                </span>
+              </div>
+            )}
           </div>
         </Reveal>
       )}
@@ -941,6 +941,22 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
     );
   }
 
+  // Unlimited plus Accrued is a contradiction the engine resolves by ignoring the accrual entirely:
+  // there is no quota to earn a share of. Saying so beats offering a cadence and a cap that decide
+  // nothing — which is what this step used to do.
+  if (values.unlimitedQuota) {
+    return (
+      <div className="space-y-6">
+        <StepIntro>How entitlement is earned over time.</StepIntro>
+        <p className="rounded-lg border border-brown-200 bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
+          This policy has an <span className="font-medium text-foreground">unlimited</span> quota,
+          so there is no yearly total to earn a share of and nothing here would be read. Set a yearly
+          quota in the Entitlement step to accrue against it.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <StepIntro>How the yearly entitlement is earned over the year.</StepIntro>
@@ -988,6 +1004,36 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
           />
         </Field>
       </div>
+
+      <Field
+        label="When days land"
+        htmlFor="wiz-accrual-timing"
+        hint="At the start of each period, or once it has been worked through."
+      >
+        <Select
+          value={values.accrualTiming}
+          onValueChange={(v) => set("accrualTiming", v as TimeOffAccrualTiming)}
+        >
+          <SelectTrigger id="wiz-accrual-timing">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={TimeOffAccrualTiming.StartOfPeriod}>
+              At the start of the period
+            </SelectItem>
+            <SelectItem value={TimeOffAccrualTiming.EndOfPeriod}>
+              At the end of the period
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
+      <ToggleField
+        label="Earn during the waiting period"
+        hint="Days accumulate while the employee still cannot take this leave."
+        checked={values.accrueDuringWaiting}
+        onCheckedChange={(v) => set("accrueDuringWaiting", v)}
+      />
     </div>
   );
 };
@@ -1063,150 +1109,218 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
   );
 };
 
-// ── Step: Blackout ───────────────────────────────────────────────────
+// ── Step: Restrictions ───────────────────────────────────────────────
 
-export const BlackoutStep: FC<StepProps> = ({ values, set }) => {
-  const patchRow = (index: number, patch: Partial<WizardBlackout>) =>
+const RESTRICTION_LABEL: Record<TimeOffRestrictionType, string> = {
+  [TimeOffRestrictionType.Blackout]: "Nobody away on these dates",
+  [TimeOffRestrictionType.CoverageCap]: "No more than N people away at once",
+};
+
+/**
+ * Blackouts and coverage caps, in one step.
+ *
+ * They were two steps for two rules that share everything except their payload — a scope, a moment
+ * of evaluation and a block-or-warn outcome. Splitting them is why only one of them had a scope (so
+ * a company shutdown had to be retyped on every policy) and only one of them could warn.
+ */
+export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
+  const patchRow = (index: number, patch: Partial<WizardRestriction>) =>
     set(
-      "blackouts",
-      values.blackouts.map((b, i) => (i === index ? { ...b, ...patch } : b)),
+      "restrictions",
+      values.restrictions.map((r, i) => (i === index ? { ...r, ...patch } : r)),
     );
-  const addRow = () =>
-    set("blackouts", [...values.blackouts, { name: "", startDate: "", endDate: "" }]);
+  const addRow = (type: TimeOffRestrictionType) =>
+    set("restrictions", [
+      ...values.restrictions,
+      {
+        type,
+        scope: TimeOffRestrictionScope.Company,
+        behavior: TimeOffRestrictionBehavior.Block,
+        name: "",
+        startDate: "",
+        endDate: "",
+        recurrence: TimeOffRestrictionRecurrence.None,
+        maxUsersAway: "",
+      },
+    ]);
   const removeRow = (index: number) =>
-    set("blackouts", values.blackouts.filter((_, i) => i !== index));
+    set("restrictions", values.restrictions.filter((_, i) => i !== index));
 
   return (
     <div className="space-y-6">
-      <StepIntro>Periods when requests against this policy are blocked (e.g. a year-end freeze).</StepIntro>
+      <StepIntro>
+        When leave cannot be taken — fixed dates, or too many people away at once.
+      </StepIntro>
 
       <div className="space-y-2">
-        {values.blackouts.length === 0 && (
+        {values.restrictions.length === 0 && (
           <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
-            No blackout periods. Requests are allowed all year.
+            No restrictions. Requests are allowed all year, however many people are away.
           </p>
         )}
 
-        {values.blackouts.map((row, index) => (
-          <div
-            key={index}
-            className="flex items-end gap-2 rounded-lg border border-brown-200 px-3 py-2"
-          >
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs">Name (optional)</Label>
-              <Input
-                placeholder="Year-end freeze"
-                value={row.name}
-                onChange={(e) => patchRow(index, { name: e.target.value })}
-              />
+        {values.restrictions.map((row, index) => {
+          const blackout = row.type === TimeOffRestrictionType.Blackout;
+          return (
+            <div key={index} className="space-y-2 rounded-lg border border-brown-200 px-3 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-brown-900">
+                  {RESTRICTION_LABEL[row.type]}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeRow(index)}
+                  className="flex-none text-brown-400 hover:text-red-600"
+                  aria-label="Remove restriction"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">Name (optional)</Label>
+                  <Input
+                    placeholder={blackout ? "Year-end freeze" : "Keep the desk covered"}
+                    value={row.name}
+                    onChange={(e) => patchRow(index, { name: e.target.value })}
+                  />
+                </div>
+
+                {blackout ? (
+                  <>
+                    <div className="space-y-1">
+                      <Label className="text-xs">From</Label>
+                      <DatePicker
+                        value={row.startDate}
+                        ariaLabel="Blackout start"
+                        className="w-40"
+                        onChange={(next) => patchRow(index, { startDate: next })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">To</Label>
+                      <DatePicker
+                        value={row.endDate}
+                        ariaLabel="Blackout end"
+                        className="w-40"
+                        onChange={(next) => patchRow(index, { endDate: next })}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-1">
+                    <Label className="text-xs">Max people away</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      className="w-28"
+                      value={row.maxUsersAway}
+                      onChange={(e) => patchRow(index, { maxUsersAway: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Applies to</Label>
+                  <Select
+                    value={row.scope}
+                    onValueChange={(v) => patchRow(index, { scope: v as TimeOffRestrictionScope })}
+                  >
+                    <SelectTrigger className="h-9 w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TimeOffRestrictionScope.Team}>The same team</SelectItem>
+                      <SelectItem value={TimeOffRestrictionScope.Department}>
+                        The same department
+                      </SelectItem>
+                      <SelectItem value={TimeOffRestrictionScope.Company}>
+                        The whole company
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">When it applies</Label>
+                  <Select
+                    value={row.behavior}
+                    onValueChange={(v) =>
+                      patchRow(index, { behavior: v as TimeOffRestrictionBehavior })
+                    }
+                  >
+                    <SelectTrigger className="h-9 w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TimeOffRestrictionBehavior.Block}>
+                        Refuse those days
+                      </SelectItem>
+                      <SelectItem value={TimeOffRestrictionBehavior.Warn}>
+                        Allow, and say which days
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {blackout && (
+                  <div className="space-y-1">
+                    <Label className="text-xs">Repeats</Label>
+                    <Select
+                      value={row.recurrence}
+                      onValueChange={(v) =>
+                        patchRow(index, { recurrence: v as TimeOffRestrictionRecurrence })
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-44">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={TimeOffRestrictionRecurrence.None}>
+                          Once, on these dates
+                        </SelectItem>
+                        <SelectItem value={TimeOffRestrictionRecurrence.Yearly}>
+                          Every year
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">From</Label>
-              <DatePicker
-                value={row.startDate}
-                ariaLabel="Blackout start"
-                className="w-40"
-                onChange={(next) => patchRow(index, { startDate: next })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">To</Label>
-              <DatePicker
-                value={row.endDate}
-                ariaLabel="Blackout end"
-                className="w-40"
-                min={row.startDate || undefined}
-                onChange={(next) => patchRow(index, { endDate: next })}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => removeRow(index)}
-              className="mb-1.5 flex-none text-brown-400 hover:text-red-600"
-              aria-label="Remove blackout period"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={addRow}>
-        <Plus className="h-4 w-4" />
-        Add blackout period
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() => addRow(TimeOffRestrictionType.Blackout)}
+        >
+          <Plus className="h-4 w-4" />
+          Add a blackout
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() => addRow(TimeOffRestrictionType.CoverageCap)}
+        >
+          <Plus className="h-4 w-4" />
+          Add a coverage cap
+        </Button>
+      </div>
     </div>
   );
 };
-
-// ── Step: Coverage ───────────────────────────────────────────────────
-
-export const CoverageStep: FC<StepProps> = ({ values, set }) => (
-  <div className="space-y-6">
-    <StepIntro>Cap how many people can be away at the same time.</StepIntro>
-
-    <ToggleField
-      label="Limit how many people are away"
-      hint="Block or warn when too many people in the scope overlap."
-      checked={values.covEnabled}
-      onCheckedChange={(v) => set("covEnabled", v)}
-    />
-
-    {values.covEnabled && (
-      <Reveal>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <Label>Max people away</Label>
-            <Input
-              type="number"
-              min={0}
-              inputMode="numeric"
-              className="w-24"
-              value={values.covMaxUsers}
-              onChange={(e) => set("covMaxUsers", e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Within</Label>
-            <Select
-              value={values.covScope}
-              onValueChange={(v) => set("covScope", v as TimeOffCoverageScope)}
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={TimeOffCoverageScope.Team}>The same team</SelectItem>
-                <SelectItem value={TimeOffCoverageScope.Department}>The same department</SelectItem>
-                <SelectItem value={TimeOffCoverageScope.Company}>The whole company</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <Label>When the limit is reached</Label>
-          <Select
-            value={values.covBehavior}
-            onValueChange={(v) => set("covBehavior", v as TimeOffCoverageBehavior)}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TimeOffCoverageBehavior.Block}>Block the request</SelectItem>
-              <SelectItem value={TimeOffCoverageBehavior.Warn}>Warn only (advisory)</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            Warn is advisory for now — the request still goes through.
-          </p>
-        </div>
-      </Reveal>
-    )}
-  </div>
-);
 
 // ── Step 7: Editing ──────────────────────────────────────────────────
 
@@ -1266,10 +1380,27 @@ function Summary({ label, value }: { label: string; value: string }) {
   );
 }
 
-export const ReviewStep: FC<{ values: PolicyWizardValues; leaveTypeName?: string }> = ({
-  values,
-  leaveTypeName,
-}) => {
+function approvalSummary(v: PolicyWizardValues): string {
+  if (!v.apprRequiresApproval) return "Auto-approve on submission";
+
+  const count = v.apprApprovers.length;
+  const steps = `${count} approver${count === 1 ? "" : "s"}`;
+  switch (v.apprMode) {
+    case "SEQUENTIAL":
+      return `${steps}, in order`;
+    case "N_OF_M":
+      return `any ${v.apprRequiredCount || "1"} of ${count}`;
+    default:
+      return `${steps}, all must sign`;
+  }
+}
+
+export const ReviewStep: FC<{
+  values: PolicyWizardValues;
+  leaveTypeName?: string;
+  /** The wizard edits an existing policy as often as it creates one, and the copy has to say which. */
+  mode?: "create" | "edit";
+}> = ({ values, leaveTypeName, mode = "create" }) => {
   const unitLabel = values.unit === TimeOffPolicyUnit.Hours ? "hours" : "days";
   const quota = values.unlimitedQuota ? "Unlimited" : `${values.yearlyQuota || "0"} ${unitLabel}/year`;
   const carryover =
@@ -1278,13 +1409,14 @@ export const ReviewStep: FC<{ values: PolicyWizardValues; leaveTypeName?: string
       : values.carryoverType === TimeOffPolicyCarryoverType.Unlimited
         ? "Unlimited"
         : `Limited to ${values.carryoverLimit || "0"}`;
-  const selectedDays = WEEKDAY_BITS.filter((d) => hasWeekday(values.validWeekdays, d.bit))
-    .map((d) => d.label)
-    .join(", ");
 
   return (
     <div className="space-y-5">
-      <StepIntro>Review the policy before creating it. You can go back to any step to adjust.</StepIntro>
+      <StepIntro>
+        {mode === "edit"
+          ? "Review the changes before saving them. You can go back to any step to adjust."
+          : "Review the policy before creating it. You can go back to any step to adjust."}
+      </StepIntro>
 
       <div className="rounded-lg border border-brown-200 p-4">
         <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
@@ -1306,20 +1438,17 @@ export const ReviewStep: FC<{ values: PolicyWizardValues; leaveTypeName?: string
           label="Counting"
           value={values.countingMode === TimeOffPolicyCountingMode.WorkingDays ? "Working days" : "Calendar days"}
         />
-        <Summary label="Working days" value={selectedDays || "—"} />
         <Summary label="Negative balance" value={values.allowNegativeBalance ? "Allowed" : "Not allowed"} />
-        <Summary
-          label="Approval"
-          value={
-            values.apprRequiresApproval
-              ? `${values.apprApprovers.length} step${values.apprApprovers.length === 1 ? "" : "s"}`
-              : "Auto-approve"
-          }
-        />
+        {/* Says how the chain decides, not just how long it is. "Auto-approve" is now the truth
+            rather than a wizard default: with approvalRequired off the request is approved on
+            submission instead of waiting in PENDING for an administrator. */}
+        <Summary label="Approval" value={approvalSummary(values)} />
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Request rules, approvals and edit rules can be configured after the policy is created.
+        {mode === "edit"
+          ? "Every section above is saved together — if anything is refused, nothing changes."
+          : "Anything here can be changed later, including the steps you skipped."}
       </p>
     </div>
   );

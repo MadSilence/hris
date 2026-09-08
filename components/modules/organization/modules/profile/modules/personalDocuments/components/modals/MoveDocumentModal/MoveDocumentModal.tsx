@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
   MoveDocumentFolderOption,
@@ -52,7 +53,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <MoveDocumentForm
           isLoading={isLoading}

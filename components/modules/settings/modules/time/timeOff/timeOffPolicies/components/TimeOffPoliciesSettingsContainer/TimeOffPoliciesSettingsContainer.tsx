@@ -11,8 +11,8 @@ import {
   PolicyWizardModal,
   buildAccrualRequest,
   buildApprovalRequest,
-  buildBlackoutsRequest,
-  buildCoverageRequest,
+  buildRestrictionsRequest,
+  buildUpdatePolicyRequest,
   buildCreatePolicyRequest,
   buildEditRulesRequest,
   buildEligibilityRequest,
@@ -22,18 +22,14 @@ import {
 } from "../wizard";
 
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
+import { useSaveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useSaveTimeOffPolicy";
+import { useDuplicateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useDuplicateTimeOffPolicy";
 import { useCreateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useCreateTimeOffPolicy";
 import { useActivateTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useActivateTimeOffPolicy";
 import { useArchiveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useArchiveTimeOffPolicy";
+import { useUnarchiveTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useUnarchiveTimeOffPolicy";
+import { showUndoToast } from "@/lib/feedback/undoToast";
 import { useDeleteTimeOffPolicy } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useDeleteTimeOffPolicy";
-import { useUpdateTimeOffPolicyRequestRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyRequestRules/hooks/useUpdateTimeOffPolicyRequestRules";
-import { useUpdateTimeOffPolicyEditRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEditRules/hooks/useUpdateTimeOffPolicyEditRules";
-import { useUpdateTimeOffPolicyApprovalSettings } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyApprovalSettings/hooks/useUpdateTimeOffPolicyApprovalSettings";
-import { useUpdateTimeOffPolicyEligibility } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyEligibility/hooks/useUpdateTimeOffPolicyEligibility";
-import { useUpdateTimeOffPolicyCoverage } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyCoverage/hooks/useUpdateTimeOffPolicyCoverage";
-import { useUpdateTimeOffPolicyAccrual } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAccrual/hooks/useUpdateTimeOffPolicyAccrual";
-import { useUpdateTimeOffPolicyBlackouts } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyBlackouts/hooks/useUpdateTimeOffPolicyBlackouts";
-import { useUpdateTimeOffPolicyTenureRules } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyTenureRules/hooks/useUpdateTimeOffPolicyTenureRules";
 
 import type { TimeOffPolicy } from "@/models/timeOff";
 import { AccessDenied } from "@/components/auth/AccessDenied";
@@ -58,17 +54,12 @@ export default function TimeOffPoliciesSettingsContainer({
     : (policies ?? []);
 
   const createMutation = useCreateTimeOffPolicy();
+  const duplicateMutation = useDuplicateTimeOffPolicy();
+  const saveMutation = useSaveTimeOffPolicy();
   const activateMutation = useActivateTimeOffPolicy();
   const archiveMutation = useArchiveTimeOffPolicy();
+  const unarchiveMutation = useUnarchiveTimeOffPolicy();
   const deleteMutation = useDeleteTimeOffPolicy();
-  const requestRulesMutation = useUpdateTimeOffPolicyRequestRules();
-  const editRulesMutation = useUpdateTimeOffPolicyEditRules();
-  const approvalMutation = useUpdateTimeOffPolicyApprovalSettings();
-  const eligibilityMutation = useUpdateTimeOffPolicyEligibility();
-  const coverageMutation = useUpdateTimeOffPolicyCoverage();
-  const accrualMutation = useUpdateTimeOffPolicyAccrual();
-  const blackoutsMutation = useUpdateTimeOffPolicyBlackouts();
-  const tenureRulesMutation = useUpdateTimeOffPolicyTenureRules();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deletingPolicy, setDeletingPolicy] = useState<TimeOffPolicy | null>(null);
@@ -82,19 +73,21 @@ export default function TimeOffPoliciesSettingsContainer({
 
     const policyId = res.data?.id;
     if (policyId) {
-      // Sub-resources are keyed by policyId, so they must be saved after create.
-      await requestRulesMutation.mutateAsync({ policyId, ...buildRequestRulesRequest(values) });
-      await editRulesMutation.mutateAsync({ policyId, ...buildEditRulesRequest(values) });
-      await eligibilityMutation.mutateAsync({ policyId, ...buildEligibilityRequest(values) });
-      await coverageMutation.mutateAsync({ policyId, ...buildCoverageRequest(values) });
-      await accrualMutation.mutateAsync({ policyId, ...buildAccrualRequest(values) });
-      await blackoutsMutation.mutateAsync({ policyId, ...buildBlackoutsRequest(values) });
-      await tenureRulesMutation.mutateAsync({ policyId, ...buildTenureRulesRequest(values) });
-
-      const approval = buildApprovalRequest(values);
-      if (approval) {
-        await approvalMutation.mutateAsync({ policyId, ...approval });
-      }
+      // Sub-resources are keyed by policyId, so they are saved after the create — but in one call
+      // and one transaction, not eight. A refusal partway used to leave a policy that exists and is
+      // configured with half of what the person typed.
+      await saveMutation.mutateAsync({
+        id: policyId,
+        name: null,
+        policy: buildUpdatePolicyRequest(values),
+        requestRules: buildRequestRulesRequest(values),
+        editRules: buildEditRulesRequest(values),
+        eligibility: buildEligibilityRequest(values),
+        accrual: buildAccrualRequest(values),
+        restrictions: buildRestrictionsRequest(values),
+        tenureRules: buildTenureRulesRequest(values),
+        approval: buildApprovalRequest(values),
+      });
     }
 
     setIsCreateModalOpen(false);
@@ -109,8 +102,24 @@ export default function TimeOffPoliciesSettingsContainer({
     activateMutation.mutateAsync({ id: policy.id }).catch(showError);
   };
 
+  const handleUnarchive = (policy: TimeOffPolicy) => {
+    unarchiveMutation.mutate({ id: policy.id });
+  };
+
   const handleArchive = (policy: TimeOffPolicy) => {
-    archiveMutation.mutate({ id: policy.id });
+    // Archiving is reversible by design, so it does not get a confirmation dialog — it gets the
+    // three seconds afterwards. The undo is the unarchive that now exists; before it did, there was
+    // nothing to offer and archiving a policy was permanent.
+    archiveMutation.mutate(
+      { id: policy.id },
+      {
+        onSuccess: () =>
+          showUndoToast({
+            message: `${policy.name} archived`,
+            onUndo: () => unarchiveMutation.mutateAsync({ id: policy.id }),
+          }),
+      },
+    );
   };
 
   const handleDelete = async () => {
@@ -120,6 +129,27 @@ export default function TimeOffPoliciesSettingsContainer({
       setDeletingPolicy(null);
     } catch (error) {
       // Only a draft can be deleted; the dialog stays up so the refusal has somewhere to be read.
+      showError(error);
+    }
+  };
+
+  /**
+   * Copies the policy under a name nobody has to invent from scratch, as a draft.
+   *
+   * A prompt rather than a modal on purpose: the only thing to decide is the name, and a dialog for
+   * one text field is a dialog for the sake of having one. If it grows a second question it becomes
+   * a modal like the others.
+   */
+  const handleDuplicate = async (policy: TimeOffPolicy) => {
+    const name = window.prompt(
+      "Name for the copy",
+      `${policy.displayName} (copy)`,
+    );
+    if (!name?.trim()) return;
+
+    try {
+      await duplicateMutation.mutateAsync({ id: policy.id, name: name.trim() });
+    } catch (error) {
       showError(error);
     }
   };
@@ -135,7 +165,9 @@ export default function TimeOffPoliciesSettingsContainer({
         onOpenAction={handleOpen}
         onActivateAction={handleActivate}
         onArchiveAction={handleArchive}
+        onUnarchiveAction={handleUnarchive}
         onDeleteAction={(policy) => setDeletingPolicy(policy)}
+        onDuplicateAction={handleDuplicate}
       />
 
       <PolicyWizardModal

@@ -3,12 +3,14 @@ import type {
   TimeOffRequestDTO,
   CreateTimeOffRequestRequest,
   CancelTimeOffRequestRequest,
+  CreateTimeOffRequestResponse,
+  EditTimeOffRequestRequest,
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
   TimeOffOverlapDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
-import { CreateResponse, UpdateResponse } from "@/api/models/misc";
+import { UpdateResponse } from "@/api/models/misc";
 import type { TimeOffRequest } from "@/models/timeOff";
 
 export class HrisApiTimeOffRequestsClient {
@@ -18,8 +20,8 @@ export class HrisApiTimeOffRequestsClient {
 
   public async create(
     body: CreateTimeOffRequestRequest
-  ): Promise<CreateResponse> {
-    return hrisApiClient.post<CreateResponse>(
+  ): Promise<CreateTimeOffRequestResponse> {
+    return hrisApiClient.post<CreateTimeOffRequestResponse>(
       this.REQUESTS_PATH,
       body as unknown as Record<string, unknown>
     );
@@ -51,9 +53,26 @@ export class HrisApiTimeOffRequestsClient {
     return timeOffRequestMapper.mapTimeOffRequestDTO(dto);
   }
 
-  public async listByUserId(userId: string): Promise<TimeOffRequest[]> {
+  /** What is waiting for my decision — deliberately personal, not a company-wide list. */
+  public async listAwaitingMe(): Promise<TimeOffRequest[]> {
     const dtos = await hrisApiClient.get<TimeOffRequestDTO[]>(
-      `${this.USERS_PATH}/${userId}/time-off-requests`
+      `${this.REQUESTS_PATH}/awaiting-me`
+    );
+
+    return timeOffRequestMapper.mapTimeOffRequestDTOs(dtos);
+  }
+
+  public async listByUserId(
+    userId: string,
+    filters?: { year?: number | null; status?: string | null }
+  ): Promise<TimeOffRequest[]> {
+    const qs = new URLSearchParams();
+    if (filters?.year) qs.set("year", String(filters.year));
+    if (filters?.status) qs.set("status", filters.status);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+
+    const dtos = await hrisApiClient.get<TimeOffRequestDTO[]>(
+      `${this.USERS_PATH}/${userId}/time-off-requests${suffix}`
     );
 
     return timeOffRequestMapper.mapTimeOffRequestDTOs(dtos);
@@ -66,6 +85,34 @@ export class HrisApiTimeOffRequestsClient {
     return hrisApiClient.post<UpdateResponse>(
       `${this.REQUESTS_PATH}/${id}/cancel`,
       body as unknown as Record<string, unknown>
+    );
+  }
+
+  /**
+   * The approver's answer to a cancellation the employee asked for.
+   *
+   * Two calls rather than one with a flag, mirroring the backend: they are different decisions and
+   * the journal should say which one was taken without anyone reading a boolean.
+   */
+  public async edit(
+    id: string,
+    body: EditTimeOffRequestRequest
+  ): Promise<UpdateResponse> {
+    return hrisApiClient.patch<UpdateResponse>(
+      `${this.REQUESTS_PATH}/${id}`,
+      body as unknown as Record<string, unknown>
+    );
+  }
+
+  public async confirmCancellation(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.REQUESTS_PATH}/${id}/cancellation/confirm`
+    );
+  }
+
+  public async declineCancellation(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.REQUESTS_PATH}/${id}/cancellation/decline`
     );
   }
 

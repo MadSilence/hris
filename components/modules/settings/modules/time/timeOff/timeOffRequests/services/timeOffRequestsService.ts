@@ -24,8 +24,23 @@ export class TimeOffRequestsService {
     return internalApiClient.get<TimeOffRequest>(`/time-off/requests/${id}`);
   }
 
-  public async listByUserId(userId: string): Promise<TimeOffRequest[]> {
-    return internalApiClient.get<TimeOffRequest[]>(`/users/${userId}/time-off-requests`);
+  public async listByUserId(
+    userId: string,
+    filters?: { year?: number | null; status?: string | null },
+  ): Promise<TimeOffRequest[]> {
+    const qs = new URLSearchParams();
+    if (filters?.year) qs.set("year", String(filters.year));
+    if (filters?.status) qs.set("status", filters.status);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+
+    return internalApiClient.get<TimeOffRequest[]>(
+      `/users/${userId}/time-off-requests${suffix}`,
+    );
+  }
+
+  /** What is waiting for my decision. */
+  public async listAwaitingMe(): Promise<TimeOffRequest[]> {
+    return internalApiClient.get<TimeOffRequest[]>("/time-off/requests/awaiting-me");
   }
 }
 

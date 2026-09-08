@@ -262,6 +262,8 @@ export const OfficeComponent: FC<Props> = ({
       <ExportDataModal
         isOpen={isExportOpen}
         title="Export offices"
+        rowCount={initialOffices.length}
+        rowNoun="offices"
         description="Export all offices with their address, assigned people, and creation details."
         includedText="Included: name, description, email, phone, address, assigned people, created by, created at."
         onCancelAction={() => setIsExportOpen(false)}

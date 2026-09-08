@@ -2,13 +2,12 @@
 
 import CompanyProfileSettingsContainer
   from "@/components/modules/settings/modules/general/companyProfile/components/CompanyProfileSettingsContainer/CompanyProfileSettingsContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function CompanyProfileSettingsPage() {
   return (
-    <PermissionGate resource="SETTINGS.GENERAL" action="VIEW" fallback={<AccessDenied/>}>
+    <PageGate resource="SETTINGS.GENERAL" action="VIEW">
       <CompanyProfileSettingsContainer/>
-    </PermissionGate>
+    </PageGate>
   );
 }

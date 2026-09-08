@@ -5,12 +5,11 @@ import {
 } from "@/components/modules/settings/modules/attributes/components/SystemFieldsSection";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 import { FC } from "react";
 
 const AttributesSettingsPage: FC = () => (
-  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="VIEW" fallback={<AccessDenied/>}>
+  <PageGate resource="PEOPLE.ATTRIBUTES" action="VIEW">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
         <SettingsPageHeader title="Person Information" backHref="/settings"/>
@@ -38,7 +37,7 @@ const AttributesSettingsPage: FC = () => (
         </div>
       </div>
     </div>
-  </PermissionGate>
+  </PageGate>
 );
 
 export default AttributesSettingsPage;

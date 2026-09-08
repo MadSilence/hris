@@ -17,6 +17,19 @@ export type ExportDataFormValues = {
 export interface ExportDataFormProps {
   isLoading?: boolean;
   includedText: string;
+  /**
+   * How many rows are about to leave, when the caller can count them.
+   *
+   * The button said "Export" and nothing else, so **the only way to find out which set you had taken
+   * was to open the file — usually after sending it.** A filtered list and an unfiltered one look
+   * identical from inside this dialog.
+   *
+   * Optional because not every export is a list: a single office's sheet has no count worth stating,
+   * and inventing one would be worse than the plain verb.
+   */
+  rowCount?: number;
+  /** What is being counted, for the label: "128 roles". Ignored without `rowCount`. */
+  rowNoun?: string;
   onCancelAction: () => void;
   onSubmitAction: (values: ExportDataFormValues) => void | Promise<void>;
 }
@@ -31,6 +44,8 @@ const schema = yup.object({
 export const ExportDataForm: FC<ExportDataFormProps> = ({
   isLoading = false,
   includedText,
+  rowCount,
+  rowNoun,
   onCancelAction,
   onSubmitAction,
 }) => {
@@ -144,9 +159,21 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
           disabled={isLoading}
           className="bg-brown-600 text-white hover:bg-brown-700"
         >
-          Export
+          {exportLabel(rowCount, rowNoun)}
         </Button>
       </DialogFooter>
     </form>
   );
+};
+
+/**
+ * "Export 128 roles", or just "Export" when there is nothing honest to count.
+ *
+ * Zero is stated rather than hidden: a button offering to export nothing is the clearest possible
+ * warning that the filter above it is wrong.
+ */
+const exportLabel = (rowCount?: number, rowNoun?: string): string => {
+  if (rowCount === undefined) return "Export";
+  const noun = rowNoun ? ` ${rowNoun}` : " rows";
+  return `Export ${rowCount}${rowCount === 1 && rowNoun ? noun.replace(/s$/, "") : noun}`;
 };

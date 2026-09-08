@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import {
   UpsertRoleNameForm,
@@ -72,7 +73,7 @@ export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
         </DialogHeader>
 
         {errorMessage && (
-          <p className="text-sm text-red-500">{errorMessage}</p>
+          <FormError message={errorMessage} />
         )}
 
         <UpsertRoleNameForm

@@ -35,7 +35,7 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
-  const { data: fields } = useUserFields();
+  const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const [filters, setFilters] = React.useState<FilterDTO[]>(value?.filters ?? []);
   const [includeInactive, setIncludeInactive] = React.useState(value?.includeInactive ?? false);
 
@@ -58,6 +58,7 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
         <AudienceBuilder
           key={grantLabel}
           fields={fields}
+          isLoadingFields={fieldsLoading}
           value={filters}
           onChange={setFilters}
           includeInactive={includeInactive}

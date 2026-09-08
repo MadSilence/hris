@@ -5,9 +5,15 @@ import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 
 // The delete modals fetch an impact preview (values / people affected). That needs a QueryClient and
 // the app-data context, neither of which belongs in a modal rendering test — stub the hook instead.
+const groupImpact = { data: undefined, isLoading: false, error: undefined } as {
+  data?: { attributeCount: number; valueCount: number; peopleCount: number };
+  isLoading: boolean;
+  error?: unknown;
+};
+
 jest.mock("@/components/modules/settings/modules/attributes/hooks/useDeleteImpact", () => ({
-  useAttributeDeleteImpact: () => ({ data: undefined }),
-  useGroupDeleteImpact: () => ({ data: undefined }),
+  useAttributeDeleteImpact: () => ({ data: undefined, isLoading: false, error: undefined }),
+  useGroupDeleteImpact: () => groupImpact,
 }));
 
 const mockGroup: AttributeGroup = {
@@ -46,6 +52,9 @@ const renderModal = (
 describe("DeleteGroupModal", () => {
   afterEach(() => {
     jest.clearAllMocks();
+    groupImpact.data = undefined;
+    groupImpact.isLoading = false;
+    groupImpact.error = undefined;
   });
 
   it("does not render when isOpen is false", () => {
@@ -123,5 +132,44 @@ describe("DeleteGroupModal", () => {
 
     expect(onConfirmAction).not.toHaveBeenCalled();
     expect(onRequestCloseAction).not.toHaveBeenCalled();
+  });
+
+  // Three outcomes, not two. Before this the loading state, the failure and a genuinely empty
+  // section all rendered the same vague sentence, so the reader could not tell an empty section
+  // from an unreachable API before pressing Delete.
+  describe("what it says about the impact", () => {
+    it("says it is still asking, and will not let Delete be pressed meanwhile", () => {
+      groupImpact.isLoading = true;
+      renderModal();
+
+      expect(screen.getByText(/checking what this section contains/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /delete section/i })).toBeDisabled();
+    });
+
+    it("says the impact is unknown when it could not be read, and still allows the delete", () => {
+      groupImpact.error = new Error("boom");
+      renderModal();
+
+      expect(
+        screen.getByText(/what this section contains is unknown/i),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /delete section/i })).toBeEnabled();
+    });
+
+    it("gives the counts when it has them", () => {
+      groupImpact.data = { attributeCount: 3, valueCount: 12, peopleCount: 4 };
+      renderModal();
+
+      expect(screen.getByText(/attributes? in this section will/i)).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("12")).toBeInTheDocument();
+    });
+
+    it("says so plainly when the section is empty", () => {
+      groupImpact.data = { attributeCount: 0, valueCount: 0, peopleCount: 0 };
+      renderModal();
+
+      expect(screen.getByText(/this section is empty/i)).toBeInTheDocument();
+    });
   });
 });

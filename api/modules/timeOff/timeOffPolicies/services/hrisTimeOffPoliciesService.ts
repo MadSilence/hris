@@ -1,11 +1,14 @@
 ﻿import type {
   CreateTimeOffPolicyRequest,
   RenameTimeOffPolicyRequest,
+  SaveTimeOffPolicyRequest,
+  TimeOffPolicyEditImpactDTO,
   UpdateTimeOffPolicyRequest,
 } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { hrisApiTimeOffPoliciesClient } from "@/api/modules/timeOff/timeOffPolicies/clients/";
 import { TimeOffPolicy } from "@/models/timeOff";
+import { timeOffPolicyMapper } from "@/api/modules/timeOff/timeOffPolicies/mappers";
 
 export class HrisTimeOffPoliciesService {
   public async create(
@@ -29,6 +32,26 @@ export class HrisTimeOffPoliciesService {
     return hrisApiTimeOffPoliciesClient.update(id, body);
   }
 
+  public async save(
+    id: string,
+    body: SaveTimeOffPolicyRequest
+  ): Promise<TimeOffPolicy> {
+    const dto = await hrisApiTimeOffPoliciesClient.save(id, body);
+    return timeOffPolicyMapper.mapTimeOffPolicyDTO(dto);
+  }
+
+  public async duplicate(id: string, name: string): Promise<CreateResponse> {
+    return hrisApiTimeOffPoliciesClient.duplicate(id, name);
+  }
+
+  public async exportPolicies(format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiTimeOffPoliciesClient.exportPolicies(format);
+  }
+
+  public async editImpact(id: string): Promise<TimeOffPolicyEditImpactDTO> {
+    return hrisApiTimeOffPoliciesClient.editImpact(id);
+  }
+
   public async rename(
     id: string,
     body: RenameTimeOffPolicyRequest
@@ -38,6 +61,10 @@ export class HrisTimeOffPoliciesService {
 
   public async activate(id: string): Promise<UpdateResponse> {
     return hrisApiTimeOffPoliciesClient.activate(id);
+  }
+
+  public async unarchive(id: string): Promise<UpdateResponse> {
+    return hrisApiTimeOffPoliciesClient.unarchive(id);
   }
 
   public async archive(id: string): Promise<UpdateResponse> {

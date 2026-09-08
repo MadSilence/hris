@@ -46,6 +46,8 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
     assignmentId: "assignment-id",
     policyId: "policy-id",
     userId: "user-id",
+    periodStart: "2026-01-01",
+    periodEnd: "2026-12-31",
     year: 2026,
     openingBalance: 20,
     accruedBalance: 0,
@@ -53,6 +55,8 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
     adjustedBalance: -2,
     carriedOverBalance: 3,
     currentBalance: 16,
+    pendingBalance: 0,
+    remainingCarryover: 0,
     createdAt: "2026-01-01T10:00:00",
     updatedAt: "2026-06-01T10:00:00",
   };
@@ -83,6 +87,8 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
 
     const body = {
       assignmentId: "assignment-id",
+      periodStart: "2026-01-01",
+      periodEnd: "2026-12-31",
       year: 2026,
       openingBalance: 20,
     };
@@ -94,7 +100,8 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
 
     expect(hrisEmployeeTimeOffBalancesService.create).toHaveBeenCalledWith({
       assignmentId: "assignment-id",
-      year: 2026,
+      periodStart: "2026-01-01",
+      periodEnd: "2026-12-31",
       openingBalance: 20,
       accruedBalance: 0,
       carriedOverBalance: 0,

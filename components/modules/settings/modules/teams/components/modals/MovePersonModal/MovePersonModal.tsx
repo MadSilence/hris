@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { FormError } from "@/components/feedback/FormError";
 
 import {
   Dialog,
@@ -93,7 +94,7 @@ export function MovePersonModal({
             </RadioGroup>
           )}
 
-          {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+          <FormError message={errorMessage} />
         </div>
 
         <DialogFooter>

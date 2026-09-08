@@ -19,7 +19,6 @@ export class TimeOffPoliciesRoutes {
       effectiveDate: body.effectiveDate ?? null,
 
       countingMode: body.countingMode,
-      validWeekdays: body.validWeekdays,
       includePublicHolidays: body.includePublicHolidays,
 
       entitlementGrantingMode: body.entitlementGrantingMode,
@@ -55,6 +54,26 @@ export class TimeOffPoliciesRoutes {
     return Response.json(data);
   }
 
+  public async exportPolicies(req: Request) {
+    const url = new URL(req.url);
+    const format = url.searchParams.get("format") === "xlsx" ? "xlsx" : "csv";
+    const backendResponse = await hrisTimeOffPoliciesService.exportPolicies(format);
+    return new Response(backendResponse.body, {
+      status: backendResponse.status,
+      headers: {
+        "Content-Type":
+          backendResponse.headers.get("content-type") ?? "application/octet-stream",
+        "Content-Disposition":
+          backendResponse.headers.get("content-disposition") ?? "attachment",
+      },
+    });
+  }
+
+  public async editImpact(_req: Request, id: string) {
+    const data = await hrisTimeOffPoliciesService.editImpact(id);
+    return Response.json(data);
+  }
+
   public async getById(_req: Request, id: string) {
     const data = await hrisTimeOffPoliciesService.getById(id);
     return Response.json(data);
@@ -75,7 +94,6 @@ export class TimeOffPoliciesRoutes {
       effectiveDate: body.effectiveDate ?? null,
 
       countingMode: body.countingMode,
-      validWeekdays: body.validWeekdays,
       includePublicHolidays: body.includePublicHolidays,
 
       entitlementGrantingMode: body.entitlementGrantingMode,
@@ -123,6 +141,11 @@ export class TimeOffPoliciesRoutes {
 
   public async archive(_req: Request, id: string) {
     const data = await hrisTimeOffPoliciesService.archive(id);
+    return Response.json(data);
+  }
+
+  public async unarchive(_req: Request, id: string) {
+    const data = await hrisTimeOffPoliciesService.unarchive(id);
     return Response.json(data);
   }
 

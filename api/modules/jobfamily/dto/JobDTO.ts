@@ -5,7 +5,6 @@ export type JobDTO = {
   name: string;
   code: string | null;
   description: string | null;
-  isSystem: boolean;
   archived: boolean;
 
   /** Flattened by the backend so a job read on its own still knows its family. */

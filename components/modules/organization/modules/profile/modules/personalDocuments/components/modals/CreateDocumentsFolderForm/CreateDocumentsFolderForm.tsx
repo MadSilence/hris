@@ -93,7 +93,7 @@ export const CreateDocumentsFolderForm: FC<
         />
 
         {formik.errors.name ? (
-          <p className="text-sm text-destructive">{formik.errors.name}</p>
+          <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
         ) : (
           <p className="text-xs text-muted-foreground">
             Minimum 2 characters.

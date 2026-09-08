@@ -4,7 +4,6 @@ export type JobLevel = {
   name: string;
   /** Position within the group; absent on the trimmed projection nested in a Job. */
   sortOrder?: number;
-  isSystem?: boolean;
 
   groupId?: string;
   groupName?: string;

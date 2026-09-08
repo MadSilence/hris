@@ -2,8 +2,10 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
-import type { CreateTimeOffRequestRequest } from "@/api/modules/timeOff/timeOffRequests/dto";
-import type { CreateResponse } from "@/api/models/misc";
+import type {
+  CreateTimeOffRequestRequest,
+  CreateTimeOffRequestResponse,
+} from "@/api/modules/timeOff/timeOffRequests/dto";
 import { toActionError } from "@/lib/errors/withActionError";
 
 export const createTimeOffRequestAction = async (
@@ -25,6 +27,6 @@ export type CreateTimeOffRequestActionInput = CreateTimeOffRequestRequest;
 
 export type CreateTimeOffRequestActionOutput = {
   status: ActionStatus;
-  data?: CreateResponse;
+  data?: CreateTimeOffRequestResponse;
   errorMessage?: string;
 };

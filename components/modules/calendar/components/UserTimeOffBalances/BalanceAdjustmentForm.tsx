@@ -2,6 +2,7 @@
 
 import { FC, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { FormError } from "@/components/feedback/FormError";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
@@ -101,7 +102,7 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
         </Button>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      <FormError message={error}/>
 
       <p className="text-xs text-muted-foreground">
         Use a negative amount to deduct. This adds an entry to the ledger.

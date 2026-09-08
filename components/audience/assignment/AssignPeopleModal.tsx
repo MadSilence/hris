@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { FormError } from "@/components/feedback/FormError";
+import { AlertTriangle, Check, Loader2 } from "lucide-react";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -34,6 +35,8 @@ import { isTerminalJobStatus } from "@/api/modules/assignments/dto/SegmentAssign
 import type { FilterDTO } from "@/models/user/fields";
 import type { Segment, UserRefDTO } from "@/models/segment/Segment";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { describeSkips } from "@/components/audience/assignment/assignmentSkips";
+import type { AssignmentSkippedUser } from "@/api/modules/assignments/dto/AssignmentDTO";
 
 const MANUAL_CAP = 300;
 
@@ -41,6 +44,8 @@ type ResultSummary = { total: number; created: number; skipped: number; failed: 
 type ResultLike = {
   summary: ResultSummary;
   failed?: { userId: string; email: string; errorDetail?: string | null }[];
+  /** Only the manual path reports these per person; the segment job returns a count alone. */
+  skipped?: AssignmentSkippedUser[];
 };
 
 export type AssignPeopleModalProps = {
@@ -55,7 +60,17 @@ export type AssignPeopleModalProps = {
   invalidateKeys?: QueryKey[];
 };
 
-const DOMAIN_CONFIG: Record<string, { column: PeopleColumn; excludeField: string }> = {
+/**
+ * `column` is what the picker shows about the person's current assignment; `excludeField` keeps
+ * people who already have this one out of the list.
+ *
+ * Jobs carry no `column`: the resolver builds its extras from a fixed set that has no `job`, so a
+ * "Current position" cell would need a backend change. The exclusion filter works without it, which
+ * is the half that matters — and a duplicate the filter misses is skipped by the engine and now
+ * reported on the result screen.
+ */
+const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: string }> = {
+  "/jobs": { excludeField: "sys:job" },
   "/offices": { column: officeColumn, excludeField: "sys:office" },
   "/legal-entities": { column: legalEntityColumn, excludeField: "sys:legal_entity" },
   "/roles": { column: rolesColumn, excludeField: "sys:role" },
@@ -75,7 +90,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   temporal = false,
   invalidateKeys = [],
 }) => {
-  const { data: fields } = useUserFields();
+  const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const queryClient = useQueryClient();
 
   const [filters, setFilters] = React.useState<FilterDTO[]>([]);
@@ -89,7 +104,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const [effectiveTo, setEffectiveTo] = React.useState("");
 
   const domain = DOMAIN_CONFIG[basePath];
-  const pickerColumns = domain ? [domain.column] : undefined;
+  const pickerColumns = domain?.column ? [domain.column] : undefined;
   // "Not already assigned to this one" — which must keep people who are assigned to nothing at all,
   // hence includeEmpty. Without it the default negation semantics would hide exactly the people a
   // first assignment is usually aimed at.
@@ -182,11 +197,17 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const manualDone = applyManual.isSuccess ? applyManual.data : null;
   const segmentDone = jobStatus && isTerminalJobStatus(jobStatus) ? job.data : null;
   const result: ResultLike | null = manualDone ?? segmentDone ?? null;
-  const done = Boolean(result);
-
-  React.useEffect(() => {
-    if (done) onCloseAction();
-  }, [done, onCloseAction]);
+  /*
+   * The modal used to close itself here, in an effect on `done`.
+   *
+   * Everything below — how many were added, how many were passed over and why, which ones the engine
+   * could not write — was computed, handed to this component, and thrown away in the same tick. **The
+   * engine's characteristic bug is not a wrong answer, it is a correct answer nobody sees**: drag an
+   * archived colleague onto a team, confirm, and watch the chip stay where it was.
+   *
+   * It stays open on a result and the reader closes it. `assignmentSkips.ts` — written for exactly
+   * this and wired to two drag-and-drop hooks and nothing else — supplies the words.
+   */
 
   const busy = applyManual.isPending || applySegment.isPending;
   const errorMessage =
@@ -237,7 +258,9 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {running ? (
+          {result ? (
+            <ResultView result={result} noun={noun} />
+          ) : running ? (
             <RunningView
               created={job.data?.summary.created ?? 0}
               total={job.data?.summary.total ?? willAffect}
@@ -270,6 +293,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
               <PeoplePicker
                 fields={fields}
+                isLoadingFields={fieldsLoading}
                 filters={filters}
                 onFiltersChange={setFilters}
                 columns={pickerColumns}
@@ -283,6 +307,25 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 onIncludeInactiveChange={setIncludeInactive}
               />
 
+              {/*
+                The checkbox widens the *search*; it does not widen what the engine will write.
+                `AssignmentRuleService` skips `!user.isActive()` unconditionally, and the flag never
+                reaches it — it is a segment-resolution setting, and the manual path does not even
+                send a segment. So ticking it finds people who are then all skipped.
+
+                Said here rather than fixed in the engine, because "may a terminated employee be
+                assigned to an office" is a product decision and not one to take from a checkbox
+                label. The result screen now shows the skips either way; this stops them being a
+                surprise.
+              */}
+              {includeInactive && (
+                <p className="flex items-start gap-2 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+                  Non-active people can be found this way but not assigned — they will be listed as
+                  skipped.
+                </p>
+              )}
+
               {overCap && (
                 <p className="flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
@@ -291,13 +334,15 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 </p>
               )}
 
-              {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+              <FormError message={errorMessage} />
             </div>
           )}
         </div>
 
         <DialogFooter>
-          {running ? (
+          {result ? (
+            <Button onClick={onCloseAction}>Done</Button>
+          ) : running ? (
             <Button disabled>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Adding…
@@ -344,3 +389,60 @@ const RunningView: React.FC<{ created: number; total: number; semantics: "add" |
   );
 };
 
+/**
+ * What the apply actually did.
+ *
+ * Three numbers, and the two that are not "created" carry their reasons. The manual path returns
+ * `skipped[]` per person, so those get named or counted by reason; the segment job returns only a
+ * count for skips, so it says the count and stops rather than inventing a reason for it.
+ *
+ * **A skip is not a failure and they are not shown alike.** "Already there" and "archived" are the
+ * engine doing its job; a `failed` row is the engine unable to write, which is the only line here
+ * anybody has to act on.
+ */
+const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, noun }) => {
+  const { total, created, skipped, failed } = result.summary;
+  const skippedDetail = result.skipped ? describeSkips(result.skipped) : null;
+
+  return (
+    <div className="space-y-4 px-1 py-6">
+      <div className="flex items-start gap-3">
+        {failed > 0 ? (
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-amber-600" />
+        ) : (
+          <Check className="mt-0.5 h-5 w-5 flex-none text-green-600" />
+        )}
+        <div>
+          <p className="font-medium text-foreground">
+            {created} of {total} {total === 1 ? "person" : "people"} added to the {noun}.
+          </p>
+          {created === 0 && (
+            <p className="mt-1 text-sm text-muted-foreground">Nothing changed.</p>
+          )}
+        </div>
+      </div>
+
+      {skipped > 0 && (
+        <div className="rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+          {skippedDetail ?? `${skipped} ${skipped === 1 ? "person was" : "people were"} skipped.`}
+        </div>
+      )}
+
+      {failed > 0 && (
+        <div className="space-y-2 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-medium">
+            {failed} {failed === 1 ? "person" : "people"} could not be added.
+          </p>
+          <ul className="space-y-1">
+            {(result.failed ?? []).map((f) => (
+              <li key={f.userId}>
+                {f.email}
+                {f.errorDetail ? ` \u2014 ${f.errorDetail}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};

@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { CalendarDays, CalendarPlus, Download, Pencil, Rss, Search, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import {
@@ -44,6 +43,7 @@ import { holidaySpanDays, totalDraftDays } from "../PublicHolidayDaysEditor/holi
 import { mapServerFieldErrors } from "../PublicHolidayDaysEditor/serverFieldErrors";
 import { useInvalidatePublicHolidaysQuery } from "../../hooks/usePublicHolidayCalendars";
 import { useFillPublicHolidayYear } from "../../hooks/useFillPublicHolidayYear";
+import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
 import {
   ExportDataModal,
   ExportDataFormValues,
@@ -59,16 +59,16 @@ type Props = {
   isHolidaysLoading: boolean;
 };
 
-function statusBadge(status: PublicHolidayCalendarStatus) {
+const calendarStatus = (status: PublicHolidayCalendarStatus): EntityStatus => {
   switch (status) {
     case PublicHolidayCalendarStatus.Active:
-      return { label: "Active", className: "border-green-200 bg-green-50 text-green-700" };
+      return "active";
     case PublicHolidayCalendarStatus.Archived:
-      return { label: "Archived", className: "border-amber-200 bg-amber-50 text-amber-700" };
+      return "archived";
     default:
-      return { label: "Inactive", className: "" };
+      return "inactive";
   }
-}
+};
 
 /** Matches how the editor's date fields read a day back to you. */
 function formatHolidayDate(iso: string): string {
@@ -294,7 +294,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     return sorted.filter((h) => h.name.toLowerCase().includes(q) || h.holidayDate.includes(q));
   }, [holidays, holidaySearch]);
 
-  const badge = statusBadge(calendar.status);
+  const status = calendarStatus(calendar.status);
 
   /** Only a sourced calendar has anywhere to get an unseen year from. */
   const canAddYears =
@@ -332,9 +332,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
             >
               <Download className="h-4 w-4" />
             </Button>
-            <Badge variant="outline" className={badge.className}>
-              {badge.label}
-            </Badge>
+            <StatusBadge status={status}/>
           </div>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -573,6 +571,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
           <PublicHolidayCalendarAssignedUsersTab
             calendarId={calendar.id}
             calendarName={calendar.name}
+            isArchived={status === "archived"}
           />
         </TabsContent>
       </Tabs>

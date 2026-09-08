@@ -46,6 +46,15 @@ import {
 
 type Props = {
   fields: FieldDTO[] | undefined;
+  /**
+   * Whether `fields` is still on its way.
+   *
+   * An empty field list and an unanswered field list look identical in a dropdown, and the reader
+   * draws the wrong conclusion from the same picture: "there is nothing I can filter on" rather
+   * than "wait a second". Four of the five callers fetch the fields themselves and none of them
+   * passed the flag on.
+   */
+  isLoadingFields?: boolean;
   value: FilterDTO[];
   onChange: (next: FilterDTO[]) => void;
   /**
@@ -108,6 +117,7 @@ const blankRow = (): Row => ({
 
 export const AudienceBuilder: React.FC<Props> = ({
   fields,
+  isLoadingFields = false,
   value,
   onChange,
   includeInactive = false,
@@ -155,7 +165,7 @@ export const AudienceBuilder: React.FC<Props> = ({
             checked={includeInactive}
             onCheckedChange={(checked) => onIncludeInactiveChange(checked === true)}
           />
-          Include non-active people
+          Also search non-active people
         </label>
       )}
 
@@ -163,16 +173,28 @@ export const AudienceBuilder: React.FC<Props> = ({
         const field = catalog.find((f) => f.key === r.key) ?? null;
         return (
           <div key={r.id} className="flex flex-wrap items-center gap-2">
-            <Select value={r.key} onValueChange={(v) => onPickField(r.id, v)}>
+            <Select
+              value={r.key}
+              onValueChange={(v) => onPickField(r.id, v)}
+              disabled={isLoadingFields}
+            >
               <SelectTrigger className="h-9 w-44">
-                <SelectValue placeholder="Select field" />
+                <SelectValue placeholder={isLoadingFields ? "Loading fields\u2026" : "Select field"} />
               </SelectTrigger>
               <SelectContent>
-                {catalog.map((f) => (
-                  <SelectItem key={f.key} value={f.key}>
-                    {f.label}
-                  </SelectItem>
-                ))}
+                {catalog.length === 0 ? (
+                  <p className="px-2 py-3 text-center text-sm text-muted-foreground">
+                    {isLoadingFields
+                      ? "Loading fields\u2026"
+                      : "No fields you can filter on"}
+                  </p>
+                ) : (
+                  catalog.map((f) => (
+                    <SelectItem key={f.key} value={f.key}>
+                      {f.label}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
 

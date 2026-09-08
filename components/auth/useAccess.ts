@@ -55,10 +55,18 @@ async function fetchMeAccess(internalApiClient: InternalApiClient): Promise<Effe
   const path = typeof window !== "undefined" ? window.location.pathname : "";
   if (path === "/login" || path.startsWith("/auth")) return null;
 
-  const hasSession =
-    typeof document !== "undefined" &&
-    document.cookie.split(";").some((c) => c.trim().startsWith("has_session="));
-  if (!hasSession) return null;
+  // `has_session` is deliberately NOT consulted here.
+  //
+  // It is the only non-httpOnly cookie we set, which makes it the first one a script, an extension
+  // or a partial "clear site data" removes -- while the session itself, `access_token` and
+  // `refresh_token`, is httpOnly and survives. This function used to short-circuit on its absence
+  // and return `null`, and `null` is also what "this person may do nothing" looks like, so every
+  // gate on every page rendered "403 Access denied" against a perfectly good session. **A confident
+  // answer to a question nobody asked.**
+  //
+  // Asking costs one request, and the request is the only thing that actually knows. If the session
+  // really is gone the answer is a 401, and what to do about a 401 is decided in one place --
+  // `InternalApiClient`, which refreshes, then probes, and only then redirects.
 
   const { etag, payload: cachedPayload } = loadFromStorage();
 

@@ -67,7 +67,7 @@ describe("TimeOffRequestsRoutes", () => {
   });
 
   it("creates time off request", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisTimeOffRequestsService.create)
@@ -111,20 +111,22 @@ describe("TimeOffRequestsRoutes", () => {
       .mocked(hrisTimeOffRequestsService.listByUserId)
       .mockResolvedValue(partialMock([requestDto]));
 
+    // The route now reads year/status off the query string, so it needs a real URL.
     const res = await timeOffRequestsRoutes.listByUserId(
-      {} as Request,
+      { url: "http://localhost/api/users/user-id/time-off-requests" } as Request,
       "user-id"
     );
     const result = await res.json();
 
     expect(hrisTimeOffRequestsService.listByUserId).toHaveBeenCalledWith(
-      "user-id"
+      "user-id",
+      { year: null, status: null }
     );
     expect(result).toEqual([requestDto]);
   });
 
   it("cancels time off request", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisTimeOffRequestsService.cancel)
@@ -145,7 +147,7 @@ describe("TimeOffRequestsRoutes", () => {
   });
 
   it("approves time off request", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisTimeOffRequestsService.approve)
@@ -161,7 +163,7 @@ describe("TimeOffRequestsRoutes", () => {
   });
 
   it("rejects time off request", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
 
     jest
       .mocked(hrisTimeOffRequestsService.reject)

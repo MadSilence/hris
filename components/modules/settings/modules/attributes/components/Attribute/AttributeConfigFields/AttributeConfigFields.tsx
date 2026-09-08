@@ -50,9 +50,17 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
         Validation &amp; rules
       </p>
 
+      {/*
+        * "Required" promised something the product does not do. Nothing forces a value to exist —
+        * the field can be left empty on creation and stays empty — what the flag prevents is
+        * *clearing* a value that is already there, which is what both sides enforce
+        * (`fieldError`: "This field cannot be cleared."). Required-by-stage is the feature that
+        * would make the old label true, and it is deliberately not built: it needs lifecycle stages
+        * and an outstanding-items screen.
+        */}
       <SettingToggle
-        label="Required"
-        hint="Must be filled in on the person's profile."
+        label="Cannot be cleared"
+        hint="Once this field has a value, it cannot be emptied again. It does not have to be filled in."
         checked={!!value.required}
         onCheckedChange={(v) => onChange({ required: v })}
         disabled={disabled}

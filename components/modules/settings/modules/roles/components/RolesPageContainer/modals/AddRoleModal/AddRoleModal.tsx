@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import {
   Dialog,
   DialogContent,
@@ -99,7 +100,7 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
           </DialogHeader>
 
           {errorMessage && (
-            <p className="text-sm text-red-500">{errorMessage}</p>
+            <FormError message={errorMessage} />
           )}
 
           <AddRoleForm

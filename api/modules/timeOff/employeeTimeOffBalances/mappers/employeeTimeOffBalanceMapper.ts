@@ -10,6 +10,8 @@ export class EmployeeTimeOffBalanceMapper {
       assignmentId: dto.assignmentId,
       policyId: dto.policyId,
       userId: dto.userId,
+      periodStart: dto.periodStart,
+      periodEnd: dto.periodEnd ?? null,
       year: dto.year,
       openingBalance: dto.openingBalance,
       accruedBalance: dto.accruedBalance,
@@ -17,6 +19,8 @@ export class EmployeeTimeOffBalanceMapper {
       adjustedBalance: dto.adjustedBalance,
       carriedOverBalance: dto.carriedOverBalance,
       currentBalance: dto.currentBalance,
+      pendingBalance: dto.pendingBalance,
+      remainingCarryover: dto.remainingCarryover,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
     };

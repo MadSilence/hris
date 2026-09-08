@@ -16,6 +16,8 @@ import {
   type DraftHolidayErrors,
 } from "../PublicHolidayDaysEditor";
 import { findDraftOverlaps } from "../PublicHolidayDaysEditor/holidayOverlap";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { FormError } from "@/components/feedback/FormError";
 import { totalDraftDays } from "../PublicHolidayDaysEditor/holidaySpan";
 import { useCreatePublicHolidayCalendar } from "../../hooks/useCreatePublicHolidayCalendar";
 import { usePublicHolidayTemplate } from "../../hooks/usePublicHolidayTemplate";
@@ -78,12 +80,22 @@ export function PublicHolidayCalendarNewPage() {
     setLocationSeeded(true);
   }, [template, locationSeeded, templateRegion]);
 
-  const { data: templatePreview, isFetching: isPreviewFetching } =
-    usePublicHolidayTemplatePreview({
-      templateId,
-      year: draftYear,
-      regionCode: templateRegion || null,
-    });
+  const {
+    data: templatePreview,
+    isFetching: isPreviewFetching,
+    // Read, at last. The backend answers this correctly \u2014 `PHT00004` after three attempts at the
+    // provider \u2014 and the page threw the answer away, so an unreachable provider looked exactly like
+    // a country with no holidays: an empty editor under "No holidays yet".
+    error: previewError,
+    refetch: refetchPreview,
+  } = usePublicHolidayTemplatePreview({
+    templateId,
+    year: draftYear,
+    regionCode: templateRegion || null,
+  });
+
+  // Only while a template is selected. Typing a calendar by hand is a legitimate empty editor.
+  const previewFailed = Boolean(templateId) && !isPreviewFetching && !!previewError;
 
   const createCalendarMutation = useCreatePublicHolidayCalendar();
   const replaceYearMutation = useReplacePublicHolidayYear();
@@ -280,7 +292,7 @@ export function PublicHolidayCalendarNewPage() {
               Add all public holiday days for this calendar.
               {templateId && isPreviewFetching ? (
                 <span className="ml-2">Loading {draftYear}…</span>
-              ) : (
+              ) : previewFailed ? null : (
                 draftHolidays.length > 0 && (
                   <span className="ml-2 font-medium text-[var(--color-text-primary)]">
                     {totalDraftDays(draftHolidays)}{" "}
@@ -301,7 +313,20 @@ export function PublicHolidayCalendarNewPage() {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-8 pb-6">
-        {draftHolidays.length === 0 ? (
+        {previewFailed && draftHolidays.length === 0 ? (
+          /*
+            "Add your first holiday day below" is an invitation, and an invitation is the wrong
+            answer to a failure: it tells somebody who picked Germany that Germany has no holidays.
+            The editor stays open underneath \u2014 entering them by hand is still a way forward \u2014 but
+            the reason comes first, with the retry, because the provider is usually back in a minute.
+          */
+          <ErrorState
+            error={previewError}
+            title={`${draftYear} holidays could not be loaded`}
+            onRetry={() => void refetchPreview()}
+            compact
+          />
+        ) : draftHolidays.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
             <div className="mb-3 rounded-2xl bg-brown-50 p-3">
               <CalendarDays className="h-6 w-6 text-[var(--color-text-tertiary)]" />
@@ -330,7 +355,7 @@ export function PublicHolidayCalendarNewPage() {
           />
         )}
 
-        {generalError && <p className="mt-3 text-sm text-destructive">{generalError}</p>}
+        <FormError message={generalError || null} className="mt-3" />
       </div>
     </div>
   );

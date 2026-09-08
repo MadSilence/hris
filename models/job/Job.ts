@@ -6,7 +6,6 @@ export type Job = {
   /** Optional company-wide identifier. */
   code: string | null;
   description: string | null;
-  isSystem: boolean;
   archived: boolean;
 
   familyId: string | null;

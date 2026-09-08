@@ -19,8 +19,18 @@ import {
  * So: ask once whether the session is actually dead before redirecting. The probe is a fresh
  * request, so it carries whatever cookie is current — exactly the thing the stale request lacked.
  * Single-flight, and the answer is dropped after a second so a real logout is noticed promptly.
+ *
+ * **It has to be a route that reaches Java, and this is the whole point.** It used to be
+ * `/api/users/me`, which decodes the cookie locally with `decodeJwt` — no backend call, no signature
+ * check, not even `exp`. It answered "alive" whenever an `access_token` cookie existed, in whatever
+ * state, so the redirect below was unreachable for every revocation there is: a blocked account, a
+ * terminated user, a rotated perm-hash, an expired token. Observed live — subject blocked,
+ * `/auth/refresh` answering 401, and the browser sat on "403 Access denied" with the impersonation
+ * banner still up. `/api/me/access` is a raw proxy that forwards the token as a Bearer, so a 401
+ * from it is Java's answer and not ours. It is also the endpoint `useAccess` already keeps warm, and
+ * it honours ETag/304, so asking again costs little.
  */
-const SESSION_PROBE_PATH = "/api/users/me";
+const SESSION_PROBE_PATH = "/api/me/access";
 let sessionProbe: Promise<boolean> | null = null;
 
 const REFRESH_PATH = "/api/auth/refresh";
@@ -74,6 +84,8 @@ export const sessionNavigation = {
 async function isSessionAlive(): Promise<boolean> {
   if (!sessionProbe) {
     sessionProbe = fetch(SESSION_PROBE_PATH, { credentials: "same-origin", cache: "no-store" })
+      // 304 counts as alive: the probe honours If-None-Match and an unchanged answer is still an
+      // answer. Anything other than a 401 is not a verdict on the session.
       .then((response) => response.ok || response.status !== 401)
       .catch(() => true);
     void sessionProbe.finally(() => {
@@ -169,6 +181,7 @@ export class InternalApiClient {
     let message: string | undefined;
     let code: string | undefined;
     let fieldErrors: Record<string, string> | undefined;
+    let params: string[] | undefined;
     const ct = response.headers.get("content-type") || "";
     try {
       if (ct.includes("application/json")) {
@@ -176,6 +189,7 @@ export class InternalApiClient {
         message = (data && (data.message || data.error)) ?? undefined;
         code = data?.code ?? undefined;
         fieldErrors = data?.fieldErrors ?? undefined;
+        params = Array.isArray(data?.params) ? data.params : undefined;
       } else {
         const text = await response.text().catch(() => "");
         message = text?.trim();
@@ -189,6 +203,7 @@ export class InternalApiClient {
       status: response.status,
       code,
       fieldErrors,
+      params,
       requestId: response.headers.get("X-Request-Id") ?? undefined,
     };
 
@@ -198,8 +213,15 @@ export class InternalApiClient {
       case 404:
         throw new NotFoundError(friendly, init);
       case 401: {
-        // Redirect only if the session is really dead (see the note above isSessionAlive). A stale
-        // in-flight request still throws, so the caller can refetch with the current token.
+        // Redirect only if the session is really dead (see the note above SESSION_PROBE_PATH). A
+        // stale in-flight request still throws, so the caller can refetch with the current token.
+        //
+        // An impersonated session whose subject is blocked ends here, at the login screen, and there
+        // is no gentler answer available: the perm-hash is checked on every request, so the access
+        // token is already rejected, and the only refresh token the browser holds is the subject's —
+        // the actor's was deliberately replaced when the impersonation started. Dropping back into
+        // the actor's session would mean keeping their renewable credential alive alongside the
+        // subject's, which is the thing that fix removed.
         const onLoginPage =
           typeof window === "undefined" || window.location.pathname.startsWith("/login");
         const isProbe = path === SESSION_PROBE_PATH.replace("/api", "");

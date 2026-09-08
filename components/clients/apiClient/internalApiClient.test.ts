@@ -87,7 +87,40 @@ describe("InternalApiClient", () => {
 
     await expect(client.get("/departments/tree")).rejects.toBeInstanceOf(UnauthorizedError);
 
-    expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/users/me", expect.any(Object));
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The probe has to be a route that reaches Java.
+   *
+   * It was `/api/users/me`, which decodes the cookie on the Next server and never calls the backend
+   * — so it answered "alive" for any cookie at all, and the redirect below could not fire for a
+   * blocked account, a terminated user or a rotated perm-hash. Observed in a browser: the session
+   * was dead, `/auth/refresh` said 401, and the app rendered "403 Access denied".
+   */
+  it("probes a route that actually asks the backend", async () => {
+    mockLocation("/settings/general/departments");
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(200, {}));
+
+    await expect(client.get("/departments/tree")).rejects.toBeInstanceOf(UnauthorizedError);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/me/access", expect.any(Object));
+  });
+
+  // A 304 is the probe's normal answer once useAccess has warmed its ETag, and it means the session
+  // is fine. Reading it as anything else would log people out on a cache hit.
+  it("treats a 304 from the probe as a live session", async () => {
+    const assign = mockLocation("/settings/general/departments");
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(304));
+
+    await expect(client.get("/departments/tree")).rejects.toBeInstanceOf(UnauthorizedError);
+
     expect(assign).not.toHaveBeenCalled();
   });
 

@@ -48,6 +48,8 @@ export type JobFamilyComponentProps = {
   onDuplicateJob: (job: Job) => void;
   onArchiveJob: (job: Job) => void;
   onActivateJob: (job: Job) => void;
+  /** Opens the shared assignment modal on this position. */
+  onAssignJob: (job: Job) => void;
   onDeleteJob: (job: Job) => void;
   /** A family to reveal after creation — the list scrolls to it and opens it. */
   focusFamilyId?: string | null;
@@ -71,6 +73,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
   onDuplicateJob,
   onArchiveJob,
   onActivateJob,
+  onAssignJob,
   onDeleteJob,
   focusFamilyId,
   onFocusFamilyHandled,
@@ -228,6 +231,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
                   onDuplicateJob={onDuplicateJob}
                   onArchiveJob={onArchiveJob}
                   onActivateJob={onActivateJob}
+                  onAssignJob={onAssignJob}
                   onDeleteJob={onDeleteJob}
                 />
               ))}
@@ -267,6 +271,7 @@ type FamilySectionProps = {
   | "onDuplicateJob"
   | "onArchiveJob"
   | "onActivateJob"
+  | "onAssignJob"
   | "onDeleteJob"
 >;
 
@@ -284,6 +289,7 @@ const FamilySection: FC<FamilySectionProps> = ({
   onDuplicateJob,
   onArchiveJob,
   onActivateJob,
+  onAssignJob,
   onDeleteJob,
 }) => (
   <AccordionItem value={family.id} data-family-id={family.id} className="border-b-0">
@@ -335,7 +341,7 @@ const FamilySection: FC<FamilySectionProps> = ({
                     </DropdownMenuItem>
                     {family.archived ? (
                       <DropdownMenuItem onClick={() => onActivateFamily(family)}>
-                        Restore
+                        Unarchive
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem onClick={() => onArchiveFamily(family)}>
@@ -401,6 +407,7 @@ const FamilySection: FC<FamilySectionProps> = ({
             editing={editing}
             onEditJob={onEditJob}
             onDuplicateJob={onDuplicateJob}
+            onAssignJob={onAssignJob}
             onArchiveJob={onArchiveJob}
             onActivateJob={onActivateJob}
             onDeleteJob={onDeleteJob}
@@ -433,7 +440,7 @@ type JobRowProps = {
   editing: boolean;
 } & Pick<
   JobFamilyComponentProps,
-  "onEditJob" | "onDuplicateJob" | "onArchiveJob" | "onActivateJob" | "onDeleteJob"
+  "onEditJob" | "onDuplicateJob" | "onArchiveJob" | "onActivateJob" | "onAssignJob" | "onDeleteJob"
 >;
 
 const JobRow: FC<JobRowProps> = ({
@@ -444,6 +451,7 @@ const JobRow: FC<JobRowProps> = ({
   onDuplicateJob,
   onArchiveJob,
   onActivateJob,
+  onAssignJob,
   onDeleteJob,
 }) => (
   <div className={notLast ? "border-b border-brown-100" : ""}>
@@ -496,8 +504,23 @@ const JobRow: FC<JobRowProps> = ({
                 <PermissionGate resource="JOBS.TITLE" action="EDIT">
                   <DropdownMenuItem onClick={() => onEditJob(job)}>Edit</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicateJob(job)}>Duplicate</DropdownMenuItem>
+                  {/*
+                    The engine has had a job adapter and a full set of endpoints — preview, apply,
+                    segment apply with async status — since it was built, and the catalog offered no
+                    way in. The modal is the same one Departments, Teams, Roles and Policies use, so
+                    this is one menu item rather than a feature.
+
+                    Not offered on an archived position: the adapter refuses those, and offering an
+                    action that is certain to be skipped is the defect this wave exists to remove.
+                  */}
+                  {!job.archived && (
+                    <DropdownMenuItem onClick={() => onAssignJob(job)}>
+                      Assign people
+                    </DropdownMenuItem>
+                  )}
+
                   {job.archived ? (
-                    <DropdownMenuItem onClick={() => onActivateJob(job)}>Restore</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onActivateJob(job)}>Unarchive</DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem onClick={() => onArchiveJob(job)}>Archive</DropdownMenuItem>
                   )}

@@ -154,7 +154,7 @@ export const JobForm: FC<JobFormProps> = ({
             aria-invalid={!!formik.errors.name}
           />
 
-          {formik.errors.name && <p className="text-sm text-destructive">{formik.errors.name}</p>}
+          {formik.errors.name && <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -180,7 +180,7 @@ export const JobForm: FC<JobFormProps> = ({
             </Select>
 
             {formik.errors.familyId && (
-              <p className="text-sm text-destructive">{formik.errors.familyId}</p>
+              <p role="alert" className="text-sm text-destructive">{formik.errors.familyId}</p>
             )}
           </div>
 
@@ -227,7 +227,7 @@ export const JobForm: FC<JobFormProps> = ({
             aria-invalid={!!formik.errors.code}
           />
 
-          {formik.errors.code && <p className="text-sm text-destructive">{formik.errors.code}</p>}
+          {formik.errors.code && <p role="alert" className="text-sm text-destructive">{formik.errors.code}</p>}
         </div>
 
         <div className="space-y-2">
@@ -245,7 +245,7 @@ export const JobForm: FC<JobFormProps> = ({
           />
 
           <div className="flex items-center justify-between">
-            <p className="text-sm text-destructive">{formik.errors.description ?? ""}</p>
+            <p role="alert" className="text-sm text-destructive">{formik.errors.description ?? ""}</p>
             <p className="text-xs text-muted-foreground">{remaining} characters left</p>
           </div>
         </div>

@@ -29,10 +29,9 @@ import {
   AccrualStep,
   ApprovalsStep,
   BasicsStep,
-  BlackoutStep,
   CarryoverStep,
   CountingStep,
-  CoverageStep,
+  RestrictionsStep,
   EditingStep,
   EligibilityStep,
   EntitlementStep,
@@ -62,10 +61,9 @@ const STEPS: {
   { id: "approvals", title: "Approvals", subtitle: "Who signs off", icon: UserCheck },
   { id: "tenure", title: "Tenure rewards", subtitle: "Extra days by service", icon: CalendarClock },
   { id: "eligibility", title: "Eligibility", subtitle: "Waiting period", icon: CalendarClock },
-  { id: "coverage", title: "Coverage", subtitle: "Max people away", icon: Users },
-  { id: "blackout", title: "Blackouts", subtitle: "Frozen periods", icon: CalendarDays },
+  { id: "restrictions", title: "Restrictions", subtitle: "When leave is blocked", icon: Users },
   { id: "editing", title: "Editing", subtitle: "Who can edit requests", icon: PencilLine },
-  { id: "review", title: "Review", subtitle: "Confirm & create", icon: CheckCircle2 },
+  { id: "review", title: "Review", subtitle: "Confirm", icon: CheckCircle2 },
 ];
 
 type Props = {
@@ -74,6 +72,17 @@ type Props = {
   mode?: "create" | "edit";
   leaveTypeName?: string;
   initialValues?: PolicyWizardValues;
+  /**
+   * What is already standing under the rules being changed, shown on the Review step.
+   *
+   * Editing a policy re-prices nothing — the numbers already decided stay decided. This is what
+   * makes that visible before the save instead of leaving the administrator to guess.
+   */
+  editImpact?: {
+    affectedRequests: number;
+    inProgressRequests: number;
+    affectedPeople: number;
+  };
   onSubmitAction: (values: PolicyWizardValues, activate: boolean) => void | Promise<void>;
   onCancelAction: () => void;
 };
@@ -83,6 +92,7 @@ export const PolicyWizardModal: FC<Props> = ({
   isLoading = false,
   mode = "create",
   leaveTypeName,
+  editImpact,
   initialValues,
   onSubmitAction,
   onCancelAction,
@@ -191,14 +201,34 @@ export const PolicyWizardModal: FC<Props> = ({
         return <TenureStep values={values} set={set} />;
       case "eligibility":
         return <EligibilityStep values={values} set={set} />;
-      case "coverage":
-        return <CoverageStep values={values} set={set} />;
-      case "blackout":
-        return <BlackoutStep values={values} set={set} />;
+      case "restrictions":
+        return <RestrictionsStep values={values} set={set} />;
       case "editing":
         return <EditingStep values={values} set={set} />;
       case "review":
-        return <ReviewStep values={values} leaveTypeName={leaveTypeName} />;
+        return (
+          <>
+            <ReviewStep values={values} leaveTypeName={leaveTypeName} mode={mode} />
+            {mode === "edit" && editImpact && editImpact.affectedRequests > 0 && (
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-sm font-medium text-amber-900">
+                  {editImpact.affectedRequests} absence
+                  {editImpact.affectedRequests === 1 ? " was" : "s were"} counted under the current
+                  rules
+                </p>
+                <p className="mt-1 text-xs text-amber-800">
+                  {editImpact.inProgressRequests > 0
+                    ? `${editImpact.inProgressRequests} of them ${editImpact.inProgressRequests === 1 ? "is" : "are"} already under way. `
+                    : ""}
+                  They belong to {editImpact.affectedPeople}{" "}
+                  {editImpact.affectedPeople === 1 ? "person" : "people"} and are{" "}
+                  <span className="font-medium">not recalculated</span> — what was decided stays
+                  decided. The new rules apply to what is requested from now on.
+                </p>
+              </div>
+            )}
+          </>
+        );
     }
   };
 

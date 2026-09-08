@@ -17,7 +17,7 @@ describe("createTimeOffRequestAction", () => {
   const submission = { assignmentId: "assignment-id", startDate: "2026-07-14", endDate: "2026-07-18", reason: "Vacation" };
 
   it("creates time off request", async () => {
-    const response = { id: "request-id" };
+    const response = { id: "request-id", coverageWarningDays: [] };
     jest.mocked(hrisTimeOffRequestsService.create).mockResolvedValue(response);
 
     const result = await createTimeOffRequestAction(submission);

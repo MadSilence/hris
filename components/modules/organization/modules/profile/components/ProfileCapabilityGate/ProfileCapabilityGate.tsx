@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import type { ResourceCode } from "@/models/access";
 
 type Props = {
@@ -27,7 +29,13 @@ type Props = {
  * tab do their own checking, as they must.
  */
 export function ProfileCapabilityGate({ userId, resource, action = "VIEW", children }: Props) {
-  const { data: user } = useUser(userId);
+  const { data: user, error } = useUser(userId);
+
+  // A refusal is an answer and gets the refusal screen; anything else is a failure and says so.
+  // Without this the tab was blank forever whenever the lookup failed — the same silence as
+  // "still loading", with nothing coming.
+  if (error instanceof ForbiddenError) return <AccessDenied compact/>;
+  if (error) return <ErrorState error={error} compact/>;
 
   // The profile is server-rendered with the user already in the SWR cache, so this is a lookup
   // rather than a fetch; while it is genuinely absent, render nothing rather than flashing a
@@ -35,5 +43,8 @@ export function ProfileCapabilityGate({ userId, resource, action = "VIEW", child
   if (!user) return null;
 
   const allowed = (user.capabilities?.[resource] ?? []).includes(action);
-  return allowed ? <>{children}</> : <AccessDenied />;
+  // Compact, because this gate guards a **tab** and not a page. The smoke run of 2026-09-08 found
+  // the full-page 403 rendering under the person's own header, offering "Back to dashboard" to
+  // somebody who is standing on a profile with three other tabs they may read.
+  return allowed ? <>{children}</> : <AccessDenied compact/>;
 }

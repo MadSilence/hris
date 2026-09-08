@@ -12,6 +12,7 @@ import { EditLeaveTypeModal } from "../modals/EditLeaveTypeModal";
 import { useLeaveTypes } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useLeaveTypes";
 import { useCreateLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useCreateLeaveType";
 import { useUpdateLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useUpdateLeaveType";
+import { useRestoreLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useRestoreLeaveType";
 import { useArchiveLeaveType } from "@/components/modules/settings/modules/time/timeOff/leaveTypes/hooks/useArchiveLeaveType";
 
 import type { LeaveType } from "@/models/timeOff";
@@ -26,6 +27,7 @@ export default function LeaveTypesSettingsContainer() {
   const createMutation = useCreateLeaveType();
   const updateMutation = useUpdateLeaveType();
   const archiveMutation = useArchiveLeaveType();
+  const restoreMutation = useRestoreLeaveType();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(null);
@@ -63,6 +65,10 @@ export default function LeaveTypesSettingsContainer() {
     archiveMutation.mutateAsync({ id: leaveType.id }).catch(showError);
   };
 
+  const handleRestore = (leaveType: LeaveType) => {
+    restoreMutation.mutateAsync({ id: leaveType.id }).catch(showError);
+  };
+
   const handleOpen = (leaveType: LeaveType) => {
     router.push(`/settings/time/leave-type/${leaveType.id}/policies`);
   };
@@ -76,6 +82,7 @@ export default function LeaveTypesSettingsContainer() {
         onOpenAction={handleOpen}
         onEditAction={(leaveType) => setEditingLeaveType(leaveType)}
         onArchiveAction={handleArchive}
+        onRestoreAction={handleRestore}
       />
 
       <CreateLeaveTypeModal

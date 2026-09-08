@@ -11,6 +11,7 @@ import { triggerExportDownload } from "@/components/modules/settings/shared/Expo
 import AssignedUsersTable from "./AssignedUsersTable";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import { AccessDenied } from "@/components/auth/AccessDenied";
+import { showError } from "@/lib/errors/errorToast";
 import { ForbiddenError } from "@/components/clients/exceptions";
 
 export interface AssignedUsersModuleProps {
@@ -57,7 +58,20 @@ export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = 
       onExport={({ format }) => {
         void triggerExportDownload(`/api/roles/${roleId}/users/export`, format);
       }}
-      onRemoveUser={(userId) => removeUser.mutateAsync({ userId, roleId })}
+      /*
+       * The refusal has to reach somebody. `mutateAsync` rejects on an ERROR envelope and nothing
+       * caught it, so removing a role that the server refused — the last System Owner, an archived
+       * role — did nothing at all and said nothing at all: no card, no message, no row change. By
+       * the time the answer arrives the confirmation has closed, which is what makes this a card
+       * rather than inline text (`hris/CLAUDE.md` § "Showing a failure").
+       */
+      onRemoveUser={async (userId) => {
+        try {
+          await removeUser.mutateAsync({ userId, roleId });
+        } catch (error) {
+          showError(error);
+        }
+      }}
     />
   );
 }

@@ -11,7 +11,6 @@ const level = (name: string, sortOrder: number, overrides: Partial<JobLevel> = {
   id: `lvl-${sortOrder}`,
   name,
   sortOrder,
-  isSystem: false,
   assignedJobsCount: 0,
   assignedUsersCount: 0,
   ...overrides,
@@ -20,7 +19,6 @@ const level = (name: string, sortOrder: number, overrides: Partial<JobLevel> = {
 const group = (overrides: Partial<JobLevelGroup> = {}): JobLevelGroup => ({
   id: "grp-1",
   name: "Individual Contributor",
-  isSystem: false,
   levels: [level("Junior", 1), level("Mid", 2), level("Senior", 3)],
   assignedJobsCount: 7,
   assignedUsersCount: 12,

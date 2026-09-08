@@ -1,5 +1,6 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
+  BalanceAsOfDTO,
   EmployeeTimeOffBalanceDTO,
   EmployeeTimeOffBalanceTransactionDTO,
   CreateEmployeeTimeOffBalanceRequest,
@@ -47,6 +48,17 @@ export class HrisApiEmployeeTimeOffBalancesClient {
     return hrisApiClient.post<UpdateResponse>(
       `${this.BALANCES_PATH}/${id}/adjust`,
       body as unknown as Record<string, unknown>
+    );
+  }
+
+  /**
+   * What this balance will hold on a date — future accrual and expiry against known future usage.
+   *
+   * The endpoint existed from the start and had no caller anywhere in the frontend.
+   */
+  public async balanceAsOf(id: string, date: string): Promise<BalanceAsOfDTO> {
+    return hrisApiClient.get<BalanceAsOfDTO>(
+      `${this.BALANCES_PATH}/${id}/as-of?date=${date}`
     );
   }
 

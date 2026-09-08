@@ -100,3 +100,38 @@ describe("withActionError", () => {
     });
   });
 });
+
+describe("the field-bound message", () => {
+  const boundError = (code: string, message: string) =>
+    new ConflictError(message, { status: 409, code, fieldErrors: { name: message } });
+
+  it("puts the dictionary's words under the field, not the backend's", () => {
+    const result = toActionError(boundError("JF00001", "Provided job family name already exists"));
+
+    expect(result.fieldErrors).toEqual({
+      name: "A job family with this name already exists.",
+    });
+  });
+
+  it("leaves a map the backend built deliberately alone", () => {
+    const error = new ConflictError("Overlapping dates", {
+      status: 409,
+      code: "PH00003",
+      fieldErrors: { "2026-01-01": "Overlaps New Year", "2026-05-01": "Overlaps Labour Day" },
+    });
+
+    expect(toActionError(error).fieldErrors).toEqual({
+      "2026-01-01": "Overlaps New Year",
+      "2026-05-01": "Overlaps Labour Day",
+    });
+  });
+
+  it("leaves bean validation alone — it has no code to look up", () => {
+    const error = new ValidationError("must not be blank", {
+      status: 422,
+      fieldErrors: { building: "must not be blank" },
+    });
+
+    expect(toActionError(error).fieldErrors).toEqual({ building: "must not be blank" });
+  });
+});

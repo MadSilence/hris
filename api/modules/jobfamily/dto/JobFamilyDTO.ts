@@ -4,7 +4,6 @@ export type JobFamilyDTO = {
   id: string;
   name: string;
   description: string | null;
-  isSystem: boolean;
   archived: boolean;
 
   jobs: JobDTO[];

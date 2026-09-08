@@ -39,13 +39,18 @@ function PermissionsSkeleton() {
 
 export default function RolePermissionsContainer({ roleId }: { roleId: string }) {
   const { data, isLoading, error, save, saving, saveError } = useRolePermissions(roleId);
-  const { data: roles } = useRoles();
+  const { data: roles, isLoading: rolesLoading } = useRoles();
 
   const canEdit = useCanAccess("ROLES.ROLE", "EDIT");
   const isSystemRole = (roles ?? []).find((role) => role.id === roleId)?.systemOwner ?? false;
   // The backend rejects edits of a system role with 422 SYSTEM_ROLE_NOT_EDITABLE, and its
   // permissions are bypassed anyway — a system owner is allowed everything.
-  const readOnly = !canEdit || isSystemRole;
+  //
+  // `rolesLoading` counts as read-only, and this is the interesting part. Until the list arrives
+  // `isSystemRole` is `false` by default — not "unknown", *false* — so a system role rendered
+  // **editable** for as long as the fetch took, and anything toggled in that window came back 422
+  // on save. Offering an edit that cannot succeed is worse than making somebody wait a moment.
+  const readOnly = !canEdit || isSystemRole || rolesLoading;
 
   const [draft, setDraft] = React.useState<RolePermissionsDraft>({});
   const [scopeFilters, setScopeFilters] = React.useState<RoleScopeFilters>({});

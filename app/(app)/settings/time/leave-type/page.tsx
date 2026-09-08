@@ -1,13 +1,12 @@
 "use client";
 
 import LeaveTypesSettingsContainer from "@/components/modules/settings/modules/time/timeOff/leaveTypes/components/LeaveTypesSettingsContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function LeaveTypesPage() {
   return (
-    <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW" fallback={<AccessDenied />}>
+    <PageGate resource="PEOPLE.TIME_OFF_POLICIES" action="VIEW">
       <LeaveTypesSettingsContainer />
-    </PermissionGate>
+    </PageGate>
   );
 }

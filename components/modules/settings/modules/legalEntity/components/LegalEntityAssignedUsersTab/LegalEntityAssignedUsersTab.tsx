@@ -22,7 +22,7 @@ export default function LegalEntityAssignedUsersTab({ entity }: { entity: LegalE
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
-  const { items, total, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { items, total, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, entity.id, q);
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
@@ -44,6 +44,8 @@ export default function LegalEntityAssignedUsersTab({ entity }: { entity: LegalE
         rows={items}
         total={total}
         isLoading={isLoading}
+        error={error}
+        isArchived={entity.archived}
         hasMore={hasNextPage}
         isLoadingMore={isFetchingNextPage}
         onLoadMore={() => void fetchNextPage()}

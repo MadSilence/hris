@@ -23,7 +23,6 @@ const job = (overrides: Partial<Job> = {}): Job => ({
   name: "Backend Engineer",
   code: "ENG-01",
   description: null,
-  isSystem: false,
   archived: false,
   familyId: "fam-1",
   familyName: "Engineering",
@@ -36,7 +35,6 @@ const family = (overrides: Partial<JobFamily> = {}): JobFamily => ({
   id: overrides.id ?? "fam-1",
   name: "Engineering",
   description: null,
-  isSystem: false,
   archived: false,
   jobs: [job()],
   assignedUsersCount: 4,
@@ -56,6 +54,7 @@ const handlers = (): JobFamilyComponentProps => ({
   onDuplicateJob: jest.fn(),
   onArchiveJob: jest.fn(),
   onActivateJob: jest.fn(),
+  onAssignJob: jest.fn(),
   onDeleteJob: jest.fn(),
 });
 
@@ -129,7 +128,7 @@ describe("JobFamilyComponent", () => {
     expect(props.onArchiveJob).toHaveBeenCalledWith(expect.objectContaining({ id: "job-1" }));
   });
 
-  it("offers Restore instead of Archive on an archived position", async () => {
+  it("offers Unarchive instead of Archive on an archived position", async () => {
     const user = userEvent.setup();
     const props = renderComponent({ jobFamilies: [family({ jobs: [job({ archived: true })] })] });
 
@@ -137,9 +136,9 @@ describe("JobFamilyComponent", () => {
     await user.click(screen.getByLabelText("Job actions"));
 
     // Plain text item, no icon — same as every other entry in the menu.
-    expect(await screen.findByRole("menuitem", { name: "Restore" })).toHaveTextContent(/^Restore$/);
+    expect(await screen.findByRole("menuitem", { name: "Unarchive" })).toHaveTextContent(/^Unarchive$/);
     expect(screen.queryByRole("menuitem", { name: "Archive" })).not.toBeInTheDocument();
-    await user.click(await screen.findByRole("menuitem", { name: "Restore" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Unarchive" }));
 
     expect(props.onActivateJob).toHaveBeenCalledWith(expect.objectContaining({ id: "job-1" }));
   });

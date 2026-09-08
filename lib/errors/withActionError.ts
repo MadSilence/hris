@@ -20,6 +20,34 @@ export type ActionResult<T = unknown> = {
   requestId?: string;
 };
 
+/**
+ * The field-bound half of the same answer, in the dictionary's words.
+ *
+ * When a domain error names a field, the backend answers `fieldErrors: {name: <its own message>}` —
+ * it fills the map from `ex.getMessage()` because that is the only sentence it has. Left alone, the
+ * top of the form reads the dictionary and the line under the input reads the backend's English:
+ * *"A position with this name and level already exists in this family."* above,
+ * *"Provided job family name already exists"* below. Same refusal, two voices.
+ *
+ * Only that case is rewritten, and the equality is what identifies it: a map the backend built
+ * deliberately — the overlapping public-holiday dates, one entry per date — carries its own values
+ * and is passed through untouched, as is anything bean validation produced, which has no code to
+ * look up.
+ */
+const translateBoundField = (error: ApiError): Record<string, string> | undefined => {
+  const fieldErrors = error.fieldErrors;
+  if (!fieldErrors || !error.code) return fieldErrors;
+
+  const entries = Object.entries(fieldErrors);
+  if (entries.length !== 1) return fieldErrors;
+
+  const [field, text] = entries[0];
+  if (text !== error.message) return fieldErrors;
+
+  const translated = messageForCode(error.code, error.message, error.params);
+  return translated === FALLBACK_ERROR_MESSAGE ? fieldErrors : { [field]: translated };
+};
+
 /** Turns a caught error into the answer a caller reads. Exported for actions that cannot be wrapped. */
 export const toActionError = (error: unknown, context?: string): ActionResult<never> => {
   if (error instanceof ApiError) {
@@ -34,9 +62,9 @@ export const toActionError = (error: unknown, context?: string): ActionResult<ne
 
     return {
       status: ActionStatus.ERROR,
-      errorMessage: messageForCode(error.code, error.message),
+      errorMessage: messageForCode(error.code, error.message, error.params),
       code: error.code,
-      fieldErrors: error.fieldErrors,
+      fieldErrors: translateBoundField(error),
       // Only worth showing for a failure nobody expected; a refused business rule has nothing to
       // look up. BackendUnavailableError never has one — nothing on the far side issued it.
       requestId: error instanceof BackendUnavailableError ? undefined : error.requestId,

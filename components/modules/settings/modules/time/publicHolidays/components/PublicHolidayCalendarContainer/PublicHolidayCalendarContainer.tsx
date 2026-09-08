@@ -6,6 +6,9 @@ import { PublicHolidayCalendarDetailsComponent } from "../PublicHolidayCalendarD
 import { PublicHolidayCalendarDetailsSkeleton } from "../PublicHolidayCalendarDetailsSkeleton";
 import { usePublicHolidayCalendar } from "../../hooks/usePublicHolidayCalendar";
 import { usePublicHolidays } from "../../hooks/usePublicHolidays";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -41,8 +44,13 @@ export default function PublicHolidayCalendarContainer() {
     error: holidaysError,
   } = usePublicHolidays({ calendarId, year });
 
-  if (calendarError) throw calendarError;
-  if (holidaysError) throw holidaysError;
+  // Rendered here, not thrown. `throw` reaches `app/(app)/error.tsx`, which deliberately ignores the
+  // message \u2014 Next.js flattens the class away crossing the RSC boundary \u2014 so a coded refusal
+  // arrived as "Something went wrong", and the page it belonged to was replaced whole. Keeping the
+  // failure in the region that failed is the rule the rest of the app already follows.
+  const failure = calendarError ?? holidaysError;
+  if (failure instanceof ForbiddenError) return <AccessDenied compact/>;
+  if (failure) return <ErrorState error={failure} title="This calendar could not be loaded"/>;
 
   if (isCalendarLoading || !calendar) {
     return <PublicHolidayCalendarDetailsSkeleton />;

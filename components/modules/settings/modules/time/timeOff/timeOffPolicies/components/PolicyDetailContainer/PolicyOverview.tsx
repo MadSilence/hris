@@ -12,8 +12,6 @@ import {
 } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { TimeOffPolicy } from "@/models/timeOff";
 import {
-  WEEKDAY_BITS,
-  hasWeekday,
 } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/components/wizard";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -64,10 +62,6 @@ export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
       : "Allowed"
     : "Not allowed";
 
-  const workingDays = WEEKDAY_BITS.filter((d) => hasWeekday(policy.validWeekdays, d.bit))
-    .map((d) => d.label)
-    .join(", ");
-
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Section title="Basics">
@@ -98,7 +92,6 @@ export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
           label="Counting mode"
           value={policy.countingMode === TimeOffPolicyCountingMode.WorkingDays ? "Working days" : "Calendar days"}
         />
-        <Row label="Working days" value={workingDays || "—"} />
         <Row
           label="Public holidays"
           value={policy.includePublicHolidays ? "Consume balance" : "Excluded"}

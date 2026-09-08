@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Role } from "@/models/role/Role";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -74,7 +75,7 @@ export const AssignRolesModal: FC<AssignRolesModalProps> = ({
           </DialogHeader>
 
           {errorMessage && (
-            <p className="text-sm text-red-500">{errorMessage}</p>
+            <FormError message={errorMessage} />
           )}
 
           <AssignRolesForm

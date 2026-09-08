@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { FC, useState } from "react";
 import { UserPlus, Users, X } from "lucide-react";
 
@@ -67,18 +68,33 @@ function AssignmentRow({
 export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchived }) => {
   const [assignOpen, setAssignOpen] = useState(false);
   const [endingId, setEndingId] = useState<string | null>(null);
+  const [showEnded, setShowEnded] = useState(false);
+  const [endError, setEndError] = useState<string | null>(null);
 
   const { data: assignments, isLoading, error } = useTimeOffPolicyAssignments({ policyId });
   const endMutation = useEndTimeOffPolicyAssignment();
 
+  // Active by default, with the ended ones one click away rather than invisible: "who used to be on
+  // this policy" is a question the screen could not answer at all.
   const active = (assignments ?? []).filter(
     (a) => a.status === TimeOffPolicyAssignmentStatus.Active,
   );
+  const ended = (assignments ?? []).filter(
+    (a) => a.status !== TimeOffPolicyAssignmentStatus.Active,
+  );
+  const shown = showEnded ? [...active, ...ended] : active;
 
   const handleEnd = async (assignment: TimeOffPolicyAssignment) => {
     setEndingId(assignment.id);
+    setEndError(null);
     try {
       await endMutation.mutateAsync({ assignmentId: assignment.id, policyId, effectiveTo: null });
+    } catch (error) {
+      // There was no catch at all: ending an assignment that the backend refuses looked exactly
+      // like ending one it accepted.
+      setEndError(
+        error instanceof Error ? error.message : "The assignment could not be ended.",
+      );
     } finally {
       setEndingId(null);
     }
@@ -105,7 +121,13 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
     </Button>
   );
 
-  if (!isLoading && !error && active.length === 0) {
+  // "Nobody" means nobody ever, not "nobody right now".
+  //
+  // Keyed on `active.length` alone, this claimed "No one is assigned yet" for a policy whose only
+  // assignment had ended — which is false, someone was assigned and it finished — and it took the
+  // "Show N ended" toggle down with it, since that lives in the branch below. The one case where
+  // the ended list is the only thing worth reading was the one case that hid it.
+  if (!isLoading && !error && active.length === 0 && ended.length === 0) {
     return (
       <>
         <div className="flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
@@ -126,19 +148,33 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-none items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          {active.length} {active.length === 1 ? "person" : "people"} assigned
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            {active.length} {active.length === 1 ? "person" : "people"} assigned
+          </p>
+          {ended.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground"
+              onClick={() => setShowEnded((v) => !v)}
+            >
+              {showEnded ? "Hide" : "Show"} {ended.length} ended
+            </Button>
+          )}
+        </div>
         {assignButton}
       </div>
+
+      {endError && <p className="flex-none text-sm text-destructive">{endError}</p>}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="space-y-1">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center gap-2 px-1 py-2">
-                <div className="h-6 w-6 flex-none animate-pulse rounded-full bg-brown-100" />
-                <div className="h-3.5 w-32 animate-pulse rounded bg-brown-100" />
+                <Skeleton className="h-6 w-6 flex-none rounded-full" />
+                <Skeleton className="h-3.5 w-32" />
               </div>
             ))}
           </div>
@@ -146,13 +182,13 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           <p className="py-6 text-center text-sm text-red-500">Failed to load assignments.</p>
         ) : (
           <div className="flex flex-col">
-            {active.map((assignment) => (
+            {shown.map((assignment) => (
               <AssignmentRow
                 key={assignment.id}
                 assignment={assignment}
                 onEnd={handleEnd}
                 ending={endingId === assignment.id}
-                disabled={isArchived}
+                disabled={isArchived || assignment.status !== TimeOffPolicyAssignmentStatus.Active}
               />
             ))}
           </div>

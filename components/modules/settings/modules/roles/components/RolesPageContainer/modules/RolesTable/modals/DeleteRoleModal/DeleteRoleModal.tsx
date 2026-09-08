@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -124,14 +125,19 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         </p>
 
         {errorMessage && (
-          <p className="text-sm text-red-500">{errorMessage}</p>
+          <FormError message={errorMessage} />
         )}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
 
+          {/*
+            Disabled only while the impact question is still open. Once we know \u2014 or know we cannot
+            find out \u2014 the decision belongs to the admin. This is what "presses Delete blind" in the
+            2026-08-28 run actually was: not a missing branch, but a live button in front of one.
+          */}
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={isLoading || isImpactLoading}
             onClick={(event) => {
               // Keep the dialog mounted while the mutation runs; the caller closes it on success.
               event.preventDefault();

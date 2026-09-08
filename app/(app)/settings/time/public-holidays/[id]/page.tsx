@@ -3,13 +3,12 @@
 
 import PublicHolidayCalendarContainer
   from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayCalendarContainer/PublicHolidayCalendarContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 
 export default function PublicHolidayCalendarPage() {
   return (
-    <PermissionGate resource="ORG.PUBLIC_HOLIDAY_CALENDAR" action="VIEW" fallback={<AccessDenied/>}>
+    <PageGate resource="ORG.PUBLIC_HOLIDAY_CALENDAR" action="VIEW">
       <PublicHolidayCalendarContainer/>
-    </PermissionGate>
+    </PageGate>
   );
 }

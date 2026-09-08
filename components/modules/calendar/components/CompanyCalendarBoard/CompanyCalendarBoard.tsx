@@ -69,7 +69,10 @@ const toSegments = (marks: CompanyCalendarMark[], dayISOs: string[]): Segment[] 
 
 const titleFor = (m: CompanyCalendarMark): string => {
   const parts = [m.name];
-  if (m.dayPart === "HALF_DAY") parts.push("(half day)");
+  // The board draws half a day and leave counting charges a whole one. Both are deliberate — exact
+  // half-day arithmetic arrives with hourly absence, which does not exist — but the two screens were
+  // disagreeing in silence, and the person reading them is the one who loses the day.
+  if (m.dayPart === "HALF_DAY") parts.push("(half day — leave still counts it as a whole day)");
   if (m.nominalDate) parts.push(`— moved from ${m.nominalDate}`);
   return m.calendarName ? `${parts.join(" ")} · ${m.calendarName}` : parts.join(" ");
 };

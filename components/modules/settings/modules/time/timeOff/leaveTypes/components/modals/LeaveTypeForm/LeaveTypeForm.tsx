@@ -128,7 +128,7 @@ export const LeaveTypeForm: FC<Props> = ({
               disabled={isLoading}
               aria-invalid={!!formik.errors.name}
             />
-            {formik.errors.name && <p className="text-sm text-destructive">{formik.errors.name}</p>}
+            {formik.errors.name && <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>}
           </div>
 
           <div className="space-y-2">
@@ -142,7 +142,7 @@ export const LeaveTypeForm: FC<Props> = ({
               aria-invalid={!!formik.errors.description}
             />
             {formik.errors.description && (
-              <p className="text-sm text-destructive">{formik.errors.description}</p>
+              <p role="alert" className="text-sm text-destructive">{formik.errors.description}</p>
             )}
           </div>
 

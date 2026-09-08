@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { useQuery } from "@tanstack/react-query";
 import { UserMinus } from "lucide-react";
 
@@ -29,6 +30,7 @@ import type {
   TerminationReason,
 } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { dateToISO } from "@/lib/date";
 
 const REASONS: { id: TerminationReason; label: string }[] = [
   { id: "VOLUNTARY", label: "Voluntary — the person resigned" },
@@ -36,7 +38,18 @@ const REASONS: { id: TerminationReason; label: string }[] = [
   { id: "END_OF_CONTRACT", label: "End of contract" },
 ];
 
-const today = () => new Date().toISOString().slice(0, 10);
+/**
+ * Today, in the reader's own day.
+ *
+ * `new Date().toISOString().slice(0, 10)` is UTC, so east of Greenwich the default last working day
+ * was **yesterday** for the whole evening — on the one field where being a day out is somebody's
+ * last day at work. `dateToISO` reads the local components instead, which is the rule the shared
+ * date helpers exist for (`lib/date.ts`, and `DECISIONS.md` on dates).
+ *
+ * The backend does the matching thing with the company's clock: an omitted `lastWorkingDay` is
+ * `CompanyTimeService.today(companyId)`, not the server's date.
+ */
+const today = () => dateToISO(new Date());
 
 export type TerminateSubmission = {
   lastWorkingDay: string;
@@ -119,7 +132,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
           </div>
         </DialogHeader>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <FormError message={errorMessage} />
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

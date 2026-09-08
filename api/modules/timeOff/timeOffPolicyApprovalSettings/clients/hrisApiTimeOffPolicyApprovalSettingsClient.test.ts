@@ -12,8 +12,10 @@ jest.mock("@/api/clients/hrisApiClient/hrisApiClient", () => ({
 describe("HrisApiTimeOffPolicyApprovalSettingsClient", () => {
   const dto = {
     policyId: "policy-id",
-    allApprovalsRequired: true,
-    approvalOrderStrict: false,
+    configured: true,
+    approvalRequired: true,
+    approvalMode: "ALL" as const,
+    requiredApprovalsCount: null,
     allowSubstituteApprovers: false,
     approvers: [
       {
@@ -21,7 +23,6 @@ describe("HrisApiTimeOffPolicyApprovalSettingsClient", () => {
         approverType: TimeOffPolicyApproverType.SpecificUser,
         approverUserId: "user-id",
         approvalOrder: 1,
-        required: true,
       },
     ],
   };
@@ -48,15 +49,16 @@ describe("HrisApiTimeOffPolicyApprovalSettingsClient", () => {
     jest.mocked(hrisApiClient.put).mockResolvedValue(dto);
 
     const request = {
-      allApprovalsRequired: true,
-      approvalOrderStrict: false,
+      configured: true,
+      approvalRequired: true,
+      approvalMode: "ALL" as const,
+      requiredApprovalsCount: null,
       allowSubstituteApprovers: false,
       approvers: [
         {
           approverType: TimeOffPolicyApproverType.SpecificUser,
           approverUserId: "user-id",
           approvalOrder: 1,
-          required: true,
         },
       ],
     };

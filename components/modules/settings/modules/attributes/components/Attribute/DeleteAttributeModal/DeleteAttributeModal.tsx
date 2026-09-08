@@ -15,6 +15,7 @@ import {
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
 import { useAttributeDeleteImpact } from "@/components/modules/settings/modules/attributes/hooks/useDeleteImpact";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 type DeleteAttributeModalProps = {
   isOpen: boolean;
@@ -33,7 +34,11 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
 }) => {
   const attributeName = attribute?.name ?? "Untitled attribute";
 
-  const { data: impact } = useAttributeDeleteImpact(isOpen ? attribute?.id ?? null : null);
+  const {
+    data: impact,
+    isLoading: isImpactLoading,
+    error: impactError,
+  } = useAttributeDeleteImpact(isOpen ? attribute?.id ?? null : null);
 
   const hasOptions =
     attribute?.type === AttributeType.MULTI_SELECT ||
@@ -77,7 +82,23 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
                   </p>
                 )}
 
-                {impact && impact.valueCount > 0 && (
+                {/*
+                  Three outcomes, not two. This block read `impact &&` alone, so "we have not asked
+                  yet" and "we asked and could not get an answer" both rendered as silence \u2014 and
+                  silence here is indistinguishable from "this attribute has no values", which is
+                  the one thing the reader is trying to find out before pressing Delete. The pattern
+                  is `DeleteRoleModal`, one folder away.
+                */}
+                {isImpactLoading && <p>Checking how many people have a value for this\u2026</p>}
+
+                {!isImpactLoading && !impact && !!impactError && (
+                  <p>
+                    {messageForError(impactError)} Until then, how many values this deletes is
+                    unknown.
+                  </p>
+                )}
+
+                {!isImpactLoading && impact && impact.valueCount > 0 && (
                   <p>
                     This will permanently delete{" "}
                     <strong>{impact.valueCount}</strong> value
@@ -85,6 +106,15 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
                     <strong>{impact.peopleCount}</strong>{" "}
                     {impact.peopleCount === 1 ? "person" : "people"}.
                   </p>
+                )}
+
+                {!isImpactLoading && impact && impact.valueCount === 0 && (
+                  <p>Nobody has a value for this attribute.</p>
+                )}
+
+                {/* Nothing asked yet, and nothing to report. */}
+                {!isImpactLoading && !impact && !impactError && (
+                  <p>Any values people have for it will be deleted with it.</p>
                 )}
 
                 <p>
@@ -99,8 +129,13 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
 
+          {/*
+            Disabled *only* while the question is still open. Once the answer is in \u2014 or once we
+            know it is not coming \u2014 the decision is the admin's to make; refusing to delete because
+            an impact endpoint is down would be a second failure on top of the first.
+          */}
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={isLoading || isImpactLoading}
             onClick={(event) => {
               event.preventDefault();
               onConfirmAction();

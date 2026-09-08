@@ -1,18 +1,15 @@
 import { FC } from "react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AccessDenied } from "@/components/auth/AccessDenied";
+import { PageGate } from "@/components/auth/PageGate";
 import {
   DocumentCategoriesContainer,
 } from "@/components/modules/settings/modules/documentCategories/components/DocumentCategoriesContainer";
 
 const DocumentCategoriesSettingsPage: FC = () => (
-  <PermissionGate
+  <PageGate
     resource="PEOPLE.DOCUMENT_CATEGORIES"
-    action="MANAGE"
-    fallback={<AccessDenied/>}
-  >
+    action="MANAGE">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
         <SettingsPageHeader title="Document Categories" backHref="/settings"/>
@@ -27,7 +24,7 @@ const DocumentCategoriesSettingsPage: FC = () => (
         <DocumentCategoriesContainer/>
       </div>
     </div>
-  </PermissionGate>
+  </PageGate>
 );
 
 export default DocumentCategoriesSettingsPage;

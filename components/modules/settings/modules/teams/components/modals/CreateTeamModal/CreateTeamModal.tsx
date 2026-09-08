@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -75,7 +77,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           <div className="space-y-1.5">
             <Label htmlFor="team-name">Name *</Label>
             <Input id="team-name" name="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="e.g. Platform" />
-            {formik.touched.name && formik.errors.name && <p className="text-xs text-red-500">{formik.errors.name}</p>}
+            {formik.touched.name && formik.errors.name && <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-code">Code</Label>
@@ -107,7 +109,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
             <Label>Team lead</Label>
             <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
-          {createTeam.isError && <p className="text-sm text-red-500">{(createTeam.error as Error)?.message ?? "An error occurred."}</p>}
+          <FormError message={createTeam.error ? messageForError(createTeam.error) : null} />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>

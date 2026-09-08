@@ -10,3 +10,7 @@ export * from "./TimeOffPolicyDTO";
 export * from "./RenameTimeOffPolicyRequest";
 export * from "./CreateTimeOffPolicyRequest";
 export * from "./UpdateTimeOffPolicyRequest";
+
+export * from "./SaveTimeOffPolicyRequest";
+
+export * from "./TimeOffPolicyEditImpactDTO";

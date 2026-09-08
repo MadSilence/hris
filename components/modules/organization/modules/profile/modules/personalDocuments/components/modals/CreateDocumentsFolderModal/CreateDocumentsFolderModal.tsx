@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
@@ -61,7 +62,7 @@ export const CreateDocumentsFolderModal: FC<
             </DialogDescription>
           </DialogHeader>
 
-          {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+          <FormError message={errorMessage} />
 
           <CreateDocumentsFolderForm
             isLoading={isLoading}

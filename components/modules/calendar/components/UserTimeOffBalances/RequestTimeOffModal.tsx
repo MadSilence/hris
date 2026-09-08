@@ -1,6 +1,6 @@
 "use client";
 
-import { dateToISO, isoToDate } from "@/lib/date";
+import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
@@ -68,16 +68,35 @@ export const RequestTimeOffModal: FC<Props> = ({
 }) => {
   const createMutation = useCreateTimeOffRequest();
 
-  const [assignmentId, setAssignmentId] = useState(balances[0]?.assignmentId ?? "");
+  // Only the periods a request could actually fall into.
+  //
+  // The picker listed one row per *balance*, so a policy whose previous period is still on file
+  // appeared twice — "17 d left" and "-3 d left" — and picking the closed one filed against a period
+  // that has ended. A request has to sit inside one balance period, so a period already over can
+  // never be the right answer, and offering it only invites a refusal.
+  const selectable = useMemo(() => {
+    const today = dateToISO(new Date());
+    const open = balances.filter((b) => !b.periodEnd || b.periodEnd >= today);
+    // One row per assignment: the earliest period that has not ended is the one today falls in.
+    const byAssignment = new Map<string, EmployeeTimeOffBalance>();
+    for (const b of [...open].sort((a, c) => a.periodStart.localeCompare(c.periodStart))) {
+      if (!byAssignment.has(b.assignmentId)) byAssignment.set(b.assignmentId, b);
+    }
+    return [...byAssignment.values()];
+  }, [balances]);
+
+  const [assignmentId, setAssignmentId] = useState(selectable[0]?.assignmentId ?? "");
   const [startDate, setStartDate] = useState(initialStartDate ?? "");
   const [endDate, setEndDate] = useState(initialEndDate ?? initialStartDate ?? "");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
+  /** Set once the request has been filed and the coverage cap wants the person to know. */
+  const [coverageWarning, setCoverageWarning] = useState<string[] | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const selected = useMemo(
-    () => balances.find((b) => b.assignmentId === assignmentId),
-    [balances, assignmentId],
+    () => selectable.find((b) => b.assignmentId === assignmentId),
+    [selectable, assignmentId],
   );
   const policy = selected ? policyMap.get(selected.policyId) : undefined;
   const unit = policy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
@@ -147,12 +166,22 @@ export const RequestTimeOffModal: FC<Props> = ({
     }
     setError(null);
     try {
-      await createMutation.mutateAsync({
+      const result = await createMutation.mutateAsync({
         assignmentId,
         startDate,
         endDate,
         reason: reason.trim() || null,
       });
+
+      // The request went through, and the coverage cap says these days are already thin. A policy
+      // set to WARN means exactly this: let it through, and tell them. Closing the dialog silently
+      // is what "computed, logged and discarded" looked like from the outside.
+      const warnDays = result.data?.coverageWarningDays ?? [];
+      if (warnDays.length > 0) {
+        setCoverageWarning(warnDays);
+        return;
+      }
+
       onCloseAction();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to submit the request.");
@@ -184,7 +213,7 @@ export const RequestTimeOffModal: FC<Props> = ({
                   <SelectValue placeholder="Select a policy" />
                 </SelectTrigger>
                 <SelectContent>
-                  {balances.map((b) => {
+                  {selectable.map((b) => {
                     const p = policyMap.get(b.policyId);
                     const left = p?.unlimitedQuota
                       ? "Unlimited"
@@ -318,13 +347,37 @@ export const RequestTimeOffModal: FC<Props> = ({
           </aside>
         </div>
 
+        {coverageWarning && (
+          <div className="border-t border-amber-200 bg-amber-50 px-6 py-4">
+            <p className="text-sm font-medium text-amber-900">
+              Your request was submitted.
+            </p>
+            <p className="mt-1 text-xs text-amber-800">
+              This policy warns when too many people are away at once, and{" "}
+              {coverageWarning.length === 1
+                ? "one of your days is"
+                : `${coverageWarning.length} of your days are`}{" "}
+              already at that limit:{" "}
+              {coverageWarning.map((d) => formatDisplayDate(d, { style: "medium" })).join(", ")}.
+              Nothing is blocked — your approver
+              can see the same thing.
+            </p>
+          </div>
+        )}
+
         <div className="flex justify-end gap-2 border-t border-brown-100 px-6 py-4">
+          {coverageWarning ? (
+            <Button onClick={onCloseAction}>Got it</Button>
+          ) : (
+            <>
           <Button variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={!canSubmit}>
             {createMutation.isPending ? "Submitting…" : "Submit request"}
           </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

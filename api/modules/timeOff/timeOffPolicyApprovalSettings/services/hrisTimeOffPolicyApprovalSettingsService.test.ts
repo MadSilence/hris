@@ -15,8 +15,10 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
 
   const settings = {
     policyId: "policy-id",
-    allApprovalsRequired: true,
-    approvalOrderStrict: false,
+    configured: true,
+    approvalRequired: true,
+    approvalMode: "ALL" as const,
+    requiredApprovalsCount: null,
     allowSubstituteApprovers: false,
     approvers: [
       {
@@ -24,7 +26,6 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
         approverType: TimeOffPolicyApproverType.SpecificUser,
         approverUserId: "user-id",
         approvalOrder: 1,
-        required: true,
       },
     ],
   };
@@ -54,15 +55,16 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
       .mockResolvedValue(updateResponse);
 
     const request = {
-      allApprovalsRequired: true,
-      approvalOrderStrict: false,
+      configured: true,
+      approvalRequired: true,
+      approvalMode: "ALL" as const,
+      requiredApprovalsCount: null,
       allowSubstituteApprovers: false,
       approvers: [
         {
           approverType: TimeOffPolicyApproverType.SpecificUser,
           approverUserId: "user-id",
           approvalOrder: 1,
-          required: true,
         },
       ],
     };

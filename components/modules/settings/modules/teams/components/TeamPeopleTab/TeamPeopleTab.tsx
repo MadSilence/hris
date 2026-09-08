@@ -8,6 +8,9 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 import {
@@ -16,6 +19,7 @@ import {
 } from "@/components/audience/assignment/hooks/useAssignedUsers";
 import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { showActionError } from "@/lib/errors/errorToast";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
 import { TEAMS_QUERY_KEY } from "@/components/modules/settings/modules/teams/utils/teamQueryKeys";
 
@@ -64,6 +68,12 @@ export function TeamPeopleTab({
           queryClient.invalidateQueries({ queryKey: assignedUsersQueryKey(BASE_PATH, teamId) }),
           queryClient.invalidateQueries({ queryKey: [TEAMS_QUERY_KEY] }),
         ]);
+      } else {
+      // A row action whose context is the row itself: by the time the answer arrives there is no
+      // dialog left to put it in, so it goes to the card. This branch did not exist — a refused
+      // removal invalidated nothing, said nothing, and left the person on screen looking as though
+      // the click had missed.
+        showActionError(result);
       }
     } finally {
       setRemovingId(null);
@@ -158,8 +168,10 @@ export function TeamPeopleTab({
               </div>
             ))}
           </div>
+        ) : error instanceof ForbiddenError ? (
+          <AccessDenied compact/>
         ) : error ? (
-          <p className="py-6 text-center text-sm text-red-500">Failed to load members.</p>
+          <ErrorState error={error} compact/>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50 text-brown-500">

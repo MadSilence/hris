@@ -3,7 +3,6 @@ import { JobLevelDTO } from "@/api/modules/jobfamily/dto";
 export type JobLevelGroupDTO = {
   id: string;
   name: string;
-  isSystem: boolean;
   levels: JobLevelDTO[];
   assignedJobsCount: number;
   assignedUsersCount: number;

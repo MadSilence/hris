@@ -420,6 +420,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         isOpen={!!previewState}
         document={previewState}
         getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
+        fetchDocument={documentService.fetchPersonalDocument}
         onCloseAction={() => setPreviewState(null)}
       />
     </>
