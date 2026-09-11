@@ -68,7 +68,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
             {name}
           </p>
           <p className="truncate text-xs text-brown-500" title={user.jobName ?? undefined}>
-            {user.jobName || "—"}
+            {user.jobName}
           </p>
         </div>
       </div>

@@ -56,7 +56,7 @@ export const CreateDocumentsFolderModal: FC<
       >
         <DialogContent hideClose className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create folder</DialogTitle>
+            <DialogTitle>Add Folder</DialogTitle>
             <DialogDescription>
               Create a new folder to organize personal documents.
             </DialogDescription>

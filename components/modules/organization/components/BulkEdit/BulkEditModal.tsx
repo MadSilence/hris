@@ -385,7 +385,6 @@ function ValueEditor({
       type={inputType}
       value={single}
       onChange={(e) => setSingle(e.target.value)}
-      placeholder="Value"
       className="h-9"
     />
   );

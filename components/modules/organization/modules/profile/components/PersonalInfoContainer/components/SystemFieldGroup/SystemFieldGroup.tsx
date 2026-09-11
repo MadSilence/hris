@@ -35,6 +35,7 @@ import {
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { formatDisplayDate } from "@/lib/date";
+import { NONE_LABEL, NONE_VALUE } from "@/models/select";
 import {
   ProfileSectionCard,
   SectionEditButton,
@@ -69,7 +70,11 @@ const FIELDS_WITH_AN_EDITOR = new Set([
 ]);
 
 /** Sentinel for "no value" in a Select — Radix cannot hold an empty string as an item value. */
-const NONE = "__none__";
+/**
+ * The shared sentinel. Radix `Select` cannot hold an empty string, so every module invented its own
+ * — `ROOT_VALUE`, `"__none__"`, `"None"` — and its own label with it.
+ */
+const NONE = NONE_VALUE;
 
 /** The `yyyy-MM-dd` the date field speaks — a transport shape, not something anyone reads. */
 const toDateInput = (iso?: string | null) => (iso ? iso.slice(0, 10) : null);
@@ -260,7 +265,6 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
           <UserPickerField
             value={draft.manager}
             onChange={(manager) => setDraft((d) => ({ ...d, manager }))}
-            placeholder="No manager"
           />
         );
       case "sys:job":
@@ -268,7 +272,6 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
           <ReferenceSelect
             source="jobs"
             value={draft.jobId}
-            placeholder="No job"
             onChange={(jobId) => setDraft((d) => ({ ...d, jobId }))}
           />
         );
@@ -277,7 +280,6 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
           <ReferenceSelect
             source="offices"
             value={draft.officeId}
-            placeholder="No office"
             onChange={(officeId) => setDraft((d) => ({ ...d, officeId }))}
           />
         );
@@ -286,7 +288,6 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
           <ReferenceSelect
             source="legalEntities"
             value={draft.legalEntityId}
-            placeholder="No legal entity"
             onChange={(legalEntityId) => setDraft((d) => ({ ...d, legalEntityId }))}
           />
         );
@@ -348,18 +349,17 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
 const ReferenceSelect: React.FC<{
   source: ReferenceValueSource;
   value: string;
-  placeholder: string;
   onChange: (value: string) => void;
-}> = ({ source, value, placeholder, onChange }) => {
+}> = ({ source, value, onChange }) => {
   const { options, isLoading } = useReferenceOptions(source);
 
   return (
     <Select value={value} onValueChange={onChange} disabled={isLoading}>
       <SelectTrigger>
-        <SelectValue placeholder={isLoading ? "Loading…" : placeholder}/>
+        <SelectValue placeholder={isLoading ? "Loading…" : "Select"}/>
       </SelectTrigger>
       <SelectContent className="max-h-72">
-        <SelectItem value={NONE}>{placeholder}</SelectItem>
+        <SelectItem value={NONE}>{NONE_LABEL}</SelectItem>
         {options.map((option) => (
           <SelectItem key={option.id} value={option.id}>
             {option.label}

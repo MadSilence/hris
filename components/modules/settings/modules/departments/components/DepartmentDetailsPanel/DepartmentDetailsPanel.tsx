@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Crosshair, Info, MoreHorizontal, Users } from "lucide-react";
+import { Archive, ArchiveRestore, Crosshair, Info, Pencil, Trash2, Users } from "lucide-react";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/public/desact/src/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+  RowAction,
+  RowActionDestructive,
+  RowActionsMenu,
+} from "@/components/ui/RowActionsMenu";
 import type { DepartmentTreeNode } from "@/models/departments";
 import { DepartmentPeopleTab } from "@/components/modules/settings/modules/departments/components/DepartmentPeopleTab/DepartmentPeopleTab";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
@@ -111,31 +110,29 @@ export function DepartmentDetailsPanel({
             <Crosshair className="h-4 w-4" />
           </button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
-                aria-label="Department actions"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
-                {!isArchived && <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>}
-                {isArchived ? (
-                  <DropdownMenuItem onSelect={onActivate}>Activate</DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
-                )}
-              </PermissionGate>
-              <PermissionGate resource="ORG.DEPARTMENT" action="MANAGE">
-                <DropdownMenuItem onSelect={onDelete} className="text-red-600 focus:text-red-600">
-                  Delete
-                </DropdownMenuItem>
-              </PermissionGate>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <RowActionsMenu label="Department Actions">
+            <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
+              {!isArchived && (
+                <RowAction icon={<Pencil className="h-4 w-4" />} onClick={onEdit}>
+                  Edit
+                </RowAction>
+              )}
+              {isArchived ? (
+                <RowAction icon={<ArchiveRestore className="h-4 w-4" />} onClick={onActivate}>
+                  Unarchive
+                </RowAction>
+              ) : (
+                <RowAction icon={<Archive className="h-4 w-4" />} onClick={onArchive}>
+                  Archive
+                </RowAction>
+              )}
+            </PermissionGate>
+            <PermissionGate resource="ORG.DEPARTMENT" action="MANAGE">
+              <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={onDelete}>
+                Delete
+              </RowActionDestructive>
+            </PermissionGate>
+          </RowActionsMenu>
         </div>
       </div>
 

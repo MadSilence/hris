@@ -1,15 +1,14 @@
 "use client";
 
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableSkeleton from "./AssignedUsersTableSkeleton";
 import RemoveAssignedUserDialog from "./modals/RemoveAssignedUserDialog";
 import { PermissionGate } from "@/components/auth/PermissionGate";
-import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { formatDisplayDate } from "@/lib/date";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
+import { UserStatusBadge } from "@/components/ui/StatusBadge";
 
 export interface AssignedUsersTableContentProps {
   rows: UsersSearchItemDTO[];
@@ -22,24 +21,9 @@ export interface AssignedUsersTableContentProps {
   emptyText?: string;
 }
 
-function StatusBadge({ status }: { status?: string | null }) {
-  if (!status) return <span className="text-muted-foreground">—</span>;
-
-  const label = formatUserStatus(status);
-  const isActive = isActiveStatus(status);
-
-  return (
-    <Badge
-      variant={isActive ? "outline" : "secondary"}
-      className={isActive ? "border-green-200 bg-green-50 text-green-700" : ""}
-    >
-      {label}
-    </Badge>
-  );
-}
 
 function formatDate(iso?: string | null) {
-  return iso ? formatDisplayDate(iso, { style: "medium" }) || "—" : "—";
+  return iso ? formatDisplayDate(iso, { style: "medium" }) : "";
 }
 
 export default function AssignedUsersTableContent({
@@ -62,8 +46,8 @@ export default function AssignedUsersTableContent({
             <TableHead className="pl-4">User</TableHead>
             <TableHead>Position</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Added on</TableHead>
-            <TableHead>Added by</TableHead>
+            <TableHead>Added On</TableHead>
+            <TableHead>Added By</TableHead>
             <TableHead className="w-10"/>
           </TableRow>
         </TableHeader>
@@ -90,10 +74,10 @@ export default function AssignedUsersTableContent({
                     />
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground">{u.jobName || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{u.jobName}</TableCell>
 
                   <TableCell>
-                    <StatusBadge status={u.status} />
+                    <UserStatusBadge status={u.status}/>
                   </TableCell>
 
                   <TableCell className="text-muted-foreground">{formatDate(u.assignedAt)}</TableCell>

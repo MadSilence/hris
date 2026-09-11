@@ -85,7 +85,6 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
             autoFocus
             value={reason}
             onChange={(e) => setReason(e.currentTarget.value)}
-            placeholder="Reason for rejection"
             className="h-8 flex-1"
             disabled={busy}
           />

@@ -94,7 +94,7 @@ describe("AddRoleForm", () => {
 
     fireEvent.click(screen.getByRole("switch"));
 
-    fireEvent.change(screen.getByLabelText(/role name optional/i), {
+    fireEvent.change(screen.getByLabelText(/role name/i), {
       target: { value: "Custom Admin" },
     });
 

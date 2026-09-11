@@ -4,8 +4,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { ChevronsDownUp, ChevronsUpDown, Search } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
@@ -23,6 +22,7 @@ import {
 } from "@/components/modules/settings/modules/roles/utils/fieldAccessDraft";
 import FieldAccessView, { buildFieldGroups } from "./FieldAccessView";
 import { FieldAccessSummaryModal } from "./FieldAccessSummaryModal";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 function FieldAccessSkeleton() {
   return (
@@ -119,16 +119,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
           </div>
 
           <div className="flex flex-none flex-wrap items-center gap-2">
-            <div className="relative w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brown-400"/>
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search field"
-                className="h-9 w-[220px] pl-9"
-                inputMode="search"
-              />
-            </div>
+            <SearchBox value={query} onChange={setQuery}/>
 
             <Button
               variant="ghost"

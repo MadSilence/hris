@@ -6,12 +6,11 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Download,
-  Ellipsis,
   GripVertical,
   Lock,
   Pencil,
   Plus,
-  Search,
+  Trash2,
 } from "lucide-react";
 import {
   closestCorners,
@@ -31,7 +30,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
@@ -40,12 +38,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/public/desact/src/components/ui/accordion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { Attribute } from "@/models/attribute/Attribute";
@@ -54,6 +47,7 @@ import { sortBySortOrder } from "@/components/modules/settings/modules/attribute
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
+import { SearchBox } from "@/components/ui/SearchBox";
 import {
   ExportDataFormValues,
   triggerExportDownload,
@@ -179,7 +173,7 @@ function attributeDetails(a: Attribute): string {
       break;
   }
 
-  return parts.join(" · ") || "—";
+  return parts.join(" · ");
 }
 
 function normalize(groups: AttributeGroup[]): AttributeGroup[] {
@@ -426,16 +420,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
     // Fixed top region (search + column header) stays put; only the list below scrolls.
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-400"/>
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search attributes"
-            className="pl-9 w-[260px] h-9"
-            inputMode="search"
-          />
-        </div>
+        <SearchBox value={query} onChange={setQuery}/>
 
         <div className="flex items-center gap-2">
           <Button
@@ -642,35 +627,30 @@ const SortableGroup: FC<SortableGroupProps> = ({
               <>
               {/* Section rename/delete live behind the edit affordance now. Preset sections ship with
                   the product, so the menu is disabled rather than failing on save. */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild disabled={group.isSystem}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-brown-600 hover:bg-brown-100 disabled:opacity-40"
-                    aria-label="Section actions"
-                    disabled={group.isSystem}
-                    title={group.isSystem ? "System sections can't be renamed or deleted" : undefined}
-                    onClick={(e) => e.stopPropagation()}
+              <RowActionsMenu
+                label="Section Actions"
+                disabled={group.isSystem}
+                title={group.isSystem ? "System sections can't be renamed or deleted" : undefined}
+                stopPropagation
+              >
+                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                  <RowAction
+                    icon={<Pencil className="h-4 w-4"/>}
+                    onClick={() => onRenameGroup(group)}
                   >
-                    <Ellipsis className="h-4 w-4"/>
-                  </Button>
-                </DropdownMenuTrigger>
+                    Rename
+                  </RowAction>
+                </PermissionGate>
 
-                <DropdownMenuContent align="end">
-                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-                    <DropdownMenuItem onClick={() => onRenameGroup(group)}>
-                      Rename section
-                    </DropdownMenuItem>
-                  </PermissionGate>
-
-                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
-                    <DropdownMenuItem variant="destructive" onClick={() => onDeleteGroup(group)}>
-                      Delete section
-                    </DropdownMenuItem>
-                  </PermissionGate>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
+                  <RowActionDestructive
+                    icon={<Trash2 className="h-4 w-4"/>}
+                    onClick={() => onDeleteGroup(group)}
+                  >
+                    Delete
+                  </RowActionDestructive>
+                </PermissionGate>
+              </RowActionsMenu>
 
               <Button
                 variant="ghost"
@@ -833,34 +813,29 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
                 { resource: "PEOPLE.ATTRIBUTES", action: "MANAGE" },
               ]}
             >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-brown-500 hover:bg-brown-100"
-                    aria-label="Attribute actions"
-                    title={isPreset ? "System attributes can't be edited" : undefined}
-                    disabled={isPreset || isSavingAttribute}
+              <RowActionsMenu
+                label="Attribute Actions"
+                disabled={isPreset || isSavingAttribute}
+                title={isPreset ? "System attributes can't be edited" : undefined}
+              >
+                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                  <RowAction
+                    icon={<Pencil className="h-4 w-4"/>}
+                    onClick={() => onEditAttribute(attribute)}
                   >
-                    <Ellipsis className="h-4 w-4"/>
-                  </Button>
-                </DropdownMenuTrigger>
+                    Edit
+                  </RowAction>
+                </PermissionGate>
 
-                <DropdownMenuContent align="end">
-                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-                    <DropdownMenuItem onClick={() => onEditAttribute(attribute)}>
-                      Edit
-                    </DropdownMenuItem>
-                  </PermissionGate>
-
-                  <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
-                    <DropdownMenuItem variant="destructive" onClick={() => onDeleteAttribute(attribute)}>
-                      Delete
-                    </DropdownMenuItem>
-                  </PermissionGate>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
+                  <RowActionDestructive
+                    icon={<Trash2 className="h-4 w-4"/>}
+                    onClick={() => onDeleteAttribute(attribute)}
+                  >
+                    Delete
+                  </RowActionDestructive>
+                </PermissionGate>
+              </RowActionsMenu>
             </PermissionGate>
           )}
         </div>

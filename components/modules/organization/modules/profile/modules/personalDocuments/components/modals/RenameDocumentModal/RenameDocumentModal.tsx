@@ -5,7 +5,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface RenameDocumentModalProps {
   isOpen: boolean;
@@ -58,7 +58,7 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-2">
-            <Label htmlFor="document-name">Name</Label>
+            <RequiredLabel htmlFor="document-name" required>Name</RequiredLabel>
             <Input
               id="document-name"
               autoFocus

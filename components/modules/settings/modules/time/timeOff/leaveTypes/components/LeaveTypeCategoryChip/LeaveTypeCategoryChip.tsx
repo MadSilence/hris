@@ -19,7 +19,7 @@ const CATEGORY_META: Record<
 
 /** Category shown as a chip — mirrors the chip used in the leave-type modal. */
 export const LeaveTypeCategoryChip: FC<{ category?: LeaveTypeCategory | null }> = ({ category }) => {
-  if (!category) return <span className="text-muted-foreground">—</span>;
+  if (!category) return null;
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
   return (

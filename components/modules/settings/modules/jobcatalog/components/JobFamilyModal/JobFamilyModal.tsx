@@ -39,7 +39,7 @@ const COPY: Record<JobFamilyModalMode, { title: string; description: string; sub
   create: {
     title: "Add job family",
     description: "Group related positions under one family.",
-    submit: "Create",
+    submit: "Add",
   },
   edit: {
     title: "Edit job family",

@@ -78,7 +78,6 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
                   className="flex-1"
                   value={field.label}
                   disabled={disabled}
-                  placeholder="e.g. Institution"
                   aria-label={`Sub-field ${index + 1} label`}
                   onChange={(e) => patch(index, { label: e.currentTarget.value })}
                 />

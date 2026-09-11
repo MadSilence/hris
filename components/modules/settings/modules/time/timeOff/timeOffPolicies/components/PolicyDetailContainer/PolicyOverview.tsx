@@ -23,7 +23,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+/** A missing value renders as an empty cell — no dash, no "Not set". Rule: ui/FORMS_AND_FIELDS.md 4. */
+function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5">
       <span className="text-sm text-muted-foreground">{label}</span>
@@ -42,7 +43,7 @@ export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
   const renewal =
     policy.renewalType === TimeOffPolicyRenewalType.Manual
       ? "Manual"
-      : `${policy.renewalFixedDay ?? "—"}/${policy.renewalFixedMonth ?? "—"} yearly`;
+      : `${policy.renewalFixedDay}/${policy.renewalFixedMonth} yearly`;
 
   const carryover =
     policy.carryoverType === TimeOffPolicyCarryoverType.None
@@ -68,7 +69,7 @@ export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
         <Row label="Unit" value={policy.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
         <Row label="Pay type" value={policy.paid ? "Paid" : "Unpaid"} />
         <Row label="Visibility" value={policy.hiddenFromEmployees ? "Hidden from employees" : "Visible"} />
-        <Row label="Effective date" value={policy.effectiveDate ?? "—"} />
+        <Row label="Effective date" value={policy.effectiveDate} />
       </Section>
 
       <Section title="Entitlement & renewal">

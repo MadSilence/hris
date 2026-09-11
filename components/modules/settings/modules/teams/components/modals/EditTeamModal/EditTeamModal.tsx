@@ -18,6 +18,7 @@ import {
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const ROOT_VALUE = "none";
 
@@ -95,7 +96,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="edit-team-name">Name *</Label>
+            <RequiredLabel htmlFor="edit-team-name" required>Name</RequiredLabel>
             <Input
               id="edit-team-name"
               name="name"
@@ -115,7 +116,6 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
               name="code"
               value={formik.values.code}
               onChange={formik.handleChange}
-              placeholder="e.g. PLAT"
             />
           </div>
 
@@ -126,12 +126,11 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
               name="description"
               value={formik.values.description}
               onChange={formik.handleChange}
-              placeholder="Optional description"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-team-parent">Parent team</Label>
+            <Label htmlFor="edit-team-parent">Parent Team</Label>
             <Select
               value={formik.values.parentId || ROOT_VALUE}
               onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
@@ -140,7 +139,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                <SelectItem value={ROOT_VALUE}>None</SelectItem>
                 {activeOptions.map((t) => (
                   <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                 ))}
@@ -149,7 +148,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Team lead</Label>
+            <Label>Team Lead</Label>
             <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
 

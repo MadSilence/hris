@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Search, UserRoundX } from "lucide-react";
+import { UserRoundX } from "lucide-react";
 
-import { Input } from "@/public/desact/src/components/ui/input";
 import { PersonChip } from "@/components/ui/PersonChip";
 import {
   personDisplayName,
   personInitials,
 } from "@/components/modules/settings/modules/teams/utils/personDisplay";
 import type { TeamPerson } from "@/models/teams";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { NoResults } from "@/components/feedback/EmptyState";
 
 type Props = {
   people: TeamPerson[];
@@ -76,20 +77,12 @@ export function TeamUnassignedTab({
         <p className="mb-3 text-sm text-brown-500">
           {people.length} {people.length === 1 ? "person is" : "people are"} not on any team.
         </p>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brown-400" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            placeholder="Search people…"
-            className="h-9 pl-8 text-sm"
-          />
-        </div>
+        <SearchBox value={query} onChange={setQuery}/>
       </div>
 
       <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
         {filtered.length === 0 ? (
-          <p className="py-6 text-center text-sm text-brown-400">No people match your search.</p>
+          <NoResults hint="Try a different name or email."/>
         ) : (
           filtered.map((person) =>
             renderPersonChip ? (

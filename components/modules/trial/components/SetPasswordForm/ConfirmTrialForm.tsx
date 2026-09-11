@@ -5,7 +5,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type PasswordValues = {
   password: string;
@@ -163,13 +163,12 @@ export default function ConfirmTrialForm({
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Password</Label>
+            <RequiredLabel htmlFor="confirm-password" required>Password</RequiredLabel>
 
             <Input
               id="confirm-password"
               name="password"
               type="password"
-              placeholder="Password*"
               autoComplete="new-password"
               value={formik.values.password}
               onChange={(e) =>
@@ -184,13 +183,12 @@ export default function ConfirmTrialForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password-repeat">Confirm password</Label>
+            <RequiredLabel htmlFor="confirm-password-repeat" required>Confirm Password</RequiredLabel>
 
             <Input
               id="confirm-password-repeat"
               name="confirmPassword"
               type="password"
-              placeholder="Confirm password*"
               autoComplete="new-password"
               value={formik.values.confirmPassword}
               onChange={(e) =>

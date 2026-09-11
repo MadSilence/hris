@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type RenameDocumentsFolderFormValues = {
   name: string;
@@ -89,7 +89,7 @@ export const RenameDocumentsFolderForm: FC<
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <Label htmlFor="folder-name">Folder name</Label>
+        <RequiredLabel htmlFor="folder-name" required>Folder Name</RequiredLabel>
 
         <Input
           id="folder-name"
@@ -97,7 +97,6 @@ export const RenameDocumentsFolderForm: FC<
           onChange={(e) =>
             formik.setFieldValue("name", e.currentTarget.value)
           }
-          placeholder="e.g. Contracts"
           disabled={isLoading}
           aria-invalid={!!formik.errors.name}
         />

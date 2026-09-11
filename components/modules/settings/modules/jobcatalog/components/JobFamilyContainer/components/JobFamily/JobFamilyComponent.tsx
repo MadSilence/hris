@@ -2,17 +2,19 @@
 
 import { FC, useEffect, useMemo, useState } from "react";
 import {
+  Archive,
+  ArchiveRestore,
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
+  Copy,
   Download,
-  Ellipsis,
   Pencil,
   Plus,
-  Search,
+  Trash2,
+  Users,
 } from "lucide-react";
 
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
@@ -21,12 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/public/desact/src/components/ui/accordion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
 import {
@@ -34,9 +31,15 @@ import {
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { Job, JobFamily } from "@/models/job";
+import { Briefcase } from "lucide-react";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { JobFamilySkeleton } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/JobFamily/JobFamilySkeleton";
 
 export type JobFamilyComponentProps = {
   jobFamilies: JobFamily[] | null | undefined;
+  /** The toolbar stays put while the list fills in — only the rows are a skeleton. */
+  isLoading?: boolean;
   onCreateFamily: () => void;
   onEditFamily: (family: JobFamily) => void;
   onDuplicateFamily: (family: JobFamily) => void;
@@ -62,6 +65,7 @@ const GRID =
 
 export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
   jobFamilies,
+  isLoading = false,
   onCreateFamily,
   onEditFamily,
   onDuplicateFamily,
@@ -82,6 +86,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
   const all = useMemo(() => jobFamilies ?? [], [jobFamilies]);
 
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
   const [openIds, setOpenIds] = useState<string[]>(() => all.map((f) => f.id));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -107,10 +112,16 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
 
   const needle = query.trim().toLowerCase();
 
-  const families = useMemo(() => {
-    if (!needle) return all;
+  const archivedCount = useMemo(() => all.filter((f) => f.archived).length, [all]);
 
-    return all
+  const families = useMemo(() => {
+    // A switch between two views, not a widening of one. Rule:
+    // `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+    const inView = all.filter((f) => (showArchived ? f.archived : !f.archived));
+
+    if (!needle) return inView;
+
+    return inView
       .map((family) => {
         const familyMatches = family.name.toLowerCase().includes(needle);
         const jobs = familyMatches
@@ -125,7 +136,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
         return { ...family, jobs };
       })
       .filter((family) => family.name.toLowerCase().includes(needle) || family.jobs.length > 0);
-  }, [all, needle]);
+  }, [all, needle, showArchived]);
 
   const allOpen = families.length > 0 && openIds.length >= families.length;
   const toggleAll = () => setOpenIds(allOpen ? [] : families.map((f) => f.id));
@@ -143,36 +154,21 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
   return (
     // Fixed top region (search + column header) stays put; only the list below scrolls.
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-400"/>
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search jobs"
-            className="pl-9 w-[260px] h-9"
-            inputMode="search"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 gap-1.5 text-brown-600"
-            onClick={toggleAll}
-            disabled={families.length === 0}
-          >
-            {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
-            {allOpen ? "Collapse all" : "Expand all"}
-          </Button>
-
-          <PermissionGate resource="JOBS.FAMILY" action="EDIT">
-            <Button className="gap-1.5" onClick={onCreateFamily}>
-              <Plus className="h-4 w-4"/>
-              Add Job Family
+      <ListToolbar
+        search={{ value: query, onChange: setQuery }}
+        archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
+        secondary={
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 gap-1.5 text-brown-600"
+              onClick={toggleAll}
+              disabled={families.length === 0}
+            >
+              {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
+              {allOpen ? "Collapse All" : "Expand All"}
             </Button>
-          </PermissionGate>
 
           <Button
             size="icon"
@@ -186,8 +182,17 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           >
             <Download className="h-4 w-4"/>
           </Button>
-        </div>
-      </div>
+          </>
+        }
+        primary={
+          <PermissionGate resource="JOBS.FAMILY" action="EDIT">
+            <Button className="gap-1.5" onClick={onCreateFamily}>
+              <Plus className="h-4 w-4"/>
+              Add Job Family
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="-mx-1 max-h-[calc(100svh-380px)] overflow-y-auto px-1">
         <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
@@ -199,14 +204,25 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           <div/>
         </div>
 
+        {isLoading && <JobFamilySkeleton/>}
+
         <div className="space-y-4 pt-2">
-          {families.length === 0 && (
-            <p className="px-3 py-10 text-center text-sm text-muted-foreground">
-              {needle ? "Nothing matches your search." : "No job families yet."}
-            </p>
+          {!isLoading && families.length === 0 && (
+            <ListEmptyState
+              query={query}
+              archivedView={showArchived}
+              icon={<Briefcase className="h-7 w-7"/>}
+              title="No job families yet"
+              description="A job family groups related positions. Add the first one to start building the catalog."
+              noResultsHint="Try a different family, position or code."
+              archivedDescription="Archived job families will appear here."
+              onCreate={onCreateFamily}
+              createLabel="Add Job Family"
+              createAccess={{ resource: "JOBS.FAMILY" }}
+            />
           )}
 
-          {families.length > 0 && (
+          {!isLoading && families.length > 0 && (
             <Accordion
               type="multiple"
               value={openIds}
@@ -296,7 +312,7 @@ const FamilySection: FC<FamilySectionProps> = ({
     <div className="relative">
       <AccordionTrigger
         className={`rounded-md bg-brown-50 px-3 py-2.5 pr-9 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline ${
-          family.archived ? "opacity-60" : ""
+          ""
         }`}
       >
         <span className="flex items-center gap-2">
@@ -320,43 +336,40 @@ const FamilySection: FC<FamilySectionProps> = ({
         <div className="absolute right-[54px] top-1/2 flex -translate-y-1/2 items-center">
           {editing ? (
             <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-brown-600 hover:bg-brown-100"
-                    aria-label="Family actions"
-                    onClick={(e) => e.stopPropagation()}
+              <RowActionsMenu label="Family Actions" stopPropagation>
+                <PermissionGate resource="JOBS.FAMILY" action="EDIT">
+                  <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditFamily(family)}>
+                    Edit
+                  </RowAction>
+                  <RowAction icon={<Copy className="h-4 w-4"/>} onClick={() => onDuplicateFamily(family)}>
+                    Duplicate
+                  </RowAction>
+                  {family.archived ? (
+                    <RowAction
+                      icon={<ArchiveRestore className="h-4 w-4"/>}
+                      onClick={() => onActivateFamily(family)}
+                    >
+                      Unarchive
+                    </RowAction>
+                  ) : (
+                    <RowAction
+                      icon={<Archive className="h-4 w-4"/>}
+                      onClick={() => onArchiveFamily(family)}
+                    >
+                      Archive
+                    </RowAction>
+                  )}
+                </PermissionGate>
+
+                <PermissionGate resource="JOBS.FAMILY" action="MANAGE">
+                  <RowActionDestructive
+                    icon={<Trash2 className="h-4 w-4"/>}
+                    onClick={() => onDeleteFamily(family)}
                   >
-                    <Ellipsis className="h-4 w-4"/>
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end">
-                  <PermissionGate resource="JOBS.FAMILY" action="EDIT">
-                    <DropdownMenuItem onClick={() => onEditFamily(family)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDuplicateFamily(family)}>
-                      Duplicate
-                    </DropdownMenuItem>
-                    {family.archived ? (
-                      <DropdownMenuItem onClick={() => onActivateFamily(family)}>
-                        Unarchive
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem onClick={() => onArchiveFamily(family)}>
-                        Archive
-                      </DropdownMenuItem>
-                    )}
-                  </PermissionGate>
-
-                  <PermissionGate resource="JOBS.FAMILY" action="MANAGE">
-                    <DropdownMenuItem variant="destructive" onClick={() => onDeleteFamily(family)}>
-                      Delete
-                    </DropdownMenuItem>
-                  </PermissionGate>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    Delete
+                  </RowActionDestructive>
+                </PermissionGate>
+              </RowActionsMenu>
 
               <Button
                 variant="ghost"
@@ -457,7 +470,9 @@ const JobRow: FC<JobRowProps> = ({
   <div className={notLast ? "border-b border-brown-100" : ""}>
     {/* Archived positions stay in the list, dimmed — hiding them would make the catalogue lie
         about what used to exist. */}
-    <div className={`${GRID} min-h-11 px-3 py-1.5 ${job.archived ? "opacity-55" : ""}`}>
+    {/* Not dimmed: the chip says it, and fading a whole row makes its text harder to read for a
+        reason that is already on screen. Rule: ui/STATUS_AND_BADGES.md § 2. */}
+    <div className={`${GRID} min-h-11 px-3 py-1.5`}>
       <div className="min-w-0">
         <span className="truncate text-sm font-medium text-foreground" title={job.description ?? undefined}>
           {job.name}
@@ -466,7 +481,7 @@ const JobRow: FC<JobRowProps> = ({
 
       <div className="text-sm text-muted-foreground">{job.assignedUsersCount}</div>
 
-      <div className="truncate text-sm text-muted-foreground">{job.code ?? "—"}</div>
+      <div className="truncate text-sm text-muted-foreground">{job.code}</div>
 
       <div>
         {job.archived ? (
@@ -478,7 +493,7 @@ const JobRow: FC<JobRowProps> = ({
         )}
       </div>
 
-      <div className="truncate text-sm text-muted-foreground">{job.level?.name ?? "—"}</div>
+      <div className="truncate text-sm text-muted-foreground">{job.level?.name}</div>
 
       <div className="flex items-center justify-end">
         {editing && (
@@ -488,51 +503,53 @@ const JobRow: FC<JobRowProps> = ({
               { resource: "JOBS.TITLE", action: "MANAGE" },
             ]}
           >
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-brown-500 hover:bg-brown-100"
-                  aria-label="Job actions"
+            <RowActionsMenu label="Position Actions">
+              <PermissionGate resource="JOBS.TITLE" action="EDIT">
+                <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditJob(job)}>
+                  Edit
+                </RowAction>
+                <RowAction icon={<Copy className="h-4 w-4"/>} onClick={() => onDuplicateJob(job)}>
+                  Duplicate
+                </RowAction>
+
+                {/*
+                  The engine has had a job adapter and a full set of endpoints \u2014 preview, apply,
+                  segment apply with async status \u2014 since it was built, and the catalog offered no
+                  way in. The modal is the same one Departments, Teams, Roles and Policies use, so
+                  this is one menu item rather than a feature.
+
+                  Not offered on an archived position: the adapter refuses those, and offering an
+                  action that is certain to be skipped is the defect this wave exists to remove.
+                */}
+                {!job.archived && (
+                  <RowAction icon={<Users className="h-4 w-4"/>} onClick={() => onAssignJob(job)}>
+                    Assign People
+                  </RowAction>
+                )}
+
+                {job.archived ? (
+                  <RowAction
+                    icon={<ArchiveRestore className="h-4 w-4"/>}
+                    onClick={() => onActivateJob(job)}
+                  >
+                    Unarchive
+                  </RowAction>
+                ) : (
+                  <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => onArchiveJob(job)}>
+                    Archive
+                  </RowAction>
+                )}
+              </PermissionGate>
+
+              <PermissionGate resource="JOBS.TITLE" action="MANAGE">
+                <RowActionDestructive
+                  icon={<Trash2 className="h-4 w-4"/>}
+                  onClick={() => onDeleteJob(job)}
                 >
-                  <Ellipsis className="h-4 w-4"/>
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                <PermissionGate resource="JOBS.TITLE" action="EDIT">
-                  <DropdownMenuItem onClick={() => onEditJob(job)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDuplicateJob(job)}>Duplicate</DropdownMenuItem>
-                  {/*
-                    The engine has had a job adapter and a full set of endpoints — preview, apply,
-                    segment apply with async status — since it was built, and the catalog offered no
-                    way in. The modal is the same one Departments, Teams, Roles and Policies use, so
-                    this is one menu item rather than a feature.
-
-                    Not offered on an archived position: the adapter refuses those, and offering an
-                    action that is certain to be skipped is the defect this wave exists to remove.
-                  */}
-                  {!job.archived && (
-                    <DropdownMenuItem onClick={() => onAssignJob(job)}>
-                      Assign people
-                    </DropdownMenuItem>
-                  )}
-
-                  {job.archived ? (
-                    <DropdownMenuItem onClick={() => onActivateJob(job)}>Unarchive</DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem onClick={() => onArchiveJob(job)}>Archive</DropdownMenuItem>
-                  )}
-                </PermissionGate>
-
-                <PermissionGate resource="JOBS.TITLE" action="MANAGE">
-                  <DropdownMenuItem variant="destructive" onClick={() => onDeleteJob(job)}>
-                    Delete
-                  </DropdownMenuItem>
-                </PermissionGate>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  Delete
+                </RowActionDestructive>
+              </PermissionGate>
+            </RowActionsMenu>
           </PermissionGate>
         )}
       </div>

@@ -54,7 +54,7 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
               ))}
             </div>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            null
           ),
       }}
       assign={{

@@ -19,6 +19,7 @@ import type { LeaveType } from "@/models/timeOff";
 import type { LeaveTypeFormValues } from "../modals/LeaveTypeForm";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 
 export default function LeaveTypesSettingsContainer() {
   const router = useRouter();
@@ -31,6 +32,8 @@ export default function LeaveTypesSettingsContainer() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(null);
+  /** Archive confirms, like the other four acts that do — it used to fire on the menu click. */
+  const [archiveTarget, setArchiveTarget] = useState<LeaveType | null>(null);
   if (error instanceof ForbiddenError) return <AccessDenied/>;
   if (error) return <ErrorState error={error} />;
 
@@ -61,8 +64,14 @@ export default function LeaveTypesSettingsContainer() {
     }
   };
 
-  const handleArchive = (leaveType: LeaveType) => {
-    archiveMutation.mutateAsync({ id: leaveType.id }).catch(showError);
+  const confirmArchive = async () => {
+    if (!archiveTarget) return;
+    try {
+      await archiveMutation.mutateAsync({ id: archiveTarget.id });
+      setArchiveTarget(null);
+    } catch (error) {
+      showError(error);
+    }
   };
 
   const handleRestore = (leaveType: LeaveType) => {
@@ -81,7 +90,7 @@ export default function LeaveTypesSettingsContainer() {
         onCreateAction={() => setIsCreateModalOpen(true)}
         onOpenAction={handleOpen}
         onEditAction={(leaveType) => setEditingLeaveType(leaveType)}
-        onArchiveAction={handleArchive}
+        onArchiveAction={setArchiveTarget}
         onRestoreAction={handleRestore}
       />
 
@@ -98,6 +107,16 @@ export default function LeaveTypesSettingsContainer() {
         leaveType={editingLeaveType}
         onConfirmAction={handleEdit}
         onCancelAction={() => setEditingLeaveType(null)}
+      />
+
+      <ConfirmActionModal
+        isOpen={archiveTarget !== null}
+        title={`Archive "${archiveTarget?.name ?? ""}"`}
+        description="An archived leave type cannot be used for new requests. Existing requests keep it, and you can unarchive it at any time."
+        confirmLabel="Archive"
+        isLoading={archiveMutation.isPending}
+        onConfirmAction={confirmArchive}
+        onCancelAction={() => setArchiveTarget(null)}
       />
     </>
   );

@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { EyeOff, FolderPlus, Plus, Search, Star, Upload } from "lucide-react";
+import { EyeOff, FolderPlus, Plus, Star, Upload } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
 import { cn } from "@/public/desact/src/components/ui/utils";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 type PersonalDocumentsToolbarProps = {
   search: string;
@@ -39,15 +39,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
     // pushed to the far end, next to Trash. The row used to open with the word "Documents" above a
     // tab already called Documents.
     <div className="flex flex-1 items-center gap-3">
-      <div className="relative w-[280px]">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"/>
-        <Input
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search documents..."
-          className="pl-9"
-        />
-      </div>
+      <SearchBox value={search} onChange={onSearchChange}/>
 
       <Button
         variant="outline"
@@ -87,7 +79,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={onCreateFolder} className="cursor-pointer">
               <FolderPlus className="mr-2 h-4 w-4"/>
-              Create folder
+              Add Folder
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onUploadFromLocal} className="cursor-pointer">

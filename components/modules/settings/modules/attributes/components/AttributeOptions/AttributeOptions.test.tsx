@@ -59,7 +59,7 @@ describe("AttributeOptions", () => {
     const user = userEvent.setup();
     const { onChange } = setup();
 
-    const nameInput = screen.getByLabelText("Name");
+    const nameInput = screen.getByLabelText("Name *");
     await user.clear(nameInput);
     await user.type(nameInput, "Base salary");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -71,7 +71,7 @@ describe("AttributeOptions", () => {
     const user = userEvent.setup();
     setup();
 
-    await user.clear(screen.getByLabelText("Name"));
+    await user.clear(screen.getByLabelText("Name *"));
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });

@@ -24,6 +24,7 @@ import {
   type DateGroup,
 } from "@/components/modules/notifications/components/notificationPresenter";
 import { NotificationActions } from "@/components/modules/notifications/components/NotificationActions";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 type StatusFilter = "all" | "unread" | "starred";
 const ALL_CATEGORIES = "__all__";
@@ -108,6 +109,7 @@ export const NotificationsInbox: FC = () => {
 
   const [status, setStatus] = useState<StatusFilter>("all");
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
+  const [query, setQuery] = useState("");
 
   // Clear the badge (seen) as soon as the inbox is opened; items stay unread until opened.
   useEffect(() => {
@@ -138,8 +140,22 @@ export const NotificationsInbox: FC = () => {
     if (status === "unread") rows = rows.filter((n) => !n.read);
     else if (status === "starred") rows = rows.filter((n) => n.starred);
     if (category !== ALL_CATEGORIES) rows = rows.filter((n) => n.category === category);
+
+    /* Searched on what the reader can actually see — the presented title and message, not the raw
+       record — so a hit always corresponds to text on the screen. */
+    const needle = query.trim().toLowerCase();
+    if (needle) {
+      rows = rows.filter((n) => {
+        const { title, message } = presentNotification(n);
+        return (
+          title.toLowerCase().includes(needle) ||
+          (message ?? "").toLowerCase().includes(needle) ||
+          categoryLabel(n.category).toLowerCase().includes(needle)
+        );
+      });
+    }
     return rows;
-  }, [all, status, category]);
+  }, [all, status, category, query]);
 
   // Group the visible rows into date sections, preserving the (newest-first) server order within each.
   const groups = useMemo(() => {
@@ -166,7 +182,9 @@ export const NotificationsInbox: FC = () => {
   const busy = setStarred.isPending || remove.isPending;
 
   const emptyText =
-    status === "unread"
+    query.trim()
+      ? "No notifications match your search."
+      : status === "unread"
       ? "No unread notifications."
       : status === "starred"
         ? "No starred notifications."
@@ -203,6 +221,8 @@ export const NotificationsInbox: FC = () => {
       </section>
 
       <div className="flex flex-col gap-3">
+        <SearchBox value={query} onChange={setQuery}/>
+
         <div className="flex gap-1">
           {STATUS_FILTERS.map((f) => (
             <button

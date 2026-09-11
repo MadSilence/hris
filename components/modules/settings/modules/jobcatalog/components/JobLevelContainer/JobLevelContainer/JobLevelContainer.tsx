@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { JobLevel as JobLevelModel, JobLevelGroup } from "@/models/job";
-import { Loader } from "@/components/ui/Loader";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { JobLevel } from "@/components/modules/settings/modules/jobcatalog/components/JobLevelContainer/JobLevel/JobLevel";
 import { JobLevelNameModal } from "@/components/modules/settings/modules/jobcatalog/components/JobLevelContainer/JobLevelNameModal/JobLevelNameModal";
@@ -139,14 +138,6 @@ export default function JobLevelContainer() {
     return <div className="py-10 text-sm text-muted-foreground">Failed to load job levels</div>;
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader/>
-      </div>
-    );
-  }
-
   const isSavingName =
     createGroup.isPending || updateGroup.isPending || createLevel.isPending || updateLevel.isPending;
   const isDeleting = deleteGroup.isPending || deleteLevel.isPending;
@@ -155,6 +146,7 @@ export default function JobLevelContainer() {
     <>
       <JobLevel
         groups={groups}
+        isLoading={isLoading}
         managingGroupId={managingGroupId}
         onToggleManaging={(groupId) =>
           setManagingGroupId((current) => (current === groupId ? null : groupId))
@@ -204,7 +196,7 @@ const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
       ? {
           title: "Add job group",
           description: "A career track employees progress through.",
-          submitLabel: "Create",
+          submitLabel: "Add",
           fieldLabel: "Name",
           placeholder: "e.g., Individual Contributor",
           existingNames: names,
@@ -227,7 +219,7 @@ const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
     ? {
         title: "Add level",
         description: `A new rung at the bottom of ${dialog.group.name}.`,
-        submitLabel: "Create",
+        submitLabel: "Add",
         fieldLabel: "Name",
         placeholder: "e.g., L3 - Senior",
         existingNames: names,

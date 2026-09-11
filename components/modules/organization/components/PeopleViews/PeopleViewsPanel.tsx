@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  MoreHorizontal,
   Pencil,
   Plus,
   Share2,
@@ -24,13 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { PeopleView } from "@/models/peopleView";
 
 export type PeopleViewsPanelProps = {
@@ -142,24 +135,20 @@ export default function PeopleViewsPanel({
               dirty={activeViewId === view.id && dirty}
               onClick={() => onApplyView(view)}
               menu={
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={() => openRename(view)}>
-                    <Pencil className="mr-2 h-4 w-4" />
+                <RowActionsMenu label={`${view.name} Actions`}>
+                  <RowAction icon={<Pencil className="h-4 w-4" />} onClick={() => openRename(view)}>
                     Rename
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDuplicate(view)}>
-                    <Copy className="mr-2 h-4 w-4" />
+                  </RowAction>
+                  <RowAction icon={<Copy className="h-4 w-4" />} onClick={() => onDuplicate(view)}>
                     Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
+                  </RowAction>
+                  <RowActionDestructive
+                    icon={<Trash2 className="h-4 w-4" />}
                     onClick={() => onDelete(view)}
-                    className="text-red-600 focus:text-red-600"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                  </RowActionDestructive>
+                </RowActionsMenu>
               }
             />
           ))
@@ -193,7 +182,6 @@ export default function PeopleViewsPanel({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submitDialog()}
-            placeholder="View name"
             className="h-9"
           />
           <DialogFooter>
@@ -242,20 +230,11 @@ function ViewRow({
         ) : null}
       </button>
 
-      {menu ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={`${label} actions`}
-              className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:bg-brown-100 focus:opacity-100 group-hover:opacity-100"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          {menu}
-        </DropdownMenu>
-      ) : null}
+      {/*
+        The trigger came with the row and was `opacity-0` until hover, which makes it unreachable on
+        touch. `RowActionsMenu` brings its own always-visible trigger.
+      */}
+      {menu ?? null}
     </div>
   );
 }

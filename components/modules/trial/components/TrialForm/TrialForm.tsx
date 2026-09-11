@@ -7,6 +7,7 @@ import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type TrialValues = {
   email: string;
@@ -203,13 +204,12 @@ export default function TrialForm({
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="trial-email">Business email</Label>
+            <RequiredLabel htmlFor="trial-email" required>Business Email</RequiredLabel>
 
             <Input
               id="trial-email"
               name="email"
               type="email"
-              placeholder="Business email*"
               value={formik.values.email}
               onChange={(e) =>
                 formik.setFieldValue("email", e.currentTarget.value)
@@ -224,12 +224,11 @@ export default function TrialForm({
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="trial-first-name">First name</Label>
+              <RequiredLabel htmlFor="trial-first-name" required>First Name</RequiredLabel>
 
               <Input
                 id="trial-first-name"
                 name="firstName"
-                placeholder="First name*"
                 value={formik.values.firstName}
                 onChange={(e) =>
                   formik.setFieldValue("firstName", e.currentTarget.value)
@@ -243,12 +242,11 @@ export default function TrialForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trial-last-name">Last name</Label>
+              <RequiredLabel htmlFor="trial-last-name" required>Last Name</RequiredLabel>
 
               <Input
                 id="trial-last-name"
                 name="lastName"
-                placeholder="Last name*"
                 value={formik.values.lastName}
                 onChange={(e) =>
                   formik.setFieldValue("lastName", e.currentTarget.value)
@@ -263,12 +261,11 @@ export default function TrialForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trial-company-name">Company name</Label>
+            <RequiredLabel htmlFor="trial-company-name" required>Company Name</RequiredLabel>
 
             <Input
               id="trial-company-name"
               name="companyName"
-              placeholder="Company name*"
               value={formik.values.companyName}
               onChange={(e) =>
                 formik.setFieldValue("companyName", e.currentTarget.value)

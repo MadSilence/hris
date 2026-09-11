@@ -18,6 +18,7 @@ import {
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { DepartmentTreeNode } from "@/models/departments";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const ROOT_VALUE = "none";
 
@@ -81,14 +82,13 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="dept-name">Name *</Label>
+            <RequiredLabel htmlFor="dept-name" required>Name</RequiredLabel>
             <Input
               id="dept-name"
               name="name"
               value={formik.values.name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              placeholder="e.g. Engineering"
             />
             {formik.touched.name && formik.errors.name && (
               <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>
@@ -102,7 +102,6 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
               name="code"
               value={formik.values.code}
               onChange={formik.handleChange}
-              placeholder="e.g. ENG"
             />
           </div>
 
@@ -113,12 +112,11 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
               name="description"
               value={formik.values.description}
               onChange={formik.handleChange}
-              placeholder="Optional description"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="dept-parent">Parent department</Label>
+            <Label htmlFor="dept-parent">Parent Department</Label>
             <Select
               value={formik.values.parentId || ROOT_VALUE}
               onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
@@ -127,7 +125,7 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                <SelectItem value={ROOT_VALUE}>None</SelectItem>
                 {activeOptions.map((d) => (
                   <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                 ))}
@@ -136,7 +134,7 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
           </div>
 
           <div className="space-y-1.5">
-            <Label>Department lead</Label>
+            <Label>Department Lead</Label>
             <UserPickerField value={lead} onChange={setLeadUser} placeholder="Search for a person" />
           </div>
 
@@ -152,7 +150,7 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
             Cancel
           </Button>
           <Button onClick={() => formik.handleSubmit()} disabled={busy}>
-            {busy ? "Creating…" : "Create"}
+            {busy ? "Adding…" : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>

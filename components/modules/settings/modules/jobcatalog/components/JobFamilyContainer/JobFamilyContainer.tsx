@@ -18,7 +18,6 @@ import {
 } from "@/components/modules/settings/modules/jobcatalog/components/CatalogImpactModal";
 import { JobFamilyFormValues } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyForm";
 import { JobFormValues, NO_LEVEL } from "@/components/modules/settings/modules/jobcatalog/components/JobForm";
-import { Loader } from "@/components/ui/Loader";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { Job, JobFamily } from "@/models/job";
 
@@ -219,13 +218,6 @@ export default function JobFamilyContainer() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader/>
-      </div>
-    );
-  }
 
   const isFamilySaving =
     createFamily.isPending || updateFamily.isPending || duplicateFamily.isPending;
@@ -255,6 +247,7 @@ export default function JobFamilyContainer() {
 
       <JobFamilyComponent
         jobFamilies={families}
+        isLoading={isLoading}
         onCreateFamily={() => setFamilyDialog({ mode: "create", family: null })}
         onEditFamily={(family) => setFamilyDialog({ mode: "edit", family })}
         onDuplicateFamily={(family) => setFamilyDialog({ mode: "duplicate", family })}

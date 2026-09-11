@@ -427,7 +427,6 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     autoFocus
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.currentTarget.value)}
-                    placeholder="Why should this absence be cancelled?"
                     disabled={cancelMutation.isPending}
                   />
                   <Button
@@ -454,7 +453,6 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     autoFocus
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.currentTarget.value)}
-                    placeholder="Reason for rejection"
                     disabled={isDeciding}
                   />
                   <Button

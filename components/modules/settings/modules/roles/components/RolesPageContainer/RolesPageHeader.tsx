@@ -37,7 +37,7 @@ export default function RolesPageHeader({
         <PermissionGate resource="ROLES.ROLE" action="EDIT">
           <Button onClick={() => setAddOpen(true)} className="gap-1.5">
             <Plus className="h-4 w-4"/>
-            Create role
+            Add Role
           </Button>
         </PermissionGate>
 

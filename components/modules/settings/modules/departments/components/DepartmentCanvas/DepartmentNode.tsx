@@ -40,7 +40,7 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
         selected
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
-        isArchived && "border-dashed opacity-50",
+        isArchived && "border-dashed",
         matched && "border-amber-400 ring-2 ring-amber-300",
         dimmed && "opacity-35",
         isDropTarget && "border-emerald-400 ring-2 ring-emerald-300",

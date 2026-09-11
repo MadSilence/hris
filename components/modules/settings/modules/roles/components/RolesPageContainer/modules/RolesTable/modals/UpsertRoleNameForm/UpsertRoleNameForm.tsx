@@ -8,6 +8,7 @@ import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type UpsertRoleNameFormValues = {
   name: string;
@@ -104,7 +105,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <Label htmlFor="role-name">Role name</Label>
+        <RequiredLabel htmlFor="role-name" required>Role Name</RequiredLabel>
 
         <Input
           id="role-name"
@@ -132,7 +133,6 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
             rows={3}
             value={formik.values.description ?? ""}
             disabled={isLoading}
-            placeholder="What is this role for?"
             onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
           />
         </div>

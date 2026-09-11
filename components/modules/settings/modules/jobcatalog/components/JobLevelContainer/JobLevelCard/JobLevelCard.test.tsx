@@ -124,7 +124,7 @@ describe("JobLevelCard", () => {
     const user = userEvent.setup();
     const props = renderCard(true);
 
-    await user.click(screen.getByLabelText("Group actions"));
+    await user.click(screen.getByLabelText("Track Actions"));
     await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
 
     expect(props.onDeleteGroup).toHaveBeenCalledWith(props.group);

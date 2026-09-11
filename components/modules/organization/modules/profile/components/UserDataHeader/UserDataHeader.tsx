@@ -11,13 +11,7 @@ import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { useRouter } from "next/navigation";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Separator } from "@/public/desact/src/components/ui/separator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
-import { Ellipsis, Pencil, RefreshCw } from "lucide-react";
+import { Pencil, RefreshCw, Trash2, UserMinus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -261,29 +255,21 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             )}
 
             <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" aria-label="More actions">
-                    <Ellipsis className="w-4 h-4"/>
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem
-                    disabled={isTerminated}
-                    onClick={() => setIsTerminateOpen(true)}
-                  >
-                    {isTerminated ? "Already terminated" : "Terminate employment"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator/>
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={() => setIsDeleteOpen(true)}
-                  >
-                    Delete profile
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <RowActionsMenu label="Person Actions">
+                <RowAction
+                  icon={<UserMinus className="h-4 w-4"/>}
+                  onClick={() => setIsTerminateOpen(true)}
+                  disabled={isTerminated}
+                >
+                  {isTerminated ? "Already Terminated" : "Terminate Employment"}
+                </RowAction>
+                <RowActionDestructive
+                  icon={<Trash2 className="h-4 w-4"/>}
+                  onClick={() => setIsDeleteOpen(true)}
+                >
+                  Delete Profile
+                </RowActionDestructive>
+              </RowActionsMenu>
             </PermissionGate>
           </div>
         </div>

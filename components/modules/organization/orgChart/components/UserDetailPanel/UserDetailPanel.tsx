@@ -73,7 +73,7 @@ export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }
         </Avatar>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-base font-semibold text-brown-900">{name}</h2>
-          <p className="truncate text-sm text-brown-500">{user.jobName || "—"}</p>
+          <p className="truncate text-sm text-brown-500">{user.jobName}</p>
           <span
             className={cn(
               "mt-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium leading-none",

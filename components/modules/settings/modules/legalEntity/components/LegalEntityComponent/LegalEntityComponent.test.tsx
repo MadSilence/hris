@@ -42,7 +42,9 @@ const renderScreen = () =>
   render(<LegalEntityComponent initialEntities={[]} isLoading={false}/>);
 
 const openCreate = () =>
-  fireEvent.click(screen.getByRole("button", { name: /add legal entity/i }));
+  // The toolbar button, anchored: with an empty list the empty state is a second, deliberate
+  // "Add Legal Entity" affordance, and an unanchored name now matches both.
+  fireEvent.click(screen.getByRole("button", { name: /^add legal entity$/i }));
 
 /**
  * A server action answers 200 whether it worked or not — the envelope is the only thing that says

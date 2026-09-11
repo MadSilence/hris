@@ -1,17 +1,12 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, ArchiveRestore, Clock, Copy, Download, Eye, MoreVertical, Play, Plus, Search, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Clock, Copy, Download, Eye, Play, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import {
   TableBody,
   TableCell,
@@ -69,6 +64,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   onDuplicateAction,
 }) => {
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -83,22 +79,36 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
     }
   };
 
+  const archivedCount = useMemo(
+    () => policies.filter((p) => p.status === TimeOffPolicyStatus.Archived).length,
+    [policies],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return policies;
-    return policies.filter((p) =>
+
+    // A switch between two views, not a widening of one. Rule:
+    // `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+    const base = policies.filter((p) =>
+      showArchived
+        ? p.status === TimeOffPolicyStatus.Archived
+        : p.status !== TimeOffPolicyStatus.Archived,
+    );
+
+    if (!q) return base;
+    return base.filter((p) =>
       [p.displayName, p.description, p.unit, p.paid ? "paid" : "unpaid"]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q)),
     );
-  }, [policies, query]);
+  }, [policies, query, showArchived]);
 
   const hasPolicies = policies.length > 0;
 
   const addPolicyButton = (
     <Button className="gap-1.5" onClick={onCreateAction}>
       <Plus className="h-4 w-4" />
-      Add policy
+      Add Policy
     </Button>
   );
 
@@ -117,27 +127,15 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
         <div className="space-y-1 pb-1 pt-5">
           <h2 className="text-lg font-semibold text-foreground">Leave policies</h2>
           <p className="text-sm text-muted-foreground">
-            Every leave policy in your company — draft, active and archived.
+            Every leave policy in your company. Archived ones are behind the toggle.
           </p>
         </div>
 
-        {/* Toolbar: search (left) + actions (right) */}
-        <div className="flex items-center justify-between gap-4 py-5">
-          <div className="relative w-[260px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              className="h-9 w-[260px] pl-9"
-              placeholder="Search policies"
-              inputMode="search"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            {addPolicyButton}
-            {/* The button rendered with no handler behind it — one of the two dead export buttons
-                the frontend rules name as "do not copy this". */}
+        <ListToolbar
+          className="py-5"
+          search={{ value: query, onChange: setQuery }}
+          archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
+          secondary={
             <Button
               size="icon"
               variant="outline"
@@ -146,13 +144,21 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
             >
               <Download className="h-4 w-4" />
             </Button>
-          </div>
-        </div>
+          }
+          primary={addPolicyButton}
+        />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
         {!isLoading && !hasPolicies ? (
-          <EmptyState action={addPolicyButton} />
+          <ListEmptyState
+            icon={<Clock className="h-7 w-7" />}
+            title="No time off policies yet"
+            description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
+            onCreate={onCreateAction}
+            createLabel="Add Policy"
+            className="min-h-72 flex-1"
+          />
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <table className="w-full caption-bottom text-sm table-fixed">
@@ -160,7 +166,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                 <TableRow>
                   <TableHead className="pl-4">Policy</TableHead>
                   <TableHead>Unit</TableHead>
-                  <TableHead>Pay type</TableHead>
+                  <TableHead>Pay Type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
@@ -172,7 +178,17 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                 ) : filtered.length === 0 ? (
                   <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={5}>
-                      <SearchEmptyState query={query} noun="policies" />
+                      <ListEmptyState
+                        query={query}
+                        archivedView={showArchived}
+                        icon={<Clock className="h-7 w-7" />}
+                        title="No time off policies yet"
+                        description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
+                        noResultsHint="Try a different policy name or unit."
+                        archivedDescription="Archived policies will appear here."
+                        onCreate={onCreateAction}
+                        createLabel="Add Policy"
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -198,90 +214,69 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
-                                  aria-label="Policy actions"
+                            <RowActionsMenu label="Policy Actions">
+                              <RowAction
+                                icon={<Eye className="h-4 w-4" />}
+                                onClick={() => onOpenAction(policy)}
+                              >
+                                Open
+                              </RowAction>
+
+                              {/* A policy is nine sections and a wizard; copying one was the
+                                  only way to start from something that already works. */}
+                              <RowAction
+                                icon={<Copy className="h-4 w-4" />}
+                                onClick={() => onDuplicateAction(policy)}
+                              >
+                                Duplicate
+                              </RowAction>
+
+                              {policy.status === TimeOffPolicyStatus.Draft && (
+                                <RowAction
+                                  icon={<Play className="h-4 w-4" />}
+                                  onClick={() => onActivateAction(policy)}
                                 >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-44 rounded-lg p-1.5">
-                                <DropdownMenuItem
-                                  onClick={() => onOpenAction(policy)}
-                                  className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                  Activate
+                                </RowAction>
+                              )}
+
+                              {policy.status === TimeOffPolicyStatus.Active && (
+                                <RowAction
+                                  icon={<Archive className="h-4 w-4" />}
+                                  onClick={() => onArchiveAction(policy)}
                                 >
-                                  <Eye className="h-4 w-4 text-muted-foreground" />
-                                  Open
-                                </DropdownMenuItem>
+                                  Archive
+                                </RowAction>
+                              )}
 
-                                {/* A policy is nine sections and a wizard; copying one was the
-                                    only way to start from something that already works. */}
-                                <DropdownMenuItem
-                                  onClick={() => onDuplicateAction(policy)}
-                                  className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                              {/*
+                                Archiving a policy used to be permanent: there was an /archive
+                                endpoint and no inverse, and /activate refuses an archived policy
+                                outright. The row simply stopped being actionable, with nothing
+                                saying it was one-way.
+
+                                It comes back as a draft rather than active, so restoring a policy
+                                and resuming accrual for everybody assigned to it stay two
+                                decisions.
+                              */}
+                              {policy.status === TimeOffPolicyStatus.Archived && (
+                                <RowAction
+                                  icon={<ArchiveRestore className="h-4 w-4" />}
+                                  onClick={() => onUnarchiveAction(policy)}
                                 >
-                                  <Copy className="h-4 w-4" />
-                                  Duplicate
-                                </DropdownMenuItem>
+                                  Unarchive
+                                </RowAction>
+                              )}
 
-                                {policy.status === TimeOffPolicyStatus.Draft && (
-                                  <DropdownMenuItem
-                                    onClick={() => onActivateAction(policy)}
-                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                  >
-                                    <Play className="h-4 w-4 text-muted-foreground" />
-                                    Activate
-                                  </DropdownMenuItem>
-                                )}
-
-                                {policy.status === TimeOffPolicyStatus.Active && (
-                                  <DropdownMenuItem
-                                    onClick={() => onArchiveAction(policy)}
-                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                  >
-                                    <Archive className="h-4 w-4 text-muted-foreground" />
-                                    Archive
-                                  </DropdownMenuItem>
-                                )}
-
-                                {/*
-                                  Archiving a policy used to be permanent: there was an /archive
-                                  endpoint and no inverse, and /activate refuses an archived policy
-                                  outright. The row simply stopped being actionable, with nothing
-                                  saying it was one-way.
-
-                                  It comes back as a draft rather than active, so restoring a policy
-                                  and resuming accrual for everybody assigned to it stay two
-                                  decisions.
-                                */}
-                                {policy.status === TimeOffPolicyStatus.Archived && (
-                                  <DropdownMenuItem
-                                    onClick={() => onUnarchiveAction(policy)}
-                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                  >
-                                    <ArchiveRestore className="h-4 w-4 text-muted-foreground" />
-                                    Unarchive
-                                  </DropdownMenuItem>
-                                )}
-
-                                {policy.status === TimeOffPolicyStatus.Draft && (
-                                  <>
-                                    <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
-                                    <DropdownMenuItem
-                                      onClick={() => onDeleteAction(policy)}
-                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              {policy.status === TimeOffPolicyStatus.Draft && (
+                                <RowActionDestructive
+                                  icon={<Trash2 className="h-4 w-4" />}
+                                  onClick={() => onDeleteAction(policy)}
+                                >
+                                  Delete
+                                </RowActionDestructive>
+                              )}
+                            </RowActionsMenu>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -307,31 +302,4 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   );
 };
 
-function SearchEmptyState({ query, noun }: { query: string; noun: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="mb-3 rounded-2xl bg-brown-50 p-3">
-        <Search className="h-6 w-6 text-brown-500" />
-      </div>
-      <h3 className="text-sm font-semibold text-foreground">No {noun} found</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Nothing matches{query.trim() ? ` “${query.trim()}”` : " your search"}. Try a different term.
-      </p>
-    </div>
-  );
-}
 
-function EmptyState({ action }: { action: React.ReactNode }) {
-  return (
-    <div className="flex min-h-72 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
-      <div className="mb-4 rounded-2xl bg-brown-50 p-4">
-        <Clock className="h-7 w-7 text-brown-600" />
-      </div>
-      <h3 className="text-base font-semibold text-foreground">No time off policies yet</h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        Create your first leave policy to start managing time off for your team.
-      </p>
-      <div className="mt-5">{action}</div>
-    </div>
-  );
-}

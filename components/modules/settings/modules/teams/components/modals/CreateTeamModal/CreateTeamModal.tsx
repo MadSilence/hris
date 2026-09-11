@@ -20,6 +20,7 @@ import {
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const ROOT_VALUE = "none";
 
@@ -75,20 +76,20 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
         <DialogHeader><DialogTitle>Create team</DialogTitle></DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="team-name">Name *</Label>
-            <Input id="team-name" name="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="e.g. Platform" />
+            <RequiredLabel htmlFor="team-name" required>Name</RequiredLabel>
+            <Input id="team-name" name="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} />
             {formik.touched.name && formik.errors.name && <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-code">Code</Label>
-            <Input id="team-code" name="code" value={formik.values.code} onChange={formik.handleChange} placeholder="e.g. PLAT" />
+            <Input id="team-code" name="code" value={formik.values.code} onChange={formik.handleChange} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-description">Description</Label>
-            <Input id="team-description" name="description" value={formik.values.description} onChange={formik.handleChange} placeholder="Optional description" />
+            <Input id="team-description" name="description" value={formik.values.description} onChange={formik.handleChange} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="team-parent">Parent team</Label>
+            <Label htmlFor="team-parent">Parent Team</Label>
             <Select
               value={formik.values.parentId || ROOT_VALUE}
               onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
@@ -97,7 +98,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ROOT_VALUE}>None (root)</SelectItem>
+                <SelectItem value={ROOT_VALUE}>None</SelectItem>
                 {parentOptions.filter((t) => t.status === "ACTIVE").map((t) => (
                   <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                 ))}
@@ -106,7 +107,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           </div>
 
           <div className="space-y-1.5">
-            <Label>Team lead</Label>
+            <Label>Team Lead</Label>
             <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
           <FormError message={createTeam.error ? messageForError(createTeam.error) : null} />
@@ -114,7 +115,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>
           <Button onClick={() => formik.handleSubmit()} disabled={createTeam.isPending}>
-            {createTeam.isPending ? "Creating…" : "Create"}
+            {createTeam.isPending ? "Adding…" : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>

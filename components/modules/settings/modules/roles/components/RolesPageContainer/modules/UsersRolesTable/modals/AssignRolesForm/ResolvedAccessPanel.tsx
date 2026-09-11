@@ -23,7 +23,7 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 const scopeText = (scopes: string[]) =>
-  scopes.length === 0 ? "—" : scopes.map((s) => SCOPE_LABELS[s] ?? s).join(", ");
+  scopes.length === 0 ? "" : scopes.map((s) => SCOPE_LABELS[s] ?? s).join(", ");
 
 export interface ResolvedAccessPanelProps {
   isLoading: boolean;

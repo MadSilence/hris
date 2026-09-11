@@ -12,11 +12,15 @@ import { useCanAccess } from "@/components/auth/useAccess";
 import {
   AssignRolesModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
+import { Users } from "lucide-react";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 
 export interface UsersRolesTableProps {
   userRows?: UsersSearchItemDTO[];
   usersLoading: boolean;
+  /** The search text, so the empty screen can tell a miss from an empty list. */
+  query?: string;
   allRoles: Role[];
   onApplyRoles?: (
     userId: string,
@@ -33,6 +37,7 @@ export interface UsersRolesTableProps {
 export default function UsersRolesTable({
   userRows,
   usersLoading,
+  query,
   allRoles,
   onApplyRoles,
   isApplyingRoles = false,
@@ -87,7 +92,7 @@ export default function UsersRolesTable({
                       />
                     </TableCell>
 
-                    <TableCell className="w-1/3 text-muted-foreground">{u.jobName || "—"}</TableCell>
+                    <TableCell className="w-1/3 text-muted-foreground">{u.jobName}</TableCell>
 
                     <TableCell className="w-1/3">
                       {u.roles?.length ? (
@@ -99,7 +104,7 @@ export default function UsersRolesTable({
                           ))}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        null
                       )}
                     </TableCell>
                   </TableRow>
@@ -107,11 +112,19 @@ export default function UsersRolesTable({
               })}
 
             {!usersLoading && !hasUsers && (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={3}>
-                  <div className="text-sm text-muted-foreground">
-                    No users yet
-                  </div>
+                  {/*
+                    No create action: people are not added from the roles screen, so this is the one
+                    empty state on a list that genuinely has nothing to offer.
+                  */}
+                  <ListEmptyState
+                    query={query}
+                    icon={<Users className="h-7 w-7"/>}
+                    title="No people yet"
+                    description="People appear here once they are added to the organization."
+                    noResultsHint="Try a different name or email."
+                  />
                 </TableCell>
               </TableRow>
             )}

@@ -31,6 +31,7 @@ import type {
 } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { dateToISO } from "@/lib/date";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const REASONS: { id: TerminationReason; label: string }[] = [
   { id: "VOLUNTARY", label: "Voluntary — the person resigned" },
@@ -137,7 +138,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="last-working-day">Last working day</Label>
+              <RequiredLabel htmlFor="last-working-day" required>Last Working Day</RequiredLabel>
               <DatePicker
                 id="last-working-day"
                 value={lastWorkingDay}
@@ -167,7 +168,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
 
           <div className="flex items-center justify-between rounded-lg border border-brown-200 px-3 py-2.5">
             <div>
-              <Label htmlFor="rehire-eligible" className="text-sm">Eligible for rehire</Label>
+              <Label htmlFor="rehire-eligible" className="text-sm">Eligible for Rehire</Label>
               <p className="text-xs text-muted-foreground">
                 The first thing anyone asks when this person applies again.
               </p>
@@ -186,7 +187,6 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
               id="termination-note"
               rows={2}
               value={note}
-              placeholder="Optional — context for whoever reads this later"
               disabled={isLoading}
               onChange={(e) => setNote(e.currentTarget.value)}
             />

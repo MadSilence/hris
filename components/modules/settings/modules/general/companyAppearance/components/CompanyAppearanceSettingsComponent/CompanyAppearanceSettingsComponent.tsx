@@ -225,7 +225,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Label htmlFor="brand-hex" className="mb-0 shrink-0 leading-5">Custom colour</Label>
+              <Label htmlFor="brand-hex" className="mb-0 shrink-0 leading-5">Custom Colour</Label>
 
               <Input
                 id="brand-hex"
@@ -378,7 +378,6 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                   id="login-headline"
                   value={headline}
                   maxLength={MAX_HEADLINE}
-                  placeholder="Welcome to SixSoftware"
                   onChange={(e) => setHeadline(e.currentTarget.value)}
                   disabled={saving}
                 />
@@ -391,7 +390,6 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                   id="login-subheadline"
                   value={subheadline}
                   maxLength={MAX_SUBHEADLINE}
-                  placeholder="Sign in to continue to your workspace."
                   onChange={(e) => setSubheadline(e.currentTarget.value)}
                   disabled={saving}
                 />

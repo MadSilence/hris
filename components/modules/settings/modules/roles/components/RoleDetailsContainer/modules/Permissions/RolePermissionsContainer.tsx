@@ -6,8 +6,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { ChevronsDownUp, ChevronsUpDown, Search } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useRolePermissions } from "@/components/modules/settings/modules/roles/hooks/useRolePermissions";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -26,6 +25,7 @@ import {
 import RolePermissionsView from "./RolePermissionsView";
 import { RolePermissionsSummaryModal } from "./RolePermissionsSummaryModal";
 import { ScopeFilterModal } from "./ScopeFilterModal";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 function PermissionsSkeleton() {
   return (
@@ -141,16 +141,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
           </div>
 
           <div className="flex flex-none flex-wrap items-center gap-2">
-            <div className="relative w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brown-400"/>
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search permission"
-                className="h-9 w-[220px] pl-9"
-                inputMode="search"
-              />
-            </div>
+            <SearchBox value={query} onChange={setQuery}/>
 
             <Button variant="ghost" size="sm" className="gap-1.5 text-brown-600" onClick={toggleAllGroups}>
               {allExpanded ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}

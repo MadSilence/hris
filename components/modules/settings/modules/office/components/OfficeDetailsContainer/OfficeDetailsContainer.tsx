@@ -316,7 +316,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
               />
             ) : (
               <p className="text-sm text-foreground">
-                {current.description || "—"}
+                {current.description}
               </p>
             )}
           </div>
@@ -444,7 +444,7 @@ const Field = ({ label, value, isEditing, onChange }: FieldProps) => (
     {isEditing ? (
       <Input value={value} onChange={(event) => onChange(event.target.value)}/>
     ) : (
-      <p className="text-sm text-foreground">{value || "—"}</p>
+      <p className="text-sm text-foreground">{value}</p>
     )}
   </div>
 );

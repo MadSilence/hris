@@ -72,7 +72,7 @@ const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> =
       return (
         <div key={f.key} className="flex gap-2 text-sm">
           <dt className="text-muted-foreground">{f.label}:</dt>
-          <dd className="text-foreground">{v == null || v === "" ? "—" : String(v)}</dd>
+          <dd className="text-foreground">{v == null ? "" : String(v)}</dd>
         </div>
       );
     })}

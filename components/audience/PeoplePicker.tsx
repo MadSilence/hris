@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Filter, Search, Trash2, Users } from "lucide-react";
+import { Filter, Trash2, Users } from "lucide-react";
 import {
   TableBody,
   TableCell,
@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/compone
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -24,6 +23,7 @@ import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { rolesOf, type Segment, type UserRefDTO } from "@/models/segment/Segment";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 export type PeopleColumn = {
   key: string;
@@ -38,7 +38,7 @@ export const rolesColumn: PeopleColumn = {
   include: "roles",
   render: (u) => {
     const roles = rolesOf(u);
-    if (!roles.length) return <span className="text-sm text-muted-foreground">—</span>;
+    if (!roles.length) return null;
     return (
       <div className="flex flex-wrap gap-1">
         {roles.map((r) => (
@@ -66,7 +66,7 @@ const orgRefColumn = (key: string, header: string): PeopleColumn => ({
         {ref.name}
       </Badge>
     ) : (
-      <span className="text-sm text-muted-foreground">—</span>
+      null
     );
   },
 });
@@ -84,7 +84,7 @@ export const teamColumn: PeopleColumn = {
   include: "team",
   render: (u) => {
     const teams = orgRefsOf(u, "team");
-    if (!teams.length) return <span className="text-sm text-muted-foreground">—</span>;
+    if (!teams.length) return null;
     return (
       <div className="flex flex-wrap gap-1">
         {teams.map((t) => (
@@ -103,7 +103,7 @@ export const calendarColumn: PeopleColumn = {
   include: "calendar",
   render: (u) => {
     const calendars = orgRefsOf(u, "calendar");
-    if (!calendars.length) return <span className="text-sm text-muted-foreground">—</span>;
+    if (!calendars.length) return null;
     return (
       <div className="flex flex-wrap gap-1">
         {calendars.map((c) => (
@@ -264,16 +264,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
           )}
         </div>
 
-        <div className="relative w-[260px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name"
-            className="h-9 w-[260px] pl-9"
-            inputMode="search"
-          />
-        </div>
+        <SearchBox value={query} onChange={setQuery}/>
       </div>
 
       {/* Fixed-height table area so the modal keeps a constant size */}

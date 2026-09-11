@@ -60,7 +60,7 @@ export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
           className="max-w-2xl overflow-hidden p-0"
         >
           <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
-            <DialogTitle>Create legal entity</DialogTitle>
+            <DialogTitle>Add Legal Entity</DialogTitle>
             <DialogDescription>
               Add registration and address details for a company legal unit.
             </DialogDescription>

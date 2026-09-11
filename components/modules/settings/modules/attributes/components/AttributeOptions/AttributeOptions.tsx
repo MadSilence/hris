@@ -35,6 +35,7 @@ import {
 import { PRESET_COLORS } from "@/models/colors";
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 interface AttributeOptionsProps {
   attribute: Attribute;
@@ -221,7 +222,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="-mx-1 min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1">
       <div className="space-y-1.5">
-        <Label htmlFor="attr-name">Name</Label>
+        <RequiredLabel htmlFor="attr-name" required>Name</RequiredLabel>
         <Input
           id="attr-name"
           value={name}
@@ -234,7 +235,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Type</Label>
+        <RequiredLabel required>Type</RequiredLabel>
         <div className="flex items-center gap-2">
           <AttributeTypeChip type={type} />
           <span className="text-xs text-muted-foreground">
@@ -312,14 +313,13 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {type === AttributeType.NUMBER && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-dec-scale">Decimal scale</Label>
+          <Label htmlFor="attr-dec-scale">Decimal Scale</Label>
           <Input
             id="attr-dec-scale"
             type="number"
             min={0}
             value={decScale ?? ""}
             disabled={isPreset}
-            placeholder="e.g. 2 — leave empty for whole numbers"
             onChange={(e) => {
               const v = e.currentTarget.value;
               setDecScale(v === "" ? null : Number(v));

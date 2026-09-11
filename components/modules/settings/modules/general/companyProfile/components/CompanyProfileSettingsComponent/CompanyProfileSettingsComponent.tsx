@@ -262,7 +262,6 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
                 className="pl-9"
                 value={website}
                 onChange={(e) => setWebsite(e.currentTarget.value)}
-                placeholder="https://example.com"
                 disabled={saving}
               />
             </div>
@@ -274,7 +273,6 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
               value={description}
               onChange={(e) => setDescription(e.currentTarget.value)}
               className="min-h-24 resize-none"
-              placeholder="What the company does, in a sentence or two."
               disabled={saving}
             />
           </Field>
@@ -333,7 +331,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </Field>
 
           <div className="grid gap-2">
-            <Label className="mb-0">Working days</Label>
+            <Label className="mb-0">Working Days</Label>
 
             <div className="flex flex-wrap gap-2">
               {DAYS.map((day) => {

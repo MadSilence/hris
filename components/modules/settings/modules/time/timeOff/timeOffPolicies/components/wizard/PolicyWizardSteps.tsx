@@ -132,16 +132,14 @@ export const BasicsStep: FC<StepProps> = ({ values, set }) => (
         id="wiz-name"
         value={values.name}
         onChange={(e) => set("name", e.currentTarget.value)}
-        placeholder="e.g., Standard Vacation"
       />
     </Field>
 
-    <Field label="Description" htmlFor="wiz-desc" hint="Optional. Shown to admins.">
+    <Field label="Description" htmlFor="wiz-desc" hint="Shown to admins.">
       <Input
         id="wiz-desc"
         value={values.description}
         onChange={(e) => set("description", e.currentTarget.value)}
-        placeholder="Optional"
       />
     </Field>
 
@@ -158,7 +156,7 @@ export const BasicsStep: FC<StepProps> = ({ values, set }) => (
         </Select>
       </Field>
 
-      <Field label="Effective date" htmlFor="wiz-eff" hint="Optional. When it takes effect.">
+      <Field label="Effective date" htmlFor="wiz-eff" hint="When it takes effect.">
         <DatePicker
           id="wiz-eff"
           value={values.effectiveDate}
@@ -260,7 +258,6 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
             min={0}
             value={values.yearlyQuota}
             onChange={(e) => set("yearlyQuota", e.currentTarget.value)}
-            placeholder="20"
           />
         </Field>
       </Reveal>
@@ -550,7 +547,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
     </div>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Field label="Max duration per request" htmlFor="wiz-maxdur" hint="Optional.">
+      <Field label="Max duration per request" htmlFor="wiz-maxdur">
         <Input
           id="wiz-maxdur"
           type="number"
@@ -559,7 +556,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
           onChange={(e) => set("reqMaxDurationPerRequest", e.currentTarget.value)}
         />
       </Field>
-      <Field label="Min gap between requests (days)" htmlFor="wiz-mingap" hint="Optional.">
+      <Field label="Min gap between requests (days)" htmlFor="wiz-mingap">
         <Input
           id="wiz-mingap"
           type="number"
@@ -739,7 +736,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
       {values.apprRequiresApproval && (
         <Reveal>
           <div className="space-y-2">
-            <Label>Approval chain</Label>
+            <Label>Approval Chain</Label>
             <div className="space-y-2">
               {values.apprApprovers.map((approver, index) => (
                 <div
@@ -811,7 +808,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
           {/* One question with three answers, replacing two switches that described the same
               mechanism twice and could not express "any two of these three" between them. */}
           <div className="space-y-2 border-t border-brown-100 pt-4">
-            <Label>How do they decide?</Label>
+            <Label>How Do They Decide?</Label>
             <Select
               value={values.apprMode}
               onValueChange={(v) => set("apprMode", v as PolicyWizardValues["apprMode"])}
@@ -869,7 +866,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
       <Reveal>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label>Waiting period</Label>
+            <Label>Waiting Period</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -896,7 +893,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
           </div>
 
           <div className="space-y-1">
-            <Label>Counted from</Label>
+            <Label>Counted From</Label>
             <Select
               value={values.eligReference}
               onValueChange={(v) => set("eligReference", v as TimeOffEligibilityReference)}
@@ -985,7 +982,6 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
             min={0}
             step="0.01"
             inputMode="decimal"
-            placeholder="Auto from quota"
             value={values.accrualAmount}
             onChange={(e) => set("accrualAmount", e.target.value)}
           />
@@ -998,7 +994,6 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
             min={0}
             step="0.01"
             inputMode="decimal"
-            placeholder="Yearly quota"
             value={values.accrualCap}
             onChange={(e) => set("accrualCap", e.target.value)}
           />
@@ -1066,7 +1061,7 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
           <div key={index} className="flex items-end gap-2.5">
             <span className="pb-2 text-sm text-muted-foreground">After</span>
             <div className="space-y-1">
-              <Label className="text-xs">Years of service</Label>
+              <Label className="text-xs">Years of Service</Label>
               <Input
                 type="number"
                 min={0}
@@ -1078,7 +1073,7 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
             </div>
             <span className="pb-2 text-sm text-muted-foreground">grant</span>
             <div className="space-y-1">
-              <Label className="text-xs">Bonus days</Label>
+              <Label className="text-xs">Bonus Days</Label>
               <Input
                 type="number"
                 min={0}
@@ -1179,7 +1174,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="flex-1 space-y-1">
-                  <Label className="text-xs">Name (optional)</Label>
+                  <Label className="text-xs">Name</Label>
                   <Input
                     placeholder={blackout ? "Year-end freeze" : "Keep the desk covered"}
                     value={row.name}
@@ -1210,7 +1205,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                   </>
                 ) : (
                   <div className="space-y-1">
-                    <Label className="text-xs">Max people away</Label>
+                    <Label className="text-xs">Max People Away</Label>
                     <Input
                       type="number"
                       min={0}
@@ -1225,7 +1220,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Applies to</Label>
+                  <Label className="text-xs">Applies To</Label>
                   <Select
                     value={row.scope}
                     onValueChange={(v) => patchRow(index, { scope: v as TimeOffRestrictionScope })}
@@ -1246,7 +1241,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">When it applies</Label>
+                  <Label className="text-xs">When It Applies</Label>
                   <Select
                     value={row.behavior}
                     onValueChange={(v) =>

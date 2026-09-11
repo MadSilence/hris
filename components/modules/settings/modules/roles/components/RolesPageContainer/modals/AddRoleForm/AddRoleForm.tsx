@@ -11,6 +11,7 @@ import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Switch } from "@/public/desact/src/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 type Template = {
   id: string;
@@ -183,14 +184,13 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
 
         {!formik.values.useTemplate && (
           <div className="space-y-2">
-            <Label htmlFor="role-name">Role name</Label>
+            <RequiredLabel htmlFor="role-name" required>Role Name</RequiredLabel>
             <Input
               id="role-name"
               value={formik.values.name}
               onChange={(e) =>
                 formik.setFieldValue("name", e.currentTarget.value)
               }
-              placeholder="e.g. HR Manager"
               required
               disabled={isLoading}
               aria-invalid={!!formik.errors.name}
@@ -203,14 +203,13 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
 
         {!formik.values.useTemplate && (
           <div className="space-y-2">
-            <Label htmlFor="role-description">Description optional</Label>
+            <Label htmlFor="role-description">Description</Label>
             <Textarea
               id="role-description"
               value={formik.values.description}
               onChange={(e) =>
                 formik.setFieldValue("description", e.currentTarget.value)
               }
-              placeholder="What is this role for?"
               rows={3}
               disabled={isLoading}
               aria-invalid={!!formik.errors.description}
@@ -224,7 +223,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
         {formik.values.useTemplate && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Template</Label>
+              <RequiredLabel required>Template</RequiredLabel>
 
               <Select
                 value={formik.values.templateId}
@@ -261,14 +260,13 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="template-role-name">Role name optional</Label>
+              <RequiredLabel htmlFor="template-role-name" required>Role Name</RequiredLabel>
               <Input
                 id="template-role-name"
                 value={formik.values.templateName}
                 onChange={(e) =>
                   formik.setFieldValue("templateName", e.currentTarget.value)
                 }
-                placeholder="Leave empty to use template name"
                 disabled={isLoading}
                 aria-invalid={!!formik.errors.templateName}
               />

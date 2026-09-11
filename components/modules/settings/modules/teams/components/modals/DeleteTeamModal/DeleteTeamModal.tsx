@@ -120,7 +120,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
 
           {cascading && subMembersCount > 0 && (
             <div className="space-y-2">
-              <Label>Members of sub-teams</Label>
+              <Label>Members of Sub-teams</Label>
               <RadioGroup
                 value={effectiveSubMembersStrategy}
                 onValueChange={(v) => setSubMembersStrategy(v as TeamMembersStrategy)}

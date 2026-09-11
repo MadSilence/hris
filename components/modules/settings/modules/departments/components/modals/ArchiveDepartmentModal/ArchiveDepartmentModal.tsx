@@ -135,7 +135,7 @@ export function ArchiveDepartmentModal({
 
           {cascading && subMembersCount > 0 && (
             <div className="space-y-2">
-              <Label>Members of sub-departments</Label>
+              <Label>Members of Sub-departments</Label>
               <RadioGroup
                 value={effectiveSubMembersStrategy}
                 onValueChange={(v) => setSubMembersStrategy(v as DepartmentArchiveMembersStrategy)}

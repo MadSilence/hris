@@ -35,6 +35,7 @@ import { useTimeOffOverlaps } from "@/components/modules/settings/modules/time/t
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 type Props = {
   isOpen: boolean;
@@ -207,7 +208,7 @@ export const RequestTimeOffModal: FC<Props> = ({
           {/* Form */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs">Policy</Label>
+              <RequiredLabel className="text-xs" required>Policy</RequiredLabel>
               <Select value={assignmentId} onValueChange={setAssignmentId} disabled={createMutation.isPending}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a policy" />
@@ -229,7 +230,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">Dates</Label>
+              <RequiredLabel className="text-xs" required>Dates</RequiredLabel>
               <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -259,13 +260,12 @@ export const RequestTimeOffModal: FC<Props> = ({
 
             <div className="space-y-1.5">
               <Label htmlFor="req-reason" className="text-xs">
-                Reason <span className="text-muted-foreground">(optional)</span>
+                Reason
               </Label>
               <Textarea
                 id="req-reason"
                 value={reason}
                 onChange={(e) => setReason(e.currentTarget.value)}
-                placeholder="e.g. Family trip"
                 rows={3}
                 disabled={createMutation.isPending}
               />
@@ -305,14 +305,14 @@ export const RequestTimeOffModal: FC<Props> = ({
             <div>
               <p className="text-xs uppercase tracking-wide text-brown-400">Policy</p>
               <p className="mt-0.5 truncate text-sm font-medium text-brown-900">
-                {policy?.displayName ?? "—"}
+                {policy?.displayName}
               </p>
             </div>
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Available</span>
               <span className="font-medium text-brown-900">
-                {selected ? (unlimited ? "Unlimited" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : "—"}
+                {selected ? (unlimited ? "Unlimited" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : ""}
               </span>
             </div>
 
@@ -321,7 +321,7 @@ export const RequestTimeOffModal: FC<Props> = ({
                 Duration{isWorkingDays ? <span className="text-xs"> · working days</span> : null}
               </span>
               <span className="font-medium text-brown-900">
-                {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "—"}
+                {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : ""}
               </span>
             </div>
 

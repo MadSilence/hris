@@ -27,6 +27,7 @@ import {
   AttributeConfig,
 } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeConfigFields";
 import { ObjectFieldDef } from "@/models/attribute/objectFields";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface CreateAttributeFormProps {
   isLoading?: boolean;
@@ -216,14 +217,13 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       {/* Only the fields scroll — the modal keeps one size whatever type is picked. */}
       <div className="-mx-1 min-h-0 flex-1 space-y-6 overflow-y-auto px-1 py-1">
         <div className="space-y-2">
-          <Label htmlFor="attribute-name">Attribute name</Label>
+          <RequiredLabel htmlFor="attribute-name" required>Attribute Name</RequiredLabel>
           <Input
             id="attribute-name"
             value={formik.values.name}
             onChange={(e) =>
               formik.setFieldValue("name", e.currentTarget.value)
             }
-            placeholder="e.g., Salary"
             required
             disabled={isLoading}
             aria-invalid={!!formik.errors.name}
@@ -263,14 +263,13 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {isNumber && (
           <div className="space-y-1.5">
-            <Label htmlFor="attribute-dec-scale">Decimal scale</Label>
+            <Label htmlFor="attribute-dec-scale">Decimal Scale</Label>
             <Input
               id="attribute-dec-scale"
               type="number"
               min={0}
               value={formik.values.decScale ?? ""}
               disabled={isLoading}
-              placeholder="e.g. 2 — leave empty for whole numbers"
               onChange={(e) => {
                 const v = e.currentTarget.value;
                 void formik.setFieldValue("decScale", v === "" ? null : Number(v));

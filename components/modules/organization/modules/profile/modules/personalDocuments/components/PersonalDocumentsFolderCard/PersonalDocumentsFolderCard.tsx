@@ -1,7 +1,6 @@
 import * as React from "react";
-import { Folder, MoreHorizontal } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
+import { Folder, Pencil, Trash2 } from "lucide-react";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { DocumentFolderDTO } from "@/api/modules/documents/dto";
 
 type PersonalDocumentsFolderCardProps = {
@@ -33,25 +32,18 @@ export const PersonalDocumentsFolderCard: React.FC<PersonalDocumentsFolderCardPr
         </div>
       </button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4"/>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {onRename ? (
-            <DropdownMenuItem onClick={() => onRename(folder)}>
-              Rename
-            </DropdownMenuItem>
-          ) : null}
-          {onDelete ? (
-            <DropdownMenuItem onClick={() => onDelete(folder)}>
-              Delete
-            </DropdownMenuItem>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowActionsMenu label="Folder Actions">
+        {onRename ? (
+          <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onRename(folder)}>
+            Rename
+          </RowAction>
+        ) : null}
+        {onDelete ? (
+          <RowActionDestructive icon={<Trash2 className="h-4 w-4"/>} onClick={() => onDelete(folder)}>
+            Delete
+          </RowActionDestructive>
+        ) : null}
+      </RowActionsMenu>
     </div>
   );
 };

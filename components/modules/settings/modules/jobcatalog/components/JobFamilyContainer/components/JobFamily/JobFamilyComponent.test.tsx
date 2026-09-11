@@ -87,12 +87,12 @@ describe("JobFamilyComponent", () => {
   it("hides row actions and the add affordance until edit mode is entered", () => {
     renderComponent();
 
-    expect(screen.queryByLabelText("Job actions")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Position Actions")).not.toBeInTheDocument();
     expect(screen.queryByText("Add Job")).not.toBeInTheDocument();
 
     enterEditMode();
 
-    expect(screen.getByLabelText("Job actions")).toBeInTheDocument();
+    expect(screen.getByLabelText("Position Actions")).toBeInTheDocument();
     expect(screen.getByText("Add Job")).toBeInTheDocument();
   });
 
@@ -122,7 +122,7 @@ describe("JobFamilyComponent", () => {
     const props = renderComponent();
 
     enterEditMode();
-    await user.click(screen.getByLabelText("Job actions"));
+    await user.click(screen.getByLabelText("Position Actions"));
     await user.click(await screen.findByRole("menuitem", { name: "Archive" }));
 
     expect(props.onArchiveJob).toHaveBeenCalledWith(expect.objectContaining({ id: "job-1" }));
@@ -133,7 +133,7 @@ describe("JobFamilyComponent", () => {
     const props = renderComponent({ jobFamilies: [family({ jobs: [job({ archived: true })] })] });
 
     enterEditMode();
-    await user.click(screen.getByLabelText("Job actions"));
+    await user.click(screen.getByLabelText("Position Actions"));
 
     // Plain text item, no icon — same as every other entry in the menu.
     expect(await screen.findByRole("menuitem", { name: "Unarchive" })).toHaveTextContent(/^Unarchive$/);
@@ -155,7 +155,7 @@ describe("JobFamilyComponent", () => {
       ],
     });
 
-    fireEvent.change(screen.getByPlaceholderText("Search jobs"), { target: { value: "DES-" } });
+    fireEvent.change(screen.getByPlaceholderText("Search"), { target: { value: "DES-" } });
 
     expect(screen.getByText("Product Designer")).toBeInTheDocument();
     expect(screen.queryByText("Backend Engineer")).not.toBeInTheDocument();
@@ -164,9 +164,14 @@ describe("JobFamilyComponent", () => {
   it("shows an empty state when nothing matches", () => {
     renderComponent();
 
-    fireEvent.change(screen.getByPlaceholderText("Search jobs"), { target: { value: "zzz" } });
+    fireEvent.change(screen.getByPlaceholderText("Search"), { target: { value: "zzz" } });
 
-    expect(screen.getByText("Nothing matches your search.")).toBeInTheDocument();
+    // The shared no-results screen, which says "No results" and offers no create action -- the
+    // records exist and the query missed them.
+    expect(screen.getByText("No results")).toBeInTheDocument();
+    expect(
+      screen.getByText("Try a different family, position or code."),
+    ).toBeInTheDocument();
   });
 
   it("counts positions on the family header", () => {

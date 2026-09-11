@@ -2,16 +2,16 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Search, UserPlus, Users, X } from "lucide-react";
+import { UserPlus, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
+import type { AssignedUser } from "@/models/assignedUser";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 import {
   assignedUsersQueryKey,
@@ -22,6 +22,9 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
 import { DEPARTMENTS_QUERY_KEY } from "@/components/modules/settings/modules/departments/utils/departmentQueryKeys";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 const BASE_PATH = "/departments";
 
@@ -53,6 +56,13 @@ export function DepartmentPeopleTab({
   const debouncedQuery = useDebouncedValue(query, 300);
   const [assignOpen, setAssignOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  /**
+   * Unassign confirms, per `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7.
+   *
+   * It used to be a bare ✕ that removed on click — and the button was `opacity-0` until the row was
+   * hovered, so on touch it could not be reached at all.
+   */
+  const [removeTarget, setRemoveTarget] = useState<AssignedUser | null>(null);
 
   const [includeSubNodes, setIncludeSubNodes] = useState(false);
 
@@ -78,6 +88,12 @@ export function DepartmentPeopleTab({
     } finally {
       setRemovingId(null);
     }
+  };
+
+  const confirmRemove = async () => {
+    if (!removeTarget) return;
+    await handleRemove(removeTarget.id);
+    setRemoveTarget(null);
   };
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -116,7 +132,7 @@ export function DepartmentPeopleTab({
           {!isArchived && (
             <Button size="sm" onClick={() => setAssignOpen(true)} className="mt-1 gap-1.5">
               <UserPlus className="h-4 w-4" />
-              Add member
+              Add Member
             </Button>
           )}
         </PermissionGate>
@@ -129,20 +145,12 @@ export function DepartmentPeopleTab({
     <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Toolbar */}
       <div className="flex flex-none items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brown-400" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            placeholder="Search members…"
-            className="h-9 pl-8 text-sm"
-          />
-        </div>
+        <SearchBox value={query} onChange={setQuery} fullWidth/>
         <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
           {!isArchived && (
             <Button size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">
               <UserPlus className="h-4 w-4" />
-              Add member
+              Add Member
             </Button>
           )}
         </PermissionGate>
@@ -174,15 +182,13 @@ export function DepartmentPeopleTab({
         ) : error ? (
           <ErrorState error={error} compact/>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50 text-brown-500">
-              <Users className="h-5 w-5" />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium text-brown-900">No people match your search</p>
-              <p className="text-sm text-brown-400">Try a different name or email.</p>
-            </div>
-          </div>
+          <ListEmptyState
+            query={query}
+            icon={<Users className="h-7 w-7" />}
+            title={`No people in this ${'department'} yet`}
+            description="Assign people to see them here."
+            noResultsHint="Try a different name or email."
+          />
         ) : (
           <div className="flex flex-col">
             {items.map((member) => (
@@ -204,10 +210,10 @@ export function DepartmentPeopleTab({
                   {!isArchived && (
                     <button
                       type="button"
-                      onClick={() => handleRemove(member.id)}
+                      onClick={() => setRemoveTarget(member)}
                       disabled={removingId === member.id}
                       aria-label={`Remove ${member.firstName ?? member.email}`}
-                      className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+                      className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-red-600 disabled:opacity-50"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -223,6 +229,17 @@ export function DepartmentPeopleTab({
       </div>
 
       {assignModal}
+
+      <ConfirmActionModal
+        isOpen={removeTarget !== null}
+        title="Remove From Department"
+        description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be in this department. They keep their account and everything else.`}
+        confirmLabel="Remove"
+        destructive
+        isLoading={removingId === removeTarget?.id}
+        onConfirmAction={confirmRemove}
+        onCancelAction={() => setRemoveTarget(null)}
+      />
     </div>
   );
 }

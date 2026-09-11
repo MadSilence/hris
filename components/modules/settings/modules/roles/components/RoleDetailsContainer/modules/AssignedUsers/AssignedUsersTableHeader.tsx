@@ -1,9 +1,9 @@
 "use client";
 
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Download, Plus, Search } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 export interface AssignedUsersTableHeaderProps {
   query: string;
@@ -23,16 +23,7 @@ export default function AssignedUsersTableHeader({
 }: AssignedUsersTableHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="relative w-[260px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 w-4 h-4"/>
-        <Input
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Search users"
-          className="pl-9 w-[260px] h-9"
-          inputMode="search"
-        />
-      </div>
+      <SearchBox value={query} onChange={onQueryChange}/>
 
       <div className="flex items-center gap-3">
         {/* Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE. */}

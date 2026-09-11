@@ -73,14 +73,13 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
           value={value.description ?? ""}
           disabled={disabled}
           onChange={(e) => onChange({ description: e.currentTarget.value })}
-          placeholder="Help text shown under the field on the profile"
           className="min-h-16"
         />
       </div>
 
       {hasDefault && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-cfg-default">Default value</Label>
+          <Label htmlFor="attr-cfg-default">Default Value</Label>
           <Input
             id="attr-cfg-default"
             type={defaultInputType}
@@ -127,7 +126,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {(isText || isLongText) && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-length">Min length</Label>
+            <Label htmlFor="attr-cfg-min-length">Min Length</Label>
             <Input
               type="number"
               id="attr-cfg-min-length"
@@ -137,7 +136,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-length">Max length</Label>
+            <Label htmlFor="attr-cfg-max-length">Max Length</Label>
             <Input
               type="number"
               id="attr-cfg-max-length"
@@ -151,13 +150,12 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
 
       {isText && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-cfg-regex">Pattern (regex)</Label>
+          <Label htmlFor="attr-cfg-regex">Pattern (Regex)</Label>
           <Input
             id="attr-cfg-regex"
             value={value.regex ?? ""}
             disabled={disabled}
             onChange={(e) => onChange({ regex: e.currentTarget.value })}
-            placeholder="e.g. ^[A-Z]{2}\\d{4}$"
           />
           {type === AttributeType.PHONE && (
             <p className="text-xs text-muted-foreground">
@@ -194,7 +192,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {isMulti && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-select">Min selected</Label>
+            <Label htmlFor="attr-cfg-min-select">Min Selected</Label>
             <Input
               type="number"
               id="attr-cfg-min-select"
@@ -204,7 +202,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-select">Max selected</Label>
+            <Label htmlFor="attr-cfg-max-select">Max Selected</Label>
             <Input
               type="number"
               id="attr-cfg-max-select"

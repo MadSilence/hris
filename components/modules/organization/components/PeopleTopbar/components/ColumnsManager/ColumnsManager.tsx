@@ -97,7 +97,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search columns…"
+          placeholder="Search"
           className="h-9 pl-8"
           aria-label="Search columns"
         />

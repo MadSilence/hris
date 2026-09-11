@@ -1,17 +1,12 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, ArchiveRestore, Layers, MoreVertical, Pencil, Plus, Search } from "lucide-react";
+import { Archive, ArchiveRestore, Layers, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import {
   TableBody,
   TableCell,
@@ -58,23 +53,38 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
   onRestoreAction,
 }) => {
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+
+  const archivedCount = useMemo(
+    () => leaveTypes.filter((t) => t.status === LeaveTypeStatus.Archived).length,
+    [leaveTypes],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return leaveTypes;
-    return leaveTypes.filter((t) =>
+
+    // A switch between two views, not a widening of one. Rule:
+    // `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+    const base = leaveTypes.filter((t) =>
+      showArchived
+        ? t.status === LeaveTypeStatus.Archived
+        : t.status !== LeaveTypeStatus.Archived,
+    );
+
+    if (!q) return base;
+    return base.filter((t) =>
       [t.name, t.description, t.category ? CATEGORY_LABELS[t.category] : null]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q)),
     );
-  }, [leaveTypes, query]);
+  }, [leaveTypes, query, showArchived]);
 
   const hasLeaveTypes = leaveTypes.length > 0;
 
   const addButton = (
     <Button className="gap-1.5" onClick={onCreateAction}>
       <Plus className="h-4 w-4" />
-      Add type
+      Add Leave Type
     </Button>
   );
 
@@ -97,26 +107,24 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
           </p>
         </div>
 
-        {/* Toolbar: search (left) + actions (right) */}
-        <div className="flex items-center justify-between gap-4 py-5">
-          <div className="relative w-[260px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              className="h-9 w-[260px] pl-9"
-              placeholder="Search leave types"
-              inputMode="search"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">{addButton}</div>
-        </div>
+        <ListToolbar
+          className="py-5"
+          search={{ value: query, onChange: setQuery }}
+          archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
+          primary={addButton}
+        />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
         {!isLoading && !hasLeaveTypes ? (
-          <EmptyState action={addButton} />
+          <ListEmptyState
+            icon={<Layers className="h-7 w-7" />}
+            title="No leave types yet"
+            description="A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies."
+            onCreate={onCreateAction}
+            createLabel="Add Leave Type"
+            className="min-h-72 flex-1"
+          />
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <table className="w-full caption-bottom text-sm table-fixed">
@@ -135,7 +143,17 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                 ) : filtered.length === 0 ? (
                   <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={4}>
-                      <SearchEmptyState query={query} noun="leave types" />
+                      <ListEmptyState
+                        query={query}
+                        archivedView={showArchived}
+                        icon={<Layers className="h-7 w-7" />}
+                        title="No leave types yet"
+                        description="A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies."
+                        noResultsHint="Try a different name or category."
+                        archivedDescription="Archived leave types will appear here."
+                        onCreate={onCreateAction}
+                        createLabel="Add Leave Type"
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -171,54 +189,35 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
-                                  aria-label="Leave type actions"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-44 rounded-lg p-1.5">
-                                <DropdownMenuItem
-                                  onClick={() => onEditAction(leaveType)}
-                                  className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                >
-                                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                                  Edit
-                                </DropdownMenuItem>
+                            <RowActionsMenu label="Leave Type Actions">
+                              <RowAction
+                                icon={<Pencil className="h-4 w-4" />}
+                                onClick={() => onEditAction(leaveType)}
+                              >
+                                Edit
+                              </RowAction>
 
-                                {leaveType.status === LeaveTypeStatus.Active ? (
-                                  <>
-                                    <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
-                                    <DropdownMenuItem
-                                      onClick={() => onArchiveAction(leaveType)}
-                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                    >
-                                      <Archive className="h-4 w-4 text-muted-foreground" />
-                                      Archive
-                                    </DropdownMenuItem>
-                                  </>
-                                ) : (
-                                  <>
-                                    {/* Every archive in this product is reversible. This one was
-                                        not: a type archived by mistake could be neither restored
-                                        nor deleted. */}
-                                    <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
-                                    <DropdownMenuItem
-                                      onClick={() => onRestoreAction(leaveType)}
-                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                    >
-                                      <ArchiveRestore className="h-4 w-4 text-muted-foreground" />
-                                      Unarchive
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              {/*
+                                No separator before Archive. It had one, which is what happens when
+                                the separator means "near the bottom" rather than "past this line it
+                                is permanent" \u2014 and every archive in this product is reversible.
+                              */}
+                              {leaveType.status === LeaveTypeStatus.Active ? (
+                                <RowAction
+                                  icon={<Archive className="h-4 w-4" />}
+                                  onClick={() => onArchiveAction(leaveType)}
+                                >
+                                  Archive
+                                </RowAction>
+                              ) : (
+                                <RowAction
+                                  icon={<ArchiveRestore className="h-4 w-4" />}
+                                  onClick={() => onRestoreAction(leaveType)}
+                                >
+                                  Unarchive
+                                </RowAction>
+                              )}
+                            </RowActionsMenu>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -234,31 +233,4 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
   );
 };
 
-function SearchEmptyState({ query, noun }: { query: string; noun: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="mb-3 rounded-2xl bg-brown-50 p-3">
-        <Search className="h-6 w-6 text-brown-500" />
-      </div>
-      <h3 className="text-sm font-semibold text-foreground">No {noun} found</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Nothing matches{query.trim() ? ` “${query.trim()}”` : " your search"}. Try a different term.
-      </p>
-    </div>
-  );
-}
 
-function EmptyState({ action }: { action: React.ReactNode }) {
-  return (
-    <div className="flex min-h-72 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
-      <div className="mb-4 rounded-2xl bg-brown-50 p-4">
-        <Layers className="h-7 w-7 text-brown-600" />
-      </div>
-      <h3 className="text-base font-semibold text-foreground">No leave types yet</h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        Create your first leave type (e.g. Vacation or Sick) to start defining time off policies.
-      </p>
-      <div className="mt-5">{action}</div>
-    </div>
-  );
-}

@@ -81,7 +81,6 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.currentTarget.value)}
-            placeholder="e.g. -1"
             disabled={adjustMutation.isPending}
           />
         </div>
@@ -92,7 +91,6 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
             id={`adj-reason-${balanceId}`}
             value={reason}
             onChange={(e) => setReason(e.currentTarget.value)}
-            placeholder="Why?"
             disabled={adjustMutation.isPending}
           />
         </div>

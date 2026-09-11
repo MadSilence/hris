@@ -34,6 +34,7 @@ import { useDeleteTimeOffPolicy } from "@/components/modules/settings/modules/ti
 import type { TimeOffPolicy } from "@/models/timeOff";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 
 type Props = {
   leaveTypeId?: string;
@@ -59,6 +60,7 @@ export default function TimeOffPoliciesSettingsContainer({
   const activateMutation = useActivateTimeOffPolicy();
   const archiveMutation = useArchiveTimeOffPolicy();
   const unarchiveMutation = useUnarchiveTimeOffPolicy();
+  const [archiveTarget, setArchiveTarget] = useState<TimeOffPolicy | null>(null);
   const deleteMutation = useDeleteTimeOffPolicy();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -106,20 +108,28 @@ export default function TimeOffPoliciesSettingsContainer({
     unarchiveMutation.mutate({ id: policy.id });
   };
 
-  const handleArchive = (policy: TimeOffPolicy) => {
-    // Archiving is reversible by design, so it does not get a confirmation dialog — it gets the
-    // three seconds afterwards. The undo is the unarchive that now exists; before it did, there was
-    // nothing to offer and archiving a policy was permanent.
-    archiveMutation.mutate(
-      { id: policy.id },
-      {
-        onSuccess: () =>
-          showUndoToast({
-            message: `${policy.name} archived`,
-            onUndo: () => unarchiveMutation.mutateAsync({ id: policy.id }),
-          }),
-      },
-    );
+  /**
+   * Archive confirms, per `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7.
+   *
+   * <p>It used to fire straight from the menu **with no error handling at all**, so a refused
+   * archive was completely silent. The undo toast that briefly replaced that is kept as well: the
+   * dialog answers "did you mean to", the undo answers "I meant to and I was wrong", and on an act
+   * that removes a policy from every list it is worth having both. If that turns out to be one step
+   * too many in use, the undo is the half to drop — the confirmation is the rule.
+   */
+  const confirmArchive = async () => {
+    if (!archiveTarget) return;
+    const policy = archiveTarget;
+    try {
+      await archiveMutation.mutateAsync({ id: policy.id });
+      setArchiveTarget(null);
+      showUndoToast({
+        message: `${policy.name} archived`,
+        onUndo: () => unarchiveMutation.mutateAsync({ id: policy.id }),
+      });
+    } catch (error) {
+      showError(error);
+    }
   };
 
   const handleDelete = async () => {
@@ -164,7 +174,7 @@ export default function TimeOffPoliciesSettingsContainer({
         onCreateAction={() => setIsCreateModalOpen(true)}
         onOpenAction={handleOpen}
         onActivateAction={handleActivate}
-        onArchiveAction={handleArchive}
+        onArchiveAction={setArchiveTarget}
         onUnarchiveAction={handleUnarchive}
         onDeleteAction={(policy) => setDeletingPolicy(policy)}
         onDuplicateAction={handleDuplicate}
@@ -186,6 +196,16 @@ export default function TimeOffPoliciesSettingsContainer({
         onConfirmAction={handleDelete}
         onRequestCloseAction={() => setDeletingPolicy(null)}
       />
+      <ConfirmActionModal
+        isOpen={archiveTarget !== null}
+        title={`Archive "${archiveTarget?.name ?? ""}"`}
+        description="An archived policy stops being offered and can be unarchived at any time \u2014 it comes back as a draft, so switching it on again is a separate step."
+        confirmLabel="Archive"
+        isLoading={archiveMutation.isPending}
+        onConfirmAction={confirmArchive}
+        onCancelAction={() => setArchiveTarget(null)}
+      />
+
     </>
   );
 }

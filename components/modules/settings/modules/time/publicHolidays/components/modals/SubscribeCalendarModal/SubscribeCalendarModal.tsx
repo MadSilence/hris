@@ -116,7 +116,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
         </DialogHeader>
 
         <div className="space-y-2 py-2">
-          <Label htmlFor="feed-url">Subscription link</Label>
+          <Label htmlFor="feed-url">Subscription Link</Label>
           <div className="flex items-center gap-2">
             <Input id="feed-url" readOnly value={isLoading ? "Loading…" : url} />
             <Button

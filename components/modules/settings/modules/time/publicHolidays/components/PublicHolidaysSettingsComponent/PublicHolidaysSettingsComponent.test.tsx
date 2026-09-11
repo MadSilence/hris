@@ -79,7 +79,7 @@ const calendar = (overrides: Partial<PublicHolidayCalendar> = {}): PublicHoliday
 const openRowMenu = async (name: string) => {
   const user = userEvent.setup();
   const row = screen.getByRole("link", { name }).closest("tr");
-  await user.click(within(row as HTMLElement).getByRole("button", { name: "Calendar actions" }));
+  await user.click(within(row as HTMLElement).getByRole("button", { name: "Calendar Actions" }));
   return user;
 };
 
@@ -149,7 +149,7 @@ describe("PublicHolidaysSettingsComponent — activating and deactivating", () =
     );
 
     const user = await userEvent.setup();
-    await user.click(screen.getByRole("button", { name: "Show archived" }));
+    await user.click(screen.getByRole("button", { name: /^Archived \(/ }));
     await openRowMenu("Germany");
 
     expect(screen.getByRole("menuitem", { name: "Unarchive" })).toBeInTheDocument();

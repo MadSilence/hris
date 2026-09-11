@@ -9,6 +9,7 @@ import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 /** Matches the column and the backend's JobTextRules. */
 const DESCRIPTION_MAX = 300;
@@ -100,13 +101,12 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="job-family-name">Name</Label>
+          <RequiredLabel htmlFor="job-family-name" required>Name</RequiredLabel>
 
           <Input
             id="job-family-name"
             value={formik.values.name}
             onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-            placeholder="e.g., Engineering"
             required
             disabled={isLoading}
             aria-invalid={!!formik.errors.name}
@@ -124,7 +124,6 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
             id="job-family-description"
             value={formik.values.description}
             onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
-            placeholder="What this family covers"
             rows={3}
             maxLength={DESCRIPTION_MAX}
             disabled={isLoading}

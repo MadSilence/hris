@@ -15,7 +15,7 @@ const validValues = {
 };
 
 function fillValidForm() {
-  fireEvent.change(screen.getByLabelText(/^name$/i), {
+  fireEvent.change(screen.getByLabelText(/^name \*$/i), {
     target: { value: validValues.name },
   });
 
@@ -64,7 +64,7 @@ describe("CreateLegalEntityForm", () => {
     expect(screen.getByText(/legal entity details/i)).toBeInTheDocument();
     expect(screen.getByText(/address/i)).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^name \*$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/registration number/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tax id/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/country/i)).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe("CreateLegalEntityForm", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/^name$/i)).toHaveValue("Initial LLC");
+    expect(screen.getByLabelText(/^name \*$/i)).toHaveValue("Initial LLC");
     expect(screen.getByLabelText(/registration number/i)).toHaveValue("REG");
     expect(screen.getByLabelText(/tax id/i)).toHaveValue("TAX");
     expect(screen.getByLabelText(/country/i)).toHaveValue("Poland");
@@ -221,7 +221,7 @@ describe("CreateLegalEntityForm", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText(/^name$/i), {
+    fireEvent.change(screen.getByLabelText(/^name \*$/i), {
       target: { value: "Acme LLC" },
     });
 
@@ -254,7 +254,7 @@ describe("CreateLegalEntityForm", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/^name$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^name \*$/i)).toBeDisabled();
     expect(screen.getByLabelText(/registration number/i)).toBeDisabled();
     expect(screen.getByLabelText(/tax id/i)).toBeDisabled();
     expect(screen.getByLabelText(/country/i)).toBeDisabled();

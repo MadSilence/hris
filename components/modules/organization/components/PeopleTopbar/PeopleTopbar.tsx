@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Columns3, Filter as FilterIcon, Pencil, Plus, Search } from "lucide-react";
+import { Columns3, Filter as FilterIcon, Pencil, Plus } from "lucide-react";
 
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import {
   Popover,
@@ -22,6 +21,7 @@ import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { ColumnsManager } from "@/components/modules/organization/components/PeopleTopbar/components/ColumnsManager";
 import type { ColumnItem } from "@/models/userTable";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 export type FieldMeta = Pick<FieldDTO, "id" | "key" | "label" | "type" | "isSystem" | "options">;
 
@@ -128,23 +128,14 @@ export default function PeopleTopbar({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative w-[320px] max-w-full">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => onQueryChangeAction(e.target.value)}
-            placeholder="Search people…"
-            className="h-9 pl-9"
-            aria-label="Search people"
-          />
-        </div>
+        <SearchBox value={query} onChange={onQueryChangeAction}/>
 
         <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="gap-1.5">
                 <Plus className="h-4 w-4" />
-                Add people
+                Add People
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

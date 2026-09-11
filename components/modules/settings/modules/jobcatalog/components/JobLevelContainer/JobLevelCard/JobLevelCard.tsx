@@ -1,17 +1,12 @@
 "use client";
 
 import { FC, ReactNode, useState } from "react";
-import { ArrowRight, Briefcase, Check, ChevronDown, ChevronUp, Ellipsis, Plus, Users } from "lucide-react";
+import { ArrowRight, Briefcase, Check, ChevronDown, ChevronUp, Pencil, Plus, Trash2, Users } from "lucide-react";
 
 import { JobLevel, JobLevelGroup } from "@/models/job";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Separator } from "@/public/desact/src/components/ui/separator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
 type Props = {
@@ -63,30 +58,22 @@ export const JobLevelCard: FC<Props> = ({
           ]}
         >
           {managing && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0 text-brown-600 hover:bg-brown-100"
-                  aria-label="Group actions"
+            <RowActionsMenu label="Track Actions">
+              <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
+                <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditGroup(group)}>
+                  Rename
+                </RowAction>
+              </PermissionGate>
+
+              <PermissionGate resource="JOBS.LEVEL_GROUP" action="MANAGE">
+                <RowActionDestructive
+                  icon={<Trash2 className="h-4 w-4"/>}
+                  onClick={() => onDeleteGroup(group)}
                 >
-                  <Ellipsis className="h-4 w-4"/>
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
-                  <DropdownMenuItem onClick={() => onEditGroup(group)}>Rename</DropdownMenuItem>
-                </PermissionGate>
-
-                <PermissionGate resource="JOBS.LEVEL_GROUP" action="MANAGE">
-                  <DropdownMenuItem variant="destructive" onClick={() => onDeleteGroup(group)}>
-                    Delete
-                  </DropdownMenuItem>
-                </PermissionGate>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  Delete
+                </RowActionDestructive>
+              </PermissionGate>
+            </RowActionsMenu>
           )}
         </PermissionGate>
       </header>
@@ -272,29 +259,18 @@ const LevelActions: FC<LevelActionsProps> = ({
       <ChevronDown className="h-4 w-4"/>
     </Button>
 
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-brown-500 hover:bg-brown-100"
-          aria-label="Level actions"
-        >
-          <Ellipsis className="h-4 w-4"/>
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end">
+    <RowActionsMenu label="Level Actions">
         <PermissionGate resource="JOBS.LEVEL" action="EDIT">
-          <DropdownMenuItem onClick={onEdit}>Rename</DropdownMenuItem>
+          <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={onEdit}>
+            Rename
+          </RowAction>
         </PermissionGate>
 
         <PermissionGate resource="JOBS.LEVEL" action="MANAGE">
-          <DropdownMenuItem variant="destructive" onClick={onDelete}>
+          <RowActionDestructive icon={<Trash2 className="h-4 w-4"/>} onClick={onDelete}>
             Delete
-          </DropdownMenuItem>
+          </RowActionDestructive>
         </PermissionGate>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    </RowActionsMenu>
   </div>
 );

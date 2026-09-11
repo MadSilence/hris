@@ -10,10 +10,11 @@ import type { CreateLegalEntityActionInput, } from "@/components/modules/setting
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Archive, Building2, Download, Plus, Search } from "lucide-react";
+import { Building2, Download, Plus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import {
   LegalEntitySettingsSkeleton
 } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityComponent/LegalEntitySettingsSkeleton";
@@ -49,6 +50,11 @@ export const LegalEntityComponent: React.FC<Props> = ({
       setIsCreateLegalEntityModalOpen(false);
     }
   }, [createLegalEntityAction.data?.status]);
+
+  const openCreate = () => {
+    createLegalEntityAction.reset();
+    setIsCreateLegalEntityModalOpen(true);
+  };
 
   const handleRowClick = (row: LegalEntity) => {
     router.push(`/settings/general/legal-entities/${row.id}`);
@@ -87,9 +93,12 @@ export const LegalEntityComponent: React.FC<Props> = ({
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    const base = showArchived
-      ? initialEntities
-      : initialEntities.filter((e) => !e.archived);
+    /*
+       A switch between two views, not a widening of one: on shows **only** archived, off shows
+       everything else. It used to be additive, so "show archived" meant "show everything" and there
+       was no way to look at just the archive. Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+    */
+    const base = initialEntities.filter((e) => (showArchived ? e.archived : !e.archived));
 
     const rows = q
       ? base.filter((e) =>
@@ -112,43 +121,10 @@ export const LegalEntityComponent: React.FC<Props> = ({
   return (
     <>
       <div className="py-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="relative w-[260px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-400"/>
-            <Input
-              placeholder="Search legal entities"
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              className="pl-9 w-[260px] h-9"
-              inputMode="search"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            {archivedCount > 0 && (
-              <Button
-                variant={showArchived ? "secondary" : "outline"}
-                className="gap-1.5"
-                onClick={() => setShowArchived((v) => !v)}
-              >
-                <Archive className="h-4 w-4"/>
-                {showArchived ? "Hide archived" : `Show archived (${archivedCount})`}
-              </Button>
-            )}
-
-            <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-              <Button
-                onClick={() => {
-                  createLegalEntityAction.reset();
-                  setIsCreateLegalEntityModalOpen(true);
-                }}
-                className="gap-1.5"
-              >
-                <Plus className="h-4 w-4"/>
-                Add Legal Entity
-              </Button>
-            </PermissionGate>
-
+        <ListToolbar
+          search={{ value: query, onChange: setQuery }}
+          archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
+          secondary={
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
               <Button
                 size="icon"
@@ -159,29 +135,34 @@ export const LegalEntityComponent: React.FC<Props> = ({
                 <Download className="h-4 w-4"/>
               </Button>
             </PermissionGate>
-          </div>
-        </div>
+          }
+          primary={
+            <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
+              <Button onClick={openCreate} className="gap-1.5">
+                <Plus className="h-4 w-4"/>
+                Add Legal Entity
+              </Button>
+            </PermissionGate>
+          }
+        />
       </div>
 
       <div>
         {isLoading ? (
           <LegalEntitySettingsSkeleton/>
         ) : filteredSorted.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
-              <Building2 className="h-7 w-7"/>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                {query.trim() ? "No legal entities match your search" : "No legal entities yet"}
-              </p>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                {query.trim()
-                  ? "Try a different name, country, or registration number."
-                  : "Add a legal entity to get started."}
-              </p>
-            </div>
-          </div>
+          <ListEmptyState
+            query={query}
+            archivedView={showArchived}
+            icon={<Building2 className="h-7 w-7"/>}
+            title="No legal entities yet"
+            description="A legal entity is the company people are employed by. Add the first one to start assigning people to it."
+            noResultsHint="Try a different name, country or registration number."
+            archivedDescription="Archived legal entities will appear here."
+            onCreate={openCreate}
+            createLabel="Add Legal Entity"
+            createAccess={{ resource: "ORG.LEGAL_ENTITY" }}
+          />
         ) : (
           <Table className="table-fixed">
             <TableHeader className="[&_tr]:border-brown-200 [&_tr]:border-t-0">
@@ -190,7 +171,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
                 <TableHead className="w-[13%]">Country</TableHead>
                 <TableHead className="w-[13%]">Assigned Users</TableHead>
                 <TableHead className="w-[27%]">Address</TableHead>
-                <TableHead className="w-[12.5%]">Registration number</TableHead>
+                <TableHead className="w-[12.5%]">Registration Number</TableHead>
                 <TableHead className="w-[12.5%]">Tax ID</TableHead>
               </TableRow>
             </TableHeader>
@@ -200,19 +181,14 @@ export const LegalEntityComponent: React.FC<Props> = ({
                 <TableRow
                   key={e.id}
                   className={`group cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2 ${
-                    e.archived ? "opacity-60" : ""
+                    ""
                   }`}
                   onClick={() => handleRowClick(e)}
                 >
                   <TableCell className="truncate py-3">
                     <span className="inline-flex items-center gap-2">
                       {e.name}
-                      {e.archived && (
-                        <Badge variant="secondary" className="gap-1 font-normal">
-                          <Archive className="h-3 w-3"/>
-                          Archived
-                        </Badge>
-                      )}
+                      {e.archived && <StatusBadge status="archived"/>}
                     </span>
                   </TableCell>
 
@@ -221,7 +197,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
                   </TableCell>
 
                   <TableCell className="text-muted-foreground">
-                    {e.assignedUsersCount ?? "—"}
+                    {e.assignedUsersCount}
                   </TableCell>
 
                   <TableCell className="truncate text-muted-foreground">

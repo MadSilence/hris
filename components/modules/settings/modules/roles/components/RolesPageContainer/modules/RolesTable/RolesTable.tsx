@@ -7,6 +7,9 @@ import { Role } from "@/models/role/Role";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { formatDisplayDate } from "@/lib/date";
 import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Shield } from "lucide-react";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import RolesTableSkeleton from "./RolesTableSkeleton";
 import { useRoleDeleteImpact } from "@/components/modules/settings/modules/roles/hooks/useRoleDeleteImpact";
 import RolesTableRowActions from "./RolesTableRowActions";
@@ -22,6 +25,9 @@ type RoleActionMode = "rename" | "duplicate";
 export interface RolesTableProps {
   roleRows: Role[] | undefined;
   rolesLoading: boolean;
+  /** The search text, so the empty screen can tell a miss from an empty list. */
+  query?: string;
+  showArchived?: boolean;
   buildRoleHref?: (roleId: string) => string;
   onRenameRole?: (roleId: string, values: { name: string; description?: string }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
@@ -38,6 +44,8 @@ export interface RolesTableProps {
 export default function RolesTable({
   roleRows,
   rolesLoading,
+  query,
+  showArchived = false,
   buildRoleHref = (id) => `/settings/people/roles/${id}`,
   onRenameRole,
   onDuplicateRole,
@@ -147,19 +155,11 @@ export default function RolesTable({
                 </TableCell>
 
                 <TableCell className="text-muted-foreground">
-                  {r.userCount ?? "—"}
+                  {r.userCount}
                 </TableCell>
 
                 <TableCell>
-                  {r.archived ? (
-                    <Badge variant="outline" className="border-brown-200 bg-brown-50 text-brown-700">
-                      Archived
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
-                      Active
-                    </Badge>
-                  )}
+                  <StatusBadge status={r.archived ? "archived" : "active"}/>
                 </TableCell>
 
                 <TableCell className="text-muted-foreground">{formatDate(r.updatedAt)}</TableCell>
@@ -181,9 +181,17 @@ export default function RolesTable({
             ))}
 
           {!rolesLoading && !hasRoles && (
-            <TableRow className="[&_td]:py-2">
+            <TableRow className="hover:bg-transparent">
               <TableCell colSpan={5}>
-                <div className="text-sm text-muted-foreground">No roles yet</div>
+                <ListEmptyState
+                  query={query}
+                  archivedView={showArchived}
+                  icon={<Shield className="h-7 w-7"/>}
+                  title="No roles yet"
+                  description="A role is a set of permissions you can hand to people. Add the first one to start granting access."
+                  noResultsHint="Try a different role name."
+                  archivedDescription="Archived roles will appear here."
+                />
               </TableCell>
             </TableRow>
           )}
@@ -241,5 +249,5 @@ export default function RolesTable({
 }
 
 function formatDate(iso?: string | null) {
-  return iso ? formatDisplayDate(iso, { style: "medium" }) || "—" : "—";
+  return iso ? formatDisplayDate(iso, { style: "medium" }) : "";
 }

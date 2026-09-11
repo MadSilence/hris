@@ -49,7 +49,7 @@ describe("ConfirmTrialForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^password$/i), "Aa1!");
+    await user.type(screen.getByLabelText(/^password \*$/i), "Aa1!");
     await user.type(screen.getByLabelText(/confirm password/i), "Aa1!");
 
     await user.click(screen.getByRole("button", { name: /set password/i }));
@@ -67,7 +67,7 @@ describe("ConfirmTrialForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^password$/i), "password1");
+    await user.type(screen.getByLabelText(/^password \*$/i), "password1");
     await user.type(screen.getByLabelText(/confirm password/i), "password1");
 
     await user.click(screen.getByRole("button", { name: /set password/i }));
@@ -87,7 +87,7 @@ describe("ConfirmTrialForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^password$/i), "Password1!");
+    await user.type(screen.getByLabelText(/^password \*$/i), "Password1!");
     await user.type(screen.getByLabelText(/confirm password/i), "Password2!");
 
     await user.click(screen.getByRole("button", { name: /set password/i }));
@@ -103,7 +103,7 @@ describe("ConfirmTrialForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^password$/i), "Password1!");
+    await user.type(screen.getByLabelText(/^password \*$/i), "Password1!");
     await user.type(screen.getByLabelText(/confirm password/i), "Password1!");
 
     await user.click(screen.getByRole("button", { name: /set password/i }));
@@ -125,7 +125,7 @@ describe("ConfirmTrialForm", () => {
       onSubmitAction,
     });
 
-    expect(screen.getByLabelText(/^password$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^password \*$/i)).toBeDisabled();
     expect(screen.getByLabelText(/confirm password/i)).toBeDisabled();
 
     expect(screen.getByRole("button", { name: /saving/i })).toBeDisabled();

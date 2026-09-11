@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/public/desact/src/components/ui/select";
 import { JobFamily, JobLevelGroup } from "@/models/job";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const DESCRIPTION_MAX = 300;
 const CODE_MAX = 64;
@@ -142,13 +143,12 @@ export const JobForm: FC<JobFormProps> = ({
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="job-name">Name</Label>
+          <RequiredLabel htmlFor="job-name" required>Name</RequiredLabel>
 
           <Input
             id="job-name"
             value={formik.values.name}
             onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-            placeholder="e.g., Backend Engineer"
             required
             disabled={isLoading}
             aria-invalid={!!formik.errors.name}
@@ -159,7 +159,7 @@ export const JobForm: FC<JobFormProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="job-family">Family</Label>
+            <RequiredLabel htmlFor="job-family" required>Family</RequiredLabel>
 
             <Select
               value={formik.values.familyId}
@@ -193,11 +193,11 @@ export const JobForm: FC<JobFormProps> = ({
               disabled={isLoading || isLevelsLoading}
             >
               <SelectTrigger id="job-level">
-                <SelectValue placeholder={isLevelsLoading ? "Loading…" : "No level"}/>
+                <SelectValue placeholder={isLevelsLoading ? "Loading…" : "None"}/>
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value={NO_LEVEL}>No level</SelectItem>
+                <SelectItem value={NO_LEVEL}>None</SelectItem>
 
                 {levelGroups.map((group) => (
                   <SelectGroup key={group.id}>
@@ -221,7 +221,6 @@ export const JobForm: FC<JobFormProps> = ({
             id="job-code"
             value={formik.values.code}
             onChange={(e) => formik.setFieldValue("code", e.currentTarget.value)}
-            placeholder="Optional — e.g., ENG-BE-03"
             maxLength={CODE_MAX}
             disabled={isLoading}
             aria-invalid={!!formik.errors.code}
@@ -237,7 +236,6 @@ export const JobForm: FC<JobFormProps> = ({
             id="job-description"
             value={formik.values.description}
             onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
-            placeholder="A short line about the position"
             rows={3}
             maxLength={DESCRIPTION_MAX}
             disabled={isLoading}

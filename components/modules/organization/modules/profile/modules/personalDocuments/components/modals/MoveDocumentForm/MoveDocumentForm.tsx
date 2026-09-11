@@ -5,8 +5,8 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Label } from "@/public/desact/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type MoveDocumentFolderOption = {
   id: string;
@@ -88,7 +88,7 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <Label>Destination folder</Label>
+        <RequiredLabel required>Destination Folder</RequiredLabel>
 
         <Select
           value={formik.values.folderId}
@@ -100,7 +100,7 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value={ROOT_FOLDER_ID}>No folder</SelectItem>
+            <SelectItem value={ROOT_FOLDER_ID}>None</SelectItem>
 
             {folders.map((folder) => (
               <SelectItem key={folder.id} value={folder.id}>

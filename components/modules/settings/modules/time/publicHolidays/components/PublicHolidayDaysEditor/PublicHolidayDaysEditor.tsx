@@ -106,7 +106,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
           <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
             <TableRow>
               <TableHead className="w-44">Date</TableHead>
-              <TableHead className="w-44">End date</TableHead>
+              <TableHead className="w-44">End Date</TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="w-32">Length</TableHead>
               <TableHead className="w-12">
@@ -141,7 +141,6 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       min={holiday.holidayDate || undefined}
                       onChange={(next) => handleChange(holiday.localId, "endDate", next)}
                       disabled={disabled}
-                      placeholder="Same day"
                       ariaLabel="End date"
                       invalid={!!rowErrors?.endDate}
                       className={QUIET_FIELD}
@@ -155,7 +154,6 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       onChange={(e) =>
                         handleChange(holiday.localId, "name", e.currentTarget.value)
                       }
-                      placeholder="Holiday name"
                       disabled={disabled}
                       aria-label="Holiday name"
                       aria-invalid={!!rowErrors?.name}
@@ -209,7 +207,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
         className="mt-2"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Add holiday day
+        Add Holiday Day
       </Button>
     </div>
   );

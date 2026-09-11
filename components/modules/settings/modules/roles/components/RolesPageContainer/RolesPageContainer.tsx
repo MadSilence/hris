@@ -36,6 +36,7 @@ const errorMessageOf = (error: unknown) =>
 const RolesPageContainer: React.FC = () => {
   const [view, setView] = React.useState<RolesTableView>("roles");
   const [query, setQuery] = React.useState("");
+  const [showArchived, setShowArchived] = React.useState(false);
 
   const trimmedQuery = query.trim();
   const debouncedQuery = useDebouncedValue(trimmedQuery, 300);
@@ -66,17 +67,27 @@ const RolesPageContainer: React.FC = () => {
   const archiveRole = useArchiveRoleAction();
   const assignUserRoles = useAssignUserRolesAction();
 
-  // Archived roles are listed alongside active ones, marked with a badge rather than hidden behind
-  // a switch: a role that still grants nothing to the people holding it is exactly the thing an
-  // admin needs to notice.
-  const filteredRoles = React.useMemo(() => {
-    let rows = roles ?? [];
+  const archivedRoleCount = React.useMemo(
+    () => (roles ?? []).filter((role) => role.archived).length,
+    [roles],
+  );
+
+  /*
+    What the roles table shows: the archived view or everything else, narrowed by the search.
+
+    Archived roles used to be listed alongside active ones and marked with a badge, on the argument
+    that a role granting nothing to the people who hold it is what an admin needs to notice. The
+    toggle answers that better — it is one tap, it carries the count, and the list stops mixing two
+    states. Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+  */
+  const roleTableRows = React.useMemo(() => {
+    let rows = (roles ?? []).filter((role) => (showArchived ? role.archived : !role.archived));
     if (view === "roles" && trimmedQuery.length >= 1) {
       const needle = trimmedQuery.toLowerCase();
       rows = rows.filter((role) => role.name.toLowerCase().includes(needle));
     }
     return rows;
-  }, [roles, view, trimmedQuery]);
+  }, [roles, view, trimmedQuery, showArchived]);
 
   // Below the hooks, and rendered rather than thrown. These two were `throw rolesError` /
   // `throw peopleError` higher up: the boundary they reached replaces the page and discards the
@@ -91,7 +102,16 @@ const RolesPageContainer: React.FC = () => {
       onViewChange={setView}
       query={query}
       onQueryChange={setQuery}
-      roleRows={filteredRoles}
+      roleRows={roleTableRows}
+      /*
+        Every role, unfiltered. The assign-roles form needs the archived ones so a person can be
+        taken off them, and the name-collision check needs the ones the search is hiding — it used
+        to read the filtered list, so typing in the search box let a duplicate name through.
+      */
+      allRoles={roles ?? []}
+      archivedRoleCount={archivedRoleCount}
+      showArchived={showArchived}
+      onShowArchivedChange={setShowArchived}
       userRows={userRows}
       rolesLoading={rolesLoading}
       usersLoading={usersLoading}

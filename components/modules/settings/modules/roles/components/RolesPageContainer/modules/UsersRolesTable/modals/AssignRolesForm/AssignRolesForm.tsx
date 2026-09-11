@@ -198,9 +198,9 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
           roles actually add up to. The preview follows the *selection*, not what is saved. */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as AssignRolesTab)}>
         <TabsList className="grid w-full grid-cols-3 bg-brown-50">
-          <TabsTrigger value="roles">Assigned roles</TabsTrigger>
-          <TabsTrigger value="permissions">Resolved permissions</TabsTrigger>
-          <TabsTrigger value="fields">Resolved field visibility</TabsTrigger>
+          <TabsTrigger value="roles">Assigned Roles</TabsTrigger>
+          <TabsTrigger value="permissions">Resolved Permissions</TabsTrigger>
+          <TabsTrigger value="fields">Resolved Field Visibility</TabsTrigger>
         </TabsList>
 
         <TabsContent value="permissions" className="mt-4 max-h-[320px] overflow-y-auto">

@@ -100,7 +100,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             value={query}
             onChange={(e) => onQueryChange(e.currentTarget.value)}
             className="h-9 w-[240px] pl-9"
-            placeholder="Search people"
+            placeholder="Search"
             inputMode="search"
           />
         </div>
@@ -245,7 +245,6 @@ export const CompanyCalendarToolbar: FC<Props> = ({
           <Input
             autoFocus
             value={saveName}
-            placeholder="View name"
             onChange={(e) => setSaveName(e.currentTarget.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && saveName.trim()) {

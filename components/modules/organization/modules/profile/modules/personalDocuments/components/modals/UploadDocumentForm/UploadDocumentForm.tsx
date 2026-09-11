@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { formatBytes } from "../../../utils/formatBytes";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type FolderOption = {
   id: string;
@@ -122,7 +123,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-5">
         <div className="space-y-2">
-          <Label>Files</Label>
+          <RequiredLabel required>Files</RequiredLabel>
 
           <div
             role="button"
@@ -244,7 +245,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value={ROOT_FOLDER_ID}>No folder</SelectItem>
+              <SelectItem value={ROOT_FOLDER_ID}>None</SelectItem>
 
               {folders.map((folder) => (
                 <SelectItem key={folder.id} value={folder.id}>
@@ -256,7 +257,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label>Who can see this</Label>
+          <Label>Who Can See This</Label>
 
           <Select
             value={visibility}
@@ -286,7 +287,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value={NO_CATEGORY_ID}>No category</SelectItem>
+                <SelectItem value={NO_CATEGORY_ID}>None</SelectItem>
 
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>

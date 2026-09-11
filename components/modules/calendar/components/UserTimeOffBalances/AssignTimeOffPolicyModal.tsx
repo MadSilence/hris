@@ -31,6 +31,7 @@ import { useCreateTimeOffPolicyAssignment } from "@/components/modules/settings/
 import { useInvalidateEmployeeTimeOffBalancesQuery } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { TimeOffPolicyStatus, TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 type Props = {
   isOpen: boolean;
@@ -95,8 +96,8 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
       ? "Unlimited"
       : selected.yearlyQuota !== null
         ? `${selected.yearlyQuota} ${selected.unit === TimeOffPolicyUnit.Hours ? "h" : "d"} / year`
-        : "—"
-    : "—";
+ : ""
+ : "";
 
   const handleSubmit = async () => {
     if (!policyId) {
@@ -145,7 +146,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
           ) : (
             <>
               <div className="space-y-1.5">
-                <Label className="text-xs">Policy</Label>
+                <RequiredLabel className="text-xs" required>Policy</RequiredLabel>
                 <Select
                   value={policyId}
                   onValueChange={setPolicyId}
@@ -181,7 +182,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               )}
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Effective from</Label>
+                <Label className="text-xs">Effective From</Label>
                 <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
                   <PopoverTrigger asChild>
                     <Button

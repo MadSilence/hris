@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Check, ChevronsUpDown, Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
 import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve";
 import { emptySegment, type UserRefDTO } from "@/models/segment/Segment";
+import { SearchBox } from "@/components/ui/SearchBox";
 
 export type PickedUser = {
   id: string;
@@ -123,16 +123,7 @@ export function UserPickerField({
 
       <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
         <div className="border-b border-brown-100 p-2">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brown-400" />
-            <Input
-              autoFocus
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              placeholder="Search people…"
-              className="h-8 pl-8 text-sm"
-            />
-          </div>
+          <SearchBox value={query} onChange={setQuery}/>
         </div>
 
         <div ref={listRef} onScroll={onScroll} className="max-h-64 overflow-y-auto p-1">

@@ -76,7 +76,7 @@ describe("CreateDocumentsFolderModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /create folder/i }),
+      screen.getByRole("heading", { name: /add folder/i }),
     ).toBeInTheDocument();
 
     expect(
@@ -157,7 +157,7 @@ describe("CreateDocumentsFolderModal", () => {
     expect(onCancelAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /create folder/i }),
+      screen.getByRole("heading", { name: /add folder/i }),
     ).toBeInTheDocument();
 
     expect(

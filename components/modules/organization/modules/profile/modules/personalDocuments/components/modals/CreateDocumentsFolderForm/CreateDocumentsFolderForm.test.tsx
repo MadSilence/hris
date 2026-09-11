@@ -12,7 +12,7 @@ describe("CreateDocumentsFolderForm", () => {
     );
 
     expect(screen.getByLabelText(/folder name/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/contracts/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/folder name/i)).toBeInTheDocument();
     expect(screen.getByText(/minimum 2 characters/i)).toBeInTheDocument();
   });
 

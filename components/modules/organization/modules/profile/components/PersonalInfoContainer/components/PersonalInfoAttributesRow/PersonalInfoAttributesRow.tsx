@@ -79,7 +79,7 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
             className="text-muted-foreground"
             title="You don't have access to this field's value"
           >
-            {rawValue == null ? "—" : String(rawValue)}
+            {rawValue == null ? "" : String(rawValue)}
           </span>
         ) : !isEdit ? (
           <ViewValue attribute={attribute} rawValue={rawValue}/>
@@ -478,7 +478,6 @@ function PersonEditor({
         setLastPicked(u);
         onChange(u?.id ?? null);
       }}
-      placeholder="No one selected"
     />
   );
 }

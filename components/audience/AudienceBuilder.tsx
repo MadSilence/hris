@@ -340,7 +340,6 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     <Input
       className="h-9 w-44"
       type={inputType}
-      placeholder="Value"
       value={value}
       onChange={(e) => onValue(e.target.value)}
     />
@@ -379,7 +378,7 @@ const MultiSelect: React.FC<{
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search…" className="h-9" />
+            <CommandInput placeholder="Search" className="h-9" />
             <CommandList>
               <CommandEmpty>No options</CommandEmpty>
               <CommandGroup>

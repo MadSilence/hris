@@ -41,7 +41,7 @@ const COPY: Record<JobModalMode, { title: string; description: string; submit: s
   create: {
     title: "Add job",
     description: "A position is a family, a name and (optionally) a level.",
-    submit: "Create",
+    submit: "Add",
   },
   edit: {
     title: "Edit job",
@@ -51,7 +51,7 @@ const COPY: Record<JobModalMode, { title: string; description: string; submit: s
   duplicate: {
     title: "Duplicate job",
     description: "Everything is copied except the code, which must stay unique.",
-    submit: "Create",
+    submit: "Add",
   },
 };
 

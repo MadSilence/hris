@@ -33,7 +33,7 @@ describe("RenameAttributeGroupForm", () => {
     renderForm();
 
     expect(screen.getByLabelText(/name your section/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/hr information/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/name your section/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /rename/i })).toBeInTheDocument();
   });

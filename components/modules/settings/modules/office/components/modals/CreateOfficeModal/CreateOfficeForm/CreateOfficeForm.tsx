@@ -9,6 +9,7 @@ import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { FormError } from "@/components/feedback/FormError";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type CreateOfficeFormValues = {
   name: string;
@@ -147,14 +148,13 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="office-name">Name</Label>
+              <RequiredLabel htmlFor="office-name" required>Name</RequiredLabel>
               <Input
                 id="office-name"
                 value={formik.values.name}
                 onChange={(e) =>
                   formik.setFieldValue("name", e.currentTarget.value)
                 }
-                placeholder="e.g., London HQ"
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.name}
               />
@@ -173,7 +173,6 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 onChange={(e) =>
                   formik.setFieldValue("description", e.currentTarget.value)
                 }
-                placeholder="Optional"
                 disabled={isLoading}
               />
             </div>
@@ -187,7 +186,6 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("email", e.currentTarget.value)
                   }
-                  placeholder="Optional"
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.email}
                 />
@@ -206,7 +204,6 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   onChange={(e) =>
                     formik.setFieldValue("phone", e.currentTarget.value)
                   }
-                  placeholder="Optional"
                   disabled={isLoading}
                 />
               </div>
@@ -224,7 +221,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="office-country">Country</Label>
+                <RequiredLabel htmlFor="office-country" required>Country</RequiredLabel>
                 <Input
                   id="office-country"
                   value={formik.values.country}
@@ -242,7 +239,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="office-city">City</Label>
+                <RequiredLabel htmlFor="office-city" required>City</RequiredLabel>
                 <Input
                   id="office-city"
                   value={formik.values.city}
@@ -262,14 +259,13 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="office-street">Street</Label>
+                <RequiredLabel htmlFor="office-street" required>Street</RequiredLabel>
                 <Input
                   id="office-street"
                   value={formik.values.street}
                   onChange={(e) =>
                     formik.setFieldValue("street", e.currentTarget.value)
                   }
-                  placeholder="e.g., Baker Street"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.street}
@@ -280,14 +276,13 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="office-building">Building</Label>
+                <RequiredLabel htmlFor="office-building" required>Building</RequiredLabel>
                 <Input
                   id="office-building"
                   value={formik.values.building}
                   onChange={(e) =>
                     formik.setFieldValue("building", e.currentTarget.value)
                   }
-                  placeholder="e.g., 221B"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.building}
@@ -299,14 +294,13 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="office-post-code">Post code</Label>
+              <RequiredLabel htmlFor="office-post-code" required>Post Code</RequiredLabel>
               <Input
                 id="office-post-code"
                 value={formik.values.postCode}
                 onChange={(e) =>
                   formik.setFieldValue("postCode", e.currentTarget.value)
                 }
-                placeholder="e.g., NW1 6XE"
                 required
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.postCode}

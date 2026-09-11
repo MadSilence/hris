@@ -2,9 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import {
   TableBody,
@@ -13,25 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/public/desact/src/components/ui/table";
-import { Download, Plus, Search, Users, X } from "lucide-react";
+import { Download, Plus, Users, X } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import type { ResourceCode } from "@/models/access";
 import type { AssignedUser } from "@/models/assignedUser";
-import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 import { assignedUsersQueryKey } from "@/components/audience/assignment/hooks/useAssignedUsers";
 import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+import { UserStatusBadge } from "@/components/ui/StatusBadge";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 export interface AssignedUsersPanelProps {
   title?: string;
   description: string;
-  searchPlaceholder?: string;
   manageResource?: ResourceCode;
   rows?: AssignedUser[];
   isLoading?: boolean;
@@ -74,7 +74,6 @@ const SCROLL_OFFSET = "calc(100svh - 390px)";
 export default function AssignedUsersPanel({
   title = "Assigned People",
   description,
-  searchPlaceholder = "Search users",
   manageResource,
   rows = [],
   isLoading = false,
@@ -93,12 +92,14 @@ export default function AssignedUsersPanel({
 }: AssignedUsersPanelProps) {
   const secondary = secondaryColumn ?? {
     header: "Position",
-    render: (u: AssignedUser) => u.jobName || "—",
+    render: (u: AssignedUser) => u.jobName,
   };
   const queryClient = useQueryClient();
   const [internalQuery, setInternalQuery] = useState("");
   const [assignOpen, setAssignOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  /** Unassign confirms — `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7. */
+  const [removeTarget, setRemoveTarget] = useState<AssignedUser | null>(null);
 
   const q = query ?? internalQuery;
   const setQuery = onQueryChange ?? setInternalQuery;
@@ -132,6 +133,12 @@ export default function AssignedUsersPanel({
     } finally {
       setRemovingId(null);
     }
+  };
+
+  const confirmRemove = async () => {
+    if (!removeTarget) return;
+    await handleRemove(removeTarget.id);
+    setRemoveTarget(null);
   };
 
   const assignButton = (
@@ -183,16 +190,7 @@ export default function AssignedUsersPanel({
 
       {/* Toolbar */}
       <div className="flex flex-none items-center justify-between gap-4">
-        <div className="relative w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-400"/>
-          <Input
-            value={q}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="pl-9 w-[260px] h-9"
-            inputMode="search"
-          />
-        </div>
+        <SearchBox value={q} onChange={setQuery}/>
 
         <div className="flex items-center gap-3">
           {manageResource ? (
@@ -223,40 +221,20 @@ export default function AssignedUsersPanel({
       </div>
 
       {isEmpty ? (
-        searching ? (
-          <div
-            className={`flex flex-col items-center justify-center gap-4 text-center ${emptyClass}`}
-            style={emptyStyle}
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
-              <Users className="h-7 w-7"/>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">No people match your search</p>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                Try a different name or position.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => assign && !isArchived && setAssignOpen(true)}
-            disabled={!assign || isArchived}
-            className={`flex w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-brown-300 text-center transition-colors enabled:hover:border-brown-400 enabled:hover:bg-brown-50 disabled:cursor-default ${emptyClass}`}
-            style={emptyStyle}
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
-              <Users className="h-7 w-7"/>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">No people assigned yet</p>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                Click to assign people to this record.
-              </p>
-            </div>
-          </button>
-        )
+        <div style={emptyStyle}>
+          <ListEmptyState
+            query={searching ? q : ""}
+            icon={<Users className="h-7 w-7"/>}
+            title="No people assigned yet"
+            description="Assign people to this record to see them here."
+            noResultsHint="Try a different name or position."
+            /* An archived record takes no new people, so the block is a panel rather than a
+               button — a control that cannot work is not offered. */
+            onCreate={assign && !isArchived ? () => setAssignOpen(true) : undefined}
+            createLabel="Assign People"
+            className={emptyClass}
+          />
+        </div>
       ) : (
         <div className={scrollClass} style={scrollStyle}>
           <table className="w-full caption-bottom text-sm table-fixed">
@@ -308,7 +286,7 @@ export default function AssignedUsersPanel({
                       <TableCell className="text-muted-foreground">{secondary.render(u)}</TableCell>
 
                       <TableCell>
-                        <StatusBadge status={u.status}/>
+                        <UserStatusBadge status={u.status}/>
                       </TableCell>
 
                       {canRemove ? (
@@ -318,14 +296,14 @@ export default function AssignedUsersPanel({
                               <RemoveButton
                                 name={fullName}
                                 disabled={removingId === u.id}
-                                onClick={() => handleRemove(u.id)}
+                                onClick={() => setRemoveTarget(u)}
                               />
                             </PermissionGate>
                           ) : (
                             <RemoveButton
                               name={fullName}
                               disabled={removingId === u.id}
-                              onClick={() => handleRemove(u.id)}
+                              onClick={() => setRemoveTarget(u)}
                             />
                           )}
                         </TableCell>
@@ -359,6 +337,17 @@ export default function AssignedUsersPanel({
           invalidateKeys={assign.invalidateKeys}
         />
       ) : null}
+
+      <ConfirmActionModal
+        isOpen={removeTarget !== null}
+        title="Unassign Person"
+        description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be assigned here. They keep their account and everything else.`}
+        confirmLabel="Unassign"
+        destructive
+        isLoading={removingId === removeTarget?.id}
+        onConfirmAction={confirmRemove}
+        onCancelAction={() => setRemoveTarget(null)}
+      />
     </div>
   );
 }
@@ -378,25 +367,10 @@ function RemoveButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={`Unassign ${name}`}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-red-600 disabled:opacity-50"
     >
       <X className="h-4 w-4"/>
     </button>
   );
 }
 
-function StatusBadge({ status }: { status?: string | null }) {
-  if (!status) return <span className="text-muted-foreground">—</span>;
-
-  const label = formatUserStatus(status);
-  const active = isActiveStatus(status);
-
-  return (
-    <Badge
-      variant={active ? "outline" : "secondary"}
-      className={active ? "border-green-200 bg-green-50 text-green-700" : ""}
-    >
-      {label}
-    </Badge>
-  );
-}

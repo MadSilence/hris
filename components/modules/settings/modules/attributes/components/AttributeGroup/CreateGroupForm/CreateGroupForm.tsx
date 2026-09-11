@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface CreateGroupFormProps {
   isLoading?: boolean;
@@ -87,13 +87,12 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <Label htmlFor="group-name">Name your section</Label>
+        <RequiredLabel htmlFor="group-name" required>Name Your Section</RequiredLabel>
 
         <Input
           id="group-name"
           value={formik.values.name}
           onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-          placeholder="e.g., HR information"
           required
           disabled={isLoading}
           aria-invalid={!!formik.errors.name}

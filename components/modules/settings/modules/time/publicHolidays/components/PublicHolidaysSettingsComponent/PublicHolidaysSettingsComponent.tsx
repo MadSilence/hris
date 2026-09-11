@@ -10,23 +10,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Archive,
+  ArchiveRestore,
   CalendarDays,
   Copy,
   Download,
   DownloadCloud,
   FilePlus2,
-  MoreVertical,
   Plus,
   Power,
   PowerOff,
-  RotateCcw,
-  Search,
   Trash2,
 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -38,7 +35,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/public/desact/src/components/ui/dropdown-menu";
 import {
@@ -48,6 +44,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/public/desact/src/components/ui/table";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
@@ -67,6 +66,7 @@ import {
   ExportDataFormValues,
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 type Props = {
   calendars: PublicHolidayCalendar[];
@@ -86,7 +86,7 @@ const calendarStatus = (status: PublicHolidayCalendarStatus): EntityStatus => {
 
 /** "2025–2027" for a run of years, "2025, 2027" when there is a gap. */
 function formatYears(years: number[]) {
-  if (!years || years.length === 0) return "—";
+  if (!years || years.length === 0) return "";
 
   const sorted = [...years].sort((a, b) => a - b);
   const isContiguous = sorted.every((y, i) => i === 0 || y === sorted[i - 1] + 1);
@@ -99,7 +99,7 @@ function formatYears(years: number[]) {
 function formatCountryRegion(calendar: PublicHolidayCalendar) {
   const { sourceCountryCode: c, sourceRegionCode: r } = calendar;
   if (c && r) return `${c} / ${r}`;
-  return c || r || "—";
+  return c || r;
 }
 
 export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoading }) => {
@@ -149,13 +149,23 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const activate = useActivatePublicHolidayCalendar();
   const deactivate = useDeactivatePublicHolidayCalendar();
 
-  /** Archived calendars stay out of the list until the toggle asks for them. */
+  /**
+   * Two views, not one that widens: on shows **only** archived, off shows everything else.
+   * Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
+   */
   const visible = useMemo(
     () =>
-      showArchived
-        ? calendars
-        : calendars.filter((c) => c.status !== PublicHolidayCalendarStatus.Archived),
+      calendars.filter((c) =>
+        showArchived
+          ? c.status === PublicHolidayCalendarStatus.Archived
+          : c.status !== PublicHolidayCalendarStatus.Archived,
+      ),
     [calendars, showArchived],
+  );
+
+  const archivedCount = useMemo(
+    () => calendars.filter((c) => c.status === PublicHolidayCalendarStatus.Archived).length,
+    [calendars],
   );
 
   const filtered = useMemo(() => {
@@ -240,17 +250,23 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <DropdownMenuTrigger asChild>
         <Button className="gap-1.5">
           <Plus className="h-4 w-4" />
-          Add calendar
+          Add Calendar
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => setIsChooseTemplateModalOpen(true)}>
-          <DownloadCloud className="mr-2 h-4 w-4" />
-          Choose from template
+      <DropdownMenuContent align="end" className="w-40 rounded-lg p-1">
+        <DropdownMenuItem
+          onSelect={() => setIsChooseTemplateModalOpen(true)}
+          className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer"
+        >
+          <DownloadCloud className="h-4 w-4 text-muted-foreground" />
+          From Template
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={handleCreateManually}>
-          <FilePlus2 className="mr-2 h-4 w-4" />
-          Create manually
+        <DropdownMenuItem
+          onSelect={handleCreateManually}
+          className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer"
+        >
+          <FilePlus2 className="h-4 w-4 text-muted-foreground" />
+          Manually
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -267,34 +283,11 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             </PageDescription>
           </div>
 
-          {/* Toolbar: search (left) + actions (right) */}
-          <div className="flex items-center justify-between gap-4 py-5">
-            <div className="flex items-center gap-3">
-              <div className="relative w-[260px]">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
-                  className="h-9 w-[260px] pl-9"
-                  placeholder="Search calendars"
-                  inputMode="search"
-                />
-              </div>
-
-              <Button
-                type="button"
-                variant={showArchived ? "default" : "outline"}
-                className="h-9 gap-1.5"
-                aria-pressed={showArchived}
-                onClick={() => setShowArchived((current) => !current)}
-              >
-                <Archive className="h-4 w-4" />
-                Show archived
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {addCalendarMenu}
+          <ListToolbar
+            className="py-5"
+            search={{ value: query, onChange: setQuery }}
+            archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
+            secondary={
               <Button
                 size="icon"
                 variant="outline"
@@ -303,16 +296,19 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               >
                 <Download className="h-4 w-4" />
               </Button>
-            </div>
-          </div>
+            }
+            primary={addCalendarMenu}
+          />
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
           {!isLoading && !hasCalendars ? (
-            <EmptyState
+            <ListEmptyState
+              icon={<CalendarDays className="h-7 w-7" />}
               title="No public holiday calendars yet"
-              body="Create a manual calendar or choose a template to start using public holidays in time off calculations."
+              description="Add a manual calendar or choose a template to start using public holidays in time off calculations."
               action={addCalendarMenu}
+              className="min-h-72 flex-1"
             />
           ) : (
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
@@ -332,11 +328,18 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                   {isLoading ? (
                     <PublicHolidaysSettingsSkeleton />
                   ) : filtered.length === 0 ? (
-                    <TableRow className="[&_td]:py-2">
+                    <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={6}>
-                        <div className="py-6 text-center text-sm text-muted-foreground">
-                          No calendars match your search.
-                        </div>
+                        <ListEmptyState
+                          query={query}
+                          archivedView={showArchived}
+                          icon={<CalendarDays className="h-7 w-7" />}
+                          title="No public holiday calendars yet"
+                          description="Add a manual calendar or choose a template to start using public holidays in time off calculations."
+                          noResultsHint="Try a different calendar, country or region."
+                          archivedDescription="Archived calendars will appear here."
+                          action={addCalendarMenu}
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -374,71 +377,52 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
-                                    aria-label="Calendar actions"
+                              <RowActionsMenu label="Calendar Actions">
+                                <RowAction
+                                  icon={<Copy className="h-4 w-4" />}
+                                  onClick={() => openDuplicate(calendar)}
+                                >
+                                  Duplicate
+                                </RowAction>
+                                {isArchived ? (
+                                  <RowAction
+                                    icon={<ArchiveRestore className="h-4 w-4" />}
+                                    onClick={() => setRestoreTarget(calendar)}
                                   >
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44 rounded-lg p-1.5">
-                                  <DropdownMenuItem
-                                    onClick={() => openDuplicate(calendar)}
-                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                  >
-                                    <Copy className="h-4 w-4 text-muted-foreground" />
-                                    Duplicate
-                                  </DropdownMenuItem>
-                                  {isArchived ? (
-                                    <DropdownMenuItem
-                                      onClick={() => setRestoreTarget(calendar)}
-                                      className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                    >
-                                      <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                                      Unarchive
-                                    </DropdownMenuItem>
-                                  ) : (
-                                    <>
-                                      {isActive ? (
-                                        <DropdownMenuItem
-                                          onClick={() => setDeactivateTarget(calendar)}
-                                          className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                        >
-                                          <PowerOff className="h-4 w-4 text-muted-foreground" />
-                                          Deactivate
-                                        </DropdownMenuItem>
-                                      ) : (
-                                        <DropdownMenuItem
-                                          onClick={() => handleActivate(calendar)}
-                                          className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
-                                        >
-                                          <Power className="h-4 w-4 text-muted-foreground" />
-                                          Activate
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem
-                                        onClick={() => setArchiveTarget(calendar)}
-                                        className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer"
+                                    Unarchive
+                                  </RowAction>
+                                ) : (
+                                  <>
+                                    {isActive ? (
+                                      <RowAction
+                                        icon={<PowerOff className="h-4 w-4" />}
+                                        onClick={() => setDeactivateTarget(calendar)}
                                       >
-                                        <Archive className="h-4 w-4 text-muted-foreground" />
-                                        Archive
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-                                  <DropdownMenuSeparator className="my-1.5 bg-brown-100" />
-                                  <DropdownMenuItem
-                                    onClick={() => setDeleteTarget(calendar)}
-                                    className="gap-2.5 rounded-md px-2.5 py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                        Deactivate
+                                      </RowAction>
+                                    ) : (
+                                      <RowAction
+                                        icon={<Power className="h-4 w-4" />}
+                                        onClick={() => handleActivate(calendar)}
+                                      >
+                                        Activate
+                                      </RowAction>
+                                    )}
+                                    <RowAction
+                                      icon={<Archive className="h-4 w-4" />}
+                                      onClick={() => setArchiveTarget(calendar)}
+                                    >
+                                      Archive
+                                    </RowAction>
+                                  </>
+                                )}
+                                <RowActionDestructive
+                                  icon={<Trash2 className="h-4 w-4" />}
+                                  onClick={() => setDeleteTarget(calendar)}
+                                >
+                                  Delete
+                                </RowActionDestructive>
+                              </RowActionsMenu>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -475,7 +459,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <DialogTitle>Duplicate calendar</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="duplicate-calendar-name">New calendar name</Label>
+            <RequiredLabel htmlFor="duplicate-calendar-name" required>New Calendar Name</RequiredLabel>
             <Input
               id="duplicate-calendar-name"
               value={duplicateName}
@@ -601,23 +585,3 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   );
 };
 
-function EmptyState({
-  title,
-  body,
-  action,
-}: {
-  title: string;
-  body: string;
-  action: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-h-72 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
-      <div className="mb-4 rounded-2xl bg-brown-50 p-4">
-        <CalendarDays className="h-7 w-7 text-brown-600" />
-      </div>
-      <h3 className="text-base font-semibold text-foreground">{title}</h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
-      <div className="mt-5">{action}</div>
-    </div>
-  );
-}

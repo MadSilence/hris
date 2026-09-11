@@ -42,7 +42,9 @@ const renderScreen = () =>
   render(<OfficeComponent initialOffices={[]} isLoading={false}/>);
 
 const openCreate = () =>
-  fireEvent.click(screen.getByRole("button", { name: /add office/i }));
+  // The toolbar button, anchored: with an empty list the empty state is a second, deliberate
+  // "Add Office" affordance, and an unanchored name now matches both.
+  fireEvent.click(screen.getByRole("button", { name: /^add office$/i }));
 
 /**
  * A server action answers 200 whether it worked or not — the envelope is the only thing that says

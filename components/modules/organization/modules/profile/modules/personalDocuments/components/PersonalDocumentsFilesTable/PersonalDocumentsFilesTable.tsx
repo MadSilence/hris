@@ -1,9 +1,9 @@
 import * as React from "react";
-import { ArrowDown, ArrowUp, EyeOff, MoreHorizontal, Star } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { ArrowDown, ArrowUp, Download, Eye, EyeOff, FolderInput, Pencil, Star, StarOff, Trash2 } from "lucide-react";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 import type {
   DocumentSort,
@@ -109,7 +109,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                   {document.categoryName ? (
                     <Badge variant="secondary">{document.categoryName}</Badge>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    null
                   )}
                 </TableCell>
 
@@ -145,43 +145,50 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 </TableCell>
 
                 <TableCell className="text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4"/>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {onPreview && isPreviewable(document.mimeType) ? (
-                        <DropdownMenuItem onClick={() => onPreview(document)}>
-                          Preview
-                        </DropdownMenuItem>
-                      ) : null}
-                      <DropdownMenuItem asChild>
-                        <a href={getDownloadUrl(document.id)} download>
-                          Download
-                        </a>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onToggleStar(document)}>
-                        {document.isStarred ? "Remove star" : "Add star"}
-                      </DropdownMenuItem>
-                      {onRename ? (
-                        <DropdownMenuItem onClick={() => onRename(document)}>
-                          Rename
-                        </DropdownMenuItem>
-                      ) : null}
-                      {onMove ? (
-                        <DropdownMenuItem onClick={() => onMove(document)}>
-                          Move
-                        </DropdownMenuItem>
-                      ) : null}
-                      {onDelete ? (
-                        <DropdownMenuItem onClick={() => onDelete(document)}>
-                          Delete
-                        </DropdownMenuItem>
-                      ) : null}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <RowActionsMenu label="Document Actions">
+                    {onPreview && isPreviewable(document.mimeType) ? (
+                      <RowAction icon={<Eye className="h-4 w-4"/>} onClick={() => onPreview(document)}>
+                        Preview
+                      </RowAction>
+                    ) : null}
+
+                    {/*
+                      The one menu item that is a link rather than a handler: the download is a
+                      browser navigation, which carries the session cookie by itself.
+                    */}
+                    <DropdownMenuItem asChild className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer">
+                      <a href={getDownloadUrl(document.id)} download>
+                        <Download className="h-4 w-4 text-muted-foreground"/>
+                        Download
+                      </a>
+                    </DropdownMenuItem>
+
+                    <RowAction
+                      icon={document.isStarred ? <StarOff className="h-4 w-4"/> : <Star className="h-4 w-4"/>}
+                      onClick={() => onToggleStar(document)}
+                    >
+                      {document.isStarred ? "Remove Star" : "Add Star"}
+                    </RowAction>
+
+                    {onRename ? (
+                      <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onRename(document)}>
+                        Rename
+                      </RowAction>
+                    ) : null}
+                    {onMove ? (
+                      <RowAction icon={<FolderInput className="h-4 w-4"/>} onClick={() => onMove(document)}>
+                        Move
+                      </RowAction>
+                    ) : null}
+                    {onDelete ? (
+                      <RowActionDestructive
+                        icon={<Trash2 className="h-4 w-4"/>}
+                        onClick={() => onDelete(document)}
+                      >
+                        Delete
+                      </RowActionDestructive>
+                    ) : null}
+                  </RowActionsMenu>
                 </TableCell>
               </TableRow>
             ))}

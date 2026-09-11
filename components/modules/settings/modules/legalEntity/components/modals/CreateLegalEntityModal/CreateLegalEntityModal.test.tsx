@@ -92,7 +92,7 @@ describe("CreateLegalEntityModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /create legal entity/i }),
+      screen.getByRole("heading", { name: /add legal entity/i }),
     ).toBeInTheDocument();
 
     expect(
@@ -179,7 +179,7 @@ describe("CreateLegalEntityModal", () => {
     expect(onCancelAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /create legal entity/i }),
+      screen.getByRole("heading", { name: /add legal entity/i }),
     ).toBeInTheDocument();
 
     expect(

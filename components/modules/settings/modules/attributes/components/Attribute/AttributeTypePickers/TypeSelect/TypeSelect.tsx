@@ -21,7 +21,7 @@ export const TypeSelect: React.FC<TypeSelectProps> = ({ value, onChange }) => {
       Type
       <Select value={value} onValueChange={(v) => onChange(v as AttributeType)}>
         <SelectTrigger>
-          <SelectValue placeholder="Choose type"/>
+          <SelectValue/>
         </SelectTrigger>
 
         <SelectContent>

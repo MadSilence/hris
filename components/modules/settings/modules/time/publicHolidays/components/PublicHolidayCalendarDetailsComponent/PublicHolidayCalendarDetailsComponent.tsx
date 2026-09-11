@@ -2,10 +2,9 @@
 
 import { FC, useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, CalendarPlus, Download, Pencil, Rss, Search, Users, X } from "lucide-react";
+import { CalendarDays, CalendarPlus, Download, Pencil, Rss, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import {
   TableBody,
@@ -44,6 +43,7 @@ import { mapServerFieldErrors } from "../PublicHolidayDaysEditor/serverFieldErro
 import { useInvalidatePublicHolidaysQuery } from "../../hooks/usePublicHolidayCalendars";
 import { useFillPublicHolidayYear } from "../../hooks/useFillPublicHolidayYear";
 import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
+import { SearchBox } from "@/components/ui/SearchBox";
 import {
   ExportDataModal,
   ExportDataFormValues,
@@ -440,16 +440,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               {/* Toolbar: search + year (left) + edit (right) */}
               <div className="flex flex-none items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-[260px]">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
-                    <Input
-                      value={holidaySearch}
-                      onChange={(e) => setHolidaySearch(e.currentTarget.value)}
-                      className="h-9 w-[260px] pl-9"
-                      placeholder="Search holidays"
-                      inputMode="search"
-                    />
-                  </div>
+                  <SearchBox value={holidaySearch} onChange={setHolidaySearch}/>
 
                   <PublicHolidayYearSelect
                     value={year}
@@ -494,7 +485,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
                       <TableRow>
                         <TableHead className="w-44">Date</TableHead>
-                        <TableHead className="w-44">End date</TableHead>
+                        <TableHead className="w-44">End Date</TableHead>
                         <TableHead>Name</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -523,7 +514,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                                   </span>
                                 </span>
                               ) : (
-                                <span className="text-brown-300">—</span>
+                                null
                               )}
                             </TableCell>
                             <TableCell className="font-medium">

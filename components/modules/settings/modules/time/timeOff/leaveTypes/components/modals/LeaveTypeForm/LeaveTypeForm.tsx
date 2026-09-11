@@ -13,6 +13,7 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
 import { PRESET_COLORS } from "@/models/colors";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type LeaveTypeFormValues = {
   name: string;
@@ -118,12 +119,11 @@ export const LeaveTypeForm: FC<Props> = ({
         {/* Form fields */}
         <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="leave-type-name">Name</Label>
+            <RequiredLabel htmlFor="leave-type-name" required>Name</RequiredLabel>
             <Input
               id="leave-type-name"
               value={formik.values.name}
               onChange={(e) => formik.setFieldValue("name", e.currentTarget.value)}
-              placeholder="e.g., Paid Vacation"
               required
               disabled={isLoading}
               aria-invalid={!!formik.errors.name}
@@ -137,7 +137,6 @@ export const LeaveTypeForm: FC<Props> = ({
               id="leave-type-description"
               value={formik.values.description}
               onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
-              placeholder="Optional"
               disabled={isLoading}
               aria-invalid={!!formik.errors.description}
             />
@@ -245,7 +244,7 @@ export const LeaveTypeForm: FC<Props> = ({
                   {selectedChip.label}
                 </Badge>
               ) : (
-                <span className="text-xs text-muted-foreground">No category</span>
+                <span className="text-xs text-muted-foreground">None</span>
               )}
             </div>
           </div>

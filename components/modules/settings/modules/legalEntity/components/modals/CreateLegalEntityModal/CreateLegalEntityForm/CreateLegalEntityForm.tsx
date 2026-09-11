@@ -8,6 +8,7 @@ import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { FormError } from "@/components/feedback/FormError";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type CreateLegalEntityFormValues = {
   name: string;
@@ -178,14 +179,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="legal-entity-name">Name</Label>
+              <RequiredLabel htmlFor="legal-entity-name" required>Name</RequiredLabel>
               <Input
                 id="legal-entity-name"
                 value={formik.values.name}
                 onChange={(e) =>
                   formik.setFieldValue("name", e.currentTarget.value)
                 }
-                placeholder="e.g., Acme LLC"
                 required
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.name}
@@ -203,7 +203,6 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 onChange={(e) =>
                   formik.setFieldValue("description", e.currentTarget.value)
                 }
-                placeholder="Optional"
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.description}
               />
@@ -216,9 +215,9 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-registration-number">
-                  Registration number
-                </Label>
+                <RequiredLabel htmlFor="legal-entity-registration-number" required>
+                  Registration Number
+                </RequiredLabel>
                 <Input
                   id="legal-entity-registration-number"
                   value={formik.values.registrationNumber}
@@ -228,7 +227,6 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                       e.currentTarget.value,
                     )
                   }
-                  placeholder="Registration number"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.registrationNumber}
@@ -241,14 +239,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-tax-id">Tax ID</Label>
+                <RequiredLabel htmlFor="legal-entity-tax-id" required>Tax ID</RequiredLabel>
                 <Input
                   id="legal-entity-tax-id"
                   value={formik.values.taxId}
                   onChange={(e) =>
                     formik.setFieldValue("taxId", e.currentTarget.value)
                   }
-                  placeholder="Tax identification number"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.taxId}
@@ -272,14 +269,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-country">Country</Label>
+                <RequiredLabel htmlFor="legal-entity-country" required>Country</RequiredLabel>
                 <Input
                   id="legal-entity-country"
                   value={formik.values.country}
                   onChange={(e) =>
                     formik.setFieldValue("country", e.currentTarget.value)
                   }
-                  placeholder="Country"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.country}
@@ -292,14 +288,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-city">City</Label>
+                <RequiredLabel htmlFor="legal-entity-city" required>City</RequiredLabel>
                 <Input
                   id="legal-entity-city"
                   value={formik.values.city}
                   onChange={(e) =>
                     formik.setFieldValue("city", e.currentTarget.value)
                   }
-                  placeholder="City"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.city}
@@ -314,14 +309,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-street">Street</Label>
+                <RequiredLabel htmlFor="legal-entity-street" required>Street</RequiredLabel>
                 <Input
                   id="legal-entity-street"
                   value={formik.values.street}
                   onChange={(e) =>
                     formik.setFieldValue("street", e.currentTarget.value)
                   }
-                  placeholder="e.g., Baker Street"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.street}
@@ -334,14 +328,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="legal-entity-building">Building</Label>
+                <RequiredLabel htmlFor="legal-entity-building" required>Building</RequiredLabel>
                 <Input
                   id="legal-entity-building"
                   value={formik.values.building}
                   onChange={(e) =>
                     formik.setFieldValue("building", e.currentTarget.value)
                   }
-                  placeholder="e.g., 221B"
                   required
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.building}
@@ -355,14 +348,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="legal-entity-post-code">Post code</Label>
+              <RequiredLabel htmlFor="legal-entity-post-code" required>Post Code</RequiredLabel>
               <Input
                 id="legal-entity-post-code"
                 value={formik.values.postCode}
                 onChange={(e) =>
                   formik.setFieldValue("postCode", e.currentTarget.value)
                 }
-                placeholder="e.g., NW1 6XE"
                 required
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.postCode}

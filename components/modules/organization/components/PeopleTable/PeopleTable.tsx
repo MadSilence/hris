@@ -6,11 +6,11 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/publi
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
-import { formatUserStatus, isActiveStatus } from "@/models/user/status";
 import { formatDisplayDate } from "@/lib/date";
 import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
+import { UserStatusBadge } from "@/components/ui/StatusBadge";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
@@ -44,7 +44,7 @@ type PeopleTableProps = {
 
 // Was `toISOString().slice(0,10)`, which converts to UTC and therefore showed Created/Updated as a
 // different day to different readers.
-const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : "—");
+const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : "");
 
 export default function PeopleTable({
   data = [],
@@ -125,21 +125,21 @@ export default function PeopleTable({
     if (sysKey) {
       switch (sysKey) {
         case "email":
-          return <span>{row.email || "—"}</span>;
+          return <span>{row.email}</span>;
         case "status":
-          return <StatusBadge status={row.status} />;
+          return <UserStatusBadge status={row.status}/>;
         case "created_at":
           return <span className="text-muted-foreground">{formatDate(row.createdAt)}</span>;
         case "updated_at":
           return <span className="text-muted-foreground">{formatDate(row.updatedAt)}</span>;
         case "last_name":
-          return <span>{row.lastName || "—"}</span>;
+          return <span>{row.lastName}</span>;
         case "first_name":
-          return <span>{row.firstName || "—"}</span>;
+          return <span>{row.firstName}</span>;
         case "hire_date":
           return <span className="text-muted-foreground">{formatDate(row.hireDate)}</span>;
         case "employment_type":
-          return <span>{row.employmentType || "—"}</span>;
+          return <span>{row.employmentType}</span>;
         case "probation_end":
           return <span className="text-muted-foreground">{formatDate(row.probationEnd)}</span>;
         case "termination_date":
@@ -147,7 +147,7 @@ export default function PeopleTable({
 
         // ── References to other entities ────────────────────────────────────────────────
         case "job":
-          return <span>{row.jobName || "—"}</span>;
+          return <span>{row.jobName}</span>;
         // Derived from the position the person holds — there is no grade on a person.
         case "job_level":
           return <RefValue value={row.level} />;
@@ -171,13 +171,13 @@ export default function PeopleTable({
           return <PersonValue value={row.manager} />;
 
         default:
-          return <span>—</span>;
+          return null;
       }
     }
 
     const val = row.custom?.[colId];
     const meta = metaById.get(colId);
-    if (!meta) return <span>—</span>;
+    if (!meta) return null;
 
     switch (meta.type) {
       // A PERSON attribute stores a user id and the backend resolves it to {id, name, avatarUrl};
@@ -189,14 +189,14 @@ export default function PeopleTable({
       case "EMAIL":
       case "URL":
       case "SELECT":
-        return <span>{valueToString(val) ?? "—"}</span>;
+        return <span>{valueToString(val)}</span>;
 
       case "CHECKBOX":
         return <Checkbox checked={parseCheckboxValue(val)} disabled aria-label="checked" />;
 
       case "NUMBER": {
         const n = typeof val === "number" ? val : Number(val);
-        return Number.isNaN(n) ? <span>—</span> : <span>{Intl.NumberFormat().format(n)}</span>;
+        return Number.isNaN(n) ? null : <span>{Intl.NumberFormat().format(n)}</span>;
       }
 
       case "DATE": {
@@ -206,14 +206,14 @@ export default function PeopleTable({
 
       case "MULTI_SELECT": {
         const arr = Array.isArray(val) ? val.map(String) : [];
-        if (!arr.length) return <span>—</span>;
+        if (!arr.length) return null;
         return (
           <span className="text-muted-foreground">{arr.join(", ")}</span>
         );
       }
 
       default:
-        return <span>{valueToString(val) ?? "—"}</span>;
+        return <span>{valueToString(val)}</span>;
     }
   };
 
@@ -313,19 +313,6 @@ export default function PeopleTable({
   );
 }
 
-function StatusBadge({ status }: { status?: string | null }) {
-  if (!status) return <span className="text-muted-foreground">—</span>;
-  const label = formatUserStatus(status);
-  const active = isActiveStatus(status);
-  return (
-    <Badge
-      variant={active ? "outline" : "secondary"}
-      className={active ? "border-green-200 bg-green-50 text-green-700" : ""}
-    >
-      {label}
-    </Badge>
-  );
-}
 
 const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center gap-2 py-10 text-center">
@@ -372,7 +359,7 @@ const PersonValue: React.FC<{ value?: PersonRefDTO | null; raw?: unknown }> = ({
   }
 
   const fallback = raw == null ? null : valueToString(raw);
-  return <span className={fallback ? "text-muted-foreground" : ""}>{fallback ?? "—"}</span>;
+  return <span className={fallback ? "text-muted-foreground" : ""}>{fallback}</span>;
 };
 
 /** The resolved shape the backend sends for a PERSON attribute, or null if it is still raw. */
@@ -391,11 +378,11 @@ function asPersonRef(value: unknown): PersonRefDTO | null {
 
 /** A single-valued reference (office, department, legal entity). */
 const RefValue: React.FC<{ value?: RefDTO | null }> = ({ value }) =>
-  value ? <span>{value.name}</span> : <span>—</span>;
+  value ? <span>{value.name}</span> : null;
 
 /** A multi-valued reference (teams, roles, calendars) — chips, so a long list stays scannable. */
 const RefList: React.FC<{ values?: RefDTO[] }> = ({ values }) => {
-  if (!values?.length) return <span>—</span>;
+  if (!values?.length) return null;
 
   return (
     <div className="flex flex-wrap gap-1">

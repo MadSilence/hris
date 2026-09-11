@@ -35,7 +35,7 @@ describe("CreateOfficeForm", () => {
     expect(screen.getByText(/office details/i)).toBeInTheDocument();
     expect(screen.getByText(/address/i)).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^name \*$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe("CreateOfficeForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^name$/i), "London HQ");
+    await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
     await user.type(screen.getByLabelText(/country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/city/i), "London");
     await user.type(screen.getByLabelText(/street/i), "Baker Street");
@@ -112,7 +112,7 @@ describe("CreateOfficeForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^name$/i), "London HQ");
+    await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
     await user.type(screen.getByLabelText(/country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/city/i), "London");
     await user.type(screen.getByLabelText(/email/i), "wrong-email");
@@ -132,7 +132,7 @@ describe("CreateOfficeForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.type(screen.getByLabelText(/^name$/i), " London HQ ");
+    await user.type(screen.getByLabelText(/^name \*$/i), " London HQ ");
     await user.type(screen.getByLabelText(/description/i), " Main office ");
     await user.type(screen.getByLabelText(/email/i), " office@example.com ");
     await user.type(screen.getByLabelText(/phone/i), " +44 123 ");
@@ -167,7 +167,7 @@ describe("CreateOfficeForm", () => {
 
     // The whole address is filled because the whole address is required — the backend marks it
     // `@NotBlank`, and this test used to submit a payload the API would have refused.
-    await user.type(screen.getByLabelText(/^name$/i), "London HQ");
+    await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
     await user.type(screen.getByLabelText(/country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/street/i), "Baker Street");
     await user.type(screen.getByLabelText(/building/i), "221B");
@@ -200,7 +200,7 @@ describe("CreateOfficeForm", () => {
       },
     });
 
-    expect(screen.getByLabelText(/^name$/i)).toHaveValue("London HQ");
+    expect(screen.getByLabelText(/^name \*$/i)).toHaveValue("London HQ");
     expect(screen.getByLabelText(/description/i)).toHaveValue("Main office");
     expect(screen.getByLabelText(/email/i)).toHaveValue("office@example.com");
     expect(screen.getByLabelText(/phone/i)).toHaveValue("+44 123");
@@ -228,7 +228,7 @@ describe("CreateOfficeForm", () => {
 
     renderForm({ onDirtyChangeAction });
 
-    await user.type(screen.getByLabelText(/^name$/i), "London HQ");
+    await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
 
     await waitFor(() => {
       expect(onDirtyChangeAction).toHaveBeenCalledWith(true);
@@ -246,7 +246,7 @@ describe("CreateOfficeForm", () => {
       onCancelAction,
     });
 
-    expect(screen.getByLabelText(/^name$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^name \*$/i)).toBeDisabled();
     expect(screen.getByLabelText(/description/i)).toBeDisabled();
     expect(screen.getByLabelText(/email/i)).toBeDisabled();
     expect(screen.getByLabelText(/phone/i)).toBeDisabled();

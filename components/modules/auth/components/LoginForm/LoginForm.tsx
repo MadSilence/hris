@@ -5,7 +5,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export type LoginFormValues = {
   email: string;
@@ -130,13 +130,12 @@ export default function LoginForm({
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email address</Label>
+            <RequiredLabel htmlFor="login-email" required>Email Address</RequiredLabel>
 
             <Input
               id="login-email"
               name="email"
               type="email"
-              placeholder="Email address*"
               autoComplete="email"
               value={formik.values.email}
               onChange={(e) =>
@@ -151,13 +150,12 @@ export default function LoginForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
+            <RequiredLabel htmlFor="login-password" required>Password</RequiredLabel>
 
             <Input
               id="login-password"
               name="password"
               type="password"
-              placeholder="Password*"
               autoComplete="current-password"
               value={formik.values.password}
               onChange={(e) =>

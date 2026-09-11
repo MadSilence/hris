@@ -75,7 +75,6 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
           id={`${idPrefix}-name`}
           value={name}
           onChange={(e) => onNameChange(e.currentTarget.value)}
-          placeholder="e.g., Poland"
           disabled={disabled}
           aria-invalid={!!nameError}
         />
@@ -90,7 +89,6 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
         value={countryCode}
         // Uppercased on the way in: the field feeds both the stored code and the flag lookup.
         onChange={(e) => onCountryChange(e.currentTarget.value.toUpperCase())}
-        placeholder="e.g. DE"
         maxLength={2}
         disabled={disabled}
       />
@@ -102,14 +100,13 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
         id={`${idPrefix}-region`}
         value={regionCode}
         onChange={(e) => onRegionChange(e.currentTarget.value.toUpperCase())}
-        placeholder="Optional, e.g. DE-BY"
         disabled={disabled}
       />
     </div>
 
     {weekendSubstitution !== undefined && onWeekendSubstitutionChange ? (
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-substitution`}>Holiday on a non-working day</Label>
+        <Label htmlFor={`${idPrefix}-substitution`}>Holiday on a Non-working Day</Label>
         <Select
           value={weekendSubstitution}
           onValueChange={(next) =>

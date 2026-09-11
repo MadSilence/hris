@@ -27,7 +27,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
-import { Loader } from "@/components/ui/Loader";
 import type { DocumentCategoryDTO } from "@/api/modules/documents/dto";
 import {
   useDocumentCategories,
@@ -36,6 +35,11 @@ import {
   useDeleteDocumentCategory,
   useSaveDocumentCategory,
 } from "@/components/modules/settings/modules/documentCategories/hooks/useDocumentCategoryMutations";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { Tags } from "lucide-react";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { DocumentCategoriesSkeleton } from "./DocumentCategoriesSkeleton";
 
 const messageOf = (error: unknown): string | null =>
   error instanceof Error ? error.message : null;
@@ -47,37 +51,49 @@ export const DocumentCategoriesContainer: FC = () => {
 
   const [editing, setEditing] = useState<DocumentCategoryDTO | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [toDelete, setToDelete] = useState<DocumentCategoryDTO | null>(null);
 
   const isFormOpen = isCreateOpen || !!editing;
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader/>
-      </div>
-    );
-  }
+  const all = categories ?? [];
 
-  const rows = categories ?? [];
+  const needle = query.trim().toLowerCase();
+  const rows = needle
+    ? all.filter(
+        (category) =>
+          category.name.toLowerCase().includes(needle) ||
+          (category.description ?? "").toLowerCase().includes(needle),
+      )
+    : all;
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button
-          className="bg-brown-600 text-white hover:bg-brown-700"
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <Plus className="mr-2 h-4 w-4"/>
-          Add category
-        </Button>
-      </div>
+      <ListToolbar
+        search={{ value: query, onChange: setQuery }}
+        primary={
+          <Button
+            className="bg-brown-600 text-white hover:bg-brown-700"
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4"/>
+            Add Category
+          </Button>
+        }
+      />
 
-      {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-brown-200 px-4 py-10 text-center text-sm text-muted-foreground">
-          No categories yet. Until one exists, documents cannot be labelled — the category picker
-          stays hidden on upload.
-        </div>
+      {isLoading ? (
+        <DocumentCategoriesSkeleton/>
+      ) : rows.length === 0 ? (
+        <ListEmptyState
+          query={query}
+          icon={<Tags className="h-7 w-7"/>}
+          title="No categories yet"
+          description="Until a category exists documents cannot be labelled, and the category picker stays hidden on upload."
+          noResultsHint="Try a different category name."
+          onCreate={() => setIsCreateOpen(true)}
+          createLabel="Add Category"
+        />
       ) : (
         <div className="divide-y divide-brown-100 rounded-lg border border-brown-200">
           {rows.map((category) => (
@@ -248,7 +264,7 @@ const CategoryFormModal: FC<{
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="category-name">Name</Label>
+            <RequiredLabel htmlFor="category-name" required>Name</RequiredLabel>
             <Input
               id="category-name"
               autoFocus
@@ -264,7 +280,6 @@ const CategoryFormModal: FC<{
               id="category-description"
               value={description}
               disabled={isLoading}
-              placeholder="Optional"
               onChange={(e) => setDescription(e.currentTarget.value)}
             />
           </div>
