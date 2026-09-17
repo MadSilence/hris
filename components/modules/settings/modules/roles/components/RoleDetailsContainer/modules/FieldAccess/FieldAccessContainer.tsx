@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -11,6 +12,7 @@ import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useR
 import { useRoleFieldAccess } from "@/components/modules/settings/modules/roles/hooks/useRoleFieldAccess";
 import { useCanAccess } from "@/components/auth/useAccess";
 import {
+  buildFieldAccessBody,
   buildFieldAccessPayload,
   diffFieldAccess,
   draftFromRows,
@@ -100,7 +102,8 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
 
   const handleSave = async () => {
     try {
-      await save({ fields: payload });
+      // Carries the version the matrix was loaded with — a stale one is refused (E00409).
+      await save(buildFieldAccessBody(draft, fields, data?.version));
       setReviewOpen(false);
     } catch {
       // Surfaced inside the modal via saveError.
@@ -174,7 +177,8 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
       <FieldAccessSummaryModal
         isOpen={reviewOpen}
         isSaving={saving}
-        errorMessage={saveError?.message}
+        // The dictionary sentence, not the backend's technical message — the same as the permissions tab.
+        errorMessage={saveError ? messageForError(saveError) : undefined}
         changes={changes}
         onCancelAction={() => setReviewOpen(false)}
         onConfirmAction={handleSave}

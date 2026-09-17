@@ -127,12 +127,20 @@ describe("AttributeOptions", () => {
     expect(savedPatch(onChange).sensitive).toBe(true);
   });
 
-  it("offers Unique for text but not for numbers", () => {
+  // Numbers joined text on 2026-09-14, when the backend started guaranteeing uniqueness for them; a
+  // date still has no unique index to stand behind the switch.
+  it("offers Unique for text and numbers but not for dates", () => {
     const { unmount } = render(
-      <AttributeOptions attribute={attribute()} onChange={jest.fn()} />
+      <AttributeOptions attribute={attribute({ type: AttributeType.DATE })} onChange={jest.fn()} />
     );
     expect(screen.queryByRole("switch", { name: /unique value/i })).not.toBeInTheDocument();
     unmount();
+
+    const numberView = render(
+      <AttributeOptions attribute={attribute()} onChange={jest.fn()} />
+    );
+    expect(screen.getByRole("switch", { name: /unique value/i })).toBeInTheDocument();
+    numberView.unmount();
 
     render(
       <AttributeOptions attribute={attribute({ type: AttributeType.TEXT })} onChange={jest.fn()} />

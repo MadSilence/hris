@@ -1,11 +1,13 @@
 "use client";
 
 import { FormEvent, useCallback } from "react";
+import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 
 export type LoginFormValues = {
   email: string;
@@ -16,6 +18,13 @@ export interface LoginFormProps {
   onSubmitAction: (values: LoginFormValues) => void | Promise<void>;
   isLoading?: boolean;
   apiError?: string;
+  /** Something the person should know before signing in — e.g. that their password was just changed. */
+  notice?: string;
+  /** The company's own words, decided on the server; the shipped ones when it chose none. */
+  headline?: string;
+  subheadline?: string;
+  /** Where "sign in to your company" lives, for somebody at the wrong address. */
+  changeCompanyHref?: string;
 }
 
 export enum LoginFormMessages {
@@ -82,6 +91,10 @@ export default function LoginForm({
   onSubmitAction,
   isLoading = false,
   apiError,
+  notice,
+  headline = DEFAULT_LOGIN_HEADLINE,
+  subheadline = DEFAULT_LOGIN_SUBHEADLINE,
+  changeCompanyHref,
 }: LoginFormProps) {
   const handleFormSubmission = useCallback(
     async (values: LoginFormValues) => {
@@ -118,15 +131,24 @@ export default function LoginForm({
   };
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center py-12">
+    <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">Welcome to SixSoftware</h1>
+          <h1 className="text-4xl font-medium">{headline}</h1>
 
           <p className="text-md text-[var(--color-text-tertiary)]">
-            Sign in to continue to your workspace.
+            {subheadline}
           </p>
         </div>
+
+        {notice && (
+          <p
+            className="rounded-md border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700"
+            role="status"
+          >
+            {notice}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="space-y-2">
@@ -150,7 +172,15 @@ export default function LoginForm({
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="login-password" required>Password</RequiredLabel>
+            <div className="flex items-center justify-between">
+              <RequiredLabel htmlFor="login-password" required>Password</RequiredLabel>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
 
             <Input
               id="login-password"
@@ -174,6 +204,15 @@ export default function LoginForm({
           <Button type="submit" disabled={busy} className="h-11 w-full">
             {busy ? "Signing in…" : "Sign in"}
           </Button>
+
+          {changeCompanyHref ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Not your company?{" "}
+              <a href={changeCompanyHref} className="underline underline-offset-4">
+                Sign in to another one
+              </a>
+            </p>
+          ) : null}
         </form>
       </div>
     </div>

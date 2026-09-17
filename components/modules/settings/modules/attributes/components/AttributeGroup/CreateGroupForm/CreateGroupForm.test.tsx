@@ -33,9 +33,9 @@ describe("CreateGroupForm", () => {
     renderForm();
 
     expect(screen.getByLabelText(/name your section/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/name your section/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^description$/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^add$/i })).toBeInTheDocument();
   });
 
   it("shows validation error when name is empty", async () => {
@@ -44,7 +44,7 @@ describe("CreateGroupForm", () => {
 
     renderForm({ onSubmitAction });
 
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
 
     expect(onSubmitAction).not.toHaveBeenCalled();
 
@@ -60,7 +60,7 @@ describe("CreateGroupForm", () => {
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/name your section/i), "HR");
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
 
     expect(onSubmitAction).not.toHaveBeenCalled();
 
@@ -76,13 +76,33 @@ describe("CreateGroupForm", () => {
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/name your section/i), " HR Info ");
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.type(screen.getByLabelText(/^description$/i), " Who to call ");
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
 
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({
         name: "HR Info",
+        description: "Who to call",
       });
     });
+  });
+
+  it("refuses a description over 1000 characters", async () => {
+    const user = userEvent.setup();
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction });
+
+    await user.type(screen.getByLabelText(/name your section/i), "HR Info");
+    await user.click(screen.getByLabelText(/^description$/i));
+    await user.paste("x".repeat(1001));
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
+
+    expect(onSubmitAction).not.toHaveBeenCalled();
+
+    expect(
+      await screen.findByText(/description must be 1000 characters or fewer/i),
+    ).toBeInTheDocument();
   });
 
   it("submits by Enter", async () => {
@@ -96,6 +116,7 @@ describe("CreateGroupForm", () => {
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({
         name: "HR Info",
+        description: "",
       });
     });
   });
@@ -137,10 +158,10 @@ describe("CreateGroupForm", () => {
 
     expect(screen.getByLabelText(/name your section/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /create/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^add$/i })).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: /cancel/i }));
-    await user.click(screen.getByRole("button", { name: /create/i }));
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
 
     expect(onCancelAction).not.toHaveBeenCalled();
     expect(onSubmitAction).not.toHaveBeenCalled();

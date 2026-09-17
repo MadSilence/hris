@@ -16,12 +16,14 @@ const company: Company = {
   companyLogo: null,
   description: "We build things.",
   website: "https://six.example",
+  version: 4,
 };
 
 const settings: CompanySettings = {
   timezone: "Europe/Warsaw",
   workingDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
   weekStartDay: "MONDAY",
+  version: 9,
 };
 
 const renderComponent = (overrides: Partial<Company> = {}) => {
@@ -36,8 +38,8 @@ const renderComponent = (overrides: Partial<Company> = {}) => {
     settingsError: null,
   };
 
-  render(<CompanyProfileSettingsComponent {...props} />);
-  return props;
+  const view = render(<CompanyProfileSettingsComponent {...props} />);
+  return { ...props, rerender: view.rerender };
 };
 
 const saveButton = () => screen.getByRole("button", { name: /save changes/i });
@@ -67,8 +69,38 @@ describe("CompanyProfileSettingsComponent", () => {
       name: "Seven Software",
       description: "We build things.",
       website: "https://six.example",
+      version: 4,
     });
     expect(onSaveSettings).not.toHaveBeenCalled();
+  });
+
+  it("holds the version it was opened with once edited, so a colleague's save in between is refused", () => {
+    const { rerender, ...props } = renderComponent();
+
+    fireEvent.change(nameInput(), { target: { value: "Seven Software" } });
+
+    // A refetch brings a colleague's change while this form is being edited.
+    rerender(
+      <CompanyProfileSettingsComponent
+        {...props}
+        company={{ ...company, description: "Changed by a colleague.", version: 5 }}
+      />,
+    );
+    fireEvent.click(saveButton());
+
+    expect(props.onSaveProfile).toHaveBeenCalledWith(expect.objectContaining({ version: 4 }));
+  });
+
+  it("follows a newer version while nothing has been typed", () => {
+    const { rerender, ...props } = renderComponent();
+
+    rerender(
+      <CompanyProfileSettingsComponent {...props} company={{ ...company, version: 5 }} />,
+    );
+    fireEvent.change(nameInput(), { target: { value: "Seven Software" } });
+    fireEvent.click(saveButton());
+
+    expect(props.onSaveProfile).toHaveBeenCalledWith(expect.objectContaining({ version: 5 }));
   });
 
   it("sends working days in week order, whichever order they were clicked", () => {
@@ -90,6 +122,7 @@ describe("CompanyProfileSettingsComponent", () => {
         "SATURDAY",
         "SUNDAY",
       ],
+      version: 9,
     });
     expect(onSaveProfile).not.toHaveBeenCalled();
   });

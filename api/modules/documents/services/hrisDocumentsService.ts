@@ -10,6 +10,7 @@ import {
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
   SaveDocumentCategoryRequest,
+  UpdateDocumentCategoryRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -104,7 +105,7 @@ export class HrisDocumentsService {
 
   public async updateCategory(
     id: string,
-    body: SaveDocumentCategoryRequest
+    body: UpdateDocumentCategoryRequest
   ): Promise<UpdateResponse> {
     return hrisApiDocumentsClient.updateCategory(id, body);
   }

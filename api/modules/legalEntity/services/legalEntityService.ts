@@ -1,3 +1,4 @@
+import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
 import { NewEntity, UpdatedEntity } from "@/models/misc";
 import { hrisLegalEntityClient } from "@/api/modules/legalEntity/clients";
 import { LegalEntity } from "@/models/legalEntity";
@@ -47,6 +48,10 @@ export class LegalEntityService {
 
   public async exportLegalEntities(format: "csv" | "xlsx"): Promise<Response> {
     return hrisLegalEntityClient.exportLegalEntities(format);
+  }
+
+  public async getDeleteImpact(id: string): Promise<DetachedPeopleImpact> {
+    return hrisLegalEntityClient.getDeleteImpact(id);
   }
 
   public async exportLegalEntity(id: string, format: "csv" | "xlsx"): Promise<Response> {

@@ -25,6 +25,13 @@ export const ArchivedToggle: React.FC<{
   showingArchived: boolean;
   onChange: (showArchived: boolean) => void;
 }> = ({ count, showingArchived, onChange }) => {
+  // Unarchiving the last archived record while the archived view is on would leave the list empty
+  // with the only way back gone (seen live on holiday calendars: "No public holiday calendars yet"
+  // while three existed). The view falls back to everything else when there is nothing left to show.
+  React.useEffect(() => {
+    if (count === 0 && showingArchived) onChange(false);
+  }, [count, showingArchived, onChange]);
+
   if (count === 0) return null;
 
   return (

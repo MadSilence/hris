@@ -5,7 +5,7 @@ import { CompanyCalendarBoardContainer } from "@/components/modules/calendar/com
 
 export default function CalendarPage() {
   return (
-    <PageGate resource="PEOPLE.TIME_OFF" action="VIEW">
+    <PageGate resource="PEOPLE.CALENDAR" action="VIEW">
       <div className="flex h-[calc(100svh-6rem)] flex-col gap-5">
         <section className="flex flex-none flex-col gap-2">
           <h1 className="text-3xl font-semibold">Calendar</h1>

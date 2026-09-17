@@ -29,7 +29,8 @@ export interface RolesTableProps {
   query?: string;
   showArchived?: boolean;
   buildRoleHref?: (roleId: string) => string;
-  onRenameRole?: (roleId: string, values: { name: string; description?: string }) => void | Promise<void>;
+  /** `version` is the role's version when the dialog opened — a stale one is refused (E00409). */
+  onRenameRole?: (roleId: string, values: { name: string; description?: string; version?: number }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
   onDeleteRole?: (roleId: string) => void | Promise<void>;
   onArchiveRole?: (roleId: string, archived: boolean) => void | Promise<void>;
@@ -62,7 +63,7 @@ export default function RolesTable({
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [nameModalMode, setNameModalMode] = useState<RoleActionMode>("rename");
   const [nameModalRole, setNameModalRole] =
-    useState<{ id: string; name: string; description?: string } | null>(null);
+    useState<{ id: string; name: string; description?: string; version?: number } | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRole, setDeleteRole] = useState<{ id: string; name: string } | null>(null);
@@ -74,7 +75,8 @@ export default function RolesTable({
 
   const openRename = (role: Role) => {
     onClearErrors?.();
-    setNameModalRole({ id: role.id, name: role.name, description: role.description });
+    // A snapshot: the version is the one this dialog was opened on, not whatever the list holds later.
+    setNameModalRole({ id: role.id, name: role.name, description: role.description, version: role.version });
     setNameModalMode("rename");
     setNameModalOpen(true);
   };
@@ -104,7 +106,7 @@ export default function RolesTable({
 
   const initialNameForModal = useMemo(() => {
     if (!nameModalRole?.name) return "";
-    if (nameModalMode === "duplicate") return `${nameModalRole.name} copy`;
+    if (nameModalMode === "duplicate") return `${nameModalRole.name} (copy)`;
     return nameModalRole.name;
   }, [nameModalMode, nameModalRole?.name]);
 
@@ -214,8 +216,11 @@ export default function RolesTable({
           if (!nameModalRole) return;
 
           try {
-            if (nameModalMode === "rename") await onRenameRole?.(nameModalRole.id, values);
-            else await onDuplicateRole?.(nameModalRole.id, values);
+            if (nameModalMode === "rename") {
+              await onRenameRole?.(nameModalRole.id, { ...values, version: nameModalRole.version });
+            } else {
+              await onDuplicateRole?.(nameModalRole.id, values);
+            }
 
             closeNameModal();
           } catch {

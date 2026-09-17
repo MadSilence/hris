@@ -16,8 +16,13 @@ class HrisGroupsClient {
     return hrisApiClient.get<AttributeGroupDTO[]>(this.BASE_PATH);
   }
 
+  // The backend refuses a body carrying a property its request does not declare, so the body is
+  // built field by field rather than forwarding whatever the caller handed in.
   public async createGroup(payload: CreateGroupRequest) {
-    return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, payload)
+    return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, {
+      name: payload.name,
+      description: payload.description ?? null,
+    })
   }
 
   public async reorderAttributeGroups(payload: ReorderItemRequest[]) {
@@ -25,7 +30,13 @@ class HrisGroupsClient {
   }
 
   public async renameAttributeGroup(payload: RenameAttributeGroupRequest) {
-    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/${payload.id}/rename`, { name: payload.name })
+    // The description is replaced, not patched: a missing one clears it, so it always rides along.
+    // The version is the one the form was opened with — a stale one is refused (E00409).
+    return hrisApiClient.put<UpdateResponse>(`${this.BASE_PATH}/${payload.id}/rename`, {
+      name: payload.name,
+      description: payload.description ?? null,
+      version: payload.version,
+    })
   }
 
   public async deleteAttributeGroup(payload: DeleteAttributeGroupRequest) {

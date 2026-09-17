@@ -14,18 +14,9 @@ export class PublicHolidayTemplateMapper {
     dto: PublicHolidayTemplateDTO
   ): PublicHolidayTemplate {
     return {
-      id: dto.id,
-      provider: dto.provider,
-      name: dto.name,
-      description: dto.description,
-      countryCode: dto.countryCode,
-      countryName: dto.countryName,
-      regionCode: dto.regionCode,
-      regionName: dto.regionName,
-      languageCode: dto.languageCode,
-      supportedYearFrom: dto.supportedYearFrom,
-      supportedYearTo: dto.supportedYearTo,
-      regional: dto.regional,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 
@@ -39,9 +30,9 @@ export class PublicHolidayTemplateMapper {
     dto: PublicHolidayTemplatePreviewDTO
   ): PublicHolidayTemplatePreview {
     return {
-      templateId: dto.templateId,
-      templateName: dto.templateName,
-      year: dto.year,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       regionCode: dto.regionCode ?? null,
       holidays: this.mapPublicHolidayTemplatePreviewItemDTOs(dto.holidays),
     };

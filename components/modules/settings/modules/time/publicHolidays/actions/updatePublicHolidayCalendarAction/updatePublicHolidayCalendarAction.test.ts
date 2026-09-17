@@ -24,9 +24,9 @@ describe("updatePublicHolidayCalendarAction", () => {
     jest.restoreAllMocks();
   });
 
-  it("updates public holiday calendar", async () => {
-    const response = { id: "calendar-id", version: 1 };
-    const body = partialMock<UpdatePublicHolidayCalendarRequest>({ name: "Updated calendar" });
+  it("updates public holiday calendar, passing the version through and answering the new one", async () => {
+    const response = { id: "calendar-id", version: 4 };
+    const body = partialMock<UpdatePublicHolidayCalendarRequest>({ name: "Updated calendar", version: 3 });
 
     jest
       .mocked(hrisPublicHolidayCalendarsService.update)

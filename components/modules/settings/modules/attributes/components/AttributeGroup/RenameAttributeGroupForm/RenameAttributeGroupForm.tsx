@@ -7,10 +7,15 @@ import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface RenameAttributeGroupFormProps {
   isLoading?: boolean;
+  /** The section's current name — the form edits it rather than starting blank. */
+  initialName?: string;
+  /** The section's current description; a missing one starts empty. */
+  initialDescription?: string | null;
   onCancelAction: () => void;
   onDirtyChangeAction?: (isDirty: boolean) => void;
   onSubmitAction: (
@@ -20,6 +25,8 @@ export interface RenameAttributeGroupFormProps {
 
 export type RenameAttributeGroupFormValues = {
   name: string;
+  /** Trimmed on submit; an empty one clears the section's description. */
+  description: string;
 };
 
 const renameAttributeGroupFormValidationSchema = yup.object({
@@ -30,27 +37,37 @@ const renameAttributeGroupFormValidationSchema = yup.object({
     .min(3, "Name must be at least 3 characters long.")
     .max(120, "Name must be 120 characters or fewer.")
     .nonNullable("Please enter a section name."),
+  description: yup
+    .string()
+    .trim()
+    .max(1000, "Description must be 1000 characters or fewer."),
 });
 
 export const RenameAttributeGroupForm: FC<
   RenameAttributeGroupFormProps
 > = ({
   isLoading = false,
+  initialName = "",
+  initialDescription,
   onCancelAction,
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const startDescription = initialDescription ?? "";
+
   const handleFormSubmission = useCallback(
     (values: RenameAttributeGroupFormValues) =>
       onSubmitAction({
         name: values.name.trim(),
+        description: values.description.trim(),
       }),
     [onSubmitAction],
   );
 
   const formik = useFormik<RenameAttributeGroupFormValues>({
     initialValues: {
-      name: "",
+      name: initialName,
+      description: startDescription,
     },
     validationSchema: renameAttributeGroupFormValidationSchema,
     validateOnBlur: false,
@@ -62,10 +79,16 @@ export const RenameAttributeGroupForm: FC<
     onDirtyChangeAction?.(formik.dirty);
   }, [formik.dirty, onDirtyChangeAction]);
 
+  // Submitting an untouched form would only earn "nothing changed" from the backend, so Save stays
+  // off until the name or the description actually moved.
+  const isUnchanged =
+    formik.values.name.trim() === initialName.trim()
+    && formik.values.description.trim() === startDescription.trim();
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading) return;
+    if (isLoading || isUnchanged) return;
 
     const errors = await formik.validateForm();
 
@@ -95,6 +118,23 @@ export const RenameAttributeGroupForm: FC<
         )}
       </div>
 
+      <div className="mt-4 space-y-2">
+        <RequiredLabel htmlFor="attribute-group-description">Description</RequiredLabel>
+
+        <Textarea
+          id="attribute-group-description"
+          rows={3}
+          value={formik.values.description}
+          onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
+          disabled={isLoading}
+          aria-invalid={!!formik.errors.description}
+        />
+
+        {formik.errors.description && (
+          <p role="alert" className="text-sm text-destructive">{formik.errors.description}</p>
+        )}
+      </div>
+
       <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
         <Button
           type="button"
@@ -105,8 +145,8 @@ export const RenameAttributeGroupForm: FC<
           Cancel
         </Button>
 
-        <Button type="submit" disabled={isLoading}>
-          Rename
+        <Button type="submit" disabled={isLoading || isUnchanged}>
+          Save
         </Button>
       </DialogFooter>
     </form>

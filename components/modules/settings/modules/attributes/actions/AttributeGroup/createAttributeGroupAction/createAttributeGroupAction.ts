@@ -22,6 +22,7 @@ export const createAttributeGroupAction = async (
 
 export type CreateAttributeGroupActionInput = {
   name: string;
+  description?: string | null;
 };
 
 export type CreateAttributeGroupActionOutput = {

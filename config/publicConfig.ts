@@ -17,11 +17,20 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8081";
 
 const publicConfig: Readonly<PublicEnvironmentConfig> = {
   environment: {
-    basePath: "http://localhost:3000",
+    // Empty, so the browser calls `/api/…` on whatever host it is on. It was `http://localhost:3000`,
+    // which is a different origin from `acme.localhost:3000`: the session cookies live on the company's
+    // host, never travelled to `localhost`, and every read failed as signed out.
+    basePath: "",
   },
   auth: {
     // new URL() joins correctly whether or not BACKEND_URL has a trailing slash.
     issuerUri: new URL(JWKS_PATH, BACKEND_URL).toString(),
+  },
+  // Server-side variables, handed to the browser through `getPublicEnv` rather than a `NEXT_PUBLIC_`
+  // prefix, so one deployment's addresses are not baked into the bundle at build time.
+  web: {
+    scheme: process.env.APP_SCHEME || "http",
+    rootDomain: process.env.APP_ROOT_DOMAIN || "localhost:3000",
   },
 };
 

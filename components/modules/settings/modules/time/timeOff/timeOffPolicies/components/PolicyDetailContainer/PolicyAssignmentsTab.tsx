@@ -6,6 +6,7 @@ import { UserPlus, Users, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
+import { PolicyAssignmentWarning } from "./PolicyAssignmentWarning";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 
 import { useTimeOffPolicyAssignments } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffPolicyAssignments";
@@ -111,6 +112,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
       semantics="add"
       temporal
       invalidateKeys={[getTimeOffPolicyAssignmentsQueryKey(policyId)]}
+      renderSelectionWarning={(userIds) => <PolicyAssignmentWarning policyId={policyId} userIds={userIds} />}
     />
   );
 

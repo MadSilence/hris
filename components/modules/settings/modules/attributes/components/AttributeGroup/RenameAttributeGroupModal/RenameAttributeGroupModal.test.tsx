@@ -33,10 +33,11 @@ jest.mock(
             onClick={() =>
               props.onSubmitAction({
                 name: "HR",
+                description: "Who to call",
               })
             }
           >
-            Rename
+            Save
           </button>
         </div>
       );
@@ -74,21 +75,38 @@ describe("RenameAttributeGroupModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /rename section/i }),
+      screen.getByRole("heading", { name: /edit section/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/update the section name used to organize attributes/i),
+      screen.getByText(/update the section name and the description shown under it/i),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/group name/i)).toBeInTheDocument();
+  });
+
+  it("hands the section's current name and description to the form", () => {
+    renderModal({ initialName: "Uniform", initialDescription: "Sizes for the kit order" });
+
+    expect(mockRenameAttributeGroupForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialName: "Uniform",
+        initialDescription: "Sizes for the kit order",
+      }),
+    );
+  });
+
+  it("shows a refusal from the server inside the dialog", () => {
+    renderModal({ errorMessage: "A group with this name already exists." });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/a group with this name already exists/i);
   });
 
   it("does not render when isOpen is false", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /rename section/i }),
+      screen.queryByRole("heading", { name: /edit section/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -103,7 +121,7 @@ describe("RenameAttributeGroupModal", () => {
 
     expect(screen.getByLabelText(/group name/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /rename/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
   });
 
   it("calls confirm action from form submit", () => {
@@ -111,10 +129,11 @@ describe("RenameAttributeGroupModal", () => {
 
     renderModal({ onConfirmAction });
 
-    fireEvent.click(screen.getByRole("button", { name: /rename/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
     expect(onConfirmAction).toHaveBeenCalledWith({
       name: "HR",
+      description: "Who to call",
     });
   });
 
@@ -161,7 +180,7 @@ describe("RenameAttributeGroupModal", () => {
     expect(onRequestCloseAction).not.toHaveBeenCalled();
 
     expect(
-      screen.getByRole("heading", { name: /rename section/i }),
+      screen.getByRole("heading", { name: /edit section/i }),
     ).toBeInTheDocument();
 
     expect(

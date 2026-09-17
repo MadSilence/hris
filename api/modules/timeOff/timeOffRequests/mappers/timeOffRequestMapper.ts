@@ -4,26 +4,9 @@ import type { TimeOffRequest } from "@/models/timeOff";
 export class TimeOffRequestMapper {
   public mapTimeOffRequestDTO(dto: TimeOffRequestDTO): TimeOffRequest {
     return {
-      id: dto.id,
-      userId: dto.userId,
-      policyId: dto.policyId,
-      assignmentId: dto.assignmentId,
-      balanceId: dto.balanceId,
-      status: dto.status,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
-      requestedAmount: dto.requestedAmount,
-      reason: dto.reason,
-      cancelledAt: dto.cancelledAt,
-      cancelledBy: dto.cancelledBy,
-      cancellationReason: dto.cancellationReason,
-      approvedAt: dto.approvedAt,
-      approvedBy: dto.approvedBy,
-      rejectedAt: dto.rejectedAt,
-      rejectedBy: dto.rejectedBy,
-      rejectionReason: dto.rejectionReason,
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 

@@ -31,12 +31,20 @@ export type DocumentCategoryDTO = {
   description: string | null;
   isActive: boolean;
   isSystem: boolean;
+  /** Sent back by the edit dialog; the backend refuses a save over a newer row (E00409). */
+  version?: number;
 };
 
 export type SaveDocumentCategoryRequest = {
   name: string;
   description?: string | null;
   isActive?: boolean;
+};
+
+/** Create has no version to send — the backend body is strict, so it is only on the update type. */
+export type UpdateDocumentCategoryRequest = SaveDocumentCategoryRequest & {
+  /** The version the dialog was opened with. */
+  version?: number;
 };
 
 export type DocumentFolderContentDTO = {

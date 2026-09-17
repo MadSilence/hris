@@ -1,17 +1,11 @@
-import { NextResponse } from "next/server";
 import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
-import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
+import { timeOffRequestsRoutes } from "@/api/modules/timeOff/timeOffRequests/routes";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+// Through the routes controller, like every other read — the query parsing lived here as a copy of
+// `timeOffRequestsRoutes.listByUserId`, which was then tested while this copy ran.
 export const GET = apiRequestWrapper(async (req: Request, context: RouteContext) => {
   const { id } = await context.params;
-  const params = new URL(req.url).searchParams;
-  const yearParam = params.get("year");
-  const requests = await hrisTimeOffRequestsService.listByUserId(id, {
-    year: yearParam ? Number(yearParam) : null,
-    status: params.get("status"),
-  });
-
-  return NextResponse.json(requests);
+  return timeOffRequestsRoutes.listByUserId(req, id);
 });

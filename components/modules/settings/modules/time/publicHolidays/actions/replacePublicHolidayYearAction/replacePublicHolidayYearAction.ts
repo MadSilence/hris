@@ -25,7 +25,7 @@ export const replacePublicHolidayYearAction = async (
     const data = await hrisPublicHolidaysService.replaceYear(
       submission.calendarId,
       submission.year,
-      { holidays: submission.holidays }
+      { holidays: submission.holidays, version: submission.version }
     );
 
     return {
@@ -41,6 +41,8 @@ export type ReplacePublicHolidayYearActionInput = {
   calendarId: string;
   year: number;
   holidays: ReplaceYearHolidayItem[];
+  /** The calendar's version the editor holds; absent for a calendar created a moment ago. */
+  version?: number;
 };
 
 export type ReplacePublicHolidayYearActionOutput = {

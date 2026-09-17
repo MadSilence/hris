@@ -32,6 +32,8 @@ export type UpdateOfficeActionInput = {
   street: string;
   building: string;
   postCode: string;
+  /** The version the form was opened with; a stale one comes back as E00409. */
+  version?: number;
 };
 
 export type UpdateOfficeActionOutput = {

@@ -5,6 +5,7 @@ import { userMapper } from "@/api/modules/users/mappers/userMapper";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { User } from "@/models/user/User";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
+import { CreateResponse } from "@/api/models/misc";
 
 export type TerminationReason = "VOLUNTARY" | "INVOLUNTARY" | "END_OF_CONTRACT";
 
@@ -21,6 +22,52 @@ export type TerminationImpactDTO = {
   policyAssignmentsToEnd: number;
   directReportsToReassign: number;
   reportsMoveTo: { id: string; name: string } | null;
+  /** The day the effects land — the last working day asked about, or the recorded one. */
+  effectiveOn?: string | null;
+  /** Approved leave running past the last working day: cancelled, or cut at that day, when it applies. */
+  approvedLeaveAfterLastDay?: number;
+  /** Requests waiting on this person's decision, which nobody else can answer once their roles go. */
+  requestsAwaitingTheirDecision?: number;
+};
+
+/** What deleting a profile takes with it, and the refusal waiting for it if there is one. */
+export type PersonDeleteImpactDTO = {
+  name: string;
+  /** Null when Delete may go ahead; otherwise the code that will refuse it (U00022, U00023, U00024). */
+  refusal: string | null;
+  approverInPolicies: string[];
+  timeOffRequests: number;
+  balances: number;
+  policyAssignments: number;
+  assignmentRecords: number;
+  jobHistoryEntries: number;
+  documentsToTrash: number;
+  processesDeleted: number;
+  approvalsSignedForOthers: number;
+  directReports: number;
+  reportsMoveTo: string | null;
+};
+
+/** A new person needs a first and last name; everything else is optional and a draft is the result. */
+export type CreateUserPayload = {
+  firstName: string;
+  lastName: string;
+  email?: string | null;
+  hireDate?: string | null;
+};
+
+/** Invite now (no `sendOn`) or on a day; `email` fills a missing address or corrects it. */
+export type InviteUserPayload = {
+  email?: string | null;
+  sendOn?: string | null;
+  /** Required only when the person has an unfinished preboarding. */
+  preboarding?: "KEEP" | "END" | null;
+};
+
+export type InviteStateDTO = {
+  accountStatus: string;
+  inviteSentAt: string | null;
+  scheduledFor: string | null;
 };
 
 /** Partial patch: an omitted field is left as is (the backend never clears from here). */
@@ -30,6 +77,8 @@ export type UpdateUserPayload = {
   email?: string;
   hireDate?: string;
   probationEnd?: string;
+  /** The version the profile was opened at. */
+  version?: number;
 };
 
 export class HrisApiUsersClient {
@@ -68,6 +117,24 @@ export class HrisApiUsersClient {
     return userMapper.mapUserDTOtoUser(dto);
   }
 
+  public async createUser(payload: CreateUserPayload): Promise<CreateResponse> {
+    return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, { ...payload });
+  }
+
+  /** People who exist only as a draft — every other list leaves them out. */
+  public async getDrafts(): Promise<User[]> {
+    const res = await hrisApiClient.get<UserDTO[]>(`${this.BASE_PATH}/drafts`);
+    return res.map((u) => userMapper.mapUserDTOtoUser(u));
+  }
+
+  public async invite(id: string, payload: InviteUserPayload): Promise<InviteStateDTO> {
+    return hrisApiClient.post<InviteStateDTO>(`${this.BASE_PATH}/${id}/invite`, { ...payload });
+  }
+
+  public async cancelInvite(id: string): Promise<InviteStateDTO> {
+    return hrisApiClient.post<InviteStateDTO>(`${this.BASE_PATH}/${id}/invite/cancel`);
+  }
+
   public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/update`, { ...payload });
   }
@@ -76,8 +143,13 @@ export class HrisApiUsersClient {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/status`, { status });
   }
 
-  public async getTerminationImpact(id: string): Promise<TerminationImpactDTO> {
-    return hrisApiClient.get<TerminationImpactDTO>(`${this.BASE_PATH}/${id}/termination-impact`);
+  public async getTerminationImpact(id: string, lastWorkingDay?: string | null): Promise<TerminationImpactDTO> {
+    const query = lastWorkingDay ? `?lastWorkingDay=${encodeURIComponent(lastWorkingDay)}` : "";
+    return hrisApiClient.get<TerminationImpactDTO>(`${this.BASE_PATH}/${id}/termination-impact${query}`);
+  }
+
+  public async getDeleteImpact(id: string): Promise<PersonDeleteImpactDTO> {
+    return hrisApiClient.get<PersonDeleteImpactDTO>(`${this.BASE_PATH}/${id}/delete-impact`);
   }
 
   public async terminate(id: string, payload: TerminatePayload): Promise<void> {
@@ -86,6 +158,20 @@ export class HrisApiUsersClient {
 
   public async deleteUser(id: string): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/delete`);
+  }
+
+  /** Ends the person's ability to sign in. `PEOPLE.PROFILE` BLOCK, not MANAGE. */
+  public async block(id: string, reason?: string | null): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/block`, { reason: reason ?? null });
+  }
+
+  public async unblock(id: string, reason?: string | null): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/unblock`, { reason: reason ?? null });
+  }
+
+  /** Mails the person a link to set a new password — the one thing that lifts a sign-in lock. */
+  public async sendPasswordReset(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/password-reset`);
   }
 
   public async updateUserAttributes(
@@ -106,6 +192,7 @@ export class HrisApiUsersClient {
       sortDir: args.sortDir ?? "asc",
       filters: args.filters ?? [],
       selectedFields: args.selectedFields ?? [],
+      drafts: args.drafts ?? null,
     };
 
     const res = await hrisApiClient.post<{ items: UserDTO[]; nextCursor?: string | null }>(
@@ -117,6 +204,10 @@ export class HrisApiUsersClient {
       items: res.items.map((u) => userMapper.mapUserDTOtoUser(u)),
       nextCursor: res.nextCursor ?? null,
     };
+  }
+
+  async draftCount(): Promise<{ count: number }> {
+    return hrisApiClient.get<{ count: number }>(`${this.BASE_PATH}/drafts/count`);
   }
 
   async getFields(): Promise<FieldDTO[]> {

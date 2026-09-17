@@ -24,6 +24,8 @@ describe("renameAttributeGroupAction", () => {
   const mockInput: RenameAttributeGroupActionInput = {
     id: "test-id",
     name: "Renamed group",
+    description: "Where the uniform sizes live",
+    version: 3,
   };
 
   it("calls groupsService.renameAttributeGroup with correct arguments", async () => {

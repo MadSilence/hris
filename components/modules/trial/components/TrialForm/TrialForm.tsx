@@ -8,6 +8,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { normalizeCompanyAddress } from "@/lib/companyAddress";
 
 export type TrialValues = {
   email: string;
@@ -22,6 +23,12 @@ export interface TrialFormProps {
   isLoading?: boolean;
   apiError?: string;
   isSuccess: boolean;
+  /**
+   * The company address as a person reads it, for an address already normalised from the name. Shown
+   * while the name is typed, so the address is not a surprise in the confirmation email. The backend has
+   * the last word: a race with another registration can still suffix it.
+   */
+  companyAddressPreview?: (subdomain: string) => string;
 }
 
 export enum TrialMessages {
@@ -149,6 +156,7 @@ export default function TrialForm({
   isLoading = false,
   apiError,
   isSuccess,
+  companyAddressPreview,
 }: TrialFormProps) {
   const consentText = useMemo(
     () =>
@@ -274,6 +282,15 @@ export default function TrialForm({
               required
               aria-invalid={!!formik.errors.companyName}
             />
+
+            {companyAddressPreview && normalizeCompanyAddress(formik.values.companyName) ? (
+              <p className="text-sm text-[var(--color-text-tertiary)]" aria-live="polite">
+                Your company will sign in at{" "}
+                <span className="font-medium text-[var(--color-text-primary)]">
+                  {companyAddressPreview(normalizeCompanyAddress(formik.values.companyName))}
+                </span>
+              </p>
+            ) : null}
 
             <FieldError message={formik.errors.companyName}/>
           </div>

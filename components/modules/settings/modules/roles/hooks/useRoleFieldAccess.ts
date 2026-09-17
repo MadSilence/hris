@@ -26,7 +26,12 @@ export function useRoleFieldAccess(roleId: string) {
         payload,
       ),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: rolesQueryKeys.roleFieldAccess(roleId) });
+      // The save bumped the role's version — see useRolePermissions.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.roleFieldAccess(roleId) }),
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.rolePermissions(roleId) }),
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.roles(), exact: true }),
+      ]);
       // accessHash now covers field access (v3), so our own /me/access must be refetched.
       // Go through useInvalidateAccessQuery so the cached ETag is dropped too.
       await invalidateAccess();

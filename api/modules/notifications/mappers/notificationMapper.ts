@@ -4,18 +4,14 @@ import type { Notification, NotificationPreference } from "@/models/notification
 export class NotificationMapper {
   public mapNotificationDTO(dto: NotificationDTO): Notification {
     return {
-      id: dto.id,
-      type: dto.type,
-      category: dto.category,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       params: dto.params ?? {},
       targetType: dto.targetType ?? null,
       targetId: dto.targetId ?? null,
       sourceType: dto.sourceType ?? null,
       sourceId: dto.sourceId ?? null,
-      seen: dto.seen,
-      read: dto.read,
-      starred: dto.starred,
-      createdAt: dto.createdAt,
       source: dto.source
         ? {
             type: dto.source.type,
@@ -33,11 +29,9 @@ export class NotificationMapper {
 
   public mapPreferenceDTO(dto: NotificationPreferenceDTO): NotificationPreference {
     return {
-      category: dto.category,
-      label: dto.label,
-      enabled: dto.enabled,
-      mandatory: dto.mandatory,
-      canManage: dto.canManage,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 

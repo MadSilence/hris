@@ -4,58 +4,24 @@ import { TimeOffPolicy } from "@/models/timeOff";
 export class TimeOffPolicyMapper {
   public mapTimeOffPolicyDTO(dto: TimeOffPolicyDTO): TimeOffPolicy {
     return {
-      id: dto.id,
-      companyId: dto.companyId,
-      leaveTypeId: dto.leaveTypeId,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
 
-      name: dto.name,
-      displayName: dto.displayName,
-      description: dto.description,
 
-      status: dto.status,
-      unit: dto.unit,
 
-      paid: dto.paid,
-      hiddenFromEmployees: dto.hiddenFromEmployees,
 
-      effectiveDate: dto.effectiveDate,
 
-      countingMode: dto.countingMode,
-      includePublicHolidays: dto.includePublicHolidays,
 
-      entitlementGrantingMode: dto.entitlementGrantingMode,
-      allowRequestsInAdvanceOfAccrual: dto.allowRequestsInAdvanceOfAccrual,
 
-      yearlyQuota: dto.yearlyQuota,
-      unlimitedQuota: dto.unlimitedQuota,
 
-      renewalType: dto.renewalType,
-      renewalFixedDay: dto.renewalFixedDay,
-      renewalFixedMonth: dto.renewalFixedMonth,
 
-      carryoverType: dto.carryoverType,
-      carryoverLimit: dto.carryoverLimit,
 
-      carryoverExpiryType: dto.carryoverExpiryType,
-      carryoverExpiryValue: dto.carryoverExpiryValue,
-      carryoverExpiryUnit: dto.carryoverExpiryUnit,
 
-      allowNegativeCarryover: dto.allowNegativeCarryover,
-      negativeCarryoverLimit: dto.negativeCarryoverLimit,
 
-      allowNegativeBalance: dto.allowNegativeBalance,
-      maxNegativeBalance: dto.maxNegativeBalance,
-      negativeBalanceCappedByQuota: dto.negativeBalanceCappedByQuota,
 
-      archivedAt: dto.archivedAt,
-      archivedBy: dto.archivedBy,
 
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
-      createdBy: dto.createdBy,
-      updatedBy: dto.updatedBy,
 
-      version: dto.version,
     };
   }
 

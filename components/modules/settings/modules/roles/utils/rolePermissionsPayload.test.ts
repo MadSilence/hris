@@ -1,5 +1,6 @@
 import {
   availableScopeChoices,
+  buildRolePermissionsBody,
   buildRolePermissionsPayload,
   choiceToScopes,
   diffRolePermissions,
@@ -203,5 +204,17 @@ describe("isMissingViewAccess", () => {
   it("stays quiet for resources that have no VIEW action at all", () => {
     // SETTINGS.IMPERSONATION supports MANAGE only.
     expect(isMissingViewAccess("SETTINGS.IMPERSONATION", { MANAGE: ["COMPANY"] })).toBe(false);
+  });
+});
+
+describe("buildRolePermissionsBody", () => {
+  it("sends the rows together with the version the matrix was loaded with", () => {
+    const draft: RolePermissionsDraft = { "ORG.DEPARTMENT": { VIEW: ["COMPANY"] } };
+
+    // Exact: this is the whole PUT body, and the backend refuses a property it does not declare.
+    expect(buildRolePermissionsBody(draft, undefined, 7)).toStrictEqual({
+      permissions: [{ resourceCode: "ORG.DEPARTMENT", action: "VIEW", scopes: ["COMPANY"] }],
+      version: 7,
+    });
   });
 });

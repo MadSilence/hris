@@ -7,6 +7,16 @@ export type CompanyAppearanceDTO = {
   useImageOnLogin?: boolean;
   useImageOnDashboard?: boolean;
   sidebarContrast?: boolean;
+  /** 0 for a company whose appearance row has not been written yet. */
+  version?: number;
+};
+
+/** `GET /public/company-appearance/{subdomain}` — read without a session; nothing but the login page. */
+export type PublicCompanyAppearanceDTO = {
+  brandColor: string | null;
+  loginHeadline: string | null;
+  loginSubheadline: string | null;
+  loginImageUrl: string | null;
 };
 
 /** Null clears a field back to the shipped default. The login image has its own endpoints. */
@@ -17,4 +27,6 @@ export type UpdateCompanyAppearanceRequest = {
   useImageOnLogin: boolean;
   useImageOnDashboard: boolean;
   sidebarContrast: boolean;
+  /** The version the form was opened with; a stale one is refused with E00409. */
+  version?: number;
 };

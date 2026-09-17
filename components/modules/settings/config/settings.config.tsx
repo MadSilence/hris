@@ -79,28 +79,33 @@ export const settingsGroups: SettingsGroup[] = [
     title: "Automation",
     icon: <Automation/>,
     items: [
-      { label: "Workflows", href: "/settings/timeoff", resources: ["SETTINGS.GENERAL"] },
-      { label: "Preboadring & Onboarding", href: "/settings/holidays", resources: ["SETTINGS.GENERAL"] },
-      { label: "Offboarding", href: "/settings/offboarding", resources: ["SETTINGS.GENERAL"] },
-      { label: "Approvals", href: "/settings/approvals", resources: ["SETTINGS.GENERAL"] },
-      { label: "Notifications", href: "/settings/notifications", resources: ["SETTINGS.GENERAL"] },
-      { label: "Integrations", href: "/settings/integrations", resources: ["SETTINGS.GENERAL"] },
+      { label: "Workflows", href: "/settings/automation/workflows", resources: ["SETTINGS.GENERAL"] },
+      {
+        label: "Preboarding & Onboarding",
+        href: "/settings/automation/lifecycle",
+        resources: ["PEOPLE.LIFECYCLE_TEMPLATES"],
+      },
+      { label: "Offboarding", href: "/settings/automation/offboarding", resources: ["SETTINGS.GENERAL"] },
+      { label: "Approvals", href: "/settings/automation/approvals", resources: ["SETTINGS.GENERAL"] },
+      { label: "Notifications", href: "/settings/automation/notifications", resources: ["SETTINGS.GENERAL"] },
+      { label: "Integrations", href: "/settings/automation/integrations", resources: ["SETTINGS.GENERAL"] },
     ],
   }, {
     id: "tech",
     title: "Tech",
     icon: <Settings/>,
     items: [
-      { label: "API", href: "/settings/timeoff", resources: ["SETTINGS.GENERAL"] },
-      { label: "Login & SSO", href: "/settings/holidays", resources: ["SETTINGS.GENERAL"] },
+      { label: "API", href: "/settings/tech/api", resources: ["SETTINGS.GENERAL"] },
+      { label: "Login & SSO", href: "/settings/tech/login-and-sso", resources: ["SETTINGS.GENERAL"] },
     ],
   }, {
     id: "admin",
     title: "Admin",
     icon: <Admin/>,
     items: [
-      { label: "Subscription management", href: "/settings/timeoff", resources: ["SETTINGS.GENERAL"] },
-      { label: "Support", href: "/settings/holidays", resources: ["SETTINGS.GENERAL"] },
+      { label: "Logs", href: "/settings/admin/logs", resources: ["SETTINGS.AUDIT_LOG"] },
+      { label: "Subscription Management", href: "/settings/admin/subscription", resources: ["SETTINGS.GENERAL"] },
+      { label: "Support", href: "/settings/admin/support", resources: ["SETTINGS.GENERAL"] },
     ],
   },
 ];

@@ -16,6 +16,7 @@ const defaults: CompanyAppearance = {
   useImageOnLogin: false,
   useImageOnDashboard: false,
   sidebarContrast: false,
+  version: 2,
 };
 
 const renderComponent = (
@@ -69,6 +70,7 @@ describe("CompanyAppearanceSettingsComponent", () => {
       useImageOnLogin: false,
       useImageOnDashboard: false,
       sidebarContrast: false,
+      version: 2,
     });
   });
 

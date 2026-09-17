@@ -4,4 +4,5 @@ export interface UpdateDepartmentPayload {
   code?: string | null;
   parentId?: string | null;
   leadId?: string | null;
+  version?: number;
 }

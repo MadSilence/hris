@@ -18,5 +18,8 @@ export const useUpdateTeam = () => {
       return result;
     },
     onSuccess: () => invalidate(),
+    // A refusal can mean the tree is stale (E00409: someone else saved first). The open dialog keeps
+    // the node it was opened with; refetching means reopening it starts from the current version.
+    onError: () => invalidate(),
   });
 };

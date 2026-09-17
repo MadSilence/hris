@@ -111,13 +111,17 @@ export const NotificationsInbox: FC = () => {
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [query, setQuery] = useState("");
 
-  // Clear the badge (seen) as soon as the inbox is opened; items stay unread until opened.
-  useEffect(() => {
-    markAllSeen.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const all = useMemo(() => notifications ?? [], [notifications]);
+
+  /* The badge counts what has not been seen, and being on this page is seeing it: clear it when the inbox
+     opens and again whenever a refetch brings something new while it is open. Items stay unread until
+     opened. */
+  const hasUnseen = all.some((n) => !n.seen);
+  useEffect(() => {
+    if (isLoading) return;
+    if (hasUnseen || notifications === undefined) markAllSeen.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasUnseen, isLoading]);
 
   const counts = useMemo(
     () => ({
@@ -213,7 +217,7 @@ export const NotificationsInbox: FC = () => {
             Mark all as read
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Notification preferences" asChild>
-            <Link href="/inbox/preferences">
+            <Link href="/preferences">
               <Settings className="h-4 w-4 text-brown-500" />
             </Link>
           </Button>

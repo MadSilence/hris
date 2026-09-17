@@ -4,16 +4,11 @@ import { Role } from "@/models/role/Role";
 export class RoleMapper {
   public mapRoleDTOtoRole(dto: RoleDTO): Role {
     return {
-      id: dto.id,
-      archived: dto.archived,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       archivedAt: dto.archivedAt ?? null,
-      name: dto.name,
       description: dto.description || undefined,
-      userCount: dto.userCount,
-      createdAt: dto.createdAt,
-      systemOwner: dto.systemOwner,
-      isDefault: dto.isDefault,
-      updatedAt: dto.updatedAt,
     };
   }
 }

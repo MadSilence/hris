@@ -4,20 +4,9 @@ import { Office } from "@/models/office";
 export class OfficeMapper {
   public mapOfficeDtoToOffice(dto: OfficeDTO): Office {
     return {
-      id: dto.id,
-      name: dto.name,
-      description: dto.description,
-      email: dto.email,
-      phone: dto.phone,
-      isSystem: dto.isSystem,
-      archived: dto.archived,
-      archivedAt: dto.archivedAt,
-      country: dto.country,
-      city: dto.city,
-      street: dto.street,
-      building: dto.building,
-      postCode: dto.postCode,
-      assignedUsersCount: dto.assignedUsersCount,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 }

@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface CreateGroupFormProps {
@@ -20,6 +21,8 @@ export interface CreateGroupFormProps {
 
 export type CreateGroupFormValues = {
   name: string;
+  /** Trimmed on submit; an empty one means the section has no description. */
+  description: string;
 };
 
 const buildValidationSchema = (existingNames: string[]) => {
@@ -38,6 +41,10 @@ const buildValidationSchema = (existingNames: string[]) => {
         "A section with this name already exists.",
         (value) => !value || !taken.has(value.trim().toLowerCase()),
       ),
+    description: yup
+      .string()
+      .trim()
+      .max(1000, "Description must be 1000 characters or fewer."),
   });
 };
 
@@ -52,6 +59,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
     (values: CreateGroupFormValues) =>
       onSubmitAction({
         name: values.name.trim(),
+        description: values.description.trim(),
       }),
     [onSubmitAction],
   );
@@ -59,6 +67,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   const formik = useFormik<CreateGroupFormValues>({
     initialValues: {
       name: "",
+      description: "",
     },
     validationSchema: buildValidationSchema(existingNames),
     validateOnBlur: false,
@@ -103,6 +112,23 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
         )}
       </div>
 
+      <div className="mt-4 space-y-2">
+        <RequiredLabel htmlFor="group-description">Description</RequiredLabel>
+
+        <Textarea
+          id="group-description"
+          rows={3}
+          value={formik.values.description}
+          onChange={(e) => formik.setFieldValue("description", e.currentTarget.value)}
+          disabled={isLoading}
+          aria-invalid={!!formik.errors.description}
+        />
+
+        {formik.errors.description && (
+          <p role="alert" className="text-sm text-destructive">{formik.errors.description}</p>
+        )}
+      </div>
+
       <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
         <Button
           type="button"
@@ -114,7 +140,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Create
+          Add
         </Button>
       </DialogFooter>
     </form>

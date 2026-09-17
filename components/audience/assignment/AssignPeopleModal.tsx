@@ -58,6 +58,13 @@ export type AssignPeopleModalProps = {
   semantics: "add" | "replace";
   temporal?: boolean;
   invalidateKeys?: QueryKey[];
+  /**
+   * A warning about the people picked by hand, shown before Add — the impact-before-action contract.
+   * The domain supplies it because only the domain knows what a pair can get wrong (a leave policy
+   * whose approval chain resolves to nobody for this person). Not called for "everyone who matches":
+   * there is no list to ask about, and the result screen reports who was skipped.
+   */
+  renderSelectionWarning?: (userIds: string[]) => React.ReactNode;
 };
 
 /**
@@ -89,6 +96,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   semantics,
   temporal = false,
   invalidateKeys = [],
+  renderSelectionWarning,
 }) => {
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const queryClient = useQueryClient();
@@ -221,10 +229,13 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
     const to = temporal ? effectiveTo || null : null;
     try {
       if (mode === "all") {
+        // Must be the same segment the picker previewed, `drafts` included, or the count on the
+        // button and the people the job touches are two different sets.
         const segment: Segment = {
           filters: [...filters, ...exclusionFilters],
           excludeUserIds: [...excluded],
           includeInactive,
+          drafts: includeInactive ? "INCLUDE" : "EXCLUDE",
         };
         const res = await applySegment.mutateAsync({ segment, effectiveFrom: from, effectiveTo: to });
         setJobId(res.jobId);
@@ -308,23 +319,27 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
               />
 
               {/*
-                The checkbox widens the *search*; it does not widen what the engine will write.
-                `AssignmentRuleService` skips `!user.isActive()` unconditionally, and the flag never
-                reaches it — it is a segment-resolution setting, and the manual path does not even
-                send a segment. So ticking it finds people who are then all skipped.
+                The checkbox widens the *search* in two directions, and the engine treats the two
+                halves differently. `AssignmentRuleService` skips `!user.isActive()` — a leaver —
+                unconditionally, and no flag reaches it. Somebody who has not started, draft or not,
+                is not a leaver: assigning them a department or a calendar ahead of day one is the
+                whole point, and `ResolvedUser.isActive` says so.
 
                 Said here rather than fixed in the engine, because "may a terminated employee be
                 assigned to an office" is a product decision and not one to take from a checkbox
-                label. The result screen now shows the skips either way; this stops them being a
-                surprise.
+                label. The result screen shows the skips either way; this stops them being a surprise.
               */}
               {includeInactive && (
                 <p className="flex items-start gap-2 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-                  Non-active people can be found this way but not assigned — they will be listed as
-                  skipped.
+                  People who have left can be found this way but not assigned — they will be listed as
+                  skipped. People who have not started yet, drafts included, are assigned normally.
                 </p>
               )}
+
+              {mode === "manual" && manual.size > 0 && !overCap && renderSelectionWarning
+                ? renderSelectionWarning([...manual])
+                : null}
 
               {overCap && (
                 <p className="flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">

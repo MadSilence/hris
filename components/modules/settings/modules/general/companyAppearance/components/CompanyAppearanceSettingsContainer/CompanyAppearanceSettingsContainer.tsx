@@ -39,9 +39,8 @@ export default function CompanyAppearanceSettingsContainer() {
     );
   }
 
-  const handleSave = async (body: UpdateCompanyAppearanceRequest) => {
-    await updateAppearance.mutateAsync(body);
-  };
+  // Hands back what was saved, so the form holds the version the save produced for its next save.
+  const handleSave = async (body: UpdateCompanyAppearanceRequest) => updateAppearance.mutateAsync(body);
 
   const handleUpload = async (file: File) => {
     await uploadLoginImage.mutateAsync(file);

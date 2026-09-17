@@ -121,6 +121,24 @@ is transport-specific**. Business logic, DTO↔model mapping, and multi-call com
 proxies that need custom passthrough (`me/access` — ETag/304, `documents/.../upload` — streamed
 multipart). New route handlers default to wrapped.
 
+## The host is the company
+
+A company lives at `<subdomain>.<root>`; the root holds the landing site, "sign in to your company" and
+the trial (`(claude)/technical_documentation/COMPANY_ADDRESSES.md`).
+
+- **Read the host through `lib/companyAddress`** (`parseHost`, `requestHost`) — on the server via
+  `currentCompanySubdomain()` in `api/modules/companyAddress`. Never take the company from a request body.
+- **`middleware.ts` routes by host; it is not a security check.** Its table is `hostRouting.ts`. It also
+  sends a request with **no session cookie at all** to `/login?next=…` before an app page renders —
+  presence only; whether a token is good stays the backend's answer. The login follows `next` only
+  through `safeReturnPath`.
+- **Every call to Java carries the browser's `X-Forwarded-For` and `User-Agent`**
+  (`hrisApiClient.callerHeaders`); Java believes them only from `APP_TRUSTED_PROXIES`.
+- **Browser calls stay relative** (`/api/…`). An absolute origin is a different origin on every company.
+- **Two Next traps, both met live:** a middleware redirect to the server's own origin (locally the root)
+  is turned into a relative one — leave for the root through `/leave-for-root/<path>`; and a route
+  handler's `request.url` is the URL *before* a middleware rewrite.
+
 ## Security model (do not add a third check)
 
 - **UI gating** (`PermissionGate`, hide/disable buttons) = **UX only, zero security**. Action and
@@ -141,15 +159,24 @@ multipart). New route handlers default to wrapped.
   the react-query hook that wraps the action, not in the action itself (see
   `audience/assignment/hooks/useAssignment.ts` — `unwrap()` turns an ERROR envelope into a rejected
   mutation, which is what react-query needs).
-- **Do not write your own `catch`.** `lib/errors/withActionError` is the middle for mutations, the
-  mirror of `withErrorMiddleware` on the read path. Wrap the body, or call `toActionError(error)`
-  from a catch that has to exist for another reason:
+- **Do not write your own error handling.** `toActionError(error)` from `lib/errors/withActionError`
+  is the middle for mutations, the mirror of `withErrorMiddleware` on the read path. Every export of a
+  `"use server"` file must be a declared `async function`, so the shape is:
 
 ```ts
-export const archiveOfficeAction = withActionError(
-  (input: ArchiveOfficeActionInput) => officeService.archive(input),
-);
+export async function archiveOfficeAction(input: ArchiveOfficeActionInput): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await officeService.archive(input) };
+  } catch (error) {
+    return toActionError(error, "archiveOfficeAction");
+  }
+}
 ```
+
+- **`export const x = withActionError(...)` does not work in a `"use server"` file**, although this
+  document showed exactly that until 2026-09-14. tsc, eslint and jest all pass it; Next refuses it at
+  request time with "Server Actions must be async functions", and the page importing it answers 500.
+  No action in the codebase used it — the first eight that did were found by the lifecycle live run.
 
 - The envelope it returns is the old one plus `code`, `fieldErrors` and `requestId`. The extra
   fields are optional, so a caller that only reads `status` and `errorMessage` keeps working.
@@ -163,9 +190,6 @@ export const archiveOfficeAction = withActionError(
 
 The following areas are incomplete or inconsistent. Do not use them as references:
 
-- **Dead export buttons.** `Export policies` in `TimeOffPoliciesSettingsComponent` has no `onClick`,
-  and the Download button in `AssignedUsersPanel` renders even when the caller passes no `onExport`
-  (public-holiday calendars). Do not copy either as a working example.
 - **Two components named `DeleteUserAvatarModal`.** The shared one was deleted in the cleanup; the
   live one is declared **inside** `UpdateUserAvatarModal.tsx`. Do not add a second component with the
   name of an existing one — module resolution will not warn you.
@@ -176,7 +200,8 @@ The following areas are incomplete or inconsistent. Do not use them as reference
 Fixed by the cleanup of 2026-08-25 and no longer true (kept here so the entries are not re-added):
 the `features/` orphan directory, mock data in `CompanyProfileSettingsContainer`, the duplicate
 `RoleDetailsComponent/` folder, leftover `console.log`, and the Duplicate/Archive stubs in public
-holidays.
+holidays. Fixed later: the dead `Export policies` button and the `AssignedUsersPanel` Download button
+that rendered without an `onExport`.
 
 ---
 
@@ -259,7 +284,7 @@ Two things that are easy to get wrong:
 
 - Use Tailwind utility classes. Avoid inline styles.
 - Keep `className` readable (no excessive chaining).
-- Match the existing module's approach: most modules use Tailwind exclusively. Some older modules (`attributes`, `jobcatalog`, `PeopleTopbar`) use `.module.css` alongside Tailwind.
+- Match the existing module's approach: the feature modules use Tailwind exclusively. A few older shared pieces (`ui/Loader`, `ui/UserChip`, `ui/NavbarLink`, `app/(app)/layout`) still use `.module.css` alongside Tailwind.
 - Do not create new `.module.css` files unless the target module already uses CSS modules and there is a strong reason.
 - If a component uses `.module.css` but can be reasonably migrated to Tailwind during the task, prefer Tailwind.
 - Before building new UI, inspect nearby modules and match their spacing, borders, typography, hover states, rounded corners, and layout style.
@@ -353,7 +378,9 @@ When working on a task:
 
 # Important Constraints
 
-- Do not introduce new dependencies
+- Do not introduce new dependencies. **One was added deliberately on 2026-09-16** — `qrcode` (plus its
+  types), for the QR code beside the avatar, approved by the owner. It runs in the browser: the
+  backend has no business producing an image it does not store.
 - Do not break existing UI patterns
 - Do not bypass `InternalApiClient` with raw `fetch` in feature modules
 - Always match existing architecture in `components/modules/`

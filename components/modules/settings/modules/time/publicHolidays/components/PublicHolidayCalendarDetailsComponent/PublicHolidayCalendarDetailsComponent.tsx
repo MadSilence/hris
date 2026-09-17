@@ -1,5 +1,6 @@
 "use client";
 
+import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePublicHolidayCalendars";
 import { FC, useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { CalendarDays, CalendarPlus, Download, Pencil, Rss, Users, X } from "lucide-react";
@@ -96,6 +97,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   isHolidaysLoading,
 }) => {
   const invalidate = useInvalidatePublicHolidaysQuery();
+  const canManage = useCanManagePublicHolidayCalendars();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -121,6 +123,12 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   const [editedSubstitution, setEditedSubstitution] =
     useState<PublicHolidayCalendarWeekendSubstitution>(calendar.weekendSubstitution);
   const [editedHolidays, setEditedHolidays] = useState<DraftHoliday[]>([]);
+  /**
+   * The calendar's version when Edit was pressed. Captured then, not read off `calendar` at save
+   * time: a refetch while the editor is open would otherwise hand the save a version the form was
+   * never filled from, and a colleague's save in between would be overwritten instead of refused.
+   */
+  const [editedVersion, setEditedVersion] = useState<number | undefined>(calendar.version);
   const [nameError, setNameError] = useState("");
   const [holidayErrors, setHolidayErrors] = useState<DraftHolidayErrors>({});
   const [generalError, setGeneralError] = useState("");
@@ -160,6 +168,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     setEditedRegion(calendar.sourceRegionCode ?? "");
     setEditedSubstitution(calendar.weekendSubstitution);
     setEditedHolidays(holidaysToDraft(holidays));
+    setEditedVersion(calendar.version);
     setNameError("");
     setHolidayErrors({});
     setGeneralError("");
@@ -234,8 +243,12 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
         nextRegion !== (calendar.sourceRegionCode ?? null) ||
         editedSubstitution !== calendar.weekendSubstitution;
 
+      // Both writes are guarded on the calendar's version. The fields go first and move it, so the
+      // year is sent the version that write produced rather than the one the editor was opened with.
+      let version = editedVersion;
+
       if (metaChanged) {
-        await updatePublicHolidayCalendarAction({
+        const metaResult = await updatePublicHolidayCalendarAction({
           id: calendar.id,
           body: {
             name: editedName.trim(),
@@ -245,8 +258,20 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
             sourceRegionCode: nextRegion,
             sourceLocale: calendar.sourceLocale,
             weekendSubstitution: editedSubstitution,
+            version,
           },
         });
+
+        // This result used to be ignored, so a refused rename went on to save the year and the
+        // editor closed as if everything had landed. A refusal — E00409 included — keeps it open.
+        if (metaResult.status === ActionStatus.ERROR) {
+          setSaveError(metaResult.errorMessage || "Something went wrong while saving. Please try again.");
+          return;
+        }
+        version = metaResult.data?.version ?? version;
+        // Kept for a retry: if the year is refused below, the editor stays open, and the next Save
+        // must not be refused for the version this person's own first write moved.
+        setEditedVersion(version);
       }
 
       // The whole year in one request: the server diffs it, so a half-written calendar is no
@@ -254,6 +279,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
       const result = await replacePublicHolidayYearAction({
         calendarId: calendar.id,
         year,
+        version,
         holidays: editedHolidays.map((h) => ({
           id: h.id ?? null,
           name: h.name.trim(),
@@ -324,14 +350,16 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
             >
               <Rss className="h-4 w-4" />
             </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              aria-label="Export calendar"
-              onClick={() => setIsExportOpen(true)}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
+            {canManage ? (
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Export calendar"
+                onClick={() => setIsExportOpen(true)}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            ) : null}
             <StatusBadge status={status}/>
           </div>
         </div>
@@ -451,7 +479,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     available={canAddYears ? undefined : calendar.years}
                   />
 
-                  {canFillYear && (
+                  {canManage && canFillYear && (
                     <Button
                       variant="outline"
                       className="gap-1.5"
@@ -464,10 +492,12 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   )}
                 </div>
 
-                <Button className="gap-1.5" onClick={enterEditMode}>
-                  <Pencil className="h-4 w-4" />
-                  Edit
-                </Button>
+                {canManage ? (
+                  <Button className="gap-1.5" onClick={enterEditMode}>
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                ) : null}
               </div>
 
               {fillMessage && (
@@ -538,6 +568,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     No holidays match your search
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">Try a different name or date.</p>
+                </div>
+              ) : !canManage ? (
+                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
+                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
+                  <p className="text-sm font-medium text-foreground">No holidays for {year}</p>
                 </div>
               ) : (
                 <button

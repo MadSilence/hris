@@ -86,7 +86,12 @@ export default function JobLevelContainer() {
       settle(
         nameDialog.mode === "create"
           ? await createGroup.mutateAsync({ name })
-          : await updateGroup.mutateAsync({ id: nameDialog.group.id, name }),
+          : await updateGroup.mutateAsync({
+              id: nameDialog.group.id,
+              name,
+              // The dialog holds the row as it was when opened: the version the form was filled from.
+              version: nameDialog.group.version,
+            }),
         nameDialog.mode === "create" ? setFocusGroupId : undefined,
       );
       return;
@@ -95,7 +100,11 @@ export default function JobLevelContainer() {
     settle(
       nameDialog.mode === "create"
         ? await createLevel.mutateAsync({ groupId: nameDialog.group.id, name })
-        : await updateLevel.mutateAsync({ id: nameDialog.level.id, name }),
+        : await updateLevel.mutateAsync({
+            id: nameDialog.level.id,
+            name,
+            version: nameDialog.level.version,
+          }),
     );
   };
 

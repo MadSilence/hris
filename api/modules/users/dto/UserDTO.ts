@@ -6,6 +6,13 @@ export type UserDTO = {
   lastName: string;
   roles: { id: string; name: string }[];
   status: string;
+  accountStatus?: string;
+  /** Locked after too many failed sign-ins. Only a password reset sent from the profile lifts it. */
+  accountLocked?: boolean;
+  /** Sent back by an edit so a save based on a stale read is refused (E00409). */
+  version?: number;
+  inviteSentAt?: string | null;
+  inviteScheduledFor?: string | null;
   isEmailVerified: boolean;
   jobId?: string | null;
   jobName?: string | null;
@@ -32,5 +39,5 @@ export type UserDTO = {
    * carry it. Must be mapped through: the tabs and their gate read nothing else, so dropping it
    * here hides Documents and Time Off from everyone, own profile included.
    */
-  capabilities?: Record<string, ("VIEW" | "EDIT" | "MANAGE")[]>;
+  capabilities?: Record<string, ("VIEW" | "EDIT" | "MANAGE" | "BLOCK")[]>;
 }

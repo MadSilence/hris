@@ -1,5 +1,7 @@
 "use client";
 
+import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePublicHolidayCalendars";
+import { usePublicHolidayCalendarDeleteImpact } from "../../hooks/usePublicHolidayCalendarDeleteImpact";
 import { FC, useMemo, useRef, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
 // Five of these dialogs printed a sentence they wrote themselves — "Failed to archive the calendar."
@@ -104,6 +106,7 @@ function formatCountryRegion(calendar: PublicHolidayCalendar) {
 
 export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoading }) => {
   const router = useRouter();
+  const canManage = useCanManagePublicHolidayCalendars();
 
   const [isChooseTemplateModalOpen, setIsChooseTemplateModalOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -125,6 +128,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const [restoreTarget, setRestoreTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PublicHolidayCalendar | null>(null);
+  const deleteImpact = usePublicHolidayCalendarDeleteImpact(deleteTarget?.id ?? null);
 
   /**
    * The name a confirmation dialog shows, kept alive while the dialog closes.
@@ -184,7 +188,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const handleCreateManually = () => router.push("/settings/time/public-holidays/new");
 
   const openDuplicate = (c: PublicHolidayCalendar) => {
-    setDuplicateName(`${c.name} copy`);
+    setDuplicateName(`${c.name} (copy)`);
     setDuplicateTarget(c);
   };
 
@@ -288,16 +292,18 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             search={{ value: query, onChange: setQuery }}
             archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
             secondary={
-              <Button
-                size="icon"
-                variant="outline"
-                aria-label="Export calendars"
-                onClick={() => setIsExportOpen(true)}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+              canManage ? (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  aria-label="Export calendars"
+                  onClick={() => setIsExportOpen(true)}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              ) : undefined
             }
-            primary={addCalendarMenu}
+            primary={canManage ? addCalendarMenu : undefined}
           />
         </div>
 
@@ -377,6 +383,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end">
+                              {canManage ? (
                               <RowActionsMenu label="Calendar Actions">
                                 <RowAction
                                   icon={<Copy className="h-4 w-4" />}
@@ -423,6 +430,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                                   Delete
                                 </RowActionDestructive>
                               </RowActionsMenu>
+                              ) : null}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -566,16 +574,40 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           <DialogHeader>
             <DialogTitle>Delete &ldquo;{dialogName("delete", deleteTarget)}&rdquo;</DialogTitle>
           </DialogHeader>
-          <div className="py-2 text-sm text-brown-700">
-            This permanently deletes the calendar and all its holiday days. People assigned to it will
-            lose it. This action cannot be undone.
+          <div className="space-y-2 py-2 text-sm text-brown-700">
+            <p className="m-0">
+              This permanently deletes the calendar. It cannot be undone — to take it out of use and
+              keep everything, archive it instead.
+            </p>
+            {deleteImpact.isLoading ? (
+              <p className="m-0 text-muted-foreground">Checking what depends on this calendar…</p>
+            ) : deleteImpact.isError ? (
+              <p className="m-0 text-muted-foreground">
+                What depends on this calendar could not be checked.
+              </p>
+            ) : deleteImpact.data ? (
+              <ul className="m-0 list-disc space-y-1 pl-5">
+                <li>
+                  {deleteImpact.data.peopleAssigned} {deleteImpact.data.peopleAssigned === 1 ? "person loses" : "people lose"} this
+                  calendar. Leave already approved is not recalculated.
+                </li>
+                <li>
+                  {deleteImpact.data.holidayDays} holiday {deleteImpact.data.holidayDays === 1 ? "day is" : "days are"} deleted with it.
+                </li>
+                {deleteImpact.data.feedLinks > 0 ? (
+                  <li>
+                    {deleteImpact.data.feedLinks} subscription {deleteImpact.data.feedLinks === 1 ? "link stops" : "links stop"} working.
+                  </li>
+                ) : null}
+              </ul>
+            ) : null}
             <FormError message={remove.error ? messageForError(remove.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={remove.isPending}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={remove.isPending}>
+            <Button variant="destructive" onClick={confirmDelete} disabled={remove.isPending || deleteImpact.isLoading}>
               {remove.isPending ? "Deleting…" : "Delete"}
             </Button>
           </DialogFooter>

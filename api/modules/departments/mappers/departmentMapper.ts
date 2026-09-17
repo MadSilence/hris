@@ -10,12 +10,10 @@ import type {
 export class DepartmentMapper {
   public mapDTO(dto: DepartmentDTO): Department {
     return {
-      id: dto.id,
-      name: dto.name,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       description: dto.about ?? null,
-      code: dto.code,
-      parentId: dto.parentId,
-      status: dto.status,
       leadId: dto.leadUserId,
       memberCount: dto.membersCount,
       archivedAt: dto.status === "ARCHIVED" ? "" : null,
@@ -28,10 +26,10 @@ export class DepartmentMapper {
 
   public mapTreeNodeDTO(dto: DepartmentTreeNodeDTO): DepartmentTreeNode {
     return {
+      // The node's own extras pass through as they come; the department part is mapped the way a
+      // flat department is.
+      ...dto,
       ...this.mapDTO(dto),
-      directSubNodes: dto.directSubNodes,
-      totalPeople: dto.totalPeople,
-      totalSubNodes: dto.totalSubNodes,
       lead: dto.lead
         ? {
             id: dto.lead.id,

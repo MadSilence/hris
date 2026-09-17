@@ -1,22 +1,7 @@
 ﻿import { hrisEmployeeTimeOffBalancesService } from "@/api/modules/timeOff/employeeTimeOffBalances/services";
 
+// Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class EmployeeTimeOffBalancesRoutes {
-  public async create(req: Request) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisEmployeeTimeOffBalancesService.create({
-      assignmentId: body.assignmentId,
-      periodStart: body.periodStart,
-      periodEnd: body.periodEnd ?? null,
-      openingBalance: body.openingBalance ?? 0,
-      accruedBalance: body.accruedBalance ?? 0,
-      carriedOverBalance: body.carriedOverBalance ?? 0,
-      adjustedBalance: body.adjustedBalance ?? 0,
-    });
-
-    return Response.json(data);
-  }
-
   public async getById(_req: Request, id: string) {
     const data = await hrisEmployeeTimeOffBalancesService.getById(id);
     return Response.json(data);
@@ -25,17 +10,6 @@ export class EmployeeTimeOffBalancesRoutes {
   public async listByUserId(_req: Request, userId: string) {
     const data =
       await hrisEmployeeTimeOffBalancesService.listByUserId(userId);
-    return Response.json(data);
-  }
-
-  public async adjust(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisEmployeeTimeOffBalancesService.adjust(id, {
-      adjustmentAmount: body.adjustmentAmount,
-      reason: body.reason,
-    });
-
     return Response.json(data);
   }
 

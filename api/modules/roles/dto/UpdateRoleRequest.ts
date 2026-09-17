@@ -2,4 +2,6 @@
 export type UpdateRoleRequest = {
   newName?: string;
   description?: string;
+  /** The role's version the form was opened with; a stale one is refused with E00409. */
+  version?: number;
 }

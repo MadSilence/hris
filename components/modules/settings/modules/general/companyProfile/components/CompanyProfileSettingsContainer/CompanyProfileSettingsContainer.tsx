@@ -29,13 +29,15 @@ export default function CompanyProfileSettingsContainer() {
     );
   }
 
+  // Both hand back what was saved, so the form holds the version the save produced for its next save.
   const handleSaveProfile = async (body: UpdateCompanyRequest) => {
-    await updateCompany.mutateAsync(body);
+    const saved = await updateCompany.mutateAsync(body);
     await refreshCompany();
+    return saved;
   };
 
   const handleSaveSettings = async (body: UpdateCompanySettingsRequest) => {
-    await updateSettings.mutateAsync(body);
+    return updateSettings.mutateAsync(body);
   };
 
   return (

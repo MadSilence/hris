@@ -16,7 +16,7 @@ import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ForbiddenError } from "@/components/clients/exceptions";
-import type { ResourceCode } from "@/models/access";
+import type { AccessAction, ResourceCode } from "@/models/access";
 import type { AssignedUser } from "@/models/assignedUser";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
@@ -33,6 +33,8 @@ export interface AssignedUsersPanelProps {
   title?: string;
   description: string;
   manageResource?: ResourceCode;
+  /** The action that lets somebody assign and unassign. EDIT unless the resource has no EDIT. */
+  manageAction?: AccessAction;
   rows?: AssignedUser[];
   isLoading?: boolean;
   /**
@@ -75,6 +77,7 @@ export default function AssignedUsersPanel({
   title = "Assigned People",
   description,
   manageResource,
+  manageAction = "EDIT",
   rows = [],
   isLoading = false,
   error,
@@ -194,7 +197,7 @@ export default function AssignedUsersPanel({
 
         <div className="flex items-center gap-3">
           {manageResource ? (
-            <PermissionGate resource={manageResource} action="EDIT">
+            <PermissionGate resource={manageResource} action={manageAction}>
               {assignButton}
             </PermissionGate>
           ) : (
@@ -292,7 +295,7 @@ export default function AssignedUsersPanel({
                       {canRemove ? (
                         <TableCell className="w-10 pr-2 text-right">
                           {manageResource ? (
-                            <PermissionGate resource={manageResource} action="EDIT">
+                            <PermissionGate resource={manageResource} action={manageAction}>
                               <RemoveButton
                                 name={fullName}
                                 disabled={removingId === u.id}

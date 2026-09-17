@@ -18,4 +18,6 @@ export interface DepartmentDTO {
   parentId: string | null;
   leadUserId: string | null;
   membersCount: number;
+  /** Sent back by the edit dialog; the backend refuses a save over a newer row (E00409). */
+  version?: number;
 }

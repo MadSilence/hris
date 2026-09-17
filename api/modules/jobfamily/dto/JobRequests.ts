@@ -16,6 +16,8 @@ export type UpdateJobRequest = {
   clearCode?: boolean;
   description?: string | null;
   clearDescription?: boolean;
+  /** The version the form was opened with. */
+  version?: number;
 };
 
 /** Archive, activate and delete all take nothing but the id. */

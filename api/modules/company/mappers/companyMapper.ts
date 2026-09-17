@@ -4,9 +4,9 @@ import { CompanyDTO } from "@/api/modules/company/dto/CompanyDTO";
 export const companyMapper = {
   mapCompanyDTOtoCompany(dto: CompanyDTO): Company {
     return {
-      id: dto.id,
-      name: dto.name,
-      subdomain: dto.subdomain,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       companyLogo: this.resolveBackendAssetUrl(dto.companyLogo),
       description: dto.description ?? null,
       website: dto.website ?? null,
@@ -15,8 +15,6 @@ export const companyMapper = {
       // display primitive". This mapper lists fields explicitly, so a new one added on the backend
       // reaches nobody until it is named here; that is how the calendar was still shading Saturday
       // and Sunday after the backend had started sending the real week.
-      workingDays: dto.workingDays,
-      weekStartDay: dto.weekStartDay,
     };
   },
 

@@ -1,4 +1,4 @@
-import type { FilterDTO } from "@/models/user/fields";
+import type { DraftVisibility, FilterDTO } from "@/models/user/fields";
 
 // Reusable audience definition. filters use the same DSL as POST /users/search;
 // empty filters = every active user. excludeUserIds is subtracted after the filter resolves.
@@ -11,6 +11,16 @@ export type Segment = {
    * "everyone who still works here" is fine as a default but not as a secret.
    */
   includeInactive?: boolean;
+  /**
+   * Whether people nobody has started yet are in scope. Omitted means they are not — every stored
+   * audience, every access scope and the person-reference picker leave it alone. The "assign to"
+   * picker sets it from the same switch that widens the search to non-active people, so a person can
+   * be given their department, role and calendar before their first day.
+   *
+   * Preview and apply send the same segment on purpose: they resolve the same audience once, and a
+   * preview that counts people the apply then drops is a lie this codebase has already paid for.
+   */
+  drafts?: DraftVisibility;
 };
 
 export type UserRoleRefDTO = {

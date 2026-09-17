@@ -4,8 +4,27 @@ import * as React from "react";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
 import LoginForm, { LoginFormValues } from "@/components/modules/auth/components/LoginForm/LoginForm";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { APP_HOME } from "@/lib/companyAddress";
 
-const LoginContainer: React.FC = () => {
+export const PASSWORD_CHANGED_NOTICE = "Your password was changed. Sign in with the new one.";
+
+type LoginContainerProps = {
+  /** Set when the person arrives here straight after changing their password, which signed them out. */
+  passwordChanged?: boolean;
+  headline?: string;
+  subheadline?: string;
+  changeCompanyHref?: string;
+  /** Where signing in goes — a path on this host the server has already checked. */
+  returnTo?: string;
+};
+
+const LoginContainer: React.FC<LoginContainerProps> = ({
+  passwordChanged = false,
+  headline,
+  subheadline,
+  changeCompanyHref,
+  returnTo = APP_HOME,
+}) => {
   const loginAction = useLoginAction();
 
   const handleSubmit = React.useCallback(
@@ -20,7 +39,7 @@ const LoginContainer: React.FC = () => {
         // login page — no cookie, no brand — so the app came up in the shipped brown and only
         // corrected itself whenever something later forced a hard load. Signing in changes identity;
         // re-rendering everything from the server is the honest response, and it costs one load.
-        window.location.assign("/dashboard");
+        window.location.assign(returnTo);
         return;
       }
 
@@ -28,7 +47,7 @@ const LoginContainer: React.FC = () => {
       // sign-in. There is no code to look up and nothing specific to say.
       throw new Error(`Login answered ${res.status} without a session`);
     },
-    [loginAction],
+    [loginAction, returnTo],
   );
 
   return (
@@ -43,6 +62,10 @@ const LoginContainer: React.FC = () => {
         wrong password (`AUTH00001`) went the same way, in the server's wording rather than ours.
       */
       apiError={loginAction.error ? messageForError(loginAction.error) : undefined}
+      notice={passwordChanged ? PASSWORD_CHANGED_NOTICE : undefined}
+      headline={headline}
+      subheadline={subheadline}
+      changeCompanyHref={changeCompanyHref}
     />
   );
 };

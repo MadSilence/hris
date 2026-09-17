@@ -33,6 +33,7 @@ jest.mock(
             onClick={() =>
               props.onSubmitAction({
                 name: "HR",
+                description: "",
               })
             }
           >
@@ -115,6 +116,7 @@ describe("CreateGroupModal", () => {
 
     expect(onConfirmAction).toHaveBeenCalledWith({
       name: "HR",
+      description: "",
     });
   });
 

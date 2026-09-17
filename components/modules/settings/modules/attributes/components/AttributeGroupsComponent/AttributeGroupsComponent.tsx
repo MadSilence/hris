@@ -5,6 +5,7 @@ import {
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
+  Copy,
   Download,
   GripVertical,
   Lock,
@@ -60,6 +61,7 @@ type AttributeGroupsComponentProps = {
   onDeleteGroup: (group: AttributeGroup) => void;
   onCreateAttribute: (group: AttributeGroup) => void;
   onEditAttribute: (attribute: Attribute) => void;
+  onDuplicateAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
   isSavingAttribute?: boolean;
   /** A section to reveal after creation — it is appended at the very end of a long list. */
@@ -190,6 +192,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
   onDeleteGroup,
   onCreateAttribute,
   onEditAttribute,
+  onDuplicateAttribute,
   onDeleteAttribute,
   isSavingAttribute,
   focusGroupId,
@@ -494,6 +497,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
                       onDeleteGroup={onDeleteGroup}
                       onCreateAttribute={onCreateAttribute}
                       onEditAttribute={onEditAttribute}
+                      onDuplicateAttribute={onDuplicateAttribute}
                       onDeleteAttribute={onDeleteAttribute}
                       isSavingAttribute={isSavingAttribute}
                     />
@@ -551,6 +555,7 @@ type SortableGroupProps = {
   onDeleteGroup: (group: AttributeGroup) => void;
   onCreateAttribute: (group: AttributeGroup) => void;
   onEditAttribute: (attribute: Attribute) => void;
+  onDuplicateAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
   isSavingAttribute?: boolean;
 };
@@ -564,13 +569,16 @@ const SortableGroup: FC<SortableGroupProps> = ({
   onDeleteGroup,
   onCreateAttribute,
   onEditAttribute,
+  onDuplicateAttribute,
   onDeleteAttribute,
   isSavingAttribute,
 }) => {
   const attributes = group.attributes ?? [];
+  const description = group.description?.trim();
 
   const handleCreateAttribute = () => onCreateAttribute(group);
   const handleEditAttribute = (attribute: Attribute) => onEditAttribute(attribute);
+  const handleDuplicateAttribute = (attribute: Attribute) => onDuplicateAttribute(attribute);
   const handleDeleteAttribute = (attribute: Attribute) => onDeleteAttribute(attribute);
 
   const { setNodeRef, attributes: dragAttrs, listeners, transform, transition, isDragging } =
@@ -630,15 +638,16 @@ const SortableGroup: FC<SortableGroupProps> = ({
               <RowActionsMenu
                 label="Section Actions"
                 disabled={group.isSystem}
-                title={group.isSystem ? "System sections can't be renamed or deleted" : undefined}
+                title={group.isSystem ? "System sections can't be edited or deleted" : undefined}
                 stopPropagation
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+                  {/* Opens the section's name-and-description form, so it is Edit, not Rename. */}
                   <RowAction
                     icon={<Pencil className="h-4 w-4"/>}
                     onClick={() => onRenameGroup(group)}
                   >
-                    Rename
+                    Edit
                   </RowAction>
                 </PermissionGate>
 
@@ -687,6 +696,12 @@ const SortableGroup: FC<SortableGroupProps> = ({
 
       <AccordionContent>
         <div ref={setDropRef} className="pb-2">
+          {description && (
+            <p className="whitespace-pre-line px-3 pb-2 pt-1 text-sm text-muted-foreground">
+              {description}
+            </p>
+          )}
+
           <SortableContext
             items={attributes.map((a) => a.id)}
             strategy={verticalListSortingStrategy}
@@ -699,6 +714,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 dndEnabled={dndEnabled}
                 editing={editing}
                 onEditAttribute={handleEditAttribute}
+                onDuplicateAttribute={handleDuplicateAttribute}
                 onDeleteAttribute={handleDeleteAttribute}
                 isSavingAttribute={isSavingAttribute}
               />
@@ -735,6 +751,7 @@ type SortableAttributeRowProps = {
   dndEnabled: boolean;
   editing: boolean;
   onEditAttribute: (attribute: Attribute) => void;
+  onDuplicateAttribute: (attribute: Attribute) => void;
   onDeleteAttribute: (attribute: Attribute) => void;
   isSavingAttribute?: boolean;
 };
@@ -745,6 +762,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
   dndEnabled,
   editing,
   onEditAttribute,
+  onDuplicateAttribute,
   onDeleteAttribute,
   isSavingAttribute,
 }) => {
@@ -824,6 +842,13 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
                     onClick={() => onEditAttribute(attribute)}
                   >
                     Edit
+                  </RowAction>
+
+                  <RowAction
+                    icon={<Copy className="h-4 w-4"/>}
+                    onClick={() => onDuplicateAttribute(attribute)}
+                  >
+                    Duplicate
                   </RowAction>
                 </PermissionGate>
 

@@ -20,7 +20,9 @@ export const updateJobFamilyAction = async (
   }
 };
 
-export type UpdateJobFamilyActionInput = { id: string; name?: string; description?: string | null; clearDescription?: boolean };
+export type UpdateJobFamilyActionInput = { id: string; name?: string; description?: string | null; clearDescription?: boolean;
+  /** The version the form was opened with; a stale one comes back as E00409. */
+  version?: number };
 
 export type UpdateJobFamilyActionOutput = {
   status: ActionStatus;

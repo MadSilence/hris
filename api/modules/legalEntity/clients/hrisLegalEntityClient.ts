@@ -1,3 +1,4 @@
+import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import {
@@ -37,6 +38,7 @@ class HrisLegalEntityClient {
       street: payload.street,
       building: payload.building,
       postCode: payload.postCode,
+      version: payload.version,
     })
   }
 
@@ -46,6 +48,10 @@ class HrisLegalEntityClient {
 
   public async exportLegalEntities(format: "csv" | "xlsx"): Promise<Response> {
     return hrisApiClient.fetch(`${this.BASE_PATH}/export?format=${format}`);
+  }
+
+  public async getDeleteImpact(id: string): Promise<DetachedPeopleImpact> {
+    return hrisApiClient.get<DetachedPeopleImpact>(`${this.BASE_PATH}/${id}/delete-impact`);
   }
 
   public async exportLegalEntity(id: string, format: "csv" | "xlsx"): Promise<Response> {

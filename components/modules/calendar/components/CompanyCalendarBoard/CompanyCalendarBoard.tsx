@@ -73,7 +73,8 @@ const titleFor = (m: CompanyCalendarMark): string => {
   // half-day arithmetic arrives with hourly absence, which does not exist — but the two screens were
   // disagreeing in silence, and the person reading them is the one who loses the day.
   if (m.dayPart === "HALF_DAY") parts.push("(half day — leave still counts it as a whole day)");
-  if (m.nominalDate) parts.push(`— moved from ${m.nominalDate}`);
+  // A substituted holiday is drawn exactly like any other and says nothing about where it moved from:
+  // decided, with the nominal date dropping out of the product (`nominalDate` stays on the DTO, unused).
   return m.calendarName ? `${parts.join(" ")} · ${m.calendarName}` : parts.join(" ");
 };
 
@@ -239,7 +240,12 @@ export const CompanyCalendarBoard: FC<Props> = ({
                             {/* The name only where it fits. At month density a day column is a
                                 fraction of the row, so the tooltip carries it instead. */}
                             {density === "week" && !seg.continuesLeft ? (
-                              <span className="truncate px-1.5">{seg.mark.name}</span>
+                              <span className="truncate px-1.5">
+                                {seg.mark.name}
+                                {/* The bar is painted half; the words say so where there is room for
+                                    words, so the fill is not the only carrier of the fact. */}
+                                {seg.mark.dayPart === "HALF_DAY" ? " · Half Day" : null}
+                              </span>
                             ) : null}
                           </div>
                         ))}

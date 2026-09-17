@@ -9,12 +9,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/public/desact/src/components/ui/popover";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
 
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
@@ -22,6 +16,7 @@ import { ColumnsManager } from "@/components/modules/organization/components/Peo
 import type { ColumnItem } from "@/models/userTable";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { DraftsToggle } from "@/components/ui/DraftsToggle";
 
 export type FieldMeta = Pick<FieldDTO, "id" | "key" | "label" | "type" | "isSystem" | "options">;
 
@@ -37,9 +32,12 @@ type PeopleTopbarProps = {
   fields: FieldDTO[];
   selectedCount?: number;
   onEditSelectedAction?: () => void;
-  onAddManuallyAction?: () => void;
-  onImportCsvAction?: () => void;
-  onInviteByEmailAction?: () => void;
+  onAddPersonAction?: () => void;
+  /**
+   * The Drafts segment. Omitted entirely for a reader who cannot reach drafts — the count comes back
+   * as zero for them, and a zero count draws nothing.
+   */
+  drafts?: { count: number; showing: boolean; onChange: (showDrafts: boolean) => void };
 };
 
 export default function PeopleTopbar({
@@ -52,9 +50,8 @@ export default function PeopleTopbar({
   fields,
   selectedCount = 0,
   onEditSelectedAction,
-  onAddManuallyAction,
-  onImportCsvAction,
-  onInviteByEmailAction,
+  onAddPersonAction,
+  drafts,
 }: PeopleTopbarProps) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
@@ -112,6 +109,14 @@ export default function PeopleTopbar({
           </PopoverContent>
         </Popover>
 
+        {drafts && (
+          <DraftsToggle
+            count={drafts.count}
+            showingDrafts={drafts.showing}
+            onChange={drafts.onChange}
+          />
+        )}
+
         {/*
           * Only here while something is selected: its appearance is the signal that a selection
           * exists, which is what the "n selected" chip and the separate action bar used to say in
@@ -130,21 +135,19 @@ export default function PeopleTopbar({
       <div className="flex flex-wrap items-center gap-2">
         <SearchBox value={query} onChange={onQueryChangeAction}/>
 
-        <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                Add People
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onAddManuallyAction?.()}>Add manually</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onImportCsvAction?.()}>Import CSV</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onInviteByEmailAction?.()}>Invite by email</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </PermissionGate>
+        {/*
+          * One action, and it works. The menu that stood here offered "Add manually", "Import CSV" and
+          * "Invite by email" and none of the three was wired to anything. A person is added as a
+          * draft; inviting them is an action on their profile.
+          */}
+        {onAddPersonAction ? (
+          <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
+            <Button className="gap-1.5" onClick={onAddPersonAction}>
+              <Plus className="h-4 w-4" />
+              Add Person
+            </Button>
+          </PermissionGate>
+        ) : null}
       </div>
     </div>
   );

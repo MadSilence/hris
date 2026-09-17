@@ -67,6 +67,9 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
         description: values.description?.trim() || null,
         parentId: values.parentId || null,
         leadId: lead?.id ?? null,
+        // `department` is the node captured when the dialog opened, so this is the version the
+        // form was filled from; a save over a newer row comes back as E00409 and the dialog stays.
+        version: department.version,
       });
       onClose();
     },

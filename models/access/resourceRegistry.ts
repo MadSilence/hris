@@ -17,6 +17,9 @@ export type ResourceGroup = {
 };
 
 const ALL_ACTIONS: AccessAction[] = ["VIEW", "EDIT", "MANAGE"];
+// Mirrors ResourceRegistry.PEOPLE_ACTIONS: only a person can be blocked, so only the person resource
+// offers BLOCK — the circle who may end someone's sign-in, which is usually smaller than MANAGE's.
+const PEOPLE_ACTIONS: AccessAction[] = ["VIEW", "EDIT", "MANAGE", "BLOCK"];
 const MANAGE_ONLY: AccessAction[] = ["MANAGE"];
 const COMPANY_ONLY: AccessScope[] = ["COMPANY"];
 // Mirrors ResourceRegistry.ALL_SCOPES on the backend — resourceRegistry.test.ts fails if they drift.
@@ -53,6 +56,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedActions: ["MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
+      {
+        code: "SETTINGS.AUDIT_LOG",
+        label: "Logs",
+        description:
+          "Read the company's journal: who did what, who signed in, who was refused. View only — the page writes nothing.",
+        supportedActions: ["VIEW"],
+        supportedScopes: COMPANY_ONLY,
+      },
     ],
   },
   {
@@ -62,8 +73,8 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         code: "PEOPLE.PROFILE",
         label: "Profiles",
-        description: "Employee profiles and personal information.",
-        supportedActions: ALL_ACTIONS,
+        description: "Employee profiles and personal information. Block covers blocking, unblocking and sending a password reset.",
+        supportedActions: PEOPLE_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
       {
@@ -103,9 +114,23 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       },
       {
         code: "PEOPLE.CALENDAR",
-        label: "Calendar",
-        description: "People calendar and events.",
-        supportedActions: ["VIEW", "EDIT"],
+        label: "Company calendar",
+        description: "The company calendar board: who is away, and public holidays. Balances and reasons stay with Time off.",
+        supportedActions: ["VIEW"],
+        supportedScopes: PERSONAL_SCOPES,
+      },
+      {
+        code: "PEOPLE.LIFECYCLE_TEMPLATES",
+        label: "Preboarding & onboarding templates",
+        description: "The task lists preboarding and onboarding are started from.",
+        supportedActions: ALL_ACTIONS,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "PEOPLE.LIFECYCLE_PROCESSES",
+        label: "Preboarding & onboarding",
+        description: "Running processes: start, follow, close and delete them.",
+        supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
     ],
@@ -225,16 +250,16 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedScopes: COMPANY_ONLY,
       },
       {
-        code: "NOTIFICATION.REMINDERS",
-        label: "Reminders",
-        description: "May mute reminder notifications for themselves.",
+        code: "NOTIFICATION.POLICIES",
+        label: "Policies",
+        description: "May mute notifications about policy changes.",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
       {
-        code: "NOTIFICATION.POLICIES",
-        label: "Policies",
-        description: "May mute notifications about policy changes.",
+        code: "NOTIFICATION.DOCUMENTS",
+        label: "Documents",
+        description: "May mute notifications about documents added to their own file.",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },

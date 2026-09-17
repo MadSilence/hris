@@ -1,4 +1,5 @@
 import { CompanyAppearance } from "@/models/company/CompanyAppearance";
+import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
 import { UpdateCompanyAppearanceRequest } from "@/api/modules/company/modules/appearance/dto";
 import { hrisApiCompanyAppearanceClient } from "@/api/modules/company/modules/appearance/clients";
 
@@ -10,6 +11,11 @@ import { hrisApiCompanyAppearanceClient } from "@/api/modules/company/modules/ap
 export class HrisCompanyAppearanceService {
   public async getAppearance(): Promise<CompanyAppearance> {
     return hrisApiCompanyAppearanceClient.getAppearance();
+  }
+
+  /** The login page of the company at an address, before sign-in. */
+  public async getPublicAppearance(subdomain: string): Promise<PublicCompanyAppearance> {
+    return hrisApiCompanyAppearanceClient.getPublicAppearance(subdomain);
   }
 
   public async updateAppearance(body: UpdateCompanyAppearanceRequest): Promise<CompanyAppearance> {

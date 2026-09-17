@@ -13,6 +13,12 @@ export type ConfirmTrialPayload = {
   password: string;
 }
 
+/** The new owner, and the address their company signs in at. */
+export type ConfirmTrialResult = {
+  id: string;
+  subdomain: string;
+};
+
 export class TrialService {
     constructor(private readonly apiClient: InternalApiClient) {}
 
@@ -20,7 +26,7 @@ export class TrialService {
         return this.apiClient.post<Response>("/auth/register", payload);
     }
 
-    public async confirmTrial(payload: ConfirmTrialPayload): Promise<Response> {
-      return this.apiClient.post<Response>("/auth/register/confirm", payload);
+    public async confirmTrial(payload: ConfirmTrialPayload): Promise<ConfirmTrialResult> {
+      return this.apiClient.post<ConfirmTrialResult>("/auth/register/confirm", payload);
     }
 }

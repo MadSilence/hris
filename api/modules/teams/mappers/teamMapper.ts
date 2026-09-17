@@ -11,12 +11,10 @@ import type {
 export class TeamMapper {
   public mapDTO(dto: TeamDTO): Team {
     return {
-      id: dto.id,
-      name: dto.name,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       description: dto.about,
-      code: dto.code,
-      parentId: dto.parentId,
-      status: dto.status,
       leadId: dto.leadUserId,
       memberCount: dto.membersCount,
       archivedAt: null,
@@ -38,10 +36,10 @@ export class TeamMapper {
       : null;
 
     return {
+      // The node's own extras pass through as they come; the team part is mapped the way a flat
+      // team is. Named one by one, a field added to the node later would silently never arrive.
+      ...dto,
       ...this.mapDTO(dto),
-      directSubNodes: dto.directSubNodes,
-      totalPeople: dto.totalPeople,
-      totalSubNodes: dto.totalSubNodes,
       lead,
       children: (dto.children ?? []).map((c) => this.mapTreeNodeDTO(c)),
     };

@@ -18,6 +18,17 @@ jest.mock(
   () => ({ ChoosePublicHolidayTemplateModal: () => null }),
 );
 
+// The row menu is offered only to MANAGE holders; access comes from a query these tests do not set up.
+jest.mock(
+  "@/components/modules/settings/modules/time/publicHolidays/hooks/useCanManagePublicHolidayCalendars",
+  () => ({ useCanManagePublicHolidayCalendars: () => true }),
+);
+// The delete dialog's counts are fetched when it opens; the menu does not depend on them.
+jest.mock(
+  "@/components/modules/settings/modules/time/publicHolidays/hooks/usePublicHolidayCalendarDeleteImpact",
+  () => ({ usePublicHolidayCalendarDeleteImpact: () => ({ data: undefined, isLoading: false, isError: false }) }),
+);
+
 const mutations = {
   duplicate: jest.fn(),
   archive: jest.fn(),

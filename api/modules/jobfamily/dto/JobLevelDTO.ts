@@ -10,4 +10,7 @@ export type JobLevelDTO = {
   /** How many positions sit on this grade, and how many people hold one of them. */
   assignedJobsCount?: number;
   assignedUsersCount?: number;
+
+  /** Sent back by the rename form; the backend refuses a save over a newer row (E00409). */
+  version?: number;
 };

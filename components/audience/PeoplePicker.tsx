@@ -199,8 +199,16 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
     onFiltersChange([]);
   };
 
+  // The same switch widens the search in both directions: people who have left, and people who have
+  // not arrived. Both are "not an employee today", both are off by default, and a picker is exactly
+  // where somebody sets up an account before the first day.
   const segment: Segment = React.useMemo(
-    () => ({ filters: [...filters, ...(extraFilters ?? [])], excludeUserIds: [], includeInactive }),
+    () => ({
+      filters: [...filters, ...(extraFilters ?? [])],
+      excludeUserIds: [],
+      includeInactive,
+      drafts: includeInactive ? "INCLUDE" : "EXCLUDE",
+    }),
     [filters, extraFilters, includeInactive],
   );
   const resolve = useSegmentResolve(segment, true, q, include);

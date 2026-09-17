@@ -18,4 +18,7 @@ export type Company = {
    */
   workingDays?: string[];
   weekStartDay?: string;
+
+  /** The company row's version, sent back by the profile form. Versions the profile fields only. */
+  version?: number;
 };

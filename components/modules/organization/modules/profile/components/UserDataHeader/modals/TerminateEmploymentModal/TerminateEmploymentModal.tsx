@@ -98,10 +98,12 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
   }, [isOpen]);
 
   const { data: impact, isLoading: impactLoading } = useQuery<TerminationImpactDTO>({
-    queryKey: ["TERMINATION_IMPACT", userId],
+    queryKey: ["TERMINATION_IMPACT", userId, lastWorkingDay],
     enabled: isOpen,
     queryFn: () =>
-      internalApiClient.get<TerminationImpactDTO>(`/users/${userId}/termination-impact`),
+      internalApiClient.get<TerminationImpactDTO>(
+        `/users/${userId}/termination-impact${lastWorkingDay ? `?lastWorkingDay=${lastWorkingDay}` : ""}`,
+      ),
   });
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -213,6 +215,12 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                   )}
                   .
                 </li>
+                {(impact?.approvedLeaveAfterLastDay ?? 0) > 0 ? (
+                  <li>
+                    {impact?.approvedLeaveAfterLastDay} approved absence(s) run past the last working day.
+                    They are cancelled, or cut at that day, and the days go back to the balance.
+                  </li>
+                ) : null}
               </ul>
             )}
           </div>

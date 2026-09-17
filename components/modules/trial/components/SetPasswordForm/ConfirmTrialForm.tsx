@@ -17,6 +17,8 @@ export interface SetPasswordFormProps {
   isLoading?: boolean;
   apiError?: string;
   isSuccess: boolean;
+  /** Known once the company exists; the success screen sends the person there. */
+  signInAddress?: SignInAddress;
 }
 
 export enum PasswordMessages {
@@ -27,11 +29,12 @@ export enum PasswordMessages {
   Mismatch = "Passwords don’t match.",
 }
 
-function isStrongPassword(value: string) {
+export function isStrongPassword(value: string) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
-const schema = yup.object({
+/** The password rule every set-a-password screen uses — signup and invitation alike. */
+export const passwordSchema = yup.object({
   password: yup
     .string()
     .required(PasswordMessages.Required)
@@ -91,7 +94,13 @@ function ConfirmHeader() {
   );
 }
 
-function ConfirmSuccessBlock() {
+/** Where the new company signs in: the link, and the address as a person reads it. */
+export type SignInAddress = {
+  href: string;
+  label: string;
+};
+
+function ConfirmSuccessBlock({ signInAddress }: { signInAddress?: SignInAddress }) {
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
       <h1 className="text-4xl font-medium">Password set</h1>
@@ -101,9 +110,17 @@ function ConfirmSuccessBlock() {
         up your company.
       </p>
 
+      {signInAddress ? (
+        <p className="text-md text-[var(--color-text-tertiary)]">
+          Your company signs in at{" "}
+          <strong className="font-medium text-[var(--color-text-primary)]">{signInAddress.label}</strong>
+          {" "}— keep that address.
+        </p>
+      ) : null}
+
       <p className="text-sm text-[var(--color-text-tertiary)]">
-        Head over to the{" "}
-        <a href="/login" className="underline underline-offset-4">
+        Head over to your company&apos;s{" "}
+        <a href={signInAddress?.href ?? "/login"} className="underline underline-offset-4">
           login page
         </a>{" "}
         to get started.
@@ -117,6 +134,7 @@ export default function ConfirmTrialForm({
   isLoading = false,
   apiError,
   isSuccess,
+  signInAddress,
 }: SetPasswordFormProps) {
   const handleFormSubmission = useCallback(
     async (values: PasswordValues) => {
@@ -130,7 +148,7 @@ export default function ConfirmTrialForm({
       password: "",
       confirmPassword: "",
     },
-    validationSchema: schema,
+    validationSchema: passwordSchema,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -153,7 +171,7 @@ export default function ConfirmTrialForm({
   };
 
   if (isSuccess) {
-    return <ConfirmSuccessBlock/>;
+    return <ConfirmSuccessBlock signInAddress={signInAddress}/>;
   }
 
   return (

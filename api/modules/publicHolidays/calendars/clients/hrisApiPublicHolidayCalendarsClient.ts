@@ -1,9 +1,11 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
+import type { PublicHolidayCalendarDeleteImpact } from "@/models/publicHolidays/calendar";
 import type {
   CreatePublicHolidayCalendarRequest,
   PublicHolidayCalendarDTO,
   RenamePublicHolidayCalendarRequest,
   UpdatePublicHolidayCalendarRequest,
+  UpdatePublicHolidayCalendarResponse,
 } from "@/api/modules/publicHolidays/calendars/dto";
 import { publicHolidayCalendarMapper } from "@/api/modules/publicHolidays/calendars/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -41,9 +43,9 @@ export class HrisApiPublicHolidayCalendarsClient {
   public async update(
     id: string,
     body: UpdatePublicHolidayCalendarRequest
-  ): Promise<UpdateResponse> {
+  ): Promise<UpdatePublicHolidayCalendarResponse> {
     return hrisApiClient.patch<
-      UpdateResponse,
+      UpdatePublicHolidayCalendarResponse,
       UpdatePublicHolidayCalendarRequest
     >(`${this.BASE_PATH}/${id}`, body);
   }
@@ -80,6 +82,10 @@ export class HrisApiPublicHolidayCalendarsClient {
     return hrisApiClient.post<UpdateResponse>(
       `${this.BASE_PATH}/${id}/restore`
     );
+  }
+
+  public async getDeleteImpact(id: string): Promise<PublicHolidayCalendarDeleteImpact> {
+    return hrisApiClient.get<PublicHolidayCalendarDeleteImpact>(`${this.BASE_PATH}/${id}/delete-impact`);
   }
 
   public async delete(id: string): Promise<void> {

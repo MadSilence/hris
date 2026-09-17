@@ -22,6 +22,10 @@ export class AuthRoutes {
     if (!payload?.email || !payload?.password) {
       throw new BadRequestError("Missing email or password");
     }
+    // Only a company's own address has a login form; the root has no company to sign in to.
+    if (!payload.subdomain) {
+      throw new BadRequestError("Sign in at your company's address");
+    }
 
     return hrisAuthSessionService.login(payload);
   }

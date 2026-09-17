@@ -4,4 +4,6 @@ export interface UpdateDepartmentRequest {
   code?: string | null;
   parentId?: string | null;
   leadId?: string | null;
+  /** The version the dialog was opened with. */
+  version?: number;
 }

@@ -7,9 +7,23 @@ import { GitBranch, Users } from "lucide-react";
 
 import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 
+// Each tab titles the page itself: the two are separate pages that share a tab strip, not one page
+// with a title covering both.
 const tabs = [
-  { id: "people", label: "People", href: "/organization/people", icon: Users },
-  { id: "chart", label: "Org chart", href: "/organization/chart", icon: GitBranch },
+  {
+    id: "people",
+    label: "People",
+    href: "/organization/people",
+    icon: Users,
+    description: "Browse everyone in the company and find the person you need.",
+  },
+  {
+    id: "chart",
+    label: "Org Chart",
+    href: "/organization/chart",
+    icon: GitBranch,
+    description: "See how the company reporting structure fits together.",
+  },
 ];
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
@@ -22,10 +36,8 @@ export default function OrganizationLayout({ children }: { children: React.React
     <div className="flex h-[calc(100dvh-96px)] min-h-0 flex-col gap-10">
       <section className="flex flex-none flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[40px] font-semibold">Organisation</h1>
-          <p className="max-w-2xl text-sm text-[var(--color-text-tertiary)]">
-            Browse your team and see how the company reporting structure fits together.
-          </p>
+          <h1 className="text-[40px] font-semibold">{activeTab.label}</h1>
+          <p className="max-w-2xl text-sm text-[var(--color-text-tertiary)]">{activeTab.description}</p>
         </div>
 
         <Tabs value={activeTab.id} className="w-full">

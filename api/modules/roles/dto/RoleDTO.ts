@@ -9,4 +9,6 @@ export type RoleDTO = {
   userCount?: number;
   createdAt: string;
   updatedAt: string;
+  /** Sent back by the edit form; a stale one is refused with E00409. */
+  version?: number;
 };

@@ -113,6 +113,18 @@ describe("LoginForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
+  it("offers a way to a new password", () => {
+    renderForm();
+
+    expect(screen.getByRole("link", { name: "Forgot Password?" })).toHaveAttribute("href", "/forgot-password");
+  });
+
+  it("shows a notice when there is one", () => {
+    renderForm({ notice: "Your password was changed. Sign in with the new one." });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Your password was changed. Sign in with the new one.");
+  });
+
   it("shows api error", () => {
     renderForm({
       apiError: "Invalid credentials",

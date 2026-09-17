@@ -20,4 +20,6 @@ export interface PublicHolidayCalendarDTO {
   holidayCount: number;
   /** Years this calendar holds days for, newest first. */
   years: number[];
+  /** Sent back by the editor on save; a stale one is refused with E00409. */
+  version?: number;
 }

@@ -8,4 +8,6 @@ export type JobLevelGroup = {
   /** Sums over the track's grades. */
   assignedJobsCount: number;
   assignedUsersCount: number;
+  /** The row version the rename form sends back, so a save over someone else's change is refused. */
+  version?: number;
 };

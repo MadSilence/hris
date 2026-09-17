@@ -5,34 +5,10 @@ import { resolveBackendAssetUrl } from "./resolveBackendAssetUrl";
 export class UserMapper {
   public mapUserDTOtoUser(dto: UserDTO): User {
     return {
-      id: dto.id,
-      companyId: dto.companyId,
-      email: dto.email,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      roles: dto.roles,
-      status: dto.status,
-      isEmailVerified: dto.isEmailVerified,
-      jobId: dto.jobId,
-      jobName: dto.jobName,
-      level: dto.level,
-      department: dto.department,
-      teams: dto.teams,
-      office: dto.office,
-      legalEntity: dto.legalEntity,
-      calendars: dto.calendars,
-      manager: dto.manager,
-      hireDate: dto.hireDate,
-      employmentType: dto.employmentType,
-      probationEnd: dto.probationEnd,
-      terminationDate: dto.terminationDate,
-      lastLoginAt: dto.lastLoginAt,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       avatarUrl: resolveBackendAssetUrl(dto.avatarUrl),
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
-      custom: dto.custom,
-      fieldAccess: dto.fieldAccess,
-      capabilities: dto.capabilities,
     };
   }
 }

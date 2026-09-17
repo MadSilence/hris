@@ -1,21 +1,11 @@
-import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
-import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
-import { NotificationPreferences } from "@/components/modules/notifications/components/NotificationPreferences";
+import { redirect } from "next/navigation";
 
+/**
+ * Notification categories moved into `/preferences`, beside the display settings.
+ *
+ * <p>Kept as a redirect rather than deleted: the inbox's own link is not the only way anybody
+ * reached it, and two half-pages of "your own settings" at two different addresses was the problem.
+ */
 export default function NotificationPreferencesPage() {
-  return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col gap-4 overflow-hidden">
-      <div className="px-8 space-y-2 shrink-0">
-        <SettingsPageHeader title="Notification preferences" backHref="/inbox" />
-
-        <PageDescription className="text-base text-muted-foreground/90">
-          Choose which categories of notifications you receive.
-        </PageDescription>
-      </div>
-
-      <div className="flex-1 min-h-0">
-        <NotificationPreferences />
-      </div>
-    </div>
-  );
+  redirect("/preferences");
 }

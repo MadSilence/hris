@@ -9,9 +9,42 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "@/components/clients/exceptions";
-import { cookies } from "next/headers";
+import { cookies, headers as nextHeaders } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { isPublicBackendPath } from "@/config/security/publicBackendPaths";
+
+type HeaderReader = { get(name: string): string | null };
+
+/** The browser's request, when there is one; outside a request there is nobody to speak for. */
+const incomingHeaders = async (): Promise<HeaderReader | null> => {
+  try {
+    return await nextHeaders();
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Who is really calling, carried to the backend.
+ *
+ * Every call to Java leaves from this server, so without these the backend saw **one caller for the
+ * whole product**: the BFF's own address and Node's user agent. Sign-in's per-address throttle then
+ * counted everybody together — ten mistyped sign-ins anywhere refused every unknown address for half an
+ * hour — and the journal recorded this server as the author of every action.
+ *
+ * `x-forwarded-for` is passed on as the chain it arrived with (Next fills it with the socket's address
+ * when a request has none; a proxy in front appends to it). **The backend trusts it only from this
+ * server** — `server.tomcat.remoteip.internal-proxies` in `application.yml` — so a caller reaching Java
+ * directly cannot choose the address it is counted under.
+ */
+export const callerHeaders = (incoming: HeaderReader | null): Record<string, string> => {
+  const forwarded = incoming?.get("x-forwarded-for")?.trim();
+  const userAgent = incoming?.get("user-agent")?.trim();
+  return {
+    ...(forwarded ? { "X-Forwarded-For": forwarded } : {}),
+    ...(userAgent ? { "User-Agent": userAgent } : {}),
+  };
+};
 
 export class HrisApiClient {
   private readonly BASE_URL: string =
@@ -172,6 +205,10 @@ export class HrisApiClient {
 
     if (!isPublicBackendPath(path) && token) {
       headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    for (const [name, value] of Object.entries(callerHeaders(await incomingHeaders()))) {
+      headers.set(name, value);
     }
 
     return headers;

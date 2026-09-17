@@ -4,25 +4,14 @@ import { LeaveType } from "@/models/timeOff";
 export class LeaveTypeMapper {
   public mapLeaveTypeDTO(dto: LeaveTypeDTO): LeaveType {
     return {
-      id: dto.id,
-      companyId: dto.companyId,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
 
-      name: dto.name,
-      description: dto.description,
-      color: dto.color,
-      category: dto.category,
 
-      status: dto.status,
 
-      archivedAt: dto.archivedAt,
-      archivedBy: dto.archivedBy,
 
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
-      createdBy: dto.createdBy,
-      updatedBy: dto.updatedBy,
 
-      version: dto.version,
     };
   }
 

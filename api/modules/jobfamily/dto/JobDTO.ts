@@ -18,4 +18,6 @@ export type JobDTO = {
   createdBy: string;
   updatedAt: string;
   updatedBy: string;
+  /** Sent back by the edit form; the backend refuses a save over a newer row (E00409). */
+  version?: number;
 };

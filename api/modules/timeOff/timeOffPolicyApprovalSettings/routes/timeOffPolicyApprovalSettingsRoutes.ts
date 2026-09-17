@@ -1,26 +1,10 @@
 ﻿import { hrisTimeOffPolicyApprovalSettingsService } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/services";
 
+// Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class TimeOffPolicyApprovalSettingsRoutes {
   public async getByPolicyId(_req: Request, policyId: string) {
     const data =
       await hrisTimeOffPolicyApprovalSettingsService.getByPolicyId(policyId);
-    return Response.json(data);
-  }
-
-  public async update(req: Request, policyId: string) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisTimeOffPolicyApprovalSettingsService.update(
-      policyId,
-      {
-        approvalRequired: body.approvalRequired,
-        approvalMode: body.approvalMode,
-        requiredApprovalsCount: body.requiredApprovalsCount,
-        allowSubstituteApprovers: body.allowSubstituteApprovers,
-        approvers: body.approvers,
-      }
-    );
-
     return Response.json(data);
   }
 }

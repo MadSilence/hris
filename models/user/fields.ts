@@ -25,11 +25,14 @@ export type FieldDTO = {
   viewScopes?: string[] | null;
   options?: OptionDTO[] | null;
   // Section the field belongs to: a registry group for system fields ("Account", "Employment",
-  // "Organisation"), the attribute group's name for custom ones.
+  // "Organization"), the attribute group's name for custom ones.
   group?: string | null;
   // REFERENCE only — which catalogue supplies the values, and how many a person can hold.
   valueSource?: ReferenceValueSource | null;
   cardinality?: "ONE" | "MANY" | null;
+  // A field with no storage of its own names the field it is read from (`sys:level` → `sys:job`).
+  // Nobody edits it directly; the screen points at the source instead.
+  derivedFrom?: string | null;
 };
 
 /**
@@ -96,7 +99,20 @@ export type UsersSearchRequest = {
   sortDir?: "asc" | "desc" | null;
   selectedFields?: string[] | null;
   filters?: FilterDTO[] | null;
+  /** See {@link DraftVisibility}. Omitted means EXCLUDE — the employees, as before. */
+  drafts?: DraftVisibility | null;
 };
+
+/**
+ * Where people nobody has started yet stand in a people query.
+ *
+ * A draft has no account and no employment, so it is out of every list by default. `ONLY` is the
+ * directory's own Drafts segment — a view, not a filter — and `INCLUDE` is the "assign to" picker,
+ * where a draft can be set up before their first day. The backend honours anything but `EXCLUDE`
+ * only for a caller who may edit people company-wide, because a narrower scope cannot reach
+ * somebody who is in no department, team or office.
+ */
+export type DraftVisibility = "EXCLUDE" | "INCLUDE" | "ONLY";
 
 export type UserRoleDTO = {
   id: string;
@@ -165,6 +181,10 @@ export type UsersSearchItemDTO = {
   createdAt?: string | null;
   updatedAt?: string | null;
   custom?: Record<string, unknown>;
+  /** The access axis — DRAFT / INVITED / ACTIVE / BLOCKED. See `models/user/status.ts`. */
+  accountStatus?: string | null;
+  /** When the last invitation went out; what separates INVITED from a draft. */
+  inviteSentAt?: string | null;
 };
 
 export type UsersSearchResponseDTO = {

@@ -20,7 +20,13 @@ export function useRolePermissions(roleId: string) {
     mutationFn: async (payload) =>
       internalApiClient.put<void, UpdateRolePermissionsRequest>(`/roles/${roleId}/permissions`, payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: rolesQueryKeys.rolePermissions(roleId) });
+      // The save bumped the role's version, which both matrices and the roles list carry — refetch all
+      // three, or the next save from any of them would send the old number and be refused.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.rolePermissions(roleId) }),
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.roleFieldAccess(roleId) }),
+        queryClient.invalidateQueries({ queryKey: rolesQueryKeys.roles(), exact: true }),
+      ]);
       // Saving rotates perm_hash and the route already swapped our token cookie, so the
       // acting user's own access may have changed. Go through useInvalidateAccessQuery:
       // it also drops the cached ETag, otherwise the refetch 304s and keeps stale access.

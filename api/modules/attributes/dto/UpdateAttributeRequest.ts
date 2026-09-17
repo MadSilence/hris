@@ -26,4 +26,6 @@ export type UpdateAttributeRequest = {
   objectFields?: string | null,
   /** Nullable config fields to reset — a null above means "leave as is", not "clear". */
   clearFields?: string[],
+  /** The attribute's version the form was opened with; a stale one is refused with E00409. */
+  version?: number,
 };

@@ -12,11 +12,16 @@ export const updateUserAction = async (
   submission: UpdateUserActionInput
 ): Promise<UpdateUserActionOutput> => {
   try {
-    const { userId, managerId, jobId, officeId, legalEntityId, ...fields } = submission;
+    const { userId, managerId, jobId, officeId, legalEntityId, version, ...fields } = submission;
 
+    // The update goes first and carries the version the section was opened at: a colleague's save in
+    // between is refused (E00409) before anything is written. When only associations changed it still
+    // goes, with the version alone — a check that writes nothing — because the association endpoints
+    // have no version of their own.
     const hasFieldChanges = Object.values(fields).some((v) => v !== undefined);
-    if (hasFieldChanges) {
-      await hrisApiUsersService.updateUser(userId, fields);
+    const hasAssociationChanges = [managerId, jobId, officeId, legalEntityId].some((v) => v !== undefined);
+    if (hasFieldChanges || (version !== undefined && hasAssociationChanges)) {
+      await hrisApiUsersService.updateUser(userId, { ...fields, version });
     }
 
     // Each association has its own endpoint; `undefined` means untouched, `null` means clear.
@@ -35,6 +40,8 @@ export const updateUserAction = async (
 
 export type UpdateUserActionInput = {
   userId: string;
+  /** The person's version when the section entered edit. */
+  version?: number;
   firstName?: string;
   lastName?: string;
   email?: string;

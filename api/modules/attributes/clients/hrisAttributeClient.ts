@@ -3,6 +3,7 @@ import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { AttributeDeleteImpact } from "@/models/attribute/DeleteImpact";
 import { ReorderItemRequest } from "@/api/modules/groups/dto";
 import {
+  AttributeUpdateResponse,
   CreateAttributeRequest,
   DeleteAttributeRequest,
   RenameAttributeRequest,
@@ -14,6 +15,14 @@ class HrisAttributeClient {
 
   public async createAttribute(payload: CreateAttributeRequest) {
     return hrisApiClient.post<CreateResponse>(`${this.BASE_PATH}/create`, payload);
+  }
+
+  /** A copy of the definition and its options, never the values. Without a name the backend names it. */
+  public async duplicateAttribute(id: string, name?: string) {
+    return hrisApiClient.post<CreateResponse>(
+      `${this.BASE_PATH}/${id}/duplicate`,
+      name === undefined ? undefined : { name },
+    );
   }
 
   public async exportAttributes(format: "csv" | "xlsx"): Promise<Response> {
@@ -29,15 +38,19 @@ class HrisAttributeClient {
   }
 
   public async updateAttribute(payload: UpdateAttributeRequest) {
-    return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${payload.id}`, payload)
+    // The id addresses the attribute; it is not a field of the update. The backend refuses a body
+    // carrying a property its request does not declare, so it must not ride along.
+    const { id, ...body } = payload;
+    return hrisApiClient.patch<AttributeUpdateResponse>(`${this.BASE_PATH}/${id}`, body);
   }
 
   public async deleteAttribute(payload: DeleteAttributeRequest) {
     return hrisApiClient.post<Response>(`${this.BASE_PATH}/${payload.id}/delete`);
   }
 
-  public async setAttributeOptions(id: string, options: AttributeOptionUpsertRequest[]) {
-    return hrisApiClient.put<Response>(`${this.BASE_PATH}/${id}/options`, { options });
+  /** `version` is the attribute's — the option set is part of it, and saving the set bumps it. */
+  public async setAttributeOptions(id: string, options: AttributeOptionUpsertRequest[], version?: number) {
+    return hrisApiClient.put<Response>(`${this.BASE_PATH}/${id}/options`, { options, version });
   }
 
   public async getAttributeImpact(id: string): Promise<AttributeDeleteImpact> {

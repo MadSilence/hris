@@ -6,6 +6,8 @@ export type JobLevelGroupDTO = {
   levels: JobLevelDTO[];
   assignedJobsCount: number;
   assignedUsersCount: number;
+  /** Sent back by the rename form; the backend refuses a save over a newer row (E00409). */
+  version?: number;
 };
 
 export type CreateJobLevelGroupRequest = {
@@ -15,6 +17,8 @@ export type CreateJobLevelGroupRequest = {
 export type UpdateJobLevelGroupRequest = {
   id: string;
   name: string;
+  /** The version the form was opened with. */
+  version?: number;
 };
 
 export type ReorderJobLevelsRequest = {

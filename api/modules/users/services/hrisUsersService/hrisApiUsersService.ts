@@ -1,10 +1,15 @@
+import type { PersonDeleteImpactDTO } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { User } from "@/models/user/User";
 import {
   hrisApiUsersClient,
   type TerminatePayload,
   type TerminationImpactDTO,
   type UpdateUserPayload,
+  type CreateUserPayload,
+  type InviteUserPayload,
+  type InviteStateDTO,
 } from "@/api/modules/users/clients/hrisApiUsersClient";
+import { CreateResponse } from "@/api/models/misc";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
@@ -18,6 +23,8 @@ export type GetUsersArgs = {
 };
 
 export type UsersSearchArgs = GetUsersArgs & {
+  /** See `DraftVisibility` in `models/user/fields` — omitted means the employees, as before. */
+  drafts?: "EXCLUDE" | "INCLUDE" | "ONLY" | null;
   filters?: Array<{
     field: "first_name" | "last_name" | "email" | "status" | "created_at" | "updated_at" | "is_email_verified";
     op: "eq" | "neq" | "contains" | "starts_with" | "in" | "before" | "after" | "between";
@@ -38,6 +45,22 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.getUser(id);
   }
 
+  public async createUser(payload: CreateUserPayload): Promise<CreateResponse> {
+    return hrisApiUsersClient.createUser(payload);
+  }
+
+  public async getDrafts(): Promise<User[]> {
+    return hrisApiUsersClient.getDrafts();
+  }
+
+  public async invite(id: string, payload: InviteUserPayload): Promise<InviteStateDTO> {
+    return hrisApiUsersClient.invite(id, payload);
+  }
+
+  public async cancelInvite(id: string): Promise<InviteStateDTO> {
+    return hrisApiUsersClient.cancelInvite(id);
+  }
+
   public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
     return hrisApiUsersClient.updateUser(id, payload);
   }
@@ -46,8 +69,12 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.changeStatus(id, status);
   }
 
-  public async getTerminationImpact(id: string): Promise<TerminationImpactDTO> {
-    return hrisApiUsersClient.getTerminationImpact(id);
+  public async getTerminationImpact(id: string, lastWorkingDay?: string | null): Promise<TerminationImpactDTO> {
+    return hrisApiUsersClient.getTerminationImpact(id, lastWorkingDay);
+  }
+
+  public async getDeleteImpact(id: string): Promise<PersonDeleteImpactDTO> {
+    return hrisApiUsersClient.getDeleteImpact(id);
   }
 
   public async terminate(id: string, payload: TerminatePayload): Promise<void> {
@@ -56,6 +83,18 @@ export class HrisApiUsersService {
 
   public async deleteUser(id: string): Promise<void> {
     return hrisApiUsersClient.deleteUser(id);
+  }
+
+  public async block(id: string, reason?: string | null): Promise<void> {
+    return hrisApiUsersClient.block(id, reason);
+  }
+
+  public async unblock(id: string, reason?: string | null): Promise<void> {
+    return hrisApiUsersClient.unblock(id, reason);
+  }
+
+  public async sendPasswordReset(id: string): Promise<void> {
+    return hrisApiUsersClient.sendPasswordReset(id);
   }
 
   public async updateUserAttributes(
@@ -69,6 +108,10 @@ export class HrisApiUsersService {
     args: UsersSearchArgs
   ): Promise<{ items: User[]; nextCursor?: string | null }> {
     return hrisApiUsersClient.searchUsers(args);
+  }
+
+  async draftCount(): Promise<{ count: number }> {
+    return hrisApiUsersClient.draftCount();
   }
 
   async getFields(): Promise<FieldDTO[]> {

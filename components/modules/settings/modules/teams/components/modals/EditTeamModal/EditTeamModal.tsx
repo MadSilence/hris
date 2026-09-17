@@ -67,6 +67,9 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
         description: values.description?.trim() || null,
         parentId: values.parentId || null,
         leadId: lead?.id ?? null,
+        // `team` is the node captured when the dialog opened, so this is the version the form was
+        // filled from; a save over a newer row comes back as E00409 and the dialog stays.
+        version: team.version,
       });
       onClose();
     },

@@ -2,8 +2,15 @@
 
 import Link from "next/link";
 import type { ComponentType, FC, SVGProps } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { KeyRound, LogOut, UserRound, SlidersHorizontal, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage, } from "@/public/desact/src/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/public/desact/src/components/ui/dropdown-menu";
+import { RowAction } from "@/components/ui/RowActionsMenu";
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +47,16 @@ type SidebarProps = {
   bottomItems: NavItem[];
   profile: SidebarProfile;
   company?: Company;
+  /** Ends the session on this browser. */
+  onSignOut: () => void;
+  /** Absent when the password is not the signed-in person's to change — an impersonated session. */
+  onChangePassword?: () => void;
+  /**
+   * Offered while there is still something on the welcome worth doing — no photo, a field of their
+   * own left blank. Absent otherwise, because a menu item that opens a finished form is a control
+   * that cannot work.
+   */
+  showFinishProfile?: boolean;
 };
 
 const getInitials = (name: string) => {
@@ -62,8 +79,12 @@ const AppSidebar: FC<SidebarProps> = ({
   bottomItems,
   profile,
   company,
+  onSignOut,
+  onChangePassword,
+  showFinishProfile = false,
 }) => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const profileHref = profile.id
     ? `/organization/people/${profile.id}/personal`
@@ -205,47 +226,74 @@ const AppSidebar: FC<SidebarProps> = ({
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip={profile.name}
-                className={[
-                  "mx-auto hover:bg-sidebar-accent/60 data-[state=open]:bg-sidebar-accent/60",
-                  collapsed ? "size-10 px-0" : "h-12 w-full px-2",
-                ].join(" ")}
-              >
-                <Link
-                  href={profileHref}
-                  title={profile.name}
-                  className={[
-                    "p-0 no-underline hover:no-underline",
-                    collapsed ? "justify-center gap-0" : "gap-3",
-                  ].join(" ")}
-                >
-                  <Avatar className="size-8 shrink-0">
-                    <AvatarImage
-                      src={profile.avatarUrl ?? undefined}
-                      alt={profile.name}
-                    />
-                    <AvatarFallback className="text-xs font-semibold">
-                      {getInitials(profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
+              {/*
+                The user menu. There was no way to sign out anywhere in the app, and Change Password sat
+                in the profile header for want of anywhere else (technical_documentation/COMPANY_ADDRESSES.md). The block is
+                the trigger; the items follow ACTIONS_AND_MENUS §§ 2–3 through RowAction. Sign Out is
+                not destructive — nothing is lost — so it takes no separator and no red.
+              */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    tooltip={profile.name}
+                    aria-label="User menu"
+                    className={[
+                      "mx-auto hover:bg-sidebar-accent/60 data-[state=open]:bg-sidebar-accent/60",
+                      collapsed ? "size-10 justify-center gap-0 px-0" : "h-12 w-full gap-3 px-2",
+                    ].join(" ")}
+                  >
+                    <Avatar className="size-8 shrink-0">
+                      <AvatarImage
+                        src={profile.avatarUrl ?? undefined}
+                        alt={profile.name}
+                      />
+                      <AvatarFallback className="text-xs font-semibold">
+                        {getInitials(profile.name)}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  {!collapsed ? (
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-sm font-medium">
-                        {profile.name}
-                      </span>
-
-                      {profile.role ? (
-                        <span className="truncate text-xs text-sidebar-foreground/55">
-                          {profile.role}
+                    {!collapsed ? (
+                      <span className="flex min-w-0 flex-col text-left">
+                        <span className="truncate text-sm font-medium">
+                          {profile.name}
                         </span>
-                      ) : null}
-                    </span>
+
+                        {profile.role ? (
+                          <span className="truncate text-xs text-sidebar-foreground/55">
+                            {profile.role}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : null}
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent side="top" align="start" className="w-40 rounded-lg p-1">
+                  <RowAction icon={<UserRound className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push(profileHref)}>
+                    My Profile
+                  </RowAction>
+
+                  {showFinishProfile ? (
+                    <RowAction icon={<Sparkles className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push("/welcome?again=1")}>
+                      Finish Your Profile
+                    </RowAction>
                   ) : null}
-                </Link>
-              </SidebarMenuButton>
+
+                  <RowAction icon={<SlidersHorizontal className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push("/preferences")}>
+                    My Preferences
+                  </RowAction>
+
+                  {onChangePassword ? (
+                    <RowAction icon={<KeyRound className="h-4 w-4 text-muted-foreground"/>} onClick={onChangePassword}>
+                      Change Password
+                    </RowAction>
+                  ) : null}
+
+                  <RowAction icon={<LogOut className="h-4 w-4 text-muted-foreground"/>} onClick={onSignOut}>
+                    Sign Out
+                  </RowAction>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>

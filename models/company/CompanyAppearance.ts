@@ -16,4 +16,6 @@ export type CompanyAppearance = {
   useImageOnDashboard: boolean;
   /** True paints the sidebar in the brand colour instead of leaving it neutral. */
   sidebarContrast: boolean;
+  /** Sent back by the appearance form. 0 while the company has no appearance row yet. */
+  version?: number;
 };

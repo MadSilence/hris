@@ -4,20 +4,9 @@ import { LegalEntity } from "@/models/legalEntity";
 export class LegalEntityMapper {
   public mapLegalEntityDtoToLegalEntity(dto: LegalEntityDTO): LegalEntity {
     return {
-      id: dto.id,
-      name: dto.name,
-      description: dto.description,
-      isSystem: dto.isSystem,
-      archived: dto.archived,
-      archivedAt: dto.archivedAt,
-      registrationNumber: dto.registrationNumber,
-      taxId: dto.taxId,
-      country: dto.country,
-      city: dto.city,
-      street: dto.street,
-      building: dto.building,
-      postCode: dto.postCode,
-      assignedUsersCount: dto.assignedUsersCount,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     }
   }
 }

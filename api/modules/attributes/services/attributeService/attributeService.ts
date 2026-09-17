@@ -5,6 +5,7 @@ import {
   AttributeOptionUpsertRequest,
 } from "@/api/modules/attributes/clients/hrisAttributeClient";
 import {
+  AttributeUpdateResponse,
   CreateAttributeRequest,
   DeleteAttributeRequest,
   RenameAttributeRequest,
@@ -20,6 +21,11 @@ export class AttributeService {
     return { id: createResponse.id };
   }
 
+  public async duplicateAttribute(id: string, name?: string): Promise<NewEntity> {
+    const createResponse = await hrisAttributeClient.duplicateAttribute(id, name);
+    return { id: createResponse.id };
+  }
+
   public async exportAttributes(format: "csv" | "xlsx"): Promise<Response> {
     return hrisAttributeClient.exportAttributes(format);
   }
@@ -32,7 +38,7 @@ export class AttributeService {
     return hrisAttributeClient.renameAttribute(payload);
   }
 
-  public async updateAttribute(payload: UpdateAttributeRequest): Promise<UpdatedEntity> {
+  public async updateAttribute(payload: UpdateAttributeRequest): Promise<AttributeUpdateResponse> {
     return hrisAttributeClient.updateAttribute(payload);
   }
 
@@ -42,9 +48,10 @@ export class AttributeService {
 
   public async setAttributeOptions(
     id: string,
-    options: AttributeOptionUpsertRequest[]
+    options: AttributeOptionUpsertRequest[],
+    version?: number
   ): Promise<Response> {
-    return hrisAttributeClient.setAttributeOptions(id, options);
+    return hrisAttributeClient.setAttributeOptions(id, options, version);
   }
 
   public async getAttributeImpact(id: string): Promise<AttributeDeleteImpact> {

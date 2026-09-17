@@ -14,12 +14,16 @@ const tabs = [
     label: "Job Catalog",
     href: "/settings/general/job-catalog",
     icon: ListTree,
+    description:
+      "Build your organization's job structure. Group positions into job families, assign each job a level, and keep a single consistent catalog that roles, compensation, and reporting can rely on.",
   },
   {
     id: "job-levels",
     label: "Job Levels",
     href: "/settings/general/job-levels",
     icon: Layers,
+    description:
+      "Define the levels a job can sit at, grouped the way your organization thinks about seniority.",
   },
 ];
 
@@ -38,12 +42,11 @@ export default function SettingsJobCatalogLayout({
   return (
     <div className="space-y-6">
       <div className="px-8 space-y-4">
-        <SettingsPageHeader title="Job Catalog" backHref="/settings"/>
+        {/* The page is titled by the tab it is on — it must not claim to be one of its own children. */}
+        <SettingsPageHeader title={activeTab.label} backHref="/settings"/>
 
         <PageDescription className="text-base text-muted-foreground/90">
-          Build your organization&apos;s job structure. Group positions into job families, assign each
-          job a level, and keep a single consistent catalog that roles, compensation, and reporting
-          can rely on.
+          {activeTab.description}
         </PageDescription>
       </div>
 

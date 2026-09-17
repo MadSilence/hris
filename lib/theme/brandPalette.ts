@@ -1,4 +1,4 @@
-import { hexToOklch, isValidHex, oklchToHex } from "@/lib/theme/oklch";
+import { hexToOklch, isValidHex, oklchToHex, parseHex } from "@/lib/theme/oklch";
 
 /**
  * Derives the whole app palette from a single brand colour.
@@ -14,9 +14,11 @@ import { hexToOklch, isValidHex, oklchToHex } from "@/lib/theme/oklch";
  *   - chroma (C) is a fraction of the brand's chroma, capped per step: near-grey at the surface end,
  *     full brand presence at the action end.
  *
- * Consequence worth knowing: the picked colour is an identity, not a literal value. `brown-600`
- * renders at the ramp's lightness, so it may read slightly darker or lighter than the swatch the user
- * picked. The settings preview shows the real result.
+ * **Except step 600, the action colour, which is the picked colour itself** whenever that stays safe:
+ * white text on it reads at WCAG AA (4.5:1) and it sits between steps 500 and 700, so hover and
+ * pressed states still move the right way. The swatch and the primary button used to disagree — the
+ * button rendered at the ramp's lightness, a shade off what was picked. A colour that fails either
+ * test (a light yellow, a near-black) still falls back to the ramp, and the settings screen says so.
  */
 
 export const BRAND_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
@@ -88,6 +90,34 @@ const NEUTRAL_TOKENS: Record<string, string> = {
   "--color-border-disabled": "#f0ede8",
 };
 
+/** WCAG relative luminance of an sRGB hex colour. */
+const relativeLuminance = (hex: string): number | null => {
+  const rgb = parseHex(hex);
+  if (!rgb) return null;
+  const [r, g, b] = rgb.map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+const MIN_WHITE_TEXT_CONTRAST = 4.5;
+
+/**
+ * Whether the picked colour can be the action colour as it is. False means step 600 is generated from
+ * the ramp instead — see the header for the two conditions.
+ */
+export const isBrandColorUsedAsIs = (brandColor: string): boolean => {
+  const brand = hexToOklch(brandColor);
+  const luminance = relativeLuminance(brandColor);
+  const lighter = hexToOklch(BROWN_SCALE[500]);
+  const darker = hexToOklch(BROWN_SCALE[700]);
+  if (!brand || luminance == null || !lighter || !darker) return false;
+
+  const contrast = 1.05 / (luminance + 0.05);
+  return contrast >= MIN_WHITE_TEXT_CONTRAST && brand.l < lighter.l && brand.l > darker.l;
+};
+
 export type BrandPalette = {
   /** The 10-step scale that replaces `--brown-*`. */
   scale: Record<BrandStep, string>;
@@ -120,6 +150,13 @@ export const buildBrandPalette = (brandColor: string): BrandPalette | null => {
     if (!source) continue;
 
     neutrals[token] = oklchToHex({ l: source.l, c: source.c, h: brand.h });
+  }
+
+  if (isBrandColorUsedAsIs(brandColor)) {
+    const parsed = parseHex(brandColor);
+    if (parsed) {
+      scale[600] = `#${parsed.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+    }
   }
 
   return { scale, neutrals };

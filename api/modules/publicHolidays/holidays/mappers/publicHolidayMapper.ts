@@ -9,11 +9,9 @@ import { PublicHoliday } from "@/models/publicHolidays/holiday";
 export class PublicHolidayMapper {
   public mapPublicHolidayDTO(dto: PublicHolidayDTO): PublicHoliday {
     return {
-      id: dto.id,
-      calendarId: dto.calendarId,
-      calendarYear: dto.calendarYear,
-      name: dto.name,
-      holidayDate: dto.holidayDate,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       endDate: dto.endDate ?? dto.holidayDate,
       observedDate: dto.observedDate ?? null,
       origin: dto.origin ?? PublicHolidayOrigin.Manual,

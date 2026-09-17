@@ -20,4 +20,9 @@ export interface ReplaceYearHolidayItem {
  */
 export interface ReplaceYearHolidaysRequest {
   holidays: ReplaceYearHolidayItem[];
+  /**
+   * The *calendar's* version the editor was opened with — the year is edited as part of its
+   * calendar. A stale one is refused with E00409, and the replace moves the calendar's version.
+   */
+  version?: number;
 }

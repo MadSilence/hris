@@ -6,18 +6,10 @@ export class PublicHolidayCalendarMapper {
     dto: PublicHolidayCalendarDTO
   ): PublicHolidayCalendar {
     return {
-      id: dto.id,
-      name: dto.name,
-      status: dto.status,
-      sourceType: dto.sourceType,
-      sourceExternalId: dto.sourceExternalId,
-      sourceCountryCode: dto.sourceCountryCode,
-      sourceRegionCode: dto.sourceRegionCode,
-      sourceLocale: dto.sourceLocale,
-      weekendSubstitution: dto.weekendSubstitution,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       autoFillEnabled: dto.autoFillEnabled ?? true,
-      archivedAt: dto.archivedAt,
-      archivedBy: dto.archivedBy,
       holidayCount: dto.holidayCount ?? 0,
       years: dto.years ?? [],
     };

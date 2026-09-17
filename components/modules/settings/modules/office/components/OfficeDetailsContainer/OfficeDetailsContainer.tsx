@@ -1,7 +1,9 @@
 "use client";
 
 import { showError } from "@/lib/errors/errorToast";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { FormError } from "@/components/feedback/FormError";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, Building2, Download, Mail, MapPin, Users } from "lucide-react";
@@ -38,6 +40,7 @@ import {
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
+import { useDetachedPeopleImpact } from "@/components/modules/settings/shared/DetachedPeopleNotice";
 
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
@@ -93,8 +96,11 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  // Who deleting detaches, asked only while the Delete dialog is open.
+  const deleteImpact = useDetachedPeopleImpact("offices", officeId, isDeleteOpen);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [values, setValues] = useState<FormValues | null>(null);
+  const [openedVersion, setOpenedVersion] = useState<number | undefined>(undefined);
 
   const office = useMemo(
     () => (data ?? []).find((item) => item.id === officeId),
@@ -154,18 +160,39 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
     }));
   };
 
+  // The form is opened here, so its values and its version are taken together at this moment. A
+  // background refetch while the user types must not swap in a newer version under older values —
+  // that is precisely the overwrite the version exists to refuse.
+  const handleEdit = () => {
+    updateAction.reset();
+    setValues(mapOffice(office));
+    setOpenedVersion(office.version);
+    setIsEditing(true);
+  };
+
   const handleSave = () => {
     updateAction.mutate({
       id: office.id,
       isSystem: office.isSystem,
       ...current,
+      version: openedVersion,
     });
   };
 
   const handleCancel = () => {
+    updateAction.reset();
     setIsEditing(false);
     setValues(null);
   };
+
+  // The action answers with an envelope rather than throwing, so a refusal (E00409 among them) is
+  // in `data`; `error` is only a failure to reach the action at all. Either way the form stays open.
+  const saveError =
+    updateAction.data?.status === ActionStatus.ERROR
+      ? updateAction.data.errorMessage
+      : updateAction.error
+        ? messageForError(updateAction.error)
+        : null;
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
     try {
@@ -275,7 +302,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 ) : (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                      <Button onClick={handleEdit}>Edit</Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button
@@ -291,6 +318,8 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 )}
               </div>
             </div>
+
+            {isEditing && <FormError message={saveError}/>}
 
             <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
@@ -400,6 +429,9 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
         isOpen={isDeleteOpen}
         isLoading={deleteAction.isPending}
         office={office}
+        impact={deleteImpact.data}
+        impactLoading={deleteImpact.isLoading}
+        impactError={deleteImpact.isError}
         onConfirmAction={async () => {
           try {
             await deleteAction.mutateAsync({ id: office.id });

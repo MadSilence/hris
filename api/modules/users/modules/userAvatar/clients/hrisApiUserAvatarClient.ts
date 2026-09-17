@@ -17,6 +17,18 @@ export class HrisApiUserAvatarClient {
     );
   }
 
+  /**
+   * A one-time link for uploading your own photo from a phone.
+   *
+   * Only ever for the signed-in person — the backend takes no id — so there is no parameter here
+   * either. `expiresInSeconds` lets the screen retire the code instead of showing a dead one.
+   */
+  public async issueAvatarUploadToken(): Promise<{ token: string; expiresInSeconds: number }> {
+    return hrisApiClient.post<{ token: string; expiresInSeconds: number }>(
+      `${this.BASE_PATH}/me/avatar-upload-token`
+    );
+  }
+
   public async deleteAvatar(userId: string): Promise<void> {
     return hrisApiClient.post<void>(
       `${this.BASE_PATH}/${userId}/avatar/delete`

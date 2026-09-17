@@ -6,17 +6,10 @@ export class TimeOffPolicyAssignmentMapper {
     dto: TimeOffPolicyAssignmentDTO
   ): TimeOffPolicyAssignment {
     return {
-      id: dto.id,
-      policyId: dto.policyId,
-      userId: dto.userId,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       person: dto.person ?? null,
-      status: dto.status,
-      effectiveFrom: dto.effectiveFrom,
-      effectiveTo: dto.effectiveTo,
-      endedAt: dto.endedAt,
-      endedBy: dto.endedBy,
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
     };
   }
 

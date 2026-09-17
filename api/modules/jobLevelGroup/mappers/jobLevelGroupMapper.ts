@@ -5,22 +5,17 @@ import { JobLevelDTO } from "@/api/modules/jobfamily/dto";
 export class JobLevelGroupMapper {
   public mapJobLevelDtoToJobLevel(dto: JobLevelDTO): JobLevel {
     return {
-      id: dto.id,
-      name: dto.name,
-      sortOrder: dto.sortOrder,
-      groupId: dto.groupId,
-      groupName: dto.groupName,
-      assignedJobsCount: dto.assignedJobsCount,
-      assignedUsersCount: dto.assignedUsersCount,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 
   public mapJobLevelGroupDtoToJobLevelGroup(dto: JobLevelGroupDTO): JobLevelGroup {
     return {
-      id: dto.id,
-      name: dto.name,
-      assignedJobsCount: dto.assignedJobsCount,
-      assignedUsersCount: dto.assignedUsersCount,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       levels: (dto.levels ?? []).map((level) => this.mapJobLevelDtoToJobLevel(level)),
     };
   }

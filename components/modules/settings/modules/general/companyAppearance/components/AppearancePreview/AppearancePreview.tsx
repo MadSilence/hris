@@ -3,6 +3,7 @@
 import { FC, ReactNode, useLayoutEffect, useRef, useState } from "react";
 
 import { buildScopedBrandStyleSheet } from "@/lib/theme/brandPalette";
+import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
 /**
@@ -22,8 +23,7 @@ const PREVIEW_SCOPE = `[${PREVIEW_ATTRIBUTE}]`;
 const DESIGN_WIDTH = 1280;
 const DESIGN_HEIGHT = 800;
 
-export const DEFAULT_LOGIN_HEADLINE = "Welcome to SixSoftware";
-export const DEFAULT_LOGIN_SUBHEADLINE = "Sign in to continue to your workspace.";
+export { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 
 type Props = {
   brandColor: string | null;

@@ -1,147 +1,28 @@
-"use client";
+import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import Sidebar, { NavItem } from "@/components/layout/Sidebar/Sidebar";
-import Home from "@/public/icons/home.svg";
-import Inbox from "@/public/icons/inbox.svg";
-import Search from "@/public/icons/search.svg";
-import People from "@/public/icons/people.svg";
-import Calendar from "@/public/icons/calendar.svg";
-import Settings from "@/public/icons/settings.svg";
-import styles from "./layout.module.css";
-import { useAccess } from "@/components/auth/useAccess";
-import { canAccess, ResourceCode } from "@/models/access";
-import { settingsGroups } from "@/components/modules/settings/config/settings.config";
-import { Toaster } from "@/public/desact/src/components/ui/sonner";
-import { showError } from "@/lib/errors/errorToast";
-import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
-import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
-import ImpersonationProvider from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
-import CompanyDataProvider, { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
-import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
-import { ForbiddenError } from "@/components/clients/exceptions";
+import AppShell from "./AppShell";
+import { hrisFirstRunService } from "@/api/modules/firstRun/services";
 
-const LayoutContent = ({ children }: { children: ReactNode }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const { access } = useAccess();
+/**
+ * The gate in front of the whole signed-in app.
+ *
+ * <p>A server component on purpose. Two things have to be true before a page is worth drawing: the
+ * company has been set up, and this person has been welcomed. Asking from the client would mean
+ * rendering the sidebar, the navigation and half a dashboard and then throwing it away — which is
+ * what a redirect from inside a provider looks like to whoever is watching.
+ *
+ * <p><b>Routing, not a security check</b> (`hris/CLAUDE.md` § "Security model"). It decides where
+ * somebody lands, never what they may do; every endpoint behind it still answers for itself, and a
+ * failure to reach the backend opens the gate rather than closing it.
+ */
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  const { setupNeeded, welcomeNeeded } = await hrisFirstRunService.getFirstRunState();
 
-  const { user } = useCurrentUser();
-  const { company } = useCompanyData();
-  const { data: unreadCount } = useUnreadNotificationsCount();
+  // The company first: a person welcomed into a company with nothing in it would be asked to fill in
+  // a profile whose departments and offices do not exist yet.
+  if (setupNeeded) redirect("/setup");
+  if (welcomeNeeded) redirect("/welcome");
 
-  // Reads still announce a refusal this way: InternalApiClient dispatches the event, and only it
-  // can — a server action runs on the server and has no window. Mutations reach the same cards
-  // through showActionError instead.
-  useEffect(() => {
-    const handleForbidden = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      showError(new ForbiddenError(typeof detail === "string" ? detail : undefined, {
-        code: "E00403",
-        status: 403,
-      }));
-    };
-
-    window.addEventListener("hris:forbidden", handleForbidden);
-    return () => window.removeEventListener("hris:forbidden", handleForbidden);
-  }, []);
-
-  // Settings hub is visible when the user can view at least one settings area.
-  const settingsResources: ResourceCode[] = settingsGroups
-    .flatMap((group) => group.items)
-    .flatMap((item) => item.resources ?? []);
-
-  const allTopItems: (NavItem & { resources?: ResourceCode[] })[] = [
-    { label: "Home", href: "/dashboard", Icon: Home },
-    {
-      label: "Inbox",
-      href: "/inbox",
-      Icon: Inbox,
-      badge: unreadCount ?? 0,
-    },
-    {
-      label: "Search",
-      href: "/search",
-      Icon: Search,
-    },
-    {
-      label: "Organization",
-      href: "/organization/people",
-      Icon: People,
-      resources: ["PEOPLE.PROFILE"],
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-      Icon: Calendar,
-      resources: ["PEOPLE.TIME_OFF"],
-    },
-  ];
-
-  const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = [
-    {
-      label: "Settings",
-      href: "/settings",
-      Icon: Settings,
-      resources: settingsResources,
-    },
-  ];
-
-  const filterItem = (item: NavItem & { resources?: ResourceCode[] }) => {
-    if (!item.resources || item.resources.length === 0) return true;
-
-    return item.resources.some((resource) =>
-      canAccess({ access, resource, action: "VIEW" }),
-    );
-  };
-
-  const top = allTopItems.filter(filterItem);
-  const bottom = allBottomItems.filter(filterItem);
-
-  const profile = useMemo(() => {
-    const fullName = user
-      ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-      : "";
-    return {
-      id: user?.id ?? "",
-      name: fullName || "Loading...",
-      role: user?.email || undefined,
-      avatarUrl: user?.avatarUrl ?? null,
-    };
-  }, [user]);
-
-  return (
-    <div className={styles.frame}>
-      <Sidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((current) => !current)}
-        topItems={top}
-        bottomItems={bottom}
-        profile={profile}
-        company={company}
-      />
-
-      <div className={styles.content}>
-        <ImpersonationBanner/>
-        <main className={styles.main}>{children}</main>
-      </div>
-
-      <Toaster/>
-    </div>
-  );
-};
-
-export default function AppLayout({ children }: { children: ReactNode }) {
-  return (
-    <CurrentUserProvider>
-      <CompanyDataProvider>
-        <ImpersonationProvider>
-          <LayoutContent>
-            <div className="px-16 pt-16 pb-8">
-              {children}
-            </div>
-          </LayoutContent>
-        </ImpersonationProvider>
-      </CompanyDataProvider>
-    </CurrentUserProvider>
-  );
+  return <AppShell>{children}</AppShell>;
 }

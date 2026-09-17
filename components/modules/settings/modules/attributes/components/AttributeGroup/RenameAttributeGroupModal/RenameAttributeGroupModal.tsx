@@ -12,6 +12,11 @@ import {
 type RenameAttributeGroupModalProps = {
   isOpen: boolean;
   isLoading: boolean;
+  /** The section being edited — its name and description prefill the form. */
+  initialName?: string;
+  initialDescription?: string | null;
+  /** Server-side failure — the modal stays open and shows it instead of closing silently. */
+  errorMessage?: string | null;
   onConfirmAction: (submission: RenameAttributeGroupFormValues) => void;
   onRequestCloseAction: () => void;
 };
@@ -21,6 +26,9 @@ export const RenameAttributeGroupModal: FC<
 > = ({
   isOpen,
   isLoading = false,
+  initialName,
+  initialDescription,
+  errorMessage,
   onConfirmAction,
   onRequestCloseAction,
 }) => {
@@ -61,16 +69,27 @@ export const RenameAttributeGroupModal: FC<
                 <Pencil className="h-5 w-5" />
               </span>
               <div className="space-y-1">
-                <DialogTitle>Rename section</DialogTitle>
+                <DialogTitle>Edit Section</DialogTitle>
                 <DialogDescription>
-                  Update the section name used to organize attributes.
+                  Update the section name and the description shown under it.
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
+          {errorMessage && (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              {errorMessage}
+            </p>
+          )}
+
           <RenameAttributeGroupForm
             isLoading={isLoading}
+            initialName={initialName}
+            initialDescription={initialDescription}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}
             onSubmitAction={onConfirmAction}

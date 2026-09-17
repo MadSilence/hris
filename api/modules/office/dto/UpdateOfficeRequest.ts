@@ -9,4 +9,6 @@ export type UpdateOfficeRequest = {
   street?: string;
   building?: string;
   postCode?: string;
+  /** The version the form was opened with. */
+  version?: number;
 };

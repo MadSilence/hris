@@ -17,4 +17,6 @@ export type Job = {
 
   createdAt?: string;
   createdBy?: string;
+  /** The row version the edit form sends back, so a save over someone else's change is refused. */
+  version?: number;
 };

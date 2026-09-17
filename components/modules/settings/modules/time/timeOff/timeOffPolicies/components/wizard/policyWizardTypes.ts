@@ -182,6 +182,14 @@ export type PolicyWizardValues = {
   editManagerCanEditTeam: boolean;
   editAdminCanEditAny: boolean;
   editAllowPastEdits: boolean;
+
+  /**
+   * The policy's version the wizard was filled from (edit only; absent when creating). Sent back
+   * with the save so a colleague's save in between is refused with E00409 instead of overwritten.
+   * It travels with the values rather than being read off the live query at save time: a refetch
+   * while the wizard is open would otherwise hand the save a version the form was never filled from.
+   */
+  version?: number;
 };
 
 export const defaultPolicyWizardValues: PolicyWizardValues = {
@@ -665,6 +673,8 @@ export function policyToWizardValues(
 
   return {
     ...d,
+
+    version: policy.version,
 
     // Basics
     name: policy.displayName,

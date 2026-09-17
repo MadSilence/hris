@@ -23,6 +23,7 @@ describe("createAttributeGroupAction", () => {
 
   const mockInput: CreateAttributeGroupActionInput = {
     name: "Test name",
+    description: "Test description",
   };
 
   it("calls groupsService.createGroup with correct arguments", async () => {

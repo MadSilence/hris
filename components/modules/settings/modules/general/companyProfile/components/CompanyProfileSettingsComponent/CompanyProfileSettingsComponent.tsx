@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useMemo, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { Building2, Clock, Globe } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -21,12 +21,17 @@ import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import type { Company } from "@/models/company/Company";
 import type { CompanySettings } from "@/models/company/CompanySettings";
 import type { UpdateCompanyRequest, UpdateCompanySettingsRequest } from "@/api/modules/company/dto/CompanyDTO";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import { companyHost, companyOrigin } from "@/lib/companyAddress";
+
+type Saved = { version?: number } | undefined;
 
 type Props = {
   company: Company;
   settings: CompanySettings;
-  onSaveProfile: (body: UpdateCompanyRequest) => Promise<void> | void;
-  onSaveSettings: (body: UpdateCompanySettingsRequest) => Promise<void> | void;
+  /** Resolves with what was saved, when the caller has it, so the form holds the version it produced. */
+  onSaveProfile: (body: UpdateCompanyRequest) => Promise<Saved | void> | void;
+  onSaveSettings: (body: UpdateCompanySettingsRequest) => Promise<Saved | void> | void;
   savingProfile: boolean;
   savingSettings: boolean;
   profileError: string | null;
@@ -119,6 +124,40 @@ const Field: FC<{ id: string; label: string; className?: string; children: React
   </div>
 );
 
+/**
+ * Where the company's people sign in. Shown as text rather than as a disabled input that looks editable
+ * and is not: an administrator's job with it is to read it out and
+ * hand it on, so it can be copied.
+ */
+const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
+  const web = useAppDataContext().envConfig?.web;
+  const address = web ? companyHost(subdomain, web) : subdomain;
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(web ? `${companyOrigin(subdomain, web)}/login` : address);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-2">
+      <Label className="mb-0">Sign-in Address</Label>
+
+      <div className="flex h-9 min-w-0 items-center justify-between gap-2">
+        <span data-test="company-sign-in-address" className="truncate text-sm text-foreground">{address}</span>
+
+        <Button type="button" variant="outline" size="sm" onClick={copy}>
+          {copied ? "Copied" : "Copy"}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const CompanyProfileSettingsComponent: FC<Props> = ({
   company,
   settings,
@@ -160,6 +199,27 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
     [...workingDays].sort().join(",") !== [...settings.workingDays].sort().join(",");
 
   const dirty = profileDirty || settingsDirty;
+
+  /**
+   * The versions each half was opened with, sent back on save so a colleague's save in between is
+   * refused (E00409) instead of overwritten.
+   *
+   * A half follows the latest version only while it is clean — clean means every field shows exactly
+   * what the latest read holds, so the form *is* open on that version. Once somebody types, the
+   * version is held. A refetch that brings a colleague's change then makes the half dirty (its fields
+   * no longer match the read) and the held version refuses the save, which is the point.
+   */
+  const [profileVersion, setProfileVersion] = useState(company.version);
+  const [settingsVersion, setSettingsVersion] = useState(settings.version);
+
+  useEffect(() => {
+    if (!profileDirty) setProfileVersion(company.version);
+  }, [profileDirty, company.version]);
+
+  useEffect(() => {
+    if (!settingsDirty) setSettingsVersion(settings.version);
+  }, [settingsDirty, settings.version]);
+
   const nameMissing = name.trim().length === 0;
   const noWorkingDays = workingDays.size === 0;
 
@@ -193,16 +253,27 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
    * and the form still shows one coherent error.
    */
   const handleSave = async () => {
+    // After a save, the half holds the version that save produced. Following the read is not enough:
+    // a name saved as "  Acme " comes back trimmed, the field still differs, the half stays dirty, and
+    // the next save would be refused for a version this person moved themselves.
     if (profileDirty) {
-      await onSaveProfile({
+      const saved = await onSaveProfile({
         name: name.trim(),
         description: description.trim() || null,
         website: website.trim() || null,
+        version: profileVersion,
       });
+      if (saved?.version !== undefined) setProfileVersion(saved.version);
     }
 
     if (settingsDirty) {
-      await onSaveSettings({ timezone, workingDays: orderedWorkingDays, weekStartDay });
+      const saved = await onSaveSettings({
+        timezone,
+        workingDays: orderedWorkingDays,
+        weekStartDay,
+        version: settingsVersion,
+      });
+      if (saved?.version !== undefined) setSettingsVersion(saved.version);
     }
   };
 
@@ -238,15 +309,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
               />
             </Field>
 
-            <Field id="company-subdomain" label="Subdomain">
-              <Input
-                id="company-subdomain"
-                value={company.subdomain}
-                disabled
-                readOnly
-                title="Subdomain can't be changed here"
-              />
-            </Field>
+            <SignInAddress subdomain={company.subdomain}/>
           </div>
 
           {nameMissing ? (

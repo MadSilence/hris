@@ -23,7 +23,7 @@ const reference = (over: Partial<FieldDTO>): FieldDTO =>
     isSystem: true,
     type: AttributeType.REFERENCE,
     cardinality: "ONE",
-    group: "Organisation",
+    group: "Organization",
     ...over,
   });
 

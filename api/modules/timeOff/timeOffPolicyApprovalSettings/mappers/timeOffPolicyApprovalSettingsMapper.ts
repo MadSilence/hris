@@ -12,10 +12,9 @@ export class TimeOffPolicyApprovalSettingsMapper {
     dto: TimeOffPolicyApproverDTO
   ): TimeOffPolicyApprover {
     return {
-      id: dto.id,
-      approverType: dto.approverType,
-      approverUserId: dto.approverUserId,
-      approvalOrder: dto.approvalOrder,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 
@@ -23,12 +22,9 @@ export class TimeOffPolicyApprovalSettingsMapper {
     dto: TimeOffPolicyApprovalSettingsDTO
   ): TimeOffPolicyApprovalSettings {
     return {
-      policyId: dto.policyId,
-      configured: dto.configured,
-      approvalRequired: dto.approvalRequired,
-      approvalMode: dto.approvalMode,
-      requiredApprovalsCount: dto.requiredApprovalsCount,
-      allowSubstituteApprovers: dto.allowSubstituteApprovers,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       approvers: dto.approvers.map((approver) =>
         this.mapTimeOffPolicyApproverDTO(approver)
       ),

@@ -2,13 +2,13 @@
 
 import { attributeService } from "@/api/modules/attributes/services/attributeService";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { UpdatedEntity } from "@/models/misc";
 import { AttributeOption, AttributeType } from "@/models/attribute";
 import { toActionError } from "@/lib/errors/withActionError";
+import { AttributeUpdateResponse } from "@/api/modules/attributes/dto";
 
-export const updateAttributeAction = async (
+export async function updateAttributeAction(
   submission: UpdateAttributeActionInput
-): Promise<UpdateAttributeActionOutput> => {
+): Promise<UpdateAttributeActionOutput> {
   try {
     const data = await attributeService.updateAttribute(submission);
 
@@ -19,7 +19,7 @@ export const updateAttributeAction = async (
   } catch (error) {
     return toActionError(error, "updateAttributeAction");
   }
-};
+}
 
 export type UpdateAttributeActionInput = {
   id: string;
@@ -47,10 +47,13 @@ export type UpdateAttributeActionInput = {
   objectFields?: string | null;
   /** Nullable config fields to reset — a null above means "leave as is", not "clear". */
   clearFields?: string[];
+  /** The attribute's version when the form opened; a stale one comes back as E00409. */
+  version?: number;
 };
 
 export type UpdateAttributeActionOutput = {
   status: ActionStatus;
-  data?: UpdatedEntity;
+  /** Carries the version the update left the attribute at — the option save that follows needs it. */
+  data?: AttributeUpdateResponse;
   errorMessage?: string;
 };

@@ -1,5 +1,5 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
-import type { LoginResponse } from "@/api/modules/auth/dto";
+import type { LoginRequest, LoginResponse } from "@/api/modules/auth/dto";
 
 /** The name the backend uses for its refresh cookie, on both the way in and the way out. */
 export const REFRESH_COOKIE = "refresh_token";
@@ -29,10 +29,12 @@ export const refreshTokenFrom = (response: Response): string | undefined => {
 };
 
 class HrisAuthSessionService {
-  public async login(payload: { email: string; password: string }): Promise<SessionTokens> {
+  public async login(payload: LoginRequest): Promise<SessionTokens> {
+    // Rebuilt from the fields it declares: the backend refuses an unknown property, and the browser's
+    // body is not what decides the company.
     const { data, response } = await hrisApiClient.postWithResponse<LoginResponse>(
       "/auth/login",
-      payload
+      { email: payload.email, password: payload.password, subdomain: payload.subdomain }
     );
     return { accessToken: data.accessToken, refreshToken: refreshTokenFrom(response) };
   }

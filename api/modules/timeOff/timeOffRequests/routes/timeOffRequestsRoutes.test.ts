@@ -29,12 +29,7 @@ import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto"
 
 jest.mock("@/api/modules/timeOff/timeOffRequests/services", () => ({
   hrisTimeOffRequestsService: {
-    create: jest.fn(),
-    getById: jest.fn(),
     listByUserId: jest.fn(),
-    cancel: jest.fn(),
-    approve: jest.fn(),
-    reject: jest.fn(),
   },
 }));
 
@@ -66,46 +61,6 @@ describe("TimeOffRequestsRoutes", () => {
     jest.clearAllMocks();
   });
 
-  it("creates time off request", async () => {
-    const response = { id: "request-id", coverageWarningDays: [] };
-
-    jest
-      .mocked(hrisTimeOffRequestsService.create)
-      .mockResolvedValue(response);
-
-    const body = {
-      assignmentId: "assignment-id",
-      startDate: "2026-07-14",
-      endDate: "2026-07-18",
-      reason: "Summer vacation",
-    };
-
-    const req = { json: async () => body } as Request;
-
-    const res = await timeOffRequestsRoutes.create(req);
-    const result = await res.json();
-
-    expect(hrisTimeOffRequestsService.create).toHaveBeenCalledWith(body);
-    expect(result).toEqual(response);
-  });
-
-  it("gets time off request by id", async () => {
-    jest
-      .mocked(hrisTimeOffRequestsService.getById)
-      .mockResolvedValue(partialMock(requestDto));
-
-    const res = await timeOffRequestsRoutes.getById(
-      {} as Request,
-      "request-id"
-    );
-    const result = await res.json();
-
-    expect(hrisTimeOffRequestsService.getById).toHaveBeenCalledWith(
-      "request-id"
-    );
-    expect(result).toEqual(requestDto);
-  });
-
   it("lists time off requests by user id", async () => {
     jest
       .mocked(hrisTimeOffRequestsService.listByUserId)
@@ -123,63 +78,5 @@ describe("TimeOffRequestsRoutes", () => {
       { year: null, status: null }
     );
     expect(result).toEqual([requestDto]);
-  });
-
-  it("cancels time off request", async () => {
-    const response = { id: "request-id", coverageWarningDays: [] };
-
-    jest
-      .mocked(hrisTimeOffRequestsService.cancel)
-      .mockResolvedValue(response);
-
-    const req = {
-      json: async () => ({ cancellationReason: "Plans changed" }),
-    } as Request;
-
-    const res = await timeOffRequestsRoutes.cancel(req, "request-id");
-    const result = await res.json();
-
-    expect(hrisTimeOffRequestsService.cancel).toHaveBeenCalledWith(
-      "request-id",
-      { cancellationReason: "Plans changed" }
-    );
-    expect(result).toEqual(response);
-  });
-
-  it("approves time off request", async () => {
-    const response = { id: "request-id", coverageWarningDays: [] };
-
-    jest
-      .mocked(hrisTimeOffRequestsService.approve)
-      .mockResolvedValue(response);
-
-    const res = await timeOffRequestsRoutes.approve({} as Request, "request-id");
-    const result = await res.json();
-
-    expect(hrisTimeOffRequestsService.approve).toHaveBeenCalledWith(
-      "request-id"
-    );
-    expect(result).toEqual(response);
-  });
-
-  it("rejects time off request", async () => {
-    const response = { id: "request-id", coverageWarningDays: [] };
-
-    jest
-      .mocked(hrisTimeOffRequestsService.reject)
-      .mockResolvedValue(response);
-
-    const req = {
-      json: async () => ({ rejectionReason: "Insufficient notice period" }),
-    } as Request;
-
-    const res = await timeOffRequestsRoutes.reject(req, "request-id");
-    const result = await res.json();
-
-    expect(hrisTimeOffRequestsService.reject).toHaveBeenCalledWith(
-      "request-id",
-      { rejectionReason: "Insufficient notice period" }
-    );
-    expect(result).toEqual(response);
   });
 });

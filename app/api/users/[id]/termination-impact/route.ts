@@ -4,9 +4,11 @@ import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersServi
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export const GET = apiRequestWrapper(async (_req: Request, context: RouteContext) => {
+export const GET = apiRequestWrapper(async (req: Request, context: RouteContext) => {
   const { id } = await context.params;
-  const impact = await hrisApiUsersService.getTerminationImpact(id);
+  // The counts follow the date being typed, not the one on record.
+  const lastWorkingDay = new URL(req.url).searchParams.get("lastWorkingDay");
+  const impact = await hrisApiUsersService.getTerminationImpact(id, lastWorkingDay);
 
   return NextResponse.json(impact);
 });

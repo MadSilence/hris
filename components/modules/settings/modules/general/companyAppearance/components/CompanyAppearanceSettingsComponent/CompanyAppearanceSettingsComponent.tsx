@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FC, ReactNode, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ImageIcon, ImagePlus, Palette } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -10,7 +10,7 @@ import { Switch } from "@/public/desact/src/components/ui/switch";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { BRAND_STEPS, buildBrandPalette } from "@/lib/theme/brandPalette";
+import { BRAND_STEPS, buildBrandPalette, isBrandColorUsedAsIs } from "@/lib/theme/brandPalette";
 import { isValidHex } from "@/lib/theme/oklch";
 import { AppearancePreview } from "@/components/modules/settings/modules/general/companyAppearance/components/AppearancePreview";
 import {
@@ -22,7 +22,8 @@ import type { UpdateCompanyAppearanceRequest } from "@/api/modules/company/modul
 
 type Props = {
   appearance: CompanyAppearance;
-  onSave: (body: UpdateCompanyAppearanceRequest) => Promise<void> | void;
+  /** Resolves with what was saved, when the caller has it, so the form holds the version it produced. */
+  onSave: (body: UpdateCompanyAppearanceRequest) => Promise<{ version?: number } | undefined | void> | void;
   onUploadLoginImage: (file: File) => Promise<void> | void;
   onRemoveLoginImage: () => Promise<void> | void;
   saving: boolean;
@@ -115,6 +116,19 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
     imageOnDashboard !== appearance.useImageOnDashboard ||
     sidebarContrast !== appearance.sidebarContrast;
 
+  /**
+   * The version the form was opened with, sent back on save so a colleague's save in between is
+   * refused (E00409) instead of overwritten. It follows the latest read only while the form is clean
+   * — clean means every field shows exactly what that read holds. Once somebody types it is held, and
+   * a refetch bringing a colleague's change makes the form dirty, so the held version refuses the save.
+   * After this form's own save it holds the version that save produced (see `handleSave`).
+   */
+  const [version, setVersion] = useState(appearance.version);
+
+  useEffect(() => {
+    if (!dirty) setVersion(appearance.version);
+  }, [dirty, appearance.version]);
+
   const customHexInvalid = customHex.trim().length > 0 && !isValidHex(normaliseHex(customHex));
 
   const generatedScale = useMemo(
@@ -152,15 +166,21 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
     setSidebarContrast(appearance.sidebarContrast);
   };
 
-  const handleSave = () =>
-    onSave({
+  const handleSave = async () => {
+    const saved = await onSave({
       brandColor,
       loginHeadline: headline.trim() || null,
       loginSubheadline: subheadline.trim() || null,
       useImageOnLogin: imageOnLogin,
       useImageOnDashboard: imageOnDashboard,
       sidebarContrast,
+      version,
     });
+    // Following the read is not enough here: a headline saved as "  Welcome " comes back trimmed, the
+    // field still differs, the form stays dirty, and the next save would be refused for a version
+    // this person moved themselves.
+    if (saved && saved.version !== undefined) setVersion(saved.version);
+  };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -258,6 +278,15 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
             {customHexInvalid ? (
               <p className="m-0 -mt-2 text-xs text-destructive">
                 Enter a hex colour such as #2563eb.
+              </p>
+            ) : null}
+
+            {/* Buttons wear the picked colour exactly, unless white text on it would not read or it
+                would break hover and pressed shades — then they get the nearest safe shade, and the
+                swatch above no longer matches them, which is worth saying. */}
+            {brandColor && generatedScale && !isBrandColorUsedAsIs(brandColor) ? (
+              <p className="m-0 -mt-2 text-xs text-muted-foreground">
+                Buttons use an adjusted shade of this colour so their text stays readable.
               </p>
             ) : null}
 

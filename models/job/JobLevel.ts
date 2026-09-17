@@ -11,4 +11,7 @@ export type JobLevel = {
   /** Counters are filled on the catalogue read, not on the picker projection. */
   assignedJobsCount?: number;
   assignedUsersCount?: number;
+
+  /** The row version the rename form sends back, so a save over someone else's change is refused. */
+  version?: number;
 };

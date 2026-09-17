@@ -1,8 +1,10 @@
 import { hrisApiPublicHolidayCalendarsClient } from "@/api/modules/publicHolidays/calendars/clients";
+import type { PublicHolidayCalendarDeleteImpact } from "@/models/publicHolidays/calendar";
 import type {
   CreatePublicHolidayCalendarRequest,
   RenamePublicHolidayCalendarRequest,
   UpdatePublicHolidayCalendarRequest,
+  UpdatePublicHolidayCalendarResponse,
 } from "@/api/modules/publicHolidays/calendars/dto";
 import { PublicHolidayCalendar } from "@/models/publicHolidays/calendar";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -22,10 +24,14 @@ export class HrisPublicHolidayCalendarsService {
     return hrisApiPublicHolidayCalendarsClient.getById(id);
   }
 
+  public async getDeleteImpact(id: string): Promise<PublicHolidayCalendarDeleteImpact> {
+    return hrisApiPublicHolidayCalendarsClient.getDeleteImpact(id);
+  }
+
   public async update(
     id: string,
     body: UpdatePublicHolidayCalendarRequest
-  ): Promise<UpdateResponse> {
+  ): Promise<UpdatePublicHolidayCalendarResponse> {
     return hrisApiPublicHolidayCalendarsClient.update(id, body);
   }
 

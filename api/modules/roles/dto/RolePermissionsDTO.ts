@@ -13,6 +13,8 @@ export type RolePermissionDTO = {
 // Matches backend RoleAccessPermissionsBody (GET /roles/{id}/permissions).
 export type RolePermissionsDTO = {
   permissions: RolePermissionDTO[];
+  /** The role's version the grants were read at. Sent back on save; a stale one is E00409. */
+  version?: number;
 };
 
 // PUT /roles/{id}/permissions — full replace, identical shape to the GET response.
@@ -20,6 +22,8 @@ export type RolePermissionsDTO = {
 // MANAGE into EDIT/VIEW (see canAccess).
 export type UpdateRolePermissionsRequest = {
   permissions: RolePermissionDTO[];
+  /** The `version` the matrix was loaded with — see `buildRolePermissionsBody`. */
+  version?: number;
 };
 
 // Saving rotates users.perm_hash, so the backend hands back a freshly signed token

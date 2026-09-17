@@ -10,4 +10,6 @@ export interface Team {
   leadId: string | null;
   memberCount: number;
   archivedAt: string | null;
+  /** The row version the edit dialog sends back, so a save over someone else's change is refused. */
+  version?: number;
 }

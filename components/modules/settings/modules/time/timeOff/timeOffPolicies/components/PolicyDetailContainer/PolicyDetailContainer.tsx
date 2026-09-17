@@ -156,6 +156,9 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       restrictions: buildRestrictionsRequest(values),
       tenureRules: buildTenureRulesRequest(values),
       approval: buildApprovalRequest(values),
+      // The version the wizard was filled from. A colleague's save since then is refused (E00409):
+      // the wizard stays open with the message, and nothing of theirs is overwritten.
+      version: values.version,
     });
 
     setIsEditOpen(false);

@@ -83,6 +83,8 @@ const toDateInput = (iso?: string | null) => (iso ? iso.slice(0, 10) : null);
 const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : null);
 
 type Draft = {
+  /** Captured when the section enters edit, so a colleague's save in between is caught. */
+  version?: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -95,6 +97,7 @@ type Draft = {
 };
 
 const draftOf = (user: User): Draft => ({
+  version: user.version,
   firstName: user.firstName ?? "",
   lastName: user.lastName ?? "",
   email: user.email ?? "",
@@ -171,6 +174,7 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
 
       const res = await updateUserAction({
         userId: user.id,
+        version: draft.version,
         firstName: changed("sys:first_name", draft.firstName !== initial.firstName, draft.firstName),
         lastName: changed("sys:last_name", draft.lastName !== initial.lastName, draft.lastName),
         email: changed("sys:email", draft.email !== initial.email, draft.email),
@@ -327,6 +331,9 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
       <div className="divide-y divide-brown-100">
         {visible.map((field) => {
           const editing = isEdit && canEditField(field.id);
+          // While the section is being edited, a derived field says where it is changed rather
+          // than just sitting there unchangeable.
+          const source = isEdit && field.derivedFrom ? fields.find((f) => f.id === field.derivedFrom) : undefined;
 
           return (
             <div
@@ -336,6 +343,11 @@ export const SystemFieldGroup: React.FC<Props> = ({ user, fields, title }) => {
               <div className="text-sm text-muted-foreground">{field.label}</div>
               <div className="text-sm text-foreground">
                 {editing ? editorFor(field.id) : <SystemFieldValue user={user} field={field} />}
+                {source ? (
+                  <p className="m-0 mt-1 text-xs text-muted-foreground">
+                    Follows {source.label}. Change the {source.label.toLowerCase()} to change it.
+                  </p>
+                ) : null}
               </div>
             </div>
           );

@@ -79,9 +79,10 @@ class HrisApiRolesClient {
   public async updateRoleName(id: string, requestDTO: UpdateRoleRequest) {
     // Undefined fields are dropped so the backend leaves them alone — that is what makes editing
     // the description without touching the name (and vice versa) possible.
-    const payload: Record<string, string> = {};
+    const payload: Record<string, string | number> = {};
     if (requestDTO.newName !== undefined) payload.name = requestDTO.newName;
     if (requestDTO.description !== undefined) payload.description = requestDTO.description;
+    if (requestDTO.version !== undefined) payload.version = requestDTO.version;
 
     return hrisApiClient.patch<UpdateResponse>(`${this.BASE_PATH}/${id}`, payload);
   }

@@ -1,19 +1,7 @@
 ﻿import { hrisTimeOffRequestsService } from "@/api/modules/timeOff/timeOffRequests/services";
 
+// Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class TimeOffRequestsRoutes {
-  public async create(req: Request) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisTimeOffRequestsService.create({
-      assignmentId: body.assignmentId,
-      startDate: body.startDate,
-      endDate: body.endDate,
-      reason: body.reason ?? null,
-    });
-
-    return Response.json(data);
-  }
-
   public async previewDuration(req: Request) {
     const url = new URL(req.url);
     const data = await hrisTimeOffRequestsService.previewDuration(
@@ -34,11 +22,6 @@ export class TimeOffRequestsRoutes {
     return Response.json(data);
   }
 
-  public async getById(_req: Request, id: string) {
-    const data = await hrisTimeOffRequestsService.getById(id);
-    return Response.json(data);
-  }
-
   public async listAwaitingMe(_req: Request) {
     const data = await hrisTimeOffRequestsService.listAwaitingMe();
     return Response.json(data);
@@ -51,31 +34,6 @@ export class TimeOffRequestsRoutes {
       year: yearParam ? Number(yearParam) : null,
       status: params.get("status"),
     });
-    return Response.json(data);
-  }
-
-  public async cancel(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisTimeOffRequestsService.cancel(id, {
-      cancellationReason: body.cancellationReason ?? null,
-    });
-
-    return Response.json(data);
-  }
-
-  public async approve(_req: Request, id: string) {
-    const data = await hrisTimeOffRequestsService.approve(id);
-    return Response.json(data);
-  }
-
-  public async reject(req: Request, id: string) {
-    const body = await req.json().catch(() => ({}));
-
-    const data = await hrisTimeOffRequestsService.reject(id, {
-      rejectionReason: body.rejectionReason,
-    });
-
     return Response.json(data);
   }
 }

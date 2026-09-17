@@ -8,6 +8,8 @@ export type UpdateJobFamilyRequest = {
   name?: string;
   description?: string | null;
   clearDescription?: boolean;
+  /** The version the form was opened with. */
+  version?: number;
 };
 
 export type DuplicateJobFamilyRequest = {

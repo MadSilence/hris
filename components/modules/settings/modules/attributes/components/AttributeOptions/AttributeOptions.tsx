@@ -44,6 +44,8 @@ interface AttributeOptionsProps {
   onSave?: () => void;
   onCancel?: () => void;
   isPreset?: boolean;
+  /** A save is in flight — Save is held off so a second click cannot race the first. */
+  isSaving?: boolean;
 }
 
 // Config fields the backend can reset to NULL on request (mirrors AttributeUpdateService.CLEARABLE_FIELDS).
@@ -71,6 +73,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   onSave,
   onCancel,
   isPreset = false,
+  isSaving = false,
 }) => {
   // The type is fixed at creation — changing it would have to migrate every stored value between
   // storage columns, so the editor shows it read-only (the backend has no `type` on its update
@@ -342,10 +345,10 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       </div>
 
       <div className="mt-6 flex justify-end gap-2 border-t border-brown-100 pt-4">
-        <Button variant="outline" onClick={cancel}>
+        <Button variant="outline" onClick={cancel} disabled={isSaving}>
           Cancel
         </Button>
-        <Button onClick={save} disabled={isPreset || !name.trim()}>
+        <Button onClick={save} disabled={isPreset || !name.trim() || isSaving}>
           Save
         </Button>
       </div>

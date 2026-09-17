@@ -163,7 +163,9 @@ export const DocumentCategoriesContainer: FC = () => {
         }}
         onSubmitAction={async (values) => {
           try {
-            await save.mutateAsync({ id: editing?.id, ...values });
+            // `editing` is the row captured when the dialog opened, so its version is the one the
+            // form was filled from. A stale one is refused (E00409) and shown in the open dialog.
+            await save.mutateAsync({ id: editing?.id, ...values, version: editing?.version });
             setIsCreateOpen(false);
             setEditing(null);
           } catch {

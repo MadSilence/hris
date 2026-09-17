@@ -126,6 +126,7 @@ const RolesPageContainer: React.FC = () => {
           id: roleId,
           name: values.name,
           description: values.description,
+          version: values.version,
         });
       }}
       onDuplicateRole={async (roleId, values) => {

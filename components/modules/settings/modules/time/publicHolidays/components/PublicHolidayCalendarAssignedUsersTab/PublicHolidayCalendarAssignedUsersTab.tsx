@@ -31,6 +31,9 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
       title="Assigned people"
       description="People who have this holiday calendar assigned to them."
       manageResource="ORG.PUBLIC_HOLIDAY_CALENDAR"
+      // The resource has VIEW and MANAGE and no EDIT, so the panel's default EDIT gate hid Assign and
+      // Unassign from everybody, including the people the backend lets do both.
+      manageAction="MANAGE"
       fillParent
       query={query}
       onQueryChange={setQuery}

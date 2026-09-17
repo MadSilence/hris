@@ -139,6 +139,9 @@ export default function JobFamilyContainer() {
           name: values.name,
           description,
           clearDescription: description === null,
+          // The dialog holds the family as it was when opened, so this is the version the form
+          // was filled from — a refetch while it is open does not move it.
+          version: familyDialog.family.version,
         }),
       );
     }
@@ -164,6 +167,7 @@ export default function JobFamilyContainer() {
           clearCode: code === null,
           description,
           clearDescription: description === null,
+          version: jobDialog.job.version,
         }),
       );
       return;

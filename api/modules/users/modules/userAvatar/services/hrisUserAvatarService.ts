@@ -9,6 +9,10 @@ export class HrisUserAvatarService {
     return hrisApiUserAvatarClient.uploadAvatar(userId, file);
   }
 
+  public async issueAvatarUploadToken(): Promise<{ token: string; expiresInSeconds: number }> {
+    return hrisApiUserAvatarClient.issueAvatarUploadToken();
+  }
+
   public async deleteAvatar(userId: string): Promise<void> {
     return hrisApiUserAvatarClient.deleteAvatar(userId);
   }

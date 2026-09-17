@@ -1,6 +1,6 @@
 import { hrisApiUsersService, UsersSearchArgs } from "../../services/hrisUsersService";
-import { UsersSearchRequest } from "@/models/user/fields";
 
+// Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class UsersRoutes {
   public async getUsers(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -21,15 +21,14 @@ export class UsersRoutes {
     return Response.json(result);
   }
 
+  /** The number behind the directory's Drafts segment. Listing them is searchUsers with drafts: "ONLY". */
+  async draftCount() {
+    return Response.json(await hrisApiUsersService.draftCount());
+  }
+
   async getFields() {
     const fields = await hrisApiUsersService.getFields();
     return Response.json(fields);
-  }
-
-  async search(req: Request) {
-    const body = (await req.json()) as UsersSearchRequest;
-    const data = await hrisApiUsersService.search(body);
-    return Response.json(data);
   }
 
   async orgChart(_req: Request) {

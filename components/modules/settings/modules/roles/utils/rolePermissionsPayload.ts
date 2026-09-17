@@ -1,4 +1,7 @@
-import { RolePermissionDTO } from "@/api/modules/roles/dto/RolePermissionsDTO";
+import {
+  RolePermissionDTO,
+  UpdateRolePermissionsRequest,
+} from "@/api/modules/roles/dto/RolePermissionsDTO";
 import type { Segment } from "@/models/segment/Segment";
 import {
   ACCESS_ACTION_RANK,
@@ -119,6 +122,19 @@ export function buildRolePermissionsPayload(
   }
 
   return payload;
+}
+
+/**
+ * The whole PUT body: the rows above plus the role's `version` the matrix was loaded with
+ * (`RolePermissionsDTO.version`). Somebody else's save in between bumps it and the backend answers
+ * E00409 instead of letting this full replace wipe their grants.
+ */
+export function buildRolePermissionsBody(
+  draft: RolePermissionsDraft,
+  scopeFilters: RoleScopeFilters | undefined,
+  version: number | undefined,
+): UpdateRolePermissionsRequest {
+  return { permissions: buildRolePermissionsPayload(draft, scopeFilters), version };
 }
 
 // A single cell of the matrix. The backend accepts any combination of SELF and

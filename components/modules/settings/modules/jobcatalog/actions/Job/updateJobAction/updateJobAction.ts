@@ -21,7 +21,9 @@ export const updateJobAction = async (
 };
 
 export type UpdateJobActionInput = { id: string; name?: string; familyId?: string; levelId?: string | null; clearLevel?: boolean;
-  code?: string | null; clearCode?: boolean; description?: string | null; clearDescription?: boolean };
+  code?: string | null; clearCode?: boolean; description?: string | null; clearDescription?: boolean;
+  /** The version the form was opened with; a stale one comes back as E00409. */
+  version?: number };
 
 export type UpdateJobActionOutput = {
   status: ActionStatus;

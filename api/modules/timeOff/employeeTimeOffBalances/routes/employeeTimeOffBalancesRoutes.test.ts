@@ -32,10 +32,8 @@ import {
 
 jest.mock("@/api/modules/timeOff/employeeTimeOffBalances/services", () => ({
   hrisEmployeeTimeOffBalancesService: {
-    create: jest.fn(),
     getById: jest.fn(),
     listByUserId: jest.fn(),
-    adjust: jest.fn(),
     listTransactions: jest.fn(),
   },
 }));
@@ -78,38 +76,6 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
     jest.clearAllMocks();
   });
 
-  it("creates balance", async () => {
-    const response = { id: "balance-id" };
-
-    jest
-      .mocked(hrisEmployeeTimeOffBalancesService.create)
-      .mockResolvedValue(response);
-
-    const body = {
-      assignmentId: "assignment-id",
-      periodStart: "2026-01-01",
-      periodEnd: "2026-12-31",
-      year: 2026,
-      openingBalance: 20,
-    };
-
-    const req = { json: async () => body } as Request;
-
-    const res = await employeeTimeOffBalancesRoutes.create(req);
-    const result = await res.json();
-
-    expect(hrisEmployeeTimeOffBalancesService.create).toHaveBeenCalledWith({
-      assignmentId: "assignment-id",
-      periodStart: "2026-01-01",
-      periodEnd: "2026-12-31",
-      openingBalance: 20,
-      accruedBalance: 0,
-      carriedOverBalance: 0,
-      adjustedBalance: 0,
-    });
-    expect(result).toEqual(response);
-  });
-
   it("gets balance by id", async () => {
     jest
       .mocked(hrisEmployeeTimeOffBalancesService.getById)
@@ -142,33 +108,6 @@ describe("EmployeeTimeOffBalancesRoutes", () => {
       hrisEmployeeTimeOffBalancesService.listByUserId
     ).toHaveBeenCalledWith("user-id");
     expect(result).toEqual([balance]);
-  });
-
-  it("adjusts balance", async () => {
-    const response = { id: "balance-id" };
-
-    jest
-      .mocked(hrisEmployeeTimeOffBalancesService.adjust)
-      .mockResolvedValue(response);
-
-    const req = {
-      json: async () => ({
-        adjustmentAmount: -2,
-        reason: "Correction for unauthorized absence",
-      }),
-    } as Request;
-
-    const res = await employeeTimeOffBalancesRoutes.adjust(req, "balance-id");
-    const result = await res.json();
-
-    expect(hrisEmployeeTimeOffBalancesService.adjust).toHaveBeenCalledWith(
-      "balance-id",
-      {
-        adjustmentAmount: -2,
-        reason: "Correction for unauthorized absence",
-      }
-    );
-    expect(result).toEqual(response);
   });
 
   it("lists transactions", async () => {

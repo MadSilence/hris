@@ -27,4 +27,6 @@ export interface SaveTimeOffPolicyRequest {
   restrictions?: UpdateTimeOffPolicyRestrictionsRequest;
   tenureRules?: UpdateTimeOffPolicyTenureRulesRequest;
   approval?: UpdateTimeOffPolicyApprovalSettingsRequest;
+  /** The policy's version the editor was opened with; a stale one is refused with E00409. */
+  version?: number;
 }

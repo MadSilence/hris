@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { ComingSoonSettingsPage } from "@/components/modules/settings/components/ComingSoonSettingsPage";
 
-export default function DocumentsPage() {
-  return <p>Export</p>;
+export default function ExportSettingsPage() {
+  return <ComingSoonSettingsPage title="Export" withHeader={false} />;
 }

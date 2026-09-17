@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Badge } from "@/public/desact/src/components/ui/badge";
-import { formatUserStatus, isActiveStatus } from "@/models/user/status";
+import { formatAccountStatus, formatUserStatus, isActiveStatus, isProspectiveStatus } from "@/models/user/status";
 
 /**
  * The one status chip.
@@ -66,16 +66,35 @@ export const StatusBadge: React.FC<{
  *
  * **`Pending` and `Archived` used to render identically** — both fell through to a grey `secondary`
  * with no colour — which is worse than either choice on its own, since they mean opposite things.
- * They are still both grey here; giving `Pending` its own word and colour is an open question in
- * `analysis/ui/STATUS_AND_BADGES.md` § 3.
+ * `Pending` is gone: somebody who has not started yet is `PROSPECTIVE`, labelled *Not Started*, and
+ * drawn as the neutral state rather than the archived one (LIFECYCLE_PROCESSES_DESIGN § 2.2).
  */
 export const UserStatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
   if (!status) return null;
 
   return (
     <StatusBadge
-      status={isActiveStatus(status) ? "active" : "archived"}
+      status={isActiveStatus(status) ? "active" : isProspectiveStatus(status) ? "draft" : "archived"}
       label={formatUserStatus(status)}
     />
   );
+};
+
+/**
+ * The access axis, as a chip — and only when it says something.
+ *
+ * <p>A person carries two statuses, and the directory used to show one. *Not started* meant three
+ * different things at once: somebody who starts on Monday, somebody invited who has not accepted,
+ * and somebody who is a name in a table and nothing more. This is the second axis, drawn beside the
+ * first, and it is silent for the ordinary case — an active account needs no chip, because every
+ * account on the screen is one.
+ *
+ * <p>Blocked is included: it is an account state a reader needs to see wherever people are listed,
+ * and it is the same word the profile header already uses.
+ */
+export const AccountStatusBadge: React.FC<{ accountStatus?: string | null }> = ({ accountStatus }) => {
+  const code = (accountStatus ?? "").toUpperCase();
+  if (code !== "DRAFT" && code !== "INVITED" && code !== "BLOCKED") return null;
+
+  return <StatusBadge status={code === "DRAFT" ? "draft" : "inactive"} label={formatAccountStatus(code)} />;
 };

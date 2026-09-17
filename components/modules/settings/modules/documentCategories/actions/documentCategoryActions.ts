@@ -14,6 +14,8 @@ export type SaveDocumentCategoryInput = {
   name: string;
   description?: string | null;
   isActive?: boolean;
+  /** Edit only: the version the dialog was opened with; a stale one comes back as E00409. */
+  version?: number;
 };
 
 export const saveDocumentCategoryAction = async (
@@ -27,7 +29,8 @@ export const saveDocumentCategoryAction = async (
     };
 
     if (submission.id) {
-      await hrisDocumentsService.updateCategory(submission.id, body);
+      // Only the update carries the version: the create body is strict and has no such field.
+      await hrisDocumentsService.updateCategory(submission.id, { ...body, version: submission.version });
     } else {
       await hrisDocumentsService.createCategory(body);
     }

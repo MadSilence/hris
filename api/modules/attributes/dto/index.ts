@@ -4,3 +4,4 @@ export * from "./DeleteAttributeRequest";
 export * from "./AttributeOptionDTO";
 export * from "./CreateAttributeRequest";
 export * from "./UpdateAttributeRequest";
+export * from "./AttributeUpdateResponse";

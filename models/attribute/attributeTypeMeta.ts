@@ -33,11 +33,13 @@ export const ALL_ATTRIBUTE_TYPES = Object.values(AttributeType) as AttributeType
 // Uniqueness is enforced on `user_attribute_values.string_value` (app check + the partial unique
 // index `ux_uav_unique_string`), so only types stored as a string can be unique. NUMBER lands in
 // int_value/dec_value and was never actually enforced — offering it here was a lie.
+// Kept in step with AttributeUniqueness.SUPPORTED on the backend, which refuses the flag anywhere else.
 export const ATTRIBUTE_TYPES_UNIQUE = new Set<AttributeType>([
   AttributeType.URL,
   AttributeType.EMAIL,
   AttributeType.TEXT,
   AttributeType.PHONE,
+  AttributeType.NUMBER,
 ]);
 
 export const ATTRIBUTE_TYPES_WITH_OPTIONS = new Set<AttributeType>([

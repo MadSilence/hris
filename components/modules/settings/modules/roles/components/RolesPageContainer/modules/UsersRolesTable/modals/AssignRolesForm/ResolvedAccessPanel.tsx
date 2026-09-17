@@ -20,6 +20,7 @@ const ACTION_LABELS: Record<string, string> = {
   VIEW: "View",
   EDIT: "Edit",
   MANAGE: "Manage",
+  BLOCK: "Block",
 };
 
 const scopeText = (scopes: string[]) =>

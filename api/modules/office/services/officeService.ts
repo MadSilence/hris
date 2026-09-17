@@ -1,3 +1,4 @@
+import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
 import { NewEntity, UpdatedEntity } from "@/models/misc";
 import { hrisOfficeClient } from "@/api/modules/office/clients";
 import { Office } from "@/models/office";
@@ -47,6 +48,10 @@ export class OfficeService {
 
   public async exportOffices(format: "csv" | "xlsx"): Promise<Response> {
     return hrisOfficeClient.exportOffices(format);
+  }
+
+  public async getDeleteImpact(id: string): Promise<DetachedPeopleImpact> {
+    return hrisOfficeClient.getDeleteImpact(id);
   }
 
   public async exportOffice(id: string, format: "csv" | "xlsx"): Promise<Response> {

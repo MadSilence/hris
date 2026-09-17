@@ -32,14 +32,11 @@ jest.mock(
   () => ({
     hrisTimeOffPolicyApprovalSettingsService: {
       getByPolicyId: jest.fn(),
-      update: jest.fn(),
     },
   })
 );
 
 describe("TimeOffPolicyApprovalSettingsRoutes", () => {
-  const updateResponse = { id: "policy-id" };
-
   const settings = {
     policyId: "policy-id",
     configured: true,
@@ -76,39 +73,5 @@ describe("TimeOffPolicyApprovalSettingsRoutes", () => {
       hrisTimeOffPolicyApprovalSettingsService.getByPolicyId
     ).toHaveBeenCalledWith("policy-id");
     expect(result).toEqual(settings);
-  });
-
-  it("updates approval settings", async () => {
-    jest
-      // update resolves an UpdateResponse, not the settings — the old mock returned the wrong shape.
-      .mocked(hrisTimeOffPolicyApprovalSettingsService.update)
-      .mockResolvedValue(updateResponse);
-
-    const body = {
-      approvalRequired: true,
-      approvalMode: "ALL" as const,
-      requiredApprovalsCount: null,
-      allowSubstituteApprovers: false,
-      approvers: [
-        {
-          approverType: TimeOffPolicyApproverType.SpecificUser,
-          approverUserId: "user-id",
-          approvalOrder: 1,
-        },
-      ],
-    };
-
-    const req = { json: async () => body } as Request;
-
-    const res = await timeOffPolicyApprovalSettingsRoutes.update(
-      req,
-      "policy-id"
-    );
-    const result = await res.json();
-
-    expect(
-      hrisTimeOffPolicyApprovalSettingsService.update
-    ).toHaveBeenCalledWith("policy-id", body);
-    expect(result).toEqual(updateResponse);
   });
 });

@@ -160,4 +160,17 @@ describe("ConfirmTrialForm", () => {
       screen.queryByRole("button", { name: /set password/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("sends the new owner to their own company's login, and names the address", () => {
+    renderForm({
+      isSuccess: true,
+      signInAddress: { href: "http://acme.localhost:3000/login", label: "acme.localhost:3000" },
+    });
+
+    expect(screen.getByText("acme.localhost:3000")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /login page/i })).toHaveAttribute(
+      "href",
+      "http://acme.localhost:3000/login",
+    );
+  });
 });

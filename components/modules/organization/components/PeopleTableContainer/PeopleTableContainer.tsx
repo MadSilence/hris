@@ -8,6 +8,7 @@ import PeopleTable from "@/components/modules/organization/components/PeopleTabl
 import PeopleTopbar from "@/components/modules/organization/components/PeopleTopbar/PeopleTopbar";
 import PeopleViewsPanel from "@/components/modules/organization/components/PeopleViews/PeopleViewsPanel";
 import BulkEditModal, { type BulkEditTarget } from "@/components/modules/organization/components/BulkEdit/BulkEditModal";
+import { AddPersonModal } from "@/components/modules/organization/components/AddPerson";
 
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import type { FieldDTO, FilterDTO, UsersSearchRequest } from "@/models/user/fields";
@@ -15,6 +16,7 @@ import type { ColumnItem } from "@/models/userTable";
 import type { PeopleView, ViewPayload } from "@/models/peopleView";
 import { usePeopleSearchInfinite } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchInfinite";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
+import { useDraftCount } from "@/components/modules/organization/hooks/useDraftCount";
 import {
   usePeopleViews,
   usePeopleViewMutations,
@@ -55,11 +57,19 @@ const isColumnVisible = (f: FieldDTO): boolean =>
   (f.isSystem && f.configurable === false) || (f.viewScopes ?? []).includes("COMPANY");
 
 const PeopleTableContainer: React.FC = () => {
+  const [addPersonOpen, setAddPersonOpen] = useState(false);
   // First name, not last: the table shows one Name column and it sorts by first name, so a default
   // of last_name left the list in an order no header could explain or undo.
   const [sort, setSort] = useState<SortState>({ fieldId: "first_name", dir: "asc" });
   const [filters, setFilters] = useState<FilterDTO[]>([]);
   const [query, setQuery] = useState("");
+  /**
+   * A view, not a filter: the drafts are a separate segment of the directory, so the employee list
+   * and its total never quietly grow by people nobody has started. Everything else — the search box,
+   * the columns, the filters, the sort — applies to whichever segment is open.
+   */
+  const [showDrafts, setShowDrafts] = useState(false);
+  const { data: draftCount } = useDraftCount();
 
   const debouncedQ = useDebouncedValue(query.trim(), 300);
   const qForApi = debouncedQ.length >= 2 ? debouncedQ : undefined;
@@ -85,7 +95,7 @@ const PeopleTableContainer: React.FC = () => {
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [debouncedQ, filters, sort?.fieldId, sort?.dir]);
+  }, [debouncedQ, filters, sort?.fieldId, sort?.dir, showDrafts]);
 
   const { data: fieldsData, isLoading: fieldsLoading, error: fieldsError } = useUserFields();
 
@@ -132,8 +142,9 @@ const PeopleTableContainer: React.FC = () => {
       sortDir: sort?.dir ?? null,
       selectedFields: selectedAttrFields.length ? selectedAttrFields : null,
       filters: filters.length ? filters : null,
+      drafts: showDrafts ? "ONLY" : null,
     }),
-    [qForApi, sort?.fieldId, sort?.dir, selectedAttrFields, filters]
+    [qForApi, sort?.fieldId, sort?.dir, selectedAttrFields, filters, showDrafts]
   );
 
   const {
@@ -345,6 +356,7 @@ const PeopleTableContainer: React.FC = () => {
         <PeopleTopbar
           selectedCount={selectedIds.size}
           onEditSelectedAction={() => setBulkOpen(true)}
+          onAddPersonAction={() => setAddPersonOpen(true)}
           query={query}
           onQueryChangeAction={onQueryChange}
           columns={columns}
@@ -352,6 +364,11 @@ const PeopleTableContainer: React.FC = () => {
           filters={filters}
           onFiltersChangeAction={onFiltersChange}
           fields={fieldsData ?? []}
+          drafts={{
+            count: draftCount?.count ?? 0,
+            showing: showDrafts,
+            onChange: setShowDrafts,
+          }}
         />
 
         <PeopleTable
@@ -397,6 +414,8 @@ const PeopleTableContainer: React.FC = () => {
         fields={fieldsData ?? []}
         onApplied={onBulkApplied}
       />
+
+      <AddPersonModal open={addPersonOpen} onCloseAction={() => setAddPersonOpen(false)} />
     </div>
   );
 };

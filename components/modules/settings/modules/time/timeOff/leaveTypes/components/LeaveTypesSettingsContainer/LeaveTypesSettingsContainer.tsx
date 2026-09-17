@@ -57,7 +57,13 @@ export default function LeaveTypesSettingsContainer() {
   const handleEdit = async (values: LeaveTypeFormValues) => {
     if (!editingLeaveType) return;
     try {
-      await updateMutation.mutateAsync({ id: editingLeaveType.id, ...toPayload(values) });
+      // The version the dialog was opened with: a colleague's save in between is refused (E00409)
+      // and the dialog stays open, instead of their change being overwritten silently.
+      await updateMutation.mutateAsync({
+        id: editingLeaveType.id,
+        ...toPayload(values),
+        version: editingLeaveType.version,
+      });
       setEditingLeaveType(null);
     } catch (error) {
       showError(error);

@@ -13,6 +13,8 @@ import {
   AlertDialogTitle,
 } from "@/public/desact/src/components/ui/alert-dialog";
 import { LegalEntity } from "@/models/legalEntity";
+import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
+import { DetachedPeopleNotice } from "@/components/modules/settings/shared/DetachedPeopleNotice";
 
 type DeleteLegalEntityModalProps = {
   isOpen: boolean;
@@ -20,6 +22,10 @@ type DeleteLegalEntityModalProps = {
   onConfirmAction: () => void;
   onRequestCloseAction: () => void;
   entity: LegalEntity;
+  /** Who deleting detaches. Without it the dialog falls back to the count the entity row carries. */
+  impact?: DetachedPeopleImpact;
+  impactLoading?: boolean;
+  impactError?: boolean;
 };
 
 export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
@@ -28,7 +34,11 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
   onConfirmAction,
   onRequestCloseAction,
   entity,
+  impact,
+  impactLoading,
+  impactError,
 }) => {
+  const asked = impact !== undefined || impactLoading || impactError;
   return (
     <AlertDialog
       open={isOpen}
@@ -57,10 +67,17 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
               <h4 className="mb-1 font-medium text-red-800">Warning</h4>
               <p className="text-sm text-red-700">
                 This legal entity will be permanently removed from the system.
-                {entity?.assignedUsersCount
-                  ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
-                  : " Anyone currently assigned to it will lose that assignment."}
+                {asked
+                  ? null
+                  : entity?.assignedUsersCount
+                    ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
+                    : " Anyone currently assigned to it will lose that assignment."}
               </p>
+              {asked ? (
+                <div className="mt-2 text-red-700">
+                  <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} noun="legal entity" />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -68,7 +85,7 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={isLoading || impactLoading}
             onClick={(event) => {
               event.preventDefault();
               onConfirmAction();

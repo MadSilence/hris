@@ -10,6 +10,8 @@ export type CreateJobLevelRequest = {
 export type UpdateJobLevelRequest = {
   id: string;
   name: string;
+  /** The version the form was opened with. */
+  version?: number;
 };
 
 export type JobLevelIdRequest = {

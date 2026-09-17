@@ -49,6 +49,10 @@ describe("UserMapper", () => {
     expect(userMapper.mapUserDTOtoUser(dto()).capabilities).toBeUndefined();
   });
 
+  it("carries the sign-in lock through", () => {
+    expect(userMapper.mapUserDTOtoUser(dto({ accountStatus: "ACTIVE", accountLocked: true })).accountLocked).toBe(true);
+  });
+
   it("carries the field-access map through", () => {
     const user = userMapper.mapUserDTOtoUser(
       dto({ fieldAccess: { "sys:email": "VIEW", "attr:salary": "MASKED" } })

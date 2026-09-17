@@ -1,5 +1,5 @@
 import { hexToOklch, oklchToHex, parseHex } from "@/lib/theme/oklch";
-import { BRAND_STEPS, buildBrandPalette, buildBrandStyleSheet } from "@/lib/theme/brandPalette";
+import { BRAND_STEPS, buildBrandPalette, buildBrandStyleSheet, isBrandColorUsedAsIs } from "@/lib/theme/brandPalette";
 
 const BROWN_LIGHTNESS: Record<number, number> = {
   50: 0.964,
@@ -46,11 +46,13 @@ describe("oklch", () => {
 });
 
 describe("buildBrandPalette", () => {
-  it("preserves the brown lightness ramp for any brand colour", () => {
+  it("preserves the brown lightness ramp for any brand colour, bar the action step", () => {
     for (const brand of ["#2563eb", "#16a34a", "#e11d48"]) {
       const palette = buildBrandPalette(brand)!;
 
       for (const step of BRAND_STEPS) {
+        // 600 is the picked colour itself when that is safe — covered by the tests below.
+        if (step === 600 && isBrandColorUsedAsIs(brand)) continue;
         const { l } = hexToOklch(palette.scale[step])!;
         expect(Math.abs(l - BROWN_LIGHTNESS[step])).toBeLessThan(0.01);
       }
@@ -93,6 +95,22 @@ describe("buildBrandPalette", () => {
     expect(Math.abs(branded.l - source.l)).toBeLessThan(0.01);
     expect(Math.abs(branded.c - source.c)).toBeLessThan(0.005);
     expect(Math.abs(branded.h - hexToOklch("#2563eb")!.h)).toBeLessThan(2);
+  });
+
+  it("uses the picked colour itself as the action step when white text on it stays readable", () => {
+    expect(isBrandColorUsedAsIs("#2563eb")).toBe(true);
+    expect(buildBrandPalette("#2563EB")!.scale[600]).toBe("#2563eb");
+  });
+
+  it("falls back to the ramp for a colour white text cannot sit on", () => {
+    expect(isBrandColorUsedAsIs("#facc15")).toBe(false);
+    const { l } = hexToOklch(buildBrandPalette("#facc15")!.scale[600])!;
+    expect(Math.abs(l - BROWN_LIGHTNESS[600])).toBeLessThan(0.01);
+  });
+
+  it("falls back to the ramp for a colour darker than the pressed step", () => {
+    // Used as is, hover (700) would be lighter than the button it darkens.
+    expect(isBrandColorUsedAsIs("#111111")).toBe(false);
   });
 
   it("returns null for an unparseable colour", () => {

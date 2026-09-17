@@ -20,7 +20,8 @@ export const updateJobLevelGroupAction = async (
   }
 };
 
-export type UpdateJobLevelGroupActionInput = { id: string; name: string };
+/** `version` is the one the rename form was opened with; a stale one comes back as E00409. */
+export type UpdateJobLevelGroupActionInput = { id: string; name: string; version?: number };
 
 export type UpdateJobLevelGroupActionOutput = {
   status: ActionStatus;

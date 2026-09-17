@@ -67,10 +67,16 @@ async function refreshSession(): Promise<boolean> {
   return refreshInFlight;
 }
 
-/** Wrapped so tests can observe the redirect: jsdom's location is read-only. */
+/**
+ * Wrapped so tests can observe the redirect: jsdom's location is read-only.
+ *
+ * Carries the page along, the way the middleware does for a request with no session at all, so signing
+ * in again returns to it. The login page decides whether it is a page it will follow.
+ */
 export const sessionNavigation = {
   redirectToLogin() {
-    window.location.assign("/login");
+    const next = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(`/login?${new URLSearchParams({ next }).toString()}`);
   },
 };
 

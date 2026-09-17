@@ -15,6 +15,22 @@ export type User = {
   /** Assigned roles. Was typed as a single object while the API has always sent a list. */
   roles?: { id: string; name: string }[];
   status?: string;
+  /**
+   * The access axis — `DRAFT`, `INVITED`, `ACTIVE` or `BLOCKED`. Profile only: it decides which
+   * lifecycle actions the profile offers. Lists never carry drafts at all.
+   */
+  accountStatus?: string;
+  /**
+   * Locked after too many failed sign-ins — independent of `accountStatus`, which stays ACTIVE.
+   * Only a password reset sent from the profile lifts it. Profile only.
+   */
+  accountLocked?: boolean;
+  /** The version the record was read at; an edit sends it back. */
+  version?: number;
+  /** When the last invitation went out. Profile only. */
+  inviteSentAt?: string | null;
+  /** The day a scheduled invitation will go out. Profile only. */
+  inviteScheduledFor?: string | null;
   isEmailVerified?: boolean;
   jobId?: string | null;
   jobName?: string | null;
@@ -49,5 +65,5 @@ export type User = {
    * can answer the second: deriving it here from scope names would be a second copy of the
    * permission model, which the security model forbids. Profile only; lists do not carry it.
    */
-  capabilities?: Record<string, ("VIEW" | "EDIT" | "MANAGE")[]>;
+  capabilities?: Record<string, ("VIEW" | "EDIT" | "MANAGE" | "BLOCK")[]>;
 }

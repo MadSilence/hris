@@ -1,7 +1,10 @@
 "use client";
 
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+
 import { showError } from "@/lib/errors/errorToast";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { FALLBACK_ERROR_MESSAGE, messageForError } from "@/lib/errors/errorMessages";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CreateGroupModal } from "../AttributeGroup/CreateGroupModal";
 import { useCreateAttributeGroupAction } from "../../hooks/AttributeGroup/useCreateAttributeGroupAction";
@@ -23,6 +26,7 @@ import { EditAttributeModal } from "@/components/modules/settings/modules/attrib
 import { DeleteAttributeModal } from "@/components/modules/settings/modules/attributes/components/Attribute/DeleteAttributeModal";
 import { useCreateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useCreateAttributeAction";
 import { useDeleteAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useDeleteAttributeAction";
+import { useDuplicateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useDuplicateAttributeAction";
 import { useUpdateAttributeAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useUpdateAttributeAction";
 import { useUpdateAttributeOptionsAction } from "@/components/modules/settings/modules/attributes/hooks/Attribute/useUpdateAttributeOptionsAction";
 import { AttributeGroupsComponent } from "@/components/modules/settings/modules/attributes/components/AttributeGroupsComponent";
@@ -45,6 +49,7 @@ export default function AttributeGroupsContainer() {
   const deleteAttributeGroupAction = useDeleteAttributeGroupAction();
   const renameAttributeGroupAction = useRenameAttributeGroupAction();
   const deleteAttributeAction = useDeleteAttributeAction();
+  const duplicateAttributeAction = useDuplicateAttributeAction();
   const updateAttributeAction = useUpdateAttributeAction();
   const updateOptionsAction = useUpdateAttributeOptionsAction();
   const reorderGroupsAction = useReorderAttributeGroupAction();
@@ -93,8 +98,25 @@ export default function AttributeGroupsContainer() {
     }
   }, [deleteAttributeAction.data?.status]);
 
+  // The refusal of the open edit form, shown inside it.
+  const [editAttributeError, setEditAttributeError] = useState<string | null>(null);
+  /*
+    The version the next write of the open attribute must carry. It starts as the version the form
+    was opened with and follows the form's own writes: one save is two requests (the attribute, then
+    its option set), both guarded on the attribute's version, and the first one moves it. Kept apart
+    from `attributeToEdit` on purpose — replacing that object would re-seed the editor and wipe what
+    was typed.
+  */
+  const editVersionRef = useRef<number | undefined>(undefined);
+
+  const openEditAttribute = useCallback((attribute: Attribute) => {
+    setEditAttributeError(null);
+    editVersionRef.current = attribute.version;
+    setAttributeToEdit(attribute);
+  }, []);
+
   const handleSaveAttribute = useCallback(
-    (id: string, patch: AttributePatch) => {
+    async (id: string, patch: AttributePatch): Promise<boolean> => {
       // Server-owned fields ride along in the patch (it is a `Partial<Attribute>`) but are not part
       // of the update contract — drop them instead of putting them on the wire.
       const {
@@ -111,22 +133,76 @@ export default function AttributeGroupsContainer() {
         ...rest
       } = patch;
 
-      // The list is driven by the *groups* query; the update hook only invalidates `attributes`,
-      // so without this the saved change (a group move in particular) wouldn't show up.
-      updateAttributeAction.mutate(
-        { id, ...rest, ...(dateHideYear == null ? {} : { dateHideYear }) },
-        { onSuccess: () => invalidateGroups() }
-      );
+      setEditAttributeError(null);
 
-      if (Array.isArray(options) && options.length > 0) {
-        updateOptionsAction.mutate(
-          { attributeId: id, options },
-          { onSuccess: () => invalidateGroups() }
-        );
+      /*
+        In sequence, not side by side. Fired together, the two requests raced on the attribute's
+        version, and the form closed before either answered — a refusal was never seen. Now the form
+        stays open until both have landed, and a refusal of either stops the save and is shown in it.
+      */
+      try {
+        const updated = await updateAttributeAction.mutateAsync({
+          id,
+          ...rest,
+          ...(dateHideYear == null ? {} : { dateHideYear }),
+          version: editVersionRef.current,
+        });
+        if (updated.status === ActionStatus.ERROR) {
+          setEditAttributeError(updated.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+          return false;
+        }
+        editVersionRef.current = updated.data?.version;
+        // The list is driven by the *groups* query; the update hook only invalidates `attributes`,
+        // so without this the saved change (a group move in particular) wouldn't show up.
+        invalidateGroups();
+
+        if (Array.isArray(options) && options.length > 0) {
+          const saved = await updateOptionsAction.mutateAsync({
+            attributeId: id,
+            options,
+            version: editVersionRef.current,
+          });
+          if (saved.status === ActionStatus.ERROR) {
+            setEditAttributeError(saved.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+            return false;
+          }
+          invalidateGroups();
+        }
+
+        return true;
+      } catch (error) {
+        setEditAttributeError(messageForError(error));
+        return false;
       }
     },
     [updateAttributeAction, updateOptionsAction, invalidateGroups]
   );
+
+  // Duplicate confirms, like Archive, Delete, Unassign and Remove (ui/ACTIONS_AND_MENUS.md § 7): an
+  // accidental copy goes unnoticed. The backend names the copy and places it last in the section, so
+  // the dialog asks nothing but "did you mean to"; a refusal is shown inside it, which stays open.
+  const [attributeToDuplicate, setAttributeToDuplicate] = useState<Attribute | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const handleDuplicateAttribute = useCallback((attribute: Attribute) => {
+    setDuplicateError(null);
+    setAttributeToDuplicate(attribute);
+  }, []);
+  const confirmDuplicateAttribute = useCallback(() => {
+    if (!attributeToDuplicate) return;
+    duplicateAttributeAction.mutate(
+      { id: attributeToDuplicate.id },
+      {
+        onSuccess: (result) => {
+          if (result.status === ActionStatus.ERROR) {
+            setDuplicateError(result.errorMessage ?? null);
+            return;
+          }
+          setAttributeToDuplicate(null);
+        },
+        onError: (error) => showError(error),
+      }
+    );
+  }, [attributeToDuplicate, duplicateAttributeAction]);
 
   const handleReorderGroups = useCallback(
     (orderedIds: string[]) => {
@@ -159,11 +235,6 @@ export default function AttributeGroupsContainer() {
     [updateAttributeAction, reorderAttributesAction, invalidateGroups]
   );
 
-  const optionsError =
-    updateOptionsAction.data?.status === ActionStatus.ERROR
-      ? updateOptionsAction.data?.errorMessage
-      : null;
-
   if (loading) {
     return (
       <div className="flex h-full w-full items-center justify-center py-10">
@@ -174,12 +245,8 @@ export default function AttributeGroupsContainer() {
 
   return (
     <>
-      {optionsError && (
-        <p className="px-1 pb-3 text-sm text-destructive" role="alert">
-          {optionsError}
-        </p>
-      )}
-
+      {/* An option-set refusal used to be printed here, above the list, because the edit form had
+          already closed. It now stays open and shows the refusal itself. */}
       <AttributeGroupsComponent
         groups={groups}
         onCreateGroup={() => setIsCreateGroupModalOpen(true)}
@@ -189,14 +256,30 @@ export default function AttributeGroupsContainer() {
           setActiveGroup(group);
           setIsCreateAttributeModalOpen(true);
         }}
-        onEditAttribute={setAttributeToEdit}
+        onEditAttribute={openEditAttribute}
+        onDuplicateAttribute={handleDuplicateAttribute}
         onDeleteAttribute={setAttributeToDelete}
-        isSavingAttribute={updateAttributeAction.isPending || updateOptionsAction.isPending}
+        isSavingAttribute={
+          updateAttributeAction.isPending
+          || updateOptionsAction.isPending
+          || duplicateAttributeAction.isPending
+        }
         focusGroupId={focusGroupId}
         onFocusGroupHandled={() => setFocusGroupId(null)}
         onReorderGroups={handleReorderGroups}
         onReorderAttributes={handleReorderAttributes}
         onMoveAttribute={handleMoveAttribute}
+      />
+
+      <ConfirmActionModal
+        isOpen={!!attributeToDuplicate}
+        title={`Duplicate "${attributeToDuplicate?.name ?? ""}"?`}
+        description="A copy of this field's definition and options is added at the end of the same section. Nobody's values are copied."
+        confirmLabel="Duplicate"
+        isLoading={duplicateAttributeAction.isPending}
+        errorMessage={duplicateError}
+        onConfirmAction={confirmDuplicateAttribute}
+        onCancelAction={() => setAttributeToDuplicate(null)}
       />
 
       <CreateGroupModal
@@ -208,7 +291,12 @@ export default function AttributeGroupsContainer() {
             ? createAttributeGroupAction.data?.errorMessage
             : null
         }
-        onConfirmAction={(formValues) => createAttributeGroupAction.mutate({ name: formValues.name })}
+        onConfirmAction={(formValues) =>
+          createAttributeGroupAction.mutate({
+            name: formValues.name,
+            description: formValues.description || null,
+          })
+        }
         onRequestCloseAction={() => {
           createAttributeGroupAction.reset();
           setIsCreateGroupModalOpen(false);
@@ -253,17 +341,38 @@ export default function AttributeGroupsContainer() {
         groups={groups}
         isOpen={!!attributeToEdit}
         onSaveAction={handleSaveAttribute}
-        onRequestCloseAction={() => setAttributeToEdit(null)}
+        isSaving={updateAttributeAction.isPending || updateOptionsAction.isPending}
+        errorMessage={editAttributeError}
+        onRequestCloseAction={() => {
+          setEditAttributeError(null);
+          setAttributeToEdit(null);
+        }}
       />
 
       <RenameAttributeGroupModal
         isOpen={!!renameGroup}
         isLoading={renameAttributeGroupAction.isPending}
+        initialName={renameGroup?.name}
+        initialDescription={renameGroup?.description}
+        errorMessage={
+          renameAttributeGroupAction.data?.status === ActionStatus.ERROR
+            ? renameAttributeGroupAction.data?.errorMessage
+            : null
+        }
         onConfirmAction={(formValues) => {
           if (!renameGroup) return;
-          renameAttributeGroupAction.mutate({ id: renameGroup.id, name: formValues.name });
+          renameAttributeGroupAction.mutate({
+            id: renameGroup.id,
+            name: formValues.name,
+            description: formValues.description || null,
+            // `renameGroup` is the snapshot taken when the dialog opened, so this is that version.
+            version: renameGroup.version,
+          });
         }}
-        onRequestCloseAction={() => setRenameGroup(null)}
+        onRequestCloseAction={() => {
+          renameAttributeGroupAction.reset();
+          setRenameGroup(null);
+        }}
       />
 
       <DeleteGroupModal

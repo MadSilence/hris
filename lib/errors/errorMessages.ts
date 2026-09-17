@@ -48,11 +48,18 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AT00005: "A select attribute needs at least one option.",
   AT00008: "The validation pattern is not a valid regular expression",
   AT00009: "Built-in attributes cannot be changed.",
+  AT00010: "Unique values are not available for this field type.",
+  AT00011: "Some people already share a value of this field ({0}). Make those values different before requiring them to be unique.",
 
   // AttributeValueBusinessError
 
   // AuthBusinessError
-  AUTH00001: "That email and password do not match an account.",
+  // Said on every refusal, not only for an unknown company: a hint shown only then would itself tell a
+  // caller which companies exist (DECISIONS.md § "Company addresses — what the owner settled").
+  AUTH00001: "That email and password do not match an account. Please check your company address.",
+  AUTH00002: "Too many failed sign-in attempts. Try again later.",
+  AUTH00003: "This password reset link is no longer valid. Ask for a new one.",
+  AUTH00004: "The current password is not correct.",
 
   // AvatarBusinessError
   A00001: "Avatar upload request is invalid",
@@ -64,6 +71,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   A00007: "The photo could not be deleted. Please try again.",
   A00008: "Avatar not found",
   A00009: "You do not have access to this photo.",
+  A00010: "This upload link has expired or has already been used. Show a new code and scan it again.",
 
   // BulkEditBusinessError
   BE0005: "Provide either userIds or a segment",
@@ -110,6 +118,12 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00002: "Pick at least one working day.",
   CS00003: "Invalid working day (expected a day-of-week name)",
   CS00004: "Invalid week start day (expected a day-of-week name)",
+
+  // CompanySetupBusinessError
+  CST0001: "This company has already been set up.",
+  CST0002: "Your company is being set up right now — this page will follow along.",
+  CST0003: "Pick what you would like to start with.",
+  CST0004: "This company has no setup to complete.",
 
   // DepartmentBusinessError
   DEPT001: "Department not found",
@@ -171,25 +185,21 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // GroupBusinessError
   G00001: "A group with this name already exists.",
   G00002: "This group cannot be deleted.",
-  G00003: "That is already the group name.",
+  G00003: "Nothing changed: the section already has this name and description.",
   G00004: "Built-in groups cannot be changed.",
 
   // JobBusinessError
   J00001: "A position with this name and level already exists in this family.",
-  J00002: "Built-in positions cannot be deleted.",
   J00003: "That code is already used by another position.",
   J00004: "This position is already archived.",
   J00005: "This position is not archived, so there is nothing to restore.",
   J00006: "An archived position cannot be assigned. Restore it first.",
   JF00001: "A job family with this name already exists.",
-  JF00002: "Built-in job families cannot be deleted.",
   JF00003: "This job family is already archived.",
   JF00004: "This job family is not archived, so there is nothing to restore.",
   JF00005: "An archived job family cannot take new positions.",
   JG00001: "A track with this name already exists.",
-  JG00002: "Built-in tracks cannot be deleted.",
   JL00001: "A level with this name already exists in this track.",
-  JL00002: "Built-in levels cannot be deleted.",
   JL00004: "The levels changed while you were reordering them. Refresh the page and try again.",
 
   // LeaveTypeBusinessError
@@ -307,12 +317,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOPAA00008: "This policy renews on the hire anniversary, and this person has no hire date.",
   TOPAA00009: "This person already has an active policy for this leave type.",
 
-  // TimeOffPolicyBlackoutBusinessError
-  TOPB0001: "Time off policy not found",
-  TOPB0002: "Archived time off policy blackouts cannot be modified",
-  TOPB0003: "Blackout start and end dates are required",
-  TOPB0004: "Blackout end date must be on or after the start date",
-
   // TimeOffPolicyBusinessError
   TOP00001: "Time off policy not found",
   TOP00002: "Time off policy name is missing",
@@ -332,11 +336,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOP00015: "A policy cannot both allow requests for past dates and require advance notice. Pick one.",
   TOP00016: "A blackout needs a date range and a coverage cap needs a number, and neither takes the other's.",
   TOP00017: "This policy earns leave over time but has no accrual set up, so it would never grant anything.",
-
-  // TimeOffPolicyCoverageBusinessError
-  TOPC0001: "Time off policy not found",
-  TOPC0002: "Archived time off policy coverage cannot be modified",
-  TOPC0003: "A non-negative max-users-away value is required when coverage is enabled",
 
   // TimeOffPolicyEligibilityBusinessError
   TOPE0001: "Time off policy not found",
@@ -396,8 +395,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TORQ00038: "This policy does not allow an absence to be edited once it has started.",
   TORQ00039: "This policy does not allow a request in the past to be edited.",
   TORQ00040: "Only a pending or approved request can be edited.",
-  // TORQ00041 is deliberately absent: its message names the blocked days, so the server's own text
-  // has to win. It is in SERVER_TEXT_CODES below.
 
   // UserBusinessError
   U00001: "Someone with this email already exists.",
@@ -506,6 +503,44 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00013: "This person is not terminated.",
   U00014: "This termination has already taken effect and cannot be cancelled.",
   U00015: "This person has records in the system and cannot be deleted. Terminate them instead.",
+  U00016: "An email address is needed to send an invitation.",
+  U00017: "This person has already registered.",
+  U00018: "A blocked account cannot be invited. Unblock it first.",
+  U00019: "Somebody who has left cannot be invited.",
+  U00020: "The invitation could not be sent. Try again shortly.",
+  U00021: "This invitation link is no longer valid. Ask for a new one.",
+  U00022: "You cannot delete your own profile.",
+  U00023: "This is the last System Owner. Give somebody else the role before deleting this profile.",
+  U00024: "This person approves leave in {0}. Replace them there before deleting the profile.",
+  U00025: "This person has not registered yet. Send an invitation instead.",
+  U00026: "This account is blocked. Unblock it before sending a password reset.",
+  U00027: "This person has no email address to send the reset link to.",
+
+  // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
+  LC00001: "That template could not be found.",
+  LC00002: "A template needs a name.",
+  LC00003: "A template with this name already exists.",
+  LC00004: "A task in this template is incomplete: {0}.",
+  LC00005: "This template has been used to start a process and cannot be deleted. Archive it instead.",
+  LC00006: "An archived template cannot be used or changed. Unarchive it first.",
+  LC00010: "That process could not be found.",
+  LC00011: "This person already has a preboarding.",
+  LC00012: "A hire date is needed to start this process.",
+  LC00013: "Choose an onboarding manager.",
+  LC00014: "The onboarding manager must be somebody who works here.",
+  LC00015: "This person already has an account. Start an onboarding instead.",
+  LC00016: "This person has not been invited yet. Invite them, or start a preboarding.",
+  LC00017: "Somebody who has left cannot start a process.",
+  LC00018: "A task is assigned to somebody who is not available: {0}.",
+  LC00019: "This process is already closed.",
+  LC00020: "An email address is needed to send the preboarding link.",
+  LC00021: "The preboarding link could not be sent. Try again shortly.",
+  LC00022: "This preboarding link is no longer valid. Ask the person who sent it for a new one.",
+  LC00030: "That task could not be found.",
+  LC00031: "This task completes itself when what it asks for is done.",
+  LC00032: "This task is no longer open.",
+  LC00033: "This task is assigned to somebody else.",
+  LC00034: "This person has an unfinished preboarding. Choose whether to keep it or end it.",
 };
 
 /**

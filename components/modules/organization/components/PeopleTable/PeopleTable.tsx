@@ -10,7 +10,7 @@ import { formatDisplayDate } from "@/lib/date";
 import { parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
-import { UserStatusBadge } from "@/components/ui/StatusBadge";
+import { AccountStatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
@@ -127,7 +127,15 @@ export default function PeopleTable({
         case "email":
           return <span>{row.email}</span>;
         case "status":
-          return <UserStatusBadge status={row.status}/>;
+          // Two axes, side by side: employment first, then the account, and the second one only
+          // when it has something to say. Without it "Not Started" covered a person starting on
+          // Monday, a person who has not accepted their invitation, and a draft nobody has begun.
+          return (
+            <div className="flex flex-wrap items-center gap-1">
+              <UserStatusBadge status={row.status}/>
+              <AccountStatusBadge accountStatus={row.accountStatus}/>
+            </div>
+          );
         case "created_at":
           return <span className="text-muted-foreground">{formatDate(row.createdAt)}</span>;
         case "updated_at":

@@ -4,27 +4,17 @@ import { JobDTO, JobFamilyDTO } from "@/api/modules/jobfamily/dto";
 export class JobFamilyMapper {
   public mapJobDTOToJob(dto: JobDTO): Job {
     return {
-      id: dto.id,
-      name: dto.name,
-      code: dto.code,
-      description: dto.description,
-      archived: dto.archived,
-      familyId: dto.familyId,
-      familyName: dto.familyName,
-      level: dto.level,
-      assignedUsersCount: dto.assignedUsersCount,
-      createdAt: dto.createdAt,
-      createdBy: dto.createdBy,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
     };
   }
 
   public mapJobFamilyDTOToJobFamily(dto: JobFamilyDTO): JobFamily {
     return {
-      id: dto.id,
-      name: dto.name,
-      description: dto.description,
-      archived: dto.archived,
-      assignedUsersCount: dto.assignedUsersCount,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       jobs: (dto.jobs ?? []).map((job) => this.mapJobDTOToJob(job)),
     };
   }

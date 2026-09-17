@@ -5,4 +5,9 @@ export type PublicEnvironmentConfig = {
   auth: {
     issuerUri: string;
   };
+  /** Where this app lives: the root (landing, step 1, trial) and every company at `<subdomain>.<rootDomain>`. */
+  web: {
+    scheme: string;
+    rootDomain: string;
+  };
 };

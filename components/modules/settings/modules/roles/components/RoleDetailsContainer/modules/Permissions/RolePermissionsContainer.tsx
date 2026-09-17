@@ -12,6 +12,7 @@ import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useR
 import { useCanAccess } from "@/components/auth/useAccess";
 import { AccessAction, RESOURCE_GROUPS, ResourceCode } from "@/models/access";
 import {
+  buildRolePermissionsBody,
   buildRolePermissionsPayload,
   choiceToScopes,
   diffRolePermissions,
@@ -120,7 +121,9 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
 
   const handleSave = async () => {
     try {
-      await save({ permissions: payload });
+      // Carries the version the grants were loaded with: a colleague's save in between is refused
+      // (E00409) and the review stays open with the draft intact, instead of being overwritten.
+      await save(buildRolePermissionsBody(draft, scopeFilters, data?.version));
       setReviewOpen(false);
     } catch {
       // Surfaced inside the modal via saveError.

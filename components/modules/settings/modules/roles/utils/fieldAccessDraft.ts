@@ -1,4 +1,7 @@
-import type { RoleFieldAccessRowDTO } from "@/api/modules/roles/dto/RoleFieldAccessDTO";
+import type {
+  RoleFieldAccessRowDTO,
+  UpdateRoleFieldAccessRequest,
+} from "@/api/modules/roles/dto/RoleFieldAccessDTO";
 import type { FieldDTO } from "@/models/user/fields";
 
 // Columns of the editor: on whose records the access applies.
@@ -88,6 +91,18 @@ export function buildFieldAccessPayload(
   }
 
   return payload;
+}
+
+/**
+ * The whole PUT body: the rows above plus the role's `version` the matrix was loaded with
+ * (`RoleFieldAccessDTO.version`), so a save over somebody else's is refused (E00409), not applied.
+ */
+export function buildFieldAccessBody(
+  draft: FieldAccessDraft,
+  fields: FieldDTO[] | undefined,
+  version: number | undefined,
+): UpdateRoleFieldAccessRequest {
+  return { fields: buildFieldAccessPayload(draft, fields), version };
 }
 
 // One entry per changed (field, scope).

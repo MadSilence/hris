@@ -10,6 +10,7 @@ import {
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
   SaveDocumentCategoryRequest,
+  UpdateDocumentCategoryRequest,
   UploadDocumentArgs,
 } from "@/api/modules/documents/dto";
 import { documentMapper } from "@/api/modules/documents/mappers/documentMapper";
@@ -124,9 +125,9 @@ export class HrisApiDocumentsClient {
 
   public async updateCategory(
     id: string,
-    body: SaveDocumentCategoryRequest
+    body: UpdateDocumentCategoryRequest
   ): Promise<UpdateResponse> {
-    return hrisApiClient.patch<UpdateResponse, SaveDocumentCategoryRequest>(
+    return hrisApiClient.patch<UpdateResponse, UpdateDocumentCategoryRequest>(
       `${this.BASE_PATH}/categories/${id}`,
       body
     );

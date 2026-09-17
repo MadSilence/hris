@@ -38,6 +38,11 @@ export const ConfirmActionModal: React.FC<{
   errorMessage?: string | null;
   onConfirmAction: () => void | Promise<unknown>;
   onCancelAction: () => void;
+  /**
+   * Anything the confirmation needs besides the question — an optional reason field, say. Rendered
+   * under the description, outside it: the description is a paragraph and cannot hold a field.
+   */
+  children?: React.ReactNode;
 }> = ({
   isOpen,
   title,
@@ -48,6 +53,7 @@ export const ConfirmActionModal: React.FC<{
   errorMessage,
   onConfirmAction,
   onCancelAction,
+  children,
 }) => (
   <AlertDialog
     open={isOpen}
@@ -63,6 +69,8 @@ export const ConfirmActionModal: React.FC<{
         </AlertDialogTitle>
         <AlertDialogDescription>{description}</AlertDialogDescription>
       </AlertDialogHeader>
+
+      {children}
 
       <FormError message={errorMessage} />
 

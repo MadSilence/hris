@@ -139,10 +139,10 @@ export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }
           )}
         </div>
 
-        {/* Organisation */}
+        {/* Organization */}
         {(orgRows.length > 0 || user.teams.length > 0) && (
           <div>
-            <SectionTitle>Organisation</SectionTitle>
+            <SectionTitle>Organization</SectionTitle>
             <div className="space-y-2">
               {orgRows.map((row) => (
                 <div key={row.label} className="flex items-baseline justify-between gap-3 text-sm">

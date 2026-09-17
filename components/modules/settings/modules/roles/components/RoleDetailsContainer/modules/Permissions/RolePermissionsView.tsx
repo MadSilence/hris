@@ -24,10 +24,12 @@ const ACTION_LABELS: Record<AccessAction, string> = {
   VIEW: "View",
   EDIT: "Edit",
   MANAGE: "Manage",
+  // Offered by People → Profiles only; every other row shows the cell as unsupported.
+  BLOCK: "Block",
 };
 
-// Shared column template so the sticky header and every row line up.
-const GRID = "grid grid-cols-[minmax(0,1fr)_190px_190px_190px] items-center gap-4";
+// Shared column template so the sticky header and every row line up. One column per ACCESS_ACTIONS.
+const GRID = "grid grid-cols-[minmax(0,1fr)_170px_170px_170px_170px] items-center gap-4";
 
 // Dot before a cell's value: blue = unsaved change, gray = no access, green = granted.
 function dotClass(current: ScopeChoice, server: ScopeChoice): string {

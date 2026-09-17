@@ -27,6 +27,7 @@ describe("updateLegalEntityAction", () => {
     street: "Teststrasse",
     building: "5",
     postCode: "10117",
+    version: 3,
   };
 
   it("calls legalEntityService.updateLegalEntity with correct arguments", async () => {

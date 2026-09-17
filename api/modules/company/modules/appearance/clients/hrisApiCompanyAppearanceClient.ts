@@ -1,8 +1,10 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { companyMapper } from "@/api/modules/company/mappers/companyMapper";
 import { CompanyAppearance } from "@/models/company/CompanyAppearance";
+import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
 import {
   CompanyAppearanceDTO,
+  PublicCompanyAppearanceDTO,
   UpdateCompanyAppearanceRequest,
 } from "@/api/modules/company/modules/appearance/dto/CompanyAppearanceDTO";
 
@@ -34,6 +36,19 @@ export class HrisApiCompanyAppearanceClient {
     );
   }
 
+  /** Without a session: the login page of the company at this address. No Bearer travels with it. */
+  public async getPublicAppearance(subdomain: string): Promise<PublicCompanyAppearance> {
+    const dto = await hrisApiClient.get<PublicCompanyAppearanceDTO>(
+      `/public/company-appearance/${encodeURIComponent(subdomain)}`,
+    );
+    return {
+      brandColor: dto?.brandColor ?? null,
+      loginHeadline: dto?.loginHeadline ?? null,
+      loginSubheadline: dto?.loginSubheadline ?? null,
+      loginImageUrl: companyMapper.resolveBackendAssetUrl(dto?.loginImageUrl),
+    };
+  }
+
   /** The backend returns a backend-relative `/uploads/...` path; the browser needs an absolute URL. */
   private toModel(dto: CompanyAppearanceDTO): CompanyAppearance {
     return {
@@ -46,6 +61,9 @@ export class HrisApiCompanyAppearanceClient {
       useImageOnLogin: dto.useImageOnLogin ?? false,
       useImageOnDashboard: dto.useImageOnDashboard ?? false,
       sidebarContrast: dto.sidebarContrast ?? false,
+      // Named here because this mapper lists its fields: left out, the form would never have a
+      // version to send back, and every save would skip the check silently.
+      version: dto.version,
     };
   }
 }

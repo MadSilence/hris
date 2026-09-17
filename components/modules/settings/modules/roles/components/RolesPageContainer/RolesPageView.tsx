@@ -32,7 +32,7 @@ export interface RolesPageViewProps {
   isLoadingMoreUsers?: boolean;
   onLoadMoreUsers?: () => void;
   onCreateRole?: (values: { name: string; description?: string }) => void | Promise<void>;
-  onRenameRole?: (roleId: string, values: { name: string; description?: string }) => void | Promise<void>;
+  onRenameRole?: (roleId: string, values: { name: string; description?: string; version?: number }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
   onDeleteRole?: (roleId: string) => void | Promise<void>;
   onArchiveRole?: (roleId: string, archived: boolean) => void | Promise<void>;

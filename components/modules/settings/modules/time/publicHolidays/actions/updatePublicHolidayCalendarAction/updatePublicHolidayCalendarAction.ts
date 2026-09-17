@@ -2,8 +2,10 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPublicHolidayCalendarsService } from "@/api/modules/publicHolidays/calendars/services";
-import type { UpdatePublicHolidayCalendarRequest } from "@/api/modules/publicHolidays/calendars/dto";
-import type { UpdateResponse } from "@/api/models/misc";
+import type {
+  UpdatePublicHolidayCalendarRequest,
+  UpdatePublicHolidayCalendarResponse,
+} from "@/api/modules/publicHolidays/calendars/dto";
 import { toActionError } from "@/lib/errors/withActionError";
 
 export const updatePublicHolidayCalendarAction = async (
@@ -31,6 +33,7 @@ export type UpdatePublicHolidayCalendarActionInput = {
 
 export type UpdatePublicHolidayCalendarActionOutput = {
   status: ActionStatus;
-  data?: UpdateResponse;
+  data?: UpdatePublicHolidayCalendarResponse;
   errorMessage?: string;
+  code?: string;
 };

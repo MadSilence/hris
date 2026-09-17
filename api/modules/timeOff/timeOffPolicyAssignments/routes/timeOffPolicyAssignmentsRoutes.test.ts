@@ -30,8 +30,6 @@ import { TimeOffPolicyAssignmentStatus } from "@/api/modules/timeOff/timeOffPoli
 jest.mock("@/api/modules/timeOff/timeOffPolicyAssignments/services", () => ({
   hrisTimeOffPolicyAssignmentsService: {
     listByPolicyId: jest.fn(),
-    create: jest.fn(),
-    end: jest.fn(),
   },
 }));
 
@@ -68,54 +66,5 @@ describe("TimeOffPolicyAssignmentsRoutes", () => {
       hrisTimeOffPolicyAssignmentsService.listByPolicyId
     ).toHaveBeenCalledWith("policy-id");
     expect(result).toEqual([assignment]);
-  });
-
-  it("creates assignment", async () => {
-    const response = { id: "assignment-id" };
-
-    jest
-      .mocked(hrisTimeOffPolicyAssignmentsService.create)
-      .mockResolvedValue(response);
-
-    const body = {
-      userId: "user-id",
-      effectiveFrom: "2026-01-01",
-      effectiveTo: undefined,
-    };
-
-    const req = { json: async () => body } as Request;
-
-    const res = await timeOffPolicyAssignmentsRoutes.create(req, "policy-id");
-    const result = await res.json();
-
-    expect(hrisTimeOffPolicyAssignmentsService.create).toHaveBeenCalledWith(
-      "policy-id",
-      { ...body, effectiveTo: null }
-    );
-    expect(result).toEqual(response);
-  });
-
-  it("ends assignment", async () => {
-    const response = { id: "assignment-id" };
-
-    jest
-      .mocked(hrisTimeOffPolicyAssignmentsService.end)
-      .mockResolvedValue(response);
-
-    const req = {
-      json: async () => ({ effectiveTo: "2026-06-30" }),
-    } as Request;
-
-    const res = await timeOffPolicyAssignmentsRoutes.end(
-      req,
-      "assignment-id"
-    );
-    const result = await res.json();
-
-    expect(hrisTimeOffPolicyAssignmentsService.end).toHaveBeenCalledWith(
-      "assignment-id",
-      { effectiveTo: "2026-06-30" }
-    );
-    expect(result).toEqual(response);
   });
 });

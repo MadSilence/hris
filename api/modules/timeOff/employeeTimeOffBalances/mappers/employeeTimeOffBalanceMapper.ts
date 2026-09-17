@@ -6,23 +6,10 @@ export class EmployeeTimeOffBalanceMapper {
     dto: EmployeeTimeOffBalanceDTO
   ): EmployeeTimeOffBalance {
     return {
-      id: dto.id,
-      assignmentId: dto.assignmentId,
-      policyId: dto.policyId,
-      userId: dto.userId,
-      periodStart: dto.periodStart,
+      // Everything the backend sends, then only what changes on the way. Listing fields one by one
+      // lost every field added later, silently — the working week once never reached the calendar.
+      ...dto,
       periodEnd: dto.periodEnd ?? null,
-      year: dto.year,
-      openingBalance: dto.openingBalance,
-      accruedBalance: dto.accruedBalance,
-      usedBalance: dto.usedBalance,
-      adjustedBalance: dto.adjustedBalance,
-      carriedOverBalance: dto.carriedOverBalance,
-      currentBalance: dto.currentBalance,
-      pendingBalance: dto.pendingBalance,
-      remainingCarryover: dto.remainingCarryover,
-      createdAt: dto.createdAt,
-      updatedAt: dto.updatedAt,
     };
   }
 
