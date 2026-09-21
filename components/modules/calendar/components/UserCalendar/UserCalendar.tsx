@@ -67,8 +67,8 @@ type TimeOffSegment = {
 };
 
 const timeOffToneClass: Record<CalendarTimeOffEvent["tone"], string> = {
-  approved: "border-green-200 bg-green-100 text-green-800",
-  pending: "border-amber-200 bg-amber-100 text-amber-800",
+  approved: "border-success-200 bg-success-100 text-success-800",
+  pending: "border-warning-200 bg-warning-100 text-warning-800",
 };
 
 /**
@@ -281,7 +281,7 @@ export const UserCalendar: FC<Props> = ({
                         {holiday ? (
                           <span
                             title={holidayTitle}
-                            className="h-1.5 w-1.5 rounded-full bg-rose-400"
+                            className="h-1.5 w-1.5 rounded-full bg-danger-400"
                             aria-label={holiday.name}
                           />
                         ) : null}
@@ -325,15 +325,15 @@ export const UserCalendar: FC<Props> = ({
       {!compact && (
         <div className="flex flex-none flex-wrap items-center gap-4 pt-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
+            <span className="inline-block h-2 w-2 rounded-full bg-danger-400" />
             Public holiday
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded-sm border border-green-200 bg-green-100" />
+            <span className="inline-block h-3 w-3 rounded-sm border border-success-200 bg-success-100" />
             Time off — approved
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded-sm border border-amber-200 bg-amber-100" />
+            <span className="inline-block h-3 w-3 rounded-sm border border-warning-200 bg-warning-100" />
             Time off — pending
           </span>
           <span className="ml-auto flex items-center gap-1.5">

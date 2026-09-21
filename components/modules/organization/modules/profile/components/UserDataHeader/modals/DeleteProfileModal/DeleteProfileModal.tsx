@@ -59,7 +59,7 @@ export const DeleteProfileModal: FC<Props> = ({
     <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open && !isBusy) onClose(); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-red-600">Delete Profile</AlertDialogTitle>
+          <AlertDialogTitle className="text-danger-600">Delete Profile</AlertDialogTitle>
           <AlertDialogDescription>
             This deletes <strong>{fullName}</strong> and their history, and cannot be undone. If they
             are leaving, terminate the employment instead: that keeps the record and ends their access.
@@ -102,7 +102,7 @@ export const DeleteProfileModal: FC<Props> = ({
             </Button>
           ) : null}
           <Button
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-danger-600 text-white hover:bg-danger-700"
             disabled={isBusy || isLoading || Boolean(refusal)}
             onClick={onConfirm}
           >

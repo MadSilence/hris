@@ -328,14 +328,14 @@ export const RequestTimeOffModal: FC<Props> = ({
             {!unlimited && selected && days > 0 && (
               <div className="flex items-center justify-between border-t border-brown-200 pt-3 text-sm">
                 <span className="text-muted-foreground">Balance after</span>
-                <span className={cn("font-medium", insufficient ? "text-red-600" : "text-brown-900")}>
+                <span className={cn("font-medium", insufficient ? "text-danger-600" : "text-brown-900")}>
                   {formatDayAmount(remainingAfter)} {unit}
                 </span>
               </div>
             )}
 
             {insufficient ? (
-              <p className="text-xs text-amber-600">
+              <p className="text-xs text-warning-600">
                 Exceeds the available balance — it may be rejected depending on the policy.
               </p>
             ) : (
@@ -348,11 +348,11 @@ export const RequestTimeOffModal: FC<Props> = ({
         </div>
 
         {coverageWarning && (
-          <div className="border-t border-amber-200 bg-amber-50 px-6 py-4">
-            <p className="text-sm font-medium text-amber-900">
+          <div className="border-t border-warning-200 bg-warning-50 px-6 py-4">
+            <p className="text-sm font-medium text-warning-900">
               Your request was submitted.
             </p>
-            <p className="mt-1 text-xs text-amber-800">
+            <p className="mt-1 text-xs text-warning-800">
               This policy warns when too many people are away at once, and{" "}
               {coverageWarning.length === 1
                 ? "one of your days is"

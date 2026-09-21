@@ -18,6 +18,7 @@ export class NotificationMapper {
             id: dto.source.id,
             status: dto.source.status ?? null,
             open: dto.source.open,
+            details: dto.source.details ?? null,
           }
         : null,
     };

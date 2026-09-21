@@ -17,6 +17,10 @@ import type { ColumnItem } from "@/models/userTable";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { DraftsToggle } from "@/components/ui/DraftsToggle";
+import {
+  PeopleExport,
+  type PeopleExportSort,
+} from "@/components/modules/organization/components/PeopleTopbar/components/PeopleExport";
 
 export type FieldMeta = Pick<FieldDTO, "id" | "key" | "label" | "type" | "isSystem" | "options">;
 
@@ -38,6 +42,11 @@ type PeopleTopbarProps = {
    * as zero for them, and a zero count draws nothing.
    */
   drafts?: { count: number; showing: boolean; onChange: (showDrafts: boolean) => void };
+  /**
+   * The table's sort, for the export: the file is in the order the table is. Optional so the topbar
+   * does not own it; without it the export uses the table's default order.
+   */
+  sort?: PeopleExportSort;
 };
 
 export default function PeopleTopbar({
@@ -52,6 +61,7 @@ export default function PeopleTopbar({
   onEditSelectedAction,
   onAddPersonAction,
   drafts,
+  sort,
 }: PeopleTopbarProps) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
@@ -134,6 +144,15 @@ export default function PeopleTopbar({
 
       <div className="flex flex-wrap items-center gap-2">
         <SearchBox value={query} onChange={onQueryChangeAction}/>
+
+        {/* The current view as a file — the same search, filters, segment, columns and order. */}
+        <PeopleExport
+          columns={columns}
+          filters={filters}
+          query={query}
+          showingDrafts={drafts?.showing ?? false}
+          sort={sort}
+        />
 
         {/*
           * One action, and it works. The menu that stood here offered "Add manually", "Import CSV" and

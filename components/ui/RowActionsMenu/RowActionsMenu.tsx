@@ -82,7 +82,7 @@ export const RowAction: React.FC<{
 
 /**
  * The destructive item: a separator above it, and `variant="destructive"` rather than one of the
- * three hand-written `text-red-600` spellings the product had.
+ * three hand-written `text-danger-600` spellings the product had.
  *
  * **The separator carries as much meaning as the colour.** It is the pause between "things you do to
  * this row" and "the thing you cannot undo" — which is why one menu putting a separator before

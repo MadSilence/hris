@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Building2, Clock, Globe } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -23,6 +23,12 @@ import type { CompanySettings } from "@/models/company/CompanySettings";
 import type { UpdateCompanyRequest, UpdateCompanySettingsRequest } from "@/api/modules/company/dto/CompanyDTO";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { companyHost, companyOrigin } from "@/lib/companyAddress";
+import { ActionStatus } from "@/components/models/ActionStatus";
+import { showActionError } from "@/lib/errors/errorToast";
+import {
+  deleteCompanyLogoAction,
+  uploadCompanyLogoAction,
+} from "@/components/modules/settings/modules/general/companyProfile/actions/companyLogoActions";
 
 type Saved = { version?: number } | undefined;
 
@@ -36,6 +42,8 @@ type Props = {
   savingSettings: boolean;
   profileError: string | null;
   settingsError: string | null;
+  /** Re-reads the company after the logo changed, so the sidebar and this page draw the new one. */
+  onLogoChanged?: () => Promise<unknown> | void;
 };
 
 const DAYS: { value: string; label: string }[] = [
@@ -158,11 +166,87 @@ const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
   );
 };
 
+/**
+ * Upload, replace or remove the company logo. The file goes up as soon as it is chosen — a logo is
+ * not part of the profile form's draft, and holding an image in a draft only to lose it on Cancel
+ * would be worse than applying it at once. A refusal arrives as the card: the picker has closed.
+ */
+const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | void }> = ({
+  hasLogo,
+  onChanged,
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const upload = async (file: File) => {
+    setBusy(true);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const res = await uploadCompanyLogoAction(form);
+      if (res.status !== ActionStatus.SUCCESS) {
+        showActionError(res);
+        return;
+      }
+      await onChanged?.();
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const remove = async () => {
+    setBusy(true);
+    try {
+      const res = await deleteCompanyLogoAction();
+      if (res.status !== ActionStatus.SUCCESS) {
+        showActionError(res);
+        return;
+      }
+      await onChanged?.();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="m-0 text-sm font-medium">Logo</p>
+      <p className="m-0 text-sm text-muted-foreground">
+        {hasLogo
+          ? "Shown in the sidebar and at the top of the org chart."
+          : "Until one is uploaded, the initials stand in for it."}
+      </p>
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.currentTarget.files?.[0];
+            if (file) void upload(file);
+          }}
+        />
+        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+          {busy ? "Working…" : hasLogo ? "Replace" : "Upload Logo"}
+        </Button>
+        {hasLogo ? (
+          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void remove()}>
+            Remove
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
 export const CompanyProfileSettingsComponent: FC<Props> = ({
   company,
   settings,
   onSaveProfile,
   onSaveSettings,
+  onLogoChanged,
   savingProfile,
   savingSettings,
   profileError,
@@ -346,13 +430,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
               <AvatarFallback className="rounded-xl text-base">{initials(company.name)}</AvatarFallback>
             </Avatar>
 
-            <div className="flex flex-col gap-1">
-              <p className="m-0 text-sm font-medium">Logo</p>
-
-              <p className="m-0 text-sm text-muted-foreground">
-                Uploading a logo is coming soon. Until then the initials stand in for it.
-              </p>
-            </div>
+            <LogoControls hasLogo={!!company.companyLogo} onChanged={onLogoChanged}/>
           </div>
         </Section>
 

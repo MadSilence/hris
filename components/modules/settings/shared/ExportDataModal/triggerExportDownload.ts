@@ -1,5 +1,6 @@
 import { ExportDataFormat } from "@/components/modules/settings/shared/ExportDataModal/ExportDataForm";
 import { internalApiClient } from "@/components/clients/apiClient";
+import { showError } from "@/lib/errors/errorToast";
 
 /**
  * Downloads an export, through the same client as every other read.
@@ -26,16 +27,59 @@ export const triggerExportDownload = async (
   const params = new URLSearchParams({ format, ...(extraParams ?? {}) });
   const path = `${stripApiPrefix(basePath)}?${params.toString()}`;
 
-  const response = await internalApiClient.fetch(path, { method: "GET" });
+  /*
+   * An export is a read, and the client only announces a refusal for writes — `hris:forbidden` is
+   * dispatched when `method !== "GET"`, which keeps a page whose queries 403 on load from stacking
+   * cards. An export is not a page load: somebody pressed a button and is owed an answer, and every
+   * call site writes `void triggerExportDownload(...)`, so the rejection had nowhere to go. Pressing
+   * Export with VIEW but not EDIT closed the dialog and did nothing at all (walked 2026-09-18).
+   */
+  let response: Response;
+  try {
+    response = await internalApiClient.fetch(path, { method: "GET" });
+  } catch (error) {
+    showError(error);
+    throw error;
+  }
 
+  await saveResponse(response, fallbackFilename(basePath, format));
+};
+
+/**
+ * The same download for an export whose request is a body rather than a query string — People, where
+ * the request is the whole table view.
+ *
+ * **It does not put the failure on screen; the caller does.** A POST is a write as far as the client
+ * is concerned, so a 403 has already been announced by `InternalApiClient` (`hris:forbidden`) by the
+ * time it lands here, and announcing it again would stack two cards. Anything else is for the dialog
+ * that is still open to show, next to the button that was pressed (ERRORS.md: a card is for when the
+ * context has closed).
+ */
+export const triggerExportPostDownload = async (
+  basePath: string,
+  format: ExportDataFormat,
+  body: unknown,
+): Promise<void> => {
+  const params = new URLSearchParams({ format });
+  const path = `${stripApiPrefix(basePath)}?${params.toString()}`;
+
+  const response = await internalApiClient.fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body ?? {}),
+  });
+
+  await saveResponse(response, fallbackFilename(basePath, format));
+};
+
+/** Hands the bytes to the browser under the name `Content-Disposition` gives, or the fallback. */
+const saveResponse = async (response: Response, fallbackName: string): Promise<void> => {
   const blob = await response.blob();
   const objectUrl = URL.createObjectURL(blob);
 
   const anchor = document.createElement("a");
   anchor.href = objectUrl;
-  anchor.download =
-    parseFilename(response.headers.get("content-disposition")) ??
-    fallbackFilename(basePath, format);
+  anchor.download = parseFilename(response.headers.get("content-disposition")) ?? fallbackName;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();

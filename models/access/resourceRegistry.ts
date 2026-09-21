@@ -133,6 +133,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
+      {
+        code: "PEOPLE.ATTENDANCE",
+        label: "Attendance",
+        description:
+          "Timesheets. View reads them; Edit records your own days and exports; Manage records or corrects somebody else's.",
+        supportedActions: ALL_ACTIONS,
+        supportedScopes: PERSONAL_SCOPES,
+      },
     ],
   },
   {

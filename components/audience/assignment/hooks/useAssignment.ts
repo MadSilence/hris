@@ -84,7 +84,13 @@ export const useAssignmentJob = (basePath: string, id: string, jobId: string | n
     queryFn: async () => unwrap(await assignmentJobStatusAction(basePath, id, jobId as string)),
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return status && isTerminalJobStatus(status) ? false : 1500;
+      if (status && isTerminalJobStatus(status)) return false;
+      /* A poll that cannot answer is not a job still running. Assigning a role to an audience that
+         includes you rotates your own `perm_hash`, so the next poll answers 401 and every one after
+         it — the dialog used to sit on "Adding people… 2 of 51" for as long as it was left open,
+         while the work had in fact finished on the server. */
+      if (query.state.status === "error") return false;
+      return 1500;
     },
   });
 

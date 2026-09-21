@@ -4,7 +4,7 @@ import {
   hrisApiUsersClient,
   type TerminatePayload,
   type TerminationImpactDTO,
-  type UpdateUserPayload,
+  type PatchUserPayload,
   type CreateUserPayload,
   type InviteUserPayload,
   type InviteStateDTO,
@@ -12,6 +12,7 @@ import {
 import { CreateResponse } from "@/api/models/misc";
 import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/user/fields";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
+import type { PeopleExportRequest } from "@/models/user/peopleExport";
 
 export type GetUsersArgs = {
   limit?: number;
@@ -61,8 +62,9 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.cancelInvite(id);
   }
 
-  public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
-    return hrisApiUsersClient.updateUser(id, payload);
+  /** The profile's one write — see `PatchUserPayload`. */
+  public async patchUser(id: string, payload: PatchUserPayload): Promise<void> {
+    return hrisApiUsersClient.patchUser(id, payload);
   }
 
   public async changeStatus(id: string, status: string): Promise<void> {
@@ -114,6 +116,10 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.draftCount();
   }
 
+  async exportUsers(body: PeopleExportRequest): Promise<Response> {
+    return hrisApiUsersClient.exportUsers(body);
+  }
+
   async getFields(): Promise<FieldDTO[]> {
     return hrisApiUsersClient.getFields();
   }
@@ -130,16 +136,8 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.setManager(userId, managerId);
   }
 
-  async setJob(userId: string, jobId: string | null): Promise<void> {
-    return hrisApiUsersClient.setJob(userId, jobId);
-  }
-
-  async setOffice(userId: string, officeId: string | null): Promise<void> {
-    return hrisApiUsersClient.setOffice(userId, officeId);
-  }
-
-  async setLegalEntity(userId: string, legalEntityId: string | null): Promise<void> {
-    return hrisApiUsersClient.setLegalEntity(userId, legalEntityId);
+  async insertManagerAbove(userId: string, managerId: string): Promise<void> {
+    return hrisApiUsersClient.insertManagerAbove(userId, managerId);
   }
 }
 

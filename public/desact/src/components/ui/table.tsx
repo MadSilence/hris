@@ -4,11 +4,21 @@ import * as React from"react";
 
 import { cn } from"./utils";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+/**
+ * `stickyHeader`: the list scrolls inside its own container and its header should stay put. The
+ * wrapper's `overflow-x-auto` made the wrapper itself the scrollport a `sticky top-0` header attaches
+ * to — a box that never scrolls vertically — so the column names scrolled away on the first flick.
+ * With the flag the wrapper does not clip, and the list's own scroller carries both axes.
+ */
+function Table({
+  className,
+  stickyHeader = false,
+  ...props
+}: React.ComponentProps<"table"> & { stickyHeader?: boolean }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={stickyHeader ? "relative w-full" : "relative w-full overflow-x-auto"}
     >
       <table
         data-slot="table"

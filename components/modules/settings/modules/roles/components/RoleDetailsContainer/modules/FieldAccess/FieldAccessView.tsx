@@ -32,9 +32,9 @@ const SYSTEM_GROUP_ID = "__system__";
 const UNGROUPED_ID = "__ungrouped__";
 
 function dotClass(current: FieldActionLevel, server: FieldActionLevel): string {
-  if (current !== server) return "bg-blue-500";
+  if (current !== server) return "bg-info-500";
   if (current === "NONE") return "bg-brown-300";
-  return "bg-green-500";
+  return "bg-success-500";
 }
 
 // Friendly labels + colored chips per attribute type (like the status/role chips elsewhere).
@@ -51,6 +51,8 @@ const TYPE_LABELS: Record<string, string> = {
   PERSON: "Person",
 };
 
+// A categorical palette — one hue per field type, not a status — so the raw hues are deliberate.
+/* eslint-disable no-restricted-syntax */
 const TYPE_CHIP: Record<string, string> = {
   TEXT: "border-brown-200 bg-brown-50 text-brown-700",
   EMAIL: "border-blue-200 bg-blue-50 text-blue-700",
@@ -63,6 +65,7 @@ const TYPE_CHIP: Record<string, string> = {
   MULTI_SELECT: "border-teal-200 bg-teal-50 text-teal-700",
   PERSON: "border-indigo-200 bg-indigo-50 text-indigo-700",
 };
+/* eslint-enable no-restricted-syntax */
 
 const TypeChip: React.FC<{ type?: string | null }> = ({ type }) => {
   const key = type ?? "";
@@ -242,7 +245,7 @@ export default function FieldAccessView({
                         {field.label ?? field.key}
                         {field.sensitive && (
                           <span
-                            className="ml-2 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 align-middle text-[10px] font-normal uppercase tracking-wide text-amber-700"
+                            className="ml-2 rounded border border-warning-300 bg-warning-50 px-1.5 py-0.5 align-middle text-[10px] font-normal uppercase tracking-wide text-warning-700"
                             title="Sensitive: access is never granted automatically; without it people see a placeholder"
                           >
                             Sensitive

@@ -370,7 +370,7 @@ function RemoveButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={`Unassign ${name}`}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-red-600 disabled:opacity-50"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600 disabled:opacity-50"
     >
       <X className="h-4 w-4"/>
     </button>

@@ -166,7 +166,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               </div>
 
               {noHireDate && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-xs text-danger-700">
                   This policy renews on the hire anniversary and this person has no hire date, so the
                   balance would never renew. Set a hire date first — the assignment will be refused
                   until then.
@@ -174,7 +174,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               )}
 
               {chainWontResolve && !noHireDate && (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                <p className="rounded-lg border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
                   This policy&apos;s approval chain has nobody to sign for this person — it asks for a
                   manager, and none is set. The assignment will work; their requests will be refused
                   until somebody can approve them.

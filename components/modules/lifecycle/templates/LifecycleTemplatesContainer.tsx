@@ -82,7 +82,11 @@ export function LifecycleTemplatesContainer() {
           archivedView={showArchived}
           icon={<ListChecks className="h-6 w-6" />}
           title={`No ${PROCESS_TYPE_LABELS[type].toLowerCase()} templates yet`}
-          description={`A template is the list of tasks a ${PROCESS_TYPE_LABELS[type].toLowerCase()} starts with.`}
+          // "an onboarding", "a preboarding": the article follows the word, and a template literal
+          // that always writes "a" produced "a onboarding" on one of the two tabs.
+          description={`A template is the list of tasks ${
+            type === "ONBOARDING" ? "an" : "a"
+          } ${PROCESS_TYPE_LABELS[type].toLowerCase()} starts with.`}
           onCreate={() => setEditing({ id: null })}
           createLabel="Add Template"
           createAccess={{ resource: "PEOPLE.LIFECYCLE_TEMPLATES", action: "EDIT" }}

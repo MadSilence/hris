@@ -794,7 +794,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             {attribute.name}
           </span>
           {attribute.required && (
-            <span className="shrink-0 text-red-500" title="Required" aria-label="Required">
+            <span className="shrink-0 text-danger-500" title="Required" aria-label="Required">
               *
             </span>
           )}
@@ -806,7 +806,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
           {attribute.sensitive && (
             <Badge
               variant="outline"
-              className="shrink-0 gap-1 border-amber-300 bg-amber-50 font-normal text-amber-700"
+              className="shrink-0 gap-1 border-warning-300 bg-warning-50 font-normal text-warning-700"
               title="Access isn't granted automatically; people without it see a placeholder"
             >
               <Lock className="h-3 w-3" />

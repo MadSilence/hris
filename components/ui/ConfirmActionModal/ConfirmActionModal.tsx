@@ -63,7 +63,7 @@ export const ConfirmActionModal: React.FC<{
   >
     <AlertDialogContent className="max-w-md">
       <AlertDialogHeader>
-        <AlertDialogTitle className={destructive ? "flex items-center gap-2 text-red-600" : undefined}>
+        <AlertDialogTitle className={destructive ? "flex items-center gap-2 text-danger-600" : undefined}>
           {destructive && <AlertTriangle className="h-5 w-5" />}
           {title}
         </AlertDialogTitle>
@@ -83,7 +83,7 @@ export const ConfirmActionModal: React.FC<{
             event.preventDefault();
             void onConfirmAction();
           }}
-          className={destructive ? "bg-red-600 text-white hover:bg-red-700" : undefined}
+          className={destructive ? "bg-danger-600 text-white hover:bg-danger-700" : undefined}
         >
           {isLoading ? `${confirmLabel}…` : confirmLabel}
         </AlertDialogAction>

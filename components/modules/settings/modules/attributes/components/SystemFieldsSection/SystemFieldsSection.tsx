@@ -75,16 +75,9 @@ export const SystemFieldsSection: FC = () => {
   if (isLoading || groups.length === 0) return null;
 
   return (
+    /* The heading and its explanation live on the page now: the tab says which half this is, and a
+       second title under it said it twice. */
     <section className="space-y-3">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">System fields</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Built into every person and not editable here. Their values come from the corresponding
-          module — Offices, Departments, Job catalog. To control who sees them, use{" "}
-          <span className="font-medium">Roles → Field access</span>.
-        </p>
-      </div>
-
       <Accordion type="multiple" defaultValue={groups.map(([name]) => name)} className="space-y-2">
         {groups.map(([name, groupFields]) => (
           <AccordionItem key={name} value={name} className="border-b-0">

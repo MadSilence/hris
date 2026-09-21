@@ -3,6 +3,8 @@ export interface SourceProjectionDTO {
   id: string;
   status: string | null;
   open: boolean;
+  /** What the question needs on screen beyond its status; omitted by sources that have nothing to add. */
+  details?: Record<string, unknown> | null;
 }
 
 export interface NotificationDTO {

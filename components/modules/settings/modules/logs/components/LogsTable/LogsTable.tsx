@@ -74,16 +74,11 @@ export const LogsTable: React.FC<{
 
   return (
     /*
-     * `[&>div]:overflow-x-visible` is doing real work.
-     *
-     * The shared `Table` wraps itself in a `overflow-x-auto` div, and that wrapper — not this
-     * scroller — becomes the scrollport the sticky header sticks to. The header then scrolls away
-     * with everything else, and a list this long loses its column names on the first flick. Undoing
-     * the wrapper's overflow makes this element the scrollport again; horizontal overflow lands here
-     * instead, which is what `overflow-auto` is for.
+     * The shared `Table` used to be the scrollport its own sticky header stuck to; this list worked
+     * around it with `[&>div]:overflow-x-visible`. `stickyHeader` is that fix, in the shared piece.
      */
-    <div ref={scroller} className="min-h-0 flex-1 overflow-auto [&>div]:overflow-x-visible">
-      <Table>
+    <div ref={scroller} className="min-h-0 flex-1 overflow-auto">
+      <Table stickyHeader>
         <TableHeader className="sticky top-0 z-10 bg-background">
           <TableRow>
             <TableHead className="w-[9rem]">When</TableHead>
@@ -209,7 +204,7 @@ const Actor: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
         <div className="pl-8 text-xs text-muted-foreground">applied by {row.source}</div>
       )}
       {row.impersonatedBy && (
-        <div className="pl-8 text-xs text-amber-700">while acting as somebody else</div>
+        <div className="pl-8 text-xs text-warning-700">while acting as somebody else</div>
       )}
     </div>
   );

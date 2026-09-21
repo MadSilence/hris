@@ -23,18 +23,21 @@ export function MyTasksContainer() {
   const invalidate = useInvalidateLifecycle();
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <div className="flex shrink-0 items-center justify-end gap-2">
         <Switch id="tasks-include-done" checked={includeDone} onCheckedChange={setIncludeDone} />
         <Label htmlFor="tasks-include-done">Show Done</Label>
       </div>
 
+      {/* The list scrolls; the empty state fills what is left instead of sitting in the corner. */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
       {error ? (
         <ErrorState error={error} />
       ) : isLoading ? (
         <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-16 animate-pulse rounded-md bg-muted" />)}</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState
+          fill
           icon={<ListChecks className="h-6 w-6" />}
           title="Nothing to do"
           description="Tasks assigned to you by a preboarding or an onboarding appear here."
@@ -56,6 +59,7 @@ export function MyTasksContainer() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

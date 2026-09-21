@@ -171,4 +171,22 @@ describe("HrisApiPublicHolidayCalendarsClient", () => {
     );
     expect(result).toBeUndefined();
   });
+
+  it("applies a provider drift by its id, outside the calendar path", async () => {
+    const response = { driftId: "drift-id", applied: 1 };
+    jest.mocked(hrisApiClient.post).mockResolvedValue(response);
+
+    const result = await hrisApiPublicHolidayCalendarsClient.applyDrift("drift-id");
+
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/public-holiday-drifts/drift-id/apply");
+    expect(result).toEqual(response);
+  });
+
+  it("dismisses a provider drift by its id", async () => {
+    jest.mocked(hrisApiClient.post).mockResolvedValue(undefined);
+
+    await hrisApiPublicHolidayCalendarsClient.dismissDrift("drift-id");
+
+    expect(hrisApiClient.post).toHaveBeenCalledWith("/public-holiday-drifts/drift-id/dismiss");
+  });
 });

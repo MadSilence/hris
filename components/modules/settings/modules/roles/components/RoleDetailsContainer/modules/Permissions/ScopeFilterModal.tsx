@@ -66,7 +66,7 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
         />
 
         {filters.length === 0 && (
-          <p className="text-sm text-amber-700">
+          <p className="text-sm text-warning-700">
             A custom scope with no conditions is rejected on save — it would claim a reach it never
             defines.
           </p>

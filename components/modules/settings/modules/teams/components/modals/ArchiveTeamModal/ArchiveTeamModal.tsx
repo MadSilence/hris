@@ -157,7 +157,7 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
           )}
 
           {archiveTeam.isError && (
-            <p className="text-red-500">
+            <p className="text-danger-500">
               {(archiveTeam.error as Error)?.message ?? "An error occurred."}
             </p>
           )}

@@ -241,6 +241,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PHC00012: "Choose where this calendar's holidays come from.",
   PHC00013: "This calendar is not linked to a holiday source, so there is nothing to check against.",
   PHC00014: "This year already has holidays. Clear them before filling it again.",
+  PHC00015: "These holiday changes no longer exist. Refresh the page.",
+  PHC00016: "Somebody has already dealt with these holiday changes, or the source reported something newer.",
 
   // PublicHolidayTemplateBusinessError
   PHT00001: "That holiday template is no longer available.",
@@ -479,6 +481,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   SG00001: "You do not have permission to filter by {0}.",
   SG00002: "That filter field no longer exists ({0}). Refresh the page.",
   SG00003: "“{0}” cannot be used with {1}.",
+  // The filter holds an option that no longer exists, or a value saved before options were matched
+  // by id. Re-picking it stores the id.
+  SG00004: "That filter value is no longer one of the options for {1}. Pick it again.",
+  // Usually a saved view or shared link sorted by a field this reader cannot see.
+  SG00005: "You do not have permission to sort by {0}.",
 
   // TimeOffRequestBusinessError
   TORQ00041: "Leave cannot be taken on {0}.",
@@ -515,6 +522,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00025: "This person has not registered yet. Send an invitation instead.",
   U00026: "This account is blocked. Unblock it before sending a password reset.",
   U00027: "This person has no email address to send the reset link to.",
+  U00028: "The welcome is theirs to see. Stop impersonating to let them finish it themselves.",
+  U00029: "This office is archived and cannot take new people. Choose another one.",
+  U00030: "This legal entity is archived and cannot take new people. Choose another one.",
+  U00031: "This person has left the company and cannot be placed in an office or legal entity.",
 
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",
@@ -541,6 +552,20 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LC00032: "This task is no longer open.",
   LC00033: "This task is assigned to somebody else.",
   LC00034: "This person has an unfinished preboarding. Choose whether to keep it or end it.",
+
+  // AttendanceBusinessError — the timesheet and the work schedule editor.
+  ATD00001: "Hours must be between 0 and 24.",
+  ATD00002: "Hours can have at most two decimals, such as 7.25.",
+  ATD00003: "A day that has not happened yet cannot be recorded.",
+  ATD00004: "This day is approved leave. Cancel or shorten the leave in Time Off to record hours on it.",
+  ATD00005: "The description can be at most {0} characters.",
+  ATD00006: "Choose a range that runs forwards and covers at most {0} days.",
+  ATD00007: "That month could not be read. Use the month picker.",
+  ATD00008: "Choose exactly one person, team, department, or everyone.",
+  ATD00009: "That team or department no longer exists.",
+  ATD00010: "Somebody recorded this day at the same moment. Reload the month and try again.",
+  ATD00011: "A schedule already starts on this date. Choose another date.",
+  ATD00012: "Scheduled hours must be between 0 and 24 on every day.",
 };
 
 /**

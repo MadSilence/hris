@@ -22,7 +22,7 @@ export function DroppableBlockZone({ id, depth = 0, disabled, className, childre
     <div
       ref={setNodeRef}
       data-drop-id={id}
-      className={cn("rounded-xl", className, isOver && !disabled && "ring-2 ring-inset ring-emerald-400")}
+      className={cn("rounded-xl", className, isOver && !disabled && "ring-2 ring-inset ring-success-400")}
     >
       {children}
     </div>

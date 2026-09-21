@@ -354,6 +354,7 @@ const PeopleTableContainer: React.FC = () => {
         ) : null}
 
         <PeopleTopbar
+          sort={sort}
           selectedCount={selectedIds.size}
           onEditSelectedAction={() => setBulkOpen(true)}
           onAddPersonAction={() => setAddPersonOpen(true)}

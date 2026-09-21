@@ -200,7 +200,7 @@ export const DocumentCategoriesContainer: FC = () => {
             <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               disabled={remove.isPending}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-danger-600 text-white hover:bg-danger-700"
               onClick={async (e) => {
                 e.preventDefault();
                 if (!toDelete) return;

@@ -1,5 +1,10 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type { CompanyCalendarMark, CompanyCalendarPeoplePage } from "@/models/calendar";
+import type {
+  CompanyCalendarGroup,
+  CompanyCalendarGrouping,
+  CompanyCalendarMark,
+  CompanyCalendarPeoplePage,
+} from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
 
 export type CompanyCalendarPeopleQuery = {
@@ -7,6 +12,14 @@ export type CompanyCalendarPeopleQuery = {
   limit?: number;
   q?: string;
   filters?: FilterDTO[];
+  /** One group of a grouped board. `id: null` is the "no value" group. */
+  group?: { by: CompanyCalendarGrouping; id: string | null } | null;
+};
+
+export type CompanyCalendarGroupsQuery = {
+  q?: string;
+  filters?: FilterDTO[];
+  groupBy: CompanyCalendarGrouping;
 };
 
 export type CompanyCalendarMarksQuery = {
@@ -28,6 +41,17 @@ export class CompanyCalendarService {
       limit: params.limit ?? null,
       q: params.q ?? null,
       filters: params.filters?.length ? params.filters : null,
+      groupBy: params.group?.by ?? null,
+      groupId: params.group?.id ?? null,
+    });
+  }
+
+  /** The headers of a grouped board, each with its count — same search and filters as the rows. */
+  public async groups(params: CompanyCalendarGroupsQuery): Promise<CompanyCalendarGroup[]> {
+    return internalApiClient.post<CompanyCalendarGroup[]>("/calendar/company/groups", {
+      q: params.q ?? null,
+      filters: params.filters?.length ? params.filters : null,
+      groupBy: params.groupBy,
     });
   }
 

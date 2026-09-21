@@ -1,4 +1,6 @@
 import { hrisApiUsersService, UsersSearchArgs } from "../../services/hrisUsersService";
+import { formatOf, streamBinary } from "@/api/utils/exportResponse";
+import type { PeopleExportRequest } from "@/models/user/peopleExport";
 
 // Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class UsersRoutes {
@@ -19,6 +21,22 @@ export class UsersRoutes {
     const body = (await req.json().catch(() => ({}))) as UsersSearchArgs;
     const result = await hrisApiUsersService.searchUsers(body);
     return Response.json(result);
+  }
+
+  /**
+   * The People table's view as a file. The format comes from the query string, like every other
+   * export route, and wins over whatever the body says; the rest of the body is the view and is passed
+   * on as it is — the backend decides which of its columns the caller may carry out.
+   */
+  public async exportUsers(req: Request) {
+    const body = (await req.json().catch(() => ({}))) as Partial<PeopleExportRequest>;
+    const request: PeopleExportRequest = {
+      ...body,
+      columns: Array.isArray(body.columns) ? body.columns : [],
+      allColumns: body.allColumns === true,
+      format: formatOf(req),
+    };
+    return streamBinary(await hrisApiUsersService.exportUsers(request));
   }
 
   /** The number behind the directory's Drafts segment. Listing them is searchUsers with drafts: "ONLY". */

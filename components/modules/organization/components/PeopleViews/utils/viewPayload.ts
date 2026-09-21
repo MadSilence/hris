@@ -1,15 +1,7 @@
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import type { ColumnItem } from "@/models/userTable";
 import type { ViewPayload, ViewSort } from "@/models/peopleView";
-
-const ALLOWED_SORT_FIELDS = new Set([
-  "first_name",
-  "last_name",
-  "email",
-  "status",
-  "created_at",
-  "updated_at",
-]);
+import { isSortKeyAvailable } from "@/components/modules/organization/components/PeopleTable/peopleSort";
 
 const PINNED_COLUMN_ID = "sys:first_name";
 
@@ -60,14 +52,17 @@ export function applyPayload(payload: ViewPayload, visibleFields: FieldDTO[]): A
   });
   const droppedFilters = (payload.filters ?? []).length - keptFilters.length;
 
+  // The table's own list of sortable columns, not a copy — the copy was six columns long and dropped
+  // a saved sort by hire date. An attribute sort needs the field among the reader's visible ones.
   const sort =
-    payload.sort && ALLOWED_SORT_FIELDS.has(payload.sort.fieldId) ? payload.sort : null;
+    payload.sort && isSortKeyAvailable(payload.sort.fieldId, visibleFields) ? payload.sort : null;
+  const droppedSort = payload.sort && !sort && payload.sort.fieldId.startsWith("attr:") ? 1 : 0;
 
   return {
     columns,
     filters: keptFilters,
     sort,
-    dropped: droppedCols + droppedFilters,
+    dropped: droppedCols + droppedFilters + droppedSort,
   };
 }
 

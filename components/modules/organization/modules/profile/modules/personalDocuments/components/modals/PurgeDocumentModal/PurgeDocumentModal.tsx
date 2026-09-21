@@ -48,7 +48,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
             <Trash2 className="h-5 w-5"/>
             Delete forever
           </AlertDialogTitle>
@@ -59,12 +59,12 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
             <div>
-              <h4 className="mb-1 font-medium text-red-800">There is no trash after this</h4>
-              <p className="text-sm text-red-700">
+              <h4 className="mb-1 font-medium text-danger-800">There is no trash after this</h4>
+              <p className="text-sm text-danger-700">
                 Leaving the document where it is deletes it automatically once the retention period
                 ends.
               </p>
@@ -84,7 +84,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-danger-600 text-white hover:bg-danger-700"
           >
             Delete forever
           </AlertDialogAction>

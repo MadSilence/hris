@@ -52,7 +52,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
         selected
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
-        isDropTarget && "border-green-400 ring-2 ring-green-300",
+        isDropTarget && "border-success-400 ring-2 ring-success-300",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />
@@ -89,15 +89,20 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
           selected ? "border-brown-300" : "border-brown-100",
         )}
       >
-        <span
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium",
-            isActive ? "bg-green-50 text-green-700" : "bg-brown-100 text-brown-500",
-          )}
-        >
-          <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-green-500" : "bg-brown-400")} />
-          {isActive ? "Active" : "Suspended"}
-        </span>
+        {/* No status when the caller may not see it — "Suspended" would be a claim nobody made. */}
+        {user.status ? (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium",
+              isActive ? "bg-success-50 text-success-700" : "bg-brown-100 text-brown-500",
+            )}
+          >
+            <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-success-500" : "bg-brown-400")} />
+            {isActive ? "Active" : "Suspended"}
+          </span>
+        ) : (
+          <span />
+        )}
 
         {hasChildren ? (
           <span className="text-brown-500">

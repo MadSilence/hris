@@ -53,7 +53,7 @@ export function CanvasMessage({
   return (
     <div
       className={`flex h-full flex-col items-center justify-center px-6 text-center text-sm ${
-        tone === "error" ? "text-red-500" : "text-brown-400"
+        tone === "error" ? "text-danger-500" : "text-brown-400"
       }`}
     >
       {children}

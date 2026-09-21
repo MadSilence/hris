@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { decodeJwt } from "jose";
 import { hrisApiFirstRunClient } from "@/api/modules/firstRun/clients";
 import type {
   WelcomeDTO,
@@ -12,8 +14,26 @@ import type {
 export type FirstRunState = {
   /** The owner has not said what this company should start with. */
   setupNeeded: boolean;
-  /** This person has never been shown the welcome. */
+  /** This person has never been shown the welcome — and it is them, not somebody acting as them. */
   welcomeNeeded: boolean;
+  /** The session is an impersonation: the actor is looking through somebody else's eyes. */
+  impersonating: boolean;
+};
+
+/**
+ * Whether the session cookie says it is an impersonation — the `imp` claim, decoded on this server.
+ *
+ * Not a security check (`decodeJwt` verifies nothing; the backend refuses to complete a welcome
+ * under impersonation on its own). It decides where somebody lands: the welcome belongs to the person
+ * it greets, so an actor is never sent into it, and cannot spend it for them by pressing Skip.
+ */
+const isImpersonatingSession = async (): Promise<boolean> => {
+  try {
+    const token = (await cookies()).get("access_token")?.value;
+    return token ? Boolean((decodeJwt(token) as { imp?: boolean }).imp) : false;
+  } catch {
+    return false;
+  }
 };
 
 export class HrisFirstRunService {
@@ -67,10 +87,13 @@ export class HrisFirstRunService {
       hrisApiFirstRunClient.getCompanySetup(),
       hrisApiFirstRunClient.getUserSettings(),
     ]);
+    const impersonating = await isImpersonatingSession();
 
     return {
       setupNeeded: setup.status === "fulfilled" && setup.value.status !== "COMPLETED",
-      welcomeNeeded: settings.status === "fulfilled" && settings.value.welcomeCompletedAt === null,
+      welcomeNeeded:
+        !impersonating && settings.status === "fulfilled" && settings.value.welcomeCompletedAt === null,
+      impersonating,
     };
   }
 }

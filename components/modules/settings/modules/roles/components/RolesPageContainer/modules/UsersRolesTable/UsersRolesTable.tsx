@@ -54,7 +54,7 @@ export default function UsersRolesTable({
 
   return (
     <>
-      <Table className="table-fixed">
+      <Table className="table-fixed" stickyHeader>
         <TableHeader className="sticky top-0 z-10 bg-white">
           <TableRow>
             <TableHead className="w-1/3 pl-4">User</TableHead>

@@ -50,6 +50,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const selected = useMemo(
     () => templates.find((template) => template.id === value) ?? null,
@@ -62,6 +63,34 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
       // Opening from the chevron leaves focus wherever it was; put the caret in the field either way.
       inputRef.current?.focus();
     }
+  }, [open]);
+
+  /*
+   * The list scrolls itself, with a non-passive listener, and that is not a flourish.
+   *
+   * Inside a dialog this list cannot scroll otherwise. Radix's dialog wraps the page in
+   * `react-remove-scroll` and allows exactly one subtree — the dialog's own content
+   * (`shards: [contentRef]`). This list is **portalled to `<body>`**, so every wheel event over it is
+   * outside both, and the lock calls `preventDefault()` on it: 237 countries, and the wheel does
+   * nothing. Moving the list inside the dialog instead is not the fix — `DialogContent` is
+   * `translate-x-[-50%]`, and a transformed ancestor makes the popover's fixed positioning land in
+   * the wrong place.
+   *
+   * So the list does the scrolling itself. The listener is native and non-passive because React
+   * attaches `onWheel` passively, where `preventDefault` is ignored — and without it the page would
+   * scroll *as well* on the screens where nothing is locked.
+   */
+  useEffect(() => {
+    const list = listRef.current;
+    if (!open || !list) return;
+
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      list.scrollTop += event.deltaY;
+    };
+
+    list.addEventListener("wheel", onWheel, { passive: false });
+    return () => list.removeEventListener("wheel", onWheel);
   }, [open]);
 
   const filtered = useMemo(() => {
@@ -176,9 +205,10 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
         onInteractOutside={(event) => {
           if (boxRef.current?.contains(event.target as Node)) event.preventDefault();
         }}
+        ref={listRef}
         id={listId}
         role="listbox"
-        className="max-h-72 w-[var(--radix-popover-trigger-width)] overflow-y-auto p-1"
+        className="max-h-72 w-[var(--radix-popover-trigger-width)] overflow-y-auto overscroll-contain p-1"
       >
         {filtered.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-[var(--color-text-tertiary)]">

@@ -40,10 +40,21 @@ describe("usePublicHolidayTemplates", () => {
     expect(useQuery).toHaveBeenCalledWith({
       queryKey: getPublicHolidayTemplatesQueryKey(),
       queryFn: expect.any(Function),
+      enabled: true,
     });
 
     await capturedOpts.queryFn();
 
     expect(publicHolidayTemplatesService.list).toHaveBeenCalledWith();
+  });
+
+  it("stays disabled until the flow that needs the catalogue asks for it", () => {
+    (useQuery as jest.Mock).mockReturnValue({});
+
+    renderHook(() => usePublicHolidayTemplates({ enabled: false }));
+
+    expect(useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

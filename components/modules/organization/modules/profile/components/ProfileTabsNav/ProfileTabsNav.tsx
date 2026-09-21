@@ -86,9 +86,11 @@ export function ProfileTabsNav({ userId, capabilities }: Props) {
 
       <ConfirmCancelModal
         isOpen={!!pendingHref}
+        // The owner's wording (person-profile plan 9.3): the question is about leaving, not discarding.
+        title="Leave without saving?"
         description="You have unsaved changes on this tab. Leaving now discards them."
         cancelText="Keep editing"
-        confirmText="Discard and leave"
+        confirmText="Leave without saving"
         onCancelAction={() => setPendingHref(null)}
         onConfirmAction={() => {
           const href = pendingHref;

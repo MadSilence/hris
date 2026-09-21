@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Mail, PanelRightClose } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import type { OrgChartUser } from "@/models/orgChart/OrgChartUser";
+import { Button } from "@/public/desact/src/components/ui/button";
+import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 
 type Props = {
   user: OrgChartUser;
@@ -14,6 +16,16 @@ type Props = {
   reports: OrgChartUser[];
   onSelect: (id: string) => void;
   onCollapse: () => void;
+  /** Whether the viewer may change reporting lines — the same right the drag asks for. */
+  canEditManager?: boolean;
+  isSavingManager?: boolean;
+  /** A new manager, or null to make the person a top of the organisation. */
+  onChangeManager?: (managerId: string | null) => void;
+  /**
+   * Puts the picked person between this one and their manager: the picked person takes this one's
+   * place, and this one reports to them. One call — the server moves both lines together.
+   */
+  onInsertManagerAbove?: (managerId: string) => void;
 };
 
 function fullName(u: OrgChartUser): string {
@@ -55,7 +67,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }: Props) {
+export function UserDetailPanel({
+  user,
+  manager,
+  reports,
+  onSelect,
+  onCollapse,
+  canEditManager = false,
+  isSavingManager = false,
+  onChangeManager,
+  onInsertManagerAbove,
+}: Props) {
+  const [insertingAbove, setInsertingAbove] = useState(false);
   const isActive = user.status === "ACTIVE";
   const name = fullName(user);
   const orgRows: { label: string; value: string }[] = [];
@@ -74,15 +97,19 @@ export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-base font-semibold text-brown-900">{name}</h2>
           <p className="truncate text-sm text-brown-500">{user.jobName}</p>
-          <span
-            className={cn(
-              "mt-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium leading-none",
-              isActive ? "bg-green-50 text-green-700" : "bg-brown-100 text-brown-500",
-            )}
-          >
-            <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-green-500" : "bg-brown-400")} />
-            {isActive ? "Active" : "Suspended"}
-          </span>
+          {/* Status is a field like any other: a caller who may not see it gets none, and "Suspended"
+              would be a claim about somebody the API said nothing about. */}
+          {user.status ? (
+            <span
+              className={cn(
+                "mt-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium leading-none",
+                isActive ? "bg-success-50 text-success-700" : "bg-brown-100 text-brown-500",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-success-500" : "bg-brown-400")} />
+              {isActive ? "Active" : "Suspended"}
+            </span>
+          ) : null}
         </div>
         <button
           type="button"
@@ -100,13 +127,15 @@ export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }
         {/* Contacts */}
         <div>
           <SectionTitle>Contacts</SectionTitle>
-          <a
-            href={`mailto:${user.email}`}
-            className="flex items-center gap-2 text-sm text-brown-700 no-underline hover:text-brown-900"
-          >
-            <Mail className="h-4 w-4 flex-none text-brown-400" />
-            <span className="truncate">{user.email}</span>
-          </a>
+          {user.email ? (
+            <a
+              href={`mailto:${user.email}`}
+              className="flex items-center gap-2 text-sm text-brown-700 no-underline hover:text-brown-900"
+            >
+              <Mail className="h-4 w-4 flex-none text-brown-400" />
+              <span className="truncate">{user.email}</span>
+            </a>
+          ) : null}
           <Link
             href={`/organization/people/${user.id}/personal`}
             className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-brown-200 px-2.5 py-1.5 text-sm text-brown-700 no-underline transition-colors hover:bg-brown-50"
@@ -124,6 +153,77 @@ export function UserDetailPanel({ user, manager, reports, onSelect, onCollapse }
           ) : (
             <p className="px-1.5 text-sm text-brown-400">Top of the organisation.</p>
           )}
+          {/* The drag is the fast way; this is the way that does not need the other person on screen.
+              Both write the profile's own manager field, so the rules (no cycles, not oneself) are the
+              server's, and a refusal arrives as a card. */}
+          {canEditManager && onChangeManager ? (
+            <div className="mt-2 space-y-2 px-1.5">
+              <UserPickerField
+                value={null}
+                onChange={(picked) => {
+                  if (picked && picked.id !== user.id) onChangeManager(picked.id);
+                }}
+                placeholder={manager ? "Change manager…" : "Set a manager…"}
+                allowClear={false}
+                disabled={isSavingManager}
+              />
+              {manager ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSavingManager}
+                  onClick={() => onChangeManager(null)}
+                >
+                  Remove Manager
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+          {/* Inserting a level is the one reporting change a drag cannot express: two people move at
+              once. It is its own action rather than two picks, so the server can do both or neither. */}
+          {canEditManager && onInsertManagerAbove ? (
+            <div className="mt-2 space-y-2 px-1.5">
+              {insertingAbove ? (
+                <>
+                  <p className="text-xs text-brown-500">
+                    {manager
+                      ? `The person you pick will take ${name}'s place under ${fullName(manager)}, and ${name} will report to them.`
+                      : `The person you pick will become the top of this branch, and ${name} will report to them.`}
+                  </p>
+                  <UserPickerField
+                    value={null}
+                    onChange={(picked) => {
+                      if (!picked || picked.id === user.id) return;
+                      setInsertingAbove(false);
+                      onInsertManagerAbove(picked.id);
+                    }}
+                    allowClear={false}
+                    disabled={isSavingManager}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isSavingManager}
+                    onClick={() => setInsertingAbove(false)}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSavingManager}
+                  onClick={() => setInsertingAbove(true)}
+                >
+                  Add Manager Above
+                </Button>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div>

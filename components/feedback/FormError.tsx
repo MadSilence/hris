@@ -25,12 +25,12 @@ export const FormError: React.FC<{
   return (
     <div
       role="alert"
-      className={`flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 ${className ?? ""}`}
+      className={`flex items-start gap-2 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 ${className ?? ""}`}
     >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" />
       <div className="flex flex-col gap-0.5">
-        <p className="text-sm text-red-700">{message}</p>
-        {reference && <p className="font-mono text-xs text-red-600/70">{reference}</p>}
+        <p className="text-sm text-danger-700">{message}</p>
+        {reference && <p className="font-mono text-xs text-danger-600/70">{reference}</p>}
       </div>
     </div>
   );

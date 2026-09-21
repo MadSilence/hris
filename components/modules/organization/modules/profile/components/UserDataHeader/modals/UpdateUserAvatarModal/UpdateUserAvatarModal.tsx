@@ -244,9 +244,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                 variant="outline"
                 disabled={isLoading || !hasCurrentAvatar}
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="h-auto items-center justify-start gap-4 rounded-2xl px-5 py-5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="h-auto items-center justify-start gap-4 rounded-2xl px-5 py-5 text-danger-600 hover:bg-danger-50 hover:text-danger-700"
               >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-red-50">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-danger-50">
                   <Trash2 className="size-5"/>
                 </span>
 
@@ -331,7 +331,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
             <UserRoundX className="h-5 w-5"/>
             Remove avatar
           </AlertDialogTitle>
@@ -343,12 +343,12 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
             <div>
-              <h4 className="mb-1 font-medium text-red-800">Warning</h4>
-              <p className="text-sm text-red-700">
+              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
+              <p className="text-sm text-danger-700">
                 The current avatar will be permanently removed.
               </p>
             </div>
@@ -367,7 +367,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
               event.preventDefault();
               void onConfirmAction();
             }}
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-danger-600 text-white hover:bg-danger-700"
           >
             Remove avatar
           </AlertDialogAction>

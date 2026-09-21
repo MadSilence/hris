@@ -30,7 +30,7 @@ import type {
   TerminationReason,
 } from "@/api/modules/users/clients/hrisApiUsersClient";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { dateToISO } from "@/lib/date";
+import { dateToISO, formatDisplayDate } from "@/lib/date";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 const REASONS: { id: TerminationReason; label: string }[] = [
@@ -123,7 +123,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
       <DialogContent hideClose className="sm:max-w-xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-600">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger-50 text-danger-600">
               <UserMinus className="h-5 w-5"/>
             </span>
             <div>
@@ -194,13 +194,22 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             />
           </div>
 
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3.5">
-            <p className="mb-1.5 text-sm font-medium text-amber-900">What this will do</p>
+          <div className="rounded-lg border border-warning-200 bg-warning-50 p-3.5">
+            <p className="mb-1.5 text-sm font-medium text-warning-900">What this will do</p>
             {impactLoading ? (
-              <p className="text-sm text-amber-800">Checking…</p>
+              <p className="text-sm text-warning-800">Checking…</p>
             ) : (
-              <ul className="space-y-1 text-sm text-amber-800">
-                <li>Status becomes Archived and the person loses access.</li>
+              <ul className="space-y-1 text-sm text-warning-800">
+                {/* The change lands on the day after the last working day; until then the person
+                    is an employee like any other, and saying otherwise was the dialog's one lie. */}
+                {impact?.effectiveOn && impact.effectiveOn > today() ? (
+                  <li>
+                    Nothing changes until <strong>{formatDisplayDate(impact.effectiveOn)}</strong>. Then the
+                    status becomes Archived and the person loses access.
+                  </li>
+                ) : (
+                  <li>Status becomes Archived and the person loses access.</li>
+                )}
                 <li>{impact?.rolesToRevoke ?? 0} role(s) revoked.</li>
                 <li>
                   {impact?.policyAssignmentsToEnd ?? 0} time-off policy assignment(s) ended.
@@ -215,6 +224,12 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                   )}
                   .
                 </li>
+                {(impact?.requestsAwaitingTheirDecision ?? 0) > 0 ? (
+                  <li>
+                    {impact?.requestsAwaitingTheirDecision} request(s) are waiting for this person to decide.
+                    Nobody takes them over automatically.
+                  </li>
+                ) : null}
                 {(impact?.approvedLeaveAfterLastDay ?? 0) > 0 ? (
                   <li>
                     {impact?.approvedLeaveAfterLastDay} approved absence(s) run past the last working day.
@@ -232,7 +247,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             <Button
               type="submit"
               disabled={isLoading || !lastWorkingDay}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-danger-600 text-white hover:bg-danger-700"
             >
               {isLoading ? "Terminating…" : "Terminate"}
             </Button>

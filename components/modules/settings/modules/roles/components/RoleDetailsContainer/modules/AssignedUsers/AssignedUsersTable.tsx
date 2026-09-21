@@ -53,9 +53,9 @@ export default function AssignedUsersTable({
         {/* An archived role still lists whoever held it, but it grants them nothing — say so here
             rather than letting someone assign people to it and wonder why nothing happened. */}
         {isArchived && (
-          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-            <Archive className="mt-0.5 h-5 w-5 shrink-0 text-amber-600"/>
-            <div className="min-w-0 text-sm text-amber-800">
+          <div className="flex items-start gap-3 rounded-lg border border-warning-200 bg-warning-50 p-4">
+            <Archive className="mt-0.5 h-5 w-5 shrink-0 text-warning-600"/>
+            <div className="min-w-0 text-sm text-warning-800">
               <p className="font-medium">This role is archived</p>
               <p>
                 It grants nothing to the people below and cannot be assigned to anyone else.

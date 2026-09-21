@@ -31,3 +31,23 @@ export interface CompanyCalendarMark {
   calendarId: string;
   calendarName: string | null;
 }
+
+/**
+ * The one dimension the board's rows can be grouped by — one at a time, never nested. Each is a
+ * registry field (`sys:department`, `sys:team`, `sys:office`), and grouping by it needs the same
+ * company-wide read grant that filtering by it does.
+ */
+export type CompanyCalendarGrouping = "DEPARTMENT" | "TEAM" | "OFFICE";
+
+/**
+ * One group header. `id` and `name` are null for the "no value" group — the people with no
+ * department, team or office — which the backend always sends last.
+ *
+ * `count` is the rows under this header for the current search and filters, within the reader's
+ * scope. A person in two teams is a row under each, and counted in each.
+ */
+export interface CompanyCalendarGroup {
+  id: string | null;
+  name: string | null;
+  count: number;
+}

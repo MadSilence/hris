@@ -54,7 +54,7 @@ type Edit = { title?: string; assignee?: PickedUser | null; removed?: boolean };
 export function StartProcessModal({ open, type, userId, fullName, lineManager, onCloseAction }: Props) {
   const router = useRouter();
   const invalidate = useInvalidateLifecycle();
-  const { data: templates } = useLifecycleTemplates(type, open);
+  const { data: templates, isLoading: isLoadingTemplates } = useLifecycleTemplates(type, open);
 
   const [step, setStep] = useState<"choose" | "review">("choose");
   const [templateId, setTemplateId] = useState("");
@@ -179,7 +179,10 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                     ))}
                   </SelectContent>
                 </Select>
-                {usable.length === 0 && (
+                {/* Only once the list has actually come back: an empty `data` while the query is in
+                    flight told somebody who has templates that they have none, for as long as the
+                    request took. */}
+                {!isLoadingTemplates && usable.length === 0 && (
                   <p className="text-xs text-muted-foreground">
                     There are no {PROCESS_TYPE_LABELS[type].toLowerCase()} templates yet. Add one in Settings → Preboarding &amp; Onboarding.
                   </p>

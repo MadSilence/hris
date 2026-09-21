@@ -263,7 +263,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-red-600 hover:text-red-700"
+              className="h-9 w-9 text-danger-600 hover:text-danger-700"
               aria-label="Clear all filters"
               onClick={clearAll}
             >

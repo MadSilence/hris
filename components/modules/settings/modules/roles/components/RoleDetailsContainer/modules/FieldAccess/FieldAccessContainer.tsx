@@ -152,7 +152,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
         {isLoading ? (
           <FieldAccessSkeleton/>
         ) : error ? (
-          <p className="text-sm text-red-600">Failed to load field access.</p>
+          <p className="text-sm text-danger-600">Failed to load field access.</p>
         ) : (
           <FieldAccessView
             groups={groups}

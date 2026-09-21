@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { DeleteProfileModal } from "./modals/DeleteProfileModal";
-import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
@@ -71,6 +71,10 @@ export type UserDataHeaderProps = {
 export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) {
   const { data: userFetched } = useUser(userId);
   const user = userFetched ?? userProp;
+  // The profile's SWR cache is its own (`UserProvider` sets `provider: () => new Map()`), so the
+  // global `mutate` from "swr" never reached it: an invite, a block or a termination succeeded and the
+  // header kept the old status until a reload. The provider's own `mutate` is the one that revalidates.
+  const { mutate } = useSWRConfig();
 
   const { userId: currentUserId, impersonating } = useCurrentUser();
   const router = useRouter();
@@ -194,8 +198,14 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const fullName =
     `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "Unnamed";
   const isOwnProfile = currentUserId === user.id;
-  const isTerminated = !!user.terminationDate;
   const isArchived = (user.status ?? "").toUpperCase() === "ARCHIVED";
+  /*
+   * A termination date is written when the termination is *scheduled*, and the effects land the day
+   * after it. Reading the date alone labelled a person still coming to work "Already Terminated" — the
+   * opposite of the truth. Applied means archived; a date without that is pending.
+   */
+  const isTerminated = !!user.terminationDate && isArchived;
+  const isTerminationPending = !!user.terminationDate && !isArchived;
   /**
    * A draft is a name in a table: no account, no employment, no history. The header used to offer it
    * everything an employee gets — sign in as them, terminate their employment — and every one of
@@ -274,7 +284,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                   variant="outline"
                   className={
                     isActiveStatus(user.status)
-                      ? "border-green-200 bg-green-50 text-green-700"
+                      ? "border-success-200 bg-success-50 text-success-700"
                       : ""
                   }
                 >
@@ -395,9 +405,13 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                   <RowAction
                     icon={<UserMinus className="h-4 w-4"/>}
                     onClick={() => setIsTerminateOpen(true)}
-                    disabled={isTerminated}
+                    disabled={isTerminated || isTerminationPending}
                   >
-                    {isTerminated ? "Already Terminated" : "Terminate Employment"}
+                    {isTerminated
+                      ? "Already Terminated"
+                      : isTerminationPending
+                        ? `Leaving ${formatDisplayDate(String(user.terminationDate))}`
+                        : "Terminate Employment"}
                   </RowAction>
                 )}
                 {canManageProfiles && !isOwnProfile && (
@@ -497,7 +511,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         fullName={fullName}
         isBusy={isLifecycleBusy}
         error={lifecycleError}
-        onTerminateInstead={isTerminated ? null : () => {
+        onTerminateInstead={isTerminated || isTerminationPending ? null : () => {
           setIsDeleteOpen(false);
           setLifecycleError(null);
           setIsTerminateOpen(true);

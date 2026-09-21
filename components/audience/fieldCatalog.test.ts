@@ -195,3 +195,34 @@ describe("buildAudienceFields", () => {
     expect(keys).not.toContain("sys:job");
   });
 });
+
+describe("value pickers for custom attributes", () => {
+  const sourceOf = (over: Partial<FieldDTO>) => buildAudienceFields([field(over)])[0]?.valueSource;
+
+  it.each([
+    AttributeType.COUNTRY,
+    AttributeType.LANGUAGE,
+    AttributeType.TIMEZONE,
+    AttributeType.CURRENCY,
+  ])("picks a %s from its managed catalogue instead of a text box", (type) => {
+    expect(sourceOf({ type })).toBe("catalog");
+    expect(operatorsForField(field({ type }))).toEqual(["eq", "neq", "in", "not_in"]);
+  });
+
+  // The backend matches an option by its id and refuses anything else, so a SELECT with no options
+  // yet must not fall back to a text box that could only produce a refusal.
+  it("keeps a select on its option list even before it has options", () => {
+    expect(sourceOf({ type: AttributeType.SELECT, options: [] })).toBe("attributeOptions");
+    expect(sourceOf({ type: AttributeType.MULTI_SELECT, options: null })).toBe("attributeOptions");
+  });
+
+  it("gives custom numbers and dates their own inputs", () => {
+    expect(sourceOf({ type: AttributeType.NUMBER })).toBe("number");
+    expect(sourceOf({ type: AttributeType.DATE })).toBe("date");
+  });
+
+  it("leaves plain text as text", () => {
+    expect(sourceOf({ type: AttributeType.TEXT })).toBe("freeText");
+    expect(sourceOf({ type: AttributeType.PHONE })).toBe("freeText");
+  });
+});

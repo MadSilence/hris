@@ -87,7 +87,7 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     case "TIMEOFF_APPROVAL_REQUESTED": {
       const requesterId = str(p.requesterId);
       return {
-        title: "Time off approval requested",
+        title: "Time Off Approval Requested",
         message: `${str(p.requesterName) || "An employee"} requested ${dayCount(str(p.amount))} · ${dates(p)}`,
         Icon: CalendarClock,
         href: requesterId ? `/organization/people/${requesterId}/time-off` : null,
@@ -193,7 +193,7 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         .join(", ");
       return {
         title: "Holidays Changed at the Source",
-        message: `${str(p.calendarName) || "A holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} differs from its source${counts ? `: ${counts}` : ""}. Review it before people plan around it.`,
+        message: `${str(p.calendarName) || "A holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} differs from its source${counts ? `: ${counts}` : ""}. Nothing changes until someone applies it.`,
         Icon: TriangleAlert,
         href: calendarId ? `/settings/time/public-holidays/${calendarId}` : null,
       };
@@ -303,7 +303,7 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       const role = str(p.roleName) || "A role";
       const who = str(p.actorName);
       return {
-        title: "Role access changed",
+        title: "Role Access Changed",
         message: who ? `${who} changed the ${what} of ${role}.` : `The ${what} of ${role} changed.`,
         Icon: TriangleAlert,
         href: roleId ? `/settings/people/roles/${roleId}` : null,
@@ -322,7 +322,7 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     }
     default:
       return {
-        title: n.type.replaceAll("_", " ").toLowerCase(),
+        title: n.type.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
         message: "",
         Icon: Bell,
         href: n.targetType && n.targetId ? null : null,

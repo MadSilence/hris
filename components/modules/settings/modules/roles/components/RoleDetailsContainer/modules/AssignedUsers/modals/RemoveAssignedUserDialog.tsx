@@ -46,7 +46,7 @@ export default function RemoveAssignedUserDialog({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
             <AlertTriangle className="w-5 h-5"/>
             Remove user from role
           </AlertDialogTitle>
@@ -56,12 +56,12 @@ export default function RemoveAssignedUserDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-danger-50 border border-danger-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5"/>
+            <AlertTriangle className="w-5 h-5 text-danger-600 mt-0.5"/>
             <div>
-              <h4 className="font-medium text-red-800 mb-1">Warning</h4>
-              <p className="text-sm text-red-700">
+              <h4 className="font-medium text-danger-800 mb-1">Warning</h4>
+              <p className="text-sm text-danger-700">
                 The user will lose the access granted by this role until it is assigned again.
               </p>
             </div>
@@ -71,7 +71,7 @@ export default function RemoveAssignedUserDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-danger-600 hover:bg-danger-700"
             disabled={busy}
             onClick={(event) => {
               event.preventDefault();

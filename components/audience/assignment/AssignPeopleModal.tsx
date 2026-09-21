@@ -191,7 +191,12 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const needsDate = temporal && !effectiveFrom;
 
   const jobStatus = job.data?.status;
-  const running = Boolean(jobId) && !(jobStatus && isTerminalJobStatus(jobStatus));
+  /* The poll stopped answering. The job itself is running or finished on the server — what ended is
+     this browser's right to ask, which is what a bulk assignment that includes the person making it
+     does to their own token (`technical_documentation/ACCESS.md` § 8). Saying so beats a progress
+     bar that never moves again. */
+  const lostTheThread = Boolean(jobId) && job.isError;
+  const running = Boolean(jobId) && !lostTheThread && !(jobStatus && isTerminalJobStatus(jobStatus));
   React.useEffect(() => {
     if (jobStatus && isTerminalJobStatus(jobStatus)) {
       for (const key of invalidateKeys) void queryClient.invalidateQueries({ queryKey: key });
@@ -271,6 +276,14 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         <div className="min-h-0 flex-1 overflow-y-auto">
           {result ? (
             <ResultView result={result} noun={noun} />
+          ) : lostTheThread ? (
+            <div className="space-y-2 py-6 text-sm">
+              <p className="font-medium">This is still running, and we cannot follow it from here.</p>
+              <p className="text-muted-foreground">
+                Reload the page to see the result. If your own access changed with this assignment, sign in
+                again first — the change itself is not affected.
+              </p>
+            </div>
           ) : running ? (
             <RunningView
               created={job.data?.summary.created ?? 0}
@@ -342,7 +355,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 : null}
 
               {overCap && (
-                <p className="flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <p className="flex items-start gap-2 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
                   You’ve selected {manual.size}. Add up to {MANUAL_CAP} manually, or use “select
                   everyone who matches” for larger groups.
@@ -357,6 +370,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         <DialogFooter>
           {result ? (
             <Button onClick={onCloseAction}>Done</Button>
+          ) : lostTheThread ? (
+            <Button onClick={onCloseAction}>Close</Button>
           ) : running ? (
             <Button disabled>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -423,9 +438,9 @@ const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, no
     <div className="space-y-4 px-1 py-6">
       <div className="flex items-start gap-3">
         {failed > 0 ? (
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-amber-600" />
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-warning-600" />
         ) : (
-          <Check className="mt-0.5 h-5 w-5 flex-none text-green-600" />
+          <Check className="mt-0.5 h-5 w-5 flex-none text-success-600" />
         )}
         <div>
           <p className="font-medium text-foreground">
@@ -444,7 +459,7 @@ const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, no
       )}
 
       {failed > 0 && (
-        <div className="space-y-2 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div className="space-y-2 rounded-md bg-danger-50 px-4 py-3 text-sm text-danger-800">
           <p className="font-medium">
             {failed} {failed === 1 ? "person" : "people"} could not be added.
           </p>

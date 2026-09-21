@@ -29,8 +29,11 @@ import { useAccess } from "@/components/auth/useAccess";
 import {
   UserPickerField,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
+import { useUser } from "@/components/hooks/useUser/useUser";
 import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
+import type { AttributeType } from "@/models/attribute/AttributeType";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import {
   AudienceOperator,
@@ -81,6 +84,9 @@ const isRangeOp = (op: AudienceOperator) => op === "between";
 
 const optionsForKey = (key: string, fields: FieldDTO[] | undefined): OptionDTO[] | null =>
   fields?.find((f) => f.id === key)?.options ?? null;
+
+const typeForKey = (key: string, fields: FieldDTO[] | undefined): AttributeType | null =>
+  fields?.find((f) => f.id === key)?.type ?? null;
 
 const rowComplete = (r: Row): boolean => {
   if (!r.key || !r.op) return false;
@@ -217,6 +223,7 @@ export const AudienceBuilder: React.FC<Props> = ({
                   source={field.valueSource}
                   op={r.op}
                   attributeOptions={optionsForKey(field.key, fields)}
+                  attributeType={typeForKey(field.key, fields)}
                   value={r.value}
                   valueTo={r.valueTo}
                   values={r.values}
@@ -244,7 +251,7 @@ export const AudienceBuilder: React.FC<Props> = ({
               size="icon"
               onClick={() => removeRow(r.id)}
               aria-label="Remove filter"
-              className="ml-auto h-9 w-9 text-red-600 hover:text-red-700"
+              className="ml-auto h-9 w-9 text-danger-600 hover:text-danger-700"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -270,6 +277,7 @@ type ValueEditorProps = {
   source: AudienceValueSource;
   op: AudienceOperator;
   attributeOptions: OptionDTO[] | null;
+  attributeType: AttributeType | null;
   value: string;
   valueTo: string;
   values: string[];
@@ -278,10 +286,25 @@ type ValueEditorProps = {
   onValues: (v: string[]) => void;
 };
 
+/**
+ * A rule stores only the person's id, so the picker was handed `{ id }` and drew "Unknown" for
+ * whoever had just been chosen. The name is read back the way the policy wizard's approver field does.
+ */
+const PickedPersonField: React.FC<{ id: string; onValue: (v: string) => void }> = ({ id, onValue }) => {
+  const { data } = useUser(id);
+  const value = data
+    ? { id, firstName: data.firstName, lastName: data.lastName, email: data.email, avatarUrl: data.avatarUrl }
+    : { id };
+  return (
+    <UserPickerField value={value} onChange={(user) => onValue(user?.id ?? "")} placeholder="Select a person" />
+  );
+};
+
 const RuleValueEditor: React.FC<ValueEditorProps> = ({
   source,
   op,
   attributeOptions,
+  attributeType,
   value,
   valueTo,
   values,
@@ -289,17 +312,17 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
   onValueTo,
   onValues,
 }) => {
-  const { options, isLoading, hasOptions } = useAudienceFieldOptions(source, attributeOptions);
+  const { options, isLoading, hasOptions } = useAudienceFieldOptions(source, attributeOptions, attributeType);
 
   // People are searched, not enumerated — a company-wide dropdown of employees is unusable.
   if (source === "people") {
     return (
       <div className="w-56">
-        <UserPickerField
-          value={value ? { id: value } : null}
-          onChange={(user) => onValue(user?.id ?? "")}
-          placeholder="Select a person"
-        />
+        {value ? (
+          <PickedPersonField id={value} onValue={onValue} />
+        ) : (
+          <UserPickerField value={null} onChange={(user) => onValue(user?.id ?? "")} placeholder="Select a person" />
+        )}
       </div>
     );
   }
@@ -307,6 +330,10 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
   if (hasOptions) {
     if (isMultiOp(op)) {
       return <MultiSelect options={options} values={values} onChange={onValues} loading={isLoading} />;
+    }
+    // Hundreds of countries or time zones do not scroll well in a plain dropdown; they are searched.
+    if (source === "catalog") {
+      return <SearchableSelect options={options} value={value} onChange={onValue} />;
     }
     return (
       <Select value={value} onValueChange={onValue}>
@@ -324,7 +351,21 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     );
   }
 
-  const inputType = source === "date" ? "date" : source === "number" ? "number" : "text";
+  // The one shared date field — a raw `<input type="date">` is the browser's control, not ours.
+  if (source === "date") {
+    if (isRangeOp(op)) {
+      return (
+        <div className="flex items-center gap-1">
+          <DatePicker className="h-9 w-36" value={value} onChange={onValue} ariaLabel="From" />
+          <span className="text-sm text-muted-foreground">…</span>
+          <DatePicker className="h-9 w-36" value={valueTo} onChange={onValueTo} ariaLabel="To" />
+        </div>
+      );
+    }
+    return <DatePicker className="h-9 w-44" value={value} onChange={onValue} />;
+  }
+
+  const inputType = source === "number" ? "number" : "text";
 
   if (isRangeOp(op)) {
     return (
@@ -343,6 +384,59 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
       value={value}
       onChange={(e) => onValue(e.target.value)}
     />
+  );
+};
+
+// ---- single select with search (Desact Command combobox) ---------------
+
+const SearchableSelect: React.FC<{
+  options: AudienceOption[];
+  value: string;
+  onChange: (v: string) => void;
+}> = ({ options, value, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const picked = options.find((o) => o.id === value) ?? null;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="h-9 w-44 justify-between font-normal"
+        >
+          <span className={picked ? "truncate" : "truncate text-muted-foreground"}>
+            {picked ? picked.label : "Select value"}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search" className="h-9" />
+          <CommandList>
+            <CommandEmpty>No options</CommandEmpty>
+            <CommandGroup>
+              {options.map((o) => (
+                <CommandItem
+                  key={o.id}
+                  value={o.label}
+                  onSelect={() => {
+                    onChange(o.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check className={o.id === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
+                  {o.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

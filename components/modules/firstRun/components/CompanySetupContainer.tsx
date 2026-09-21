@@ -135,7 +135,11 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
     const res = await submitCompanySetupAction({ industry, sizeBand, countryCode, dataset });
     setSubmitting(false);
 
-    if (res.status !== ActionStatus.SUCCESS) {
+    // Somebody else — the same owner in another window — started it first. That is not a failure to
+    // report: the screen does what the refusal promises and follows their run. It used to raise the
+    // refusal card, with a request id nobody needs, and leave this window on the form.
+    const alreadyRunning = res.status !== ActionStatus.SUCCESS && res.code === "CST0002";
+    if (res.status !== ActionStatus.SUCCESS && !alreadyRunning) {
       showActionError(res);
       return;
     }

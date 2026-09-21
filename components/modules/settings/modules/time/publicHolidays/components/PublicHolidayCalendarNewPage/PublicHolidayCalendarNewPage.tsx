@@ -231,7 +231,10 @@ export function PublicHolidayCalendarNewPage() {
 
   const isLoading =
     isSubmitting || createCalendarMutation.isPending || replaceYearMutation.isPending;
-  const isFirstTemplateLoad = Boolean(templateId) && seededYear === null;
+  /* `seededYear` is only set by a preview that came back, so a provider that never answers left this
+     true for ever and the page sat on its skeleton — with the failure branch below written, correct and
+     unreachable. A failed preview is an answer: stop waiting for one. */
+  const isFirstTemplateLoad = Boolean(templateId) && seededYear === null && !previewFailed;
 
   if (isFirstTemplateLoad) {
     return (

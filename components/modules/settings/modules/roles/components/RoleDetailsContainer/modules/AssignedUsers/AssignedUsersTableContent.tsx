@@ -97,7 +97,7 @@ export default function AssignedUsersTableContent({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-red-600"
+                          className="text-danger-600"
                           aria-label="Remove user"
                           disabled
                           title="The default role can't be removed"
@@ -112,7 +112,7 @@ export default function AssignedUsersTableContent({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-red-600 hover:text-red-700"
+                              className="text-danger-600 hover:text-danger-700"
                               aria-label="Remove user"
                               onClick={(e) => e.stopPropagation()}
                             >

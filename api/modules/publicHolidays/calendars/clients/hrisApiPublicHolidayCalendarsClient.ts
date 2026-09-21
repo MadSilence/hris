@@ -10,7 +10,10 @@ import type {
 import { publicHolidayCalendarMapper } from "@/api/modules/publicHolidays/calendars/mappers";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import { PublicHolidayCalendar } from "@/models/publicHolidays/calendar";
-import type { PublicHolidayYearFillResult } from "@/api/modules/publicHolidays/calendars/dto";
+import type {
+  PublicHolidayDriftApplyResult,
+  PublicHolidayYearFillResult,
+} from "@/api/modules/publicHolidays/calendars/dto";
 
 export class HrisApiPublicHolidayCalendarsClient {
   private readonly BASE_PATH = "/public-holiday-calendars";
@@ -104,6 +107,16 @@ export class HrisApiPublicHolidayCalendarsClient {
     return hrisApiClient.post<PublicHolidayYearFillResult>(
       `${this.BASE_PATH}/${id}/years/${year}/fill`
     );
+  }
+
+  /** Writes what the provider reported into the year, and re-prices the leave under the moved days. */
+  public async applyDrift(driftId: string): Promise<PublicHolidayDriftApplyResult> {
+    return hrisApiClient.post<PublicHolidayDriftApplyResult>(`/public-holiday-drifts/${driftId}/apply`);
+  }
+
+  /** Declines it; the same difference is not announced again. */
+  public async dismissDrift(driftId: string): Promise<void> {
+    return hrisApiClient.post<void>(`/public-holiday-drifts/${driftId}/dismiss`);
   }
 
   public async exportCalendars(format: "csv" | "xlsx"): Promise<Response> {

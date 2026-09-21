@@ -7,10 +7,12 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
 import { formatDisplayDate } from "@/lib/date";
-import { parseCheckboxValue } from "@/models/attribute/attributeValue";
+import { optionValueLabel, parseCheckboxValue } from "@/models/attribute/attributeValue";
+import { isMaskedValue, objectValueSummary } from "@/models/attribute/objectValueSummary";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
 import { AccountStatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
+import { sortKeyForColumn } from "@/components/modules/organization/components/PeopleTable/peopleSort";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
@@ -88,16 +90,14 @@ export default function PeopleTable({
     return () => obs.disconnect();
   }, [hasMore, onLoadMore, data.length]);
 
-  const toggleSort = (fieldId: string) => {
+  const toggleSort = (sortKey: string) => {
     if (!onSortChange) return;
-    const sysKey = sysKeyFromId(fieldId);
-    if (!sysKey) return;
-    if (!active || active.fieldId !== sysKey) {
-      onSortChange({ fieldId: sysKey, dir: "asc" });
+    if (!active || active.fieldId !== sortKey) {
+      onSortChange({ fieldId: sortKey, dir: "asc" });
       return;
     }
     if (active.dir === "asc") {
-      onSortChange({ fieldId: sysKey, dir: "desc" });
+      onSortChange({ fieldId: sortKey, dir: "desc" });
       return;
     }
     onSortChange(null);
@@ -187,6 +187,16 @@ export default function PeopleTable({
     const meta = metaById.get(colId);
     if (!meta) return null;
 
+    // A sensitive value the reader may not see arrives as the mask. It is drawn as absent-but-present,
+    // muted and labelled, rather than as text that looks like somebody typed dots.
+    if (isMaskedValue(val) || (meta.type === "SELECT" && isMaskedValue(optionValueLabel(val)))) {
+      return (
+        <span className="text-muted-foreground" title="Hidden — you do not have access to this value">
+          {typeof val === "string" ? val : optionValueLabel(val)}
+        </span>
+      );
+    }
+
     switch (meta.type) {
       // A PERSON attribute stores a user id and the backend resolves it to {id, name, avatarUrl};
       // it is a person like any other, so it gets the same chip as the Name and Manager columns.
@@ -196,8 +206,11 @@ export default function PeopleTable({
       case "TEXT":
       case "EMAIL":
       case "URL":
-      case "SELECT":
         return <span>{valueToString(val)}</span>;
+
+      // An option is a pair: the id it is matched by, and the text it is read by.
+      case "SELECT":
+        return <span>{optionValueLabel(val)}</span>;
 
       case "CHECKBOX":
         return <Checkbox checked={parseCheckboxValue(val)} disabled aria-label="checked" />;
@@ -213,11 +226,21 @@ export default function PeopleTable({
       }
 
       case "MULTI_SELECT": {
-        const arr = Array.isArray(val) ? val.map(String) : [];
+        const arr = Array.isArray(val)
+          ? val.map((v) => optionValueLabel(v)).filter((s): s is string => s != null)
+          : [];
         if (!arr.length) return null;
         return (
           <span className="text-muted-foreground">{arr.join(", ")}</span>
         );
+      }
+
+      // Stored as a list of records; the cell used to print it as JSON.
+      case "MONEY":
+      case "ADDRESS":
+      case "OBJECT": {
+        const summary = objectValueSummary(meta.type, val);
+        return summary ? <span title={summary}>{summary}</span> : null;
       }
 
       default:
@@ -251,14 +274,16 @@ export default function PeopleTable({
             </TableHead>
 
             {visibleColumns.map((column) => {
-              const sysKey = sysKeyFromId(column.id);
-              const isSortable = !!sysKey && SORTABLE_SYS_KEYS.has(sysKey);
-              const isActive = !!active && !!sysKey && active.fieldId === sysKey;
+              // A system column sorts by its bare key, a custom attribute by `attr:<id>` — and only
+              // one with a single scalar value (peopleSort.SORTABLE_ATTRIBUTE_TYPES).
+              const sortKey = sortKeyForColumn(column.id, metaById.get(column.id));
+              const isSortable = !!sortKey;
+              const isActive = !!active && !!sortKey && active.fieldId === sortKey;
 
               return (
                 <TableHead
                   key={column.id}
-                  onClick={() => isSortable && toggleSort(column.id)}
+                  onClick={() => sortKey && toggleSort(sortKey)}
                   title={isSortable ? column.label : undefined}
                   className={`truncate ${isSortable ? "cursor-pointer select-none" : ""}`}
                 >
@@ -330,24 +355,6 @@ const EmptyState: React.FC = () => (
     </div>
   </div>
 );
-
-/**
- * Columns the backend can actually order by (`UserRepositoryImpl.searchUsersKeysetWithFilters`).
- * Anything else would be accepted by the API and silently fall back to last_name, so its header
- * stays inert rather than pretending. Extend together with the backend sort switch.
- */
-const SORTABLE_SYS_KEYS = new Set([
-  "first_name",
-  "last_name",
-  "email",
-  "status",
-  "created_at",
-  "updated_at",
-  "hire_date",
-  "employment_type",
-  "probation_end",
-  "termination_date",
-]);
 
 function sysKeyFromId(id: string): string | null {
   if (!id.startsWith("sys:")) return null;

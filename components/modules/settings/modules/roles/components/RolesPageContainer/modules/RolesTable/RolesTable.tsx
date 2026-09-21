@@ -112,7 +112,7 @@ export default function RolesTable({
 
   return (
     <>
-      <Table className="table-fixed">
+      <Table className="table-fixed" stickyHeader>
         <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
           <TableRow>
             <TableHead className="w-1/4">Name</TableHead>

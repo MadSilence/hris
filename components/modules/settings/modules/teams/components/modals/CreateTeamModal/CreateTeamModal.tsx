@@ -78,7 +78,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           <div className="space-y-1.5">
             <RequiredLabel htmlFor="team-name" required>Name</RequiredLabel>
             <Input id="team-name" name="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} />
-            {formik.touched.name && formik.errors.name && <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>}
+            {formik.touched.name && formik.errors.name && <p role="alert" className="text-xs text-danger-500">{formik.errors.name}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-code">Code</Label>

@@ -38,7 +38,7 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
         dimmed && "opacity-35",
-        dropTargetId === COMPANY_NODE_ID && "border-emerald-400 ring-2 ring-emerald-300",
+        dropTargetId === COMPANY_NODE_ID && "border-success-400 ring-2 ring-success-300",
       )}
     >
       {/* Top row: company icon / logo */}

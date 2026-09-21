@@ -51,7 +51,7 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
     selected
       ? "border-brown-300 bg-brown-100"
       : "border-brown-200 hover:border-brown-300 hover:bg-brown-50",
-    matched && "border-amber-400 ring-2 ring-amber-300",
+    matched && "border-warning-400 ring-2 ring-warning-300",
     dimmed && "opacity-35",
     archived && "border-dashed bg-brown-50/70",
     draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",

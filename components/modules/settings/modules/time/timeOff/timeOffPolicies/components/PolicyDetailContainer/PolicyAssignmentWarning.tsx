@@ -37,7 +37,7 @@ export const PolicyAssignmentWarning: React.FC<Props> = ({ policyId, userIds }) 
   if (noApprover.length === 0 && noHireDate.length === 0) return null;
 
   return (
-    <div className="flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
+    <div className="flex items-start gap-2 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
       <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
       <div className="space-y-1">
         {noApprover.length > 0 ? (

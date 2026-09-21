@@ -194,7 +194,7 @@ export function TeamPeopleTab({
               <div
                 key={member.id}
                 className={`group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50 ${
-                  member.id === highlightUserId ? "bg-amber-50 ring-1 ring-amber-200" : ""
+                  member.id === highlightUserId ? "bg-warning-50 ring-1 ring-warning-200" : ""
                 }`}
               >
                 <UserChip
@@ -212,7 +212,7 @@ export function TeamPeopleTab({
                       onClick={() => setRemoveTarget(member)}
                       disabled={removingId === member.id}
                       aria-label={`Remove ${member.firstName ?? member.email}`}
-                      className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-red-600 disabled:opacity-50"
+                      className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600 disabled:opacity-50"
                     >
                       <X className="h-4 w-4" />
                     </button>

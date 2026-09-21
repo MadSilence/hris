@@ -108,7 +108,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
               onBlur={formik.handleBlur}
             />
             {formik.touched.name && formik.errors.name && (
-              <p role="alert" className="text-xs text-red-500">{formik.errors.name}</p>
+              <p role="alert" className="text-xs text-danger-500">{formik.errors.name}</p>
             )}
           </div>
 
@@ -156,7 +156,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
           </div>
 
           {updateTeam.isError && (
-            <p className="text-sm text-red-500">
+            <p className="text-sm text-danger-500">
               {(updateTeam.error as Error)?.message ?? "An error occurred."}
             </p>
           )}

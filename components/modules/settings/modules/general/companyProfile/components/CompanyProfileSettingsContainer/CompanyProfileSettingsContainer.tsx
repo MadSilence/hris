@@ -46,6 +46,7 @@ export default function CompanyProfileSettingsContainer() {
       settings={settings}
       onSaveProfile={handleSaveProfile}
       onSaveSettings={handleSaveSettings}
+      onLogoChanged={refreshCompany}
       savingProfile={updateCompany.isPending}
       savingSettings={updateSettings.isPending}
       profileError={updateCompany.error instanceof Error ? updateCompany.error.message : null}

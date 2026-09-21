@@ -57,7 +57,7 @@ function AssignmentRow({
           disabled={ending}
           aria-label="End assignment"
           title="End assignment"
-          className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+          className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-danger-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
         >
           <X className="h-4 w-4" />
         </button>
@@ -181,7 +181,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             ))}
           </div>
         ) : error ? (
-          <p className="py-6 text-center text-sm text-red-500">Failed to load assignments.</p>
+          <p className="py-6 text-center text-sm text-danger-500">Failed to load assignments.</p>
         ) : (
           <div className="flex flex-col">
             {shown.map((assignment) => (

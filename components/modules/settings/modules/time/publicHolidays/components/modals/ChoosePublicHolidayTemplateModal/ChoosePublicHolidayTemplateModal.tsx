@@ -57,7 +57,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
     data: templates = [],
     isLoading,
     error,
-  } = usePublicHolidayTemplates();
+  } = usePublicHolidayTemplates({ enabled: isOpen });
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<string>(NATIONAL);
@@ -240,6 +240,7 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
               Regional
             </Badge>
           ) : (
+            // eslint-disable-next-line no-restricted-syntax -- a kind (national / regional), not a status
             <Badge className="border-blue-200 bg-blue-100 text-blue-800">
               National
             </Badge>

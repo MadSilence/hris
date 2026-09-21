@@ -41,9 +41,9 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
           ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
           : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
         isArchived && "border-dashed",
-        matched && "border-amber-400 ring-2 ring-amber-300",
+        matched && "border-warning-400 ring-2 ring-warning-300",
         dimmed && "opacity-35",
-        isDropTarget && "border-emerald-400 ring-2 ring-emerald-300",
+        isDropTarget && "border-success-400 ring-2 ring-success-300",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />

@@ -114,7 +114,7 @@ export const ObjectRecordsEditor: FC<{
             <button
               type="button"
               onClick={() => onChange(records.filter((_, idx) => idx !== i))}
-              className="flex items-center gap-1 text-xs text-brown-400 hover:text-red-600"
+              className="flex items-center gap-1 text-xs text-brown-400 hover:text-danger-600"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Remove

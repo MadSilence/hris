@@ -50,7 +50,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
         onClick={() => onStarredOnlyChange(!starredOnly)}
         className={cn(starredOnly && "border-brown-300 bg-brown-50")}
       >
-        <Star className={cn("h-4 w-4", starredOnly && "fill-current text-yellow-500")}/>
+        <Star className={cn("h-4 w-4", starredOnly && "fill-current text-warning-500")}/>
       </Button>
 
       {showHrOnlyFilter && (

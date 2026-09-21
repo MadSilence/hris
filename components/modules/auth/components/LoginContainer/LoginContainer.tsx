@@ -29,7 +29,15 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
 
   const handleSubmit = React.useCallback(
     async (values: LoginFormValues) => {
-      const res = await loginAction.mutateAsync(values);
+      let res: Awaited<ReturnType<typeof loginAction.mutateAsync>>;
+      try {
+        res = await loginAction.mutateAsync(values);
+      } catch {
+        // A refusal is already on screen — `loginAction.error` feeds `apiError` below. Rethrowing
+        // left the form's submit handler with a rejected promise nobody awaited, which Next's dev
+        // overlay reports as a runtime error on every wrong password.
+        return;
+      }
 
       if (res.ok) {
         // A full navigation, not router.push, on purpose.

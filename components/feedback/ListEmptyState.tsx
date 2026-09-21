@@ -49,6 +49,8 @@ export const ListEmptyState: React.FC<{
   createAccess?: { resource: ResourceCode; action?: AccessAction };
   /** A control to render in place of the clickable block — see {@link EmptyState}. */
   action?: React.ReactNode;
+  /** Fills the height its parent gives it — see {@link EmptyState}'s `fill`. */
+  fill?: boolean;
   className?: string;
 }> = ({
   query,
@@ -62,10 +64,11 @@ export const ListEmptyState: React.FC<{
   createLabel,
   createAccess,
   action,
+  fill,
   className,
 }) => {
   if (query?.trim()) {
-    return <NoResults hint={noResultsHint} className={className} />;
+    return <NoResults hint={noResultsHint} fill={fill} className={className} />;
   }
 
   // No create action here on purpose: the archive is filled by archiving, never by creating.
@@ -75,12 +78,13 @@ export const ListEmptyState: React.FC<{
         icon={icon}
         title="Nothing archived"
         description={archivedDescription}
+        fill={fill}
         className={className}
       />
     );
   }
 
-  const common = { icon, title, description, action, className };
+  const common = { icon, title, description, action, fill, className };
 
   if (createAccess && onCreate) {
     return (

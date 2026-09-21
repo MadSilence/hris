@@ -787,7 +787,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                     type="button"
                     onClick={() => removeApprover(index)}
                     disabled={values.apprApprovers.length <= 1}
-                    className="flex-none text-brown-400 hover:text-red-600 disabled:opacity-40"
+                    className="flex-none text-brown-400 hover:text-danger-600 disabled:opacity-40"
                     aria-label="Remove step"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1087,7 +1087,7 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
             <button
               type="button"
               onClick={() => removeRow(index)}
-              className="pb-2 flex-none text-brown-400 hover:text-red-600"
+              className="pb-2 flex-none text-brown-400 hover:text-danger-600"
               aria-label="Remove tenure tier"
             >
               <Trash2 className="h-4 w-4" />
@@ -1165,7 +1165,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                 <button
                   type="button"
                   onClick={() => removeRow(index)}
-                  className="flex-none text-brown-400 hover:text-red-600"
+                  className="flex-none text-brown-400 hover:text-danger-600"
                   aria-label="Remove restriction"
                 >
                   <Trash2 className="h-4 w-4" />

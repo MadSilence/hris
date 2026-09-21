@@ -7,6 +7,7 @@ import { PanelRightOpen } from "lucide-react";
 
 import { useOrgChart } from "@/components/modules/organization/orgChart/hooks/useOrgChart/useOrgChart";
 import { useSetManager } from "@/components/modules/organization/orgChart/hooks/useSetManager";
+import { useInsertManagerAbove } from "@/components/modules/organization/orgChart/hooks/useInsertManagerAbove";
 import { buildOrgForest, type OrgTreeNode } from "@/components/modules/organization/orgChart/utils/buildOrgTree";
 import { OrgChartCanvas } from "@/components/modules/organization/orgChart/components/OrgChartCanvas";
 import { UserDetailPanel } from "@/components/modules/organization/orgChart/components/UserDetailPanel/UserDetailPanel";
@@ -16,6 +17,7 @@ import { canAccess } from "@/models/access";
 export default function OrgChartContainer() {
   const { data: users = [], isLoading, error } = useOrgChart();
   const setManager = useSetManager();
+  const insertManagerAbove = useInsertManagerAbove();
   const { access } = useAccess();
   const canReparent = canAccess({ access, resource: "PEOPLE.PROFILE", action: "EDIT" });
 
@@ -130,11 +132,20 @@ export default function OrgChartContainer() {
         <div className="w-[360px] flex-none overflow-hidden border-l border-brown-200 bg-white">
           {selectedUser ? (
             <UserDetailPanel
+              key={selectedUser.id}
               user={selectedUser}
               manager={manager}
               reports={reports}
               onSelect={handlePanelSelect}
               onCollapse={() => setPanelOpen(false)}
+              canEditManager={canReparent}
+              isSavingManager={setManager.isPending || insertManagerAbove.isPending}
+              onChangeManager={(managerId) =>
+                setManager.mutate({ userId: selectedUser.id, managerId })
+              }
+              onInsertManagerAbove={(managerId) =>
+                insertManagerAbove.mutate({ userId: selectedUser.id, managerId })
+              }
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">

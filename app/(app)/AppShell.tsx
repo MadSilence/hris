@@ -8,7 +8,7 @@ import Search from "@/public/icons/search.svg";
 import People from "@/public/icons/people.svg";
 import Calendar from "@/public/icons/calendar.svg";
 import Settings from "@/public/icons/settings.svg";
-import { ListChecks, Workflow } from "lucide-react";
+import { Clock, ListChecks, Workflow } from "lucide-react";
 import styles from "./layout.module.css";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, isSystemOwner, ResourceCode } from "@/models/access";
@@ -55,7 +55,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Reads still announce a refusal this way: InternalApiClient dispatches the event, and only it
+  // Non-GET calls through InternalApiClient still announce a refusal this way (reads do not — a
+  // failed read belongs to the region that did not load); only the client can dispatch it
   // can — a server action runs on the server and has no window. Mutations reach the same cards
   // through showActionError instead.
   useEffect(() => {
@@ -106,6 +107,13 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       // A grant that reaches nobody but yourself builds a board with one row; the item is offered
       // only when the scope reaches further. `canAccess` without a scope passed on any grant at all.
       widerThanSelf: true,
+    },
+    // Everyone keeps their own timesheet; the item shows for whoever may read one.
+    {
+      label: "Timesheet",
+      href: "/attendance",
+      Icon: Clock as NavItem["Icon"],
+      resources: ["PEOPLE.ATTENDANCE"],
     },
     {
       label: "Processes",

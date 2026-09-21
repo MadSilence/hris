@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import { Bookmark, ChevronLeft, ChevronRight, Filter as FilterIcon, Search, Trash2 } from "lucide-react";
+import { Bookmark, Check, ChevronLeft, ChevronRight, Filter as FilterIcon, Rows3, Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
@@ -21,6 +21,8 @@ import {
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import type { CalendarView } from "@/models/calendarView";
+import type { CompanyCalendarGrouping } from "@/models/calendar";
+import { groupingLabel } from "@/components/modules/calendar/lib/grouping";
 
 type Density = "month" | "week";
 
@@ -31,6 +33,12 @@ type Props = {
   fields: FieldDTO[] | undefined;
   filters: FilterDTO[];
   onFiltersChange: (next: FilterDTO[]) => void;
+
+  /** Null is a flat board. */
+  grouping: CompanyCalendarGrouping | null;
+  /** What this reader may group by — a company-wide read on the field. */
+  groupingOptions: CompanyCalendarGrouping[];
+  onGroupingChange: (next: CompanyCalendarGrouping | null) => void;
 
   views: CalendarView[];
   activeViewId: string | null;
@@ -54,6 +62,9 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   fields,
   filters,
   onFiltersChange,
+  grouping,
+  groupingOptions,
+  onGroupingChange,
   views,
   activeViewId,
   viewsBusy = false,
@@ -71,6 +82,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
   const [seed, setSeed] = useState(0);
 
+  const [groupOpen, setGroupOpen] = useState(false);
   const [viewsOpen, setViewsOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
@@ -133,6 +145,38 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             </div>
           </PopoverContent>
         </Popover>
+
+        {/* One dimension at a time, never nested. Offered only for a field the reader could filter
+            by: a header prints the field's value, so grouping by it is a way of reading it. */}
+        {groupingOptions.length > 0 || grouping !== null ? (
+          <Popover open={groupOpen} onOpenChange={setGroupOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <Rows3 className="h-4 w-4" />
+                {grouping ? `Group: ${groupingLabel(grouping)}` : "Group"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-[200px] p-2">
+              {([null, ...groupingOptions] as (CompanyCalendarGrouping | null)[]).map((option) => (
+                <button
+                  key={option ?? "none"}
+                  type="button"
+                  onClick={() => {
+                    onGroupingChange(option);
+                    setGroupOpen(false);
+                  }}
+                  className={[
+                    "flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm hover:bg-brown-50",
+                    option === grouping ? "font-medium text-brown-800" : "text-brown-600",
+                  ].join(" ")}
+                >
+                  {option ? groupingLabel(option) : "None"}
+                  {option === grouping ? <Check className="h-3.5 w-3.5" /> : null}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+        ) : null}
 
         <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
           <PopoverTrigger asChild>
@@ -254,8 +298,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             }}
           />
           <p className="text-xs text-muted-foreground">
-            A view remembers the filters and the week/month choice — not the period. Opened in June it
-            shows June.
+            A view remembers the filters, the grouping and the week/month choice — not the period.
+            Opened in June it shows June.
           </p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSaveOpen(false)}>

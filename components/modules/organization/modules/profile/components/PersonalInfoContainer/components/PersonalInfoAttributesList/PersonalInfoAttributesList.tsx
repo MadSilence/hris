@@ -15,19 +15,27 @@ type Props = {
   /** The values as they were before this edit — what `required` is measured against. */
   initialValueMap?: Record<string, unknown>;
   registerSection: (id: string, el: HTMLElement | null) => void;
-  /** The one group currently open for editing, or null. Editing is per block, not per page. */
-  editingGroupId: string | null;
+  /**
+   * The blocks open for editing. A block is opened by its own pencil, and several may be open at
+   * once: they share one draft and one Save, in the bar at the bottom.
+   */
+  openGroupIds: ReadonlySet<string>;
   editableAttrIds: Set<string>;
   /** Attributes the caller may only see masked (sensitive + no VIEW) — rendered as a placeholder. */
   maskedAttrIds?: Set<string>;
   onChangeValue: (attributeId: string, v: unknown) => void;
   onValidityChange?: (attributeId: string, error: string | null) => void;
-  /** The pencil, or Cancel/Save, for one custom group — built by the container that owns the draft. */
+  /** The pencil, or Cancel, for one custom group — built by the container that owns the draft. */
   renderGroupActions?: (groupId: string) => React.ReactNode;
-  /** Built-in sections rendered above the custom groups, tracked by the same scrollspy. */
+  /**
+   * Sections rendered above the custom groups, tracked by the same scrollspy: the built-in field
+   * groups, and the position timeline after Organization.
+   */
   leadingSections?: { id: string; content: React.ReactNode }[];
   /** Why there are no attribute groups — "not configured" reads differently from "no access". */
   attributesNotice?: string | null;
+  /** The sticky save bar. Rendered last, inside the scroll area, so it sticks to its bottom edge. */
+  footer?: React.ReactNode;
 };
 
 export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
@@ -37,7 +45,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
       valueMap,
       initialValueMap,
       registerSection,
-      editingGroupId,
+      openGroupIds,
       editableAttrIds,
       maskedAttrIds,
       onChangeValue,
@@ -45,14 +53,17 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
       renderGroupActions,
       leadingSections,
       attributesNotice,
+      footer,
     },
     ref
   ) => {
     return (
       <section ref={ref} className="relative h-full min-h-0 overflow-y-auto pr-1">
         {/*
-          No page-level Save: each block carries its own pencil and its own draft, so the actions
-          stay next to what they act on instead of floating above everything.
+          Each block carries its own pencil; Save is not in any block but in the bar stuck to the
+          bottom of this area, which appears as soon as something changed and saves every open
+          block in one request. It used to be per block — and before that one page-wide Edit with
+          Save above a form the reader had scrolled past.
         */}
         {leadingSections?.map((section) => (
           <div
@@ -90,7 +101,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
                         attribute={attr}
                         rawValue={valueMap[attr.id]}
                         masked={maskedAttrIds?.has(attr.id)}
-                        isEdit={editingGroupId === group.id && editableAttrIds.has(attr.id)}
+                        isEdit={openGroupIds.has(group.id) && editableAttrIds.has(attr.id)}
                         wasFilled={!isEmptyValue((initialValueMap ?? valueMap)[attr.id])}
                         onChange={(v) => onChangeValue(attr.id, v)}
                         onValidityChange={(err) => onValidityChange?.(attr.id, err)}
@@ -103,6 +114,8 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
             </ProfileSectionCard>
           </div>
         ))}
+
+        {footer}
       </section>
     );
   }

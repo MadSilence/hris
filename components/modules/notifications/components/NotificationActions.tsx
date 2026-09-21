@@ -1,10 +1,11 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useId, useState } from "react";
 import { Check, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import type { Notification } from "@/models/notifications";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
@@ -13,11 +14,12 @@ import { useDecideCancellation } from "@/components/modules/settings/modules/tim
 import { useInvalidateNotifications } from "@/components/modules/notifications/hooks/useNotifications";
 import { useMarkNotificationRead } from "@/components/modules/notifications/hooks/useNotificationMutations";
 import { showError } from "@/lib/errors/errorToast";
+import { PublicHolidayDriftActions } from "@/components/modules/notifications/components/PublicHolidayDriftActions";
 
 type Outcome = { label: string; className: string };
 
-const GREEN = "text-green-700";
-const RED = "text-red-600";
+const GREEN = "text-success-700";
+const RED = "text-danger-600";
 const MUTED = "text-brown-500";
 
 /**
@@ -27,6 +29,9 @@ const MUTED = "text-brown-500";
  */
 const APPROVAL_OUTCOMES: Record<string, Outcome> = {
   APPROVED: { label: "Approved", className: GREEN },
+  // This approver has signed; the request still waits for the rest of its chain. The backend answers
+  // it per recipient, so the next approver's copy of the same request still offers the buttons.
+  APPROVED_BY_YOU: { label: "You approved · waiting for the rest of the chain", className: GREEN },
   CANCELLATION_PENDING: { label: "Approved", className: GREEN },
   REJECTED: { label: "Rejected", className: RED },
   CANCELLED: { label: "Cancelled", className: MUTED },
@@ -38,11 +43,13 @@ const CANCELLATION_OUTCOMES: Record<string, Outcome> = {
 };
 
 const ACTIONABLE_TYPES = new Set(["TIMEOFF_APPROVAL_REQUESTED", "TIMEOFF_CANCELLATION_REQUESTED"]);
+const PUBLIC_HOLIDAY_DRIFT_TYPE = "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT";
 
 /**
  * Renders the type-specific action controls for an actionable notification, gated by the live source
  * status (§5). This is the single place the (generic) inbox couples to a domain (time-off approve/
- * reject, and the answer to a cancellation); new actionable types add a branch here. When the source is
+ * reject, the answer to a cancellation, and a holiday source drift to apply or dismiss); new actionable
+ * types add a branch here. When the source is
  * no longer open, the resolved outcome is shown instead of buttons.
  *
  * Answering from the inbox also marks the notification read: the question has been dealt with, and
@@ -57,6 +64,12 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
 
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
+  const reasonId = useId();
+
+  // A holiday drift asks a different question of a different domain; it has its own controls.
+  if (notification.type === PUBLIC_HOLIDAY_DRIFT_TYPE) {
+    return <PublicHolidayDriftActions notification={notification} />;
+  }
 
   const source = notification.source;
   if (!ACTIONABLE_TYPES.has(notification.type) || !source) {
@@ -86,6 +99,10 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
       return true;
     } catch (error) {
       showError(error);
+      // A refusal here nearly always means the question moved on without this copy — somebody else
+      // decided first. Re-reading the inbox replaces the stale buttons with what actually happened,
+      // instead of leaving Approve on screen to be refused again.
+      invalidateNotifications();
       return false;
     }
   };
@@ -127,20 +144,26 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
   return (
     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
       {rejecting ? (
-        <div className="flex items-center gap-2">
-          <Input
-            autoFocus
-            value={reason}
-            onChange={(e) => setReason(e.currentTarget.value)}
-            className="h-8 flex-1"
-            disabled={busy}
-          />
-          <Button size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
-            Reject
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
-            Cancel
-          </Button>
+        <div className="flex flex-col gap-1.5">
+          {/* The button is disabled until this is filled, so the field has to say it is required —
+              without a label it was an unexplained empty box beside a dead button. */}
+          <RequiredLabel htmlFor={reasonId} required>Reason</RequiredLabel>
+          <div className="flex items-center gap-2">
+            <Input
+              id={reasonId}
+              autoFocus
+              value={reason}
+              onChange={(e) => setReason(e.currentTarget.value)}
+              className="h-8 flex-1"
+              disabled={busy}
+            />
+            <Button size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
+              Reject
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
+              Cancel
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex items-center gap-2">

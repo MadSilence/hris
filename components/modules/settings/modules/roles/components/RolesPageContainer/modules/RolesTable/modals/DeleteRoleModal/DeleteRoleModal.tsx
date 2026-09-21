@@ -50,7 +50,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
     >
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
             <AlertTriangle className="h-5 w-5"/>
             Delete role
           </AlertDialogTitle>
@@ -66,14 +66,14 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600"/>
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
             <div className="min-w-0 flex-1">
-              <h4 className="mb-1 font-medium text-red-800">What this affects</h4>
+              <h4 className="mb-1 font-medium text-danger-800">What this affects</h4>
 
               {isImpactLoading && (
-                <p className="text-sm text-red-700">Checking what depends on this role…</p>
+                <p className="text-sm text-danger-700">Checking what depends on this role…</p>
               )}
 
               {/*
@@ -83,19 +83,19 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
                 to tell an empty role from an unreachable API before pressing Delete.
               */}
               {!isImpactLoading && !impact && !!impactError && (
-                <p className="text-sm text-red-700">
+                <p className="text-sm text-danger-700">
                   {messageForError(impactError)} Until then, how many people this affects is unknown.
                 </p>
               )}
 
               {!isImpactLoading && !impact && !impactError && (
-                <p className="text-sm text-red-700">
+                <p className="text-sm text-danger-700">
                   Users assigned to this role may lose access to systems and workflows.
                 </p>
               )}
 
               {!isImpactLoading && impact && (
-                <ul className="space-y-1 text-sm text-red-700">
+                <ul className="space-y-1 text-sm text-danger-700">
                   <li>
                     <strong>{impact.peopleCount}</strong>{" "}
                     {impact.peopleCount === 1 ? "person holds" : "people hold"} this role.
@@ -143,7 +143,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
               event.preventDefault();
               void onConfirmAction();
             }}
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-danger-600 text-white hover:bg-danger-700"
           >
             <Trash2 className="mr-2 h-4 w-4"/>
             Delete role

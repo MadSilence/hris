@@ -1,5 +1,7 @@
 import { isReferenceField, type FieldDTO, type FilterDTO, type ReferenceValueSource } from "@/models/user/fields";
 import type { ResourceCode } from "@/models/access";
+import { AttributeType } from "@/models/attribute/AttributeType";
+import { isManagedCatalogType } from "@/models/attribute/managedCatalogs";
 
 export type AudienceOperator = FilterDTO["op"];
 
@@ -10,6 +12,10 @@ export type AudienceValueSource =
   | "date"
   | "boolean"
   | "attributeOptions"
+  // A managed catalogue — ISO countries and languages, IANA time zones, ISO currencies
+  // (`models/attribute/managedCatalogs`). The attribute stores the entry's value as text, so the
+  // filter sends that same text; what changes is that it is picked, not typed.
+  | "catalog"
   | ReferenceValueSource;
 
 export type AudienceFieldGroup = "Org" | "System" | "Custom";
@@ -65,6 +71,13 @@ export function operatorsForField(field: FieldDTO): AudienceOperator[] {
         return ["eq", "neq", "in", "not_in"];
       case "MULTI_SELECT":
         return ["has_any", "not_has_any"];
+      // Picked from a catalogue, so "contains" and "starts with" would only be ways of typing a
+      // country badly.
+      case "COUNTRY":
+      case "LANGUAGE":
+      case "TIMEZONE":
+      case "CURRENCY":
+        return ["eq", "neq", "in", "not_in"];
       default:
         return ["eq", "neq", "contains", "starts_with", "in", "not_in"];
     }
@@ -129,7 +142,19 @@ function valueSourceForField(field: FieldDTO): AudienceValueSource {
   if (isReferenceField(field)) return field.valueSource as ReferenceValueSource;
 
   if (!field.isSystem) {
-    return field.options && field.options.length > 0 ? "attributeOptions" : "freeText";
+    switch (field.type) {
+      // Always the option list, even an empty one: the backend matches an option by its id and
+      // refuses anything else (SG00004), so a free-text box here could only produce a refusal.
+      case AttributeType.SELECT:
+      case AttributeType.MULTI_SELECT:
+        return "attributeOptions";
+      case AttributeType.NUMBER:
+        return "number";
+      case AttributeType.DATE:
+        return "date";
+      default:
+        return isManagedCatalogType(field.type) ? "catalog" : "freeText";
+    }
   }
 
   switch (field.type) {

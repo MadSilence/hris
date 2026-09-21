@@ -5,6 +5,11 @@ import { FlatCompat } from "@eslint/eslintrc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const RAW_STATUS_HUE =
+  "/(^|[\\s:])(bg|text|border|ring|fill|stroke|from|to|via|divide|outline|decoration|placeholder|accent|caret|shadow)(-[a-z]+)?-(red|rose|green|emerald|lime|amber|yellow|orange|blue|sky|teal)-[0-9]/";
+const RAW_STATUS_HUE_MESSAGE =
+  "Use a semantic colour token (success-*, danger-*, warning-*, info-*) instead of a raw Tailwind hue — ui/STATUS_AND_BADGES.md § 3.";
+
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
@@ -41,6 +46,22 @@ const eslintConfig = [
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
           destructuredArrayIgnorePattern: "^_",
+        },
+      ],
+      // A status colour is a semantic token — `success-*`, `danger-*`, `warning-*`, `info-*` —
+      // never a raw Tailwind hue (`technical_documentation/ui/STATUS_AND_BADGES.md` § 3). The
+      // scales are exact copies of green/red/amber/blue, so the conversion of 2026-09-21 moved
+      // no pixel; this rule is what keeps the raw hues from growing back. A categorical palette
+      // (a chip per field type) is not a status and says so with an eslint-disable comment.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: `Literal[value=${RAW_STATUS_HUE}]`,
+          message: RAW_STATUS_HUE_MESSAGE,
+        },
+        {
+          selector: `TemplateElement[value.raw=${RAW_STATUS_HUE}]`,
+          message: RAW_STATUS_HUE_MESSAGE,
         },
       ],
     },

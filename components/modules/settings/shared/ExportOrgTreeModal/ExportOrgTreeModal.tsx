@@ -181,7 +181,7 @@ export function ExportOrgTreeModal({
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-danger-500">{error}</p>}
         </div>
 
         <DialogFooter className="mt-6">

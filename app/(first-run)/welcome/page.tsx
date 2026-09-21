@@ -16,9 +16,12 @@ type Props = { searchParams: Promise<{ again?: string }> };
  */
 export default async function WelcomePage({ searchParams }: Props) {
   const { again } = await searchParams;
-  const { setupNeeded, welcomeNeeded } = await hrisFirstRunService.getFirstRunState();
+  const { setupNeeded, welcomeNeeded, impersonating } = await hrisFirstRunService.getFirstRunState();
 
   if (setupNeeded) redirect("/setup");
+  // The welcome is the person's own, even with `?again`: an actor impersonating them neither lands
+  // here nor may open it by hand, or they could finish or skip it on the person's behalf.
+  if (impersonating) redirect("/dashboard");
   if (!welcomeNeeded && again === undefined) redirect("/dashboard");
 
   return <WelcomeContainer />;

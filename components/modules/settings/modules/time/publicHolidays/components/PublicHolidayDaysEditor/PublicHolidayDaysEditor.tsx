@@ -186,7 +186,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       disabled={disabled}
                       onClick={() => handleRemove(holiday.localId)}
                       aria-label="Remove holiday"
-                      className="text-[var(--color-text-tertiary)] hover:text-red-600"
+                      className="text-[var(--color-text-tertiary)] hover:text-danger-600"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

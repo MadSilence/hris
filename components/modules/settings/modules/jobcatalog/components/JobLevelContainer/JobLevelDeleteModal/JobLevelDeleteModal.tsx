@@ -58,7 +58,7 @@ export const JobLevelDeleteModal: FC<Props> = ({
     <AlertDialogContent>
       <AlertDialogHeader>
         <div className="flex items-center gap-3 text-left">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-danger-100 text-danger-600">
             <Trash2 className="h-5 w-5"/>
           </span>
           <div className="space-y-1">
@@ -71,14 +71,14 @@ export const JobLevelDeleteModal: FC<Props> = ({
         </div>
       </AlertDialogHeader>
 
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+      <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600"/>
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600"/>
 
           <div>
-            <h4 className="mb-1 font-medium text-red-800">Warning</h4>
+            <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
 
-            <div className="space-y-1 text-sm text-red-700">
+            <div className="space-y-1 text-sm text-danger-700">
               {affectedLevels !== undefined && affectedLevels > 0 && (
                 <p>
                   <strong>{affectedLevels}</strong> level{affectedLevels === 1 ? "" : "s"} in this
@@ -130,7 +130,7 @@ export const JobLevelDeleteModal: FC<Props> = ({
             e.preventDefault();
             onConfirmAction();
           }}
-          className="bg-red-600 text-white hover:bg-red-700"
+          className="bg-danger-600 text-white hover:bg-danger-700"
         >
           Delete {entityLabel}
         </AlertDialogAction>

@@ -8,3 +8,4 @@ export * from "./PublicHolidayCalendarDTO";
 export * from "./PublicHolidayYearFillResultDTO";
 
 
+export * from "./PublicHolidayDriftApplyResultDTO";

@@ -159,7 +159,7 @@ export function ArchiveDepartmentModal({
           )}
 
           {archiveDepartment.isError && (
-            <p className="text-red-500">
+            <p className="text-danger-500">
               {(archiveDepartment.error as Error)?.message ?? "An error occurred."}
             </p>
           )}

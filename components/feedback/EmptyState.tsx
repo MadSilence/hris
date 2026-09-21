@@ -32,8 +32,18 @@ export const EmptyState: React.FC<{
    * rendered as given.
    */
   action?: React.ReactNode;
+  /**
+   * Fills the height its parent gives it instead of sizing to its own content.
+   *
+   * For a **page** whose whole body is the empty state — Tasks, Processes, the Inbox — where a
+   * content-sized block reads as a stray card pinned under the heading with the rest of the screen
+   * empty below it. A list *inside* a page keeps the default: there the block is one section among
+   * several, and stretching it would push the rest out of view. The parent has to have a height
+   * (`flex-1 min-h-0` inside a column that knows one).
+   */
+  fill?: boolean;
   className?: string;
-}> = ({ icon, title, description, onCreate, createLabel, action, className }) => {
+}> = ({ icon, title, description, onCreate, createLabel, action, fill, className }) => {
   const create = onCreate;
 
   const body = (
@@ -52,7 +62,9 @@ export const EmptyState: React.FC<{
     </>
   );
 
-  const shell = `flex w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-brown-300 px-6 py-12 text-center ${className ?? ""}`;
+  const shell = `flex w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-brown-300 px-6 py-12 text-center ${
+    fill ? "h-full" : ""
+  } ${className ?? ""}`;
 
   // A button, not a div with a click handler: it has to be reachable by keyboard and announced as
   // the action it is.
@@ -77,10 +89,14 @@ export const EmptyState: React.FC<{
 export const NoResults: React.FC<{
   /** What was being looked for, for the second line: "Try a different name or email." */
   hint?: string;
+  /** See {@link EmptyState}'s `fill`. */
+  fill?: boolean;
   className?: string;
-}> = ({ hint = "Try a different search.", className }) => (
+}> = ({ hint = "Try a different search.", fill, className }) => (
   <div
-    className={`flex w-full flex-col items-center justify-center gap-4 px-6 py-12 text-center ${className ?? ""}`}
+    className={`flex w-full flex-col items-center justify-center gap-4 px-6 py-12 text-center ${
+      fill ? "h-full" : ""
+    } ${className ?? ""}`}
   >
     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
       <SearchX className="h-7 w-7" />

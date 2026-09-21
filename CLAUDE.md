@@ -284,7 +284,7 @@ Two things that are easy to get wrong:
 
 - Use Tailwind utility classes. Avoid inline styles.
 - Keep `className` readable (no excessive chaining).
-- Match the existing module's approach: the feature modules use Tailwind exclusively. A few older shared pieces (`ui/Loader`, `ui/UserChip`, `ui/NavbarLink`, `app/(app)/layout`) still use `.module.css` alongside Tailwind.
+- Match the existing module's approach: the feature modules use Tailwind exclusively. A few older shared pieces (`ui/Loader`, `ui/NavbarLink`, `app/(app)/layout`) still use `.module.css` alongside Tailwind.
 - Do not create new `.module.css` files unless the target module already uses CSS modules and there is a strong reason.
 - If a component uses `.module.css` but can be reasonably migrated to Tailwind during the task, prefer Tailwind.
 - Before building new UI, inspect nearby modules and match their spacing, borders, typography, hover states, rounded corners, and layout style.

@@ -137,7 +137,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                     <Star
                       className={`h-4 w-4 ${
                         document.isStarred
-                          ? "fill-current text-yellow-500"
+                          ? "fill-current text-warning-500"
                           : "text-muted-foreground"
                       }`}
                     />

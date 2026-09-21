@@ -31,7 +31,7 @@ export function ProcessesListContainer() {
   }), [source.data, query]);
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <ListToolbar
         search={{ value: query, onChange: setQuery }}
         archived={(archived.data?.length ?? 0) > 0
@@ -39,12 +39,15 @@ export function ProcessesListContainer() {
           : undefined}
       />
 
+      {/* The table scrolls; the empty state fills what is left instead of sitting under the toolbar. */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
       {source.error ? (
         <ErrorState error={source.error} />
       ) : source.isLoading ? (
         <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-md bg-muted" />)}</div>
       ) : rows.length === 0 ? (
         <ListEmptyState
+          fill
           query={query}
           archivedView={showArchived}
           icon={<Workflow className="h-6 w-6" />}
@@ -87,6 +90,7 @@ export function ProcessesListContainer() {
           </TableBody>
         </Table>
       )}
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
+import { formatDisplayDate } from "@/lib/date";
 import { FC, useMemo, useState } from "react";
 import { CalendarX2 } from "lucide-react";
 
@@ -23,6 +24,7 @@ import {
   SelectValue,
 } from "@/public/desact/src/components/ui/select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -32,10 +34,10 @@ type Props = { userId: string };
 
 
 const STATUS_STYLE: Record<TimeOffRequestStatus, string> = {
-  [TimeOffRequestStatus.Pending]: "border-amber-200 bg-amber-50 text-amber-700",
-  [TimeOffRequestStatus.Approved]: "border-green-200 bg-green-50 text-green-700",
-  [TimeOffRequestStatus.CancellationPending]: "border-amber-200 bg-amber-50 text-amber-700",
-  [TimeOffRequestStatus.Rejected]: "border-red-200 bg-red-50 text-red-700",
+  [TimeOffRequestStatus.Pending]: "border-warning-200 bg-warning-50 text-warning-700",
+  [TimeOffRequestStatus.Approved]: "border-success-200 bg-success-50 text-success-700",
+  [TimeOffRequestStatus.CancellationPending]: "border-warning-200 bg-warning-50 text-warning-700",
+  [TimeOffRequestStatus.Rejected]: "border-danger-200 bg-danger-50 text-danger-700",
   [TimeOffRequestStatus.Cancelled]: "border-brown-200 bg-brown-50 text-brown-500",
 };
 
@@ -219,14 +221,12 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
     );
   }
 
-  if (rows.length === 0) {
-    return (
-      <div className="flex items-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-6 text-sm text-muted-foreground">
-        <CalendarX2 className="h-5 w-5 text-brown-400" />
-        No time off requests yet.
-      </div>
-    );
-  }
+  /*
+   * The empty state used to `return` from here, above the filter row — so filtering to a year with
+   * no requests removed the filters along with the list, and the only way back was to close the
+   * sheet. Nothing is filtered out of the controls that do the filtering.
+   */
+  const filtered = yearFilter !== "ALL" || statusFilter !== "ALL";
 
   return (
     <div className="space-y-2">
@@ -262,6 +262,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
+      {rows.length === 0 ? (
+        <div className="flex items-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-6 text-sm text-muted-foreground">
+          <CalendarX2 className="h-5 w-5 text-brown-400" />
+          {filtered
+            ? "No requests match these filters."
+            : "No time off requests yet."}
+        </div>
+      ) : (
       <div className="divide-y divide-brown-100 rounded-lg border border-brown-200">
         {rows.map((request) => {
           const isPending = request.status === TimeOffRequestStatus.Pending;
@@ -292,20 +300,21 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {request.startDate} → {request.endDate} · {formatDayAmount(request.requestedAmount)} d
+                    {formatDisplayDate(request.startDate)} → {formatDisplayDate(request.endDate)} ·{" "}
+                    {formatDayAmount(request.requestedAmount)} d
                     {request.reason ? <span> · {request.reason}</span> : null}
                   </p>
 
                   {/* The reason travelled from the backend all along and nothing rendered it, so a
                       rejection read as a bare red badge and the requester had to go and ask. */}
                   {request.status === TimeOffRequestStatus.Rejected && request.rejectionReason && (
-                    <p className="mt-1 text-xs text-red-700">
+                    <p className="mt-1 text-xs text-danger-700">
                       <span className="font-medium">Reason:</span> {request.rejectionReason}
                     </p>
                   )}
 
                   {request.status === TimeOffRequestStatus.CancellationPending && (
-                    <p className="mt-1 text-xs text-amber-700">
+                    <p className="mt-1 text-xs text-warning-700">
                       Waiting for the approver to confirm the cancellation
                       {request.cancellationReason ? ` · ${request.cancellationReason}` : ""}
                     </p>
@@ -318,7 +327,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-green-700 hover:text-green-800"
+                        className="text-success-700 hover:text-success-800"
                         onClick={() => handleApprove(request)}
                         disabled={isDeciding}
                       >
@@ -346,7 +355,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-green-700 hover:text-green-800"
+                        className="text-success-700 hover:text-success-800"
                         onClick={() => handleCancellationDecision(request, "CONFIRM")}
                         disabled={isDeciding}
                       >
@@ -422,8 +431,11 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
               )}
 
               {isCancelling && (
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex flex-col gap-1.5">
+                  <RequiredLabel htmlFor={`cancel-reason-${request.id}`} required>Reason</RequiredLabel>
+                  <div className="flex items-center gap-2">
                   <Input
+                    id={`cancel-reason-${request.id}`}
                     autoFocus
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.currentTarget.value)}
@@ -444,12 +456,18 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   >
                     Back
                   </Button>
+                  </div>
                 </div>
               )}
 
               {isRejecting && (
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex flex-col gap-1.5">
+                  {/* Confirm stays disabled until this is filled: say so, rather than leaving an
+                      unexplained box beside a dead button. */}
+                  <RequiredLabel htmlFor={`reject-reason-${request.id}`} required>Reason</RequiredLabel>
+                  <div className="flex items-center gap-2">
                   <Input
+                    id={`reject-reason-${request.id}`}
                     autoFocus
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.currentTarget.value)}
@@ -470,12 +488,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   >
                     Cancel
                   </Button>
+                  </div>
                 </div>
               )}
             </div>
           );
         })}
       </div>
+      )}
     </div>
   );
 };

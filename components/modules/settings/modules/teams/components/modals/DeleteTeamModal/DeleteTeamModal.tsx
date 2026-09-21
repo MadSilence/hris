@@ -144,7 +144,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
           )}
 
           {deleteTeam.isError && (
-            <p className="text-red-500">
+            <p className="text-danger-500">
               {(deleteTeam.error as Error)?.message ?? "An error occurred."}
             </p>
           )}

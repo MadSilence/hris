@@ -6,6 +6,7 @@ import { FieldDTO, UsersSearchRequest, UsersSearchResponseDTO } from "@/models/u
 import { User } from "@/models/user/User";
 import { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 import { CreateResponse } from "@/api/models/misc";
+import type { PeopleExportRequest } from "@/models/user/peopleExport";
 
 export type TerminationReason = "VOLUNTARY" | "INVOLUNTARY" | "END_OF_CONTRACT";
 
@@ -81,6 +82,24 @@ export type UpdateUserPayload = {
   version?: number;
 };
 
+/** The references `PATCH /users/{id}` can empty — by name, because a null value means "leave it alone". */
+export type PatchUserClearable = "managerId" | "jobId" | "officeId" | "legalEntityId";
+
+/**
+ * `PATCH /users/{id}` — everything the profile edits, in one request and one transaction. Omitted means
+ * untouched; a reference is emptied by naming it in `clear`; a custom value is cleared by sending
+ * `null` for it in `attributes`.
+ */
+export type PatchUserPayload = UpdateUserPayload & {
+  managerId?: string;
+  jobId?: string;
+  officeId?: string;
+  legalEntityId?: string;
+  clear?: PatchUserClearable[];
+  /** Custom attribute values by attribute id. */
+  attributes?: Record<string, unknown>;
+};
+
 export class HrisApiUsersClient {
   private readonly BASE_PATH: string = '/users';
 
@@ -135,8 +154,8 @@ export class HrisApiUsersClient {
     return hrisApiClient.post<InviteStateDTO>(`${this.BASE_PATH}/${id}/invite/cancel`);
   }
 
-  public async updateUser(id: string, payload: UpdateUserPayload): Promise<void> {
-    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/update`, { ...payload });
+  public async patchUser(id: string, payload: PatchUserPayload): Promise<void> {
+    await hrisApiClient.patch<void>(`${this.BASE_PATH}/${id}`, { ...payload });
   }
 
   public async changeStatus(id: string, status: string): Promise<void> {
@@ -210,6 +229,11 @@ export class HrisApiUsersClient {
     return hrisApiClient.get<{ count: number }>(`${this.BASE_PATH}/drafts/count`);
   }
 
+  /** The People table's view as a file. The raw response, so the route can stream it on. */
+  async exportUsers(body: PeopleExportRequest): Promise<Response> {
+    return hrisApiClient.postForBinary(`${this.BASE_PATH}/export?format=${body.format}`, body);
+  }
+
   async getFields(): Promise<FieldDTO[]> {
     return hrisApiClient.get<FieldDTO[]>(`${this.BASE_PATH}/fields`);
   }
@@ -227,31 +251,11 @@ export class HrisApiUsersClient {
   }
 
   /**
-   * Org associations. Each has an assign (PUT) and a clear (DELETE) endpoint rather than a nullable
-   * body, so `null` here means "clear" and maps onto the DELETE.
+   * Puts `managerId` between the person and their current manager — both reporting lines change in
+   * one transaction on the server, so this is one call and not two `setManager`s.
    */
-  async setJob(userId: string, jobId: string | null): Promise<void> {
-    if (jobId === null) {
-      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/job`);
-      return;
-    }
-    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/job`, { jobId });
-  }
-
-  async setOffice(userId: string, officeId: string | null): Promise<void> {
-    if (officeId === null) {
-      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/office`);
-      return;
-    }
-    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/office`, { officeId });
-  }
-
-  async setLegalEntity(userId: string, legalEntityId: string | null): Promise<void> {
-    if (legalEntityId === null) {
-      await hrisApiClient.delete<void>(`${this.BASE_PATH}/${userId}/legal-entity`);
-      return;
-    }
-    await hrisApiClient.put<void>(`${this.BASE_PATH}/${userId}/legal-entity`, { legalEntityId });
+  async insertManagerAbove(userId: string, managerId: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${userId}/manager/insert-above`, { managerId });
   }
 }
 

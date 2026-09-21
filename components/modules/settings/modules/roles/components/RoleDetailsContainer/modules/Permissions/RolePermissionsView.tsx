@@ -33,9 +33,9 @@ const GRID = "grid grid-cols-[minmax(0,1fr)_170px_170px_170px_170px] items-cente
 
 // Dot before a cell's value: blue = unsaved change, gray = no access, green = granted.
 function dotClass(current: ScopeChoice, server: ScopeChoice): string {
-  if (current !== server) return "bg-blue-500";
+  if (current !== server) return "bg-info-500";
   if (current === "NONE") return "bg-brown-300";
-  return "bg-green-500";
+  return "bg-success-500";
 }
 
 export interface RolePermissionsViewProps {
@@ -126,7 +126,7 @@ export default function RolePermissionsView({
                         <p className="text-xs text-muted-foreground">{resource.description}</p>
 
                         {missingView && (
-                          <p className="mt-1 flex items-center gap-1.5 text-xs text-amber-700">
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-warning-700">
                             <AlertTriangle className="h-3.5 w-3.5"/>
                             Without view access this role cannot open the related pages.
                           </p>
@@ -183,7 +183,7 @@ export default function RolePermissionsView({
                                 disabled={readOnly}
                                 onClick={() => onEditFilters?.(resource.code, action)}
                                 className={`self-start text-xs underline-offset-2 hover:underline ${
-                                  conditions === 0 ? "text-amber-700" : "text-muted-foreground"
+                                  conditions === 0 ? "text-warning-700" : "text-muted-foreground"
                                 }`}
                               >
                                 {conditions === 0

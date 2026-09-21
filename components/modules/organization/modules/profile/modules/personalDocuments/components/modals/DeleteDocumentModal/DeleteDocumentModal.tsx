@@ -41,7 +41,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
             <FileX2 className="h-5 w-5"/>
             Delete document
           </AlertDialogTitle>
@@ -64,7 +64,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-danger-600 text-white hover:bg-danger-700"
           >
             Delete document
           </AlertDialogAction>

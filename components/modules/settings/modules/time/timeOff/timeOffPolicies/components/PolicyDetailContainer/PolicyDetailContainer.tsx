@@ -245,7 +245,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-red-600 hover:text-red-700"
+                className="gap-1.5 text-danger-600 hover:text-danger-700"
                 onClick={() => setIsDeleteOpen(true)}
               >
                 <Trash2 className="h-4 w-4" />

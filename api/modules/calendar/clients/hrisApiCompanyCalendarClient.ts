@@ -1,5 +1,10 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
-import type { CompanyCalendarMark, CompanyCalendarPeoplePage } from "@/models/calendar";
+import type {
+  CompanyCalendarGroup,
+  CompanyCalendarGrouping,
+  CompanyCalendarMark,
+  CompanyCalendarPeoplePage,
+} from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
 
 export type CompanyCalendarPeopleQuery = {
@@ -7,6 +12,15 @@ export type CompanyCalendarPeopleQuery = {
   limit?: number;
   q?: string;
   filters?: FilterDTO[] | null;
+  /** With `groupBy` set, the rows of one group; a null `groupId` is the "no value" group. */
+  groupBy?: CompanyCalendarGrouping | null;
+  groupId?: string | null;
+};
+
+export type CompanyCalendarGroupsQuery = {
+  q?: string;
+  filters?: FilterDTO[] | null;
+  groupBy: CompanyCalendarGrouping;
 };
 
 export type CompanyCalendarMarksQuery = {
@@ -24,6 +38,16 @@ export class HrisApiCompanyCalendarClient {
       limit: params.limit ?? null,
       q: params.q ?? null,
       filters: params.filters ?? null,
+      groupBy: params.groupBy ?? null,
+      groupId: params.groupId ?? null,
+    });
+  }
+
+  public async groups(params: CompanyCalendarGroupsQuery): Promise<CompanyCalendarGroup[]> {
+    return hrisApiClient.post<CompanyCalendarGroup[]>(`${this.BASE_PATH}/groups`, {
+      q: params.q ?? null,
+      filters: params.filters ?? null,
+      groupBy: params.groupBy,
     });
   }
 

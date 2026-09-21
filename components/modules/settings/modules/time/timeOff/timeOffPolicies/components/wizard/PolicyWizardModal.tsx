@@ -210,13 +210,13 @@ export const PolicyWizardModal: FC<Props> = ({
           <>
             <ReviewStep values={values} leaveTypeName={leaveTypeName} mode={mode} />
             {mode === "edit" && editImpact && editImpact.affectedRequests > 0 && (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                <p className="text-sm font-medium text-amber-900">
+              <div className="mt-4 rounded-lg border border-warning-200 bg-warning-50 px-4 py-3">
+                <p className="text-sm font-medium text-warning-900">
                   {editImpact.affectedRequests} absence
                   {editImpact.affectedRequests === 1 ? " was" : "s were"} counted under the current
                   rules
                 </p>
-                <p className="mt-1 text-xs text-amber-800">
+                <p className="mt-1 text-xs text-warning-800">
                   {editImpact.inProgressRequests > 0
                     ? `${editImpact.inProgressRequests} of them ${editImpact.inProgressRequests === 1 ? "is" : "are"} already under way. `
                     : ""}

@@ -111,7 +111,7 @@ export default function PeopleViewsPanel({
       </div>
 
       {isShared ? (
-        <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+        <div className="flex items-center gap-2 rounded-md border border-warning-200 bg-warning-50 px-2 py-1.5 text-xs text-warning-800">
           <Share2 className="h-3.5 w-3.5 shrink-0" />
           <span className="truncate">Shared view (not saved)</span>
         </div>

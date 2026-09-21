@@ -88,7 +88,7 @@ export const BalanceLedger: FC<Props> = ({ balanceId, periodEnd }) => {
             </p>
           </div>
           <div className="flex items-baseline gap-3 text-right">
-            <span className={cn("text-sm font-medium", t.amount < 0 ? "text-red-600" : "text-green-700")}>
+            <span className={cn("text-sm font-medium", t.amount < 0 ? "text-danger-600" : "text-success-700")}>
               {signed(t.amount)}
             </span>
             <span className="w-12 text-xs text-muted-foreground">{formatDayAmount(running)}</span>

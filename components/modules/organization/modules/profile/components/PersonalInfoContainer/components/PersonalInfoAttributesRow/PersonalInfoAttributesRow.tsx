@@ -2,7 +2,13 @@ import * as React from "react";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
-import { parseCheckboxValue, parsePersonValue } from "@/models/attribute/attributeValue";
+import {
+  optionValueId,
+  sameOptionId,
+  optionValueLabel,
+  parseCheckboxValue,
+  parsePersonValue,
+} from "@/models/attribute/attributeValue";
 import { formatDisplayDate } from "@/lib/date";
 import {
   UserPickerField,
@@ -15,7 +21,7 @@ import {
   SingleRecordView,
   SingleRecordEditor,
 } from "./ObjectAttributeField";
-import UserChip from "@/components/ui/UserChip/UserChip";
+import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
@@ -172,10 +178,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       const person = parsePersonValue(rawValue);
       if (person) {
         return (
-          <UserChip
-            name={person.name}
-            href={`/organization/people/${person.id}/personal`}
-          />
+          <UserChip id={person.id} name={person.name} />
         );
       }
 
@@ -603,26 +606,23 @@ function toInputDateValue(raw: unknown): string {
 }
 
 /*
- * Option values reach this component as option **ids** — `PersonalInfoContainer` normalises them
- * once, on the way in, because the API reads an option as its text and writes it as an id. Matching
- * on the option's text as well used to happen here, in three places, each half-written; the
- * conversion belongs at the boundary, not in every consumer.
+ * Option values reach this component as option **ids** — `PersonalInfoContainer` unwraps the
+ * `{ id, label }` pair once, on the way in. The colour lives only in the catalogue, so the option is
+ * still looked up here; matching on the option's *text* used to happen too, in three places, each
+ * half-written, and that is gone.
  */
 
 function resolveSingleOption(
   attribute: Attribute,
   raw: unknown,
 ): { label: string | null; color: string | undefined } {
-  if (!attribute.options?.length) {
-    return { label: raw ? String(raw) : null, color: undefined };
-  }
   if (raw == null) return { label: null, color: undefined };
+  const id = optionValueId(raw) ?? String(raw);
+  const found = attribute.options?.find((o) => sameOptionId(o.id, id));
 
-  const found = attribute.options.find((o) => o.id === String(raw));
-
-  // An id with no option behind it — deleted after the value was written — shows as itself rather
-  // than as "Not set": the value exists, and pretending otherwise loses it silently.
-  return { label: found?.value ?? String(raw), color: found?.color };
+  // An id with no option behind it — deleted after the value was written — shows the label it was
+  // read with, or the id itself: the value exists, and pretending otherwise loses it silently.
+  return { label: found?.value ?? optionValueLabel(raw), color: found?.color };
 }
 
 function resolveMultiOptions(
@@ -632,9 +632,10 @@ function resolveMultiOptions(
   const arr = raw == null ? [] : Array.isArray(raw) ? raw : [raw];
 
   return arr.map((val) => {
-    const found = attribute.options?.find((o) => o.id === String(val));
+    const id = optionValueId(val) ?? String(val);
+    const found = attribute.options?.find((o) => sameOptionId(o.id, id));
     return found
       ? { key: found.id, label: found.value, color: found.color }
-      : { key: String(val), label: String(val) };
+      : { key: id, label: optionValueLabel(val) ?? id };
   });
 }

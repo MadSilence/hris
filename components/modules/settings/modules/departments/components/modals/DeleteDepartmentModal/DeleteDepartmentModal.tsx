@@ -144,7 +144,7 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
           )}
 
           {deleteDepartment.isError && (
-            <p className="text-red-500">
+            <p className="text-danger-500">
               {(deleteDepartment.error as Error)?.message ?? "An error occurred."}
             </p>
           )}

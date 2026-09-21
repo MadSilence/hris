@@ -2,45 +2,59 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiUsersService } from "@/api/modules/users/services/hrisUsersService";
+import type {
+  PatchUserClearable,
+  PatchUserPayload,
+} from "@/api/modules/users/clients/hrisApiUsersClient";
 import { toActionError } from "@/lib/errors/withActionError";
 
 /**
- * Job & Employment writes that land on `POST /users/{id}/update` plus, when it changed, the
- * separate manager endpoint. Both are scope-checked server-side (`requireScopedOn`).
+ * The person profile's one save: **one `PATCH /users/{id}`**, one transaction on the server.
+ *
+ * It used to be up to five calls — `/update`, then the manager, job, office and legal-entity
+ * endpoints one after another — so a refusal on the fourth left the first three written. Now the
+ * server checks every field the patch carries before it writes any of them, and a field the caller may
+ * not edit refuses the whole save (as `/update` always did).
  */
-export const updateUserAction = async (
+export async function updateUserAction(
   submission: UpdateUserActionInput
-): Promise<UpdateUserActionOutput> => {
+): Promise<UpdateUserActionOutput> {
   try {
-    const { userId, managerId, jobId, officeId, legalEntityId, version, ...fields } = submission;
-
-    // The update goes first and carries the version the section was opened at: a colleague's save in
-    // between is refused (E00409) before anything is written. When only associations changed it still
-    // goes, with the version alone — a check that writes nothing — because the association endpoints
-    // have no version of their own.
-    const hasFieldChanges = Object.values(fields).some((v) => v !== undefined);
-    const hasAssociationChanges = [managerId, jobId, officeId, legalEntityId].some((v) => v !== undefined);
-    if (hasFieldChanges || (version !== undefined && hasAssociationChanges)) {
-      await hrisApiUsersService.updateUser(userId, { ...fields, version });
-    }
-
-    // Each association has its own endpoint; `undefined` means untouched, `null` means clear.
-    if (managerId !== undefined) await hrisApiUsersService.setManager(userId, managerId);
-    if (jobId !== undefined) await hrisApiUsersService.setJob(userId, jobId);
-    if (officeId !== undefined) await hrisApiUsersService.setOffice(userId, officeId);
-    if (legalEntityId !== undefined) {
-      await hrisApiUsersService.setLegalEntity(userId, legalEntityId);
-    }
-
+    await hrisApiUsersService.patchUser(submission.userId, toPatchPayload(submission));
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
     return toActionError(error, "updateUserAction");
   }
-};
+}
+
+/**
+ * The form's convention — `undefined` untouched, `null` clear — onto the wire's: a null cannot say
+ * "clear" in a partial patch, so a cleared reference is named in `clear` instead.
+ */
+function toPatchPayload(submission: UpdateUserActionInput): PatchUserPayload {
+  const { userId: _userId, managerId, jobId, officeId, legalEntityId, attributes, ...fields } = submission;
+
+  const payload: PatchUserPayload = { ...fields };
+  const clear: PatchUserClearable[] = [];
+
+  const reference = (name: PatchUserClearable, value: string | null | undefined) => {
+    if (value === undefined) return;
+    if (value === null) clear.push(name);
+    else payload[name] = value;
+  };
+  reference("managerId", managerId);
+  reference("jobId", jobId);
+  reference("officeId", officeId);
+  reference("legalEntityId", legalEntityId);
+
+  if (clear.length > 0) payload.clear = clear;
+  if (attributes && Object.keys(attributes).length > 0) payload.attributes = attributes;
+  return payload;
+}
 
 export type UpdateUserActionInput = {
   userId: string;
-  /** The person's version when the section entered edit. */
+  /** The person's version when editing started — a colleague's save in between is refused (E00409). */
   version?: number;
   firstName?: string;
   lastName?: string;
@@ -52,6 +66,8 @@ export type UpdateUserActionInput = {
   jobId?: string | null;
   officeId?: string | null;
   legalEntityId?: string | null;
+  /** Custom attribute values by attribute id; `null` clears one. */
+  attributes?: Record<string, unknown>;
 };
 
 export type UpdateUserActionOutput = {

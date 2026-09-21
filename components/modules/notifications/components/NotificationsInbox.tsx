@@ -56,7 +56,9 @@ const NotificationRow: FC<{
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate font-medium capitalize text-brown-900">{title}</p>
+          {/* The titles are written in Title Case where they are built; `capitalize` here title-cased every
+              word on top of that and produced "Holidays Changed At The Source". */}
+          <p className="truncate font-medium text-brown-900">{title}</p>
           {!notification.read && <span className="h-2 w-2 shrink-0 rounded-full bg-brown-600" />}
         </div>
         {message && <p className="mt-0.5 text-sm text-muted-foreground">{message}</p>}
@@ -80,7 +82,7 @@ const NotificationRow: FC<{
           disabled={busy}
           onClick={() => onToggleStar(notification)}
         >
-          <Star className={cn("h-4 w-4", notification.starred ? "fill-amber-400 text-amber-400" : "text-brown-400")} />
+          <Star className={cn("h-4 w-4", notification.starred ? "fill-warning-400 text-warning-400" : "text-brown-400")} />
         </Button>
         <Button
           variant="ghost"
@@ -281,7 +283,7 @@ export const NotificationsInbox: FC = () => {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-16 text-center">
+        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-16 text-center">
           <Bell className="h-8 w-8 text-brown-300" />
           <p className="text-sm text-muted-foreground">{emptyText}</p>
         </div>

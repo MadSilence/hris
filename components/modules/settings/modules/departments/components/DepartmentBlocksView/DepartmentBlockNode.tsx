@@ -71,7 +71,7 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
       className={cn(
         "nopan flex flex-col rounded-xl border bg-white transition-shadow",
         selected ? "border-brown-300 shadow-md ring-1 ring-brown-200" : "border-brown-200 shadow-sm",
-        matched && "border-amber-400 ring-2 ring-amber-300 ring-inset",
+        matched && "border-warning-400 ring-2 ring-warning-300 ring-inset",
         dimmed && "opacity-35",
         isArchived && "border-dashed bg-brown-50/60",
       )}

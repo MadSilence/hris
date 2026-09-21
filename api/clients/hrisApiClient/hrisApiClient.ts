@@ -129,6 +129,28 @@ export class HrisApiClient {
   }
 
   /**
+   * The same raw passthrough for a POST with a JSON body — the People export, whose request is the
+   * whole table view (filters, columns, sort) and does not fit a query string. The body is returned
+   * unread, so a large file streams through instead of being buffered here.
+   */
+  public async postForBinary(path: string, body: unknown, accept = "*/*"): Promise<Response> {
+    const headers = await this.prepareHeaders(path);
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept", accept);
+
+    const response = await this.send(path, {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+      headers,
+      cache: "no-store",
+    });
+
+    await this.checkResponseStatus(response);
+
+    return response;
+  }
+
+  /**
    * The only place `fetch` is called. A throw here means the request never reached the backend —
    * it is down, the port is wrong, DNS failed — which is not a 500 from the API.
    */

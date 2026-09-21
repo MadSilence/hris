@@ -2,6 +2,7 @@ import { hrisApiPublicHolidayCalendarsClient } from "@/api/modules/publicHoliday
 import type { PublicHolidayCalendarDeleteImpact } from "@/models/publicHolidays/calendar";
 import type {
   CreatePublicHolidayCalendarRequest,
+  PublicHolidayDriftApplyResult,
   RenamePublicHolidayCalendarRequest,
   UpdatePublicHolidayCalendarRequest,
   UpdatePublicHolidayCalendarResponse,
@@ -56,6 +57,14 @@ export class HrisPublicHolidayCalendarsService {
 
   public async fillYear(id: string, year: number) {
     return hrisApiPublicHolidayCalendarsClient.fillYear(id, year);
+  }
+
+  public async applyDrift(driftId: string): Promise<PublicHolidayDriftApplyResult> {
+    return hrisApiPublicHolidayCalendarsClient.applyDrift(driftId);
+  }
+
+  public async dismissDrift(driftId: string): Promise<void> {
+    return hrisApiPublicHolidayCalendarsClient.dismissDrift(driftId);
   }
 
   public async restore(id: string): Promise<UpdateResponse> {
