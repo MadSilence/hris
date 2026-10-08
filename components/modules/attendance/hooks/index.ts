@@ -1,4 +1,4 @@
 export * from "./attendanceQueryKeys";
 export * from "./useAttendanceQueries";
-export * from "./useRecordAttendanceDay";
+export * from "./useAttendanceEntries";
 export * from "./useAddWorkSchedule";

@@ -3,12 +3,12 @@ import { hrisApiAttendanceService } from "@/api/modules/attendance/services";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import {
   addWorkScheduleAction,
-  recordAttendanceDayAction,
+  logAttendanceAction,
 } from "@/components/modules/attendance/actions/attendanceActions";
 
 jest.mock("@/api/modules/attendance/services", () => ({
   hrisApiAttendanceService: {
-    recordDay: jest.fn(),
+    logEntries: jest.fn(),
     addWorkSchedule: jest.fn(),
   },
 }));
@@ -24,29 +24,33 @@ describe("attendance actions", () => {
     jest.restoreAllMocks();
   });
 
-  it("records a day through the service", async () => {
+  it("logs a span through the service", async () => {
     const entry = {
-      id: "e-1", userId: "u-1", workDate: "2026-09-21", hours: 8, description: null, source: "WEB" as const,
+      id: "e-1", userId: "u-1", workDate: "2026-09-21", startTime: "09:00", endTime: "17:00", minutes: 480,
+      description: null,
     };
-    jest.mocked(hrisApiAttendanceService.recordDay).mockResolvedValue(entry);
+    jest.mocked(hrisApiAttendanceService.logEntries).mockResolvedValue([entry]);
+    const body = { dates: ["2026-09-21"], startTime: "09:00", endTime: "17:00" };
 
-    const result = await recordAttendanceDayAction({ userId: "u-1", date: "2026-09-21", body: { hours: 8 } });
+    const result = await logAttendanceAction({ userId: "u-1", body });
 
-    expect(hrisApiAttendanceService.recordDay).toHaveBeenCalledWith("u-1", "2026-09-21", { hours: 8 });
-    expect(result).toEqual({ status: ActionStatus.SUCCESS, data: entry });
+    expect(hrisApiAttendanceService.logEntries).toHaveBeenCalledWith("u-1", body);
+    expect(result).toEqual({ status: ActionStatus.SUCCESS, data: [entry] });
   });
 
   /** A colleague's timesheet refused by Java arrives as the dictionary's words, never as a throw. */
   it("turns a refusal into an ERROR envelope with the dictionary's text", async () => {
-    jest.mocked(hrisApiAttendanceService.recordDay).mockRejectedValue(
-      new ForbiddenError("Access denied: PEOPLE.ATTENDANCE.MANAGE on target", { code: "E00403", status: 403 }),
+    jest.mocked(hrisApiAttendanceService.logEntries).mockRejectedValue(
+      new ForbiddenError("Access denied: only the person logs their own time", { code: "E00403", status: 403 }),
     );
 
-    const result = await recordAttendanceDayAction({ userId: "colleague", date: "2026-09-21", body: { hours: 8 } });
+    const result = await logAttendanceAction({
+      userId: "colleague", body: { dates: ["2026-09-21"], startTime: "09:00", endTime: "17:00" },
+    });
 
     expect(result.status).toBe(ActionStatus.ERROR);
     expect(result.errorMessage).toBeTruthy();
-    expect(result.errorMessage).not.toContain("PEOPLE.ATTENDANCE");
+    expect(result.errorMessage).not.toContain("only the person");
   });
 
   it("adds a work schedule through the service", async () => {

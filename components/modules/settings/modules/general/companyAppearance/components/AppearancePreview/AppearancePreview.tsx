@@ -5,6 +5,7 @@ import { FC, ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { buildScopedBrandStyleSheet } from "@/lib/theme/brandPalette";
 import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 import { cn } from "@/public/desact/src/components/ui/utils";
+import { AuthBackdrop, AUTH_CARD_CLASS } from "@/components/modules/auth/components/AuthScreen";
 
 /**
  * Miniatures of the two screens the Appearance settings actually change, painted with the *draft*
@@ -289,13 +290,10 @@ const LoginScreen: FC<{
         <img src={backgroundUrl} alt="" className="absolute inset-0 h-full w-full object-cover"/>
       </>
     ) : (
-      <>
-        <span className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-brown-300 opacity-60 blur-3xl"/>
-        <span className="absolute -bottom-32 -right-16 h-[460px] w-[460px] rounded-full bg-brown-500 opacity-40 blur-3xl"/>
-      </>
+      <AuthBackdrop/>
     )}
 
-    <div className="relative flex w-[460px] flex-col gap-8 rounded-3xl bg-white p-12 shadow-2xl">
+    <div className={cn(AUTH_CARD_CLASS, "flex flex-col gap-8 sm:p-12")}>
       <div className="flex flex-col gap-3 text-center">
         <h1 className="m-0 text-4xl font-medium text-[var(--color-text-primary)]">{headline}</h1>
 
@@ -303,7 +301,7 @@ const LoginScreen: FC<{
       </div>
 
       <div className="flex flex-col gap-5">
-        {["Email address*", "Password*"].map((placeholder) => (
+        {["Email address", "Password"].map((placeholder) => (
           <span
             key={placeholder}
             className="flex h-11 items-center rounded-[10px] border border-brown-200 px-4 text-[var(--color-text-placeholder)]"
@@ -316,6 +314,8 @@ const LoginScreen: FC<{
           Sign in
         </span>
       </div>
+
+      <p className="m-0 text-center text-sm text-[var(--color-text-tertiary)]">Forgot Password?</p>
     </div>
   </div>
 );

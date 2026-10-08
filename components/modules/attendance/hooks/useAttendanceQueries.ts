@@ -1,23 +1,60 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
-import type { AttendanceCapabilities, AttendanceMonth, WorkSchedule } from "@/models/attendance";
+import type {
+  AttendanceCapabilities,
+  AttendanceLog,
+  AttendancePeriod,
+  AttendanceReportPage,
+  AttendanceReportRequest,
+  WorkSchedule,
+} from "@/models/attendance";
+import type { FilterDTO } from "@/models/user/fields";
 import { attendanceQueryKeys } from "./attendanceQueryKeys";
 
-/** A person's month. `month` is `yyyy-MM`; `null` asks for the company's current month. */
-export const useAttendanceMonth = (userId: string | null, month: string | null) => {
+const REPORT_PAGE = 50;
+
+/** One person's period, day by day — the person page and the profile tab read the same thing. */
+export const useAttendanceLog = (userId: string | null, period: AttendancePeriod | null) => {
   const { internalApiClient } = useAppDataContext();
-  return useQuery<AttendanceMonth>({
-    queryKey: attendanceQueryKeys.month(userId ?? "", month),
-    queryFn: () => internalApiClient.get<AttendanceMonth>(
-      `/attendance/users/${userId}/month${month ? `?month=${encodeURIComponent(month)}` : ""}`,
-    ),
-    enabled: Boolean(userId),
+  return useQuery<AttendanceLog>({
+    queryKey: attendanceQueryKeys.log(userId ?? "", period ?? { from: "", to: "" }),
+    queryFn: () => {
+      const query = new URLSearchParams({ from: period!.from, to: period!.to });
+      if (period!.expectedUntil) query.set("expectedUntil", period!.expectedUntil);
+      return internalApiClient.get<AttendanceLog>(`/attendance/users/${userId}/log?${query.toString()}`);
+    },
+    enabled: Boolean(userId && period),
+    placeholderData: keepPreviousData,
   });
 };
 
-/** What the caller may do on this person's timesheet and schedule — answered by the server. */
+/**
+ * The overview: people over a period, a page at a time. The first page carries how many people the
+ * whole report covers.
+ */
+export const useAttendanceReport = (params: AttendancePeriod & { q: string; filters: FilterDTO[] }, enabled = true) => {
+  const { internalApiClient } = useAppDataContext();
+  return useInfiniteQuery<AttendanceReportPage>({
+    queryKey: attendanceQueryKeys.report(params),
+    initialPageParam: null,
+    queryFn: ({ pageParam }) => internalApiClient.post<AttendanceReportPage>("/attendance/report", {
+      from: params.from,
+      to: params.to,
+      expectedUntil: params.expectedUntil ?? null,
+      q: params.q.trim().length >= 2 ? params.q.trim() : null,
+      filters: params.filters.length ? params.filters : null,
+      cursor: (pageParam as string | null) ?? null,
+      limit: REPORT_PAGE,
+    } satisfies AttendanceReportRequest),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
+    enabled,
+  });
+};
+
+/** What the caller may do on this person's attendance — answered by the server. */
 export const useAttendanceCapabilities = (userId: string | null) => {
   const { internalApiClient } = useAppDataContext();
   return useQuery<AttendanceCapabilities>({
@@ -37,8 +74,8 @@ export const useWorkSchedules = (userId: string | null, enabled = true) => {
 };
 
 /**
- * Everything an attendance write can have changed. A new schedule moves the norm and which days are
- * expected, so it invalidates the months too, not only the schedule list.
+ * Everything an attendance write can have changed. A span moves a day, the person's totals and the
+ * overview's row; a new schedule moves the norm — so the whole module is refetched, not one key.
  */
 export const useInvalidateAttendance = () => {
   const queryClient = useQueryClient();

@@ -3,6 +3,8 @@ export type CompanySettings = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  /** Minutes in a company working day — Attendance's norm for anybody without a personal schedule. */
+  dailyNormMinutes?: number;
   /** Sent back by the settings form. 0 while the company has no settings row yet. */
   version?: number;
 };

@@ -4,7 +4,8 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { Label } from "@/public/desact/src/components/ui/label";
+import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import {
   companyHost,
   companyOrigin,
@@ -64,29 +65,33 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
     goTo(address);
   };
 
+  const offered = chooseAnother ? null : rememberedSubdomain;
+
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center py-12">
+    <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
           <h1 className="text-4xl font-medium">Sign in to your company</h1>
           <p className="text-md text-[var(--color-text-tertiary)]">
-            Enter your company&apos;s address — the one you sign in at.
+            {offered
+              ? "Continue to the company you signed in to last time, or choose another."
+              : <>Enter your company&apos;s address — the one you sign in at.</>}
           </p>
         </div>
 
-        {rememberedSubdomain && !chooseAnother ? (
-          <div className="space-y-4">
-            <Button className="h-11 w-full" onClick={() => goTo(rememberedSubdomain)}>
-              Continue to {companyHost(rememberedSubdomain, web)}
+        {offered ? (
+          <div className="space-y-3">
+            <Button className="h-11 w-full" onClick={() => goTo(offered)}>
+              Continue to {companyHost(offered, web)}
             </Button>
-            <Button variant="outline" className="h-11 w-full" onClick={() => setChooseAnother(true)}>
+            <Button variant="outline" className="h-11 w-full bg-transparent" onClick={() => setChooseAnother(true)}>
               Use another company
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="company-address" required>Company Address</RequiredLabel>
+              <Label htmlFor="company-address">Company Address</Label>
 
               <div className="flex items-center gap-2">
                 <Input
@@ -102,19 +107,11 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
                     setError(null);
                   }}
                   aria-invalid={Boolean(error)}
-                  aria-describedby="company-address-preview"
+                  className="h-11"
                   autoFocus
                 />
                 <span className="shrink-0 text-sm text-[var(--color-text-tertiary)]">{suffix}</span>
               </div>
-
-              <p id="company-address-preview" className="text-sm text-[var(--color-text-tertiary)]" aria-live="polite">
-                {address ? (
-                  <>You will sign in at <span className="font-medium text-[var(--color-text-primary)]">{companyHost(address, web)}</span></>
-                ) : (
-                  "Letters, numbers and dashes."
-                )}
-              </p>
 
               {error && (
                 <p className="text-sm text-destructive" role="alert">{error}</p>
@@ -125,18 +122,12 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
           </form>
         )}
 
-        <div className="space-y-2 text-center text-sm text-muted-foreground">
-          <p>
-            <Link href="/find-company" className="underline underline-offset-4">
-              Don&apos;t know your company address?
-            </Link>
-          </p>
-          <p>
-            New here?{" "}
-            <Link href="/trial" className="underline underline-offset-4">Start a free trial</Link>
-          </p>
-        </div>
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href="/find-company" className="underline-offset-4 hover:underline">
+            Forgot company address?
+          </Link>
+        </p>
       </div>
-    </div>
+    </AuthScreen>
   );
 }

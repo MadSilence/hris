@@ -17,10 +17,21 @@ type TabDef = {
   resource?: ResourceCode;
 };
 
+/**
+ * The order is the owner's. Public Profile, Salary, Forms, Tasks and Notes are UI only for now —
+ * each opens `ProfileComingSoonTab` — and carry no resource: they are ungated until there is
+ * something behind them worth a permission.
+ */
 const TABS: TabDef[] = [
+  { id: "public-profile", label: "Public Profile" },
   { id: "personal", label: "Personal Info" },
   { id: "documents", label: "Documents", resource: "PEOPLE.DOCUMENTS" },
   { id: "time-off", label: "Time Off", resource: "PEOPLE.TIME_OFF" },
+  { id: "salary", label: "Salary" },
+  { id: "attendance", label: "Attendance", resource: "PEOPLE.ATTENDANCE" },
+  { id: "forms", label: "Forms" },
+  { id: "tasks", label: "Tasks" },
+  { id: "notes", label: "Notes" },
 ];
 
 type Props = {

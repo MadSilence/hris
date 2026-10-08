@@ -1,5 +1,6 @@
 import React from "react";
 
+import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import LoginContainer from "@/components/modules/auth/components/LoginContainer/LoginContainer";
 import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
 import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
@@ -31,40 +32,14 @@ export default function CompanyLoginScreen({ appearance, passwordChanged, change
   const backgroundUrl = appearance.loginImageUrl;
 
   return (
-    <div
-      data-test="company-login"
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-brown-100 px-4 py-10"
-    >
-      {backgroundUrl ? (
-        <>
-          <link rel="preload" as="image" href={backgroundUrl} />
-          {/* Backend-hosted upload of unknown dimensions; next/image would need a remote pattern for
-              the API origin, and would swap in a placeholder first — a repaint by design. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={backgroundUrl}
-            alt=""
-            loading="eager"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </>
-      ) : (
-        <>
-          <span aria-hidden className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-brown-300 opacity-60 blur-3xl"/>
-          <span aria-hidden className="absolute -bottom-32 -right-16 h-[460px] w-[460px] rounded-full bg-brown-500 opacity-40 blur-3xl"/>
-        </>
-      )}
-
-      <div className="relative w-full max-w-[460px] rounded-3xl bg-white p-8 shadow-2xl sm:p-12">
-        <LoginContainer
-          passwordChanged={passwordChanged}
-          headline={headline}
-          subheadline={subheadline}
-          changeCompanyHref={changeCompanyHref}
-          returnTo={returnTo}
-        />
-      </div>
-    </div>
+    <AuthScreen data-test="company-login" backgroundUrl={backgroundUrl} className="min-h-screen">
+      <LoginContainer
+        passwordChanged={passwordChanged}
+        headline={headline}
+        subheadline={subheadline}
+        changeCompanyHref={changeCompanyHref}
+        returnTo={returnTo}
+      />
+    </AuthScreen>
   );
 }

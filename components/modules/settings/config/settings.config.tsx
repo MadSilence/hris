@@ -81,11 +81,10 @@ export const settingsGroups: SettingsGroup[] = [
     items: [
       { label: "Workflows", href: "/settings/automation/workflows", resources: ["SETTINGS.GENERAL"] },
       {
-        label: "Preboarding & Onboarding",
-        href: "/settings/automation/lifecycle",
-        resources: ["PEOPLE.LIFECYCLE_TEMPLATES"],
+        label: "Preboarding, Onboarding & Offboarding",
+        href: "/settings/automation/preboarding",
+        resources: ["PEOPLE.LIFECYCLE_TEMPLATES", "SETTINGS.GENERAL"],
       },
-      { label: "Offboarding", href: "/settings/automation/offboarding", resources: ["SETTINGS.GENERAL"] },
       { label: "Approvals", href: "/settings/automation/approvals", resources: ["SETTINGS.GENERAL"] },
       { label: "Notifications", href: "/settings/automation/notifications", resources: ["SETTINGS.GENERAL"] },
       { label: "Integrations", href: "/settings/automation/integrations", resources: ["SETTINGS.GENERAL"] },

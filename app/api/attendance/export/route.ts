@@ -1,9 +1,13 @@
 import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
-import { streamBinary } from "@/api/utils/exportResponse";
+import { formatOf, streamBinary } from "@/api/utils/exportResponse";
 import { hrisApiAttendanceService } from "@/api/modules/attendance/services";
+import type { AttendanceExportRequest } from "@/models/attendance";
 
-/** A month of timesheets as a file. Streams Java's response as is; the file name is Java's. */
-export const GET = apiRequestWrapper(async (req: Request) => {
-  const backendResponse = await hrisApiAttendanceService.exportMonth(new URL(req.url).searchParams);
-  return streamBinary(backendResponse);
+/**
+ * What the overview shows, as a file — a POST, because the request carries the filters. The format
+ * rides the query, as on the People export; the file name is Java's.
+ */
+export const POST = apiRequestWrapper(async (req: Request) => {
+  const body = (await req.json().catch(() => ({}))) as AttendanceExportRequest;
+  return streamBinary(await hrisApiAttendanceService.exportReport(body, formatOf(req)));
 });

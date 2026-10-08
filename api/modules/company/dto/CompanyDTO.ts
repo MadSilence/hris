@@ -16,6 +16,7 @@ export type CompanySettingsDTO = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  dailyNormMinutes?: number;
   /** 0 for a company whose settings row has not been written yet. */
   version?: number;
 };
@@ -32,6 +33,8 @@ export type UpdateCompanySettingsRequest = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  /** Minutes in a company working day. Left out, the stored value stays — the Company form does not carry it. */
+  dailyNormMinutes?: number | null;
   /** The version the form was opened with; a stale one is refused with E00409. */
   version?: number;
 };

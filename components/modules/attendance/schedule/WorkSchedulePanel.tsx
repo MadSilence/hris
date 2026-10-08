@@ -11,9 +11,8 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { formatDisplayDate } from "@/lib/date";
-import { WEEKDAY_FIELDS, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
+import { formatMinutes, WEEKDAY_FIELDS, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
 import { AttendanceActionError, useAddWorkSchedule, useWorkSchedules } from "@/components/modules/attendance/hooks";
-import { formatHours } from "@/components/modules/attendance/timesheet/month";
 import { AddWorkScheduleModal } from "./AddWorkScheduleModal";
 
 type Props = {
@@ -34,7 +33,7 @@ const weeklyHours = (schedule: WorkSchedule) =>
   WEEKDAY_FIELDS.reduce((sum, field) => sum + Number(schedule[field.key] ?? 0), 0);
 
 /**
- * A person's working week over time (ATTENDANCE_PLAN 1.4 and 3.4). Read-only history plus one
+ * A person's working week over time. Read-only history plus one
  * action: add a schedule from a date. Somebody with no schedule works the company week.
  */
 export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) => {
@@ -80,7 +79,7 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
         <EmptyState
           icon={<CalendarClock className="h-6 w-6"/>}
           title="Works the company week"
-          description="No personal schedule. The company's working days apply, with no set number of hours."
+          description="No personal schedule. The company's working days apply, each at the company's working-day length."
           onCreate={canEdit ? () => setAdding(true) : undefined}
           createLabel={canEdit ? "Add Work Schedule" : undefined}
         />
@@ -110,9 +109,9 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
                       {current?.id === schedule.id && <StatusBadge status="active" label="In Force" className="ml-2"/>}
                     </TableCell>
                     {WEEKDAY_FIELDS.map((field) => (
-                      <TableCell key={field.key}>{formatHours(schedule[field.key])}</TableCell>
+                      <TableCell key={field.key} className="tabular-nums">{formatMinutes(Number(schedule[field.key]) * 60)}</TableCell>
                     ))}
-                    <TableCell>{formatHours(weeklyHours(schedule))}</TableCell>
+                    <TableCell className="tabular-nums">{formatMinutes(weeklyHours(schedule) * 60)}</TableCell>
                   </TableRow>
                 ))}
             </TableBody>

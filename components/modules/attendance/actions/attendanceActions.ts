@@ -7,32 +7,43 @@ import { hrisApiAttendanceService } from "@/api/modules/attendance/services";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 import type {
   AttendanceEntry,
-  RecordAttendanceDayRequest,
+  AttendanceEntryUpdateRequest,
+  AttendanceEntryWriteRequest,
   WorkSchedule,
   WorkScheduleWriteRequest,
 } from "@/models/attendance";
 
-export type RecordAttendanceDayInput = {
-  userId: string;
-  /** `yyyy-MM-dd`. */
-  date: string;
-  body: RecordAttendanceDayRequest;
-};
+export type LogAttendanceInput = { userId: string; body: AttendanceEntryWriteRequest };
+export type AmendAttendanceInput = { userId: string; entryId: string; body: AttendanceEntryUpdateRequest };
+export type RemoveAttendanceInput = { userId: string; entryId: string };
+export type AddWorkScheduleInput = { userId: string; body: WorkScheduleWriteRequest };
 
-export type AddWorkScheduleInput = {
-  userId: string;
-  body: WorkScheduleWriteRequest;
-};
+/** Logs the same span on every picked day — written or refused as a whole. */
+export async function logAttendanceAction(input: LogAttendanceInput): Promise<ActionResult<AttendanceEntry[]>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisApiAttendanceService.logEntries(input.userId, input.body) };
+  } catch (error) {
+    return toActionError(error, "logAttendanceAction");
+  }
+}
 
-/** Records a day or amends the one already there. Zero hours clears it. */
-export async function recordAttendanceDayAction(input: RecordAttendanceDayInput): Promise<ActionResult<AttendanceEntry>> {
+export async function amendAttendanceAction(input: AmendAttendanceInput): Promise<ActionResult<AttendanceEntry>> {
   try {
     return {
       status: ActionStatus.SUCCESS,
-      data: await hrisApiAttendanceService.recordDay(input.userId, input.date, input.body),
+      data: await hrisApiAttendanceService.amendEntry(input.userId, input.entryId, input.body),
     };
   } catch (error) {
-    return toActionError(error, "recordAttendanceDayAction");
+    return toActionError(error, "amendAttendanceAction");
+  }
+}
+
+export async function removeAttendanceAction(input: RemoveAttendanceInput): Promise<ActionResult<null>> {
+  try {
+    await hrisApiAttendanceService.removeEntry(input.userId, input.entryId);
+    return { status: ActionStatus.SUCCESS, data: null };
+  } catch (error) {
+    return toActionError(error, "removeAttendanceAction");
   }
 }
 

@@ -9,18 +9,40 @@ import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/t
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
 import {
   UserCalendar,
+  type CalendarDayInfo,
   type CalendarHolidayEvent,
   type CalendarTimeOffEvent,
 } from "@/components/modules/calendar/components/UserCalendar/UserCalendar";
+
+/** Pending is on the board by default; Attendance asks for approved leave only — it is the only kind that holds a day. */
+const DEFAULT_STATUSES = [TimeOffRequestStatus.Approved, TimeOffRequestStatus.Pending];
 
 type Props = {
   userId: string;
   variant?: "full" | "compact";
   headerAction?: ReactNode;
   onSelectRange?: (startISO: string, endISO: string) => void;
+  timeOffStatuses?: TimeOffRequestStatus[];
+  /** Passed straight through; see `UserCalendar`. */
+  selectedRange?: { start: string; end: string } | null;
+  toolbar?: "grouped" | "split";
+  renderDay?: (day: CalendarDayInfo) => ReactNode;
+  onMonthChange?: (month: string) => void;
+  footer?: (visibleDays: CalendarDayInfo[]) => ReactNode;
 };
 
-export const UserCalendarContainer: FC<Props> = ({ userId, variant = "full", headerAction, onSelectRange }) => {
+export const UserCalendarContainer: FC<Props> = ({
+  userId,
+  variant = "full",
+  headerAction,
+  onSelectRange,
+  timeOffStatuses = DEFAULT_STATUSES,
+  selectedRange,
+  toolbar,
+  renderDay,
+  onMonthChange,
+  footer,
+}) => {
   const { data: holidays, isLoading: holidaysLoading } = useUserPublicHolidays({ userId });
   const { data: requests, isLoading: requestsLoading } = useTimeOffRequestsByUser({ userId });
   const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
@@ -44,11 +66,7 @@ export const UserCalendarContainer: FC<Props> = ({ userId, variant = "full", hea
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
     const policyName = new Map((policies ?? []).map((p) => [p.id, p.displayName]));
     return (requests ?? [])
-      .filter(
-        (r) =>
-          r.status === TimeOffRequestStatus.Approved ||
-          r.status === TimeOffRequestStatus.Pending,
-      )
+      .filter((r) => timeOffStatuses.includes(r.status))
       .map((r) => ({
         id: r.id,
         label: policyName.get(r.policyId) ?? "Time off",
@@ -56,7 +74,7 @@ export const UserCalendarContainer: FC<Props> = ({ userId, variant = "full", hea
         endDate: r.endDate,
         tone: r.status === TimeOffRequestStatus.Approved ? "approved" : "pending",
       }));
-  }, [requests, policies]);
+  }, [requests, policies, timeOffStatuses]);
 
   return (
     <UserCalendar
@@ -66,6 +84,11 @@ export const UserCalendarContainer: FC<Props> = ({ userId, variant = "full", hea
       variant={variant}
       headerAction={headerAction}
       onSelectRange={onSelectRange}
+      selectedRange={selectedRange}
+      toolbar={toolbar}
+      renderDay={renderDay}
+      onMonthChange={onMonthChange}
+      footer={footer}
     />
   );
 };

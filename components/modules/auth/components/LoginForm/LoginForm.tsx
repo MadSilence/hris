@@ -6,7 +6,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { Label } from "@/public/desact/src/components/ui/label";
 import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 
 export type LoginFormValues = {
@@ -150,9 +150,9 @@ export default function LoginForm({
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="login-email" required>Email Address</RequiredLabel>
+            <Label htmlFor="login-email">Email Address</Label>
 
             <Input
               id="login-email"
@@ -165,6 +165,7 @@ export default function LoginForm({
               }
               disabled={busy}
               required
+              className="h-11"
               aria-invalid={!!formik.errors.email}
             />
 
@@ -172,15 +173,7 @@ export default function LoginForm({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <RequiredLabel htmlFor="login-password" required>Password</RequiredLabel>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
+            <Label htmlFor="login-password">Password</Label>
 
             <Input
               id="login-password"
@@ -193,6 +186,7 @@ export default function LoginForm({
               }
               disabled={busy}
               required
+              className="h-11"
               aria-invalid={!!formik.errors.password}
             />
 
@@ -205,15 +199,24 @@ export default function LoginForm({
             {busy ? "Signing in…" : "Sign in"}
           </Button>
 
+        </form>
+
+        <div className="space-y-2 text-center text-sm text-muted-foreground">
+          <p>
+            <Link href="/forgot-password" className="underline-offset-4 hover:underline">
+              Forgot Password?
+            </Link>
+          </p>
+
           {changeCompanyHref ? (
-            <p className="text-center text-sm text-muted-foreground">
+            <p>
               Not your company?{" "}
               <a href={changeCompanyHref} className="underline underline-offset-4">
                 Sign in to another one
               </a>
             </p>
           ) : null}
-        </form>
+        </div>
       </div>
     </div>
   );

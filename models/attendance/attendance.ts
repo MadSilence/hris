@@ -1,73 +1,126 @@
 /**
- * The timesheet, as the backend sends it (`hris-api` `features/attendance`).
+ * Attendance, as the backend sends it (`hris-api` `features/attendance`). Rebuilt 2026-09-28
+ * (`ATTENDANCE_REBUILD_PLAN.md`).
  *
- * Hours only. The amount owed needs an hourly rate, and where a rate comes from is an open question
- * (`NEED_TO_DISCUSS.md` § 24), so nothing here is money.
- *
- * Hours travel as JSON numbers (Java `BigDecimal`), dates as `yyyy-MM-dd`.
+ * Durations are **minutes** everywhere; the screens spell them `H:MM` (`formatMinutes`). Dates are
+ * `yyyy-MM-dd`, times of day `HH:mm`. Nothing here is money.
  */
 
-export type AttendanceSource = "WEB" | "MANUAL" | "IMPORT";
+import type { FilterDTO } from "@/models/user/fields";
 
+/** One logged span of work on one day. */
 export type AttendanceEntry = {
   id: string;
   userId: string;
   workDate: string;
-  hours: number;
+  startTime: string;
+  endTime: string;
+  minutes: number;
   description: string | null;
-  source: AttendanceSource;
 };
 
-export type AttendanceDay = {
+/** A person's period in five numbers — a row of the overview, the head of the person page. */
+export type AttendanceTotals = {
+  expectedDays: number;
+  loggedDays: number;
+  expectedMinutes: number;
+  loggedMinutes: number;
+  overtimeMinutes: number;
+};
+
+export type AttendanceLogDay = {
   date: string;
-  /** The person's schedule (or the company week) has hours this weekday, and it is no holiday of theirs. */
+  /** Inside the person's employment — hire date to termination date. */
+  employed: boolean;
+  /** Employed, their week works this weekday, and it is not their public holiday. */
   workingDay: boolean;
-  /** The norm from the person's own schedule; `null` when only the company week applies — it gives days, not hours. */
-  scheduledHours: number | null;
-  /** The public holiday on this day, when there is one. */
+  /** How long the day is expected to be. Zero on a day off, a holiday, leave or outside employment. */
+  normMinutes: number;
+  /** A working day, not on leave, not after the period's `expectedUntil`. */
+  expected: boolean;
   holiday: string | null;
-  /** Approved leave holds this day. Only the fact — the policy and the reason stay with Time Off. */
   onLeave: boolean;
-  hours: number | null;
-  description: string | null;
-  source: AttendanceSource | null;
-  /** Hours recorded on a day of leave — possible only when the leave was approved afterwards. */
-  conflict: boolean;
+  /** Expected, nothing logged, and already past. */
+  missing: boolean;
+  loggedMinutes: number;
+  overtimeMinutes: number;
+  entries: AttendanceEntry[];
 };
 
-export type AttendanceSummary = {
-  recordedHours: number;
-  daysRecorded: number;
-  workingDays: number;
-  leaveDays: number;
-  missingDays: number;
-  /** `null` when any expected day has no known norm. */
-  scheduledHours: number | null;
-};
-
-export type AttendanceMonth = {
+export type AttendanceLog = {
   userId: string;
-  /** `yyyy-MM`. */
-  month: string;
+  /** Name and photo only — email and status are left out of this read. */
+  person: AttendancePerson;
+  from: string;
+  to: string;
+  expectedUntil: string;
   /** The company's today — not the browser's. */
   today: string;
-  days: AttendanceDay[];
-  summary: AttendanceSummary;
+  totals: AttendanceTotals;
+  days: AttendanceLogDay[];
 };
 
-/** What the caller may do on one person's timesheet and schedule — the server's answer, not a guess. */
+/** What the caller may do on one person's attendance — the server's answer, not a guess. */
 export type AttendanceCapabilities = {
   canView: boolean;
-  canRecord: boolean;
-  canViewOthers: boolean;
-  canExport: boolean;
+  /** Only on your own timesheet: nobody logs somebody else's time. */
+  canLog: boolean;
+  /** The company overview, the person pages and the export. */
+  canManage: boolean;
   canViewSchedule: boolean;
   canEditSchedule: boolean;
 };
 
-export type RecordAttendanceDayRequest = {
-  hours: number;
+export type AttendanceEntryWriteRequest = {
+  dates: string[];
+  startTime: string;
+  endTime: string;
   description?: string | null;
+};
+
+export type AttendanceEntryUpdateRequest = {
+  startTime: string;
+  endTime: string;
+  description?: string | null;
+};
+
+export type AttendancePerson = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  /** Null when the reader may not see emails. */
+  email: string | null;
+  avatarUrl: string | null;
+  status: string | null;
+};
+
+export type AttendanceReportRow = { person: AttendancePerson; totals: AttendanceTotals };
+
+export type AttendanceReportPage = {
+  items: AttendanceReportRow[];
+  nextCursor: string | null;
+  /** How many people the whole report covers — on the first page only. */
+  total: number | null;
+};
+
+/** The period the overview, the person page and the export are asked about. */
+export type AttendancePeriod = {
+  from: string;
+  to: string;
+  /** The last day "expected" counts: today for the default month, absent for a picked period. */
+  expectedUntil?: string | null;
+};
+
+export type AttendanceReportRequest = AttendancePeriod & {
+  q?: string | null;
+  filters?: FilterDTO[] | null;
+  cursor?: string | null;
+  limit?: number | null;
+};
+
+export type AttendanceExportRequest = AttendancePeriod & {
+  q?: string | null;
+  filters?: FilterDTO[] | null;
 };
 
 /** Hours per weekday, in force from a date. Zero hours: not a working day. */
@@ -98,15 +151,8 @@ export const WEEKDAY_FIELDS = [
 
 export type WeekdayHoursKey = (typeof WEEKDAY_FIELDS)[number]["key"];
 
-/** Exactly one target per export. */
-export type AttendanceExportTarget =
-  | { type: "person"; userId: string }
-  | { type: "team"; teamId: string }
-  | { type: "department"; departmentId: string }
-  | { type: "company" };
-
-export const ATTENDANCE_SOURCE_LABELS: Record<AttendanceSource, string> = {
-  WEB: "Recorded by the person",
-  MANUAL: "Recorded by somebody else",
-  IMPORT: "Imported",
+/** `7:30` — hours and minutes, the one spelling of a duration in Attendance. */
+export const formatMinutes = (minutes: number): string => {
+  const whole = Math.max(0, Math.round(minutes));
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 };

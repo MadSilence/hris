@@ -8,14 +8,12 @@ import CompanyAddressStep, {
 const web = { scheme: "http", rootDomain: "localhost:3000" };
 
 describe("CompanyAddressStep", () => {
-  it("shows the address as it is typed and goes straight to that company's login", async () => {
+  it("goes straight to that company's login", async () => {
     const user = userEvent.setup();
     const navigate = jest.fn();
     render(<CompanyAddressStep web={web} rememberedSubdomain={null} navigate={navigate} />);
 
     await user.type(screen.getByLabelText(/company address/i), "Acme Corp");
-
-    expect(screen.getByText("acme-corp.localhost:3000")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
@@ -57,10 +55,10 @@ describe("CompanyAddressStep", () => {
     expect(screen.getByLabelText(/company address/i)).toBeInTheDocument();
   });
 
-  it("points to finding an address and to the trial", () => {
+  it("points to finding an address, and nowhere else", () => {
     render(<CompanyAddressStep web={web} rememberedSubdomain={null} navigate={jest.fn()} />);
 
-    expect(screen.getByRole("link", { name: /don't know your company address/i })).toHaveAttribute("href", "/find-company");
-    expect(screen.getByRole("link", { name: /start a free trial/i })).toHaveAttribute("href", "/trial");
+    expect(screen.getByRole("link", { name: "Forgot company address?" })).toHaveAttribute("href", "/find-company");
+    expect(screen.queryByRole("link", { name: /free trial/i })).not.toBeInTheDocument();
   });
 });

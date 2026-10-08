@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from "react";
 import { Archive, ArchiveRestore, ListChecks, Pencil, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
@@ -24,9 +23,13 @@ import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDial
 import { TemplateEditorDialog } from "./TemplateEditorDialog";
 import { PROCESS_TYPE_LABELS, type ProcessType, type TemplateSummary } from "@/models/lifecycle";
 
-/** Settings → Preboarding & Onboarding: the templates processes are started from. */
-export function LifecycleTemplatesContainer() {
-  const [type, setType] = useState<ProcessType>("PREBOARDING");
+type Props = {
+  /** Which process's templates — each is its own tab and route in Settings. */
+  type: ProcessType;
+};
+
+/** Settings → Preboarding / Onboarding: the templates processes are started from. */
+export function LifecycleTemplatesContainer({ type }: Props) {
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<{ id: string | null } | null>(null);
@@ -50,13 +53,6 @@ export function LifecycleTemplatesContainer() {
 
   return (
     <div className="space-y-4">
-      <Tabs value={type} onValueChange={(v) => { setType(v as ProcessType); setShowArchived(false); }}>
-        <TabsList>
-          <TabsTrigger value="PREBOARDING">Preboarding</TabsTrigger>
-          <TabsTrigger value="ONBOARDING">Onboarding</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
       <ListToolbar
         search={{ value: query, onChange: setQuery }}
         archived={archivedCount > 0 ? { count: archivedCount, showing: showArchived, onChange: setShowArchived } : undefined}

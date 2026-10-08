@@ -118,6 +118,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00002: "Pick at least one working day.",
   CS00003: "Invalid working day (expected a day-of-week name)",
   CS00004: "Invalid week start day (expected a day-of-week name)",
+  CS00005: "Enter the length of a working day between 0:01 and 24:00.",
 
   // CompanySetupBusinessError
   CST0001: "This company has already been set up.",
@@ -553,17 +554,12 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LC00033: "This task is assigned to somebody else.",
   LC00034: "This person has an unfinished preboarding. Choose whether to keep it or end it.",
 
-  // AttendanceBusinessError — the timesheet and the work schedule editor.
-  ATD00001: "Hours must be between 0 and 24.",
-  ATD00002: "Hours can have at most two decimals, such as 7.25.",
-  ATD00003: "A day that has not happened yet cannot be recorded.",
-  ATD00004: "This day is approved leave. Cancel or shorten the leave in Time Off to record hours on it.",
+  // AttendanceBusinessError — logged time, its reads and the work schedule editor.
+  ATD00001: "Enter a start and an end on the same day, the end later than the start.",
+  ATD00002: "This overlaps time already logged on {0}. Change the times or edit the existing entry.",
+  ATD00003: "Pick between 1 and {0} days.",
   ATD00005: "The description can be at most {0} characters.",
   ATD00006: "Choose a range that runs forwards and covers at most {0} days.",
-  ATD00007: "That month could not be read. Use the month picker.",
-  ATD00008: "Choose exactly one person, team, department, or everyone.",
-  ATD00009: "That team or department no longer exists.",
-  ATD00010: "Somebody recorded this day at the same moment. Reload the month and try again.",
   ATD00011: "A schedule already starts on this date. Choose another date.",
   ATD00012: "Scheduled hours must be between 0 and 24 on every day.",
 };

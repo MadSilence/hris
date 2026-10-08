@@ -7,7 +7,7 @@ import {
   addWorkScheduleAction,
   type AddWorkScheduleInput,
 } from "@/components/modules/attendance/actions";
-import { AttendanceActionError } from "./useRecordAttendanceDay";
+import { AttendanceActionError } from "./useAttendanceEntries";
 import { useInvalidateAttendance } from "./useAttendanceQueries";
 
 export const useAddWorkSchedule = () => {

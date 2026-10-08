@@ -6,7 +6,8 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { Label } from "@/public/desact/src/components/ui/label";
+import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { remindCompanyAddressesAction } from "@/components/modules/companyAddress/actions/companyAddressActions";
@@ -26,7 +27,7 @@ const schema = yup.object({
 });
 
 /**
- * "Don't know your company address?"
+ * "Forgot company address?"
  *
  * **The answer never says whether the email holds an account anywhere** — the backend replies the same
  * for none, one or many, and so does this screen. The addresses go to the inbox. Only a request that
@@ -62,18 +63,22 @@ export function FindCompanyContainer() {
 
   if (sent) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-        <h1 className="text-4xl font-medium">Check Your Email</h1>
-        <p className="text-md text-muted-foreground" role="status">{FIND_COMPANY_SENT_MESSAGE}</p>
-        <Button asChild variant="outline">
-          <Link href="/login">Back to Sign In</Link>
-        </Button>
-      </div>
+      <AuthScreen className="flex-1">
+        <div className="w-full space-y-8 text-center">
+          <div className="space-y-3">
+            <h1 className="text-4xl font-medium">Check Your Email</h1>
+            <p className="text-md text-muted-foreground" role="status">{FIND_COMPANY_SENT_MESSAGE}</p>
+          </div>
+          <Button asChild variant="outline" className="h-11 w-full bg-transparent">
+            <Link href="/login">Back to Sign In</Link>
+          </Button>
+        </div>
+      </AuthScreen>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center py-12">
+    <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
           <h1 className="text-4xl font-medium">Find Your Company</h1>
@@ -82,9 +87,9 @@ export function FindCompanyContainer() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="find-company-email" required>Email Address</RequiredLabel>
+            <Label htmlFor="find-company-email">Email Address</Label>
             <Input
               id="find-company-email"
               name="email"
@@ -93,6 +98,7 @@ export function FindCompanyContainer() {
               value={formik.values.email}
               onChange={(e) => formik.setFieldValue("email", e.currentTarget.value)}
               disabled={busy}
+              className="h-11"
               aria-invalid={Boolean(formik.errors.email)}
             />
             {formik.errors.email && (
@@ -107,10 +113,10 @@ export function FindCompanyContainer() {
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            <Link href="/login" className="underline underline-offset-4">Back to Sign In</Link>
+            <Link href="/login" className="underline-offset-4 hover:underline">Back to Sign In</Link>
           </p>
         </form>
       </div>
-    </div>
+    </AuthScreen>
   );
 }

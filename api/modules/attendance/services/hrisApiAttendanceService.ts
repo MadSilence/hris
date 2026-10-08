@@ -1,30 +1,77 @@
-import { EXPORT_QUERY_KEYS, hrisApiAttendanceClient } from "@/api/modules/attendance/clients";
+import { hrisApiAttendanceClient } from "@/api/modules/attendance/clients";
 import type {
   AttendanceCapabilities,
   AttendanceEntry,
-  AttendanceMonth,
-  RecordAttendanceDayRequest,
+  AttendanceEntryUpdateRequest,
+  AttendanceEntryWriteRequest,
+  AttendanceExportRequest,
+  AttendanceLog,
+  AttendancePeriod,
+  AttendanceReportPage,
+  AttendanceReportRequest,
   WorkSchedule,
   WorkScheduleWriteRequest,
 } from "@/models/attendance";
 
+const trimmed = (text: string | null | undefined): string | null => (text?.trim() ? text.trim() : null);
+
+/** Only the keys the backend reads travel, so the BFF passes nothing through by accident. */
+const periodOf = (body: AttendancePeriod): AttendancePeriod => ({
+  from: body.from,
+  to: body.to,
+  expectedUntil: body.expectedUntil ?? null,
+});
+
 /**
- * The seam for the timesheet and the work schedule: every transport — route handler, server action,
+ * The seam for Attendance and the work schedule: every transport — route handler, server action,
  * RSC — converges here. Authorization is Java's; nothing is checked on this side.
  */
 export class HrisApiAttendanceService {
-  public async month(userId: string, month?: string | null): Promise<AttendanceMonth> {
-    return hrisApiAttendanceClient.month(userId, month);
+  public async log(userId: string, period: AttendancePeriod): Promise<AttendanceLog> {
+    return hrisApiAttendanceClient.log(userId, periodOf(period));
   }
 
   public async capabilities(userId: string): Promise<AttendanceCapabilities> {
     return hrisApiAttendanceClient.capabilities(userId);
   }
 
-  public async recordDay(userId: string, date: string, body: RecordAttendanceDayRequest): Promise<AttendanceEntry> {
-    return hrisApiAttendanceClient.recordDay(userId, date, {
-      hours: body.hours,
-      description: body.description?.trim() ? body.description.trim() : null,
+  public async logEntries(userId: string, body: AttendanceEntryWriteRequest): Promise<AttendanceEntry[]> {
+    return hrisApiAttendanceClient.logEntries(userId, {
+      dates: body.dates,
+      startTime: body.startTime,
+      endTime: body.endTime,
+      description: trimmed(body.description),
+    });
+  }
+
+  public async amendEntry(userId: string, entryId: string, body: AttendanceEntryUpdateRequest): Promise<AttendanceEntry> {
+    return hrisApiAttendanceClient.amendEntry(userId, entryId, {
+      startTime: body.startTime,
+      endTime: body.endTime,
+      description: trimmed(body.description),
+    });
+  }
+
+  public async removeEntry(userId: string, entryId: string): Promise<void> {
+    return hrisApiAttendanceClient.removeEntry(userId, entryId);
+  }
+
+  public async report(body: AttendanceReportRequest): Promise<AttendanceReportPage> {
+    return hrisApiAttendanceClient.report({
+      ...periodOf(body),
+      q: body.q ?? null,
+      filters: body.filters?.length ? body.filters : null,
+      cursor: body.cursor ?? null,
+      limit: body.limit ?? null,
+    });
+  }
+
+  public async exportReport(body: AttendanceExportRequest, format: "csv" | "xlsx"): Promise<Response> {
+    return hrisApiAttendanceClient.exportReport({
+      ...periodOf(body),
+      q: body.q ?? null,
+      filters: body.filters?.length ? body.filters : null,
+      format,
     });
   }
 
@@ -34,16 +81,6 @@ export class HrisApiAttendanceService {
 
   public async addWorkSchedule(userId: string, body: WorkScheduleWriteRequest): Promise<WorkSchedule> {
     return hrisApiAttendanceClient.addWorkSchedule(userId, body);
-  }
-
-  /** Forwards only the keys an export understands, so the BFF passes nothing through by accident. */
-  public async exportMonth(incoming: URLSearchParams): Promise<Response> {
-    const query = new URLSearchParams();
-    for (const key of EXPORT_QUERY_KEYS) {
-      const value = incoming.get(key);
-      if (value) query.set(key, value);
-    }
-    return hrisApiAttendanceClient.exportMonth(query);
   }
 }
 

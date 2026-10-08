@@ -5,7 +5,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { addWorkScheduleAction } from "@/components/modules/attendance/actions";
 import { useInvalidateAttendance } from "@/components/modules/attendance/hooks/useAttendanceQueries";
 import { useAddWorkSchedule } from "@/components/modules/attendance/hooks/useAddWorkSchedule";
-import { AttendanceActionError } from "@/components/modules/attendance/hooks/useRecordAttendanceDay";
+import { AttendanceActionError } from "@/components/modules/attendance/hooks/useAttendanceEntries";
 
 jest.mock("@tanstack/react-query", () => ({
   useMutation: jest.fn(),

@@ -10,7 +10,7 @@ import { useAttendanceCapabilities } from "@/components/modules/attendance/hooks
 import { WorkSchedulePanel } from "./WorkSchedulePanel";
 
 /**
- * Settings → Attendance: one person's work schedule, picked by name. The same panel the timesheet
+ * Settings → Attendance: one person's work schedule, picked by name. The same panel Attendance
  * shows under a person's month — this is the way in for somebody who looks after schedules rather
  * than timesheets.
  */

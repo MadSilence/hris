@@ -11,7 +11,7 @@ import Settings from "@/public/icons/settings.svg";
 import { Clock, ListChecks, Workflow } from "lucide-react";
 import styles from "./layout.module.css";
 import { useAccess } from "@/components/auth/useAccess";
-import { canAccess, isSystemOwner, ResourceCode } from "@/models/access";
+import { canAccess, isSystemOwner, ResourceCode, type AccessAction } from "@/models/access";
 import { settingsGroups } from "@/components/modules/settings/config/settings.config";
 import { Toaster } from "@/public/desact/src/components/ui/sonner";
 import { showError } from "@/lib/errors/errorToast";
@@ -77,7 +77,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     .flatMap((group) => group.items)
     .flatMap((item) => item.resources ?? []);
 
-  const allTopItems: (NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean })[] = [
+  const allTopItems: (NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction })[] = [
     { label: "Home", href: "/dashboard", Icon: Home },
     {
       label: "Inbox",
@@ -108,12 +108,14 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       // only when the scope reaches further. `canAccess` without a scope passed on any grant at all.
       widerThanSelf: true,
     },
-    // Everyone keeps their own timesheet; the item shows for whoever may read one.
+    // The company's attendance, for those who manage it (MANAGE). Everybody logs their own time on
+    // their profile; the overview is not theirs to see.
     {
-      label: "Timesheet",
+      label: "Attendance",
       href: "/attendance",
       Icon: Clock as NavItem["Icon"],
       resources: ["PEOPLE.ATTENDANCE"],
+      action: "MANAGE",
     },
     {
       label: "Processes",
@@ -132,11 +134,11 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     },
   ];
 
-  const filterItem = (item: NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean }) => {
+  const filterItem = (item: NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction }) => {
     if (!item.resources || item.resources.length === 0) return true;
 
     return item.resources.some((resource) => {
-      if (!canAccess({ access, resource, action: "VIEW" })) return false;
+      if (!canAccess({ access, resource, action: item.action ?? "VIEW" })) return false;
       if (!item.widerThanSelf || isSystemOwner(access)) return true;
       const scopes = access?.permissions?.[resource]?.VIEW ?? [];
       return scopes.some((scope) => scope !== "SELF");

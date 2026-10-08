@@ -12,7 +12,8 @@ export default function TimeOffPage() {
 
   return (
     <ProfileCapabilityGate userId={userId} resource="PEOPLE.TIME_OFF">
-      <div className="h-[72vh] w-full">
+      {/* The same frame as the Attendance tab: the scroll lives here, since the profile shell clips. */}
+      <div className="h-full w-full overflow-y-auto pb-2">
         <UserTimeOffCalendar userId={userId}/>
       </div>
     </ProfileCapabilityGate>

@@ -18,8 +18,14 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
 import { FormError } from "@/components/feedback/FormError";
-import { WEEKDAY_FIELDS, type WeekdayHoursKey, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
-import { parseHours } from "@/components/modules/attendance/timesheet/month";
+import { formatMinutes, WEEKDAY_FIELDS, type WeekdayHoursKey, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
+import { parseDuration } from "@/components/modules/attendance/lib";
+
+/** The schedule is stored in hours; a day may be typed as `7:30` or `7.5`. */
+const hoursOf = (value: string): number | null => {
+  const minutes = parseDuration(value);
+  return minutes === null ? null : Math.round((minutes / 60) * 100) / 100;
+};
 
 type FormValues = { effectiveFrom: string } & Record<WeekdayHoursKey, string>;
 
@@ -35,9 +41,9 @@ type Props = {
 const hoursField = yup
   .string()
   .required("Enter the hours, or 0 for a day off.")
-  .test("hours", "Hours must be a number between 0 and 24, with at most two decimals.", (value) => {
-    const parsed = parseHours(value ?? "");
-    return parsed !== null && parsed >= 0 && parsed <= 24 && Math.round(parsed * 100) === parsed * 100;
+  .test("hours", "Enter the hours as 7:30 or 7.5, between 0 and 24.", (value) => {
+    const minutes = parseDuration(value ?? "");
+    return minutes !== null && minutes >= 0 && minutes <= 24 * 60;
   });
 
 const schema = yup.object({
@@ -48,8 +54,8 @@ const schema = yup.object({
 const initialValues = (current: WorkSchedule | null): FormValues => {
   const base = { effectiveFrom: "" } as FormValues;
   for (const field of WEEKDAY_FIELDS) {
-    const fallback = ["saturdayHours", "sundayHours"].includes(field.key) ? "0" : "8";
-    base[field.key] = current ? String(current[field.key]) : fallback;
+    const fallback = ["saturdayHours", "sundayHours"].includes(field.key) ? "0:00" : "8:00";
+    base[field.key] = current ? formatMinutes(Number(current[field.key]) * 60) : fallback;
   }
   return base;
 };
@@ -71,7 +77,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
     onSubmit: async (values) => {
       setServerError(null);
       const body = { effectiveFrom: values.effectiveFrom } as WorkScheduleWriteRequest;
-      for (const field of WEEKDAY_FIELDS) body[field.key] = parseHours(values[field.key]) ?? 0;
+      for (const field of WEEKDAY_FIELDS) body[field.key] = hoursOf(values[field.key]) ?? 0;
       const error = await onSubmitAction(body);
       if (error) {
         setServerError(error);
@@ -92,7 +98,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
     onCloseAction();
   };
 
-  const weeklyTotal = WEEKDAY_FIELDS.reduce((sum, field) => sum + (parseHours(formik.values[field.key]) ?? 0), 0);
+  const weeklyTotal = WEEKDAY_FIELDS.reduce((sum, field) => sum + (parseDuration(formik.values[field.key]) ?? 0), 0);
 
   return (
     <>
@@ -151,7 +157,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
               </p>
             )}
             <p className="text-sm text-muted-foreground">
-              {Number(weeklyTotal.toFixed(2))} hours a week
+              {formatMinutes(weeklyTotal)} a week
             </p>
 
             <DialogFooter>

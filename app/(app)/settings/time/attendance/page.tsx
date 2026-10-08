@@ -2,11 +2,11 @@ import { FC } from "react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import { PageGate } from "@/components/auth/PageGate";
-import { WorkScheduleSettingsContainer } from "@/components/modules/attendance/schedule";
+import { CompanyWorkdayNorm, WorkScheduleSettingsContainer } from "@/components/modules/attendance/schedule";
 
 /**
- * Attendance settings: work schedules (ATTENDANCE_PLAN 1.4 / 3.4). Timesheets themselves live on the
- * Timesheet page; this is where the working week behind them is kept.
+ * Attendance settings: how long a company working day is, and the personal schedules that override it.
+ * Logged time itself lives on the Attendance page and the person profile; this is the norm behind it.
  */
 const AttendanceSettingsPage: FC = () => (
   <PageGate resource="PEOPLE.PROFILE" action="VIEW">
@@ -15,13 +15,14 @@ const AttendanceSettingsPage: FC = () => (
         <SettingsPageHeader title="Attendance" backHref="/settings"/>
 
         <PageDescription className="text-base text-muted-foreground/90">
-          Work schedules: how many hours a person works on each weekday, from a date on. Leave is not charged
-          for a day with no hours, and the timesheet compares recorded hours against the schedule. Somebody
-          with no schedule works the company week.
+          What Attendance expects of people. Everybody works the company week at the company&apos;s working-day
+          length, unless they have a personal schedule: hours per weekday, from a date on. Leave is not charged
+          for a day with no hours, and time logged beyond a day&apos;s hours is overtime.
         </PageDescription>
       </div>
 
-      <div className="px-8">
+      <div className="space-y-10 px-8">
+        <CompanyWorkdayNorm/>
         <WorkScheduleSettingsContainer/>
       </div>
     </div>

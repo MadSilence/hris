@@ -232,8 +232,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const mayUnblock = mayControlAccess && user.accountStatus === "BLOCKED";
   const maySendReset = mayControlAccess && user.accountStatus === "ACTIVE";
   const isLocked = Boolean(user.accountLocked);
+  // Your own password, on your own profile — and not while impersonating. The screen says "own
+  // profile" because the session is that person, but the human at the keyboard is somebody else, and
+  // the dialog would ask for a password they do not have and must not set.
+  const mayChangeOwnPassword = isOwnProfile && !impersonating;
   const hasPersonActions =
-    mayTerminate || mayBlock || mayUnblock || maySendReset ||
+    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset ||
     (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || !isOwnProfile));
 
   const rawAvatarUrl =
@@ -314,22 +318,6 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             the other stubs and deliberately not brought back — there is no feature under them.
           */}
           <div className="flex items-center gap-2">
-            {/*
-              There is no user menu in the app shell — the sidebar's avatar is a link to this page — so
-              the own profile is where a person changes their own password.
-            */}
-            {/*
-              Your own password, on your own profile — and not while impersonating. The screen says
-              "own profile" because the session is that person, but the human at the keyboard is
-              somebody else, and the dialog would ask for a password they do not have and must not set.
-            */}
-            {isOwnProfile && !impersonating && (
-              <Button variant="outline" className="gap-1.5" onClick={() => setIsChangePasswordOpen(true)}>
-                <KeyRound className="h-4 w-4"/>
-                Change Password
-              </Button>
-            )}
-
             {mayImpersonate && (
               <PermissionGate resource="SETTINGS.IMPERSONATION" action="MANAGE">
                 <Button
@@ -364,6 +352,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             */}
             {hasPersonActions && (
               <RowActionsMenu label="Person Actions">
+                {/* In the kebab like every other action on a profile — the own one is no exception. */}
+                {mayChangeOwnPassword && (
+                  <RowAction icon={<KeyRound className="h-4 w-4"/>} onClick={() => setIsChangePasswordOpen(true)}>
+                    Change Password
+                  </RowAction>
+                )}
                 {canManageProfiles && user.inviteScheduledFor && (
                   <RowAction
                     icon={<CalendarX className="h-4 w-4"/>}
