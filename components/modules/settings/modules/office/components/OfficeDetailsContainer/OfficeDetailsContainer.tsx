@@ -15,6 +15,8 @@ import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { HolidayCalendarBindingSection } from "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding";
 
 import { useOffice } from "@/components/modules/settings/modules/office/hooks/useOffice";
 import { useUpdateOfficeAction } from "@/components/modules/settings/modules/office/hooks/useUpdateOfficeAction";
@@ -58,7 +60,10 @@ type FormValues = {
   postCode: string;
   email: string;
   phone: string;
+  isRemote: boolean;
 };
+
+type TextField = Exclude<keyof FormValues, "isRemote">;
 
 type SectionTitleProps = {
   icon: ReactNode;
@@ -82,6 +87,7 @@ const mapOffice = (office: Office): FormValues => ({
   postCode: office.postCode ?? "",
   email: office.email ?? "",
   phone: office.phone ?? "",
+  isRemote: office.isRemote ?? false,
 });
 
 export default function OfficeDetailsContainer({ officeId }: Props) {
@@ -153,10 +159,17 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
     restoreAction.mutate(office.id);
   };
 
-  const updateField = (key: keyof FormValues, value: string) => {
+  const updateField = (key: TextField, value: string) => {
     setValues((prev) => ({
       ...(prev ?? mapOffice(office)),
       [key]: value,
+    }));
+  };
+
+  const updateRemote = (value: boolean) => {
+    setValues((prev) => ({
+      ...(prev ?? mapOffice(office)),
+      isRemote: value,
     }));
   };
 
@@ -232,6 +245,11 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                     <Badge variant="secondary" className="gap-1 font-normal">
                       <Archive className="h-3 w-3"/>
                       Archived
+                    </Badge>
+                  )}
+                  {office.isRemote && (
+                    <Badge variant="secondary" className="font-normal">
+                      Remote
                     </Badge>
                   )}
                 </div>
@@ -333,6 +351,22 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
             onChange={(value) => updateField("name", value)}
           />
 
+          <div className="space-y-2">
+            <Label htmlFor="office-remote">Remote</Label>
+            {isEditing ? (
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <Checkbox
+                  id="office-remote"
+                  checked={current.isRemote}
+                  onCheckedChange={(c) => updateRemote(c === true)}
+                />
+                People here work from anywhere in the office&apos;s country
+              </label>
+            ) : (
+              <p className="text-sm text-foreground">{current.isRemote ? "Yes" : "No"}</p>
+            )}
+          </div>
+
           <div className="space-y-2 md:col-span-2">
             <Label>Description</Label>
             {isEditing ? (
@@ -416,6 +450,15 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
           />
         </div>
       </div>
+
+      <Separator/>
+
+      <HolidayCalendarBindingSection
+        kind="OFFICE"
+        refId={office.id}
+        placeName={office.name}
+        readOnly={isArchived}
+      />
             </div>
           </div>
         </TabsContent>

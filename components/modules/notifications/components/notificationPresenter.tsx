@@ -13,6 +13,7 @@ import {
   TriangleAlert,
   Users,
   XCircle,
+  Zap,
 } from "lucide-react";
 import type { Notification } from "@/models/notifications";
 
@@ -86,18 +87,29 @@ export const presentNotification = (n: Notification): NotificationPresentation =
   switch (n.type) {
     case "TIMEOFF_APPROVAL_REQUESTED": {
       const requesterId = str(p.requesterId);
+      // The request itself, with what the decision needs beside Approve and Reject (WALK_QUESTIONS § 7):
+      // the person's time-off tab refused an approver without a role over them.
+      const requestId = n.targetType === "TIME_OFF_REQUEST" ? str(n.targetId) : "";
       return {
         title: "Time Off Approval Requested",
-        message: `${str(p.requesterName) || "An employee"} requested ${dayCount(str(p.amount))} · ${dates(p)}`,
+        // A delegate's copy says whom they are answering for ("for Anna").
+        message: `${str(p.requesterName) || "An employee"} requested ${dayCount(str(p.amount))} · ${dates(p)}${
+          str(p.onBehalfOfName) ? ` · for ${str(p.onBehalfOfName)}` : ""
+        }`,
         Icon: CalendarClock,
-        href: requesterId ? `/organization/people/${requesterId}/time-off` : null,
+        href: requestId
+          ? `/time-off/requests/${requestId}`
+          : requesterId ? `/organization/people/${requesterId}/time-off` : null,
       };
     }
     case "TIMEOFF_CANCELLATION_REQUESTED":
       return {
         title: "Cancellation Requested",
         message: withReason(
-          `${str(p.requesterName) || "An employee"} asks to cancel approved time off · ${dates(p)}.`,
+          // A delegate is asked too, and is told whom they answer for — as with the request itself.
+          `${str(p.requesterName) || "An employee"} asks to cancel approved time off · ${dates(p)}${
+            str(p.onBehalfOfName) ? ` · for ${str(p.onBehalfOfName)}` : ""
+          }.`,
           p.reason,
         ),
         Icon: CalendarClock,
@@ -167,6 +179,15 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         Icon: CalendarClock,
         href: ownTimeOff(p.userId),
       };
+    case "TIMEOFF_APPROVALS_DELEGATED":
+      return {
+        title: "Approvals Delegated to You",
+        message: `${str(p.delegatorName) || "A colleague"} delegated their leave approvals to you${
+          dates(p) ? ` · ${dates(p)}` : ""
+        }${str(p.delegationSource) === "LEAVE" ? ", while they are on leave" : ""}. You are asked beside them; whoever answers first decides.`,
+        Icon: Users,
+        href: "/preferences",
+      };
     case "TIMEOFF_BALANCE_ADJUSTED":
       return {
         title: "Balance Adjusted",
@@ -191,9 +212,37 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         .filter(([count]) => Number(count) > 0)
         .map(([count, what]) => `${count} ${what}`)
         .join(", ");
+      // A conflict: the provider changed days the company overrode. It blocks nothing — the company's
+      // version stays in force until somebody takes the source's.
+      if (p.conflict === true || p.conflict === "true") {
+        const conflictOutcome =
+          n.source?.status === "APPLIED"
+            ? "The source's version was taken."
+            : n.source?.status === "DISMISSED"
+              ? "Your version was kept."
+              : n.source?.status === "SUPERSEDED"
+                ? "A newer check replaced it."
+                : "Your version stays in force until someone takes the source's.";
+        return {
+          title: "Your Holiday Edits Differ from the Source",
+          message: `The source of ${str(p.calendarName) || "a holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} changed ${counts ? `days you edited: ${counts}` : "days you edited"}. ${conflictOutcome}`,
+          Icon: TriangleAlert,
+          href: calendarId ? `/settings/time/public-holidays/${calendarId}` : null,
+        };
+      }
+      // The last sentence follows the drift as it is now, not as it was when the card was sent: every
+      // calendar manager holds a copy and one person's Apply closes them all (WALK_QUESTIONS § 17).
+      const outcome =
+        n.source?.status === "APPLIED"
+          ? "It has been applied."
+          : n.source?.status === "DISMISSED"
+            ? "It was dismissed; nothing changed."
+            : n.source?.status === "SUPERSEDED"
+              ? "A newer check replaced it."
+              : "Nothing changes until someone applies it.";
       return {
         title: "Holidays Changed at the Source",
-        message: `${str(p.calendarName) || "A holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} differs from its source${counts ? `: ${counts}` : ""}. Nothing changes until someone applies it.`,
+        message: `${str(p.calendarName) || "A holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} differs from its source${counts ? `: ${counts}` : ""}. ${outcome}`,
         Icon: TriangleAlert,
         href: calendarId ? `/settings/time/public-holidays/${calendarId}` : null,
       };
@@ -280,6 +329,16 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       const count = Number(p.taskCount) || 0;
       const kind = str(p.processType) === "ONBOARDING" ? "onboarding" : "preboarding";
       const due = str(p.firstDueDate) ? ` The first is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
+      // A task that waited for another and has just opened (decision 10): one task, named.
+      if (str(p.openedTaskTitle)) {
+        const dueOn = str(p.firstDueDate) ? ` It is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
+        return {
+          title: "A Task for You",
+          message: `"${str(p.openedTaskTitle)}" in ${str(p.targetName) || "a person"}'s ${kind} is ready: what it waited for is done.${dueOn}`,
+          Icon: ListChecks,
+          href: "/tasks",
+        };
+      }
       return {
         title: count === 1 ? "A Task for You" : "Tasks for You",
         message: `${str(p.targetName) || "A person"}'s ${kind} started, and ${count === 1 ? "1 task is" : `${count} tasks are`} yours.${due}`,
@@ -295,6 +354,56 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         message: `${str(p.targetName) || "A person"}'s ${kind} stopped: a scheduled step could not be done, and what came after it was not started.`,
         Icon: TriangleAlert,
         href: processId ? `/processes/${processId}` : null,
+      };
+    }
+    // Automations (AUTOMATIONS_DESIGN.md § 4–6). A rule's own message is the author's text, rendered
+    // for this person by the engine; the other three are about the rule, and are told to its author.
+    case "AUTOMATION_MESSAGE": {
+      return {
+        title: str(p.ruleName) || "Automation",
+        message: str(p.text) || "An automation sent you a message.",
+        Icon: Zap,
+        href: ownProfile(p.personId),
+      };
+    }
+    case "AUTOMATION_TASK_ASSIGNED": {
+      const due = str(p.dueDate) ? ` Due ${formatDisplayDate(str(p.dueDate))}.` : "";
+      const forWhom = str(p.personName) ? ` for ${str(p.personName)}` : "";
+      return {
+        title: "A Task for You",
+        message: `${str(p.taskTitle) || "A task"}${forWhom} — set by the automation ${str(p.ruleName) || "of your company"}.${due}`,
+        Icon: ListChecks,
+        href: "/tasks",
+      };
+    }
+    case "AUTOMATION_RUN_FAILED": {
+      const ruleId = str(p.automationRuleId);
+      const error = str(p.error).trim();
+      return {
+        title: "Automation Failed",
+        message: `${str(p.ruleName) || "An automation"} could not finish for ${str(p.personName) || "a person"}${error ? `: ${error.replace(/\.$/, "")}.` : "."} Open its run log to retry.`,
+        Icon: TriangleAlert,
+        href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
+      };
+    }
+    case "AUTOMATION_RULE_PAUSED": {
+      const ruleId = str(p.automationRuleId);
+      const reason = str(p.reason).trim();
+      return {
+        title: "Automation Paused",
+        message: `${str(p.ruleName) || "An automation"} was paused: something it uses is gone.${reason ? ` ${reason}` : ""} Fix it and resume the rule.`,
+        Icon: TriangleAlert,
+        href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
+      };
+    }
+    case "INVITATION_FAILED": {
+      // A scheduled invitation outside any process that could not go out — told to whoever scheduled it.
+      const userId = str(p.userId);
+      return {
+        title: "Invitation Not Sent",
+        message: `The invitation scheduled for ${str(p.targetName) || "a person"} could not be sent. Open their profile to invite them again.`,
+        Icon: TriangleAlert,
+        href: userId ? `/organization/people/${userId}` : null,
       };
     }
     case "ROLE_ACCESS_CHANGED": {

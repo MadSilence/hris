@@ -4,6 +4,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Download, Plus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
 
 export interface AssignedUsersTableHeaderProps {
   query: string;
@@ -12,6 +13,9 @@ export interface AssignedUsersTableHeaderProps {
   assignDisabledReason?: string;
   onAssignClick?: () => void;
   onExportClick: () => void;
+  /** Present to offer the history view of who held the role. */
+  showHistory?: boolean;
+  onShowHistoryChange?: (showing: boolean) => void;
 }
 
 export default function AssignedUsersTableHeader({
@@ -20,12 +24,15 @@ export default function AssignedUsersTableHeader({
   assignDisabledReason,
   onAssignClick,
   onExportClick,
+  showHistory = false,
+  onShowHistoryChange,
 }: AssignedUsersTableHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <SearchBox value={query} onChange={onQueryChange}/>
+      {showHistory ? <span/> : <SearchBox value={query} onChange={onQueryChange}/>}
 
       <div className="flex items-center gap-3">
+        {onShowHistoryChange ? <HistoryToggle showing={showHistory} onChange={onShowHistoryChange}/> : null}
         {/* Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE. */}
         <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
           <Button

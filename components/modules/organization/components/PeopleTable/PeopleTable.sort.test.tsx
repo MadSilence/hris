@@ -7,7 +7,8 @@ import { AttributeType } from "@/models/attribute";
 const NUMBER_ATTR = "attr:33333333-3333-3333-3333-333333333333";
 const TAGS_ATTR = "attr:44444444-4444-4444-4444-444444444444";
 
-const meta = (id: string, type: AttributeType, label: string): FieldDTO => ({
+// `sortable` is the backend's answer (`GET /users/fields`); the header only reads it.
+const meta = (id: string, type: AttributeType, label: string, sortable: boolean): FieldDTO => ({
   id,
   key: label,
   label,
@@ -15,6 +16,7 @@ const meta = (id: string, type: AttributeType, label: string): FieldDTO => ({
   isSystem: false,
   level: "READ",
   viewScopes: ["COMPANY"],
+  sortable,
 });
 
 const columns = [
@@ -31,8 +33,8 @@ const renderTable = (onSortChange: jest.Mock, sort: { fieldId: string; dir: "asc
       onSortChange={onSortChange}
       visibleColumns={columns}
       fieldsMeta={[
-        meta(NUMBER_ATTR, AttributeType.NUMBER, "Salary band"),
-        meta(TAGS_ATTR, AttributeType.MULTI_SELECT, "Skills"),
+        meta(NUMBER_ATTR, AttributeType.NUMBER, "Salary band", true),
+        meta(TAGS_ATTR, AttributeType.MULTI_SELECT, "Skills", false),
       ]}
     />,
   );

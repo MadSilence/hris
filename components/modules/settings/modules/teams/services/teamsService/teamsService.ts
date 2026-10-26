@@ -1,5 +1,5 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type { TeamPerson, TeamSummary, TeamTreeNode } from "@/models/teams";
+import type { TeamPerson, TeamRestoreImpact, TeamSummary, TeamTreeNode } from "@/models/teams";
 
 export class TeamsService {
   public async tree(nested = true, includeArchived = false): Promise<TeamTreeNode[]> {
@@ -18,6 +18,10 @@ export class TeamsService {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     return internalApiClient.get<TeamPerson[]>(`/teams/people?${params}`);
+  }
+
+  public async restoreImpact(id: string): Promise<TeamRestoreImpact> {
+    return internalApiClient.get<TeamRestoreImpact>(`/teams/${id}/restore-impact`);
   }
 }
 

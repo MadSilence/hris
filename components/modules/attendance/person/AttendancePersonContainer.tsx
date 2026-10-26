@@ -13,6 +13,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatDisplayDate } from "@/lib/date";
 import { formatMinutes, type AttendanceLogDay, type AttendanceTotals } from "@/models/attendance";
 import { useAttendanceCapabilities, useAttendanceLog } from "@/components/modules/attendance/hooks";
+import { formatAmounts } from "@/components/modules/attendance/lib";
 import { WorkSchedulePanel } from "@/components/modules/attendance/schedule";
 import { PeriodControl } from "@/components/modules/attendance/overview/PeriodControl";
 import { useAttendanceView } from "@/components/modules/attendance/overview";
@@ -34,7 +35,9 @@ export const dayNote = (day: AttendanceLogDay): { text: string; tone: "missing" 
 export const daysShown = (days: AttendanceLogDay[]): AttendanceLogDay[] =>
   days.filter((day) => day.expected || day.loggedMinutes > 0);
 
-const TOTALS: { key: keyof AttendanceTotals; label: string; minutes: boolean }[] = [
+type NumericTotal = Exclude<keyof AttendanceTotals, "amounts">;
+
+const TOTALS: { key: NumericTotal; label: string; minutes: boolean }[] = [
   { key: "expectedDays", label: "Expected Days", minutes: false },
   { key: "loggedDays", label: "Logged Days", minutes: false },
   { key: "expectedMinutes", label: "Expected Hours", minutes: true },
@@ -61,6 +64,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const backHref = `/attendance${view.search ? `?${view.search}` : ""}`;
   const days = log.data ? daysShown(log.data.days) : [];
+  const amount = formatAmounts(log.data?.totals.amounts);
 
   return (
     <div className="space-y-6">
@@ -111,6 +115,13 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                 </dd>
               </div>
             ))}
+            {/* Only when the server sent money: a reader who may not see the rate gets no figure, not a 0. */}
+            {amount && (
+              <div>
+                <dt className="text-xs text-muted-foreground">Amount</dt>
+                <dd className="mt-0.5 text-lg font-semibold tabular-nums text-brown-900">{amount}</dd>
+              </div>
+            )}
           </dl>
 
           <div className="rounded-lg border border-brown-200 bg-white">

@@ -52,6 +52,7 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
+import { HolidayCalendarBindingSection } from "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding";
 import { PublicHolidaysSettingsSkeleton } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidaysSettingsSkeleton";
 import { PublicHolidayCalendarStatus } from "@/api/modules/publicHolidays/calendars/dto";
 import { PublicHolidayCalendar } from "@/models/publicHolidays/calendar";
@@ -285,6 +286,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <PageDescription className="text-base text-muted-foreground/90">
               Manage public holiday calendars and assign them to employees, locations or groups.
             </PageDescription>
+          </div>
+
+          <div className="mt-5 rounded-lg bg-brown-50/60 px-4 py-4">
+            <HolidayCalendarBindingSection kind="COMPANY_DEFAULT" refId={null} placeName="the Company" />
           </div>
 
           <ListToolbar

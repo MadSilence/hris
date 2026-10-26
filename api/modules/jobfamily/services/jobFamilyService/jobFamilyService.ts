@@ -1,12 +1,13 @@
 import { NewEntity, UpdatedEntity } from "@/models/misc";
 import { hrisJobFamilyClient } from "@/api/modules/jobfamily/clients";
 import {
+  ActivateJobFamilyRequest,
   CreateJobFamilyRequest,
   DuplicateJobFamilyRequest,
   JobFamilyIdRequest,
   UpdateJobFamilyRequest,
 } from "@/api/modules/jobfamily/dto";
-import { JobFamily } from "@/models/job";
+import { JobFamily, JobFamilyRestoreImpact } from "@/models/job";
 import { jobFamilyMapper } from "@/api/modules/jobfamily/mappers";
 
 export class JobFamilyService {
@@ -33,8 +34,13 @@ export class JobFamilyService {
     return hrisJobFamilyClient.archiveJobFamily(payload);
   }
 
-  public async activateJobFamily(payload: JobFamilyIdRequest): Promise<UpdatedEntity> {
+  public async activateJobFamily(payload: ActivateJobFamilyRequest): Promise<UpdatedEntity> {
     return hrisJobFamilyClient.activateJobFamily(payload);
+  }
+
+  public async getRestoreImpact(id: string): Promise<JobFamilyRestoreImpact> {
+    const dto = await hrisJobFamilyClient.getRestoreImpact(id);
+    return { archivedJobs: dto.archivedJobs.map((job) => ({ ...job })) };
   }
 
   public async deleteJobFamily(payload: JobFamilyIdRequest): Promise<Response> {

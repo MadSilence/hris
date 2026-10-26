@@ -241,6 +241,14 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                             {t.dueDate ? ` (${formatDisplayDate(t.dueDate, { style: "medium" })})` : ""} · done by{" "}
                             {e.assignee ? e.assignee.firstName : t.assigneeName ?? "nobody"}
                           </p>
+                          {(t.waitsFor ?? []).filter((id) => !edits[id]?.removed).length > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              Waits for{" "}
+                              {(t.waitsFor ?? []).filter((id) => !edits[id]?.removed)
+                                .map((id) => preview.tasks.find((p) => p.templateItemId === id)?.title ?? "another task").join(", ")}
+                              {" "}— its assignee is told when that is done.
+                            </p>
+                          )}
                         </div>
                         <Button
                           variant="ghost"

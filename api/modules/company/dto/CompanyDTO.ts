@@ -17,6 +17,7 @@ export type CompanySettingsDTO = {
   workingDays: string[];
   weekStartDay: string;
   dailyNormMinutes?: number;
+  attendanceRateAttributeId?: string | null;
   /** 0 for a company whose settings row has not been written yet. */
   version?: number;
 };
@@ -35,6 +36,11 @@ export type UpdateCompanySettingsRequest = {
   weekStartDay: string;
   /** Minutes in a company working day. Left out, the stored value stays — the Company form does not carry it. */
   dailyNormMinutes?: number | null;
+  /**
+   * The MONEY field Attendance prices logged time from. Left out, the stored choice stays — the Company
+   * form does not carry it; `{ attributeId: null }` means no money in Attendance.
+   */
+  attendanceRate?: { attributeId: string | null } | null;
   /** The version the form was opened with; a stale one is refused with E00409. */
   version?: number;
 };

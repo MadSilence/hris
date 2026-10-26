@@ -64,6 +64,7 @@ export const OfficeComponent: FC<Props> = ({
       description: values.description,
       email: values.email,
       phone: values.phone,
+      isRemote: values.isRemote,
       country: values.country,
       city: values.city,
       street: values.street,

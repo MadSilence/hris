@@ -19,7 +19,8 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
     approvalRequired: true,
     approvalMode: "ALL" as const,
     requiredApprovalsCount: null,
-    allowSubstituteApprovers: false,
+    fallbackRoleId: null,
+    fallbackRoleName: null,
     approvers: [
       {
         id: "approver-id",
@@ -59,7 +60,7 @@ describe("HrisTimeOffPolicyApprovalSettingsService", () => {
       approvalRequired: true,
       approvalMode: "ALL" as const,
       requiredApprovalsCount: null,
-      allowSubstituteApprovers: false,
+      fallbackRoleId: null,
       approvers: [
         {
           approverType: TimeOffPolicyApproverType.SpecificUser,

@@ -36,6 +36,7 @@ import type { AttributeType } from "@/models/attribute/AttributeType";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import {
+  AudienceField,
   AudienceOperator,
   AudienceValueSource,
   OPERATOR_LABELS,
@@ -179,30 +180,12 @@ export const AudienceBuilder: React.FC<Props> = ({
         const field = catalog.find((f) => f.key === r.key) ?? null;
         return (
           <div key={r.id} className="flex flex-wrap items-center gap-2">
-            <Select
+            <FieldPicker
+              fields={catalog}
               value={r.key}
-              onValueChange={(v) => onPickField(r.id, v)}
-              disabled={isLoadingFields}
-            >
-              <SelectTrigger className="h-9 w-44">
-                <SelectValue placeholder={isLoadingFields ? "Loading fields\u2026" : "Select field"} />
-              </SelectTrigger>
-              <SelectContent>
-                {catalog.length === 0 ? (
-                  <p className="px-2 py-3 text-center text-sm text-muted-foreground">
-                    {isLoadingFields
-                      ? "Loading fields\u2026"
-                      : "No fields you can filter on"}
-                  </p>
-                ) : (
-                  catalog.map((f) => (
-                    <SelectItem key={f.key} value={f.key}>
-                      {f.label}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              onChange={(v) => onPickField(r.id, v)}
+              loading={isLoadingFields}
+            />
 
             {field && r.op && (
               <>
@@ -384,6 +367,79 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
       value={value}
       onChange={(e) => onValue(e.target.value)}
     />
+  );
+};
+
+// ---- the field of a condition: searchable and grouped ------------------
+
+const FIELD_GROUP_ORDER: AudienceField["group"][] = ["System", "Org", "Custom"];
+const FIELD_GROUP_LABELS: Record<AudienceField["group"], string> = {
+  System: "Person",
+  Org: "Organization",
+  Custom: "Custom Fields",
+};
+
+/**
+ * Fifty-odd fields do not fit a plain list (WALK_QUESTIONS § 17, answering NEED_TO_DISCUSS § 19 for
+ * this case): the same Command combobox the value pickers use, with a search box and the fields in
+ * their groups.
+ */
+const FieldPicker: React.FC<{
+  fields: AudienceField[];
+  value: string;
+  onChange: (key: string) => void;
+  loading: boolean;
+}> = ({ fields, value, onChange, loading }) => {
+  const [open, setOpen] = useState(false);
+  const picked = fields.find((f) => f.key === value) ?? null;
+  const groups = FIELD_GROUP_ORDER.map((g) => ({ group: g, items: fields.filter((f) => f.group === g) })).filter(
+    (g) => g.items.length > 0,
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          aria-label="Field"
+          disabled={loading}
+          className="h-9 w-44 justify-between font-normal"
+        >
+          <span className={picked ? "truncate" : "truncate text-muted-foreground"}>
+            {picked ? picked.label : loading ? "Loading fields…" : "Select field"}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search fields" className="h-9" />
+          <CommandList>
+            <CommandEmpty>{fields.length === 0 ? "No fields you can filter on" : "No matching field"}</CommandEmpty>
+            {groups.map(({ group, items }) => (
+              <CommandGroup key={group} heading={FIELD_GROUP_LABELS[group]}>
+                {items.map((f) => (
+                  <CommandItem
+                    key={f.key}
+                    value={`${f.label} ${f.key}`}
+                    onSelect={() => {
+                      onChange(f.key);
+                      setOpen(false);
+                    }}
+                  >
+                    <Check className={f.key === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
+                    {f.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

@@ -15,6 +15,32 @@ export type TerminatePayload = {
   reason?: TerminationReason | null;
   rehireEligible?: boolean | null;
   note?: string | null;
+  /** Whom the leaver's decisions go to, per group; a null group goes to its default. */
+  reassign?: LeaverReassignment | null;
+};
+
+/** Whom each group of a leaver's decisions goes to (`LeaverDecisionsDTOs.LeaverReassignment`). */
+export type LeaverReassignment = {
+  requestsTo: string | null;
+  tasksTo: string | null;
+  policiesTo: string | null;
+};
+
+type Ref = { id: string; name: string | null };
+
+/** What was waiting on the leaver, by group, each with the default it goes to when nobody is chosen. */
+export type LeaverDecisionsDTO = {
+  requests: {
+    requestId: string;
+    requester: Ref | null;
+    startDate: string;
+    endDate: string;
+    status: string;
+    /** Who takes it unchosen: the policy's fallback role; null when the policy has none. */
+    fallbackRoleName: string | null;
+  }[];
+  tasks: { taskId: string; title: string; subject: Ref | null; defaultAssignee: Ref | null }[];
+  policies: { policyId: string; policyName: string | null; approvalOrder: number; fallbackRoleName: string | null }[];
 };
 
 /** What terminating will change — shown in the confirmation before anything happens. */
@@ -29,6 +55,8 @@ export type TerminationImpactDTO = {
   approvedLeaveAfterLastDay?: number;
   /** Requests waiting on this person's decision, which nobody else can answer once their roles go. */
   requestsAwaitingTheirDecision?: number;
+  /** The leaver's-decisions step: what the dialog lists and reassigns. */
+  decisions?: LeaverDecisionsDTO | null;
 };
 
 /** What deleting a profile takes with it, and the refusal waiting for it if there is one. */
@@ -240,6 +268,11 @@ export class HrisApiUsersClient {
 
   async search(body: UsersSearchRequest): Promise<UsersSearchResponseDTO> {
     return hrisApiClient.post<UsersSearchResponseDTO>(`${this.BASE_PATH}/search`, body);
+  }
+
+  /** How many rows the table holds for this search — the N of "Select all N matching". */
+  async searchCount(body: UsersSearchRequest): Promise<{ count: number }> {
+    return hrisApiClient.post<{ count: number }>(`${this.BASE_PATH}/search/count`, body);
   }
 
   async orgChart(): Promise<OrgChartUser[]> {

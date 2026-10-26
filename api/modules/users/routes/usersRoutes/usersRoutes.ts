@@ -1,6 +1,7 @@
 import { hrisApiUsersService, UsersSearchArgs } from "../../services/hrisUsersService";
 import { formatOf, streamBinary } from "@/api/utils/exportResponse";
 import type { PeopleExportRequest } from "@/models/user/peopleExport";
+import type { UsersSearchRequest } from "@/models/user/fields";
 
 // Mutations go through server actions; reads go through these methods only where a route handler exists.
 export class UsersRoutes {
@@ -42,6 +43,16 @@ export class UsersRoutes {
   /** The number behind the directory's Drafts segment. Listing them is searchUsers with drafts: "ONLY". */
   async draftCount() {
     return Response.json(await hrisApiUsersService.draftCount());
+  }
+
+  /**
+   * How many rows the People table holds for its current search, filters and drafts segment — counted
+   * the way an operation over the whole filter then resolves it, so the number confirmed is the number
+   * written.
+   */
+  async searchCount(req: Request) {
+    const body = (await req.json().catch(() => ({}))) as UsersSearchRequest;
+    return Response.json(await hrisApiUsersService.searchCount(body));
   }
 
   async getFields() {

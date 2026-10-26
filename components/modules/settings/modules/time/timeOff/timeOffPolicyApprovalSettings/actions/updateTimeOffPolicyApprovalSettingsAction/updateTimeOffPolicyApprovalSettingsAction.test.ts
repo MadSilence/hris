@@ -21,7 +21,7 @@ describe("updateTimeOffPolicyApprovalSettingsAction", () => {
     approvalRequired: true,
     approvalMode: "ALL" as const,
     requiredApprovalsCount: null,
-    allowSubstituteApprovers: false,
+    fallbackRoleId: null,
     approvers: [{ approverType: TimeOffPolicyApproverType.SpecificUser, approverUserId: "user-id", approvalOrder: 1, required: true }],
   };
 

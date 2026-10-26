@@ -79,6 +79,7 @@ export const settingsGroups: SettingsGroup[] = [
     title: "Automation",
     icon: <Automation/>,
     items: [
+      { label: "Automations", href: "/settings/automation/automations", resources: ["SETTINGS.AUTOMATIONS"] },
       { label: "Workflows", href: "/settings/automation/workflows", resources: ["SETTINGS.GENERAL"] },
       {
         label: "Preboarding, Onboarding & Offboarding",

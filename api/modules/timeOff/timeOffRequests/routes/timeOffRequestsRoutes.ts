@@ -22,6 +22,10 @@ export class TimeOffRequestsRoutes {
     return Response.json(data);
   }
 
+  public async getDecisionContext(id: string) {
+    return Response.json(await hrisTimeOffRequestsService.getDecisionContext(id));
+  }
+
   public async listAwaitingMe(_req: Request) {
     const data = await hrisTimeOffRequestsService.listAwaitingMe();
     return Response.json(data);

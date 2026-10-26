@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
 import { Archive } from "lucide-react";
+import { AssignmentHistoryList } from "@/components/audience/assignment/history/AssignmentHistory";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableHeader from "./AssignedUsersTableHeader";
 import AssignedUsersTableContent from "./AssignedUsersTableContent";
@@ -46,6 +47,8 @@ export default function AssignedUsersTable({
 }: AssignedUsersTableProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
+  /** Who held the role, by which rule or by hand, and when: the table's second view. */
+  const [showHistory, setShowHistory] = useState(false);
 
   return (
     <>
@@ -74,10 +77,15 @@ export default function AssignedUsersTable({
             }
             onAssignClick={() => setAssignOpen(true)}
             onExportClick={() => setExportOpen(true)}
+            showHistory={showHistory}
+            onShowHistoryChange={setShowHistory}
           />
         </CardHeader>
 
         <CardContent className="px-0">
+          {showHistory ? (
+            <AssignmentHistoryList assignableType="ROLE" assignableId={roleId} />
+          ) : (
           <AssignedUsersTableContent
             rows={rows}
             isLoading={isLoading}
@@ -92,6 +100,7 @@ export default function AssignedUsersTable({
                 : "No users yet — use Assign to give this role to someone."
             }
           />
+          )}
         </CardContent>
       </Card>
 

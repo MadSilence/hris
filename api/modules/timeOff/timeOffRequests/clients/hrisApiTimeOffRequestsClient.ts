@@ -8,10 +8,12 @@ import type {
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
   TimeOffOverlapDTO,
+  TimeOffDecisionContextDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
+import { employeeTimeOffBalanceMapper } from "@/api/modules/timeOff/employeeTimeOffBalances/mappers/employeeTimeOffBalanceMapper";
 import { UpdateResponse } from "@/api/models/misc";
-import type { TimeOffRequest } from "@/models/timeOff";
+import type { TimeOffDecisionContext, TimeOffRequest } from "@/models/timeOff";
 
 export class HrisApiTimeOffRequestsClient {
   private readonly REQUESTS_PATH = "/time-off/requests";
@@ -51,6 +53,23 @@ export class HrisApiTimeOffRequestsClient {
     );
 
     return timeOffRequestMapper.mapTimeOffRequestDTO(dto);
+  }
+
+  /** The request with everything its decision needs (WALK_QUESTIONS § 7). */
+  public async getDecisionContext(id: string): Promise<TimeOffDecisionContext> {
+    const dto = await hrisApiClient.get<TimeOffDecisionContextDTO>(`${this.REQUESTS_PATH}/${id}/decision-context`);
+    return {
+      request: timeOffRequestMapper.mapTimeOffRequestDTO(dto.request),
+      requesterName: dto.requesterName,
+      balance: dto.balance ? employeeTimeOffBalanceMapper.mapEmployeeTimeOffBalanceDTO(dto.balance) : null,
+      otherLeave: timeOffRequestMapper.mapTimeOffRequestDTOs(dto.otherLeave),
+      peersAway: dto.peersAway,
+      awaitingYou: dto.awaitingYou,
+      answeringAs: dto.answeringAs ?? null,
+      answeringOnBehalfOfName: dto.answeringOnBehalfOfName ?? null,
+      canDecideAnyway: dto.canDecideAnyway ?? false,
+      steps: dto.steps ?? [],
+    };
   }
 
   /** What is waiting for my decision — deliberately personal, not a company-wide list. */
@@ -128,6 +147,19 @@ export class HrisApiTimeOffRequestsClient {
   ): Promise<UpdateResponse> {
     return hrisApiClient.post<UpdateResponse>(
       `${this.REQUESTS_PATH}/${id}/reject`,
+      body as unknown as Record<string, unknown>
+    );
+  }
+
+  /** Approve Anyway: an administrator decides over the chain, whatever steps are still open. */
+  public async approveAnyway(id: string): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(`${this.REQUESTS_PATH}/${id}/approve-anyway`);
+  }
+
+  /** Reject Anyway: the same override, the other answer — with a reason, as any rejection. */
+  public async rejectAnyway(id: string, body: RejectTimeOffRequestRequest): Promise<UpdateResponse> {
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.REQUESTS_PATH}/${id}/reject-anyway`,
       body as unknown as Record<string, unknown>
     );
   }

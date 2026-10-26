@@ -44,7 +44,7 @@ const tomorrowISO = () => {
  *
  * **A missing email is not a refusal.** The field is here, and required only when the profile has no
  * address; the backend's `INVITE_EMAIL_REQUIRED` lands on it if the record changed underneath
- * (LIFECYCLE_PROCESSES_DESIGN § 2.3).
+ * (LIFECYCLE_PROCESSES.md § 2.3).
  */
 export function InviteUserModal({
   open, userId, fullName, email, isResend = false, onCloseAction, onInvitedAction,

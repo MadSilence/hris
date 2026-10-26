@@ -35,6 +35,12 @@ import { useDepartmentPeople } from "@/components/modules/settings/modules/depar
 import { useDepartmentMembership } from "@/components/modules/settings/modules/departments/hooks/useDepartmentMembership/useDepartmentMembership";
 import { useDepartmentSearch } from "@/components/modules/settings/modules/departments/hooks/useDepartmentSearch/useDepartmentSearch";
 import { useActivateDepartment } from "@/components/modules/settings/modules/departments/hooks/useActivateDepartment/useActivateDepartment";
+import { useDepartmentRestoreImpact } from "@/components/modules/settings/modules/departments/hooks/useDepartmentRestoreImpact/useDepartmentRestoreImpact";
+import {
+  RestoreWithChildrenModal,
+  useRestoreWithChildren,
+  type RestoreChild,
+} from "@/components/modules/settings/shared/RestoreWithChildrenModal";
 import { useMoveDepartment } from "@/components/modules/settings/modules/departments/hooks/useMoveDepartment/useMoveDepartment";
 import { useMovePersonToDepartment } from "@/components/modules/settings/modules/departments/hooks/useMovePersonToDepartment/useMovePersonToDepartment";
 import { DepartmentCanvas } from "@/components/modules/settings/modules/departments/components/DepartmentCanvas";
@@ -170,6 +176,8 @@ export default function DepartmentsContainer() {
   const [editTarget, setEditTarget] = useState<DepartmentTreeNode | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentTreeNode | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<DepartmentTreeNode | null>(null);
+  /** Unarchive was pressed on it; the restore flow decides whether a choice is needed. */
+  const [restoreTarget, setRestoreTarget] = useState<DepartmentTreeNode | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
@@ -178,6 +186,22 @@ export default function DepartmentsContainer() {
   const { data: people = [], isLoading: peopleLoading } = useDepartmentPeople(canSeePeople);
   const membership = useDepartmentMembership(people);
   const activateDept = useActivateDepartment();
+  const restoreImpact = useDepartmentRestoreImpact(restoreTarget?.id ?? null);
+  const restoreChildren = useMemo<RestoreChild[] | undefined>(
+    () => restoreImpact.data?.archivedUnits.map((unit) => ({ ...unit })),
+    [restoreImpact.data],
+  );
+  const restoreFlow = useRestoreWithChildren({
+    targetId: restoreTarget?.id ?? null,
+    impact: {
+      items: restoreChildren,
+      isFetching: restoreImpact.isFetching,
+      isError: restoreImpact.isError,
+      error: restoreImpact.error,
+    },
+    restore: (id, restoreUnitIds) => activateDept.mutateAsync({ id, restoreUnitIds }),
+    onFinished: () => setRestoreTarget(null),
+  });
   const moveDepartment = useMoveDepartment();
   const movePerson = useMovePersonToDepartment();
 
@@ -601,7 +625,7 @@ export default function DepartmentsContainer() {
           peopleFocus={peopleFocus}
           onEdit={() => setEditTarget(selectedDepartment)}
           onArchive={() => setArchiveTarget(selectedDepartment)}
-          onActivate={() => activateDept.mutate(selectedDepartment.id)}
+          onActivate={() => setRestoreTarget(selectedDepartment)}
           onDelete={() => setDeleteTarget(selectedDepartment)}
           onRecenter={() => setRecenterNonce((n) => n + 1)}
         />
@@ -879,7 +903,21 @@ export default function DepartmentsContainer() {
           }}
         />
       )}
+
+      {restoreTarget && restoreFlow.isDialogOpen && (
+        <RestoreWithChildrenModal
+          key={restoreTarget.id}
+          isOpen
+          title="Unarchive Department"
+          name={restoreTarget.name}
+          childNoun="sub-departments"
+          items={restoreFlow.items}
+          isLoading={restoreFlow.isPending}
+          errorMessage={restoreFlow.errorMessage}
+          onConfirmAction={(ids) => void restoreFlow.confirm(ids)}
+          onCancelAction={restoreFlow.cancel}
+        />
+      )}
     </div>
   );
 }
-

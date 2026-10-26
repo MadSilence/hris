@@ -15,19 +15,29 @@ import type { FieldDTO, FilterDTO, UsersSearchRequest } from "@/models/user/fiel
 import type { ColumnItem } from "@/models/userTable";
 import type { PeopleView, ViewPayload } from "@/models/peopleView";
 import { usePeopleSearchInfinite } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchInfinite";
+import { usePeopleSearchCount } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchCount";
+import { bulkTargetFor, heldCountFor, offersAllMatching } from "./selection";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import { useDraftCount } from "@/components/modules/organization/hooks/useDraftCount";
 import {
   usePeopleViews,
   usePeopleViewMutations,
-  useResolveSharedView,
 } from "@/components/modules/organization/components/PeopleViews/hooks/usePeopleViews";
 import {
   applyPayload,
   extractPayload,
   payloadsEqual,
 } from "@/components/modules/organization/components/PeopleViews/utils/viewPayload";
+import {
+  decodeTableState,
+  encodeTableState,
+  hasTableState,
+  urlStateToPayload,
+  type TableStateDefaults,
+} from "@/components/modules/organization/components/PeopleViews/utils/tableUrlState";
 import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { ForbiddenError } from "@/components/clients/exceptions";
 
 const PAGE_SIZE = 100;
@@ -75,8 +85,11 @@ const PeopleTableContainer: React.FC = () => {
   const qForApi = debouncedQ.length >= 2 ? debouncedQ : undefined;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // "Select All N Matching": the operation then targets the table's whole set, not the ids held.
+  const [allMatching, setAllMatching] = useState(false);
 
   const toggleOne = useCallback((id: string, checked: boolean) => {
+    setAllMatching(false);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (checked) next.add(id);
@@ -86,6 +99,7 @@ const PeopleTableContainer: React.FC = () => {
   }, []);
 
   const toggleAllOnPage = useCallback((ids: string[], checked: boolean) => {
+    if (!checked) setAllMatching(false);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       ids.forEach((id) => (checked ? next.add(id) : next.delete(id)));
@@ -95,6 +109,7 @@ const PeopleTableContainer: React.FC = () => {
 
   useEffect(() => {
     setSelectedIds(new Set());
+    setAllMatching(false);
   }, [debouncedQ, filters, sort?.fieldId, sort?.dir, showDrafts]);
 
   const { data: fieldsData, isLoading: fieldsLoading, error: fieldsError } = useUserFields();
@@ -156,6 +171,14 @@ const PeopleTableContainer: React.FC = () => {
     isFetchingNextPage,
   } = usePeopleSearchInfinite(params);
 
+  // Every loaded row is held and the table has more: offer the whole set, the way a mail client does.
+  // The count is asked only then, and it is the backend's TABLE count — the set the edit will write.
+  const loadedIds = useMemo(() => items.map((u) => u.id), [items]);
+  const allLoadedSelected = loadedIds.length > 0 && loadedIds.every((id) => selectedIds.has(id));
+  const { data: matching } = usePeopleSearchCount(params, allLoadedSelected && (Boolean(hasNextPage) || allMatching));
+  const matchingCount = matching?.count ?? null;
+  const offerAllMatching = offersAllMatching(loadedIds, selectedIds, matchingCount, allMatching);
+
   const onSortChange = useCallback((next: SortState) => {
     setSort(next);
   }, []);
@@ -175,15 +198,12 @@ const PeopleTableContainer: React.FC = () => {
   const visibleColumns = useMemo(() => columns.filter((c) => c.checked), [columns]);
 
   const searchParams = useSearchParams();
-  const sharedToken = searchParams.get("shared");
 
   const { data: views = [], isLoading: viewsLoading } = usePeopleViews();
   const viewMutations = usePeopleViewMutations();
-  const { data: sharedData } = useResolveSharedView(sharedToken);
 
   const [panelCollapsed, setPanelCollapsed] = useState(true);
   const [activeView, setActiveView] = useState<{ id: string; name: string; payload: ViewPayload } | null>(null);
-  const [isShared, setIsShared] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -198,15 +218,20 @@ const PeopleTableContainer: React.FC = () => {
   );
   const dirty = activeView ? !payloadsEqual(currentPayload, activeView.payload) : false;
 
+  /**
+   * `hiddenByServer` is how many fields the backend took out of a saved view before sending it — it
+   * never sends their ids. `applyPayload` drops whatever else this reader cannot use, and either one
+   * is worth the same short note.
+   */
   const applyConfig = useCallback(
-    (payload: ViewPayload): ViewPayload => {
+    (payload: ViewPayload, hiddenByServer = 0): ViewPayload => {
       const visible = (fieldsData ?? []).filter(isColumnVisible).filter(isColumnOffered);
       const applied = applyPayload(payload, visible);
       setColumns(applied.columns);
       setFilters(applied.filters);
       setSort(applied.sort);
       setNotice(
-        applied.dropped > 0
+        applied.dropped + hiddenByServer > 0
           ? "Some fields in this view aren't available to you and were hidden."
           : null,
       );
@@ -221,37 +246,31 @@ const PeopleTableContainer: React.FC = () => {
 
   const onApplyView = useCallback(
     (view: PeopleView) => {
-      const effective = applyConfig(view.payload);
+      const effective = applyConfig(view.payload, view.hiddenFieldCount ?? 0);
       setActiveView({ id: view.id, name: view.name, payload: effective });
-      setIsShared(false);
     },
     [applyConfig],
   );
 
-  const onApplyDefault = useCallback(() => {
+  const tableDefaults = useMemo<TableStateDefaults>(() => {
     const visible = (fieldsData ?? []).filter(isColumnVisible).filter(isColumnOffered);
-    applyConfig({
-      columns: visible
-        .filter((f) => DEFAULT_ON.has(f.id) || f.id === NAME_COLUMN_ID)
-        .map((f) => f.id),
-      filters: [],
+    return {
+      columns: visible.filter((f) => DEFAULT_ON.has(f.id) || f.id === NAME_COLUMN_ID).map((f) => f.id),
       sort: { fieldId: "first_name", dir: "asc" },
-    });
+    };
+  }, [fieldsData]);
+
+  const onApplyDefault = useCallback(() => {
+    applyConfig({ columns: tableDefaults.columns, filters: [], sort: tableDefaults.sort });
     setActiveView(null);
-    setIsShared(false);
-  }, [applyConfig, fieldsData]);
+  }, [applyConfig, tableDefaults]);
 
   const onSaveAs = useCallback(
     (name: string) => {
       const payload = currentPayload;
       viewMutations.create.mutate(
         { name, payload },
-        {
-          onSuccess: (created) => {
-            setActiveView({ id: created.id, name: created.name, payload });
-            setIsShared(false);
-          },
-        },
+        { onSuccess: (created) => setActiveView({ id: created.id, name: created.name, payload }) },
       );
     },
     [currentPayload, viewMutations.create],
@@ -279,39 +298,92 @@ const PeopleTableContainer: React.FC = () => {
     [viewMutations.update],
   );
 
+  /** "Duplicate" on one's own view; "Save a Copy" on a shared one, which then becomes the open view. */
   const onDuplicate = useCallback(
-    (view: PeopleView) => viewMutations.duplicate.mutate(view.id),
+    (view: PeopleView) =>
+      viewMutations.duplicate.mutate(view.id, {
+        onSuccess: (created) => {
+          if ((view.access ?? "OWNER") === "OWNER") return;
+          setActiveView((prev) =>
+            prev?.id === view.id ? { id: created.id, name: created.name, payload: prev.payload } : prev,
+          );
+          setNotice(`Saved “${created.name}” to My Views.`);
+        },
+      }),
     [viewMutations.duplicate],
   );
 
-  const onDelete = useCallback(
-    (view: PeopleView) => {
-      viewMutations.remove.mutate(view.id, {
-        onSuccess: () => setActiveView((prev) => (prev?.id === view.id ? null : prev)),
-      });
-    },
-    [viewMutations.remove],
-  );
+  /**
+   * Save a Copy of the open view when it is shared to view only. With changes on screen the copy is
+   * what is on screen — copying the stored definition would throw them away.
+   */
+  const onSaveActiveCopy = useCallback(() => {
+    if (!activeView) return;
+    const source = views.find((v) => v.id === activeView.id);
+    if (source && !dirty) {
+      onDuplicate(source);
+      return;
+    }
+    const payload = currentPayload;
+    viewMutations.create.mutate(
+      { name: activeView.name, payload },
+      {
+        onSuccess: (created) => {
+          setActiveView({ id: created.id, name: created.name, payload });
+          setNotice(`Saved “${created.name}” to My Views.`);
+        },
+      },
+    );
+  }, [activeView, currentPayload, dirty, onDuplicate, viewMutations.create, views]);
 
-  const onShare = useCallback(() => {
-    viewMutations.share.mutate(currentPayload, {
-      onSuccess: ({ token }) => {
-        const url = `${window.location.origin}/organization/people?shared=${token}`;
-        void navigator.clipboard?.writeText(url).catch(() => {});
-        setNotice("Share link copied to clipboard.");
+  // Delete always confirms (ACTIONS_AND_MENUS.md) — a view can be shared, and its people lose it too.
+  const [deletingView, setDeletingView] = useState<PeopleView | null>(null);
+  const onDelete = useCallback((view: PeopleView) => setDeletingView(view), []);
+  const confirmDelete = useCallback(() => {
+    if (!deletingView) return;
+    const id = deletingView.id;
+    viewMutations.remove.mutate(id, {
+      onSuccess: () => {
+        setActiveView((prev) => (prev?.id === id ? null : prev));
+        setDeletingView(null);
       },
     });
-  }, [currentPayload, viewMutations.share]);
+  }, [deletingView, viewMutations.remove]);
 
-  const appliedShareRef = useRef<string | null>(null);
+  const onCopyLink = useCallback(() => {
+    void navigator.clipboard?.writeText(window.location.href).catch(() => {});
+    setNotice("Link copied. Whoever opens it sees this table under their own access.");
+  }, []);
+
+  // The table's state lives in the address (`tableUrlState.ts`): read once when the field catalogue
+  // has arrived — through `applyConfig`, so a column the reader may not see is dropped like any view's —
+  // and written back as the table changes. `replaceState`, not a navigation: a history entry per
+  // keystroke would make Back useless, and Next keeps `useSearchParams` in step with it.
+  // `urlReady` is state, not only the ref, so the first write waits for the render that holds what was read.
+  const urlReadRef = useRef(false);
+  const [urlReady, setUrlReady] = useState(false);
   useEffect(() => {
-    if (!sharedToken || !sharedData || !fieldsData) return;
-    if (appliedShareRef.current === sharedToken) return;
-    appliedShareRef.current = sharedToken;
-    applyConfig(sharedData.payload);
-    setActiveView(null);
-    setIsShared(true);
-  }, [sharedToken, sharedData, fieldsData, applyConfig]);
+    if (urlReadRef.current || !fieldsData) return;
+    urlReadRef.current = true;
+    setUrlReady(true);
+    if (!hasTableState(searchParams)) return;
+    const state = decodeTableState(searchParams);
+    applyConfig(urlStateToPayload(state, tableDefaults));
+    setQuery(state.q);
+    setShowDrafts(state.drafts);
+  }, [fieldsData, searchParams, applyConfig, tableDefaults]);
+
+  useEffect(() => {
+    if (!urlReady || !fieldsData) return;
+    const next = encodeTableState(
+      { columns: currentPayload.columns, filters, sort, q: debouncedQ, drafts: showDrafts },
+      tableDefaults,
+      new URLSearchParams(window.location.search),
+    );
+    const current = window.location.search.replace(/^\?/, "");
+    if (next === current) return;
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${next ? `?${next}` : ""}`);
+  }, [urlReady, fieldsData, currentPayload.columns, filters, sort, debouncedQ, showDrafts, tableDefaults]);
 
   const viewsBusy = viewMutations.create.isPending || viewMutations.update.isPending;
 
@@ -320,10 +392,12 @@ const PeopleTableContainer: React.FC = () => {
   // Selection lives in one place now: the header checkbox picks everyone up or puts everyone down,
   // and the Edit button in the topbar appears while anyone is held. The old action bar said the same
   // thing a third time and cost a row of screen.
-  const bulkTarget: BulkEditTarget = { kind: "ids", userIds: Array.from(selectedIds) };
+  const bulkTarget: BulkEditTarget = bulkTargetFor(allMatching, selectedIds, { filters, q: params.q, drafts: params.drafts });
+  const heldCount = heldCountFor(allMatching, selectedIds, matchingCount);
 
   const onBulkApplied = useCallback(() => {
     setSelectedIds(new Set());
+    setAllMatching(false);
   }, []);
 
   // Below every hook on purpose: an early return here would render fewer hooks than the previous
@@ -355,7 +429,7 @@ const PeopleTableContainer: React.FC = () => {
 
         <PeopleTopbar
           sort={sort}
-          selectedCount={selectedIds.size}
+          selectedCount={heldCount}
           onEditSelectedAction={() => setBulkOpen(true)}
           onAddPersonAction={() => setAddPersonOpen(true)}
           query={query}
@@ -371,6 +445,37 @@ const PeopleTableContainer: React.FC = () => {
             onChange: setShowDrafts,
           }}
         />
+
+        {offerAllMatching ? (
+          <div className="flex items-center gap-2 rounded-md border border-brown-200 bg-brown-50 px-3 py-1.5 text-xs text-muted-foreground">
+            {allMatching ? (
+              <>
+                <span>All {matchingCount} {matchingCount === 1 ? "person" : "people"} matching are selected.</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAllMatching(false);
+                    setSelectedIds(new Set());
+                  }}
+                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                >
+                  Clear Selection
+                </button>
+              </>
+            ) : (
+              <>
+                <span>All {selectedIds.size} loaded {selectedIds.size === 1 ? "person is" : "people are"} selected.</span>
+                <button
+                  type="button"
+                  onClick={() => setAllMatching(true)}
+                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                >
+                  Select All {matchingCount} Matching
+                </button>
+              </>
+            )}
+          </div>
+        ) : null}
 
         <PeopleTable
           data={items}
@@ -394,7 +499,6 @@ const PeopleTableContainer: React.FC = () => {
         views={views}
         isLoading={viewsLoading}
         activeViewId={activeView?.id ?? null}
-        isShared={isShared}
         dirty={dirty}
         busy={viewsBusy}
         onApplyDefault={onApplyDefault}
@@ -404,19 +508,34 @@ const PeopleTableContainer: React.FC = () => {
         onRename={onRename}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
-        onShare={onShare}
+        onCopyLink={onCopyLink}
+        onSaveActiveCopy={onSaveActiveCopy}
       />
 
       <BulkEditModal
         isOpen={bulkOpen}
         onClose={() => setBulkOpen(false)}
         target={bulkTarget}
-        count={selectedIds.size}
+        count={heldCount}
         fields={fieldsData ?? []}
         onApplied={onBulkApplied}
       />
 
       <AddPersonModal open={addPersonOpen} onCloseAction={() => setAddPersonOpen(false)} />
+
+      <ConfirmActionModal
+        isOpen={deletingView !== null}
+        title="Delete View"
+        description={deletingView
+          ? `“${deletingView.name}” will be deleted. Anyone it is shared with loses it too.`
+          : ""}
+        confirmLabel="Delete"
+        destructive
+        isLoading={viewMutations.remove.isPending}
+        errorMessage={viewMutations.remove.error ? messageForError(viewMutations.remove.error) : null}
+        onCancelAction={() => setDeletingView(null)}
+        onConfirmAction={confirmDelete}
+      />
     </div>
   );
 };

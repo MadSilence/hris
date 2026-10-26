@@ -33,6 +33,11 @@ export class TeamsRoutes {
     return Response.json(data);
   }
 
+  public async restoreImpact(_req: Request, id: string) {
+    const data = await hrisTeamsService.restoreImpact(id);
+    return Response.json(data);
+  }
+
   public async exportTree(req: Request, id: string) {
     const url = new URL(req.url);
     const backendResponse = await hrisTeamsService.exportTree(id, {

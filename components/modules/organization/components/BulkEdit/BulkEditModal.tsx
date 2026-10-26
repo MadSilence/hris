@@ -38,11 +38,17 @@ import {
 } from "@/components/modules/organization/components/BulkEdit/utils/bulkEditFields";
 import { useBulkEdit, useBulkEditJob } from "@/components/modules/organization/components/BulkEdit/hooks/useBulkEdit";
 import { isTerminalJobStatus } from "@/api/modules/assignments/dto/SegmentAssignmentDTO";
-import { isReferenceValueSource, type FilterDTO, type ReferenceValueSource } from "@/models/user/fields";
+import {
+  isReferenceValueSource,
+  type DraftVisibility,
+  type FilterDTO,
+  type ReferenceValueSource,
+} from "@/models/user/fields";
 
 export type BulkEditTarget =
   | { kind: "ids"; userIds: string[] }
-  | { kind: "segment"; filters: FilterDTO[] };
+  // Everyone the table holds for its search, filters and drafts segment — "Select All N Matching".
+  | { kind: "segment"; filters: FilterDTO[]; q?: string | null; drafts?: DraftVisibility | null };
 
 type Props = {
   isOpen: boolean;
@@ -134,7 +140,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
       target.kind === "ids"
         ? { userIds: target.userIds, field: field.key, operation, value: buildValue(), confirmPartial }
         : {
-            segment: { filters: target.filters },
+            segment: { filters: target.filters, q: target.q ?? null, drafts: target.drafts ?? null },
             field: field.key,
             operation,
             value: buildValue(),

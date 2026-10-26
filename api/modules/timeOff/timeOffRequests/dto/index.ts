@@ -9,3 +9,5 @@ export * from "./TimeOffOverlapDTO";
 export * from "./EditTimeOffRequestRequest";
 
 export * from "./CreateTimeOffRequestResponse";
+export * from "./TimeOffDecisionContextDTO";
+export * from "./TimeOffApprovalStepDTO";

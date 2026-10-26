@@ -34,7 +34,15 @@ import { NONE_LABEL, NONE_VALUE } from "@/models/select";
 import {
   ProfileSectionCard,
 } from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/ProfileSectionCard";
+import type { ScheduledChange } from "@/models/user/ScheduledChange";
+import {
+  PendingValue,
+  pendingSteps,
+  type FieldValue,
+} from "@/components/modules/organization/modules/profile/components/ScheduledChanges";
 import { canEditSystemField, type SystemDraft } from "./systemDraft";
+import { ProvenanceMarker } from "@/components/audience/assignment/provenance/ProvenanceMarker";
+import type { AssignmentProvenance } from "@/models/automations";
 
 /**
  * System fields that already live somewhere better on this page: the header shows the name badge
@@ -71,6 +79,16 @@ type Props = {
   onDraftChange: (update: (draft: SystemDraft) => SystemDraft) => void;
   /** The pencil, or Cancel, for this block — the container decides, because it owns the draft. */
   actions?: React.ReactNode;
+  /**
+   * The person's scheduled changes the reader may act on. A field one of them will change reads
+   * `current → new from <date>`, the second half muted. Empty for a reader who may only view.
+   */
+  scheduledChanges?: ScheduledChange[];
+  /**
+   * Whose decision each assigned value is — by hand or by which live rule (AUTOMATIONS_DESIGN.md § 7).
+   * Undefined while it loads; nothing is drawn then.
+   */
+  provenance?: AssignmentProvenance[];
 };
 
 /**
@@ -92,7 +110,10 @@ export const SystemFieldGroup: React.FC<Props> = ({
   draft,
   onDraftChange,
   actions,
+  scheduledChanges,
+  provenance,
 }) => {
+  const { mutate } = useSWRConfig();
   const visible = fields.filter((f) => !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id));
   if (visible.length === 0) return null;
 
@@ -195,7 +216,20 @@ export const SystemFieldGroup: React.FC<Props> = ({
             >
               <div className="text-sm text-muted-foreground">{field.label}</div>
               <div className="text-sm text-foreground">
-                {editing && draft ? editorFor(field.id, draft) : <SystemFieldValue user={user} field={field} />}
+                {editing && draft ? editorFor(field.id, draft) : (
+                  <>
+                    <PendingValue steps={pendingSteps(scheduledChanges, field.id, currentValuesOf(user, field.id))}>
+                      <SystemFieldValue user={user} field={field} />
+                    </PendingValue>
+                    <ProvenanceMarker
+                      userId={user.id}
+                      fieldId={field.id}
+                      provenance={provenance}
+                      canEdit={user.fieldAccess?.[field.id] === "EDIT"}
+                      onReturned={() => void mutate(`/api/users/${user.id}`)}
+                    />
+                  </>
+                )}
                 {source ? (
                   <p className="m-0 mt-1 text-xs text-muted-foreground">
                     Follows {source.label}. Change the {source.label.toLowerCase()} to change it.
@@ -340,5 +374,28 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
     default:
       // A field registered on the backend that nothing here knows how to read yet.
       return isReferenceField(field) ? <NotSet /> : <NotSet />;
+  }
+};
+
+/** What a reference field holds now, in the shape a scheduled change is compared against. */
+const currentValuesOf = (user: User, fieldId: string): FieldValue[] => {
+  const one = (ref?: { id: string; name: string } | null) => (ref ? [{ id: ref.id, name: ref.name }] : []);
+  switch (fieldId) {
+    case "sys:office":
+      return one(user.office);
+    case "sys:department":
+      return one(user.department);
+    case "sys:legal_entity":
+      return one(user.legalEntity);
+    case "sys:job":
+      return user.jobId ? [{ id: user.jobId, name: user.jobName ?? "" }] : [];
+    case "sys:team":
+      return (user.teams ?? []).map((t) => ({ id: t.id, name: t.name }));
+    case "sys:role":
+      return (user.roles ?? []).map((r) => ({ id: r.id, name: r.name }));
+    case "sys:calendar":
+      return (user.calendars ?? []).map((c) => ({ id: c.id, name: c.name }));
+    default:
+      return [];
   }
 };

@@ -1,10 +1,12 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import {
+  ActivateJobFamilyRequest,
   CreateJobFamilyRequest,
   DuplicateJobFamilyRequest,
   JobFamilyDTO,
   JobFamilyIdRequest,
+  JobFamilyRestoreImpactDTO,
   UpdateJobFamilyRequest,
 } from "@/api/modules/jobfamily/dto";
 
@@ -32,8 +34,17 @@ class HrisJobFamilyClient {
     return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/archive`);
   }
 
-  public async activateJobFamily({ id }: JobFamilyIdRequest) {
-    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/activate`);
+  public async activateJobFamily({ id, restoreJobIds }: ActivateJobFamilyRequest) {
+    // No body at all when nothing is chosen: the backend reads that as "the family alone", as before.
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/activate`,
+      restoreJobIds?.length ? { restoreJobIds } : undefined,
+    );
+  }
+
+  /** The archived positions that could come back with this family. */
+  public async getRestoreImpact(id: string): Promise<JobFamilyRestoreImpactDTO> {
+    return hrisApiClient.get<JobFamilyRestoreImpactDTO>(`${this.BASE_PATH}/${id}/restore-impact`);
   }
 
   public async deleteJobFamily({ id }: JobFamilyIdRequest) {

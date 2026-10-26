@@ -17,3 +17,4 @@ export type {
   DepartmentArchiveChildrenStrategy,
   DepartmentArchiveMembersStrategy,
 } from "./ArchiveDepartmentPayload";
+export type { ArchivedDepartmentUnit, DepartmentRestoreImpact } from "./DepartmentRestoreImpact";

@@ -1,12 +1,18 @@
-import type { FilterDTO } from "@/models/user/fields";
+import type { DraftVisibility, FilterDTO } from "@/models/user/fields";
 
 export type BulkOperation = "SET" | "CLEAR" | "ADD" | "REMOVE";
 
 export type BulkEditSegment = {
   filters: FilterDTO[];
   excludeUserIds?: string[];
-  /** Same meaning as on a Segment: off means active people only. */
+  /**
+   * Ignored by bulk edit, which resolves every segment as the People table shows it — not-started and
+   * archived people included (`SegmentResolverService.Mode.TABLE`).
+   */
   includeInactive?: boolean;
+  /** The table's search term and drafts segment, so the segment is the table's exact set. */
+  q?: string | null;
+  drafts?: DraftVisibility | null;
 };
 
 export type BulkEditRequest = {

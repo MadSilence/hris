@@ -1,6 +1,7 @@
 import { PersonalPreferencesForm } from "@/components/modules/firstRun/components/PersonalPreferencesForm";
 import { NotificationPreferences } from "@/components/modules/notifications/components/NotificationPreferences";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
+import { DelegateApprovalsSection } from "@/components/modules/delegations/components";
 
 export const metadata = { title: "My Preferences" };
 
@@ -17,13 +18,18 @@ export default function PreferencesPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-foreground">My Preferences</h1>
         <PageDescription className="text-base text-muted-foreground/90">
-          How the product reads to you, and what it tells you about.
+          How the product reads to you, who decides for you while you are away, and what it tells you about.
         </PageDescription>
       </header>
 
       <section className="max-w-lg space-y-4">
         <h2 className="text-lg font-medium text-foreground">Dates and Time</h2>
         <PersonalPreferencesForm />
+      </section>
+
+      <section className="max-w-xl space-y-4">
+        <h2 className="text-lg font-medium text-foreground">Delegate Approvals</h2>
+        <DelegateApprovalsSection />
       </section>
 
       <section className="space-y-4">

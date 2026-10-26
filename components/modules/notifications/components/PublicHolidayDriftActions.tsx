@@ -1,7 +1,8 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Check, X } from "lucide-react";
+import Link from "next/link";
+import { Check, Pencil, Shield, X } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import { cn } from "@/public/desact/src/components/ui/utils";
@@ -16,7 +17,10 @@ import { useMarkNotificationRead } from "@/components/modules/notifications/hook
 import { formatDisplayDate } from "@/lib/date";
 import { showError } from "@/lib/errors/errorToast";
 
-/** One change, as the backend projects it (`PublicHolidayDriftImpactService`). */
+/**
+ * One change, as the backend projects it (`PublicHolidayDriftImpactService`). On a conflict the
+ * `previous…` fields are the company's day as it stands and the others what the provider says now.
+ */
 type DriftChange = {
   kind: "ADDED" | "CHANGED" | "MOVED" | "REMOVED";
   name: string | null;
@@ -25,6 +29,7 @@ type DriftChange = {
   end: string | null;
   previousStart: string | null;
   previousEnd: string | null;
+  conflict?: boolean;
 };
 
 /** A live leave request covering a day the change moves — listed only when the reader may see it. */
@@ -37,6 +42,8 @@ type AffectedRequest = {
 };
 
 type DriftDetails = {
+  /** `CONFLICT`: the provider changed days the company overrode. */
+  kind: "ORDINARY" | "CONFLICT";
   changes: DriftChange[];
   changeCount: number;
   peopleOnCalendar: number;
@@ -44,10 +51,19 @@ type DriftDetails = {
   affectedRequestCount: number;
 };
 
-const OUTCOMES: Record<string, { label: string; className: string }> = {
+type Outcome = { label: string; className: string };
+
+const OUTCOMES: Record<string, Outcome> = {
   APPLIED: { label: "Applied", className: "text-success-700" },
   DISMISSED: { label: "Dismissed", className: "text-brown-500" },
   SUPERSEDED: { label: "Replaced by a newer check of the source", className: "text-brown-500" },
+};
+
+/** The same statuses, read as the answers to a conflict. */
+const CONFLICT_OUTCOMES: Record<string, Outcome> = {
+  APPLIED: { label: "The source's version was taken", className: "text-success-700" },
+  DISMISSED: { label: "Your version was kept", className: "text-brown-500" },
+  SUPERSEDED: OUTCOMES.SUPERSEDED,
 };
 
 const REQUEST_STATUS: Record<string, string> = {
@@ -61,12 +77,19 @@ const asNumber = (value: unknown): number => (typeof value === "number" ? value 
 
 /** The projection's `details`, read defensively: it is untyped on the wire. */
 export const readDriftDetails = (details: Record<string, unknown> | null): DriftDetails => ({
+  kind: details?.kind === "CONFLICT" ? "CONFLICT" : "ORDINARY",
   changes: asArray<DriftChange>(details?.changes),
   changeCount: asNumber(details?.changeCount),
   peopleOnCalendar: asNumber(details?.peopleOnCalendar),
   affectedRequests: asArray<AffectedRequest>(details?.affectedRequests),
   affectedRequestCount: asNumber(details?.affectedRequestCount),
 });
+
+/** A conflict is the same notification asking another question; either half of it can say so. */
+export const isConflictDrift = (notification: Notification): boolean =>
+  notification.params?.conflict === true ||
+  notification.params?.conflict === "true" ||
+  notification.source?.details?.kind === "CONFLICT";
 
 const day = (iso: string | null) => formatDisplayDate(iso, { style: "medium", hideYear: true });
 
@@ -93,6 +116,15 @@ export const describeDriftChange = (change: DriftChange): string => {
   }
 };
 
+/** "The source now says X; yours says Y" — a conflict, one line per day. */
+export const describeConflict = (change: DriftChange): string => {
+  const theirs = change.start ? `${change.name ?? ""}, ${span(change.start, change.end)}` : "no holiday";
+  const ours = change.previousStart
+    ? `${change.previousName ?? ""}, ${span(change.previousStart, change.previousEnd)}`
+    : "no holiday (you removed it)";
+  return `The source now says ${theirs}; yours says ${ours}.`;
+};
+
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 const resultSummary = (result: PublicHolidayDriftApplyResult): string => {
@@ -112,9 +144,14 @@ const resultSummary = (result: PublicHolidayDriftApplyResult): string => {
 };
 
 /**
- * The drift question in the inbox: what the provider changed, whose leave it touches, and Apply or
- * Dismiss. Every calendar manager holds a copy of the same question, so whoever answers first closes all
- * of them — the next read of anybody's inbox shows the outcome instead of the buttons.
+ * The drift question in the inbox: what the provider changed, whose leave it touches, and the answer.
+ *
+ * An ordinary drift — days nobody overrode — is Apply or Dismiss; dismissing keeps the day as it is, as
+ * an override. A conflict — the provider changed days the company overrode — is Keep Ours, Take Theirs
+ * or Edit, and blocks nothing: the company's version stays in force until somebody takes the source's.
+ *
+ * Every calendar manager holds a copy of the same question, so whoever answers first closes all of
+ * them — the next read of anybody's inbox shows the outcome instead of the buttons.
  */
 export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ notification }) => {
   const invalidateNotifications = useInvalidateNotifications();
@@ -126,8 +163,10 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
   const source = notification.source;
   if (!source) return null;
 
+  const conflict = isConflictDrift(notification);
+
   if (!source.open) {
-    const outcome = OUTCOMES[source.status ?? ""];
+    const outcome = (conflict ? CONFLICT_OUTCOMES : OUTCOMES)[source.status ?? ""];
     return (
       <div className="mt-2 flex flex-col gap-1">
         {outcome && <p className={cn("text-xs font-medium", outcome.className)}>{outcome.label}</p>}
@@ -140,6 +179,7 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
   const busy = apply.isPending || dismiss.isPending;
   const hiddenRequests = details.affectedRequestCount - details.affectedRequests.length;
   const moreChanges = details.changeCount - details.changes.length;
+  const calendarHref = notification.targetId ? `/settings/time/public-holidays/${notification.targetId}` : null;
 
   const answered = () => {
     invalidateNotifications();
@@ -158,22 +198,39 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
     }
   };
 
+  const applyDrift = () =>
+    run(async () => {
+      const result = await apply.mutateAsync({ driftId: source.id });
+      if (result) setApplied(result);
+    });
+  const dismissDrift = () => run(() => dismiss.mutateAsync({ driftId: source.id }));
+
+  const leaveLine =
+    details.affectedRequestCount === 0
+      ? "No leave touches the changed days."
+      : conflict
+        ? `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} these days and would be recalculated if you take the source's version:`
+        : `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} the changed days and will be recalculated:`;
+
   return (
     <div className="mt-3 flex flex-col gap-2 text-xs text-brown-700" onClick={(e) => e.stopPropagation()}>
       {details.changes.length > 0 && (
         <ul className="flex flex-col gap-0.5">
           {details.changes.map((change, index) => (
-            <li key={`${change.kind}-${change.name ?? change.previousName}-${index}`}>{describeDriftChange(change)}</li>
+            <li key={`${change.kind}-${change.name ?? change.previousName}-${index}`}>
+              {conflict ? describeConflict(change) : describeDriftChange(change)}
+            </li>
           ))}
           {moreChanges > 0 && <li className="text-brown-500">and {plural(moreChanges, "more change", "more changes")}</li>}
         </ul>
       )}
 
+      {conflict && (
+        <p className="text-brown-500">Your version stays in force until someone takes the source&apos;s.</p>
+      )}
+
       <p>
-        {plural(details.peopleOnCalendar, "person observes", "people observe")} this calendar.{" "}
-        {details.affectedRequestCount === 0
-          ? "No leave touches the changed days."
-          : `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} the changed days and will be recalculated:`}
+        {plural(details.peopleOnCalendar, "person observes", "people observe")} this calendar. {leaveLine}
       </p>
 
       {details.affectedRequests.length > 0 && (
@@ -192,30 +249,37 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         </p>
       )}
 
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const result = await apply.mutateAsync({ driftId: source.id });
-              if (result) setApplied(result);
-            })
-          }
-        >
-          <Check className="h-4 w-4" />
-          Apply Changes
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={busy}
-          onClick={() => run(() => dismiss.mutateAsync({ driftId: source.id }))}
-        >
-          <X className="h-4 w-4" />
-          Dismiss
-        </Button>
-      </div>
+      {conflict ? (
+        <div className="flex items-center gap-2">
+          <Button size="sm" disabled={busy} onClick={dismissDrift}>
+            <Shield className="h-4 w-4" />
+            Keep Ours
+          </Button>
+          <Button size="sm" variant="outline" disabled={busy} onClick={applyDrift}>
+            <Check className="h-4 w-4" />
+            Take Theirs
+          </Button>
+          {calendarHref && (
+            <Button size="sm" variant="ghost" asChild>
+              <Link href={calendarHref}>
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <Button size="sm" disabled={busy} onClick={applyDrift}>
+            <Check className="h-4 w-4" />
+            Apply Changes
+          </Button>
+          <Button size="sm" variant="outline" disabled={busy} onClick={dismissDrift}>
+            <X className="h-4 w-4" />
+            Dismiss
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -38,6 +38,7 @@ class HrisOfficeClient {
       street: payload.street,
       building: payload.building,
       postCode: payload.postCode,
+      isRemote: payload.isRemote,
       version: payload.version,
     })
   }

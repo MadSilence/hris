@@ -38,7 +38,7 @@ const validationSchema = Yup.object({
  * opens the new profile, which is where *Invite* lives.
  *
  * A hire date today or earlier enters somebody already working here; a later one, or none, somebody
- * who has not started (LIFECYCLE_PROCESSES_DESIGN § 2).
+ * who has not started (LIFECYCLE_PROCESSES.md § 2).
  */
 export function AddPersonModal({ open, onCloseAction }: Props) {
   const router = useRouter();

@@ -18,6 +18,12 @@ jest.mock(
   () => ({ ChoosePublicHolidayTemplateModal: () => null }),
 );
 
+// The company default's Holiday Calendar field reads through react-query; it is tested on its own.
+jest.mock(
+  "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding",
+  () => ({ HolidayCalendarBindingSection: () => null }),
+);
+
 // The row menu is offered only to MANAGE holders; access comes from a query these tests do not set up.
 jest.mock(
   "@/components/modules/settings/modules/time/publicHolidays/hooks/useCanManagePublicHolidayCalendars",

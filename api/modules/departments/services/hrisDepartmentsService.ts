@@ -5,6 +5,7 @@ import type {
   MoveDepartmentRequest,
   DeleteDepartmentRequest,
   ArchiveDepartmentRequest,
+  ActivateDepartmentRequest,
 } from "@/api/modules/departments/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 import type {
@@ -12,6 +13,7 @@ import type {
   DepartmentTreeNode,
   DepartmentSummary,
   DepartmentPerson,
+  DepartmentRestoreImpact,
 } from "@/models/departments";
 
 export class HrisDepartmentsService {
@@ -51,8 +53,13 @@ export class HrisDepartmentsService {
     return hrisApiDepartmentsClient.archive(id, body);
   }
 
-  public async activate(id: string): Promise<UpdateResponse> {
-    return hrisApiDepartmentsClient.activate(id);
+  public async activate(id: string, body?: ActivateDepartmentRequest): Promise<UpdateResponse> {
+    return hrisApiDepartmentsClient.activate(id, body);
+  }
+
+  public async restoreImpact(id: string): Promise<DepartmentRestoreImpact> {
+    const dto = await hrisApiDepartmentsClient.restoreImpact(id);
+    return { archivedUnits: dto.archivedUnits.map((unit) => ({ ...unit })) };
   }
 
   public async delete(id: string, body: DeleteDepartmentRequest): Promise<void> {

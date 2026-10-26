@@ -20,7 +20,8 @@ export const activateJobFamilyAction = async (
   }
 };
 
-export type ActivateJobFamilyActionInput = { id: string };
+/** Absent or empty `restoreJobIds` restores the family alone, as before the choice existed. */
+export type ActivateJobFamilyActionInput = { id: string; restoreJobIds?: string[] };
 
 export type ActivateJobFamilyActionOutput = {
   status: ActionStatus;

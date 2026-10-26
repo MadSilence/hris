@@ -1,13 +1,16 @@
 /**
  * Preboarding and onboarding — templates, processes and tasks.
- * Design: (claude)/technical_design/LIFECYCLE_PROCESSES_DESIGN.md.
+ * Design: (claude)/technical_documentation/LIFECYCLE_PROCESSES.md.
  */
 
 export type ProcessType = "PREBOARDING" | "ONBOARDING";
 export type TaskKind = "CHECKLIST" | "FILL_FIELDS" | "DOCUMENT";
 export type DueKind = "OFFSET" | "BEFORE_START";
-export type AssigneeKind = "TARGET" | "ONBOARDING_MANAGER" | "SPECIFIC_USER";
-export type TaskStatus = "OPEN" | "DONE" | "CANCELLED";
+/** LINE_MANAGER: a task an automation gave to "the manager" — it follows the reporting line; never in a template. */
+export type TemplateAssigneeKind = "TARGET" | "ONBOARDING_MANAGER" | "SPECIFIC_USER";
+export type AssigneeKind = TemplateAssigneeKind | "LINE_MANAGER";
+/** WAITING: waits for other tasks of its process; its assignee is not told and does not see it yet. */
+export type TaskStatus = "WAITING" | "OPEN" | "DONE" | "CANCELLED";
 export type ProcessStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "PARTIALLY_FAILED" | "CANCELLED";
 /** Why a named person cannot take a task. */
 export type AssigneeProblem = "MISSING" | "LEFT" | "NOT_STARTED_DRAFT";
@@ -28,6 +31,8 @@ export type TemplateSummary = {
   archivedAt: string | null;
   updatedAt: string;
   hasProblems: boolean;
+  /** Each task's day relative to the start day, for the small timeline; null = "by the start day". */
+  dayOffsets: (number | null)[];
 };
 
 export type TemplateItem = {
@@ -43,6 +48,8 @@ export type TemplateItem = {
   assigneeName: string | null;
   assigneeProblem: AssigneeProblem | null;
   config: TaskConfig;
+  /** The ids of the items of the same template this one waits for — the arrows on the canvas. */
+  waitsFor: string[];
 };
 
 export type Template = {
@@ -64,6 +71,13 @@ export type TemplateItemWrite = {
   assigneeKind: AssigneeKind;
   assigneeUserId: string | null;
   config: TaskConfig | null;
+  /**
+   * This item's name within the request — its id when it exists, anything unique when new. Items get new ids
+   * on every save, so an arrow names keys, not ids.
+   */
+  key?: string;
+  /** The keys of the items this one waits for (decision 10). */
+  waitsFor?: string[];
 };
 
 export type TemplateWrite = {
@@ -92,6 +106,8 @@ export type Task = {
   fields: { id: string; name: string | null; type: string | null; filled: boolean }[] | null;
   category: Ref | null;
   completedAt: string | null;
+  /** WAITING: the tasks it still waits for — "Waiting for …". Empty otherwise. */
+  waitingFor: Ref[];
 };
 
 export type ItemOverride = {
@@ -128,6 +144,8 @@ export type PlannedTask = {
   assigneeName: string | null;
   assigneeProblem: AssigneeProblem | null;
   config: TaskConfig;
+  /** The template items this one waits for, among those the summary keeps. */
+  waitsFor: string[];
 };
 
 export type StartPreview = {
@@ -221,7 +239,8 @@ export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   DOCUMENT: "Upload Document",
 };
 
-export const ASSIGNEE_KIND_LABELS: Record<AssigneeKind, string> = {
+/** What a template may name — LINE_MANAGER is an automation's, never offered here. */
+export const ASSIGNEE_KIND_LABELS: Record<TemplateAssigneeKind, string> = {
   TARGET: "The New Person",
   ONBOARDING_MANAGER: "Onboarding Manager",
   SPECIFIC_USER: "Specific Person",

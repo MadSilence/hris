@@ -11,6 +11,8 @@ export type UserSettingsDTO = {
   timeFormat: UserTimeFormat;
   language: string | null;
   welcomeCompletedAt: string | null;
+  /** "Delegate my approvals while I'm on leave" — on unless switched off. */
+  delegateApprovalsOnLeave: boolean;
 };
 
 export type UpdateUserSettingsRequest = {
@@ -20,4 +22,5 @@ export type UpdateUserSettingsRequest = {
   dateFormat?: UserDateFormat;
   timeFormat?: UserTimeFormat;
   language?: string | null;
+  delegateApprovalsOnLeave?: boolean;
 };

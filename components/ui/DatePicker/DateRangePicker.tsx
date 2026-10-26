@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, type FC } from "react";
-import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { CalendarRange, X } from "lucide-react";
 
-import { dateToISO, isoToDate } from "@/lib/date";
+import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 import { Calendar } from "@/public/desact/src/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
 import { cn } from "@/public/desact/src/components/ui/utils";
@@ -105,7 +104,7 @@ export const DateRangePicker: FC<Props> = ({
 
           <span className={cn("min-w-0 flex-1 truncate text-left", !value && "text-muted-foreground")}>
             {value
-              ? `${format(isoToDate(value.start), "MMM d, yyyy")} – ${format(isoToDate(value.end), "MMM d, yyyy")}`
+              ? `${formatDisplayDate(value.start, { style: "medium" })} – ${formatDisplayDate(value.end, { style: "medium" })}`
               : placeholder}
           </span>
 

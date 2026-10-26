@@ -35,6 +35,8 @@ describe("skipReasonText", () => {
     expect(skipReasonText("USER_NOT_FOUND")).toBe("no longer exists");
     expect(skipReasonText("INVALID_TARGET")).toBe("cannot be assigned here");
     expect(skipReasonText("DOMAIN_ERROR")).toBe("rejected by the system");
+    expect(skipReasonText("HAND_OVERRIDE")).toBe("set by hand to something else");
+    expect(skipReasonText("RULE_CONFLICT")).toBe("another rule sets this for them");
   });
 });
 

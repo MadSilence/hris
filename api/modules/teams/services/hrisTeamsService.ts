@@ -5,9 +5,10 @@ import type {
   MoveTeamRequest,
   DeleteTeamRequest,
   ArchiveTeamRequest,
+  ActivateTeamRequest,
 } from "@/api/modules/teams/dto";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
-import type { Team, TeamTreeNode, TeamSummary, TeamPerson } from "@/models/teams";
+import type { Team, TeamTreeNode, TeamSummary, TeamPerson, TeamRestoreImpact } from "@/models/teams";
 
 export class HrisTeamsService {
   public async list(): Promise<Team[]> {
@@ -46,8 +47,13 @@ export class HrisTeamsService {
     return hrisApiTeamsClient.archive(id, body);
   }
 
-  public async activate(id: string): Promise<UpdateResponse> {
-    return hrisApiTeamsClient.activate(id);
+  public async activate(id: string, body?: ActivateTeamRequest): Promise<UpdateResponse> {
+    return hrisApiTeamsClient.activate(id, body);
+  }
+
+  public async restoreImpact(id: string): Promise<TeamRestoreImpact> {
+    const dto = await hrisApiTeamsClient.restoreImpact(id);
+    return { archivedUnits: dto.archivedUnits.map((unit) => ({ ...unit })) };
   }
 
   public async delete(id: string, body: DeleteTeamRequest): Promise<void> {

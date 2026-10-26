@@ -27,7 +27,14 @@ export type AssignmentSkipReason =
   | "USER_ARCHIVED"
   | "USER_NOT_FOUND"
   | "DOMAIN_ERROR"
-  | "INVALID_TARGET";
+  | "INVALID_TARGET"
+  /** A live rule left a value set by hand alone (AUTOMATIONS_DESIGN.md § 7). */
+  | "HAND_OVERRIDE"
+  /** Another live rule already sets this single-valued field for the person. */
+  | "RULE_CONFLICT";
+
+/** Whose decision an assignment record is: a person's, or a live rule's. */
+export type AssignmentOrigin = "HAND" | "RULE";
 
 export type AssignmentSummary = {
   total: number;
@@ -55,6 +62,8 @@ export type AssignmentPreviewDTO = {
   toCreate: AssignmentPreviewUser[];
   toSkip: AssignmentSkippedUser[];
   summary: AssignmentSummary;
+  /** The skips counted by reason — "N will be assigned, M skipped, and why". */
+  skippedByReason?: Partial<Record<AssignmentSkipReason, number>>;
 };
 
 export type AssignmentFailedUser = {
@@ -66,10 +75,26 @@ export type AssignmentFailedUser = {
 
 export type AssignmentApplyDTO = {
   ruleId: string;
-  created: (AssignmentPreviewUser & { recordId?: string | null })[];
+  created: (AssignmentPreviewUser & { recordId?: string | null; scheduledFor?: string | null })[];
   skipped: AssignmentSkippedUser[];
   failed: AssignmentFailedUser[];
   summary: AssignmentSummary;
+};
+
+// One person × one target, as the engine recorded it. A hand apply records origin HAND; a live rule
+// records RULE and its automation rule.
+export type AssignmentRecordDTO = {
+  id: string;
+  ruleId?: string | null;
+  assignableType: string;
+  assignableId: string;
+  userId: string;
+  status: "CREATED" | "SCHEDULED" | "SKIPPED" | "FAILED" | "REMOVED";
+  skipReason?: AssignmentSkipReason | null;
+  errorDetail?: string | null;
+  createdAt: string;
+  origin?: AssignmentOrigin | null;
+  automationRuleId?: string | null;
 };
 
 // Rules are an append-only journal of applied operations — they cannot be edited.

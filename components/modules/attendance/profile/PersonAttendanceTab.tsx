@@ -181,8 +181,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <div className={canLog ? "min-w-0 lg:basis-2/3" : "min-w-0 flex-1"}>
+      <div className="flex flex-col gap-6 xl:flex-row">
+        <div className={canLog ? "min-w-0 xl:flex-1" : "min-w-0 flex-1"}>
           <UserCalendarContainer
             userId={userId}
             variant="compact"
@@ -206,7 +206,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         </div>
 
         {canLog && (
-          <Card className="min-h-0 gap-4 border-brown-100 p-6 lg:basis-1/3">
+          <Card className="min-h-0 gap-4 border-brown-100 p-6 xl:w-80 xl:shrink-0">
             <div className="space-y-1">
               <h3 className="text-base font-semibold text-foreground">{editing ? "Edit Time" : "Log Hours"}</h3>
               <p className="min-h-5 text-sm text-muted-foreground">{rangeLabel}</p>

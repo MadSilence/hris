@@ -7,4 +7,5 @@ export const departmentQueryKeys = {
   people: () => [DEPARTMENTS_QUERY_KEY, "people"] as const,
   summary: (includeArchived: boolean) =>
     [DEPARTMENTS_QUERY_KEY, "summary", includeArchived] as const,
+  restoreImpact: (id: string | null) => [DEPARTMENTS_QUERY_KEY, "restore-impact", id] as const,
 };

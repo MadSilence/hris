@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CheckCircle2, Circle, FileUp, ListChecks, TextCursorInput } from "lucide-react";
+import { CheckCircle2, Circle, FileUp, Hourglass, ListChecks, TextCursorInput } from "lucide-react";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { formatDisplayDate } from "@/lib/date";
@@ -37,16 +37,22 @@ export function TaskList({ tasks, showAssignee, showSubject, onCompleteAction, c
         const done = task.status === "DONE";
         const cancelled = task.status === "CANCELLED";
         const overdue = task.status === "OPEN" && task.dueReached;
+        // Decision 10: until what it waits for is done, the task is not its assignee's yet — said in words,
+        // with the names, rather than drawn as an ordinary open task.
+        const waiting = task.status === "WAITING";
+        const waitingFor = (task.waitingFor ?? []).map((t) => t.name ?? "another task").join(", ");
         return (
           <li key={task.id} className="flex items-start gap-3 px-4 py-3" data-testid="task-row">
             {done ? (
               <CheckCircle2 className="mt-0.5 h-5 w-5 text-success-600" aria-label="Done" />
+            ) : waiting ? (
+              <Hourglass className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label="Waiting" />
             ) : (
               <Circle className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label={cancelled ? "Cancelled" : "Open"} />
             )}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`font-medium ${cancelled ? "line-through text-muted-foreground" : ""}`}>{task.title}</span>
+                <span className={`font-medium ${cancelled ? "line-through text-muted-foreground" : waiting ? "text-muted-foreground" : ""}`}>{task.title}</span>
                 <Badge variant="outline" className="gap-1">
                   <Icon className="h-3 w-3" />
                   {TASK_KIND_LABELS[task.kind]}
@@ -54,11 +60,17 @@ export function TaskList({ tasks, showAssignee, showSubject, onCompleteAction, c
                 {task.processType && <Badge variant="outline">{PROCESS_TYPE_LABELS[task.processType]}</Badge>}
                 {overdue && <Badge variant="outline" className="border-warning-200 bg-warning-50 text-warning-700">Due</Badge>}
                 {cancelled && <Badge variant="outline">Cancelled</Badge>}
+                {waiting && (
+                  <Badge variant="outline" className="gap-1 text-muted-foreground">
+                    <Hourglass className="h-3 w-3" />
+                    {waitingFor ? `Waiting for ${waitingFor}` : "Waiting"}
+                  </Badge>
+                )}
               </div>
               {task.description && <p className="mt-1 text-sm text-muted-foreground">{task.description}</p>}
               <p className="mt-1 text-xs text-muted-foreground">
                 {[
-                  task.dueDate ? `Due ${formatDisplayDate(task.dueDate, { style: "medium" })}` : null,
+                  task.dueDate ? `${waiting ? "Planned for" : "Due"} ${formatDisplayDate(task.dueDate, { style: "medium" })}` : null,
                   showSubject && task.subject ? `About ${task.subject.name ?? ""}` : null,
                   showAssignee ? `Done by ${task.assignee?.name ?? "nobody"}` : null,
                   done && task.completedAt ? `Done ${formatDisplayDate(task.completedAt, { style: "medium" })}` : null,

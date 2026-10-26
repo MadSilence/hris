@@ -2,10 +2,15 @@ import { FC } from "react";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import { PageGate } from "@/components/auth/PageGate";
-import { CompanyWorkdayNorm, WorkScheduleSettingsContainer } from "@/components/modules/attendance/schedule";
+import {
+  AttendanceRateField,
+  CompanyWorkdayNorm,
+  WorkScheduleSettingsContainer,
+} from "@/components/modules/attendance/schedule";
 
 /**
- * Attendance settings: how long a company working day is, and the personal schedules that override it.
+ * Attendance settings: how long a company working day is, which money field prices logged time, and the
+ * personal schedules that override the working day.
  * Logged time itself lives on the Attendance page and the person profile; this is the norm behind it.
  */
 const AttendanceSettingsPage: FC = () => (
@@ -23,6 +28,7 @@ const AttendanceSettingsPage: FC = () => (
 
       <div className="space-y-10 px-8">
         <CompanyWorkdayNorm/>
+        <AttendanceRateField/>
         <WorkScheduleSettingsContainer/>
       </div>
     </div>

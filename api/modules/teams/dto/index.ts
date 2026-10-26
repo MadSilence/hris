@@ -15,3 +15,5 @@ export type {
   TeamArchiveChildrenStrategy,
   TeamArchiveMembersStrategy,
 } from "./ArchiveTeamRequest";
+export type { ArchivedTeamUnitDTO, TeamRestoreImpactDTO } from "./TeamRestoreImpactDTO";
+export type { ActivateTeamRequest } from "./ActivateTeamRequest";

@@ -1,5 +1,6 @@
 import { internalApiClient } from "@/components/clients/apiClient";
 import type {
+  DepartmentRestoreImpact,
   DepartmentPerson,
   DepartmentSummary,
   DepartmentTreeNode,
@@ -22,6 +23,10 @@ export class DepartmentsService {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     return internalApiClient.get<DepartmentPerson[]>(`/departments/people?${params}`);
+  }
+
+  public async restoreImpact(id: string): Promise<DepartmentRestoreImpact> {
+    return internalApiClient.get<DepartmentRestoreImpact>(`/departments/${id}/restore-impact`);
   }
 }
 

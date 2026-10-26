@@ -27,6 +27,7 @@ export const POSITION_CHANGE_REASON_LABELS: Record<PositionChangeReason, string>
   ASSIGNED: "Set on the profile",
   UNASSIGNED: "Cleared on the profile",
   BULK: "Bulk edit",
+  IMPORTED: "Imported from a file",
   JOB_ARCHIVED: "Position archived",
   JOB_DELETED: "Position deleted",
   FAMILY_ARCHIVED: "Job family archived",

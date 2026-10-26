@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Columns3, Filter as FilterIcon, Pencil, Plus } from "lucide-react";
+import Link from "next/link";
+import { Columns3, Filter as FilterIcon, Pencil, Plus, Upload } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
 import {
@@ -22,7 +23,7 @@ import {
   type PeopleExportSort,
 } from "@/components/modules/organization/components/PeopleTopbar/components/PeopleExport";
 
-export type FieldMeta = Pick<FieldDTO, "id" | "key" | "label" | "type" | "isSystem" | "options">;
+export type FieldMeta = Pick<FieldDTO, "id" | "key" | "label" | "type" | "isSystem" | "options" | "sortable">;
 
 const PINNED_COLUMN_ID = "sys:first_name";
 
@@ -159,6 +160,22 @@ export default function PeopleTopbar({
           * "Invite by email" and none of the three was wired to anything. A person is added as a
           * draft; inviting them is an action on their profile.
           */}
+        {/*
+          * Many people at once, from a spreadsheet — a secondary action beside the primary one
+          * (ACTIONS_AND_MENUS.md § 4), rather than a menu under Add Person: the menu that stood here
+          * offered three actions and none of them worked, and one working button is what replaced it.
+          */}
+        {onAddPersonAction ? (
+          <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link href="/settings/general/import">
+                <Upload className="h-4 w-4" />
+                Import
+              </Link>
+            </Button>
+          </PermissionGate>
+        ) : null}
+
         {onAddPersonAction ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
             <Button className="gap-1.5" onClick={onAddPersonAction}>

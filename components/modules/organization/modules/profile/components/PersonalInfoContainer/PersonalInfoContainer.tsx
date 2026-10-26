@@ -25,11 +25,18 @@ import { useProfileEditGuard } from "@/components/modules/organization/modules/p
 import { Loader } from "@/components/ui/Loader";
 import { Card } from "@/public/desact/src/components/ui/card";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { SectionEditButton } from "./components/ProfileSectionCard";
+import { ProfileSectionCard, SectionEditButton } from "./components/ProfileSectionCard";
 import { useSWRConfig } from "swr";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { updateUserAction } from "@/components/modules/organization/modules/profile/actions/updateUserAction";
 import { PositionHistoryPanel } from "@/components/modules/organization/modules/profile/components/PositionHistoryPanel";
+import { useUserScheduledChanges } from "@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { useAssignmentProvenance } from "@/components/modules/automations/hooks";
+import { PersonAutomationRuns } from "@/components/modules/automations/runs/PersonAutomationRuns";
+
+/** The person's automation runs: after the built-in groups, for readers of the run log only. */
+const AUTOMATION_RUNS_SECTION_ID = "automation-runs";
 
 /** The position timeline's place in the page and the sidebar. */
 const POSITION_HISTORY_SECTION_ID = "position-history";
@@ -77,6 +84,12 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
   const { data: fetchedGroups, isLoading, error } = useAttributeGroups();
   const { data: catalogue, isLoading: isCatalogueLoading } = useUserFields();
+  // The same query the header reads, so one request: a field that will change shows `→ new from <date>`.
+  const { data: scheduledChanges } = useUserScheduledChanges(user?.id ?? "");
+  // Whose decision each assigned value is: "From rule: …", or a hand value holding a rule off.
+  const { data: provenance } = useAssignmentProvenance(user?.id ?? "");
+  // The run log is behind SETTINGS.AUTOMATIONS (AUTOMATIONS_DESIGN.md § 9.11), so the profile's copy is too.
+  const canSeeAutomationRuns = useCanAccess("SETTINGS.AUTOMATIONS", "VIEW");
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -250,14 +263,16 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
    */
   const leadingIds = useMemo(() => {
     const ids: { id: string; name: string }[] = systemGroups.map((g) => ({ id: g.id, name: g.name }));
-    if (!showPositionHistory) return ids;
-    const after = ids.findIndex((g) => g.name === POSITION_HISTORY_AFTER_GROUP);
-    ids.splice(after === -1 ? ids.length : after + 1, 0, {
-      id: POSITION_HISTORY_SECTION_ID,
-      name: "Position History",
-    });
+    if (showPositionHistory) {
+      const after = ids.findIndex((g) => g.name === POSITION_HISTORY_AFTER_GROUP);
+      ids.splice(after === -1 ? ids.length : after + 1, 0, {
+        id: POSITION_HISTORY_SECTION_ID,
+        name: "Position History",
+      });
+    }
+    if (canSeeAutomationRuns) ids.push({ id: AUTOMATION_RUNS_SECTION_ID, name: "Automation Runs" });
     return ids;
-  }, [systemGroups, showPositionHistory]);
+  }, [systemGroups, showPositionHistory, canSeeAutomationRuns]);
 
   const sections = useMemo(
     () => [...leadingIds, ...visibleGroups.map((g) => ({ id: g.id, name: g.name }))],
@@ -462,6 +477,16 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
             if (id === POSITION_HISTORY_SECTION_ID) {
               return [{ id, content: <PositionHistoryPanel userId={user.id} user={user}/> }];
             }
+            if (id === AUTOMATION_RUNS_SECTION_ID) {
+              return [{
+                id,
+                content: (
+                  <ProfileSectionCard title="Automation Runs">
+                    <PersonAutomationRuns personId={user.id}/>
+                  </ProfileSectionCard>
+                ),
+              }];
+            }
             const g = systemGroups.find((group) => group.id === id);
             if (!g) return [];
             return [{
@@ -473,6 +498,8 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
                   title={g.name}
                   isEdit={openGroupIds.has(g.id)}
                   draft={systemDraft}
+                  scheduledChanges={scheduledChanges}
+                  provenance={provenance}
                   onDraftChange={(update) => setSystemDraft((d) => (d ? update(d) : d))}
                   actions={groupActions(
                     g.id,

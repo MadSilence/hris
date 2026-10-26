@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Link2,
   Pencil,
   Plus,
   Share2,
@@ -25,16 +26,17 @@ import {
 } from "@/public/desact/src/components/ui/dialog";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { PeopleView } from "@/models/peopleView";
+import { ShareViewDialog } from "@/components/modules/organization/components/PeopleViews/ShareViewDialog";
 
 export type PeopleViewsPanelProps = {
   collapsed: boolean;
   onToggleCollapsed: () => void;
 
+  /** The caller's own views and the ones shared with them — `access` tells them apart. */
   views: PeopleView[];
   isLoading: boolean;
 
   activeViewId: string | null;
-  isShared: boolean;
   dirty: boolean;
   busy?: boolean;
 
@@ -45,7 +47,10 @@ export type PeopleViewsPanelProps = {
   onRename: (view: PeopleView, name: string) => void;
   onDuplicate: (view: PeopleView) => void;
   onDelete: (view: PeopleView) => void;
-  onShare: () => void;
+  /** Copies the page's address — the table's state is in it, so the link opens what is on screen. */
+  onCopyLink: () => void;
+  /** Save a Copy of the open view when it is shared to view only. */
+  onSaveActiveCopy: () => void;
 };
 
 type NameDialogState =
@@ -53,13 +58,14 @@ type NameDialogState =
   | { kind: "rename"; view: PeopleView }
   | null;
 
+const isOwn = (view: PeopleView) => (view.access ?? "OWNER") === "OWNER";
+
 export default function PeopleViewsPanel({
   collapsed,
   onToggleCollapsed,
   views,
   isLoading,
   activeViewId,
-  isShared,
   dirty,
   busy,
   onApplyDefault,
@@ -69,10 +75,18 @@ export default function PeopleViewsPanel({
   onRename,
   onDuplicate,
   onDelete,
-  onShare,
+  onCopyLink,
+  onSaveActiveCopy,
 }: PeopleViewsPanelProps) {
   const [dialog, setDialog] = useState<NameDialogState>(null);
   const [name, setName] = useState("");
+  const [sharing, setSharing] = useState<PeopleView | null>(null);
+
+  const ownViews = views.filter(isOwn);
+  const sharedViews = views.filter((v) => !isOwn(v));
+  const activeView = views.find((v) => v.id === activeViewId) ?? null;
+  // A view shared to view only is read, not saved over: the way to keep a change is a copy.
+  const canSaveActive = activeView !== null && activeView.access !== "VIEW";
 
   const openSaveAs = () => {
     setName("");
@@ -104,78 +118,102 @@ export default function PeopleViewsPanel({
   return (
     <div className="flex w-60 flex-none flex-col gap-3 border-l border-brown-200 pl-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-foreground">Saved views</span>
+        <span className="text-sm font-semibold text-foreground">Saved Views</span>
         <Button variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Collapse views panel">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {isShared ? (
-        <div className="flex items-center gap-2 rounded-md border border-warning-200 bg-warning-50 px-2 py-1.5 text-xs text-warning-800">
-          <Share2 className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">Shared view (not saved)</span>
-        </div>
-      ) : null}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+        <section className="flex flex-col gap-0.5" aria-label="My Views">
+          <SectionLabel>My Views</SectionLabel>
+          <ViewRow label="Default" active={activeViewId === null} onClick={onApplyDefault} />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
-        <ViewRow
-          label="Default"
-          active={activeViewId === null && !isShared}
-          onClick={onApplyDefault}
-        />
+          {isLoading ? (
+            <div className="px-2 py-2 text-xs text-muted-foreground">Loading…</div>
+          ) : (
+            ownViews.map((view) => (
+              <ViewRow
+                key={view.id}
+                label={view.name}
+                active={activeViewId === view.id}
+                dirty={activeViewId === view.id && dirty}
+                onClick={() => onApplyView(view)}
+                menu={
+                  <RowActionsMenu label={`${view.name} Actions`}>
+                    <RowAction icon={<Pencil className="h-4 w-4" />} onClick={() => openRename(view)}>
+                      Rename
+                    </RowAction>
+                    <RowAction icon={<Copy className="h-4 w-4" />} onClick={() => onDuplicate(view)}>
+                      Duplicate
+                    </RowAction>
+                    <RowAction icon={<Share2 className="h-4 w-4" />} onClick={() => setSharing(view)}>
+                      Share
+                    </RowAction>
+                    <RowActionDestructive
+                      icon={<Trash2 className="h-4 w-4" />}
+                      onClick={() => onDelete(view)}
+                    >
+                      Delete
+                    </RowActionDestructive>
+                  </RowActionsMenu>
+                }
+              />
+            ))
+          )}
+        </section>
 
-        {isLoading ? (
-          <div className="px-2 py-2 text-xs text-muted-foreground">Loading…</div>
-        ) : (
-          views.map((view) => (
-            <ViewRow
-              key={view.id}
-              label={view.name}
-              active={activeViewId === view.id}
-              dirty={activeViewId === view.id && dirty}
-              onClick={() => onApplyView(view)}
-              menu={
-                <RowActionsMenu label={`${view.name} Actions`}>
-                  <RowAction icon={<Pencil className="h-4 w-4" />} onClick={() => openRename(view)}>
-                    Rename
-                  </RowAction>
-                  <RowAction icon={<Copy className="h-4 w-4" />} onClick={() => onDuplicate(view)}>
-                    Duplicate
-                  </RowAction>
-                  <RowActionDestructive
-                    icon={<Trash2 className="h-4 w-4" />}
-                    onClick={() => onDelete(view)}
-                  >
-                    Delete
-                  </RowActionDestructive>
-                </RowActionsMenu>
-              }
-            />
-          ))
-        )}
+        {sharedViews.length ? (
+          <section className="flex flex-col gap-0.5" aria-label="Shared With Me">
+            <SectionLabel>Shared With Me</SectionLabel>
+            {sharedViews.map((view) => (
+              <ViewRow
+                key={view.id}
+                label={view.name}
+                detail={`${view.ownerName ?? "Someone"} · ${view.access === "EDIT" ? "Can Edit" : "Can View"}`}
+                active={activeViewId === view.id}
+                dirty={activeViewId === view.id && dirty}
+                onClick={() => onApplyView(view)}
+                menu={
+                  <RowActionsMenu label={`${view.name} Actions`}>
+                    <RowAction icon={<Copy className="h-4 w-4" />} onClick={() => onDuplicate(view)}>
+                      Save a Copy
+                    </RowAction>
+                  </RowActionsMenu>
+                }
+              />
+            ))}
+          </section>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1.5 border-t border-brown-200 pt-3">
-        {activeViewId !== null && dirty ? (
+        {activeView !== null && dirty && canSaveActive ? (
           <Button size="sm" variant="outline" onClick={onUpdateActive} disabled={busy} className="justify-start gap-2">
             <Check className="h-4 w-4" />
-            Save changes
+            Save Changes
+          </Button>
+        ) : null}
+        {activeView !== null && !canSaveActive ? (
+          <Button size="sm" variant="outline" onClick={onSaveActiveCopy} disabled={busy} className="justify-start gap-2">
+            <Copy className="h-4 w-4" />
+            Save a Copy
           </Button>
         ) : null}
         <Button size="sm" variant="outline" onClick={openSaveAs} disabled={busy} className="justify-start gap-2">
           <Plus className="h-4 w-4" />
-          Save as new view
+          Save as New View
         </Button>
-        <Button size="sm" variant="ghost" onClick={onShare} disabled={busy} className="justify-start gap-2">
-          <Share2 className="h-4 w-4" />
-          Copy share link
+        <Button size="sm" variant="ghost" onClick={onCopyLink} className="justify-start gap-2">
+          <Link2 className="h-4 w-4" />
+          Copy Link
         </Button>
       </div>
 
       <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{dialog?.kind === "rename" ? "Rename view" : "Save view"}</DialogTitle>
+            <DialogTitle>{dialog?.kind === "rename" ? "Rename View" : "Save View"}</DialogTitle>
           </DialogHeader>
           <Input
             autoFocus
@@ -194,18 +232,27 @@ export default function PeopleViewsPanel({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ShareViewDialog view={sharing} onClose={() => setSharing(null)} />
     </div>
   );
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <span className="px-2 pb-1 text-xs font-medium text-muted-foreground">{children}</span>;
+}
+
 function ViewRow({
   label,
+  detail,
   active,
   dirty,
   onClick,
   menu,
 }: {
   label: string;
+  /** A quiet second line — whose view it is and what the reader may do with it. */
+  detail?: string;
   active?: boolean;
   dirty?: boolean;
   onClick: () => void;
@@ -222,7 +269,10 @@ function ViewRow({
         onClick={onClick}
         className="flex min-w-0 flex-1 items-center gap-2 py-1.5 text-left text-sm text-foreground"
       >
-        <span className="truncate">{label}</span>
+        <span className="min-w-0">
+          <span className="block truncate">{label}</span>
+          {detail ? <span className="block truncate text-[11px] text-muted-foreground">{detail}</span> : null}
+        </span>
         {dirty ? (
           <Badge variant="secondary" className="ml-auto h-4 shrink-0 px-1 text-[10px] font-normal">
             edited

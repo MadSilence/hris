@@ -61,7 +61,7 @@ All new feature code should use TanStack Query:
 - `useQuery` for reads
 - `useMutation` for mutations
 - Centralize query keys per module (e.g. `publicHolidaysQueryKeys.ts`)
-- Expose cache invalidation as a standalone hook (e.g. `useInvalidatePublicHolidaysQuery`)
+- Expose cache invalidation as a standalone hook (e.g. `useInvalidateDepartmentsQuery`)
 - Do not fetch data directly inside components if a hook exists
 
 ## Global providers → SWR (legacy)
@@ -173,16 +173,15 @@ export async function archiveOfficeAction(input: ArchiveOfficeActionInput): Prom
 }
 ```
 
-- **`export const x = withActionError(...)` does not work in a `"use server"` file**, although this
-  document showed exactly that until 2026-09-14. tsc, eslint and jest all pass it; Next refuses it at
-  request time with "Server Actions must be async functions", and the page importing it answers 500.
-  No action in the codebase used it — the first eight that did were found by the lifecycle live run.
+- **`export const x = withActionError(...)` does not work in a `"use server"` file.** tsc, eslint
+  and jest all pass it; Next refuses it at request time with "Server Actions must be async
+  functions", and the page importing it answers 500.
 
 - The envelope it returns is the old one plus `code`, `fieldErrors` and `requestId`. The extra
   fields are optional, so a caller that only reads `status` and `errorMessage` keeps working.
 - **Never write a user-facing sentence in an action.** `errorMessage` is filled from
   `lib/errors/errorMessages` by the backend's error code; the backend's own `message` is technical
-  and is not shown. Adding an error: `DECISIONS.md` → "Как заводится новая ошибка".
+  and is not shown. Adding an error: `(claude)/technical_documentation/ERRORS.md` → "Как заводится новая ошибка".
 
 ---
 
@@ -197,15 +196,9 @@ The following areas are incomplete or inconsistent. Do not use them as reference
   `models/userTable/` (both declared `ColumnItem`); the folder was unreachable and is gone. TypeScript
   resolves the file first and says nothing.
 
-Fixed by the cleanup of 2026-08-25 and no longer true (kept here so the entries are not re-added):
-the `features/` orphan directory, mock data in `CompanyProfileSettingsContainer`, the duplicate
-`RoleDetailsComponent/` folder, leftover `console.log`, and the Duplicate/Archive stubs in public
-holidays. Fixed later: the dead `Export policies` button and the `AssignedUsersPanel` Download button
-that rendered without an `onExport`.
-
 ---
 
-# Conventions Confirmed by the 2026-08-25 Cleanup
+# Conventions
 
 - **Imports go through the folder when it has an `index.ts`.** 460 imports already do; the barrels
   that were missing or empty have been filled in. Do not import a file directly past an existing
@@ -315,7 +308,7 @@ Two things that are easy to get wrong:
 
 When working on a task:
 
-1. Find a similar **working** implementation in `components/modules/` (not `features/`)
+1. Find a similar **working** implementation in `components/modules/`
 2. Reuse the same structure and patterns
 3. List files to be changed
 4. Keep changes minimal and localized
@@ -324,18 +317,8 @@ When working on a task:
 
 # When Making Changes
 
-- Do NOT refactor unrelated code
-- Do NOT rename public APIs
-- Follow existing naming conventions
-- Keep diffs small
-
----
-
-# After Making Changes
-
-- Summarize what was changed
-- List affected files
-- Suggest test commands if relevant
+Keep the diff to the task: leave unrelated code and public API names as they are, and follow the
+existing naming conventions.
 
 ---
 
@@ -343,7 +326,7 @@ When working on a task:
 
 - Do not scan the entire repository unless necessary
 - Prefer reading only relevant files
-- Use existing docs (CLAUDE.md, docs/ai/*) first
+- Use the existing docs first: the root `CLAUDE.md` routes to the one you need under `(claude)/`
 
 ---
 
@@ -378,9 +361,12 @@ When working on a task:
 
 # Important Constraints
 
-- Do not introduce new dependencies. **One was added deliberately on 2026-09-16** — `qrcode` (plus its
-  types), for the QR code beside the avatar, approved by the owner. It runs in the browser: the
-  backend has no business producing an image it does not store.
+- Do not introduce new dependencies without the owner's approval. Two were approved: `qrcode` (plus
+  its types), for the QR code beside the avatar — it runs in the browser because the backend should
+  not produce an image it does not store; and `@xyflow/react` (React Flow), for the org chart, the
+  department and team canvases and the lifecycle template canvas
+  (`components/modules/lifecycle/templates/canvas`). Positions on the template canvas are derived from
+  the tasks, never stored.
 - Do not break existing UI patterns
 - Do not bypass `InternalApiClient` with raw `fetch` in feature modules
 - Always match existing architecture in `components/modules/`
@@ -422,13 +408,3 @@ Avoid using incomplete modules as reference.
 - Before editing, check the current branch and report it.
 - If not on `main`/`master`, ask before switching, or switch only if explicitly instructed.
 
----
-
-# UI / Styling Direction
-
-- Follow the current UX/UI of the existing application. Do not redesign.
-- Before creating new UI, inspect nearby modules and match their spacing, borders, typography, hover states, rounded corners, and layout style.
-- Prefer Tailwind utility classes.
-- Do not create new `.module.css` files unless the target module already uses CSS modules and there is a strong reason.
-- If a component uses `.module.css` but can be reasonably migrated to Tailwind during the task, prefer Tailwind.
-- Do not introduce new visual language or redesign patterns unless explicitly requested.

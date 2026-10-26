@@ -29,6 +29,7 @@ import { cn } from "@/public/desact/src/components/ui/utils";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import type { TimeOffRequest } from "@/models/timeOff";
+import { DecideAnywayControls } from "@/components/modules/timeOffDecision";
 
 type Props = { userId: string };
 
@@ -99,6 +100,9 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
   // backend re-checks the approver against the policy's approval settings anyway.
   const { userId: currentUserId } = useCurrentUser();
   const canDecide = useCanAccess("PEOPLE.TIME_OFF", "EDIT") && currentUserId !== userId;
+  // Deciding over the chain (Approve Anyway) is PEOPLE.TIME_OFF MANAGE on the person — UX only; the
+  // backend checks it against this requester and journals it as an override.
+  const canDecideAnyway = useCanAccess("PEOPLE.TIME_OFF", "MANAGE") && currentUserId !== userId;
 
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -346,6 +350,10 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         Reject
                       </Button>
                     </>
+                  )}
+
+                  {canDecideAnyway && isPending && !isRejecting && (
+                    <DecideAnywayControls requestId={request.id} />
                   )}
 
                   {/* The dead end: the request reached CANCELLATION_PENDING and nothing in the

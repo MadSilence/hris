@@ -43,6 +43,17 @@ import { holidaySpanDays, totalDraftDays } from "../PublicHolidayDaysEditor/holi
 import { mapServerFieldErrors } from "../PublicHolidayDaysEditor/serverFieldErrors";
 import { useInvalidatePublicHolidaysQuery } from "../../hooks/usePublicHolidayCalendars";
 import { useFillPublicHolidayYear } from "../../hooks/useFillPublicHolidayYear";
+import {
+  usePublicHolidayOverrides,
+  useRevertPublicHolidayOverride,
+} from "../../hooks/usePublicHolidayOverrides";
+import {
+  PublicHolidayEditedMarker,
+  PublicHolidayOverrideRowActions,
+  RemovedProviderDays,
+} from "../PublicHolidayOverrides";
+import type { PublicHolidayOverride } from "@/models/publicHolidays/holiday";
+import { showError } from "@/lib/errors/errorToast";
 import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
 import { SearchBox } from "@/components/ui/SearchBox";
 import {
@@ -137,6 +148,47 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   const [fillMessage, setFillMessage] = useState("");
 
   const fillYear = useFillPublicHolidayYear();
+
+  /**
+   * The company's overrides of the provider's days. A calendar with no provider has nothing to
+   * override, so it does not ask.
+   */
+  const overridesQuery = usePublicHolidayOverrides({
+    calendarId: calendar.id,
+    year,
+    enabled: calendar.sourceType !== PublicHolidayCalendarSourceType.Manual,
+  });
+  const revertOverride = useRevertPublicHolidayOverride();
+  const [revertMessage, setRevertMessage] = useState("");
+
+  const { overrideByHoliday, removedProviderDays } = useMemo(() => {
+    const overrides = overridesQuery.data ?? [];
+    return {
+      overrideByHoliday: new Map(
+        overrides.filter((o) => o.holidayId).map((o) => [o.holidayId as string, o]),
+      ),
+      removedProviderDays: overrides.filter((o) => !o.holidayId && o.providerPresent),
+    };
+  }, [overridesQuery.data]);
+
+  /** "Revert to Provider": the day becomes the provider's again, and the leave under it is re-priced. */
+  const handleRevert = async (override: PublicHolidayOverride) => {
+    setRevertMessage("");
+    const name =
+      holidays.find((h) => h.id === override.holidayId)?.name ?? override.providerName ?? "The day";
+    try {
+      const result = await revertOverride.mutateAsync({ overrideId: override.id });
+      const repriced = result?.recalculatedRequests ?? 0;
+      setRevertMessage(
+        `${name} is the provider's version again.` +
+          (repriced > 0
+            ? ` ${repriced} leave ${repriced === 1 ? "request was" : "requests were"} recalculated.`
+            : ""),
+      );
+    } catch (error) {
+      showError(error);
+    }
+  };
 
   /**
    * A sourced calendar can pull a year it does not have yet. The backend refuses to touch a year
@@ -474,6 +526,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     value={year}
                     onChange={(next) => {
                       setFillMessage("");
+                      setRevertMessage("");
                       onYearChange(next);
                     }}
                     available={canAddYears ? undefined : calendar.years}
@@ -503,6 +556,9 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               {fillMessage && (
                 <p className="flex-none text-sm text-muted-foreground">{fillMessage}</p>
               )}
+              {revertMessage && (
+                <p className="flex-none text-sm text-muted-foreground">{revertMessage}</p>
+              )}
 
               {isHolidaysLoading ? (
                 <div className="min-h-0 flex-1 pr-1 text-sm text-muted-foreground">
@@ -517,12 +573,16 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                         <TableHead className="w-44">Date</TableHead>
                         <TableHead className="w-44">End Date</TableHead>
                         <TableHead>Name</TableHead>
+                        <TableHead className="w-12">
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {visibleHolidays.map((holiday) => {
                         const isSpan =
                           !!holiday.endDate && holiday.endDate !== holiday.holidayDate;
+                        const override = overrideByHoliday.get(holiday.id);
 
                         return (
                           <TableRow key={holiday.id} className="border-brown-100 [&_td]:py-2">
@@ -554,6 +614,16 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                                   Half day
                                 </span>
                               )}
+                              {override && <PublicHolidayEditedMarker override={override} />}
+                            </TableCell>
+                            <TableCell className="py-1">
+                              {override && canManage && status !== "archived" ? (
+                                <PublicHolidayOverrideRowActions
+                                  override={override}
+                                  disabled={revertOverride.isPending}
+                                  onRevert={handleRevert}
+                                />
+                              ) : null}
                             </TableCell>
                           </TableRow>
                         );
@@ -589,6 +659,13 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   </p>
                 </button>
               )}
+
+              <RemovedProviderDays
+                overrides={removedProviderDays}
+                canRevert={canManage && status !== "archived"}
+                disabled={revertOverride.isPending}
+                onRevert={handleRevert}
+              />
             </div>
           )}
         </TabsContent>

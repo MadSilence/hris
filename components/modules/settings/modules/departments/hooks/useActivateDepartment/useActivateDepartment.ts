@@ -3,12 +3,16 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { useInvalidateDepartmentsQuery } from "@/components/modules/settings/modules/departments/hooks/useInvalidateDepartmentsQuery/useInvalidateDepartmentsQuery";
 import { activateDepartmentAction } from "@/components/modules/settings/modules/departments/actions/activateDepartmentAction/activateDepartmentAction";
 
+/** A bare id restores the department alone; the object form also names the sub-units to bring back. */
+export type ActivateDepartmentInput = string | { id: string; restoreUnitIds?: string[] };
+
 export const useActivateDepartment = () => {
   const invalidate = useInvalidateDepartmentsQuery();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const result = await activateDepartmentAction(id);
+    mutationFn: async (input: ActivateDepartmentInput) => {
+      const { id, restoreUnitIds } = typeof input === "string" ? { id: input, restoreUnitIds: undefined } : input;
+      const result = await activateDepartmentAction(id, restoreUnitIds);
       if (result.status === ActionStatus.ERROR) {
         throw new Error(result.errorMessage ?? "Failed to activate department");
       }

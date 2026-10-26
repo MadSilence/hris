@@ -46,12 +46,12 @@ const preview: StartPreview = {
     {
       templateItemId: "i1", position: 0, kind: "CHECKLIST", title: "Say hello", description: null,
       dueKind: "OFFSET", offsetDays: -7, dueDate: "2026-10-07", assigneeKind: "TARGET",
-      assigneeUserId: "p1", assigneeName: "Alan Turing", assigneeProblem: null, config: {},
+      assigneeUserId: "p1", assigneeName: "Alan Turing", assigneeProblem: null, config: {}, waitsFor: [],
     },
     {
       templateItemId: "i2", position: 1, kind: "CHECKLIST", title: "Welcome call", description: null,
       dueKind: "OFFSET", offsetDays: 1, dueDate: "2026-10-15", assigneeKind: "SPECIFIC_USER",
-      assigneeUserId: "gone", assigneeName: "Old Colleague", assigneeProblem: "LEFT", config: {},
+      assigneeUserId: "gone", assigneeName: "Old Colleague", assigneeProblem: "LEFT", config: {}, waitsFor: [],
     },
   ],
 };

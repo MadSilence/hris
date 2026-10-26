@@ -34,6 +34,13 @@ import { useActivateJobAction } from "@/components/modules/settings/modules/jobc
 import { useDeleteJobAction } from "@/components/modules/settings/modules/jobcatalog/hooks/Job/useDeleteJobAction";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 import { JOB_FAMILY_QUERY_KEY } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useJobFamily";
+import { useJobFamilyRestoreImpact } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useJobFamilyRestoreImpact";
+import {
+  RestoreWithChildrenModal,
+  useRestoreWithChildren,
+  type RestoreChild,
+} from "@/components/modules/settings/shared/RestoreWithChildrenModal";
+import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
 
 /** What the family dialog is currently doing, and to which family. */
 type FamilyDialog = { mode: JobFamilyModalMode; family: JobFamily | null };
@@ -57,6 +64,8 @@ export default function JobFamilyContainer() {
   const [focusFamilyId, setFocusFamilyId] = useState<string | null>(null);
   /** The position whose assignment modal is open, if any. */
   const [assignJob, setAssignJob] = useState<Job | null>(null);
+  /** The family whose Unarchive was pressed; the restore flow decides whether a choice is needed. */
+  const [restoreTarget, setRestoreTarget] = useState<JobFamily | null>(null);
 
   // The grade picker is only needed once a job dialog is open; fetching it with the page would
   // cost every visitor a request for a list most of them never see.
@@ -74,6 +83,38 @@ export default function JobFamilyContainer() {
   const archiveJob = useArchiveJobAction();
   const activateJob = useActivateJobAction();
   const deleteJob = useDeleteJobAction();
+
+  const restoreImpact = useJobFamilyRestoreImpact(restoreTarget?.id ?? null);
+  const restoreChildren = useMemo<RestoreChild[] | undefined>(
+    () =>
+      restoreImpact.data?.archivedJobs.map((job) => ({
+        id: job.id,
+        name: job.name,
+        detail: job.code,
+        parentId: null,
+        depth: 1,
+        archivedAt: job.archivedAt,
+        archivedWithParent: job.archivedWithFamily,
+      })),
+    [restoreImpact.data],
+  );
+  const restoreFlow = useRestoreWithChildren({
+    targetId: restoreTarget?.id ?? null,
+    impact: {
+      items: restoreChildren,
+      isFetching: restoreImpact.isFetching,
+      isError: restoreImpact.isError,
+      error: restoreImpact.error,
+    },
+    restore: async (id, restoreJobIds) => {
+      // The catalogue's hooks hand the envelope back rather than throwing; the flow wants a rejection.
+      const result = await activateFamily.mutateAsync({ id, restoreJobIds });
+      if (result.status === ActionStatus.ERROR) {
+        throw new Error(result.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+      }
+    },
+    onFinished: () => setRestoreTarget(null),
+  });
 
   const families = useMemo(() => data ?? [], [data]);
 
@@ -206,9 +247,9 @@ export default function JobFamilyContainer() {
     );
   };
 
-  const restoreFamily = async (family: JobFamily) => {
+  const restoreFamily = (family: JobFamily) => {
     setErrorMessage(null);
-    await activateFamily.mutateAsync({ id: family.id });
+    setRestoreTarget(family);
   };
 
   const restoreJob = async (job: Job) => {
@@ -307,6 +348,21 @@ export default function JobFamilyContainer() {
           {...impactProps(impactDialog)}
           onConfirmAction={confirmImpact}
           onRequestCloseAction={closeDialogs}
+        />
+      )}
+
+      {restoreTarget && restoreFlow.isDialogOpen && (
+        <RestoreWithChildrenModal
+          key={restoreTarget.id}
+          isOpen
+          title="Unarchive Job Family"
+          name={restoreTarget.name}
+          childNoun="positions"
+          items={restoreFlow.items}
+          isLoading={restoreFlow.isPending}
+          errorMessage={restoreFlow.errorMessage}
+          onConfirmAction={(ids) => void restoreFlow.confirm(ids)}
+          onCancelAction={restoreFlow.cancel}
         />
       )}
     </>

@@ -86,7 +86,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       badge: unreadCount ?? 0,
     },
     // Beside the inbox: where tasks assigned to me land, a preboarding's included once the person
-    // registers (LIFECYCLE_PROCESSES_DESIGN § 5.3). Everyone has one.
+    // registers (LIFECYCLE_PROCESSES.md § 5.3). Everyone has one.
     { label: "Tasks", href: "/tasks", Icon: ListChecks as NavItem["Icon"] },
     {
       label: "Search",

@@ -32,6 +32,7 @@ const REGISTERED_TYPES = [
   "TIMEOFF_POLICY_ASSIGNED",
   "TIMEOFF_POLICY_ENDED",
   "TIMEOFF_BALANCE_ADJUSTED",
+  "TIMEOFF_APPROVALS_DELEGATED",
   "ROLE_ASSIGNMENT_CREATED",
   "ROLE_ASSIGNMENT_REMOVED",
   "MANAGER_CHANGED",
@@ -41,10 +42,15 @@ const REGISTERED_TYPES = [
   "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT",
   "LIFECYCLE_PROCESS_STEP_FAILED",
   "LIFECYCLE_TASKS_ASSIGNED",
+  "INVITATION_FAILED",
   "ROLE_ACCESS_CHANGED",
   "ROLE_HOLDERS_CHANGED",
   "ACCOUNT_LOCKED",
   "DOCUMENT_ADDED_TO_FILE",
+  "AUTOMATION_MESSAGE",
+  "AUTOMATION_TASK_ASSIGNED",
+  "AUTOMATION_RUN_FAILED",
+  "AUTOMATION_RULE_PAUSED",
 ];
 
 describe("presentNotification", () => {
@@ -130,6 +136,153 @@ describe("presentNotification", () => {
 
       expect(view.href).toBeNull();
       expect(view.message).toMatch(/^Somebody's account was locked/);
+    });
+  });
+});
+
+describe("an approval request leads to the request itself (WALK_QUESTIONS § 7)", () => {
+  it("opens the request's own page, where the decision's context sits beside Approve and Reject", () => {
+    const p = presentNotification(notification({
+      type: "TIMEOFF_APPROVAL_REQUESTED",
+      targetType: "TIME_OFF_REQUEST",
+      targetId: "req-1",
+      params: { requesterId: "u-1", requesterName: "Ada", amount: "2" },
+    }));
+    expect(p.href).toBe("/time-off/requests/req-1");
+  });
+
+  it("falls back to the person's time off when the notification carries no request", () => {
+    const p = presentNotification(notification({ type: "TIMEOFF_APPROVAL_REQUESTED", params: { requesterId: "u-1" } }));
+    expect(p.href).toBe("/organization/people/u-1/time-off");
+  });
+});
+
+describe("a holiday drift", () => {
+  const drift = (status: string | null, open: boolean) =>
+    presentNotification(
+      notification({
+        type: "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT",
+        params: { calendarName: "Germany", year: 2027, added: 1 },
+        source: status === null ? null : { type: "PUBLIC_HOLIDAY_DRIFT", id: "d1", status, open, details: null },
+      }),
+    ).message;
+
+  it("waits for someone to apply it while it is open", () => {
+    expect(drift("OPEN", true)).toMatch(/Nothing changes until someone applies it\.$/);
+  });
+
+  // Every calendar manager holds a copy; one Apply closes them all.
+  it("says it was applied once somebody applied it", () => {
+    expect(drift("APPLIED", false)).toMatch(/It has been applied\.$/);
+  });
+
+  it("says nothing changed once it was dismissed", () => {
+    expect(drift("DISMISSED", false)).toMatch(/dismissed; nothing changed\.$/);
+  });
+});
+
+describe("a holiday conflict — the source changed days the company edited", () => {
+  const conflict = (status: string) =>
+    presentNotification(
+      notification({
+        type: "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT",
+        params: { calendarName: "Germany", year: 2027, changed: 1, conflict: true },
+        source: { type: "PUBLIC_HOLIDAY_DRIFT", id: "d1", status, open: status === "OPEN", details: null },
+      }),
+    );
+
+  it("asks about the edited days and blocks nothing while open", () => {
+    const p = conflict("OPEN");
+    expect(p.title).toBe("Your Holiday Edits Differ from the Source");
+    expect(p.message).toMatch(/changed days you edited: 1 changed\./);
+    expect(p.message).toMatch(/Your version stays in force until someone takes the source's\.$/);
+  });
+
+  it("follows the answer: kept, or taken", () => {
+    expect(conflict("DISMISSED").message).toMatch(/Your version was kept\.$/);
+    expect(conflict("APPLIED").message).toMatch(/The source's version was taken\.$/);
+  });
+});
+
+describe("approvals for somebody else", () => {
+  it("a delegate's copy of an approval request says whom it is for", () => {
+    const view = presentNotification(
+      notification({
+        type: "TIMEOFF_APPROVAL_REQUESTED",
+        params: { requesterName: "Bob Builder", amount: "2", onBehalfOfName: "Anna Approver" },
+      }),
+    );
+    expect(view.message).toMatch(/· for Anna Approver$/);
+  });
+
+  it("a delegate's copy of a cancellation request says whom it is for", () => {
+    const view = presentNotification(
+      notification({
+        type: "TIMEOFF_CANCELLATION_REQUESTED",
+        params: { requesterName: "Bob Builder", startDate: "2026-11-02", endDate: "2026-11-06", onBehalfOfName: "Anna Approver" },
+      }),
+    );
+    expect(view.message).toMatch(/asks to cancel approved time off · .+ · for Anna Approver\./);
+  });
+
+  it("the approver's own copy says nothing of the kind", () => {
+    const view = presentNotification(
+      notification({ type: "TIMEOFF_APPROVAL_REQUESTED", params: { requesterName: "Bob Builder", amount: "2" } }),
+    );
+    expect(view.message).not.toMatch(/for /);
+  });
+
+  it("a delegation tells the delegate who, when and why, and leads to their preferences", () => {
+    const view = presentNotification(
+      notification({
+        type: "TIMEOFF_APPROVALS_DELEGATED",
+        params: { delegatorName: "Anna Approver", startDate: "2026-11-02", endDate: "2026-11-06", delegationSource: "LEAVE" },
+      }),
+    );
+    expect(view.title).toBe("Approvals Delegated to You");
+    expect(view.message).toMatch(/^Anna Approver delegated their leave approvals to you · .+, while they are on leave\./);
+    expect(view.href).toBe("/preferences");
+  });
+
+  describe("automations", () => {
+    it("shows a rule's own message under the rule's name, linked to the person", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_MESSAGE", params: { ruleName: "Welcome", text: "Anna starts on Monday.", personId: "p1" } }),
+      );
+
+      expect(view.title).toBe("Welcome");
+      expect(view.message).toBe("Anna starts on Monday.");
+      expect(view.href).toBe("/organization/people/p1/personal");
+    });
+
+    it("names the task, whom it is for and the rule that set it", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_TASK_ASSIGNED", params: { taskTitle: "Prepare a desk", personName: "Anna", ruleName: "First day", dueDate: "2026-11-03" } }),
+      );
+
+      expect(view.title).toBe("A Task for You");
+      expect(view.message).toMatch(/^Prepare a desk for Anna — set by the automation First day. Due .+.$/);
+      expect(view.href).toBe("/tasks");
+    });
+
+    it("tells the author which run failed and why, and links to the rule", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_RUN_FAILED", params: { automationRuleId: "r1", ruleName: "Welcome", personName: "Anna", error: "MISSING_PLACEHOLDER: managerName" } }),
+      );
+
+      expect(view.title).toBe("Automation Failed");
+      expect(view.message).toBe("Welcome could not finish for Anna: MISSING_PLACEHOLDER: managerName. Open its run log to retry.");
+      expect(view.href).toBe("/settings/automation/automations/r1");
+    });
+
+    it("says a rule was paused and why", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_RULE_PAUSED", params: { automationRuleId: "r1", ruleName: "Berlin calendar", reason: "The calendar was archived." } }),
+      );
+
+      expect(view.title).toBe("Automation Paused");
+      expect(view.message).toBe("Berlin calendar was paused: something it uses is gone. The calendar was archived. Fix it and resume the rule.");
+      expect(view.href).toBe("/settings/automation/automations/r1");
     });
   });
 });

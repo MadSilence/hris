@@ -39,7 +39,7 @@ describe("CreateOfficeForm", () => {
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/country/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^country/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/city/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/street/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/building/i)).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe("CreateOfficeForm", () => {
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
-    await user.type(screen.getByLabelText(/country/i), "United Kingdom");
+    await user.type(screen.getByLabelText(/^country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/city/i), "London");
     await user.type(screen.getByLabelText(/street/i), "Baker Street");
     await user.type(screen.getByLabelText(/post code/i), "NW1");
@@ -95,6 +95,52 @@ describe("CreateOfficeForm", () => {
     expect(
       await screen.findByText(/please enter a building number/i),
     ).toBeInTheDocument();
+    expect(onSubmitAction).not.toHaveBeenCalled();
+  });
+
+  it("asks a remote office for its country only", async () => {
+    const user = userEvent.setup();
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction });
+
+    await user.type(screen.getByLabelText(/^name \*$/i), "Remote Germany");
+    await user.type(screen.getByLabelText(/^country/i), "Germany");
+    await user.click(screen.getByRole("checkbox", { name: /remote/i }));
+
+    // No asterisk on the address once the office is remote.
+    expect(screen.getByLabelText(/street/i)).not.toBeRequired();
+
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    await waitFor(() => {
+      expect(onSubmitAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Remote Germany",
+          country: "Germany",
+          isRemote: true,
+          city: "",
+          street: "",
+          building: "",
+          postCode: "",
+        }),
+      );
+    });
+    expect(screen.queryByText(/please enter a city/i)).not.toBeInTheDocument();
+  });
+
+  it("still requires the address once Remote is unticked", async () => {
+    const user = userEvent.setup();
+    const onSubmitAction = jest.fn();
+
+    renderForm({ onSubmitAction, initialValues: { isRemote: true } });
+
+    await user.type(screen.getByLabelText(/^name \*$/i), "Berlin");
+    await user.type(screen.getByLabelText(/^country/i), "Germany");
+    await user.click(screen.getByRole("checkbox", { name: /remote/i }));
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    expect(await screen.findByText(/please enter a city/i)).toBeInTheDocument();
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
@@ -113,7 +159,7 @@ describe("CreateOfficeForm", () => {
     renderForm({ onSubmitAction });
 
     await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
-    await user.type(screen.getByLabelText(/country/i), "United Kingdom");
+    await user.type(screen.getByLabelText(/^country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/city/i), "London");
     await user.type(screen.getByLabelText(/email/i), "wrong-email");
 
@@ -136,7 +182,7 @@ describe("CreateOfficeForm", () => {
     await user.type(screen.getByLabelText(/description/i), " Main office ");
     await user.type(screen.getByLabelText(/email/i), " office@example.com ");
     await user.type(screen.getByLabelText(/phone/i), " +44 123 ");
-    await user.type(screen.getByLabelText(/country/i), " United Kingdom ");
+    await user.type(screen.getByLabelText(/^country/i), " United Kingdom ");
     await user.type(screen.getByLabelText(/city/i), " London ");
     await user.type(screen.getByLabelText(/street/i), " Baker Street ");
     await user.type(screen.getByLabelText(/building/i), " 221B ");
@@ -150,6 +196,7 @@ describe("CreateOfficeForm", () => {
         description: "Main office",
         email: "office@example.com",
         phone: "+44 123",
+        isRemote: false,
         country: "United Kingdom",
         city: "London",
         street: "Baker Street",
@@ -168,7 +215,7 @@ describe("CreateOfficeForm", () => {
     // The whole address is filled because the whole address is required — the backend marks it
     // `@NotBlank`, and this test used to submit a payload the API would have refused.
     await user.type(screen.getByLabelText(/^name \*$/i), "London HQ");
-    await user.type(screen.getByLabelText(/country/i), "United Kingdom");
+    await user.type(screen.getByLabelText(/^country/i), "United Kingdom");
     await user.type(screen.getByLabelText(/street/i), "Baker Street");
     await user.type(screen.getByLabelText(/building/i), "221B");
     await user.type(screen.getByLabelText(/post code/i), "NW1");
@@ -204,7 +251,7 @@ describe("CreateOfficeForm", () => {
     expect(screen.getByLabelText(/description/i)).toHaveValue("Main office");
     expect(screen.getByLabelText(/email/i)).toHaveValue("office@example.com");
     expect(screen.getByLabelText(/phone/i)).toHaveValue("+44 123");
-    expect(screen.getByLabelText(/country/i)).toHaveValue("United Kingdom");
+    expect(screen.getByLabelText(/^country/i)).toHaveValue("United Kingdom");
     expect(screen.getByLabelText(/city/i)).toHaveValue("London");
     expect(screen.getByLabelText(/street/i)).toHaveValue("Baker Street");
     expect(screen.getByLabelText(/building/i)).toHaveValue("221B");
@@ -250,7 +297,7 @@ describe("CreateOfficeForm", () => {
     expect(screen.getByLabelText(/description/i)).toBeDisabled();
     expect(screen.getByLabelText(/email/i)).toBeDisabled();
     expect(screen.getByLabelText(/phone/i)).toBeDisabled();
-    expect(screen.getByLabelText(/country/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^country/i)).toBeDisabled();
     expect(screen.getByLabelText(/city/i)).toBeDisabled();
     expect(screen.getByLabelText(/street/i)).toBeDisabled();
     expect(screen.getByLabelText(/building/i)).toBeDisabled();

@@ -31,6 +31,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   O00006: "This office is already archived.",
   O00007: "This office is already active.",
   O00008: "An archived office cannot be changed. Restore it first.",
+  O00009: "An office that is not remote needs a city, street, building and post code.",
 
   // AssignmentEngineBusinessError
   ASGN002: "That item could not be found in this company.",
@@ -119,6 +120,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00003: "Invalid working day (expected a day-of-week name)",
   CS00004: "Invalid week start day (expected a day-of-week name)",
   CS00005: "Enter the length of a working day between 0:01 and 24:00.",
+  CS00006: "Pick a money field for the hourly rate, or None.",
 
   // CompanySetupBusinessError
   CST0001: "This company has already been set up.",
@@ -141,6 +143,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   DEPT012: "An archived department cannot be changed. Restore it first.",
   DEPT013: "Move target department not found",
   DEPT014: "People cannot be moved into an archived department.",
+  DEPT015: "One of the chosen sub-departments is not an archived part of this department. Reopen the dialog and choose again.",
+  DEPT016: "A sub-department can only come back with its parent. Choose its parent too, or leave both archived.",
 
   // DocumentBusinessError
   D00001: "Document not found",
@@ -199,6 +203,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   JF00003: "This job family is already archived.",
   JF00004: "This job family is not archived, so there is nothing to restore.",
   JF00005: "An archived job family cannot take new positions.",
+  JF00006: "One of the chosen positions is not an archived position of this family. Reopen the dialog and choose again.",
   JG00001: "A track with this name already exists.",
   JL00001: "A level with this name already exists in this track.",
   JL00004: "The levels changed while you were reordering them. Refresh the page and try again.",
@@ -226,6 +231,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PH00008: "Holidays cannot be changed in an archived calendar.",
   PH00009: "The holiday cannot end before it starts.",
   PH00010: "This holiday overlaps another one in the calendar.",
+  PH00011: "This day is already the provider's version. Refresh the page.",
+  PH00012: "This calendar comes from where the person works. Give them a calendar of their own instead of removing it.",
+  PH00013: "An archived calendar cannot be given to a place. Restore it first.",
+  PH00014: "An archived office or legal entity cannot be given a holiday calendar.",
 
   // PublicHolidayCalendarBusinessError
   PHC00001: "This calendar no longer exists. Refresh the page.",
@@ -294,6 +303,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TEAM013: "Move target team not found",
   TEAM014: "People cannot be moved into an archived team.",
   TEAM015: "User is not a member of this team",
+  TEAM016: "One of the chosen sub-teams is not an archived part of this team. Reopen the dialog and choose again.",
+  TEAM017: "A sub-team can only come back with its parent. Choose its parent too, or leave both archived.",
 
   // TimeOffPolicyAccrualBusinessError
   TOPAC001: "Time off policy not found",
@@ -308,6 +319,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOPAS00005: "The number of approvals required has to be between one and the number of approvers.",
   TOPAS00006: "Approval settings cannot be modified on an archived policy",
   TOPAS00007: "approvalOrder is required and must be a positive integer",
+  TOPAS00008: "That role no longer exists. Choose another fallback approver.",
 
   // TimeOffPolicyAssignmentBusinessError
   TOPAA00001: "Time off policy assignment not found",
@@ -490,6 +502,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
 
   // TimeOffRequestBusinessError
   TORQ00041: "Leave cannot be taken on {0}.",
+  TORQ00042: "Only somebody who manages this person's time off can decide over the approval chain.",
+  TORQ00043: "Choose somebody else who works here and can sign in.",
+  TORQ00044: "Choose a start and an end date, the end on or after the start and not in the past.",
+  TORQ00045: "This delegation no longer exists. Refresh the page.",
 
   // --- Codes that had no entry at all -----------------------------------------------------------
 
@@ -527,6 +543,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00029: "This office is archived and cannot take new people. Choose another one.",
   U00030: "This legal entity is archived and cannot take new people. Choose another one.",
   U00031: "This person has left the company and cannot be placed in an office or legal entity.",
+  U00032: "This change is no longer scheduled. It may have taken effect or been cancelled already.",
+  U00033: "This change follows another date. Change that date to move or stop it.",
+  U00034: "The date of this change cannot be changed here.",
+  U00035: "Choose a date that is still ahead.",
+  U00036: "Somebody you chose cannot take these decisions: choose a colleague who works here and can sign in.",
 
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",
@@ -535,6 +556,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LC00004: "A task in this template is incomplete: {0}.",
   LC00005: "This template has been used to start a process and cannot be deleted. Archive it instead.",
   LC00006: "An archived template cannot be used or changed. Unarchive it first.",
+  LC00007: "These tasks wait for each other in a circle, so none of them would ever open: {0}. Remove one of the arrows.",
   LC00010: "That process could not be found.",
   LC00011: "This person already has a preboarding.",
   LC00012: "A hire date is needed to start this process.",
@@ -553,6 +575,26 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LC00032: "This task is no longer open.",
   LC00033: "This task is assigned to somebody else.",
   LC00034: "This person has an unfinished preboarding. Choose whether to keep it or end it.",
+  LC00035: "This task is waiting for another task to be done first.",
+
+  // AutomationBusinessError — Settings → Automation and the live assignment rules.
+  AU00001: "That automation could not be found.",
+  AU00002: "An automation needs a name.",
+  AU00003: "The trigger is not finished yet: {0}.",
+  AU00004: "One of the actions is not finished yet: {0}.",
+  AU00005: "{0} is not a placeholder this text can use. Insert one from the list under the field.",
+  AU00006: "Something this automation uses no longer exists or is archived: {0}. Choose another one.",
+  AU00007: "Somebody published a newer version of this automation while you were editing. Reload the page to see it.",
+  AU00008: "An archived automation cannot be changed. Unarchive it first.",
+  AU00009: "This cannot be done while the automation is {0}. Reload the page to see where it stands.",
+  AU00010: "This automation still uses something that is gone: {0}. Fix it and publish before resuming.",
+  AU00011: "This automation has already run for somebody, so it cannot be deleted. Archive it instead.",
+  AU00012: "That run could not be found.",
+  AU00013: "Only a failed run can be retried, and only a scheduled one cancelled.",
+  AU00014: "No enabled automation sets this for this person, so there is no rule to return to.",
+  AU00015: "{0} cannot be assigned by an automation.",
+  AU00016: "This automation is a place's Holiday Calendar. Change it on that office, legal entity or the public holidays page.",
+  AU00020: "You cannot set up an automation that does this, because you could not do it by hand: {0}.",
 
   // AttendanceBusinessError — logged time, its reads and the work schedule editor.
   ATD00001: "Enter a start and an end on the same day, the end later than the start.",
@@ -562,6 +604,47 @@ export const ERROR_MESSAGES: Record<string, string> = {
   ATD00006: "Choose a range that runs forwards and covers at most {0} days.",
   ATD00011: "A schedule already starts on this date. Choose another date.",
   ATD00012: "Scheduled hours must be between 0 and 24 on every day.",
+
+  // PeopleImportBusinessError — the file (IMP000xx), the import (IMP001xx), a cell (IMP002xx).
+  IMP00001: "The file is empty.",
+  IMP00002: "The file is larger than {0} MB. Split it, or save it as XLSX, which is smaller.",
+  IMP00003: "The file has more than {0} people. Split it into smaller files.",
+  IMP00004: "Only .csv and .xlsx files can be imported. Save the file in one of those formats.",
+  IMP00005: "The CSV file is not UTF-8. Save it again as “CSV UTF-8”, or as XLSX.",
+  IMP00006: "The file could not be read. Check that it opens in a spreadsheet, and that it is not password-protected.",
+  IMP00007: "The first row of the file must name the columns.",
+  IMP00008: "The file has a header row and no people under it.",
+  IMP00101: "That import could not be found.",
+  IMP00102: "This import has already been applied or discarded. Start a new one.",
+  IMP00103: "Another import is running in this company. Wait for it to finish.",
+  IMP00104: "The file has errors. Fix them and check it again before importing.",
+  IMP00105: "Importing people needs the right to edit profiles across the whole company.",
+  IMP00106: "One of the chosen fields no longer exists ({0}). Reload the page.",
+  IMP00107: "{0} is chosen for more than one column. Choose it for one.",
+  IMP00108: "Choose the columns for First name and Last name.",
+  IMP00109: "You do not have permission to fill {0}.",
+  IMP00110: "Sending invitations needs the right to manage profiles.",
+  IMP00111: "The file has no column {0}.",
+  IMP00112: "The import has not finished yet.",
+  IMP00201: "{0} is required.",
+  IMP00202: "“{0}” is not a date written as {1}.",
+  IMP00203: "“{0}” is not a number.",
+  IMP00204: "“{0}” is not an email address.",
+  IMP00205: "{0} already belongs to somebody in the company. An import only creates people.",
+  IMP00206: "{0} is in more than one row ({1}).",
+  IMP00207: "There is no {0} called “{1}”. Create it first, or correct the name.",
+  IMP00208: "The {0} “{1}” is archived. Restore it, or choose another.",
+  IMP00209: "“{0}” is not one of the options of {1}.",
+  IMP00210: "“{0}” is not Yes or No.",
+  IMP00211: "Nobody in the company or in this file has the email {0}.",
+  IMP00212: "The manager {0} is in row {1}, which has errors. Fix that row first.",
+  IMP00213: "A person cannot be their own manager.",
+  IMP00214: "These people would be each other’s managers: {0}.",
+  IMP00215: "“{0}” is in more than one row, and {1} must be unique.",
+  IMP00216: "{0} cannot be imported from a file.",
+  IMP00217: "This row could not be created: {0}",
+  IMP00218: "The person was created, but their manager could not be set: {0}",
+  IMP00219: "“{0}” is not a whole number, and {1} takes whole numbers only.",
 };
 
 /**

@@ -67,7 +67,7 @@ export const StatusBadge: React.FC<{
  * **`Pending` and `Archived` used to render identically** — both fell through to a grey `secondary`
  * with no colour — which is worse than either choice on its own, since they mean opposite things.
  * `Pending` is gone: somebody who has not started yet is `PROSPECTIVE`, labelled *Not Started*, and
- * drawn as the neutral state rather than the archived one (LIFECYCLE_PROCESSES_DESIGN § 2.2).
+ * drawn as the neutral state rather than the archived one (LIFECYCLE_PROCESSES.md § 2.2).
  */
 export const UserStatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
   if (!status) return null;

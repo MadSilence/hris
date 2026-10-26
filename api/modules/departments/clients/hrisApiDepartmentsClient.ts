@@ -9,6 +9,8 @@ import type {
   MoveDepartmentRequest,
   DeleteDepartmentRequest,
   ArchiveDepartmentRequest,
+  ActivateDepartmentRequest,
+  DepartmentRestoreImpactDTO,
 } from "@/api/modules/departments/dto";
 import { departmentMapper } from "@/api/modules/departments/mappers";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -88,8 +90,17 @@ export class HrisApiDepartmentsClient {
     );
   }
 
-  public async activate(id: string): Promise<UpdateResponse> {
-    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/activate`);
+  public async activate(id: string, body?: ActivateDepartmentRequest): Promise<UpdateResponse> {
+    // No body at all when nothing is chosen: the backend reads that as "the department alone", as before.
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/activate`,
+      body?.restoreUnitIds?.length ? { restoreUnitIds: body.restoreUnitIds } : undefined,
+    );
+  }
+
+  /** The archived sub-units that could come back with this department, in tree order. */
+  public async restoreImpact(id: string): Promise<DepartmentRestoreImpactDTO> {
+    return hrisApiClient.get<DepartmentRestoreImpactDTO>(`${this.BASE_PATH}/${id}/restore-impact`);
   }
 
   public async delete(id: string, body: DeleteDepartmentRequest): Promise<void> {

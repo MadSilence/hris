@@ -151,6 +151,14 @@ export type PolicyWizardValues = {
   /** Only for N_OF_M: how many of the listed approvers have to sign. */
   apprRequiredCount: string;
   apprApprovers: WizardApprover[];
+  /**
+   * Whose holders decide a step that resolves to nobody (a leaver, an empty manager step, an approver
+   * away with nobody standing in). `apprFallbackDefault`: not chosen yet on settings being created —
+   * nothing is sent and the backend gives the HR Admin role when the company has one.
+   */
+  apprFallbackDefault: boolean;
+  apprFallbackRoleId: string | null;
+  apprFallbackRoleName: string | null;
 
   // Eligibility (eligibility)
   eligEnabled: boolean;
@@ -238,6 +246,9 @@ export const defaultPolicyWizardValues: PolicyWizardValues = {
   apprMode: "ALL",
   apprRequiredCount: "1",
   apprApprovers: [{ type: TimeOffPolicyApproverType.Manager, user: null }],
+  apprFallbackDefault: true,
+  apprFallbackRoleId: null,
+  apprFallbackRoleName: null,
 
   eligEnabled: false,
   eligDelayValue: "",
@@ -527,10 +538,11 @@ export function buildApprovalRequest(
     approvalMode: v.apprMode,
     requiredApprovalsCount:
       v.apprMode === "N_OF_M" ? toNumber(v.apprRequiredCount) ?? 1 : null,
-    // Substitutes need a delegation model that does not exist, so the setting is carried unchanged
-    // rather than offered: the wizard no longer shows a switch for it. See DECISIONS.md
-  // "A setting that is offered must work — and the corollary".
-    allowSubstituteApprovers: false,
+    // The fallback role: a chosen one, "none" said explicitly, or — not chosen on settings being
+    // created — nothing, and the backend gives the HR Admin role. (allowSubstituteApprovers went:
+    // delegation is always allowed, so there is no switch for it.)
+    fallbackRoleId: v.apprFallbackDefault ? null : v.apprFallbackRoleId,
+    ...(v.apprFallbackDefault || v.apprFallbackRoleId ? {} : { noFallbackRole: true }),
     approvers: v.apprApprovers.map((a, i) => ({
       approverType: a.type,
       approverUserId:
@@ -737,6 +749,9 @@ export function policyToWizardValues(
           user: a.approverUserId ? { id: a.approverUserId } : null,
         }))
       : d.apprApprovers,
+    apprFallbackDefault: !approval?.configured,
+    apprFallbackRoleId: approval?.configured ? approval.fallbackRoleId ?? null : null,
+    apprFallbackRoleName: approval?.configured ? approval.fallbackRoleName ?? null : null,
 
     // Eligibility
     eligEnabled: eligibility?.eligibilityDelayEnabled ?? d.eligEnabled,

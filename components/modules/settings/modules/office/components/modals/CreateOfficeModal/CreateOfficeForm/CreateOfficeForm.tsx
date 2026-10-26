@@ -5,6 +5,7 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
 import { Button } from "@/public/desact/src/components/ui/button";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
@@ -16,6 +17,8 @@ export type CreateOfficeFormValues = {
   description: string;
   email: string;
   phone: string;
+  /** People here work from anywhere in the office's country: no postal address is asked for. */
+  isRemote: boolean;
   country: string;
   city: string;
   street: string;
@@ -45,15 +48,29 @@ const createOfficeSchema = yup.object({
   description: yup.string().trim().max(1000).optional(),
   email: yup.string().trim().email().max(320).optional(),
   phone: yup.string().trim().max(120).optional(),
+  isRemote: yup.boolean(),
+  // The country always: a remote office is "anywhere in" it, and it is bound to that country's calendar.
   country: yup.string().trim().required("Please enter a country.").max(120),
-  city: yup.string().trim().required("Please enter a city.").max(120),
-  // Required because the backend requires them: `OfficeCreateRequest` marks the whole address
-  // `@NotBlank`. They used to be optional here and labelled "Optional", so a submit without a
-  // building number came back as "check the highlighted fields" with nothing highlighted.
-  street: yup.string().trim().required("Please enter a street.").max(200),
-  building: yup.string().trim().required("Please enter a building number.").max(50),
-  postCode: yup.string().trim().required("Please enter a post code.").max(50),
+  // The postal address is required exactly when the backend requires it — of an office that is not
+  // remote (`OfficeAddress`, O00009). It was once optional here while the API required it, so a submit
+  // without a building number came back as "check the highlighted fields" with nothing highlighted.
+  city: addressPart("Please enter a city.", 120),
+  street: addressPart("Please enter a street.", 200),
+  building: addressPart("Please enter a building number.", 50),
+  postCode: addressPart("Please enter a post code.", 50),
 });
+
+function addressPart(message: string, max: number) {
+  return yup
+    .string()
+    .trim()
+    .max(max)
+    .when("isRemote", {
+      is: true,
+      then: (schema) => schema.optional(),
+      otherwise: (schema) => schema.required(message),
+    });
+}
 
 const getInitialValues = (
   initialValues?: Partial<CreateOfficeFormValues>,
@@ -62,6 +79,7 @@ const getInitialValues = (
   description: initialValues?.description ?? "",
   email: initialValues?.email ?? "",
   phone: initialValues?.phone ?? "",
+  isRemote: initialValues?.isRemote ?? false,
   country: initialValues?.country ?? "",
   city: initialValues?.city ?? "",
   street: initialValues?.street ?? "",
@@ -76,6 +94,7 @@ const sanitize = (
   description: values.description.trim(),
   email: values.email.trim(),
   phone: values.phone.trim(),
+  isRemote: values.isRemote,
   country: values.country.trim(),
   city: values.city.trim(),
   street: values.street.trim(),
@@ -208,13 +227,29 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 />
               </div>
             </div>
+
+            {/* The same field and words as the office page's own Remote checkbox. */}
+            <div className="space-y-2">
+              <Label htmlFor="office-remote">Remote</Label>
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <Checkbox
+                  id="office-remote"
+                  checked={formik.values.isRemote}
+                  onCheckedChange={(c) => formik.setFieldValue("isRemote", c === true)}
+                  disabled={isLoading}
+                />
+                People here work from anywhere in the office&apos;s country
+              </label>
+            </div>
           </div>
 
           {/* SECTION: ADDRESS */}
           <div className="mb-4">
             <h3 className="text-sm font-semibold">Address</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Physical location of the office.
+              {formik.values.isRemote
+                ? "A remote office needs only its country; the rest of the address is optional."
+                : "Physical location of the office."}
             </p>
           </div>
 
@@ -239,7 +274,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-city" required>City</RequiredLabel>
+                <RequiredLabel htmlFor="office-city" required={!formik.values.isRemote}>City</RequiredLabel>
                 <Input
                   id="office-city"
                   value={formik.values.city}
@@ -259,14 +294,14 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-street" required>Street</RequiredLabel>
+                <RequiredLabel htmlFor="office-street" required={!formik.values.isRemote}>Street</RequiredLabel>
                 <Input
                   id="office-street"
                   value={formik.values.street}
                   onChange={(e) =>
                     formik.setFieldValue("street", e.currentTarget.value)
                   }
-                  required
+                  required={!formik.values.isRemote}
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.street}
                 />
@@ -276,14 +311,14 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-building" required>Building</RequiredLabel>
+                <RequiredLabel htmlFor="office-building" required={!formik.values.isRemote}>Building</RequiredLabel>
                 <Input
                   id="office-building"
                   value={formik.values.building}
                   onChange={(e) =>
                     formik.setFieldValue("building", e.currentTarget.value)
                   }
-                  required
+                  required={!formik.values.isRemote}
                   disabled={isLoading}
                   aria-invalid={!!shownErrors.building}
                 />
@@ -294,14 +329,14 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="office-post-code" required>Post Code</RequiredLabel>
+              <RequiredLabel htmlFor="office-post-code" required={!formik.values.isRemote}>Post Code</RequiredLabel>
               <Input
                 id="office-post-code"
                 value={formik.values.postCode}
                 onChange={(e) =>
                   formik.setFieldValue("postCode", e.currentTarget.value)
                 }
-                required
+                required={!formik.values.isRemote}
                 disabled={isLoading}
                 aria-invalid={!!shownErrors.postCode}
               />

@@ -2,7 +2,13 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiPeopleViewsService } from "@/api/modules/peopleViews/services/hrisApiPeopleViewsService";
-import type { PeopleView, ViewPayload } from "@/models/peopleView";
+import type {
+  PeopleView,
+  PeopleViewShare,
+  ShareGrantee,
+  SharePermission,
+  ViewPayload,
+} from "@/models/peopleView";
 import { toActionError } from "@/lib/errors/withActionError";
 
 export type ViewActionResult<T> = {
@@ -54,10 +60,35 @@ export async function deleteViewAction(id: string): Promise<ViewActionResult<voi
   }
 }
 
-export async function shareViewAction(payload: ViewPayload): Promise<ViewActionResult<{ token: string }>> {
+export async function shareViewAction(
+  viewId: string,
+  grantees: ShareGrantee[],
+): Promise<ViewActionResult<PeopleViewShare[]>> {
   try {
-    const data = await hrisApiPeopleViewsService.share(payload);
+    const data = await hrisApiPeopleViewsService.share(viewId, grantees);
     return { status: ActionStatus.SUCCESS, data };
+  } catch (error) {
+    return toActionError(error, "peopleViewActions");
+  }
+}
+
+export async function updateViewShareAction(
+  viewId: string,
+  shareId: string,
+  permission: SharePermission,
+): Promise<ViewActionResult<PeopleViewShare>> {
+  try {
+    const data = await hrisApiPeopleViewsService.updateShare(viewId, shareId, permission);
+    return { status: ActionStatus.SUCCESS, data };
+  } catch (error) {
+    return toActionError(error, "peopleViewActions");
+  }
+}
+
+export async function unshareViewAction(viewId: string, shareId: string): Promise<ViewActionResult<void>> {
+  try {
+    await hrisApiPeopleViewsService.unshare(viewId, shareId);
+    return { status: ActionStatus.SUCCESS };
   } catch (error) {
     return toActionError(error, "peopleViewActions");
   }

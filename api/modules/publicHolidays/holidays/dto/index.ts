@@ -3,3 +3,4 @@ export * from "./PublicHolidayDTO";
 export * from "./PublicHolidayOrigin";
 export * from "./PublicHolidayType";
 export * from "./ReplaceYearHolidaysRequest";
+export * from "./PublicHolidayOverrideDTO";

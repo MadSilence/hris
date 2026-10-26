@@ -14,6 +14,7 @@ import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import { Separator } from "@/public/desact/src/components/ui/separator";
+import { HolidayCalendarBindingSection } from "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import LegalEntityAssignedUsersTab from "@/components/modules/settings/modules/legalEntity/components/LegalEntityAssignedUsersTab/LegalEntityAssignedUsersTab";
 import { useLegalEntity } from "@/components/modules/settings/modules/legalEntity/hooks/useLegalEntity";
@@ -409,6 +410,15 @@ export default function LegalEntityDetailsContainer({
           />
         </div>
       </div>
+
+      <Separator/>
+
+      <HolidayCalendarBindingSection
+        kind="LEGAL_ENTITY"
+        refId={entity.id}
+        placeName={entity.name}
+        readOnly={isArchived}
+      />
             </div>
           </div>
         </TabsContent>

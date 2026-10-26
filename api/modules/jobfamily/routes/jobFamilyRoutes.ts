@@ -10,6 +10,11 @@ export class JobFamilyRoutes {
     return Response.json(jobFamilies);
   }
 
+  public async getRestoreImpact(id: string) {
+    const impact = await this.service.getRestoreImpact(id);
+    return Response.json(impact);
+  }
+
   /** Binary passthrough — the only transport that can stream the spreadsheet back. */
   public async exportJobCatalog(req: Request) {
     const backendResponse = await this.service.exportJobCatalog(formatOf(req));

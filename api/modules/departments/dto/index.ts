@@ -15,3 +15,5 @@ export type {
   DepartmentArchiveChildrenStrategy,
   DepartmentArchiveMembersStrategy,
 } from "./ArchiveDepartmentRequest";
+export type { ArchivedDepartmentUnitDTO, DepartmentRestoreImpactDTO } from "./DepartmentRestoreImpactDTO";
+export type { ActivateDepartmentRequest } from "./ActivateDepartmentRequest";

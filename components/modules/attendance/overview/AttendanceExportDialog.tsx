@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { format } from "date-fns";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
   Dialog,
@@ -14,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FormError } from "@/components/feedback/FormError";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { isoToDate } from "@/lib/date";
+import { formatDisplayDate } from "@/lib/date";
 import {
   ExportDataForm,
   type ExportDataFormValues,
@@ -23,8 +22,8 @@ import { triggerExportPostDownload } from "@/components/modules/settings/shared/
 import type { AttendanceExportRequest, AttendanceReportRow } from "@/models/attendance";
 import type { FieldDTO } from "@/models/user/fields";
 import type { AttendanceView } from "./useAttendanceView";
-import { ATTENDANCE_COLUMNS, personName } from "./AttendanceTable";
-import { describeFilter } from "./describeFilters";
+import { attendanceColumns, personName } from "./AttendanceTable";
+import { FilterBadge } from "./FilterBadge";
 
 const PREVIEW_ROWS = 5;
 
@@ -40,7 +39,7 @@ type Props = {
 };
 
 const periodLabel = (from: string, to: string) =>
-  `${format(isoToDate(from), "MMM d, yyyy")} – ${format(isoToDate(to), "MMM d, yyyy")}`;
+  `${formatDisplayDate(from, { style: "medium" })} – ${formatDisplayDate(to, { style: "medium" })}`;
 
 /**
  * Export what the overview shows. Before the file is made, the dialog says what it will be made from
@@ -80,6 +79,8 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
 
   const search = view.query.trim().length >= 2 ? view.query.trim() : null;
   const preview = rows.slice(0, PREVIEW_ROWS);
+  const columns = attendanceColumns(preview);
+  const money = columns.some((column) => column.key === "amount");
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
@@ -108,7 +109,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
             <dd className="flex min-w-0 flex-1 flex-wrap gap-1.5">
               {view.filters.length
                 ? view.filters.map((filter, index) => (
-                  <Badge key={index} variant="secondary" className="font-normal">{describeFilter(filter, fields)}</Badge>
+                  <FilterBadge key={index} filter={filter} fields={fields} />
                 ))
                 : <span className="text-muted-foreground">None — everyone in your reach</span>}
             </dd>
@@ -121,7 +122,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[28%]">Name</TableHead>
-                  {ATTENDANCE_COLUMNS.map((column) => (
+                  {columns.map((column) => (
                     <TableHead key={column.key} className="text-right">{column.label}</TableHead>
                   ))}
                 </TableRow>
@@ -130,7 +131,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
                 {preview.map((row) => (
                   <TableRow key={row.person.id} className="hover:bg-transparent">
                     <TableCell className="truncate">{personName(row.person)}</TableCell>
-                    {ATTENDANCE_COLUMNS.map((column) => (
+                    {columns.map((column) => (
                       <TableCell key={column.key} className="text-right tabular-nums">{column.value(row)}</TableCell>
                     ))}
                   </TableRow>
@@ -147,7 +148,9 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
 
         <ExportDataForm
           isLoading={busy}
-          includedText="Included: the summary — name, email, status and the five numbers — and every logged entry with its date, times, hours, description and a note on days without a norm."
+          includedText={money
+            ? "Included: the summary — name, email, status, the five numbers and the amount owed with its currency — and every logged entry with its date, times, hours, description, a note on days without a norm, and the rate it was logged at."
+            : "Included: the summary — name, email, status and the five numbers — and every logged entry with its date, times, hours, description and a note on days without a norm."}
           rowCount={total ?? undefined}
           rowNoun={total === 1 ? "person" : "people"}
           onCancelAction={close}

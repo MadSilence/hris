@@ -33,6 +33,11 @@ export class DepartmentsRoutes {
     return Response.json(data);
   }
 
+  public async restoreImpact(_req: Request, id: string) {
+    const data = await hrisDepartmentsService.restoreImpact(id);
+    return Response.json(data);
+  }
+
   public async exportTree(req: Request, id: string) {
     const url = new URL(req.url);
     const backendResponse = await hrisDepartmentsService.exportTree(id, {

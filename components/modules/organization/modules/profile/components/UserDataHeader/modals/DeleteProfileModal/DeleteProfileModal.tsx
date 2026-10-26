@@ -61,8 +61,12 @@ export const DeleteProfileModal: FC<Props> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="text-danger-600">Delete Profile</AlertDialogTitle>
           <AlertDialogDescription>
-            This deletes <strong>{fullName}</strong> and their history, and cannot be undone. If they
-            are leaving, terminate the employment instead: that keeps the record and ends their access.
+            This deletes <strong>{fullName}</strong> and their history, and cannot be undone.
+            {/* Only while Terminate is on offer: for a person already terminated the advice points at
+                a button that is not there (WALK_QUESTIONS § 17). */}
+            {onTerminateInstead
+              ? " If they are leaving, terminate the employment instead: that keeps the record and ends their access."
+              : null}
           </AlertDialogDescription>
         </AlertDialogHeader>
 

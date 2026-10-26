@@ -13,6 +13,11 @@ export interface TimeOffPolicyApprovalSettings {
   approvalMode: "SEQUENTIAL" | "ALL" | "N_OF_M";
   /** Only for N_OF_M. */
   requiredApprovalsCount: number | null;
-  allowSubstituteApprovers: boolean;
+  /**
+   * Whose holders decide a step that resolves to nobody — a leaver, an empty manager step, an approver
+   * away with nobody standing in. Null: no fallback, which the settings warn about.
+   */
+  fallbackRoleId: string | null;
+  fallbackRoleName: string | null;
   approvers: TimeOffPolicyApprover[];
 }

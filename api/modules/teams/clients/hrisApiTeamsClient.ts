@@ -9,6 +9,8 @@ import type {
   MoveTeamRequest,
   DeleteTeamRequest,
   ArchiveTeamRequest,
+  ActivateTeamRequest,
+  TeamRestoreImpactDTO,
 } from "@/api/modules/teams/dto";
 import { teamMapper } from "@/api/modules/teams/mappers";
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
@@ -79,8 +81,17 @@ export class HrisApiTeamsClient {
     );
   }
 
-  public async activate(id: string): Promise<UpdateResponse> {
-    return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/activate`);
+  public async activate(id: string, body?: ActivateTeamRequest): Promise<UpdateResponse> {
+    // No body at all when nothing is chosen: the backend reads that as "the team alone", as before.
+    return hrisApiClient.post<UpdateResponse>(
+      `${this.BASE_PATH}/${id}/activate`,
+      body?.restoreUnitIds?.length ? { restoreUnitIds: body.restoreUnitIds } : undefined,
+    );
+  }
+
+  /** The archived sub-units that could come back with this team, in tree order. */
+  public async restoreImpact(id: string): Promise<TeamRestoreImpactDTO> {
+    return hrisApiClient.get<TeamRestoreImpactDTO>(`${this.BASE_PATH}/${id}/restore-impact`);
   }
 
   public async delete(id: string, body: DeleteTeamRequest): Promise<void> {

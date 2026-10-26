@@ -27,6 +27,18 @@ export type ActivityLogEntry = {
   userAgent: string | null;
   traceId: string | null;
   metadata: Record<string, unknown> | null;
+  /**
+   * What the row names by id — an office, a policy, a manager — by its name today, or by the name the row
+   * kept when it was written once it is gone (`gone`). WALK_QUESTIONS § 4. Absent on older answers.
+   */
+  mentions?: ActivityLogMention[];
+};
+
+export type ActivityLogMention = {
+  key: string;
+  id: string;
+  name: string | null;
+  gone: boolean;
 };
 
 export type ActivityLogPage = {

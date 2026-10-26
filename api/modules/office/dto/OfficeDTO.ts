@@ -7,11 +7,13 @@ export type OfficeDTO = {
   isSystem: boolean;
   archived: boolean;
   archivedAt?: string | null;
+  isRemote?: boolean;
   country: string;
-  city: string;
-  street: string;
-  building: string;
-  postCode: string;
+  /** Null for a remote office that has no postal address. */
+  city?: string | null;
+  street?: string | null;
+  building?: string | null;
+  postCode?: string | null;
   assignedUsersCount?: number;
 
   createdAt: string;

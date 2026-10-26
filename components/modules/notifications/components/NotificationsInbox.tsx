@@ -204,9 +204,14 @@ export const NotificationsInbox: FC = () => {
       <section className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-brown-900">Inbox</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {counts.unread > 0 ? `${counts.unread} unread` : "You're all caught up"}
-          </p>
+          {/* Nothing is known before the first answer, so the line says nothing rather than "caught up". */}
+          {isLoading ? (
+            <div aria-hidden className="mt-2 h-4 w-28 animate-pulse rounded bg-brown-100" />
+          ) : (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {counts.unread > 0 ? `${counts.unread} unread` : "You're all caught up"}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button

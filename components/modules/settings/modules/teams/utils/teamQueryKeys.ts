@@ -7,4 +7,5 @@ export const teamQueryKeys = {
   people: () => [TEAMS_QUERY_KEY, "people"] as const,
   summary: (includeArchived: boolean) =>
     [TEAMS_QUERY_KEY, "summary", includeArchived] as const,
+  restoreImpact: (id: string | null) => [TEAMS_QUERY_KEY, "restore-impact", id] as const,
 };

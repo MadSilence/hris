@@ -3,8 +3,9 @@ import {
   PublicHolidayOrigin,
   PublicHolidayType,
   type PublicHolidayDTO,
+  type PublicHolidayOverrideDTO,
 } from "@/api/modules/publicHolidays/holidays/dto";
-import { PublicHoliday } from "@/models/publicHolidays/holiday";
+import { PublicHoliday, PublicHolidayOverride } from "@/models/publicHolidays/holiday";
 
 export class PublicHolidayMapper {
   public mapPublicHolidayDTO(dto: PublicHolidayDTO): PublicHoliday {
@@ -23,6 +24,21 @@ export class PublicHolidayMapper {
 
   public mapPublicHolidayDTOs(dtos: PublicHolidayDTO[]): PublicHoliday[] {
     return dtos.map((dto) => this.mapPublicHolidayDTO(dto));
+  }
+
+  public mapPublicHolidayOverrideDTO(dto: PublicHolidayOverrideDTO): PublicHolidayOverride {
+    return {
+      ...dto,
+      holidayId: dto.holidayId ?? null,
+      providerName: dto.providerName ?? null,
+      providerHolidayDate: dto.providerHolidayDate ?? null,
+      providerEndDate: dto.providerEndDate ?? dto.providerHolidayDate ?? null,
+      providerType: dto.providerType ?? null,
+    };
+  }
+
+  public mapPublicHolidayOverrideDTOs(dtos: PublicHolidayOverrideDTO[]): PublicHolidayOverride[] {
+    return dtos.map((dto) => this.mapPublicHolidayOverrideDTO(dto));
   }
 }
 

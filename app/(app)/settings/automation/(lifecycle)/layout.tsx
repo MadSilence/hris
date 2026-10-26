@@ -50,7 +50,7 @@ const tabs: Tab[] = [
     href: "/settings/automation/offboarding",
     icon: UserMinus,
     // What the "Offboarding" settings entry was gated by before it became a tab; offboarding
-    // templates are not built — the design defers them (technical_design/LIFECYCLE_PROCESSES_DESIGN.md).
+    // templates are not built — the design defers them (technical_documentation/LIFECYCLE_PROCESSES.md).
     resource: "SETTINGS.GENERAL",
     title: "Offboarding",
     description:

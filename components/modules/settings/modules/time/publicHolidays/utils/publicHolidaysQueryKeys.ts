@@ -53,3 +53,23 @@ export const getPublicHolidayTemplateRegionsQueryKey = (
   "regions",
   year,
 ];
+
+/** Under the calendar, so invalidating every holiday query refreshes the overrides with the days. */
+export const getPublicHolidayOverridesQueryKey = (calendarId: string, year?: number) => [
+  PUBLIC_HOLIDAYS_QUERY_KEY,
+  "calendars",
+  calendarId,
+  "overrides",
+  ...(year ? [year] : []),
+];
+
+/**
+ * The Holiday Calendar field of an office, a legal entity or the company default. Under the module's key,
+ * so a change to a calendar refreshes the field's name with it.
+ */
+export const getHolidayCalendarBindingQueryKey = (kind: string, refId: string | null) => [
+  PUBLIC_HOLIDAYS_QUERY_KEY,
+  "bindings",
+  kind,
+  refId ?? "company",
+];

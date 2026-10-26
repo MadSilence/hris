@@ -21,4 +21,9 @@ export interface TimeOffRequestDTO {
   rejectionReason: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Approved or rejected by an administrator over the chain (Approve Anyway / Reject Anyway). */
+  decidedAnyway?: boolean;
+  /** "Awaiting me" only: the approver this request reaches the reader for, as their delegate ("for Anna"). */
+  awaitingOnBehalfOfUserId?: string | null;
+  awaitingOnBehalfOfName?: string | null;
 }

@@ -26,9 +26,16 @@ import {
 } from "@/public/desact/src/components/ui/select";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import type {
+  LeaverReassignment,
   TerminationImpactDTO,
   TerminationReason,
 } from "@/api/modules/users/clients/hrisApiUsersClient";
+import {
+  hasLeaverDecisions,
+  LeaverDecisionsStep,
+  NO_REASSIGNMENT,
+  type LeaverReassignmentChoice,
+} from "./LeaverDecisionsStep";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { dateToISO, formatDisplayDate } from "@/lib/date";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -57,6 +64,8 @@ export type TerminateSubmission = {
   reason: TerminationReason;
   rehireEligible: boolean;
   note: string | null;
+  /** Whom the leaver's decisions go to; a null group goes to its default. */
+  reassign: LeaverReassignment;
 };
 
 export interface TerminateEmploymentModalProps {
@@ -88,6 +97,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
   const [reason, setReason] = useState<TerminationReason>("VOLUNTARY");
   const [rehireEligible, setRehireEligible] = useState(true);
   const [note, setNote] = useState("");
+  const [reassign, setReassign] = useState<LeaverReassignmentChoice>(NO_REASSIGNMENT);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -95,6 +105,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
     setReason("VOLUNTARY");
     setRehireEligible(true);
     setNote("");
+    setReassign(NO_REASSIGNMENT);
   }, [isOpen]);
 
   const { data: impact, isLoading: impactLoading } = useQuery<TerminationImpactDTO>({
@@ -115,6 +126,11 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
       reason,
       rehireEligible,
       note: note.trim() || null,
+      reassign: {
+        requestsTo: reassign.requestsTo?.id ?? null,
+        tasksTo: reassign.tasksTo?.id ?? null,
+        policiesTo: reassign.policiesTo?.id ?? null,
+      },
     });
   };
 
@@ -194,18 +210,29 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             />
           </div>
 
+          {hasLeaverDecisions(impact?.decisions) && (
+            <LeaverDecisionsStep
+              fullName={fullName}
+              decisions={impact.decisions}
+              value={reassign}
+              onChange={setReassign}
+              disabled={isLoading}
+            />
+          )}
+
           <div className="rounded-lg border border-warning-200 bg-warning-50 p-3.5">
             <p className="mb-1.5 text-sm font-medium text-warning-900">What this will do</p>
             {impactLoading ? (
               <p className="text-sm text-warning-800">Checking…</p>
             ) : (
               <ul className="space-y-1 text-sm text-warning-800">
-                {/* The change lands on the day after the last working day; until then the person
-                    is an employee like any other, and saying otherwise was the dialog's one lie. */}
-                {impact?.effectiveOn && impact.effectiveOn > today() ? (
+                {/* The change lands on the day after the last working day (WALK_QUESTIONS § 14); until
+                    then the person is an employee like any other — the whole of the last day included,
+                    which is why a last day of today still reads "the end of today", not "now". */}
+                {impact?.effectiveOn && impact.effectiveOn >= today() ? (
                   <li>
-                    Nothing changes until <strong>{formatDisplayDate(impact.effectiveOn)}</strong>. Then the
-                    status becomes Archived and the person loses access.
+                    Nothing changes until the end of <strong>{formatDisplayDate(impact.effectiveOn)}</strong>.
+                    Then the status becomes Archived and the person loses access.
                   </li>
                 ) : (
                   <li>Status becomes Archived and the person loses access.</li>
@@ -227,7 +254,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                 {(impact?.requestsAwaitingTheirDecision ?? 0) > 0 ? (
                   <li>
                     {impact?.requestsAwaitingTheirDecision} request(s) are waiting for this person to decide.
-                    Nobody takes them over automatically.
+                    They are handed on as chosen above, or to their policy&apos;s fallback role.
                   </li>
                 ) : null}
                 {(impact?.approvedLeaveAfterLastDay ?? 0) > 0 ? (

@@ -112,3 +112,37 @@ describe("AudienceBuilder", () => {
     expect(screen.getByText(/also search non-active people/i)).toBeInTheDocument();
   });
 });
+
+describe("AudienceBuilder — the field picker", () => {
+  // WALK_QUESTIONS § 17: fifty-odd fields need a search box, not a plain list.
+  const many: FieldDTO[] = [
+    { id: "sys:first_name", label: "First name", isSystem: true, configurable: false, type: "TEXT" } as FieldDTO,
+    { id: "sys:email", label: "Email", isSystem: true, configurable: false, type: "EMAIL" } as FieldDTO,
+    {
+      id: "attr:1",
+      label: "Shirt size",
+      isSystem: false,
+      type: "TEXT",
+      level: "READ",
+      viewScopes: ["COMPANY"],
+    } as FieldDTO,
+  ];
+
+  beforeAll(() => {
+    // cmdk scrolls the active item into view, which jsdom does not implement.
+    Element.prototype.scrollIntoView = jest.fn();
+  });
+
+  it("narrows the fields to what is typed and picks one", () => {
+    const onChange = jest.fn();
+    render(<AudienceBuilder fields={many} value={[]} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Field" }));
+    fireEvent.change(screen.getByPlaceholderText("Search fields"), { target: { value: "shirt" } });
+
+    expect(screen.queryByText("Email")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Shirt size"));
+
+    expect(screen.getByRole("combobox", { name: "Field" })).toHaveTextContent("Shirt size");
+  });
+});

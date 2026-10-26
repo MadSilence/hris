@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Notification } from "@/models/notifications";
-import { PublicHolidayDriftActions, describeDriftChange } from "./PublicHolidayDriftActions";
+import { PublicHolidayDriftActions, describeConflict, describeDriftChange } from "./PublicHolidayDriftActions";
 
 const applyMutateAsync = jest.fn();
 const dismissMutateAsync = jest.fn();
@@ -163,5 +163,118 @@ describe("describeDriftChange", () => {
         previousEnd: "2026-08-31",
       }),
     ).toMatch(/^No longer a holiday: Summer Bank Holiday, /);
+  });
+});
+
+describe("PublicHolidayDriftActions — a conflict on days the company edited", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const conflictDetails = {
+    ...details,
+    kind: "CONFLICT",
+    changes: [
+      {
+        kind: "MOVED",
+        name: "Early May Bank Holiday",
+        previousName: "Early May (company)",
+        start: "2026-05-11",
+        end: "2026-05-11",
+        previousStart: "2026-05-05",
+        previousEnd: "2026-05-05",
+        conflict: true,
+      },
+    ],
+  };
+
+  const openConflict = () => {
+    const n = openDrift(conflictDetails);
+    return { ...n, params: { ...n.params, conflict: true } };
+  };
+
+  it("says what the source says now against what the company said, and that nothing is blocked", () => {
+    render(<PublicHolidayDriftActions notification={openConflict()} />);
+
+    expect(
+      screen.getByText(/The source now says Early May Bank Holiday, .*; yours says Early May \(company\), /),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Your version stays in force until someone takes the source's/)).toBeInTheDocument();
+    expect(screen.getByText(/would be recalculated if you take the source's version/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Apply Changes/ })).not.toBeInTheDocument();
+  });
+
+  it("keeps ours by dismissing — no day changes", async () => {
+    dismissMutateAsync.mockResolvedValue(undefined);
+
+    render(<PublicHolidayDriftActions notification={openConflict()} />);
+    await userEvent.click(screen.getByRole("button", { name: /Keep Ours/ }));
+
+    expect(dismissMutateAsync).toHaveBeenCalledWith({ driftId: "drift-1" });
+    expect(applyMutateAsync).not.toHaveBeenCalled();
+    expect(markRead).toHaveBeenCalledWith("n-1");
+  });
+
+  it("takes theirs by applying", async () => {
+    applyMutateAsync.mockResolvedValue({
+      driftId: "drift-1",
+      calendarId: "calendar-1",
+      year: 2026,
+      applied: 1,
+      skipped: [],
+      recalculatedRequests: 1,
+      requestsLeftUnchanged: 0,
+    });
+
+    render(<PublicHolidayDriftActions notification={openConflict()} />);
+    await userEvent.click(screen.getByRole("button", { name: /Take Theirs/ }));
+
+    expect(applyMutateAsync).toHaveBeenCalledWith({ driftId: "drift-1" });
+  });
+
+  it("offers Edit, which opens the calendar", () => {
+    render(<PublicHolidayDriftActions notification={openConflict()} />);
+
+    expect(screen.getByRole("link", { name: /Edit/ })).toHaveAttribute(
+      "href",
+      "/settings/time/public-holidays/calendar-1",
+    );
+  });
+
+  it("reads a kept conflict as kept, not as dismissed", () => {
+    const n = notification({ type: "PUBLIC_HOLIDAY_DRIFT", id: "drift-1", status: "DISMISSED", open: false, details: null });
+    render(<PublicHolidayDriftActions notification={{ ...n, params: { ...n.params, conflict: true } }} />);
+
+    expect(screen.getByText("Your version was kept")).toBeInTheDocument();
+  });
+});
+
+describe("describeConflict", () => {
+  it("says so when the company removed the day the source still has", () => {
+    expect(
+      describeConflict({
+        kind: "MOVED",
+        name: "Summer Bank Holiday",
+        previousName: null,
+        start: "2026-09-07",
+        end: "2026-09-07",
+        previousStart: null,
+        previousEnd: null,
+      }),
+    ).toMatch(/; yours says no holiday \(you removed it\)\.$/);
+  });
+
+  it("says so when the source dropped a day the company kept", () => {
+    expect(
+      describeConflict({
+        kind: "REMOVED",
+        name: null,
+        previousName: "Boxing Day",
+        start: null,
+        end: null,
+        previousStart: "2026-12-28",
+        previousEnd: "2026-12-28",
+      }),
+    ).toMatch(/^The source now says no holiday; yours says Boxing Day, /);
   });
 });

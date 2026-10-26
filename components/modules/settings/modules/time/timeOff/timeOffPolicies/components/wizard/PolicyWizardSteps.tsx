@@ -47,6 +47,7 @@ import {
   type PickedUser,
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { useUser } from "@/components/hooks/useUser/useUser";
+import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import {
   PolicyWizardValues,
   WizardApprover,
@@ -705,6 +706,78 @@ const ApproverUserField: FC<{
     <UserPickerField value={user} onChange={onChange} placeholder="Select approver" allowClear={false} />
   );
 
+const FALLBACK_DEFAULT = "__default__";
+const FALLBACK_NONE = "__none__";
+
+/**
+ * The policy's fallback: a role, so it survives the next leaver. Any step that resolves to nobody —
+ * a named approver who left, a manager step for somebody with no manager, an approver away with
+ * nobody standing in — goes to its holders. No fallback is allowed and warned about, the way a chain
+ * with nobody in it is.
+ *
+ * The roles list needs ROLES.ROLE VIEW; without it the field still shows the role already chosen.
+ */
+export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
+  const { data: roles } = useRoles();
+  const live = (roles ?? []).filter((r) => !r.archived && !r.systemOwner);
+  const known = values.apprFallbackRoleId && !live.some((r) => r.id === values.apprFallbackRoleId)
+    ? [{ id: values.apprFallbackRoleId, name: values.apprFallbackRoleName ?? "The chosen role" }]
+    : [];
+  const current = values.apprFallbackDefault
+    ? FALLBACK_DEFAULT
+    : values.apprFallbackRoleId ?? FALLBACK_NONE;
+  const none = !values.apprFallbackDefault && !values.apprFallbackRoleId;
+
+  const choose = (v: string) => {
+    if (v === FALLBACK_DEFAULT) {
+      set("apprFallbackDefault", true);
+      set("apprFallbackRoleId", null);
+      set("apprFallbackRoleName", null);
+      return;
+    }
+    set("apprFallbackDefault", false);
+    if (v === FALLBACK_NONE) {
+      set("apprFallbackRoleId", null);
+      set("apprFallbackRoleName", null);
+      return;
+    }
+    set("apprFallbackRoleId", v);
+    set("apprFallbackRoleName", [...live, ...known].find((r) => r.id === v)?.name ?? null);
+  };
+
+  return (
+    <div className="space-y-2 border-t border-brown-100 pt-4">
+      <Label htmlFor="appr-fallback-role">Fallback Approver</Label>
+      <Select value={current} onValueChange={choose}>
+        <SelectTrigger id="appr-fallback-role" className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {values.apprFallbackDefault && (
+            <SelectItem value={FALLBACK_DEFAULT}>HR Admin (the default)</SelectItem>
+          )}
+          {[...known, ...live].map((r) => (
+            <SelectItem key={r.id} value={r.id}>
+              {r.name}
+            </SelectItem>
+          ))}
+          <SelectItem value={FALLBACK_NONE}>No Fallback</SelectItem>
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-muted-foreground">
+        A role whose holders decide any step nobody can: an approver who has left, a manager step for
+        somebody with no manager, an approver away with nobody standing in.
+      </p>
+      {none && (
+        <p role="alert" className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
+          Without a fallback, a request whose approver has left or is away with nobody standing in waits
+          for an administrator to approve it anyway.
+        </p>
+      )}
+    </div>
+  );
+};
+
 export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
   const patchApprover = (index: number, patch: Partial<WizardApprover>) =>
     set(
@@ -843,6 +916,8 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
               </div>
             )}
           </div>
+
+          <FallbackRoleField values={values} set={set} />
         </Reveal>
       )}
     </div>

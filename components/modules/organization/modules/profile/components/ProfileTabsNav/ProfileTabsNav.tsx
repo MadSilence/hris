@@ -68,14 +68,15 @@ export function ProfileTabsNav({ userId, capabilities }: Props) {
     <>
       <Tabs value={active} className="w-full">
         <TabsList
-          className="grid w-full bg-brown-50"
-          style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}
+          // Scrolls rather than squeezes: at a narrow pane equal columns cut every label short
+          // ("Public Prof|Personal Inf"). Each tab keeps its full label and the row grows to fit.
+          className="flex w-full justify-start overflow-x-auto bg-brown-50"
         >
           {visibleTabs.map((tab) => {
             const href = `${base}/${tab.id}`;
 
             return (
-              <TabsTrigger key={tab.id} value={tab.id} asChild>
+              <TabsTrigger key={tab.id} value={tab.id} className="flex-1 shrink-0 whitespace-nowrap" asChild>
                 <Link
                   href={href}
                   className="no-underline"

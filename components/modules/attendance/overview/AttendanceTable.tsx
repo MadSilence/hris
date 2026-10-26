@@ -5,6 +5,7 @@ import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { formatMinutes, type AttendanceReportRow } from "@/models/attendance";
+import { formatAmounts } from "@/components/modules/attendance/lib";
 
 type Props = {
   rows: AttendanceReportRow[];
@@ -20,14 +21,30 @@ type Props = {
 export const personName = (p: AttendanceReportRow["person"]) =>
   `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || p.email || "";
 
+type AttendanceColumn = { key: string; label: string; value: (r: AttendanceReportRow) => string };
+
 /** The columns, in order — the table and the export preview print the same ones. */
-export const ATTENDANCE_COLUMNS = [
-  { key: "expectedDays", label: "Expected Days", value: (r: AttendanceReportRow) => String(r.totals.expectedDays) },
-  { key: "loggedDays", label: "Logged Days", value: (r: AttendanceReportRow) => String(r.totals.loggedDays) },
-  { key: "expectedHours", label: "Expected Hours", value: (r: AttendanceReportRow) => formatMinutes(r.totals.expectedMinutes) },
-  { key: "loggedHours", label: "Logged Hours", value: (r: AttendanceReportRow) => formatMinutes(r.totals.loggedMinutes) },
-  { key: "overtimeHours", label: "Overtime Hours", value: (r: AttendanceReportRow) => formatMinutes(r.totals.overtimeMinutes) },
-] as const;
+export const ATTENDANCE_COLUMNS: readonly AttendanceColumn[] = [
+  { key: "expectedDays", label: "Expected Days", value: (r) => String(r.totals.expectedDays) },
+  { key: "loggedDays", label: "Logged Days", value: (r) => String(r.totals.loggedDays) },
+  { key: "expectedHours", label: "Expected Hours", value: (r) => formatMinutes(r.totals.expectedMinutes) },
+  { key: "loggedHours", label: "Logged Hours", value: (r) => formatMinutes(r.totals.loggedMinutes) },
+  { key: "overtimeHours", label: "Overtime Hours", value: (r) => formatMinutes(r.totals.overtimeMinutes) },
+];
+
+const AMOUNT_COLUMN: AttendanceColumn = {
+  key: "amount",
+  label: "Amount",
+  value: (r) => formatAmounts(r.totals.amounts) ?? "",
+};
+
+/**
+ * The columns for these rows: the five numbers, and "Amount" only when the server sent money — it
+ * sends none to a reader who may not see the rate field, or when the company prices no time. The
+ * server decides; this only leaves out a column that would be blank in every row.
+ */
+export const attendanceColumns = (rows: AttendanceReportRow[]): readonly AttendanceColumn[] =>
+  rows.some((row) => row.totals.amounts != null) ? [...ATTENDANCE_COLUMNS, AMOUNT_COLUMN] : ATTENDANCE_COLUMNS;
 
 /**
  * The overview: one row a person, sorted by name, the numbers in `H:MM`. A row opens the person's log
@@ -43,6 +60,7 @@ export const AttendanceTable: React.FC<Props> = ({
   empty,
 }) => {
   const sentinel = useRef<HTMLDivElement | null>(null);
+  const columns = attendanceColumns(rows);
 
   useEffect(() => {
     const node = sentinel.current;
@@ -60,7 +78,7 @@ export const AttendanceTable: React.FC<Props> = ({
         <TableHeader className="sticky top-0 z-10 bg-white">
           <TableRow>
             <TableHead className="w-[32%]">Name</TableHead>
-            {ATTENDANCE_COLUMNS.map((column) => (
+            {columns.map((column) => (
               <TableHead key={column.key} className="text-right">{column.label}</TableHead>
             ))}
           </TableRow>
@@ -70,7 +88,7 @@ export const AttendanceTable: React.FC<Props> = ({
             ? Array.from({ length: 8 }, (_, index) => (
               <TableRow key={index}>
                 <TableCell><Skeleton className="h-5 w-44"/></TableCell>
-                {ATTENDANCE_COLUMNS.map((column) => (
+                {columns.map((column) => (
                   <TableCell key={column.key}><Skeleton className="ml-auto h-4 w-12"/></TableCell>
                 ))}
               </TableRow>
@@ -78,7 +96,7 @@ export const AttendanceTable: React.FC<Props> = ({
             : rows.length === 0 && empty
               ? (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={ATTENDANCE_COLUMNS.length + 1}>{empty}</TableCell>
+                  <TableCell colSpan={columns.length + 1}>{empty}</TableCell>
                 </TableRow>
               )
               : rows.map((row) => (
@@ -100,7 +118,7 @@ export const AttendanceTable: React.FC<Props> = ({
                       avatarUrl={row.person.avatarUrl}
                     />
                   </TableCell>
-                  {ATTENDANCE_COLUMNS.map((column) => (
+                  {columns.map((column) => (
                     <TableCell key={column.key} className="text-right tabular-nums">{column.value(row)}</TableCell>
                   ))}
                 </TableRow>

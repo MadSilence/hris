@@ -35,6 +35,12 @@ import { useTeamPeople } from "@/components/modules/settings/modules/teams/hooks
 import { useTeamMembership } from "@/components/modules/settings/modules/teams/hooks/useTeamMembership/useTeamMembership";
 import { useTeamSearch } from "@/components/modules/settings/modules/teams/hooks/useTeamSearch/useTeamSearch";
 import { useActivateTeam } from "@/components/modules/settings/modules/teams/hooks/useActivateTeam/useActivateTeam";
+import { useTeamRestoreImpact } from "@/components/modules/settings/modules/teams/hooks/useTeamRestoreImpact/useTeamRestoreImpact";
+import {
+  RestoreWithChildrenModal,
+  useRestoreWithChildren,
+  type RestoreChild,
+} from "@/components/modules/settings/shared/RestoreWithChildrenModal";
 import { useMoveTeam } from "@/components/modules/settings/modules/teams/hooks/useMoveTeam/useMoveTeam";
 import {
   useMovePersonToTeam,
@@ -175,6 +181,8 @@ export default function TeamsContainer() {
   const [editTarget, setEditTarget] = useState<TeamTreeNode | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TeamTreeNode | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<TeamTreeNode | null>(null);
+  /** Unarchive was pressed on it; the restore flow decides whether a choice is needed. */
+  const [restoreTarget, setRestoreTarget] = useState<TeamTreeNode | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
@@ -183,6 +191,22 @@ export default function TeamsContainer() {
   const { data: people = [], isLoading: peopleLoading } = useTeamPeople(canSeePeople);
   const membership = useTeamMembership(people);
   const activateDept = useActivateTeam();
+  const restoreImpact = useTeamRestoreImpact(restoreTarget?.id ?? null);
+  const restoreChildren = useMemo<RestoreChild[] | undefined>(
+    () => restoreImpact.data?.archivedUnits.map((unit) => ({ ...unit })),
+    [restoreImpact.data],
+  );
+  const restoreFlow = useRestoreWithChildren({
+    targetId: restoreTarget?.id ?? null,
+    impact: {
+      items: restoreChildren,
+      isFetching: restoreImpact.isFetching,
+      isError: restoreImpact.isError,
+      error: restoreImpact.error,
+    },
+    restore: (id, restoreUnitIds) => activateDept.mutateAsync({ id, restoreUnitIds }),
+    onFinished: () => setRestoreTarget(null),
+  });
   const moveTeam = useMoveTeam();
   const movePerson = useMovePersonToTeam();
 
@@ -613,7 +637,7 @@ export default function TeamsContainer() {
           peopleFocus={peopleFocus}
           onEdit={() => setEditTarget(selectedTeam)}
           onArchive={() => setArchiveTarget(selectedTeam)}
-          onActivate={() => activateDept.mutate(selectedTeam.id)}
+          onActivate={() => setRestoreTarget(selectedTeam)}
           onDelete={() => setDeleteTarget(selectedTeam)}
           onRecenter={() => setRecenterNonce((n) => n + 1)}
         />
@@ -894,7 +918,21 @@ export default function TeamsContainer() {
           }}
         />
       )}
+
+      {restoreTarget && restoreFlow.isDialogOpen && (
+        <RestoreWithChildrenModal
+          key={restoreTarget.id}
+          isOpen
+          title="Unarchive Team"
+          name={restoreTarget.name}
+          childNoun="sub-teams"
+          items={restoreFlow.items}
+          isLoading={restoreFlow.isPending}
+          errorMessage={restoreFlow.errorMessage}
+          onConfirmAction={(ids) => void restoreFlow.confirm(ids)}
+          onCancelAction={restoreFlow.cancel}
+        />
+      )}
     </div>
   );
 }
-

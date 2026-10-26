@@ -33,6 +33,9 @@ export type FieldDTO = {
   // A field with no storage of its own names the field it is read from (`sys:level` → `sys:job`).
   // Nobody edits it directly; the screen points at the source instead.
   derivedFrom?: string | null;
+  // Whether the People table can be ordered by this field — the backend's answer (`UserGetService`),
+  // so the header and the saved views never keep a copy of their own.
+  sortable?: boolean;
 };
 
 /**

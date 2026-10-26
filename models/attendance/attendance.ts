@@ -3,7 +3,8 @@
  * (`ATTENDANCE_REBUILD_PLAN.md`).
  *
  * Durations are **minutes** everywhere; the screens spell them `H:MM` (`formatMinutes`). Dates are
- * `yyyy-MM-dd`, times of day `HH:mm`. Nothing here is money.
+ * `yyyy-MM-dd`, times of day `HH:mm`. Money is the amount owed (`AttendanceTotals.amounts`), from the
+ * rate snapshotted into each span when it was logged; it is absent for a reader who may not see the rate.
  */
 
 import type { FilterDTO } from "@/models/user/fields";
@@ -19,6 +20,13 @@ export type AttendanceEntry = {
   description: string | null;
 };
 
+/** What logged time is owed at, in one currency — never converted into another. */
+export type AttendanceAmount = {
+  /** ISO 4217, e.g. `EUR`. */
+  currency: string;
+  amount: number;
+};
+
 /** A person's period in five numbers — a row of the overview, the head of the person page. */
 export type AttendanceTotals = {
   expectedDays: number;
@@ -26,6 +34,11 @@ export type AttendanceTotals = {
   expectedMinutes: number;
   loggedMinutes: number;
   overtimeMinutes: number;
+  /**
+   * The amount owed, one per currency. Empty: nothing in the period carries a rate. Null: the reader may
+   * not see the rate field, or the company prices no time — the screens then show nothing at all.
+   */
+  amounts?: AttendanceAmount[] | null;
 };
 
 export type AttendanceLogDay = {

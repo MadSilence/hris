@@ -25,6 +25,7 @@ import { DEPARTMENTS_QUERY_KEY } from "@/components/modules/settings/modules/dep
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { AssignmentHistoryList, HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
 
 const BASE_PATH = "/departments";
 
@@ -65,6 +66,8 @@ export function DepartmentPeopleTab({
   const [removeTarget, setRemoveTarget] = useState<AssignedUser | null>(null);
 
   const [includeSubNodes, setIncludeSubNodes] = useState(false);
+  /** Who was placed here, by which rule or by hand, and when: the roster's second view. */
+  const [showHistory, setShowHistory] = useState(false);
 
   const { items, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, departmentId, debouncedQuery, includeSubNodes);
@@ -118,6 +121,18 @@ export function DepartmentPeopleTab({
 
   // Truly empty (no members at all) → a single call-to-action, no toolbar.
   const isEmpty = !isLoading && !error && items.length === 0 && !debouncedQuery;
+  if (showHistory) {
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-3">
+        <div className="flex flex-none items-center justify-end">
+          <HistoryToggle showing={showHistory} onChange={setShowHistory} />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <AssignmentHistoryList assignableType="DEPARTMENT" assignableId={departmentId} />
+        </div>
+      </div>
+    );
+  }
   if (isEmpty) {
     return (
       <div className="flex h-full min-h-0 flex-col items-center justify-center gap-3 px-6 text-center">
@@ -136,6 +151,7 @@ export function DepartmentPeopleTab({
             </Button>
           )}
         </PermissionGate>
+        <HistoryToggle showing={showHistory} onChange={setShowHistory} />
         {assignModal}
       </div>
     );
@@ -146,6 +162,7 @@ export function DepartmentPeopleTab({
       {/* Toolbar */}
       <div className="flex flex-none items-center gap-2">
         <SearchBox value={query} onChange={setQuery} fullWidth/>
+        <HistoryToggle showing={showHistory} onChange={setShowHistory} />
         <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
           {!isArchived && (
             <Button size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">

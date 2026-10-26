@@ -64,6 +64,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedActions: ["VIEW"],
         supportedScopes: COMPANY_ONLY,
       },
+      {
+        code: "SETTINGS.AUTOMATIONS",
+        label: "Automation",
+        description:
+          "Read automation rules and their run log (View); create, publish, enable and pause them (Manage). A rule can only do what its author may do by hand.",
+        supportedActions: ["VIEW", "MANAGE"],
+        supportedScopes: COMPANY_ONLY,
+      },
     ],
   },
   {

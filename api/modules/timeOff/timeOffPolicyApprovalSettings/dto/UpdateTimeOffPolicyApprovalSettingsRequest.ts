@@ -10,6 +10,8 @@ export interface UpdateTimeOffPolicyApprovalSettingsRequest {
   approvalMode: "SEQUENTIAL" | "ALL" | "N_OF_M";
   /** Only for N_OF_M. */
   requiredApprovalsCount: number | null;
-  allowSubstituteApprovers: boolean;
+  /** The fallback role. With it null, `noFallbackRole: true` says "none"; neither leaves it as it is. */
+  fallbackRoleId: string | null;
+  noFallbackRole?: boolean;
   approvers: UpdateTimeOffPolicyApproverRequest[];
 }

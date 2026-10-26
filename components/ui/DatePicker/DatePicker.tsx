@@ -1,9 +1,8 @@
 "use client";
 
-import { dateToISO, isoToDate } from "@/lib/date";
+import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { useState, type FC } from "react";
-import { format } from "date-fns";
 import type { Matcher } from "react-day-picker";
 import { CalendarDays, X } from "lucide-react";
 
@@ -90,7 +89,7 @@ export const DatePicker: FC<Props> = ({
           <CalendarDays className="size-4 shrink-0 text-brown-400" aria-hidden />
 
           <span className={cn("min-w-0 flex-1 truncate text-left", !selected && "text-muted-foreground")}>
-            {selected ? format(selected, "MMM d, yyyy") : placeholder}
+            {selected ? formatDisplayDate(selected, { style: "medium" }) : placeholder}
           </span>
 
           {clearable && selected && !disabled && (

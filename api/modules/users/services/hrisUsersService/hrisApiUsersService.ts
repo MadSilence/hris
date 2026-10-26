@@ -116,6 +116,10 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.draftCount();
   }
 
+  async searchCount(body: UsersSearchRequest): Promise<{ count: number }> {
+    return hrisApiUsersClient.searchCount(body);
+  }
+
   async exportUsers(body: PeopleExportRequest): Promise<Response> {
     return hrisApiUsersClient.exportUsers(body);
   }

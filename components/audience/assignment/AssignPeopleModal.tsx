@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { FormError } from "@/components/feedback/FormError";
-import { AlertTriangle, Check, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, Repeat } from "lucide-react";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -25,18 +26,17 @@ import {
   type PeopleColumn,
 } from "@/components/audience/PeoplePicker";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
-import {
-  useApplyAssignment,
-  useApplySegment,
-  useAssignmentJob,
-} from "@/components/audience/assignment/hooks/useAssignment";
+import { useApplyAssignment, useAssignmentPreview } from "@/components/audience/assignment/hooks/useAssignment";
 import { PEOPLE_SEARCH_QK } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearch";
-import { isTerminalJobStatus } from "@/api/modules/assignments/dto/SegmentAssignmentDTO";
 import type { FilterDTO } from "@/models/user/fields";
 import type { Segment, UserRefDTO } from "@/models/segment/Segment";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { describeSkips } from "@/components/audience/assignment/assignmentSkips";
-import type { AssignmentSkippedUser } from "@/api/modules/assignments/dto/AssignmentDTO";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { countSkips, describeSkips, skipCountLines } from "@/components/audience/assignment/assignmentSkips";
+import { assignableTypeOf } from "@/components/audience/assignment/assignableTypes";
+import type { AssignmentSkippedUser, AssignmentSkipReason } from "@/api/modules/assignments/dto/AssignmentDTO";
+import { useCreateLiveRule, useLiveRulePreview } from "@/components/modules/automations/hooks";
+import type { LiveAssignmentCreated } from "@/models/automations";
 
 const MANUAL_CAP = 300;
 
@@ -44,8 +44,16 @@ type ResultSummary = { total: number; created: number; skipped: number; failed: 
 type ResultLike = {
   summary: ResultSummary;
   failed?: { userId: string; email: string; errorDetail?: string | null }[];
-  /** Only the manual path reports these per person; the segment job returns a count alone. */
   skipped?: AssignmentSkippedUser[];
+};
+
+/** What the preview step shows, whichever path produced it. */
+type PreviewSummary = {
+  willAssign: number;
+  skipped: number;
+  skippedByReason: Partial<Record<AssignmentSkipReason, number>>;
+  /** Live rules only: people another live rule already places here. */
+  conflicts: number;
 };
 
 export type AssignPeopleModalProps = {
@@ -62,7 +70,7 @@ export type AssignPeopleModalProps = {
    * A warning about the people picked by hand, shown before Add — the impact-before-action contract.
    * The domain supplies it because only the domain knows what a pair can get wrong (a leave policy
    * whose approval chain resolves to nobody for this person). Not called for "everyone who matches":
-   * there is no list to ask about, and the result screen reports who was skipped.
+   * there is no list to ask about, and the preview step counts who would be skipped.
    */
   renderSelectionWarning?: (userIds: string[]) => React.ReactNode;
 };
@@ -73,8 +81,7 @@ export type AssignPeopleModalProps = {
  *
  * Jobs carry no `column`: the resolver builds its extras from a fixed set that has no `job`, so a
  * "Current position" cell would need a backend change. The exclusion filter works without it, which
- * is the half that matters — and a duplicate the filter misses is skipped by the engine and now
- * reported on the result screen.
+ * is the half that matters — and a duplicate the filter misses is skipped by the engine and reported.
  */
 const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: string }> = {
   "/jobs": { excludeField: "sys:job" },
@@ -86,6 +93,19 @@ const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: strin
   "/public-holiday-calendars": { column: calendarColumn, excludeField: "sys:calendar" },
 };
 
+const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
+
+/**
+ * Assign people to one target — eight surfaces, one modal (ASSIGNMENT_PLAN 4.1, owner decision 7).
+ *
+ * Two steps: pick, then **preview** ("N will be assigned, M skipped, and why") before Apply, on every
+ * surface. Two modes, and they are different promises:
+ *
+ * - **Picked people** are assigned by hand, once, through the module's own `/apply` — a hand
+ *   assignment, which no rule ever takes away.
+ * - **Everyone who matches** creates a **live rule** (`/assignments/live-rules`): everyone who matches
+ *   now, and anyone who matches later. The rule is listed in Settings → Automation like any other.
+ */
 export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   isOpen,
   onCloseAction,
@@ -107,22 +127,25 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const [manual, setManual] = React.useState<Set<string>>(new Set());
   const [excluded, setExcluded] = React.useState<Set<string>>(new Set());
   const [total, setTotal] = React.useState(0);
-  const [jobId, setJobId] = React.useState<string | null>(null);
   const [effectiveFrom, setEffectiveFrom] = React.useState("");
   const [effectiveTo, setEffectiveTo] = React.useState("");
+  const [step, setStep] = React.useState<"pick" | "preview">("pick");
+  const [previewSummary, setPreviewSummary] = React.useState<PreviewSummary | null>(null);
+  const [liveResult, setLiveResult] = React.useState<LiveAssignmentCreated | null>(null);
 
+  const assignableType = assignableTypeOf(basePath);
   const domain = DOMAIN_CONFIG[basePath];
   const pickerColumns = domain?.column ? [domain.column] : undefined;
   // "Not already assigned to this one" — which must keep people who are assigned to nothing at all,
-  // hence includeEmpty. Without it the default negation semantics would hide exactly the people a
-  // first assignment is usually aimed at.
+  // hence includeEmpty. The picker only: see `liveSegment` for why the rule must not carry it.
   const exclusionFilters: FilterDTO[] = domain
     ? [{ field: domain.excludeField, op: "neq", value: assignableId, includeEmpty: true }]
     : [];
 
+  const previewManual = useAssignmentPreview(basePath, assignableId);
   const applyManual = useApplyAssignment(basePath, assignableId, invalidateKeys);
-  const applySegment = useApplySegment(basePath, assignableId);
-  const job = useAssignmentJob(basePath, assignableId, jobId);
+  const previewLive = useLiveRulePreview();
+  const createLive = useCreateLiveRule();
 
   const reset = React.useCallback(() => {
     setFilters([]);
@@ -130,12 +153,16 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
     setManual(new Set());
     setExcluded(new Set());
     setTotal(0);
-    setJobId(null);
     setEffectiveFrom("");
     setEffectiveTo("");
+    setStep("pick");
+    setPreviewSummary(null);
+    setLiveResult(null);
+    previewManual.reset();
     applyManual.reset();
-    applySegment.reset();
-  }, [applyManual, applySegment]);
+    previewLive.reset();
+    createLive.reset();
+  }, [previewManual, applyManual, previewLive, createLive]);
 
   React.useEffect(() => {
     if (isOpen) reset();
@@ -149,27 +176,14 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const onToggle = React.useCallback(
     (u: UserRefDTO) => {
-      if (mode === "all") {
-        setExcluded((s) => {
-          const next = new Set(s);
-          if (next.has(u.id)) {
-            next.delete(u.id);
-          } else {
-            next.add(u.id);
-          }
-          return next;
-        });
-      } else {
-        setManual((s) => {
-          const next = new Set(s);
-          if (next.has(u.id)) {
-            next.delete(u.id);
-          } else {
-            next.add(u.id);
-          }
-          return next;
-        });
-      }
+      const flip = (s: Set<string>) => {
+        const next = new Set(s);
+        if (next.has(u.id)) next.delete(u.id);
+        else next.add(u.id);
+        return next;
+      };
+      if (mode === "all") setExcluded(flip);
+      else setManual(flip);
     },
     [mode],
   );
@@ -186,134 +200,125 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const onMetaChange = React.useCallback((meta: { total: number }) => setTotal(meta.total), []);
 
-  const willAffect = mode === "all" ? Math.max(total - excluded.size, 0) : manual.size;
-  const overCap = mode === "manual" && manual.size > MANUAL_CAP;
-  const needsDate = temporal && !effectiveFrom;
+  const live = mode === "all";
+  const willAffect = live ? Math.max(total - excluded.size, 0) : manual.size;
+  const overCap = !live && manual.size > MANUAL_CAP;
+  // A live rule assigns each person from the day they start matching, so it takes no dates.
+  const needsDate = temporal && !live && !effectiveFrom;
 
-  const jobStatus = job.data?.status;
-  /* The poll stopped answering. The job itself is running or finished on the server — what ended is
-     this browser's right to ask, which is what a bulk assignment that includes the person making it
-     does to their own token (`technical_documentation/ACCESS.md` § 8). Saying so beats a progress
-     bar that never moves again. */
-  const lostTheThread = Boolean(jobId) && job.isError;
-  const running = Boolean(jobId) && !lostTheThread && !(jobStatus && isTerminalJobStatus(jobStatus));
-  React.useEffect(() => {
-    if (jobStatus && isTerminalJobStatus(jobStatus)) {
-      for (const key of invalidateKeys) void queryClient.invalidateQueries({ queryKey: key });
-      void queryClient.invalidateQueries({ queryKey: [PEOPLE_SEARCH_QK] });
-    }
-    // invalidateKeys is a prop array rebuilt by the parent each render; depending on it would
-    // re-run this on every render. The job status is what should drive the invalidation.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobStatus, queryClient]);
-
-  const manualDone = applyManual.isSuccess ? applyManual.data : null;
-  const segmentDone = jobStatus && isTerminalJobStatus(jobStatus) ? job.data : null;
-  const result: ResultLike | null = manualDone ?? segmentDone ?? null;
   /*
-   * The modal used to close itself here, in an effect on `done`.
-   *
-   * Everything below — how many were added, how many were passed over and why, which ones the engine
-   * could not write — was computed, handed to this component, and thrown away in the same tick. **The
-   * engine's characteristic bug is not a wrong answer, it is a correct answer nobody sees**: drag an
-   * archived colleague onto a team, confirm, and watch the chip stay where it was.
-   *
-   * It stays open on a result and the reader closes it. `assignmentSkips.ts` — written for exactly
-   * this and wired to two drag-and-drop hooks and nothing else — supplies the words.
+   * The rule's segment is the reader's filters and nothing else. The picker also hides people who
+   * already have this target — but a rule whose segment says "does not have it" would see everyone it
+   * assigns stop matching at once, and take it back again. Somebody who already has it is skipped as
+   * a duplicate instead, and the preview says so.
    */
+  const liveSegment = (): Segment => ({
+    filters,
+    excludeUserIds: [...excluded],
+    includeInactive,
+    drafts: includeInactive ? "INCLUDE" : "EXCLUDE",
+  });
+  const manualRequest = () => ({
+    targetType: "USER" as const,
+    targetPayload: { userIds: [...manual] },
+    effectiveFrom: temporal ? effectiveFrom || null : null,
+    effectiveTo: temporal ? effectiveTo || null : null,
+  });
+  const liveRequest = () => ({
+    assignableType: assignableType as NonNullable<typeof assignableType>,
+    assignableId,
+    segment: liveSegment(),
+  });
 
-  const busy = applyManual.isPending || applySegment.isPending;
-  const errorMessage =
-    applyManual.error?.message ??
-    applySegment.error?.message ??
-    (jobStatus === "FAILED" ? job.data?.errorDetail ?? "The job failed." : undefined);
-
-  const handleApply = async () => {
+  const handlePreview = async () => {
     if (willAffect === 0 || overCap || needsDate) return;
-    const from = temporal ? effectiveFrom || null : null;
-    const to = temporal ? effectiveTo || null : null;
     try {
-      if (mode === "all") {
-        // Must be the same segment the picker previewed, `drafts` included, or the count on the
-        // button and the people the job touches are two different sets.
-        const segment: Segment = {
-          filters: [...filters, ...exclusionFilters],
-          excludeUserIds: [...excluded],
-          includeInactive,
-          drafts: includeInactive ? "INCLUDE" : "EXCLUDE",
-        };
-        const res = await applySegment.mutateAsync({ segment, effectiveFrom: from, effectiveTo: to });
-        setJobId(res.jobId);
+      if (live) {
+        if (!assignableType) return;
+        const p = await previewLive.mutateAsync(liveRequest());
+        const skipped = Object.values(p.skippedByReason).reduce((n, x) => n + (x ?? 0), 0);
+        setPreviewSummary({ willAssign: p.willAssign, skipped, skippedByReason: p.skippedByReason, conflicts: p.conflicts.length });
       } else {
-        await applyManual.mutateAsync({
-          targetType: "USER",
-          targetPayload: { userIds: [...manual] },
-          effectiveFrom: from,
-          effectiveTo: to,
-        });
+        const p = await previewManual.mutateAsync(manualRequest());
+        const byReason = p.skippedByReason ?? countSkips(p.toSkip);
+        setPreviewSummary({ willAssign: p.summary.created, skipped: p.summary.skipped, skippedByReason: byReason, conflicts: 0 });
       }
+      setStep("preview");
     } catch {
+      // The error is on the mutation, and the form shows it.
     }
   };
 
+  const handleApply = async () => {
+    try {
+      if (live) {
+        const created = await createLive.mutateAsync(liveRequest());
+        setLiveResult(created);
+        for (const key of invalidateKeys) await queryClient.invalidateQueries({ queryKey: key });
+        await queryClient.invalidateQueries({ queryKey: [PEOPLE_SEARCH_QK] });
+      } else {
+        await applyManual.mutateAsync(manualRequest());
+      }
+    } catch {
+      // Shown in the dialog that asked.
+    }
+  };
+
+  const busy = previewManual.isPending || previewLive.isPending || applyManual.isPending || createLive.isPending;
+  const errorMessage =
+    previewManual.error?.message ??
+    previewLive.error?.message ??
+    applyManual.error?.message ??
+    createLive.error?.message;
+
+  /*
+   * The modal stays open on a result and the reader closes it. Closing on "success" threw away who
+   * was added, who was passed over and why — the engine's characteristic bug is a correct answer
+   * nobody sees.
+   */
+  const manualResult: ResultLike | null = applyManual.isSuccess ? applyManual.data : null;
+  const done = Boolean(manualResult || liveResult);
+
   const closeGuarded = () => {
-    if (!busy && !running) onCloseAction();
+    if (!busy) onCloseAction();
   };
 
   const description =
     semantics === "add"
-      ? `This only adds the ${noun} — nobody is removed. The audience is captured once, now.`
+      ? `This only adds the ${noun} — nobody is removed.`
       : `A person can belong to one ${noun} only, so anyone who already has one leaves it — this is a move, not an addition.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeGuarded(); }}>
       <DialogContent className="sm:max-w-3xl max-h-[88vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add people to {assignableName ?? noun}</DialogTitle>
+          <DialogTitle>Add People to {assignableName ?? noun}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {result ? (
-            <ResultView result={result} noun={noun} />
-          ) : lostTheThread ? (
-            <div className="space-y-2 py-6 text-sm">
-              <p className="font-medium">This is still running, and we cannot follow it from here.</p>
-              <p className="text-muted-foreground">
-                Reload the page to see the result. If your own access changed with this assignment, sign in
-                again first — the change itself is not affected.
-              </p>
-            </div>
-          ) : running ? (
-            <RunningView
-              created={job.data?.summary.created ?? 0}
-              total={job.data?.summary.total ?? willAffect}
-              semantics={semantics}
-            />
+          {liveResult ? (
+            <LiveResultView result={liveResult} noun={noun} />
+          ) : manualResult ? (
+            <ResultView result={manualResult} noun={noun} />
+          ) : step === "preview" && previewSummary ? (
+            <PreviewView summary={previewSummary} live={live} noun={noun} errorMessage={errorMessage} />
           ) : (
             <div className="space-y-3">
-              {temporal && (
+              {temporal && !live && (
                 <div className="flex flex-wrap gap-4 rounded-md border border-brown-200 px-4 py-3">
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="text-muted-foreground">Effective from *</span>
-                    <DatePicker
-                      value={effectiveFrom}
-                      onChange={setEffectiveFrom}
-                      ariaLabel="Effective from"
-                      className="w-44"
-                    />
+                    <DatePicker value={effectiveFrom} onChange={setEffectiveFrom} ariaLabel="Effective from" className="w-44" />
                   </label>
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="text-muted-foreground">Effective to</span>
-                    <DatePicker
-                      value={effectiveTo}
-                      onChange={setEffectiveTo}
-                      ariaLabel="Effective to"
-                      className="w-44"
-                    />
+                    <DatePicker value={effectiveTo} onChange={setEffectiveTo} ariaLabel="Effective to" className="w-44" />
                   </label>
                 </div>
               )}
+
+              {live && <LiveRuleNote temporal={temporal} />}
 
               <PeoplePicker
                 fields={fields}
@@ -324,7 +329,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 extraFilters={exclusionFilters}
                 isSelected={isSelected}
                 onToggle={onToggle}
-                allMatchingSelected={mode === "all"}
+                allMatchingSelected={live}
                 onToggleAllMatching={onToggleAllMatching}
                 onMetaChange={onMetaChange}
                 includeInactive={includeInactive}
@@ -337,10 +342,6 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 unconditionally, and no flag reaches it. Somebody who has not started, draft or not,
                 is not a leaver: assigning them a department or a calendar ahead of day one is the
                 whole point, and `ResolvedUser.isActive` says so.
-
-                Said here rather than fixed in the engine, because "may a terminated employee be
-                assigned to an office" is a product decision and not one to take from a checkbox
-                label. The result screen shows the skips either way; this stops them being a surprise.
               */}
               {includeInactive && (
                 <p className="flex items-start gap-2 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
@@ -350,7 +351,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 </p>
               )}
 
-              {mode === "manual" && manual.size > 0 && !overCap && renderSelectionWarning
+              {!live && manual.size > 0 && !overCap && renderSelectionWarning
                 ? renderSelectionWarning([...manual])
                 : null}
 
@@ -368,25 +369,25 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         </div>
 
         <DialogFooter>
-          {result ? (
+          {done ? (
             <Button onClick={onCloseAction}>Done</Button>
-          ) : lostTheThread ? (
-            <Button onClick={onCloseAction}>Close</Button>
-          ) : running ? (
-            <Button disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Adding…
-            </Button>
+          ) : step === "preview" ? (
+            <>
+              <Button variant="outline" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <Button onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
+                {busy ? "Applying…" : live ? "Create Live Rule" : `Add ${people(previewSummary?.willAssign ?? 0)}`}
+              </Button>
+            </>
           ) : (
             <>
               <Button variant="outline" onClick={onCloseAction} disabled={busy}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleApply}
-                disabled={busy || willAffect === 0 || overCap || needsDate}
-              >
-                {busy ? "Starting…" : `Add ${willAffect} ${willAffect === 1 ? "person" : "people"}`}
+              <Button onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
+                {busy ? "Checking…" : `Review ${people(willAffect)}`}
               </Button>
             </>
           )}
@@ -396,25 +397,87 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   );
 };
 
-const RunningView: React.FC<{ created: number; total: number; semantics: "add" | "replace" }> = ({
-  created,
-  total,
-  semantics,
-}) => {
-  const pct = total > 0 ? Math.min(Math.round((created / total) * 100), 100) : 0;
-  return (
-    <div className="space-y-3 py-6">
-      <div className="flex items-center gap-2 text-sm">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Adding people… {created} of {total}
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-brown-100">
-        <div className="h-full bg-brown-400 transition-all" style={{ width: `${pct}%` }} />
-      </div>
-      <p className="text-xs text-muted-foreground">
-        You can keep this open — it finishes on its own.{" "}
-        {semantics === "add" ? "Already-assigned people are skipped." : "Existing assignments are reassigned."}
+/** Said plainly, where the reader chooses it: a filter here is a promise about the future too. */
+const LiveRuleNote: React.FC<{ temporal: boolean }> = ({ temporal }) => (
+  <div className="flex items-start gap-3 rounded-md bg-info-50 px-4 py-3 text-sm text-info-800" data-test="live-rule-note">
+    <Repeat className="mt-0.5 h-4 w-4 flex-none" />
+    <div>
+      <p className="m-0 font-medium">Everyone who matches now, and anyone who matches later.</p>
+      <p className="m-0">
+        Assigning by filter creates a live rule: people who start matching are assigned, and people who
+        stop matching lose only what the rule gave them. A value somebody set by hand is left alone.
+        {temporal ? " Each person gets it from the day they start matching — today for everyone who matches now." : ""}
       </p>
+    </div>
+  </div>
+);
+
+/** "N will be assigned, M skipped" — and why — before anything is written. */
+const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; noun: string; errorMessage?: string }> = ({
+  summary,
+  live,
+  noun,
+  errorMessage,
+}) => {
+  const lines = skipCountLines(summary.skippedByReason);
+  return (
+    <div className="space-y-4 px-1 py-6" data-test="assignment-preview">
+      <p className="m-0 text-base font-medium text-foreground">
+        {people(summary.willAssign)} will be assigned{summary.skipped > 0 ? `, ${summary.skipped} skipped` : ""}.
+      </p>
+      {lines.length > 0 && (
+        <ul className="m-0 list-none space-y-1 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+          {lines.map((l) => <li key={l.reason}>{l.text}</li>)}
+        </ul>
+      )}
+      {summary.conflicts > 0 && (
+        <p className="m-0 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
+          {people(summary.conflicts)} already {summary.conflicts === 1 ? "has" : "have"} a {noun} from another live
+          rule. That rule keeps it; this one does not overwrite it.
+        </p>
+      )}
+      {live ? (
+        <p className="m-0 text-sm text-muted-foreground">
+          This creates a live rule — everyone who matches now, and anyone who matches later. You can find
+          it, change it or switch it off in Settings → Automation.
+        </p>
+      ) : (
+        <p className="m-0 text-sm text-muted-foreground">
+          These people are assigned by hand, once. No rule takes a hand assignment away.
+        </p>
+      )}
+      <FormError message={errorMessage} />
+    </div>
+  );
+};
+
+const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> = ({ result, noun }) => {
+  const lines = skipCountLines(result.skippedByReason);
+  return (
+    <div className="space-y-4 px-1 py-6">
+      <div className="flex items-start gap-3">
+        <Check className="mt-0.5 h-5 w-5 flex-none text-success-600" />
+        <div>
+          <p className="m-0 font-medium text-foreground">
+            Live rule “{result.ruleName}” created.
+          </p>
+          <p className="m-0 mt-1 text-sm text-muted-foreground">
+            {people(result.appliedNow)} added to the {noun} now
+            {result.willAssign > result.appliedNow ? `, ${result.willAssign - result.appliedNow} more on their own date` : ""}.
+            Anyone who matches later is added too.
+          </p>
+        </div>
+      </div>
+      {lines.length > 0 && (
+        <ul className="m-0 list-none space-y-1 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+          {lines.map((l) => <li key={l.reason}>{l.text}</li>)}
+        </ul>
+      )}
+      <PermissionGate resource="SETTINGS.AUTOMATIONS" action="VIEW">
+        <Link href={`/settings/automation/automations/${result.ruleId}`} className="text-sm">
+          Open the Rule
+        </Link>
+      </PermissionGate>
     </div>
   );
 };
@@ -422,13 +485,9 @@ const RunningView: React.FC<{ created: number; total: number; semantics: "add" |
 /**
  * What the apply actually did.
  *
- * Three numbers, and the two that are not "created" carry their reasons. The manual path returns
- * `skipped[]` per person, so those get named or counted by reason; the segment job returns only a
- * count for skips, so it says the count and stops rather than inventing a reason for it.
- *
- * **A skip is not a failure and they are not shown alike.** "Already there" and "archived" are the
- * engine doing its job; a `failed` row is the engine unable to write, which is the only line here
- * anybody has to act on.
+ * Three numbers, and the two that are not "created" carry their reasons. **A skip is not a failure
+ * and they are not shown alike.** "Already there" and "archived" are the engine doing its job; a
+ * `failed` row is the engine unable to write, which is the only line here anybody has to act on.
  */
 const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, noun }) => {
   const { total, created, skipped, failed } = result.summary;
@@ -467,7 +526,7 @@ const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, no
             {(result.failed ?? []).map((f) => (
               <li key={f.userId}>
                 {f.email}
-                {f.errorDetail ? ` \u2014 ${f.errorDetail}` : ""}
+                {f.errorDetail ? ` — ${f.errorDetail}` : ""}
               </li>
             ))}
           </ul>

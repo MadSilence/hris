@@ -28,6 +28,8 @@ import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { UserStatusBadge } from "@/components/ui/StatusBadge";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { AssignmentHistoryList, HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
+import { assignableTypeOf } from "@/components/audience/assignment/assignableTypes";
 
 export interface AssignedUsersPanelProps {
   title?: string;
@@ -103,6 +105,9 @@ export default function AssignedUsersPanel({
   const [removingId, setRemovingId] = useState<string | null>(null);
   /** Unassign confirms — `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7. */
   const [removeTarget, setRemoveTarget] = useState<AssignedUser | null>(null);
+  /** Who had it when, by which rule or by hand — the same panel, a second view (ASSIGNMENT_PLAN 4.1). */
+  const [showHistory, setShowHistory] = useState(false);
+  const historyType = assign ? assignableTypeOf(assign.basePath) : undefined;
 
   const q = query ?? internalQuery;
   const setQuery = onQueryChange ?? setInternalQuery;
@@ -193,9 +198,12 @@ export default function AssignedUsersPanel({
 
       {/* Toolbar */}
       <div className="flex flex-none items-center justify-between gap-4">
-        <SearchBox value={q} onChange={setQuery}/>
+        {/* The search reads the roster; the history is its own list, newest first. */}
+        {showHistory ? <span/> : <SearchBox value={q} onChange={setQuery}/>}
 
         <div className="flex items-center gap-3">
+          {historyType ? <HistoryToggle showing={showHistory} onChange={setShowHistory}/> : null}
+
           {manageResource ? (
             <PermissionGate resource={manageResource} action={manageAction}>
               {assignButton}
@@ -223,7 +231,11 @@ export default function AssignedUsersPanel({
         </div>
       </div>
 
-      {isEmpty ? (
+      {showHistory && historyType && assign ? (
+        <div className={scrollClass} style={scrollStyle}>
+          <AssignmentHistoryList assignableType={historyType} assignableId={assign.assignableId}/>
+        </div>
+      ) : isEmpty ? (
         <div style={emptyStyle}>
           <ListEmptyState
             query={searching ? q : ""}

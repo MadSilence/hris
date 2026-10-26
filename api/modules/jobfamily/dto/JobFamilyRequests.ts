@@ -21,3 +21,8 @@ export type DuplicateJobFamilyRequest = {
 export type JobFamilyIdRequest = {
   id: string;
 };
+
+/** Absent or empty `restoreJobIds` restores the family alone. */
+export type ActivateJobFamilyRequest = JobFamilyIdRequest & {
+  restoreJobIds?: string[];
+};

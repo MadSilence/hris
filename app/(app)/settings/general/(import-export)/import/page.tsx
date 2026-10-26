@@ -1,7 +1,7 @@
 "use client";
 
-import { ComingSoonSettingsPage } from "@/components/modules/settings/components/ComingSoonSettingsPage";
+import { PeopleImportContainer } from "@/components/modules/settings/modules/peopleImport";
 
 export default function ImportSettingsPage() {
-  return <ComingSoonSettingsPage title="Import" withHeader={false} />;
+  return <PeopleImportContainer />;
 }

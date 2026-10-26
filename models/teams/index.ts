@@ -17,3 +17,4 @@ export type {
   TeamArchiveChildrenStrategy,
   TeamArchiveMembersStrategy,
 } from "./ArchiveTeamPayload";
+export type { ArchivedTeamUnit, TeamRestoreImpact } from "./TeamRestoreImpact";

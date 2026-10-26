@@ -62,6 +62,12 @@ import {
 } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/UpdateUserAvatarModal";
 import { useUploadUserAvatar } from "@/components/modules/organization/modules/profile/hooks/useUploadUserAvatar";
 import { useDeleteUserAvatar } from "@/components/modules/organization/modules/profile/hooks/useDeleteUserAvatar";
+import { useUserScheduledChanges } from "@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges";
+import {
+  PendingValue,
+  pendingSteps,
+  ScheduledChangesPanel,
+} from "@/components/modules/organization/modules/profile/components/ScheduledChanges";
 
 export type UserDataHeaderProps = {
   userId: string;
@@ -93,6 +99,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
   // Above the early return: hooks are counted per render.
   const canManageProfiles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
+  // Java lists only what this reader may act on, so a reader who may only view gets none.
+  const { data: scheduledChanges } = useUserScheduledChanges(userId);
 
   const localAvatarUrlRef = useRef<string | null>(null);
 
@@ -284,16 +292,22 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
             <div className="flex items-center gap-3 flex-wrap mt-3">
               {user.status && (
-                <Badge
-                  variant="outline"
-                  className={
-                    isActiveStatus(user.status)
-                      ? "border-success-200 bg-success-50 text-success-700"
-                      : ""
-                  }
+                <PendingValue
+                  steps={pendingSteps(scheduledChanges, "sys:status", [
+                    { id: user.status, name: formatUserStatus(user.status) },
+                  ])}
                 >
-                  {formatUserStatus(user.status)}
-                </Badge>
+                  <Badge
+                    variant="outline"
+                    className={
+                      isActiveStatus(user.status)
+                        ? "border-success-200 bg-success-50 text-success-700"
+                        : ""
+                    }
+                  >
+                    {formatUserStatus(user.status)}
+                  </Badge>
+                </PendingValue>
               )}
 
               {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
@@ -311,6 +325,14 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             </div>
 
             <LifecycleNote user={user} />
+
+            <div className="mt-2 -ml-2 empty:hidden">
+              <ScheduledChangesPanel
+                userId={user.id}
+                changes={scheduledChanges ?? []}
+                onChangedAction={() => refreshUser(user.id)}
+              />
+            </div>
           </div>
 
           {/*

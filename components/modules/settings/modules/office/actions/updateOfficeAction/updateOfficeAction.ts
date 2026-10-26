@@ -32,6 +32,8 @@ export type UpdateOfficeActionInput = {
   street: string;
   building: string;
   postCode: string;
+  /** A remote office: people working anywhere in its country. */
+  isRemote?: boolean;
   /** The version the form was opened with; a stale one comes back as E00409. */
   version?: number;
 };

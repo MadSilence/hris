@@ -21,6 +21,18 @@ const mockSetDirty = jest.fn();
 jest.mock("@/components/modules/organization/modules/profile/context/ProfileEditGuard", () => ({
   useProfileEditGuard: () => ({ setDirty: mockSetDirty, isDirty: false }),
 }));
+// Scheduled changes have their own tests (ScheduledChanges/); here nothing is scheduled.
+jest.mock("@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges", () => ({
+  useUserScheduledChanges: () => ({ data: [] }),
+}));
+// Provenance and the person's automation runs have their own tests; here there is neither.
+jest.mock("@/components/modules/automations/hooks", () => ({
+  useAssignmentProvenance: () => ({ data: undefined }),
+}));
+jest.mock("@/components/auth/useAccess", () => ({
+  ...jest.requireActual("@/components/auth/useAccess"),
+  useCanAccess: () => false,
+}));
 // The timeline has its own tests; here it only has to take its place among the sections.
 jest.mock("@/components/modules/organization/modules/profile/components/PositionHistoryPanel", () => ({
   PositionHistoryPanel: () => <div>Position timeline</div>,

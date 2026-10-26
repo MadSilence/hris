@@ -8,6 +8,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PolicyAssignmentWarning } from "./PolicyAssignmentWarning";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
+import { AssignmentHistoryList, HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
 
 import { useTimeOffPolicyAssignments } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffPolicyAssignments";
 import { useEndTimeOffPolicyAssignment } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useEndTimeOffPolicyAssignment";
@@ -71,6 +72,8 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   const [endingId, setEndingId] = useState<string | null>(null);
   const [showEnded, setShowEnded] = useState(false);
   const [endError, setEndError] = useState<string | null>(null);
+  /** Who was given the policy, by which rule or by hand, and when. */
+  const [showHistory, setShowHistory] = useState(false);
 
   const { data: assignments, isLoading, error } = useTimeOffPolicyAssignments({ policyId });
   const endMutation = useEndTimeOffPolicyAssignment();
@@ -129,6 +132,19 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   // assignment had ended — which is false, someone was assigned and it finished — and it took the
   // "Show N ended" toggle down with it, since that lives in the branch below. The one case where
   // the ended list is the only thing worth reading was the one case that hid it.
+  if (showHistory) {
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-3">
+        <div className="flex flex-none items-center justify-end">
+          <HistoryToggle showing={showHistory} onChange={setShowHistory} />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <AssignmentHistoryList assignableType="TIME_OFF_POLICY" assignableId={policyId} />
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoading && !error && active.length === 0 && ended.length === 0) {
     return (
       <>
@@ -141,6 +157,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             Assign this policy to people — individually or by segment — to give them this time off.
           </p>
           {assignButton && <div className="mt-5">{assignButton}</div>}
+          <HistoryToggle showing={showHistory} onChange={setShowHistory} className="mt-3" />
         </div>
         {assignModal}
       </>
@@ -165,7 +182,10 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             </Button>
           )}
         </div>
-        {assignButton}
+        <div className="flex items-center gap-2">
+          <HistoryToggle showing={showHistory} onChange={setShowHistory} />
+          {assignButton}
+        </div>
       </div>
 
       {endError && <p className="flex-none text-sm text-destructive">{endError}</p>}

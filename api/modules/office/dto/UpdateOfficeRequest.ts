@@ -9,6 +9,8 @@ export type UpdateOfficeRequest = {
   street?: string;
   building?: string;
   postCode?: string;
+  /** A remote office (people working anywhere in its country). Absent leaves it as it is. */
+  isRemote?: boolean;
   /** The version the form was opened with. */
   version?: number;
 };

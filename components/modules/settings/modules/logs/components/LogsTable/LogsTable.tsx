@@ -232,6 +232,20 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
         <Fact label="Device" value={row.userAgent}/>
       </dl>
 
+      {row.mentions && row.mentions.length > 0 && (
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-1 text-xs sm:grid-cols-2">
+          {row.mentions.map((m) => (
+            <div key={m.key} className="min-w-0">
+              <dt className="text-[11px] uppercase tracking-wide text-muted-foreground/70">{mentionLabel(m.key)}</dt>
+              <dd className="truncate text-foreground" title={m.id}>
+                {m.name ?? "Unknown"}
+                {m.gone && <span className="text-muted-foreground"> · deleted since</span>}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
       {Object.keys(rest).length > 0 && (
         <details className="text-xs">
           <summary className="cursor-pointer text-muted-foreground">Everything else the row carries</summary>
@@ -253,6 +267,33 @@ const Fact: React.FC<{ label: string; value: string | null }> = ({ label, value 
       </dd>
     </div>
   ) : null;
+
+/** What a mention's id key is, for a reader: `managerIdFrom` → "Manager (before)". */
+const MENTION_LABELS: Record<string, string> = {
+  policyId: "Policy",
+  categoryId: "Document category",
+  folderId: "Folder",
+  oldFolderId: "Folder (before)",
+  newFolderId: "Folder (after)",
+  levelId: "Level",
+  familyId: "Job family",
+  groupId: "Level group",
+  calendarId: "Holiday calendar",
+  leadId: "Lead",
+  managerIdFrom: "Manager (before)",
+  managerIdTo: "Manager (after)",
+  newManagerId: "New manager",
+  parentId: "Parent",
+  oldParentId: "Parent (before)",
+  assignableId: "Assigned to",
+  // The grantee of a shared saved view, one key per kind (PeopleViewActivityEvent).
+  granteeUserId: "Shared with",
+  teamId: "Team",
+  departmentId: "Department",
+  roleId: "Role",
+};
+
+const mentionLabel = (key: string): string => MENTION_LABELS[key] ?? humanise(key.replace(/Id/, ""));
 
 const humanise = (code: string | null): string => {
   if (!code) return "—";

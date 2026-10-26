@@ -9,7 +9,7 @@ import type {
   TimeOffOverlapDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { UpdateResponse } from "@/api/models/misc";
-import type { TimeOffRequest } from "@/models/timeOff";
+import type { TimeOffDecisionContext, TimeOffRequest } from "@/models/timeOff";
 
 export class HrisTimeOffRequestsService {
   public async create(
@@ -36,6 +36,10 @@ export class HrisTimeOffRequestsService {
 
   public async getById(id: string): Promise<TimeOffRequest> {
     return hrisApiTimeOffRequestsClient.getById(id);
+  }
+
+  public async getDecisionContext(id: string): Promise<TimeOffDecisionContext> {
+    return hrisApiTimeOffRequestsClient.getDecisionContext(id);
   }
 
   public async listAwaitingMe(): Promise<TimeOffRequest[]> {
@@ -80,6 +84,17 @@ export class HrisTimeOffRequestsService {
     body: RejectTimeOffRequestRequest
   ): Promise<UpdateResponse> {
     return hrisApiTimeOffRequestsClient.reject(id, body);
+  }
+
+  /** An administrator's decision over the chain — Approve Anyway, or Reject Anyway with a reason. */
+  public async decideAnyway(
+    id: string,
+    decision: "APPROVE" | "REJECT",
+    rejectionReason?: string,
+  ): Promise<UpdateResponse> {
+    return decision === "APPROVE"
+      ? hrisApiTimeOffRequestsClient.approveAnyway(id)
+      : hrisApiTimeOffRequestsClient.rejectAnyway(id, { rejectionReason: rejectionReason ?? "" });
   }
 }
 

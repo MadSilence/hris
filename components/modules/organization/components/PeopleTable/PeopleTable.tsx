@@ -275,7 +275,7 @@ export default function PeopleTable({
 
             {visibleColumns.map((column) => {
               // A system column sorts by its bare key, a custom attribute by `attr:<id>` — and only
-              // one with a single scalar value (peopleSort.SORTABLE_ATTRIBUTE_TYPES).
+              // where the backend marks the field `sortable`.
               const sortKey = sortKeyForColumn(column.id, metaById.get(column.id));
               const isSortable = !!sortKey;
               const isActive = !!active && !!sortKey && active.fieldId === sortKey;

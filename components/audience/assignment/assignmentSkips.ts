@@ -22,6 +22,10 @@ export function skipReasonText(reason: AssignmentSkipReason): string {
       return "no longer exists";
     case "INVALID_TARGET":
       return "cannot be assigned here";
+    case "HAND_OVERRIDE":
+      return "set by hand to something else";
+    case "RULE_CONFLICT":
+      return "another rule sets this for them";
     case "DOMAIN_ERROR":
     default:
       return "rejected by the system";
@@ -68,4 +72,25 @@ export function assignmentSkippedEverything(result: AssignmentApplyDTO | undefin
   if (result.created.length > 0) return null;
 
   return describeSkips(result.skipped);
+}
+
+/**
+ * Skips counted by reason — what a preview returns as `skippedByReason` — as lines in a fixed order,
+ * largest first, so "N will be assigned, M skipped" can say why without listing anybody.
+ */
+export function skipCountLines(
+  counts: Partial<Record<AssignmentSkipReason, number>> | null | undefined,
+): { reason: AssignmentSkipReason; count: number; text: string }[] {
+  return Object.entries(counts ?? {})
+    .map(([reason, count]) => ({ reason: reason as AssignmentSkipReason, count: count ?? 0 }))
+    .filter((line) => line.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .map((line) => ({ ...line, text: `${line.count} ${skipReasonText(line.reason)}` }));
+}
+
+/** The same counts, built from a per-person list when the response carries no tally of its own. */
+export function countSkips(skipped: AssignmentSkippedUser[] | null | undefined): Partial<Record<AssignmentSkipReason, number>> {
+  const out: Partial<Record<AssignmentSkipReason, number>> = {};
+  for (const user of skipped ?? []) out[user.reason] = (out[user.reason] ?? 0) + 1;
+  return out;
 }
