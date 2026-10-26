@@ -38,7 +38,8 @@ export type UserRefDTO = {
   id: string;
   firstName?: string | null;
   lastName?: string | null;
-  email: string;
+  /** Null when the reader may not see `sys:email` — the server masks it like every list of people. */
+  email: string | null;
   avatarUrl?: string | null;
   status?: string | null;
   extras?: Record<string, unknown> | null;

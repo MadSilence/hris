@@ -34,6 +34,18 @@ describe("UserCalendar — what a caller is told", () => {
     expect(onMonthChange).toHaveBeenLastCalledWith("2026-11");
   });
 
+  it("offers Today in the split toolbar only away from the current month", () => {
+    const onMonthChange = jest.fn();
+    renderCalendar({ toolbar: "split", onMonthChange });
+
+    expect(screen.queryByRole("button", { name: "Today" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Today" }));
+
+    expect(onMonthChange).toHaveBeenLastCalledWith("2026-10");
+    expect(screen.queryByRole("button", { name: "Today" })).not.toBeInTheDocument();
+  });
+
   it("draws only the weeks the month touches", () => {
     // October 2026 starts on a Thursday and ends on a Saturday: five rows, Mon 28 Sep – Sun 1 Nov.
     // The grid was a fixed six, which added a week that belonged entirely to November.

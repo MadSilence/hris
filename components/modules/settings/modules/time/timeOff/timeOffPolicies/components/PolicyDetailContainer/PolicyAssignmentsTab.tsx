@@ -168,9 +168,14 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-none items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <p className="text-sm text-muted-foreground">
-            {active.length} {active.length === 1 ? "person" : "people"} assigned
-          </p>
+          {/* A count while the list is still loading claimed "0 people assigned" for seconds. */}
+          {isLoading ? (
+            <Skeleton className="h-4 w-28" />
+          ) : error ? null : (
+            <p className="text-sm text-muted-foreground">
+              {active.length} {active.length === 1 ? "person" : "people"} assigned
+            </p>
+          )}
           {ended.length > 0 && (
             <Button
               variant="ghost"

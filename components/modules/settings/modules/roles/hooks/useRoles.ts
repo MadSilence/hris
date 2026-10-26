@@ -10,12 +10,14 @@ export { ROLES_QUERY_KEY };
 const getRoles = async (apiClient: InternalApiClient): Promise<Role[]> =>
   apiClient.get<Role[]>("/roles");
 
-export const useRoles = () => {
+/** @param enabled false holds the read back — for a reader who may be refused it until they act. */
+export const useRoles = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const {internalApiClient} = useAppDataContext();
 
   return useQuery<Role[]>({
     queryKey: rolesQueryKeys.roles(),
     queryFn: () => getRoles(internalApiClient),
+    enabled,
     /**
      * Reference data several components read at once, with an explicit invalidator beside it.
      *

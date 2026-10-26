@@ -90,7 +90,9 @@ export const DeleteProfileModal: FC<Props> = ({
             </ul>
             {impact.directReports > 0 ? (
               <p className="m-0 text-muted-foreground">
-                {plural(impact.directReports, "direct report moves", "direct reports move")} to {impact.reportsMoveTo ?? "no manager"}.
+                {impact.reportsMoveTo
+                  ? <>{plural(impact.directReports, "direct report moves", "direct reports move")} to {impact.reportsMoveTo}.</>
+                  : <>{plural(impact.directReports, "direct report is", "direct reports are")} left without a manager.</>}
               </p>
             ) : null}
           </div>

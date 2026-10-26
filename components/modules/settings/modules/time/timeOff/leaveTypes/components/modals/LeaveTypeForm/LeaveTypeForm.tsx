@@ -249,7 +249,7 @@ export const LeaveTypeForm: FC<Props> = ({
             </div>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            You&apos;ll add policies (quotas, accrual, approvals) inside this type after creating it.
+            Policies (quotas, accrual, approvals) live inside this type and are added on its page.
           </p>
         </aside>
       </div>

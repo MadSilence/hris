@@ -67,6 +67,8 @@ type Props = {
    */
   includeInactive?: boolean;
   onIncludeInactiveChange?: (next: boolean) => void;
+  /** The checkbox's words — "search" fits a picker, not an access scope, which reaches people. */
+  includeInactiveLabel?: string;
 };
 
 type Row = {
@@ -129,6 +131,7 @@ export const AudienceBuilder: React.FC<Props> = ({
   onChange,
   includeInactive = false,
   onIncludeInactiveChange,
+  includeInactiveLabel,
 }) => {
   const { access } = useAccess();
   // Only offer fields the caller can actually see (e.g. no JOBS.TITLE VIEW → no Job filter).
@@ -172,7 +175,7 @@ export const AudienceBuilder: React.FC<Props> = ({
             checked={includeInactive}
             onCheckedChange={(checked) => onIncludeInactiveChange(checked === true)}
           />
-          Also search non-active people
+          {includeInactiveLabel ?? "Also search non-active people"}
         </label>
       )}
 
@@ -392,9 +395,11 @@ const FieldPicker: React.FC<{
 }> = ({ fields, value, onChange, loading }) => {
   const [open, setOpen] = useState(false);
   const picked = fields.find((f) => f.key === value) ?? null;
-  const groups = FIELD_GROUP_ORDER.map((g) => ({ group: g, items: fields.filter((f) => f.group === g) })).filter(
-    (g) => g.items.length > 0,
-  );
+  // Alphabetical inside each group: the catalogue's own order is the registry's, which nobody reads by.
+  const groups = FIELD_GROUP_ORDER.map((g) => ({
+    group: g,
+    items: fields.filter((f) => f.group === g).sort((a, b) => a.label.localeCompare(b.label)),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

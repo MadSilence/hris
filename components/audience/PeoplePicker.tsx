@@ -139,14 +139,14 @@ export type PeoplePickerProps = {
 };
 
 function fullName(u: UserRefDTO) {
-  return `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
+  return `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "—";
 }
 
 function initials(u: UserRefDTO) {
   const a = (u.firstName ?? "").trim();
   const b = (u.lastName ?? "").trim();
   const i = (a ? a[0] : "") + (b ? b[0] : "");
-  return (i || (u.email[0] ?? "—")).toUpperCase();
+  return (i || (u.email?.[0] ?? "—")).toUpperCase();
 }
 
 export const PeoplePicker: React.FC<PeoplePickerProps> = ({

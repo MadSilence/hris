@@ -62,7 +62,10 @@ import {
 } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/UpdateUserAvatarModal";
 import { useUploadUserAvatar } from "@/components/modules/organization/modules/profile/hooks/useUploadUserAvatar";
 import { useDeleteUserAvatar } from "@/components/modules/organization/modules/profile/hooks/useDeleteUserAvatar";
-import { useUserScheduledChanges } from "@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges";
+import {
+  useInvalidateUserScheduledChanges,
+  useUserScheduledChanges,
+} from "@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges";
 import {
   PendingValue,
   pendingSteps,
@@ -101,6 +104,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const canManageProfiles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
   // Java lists only what this reader may act on, so a reader who may only view gets none.
   const { data: scheduledChanges } = useUserScheduledChanges(userId);
+  const invalidateScheduledChanges = useInvalidateUserScheduledChanges();
 
   const localAvatarUrlRef = useRef<string | null>(null);
 
@@ -511,7 +515,9 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             const res = await terminateUserAction({ userId: user.id, ...values });
             if (res.status === ActionStatus.SUCCESS) {
               setIsTerminateOpen(false);
-              await refreshUser(user.id);
+              // The termination is a scheduled change: without this the header kept reading "Active"
+              // with no "→ Archived from …" until a reload (walk of 2026-10-26).
+              await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
             } else {
               setLifecycleError(res.errorMessage ?? "Failed to terminate employment.");
             }
@@ -580,7 +586,13 @@ function LifecycleNote({ user }: { user: User }) {
   }
 
   if (parts.length === 0) return null;
-  return <p className="mt-2 text-sm text-muted-foreground">{parts.join(" · ")}</p>;
+  // The dates are written in the reader's locale, which the server does not know: it renders "Dec 21,
+  // 2026", the browser "21 Dec 2026", and React threw a hydration error over it (walk of 2026-10-26).
+  return (
+    <p className="mt-2 text-sm text-muted-foreground" suppressHydrationWarning>
+      {parts.join(" · ")}
+    </p>
+  );
 }
 
 function initialsOf(name: string) {

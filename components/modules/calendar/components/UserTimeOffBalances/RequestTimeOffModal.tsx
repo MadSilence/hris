@@ -199,7 +199,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
             <div>
               <DialogTitle className="text-lg">Request time off</DialogTitle>
-              <DialogDescription>Pick a policy and your dates — it goes to your approver.</DialogDescription>
+              <DialogDescription>Pick a policy and the dates — the request goes to the approver.</DialogDescription>
             </div>
           </div>
         </DialogHeader>

@@ -195,7 +195,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
       {editingCell && (
         <ScopeFilterModal
           isOpen
-          grantLabel={`${editingCell.resource} · ${editingCell.action}`}
+          grantLabel={grantLabel(editingCell.resource, editingCell.action)}
           value={scopeFilters[editingCell.resource]?.[editingCell.action]}
           onCancelAction={() => setEditingCell(null)}
           onConfirmAction={(segment) => {
@@ -221,4 +221,10 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
       />
     </Card>
   );
+}
+
+/** "People profiles · View", not the codes "PEOPLE.PROFILE · VIEW" (SWEEP_QUESTIONS S13). */
+function grantLabel(resource: ResourceCode, action: AccessAction): string {
+  const label = RESOURCE_GROUPS.flatMap((g) => g.resources).find((r) => r.code === resource)?.label ?? resource;
+  return `${label} · ${action.charAt(0)}${action.slice(1).toLowerCase()}`;
 }

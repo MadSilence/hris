@@ -290,7 +290,9 @@ const RefChips: React.FC<{ values?: { id: string; name: string }[] }> = ({ value
 const RolesCell: React.FC<{ user: User }> = ({ user }) => {
   const { mutate } = useSWRConfig();
   const [isOpen, setIsOpen] = useState(false);
-  const { data: allRoles } = useRoles();
+  // Read when the modal opens, not with the page: an employee viewing a profile may not list roles,
+  // and every profile visit used to be refused twice (SWEEP_QUESTIONS S2).
+  const { data: allRoles } = useRoles({ enabled: isOpen });
   const assignRoles = useAssignUserRolesAction();
 
   return (

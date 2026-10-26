@@ -265,6 +265,7 @@ export const UserCalendar: FC<Props> = ({
   const goNext = () =>
     setCursor((c) => (c.month === 11 ? { year: c.year + 1, month: 0 } : { ...c, month: c.month + 1 }));
   const goToday = () => setCursor({ year: today.getFullYear(), month: today.getMonth() });
+  const isCurrentMonth = cursor.year === today.getFullYear() && cursor.month === today.getMonth();
 
   const cellMinH = compact ? "min-h-[72px]" : "min-h-[104px]";
   const monthClass = compact ? "text-base font-semibold text-foreground" : "text-lg font-semibold text-foreground";
@@ -288,9 +289,16 @@ export const UserCalendar: FC<Props> = ({
             </Button>
           </div>
           {/* Its own row rather than a third thing in the stepper, which would push the month off
-              centre. No caller passes one today; this is so a later one is not silently dropped. */}
-          {headerAction ? (
-            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">{headerAction}</div>
+              centre. Today appears only away from the current month, where there is somewhere to go. */}
+          {headerAction || !isCurrentMonth ? (
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+              {!isCurrentMonth && (
+                <Button variant="outline" size="sm" onClick={goToday}>
+                  Today
+                </Button>
+              )}
+              {headerAction}
+            </div>
           ) : null}
         </div>
       ) : (

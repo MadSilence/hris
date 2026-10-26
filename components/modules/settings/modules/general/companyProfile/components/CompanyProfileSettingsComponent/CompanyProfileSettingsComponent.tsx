@@ -82,7 +82,9 @@ const TIMEZONE_OPTIONS: { value: string; label: string }[] = [
   { value: "Asia/Dubai", label: "GST — Dubai (UTC+4)" },
   { value: "Asia/Karachi", label: "PKT — Karachi, Tashkent (UTC+5)" },
   { value: "Asia/Kolkata", label: "IST — Delhi, Mumbai, Bengaluru (UTC+5:30)" },
-  { value: "Asia/Almaty", label: "ALMT — Almaty, Dhaka (UTC+6)" },
+  // Kazakhstan moved to a single zone, UTC+5, in March 2024; Dhaka stayed at UTC+6.
+  { value: "Asia/Almaty", label: "ALMT — Almaty, Astana (UTC+5)" },
+  { value: "Asia/Dhaka", label: "BDT — Dhaka (UTC+6)" },
   { value: "Asia/Bangkok", label: "ICT — Bangkok, Jakarta, Hanoi (UTC+7)" },
   { value: "Asia/Shanghai", label: "CST — Shanghai, Beijing (UTC+8)" },
   { value: "Asia/Singapore", label: "SGT — Singapore, Kuala Lumpur (UTC+8)" },

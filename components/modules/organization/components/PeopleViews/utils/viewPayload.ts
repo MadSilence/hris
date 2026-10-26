@@ -54,9 +54,11 @@ export function applyPayload(payload: ViewPayload, visibleFields: FieldDTO[]): A
 
   // The table's own list of sortable columns, not a copy — the copy was six columns long and dropped
   // a saved sort by hire date. An attribute sort needs the field among the reader's visible ones.
-  const sort =
-    payload.sort && isSortKeyAvailable(payload.sort.fieldId, visibleFields) ? payload.sort : null;
-  const droppedSort = payload.sort && !sort && payload.sort.fieldId.startsWith("attr:") ? 1 : 0;
+  // A sort with no field id — a view written by another client, or by hand — is no sort; it used to throw
+  // inside the click handler and leave the view highlighted but never applied (walk of 2026-10-26).
+  const sortField = typeof payload.sort?.fieldId === "string" ? payload.sort.fieldId : null;
+  const sort = payload.sort && sortField && isSortKeyAvailable(sortField, visibleFields) ? payload.sort : null;
+  const droppedSort = payload.sort && !sort && sortField?.startsWith("attr:") ? 1 : 0;
 
   return {
     columns,

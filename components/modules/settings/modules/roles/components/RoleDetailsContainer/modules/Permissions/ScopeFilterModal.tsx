@@ -63,6 +63,7 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
           onChange={setFilters}
           includeInactive={includeInactive}
           onIncludeInactiveChange={setIncludeInactive}
+          includeInactiveLabel="Also reach people who are not active"
         />
 
         {filters.length === 0 && (
