@@ -57,8 +57,9 @@ type Props = {
   selectedRange?: { start: string; end: string } | null;
   /**
    * The toolbar's shape. `grouped` — the month, `Today` and the arrows together on the left, the
-   * action on the right. `split` — an arrow at each edge with the month centred between them, and no
-   * `Today`: a stepper, for a grid read one month at a time.
+   * action on the right. `split` — an arrow at each edge with the month centred between them: a
+   * stepper, for a grid read one month at a time; `Today` sits in a row under it, shown only away
+   * from the current month.
    */
   toolbar?: "grouped" | "split";
   /** Extra content inside every day cell — Attendance draws the hours recorded on the day. */

@@ -48,7 +48,7 @@ const TOTALS: { key: NumericTotal; label: string; minutes: boolean }[] = [
 const COLUMNS = 6;
 
 /**
- * One person's log for a period (ATTENDANCE_REBUILD_PLAN batch 4) — opened from a row of the
+ * One person's log for a period (technical_documentation/ATTENDANCE.md § 8) — opened from a row of the
  * overview, read-only. Every expected day is listed and a missing one is marked; several spans on a day
  * are several lines under one date. Logging happens on the person's own profile, nowhere else.
  */

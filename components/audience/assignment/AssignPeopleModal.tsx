@@ -96,7 +96,7 @@ const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: strin
 const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
 
 /**
- * Assign people to one target — eight surfaces, one modal (ASSIGNMENT_PLAN 4.1, owner decision 7).
+ * Assign people to one target — eight surfaces, one modal (DECISIONS.md, 2026-10-16, decision 7).
  *
  * Two steps: pick, then **preview** ("N will be assigned, M skipped, and why") before Apply, on every
  * surface. Two modes, and they are different promises:

@@ -75,7 +75,7 @@ const HoursBadge: FC<{ minutes: number }> = ({ minutes }) => (
 );
 
 /**
- * The person's Attendance tab (ATTENDANCE_REBUILD_PLAN batch 5): their month on the left, the form on
+ * The person's Attendance tab (technical_documentation/ATTENDANCE.md § 8): their month on the left, the form on
  * the right, the picked days' entries underneath.
  *
  * **Only the person logs their own time** (the owner, 2026-09-28) — on their own profile, or somebody

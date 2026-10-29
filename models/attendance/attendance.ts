@@ -1,6 +1,6 @@
 /**
  * Attendance, as the backend sends it (`hris-api` `features/attendance`). Rebuilt 2026-09-28
- * (`ATTENDANCE_REBUILD_PLAN.md`).
+ * (`(claude)/technical_documentation/ATTENDANCE.md`).
  *
  * Durations are **minutes** everywhere; the screens spell them `H:MM` (`formatMinutes`). Dates are
  * `yyyy-MM-dd`, times of day `HH:mm`. Money is the amount owed (`AttendanceTotals.amounts`), from the

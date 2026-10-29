@@ -20,7 +20,7 @@ import { useAttendanceView } from "./useAttendanceView";
 const SEARCH_DEBOUNCE_MS = 300;
 
 /**
- * The Attendance overview (ATTENDANCE_REBUILD_PLAN batch 3): people — searched and filtered as on the
+ * The Attendance overview (technical_documentation/ATTENDANCE.md § 8): people — searched and filtered as on the
  * People table — over a month or a picked range, one row each. A row opens the person's log for the
  * same period, and the view survives the round trip because it lives in the URL.
  *

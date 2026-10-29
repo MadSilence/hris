@@ -108,7 +108,7 @@ export default function AssignedUsersPanel({
   const [removingId, setRemovingId] = useState<string | null>(null);
   /** Unassign confirms — `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7. */
   const [removeTarget, setRemoveTarget] = useState<AssignedUser | null>(null);
-  /** Who had it when, by which rule or by hand — the same panel, a second view (ASSIGNMENT_PLAN 4.1). */
+  /** Who had it when, by which rule or by hand — the same panel, a second view (DECISIONS.md, 2026-10-16, decision 7). */
   const [showHistory, setShowHistory] = useState(false);
   const historyType = assign ? assignableTypeOf(assign.basePath) : undefined;
 

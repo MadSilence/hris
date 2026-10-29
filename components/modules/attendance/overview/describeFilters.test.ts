@@ -18,7 +18,7 @@ const names = new Map([
 ]);
 
 describe("describeFilter — a reference field", () => {
-  // ATTENDANCE_REBUILD_PLAN 7.4: the preview said "2 selected" where it could say which.
+  // Found by the 2026-10-16 walk (HISTORY.md § "Attendance"): the preview said "2 selected" where it could say which.
   it("names the picked values once their catalogue is read", () => {
     expect(describeFilter({ field: "sys:office", op: "in", values: ["o1", "o2"] }, [office], names)).toBe(
       "Office is any of Berlin, Munich",
