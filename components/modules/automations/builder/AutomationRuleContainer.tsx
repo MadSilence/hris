@@ -334,9 +334,9 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   ) : null;
 
   const primary = readOnly ? null : saveOnly ? (
-    <Button onClick={() => void saveName()} disabled={!canPublish || publishing}>Save</Button>
+    <Button type="button" onClick={() => void saveName()} disabled={!canPublish || publishing}>Save</Button>
   ) : (
-    <Button
+    <Button type="button"
       onClick={() => { setPublishError(null); setPublishOpen(true); }}
       disabled={!canPublish || publishing || (!isNew && !definitionChanged)}
     >

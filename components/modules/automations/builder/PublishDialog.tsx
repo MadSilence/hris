@@ -164,8 +164,8 @@ export function PublishDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-          <Button
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>Cancel</Button>
+          <Button type="button"
             onClick={() => onConfirm({ inFlight: inFlightChoice, enable: canEnable && enable, backfill })}
             disabled={isLoading}
           >
@@ -208,8 +208,8 @@ export function EnableDialog({
         <EnableChoice value={backfill} onChange={setBackfill} pastMomentCount={pastMomentCount} />
         <FormError message={errorMessage} />
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-          <Button onClick={() => onConfirm(backfill)} disabled={isLoading}>{isLoading ? "Enabling…" : "Enable"}</Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>Cancel</Button>
+          <Button type="button" onClick={() => onConfirm(backfill)} disabled={isLoading}>{isLoading ? "Enabling…" : "Enable"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

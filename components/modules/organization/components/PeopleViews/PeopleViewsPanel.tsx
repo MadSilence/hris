@@ -107,7 +107,7 @@ export default function PeopleViewsPanel({
   if (collapsed) {
     return (
       <div className="flex flex-none flex-col items-center gap-2 border-l border-brown-200 pl-2 pt-1">
-        <Button variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Expand views panel">
+        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Expand views panel">
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <Bookmark className="h-4 w-4 text-muted-foreground" />
@@ -119,7 +119,7 @@ export default function PeopleViewsPanel({
     <div className="flex w-60 flex-none flex-col gap-3 border-l border-brown-200 pl-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">Saved Views</span>
-        <Button variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Collapse views panel">
+        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Collapse views panel">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
@@ -189,22 +189,22 @@ export default function PeopleViewsPanel({
 
       <div className="flex flex-col gap-1.5 border-t border-brown-200 pt-3">
         {activeView !== null && dirty && canSaveActive ? (
-          <Button size="sm" variant="outline" onClick={onUpdateActive} disabled={busy} className="justify-start gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={onUpdateActive} disabled={busy} className="justify-start gap-2">
             <Check className="h-4 w-4" />
             Save Changes
           </Button>
         ) : null}
         {activeView !== null && !canSaveActive ? (
-          <Button size="sm" variant="outline" onClick={onSaveActiveCopy} disabled={busy} className="justify-start gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={onSaveActiveCopy} disabled={busy} className="justify-start gap-2">
             <Copy className="h-4 w-4" />
             Save a Copy
           </Button>
         ) : null}
-        <Button size="sm" variant="outline" onClick={openSaveAs} disabled={busy} className="justify-start gap-2">
+        <Button type="button" size="sm" variant="outline" onClick={openSaveAs} disabled={busy} className="justify-start gap-2">
           <Plus className="h-4 w-4" />
           Save as New View
         </Button>
-        <Button size="sm" variant="ghost" onClick={onCopyLink} className="justify-start gap-2">
+        <Button type="button" size="sm" variant="ghost" onClick={onCopyLink} className="justify-start gap-2">
           <Link2 className="h-4 w-4" />
           Copy Link
         </Button>
@@ -223,10 +223,10 @@ export default function PeopleViewsPanel({
             className="h-9"
           />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialog(null)}>
+            <Button type="button" variant="ghost" onClick={() => setDialog(null)}>
               Cancel
             </Button>
-            <Button onClick={submitDialog} disabled={!name.trim()}>
+            <Button type="button" onClick={submitDialog} disabled={!name.trim()}>
               {dialog?.kind === "rename" ? "Rename" : "Save"}
             </Button>
           </DialogFooter>

@@ -45,6 +45,7 @@ export const useCurrentPeopleImport = () => {
     queryKey: peopleImportQueryKeys.current,
     queryFn: async () => (await internalApiClient.get<PeopleImportDTO | undefined>("/people-imports/current")) ?? null,
     refetchInterval: (query) => (query.state.data?.status === "APPLYING" ? 1500 : false),
+    refetchIntervalInBackground: true,
   });
 };
 

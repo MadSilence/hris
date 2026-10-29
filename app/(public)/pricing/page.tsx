@@ -50,7 +50,7 @@ export default function PricingPage() {
             </CardContent>
 
             <CardFooter>
-              <Button className="w-full">{t.cta}</Button>
+              <Button type="button" className="w-full">{t.cta}</Button>
             </CardFooter>
           </Card>
         ))}

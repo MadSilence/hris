@@ -92,6 +92,8 @@ export const useAssignmentJob = (basePath: string, id: string, jobId: string | n
       if (query.state.status === "error") return false;
       return 1500;
     },
+    // The dialog says it finishes on its own; it has to, in a background tab too (SWEEP Q6).
+    refetchIntervalInBackground: true,
   });
 
 export const useAssignmentRules = (basePath: string, id: string, page = 0, size = 20) =>

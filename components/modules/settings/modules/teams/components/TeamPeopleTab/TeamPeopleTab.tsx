@@ -69,7 +69,7 @@ export function TeamPeopleTab({
   /** Who was placed here, by which rule or by hand, and when: the roster's second view. */
   const [showHistory, setShowHistory] = useState(false);
 
-  const { items, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { items, total, limited, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, teamId, debouncedQuery, includeSubNodes);
 
   const handleRemove = async (userId: string) => {
@@ -139,12 +139,23 @@ export function TeamPeopleTab({
           <Users className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-medium text-brown-900">No people in this team yet</p>
-          <p className="mt-1 text-sm text-brown-400">Assign people to see them here.</p>
+          {limited && total > 0 ? (
+            // A roster is people data: the reader sees the team and its size, not people outside
+            // their access (decided 2026-10-27).
+            <>
+              <p className="text-sm font-medium text-brown-900">{total} {total === 1 ? "person" : "people"}, none you can see</p>
+              <p className="mt-1 text-sm text-brown-400">Only the people your access covers are listed.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-brown-900">No people in this team yet</p>
+              <p className="mt-1 text-sm text-brown-400">Assign people to see them here.</p>
+            </>
+          )}
         </div>
         <PermissionGate resource="ORG.TEAM" action="EDIT">
           {!isArchived && (
-            <Button size="sm" onClick={() => setAssignOpen(true)} className="mt-1 gap-1.5">
+            <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="mt-1 gap-1.5">
               <UserPlus className="h-4 w-4" />
               Add Member
             </Button>
@@ -164,7 +175,7 @@ export function TeamPeopleTab({
         <HistoryToggle showing={showHistory} onChange={setShowHistory} />
         <PermissionGate resource="ORG.TEAM" action="EDIT">
           {!isArchived && (
-            <Button size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">
+            <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">
               <UserPlus className="h-4 w-4" />
               Add Member
             </Button>
@@ -181,6 +192,10 @@ export function TeamPeopleTab({
           Show also from sub-teams
         </label>
       )}
+
+      {limited && !error ? (
+        <p className="flex-none text-xs text-muted-foreground">Only the people your access covers are listed.</p>
+      ) : null}
 
       {/* List (the only scroll area) */}
       <div ref={listRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto">

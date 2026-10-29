@@ -52,6 +52,16 @@ describe("InviteUserModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("hands the invitation as it now stands to the caller, so the header can show it at once", async () => {
+    const state = { accountStatus: "DRAFT", inviteSentAt: null, scheduledFor: "2026-11-02" };
+    (inviteUserAction as jest.Mock).mockResolvedValue({ status: ActionStatus.SUCCESS, data: state });
+    const { onInvited } = renderModal({ email: "ada@example.com" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    await waitFor(() => expect(onInvited).toHaveBeenCalledWith(state));
+  });
+
   it("does not resend the address already on record", async () => {
     renderModal({ email: "ada@example.com" });
 

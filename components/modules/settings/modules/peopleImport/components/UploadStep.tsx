@@ -49,7 +49,7 @@ export const UploadStep: React.FC = () => {
           One column per field you may fill, with lists to pick departments, offices, jobs and options from.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button
+          <Button type="button"
             variant="outline"
             size="sm"
             className="gap-1.5"
@@ -58,7 +58,7 @@ export const UploadStep: React.FC = () => {
             <FileSpreadsheet className="h-4 w-4" />
             Download XLSX Template
           </Button>
-          <Button
+          <Button type="button"
             variant="ghost"
             size="sm"
             onClick={() => void triggerExportDownload("/api/people-imports/template", "csv").catch(() => undefined)}
@@ -85,7 +85,7 @@ export const UploadStep: React.FC = () => {
             e.target.value = "";
           }}
         />
-        <Button className="mt-3 gap-1.5" disabled={upload.isPending} onClick={() => input.current?.click()}>
+        <Button type="button" className="mt-3 gap-1.5" disabled={upload.isPending} onClick={() => input.current?.click()}>
           <Upload className="h-4 w-4" />
           {upload.isPending ? "Reading the file…" : "Choose File"}
         </Button>

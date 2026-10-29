@@ -68,7 +68,7 @@ export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
       <Section title="Basics">
         <Row label="Unit" value={policy.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
         <Row label="Pay type" value={policy.paid ? "Paid" : "Unpaid"} />
-        <Row label="Visibility" value={policy.hiddenFromEmployees ? "Hidden from employees" : "Visible"} />
+        <Row label="Visibility" value={policy.hiddenFromEmployees ? "Private — colleagues see “Time off”" : "Leave type visible to colleagues"} />
         <Row label="Effective date" value={policy.effectiveDate} />
       </Section>
 

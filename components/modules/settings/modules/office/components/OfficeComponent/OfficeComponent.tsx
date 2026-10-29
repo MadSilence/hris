@@ -125,7 +125,7 @@ export const OfficeComponent: FC<Props> = ({
           archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
           secondary={
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
-              <Button
+              <Button type="button"
                 size="icon"
                 variant="outline"
                 aria-label="Export offices"
@@ -137,7 +137,7 @@ export const OfficeComponent: FC<Props> = ({
           }
           primary={
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
-              <Button onClick={openCreate} className="gap-1.5">
+              <Button type="button" onClick={openCreate} className="gap-1.5">
                 <Plus className="h-4 w-4"/>
                 Add Office
               </Button>

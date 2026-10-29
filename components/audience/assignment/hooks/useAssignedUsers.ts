@@ -45,6 +45,7 @@ export const useAssignedUsers = (
 
   const items: AssignedUser[] = query.data?.pages.flatMap((page) => page.items) ?? [];
   const total = query.data?.pages[0]?.total ?? 0;
+  const limited = query.data?.pages[0]?.limited ?? false;
 
-  return { ...query, items, total };
+  return { ...query, items, total, limited };
 };

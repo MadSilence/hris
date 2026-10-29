@@ -41,8 +41,8 @@ export default function ProductsPage() {
             </CardContent>
 
             <CardFooter className="flex flex-col gap-3 sm:flex-row">
-              <Button>Request demo</Button>
-              <Button variant="secondary">Learn more</Button>
+              <Button type="button">Request demo</Button>
+              <Button type="button" variant="secondary">Learn more</Button>
             </CardFooter>
           </Card>
         ))}

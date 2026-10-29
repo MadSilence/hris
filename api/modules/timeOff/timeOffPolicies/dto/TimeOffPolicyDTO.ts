@@ -13,7 +13,6 @@ export interface TimeOffPolicyDTO {
   leaveTypeId: string;
 
   name: string;
-  displayName: string;
   description: string | null;
 
   status: TimeOffPolicyStatus;

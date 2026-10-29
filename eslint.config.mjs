@@ -63,6 +63,15 @@ const eslintConfig = [
           selector: `TemplateElement[value.raw=${RAW_STATUS_HUE}]`,
           message: RAW_STATUS_HUE_MESSAGE,
         },
+        // A button with no `type` is a submit button inside any form it ends up in, and the vendored
+        // Button sets no default. It swallowed a step of the welcome once (NEED_TO_DISCUSS § 20); the
+        // owner chose this rule over changing the kit (2026-10-27). `react/button-has-type` sees only
+        // the native element, so the selector covers `<Button>` too. `asChild` renders its child's tag.
+        {
+          selector:
+            "JSXOpeningElement[name.name=/^(Button|button)$/]:not(:has(JSXAttribute[name.name='type'])):not(:has(JSXAttribute[name.name='asChild']))",
+          message: 'Give the button a type: type="button", or type="submit" for the one that submits its form.',
+        },
       ],
     },
   },

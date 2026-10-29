@@ -87,7 +87,7 @@ export function TaskList({ tasks, showAssignee, showSubject, onCompleteAction, c
             </div>
             <div className="shrink-0">
               {task.status === "OPEN" && task.kind === "CHECKLIST" && onCompleteAction && (canComplete?.(task) ?? true) && (
-                <Button size="sm" variant="outline" disabled={busyTaskId === task.id} onClick={() => onCompleteAction(task)}>
+                <Button type="button" size="sm" variant="outline" disabled={busyTaskId === task.id} onClick={() => onCompleteAction(task)}>
                   Mark Done
                 </Button>
               )}

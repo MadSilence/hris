@@ -42,7 +42,7 @@ export const CheckErrors: React.FC<Props> = ({ anImport, mode }) => {
             : `${list.length} ${list.length === 1 ? "row needs" : "rows need"} attention.`}
         </p>
         {mode === "check" && (
-          <Button
+          <Button type="button"
             variant="outline"
             size="sm"
             className="gap-1.5"

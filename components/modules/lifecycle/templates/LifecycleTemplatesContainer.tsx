@@ -68,7 +68,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
         archived={archivedCount > 0 ? { count: archivedCount, showing: showArchived, onChange: setShowArchived } : undefined}
         primary={
           <PermissionGate resource="PEOPLE.LIFECYCLE_TEMPLATES" action="EDIT">
-            <Button className="gap-1.5" onClick={() => setAdding(true)}>
+            <Button type="button" className="gap-1.5" onClick={() => setAdding(true)}>
               <Plus className="h-4 w-4" />
               Add Template
             </Button>

@@ -22,7 +22,7 @@ export default function OfficeAssignedUsersTab({ office }: { office: Office }) {
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
-  const { items, total, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { items, total, limited, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, office.id, q);
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
@@ -43,6 +43,7 @@ export default function OfficeAssignedUsersTab({ office }: { office: Office }) {
         onQueryChange={setQuery}
         rows={items}
         total={total}
+        limited={limited}
         isLoading={isLoading}
         error={error}
         isArchived={office.archived}

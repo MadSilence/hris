@@ -10,7 +10,7 @@ import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
 /**
  * Trades the refresh token for a new access token.
  *
- * Access tokens last 150 minutes and refresh tokens 30 days, so a working day used to end in a
+ * Access tokens last 30 minutes and refresh tokens 14 days, so a working day used to end in a
  * login screen with 29 days of validity unused — the endpoint existed on the backend and nothing
  * could reach it, because the refresh cookie never made it past this server. A bare cookie flow, so
  * it is a route handler rather than an action.

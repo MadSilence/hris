@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 
 import { TimeOffPoliciesSettingsComponent } from "../TimeOffPoliciesSettingsComponent";
 import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
+import { DuplicateTimeOffPolicyModal } from "../modals/DuplicateTimeOffPolicyModal";
+import { messageForError } from "@/lib/errors/errorMessages";
 import {
   PolicyWizardModal,
   buildAccrualRequest,
@@ -60,6 +62,8 @@ export default function TimeOffPoliciesSettingsContainer({
   const activateMutation = useActivateTimeOffPolicy();
   const archiveMutation = useArchiveTimeOffPolicy();
   const unarchiveMutation = useUnarchiveTimeOffPolicy();
+  const [duplicating, setDuplicating] = useState<TimeOffPolicy | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<TimeOffPolicy | null>(null);
   const deleteMutation = useDeleteTimeOffPolicy();
 
@@ -80,7 +84,6 @@ export default function TimeOffPoliciesSettingsContainer({
       // configured with half of what the person typed.
       await saveMutation.mutateAsync({
         id: policyId,
-        name: null,
         policy: buildUpdatePolicyRequest(values),
         requestRules: buildRequestRulesRequest(values),
         editRules: buildEditRulesRequest(values),
@@ -144,23 +147,23 @@ export default function TimeOffPoliciesSettingsContainer({
   };
 
   /**
-   * Copies the policy under a name nobody has to invent from scratch, as a draft.
-   *
-   * A prompt rather than a modal on purpose: the only thing to decide is the name, and a dialog for
-   * one text field is a dialog for the sake of having one. If it grows a second question it becomes
-   * a modal like the others.
+   * Copies the policy, as a draft, under a name proposed from the original's. A dialog rather than the
+   * native prompt it was: a refusal — a name already taken — stays beside the field (SWEEP S3).
    */
-  const handleDuplicate = async (policy: TimeOffPolicy) => {
-    const name = window.prompt(
-      "Name for the copy",
-      `${policy.displayName} (copy)`,
-    );
-    if (!name?.trim()) return;
 
+  const handleDuplicate = (policy: TimeOffPolicy) => {
+    setDuplicateError(null);
+    setDuplicating(policy);
+  };
+
+  const confirmDuplicate = async (name: string) => {
+    if (!duplicating) return;
+    setDuplicateError(null);
     try {
-      await duplicateMutation.mutateAsync({ id: policy.id, name: name.trim() });
+      await duplicateMutation.mutateAsync({ id: duplicating.id, name });
+      setDuplicating(null);
     } catch (error) {
-      showError(error);
+      setDuplicateError(messageForError(error));
     }
   };
 
@@ -206,6 +209,14 @@ export default function TimeOffPoliciesSettingsContainer({
         onCancelAction={() => setArchiveTarget(null)}
       />
 
+      <DuplicateTimeOffPolicyModal
+        isOpen={duplicating !== null}
+        isLoading={duplicateMutation.isPending}
+        sourceName={duplicating?.name}
+        errorMessage={duplicateError}
+        onCancelAction={() => setDuplicating(null)}
+        onConfirmAction={(name) => void confirmDuplicate(name)}
+      />
     </>
   );
 }

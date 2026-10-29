@@ -72,7 +72,7 @@ export const DocumentCategoriesContainer: FC = () => {
       <ListToolbar
         search={{ value: query, onChange: setQuery }}
         primary={
-          <Button
+          <Button type="button"
             className="bg-brown-600 text-white hover:bg-brown-700"
             onClick={() => setIsCreateOpen(true)}
           >
@@ -126,7 +126,7 @@ export const DocumentCategoriesContainer: FC = () => {
                 </span>
               ) : (
                 <div className="flex items-center gap-1">
-                  <Button
+                  <Button type="button"
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
@@ -135,7 +135,7 @@ export const DocumentCategoriesContainer: FC = () => {
                   >
                     <Pencil className="h-4 w-4"/>
                   </Button>
-                  <Button
+                  <Button type="button"
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"

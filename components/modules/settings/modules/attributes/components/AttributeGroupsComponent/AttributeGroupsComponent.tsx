@@ -426,7 +426,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
         <SearchBox value={query} onChange={setQuery}/>
 
         <div className="flex items-center gap-2">
-          <Button
+          <Button type="button"
             variant="ghost"
             size="sm"
             className="h-9 gap-1.5 text-brown-600"
@@ -438,13 +438,13 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
           </Button>
 
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-            <Button className="gap-1.5" onClick={onCreateGroup}>
+            <Button type="button" className="gap-1.5" onClick={onCreateGroup}>
               <Plus className="h-4 w-4"/>
               Add Section
             </Button>
           </PermissionGate>
 
-          <Button
+          <Button type="button"
             size="icon"
             variant="outline"
             className="h-9 w-9"
@@ -661,7 +661,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 </PermissionGate>
               </RowActionsMenu>
 
-              <Button
+              <Button type="button"
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-brown-600 hover:bg-brown-100"
@@ -676,7 +676,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
               </Button>
               </>
             ) : (
-              <Button
+              <Button type="button"
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-brown-600 hover:bg-brown-100"

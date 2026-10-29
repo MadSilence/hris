@@ -15,7 +15,7 @@ import { REFRESH_COOKIE } from "@/api/modules/auth/services/hrisAuthSessionServi
 const REFRESH_MAX_AGE_SECONDS = 14 * 24 * 60 * 60;
 
 /**
- * The access token's own lifetime is 150 minutes; the cookie is given the refresh window instead.
+ * The access token's own lifetime is 30 minutes; the cookie is given the refresh window instead.
  *
  * A cookie shorter than the session is what caused "Access denied" on a perfectly good session:
  * `access_token` and `has_session` had no `maxAge` at all, so they were *session* cookies — closing

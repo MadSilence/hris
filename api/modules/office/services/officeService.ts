@@ -37,7 +37,7 @@ export class OfficeService {
 
   public async archiveOffice(
     id: string,
-    strategy: "KEEP" | "UNASSIGN"
+    strategy: "KEEP"
   ): Promise<UpdatedEntity> {
     return hrisOfficeClient.archiveOffice(id, { assignedUsersStrategy: strategy });
   }

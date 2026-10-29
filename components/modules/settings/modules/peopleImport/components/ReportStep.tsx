@@ -33,7 +33,7 @@ export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
         <p className="text-sm text-muted-foreground">
           {people(anImport.createdCount)} had been created before it stopped. They are in the People table as drafts.
         </p>
-        <div><Button onClick={onStartAnother}>Import Another File</Button></div>
+        <div><Button type="button" onClick={onStartAnother}>Import Another File</Button></div>
       </div>
     );
   }
@@ -69,7 +69,7 @@ export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
 
       {offerInvitations && (
         <div>
-          <Button
+          <Button type="button"
             variant="outline"
             disabled={invite.isPending}
             onClick={() => {
@@ -86,7 +86,7 @@ export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
 
       {anImport.status === "COMPLETED_WITH_FAILURES" && <CheckErrors anImport={anImport} mode="report" />}
 
-      <div><Button onClick={onStartAnother}>Import Another File</Button></div>
+      <div><Button type="button" onClick={onStartAnother}>Import Another File</Button></div>
     </div>
   );
 };

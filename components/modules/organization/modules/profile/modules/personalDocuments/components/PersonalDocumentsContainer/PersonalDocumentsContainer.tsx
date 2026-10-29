@@ -217,7 +217,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
             <div className="ml-auto flex items-center gap-3">
               {canManage && (
-                <Button
+                <Button type="button"
                   variant={showTrash ? "secondary" : "outline"}
                   size="icon"
                   aria-label="Trash"

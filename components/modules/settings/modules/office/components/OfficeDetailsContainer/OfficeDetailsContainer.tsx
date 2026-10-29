@@ -262,7 +262,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 {isEditing ? (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
@@ -271,7 +271,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
@@ -279,26 +279,26 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                         Delete
                       </Button>
                     </PermissionGate>
-                    <Button
+                    <Button type="button"
                       variant="outline"
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={updateAction.isPending}>
+                    <Button type="button" onClick={handleSave} disabled={updateAction.isPending}>
                       Save changes
                     </Button>
                   </>
                 ) : isArchived ? (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button onClick={handleRestore} disabled={restoreAction.isPending}>
+                      <Button type="button" onClick={handleRestore} disabled={restoreAction.isPending}>
                         Unarchive
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
@@ -307,7 +307,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button
+                      <Button type="button"
                         size="icon"
                         variant="outline"
                         aria-label="Export office"
@@ -320,10 +320,10 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 ) : (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button onClick={handleEdit}>Edit</Button>
+                      <Button type="button" onClick={handleEdit}>Edit</Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button
+                      <Button type="button"
                         size="icon"
                         variant="outline"
                         aria-label="Export office"

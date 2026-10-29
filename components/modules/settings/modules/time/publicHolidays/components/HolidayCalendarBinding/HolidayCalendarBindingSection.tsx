@@ -60,7 +60,7 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
         </div>
         {!readOnly && (
           <PermissionGate allOf={writeChecks(kind)}>
-            <Button variant="outline" onClick={() => setIsOpen(true)} disabled={binding.isLoading}>
+            <Button type="button" variant="outline" onClick={() => setIsOpen(true)} disabled={binding.isLoading}>
               {current?.calendarId ? "Change" : "Set Calendar"}
             </Button>
           </PermissionGate>

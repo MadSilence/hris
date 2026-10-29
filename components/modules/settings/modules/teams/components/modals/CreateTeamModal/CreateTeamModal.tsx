@@ -113,8 +113,8 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           <FormError message={createTeam.error ? messageForError(createTeam.error) : null} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={createTeam.isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>
+          <Button type="button" onClick={() => formik.handleSubmit()} disabled={createTeam.isPending}>
             {createTeam.isPending ? "Adding…" : "Add"}
           </Button>
         </DialogFooter>

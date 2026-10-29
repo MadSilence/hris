@@ -15,6 +15,7 @@ import { DatePicker, dateToISO } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { inviteUserAction } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
+import type { InviteStateDTO } from "@/api/modules/users/clients/hrisApiUsersClient";
 
 type Props = {
   open: boolean;
@@ -25,7 +26,8 @@ type Props = {
   /** Somebody already invited gets a new link, and the old one stops working. */
   isResend?: boolean;
   onCloseAction: () => void;
-  onInvitedAction: () => void | Promise<void>;
+  /** Handed the invitation as it now stands, so the caller can show it without waiting for a refetch. */
+  onInvitedAction: (state: InviteStateDTO | null) => void | Promise<void>;
 };
 
 type Values = { email: string; when: "now" | "later"; sendOn: string; preboarding: "" | "KEEP" | "END" };
@@ -85,7 +87,7 @@ export function InviteUserModal({
         else setError(res.errorMessage ?? null);
         return;
       }
-      await onInvitedAction();
+      await onInvitedAction(res.data ?? null);
       onCloseAction();
     },
   });
@@ -194,10 +196,10 @@ export function InviteUserModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCloseAction} disabled={busy}>
+          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
             Cancel
           </Button>
-          <Button
+          <Button type="button"
             onClick={async () => {
               await formik.setTouched({ email: true, sendOn: true });
               formik.handleSubmit();

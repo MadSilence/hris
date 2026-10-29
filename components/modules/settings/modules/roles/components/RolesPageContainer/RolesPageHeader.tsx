@@ -35,13 +35,13 @@ export default function RolesPageHeader({
     <>
       <div className="flex items-center gap-2">
         <PermissionGate resource="ROLES.ROLE" action="EDIT">
-          <Button onClick={() => setAddOpen(true)} className="gap-1.5">
+          <Button type="button" onClick={() => setAddOpen(true)} className="gap-1.5">
             <Plus className="h-4 w-4"/>
             Add Role
           </Button>
         </PermissionGate>
 
-        <Button
+        <Button type="button"
           size="icon"
           variant="outline"
           onClick={() => setExportOpen(true)}

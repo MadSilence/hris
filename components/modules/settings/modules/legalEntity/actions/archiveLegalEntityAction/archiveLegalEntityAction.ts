@@ -4,7 +4,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { legalEntityService } from "@/api/modules/legalEntity/services/legalEntityService";
 import { toActionError } from "@/lib/errors/withActionError";
 
-export type AssignedUsersStrategy = "KEEP" | "UNASSIGN";
+export type AssignedUsersStrategy = "KEEP";
 
 export type ArchiveLegalEntityActionInput = {
   id: string;

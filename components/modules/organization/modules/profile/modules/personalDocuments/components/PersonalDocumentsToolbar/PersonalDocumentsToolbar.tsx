@@ -41,7 +41,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
     <div className="flex flex-1 items-center gap-3">
       <SearchBox value={search} onChange={onSearchChange}/>
 
-      <Button
+      <Button type="button"
         variant="outline"
         size="icon"
         aria-label="Show starred only"
@@ -54,7 +54,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       </Button>
 
       {showHrOnlyFilter && (
-        <Button
+        <Button type="button"
           variant="outline"
           size="icon"
           aria-label="Show HR-only documents"
@@ -70,7 +70,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       {canEdit && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="ml-auto bg-brown-600 text-white hover:bg-brown-700">
+            <Button type="button" className="ml-auto bg-brown-600 text-white hover:bg-brown-700">
               <Plus className="mr-2 h-4 w-4"/>
               Add
             </Button>

@@ -251,11 +251,11 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
 
       {conflict ? (
         <div className="flex items-center gap-2">
-          <Button size="sm" disabled={busy} onClick={dismissDrift}>
+          <Button type="button" size="sm" disabled={busy} onClick={dismissDrift}>
             <Shield className="h-4 w-4" />
             Keep Ours
           </Button>
-          <Button size="sm" variant="outline" disabled={busy} onClick={applyDrift}>
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={applyDrift}>
             <Check className="h-4 w-4" />
             Take Theirs
           </Button>
@@ -270,11 +270,11 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button size="sm" disabled={busy} onClick={applyDrift}>
+          <Button type="button" size="sm" disabled={busy} onClick={applyDrift}>
             <Check className="h-4 w-4" />
             Apply Changes
           </Button>
-          <Button size="sm" variant="outline" disabled={busy} onClick={dismissDrift}>
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={dismissDrift}>
             <X className="h-4 w-4" />
             Dismiss
           </Button>

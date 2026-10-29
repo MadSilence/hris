@@ -262,7 +262,7 @@ export function PublicHolidayCalendarNewPage() {
             title="New Public Holiday Calendar"
             backHref="/settings/time/public-holidays"
           />
-          <Button onClick={handleSubmit} disabled={!isFormValid || isLoading}>
+          <Button type="button" onClick={handleSubmit} disabled={!isFormValid || isLoading}>
             {isLoading ? "Saving…" : "Save"}
           </Button>
         </div>

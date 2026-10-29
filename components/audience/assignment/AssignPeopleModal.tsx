@@ -135,7 +135,9 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const assignableType = assignableTypeOf(basePath);
   const domain = DOMAIN_CONFIG[basePath];
-  const pickerColumns = domain?.column ? [domain.column] : undefined;
+  // A domain without its own column shows none. `undefined` fell back to the picker's default, the
+  // roles column, so assigning a leave policy or a job listed everybody's roles (SWEEP S4).
+  const pickerColumns = domain?.column ? [domain.column] : [];
   // "Not already assigned to this one" — which must keep people who are assigned to nothing at all,
   // hence includeEmpty. The picker only: see `liveSegment` for why the rule must not carry it.
   const exclusionFilters: FilterDTO[] = domain
@@ -370,23 +372,23 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
         <DialogFooter>
           {done ? (
-            <Button onClick={onCloseAction}>Done</Button>
+            <Button type="button" onClick={onCloseAction}>Done</Button>
           ) : step === "preview" ? (
             <>
-              <Button variant="outline" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
+              <Button type="button" variant="outline" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-              <Button onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
+              <Button type="button" onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
                 {busy ? "Applying…" : live ? "Create Live Rule" : `Add ${people(previewSummary?.willAssign ?? 0)}`}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={onCloseAction} disabled={busy}>
+              <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
                 Cancel
               </Button>
-              <Button onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
+              <Button type="button" onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
                 {busy ? "Checking…" : `Review ${people(willAffect)}`}
               </Button>
             </>

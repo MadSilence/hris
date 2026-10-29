@@ -165,10 +165,10 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => void onCheck()} disabled={busy || missingRequired.length > 0}>
+        <Button type="button" onClick={() => void onCheck()} disabled={busy || missingRequired.length > 0}>
           {check.isPending ? "Checking every row…" : checkedWithErrors ? "Check Again" : "Check File"}
         </Button>
-        <Button
+        <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}

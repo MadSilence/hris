@@ -130,6 +130,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
         requestsTo: reassign.requestsTo?.id ?? null,
         tasksTo: reassign.tasksTo?.id ?? null,
         policiesTo: reassign.policiesTo?.id ?? null,
+        processesTo: reassign.processesTo?.id ?? null,
       },
     });
   };

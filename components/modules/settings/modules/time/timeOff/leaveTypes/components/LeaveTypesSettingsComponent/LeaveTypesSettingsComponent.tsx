@@ -82,7 +82,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
   const hasLeaveTypes = leaveTypes.length > 0;
 
   const addButton = (
-    <Button className="gap-1.5" onClick={onCreateAction}>
+    <Button type="button" className="gap-1.5" onClick={onCreateAction}>
       <Plus className="h-4 w-4" />
       Add Leave Type
     </Button>

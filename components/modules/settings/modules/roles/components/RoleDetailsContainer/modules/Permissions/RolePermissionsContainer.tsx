@@ -146,17 +146,17 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
           <div className="flex flex-none flex-wrap items-center gap-2">
             <SearchBox value={query} onChange={setQuery}/>
 
-            <Button variant="ghost" size="sm" className="gap-1.5 text-brown-600" onClick={toggleAllGroups}>
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-brown-600" onClick={toggleAllGroups}>
               {allExpanded ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
               {allExpanded ? "Collapse all" : "Expand all"}
             </Button>
 
             {showFooter && (
               <>
-                <Button variant="outline" onClick={() => setDraft(serverDraft)} disabled={saving}>
+                <Button type="button" variant="outline" onClick={() => setDraft(serverDraft)} disabled={saving}>
                   Reset
                 </Button>
-                <Button onClick={() => setReviewOpen(true)} disabled={saving}>
+                <Button type="button" onClick={() => setReviewOpen(true)} disabled={saving}>
                   Review &amp; Save
                 </Button>
               </>

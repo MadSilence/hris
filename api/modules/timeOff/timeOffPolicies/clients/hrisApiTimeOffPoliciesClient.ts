@@ -1,7 +1,6 @@
 ﻿import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   CreateTimeOffPolicyRequest,
-  RenameTimeOffPolicyRequest,
   TimeOffPolicyDTO,
   SaveTimeOffPolicyRequest,
   TimeOffPolicyEditImpactDTO,
@@ -72,16 +71,6 @@ export class HrisApiTimeOffPoliciesClient {
   public async editImpact(id: string): Promise<TimeOffPolicyEditImpactDTO> {
     return hrisApiClient.get<TimeOffPolicyEditImpactDTO>(
       `${this.BASE_PATH}/${id}/edit-impact`
-    );
-  }
-
-  public async rename(
-    id: string,
-    body: RenameTimeOffPolicyRequest
-  ): Promise<UpdateResponse> {
-    return hrisApiClient.post<UpdateResponse>(
-      `${this.BASE_PATH}/${id}/rename`,
-      body as unknown as Record<string, unknown>
     );
   }
 

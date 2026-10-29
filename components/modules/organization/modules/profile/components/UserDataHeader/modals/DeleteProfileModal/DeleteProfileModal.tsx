@@ -103,11 +103,11 @@ export const DeleteProfileModal: FC<Props> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isBusy}>Cancel</AlertDialogCancel>
           {onTerminateInstead ? (
-            <Button variant="outline" disabled={isBusy} onClick={onTerminateInstead}>
+            <Button type="button" variant="outline" disabled={isBusy} onClick={onTerminateInstead}>
               Terminate Instead
             </Button>
           ) : null}
-          <Button
+          <Button type="button"
             className="bg-danger-600 text-white hover:bg-danger-700"
             disabled={isBusy || isLoading || Boolean(refusal)}
             onClick={onConfirm}

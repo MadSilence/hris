@@ -15,7 +15,7 @@ class HrisLegalEntityClient {
     return hrisApiClient.get<LegalEntityDTO[]>(`${this.BASE_PATH}?includeArchived=true`);
   }
 
-  public async archiveLegalEntity(id: string, payload: { assignedUsersStrategy: "KEEP" | "UNASSIGN" }) {
+  public async archiveLegalEntity(id: string, payload: { assignedUsersStrategy: "KEEP" }) {
     return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/archive`, payload)
   }
 

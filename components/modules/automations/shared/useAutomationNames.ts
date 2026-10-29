@@ -27,7 +27,7 @@ const usePolicyOptions = (enabled: boolean) => {
     enabled,
   });
   const options: ReferenceOption[] = useMemo(
-    () => (query.data ?? []).map((p) => ({ id: p.id, label: p.displayName || p.name })),
+    () => (query.data ?? []).map((p) => ({ id: p.id, label: p.name })),
     [query.data],
   );
   return { options, isLoading: query.isLoading };

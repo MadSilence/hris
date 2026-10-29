@@ -1,5 +1,5 @@
 import { applyPayload } from "./viewPayload";
-import type { FieldDTO } from "@/models/user/fields";
+import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import type { ViewPayload } from "@/models/peopleView";
 import { partialMock } from "@/test/types";
 
@@ -19,5 +19,17 @@ describe("applyPayload", () => {
 
     expect(applied.sort).toBeNull();
     expect(applied.columns.filter((c) => c.checked).map((c) => c.id)).toEqual(["sys:first_name", "sys:email"]);
+  });
+});
+
+describe("applyPayload — a stored view is cleaned on read", () => {
+  it("drops keys a filter no longer has, so a strict search body is not refused", () => {
+    const stored = {
+      columns: [],
+      filters: [{ field: "sys:status", op: "eq", value: "ACTIVE", legacyFlag: true } as unknown as FilterDTO],
+      sort: null,
+    };
+    const applied = applyPayload(stored, []);
+    expect(applied.filters).toEqual([{ field: "sys:status", op: "eq", value: "ACTIVE" }]);
   });
 });

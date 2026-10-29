@@ -61,7 +61,7 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
           {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires
               onOpenChange — adding a handler here called onRequestCloseAction twice per click. */}
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction disabled={isLoading || impactLoading} onClick={(event) => {
+          <AlertDialogAction disabled={isLoading || impactLoading} className="bg-danger-600 text-white hover:bg-danger-700" onClick={(event) => {
               event.preventDefault();
               onConfirmAction();
             }}>

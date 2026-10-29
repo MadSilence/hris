@@ -130,7 +130,7 @@ function LaneHeaders({ layout, readOnly, onAdd }: { layout: Layout; readOnly: bo
             )}
           </span>
           {!readOnly && (
-            <Button
+            <Button type="button"
               variant="ghost"
               size="icon"
               className="h-7 w-7 shrink-0"

@@ -164,10 +164,10 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={archiveTeam.isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={archiveTeam.isPending}>
             Cancel
           </Button>
-          <Button onClick={handleArchive} disabled={archiveTeam.isPending}>
+          <Button type="button" onClick={handleArchive} disabled={archiveTeam.isPending}>
             {archiveTeam.isPending ? "Archiving…" : "Archive"}
           </Button>
         </DialogFooter>

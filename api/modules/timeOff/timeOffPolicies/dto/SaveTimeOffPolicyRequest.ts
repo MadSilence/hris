@@ -16,8 +16,6 @@ import type { UpdateTimeOffPolicyApprovalSettingsRequest } from "@/api/modules/t
  * Every section is optional: omitting one leaves it as it is.
  */
 export interface SaveTimeOffPolicyRequest {
-  /** A new slug, when the policy is being renamed. */
-  name: string | null;
   policy: UpdateTimeOffPolicyRequest;
   requestRules?: UpdateTimeOffPolicyRequestRulesRequest;
   editRules?: UpdateTimeOffPolicyEditRulesRequest;

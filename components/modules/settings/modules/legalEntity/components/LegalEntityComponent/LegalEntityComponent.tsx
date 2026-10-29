@@ -126,7 +126,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
           archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
           secondary={
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-              <Button
+              <Button type="button"
                 size="icon"
                 variant="outline"
                 aria-label="Export legal entities"
@@ -138,7 +138,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
           }
           primary={
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-              <Button onClick={openCreate} className="gap-1.5">
+              <Button type="button" onClick={openCreate} className="gap-1.5">
                 <Plus className="h-4 w-4"/>
                 Add Legal Entity
               </Button>

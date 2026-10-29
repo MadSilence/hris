@@ -72,7 +72,7 @@ const openReview = async () => {
   );
   fireEvent.click(screen.getByText("Choose Template"));
   fireEvent.click(screen.getByRole("button", { name: "Review Tasks" }));
-  await screen.findByDisplayValue("Welcome call");
+  await screen.findByText("Welcome call");
 };
 
 describe("StartProcessModal", () => {
@@ -95,6 +95,31 @@ describe("StartProcessModal", () => {
       expect.objectContaining({ templateItemId: "i2", removed: false, assigneeKind: "SPECIFIC_USER", assigneeUserId: "u-new" }),
     ]);
     await waitFor(() => expect(push).toHaveBeenCalledWith("/processes/proc1"));
+  });
+
+  it("names every task by its title, with its kind beside", async () => {
+    await openReview();
+
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0]).toHaveTextContent("Say hello");
+    expect(rows[0]).toHaveTextContent("Checklist");
+    expect(rows[1]).toHaveTextContent("Welcome call");
+  });
+
+  it("renames a task on request and starts with the new title", async () => {
+    await openReview();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Rename Task" })[0]);
+    fireEvent.change(screen.getByLabelText("Task Title"), { target: { value: "Say hi" } });
+    fireEvent.keyDown(screen.getByLabelText("Task Title"), { key: "Enter" });
+    expect(screen.getByText("Say hi")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove Task" })[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+
+    await waitFor(() => expect(startProcessAction).toHaveBeenCalled());
+    const body = (startProcessAction as jest.Mock).mock.calls[0][0].body;
+    expect(body.items).toEqual(expect.arrayContaining([expect.objectContaining({ templateItemId: "i1", title: "Say hi" })]));
   });
 
   it("can remove the task instead", async () => {

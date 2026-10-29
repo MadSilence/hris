@@ -151,10 +151,10 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={deleteDepartment.isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={deleteDepartment.isPending}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteDepartment.isPending}>
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteDepartment.isPending}>
             {deleteDepartment.isPending ? "Deleting…" : "Delete"}
           </Button>
         </DialogFooter>

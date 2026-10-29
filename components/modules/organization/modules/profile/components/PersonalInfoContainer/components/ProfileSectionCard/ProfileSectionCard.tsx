@@ -37,7 +37,7 @@ export const SectionEditButton: React.FC<{ onClick: () => void; label: string }>
   onClick,
   label,
 }) => (
-  <Button
+  <Button type="button"
     variant="ghost"
     size="icon"
     className="h-7 w-7 text-brown-600 hover:bg-brown-100"

@@ -120,7 +120,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   );
 
   const assignButton = !isArchived && (
-    <Button size="sm" className="gap-1.5" onClick={() => setAssignOpen(true)}>
+    <Button type="button" size="sm" className="gap-1.5" onClick={() => setAssignOpen(true)}>
       <UserPlus className="h-4 w-4" />
       Assign people
     </Button>
@@ -177,7 +177,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             </p>
           )}
           {ended.length > 0 && (
-            <Button
+            <Button type="button"
               variant="ghost"
               size="sm"
               className="text-xs text-muted-foreground"

@@ -143,11 +143,8 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     if (!policy) return;
     const id = policy.id;
 
-    const newSlug = values.name.trim().toLowerCase().replace(/\s+/g, "-");
-
     await saveMutation.mutateAsync({
       id,
-      name: newSlug !== policy.name ? newSlug : null,
       policy: buildUpdatePolicyRequest(values),
       requestRules: buildRequestRulesRequest(values),
       editRules: buildEditRulesRequest(values),
@@ -208,7 +205,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
-        <SettingsPageHeader title={policy.displayName} backHref={listHref} />
+        <SettingsPageHeader title={policy.name} backHref={listHref} />
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
           <div className="flex items-center gap-2.5">
@@ -220,7 +217,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
 
           <div className="flex items-center gap-2">
             {isDraft && (
-              <Button
+              <Button type="button"
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
@@ -231,7 +228,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
               </Button>
             )}
             {policy.status === TimeOffPolicyStatus.Active && (
-              <Button
+              <Button type="button"
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
@@ -242,7 +239,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
               </Button>
             )}
             {isDraft && (
-              <Button
+              <Button type="button"
                 variant="outline"
                 size="sm"
                 className="gap-1.5 text-danger-600 hover:text-danger-700"
@@ -253,7 +250,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
               </Button>
             )}
             {!isArchived && (
-              <Button size="sm" className="gap-1.5" onClick={() => setIsEditOpen(true)}>
+              <Button type="button" size="sm" className="gap-1.5" onClick={() => setIsEditOpen(true)}>
                 <Pencil className="h-4 w-4" />
                 Edit
               </Button>
@@ -278,7 +275,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
         <TabsContent value="assignments" className="mt-5 min-h-0 flex-1 pb-6">
           <PolicyAssignmentsTab
             policyId={policy.id}
-            policyName={policy.displayName}
+            policyName={policy.name}
             isArchived={isArchived}
           />
         </TabsContent>

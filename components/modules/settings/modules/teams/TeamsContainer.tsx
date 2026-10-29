@@ -527,7 +527,7 @@ export default function TeamsContainer() {
         <CanvasMessage>
           <span>No teams yet.</span>
           <PermissionGate resource="ORG.TEAM" action="EDIT">
-            <Button size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
+            <Button type="button" size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
               <Plus className="h-4 w-4" />
               Create your first team
             </Button>

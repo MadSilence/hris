@@ -23,10 +23,6 @@ import {
   TimeOffPolicyRenewalType,
   TimeOffPolicyUnit,
 } from "@/api/modules/timeOff/timeOffPolicies/dto";
-import {
-  TimeOffCertificateRequirementType,
-  TimeOffRequestUnit,
-} from "@/api/modules/timeOff/timeOffPolicyRequestRules/dto";
 import { TimeOffPolicyApproverType } from "@/api/modules/timeOff/timeOffPolicyApprovalSettings/dto";
 import {
   TimeOffEligibilityDelayUnit,
@@ -174,8 +170,8 @@ export const BasicsStep: FC<StepProps> = ({ values, set }) => (
         onCheckedChange={(v) => set("paid", v)}
       />
       <ToggleField
-        label="Hidden from employees"
-        hint="Hide this policy from employee self-service views."
+        label="Private — colleagues see only “Time off”"
+        hint="On the company calendar and home, colleagues see that the person is away but not this leave type. The person, their manager and HR still see it. Employees also do not see the policy in the policy list."
         checked={values.hiddenFromEmployees}
         onCheckedChange={(v) => set("hiddenFromEmployees", v)}
       />
@@ -507,26 +503,10 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
     <StepIntro>Rules for how employees may request time off under this policy.</StepIntro>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Field
-        label="Minimum request unit"
-        htmlFor="wiz-minunit"
-        hint="Smallest bookable unit. Hours ⇒ hourly; Half day ⇒ half-days; Full day ⇒ whole days."
-      >
-        <Select
-          value={values.reqMinRequestUnit}
-          onValueChange={(v) => set("reqMinRequestUnit", v as TimeOffRequestUnit)}
-        >
-          <SelectTrigger id="wiz-minunit">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={TimeOffRequestUnit.FullDay}>Full day</SelectItem>
-            <SelectItem value={TimeOffRequestUnit.HalfDay}>Half day</SelectItem>
-            <SelectItem value={TimeOffRequestUnit.Hours}>Hours</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
+      {/* "Minimum request unit" and "Certificate / attachment" are not offered: both were stored and
+          nothing enforced them — every request is whole days, and leave has no attachments. They come
+          back with hourly leave and attachments (decided 2026-10-27, NEED_TO_DISCUSS § 17); the stored
+          values still round-trip untouched. */}
       <Field label="Min duration per request" htmlFor="wiz-mindur" hint="Optional (e.g. minimum a week).">
         <Input
           id="wiz-mindur"
@@ -633,42 +613,6 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
       </div>
     </div>
 
-    <div className="border-t border-brown-100 pt-5">
-      <Field label="Certificate / attachment" htmlFor="wiz-cert" hint="e.g. a doctor's note for sick leave.">
-        <Select
-          value={values.reqCertificateRequirementType}
-          onValueChange={(v) =>
-            set("reqCertificateRequirementType", v as TimeOffCertificateRequirementType)
-          }
-        >
-          <SelectTrigger id="wiz-cert">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={TimeOffCertificateRequirementType.None}>Not required</SelectItem>
-            <SelectItem value={TimeOffCertificateRequirementType.Always}>Always required</SelectItem>
-            <SelectItem value={TimeOffCertificateRequirementType.FromDuration}>
-              Required from a duration
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-      {values.reqCertificateRequirementType === TimeOffCertificateRequirementType.FromDuration && (
-        <div className="mt-4">
-          <Reveal>
-            <Field label="Required from (duration)" htmlFor="wiz-certdur">
-              <Input
-                id="wiz-certdur"
-                type="number"
-                min={0}
-                value={values.reqCertificateRequiredFromDuration}
-                onChange={(e) => set("reqCertificateRequiredFromDuration", e.currentTarget.value)}
-              />
-            </Field>
-          </Reveal>
-        </div>
-      )}
-    </div>
   </div>
 );
 

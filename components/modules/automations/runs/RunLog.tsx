@@ -54,12 +54,12 @@ function RunActions({ run, onDone }: { run: AutomationRun; onDone: () => void })
   return (
     <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
       {run.status === "FAILED" ? (
-        <Button variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("retry"); }}>
+        <Button type="button" variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("retry"); }}>
           <RotateCcw className="h-3.5 w-3.5" />
           Retry
         </Button>
       ) : (
-        <Button variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("cancel"); }}>
+        <Button type="button" variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("cancel"); }}>
           <XCircle className="h-3.5 w-3.5" />
           Cancel
         </Button>
@@ -205,9 +205,9 @@ export function RunLog({ ruleId }: { ruleId: string }) {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+          <Button type="button" variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</Button>
           <span className="text-sm text-muted-foreground">{page + 1} / {totalPages}</span>
-          <Button variant="outline" size="sm" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button type="button" variant="outline" size="sm" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
         </div>
       )}
     </div>

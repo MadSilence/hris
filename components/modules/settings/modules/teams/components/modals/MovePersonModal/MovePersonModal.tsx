@@ -98,10 +98,10 @@ export function MovePersonModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={isPending}>
+          <Button type="button" onClick={onConfirm} disabled={isPending}>
             {isPending ? "Saving…" : isRemoval ? "Remove" : "Confirm"}
           </Button>
         </DialogFooter>

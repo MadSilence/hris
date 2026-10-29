@@ -97,7 +97,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
     if (!q) return base;
     return base.filter((p) =>
-      [p.displayName, p.description, p.unit, p.paid ? "paid" : "unpaid"]
+      [p.name, p.description, p.unit, p.paid ? "paid" : "unpaid"]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q)),
     );
@@ -106,7 +106,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   const hasPolicies = policies.length > 0;
 
   const addPolicyButton = (
-    <Button className="gap-1.5" onClick={onCreateAction}>
+    <Button type="button" className="gap-1.5" onClick={onCreateAction}>
       <Plus className="h-4 w-4" />
       Add Policy
     </Button>
@@ -136,7 +136,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
           search={{ value: query, onChange: setQuery }}
           archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
           secondary={
-            <Button
+            <Button type="button"
               size="icon"
               variant="outline"
               aria-label="Export policies"
@@ -201,7 +201,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                         onClick={() => onOpenAction(policy)}
                       >
                         <TableCell className="py-3 pl-4">
-                          <span className="font-medium text-primary">{policy.displayName}</span>
+                          <span className="font-medium text-primary">{policy.name}</span>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {policy.unit === "DAYS" ? "Days" : "Hours"}

@@ -42,7 +42,7 @@ export const RowActionsMenu: React.FC<{
         without it is an unlabelled button to a screen reader, and two of the nineteen shipped that
         way. A required prop is the only version of this rule that cannot be forgotten.
       */}
-      <Button
+      <Button type="button"
         variant="ghost"
         size="icon"
         className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700 disabled:opacity-40"

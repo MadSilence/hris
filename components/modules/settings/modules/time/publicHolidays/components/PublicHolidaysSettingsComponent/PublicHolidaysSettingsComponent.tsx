@@ -253,7 +253,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const addCalendarMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="gap-1.5">
+        <Button type="button" className="gap-1.5">
           <Plus className="h-4 w-4" />
           Add Calendar
         </Button>
@@ -298,7 +298,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
             secondary={
               canManage ? (
-                <Button
+                <Button type="button"
                   size="icon"
                   variant="outline"
                   aria-label="Export calendars"
@@ -487,10 +487,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDuplicateTarget(null)} disabled={duplicate.isPending}>
+            <Button type="button" variant="outline" onClick={() => setDuplicateTarget(null)} disabled={duplicate.isPending}>
               Cancel
             </Button>
-            <Button onClick={confirmDuplicate} disabled={duplicate.isPending || !duplicateName.trim()}>
+            <Button type="button" onClick={confirmDuplicate} disabled={duplicate.isPending || !duplicateName.trim()}>
               {duplicate.isPending ? "Duplicating…" : "Duplicate"}
             </Button>
           </DialogFooter>
@@ -511,10 +511,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <FormError message={archive.error ? messageForError(archive.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setArchiveTarget(null)} disabled={archive.isPending}>
+            <Button type="button" variant="outline" onClick={() => setArchiveTarget(null)} disabled={archive.isPending}>
               Cancel
             </Button>
-            <Button onClick={confirmArchive} disabled={archive.isPending}>
+            <Button type="button" onClick={confirmArchive} disabled={archive.isPending}>
               {archive.isPending ? "Archiving…" : "Archive"}
             </Button>
           </DialogFooter>
@@ -534,10 +534,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <FormError message={restore.error ? messageForError(restore.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRestoreTarget(null)} disabled={restore.isPending}>
+            <Button type="button" variant="outline" onClick={() => setRestoreTarget(null)} disabled={restore.isPending}>
               Cancel
             </Button>
-            <Button onClick={confirmRestore} disabled={restore.isPending}>
+            <Button type="button" onClick={confirmRestore} disabled={restore.isPending}>
               {restore.isPending ? "Unarchiving…" : "Unarchive"}
             </Button>
           </DialogFooter>
@@ -559,14 +559,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             )}
           </div>
           <DialogFooter>
-            <Button
+            <Button type="button"
               variant="outline"
               onClick={() => setDeactivateTarget(null)}
               disabled={deactivate.isPending}
             >
               Cancel
             </Button>
-            <Button onClick={confirmDeactivate} disabled={deactivate.isPending}>
+            <Button type="button" onClick={confirmDeactivate} disabled={deactivate.isPending}>
               {deactivate.isPending ? "Deactivating…" : "Deactivate"}
             </Button>
           </DialogFooter>
@@ -609,10 +609,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <FormError message={remove.error ? messageForError(remove.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={remove.isPending}>
+            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} disabled={remove.isPending}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={remove.isPending || deleteImpact.isLoading}>
+            <Button type="button" variant="destructive" onClick={confirmDelete} disabled={remove.isPending || deleteImpact.isLoading}>
               {remove.isPending ? "Deleting…" : "Delete"}
             </Button>
           </DialogFooter>

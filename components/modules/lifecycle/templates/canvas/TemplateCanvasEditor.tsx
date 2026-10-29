@@ -329,7 +329,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         {!readOnly && view === "canvas" && (
           <Popover open={laneOpen} onOpenChange={setLaneOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-1.5">
+              <Button type="button" variant="outline" className="gap-1.5">
                 <UserPlus className="h-4 w-4" />
                 Add Lane
               </Button>
@@ -353,7 +353,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         )}
 
         {!readOnly && (
-          <Button onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
+          <Button type="button" onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
         )}
 
         {canManage && (

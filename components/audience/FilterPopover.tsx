@@ -40,7 +40,7 @@ export const FilterPopover: React.FC<Props> = ({ fields, isLoadingFields, value,
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 gap-1.5">
+        <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
           <FilterIcon className="h-4 w-4"/>
           Filter
           {value.length > 0 ? (
@@ -51,8 +51,8 @@ export const FilterPopover: React.FC<Props> = ({ fields, isLoadingFields, value,
       <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
         <AudienceBuilder key={seed} fields={fields} isLoadingFields={isLoadingFields} value={draft} onChange={setDraft}/>
         <div className="mt-3 flex items-center justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setDraft([])}>Reset</Button>
-          <Button
+          <Button type="button" variant="ghost" size="sm" onClick={() => setDraft([])}>Reset</Button>
+          <Button type="button"
             size="sm"
             onClick={() => {
               onChange(draft);

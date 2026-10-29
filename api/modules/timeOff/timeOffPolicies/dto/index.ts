@@ -7,7 +7,6 @@ export * from "./TimeOffPolicyCountingMode";
 export * from "./TimeOffPolicyEntitlementMode";
 export * from "./TimeOffPolicyRenewalType";
 export * from "./TimeOffPolicyDTO";
-export * from "./RenameTimeOffPolicyRequest";
 export * from "./CreateTimeOffPolicyRequest";
 export * from "./UpdateTimeOffPolicyRequest";
 

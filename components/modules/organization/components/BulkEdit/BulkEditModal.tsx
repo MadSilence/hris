@@ -290,10 +290,10 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
           {outOfScope ? (
             <>
               {/* Back to the selection, rather than a dead end. */}
-              <Button variant="ghost" onClick={() => setOutOfScope(null)} disabled={bulkEdit.isPending}>
+              <Button type="button" variant="ghost" onClick={() => setOutOfScope(null)} disabled={bulkEdit.isPending}>
                 Back to selection
               </Button>
-              <Button onClick={() => doSubmit(true)} disabled={bulkEdit.isPending || !outOfScope.allowedCount}>
+              <Button type="button" onClick={() => doSubmit(true)} disabled={bulkEdit.isPending || !outOfScope.allowedCount}>
                 {bulkEdit.isPending
                   ? "Applying…"
                   : `Apply to ${outOfScope.allowedCount} allowed`}
@@ -301,10 +301,10 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             </>
           ) : (
             <>
-              <Button variant="ghost" onClick={onClose} disabled={busy}>
+              <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
                 Cancel
               </Button>
-              <Button onClick={onApply} disabled={!canSubmit}>
+              <Button type="button" onClick={onApply} disabled={!canSubmit}>
                 {bulkEdit.isPending ? "Applying…" : isStatus && confirming ? "Confirm" : "Apply"}
               </Button>
             </>

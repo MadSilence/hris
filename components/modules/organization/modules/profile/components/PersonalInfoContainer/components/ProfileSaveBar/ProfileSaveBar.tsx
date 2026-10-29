@@ -49,10 +49,10 @@ export const ProfileSaveBar: React.FC<Props> = ({
             {error}
           </span>
         )}
-        <Button variant="outline" size="sm" onClick={onDiscard} disabled={isSaving}>
+        <Button type="button" variant="outline" size="sm" onClick={onDiscard} disabled={isSaving}>
           Discard
         </Button>
-        <Button size="sm" onClick={onSave} disabled={isSaving || saveBlocked || changeCount === 0}>
+        <Button type="button" size="sm" onClick={onSave} disabled={isSaving || saveBlocked || changeCount === 0}>
           {isSaving ? "Saving…" : "Save"}
         </Button>
       </div>

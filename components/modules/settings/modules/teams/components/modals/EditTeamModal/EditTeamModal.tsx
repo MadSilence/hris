@@ -163,10 +163,10 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={busy}>
+          <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
             {busy ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>

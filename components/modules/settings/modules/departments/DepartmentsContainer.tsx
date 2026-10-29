@@ -513,7 +513,7 @@ export default function DepartmentsContainer() {
         <CanvasMessage>
           <span>No departments yet.</span>
           <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
-            <Button size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
+            <Button type="button" size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
               <Plus className="h-4 w-4" />
               Create your first department
             </Button>

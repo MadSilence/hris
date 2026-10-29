@@ -46,6 +46,8 @@ export interface AssignedUsersPanelProps {
    */
   error?: unknown;
   total?: number;
+  /** The reader sees only the people their access covers — `total` may count more than the rows. */
+  limited?: boolean;
   query?: string;
   onQueryChange?: (value: string) => void;
   secondaryColumn?: { header: string; render: (user: AssignedUser) => ReactNode };
@@ -84,6 +86,7 @@ export default function AssignedUsersPanel({
   isLoading = false,
   error,
   total,
+  limited = false,
   query,
   onQueryChange,
   hasMore = false,
@@ -150,7 +153,7 @@ export default function AssignedUsersPanel({
   };
 
   const assignButton = (
-    <Button
+    <Button type="button"
       className="gap-1.5"
       onClick={() => setAssignOpen(true)}
       disabled={!assign || isArchived}
@@ -178,6 +181,9 @@ export default function AssignedUsersPanel({
         {error ? null : <span className="font-normal text-brown-400"> ({total ?? rows.length})</span>}
       </h2>
       <p className="text-sm text-muted-foreground">{description}</p>
+      {limited && !error ? (
+        <p className="text-xs text-muted-foreground">Only the people your access covers are listed.</p>
+      ) : null}
     </div>
   );
 
@@ -219,7 +225,7 @@ export default function AssignedUsersPanel({
             * the reader concludes the export is broken rather than that it is not offered here.
             */}
           {onExport ? (
-            <Button
+            <Button type="button"
               size="icon"
               variant="outline"
               aria-label="Export"
@@ -240,8 +246,10 @@ export default function AssignedUsersPanel({
           <ListEmptyState
             query={searching ? q : ""}
             icon={<Users className="h-7 w-7"/>}
-            title="No people assigned yet"
-            description="Assign people to this record to see them here."
+            title={limited && (total ?? 0) > 0 ? "No one you can see" : "No people assigned yet"}
+            description={limited && (total ?? 0) > 0
+              ? "People are assigned here, but none of them is someone your access covers."
+              : "Assign people to this record to see them here."}
             noResultsHint="Try a different name or position."
             /* An archived record takes no new people, so the block is a panel rather than a
                button — a control that cannot work is not offered. */
@@ -332,7 +340,7 @@ export default function AssignedUsersPanel({
 
           {hasMore ? (
             <div className="flex justify-center py-3">
-              <Button variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+              <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
                 {isLoadingMore ? "Loading…" : "Load more"}
               </Button>
             </div>

@@ -27,6 +27,7 @@ export default function RoleDetailsContainer({ roleId }: RoleDetailsContainerPro
       roleId={roleId}
       roleName={role?.name}
       isDefaultRole={role?.isDefault ?? false}
+      isSystemOwnerRole={role?.systemOwner ?? false}
       isArchived={role?.archived ?? false}
       isLoading={isLoading}
     />

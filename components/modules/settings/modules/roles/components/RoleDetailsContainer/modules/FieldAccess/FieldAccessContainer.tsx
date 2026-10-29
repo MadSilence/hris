@@ -124,7 +124,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
           <div className="flex flex-none flex-wrap items-center gap-2">
             <SearchBox value={query} onChange={setQuery}/>
 
-            <Button
+            <Button type="button"
               variant="ghost"
               size="sm"
               className="gap-1.5 text-brown-600"
@@ -136,10 +136,10 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
 
             {showActions && (
               <>
-                <Button variant="outline" onClick={() => setDraft(serverDraft)} disabled={saving}>
+                <Button type="button" variant="outline" onClick={() => setDraft(serverDraft)} disabled={saving}>
                   Reset
                 </Button>
-                <Button onClick={() => setReviewOpen(true)} disabled={saving}>
+                <Button type="button" onClick={() => setReviewOpen(true)} disabled={saving}>
                   Review &amp; Save
                 </Button>
               </>

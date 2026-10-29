@@ -12,7 +12,6 @@ jest.mock("@/api/modules/timeOff/timeOffPolicies/clients/", () => ({
     list: jest.fn(),
     getById: jest.fn(),
     update: jest.fn(),
-    rename: jest.fn(),
     activate: jest.fn(),
     archive: jest.fn(),
     delete: jest.fn(),
@@ -67,21 +66,6 @@ describe("HrisTimeOffPoliciesService", () => {
     const result = await hrisTimeOffPoliciesService.update("policy-id", request);
 
     expect(hrisApiTimeOffPoliciesClient.update).toHaveBeenCalledWith("policy-id", request);
-    expect(result).toEqual(response);
-  });
-
-  it("delegates rename to client", async () => {
-    const response = { id: "policy-id", version: 1 };
-
-    jest.mocked(hrisApiTimeOffPoliciesClient.rename).mockResolvedValue(response);
-
-    const result = await hrisTimeOffPoliciesService.rename("policy-id", {
-      name: "new-name",
-    });
-
-    expect(hrisApiTimeOffPoliciesClient.rename).toHaveBeenCalledWith("policy-id", {
-      name: "new-name",
-    });
     expect(result).toEqual(response);
   });
 

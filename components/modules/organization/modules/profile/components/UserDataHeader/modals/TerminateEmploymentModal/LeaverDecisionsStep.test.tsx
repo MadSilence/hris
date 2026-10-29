@@ -74,6 +74,7 @@ describe("LeaverDecisionsStep", () => {
       requestsTo: { id: "erin", firstName: "Erin" },
       tasksTo: null,
       policiesTo: null,
+      processesTo: null,
     });
     expect(screen.getByTestId("picker-reassign-requestsTo")).toHaveTextContent("picked erin");
     // The default is no longer what happens to that group, so it is not said any more.
@@ -92,5 +93,23 @@ describe("LeaverDecisionsStep", () => {
     expect(screen.getByText(/they wait for an administrator/)).toBeInTheDocument();
     expect(hasLeaverDecisions({ requests: [], tasks: [], policies: [] })).toBe(false);
     expect(hasLeaverDecisions(null)).toBe(false);
+  });
+
+  it("lists the processes the leaver manages, defaulting to their own manager (WALK_QUESTIONS § 18)", () => {
+    const withProcesses: LeaverDecisionsDTO = {
+      requests: [],
+      tasks: [],
+      policies: [],
+      processes: [
+        { processId: "p1", type: "ONBOARDING", subject: { id: "ab", name: "Abigail Young" }, defaultManager: { id: "m", name: "Mia Manager" } },
+      ],
+    };
+    expect(hasLeaverDecisions(withProcesses)).toBe(true);
+    render(<LeaverDecisionsStep fullName="Julian" decisions={withProcesses} value={NO_REASSIGNMENT} onChange={jest.fn()} />);
+
+    const group = screen.getByTestId("leaver-group-processesTo");
+    expect(within(group).getByText("Processes They Manage (1)")).toBeInTheDocument();
+    expect(within(group).getByText("Onboarding of Abigail Young")).toBeInTheDocument();
+    expect(within(group).getByText(/Unchosen, they go to Mia Manager, their manager/)).toBeInTheDocument();
   });
 });

@@ -69,10 +69,10 @@ export function MoveDepartmentModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={isPending}>
+          <Button type="button" onClick={onConfirm} disabled={isPending}>
             {isPending ? "Moving…" : target ? "Move department" : "Make top-level"}
           </Button>
         </DialogFooter>

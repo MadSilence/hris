@@ -14,11 +14,12 @@ export interface RoleDetailsViewProps {
   roleId: string;
   roleName?: string;
   isDefaultRole?: boolean;
+  isSystemOwnerRole?: boolean;
   isArchived?: boolean;
   isLoading?: boolean;
 }
 
-export default function RoleDetailsView({ roleId, roleName, isDefaultRole = false, isArchived = false, isLoading = false }: RoleDetailsViewProps) {
+export default function RoleDetailsView({ roleId, roleName, isDefaultRole = false, isSystemOwnerRole = false, isArchived = false, isLoading = false }: RoleDetailsViewProps) {
   // Counts loaded rows — the backend has no total yet, so this grows as pages load.
   const { items: assignedUsers, isLoading: assignedLoading } = useRoleUsers(roleId, null);
   const assignedCount = assignedLoading ? undefined : assignedUsers.length;
@@ -50,7 +51,7 @@ export default function RoleDetailsView({ roleId, roleName, isDefaultRole = fals
         </TabsList>
 
         <TabsContent value="assigned" className="mt-8">
-          <AssignedUsersModule roleId={roleId} roleName={roleName} isDefaultRole={isDefaultRole} isArchived={isArchived} isLoading={isLoading}/>
+          <AssignedUsersModule roleId={roleId} roleName={roleName} isDefaultRole={isDefaultRole} isSystemOwnerRole={isSystemOwnerRole} isArchived={isArchived} isLoading={isLoading}/>
         </TabsContent>
 
         <TabsContent value="permissions" className="mt-8">

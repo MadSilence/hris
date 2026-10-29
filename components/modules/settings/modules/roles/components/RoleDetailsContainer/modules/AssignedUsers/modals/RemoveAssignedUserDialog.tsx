@@ -18,10 +18,16 @@ import { AlertTriangle } from "lucide-react";
 export default function RemoveAssignedUserDialog({
   trigger,
   userLabel,
+  removingOwnOwnerRole = false,
   onConfirm,
 }: {
   trigger: React.ReactNode;
   userLabel: string;
+  /**
+   * Taking the System Owner role off yourself: allowed while another owner exists (the last one is
+   * refused, R00005), and then the dialog says it is you and that you will be signed out (SWEEP Q2).
+   */
+  removingOwnOwnerRole?: boolean;
   onConfirm: () => Promise<unknown> | void;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -62,7 +68,9 @@ export default function RemoveAssignedUserDialog({
             <div>
               <h4 className="font-medium text-danger-800 mb-1">Warning</h4>
               <p className="text-sm text-danger-700">
-                The user will lose the access granted by this role until it is assigned again.
+                {removingOwnOwnerRole
+                  ? "This is you. You will lose the System Owner role and be signed out at once; another owner can give it back."
+                  : "The user will lose the access granted by this role until it is assigned again."}
               </p>
             </div>
           </div>

@@ -186,7 +186,7 @@ export const JobLevelCard: FC<Props> = ({
           { resource: "JOBS.LEVEL", action: "EDIT" },
         ]}
       >
-        <Button
+        <Button type="button"
           variant="ghost"
           className="group mt-1 w-full justify-between px-2 text-brown-600 hover:bg-brown-50 hover:text-brown-700"
           onClick={onToggleManaging}
@@ -237,7 +237,7 @@ const LevelActions: FC<LevelActionsProps> = ({
   onDelete,
 }) => (
   <div className="flex shrink-0 items-center">
-    <Button
+    <Button type="button"
       variant="ghost"
       size="icon"
       className="h-7 w-7 text-brown-500 hover:bg-brown-100"
@@ -248,7 +248,7 @@ const LevelActions: FC<LevelActionsProps> = ({
       <ChevronUp className="h-4 w-4"/>
     </Button>
 
-    <Button
+    <Button type="button"
       variant="ghost"
       size="icon"
       className="h-7 w-7 text-brown-500 hover:bg-brown-100"

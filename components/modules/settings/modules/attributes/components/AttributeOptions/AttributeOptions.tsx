@@ -345,10 +345,10 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       </div>
 
       <div className="mt-6 flex justify-end gap-2 border-t border-brown-100 pt-4">
-        <Button variant="outline" onClick={cancel} disabled={isSaving}>
+        <Button type="button" variant="outline" onClick={cancel} disabled={isSaving}>
           Cancel
         </Button>
-        <Button onClick={save} disabled={isPreset || !name.trim() || isSaving}>
+        <Button type="button" onClick={save} disabled={isPreset || !name.trim() || isSaving}>
           Save
         </Button>
       </div>

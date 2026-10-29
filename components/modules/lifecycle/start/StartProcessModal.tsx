@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TriangleAlert, Undo2, X } from "lucide-react";
+import { Pencil, TriangleAlert, Undo2, X } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
@@ -63,6 +63,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
   const [email, setEmail] = useState("");
   const [preview, setPreview] = useState<StartPreview | null>(null);
   const [edits, setEdits] = useState<Record<string, Edit>>({});
+  const [renaming, setRenaming] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -76,6 +77,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     setEmail("");
     setPreview(null);
     setEdits({});
+    setRenaming(null);
     setError(null);
     setFieldErrors({});
   }, [open, lineManager]);
@@ -230,12 +232,27 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                     <li key={t.templateItemId} className={`space-y-2 px-3 py-3 ${e.removed ? "opacity-60" : ""}`} data-testid="planned-task">
                       <div className="flex items-start gap-2">
                         <div className="flex-1 space-y-1">
-                          <Input
-                            aria-label="Task Title"
-                            value={e.title ?? t.title}
-                            disabled={e.removed}
-                            onChange={(ev) => setEdits((all) => ({ ...all, [t.templateItemId]: { ...e, title: ev.target.value } }))}
-                          />
+                          {/* The title is read as text, not only as the value of a box: the walk saw this
+                              list as kinds alone (SWEEP S11). Renaming opens the box on request. */}
+                          {renaming === t.templateItemId && !e.removed ? (
+                            <Input
+                              aria-label="Task Title"
+                              autoFocus
+                              value={e.title ?? t.title}
+                              onChange={(ev) => setEdits((all) => ({ ...all, [t.templateItemId]: { ...e, title: ev.target.value } }))}
+                              onBlur={() => setRenaming(null)}
+                              onKeyDown={(ev) => {
+                                if (ev.key === "Enter") {
+                                  ev.preventDefault();
+                                  setRenaming(null);
+                                }
+                              }}
+                            />
+                          ) : (
+                            <p className={`text-sm font-medium ${e.removed ? "line-through" : ""}`}>
+                              {(e.title ?? t.title).trim() || "Untitled task"}
+                            </p>
+                          )}
                           <p className="text-xs text-muted-foreground">
                             {TASK_KIND_LABELS[t.kind]} · {describeDue(t.dueKind, t.offsetDays)}
                             {t.dueDate ? ` (${formatDisplayDate(t.dueDate, { style: "medium" })})` : ""} · done by{" "}
@@ -250,7 +267,18 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                             </p>
                           )}
                         </div>
-                        <Button
+                        {!e.removed && renaming !== t.templateItemId && (
+                          <Button type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            aria-label="Rename Task"
+                            onClick={() => setRenaming(t.templateItemId)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button type="button"
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
@@ -288,11 +316,11 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
 
         <DialogFooter>
           {step === "review" && (
-            <Button variant="outline" onClick={() => setStep("choose")} disabled={busy}>Back</Button>
+            <Button type="button" variant="outline" onClick={() => setStep("choose")} disabled={busy}>Back</Button>
           )}
-          <Button variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
           {step === "choose" ? (
-            <Button
+            <Button type="button"
               onClick={() => (preview && (hireDate || !preview.hireDateRequired) && (email.trim() || !preview.emailRequired)
                 ? setStep("review")
                 : loadPreview())}
@@ -301,7 +329,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
               {busy ? "Checking…" : "Review Tasks"}
             </Button>
           ) : (
-            <Button onClick={start} disabled={busy || blocking}>{busy ? "Starting…" : "Start"}</Button>
+            <Button type="button" onClick={start} disabled={busy || blocking}>{busy ? "Starting…" : "Start"}</Button>
           )}
         </DialogFooter>
       </DialogContent>

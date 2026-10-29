@@ -86,7 +86,7 @@ export default function PeopleTopbar({
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button type="button" variant="outline" size="sm" className="gap-1.5">
               <Columns3 className="h-4 w-4" />
               Columns
             </Button>
@@ -102,7 +102,7 @@ export default function PeopleTopbar({
 
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button type="button" variant="outline" size="sm" className="gap-1.5">
               <FilterIcon className="h-4 w-4" />
               Filter
             </Button>
@@ -110,10 +110,10 @@ export default function PeopleTopbar({
           <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
             <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
             <div className="mt-3 flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={resetFilters}>
+              <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
                 Reset
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button type="button" size="sm" onClick={applyFilters}>
                 Apply
               </Button>
             </div>
@@ -135,7 +135,7 @@ export default function PeopleTopbar({
           */}
         {selectedCount > 0 ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
-            <Button size="sm" className="gap-1.5" onClick={() => onEditSelectedAction?.()}>
+            <Button type="button" size="sm" className="gap-1.5" onClick={() => onEditSelectedAction?.()}>
               <Pencil className="h-4 w-4" />
               Edit
             </Button>
@@ -178,7 +178,7 @@ export default function PeopleTopbar({
 
         {onAddPersonAction ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
-            <Button className="gap-1.5" onClick={onAddPersonAction}>
+            <Button type="button" className="gap-1.5" onClick={onAddPersonAction}>
               <Plus className="h-4 w-4" />
               Add Person
             </Button>

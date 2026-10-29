@@ -34,7 +34,7 @@ describe("DeleteLegalEntityModal", () => {
     renderModal({ isOpen: false });
 
     expect(
-      screen.queryByRole("heading", { name: /delete legal entity/i }),
+      screen.queryByRole("heading", { name: /permanently delete/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -42,10 +42,10 @@ describe("DeleteLegalEntityModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /delete legal entity/i }),
+      screen.getByRole("heading", { name: /permanently delete/i }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("Acme Ltd")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /"acme ltd" legal entity\?/i })).toBeInTheDocument();
 
     expect(
       screen.getByText(/this legal entity will be permanently removed/i),
@@ -57,7 +57,7 @@ describe("DeleteLegalEntityModal", () => {
 
     renderModal({ onConfirmAction });
 
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
     expect(onConfirmAction).toHaveBeenCalledTimes(1);
   });
@@ -80,11 +80,11 @@ describe("DeleteLegalEntityModal", () => {
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: /delete legal entity/i }),
+      screen.getByRole("button", { name: /^delete$/i }),
     ).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
-    fireEvent.click(screen.getByRole("button", { name: /delete legal entity/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
     expect(onConfirmAction).not.toHaveBeenCalled();
     expect(onRequestCloseAction).not.toHaveBeenCalled();

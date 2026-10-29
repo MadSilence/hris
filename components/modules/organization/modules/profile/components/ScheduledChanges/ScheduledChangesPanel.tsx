@@ -79,7 +79,7 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
 
   return (
     <>
-      <Button
+      <Button type="button"
         variant="ghost"
         size="sm"
         className="h-7 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
@@ -112,7 +112,7 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   {change.canReschedule && (
-                    <Button
+                    <Button type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => {
@@ -124,7 +124,7 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
                     </Button>
                   )}
                   {change.canCancel && (
-                    <Button variant="ghost" size="sm" onClick={() => setCancelling(change)}>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setCancelling(change)}>
                       Cancel
                     </Button>
                   )}

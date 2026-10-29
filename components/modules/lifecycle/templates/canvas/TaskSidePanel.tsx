@@ -73,7 +73,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
     >
       <div className="flex items-center justify-between gap-2 px-5 pb-2 pt-4">
         <h2 className="text-base font-semibold text-brown-900">Task</h2>
-        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Close Panel" onClick={onClose}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Close Panel" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -244,7 +244,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
 
       {!readOnly && (
         <div className="border-t border-brown-100 px-5 py-3">
-          <Button variant="ghost" className="gap-1.5 text-danger-600 hover:text-danger-700" onClick={onRemove}>
+          <Button type="button" variant="ghost" className="gap-1.5 text-danger-600 hover:text-danger-700" onClick={onRemove}>
             <Trash2 className="h-4 w-4" />
             Remove Task
           </Button>

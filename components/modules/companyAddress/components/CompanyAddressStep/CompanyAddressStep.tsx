@@ -81,10 +81,10 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
 
         {offered ? (
           <div className="space-y-3">
-            <Button className="h-11 w-full" onClick={() => goTo(offered)}>
+            <Button type="button" className="h-11 w-full" onClick={() => goTo(offered)}>
               Continue to {companyHost(offered, web)}
             </Button>
-            <Button variant="outline" className="h-11 w-full bg-transparent" onClick={() => setChooseAnother(true)}>
+            <Button type="button" variant="outline" className="h-11 w-full bg-transparent" onClick={() => setChooseAnother(true)}>
               Use another company
             </Button>
           </div>

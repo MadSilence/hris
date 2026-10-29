@@ -9,6 +9,7 @@ import { PermissionGate } from "@/components/auth/PermissionGate";
 import { formatDisplayDate } from "@/lib/date";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { UserStatusBadge } from "@/components/ui/StatusBadge";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 
 export interface AssignedUsersTableContentProps {
   rows: UsersSearchItemDTO[];
@@ -18,6 +19,8 @@ export interface AssignedUsersTableContentProps {
   onLoadMore?: () => void;
   onRemoveUser: (userId: string) => Promise<unknown> | void;
   disableRemove?: boolean;
+  /** Removing yourself from it ends your own session, and the dialog says so. */
+  isSystemOwnerRole?: boolean;
   emptyText?: string;
 }
 
@@ -34,8 +37,10 @@ export default function AssignedUsersTableContent({
   onLoadMore,
   onRemoveUser,
   disableRemove = false,
+  isSystemOwnerRole = false,
   emptyText = "No users yet",
 }: AssignedUsersTableContentProps) {
+  const { userId: currentUserId } = useCurrentUser();
   const hasData = rows.length > 0;
 
   return (
@@ -94,7 +99,7 @@ export default function AssignedUsersTableContent({
                     {/* Removing a role is gated by PEOPLE.PROFILE MANAGE on the backend. */}
                     <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
                       {disableRemove ? (
-                        <Button
+                        <Button type="button"
                           variant="ghost"
                           size="icon"
                           className="text-danger-600"
@@ -108,8 +113,9 @@ export default function AssignedUsersTableContent({
                       ) : (
                         <RemoveAssignedUserDialog
                           userLabel={fullName}
+                          removingOwnOwnerRole={isSystemOwnerRole && u.id === currentUserId}
                           trigger={
-                            <Button
+                            <Button type="button"
                               variant="ghost"
                               size="icon"
                               className="text-danger-600 hover:text-danger-700"
@@ -140,7 +146,7 @@ export default function AssignedUsersTableContent({
 
       {hasMore && (
         <div className="flex justify-center py-3">
-          <Button variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+          <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? "Loading…" : "Load more"}
           </Button>
         </div>

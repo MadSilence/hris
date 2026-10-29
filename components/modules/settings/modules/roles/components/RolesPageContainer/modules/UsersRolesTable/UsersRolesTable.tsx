@@ -133,7 +133,7 @@ export default function UsersRolesTable({
 
       {hasMore && (
         <div className="flex justify-center py-3">
-          <Button variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+          <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? "Loading…" : "Load more"}
           </Button>
         </div>

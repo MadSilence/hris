@@ -31,7 +31,7 @@ export function TaskKindConfigFields({ idPrefix, kind, type, attributeIds, categ
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
   const { data: groups } = useAttributeGroups();
-  const { data: categories } = useDocumentCategories();
+  const { data: categories, isLoading: isLoadingCategories } = useDocumentCategories();
   const attributes = (groups ?? []).flatMap((g) => g.attributes ?? [])
     .filter((a) => type !== "PREBOARDING" || !NOT_ON_PREBOARDING_PAGE.has(String(a.type)));
 
@@ -69,6 +69,13 @@ export function TaskKindConfigFields({ idPrefix, kind, type, attributeIds, categ
             {(categories ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
+        {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). Only once the
+            list has come back, so a slow read does not claim there are none. */}
+        {!isLoadingCategories && (categories ?? []).length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            No document categories yet — add them in Settings → People → Documents.
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">Closes by itself once a file of this category is uploaded.</p>
       </div>
     );

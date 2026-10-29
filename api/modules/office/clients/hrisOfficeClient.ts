@@ -15,7 +15,7 @@ class HrisOfficeClient {
     return hrisApiClient.get<OfficeDTO[]>(`${this.BASE_PATH}?includeArchived=true`);
   }
 
-  public async archiveOffice(id: string, payload: { assignedUsersStrategy: "KEEP" | "UNASSIGN" }) {
+  public async archiveOffice(id: string, payload: { assignedUsersStrategy: "KEEP" }) {
     return hrisApiClient.post<UpdateResponse>(`${this.BASE_PATH}/${id}/archive`, payload)
   }
 

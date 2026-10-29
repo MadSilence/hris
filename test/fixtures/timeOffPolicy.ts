@@ -25,8 +25,7 @@ export const timeOffPolicyCreateRequest = (
 ): CreateTimeOffPolicyRequest => ({
   leaveTypeId: "leave-type-id",
 
-  name: "vacation",
-  displayName: "Vacation",
+  name: "Vacation",
   description: null,
 
   status: TimeOffPolicyStatus.Draft,
@@ -70,11 +69,11 @@ export const timeOffPolicyCreateRequest = (
 export const timeOffPolicyUpdateRequest = (
   overrides: Partial<UpdateTimeOffPolicyRequest> = {},
 ): UpdateTimeOffPolicyRequest => {
-  const { leaveTypeId, name, status, ...shared } = timeOffPolicyCreateRequest();
+  // The update carries the name too: renaming is an ordinary save.
+  const { leaveTypeId, status, ...shared } = timeOffPolicyCreateRequest();
 
   // Referenced so the destructure reads as deliberate rather than as a mistake.
   void leaveTypeId;
-  void name;
   void status;
 
   return { ...shared, ...overrides };

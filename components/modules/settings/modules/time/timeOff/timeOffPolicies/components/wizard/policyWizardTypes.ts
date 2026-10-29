@@ -447,8 +447,7 @@ export function buildCreatePolicyRequest(
   return {
     leaveTypeId,
 
-    name: v.name.trim().toLowerCase().replace(/\s+/g, "-"),
-    displayName: v.name.trim(),
+    name: v.name.trim(),
     description: v.description.trim() || null,
 
     status: activate ? TimeOffPolicyStatus.Active : TimeOffPolicyStatus.Draft,
@@ -618,7 +617,7 @@ export function buildUpdatePolicyRequest(v: PolicyWizardValues): UpdateTimeOffPo
   const usesFixedDate = v.renewalType === TimeOffPolicyRenewalType.YearlyFixedDate;
 
   return {
-    displayName: v.name.trim(),
+    name: v.name.trim(),
     description: v.description.trim() || null,
 
     unit: v.unit,
@@ -689,7 +688,7 @@ export function policyToWizardValues(
     version: policy.version,
 
     // Basics
-    name: policy.displayName,
+    name: policy.name,
     description: policy.description ?? "",
     unit: policy.unit,
     paid: policy.paid,

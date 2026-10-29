@@ -24,6 +24,7 @@ export type LeaverReassignment = {
   requestsTo: string | null;
   tasksTo: string | null;
   policiesTo: string | null;
+  processesTo: string | null;
 };
 
 type Ref = { id: string; name: string | null };
@@ -41,6 +42,8 @@ export type LeaverDecisionsDTO = {
   }[];
   tasks: { taskId: string; title: string; subject: Ref | null; defaultAssignee: Ref | null }[];
   policies: { policyId: string; policyName: string | null; approvalOrder: number; fallbackRoleName: string | null }[];
+  /** Running onboardings and offboardings the leaver manages; unchosen, they go to the leaver's own manager. */
+  processes?: { processId: string; type: string | null; subject: Ref | null; defaultManager: Ref | null }[];
 };
 
 /** What terminating will change — shown in the confirmation before anything happens. */

@@ -86,11 +86,11 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
       <FormError message={error} />
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={onApply} disabled={busy}>
+        <Button type="button" onClick={onApply} disabled={busy}>
           {apply.isPending ? "Starting…" : `Import ${people(anImport.rowCount)}`}
         </Button>
-        <Button variant="outline" onClick={onBack} disabled={busy}>Change Mapping</Button>
-        <Button
+        <Button type="button" variant="outline" onClick={onBack} disabled={busy}>Change Mapping</Button>
+        <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}

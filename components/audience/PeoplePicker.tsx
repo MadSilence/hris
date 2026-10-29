@@ -228,7 +228,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
         <div className="flex items-center gap-1.5">
           <Popover open={open} onOpenChange={openChange}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-1.5">
+              <Button type="button" variant="outline" className="gap-1.5">
                 <Filter className="h-4 w-4" />
                 Filter
                 {filterCount > 0 && (
@@ -249,10 +249,10 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 onIncludeInactiveChange={onIncludeInactiveChange}
               />
               <div className="mt-3 flex items-center justify-end gap-2 border-t border-brown-100 pt-3">
-                <Button variant="ghost" size="sm" onClick={resetFilters}>
+                <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
                   Reset
                 </Button>
-                <Button size="sm" onClick={applyFilters}>
+                <Button type="button" size="sm" onClick={applyFilters}>
                   Apply
                 </Button>
               </div>
@@ -260,7 +260,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
           </Popover>
 
           {filterCount > 0 && (
-            <Button
+            <Button type="button"
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-danger-600 hover:text-danger-700"
@@ -338,7 +338,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               {resolve.hasNextPage && (
                 <TableRow>
                   <TableCell colSpan={colCount} className="py-2 text-center">
-                    <Button
+                    <Button type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => resolve.fetchNextPage()}

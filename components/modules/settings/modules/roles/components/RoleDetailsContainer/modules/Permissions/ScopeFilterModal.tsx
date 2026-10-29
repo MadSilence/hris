@@ -74,10 +74,10 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCancelAction}>
+          <Button type="button" variant="outline" onClick={onCancelAction}>
             Cancel
           </Button>
-          <Button
+          <Button type="button"
             disabled={filters.length === 0}
             onClick={() => onConfirmAction({ filters, excludeUserIds: [], includeInactive })}
             className="bg-brown-600 text-white hover:bg-brown-700"

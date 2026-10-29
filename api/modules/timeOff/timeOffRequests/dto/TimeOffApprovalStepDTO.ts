@@ -1,5 +1,5 @@
 /** How somebody came to sign a step: as its approver, as their delegate, or as the policy's fallback. */
-export type TimeOffApprovalVia = "DIRECT" | "DELEGATE" | "FALLBACK";
+export type TimeOffApprovalVia = "DIRECT" | "DELEGATE" | "FALLBACK" | "OVERRIDE";
 
 /** Why a step was put to whom it was put to. */
 export type TimeOffStepAskedReason = "RESOLVED" | "FALLBACK" | "REASSIGNED";

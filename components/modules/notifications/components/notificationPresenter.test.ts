@@ -32,6 +32,7 @@ const REGISTERED_TYPES = [
   "TIMEOFF_POLICY_ASSIGNED",
   "TIMEOFF_POLICY_ENDED",
   "TIMEOFF_BALANCE_ADJUSTED",
+  "TIMEOFF_REQUEST_REPRICED",
   "TIMEOFF_APPROVALS_DELEGATED",
   "ROLE_ASSIGNMENT_CREATED",
   "ROLE_ASSIGNMENT_REMOVED",
@@ -230,6 +231,18 @@ describe("approvals for somebody else", () => {
       notification({ type: "TIMEOFF_APPROVAL_REQUESTED", params: { requesterName: "Bob Builder", amount: "2" } }),
     );
     expect(view.message).not.toMatch(/for /);
+  });
+
+  it("tells a person their leave costs a different number of days after a holiday change", () => {
+    const view = presentNotification(
+      notification({
+        type: "TIMEOFF_REQUEST_REPRICED",
+        params: { userId: "u-1", policyName: "Annual Leave", startDate: "2026-12-21", endDate: "2026-12-24", previousAmount: "4", amount: "3" },
+      }),
+    );
+    expect(view.title).toBe("Time Off Re-priced");
+    expect(view.message).toMatch(/^The holidays under your Annual Leave request .+ changed, so it now costs 3 days instead of 4 days\.$/);
+    expect(view.href).toBe("/organization/people/u-1/time-off");
   });
 
   it("a delegation tells the delegate who, when and why, and leads to their preferences", () => {

@@ -213,7 +213,7 @@ export function ShareViewDialog({
                         setPending((prev) => prev.map((q) => (q === p ? { ...q, permission } : q)))
                       }
                     />
-                    <Button
+                    <Button type="button"
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
@@ -272,7 +272,7 @@ export function ShareViewDialog({
                           label={`${name} Permission`}
                           onChange={(permission) => changePermission(s, permission)}
                         />
-                        <Button variant="ghost" size="sm" onClick={() => setRemoving(s)}>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setRemoving(s)}>
                           Remove
                         </Button>
                       </li>
@@ -284,10 +284,10 @@ export function ShareViewDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={close}>
+            <Button type="button" variant="ghost" onClick={close}>
               Cancel
             </Button>
-            <Button onClick={submit} disabled={!pending.length || mutations.share.isPending}>
+            <Button type="button" onClick={submit} disabled={!pending.length || mutations.share.isPending}>
               Share
             </Button>
           </DialogFooter>

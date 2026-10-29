@@ -64,7 +64,7 @@ export const AttendanceOverviewContainer: React.FC = () => {
         secondary={
           <>
             <PeriodControl month={view.month} range={view.range} onMonthChange={setMonth} onRangeChange={setRange}/>
-            <Button size="icon" variant="outline" aria-label="Export attendance" onClick={() => setExporting(true)}>
+            <Button type="button" size="icon" variant="outline" aria-label="Export attendance" onClick={() => setExporting(true)}>
               <Download className="h-4 w-4"/>
             </Button>
           </>

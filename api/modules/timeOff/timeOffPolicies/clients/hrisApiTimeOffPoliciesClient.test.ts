@@ -60,7 +60,7 @@ describe("HrisApiTimeOffPoliciesClient", () => {
     const response = { id: "policy-id", version: 1 };
 
     const request = timeOffPolicyUpdateRequest({
-      displayName: "Vacation updated",
+      name: "Vacation updated",
       yearlyQuota: 25,
       carryoverType: TimeOffPolicyCarryoverType.Limited,
       carryoverLimit: 5,

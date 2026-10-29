@@ -126,7 +126,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               </p>
             </div>
 
-            <Button
+            <Button type="button"
               variant="ghost"
               size="sm"
               disabled={isBusy}
@@ -136,7 +136,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               Restore
             </Button>
 
-            <Button
+            <Button type="button"
               variant="ghost"
               size="sm"
               className="text-muted-foreground hover:text-destructive"

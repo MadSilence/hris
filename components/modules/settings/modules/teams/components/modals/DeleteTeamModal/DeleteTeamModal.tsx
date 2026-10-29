@@ -151,10 +151,10 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending}>
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending}>
             {deleteTeam.isPending ? "Deleting…" : "Delete"}
           </Button>
         </DialogFooter>

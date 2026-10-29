@@ -24,6 +24,20 @@ export type AppliedView = {
   dropped: number;
 };
 
+/**
+ * A stored filter, cut down to the fields a filter has today. A view replays its JSON into a request body
+ * the backend reads strictly, so a key that has since left FilterDTO would refuse the whole search; the
+ * view is cleaned when it is opened instead (decided 2026-10-27, SWEEP O1).
+ */
+const cleanFilter = (f: FilterDTO): FilterDTO => {
+  const clean: FilterDTO = { field: f.field, op: f.op };
+  if (f.value !== undefined) clean.value = f.value;
+  if (f.valueTo !== undefined) clean.valueTo = f.valueTo;
+  if (f.values !== undefined) clean.values = f.values;
+  if (f.includeEmpty !== undefined) clean.includeEmpty = f.includeEmpty;
+  return clean;
+};
+
 export function applyPayload(payload: ViewPayload, visibleFields: FieldDTO[]): AppliedView {
   const byId = new Map(visibleFields.map((f) => [f.id, f]));
 
@@ -45,11 +59,13 @@ export function applyPayload(payload: ViewPayload, visibleFields: FieldDTO[]): A
   const pinned = columns.find((c) => c.id === PINNED_COLUMN_ID);
   if (pinned) pinned.checked = true;
 
-  const keptFilters = (payload.filters ?? []).filter((f) => {
-    if (!f?.field) return false;
-    if (f.field.startsWith("attr:")) return byId.has(f.field);
-    return true;
-  });
+  const keptFilters = (payload.filters ?? [])
+    .filter((f) => {
+      if (!f?.field) return false;
+      if (f.field.startsWith("attr:")) return byId.has(f.field);
+      return true;
+    })
+    .map(cleanFilter);
   const droppedFilters = (payload.filters ?? []).length - keptFilters.length;
 
   // The table's own list of sortable columns, not a copy — the copy was six columns long and dropped
@@ -57,7 +73,10 @@ export function applyPayload(payload: ViewPayload, visibleFields: FieldDTO[]): A
   // A sort with no field id — a view written by another client, or by hand — is no sort; it used to throw
   // inside the click handler and leave the view highlighted but never applied (walk of 2026-10-26).
   const sortField = typeof payload.sort?.fieldId === "string" ? payload.sort.fieldId : null;
-  const sort = payload.sort && sortField && isSortKeyAvailable(sortField, visibleFields) ? payload.sort : null;
+  const sort: ViewSort =
+    payload.sort && sortField && isSortKeyAvailable(sortField, visibleFields)
+      ? { fieldId: sortField, dir: payload.sort.dir === "desc" ? "desc" : "asc" }
+      : null;
   const droppedSort = payload.sort && !sort && sortField?.startsWith("attr:") ? 1 : 0;
 
   return {

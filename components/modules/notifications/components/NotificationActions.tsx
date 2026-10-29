@@ -111,7 +111,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
     const userId = String(notification.params?.requesterId ?? "");
     return (
       <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-        <Button
+        <Button type="button"
           size="sm"
           disabled={busy}
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "CONFIRM" }))}
@@ -119,7 +119,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
           <Check className="h-4 w-4" />
           Approve Cancellation
         </Button>
-        <Button
+        <Button type="button"
           size="sm"
           variant="outline"
           disabled={busy}
@@ -157,21 +157,21 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
               className="h-8 flex-1"
               disabled={busy}
             />
-            <Button size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
+            <Button type="button" size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
               Reject
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
               Cancel
             </Button>
           </div>
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
+          <Button type="button" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
             <Check className="h-4 w-4" />
             Approve
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setRejecting(true)} disabled={busy}>
+          <Button type="button" size="sm" variant="outline" onClick={() => setRejecting(true)} disabled={busy}>
             <X className="h-4 w-4" />
             Reject
           </Button>

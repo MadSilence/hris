@@ -70,7 +70,7 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
         <p className="mt-1 text-muted-foreground">Take a photo for your profile.</p>
       </div>
 
-      <Button
+      <Button type="button"
         size="lg"
         className="h-14 w-full max-w-xs gap-2 text-base"
         onClick={() => input.current?.click()}

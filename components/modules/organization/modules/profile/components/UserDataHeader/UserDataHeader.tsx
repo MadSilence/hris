@@ -274,7 +274,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               resource={isOwnProfile ? undefined : "PEOPLE.PROFILE"}
               action="EDIT"
             >
-              <Button
+              <Button type="button"
                 size="icon"
                 variant="outline"
                 className="absolute right-1 bottom-1 rounded-full"
@@ -346,7 +346,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
           <div className="flex items-center gap-2">
             {mayImpersonate && (
               <PermissionGate resource="SETTINGS.IMPERSONATION" action="MANAGE">
-                <Button
+                <Button type="button"
                   variant="outline"
                   size="icon"
                   aria-label="Login as user"
@@ -361,7 +361,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
             {mayInvite && (
               <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-                <Button
+                <Button type="button"
                   variant={isInvited ? "outline" : "default"}
                   className="gap-1.5"
                   onClick={() => setIsInviteOpen(true)}
@@ -389,8 +389,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     icon={<CalendarX className="h-4 w-4"/>}
                     onClick={async () => {
                       const res = await cancelInviteAction({ userId: user.id });
-                      if (res.status === ActionStatus.SUCCESS) await refreshUser(user.id);
-                      else showActionError(res);
+                      if (res.status === ActionStatus.SUCCESS) {
+                        await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
+                      } else {
+                        showActionError(res);
+                      }
                     }}
                   >
                     Cancel Scheduled Invitation
@@ -493,8 +496,23 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         email={user.email ?? null}
         isResend={isInvited}
         onCloseAction={() => setIsInviteOpen(false)}
-        onInvitedAction={async () => {
-          await refreshUser(user.id);
+        onInvitedAction={async (state) => {
+          // A scheduled invite left the header on "Not invited" until a reload (walk, SWEEP S11). The
+          // answer already says where the invitation stands: write it into the cache at once, then
+          // refetch the person and the scheduled changes the invite is one of — as termination does.
+          if (state) {
+            await mutate<User>(
+              `/api/users/${user.id}`,
+              (current) => current && {
+                ...current,
+                accountStatus: state.accountStatus,
+                inviteSentAt: state.inviteSentAt,
+                inviteScheduledFor: state.scheduledFor,
+              },
+              { revalidate: false },
+            );
+          }
+          await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
         }}
       />
 

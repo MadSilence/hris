@@ -15,4 +15,9 @@ export type AssignedUsersPage = {
   items: AssignedUser[];
   nextCursor?: string | null;
   total: number;
+  /**
+   * The reader sees only part of the roster: a unit's list of people answers to the people grant and
+   * its scope, like the directory — so `total` can be larger than what is listed, down to none.
+   */
+  limited?: boolean;
 };

@@ -53,10 +53,10 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => !isLoading && onRequestCloseAction()} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={() => !isLoading && onRequestCloseAction()} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={() => !isLoading && onConfirmAction("KEEP")} disabled={isLoading}>
+          <Button type="button" onClick={() => !isLoading && onConfirmAction("KEEP")} disabled={isLoading}>
             {isLoading ? "Archiving…" : "Archive"}
           </Button>
         </DialogFooter>

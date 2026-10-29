@@ -18,6 +18,7 @@ export interface AssignedUsersTableProps {
   roleId: string;
   roleName?: string;
   isDefaultRole?: boolean;
+  isSystemOwnerRole?: boolean;
   isArchived?: boolean;
   rows: UsersSearchItemDTO[] | undefined;
   isLoading?: boolean;
@@ -34,6 +35,7 @@ export default function AssignedUsersTable({
   roleId,
   roleName,
   isDefaultRole = false,
+  isSystemOwnerRole = false,
   isArchived = false,
   rows = [],
   isLoading = false,
@@ -94,6 +96,7 @@ export default function AssignedUsersTable({
             onLoadMore={onLoadMore}
             onRemoveUser={onRemoveUser}
             disableRemove={isDefaultRole}
+            isSystemOwnerRole={isSystemOwnerRole}
             emptyText={
               isArchived
                 ? "Nobody holds this archived role."

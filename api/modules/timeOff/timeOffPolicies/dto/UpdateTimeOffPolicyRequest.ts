@@ -7,7 +7,8 @@ import { TimeOffPolicyRenewalType } from "@/api/modules/timeOff/timeOffPolicies/
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyUnit";
 
 export interface UpdateTimeOffPolicyRequest {
-  displayName: string;
+  /** The policy's one name, as typed — unique inside its leave type. Renaming is an ordinary save. */
+  name: string;
   description: string | null;
 
   unit: TimeOffPolicyUnit;

@@ -146,10 +146,10 @@ export function CreateDepartmentModal({ open, onClose, parentOptions, defaultPar
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={busy}>
+          <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
             {busy ? "Adding…" : "Add"}
           </Button>
         </DialogFooter>

@@ -69,7 +69,7 @@ export function AutomationsListContainer() {
 
   const newButton = (
     <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
-      <Button className="gap-1.5" onClick={() => router.push(NEW_HREF)}>
+      <Button type="button" className="gap-1.5" onClick={() => router.push(NEW_HREF)}>
         <Plus className="h-4 w-4" />
         New Automation
       </Button>
@@ -184,7 +184,7 @@ function FirstAutomation({ onStart, onBlank }: { onStart: (id: StarterId) => voi
             </button>
           ))}
         </div>
-        <Button className="gap-1.5" onClick={onBlank}>
+        <Button type="button" className="gap-1.5" onClick={onBlank}>
           <Plus className="h-4 w-4" />
           New Automation
         </Button>

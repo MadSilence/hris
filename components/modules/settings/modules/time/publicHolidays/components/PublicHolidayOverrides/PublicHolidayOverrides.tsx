@@ -78,7 +78,7 @@ export const RemovedProviderDays: FC<{
               {span(override.providerHolidayDate, override.providerEndDate)}
             </span>
             {canRevert && (
-              <Button
+              <Button type="button"
                 variant="ghost"
                 size="sm"
                 className="gap-1.5"

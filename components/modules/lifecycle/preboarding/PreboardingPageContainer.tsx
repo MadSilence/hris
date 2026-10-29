@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/public/desact/src/components/ui/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -53,7 +54,11 @@ export function PreboardingPageContainer({ token, initialPage }: { token: string
                 ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-success-600" aria-label="Done" />
                 : <Circle className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label="To do" />}
               <div className="flex-1">
-                <h2 className="font-medium">{task.title}</h2>
+                {/* The icon alone did not read as done in the walk (SWEEP S11): a finished task says so. */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className={`font-medium ${task.status === "DONE" ? "text-muted-foreground" : ""}`}>{task.title}</h2>
+                  {task.status === "DONE" && <StatusBadge status="active" label="Done" />}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {TASK_KIND_LABELS[task.kind]} · {describeDue(task.dueKind, null)}
                   {task.dueDate ? ` · by ${formatDisplayDate(task.dueDate, { style: "medium" })}` : ""}
@@ -85,7 +90,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
   if (task.kind === "CHECKLIST") {
     return (
       <div className="space-y-2 pl-8">
-        <Button
+        <Button type="button"
           size="sm"
           disabled={busy}
           onClick={async () => {
@@ -106,7 +111,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
       <div className="space-y-2 pl-8">
         <Label htmlFor={`${task.id}-file`}>{task.categoryName ? `File: ${task.categoryName}` : "File"}</Label>
         <Input id={`${task.id}-file`} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={busy} />
-        <Button
+        <Button type="button"
           size="sm"
           disabled={busy || !file}
           onClick={async () => {
@@ -133,7 +138,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
       {fields.map((f) => (
         <FieldInput key={f.id} field={f} value={values[f.id]} onChange={(v) => setValues((all) => ({ ...all, [f.id]: v }))} disabled={busy} />
       ))}
-      <Button
+      <Button type="button"
         size="sm"
         disabled={busy || Object.keys(values).length === 0}
         onClick={async () => {

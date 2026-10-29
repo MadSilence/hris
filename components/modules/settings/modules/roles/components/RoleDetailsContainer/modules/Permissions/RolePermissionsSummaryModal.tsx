@@ -69,10 +69,10 @@ export const RolePermissionsSummaryModal: FC<RolePermissionsSummaryModalProps> =
         <FormError message={errorMessage} />
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCancelAction} disabled={isSaving}>
+          <Button type="button" variant="outline" onClick={onCancelAction} disabled={isSaving}>
             Cancel
           </Button>
-          <Button onClick={onConfirmAction} disabled={isSaving}>
+          <Button type="button" onClick={onConfirmAction} disabled={isSaving}>
             {isSaving ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>

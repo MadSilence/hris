@@ -1,6 +1,5 @@
 ﻿import type {
   CreateTimeOffPolicyRequest,
-  RenameTimeOffPolicyRequest,
   SaveTimeOffPolicyRequest,
   TimeOffPolicyEditImpactDTO,
   UpdateTimeOffPolicyRequest,
@@ -50,13 +49,6 @@ export class HrisTimeOffPoliciesService {
 
   public async editImpact(id: string): Promise<TimeOffPolicyEditImpactDTO> {
     return hrisApiTimeOffPoliciesClient.editImpact(id);
-  }
-
-  public async rename(
-    id: string,
-    body: RenameTimeOffPolicyRequest
-  ): Promise<UpdateResponse> {
-    return hrisApiTimeOffPoliciesClient.rename(id, body);
   }
 
   public async activate(id: string): Promise<UpdateResponse> {

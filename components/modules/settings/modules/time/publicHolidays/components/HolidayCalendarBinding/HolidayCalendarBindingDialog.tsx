@@ -128,19 +128,19 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
         <DialogFooter>
           {preview.data === undefined ? (
             <>
-              <Button variant="outline" onClick={onRequestCloseAction} disabled={busy}>
+              <Button type="button" variant="outline" onClick={onRequestCloseAction} disabled={busy}>
                 Cancel
               </Button>
-              <Button onClick={onReview} disabled={busy || unchanged}>
+              <Button type="button" onClick={onReview} disabled={busy || unchanged}>
                 {preview.isPending ? "Reviewing…" : "Review"}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={resetPreview} disabled={busy}>
+              <Button type="button" variant="outline" onClick={resetPreview} disabled={busy}>
                 Back
               </Button>
-              <Button onClick={() => void onApply()} disabled={busy}>
+              <Button type="button" onClick={() => void onApply()} disabled={busy}>
                 {apply.isPending ? "Applying…" : "Apply"}
               </Button>
             </>

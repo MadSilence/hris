@@ -211,7 +211,7 @@ export default function HomePage() {
 
             <form className="flex gap-2 w-full md:w-auto">
               <Input name="work-email" placeholder="Work email" type="email"/>
-              <Button variant="secondary">Subscribe</Button>
+              <Button type="button" variant="secondary">Subscribe</Button>
             </form>
           </CardFooter>
         </Card>

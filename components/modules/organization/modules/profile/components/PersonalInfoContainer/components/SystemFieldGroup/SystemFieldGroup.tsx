@@ -300,7 +300,7 @@ const RolesCell: React.FC<{ user: User }> = ({ user }) => {
       <RefChips values={user.roles}/>
 
       <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-        <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
           Manage
         </Button>
       </PermissionGate>

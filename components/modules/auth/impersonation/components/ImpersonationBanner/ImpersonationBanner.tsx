@@ -28,7 +28,7 @@ export function ImpersonationBanner() {
         </span>
       </div>
 
-      <Button
+      <Button type="button"
         variant="outline"
         size="sm"
         disabled={stopImpersonation.isPending}

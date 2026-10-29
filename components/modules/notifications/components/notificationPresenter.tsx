@@ -202,6 +202,15 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         Icon: CalendarClock,
         href: ownTimeOff(p.userId),
       };
+    case "TIMEOFF_REQUEST_REPRICED":
+      return {
+        title: "Time Off Re-priced",
+        message: `The holidays under your ${leave(p)} ${dates(p)} changed, so it now costs ${dayCount(str(p.amount))}${
+          str(p.previousAmount) ? ` instead of ${dayCount(str(p.previousAmount))}` : ""
+        }.`,
+        Icon: CalendarClock,
+        href: ownTimeOff(p.userId),
+      };
     case "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT": {
       const calendarId = str(p.calendarId);
       const counts = [

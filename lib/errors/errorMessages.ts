@@ -44,7 +44,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // AttributeBusinessError
   AT00001: "An attribute with this name already exists.",
   AT00002: "Built-in attributes cannot be deleted.",
-  AT00003: "That is already the attribute name.",
   AT00004: "This attribute type does not use options.",
   AT00005: "A select attribute needs at least one option.",
   AT00008: "The validation pattern is not a valid regular expression",
@@ -121,6 +120,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00004: "Invalid week start day (expected a day-of-week name)",
   CS00005: "Enter the length of a working day between 0:01 and 24:00.",
   CS00006: "Pick a money field for the hourly rate, or None.",
+  CS00007: "Pick a date field for birthdays, or None.",
 
   // CompanySetupBusinessError
   CST0001: "This company has already been set up.",
@@ -166,7 +166,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   D00017: "This folder still has files in it. Empty it first.",
   D00018: "Invalid parent folder",
   D00019: "Invalid target folder for document move",
-  D00020: "That is already the folder name.",
   D00021: "You do not have access to this folder.",
   D00022: "Document category not found",
   D00023: "Document category name is missing",
@@ -174,7 +173,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   D00025: "You do not have access to this category.",
   D00026: "Built-in categories cannot be deleted.",
   D00027: "This category is still applied to documents. Remove it from them first.",
-  D00028: "That is already the category name.",
 
   // EmployeeTimeOffBalanceBusinessError
   ETOBB00001: "Employee time off balance not found",
@@ -190,7 +188,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // GroupBusinessError
   G00001: "A group with this name already exists.",
   G00002: "This group cannot be deleted.",
-  G00003: "Nothing changed: the section already has this name and description.",
   G00004: "Built-in groups cannot be changed.",
 
   // JobBusinessError
@@ -225,7 +222,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PH00002: "Give the holiday a name.",
   PH00003: "A holiday on this date already exists in the calendar.",
   PH00004: "You do not have permission to change this holiday.",
-  PH00005: "That is already the holiday name.",
   PH00006: "Give the holiday a date.",
   PH00007: "A holiday must fall in the calendar's own year.",
   PH00008: "Holidays cannot be changed in an archived calendar.",
@@ -241,7 +237,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PHC00002: "Give the calendar a name.",
   PHC00003: "A calendar with this name already exists.",
   PHC00004: "You do not have permission to change this calendar.",
-  PHC00005: "That is already the calendar name.",
   PHC00006: "This calendar is already archived.",
   PHC00007: "This calendar is already active.",
   PHC00008: "This calendar is already inactive.",
@@ -266,7 +261,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
 
   // RoleBusinessError
   R00001: "A role with this name already exists.",
-  R00002: "Nothing to update — the role is unchanged.",
   R00003: "This role cannot be deleted.",
   R00004: "The default role cannot be removed from a person.",
   R00005: "This is the last System Owner — give the role to someone else first",
@@ -335,10 +329,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // TimeOffPolicyBusinessError
   TOP00001: "Time off policy not found",
   TOP00002: "Time off policy name is missing",
-  TOP00003: "Time off policy display name is missing",
   TOP00004: "A policy with this name already exists.",
   TOP00005: "Access denied to time off policy",
-  TOP00006: "That is already the policy name.",
   TOP00018: "This policy is not archived, so there is nothing to bring back.",
   TOP00007: "This policy is already archived.",
   TOP00008: "Time off policy is already active",
@@ -548,6 +540,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00034: "The date of this change cannot be changed here.",
   U00035: "Choose a date that is still ahead.",
   U00036: "Somebody you chose cannot take these decisions: choose a colleague who works here and can sign in.",
+  U00037: "Only a System Owner can impersonate a System Owner.",
 
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",

@@ -10,12 +10,21 @@ export type LeaverReassignmentChoice = {
   requestsTo: PickedUser | null;
   tasksTo: PickedUser | null;
   policiesTo: PickedUser | null;
+  processesTo: PickedUser | null;
 };
 
-export const NO_REASSIGNMENT: LeaverReassignmentChoice = { requestsTo: null, tasksTo: null, policiesTo: null };
+export const NO_REASSIGNMENT: LeaverReassignmentChoice = {
+  requestsTo: null,
+  tasksTo: null,
+  policiesTo: null,
+  processesTo: null,
+};
 
 export const hasLeaverDecisions = (d: LeaverDecisionsDTO | null | undefined): d is LeaverDecisionsDTO =>
-  !!d && d.requests.length + d.tasks.length + d.policies.length > 0;
+  !!d && d.requests.length + d.tasks.length + d.policies.length + (d.processes?.length ?? 0) > 0;
+
+const processLabel = (type: string | null): string =>
+  type === "OFFBOARDING" ? "Offboarding" : type === "ONBOARDING" ? "Onboarding" : "Process";
 
 const span = (start: string, end: string) =>
   start === end ? formatDisplayDate(start) : `${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
@@ -30,7 +39,7 @@ const fallbackDefault = (names: (string | null)[]): string => {
 
 /**
  * The leaver's-decisions step of a termination: what was waiting on the person — leave requests they
- * were to approve, lifecycle tasks assigned to them, policy steps naming them — with *Reassign To…* per
+ * were to approve, lifecycle tasks assigned to them, policy steps naming them, processes they manage — with *Reassign To…* per
  * group. Applied with the termination's effects, on the day after the last working day, to whatever is
  * still waiting then; a group left unchosen goes to its default, which each group says.
  */
@@ -59,6 +68,17 @@ export const LeaverDecisionsStep: FC<{
       title: `Leave Policies Naming Them (${decisions.policies.length})`,
       items: decisions.policies.map((p) => `${p.policyName ?? "A policy"} · step ${p.approvalOrder}`),
       hint: fallbackDefault(decisions.policies.map((p) => p.fallbackRoleName)),
+    },
+    // The processes they manage: the tasks held by the onboarding manager follow whoever takes them
+    // (WALK_QUESTIONS § 18, decided 2026-10-27).
+    (decisions.processes?.length ?? 0) > 0 && {
+      key: "processesTo" as const,
+      title: `Processes They Manage (${decisions.processes!.length})`,
+      items: decisions.processes!.map((p) =>
+        p.subject?.name ? `${processLabel(p.type)} of ${p.subject.name}` : processLabel(p.type)),
+      hint: decisions.processes![0].defaultManager?.name
+        ? `Unchosen, they go to ${decisions.processes![0].defaultManager.name}, their manager, with the tasks that come with them.`
+        : "Unchosen, they stay without an onboarding manager until somebody sets one: this person has no manager.",
     },
   ].filter((g): g is Exclude<typeof g, false> => !!g);
 

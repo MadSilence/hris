@@ -246,7 +246,7 @@ export default function LegalEntityDetailsContainer({
                 {isEditing ? (
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
@@ -255,7 +255,7 @@ export default function LegalEntityDetailsContainer({
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
@@ -263,26 +263,26 @@ export default function LegalEntityDetailsContainer({
                         Delete
                       </Button>
                     </PermissionGate>
-                    <Button
+                    <Button type="button"
                       variant="outline"
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={updateAction.isPending}>
+                    <Button type="button" onClick={handleSave} disabled={updateAction.isPending}>
                       Save changes
                     </Button>
                   </>
                 ) : isArchived ? (
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button onClick={handleRestore} disabled={restoreAction.isPending}>
+                      <Button type="button" onClick={handleRestore} disabled={restoreAction.isPending}>
                         Unarchive
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
-                      <Button
+                      <Button type="button"
                         variant="outline"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
@@ -291,7 +291,7 @@ export default function LegalEntityDetailsContainer({
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button
+                      <Button type="button"
                         size="icon"
                         variant="outline"
                         aria-label="Export legal entity"
@@ -304,10 +304,10 @@ export default function LegalEntityDetailsContainer({
                 ) : (
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button onClick={handleEdit}>Edit</Button>
+                      <Button type="button" onClick={handleEdit}>Edit</Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button
+                      <Button type="button"
                         size="icon"
                         variant="outline"
                         aria-label="Export legal entity"

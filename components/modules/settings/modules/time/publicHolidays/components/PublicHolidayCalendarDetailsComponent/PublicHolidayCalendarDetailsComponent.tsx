@@ -393,7 +393,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
             }
           />
           <div className="flex items-center gap-3">
-            <Button
+            <Button type="button"
               size="icon"
               variant="outline"
               aria-label="Subscribe in your calendar app"
@@ -403,7 +403,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               <Rss className="h-4 w-4" />
             </Button>
             {canManage ? (
-              <Button
+              <Button type="button"
                 size="icon"
                 variant="outline"
                 aria-label="Export calendar"
@@ -439,7 +439,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               <div className="flex flex-none items-center justify-between gap-4">
                 <h3 className="text-sm font-semibold text-foreground">Edit calendar</h3>
                 <div className="flex gap-2">
-                  <Button
+                  <Button type="button"
                     variant="outline"
                     className="gap-1.5"
                     disabled={isSaving}
@@ -448,7 +448,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     <X className="h-4 w-4" />
                     Cancel
                   </Button>
-                  <Button disabled={!isEditFormValid || isSaving} onClick={handleSave}>
+                  <Button type="button" disabled={!isEditFormValid || isSaving} onClick={handleSave}>
                     {isSaving ? "Saving…" : "Save"}
                   </Button>
                 </div>
@@ -533,7 +533,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   />
 
                   {canManage && canFillYear && (
-                    <Button
+                    <Button type="button"
                       variant="outline"
                       className="gap-1.5"
                       disabled={fillYear.isPending}
@@ -546,7 +546,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                 </div>
 
                 {canManage ? (
-                  <Button className="gap-1.5" onClick={enterEditMode}>
+                  <Button type="button" className="gap-1.5" onClick={enterEditMode}>
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>

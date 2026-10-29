@@ -61,7 +61,7 @@ export const ErrorState: React.FC<{
         </p>
       )}
 
-      <Button variant="outline" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
+      <Button type="button" variant="outline" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
         <RotateCw className="mr-2 h-4 w-4" />
         Try again
       </Button>

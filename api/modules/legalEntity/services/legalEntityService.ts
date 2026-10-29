@@ -37,7 +37,7 @@ export class LegalEntityService {
 
   public async archiveLegalEntity(
     id: string,
-    strategy: "KEEP" | "UNASSIGN"
+    strategy: "KEEP"
   ): Promise<UpdatedEntity> {
     return hrisLegalEntityClient.archiveLegalEntity(id, { assignedUsersStrategy: strategy });
   }

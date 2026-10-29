@@ -421,7 +421,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     }
     if (isChanged) return null;
     return (
-      <Button variant="outline" size="sm" onClick={() => closeGroup(groupId)} disabled={isSaving}>
+      <Button type="button" variant="outline" size="sm" onClick={() => closeGroup(groupId)} disabled={isSaving}>
         Cancel
       </Button>
     );

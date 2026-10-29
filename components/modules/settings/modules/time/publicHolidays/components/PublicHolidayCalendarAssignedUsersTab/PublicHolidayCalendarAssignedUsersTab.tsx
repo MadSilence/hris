@@ -23,7 +23,7 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
-  const { items, total, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { items, total, limited, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useAssignedUsers(BASE_PATH, calendarId, q);
 
   return (
@@ -39,6 +39,7 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
       onQueryChange={setQuery}
       rows={items}
       total={total}
+        limited={limited}
       isLoading={isLoading}
       error={error}
       isArchived={isArchived}

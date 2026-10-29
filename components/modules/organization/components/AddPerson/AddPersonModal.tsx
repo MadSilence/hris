@@ -155,10 +155,10 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCloseAction} disabled={busy}>
+          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={() => formik.handleSubmit()} disabled={busy}>
+          <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
             {busy ? "Adding…" : "Add"}
           </Button>
         </DialogFooter>

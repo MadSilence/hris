@@ -1,7 +1,6 @@
 "use client";
 
 import { FC } from "react";
-import { AlertTriangle, Building2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +27,10 @@ type DeleteLegalEntityModalProps = {
   impactError?: boolean;
 };
 
+/**
+ * The same shape as the office's delete (`DeleteOfficeModal`): one flow, one dialog. The two had a
+ * question title on one side and an icon, a heading and a "Warning" block on the other (SWEEP S6).
+ */
 export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
   isOpen,
   isLoading = false,
@@ -40,59 +43,36 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
 }) => {
   const asked = impact !== undefined || impactLoading || impactError;
   return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open && !isLoading) onRequestCloseAction();
-      }}
-    >
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestCloseAction()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <Building2 className="h-5 w-5"/>
-            Delete legal entity
+          <AlertDialogTitle>
+            Permanently delete &quot;{entity?.name ?? ""}&quot; legal entity?
           </AlertDialogTitle>
-
           <AlertDialogDescription>
-            This action cannot be undone. Legal entity{" "}
-            <strong>{entity?.name ?? "Untitled legal entity"}</strong> will be
-            permanently deleted.
+            This legal entity will be permanently removed from the system. This action cannot be undone.
+            {asked
+              ? null
+              : entity?.assignedUsersCount
+                ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
+                : " Anyone currently assigned to it will lose that assignment."}
           </AlertDialogDescription>
+          {asked ? (
+            <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} noun="legal entity" />
+          ) : null}
         </AlertDialogHeader>
-
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
-            <div>
-              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
-              <p className="text-sm text-danger-700">
-                This legal entity will be permanently removed from the system.
-                {asked
-                  ? null
-                  : entity?.assignedUsersCount
-                    ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
-                    : " Anyone currently assigned to it will lose that assignment."}
-              </p>
-              {asked ? (
-                <div className="mt-2 text-danger-700">
-                  <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} noun="legal entity" />
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
         <AlertDialogFooter>
+          {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires onOpenChange. */}
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading || impactLoading}
+            className="bg-danger-600 text-white hover:bg-danger-700"
             onClick={(event) => {
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
           >
-            Delete legal entity
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

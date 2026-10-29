@@ -39,7 +39,7 @@ let refreshInFlight: Promise<boolean> | null = null;
 /**
  * Trades the refresh token for a new access token, once.
  *
- * Access tokens last 150 minutes; before this, every request after that simply failed and the user
+ * Access tokens last 30 minutes; before this, every request after that simply failed and the user
  * was sent to /login with weeks of refresh validity unused. Single-flight on purpose: a page renders
  * a dozen queries at once, they all get 401 together, and a dozen concurrent refreshes would race —
  * the losers arriving with a token that has already been rotated away.

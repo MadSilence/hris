@@ -192,12 +192,12 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
         <div>
           {isCancellation ? (
             <div className="flex gap-2">
-              <Button disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
+              <Button type="button" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
                 requestId, userId: request.userId, decision: "CONFIRM" }))}>
                 <Check className="h-4 w-4" />
                 Approve Cancellation
               </Button>
-              <Button variant="outline" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
+              <Button type="button" variant="outline" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
                 requestId, userId: request.userId, decision: "DECLINE" }))}>
                 <X className="h-4 w-4" />
                 Decline
@@ -208,20 +208,20 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
               <RequiredLabel htmlFor={reasonId} required>Reason</RequiredLabel>
               <Input id={reasonId} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
               <div className="mt-1 flex gap-2">
-                <Button variant="destructive" disabled={busy || !reason.trim()}
+                <Button type="button" variant="destructive" disabled={busy || !reason.trim()}
                         onClick={() => void run(() => reject.mutateAsync({ requestId, rejectionReason: reason.trim() }))}>
                   Reject
                 </Button>
-                <Button variant="ghost" disabled={busy} onClick={() => setRejecting(false)}>Back</Button>
+                <Button type="button" variant="ghost" disabled={busy} onClick={() => setRejecting(false)}>Back</Button>
               </div>
             </div>
           ) : (
             <div className="flex gap-2">
-              <Button disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
+              <Button type="button" disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
                 <Check className="h-4 w-4" />
                 Approve
               </Button>
-              <Button variant="outline" disabled={busy} onClick={() => setRejecting(true)}>
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setRejecting(true)}>
                 <X className="h-4 w-4" />
                 Reject
               </Button>
@@ -265,7 +265,9 @@ export const approvalStepLine = (step: TimeOffApprovalStepDTO): { asked: string;
       ? `${by} on behalf of ${step.onBehalfOfName}`
       : step.via === "FALLBACK"
         ? `${by}, as the fallback`
-        : by;
+        : step.via === "OVERRIDE"
+          ? `${by}, approving anyway`
+          : by;
   return { asked, answered };
 };
 

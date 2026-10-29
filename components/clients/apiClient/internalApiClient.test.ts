@@ -56,7 +56,7 @@ describe("InternalApiClient", () => {
     await expect(client.post("/things")).rejects.toBeInstanceOf(ForbiddenError);
   });
 
-  // An expired access token is not a dead session. Tokens last 150 minutes and the refresh token
+  // An expired access token is not a dead session. Tokens last 30 minutes and the refresh token
   // 30 days, so a working day used to end in a login screen with weeks of validity unused.
   it("renews the session on 401 and replays the request", async () => {
     const assign = mockLocation("/settings/general/departments");

@@ -56,7 +56,7 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
 
           <AlertDialogDescription>
             This action cannot be undone. Policy{" "}
-            <strong>{policy.displayName}</strong> will be permanently deleted.
+            <strong>{policy.name}</strong> will be permanently deleted.
             Only draft policies with no active assignments can be deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>

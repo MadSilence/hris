@@ -35,7 +35,7 @@ export default function AssignedUsersTableHeader({
         {onShowHistoryChange ? <HistoryToggle showing={showHistory} onChange={onShowHistoryChange}/> : null}
         {/* Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE. */}
         <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-          <Button
+          <Button type="button"
             onClick={onAssignClick}
             disabled={!!assignDisabledReason}
             title={assignDisabledReason}
@@ -46,7 +46,7 @@ export default function AssignedUsersTableHeader({
           </Button>
         </PermissionGate>
 
-        <Button size="icon" variant="outline" onClick={onExportClick} aria-label="Export">
+        <Button type="button" size="icon" variant="outline" onClick={onExportClick} aria-label="Export">
           <Download className="h-4 w-4"/>
         </Button>
       </div>

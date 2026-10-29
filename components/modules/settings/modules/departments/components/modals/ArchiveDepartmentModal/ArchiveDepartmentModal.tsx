@@ -166,10 +166,10 @@ export function ArchiveDepartmentModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={archiveDepartment.isPending}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={archiveDepartment.isPending}>
             Cancel
           </Button>
-          <Button onClick={handleArchive} disabled={archiveDepartment.isPending}>
+          <Button type="button" onClick={handleArchive} disabled={archiveDepartment.isPending}>
             {archiveDepartment.isPending ? "Archiving…" : "Archive"}
           </Button>
         </DialogFooter>

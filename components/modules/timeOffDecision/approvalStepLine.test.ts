@@ -48,6 +48,11 @@ describe("approvalStepLine", () => {
     expect(line).toEqual({ asked: "the HR Admin role", answered: "Helen Hr, as the fallback" });
   });
 
+  it("a step closed by Approve anyway names the administrator who decided over it", () => {
+    const line = approvalStepLine(step({ signed: true, decidedByName: "Ada Admin", via: "OVERRIDE" }));
+    expect(line.answered).toBe("Ada Admin, approving anyway");
+  });
+
   it("an open step has no answer yet", () => {
     expect(approvalStepLine(step({})).answered).toBeNull();
   });

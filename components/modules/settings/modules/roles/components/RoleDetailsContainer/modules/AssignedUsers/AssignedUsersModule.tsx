@@ -18,11 +18,12 @@ export interface AssignedUsersModuleProps {
   roleId: string;
   roleName?: string;
   isDefaultRole?: boolean;
+  isSystemOwnerRole?: boolean;
   isArchived?: boolean;
   isLoading?: boolean;
 }
 
-export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = false, isArchived = false, isLoading = false }: AssignedUsersModuleProps) {
+export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = false, isSystemOwnerRole = false, isArchived = false, isLoading = false }: AssignedUsersModuleProps) {
   const [query, setQuery] = useState("");
   const debouncedQ = useDebouncedValue(query.trim(), 300);
   const qForApi = debouncedQ.length >= 2 ? debouncedQ : null;
@@ -47,6 +48,7 @@ export default function AssignedUsersModule({ roleId, roleName, isDefaultRole = 
       roleId={roleId}
       roleName={roleName}
       isDefaultRole={isDefaultRole}
+      isSystemOwnerRole={isSystemOwnerRole}
       isArchived={isArchived}
       rows={rows}
       isLoading={loading}

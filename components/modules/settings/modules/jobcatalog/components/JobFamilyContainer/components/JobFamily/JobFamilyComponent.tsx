@@ -159,7 +159,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
         archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
         secondary={
           <>
-            <Button
+            <Button type="button"
               variant="ghost"
               size="sm"
               className="h-9 gap-1.5 text-brown-600"
@@ -170,7 +170,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
               {allOpen ? "Collapse All" : "Expand All"}
             </Button>
 
-          <Button
+          <Button type="button"
             size="icon"
             variant="outline"
             className="h-9 w-9"
@@ -186,7 +186,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
         }
         primary={
           <PermissionGate resource="JOBS.FAMILY" action="EDIT">
-            <Button className="gap-1.5" onClick={onCreateFamily}>
+            <Button type="button" className="gap-1.5" onClick={onCreateFamily}>
               <Plus className="h-4 w-4"/>
               Add Job Family
             </Button>
@@ -371,7 +371,7 @@ const FamilySection: FC<FamilySectionProps> = ({
                 </PermissionGate>
               </RowActionsMenu>
 
-              <Button
+              <Button type="button"
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-brown-600 hover:bg-brown-100"
@@ -386,7 +386,7 @@ const FamilySection: FC<FamilySectionProps> = ({
               </Button>
             </>
           ) : (
-            <Button
+            <Button type="button"
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-brown-600 hover:bg-brown-100"

@@ -142,7 +142,7 @@ export const LogsFilters: React.FC<{
       </Select>
 
       {active && (
-        <Button
+        <Button type="button"
           variant="ghost"
           size="sm"
           onClick={() =>

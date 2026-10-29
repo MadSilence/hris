@@ -37,5 +37,6 @@ export const useBulkEditJob = (jobId: string | null) => {
       const s = query.state.data?.status;
       return s && isTerminalJobStatus(s) ? false : 1200;
     },
+    refetchIntervalInBackground: true,
   });
 };

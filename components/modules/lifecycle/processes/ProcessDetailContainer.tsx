@@ -9,6 +9,7 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
@@ -72,6 +73,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
               </Link>
             </h1>
             <ProcessStatusBadge status={process.status} />
+            {/* Said in the text line only, an archived process looked like any other (walk, SWEEP S11). */}
+            {process.archivedAt && <StatusBadge status="archived" />}
           </div>
           <p className="text-sm text-muted-foreground">
             {[
@@ -79,7 +82,6 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
               `Starts ${formatDisplayDate(process.anchorDate, { style: "medium" })}`,
               `Onboarding manager: ${process.manager?.name ?? "nobody"}`,
               process.type === "PREBOARDING" ? (process.linkActive ? "Preboarding link active" : "No active preboarding link") : null,
-              process.archivedAt ? "Archived" : null,
             ].filter(Boolean).join(" · ")}
           </p>
         </div>
@@ -87,7 +89,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
           <div className="flex items-center gap-2">
             {open && (
-              <Button variant="outline" className="gap-1.5" onClick={() => setDialog("complete")}>
+              <Button type="button" variant="outline" className="gap-1.5" onClick={() => setDialog("complete")}>
                 <CheckCheck className="h-4 w-4" />
                 Mark as Complete
               </Button>
@@ -163,7 +165,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             </div>
           </div>
           <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
-            <Button
+            <Button type="button"
               size="sm"
               onClick={async () => {
                 const problem = await act(rebaseProcessAction(process.id), "Dates recalculated.");

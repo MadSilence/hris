@@ -129,7 +129,7 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
 
   return (
     <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
-      <Button
+      <Button type="button"
         size="icon"
         variant="outline"
         aria-label="Export people"
