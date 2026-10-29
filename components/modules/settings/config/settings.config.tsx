@@ -48,6 +48,11 @@ export const settingsGroups: SettingsGroup[] = [
         resources: ["JOBS.FAMILY", "JOBS.LEVEL_GROUP", "JOBS.LEVEL", "JOBS.TITLE"],
       },
       { label: "Import & Export", href: "/settings/general/import", resources: ["SETTINGS.GENERAL"] },
+      {
+        label: "Templates",
+        href: "/settings/general/templates",
+        resources: ["ROLES.ROLE", "PEOPLE.ATTRIBUTES", "PEOPLE.LIFECYCLE_TEMPLATES"],
+      },
     ],
   },
   {

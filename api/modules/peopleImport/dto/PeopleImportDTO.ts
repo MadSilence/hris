@@ -12,6 +12,9 @@ export type PeopleImportStatus =
   | "FAILED"
   | "DISCARDED";
 
+/** What the file brings in (IMPORT_NEXT_DESIGN.md § 3.5). */
+export type PeopleImportKind = "PEOPLE_CREATE" | "ORG_STRUCTURE" | "LEAVE_BALANCES";
+
 export type PeopleImportDateFormat = "ISO" | "DMY_DOT" | "DMY_SLASH" | "MDY_SLASH";
 
 export type PeopleImportDecimalSeparator = "DOT" | "COMMA";
@@ -30,11 +33,14 @@ export type PeopleImportFileErrorDTO = {
 
 export type PeopleImportDTO = {
   id: string;
+  kind: PeopleImportKind;
+  /** Sent back with every edit of the preview; a stale one is refused (IMP00113). */
+  version: number;
   fileName: string;
   fileFormat: "CSV" | "XLSX";
   status: PeopleImportStatus;
   headers: string[];
-  /** Column index (as text) → field id. A column left out is not imported. */
+  /** Column index (as text) â field id. A column left out is not imported. */
   mapping: Record<string, string>;
   dateFormat: PeopleImportDateFormat;
   decimalSeparator: PeopleImportDecimalSeparator;
@@ -47,6 +53,10 @@ export type PeopleImportDTO = {
   failedCount: number;
   invitedCount: number;
   processedCount: number;
+  /** Balances already at their target when the file was applied. */
+  unchangedCount: number;
+  /** The Confirm step's numbers only this kind has: `departments`, `teams`; `toSet`, `unchanged`. */
+  summary: Record<string, number>;
   fileErrors: PeopleImportFileErrorDTO[];
   errorDetail: string | null;
   /** What this caller may map a column to, in template order. */
@@ -57,6 +67,9 @@ export type PeopleImportDTO = {
   createdAt: string;
   checkedAt: string | null;
   finishedAt: string | null;
+  /** Who last changed a row in the preview editor, and when. */
+  lastEditedByName: string | null;
+  lastEditedAt: string | null;
 };
 
 export type PeopleImportCellErrorDTO = {
@@ -70,8 +83,14 @@ export type PeopleImportCellErrorDTO = {
 export type PeopleImportRowDTO = {
   rowNumber: number;
   name: string | null;
-  status: "PENDING" | "CREATED" | "FAILED";
+  status: "PENDING" | "CREATED" | "UNCHANGED" | "FAILED";
   userId: string | null;
+  /** What the row created or changed: an org unit, a balance. */
+  objectId: string | null;
+  /** The row's cells as text, by column index — what the preview editor edits. */
+  cells: (string | null)[];
+  /** What the check found the row would do: a balance's `current`, `target`, `difference`, `unit`, `asOf`. */
+  preview: Record<string, string | number | boolean | null> | null;
   errors: PeopleImportCellErrorDTO[];
 };
 
@@ -80,4 +99,11 @@ export type PeopleImportUpdateRequest = {
   dateFormat?: PeopleImportDateFormat;
   decimalSeparator?: PeopleImportDecimalSeparator;
   inviteAfter?: boolean;
+};
+
+/** `POST /people-imports/{id}/rows` — the preview editor. */
+export type PeopleImportRowsEditRequest = {
+  version: number;
+  edits: { rowNumber: number; column: number; value: string | null }[];
+  removeRows: number[];
 };

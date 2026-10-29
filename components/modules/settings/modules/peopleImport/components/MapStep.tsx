@@ -22,7 +22,8 @@ import {
   useDiscardPeopleImport,
   useUpdatePeopleImport,
 } from "@/components/modules/settings/modules/peopleImport/hooks";
-import { CheckErrors } from "./CheckErrors";
+import { PreviewEditor } from "./PreviewEditor";
+import { IMPORT_KINDS } from "./importKinds";
 
 /** Radix refuses an empty value, so "not imported" has a name of its own. */
 const SKIP = "__skip__";
@@ -84,6 +85,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-brown-800">{anImport.fileName}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{IMPORT_KINDS[anImport.kind].title}</p>
           <p className="text-sm text-muted-foreground">
             {anImport.rowCount} {anImport.rowCount === 1 ? "row" : "rows"} · Match each column to a field, or leave it out.
           </p>
@@ -129,6 +131,8 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
         </Table>
       </div>
 
+      {/* A structure file has no dates and no numbers to read. */}
+      {anImport.kind !== "ORG_STRUCTURE" && (
       <div className="flex flex-wrap gap-6">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-brown-700">Dates written as text</span>
@@ -156,6 +160,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
           </Select>
         </label>
       </div>
+      )}
 
       <FormError message={error} />
       {missingRequired.length > 0 && (
@@ -177,7 +182,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
         </Button>
       </div>
 
-      {checkedWithErrors && <CheckErrors anImport={anImport} mode="check" />}
+      {checkedWithErrors && <PreviewEditor anImport={anImport} />}
     </div>
   );
 };

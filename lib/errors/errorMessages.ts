@@ -21,6 +21,12 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // CommonBusinessError
   E00405: "That action is not available here.",
 
+  // TemplateBusinessError — the template catalogue (TEMPLATES_DESIGN.md § 5).
+  TPL00001: "That template could not be found. Reload the list of templates.",
+  TPL00002: "The company changed since this preview was made. Here is the new preview — check it before applying.",
+  TPL00003: "“{0}” is taken too. Skip it, or rename the company’s own first.",
+  TPL00004: "This template cannot be applied right now. Tell support which one it was.",
+
   // OfficeBusinessError — added 2026-08-27 when offices stopped answering with the generic
   // validation error (finding S-1 of the first smoke run).
   O00001: "That office could not be found.",
@@ -543,6 +549,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00036: "Somebody you chose cannot take these decisions: choose a colleague who works here and can sign in.",
   U00037: "Only a System Owner can impersonate a System Owner.",
   U00038: "The confirmation link for the new email could not be sent. Try again shortly.",
+  U00039: "Only a System Owner can change a System Owner's email.",
+  U00040: "This account's email changed less than a day ago. A password reset can be sent after that.",
 
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",
@@ -608,7 +616,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   IMP00005: "The CSV file is not UTF-8. Save it again as “CSV UTF-8”, or as XLSX.",
   IMP00006: "The file could not be read. Check that it opens in a spreadsheet, and that it is not password-protected.",
   IMP00007: "The first row of the file must name the columns.",
-  IMP00008: "The file has a header row and no people under it.",
+  IMP00008: "The file has a header row and no rows under it.",
+  IMP00009: "The file is too large once unpacked. Save it again with only the sheet to import, or split it.",
   IMP00101: "That import could not be found.",
   IMP00102: "This import has already been applied or discarded. Start a new one.",
   IMP00103: "Another import is running in this company. Wait for it to finish.",
@@ -621,6 +630,14 @@ export const ERROR_MESSAGES: Record<string, string> = {
   IMP00110: "Sending invitations needs the right to manage profiles.",
   IMP00111: "The file has no column {0}.",
   IMP00112: "The import has not finished yet.",
+  IMP00113: "Somebody changed this import since you opened it. It has been reloaded — make your change again.",
+  IMP00114: "You do not have permission to run this kind of import.",
+  IMP00115: "Choose the column for {0}.",
+  IMP00116: "The file has no row {0}. Reload the import.",
+  IMP00117: "A cell can hold at most {0} characters.",
+  IMP00118: "At most {0} changes can be saved at once. Save part of them first.",
+  IMP00119: "An import needs at least one row. Discard it instead.",
+  IMP00120: "That kind of import does not exist ({0}). Reload the page.",
   IMP00201: "{0} is required.",
   IMP00202: "“{0}” is not a date written as {1}.",
   IMP00203: "“{0}” is not a number.",
@@ -640,6 +657,25 @@ export const ERROR_MESSAGES: Record<string, string> = {
   IMP00217: "This row could not be created: {0}",
   IMP00218: "The person was created, but their manager could not be set: {0}",
   IMP00219: "“{0}” is not a whole number, and {1} takes whole numbers only.",
+  IMP00220: "You do not have permission to create {0}.",
+  IMP00221: "A {0} called “{1}” already exists. Leave this row out, or move units in the org chart.",
+  IMP00222: "An archived {0} is called “{1}”. Restore it instead, or choose another name.",
+  IMP00223: "The {0} “{1}” is in more than one row ({2}).",
+  IMP00224: "There is no {0} called “{1}” in the company or in this file.",
+  IMP00225: "A unit cannot be its own parent.",
+  IMP00226: "These units would be each other’s parents: {0}.",
+  IMP00227: "The parent {0} is in row {1}, which has errors. Fix that row first.",
+  IMP00228: "This unit would be more than {0} levels deep.",
+  IMP00229: "Nobody in the company has the email {0}. Clear the lead and set it on the unit once the person is here.",
+  IMP00230: "{0} has left the company.",
+  IMP00231: "Nobody in the company has the email {0}. Import the people first.",
+  IMP00232: "The policy {0} is unlimited: there is no balance to set.",
+  IMP00233: "{0} is not assigned the policy {1}. Assign it first, then import the balance.",
+  IMP00234: "{0} has no balance period of {1} on {2}.",
+  IMP00235: "{0} is after today. A balance can be set as of today or earlier.",
+  IMP00236: "Carried over must be between 0 and the balance.",
+  IMP00237: "The carried-over days of {0} expire on {1}, before As of.",
+  IMP00238: "{0} has more than one row for the policy {1} (rows {2}).",
 };
 
 /**

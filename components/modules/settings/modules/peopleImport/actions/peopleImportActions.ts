@@ -2,7 +2,11 @@
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisPeopleImportService } from "@/api/modules/peopleImport/services";
-import type { PeopleImportDTO, PeopleImportUpdateRequest } from "@/api/modules/peopleImport/dto";
+import type {
+  PeopleImportDTO,
+  PeopleImportRowsEditRequest,
+  PeopleImportUpdateRequest,
+} from "@/api/modules/peopleImport/dto";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 
 // The steps of people import. The upload is not here: its body can exceed the action limit, so it
@@ -48,5 +52,17 @@ export async function discardPeopleImportAction(id: string): Promise<ActionResul
     return { status: ActionStatus.SUCCESS, data: await hrisPeopleImportService.discard(id) };
   } catch (error) {
     return toActionError(error, "discardPeopleImportAction");
+  }
+}
+
+/** The preview editor: cells changed, rows removed, the file checked again (IMPORT_NEXT_DESIGN.md § 9). */
+export async function editPeopleImportRowsAction(input: {
+  id: string;
+  body: PeopleImportRowsEditRequest;
+}): Promise<ActionResult<PeopleImportDTO>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisPeopleImportService.editRows(input.id, input.body) };
+  } catch (error) {
+    return toActionError(error, "editPeopleImportRowsAction");
   }
 }

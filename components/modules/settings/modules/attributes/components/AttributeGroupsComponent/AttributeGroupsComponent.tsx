@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Check,
   ChevronsDownUp,
@@ -436,6 +437,15 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
             {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
             {allOpen ? "Collapse all" : "Expand all"}
           </Button>
+
+          {/* A section with its fields, ready-made (TEMPLATES_DESIGN.md § 4.3): the field sets of the catalogue. */}
+          <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
+            <Button asChild variant="outline" className="h-9">
+              <Link href="/settings/general/templates?kind=FIELD_SET" className="no-underline">
+                Add from Library
+              </Link>
+            </Button>
+          </PermissionGate>
 
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onCreateGroup}>

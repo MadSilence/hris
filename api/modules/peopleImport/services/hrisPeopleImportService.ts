@@ -1,7 +1,9 @@
 import { hrisApiPeopleImportClient } from "@/api/modules/peopleImport/clients";
 import type {
   PeopleImportDTO,
+  PeopleImportKind,
   PeopleImportRowDTO,
+  PeopleImportRowsEditRequest,
   PeopleImportUpdateRequest,
 } from "@/api/modules/peopleImport/dto";
 
@@ -22,8 +24,16 @@ export class HrisPeopleImportService {
     return hrisApiPeopleImportClient.rows(id, errorsOnly);
   }
 
-  public async upload(form: FormData): Promise<PeopleImportDTO> {
-    return hrisApiPeopleImportClient.upload(form);
+  public async upload(form: FormData, kind: PeopleImportKind): Promise<PeopleImportDTO> {
+    return hrisApiPeopleImportClient.upload(form, kind);
+  }
+
+  public async kinds(): Promise<PeopleImportKind[]> {
+    return hrisApiPeopleImportClient.kinds();
+  }
+
+  public async editRows(id: string, body: PeopleImportRowsEditRequest): Promise<PeopleImportDTO> {
+    return hrisApiPeopleImportClient.editRows(id, body);
   }
 
   public async update(id: string, body: PeopleImportUpdateRequest): Promise<PeopleImportDTO> {
@@ -46,8 +56,8 @@ export class HrisPeopleImportService {
     return hrisApiPeopleImportClient.discard(id);
   }
 
-  public async template(format: "csv" | "xlsx"): Promise<Response> {
-    return hrisApiPeopleImportClient.template(format);
+  public async template(format: "csv" | "xlsx", kind: PeopleImportKind): Promise<Response> {
+    return hrisApiPeopleImportClient.template(format, kind);
   }
 
   public async errorFile(id: string): Promise<Response> {

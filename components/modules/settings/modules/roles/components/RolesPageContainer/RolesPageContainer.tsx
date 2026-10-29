@@ -27,6 +27,8 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import RolesPageView, { RolesTableView } from "./RolesPageView";
+import { useRouter } from "next/navigation";
+import { useTemplates } from "@/components/modules/settings/modules/templates";
 
 const PAGE_SIZE = 50;
 
@@ -59,6 +61,11 @@ const RolesPageContainer: React.FC = () => {
     selectedFields: null,
     filters: null,
   });
+
+  const router = useRouter();
+  // The role templates the reader may apply. A failed read only leaves the switch off: the page does
+  // not depend on it.
+  const { data: roleTemplates } = useTemplates("ROLE");
 
   const createRole = useCreateRoleAction();
   const renameRole = useRenameRoleAction();
@@ -121,6 +128,11 @@ const RolesPageContainer: React.FC = () => {
       onCreateRole={async (values) => {
         await createRole.mutateAsync({ name: values.name, description: values.description });
       }}
+      roleTemplates={(roleTemplates ?? []).map((t) => ({ id: t.key, name: t.title, description: t.summary }))}
+      // Starting from a template leads into its preview, never straight to a create: the preview is
+      // where a name clash and the grants on sensitive fields are decided (TEMPLATES_DESIGN.md trap 5).
+      onCreateRoleFromTemplate={({ templateId }) =>
+        router.push(`/settings/general/templates/${encodeURIComponent(templateId)}`)}
       onRenameRole={async (roleId, values) => {
         await renameRole.mutateAsync({
           id: roleId,

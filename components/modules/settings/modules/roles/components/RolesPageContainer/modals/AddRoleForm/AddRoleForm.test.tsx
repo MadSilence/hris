@@ -81,7 +81,11 @@ describe("AddRoleForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
-  it("submits role from template", async () => {
+  /**
+   * Starting from a template leads into its preview, which names the role and settles a clash —
+   * the form asks for no name of its own (TEMPLATES_DESIGN.md trap 5).
+   */
+  it("submits role from template into the preview", async () => {
     const onSubmitAction = jest.fn();
 
     render(
@@ -94,36 +98,9 @@ describe("AddRoleForm", () => {
 
     fireEvent.click(screen.getByRole("switch"));
 
-    fireEvent.change(screen.getByLabelText(/role name/i), {
-      target: { value: "Custom Admin" },
-    });
+    expect(screen.queryByLabelText(/role name/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /create/i }));
-
-    await waitFor(() => {
-      expect(onSubmitAction).toHaveBeenCalledWith({
-        useTemplate: true,
-        name: "",
-        description: "",
-        templateId: "admin",
-        templateName: "Custom Admin",
-      });
-    });
-  });
-
-  it("submits role from template with empty optional name", async () => {
-    const onSubmitAction = jest.fn();
-
-    render(
-      <AddRoleForm
-        templates={templates}
-        onCancelAction={jest.fn()}
-        onSubmitAction={onSubmitAction}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("switch"));
-    fireEvent.click(screen.getByRole("button", { name: /create/i }));
+    fireEvent.click(screen.getByRole("button", { name: /preview/i }));
 
     await waitFor(() => {
       expect(onSubmitAction).toHaveBeenCalledWith({

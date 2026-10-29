@@ -6,19 +6,23 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import type { ActionResult } from "@/lib/errors/withActionError";
 import type {
   PeopleImportDTO,
+  PeopleImportKind,
   PeopleImportRowDTO,
+  PeopleImportRowsEditRequest,
   PeopleImportUpdateRequest,
 } from "@/api/modules/peopleImport/dto";
 import {
   applyPeopleImportAction,
   checkPeopleImportAction,
   discardPeopleImportAction,
+  editPeopleImportRowsAction,
   invitePeopleImportAction,
   updatePeopleImportAction,
 } from "@/components/modules/settings/modules/peopleImport/actions";
 
 export const peopleImportQueryKeys = {
   current: ["PEOPLE_IMPORT", "current"] as const,
+  kinds: ["PEOPLE_IMPORT", "kinds"] as const,
   rows: (id: string, errorsOnly: boolean) => ["PEOPLE_IMPORT", id, "rows", errorsOnly] as const,
 };
 
@@ -36,7 +40,7 @@ const unwrap = <T,>(result: ActionResult<T>): T => {
 };
 
 /**
- * The import the page shows — the newest one that is not over, or the last report. While it is being
+ * The import the page shows â the newest one that is not over, or the last report. While it is being
  * applied the page asks every second and a half: the job has nothing to push its progress with.
  */
 export const useCurrentPeopleImport = () => {
@@ -46,6 +50,16 @@ export const useCurrentPeopleImport = () => {
     queryFn: async () => (await internalApiClient.get<PeopleImportDTO | undefined>("/people-imports/current")) ?? null,
     refetchInterval: (query) => (query.state.data?.status === "APPLYING" ? 1500 : false),
     refetchIntervalInBackground: true,
+  });
+};
+
+/** The kinds this caller may run, in move-in order — the cards of the first step. */
+export const useImportKinds = () => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<PeopleImportKind[]>({
+    queryKey: peopleImportQueryKeys.kinds,
+    queryFn: () => internalApiClient.get<PeopleImportKind[]>("/people-imports/kinds"),
+    staleTime: 60_000,
   });
 };
 
@@ -71,17 +85,17 @@ const useStepMutation = <V,>(run: (variables: V) => Promise<ActionResult<PeopleI
 };
 
 /**
- * The upload — through the route handler rather than an action (the action body limit), and through
+ * The upload â through the route handler rather than an action (the action body limit), and through
  * `InternalApiClient.fetch` so a refusal is typed and a stale session is renewed like everywhere else.
  */
 export const useUploadPeopleImport = () => {
   const { internalApiClient } = useAppDataContext();
   const queryClient = useQueryClient();
-  return useMutation<PeopleImportDTO, Error, File>({
-    mutationFn: async (file) => {
+  return useMutation<PeopleImportDTO, Error, { file: File; kind: PeopleImportKind }>({
+    mutationFn: async ({ file, kind }) => {
       const form = new FormData();
       form.append("file", file, file.name);
-      const response = await internalApiClient.fetch("/people-imports", { method: "POST", body: form });
+      const response = await internalApiClient.fetch(`/people-imports?kind=${kind}`, { method: "POST", body: form });
       return (await response.json()) as PeopleImportDTO;
     },
     onSuccess: (dto) => {
@@ -100,3 +114,7 @@ export const useApplyPeopleImport = () => useStepMutation((id: string) => applyP
 export const useInvitePeopleImport = () => useStepMutation((id: string) => invitePeopleImportAction(id));
 
 export const useDiscardPeopleImport = () => useStepMutation((id: string) => discardPeopleImportAction(id));
+
+/** The preview editor. Its answer is the import checked again, so the page redraws the new preview. */
+export const useEditPeopleImportRows = () =>
+  useStepMutation((input: { id: string; body: PeopleImportRowsEditRequest }) => editPeopleImportRowsAction(input));

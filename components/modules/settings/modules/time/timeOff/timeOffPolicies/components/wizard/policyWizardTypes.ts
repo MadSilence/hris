@@ -154,7 +154,8 @@ export type PolicyWizardValues = {
   /**
    * Whose holders decide a step that resolves to nobody (a leaver, an empty manager step, an approver
    * away with nobody standing in). `apprFallbackDefault`: not chosen yet on settings being created —
-   * nothing is sent and the backend gives the HR Admin role when the company has one.
+   * nothing is sent and the backend gives the HR Admin role when the company has one, otherwise
+   * System Owner (S2-3).
    */
   apprFallbackDefault: boolean;
   apprFallbackRoleId: string | null;
@@ -538,7 +539,7 @@ export function buildApprovalRequest(
     requiredApprovalsCount:
       v.apprMode === "N_OF_M" ? toNumber(v.apprRequiredCount) ?? 1 : null,
     // The fallback role: a chosen one, "none" said explicitly, or — not chosen on settings being
-    // created — nothing, and the backend gives the HR Admin role. (allowSubstituteApprovers went:
+    // created — nothing, and the backend gives HR Admin, or System Owner without it. (allowSubstituteApprovers went:
     // delegation is always allowed, so there is no switch for it.)
     fallbackRoleId: v.apprFallbackDefault ? null : v.apprFallbackRoleId,
     ...(v.apprFallbackDefault || v.apprFallbackRoleId ? {} : { noFallbackRole: true }),

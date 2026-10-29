@@ -698,7 +698,7 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
         </SelectTrigger>
         <SelectContent>
           {values.apprFallbackDefault && (
-            <SelectItem value={FALLBACK_DEFAULT}>HR Admin (the default)</SelectItem>
+            <SelectItem value={FALLBACK_DEFAULT}>HR Admin, or System Owner without it (the default)</SelectItem>
           )}
           {[...known, ...live].map((r) => (
             <SelectItem key={r.id} value={r.id}>

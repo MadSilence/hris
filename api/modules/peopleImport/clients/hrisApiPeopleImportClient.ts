@@ -1,7 +1,9 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   PeopleImportDTO,
+  PeopleImportKind,
   PeopleImportRowDTO,
+  PeopleImportRowsEditRequest,
   PeopleImportUpdateRequest,
 } from "@/api/modules/peopleImport/dto";
 
@@ -22,8 +24,18 @@ export class HrisApiPeopleImportClient {
     return hrisApiClient.get<PeopleImportRowDTO[]>(`${BASE}/${id}/rows?errorsOnly=${errorsOnly}`);
   }
 
-  public async upload(form: FormData): Promise<PeopleImportDTO> {
-    return hrisApiClient.postForm<PeopleImportDTO>(BASE, form);
+  /** The kind travels as a query parameter; the form carries only the file. */
+  public async upload(form: FormData, kind: PeopleImportKind): Promise<PeopleImportDTO> {
+    return hrisApiClient.postForm<PeopleImportDTO>(`${BASE}?kind=${kind}`, form);
+  }
+
+  /** The kinds the caller may run, in move-in order. */
+  public async kinds(): Promise<PeopleImportKind[]> {
+    return hrisApiClient.get<PeopleImportKind[]>(`${BASE}/kinds`);
+  }
+
+  public async editRows(id: string, body: PeopleImportRowsEditRequest): Promise<PeopleImportDTO> {
+    return hrisApiClient.post<PeopleImportDTO>(`${BASE}/${id}/rows`, { ...body });
   }
 
   public async update(id: string, body: PeopleImportUpdateRequest): Promise<PeopleImportDTO> {
@@ -47,8 +59,8 @@ export class HrisApiPeopleImportClient {
   }
 
   /** Binary: streamed through untouched, the file name in `Content-Disposition`. */
-  public async template(format: "csv" | "xlsx"): Promise<Response> {
-    return hrisApiClient.fetch(`${BASE}/template?format=${format}`, "*/*");
+  public async template(format: "csv" | "xlsx", kind: PeopleImportKind): Promise<Response> {
+    return hrisApiClient.fetch(`${BASE}/template?format=${format}&kind=${kind}`, "*/*");
   }
 
   public async errorFile(id: string): Promise<Response> {

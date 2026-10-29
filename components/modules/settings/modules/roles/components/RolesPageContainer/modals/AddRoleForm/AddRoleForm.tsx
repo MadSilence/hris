@@ -251,31 +251,15 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
                 </p>
               )}
 
-              {selectedTemplate && (
-                <p className="text-xs text-muted-foreground">
-                  {selectedTemplate.description ??
-                    "You can edit permissions after creation."}
-                </p>
+              {selectedTemplate?.description && (
+                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <RequiredLabel htmlFor="template-role-name" required>Role Name</RequiredLabel>
-              <Input
-                id="template-role-name"
-                value={formik.values.templateName}
-                onChange={(e) =>
-                  formik.setFieldValue("templateName", e.currentTarget.value)
-                }
-                disabled={isLoading}
-                aria-invalid={!!formik.errors.templateName}
-              />
-              {formik.errors.templateName && (
-                <p className="text-sm text-destructive">
-                  {formik.errors.templateName}
-                </p>
-              )}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              The next step previews exactly what the template creates in your company — and lets you
+              rename it if a role of that name exists — before anything is applied.
+            </p>
           </div>
         )}
       </div>
@@ -291,7 +275,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Create
+          {formik.values.useTemplate ? "Preview" : "Create"}
         </Button>
       </DialogFooter>
     </form>

@@ -32,6 +32,9 @@ export interface RolesPageViewProps {
   isLoadingMoreUsers?: boolean;
   onLoadMoreUsers?: () => void;
   onCreateRole?: (values: { name: string; description?: string }) => void | Promise<void>;
+  /** Role templates for Add Role → "Choose from a template". */
+  roleTemplates?: { id: string; name: string; description?: string }[];
+  onCreateRoleFromTemplate?: (values: { templateId: string; name?: string }) => void;
   onRenameRole?: (roleId: string, values: { name: string; description?: string; version?: number }) => void | Promise<void>;
   onDuplicateRole?: (roleId: string, values: { name: string }) => void | Promise<void>;
   onDeleteRole?: (roleId: string) => void | Promise<void>;
@@ -66,6 +69,8 @@ export default function RolesPageView({
   isLoadingMoreUsers = false,
   onLoadMoreUsers,
   onCreateRole,
+  roleTemplates,
+  onCreateRoleFromTemplate,
   onRenameRole,
   onDuplicateRole,
   onDeleteRole,
@@ -115,6 +120,8 @@ export default function RolesPageView({
               <RolesPageHeader
                 existingRoleNames={(allRoles ?? roleRows ?? []).map((role) => role.name)}
                 onCreateRole={onCreateRole}
+                templates={roleTemplates}
+                onCreateRoleFromTemplate={onCreateRoleFromTemplate}
                 onExportRoles={onExportRoles}
                 isCreatingRole={isCreatingRole}
                 createRoleErrorMessage={createRoleErrorMessage}

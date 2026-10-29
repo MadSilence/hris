@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
-import type { PeopleImportDTO } from "@/api/modules/peopleImport/dto";
+import type { PeopleImportDTO, PeopleImportKind, PeopleImportRowDTO } from "@/api/modules/peopleImport/dto";
 import { partialMock } from "@/test/types";
 import { PeopleImportContainer } from "./PeopleImportContainer";
 
@@ -12,9 +12,16 @@ let current: { data: PeopleImportDTO | null; isLoading: boolean; error: unknown 
 
 const idle = () => ({ mutate: jest.fn(), mutateAsync: jest.fn(), isPending: false });
 
+let rows: PeopleImportRowDTO[] = [];
+let kinds: PeopleImportKind[] = ["ORG_STRUCTURE", "PEOPLE_CREATE", "LEAVE_BALANCES"];
+const edit = idle();
+
 jest.mock("@/components/modules/settings/modules/peopleImport/hooks", () => ({
   useCurrentPeopleImport: () => ({ ...current, refetch: jest.fn() }),
-  usePeopleImportRows: () => ({ data: [], isLoading: false, error: null, refetch: jest.fn() }),
+  usePeopleImportRows: () => ({ data: rows, isLoading: false, error: null, refetch: jest.fn() }),
+  useImportKinds: () => ({ data: kinds, isLoading: false, error: null, refetch: jest.fn() }),
+  useEditPeopleImportRows: () => edit,
+  PeopleImportActionError: class extends Error {},
   useUploadPeopleImport: () => idle(),
   useUpdatePeopleImport: () => idle(),
   useCheckPeopleImport: () => idle(),
@@ -30,6 +37,12 @@ jest.mock("@/components/modules/settings/shared/ExportDataModal/triggerExportDow
 const anImport = (overrides: Partial<PeopleImportDTO>): PeopleImportDTO =>
   partialMock<PeopleImportDTO>({
     id: "imp-1",
+    kind: "PEOPLE_CREATE",
+    version: 3,
+    summary: {},
+    unchangedCount: 0,
+    lastEditedByName: null,
+    lastEditedAt: null,
     fileName: "people.csv",
     fileFormat: "CSV",
     status: "UPLOADED",
@@ -66,8 +79,25 @@ const show = (data: PeopleImportDTO | null) => {
 };
 
 describe("PeopleImportContainer", () => {
-  it("offers the template and the upload when there is no import", () => {
+  it("asks what is being imported, in move-in order, before offering a template", () => {
     show(null);
+    expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual([
+      expect.stringContaining("Structure"), expect.stringContaining("People"), expect.stringContaining("Leave Balances"),
+    ]);
+    expect(screen.queryByRole("button", { name: /download xlsx template/i })).not.toBeInTheDocument();
+  });
+
+  it("offers only the kinds the caller may run, and needs no choice when there is one", () => {
+    kinds = ["PEOPLE_CREATE"];
+    show(null);
+    expect(screen.getAllByRole("radio")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: /download xlsx template/i })).toBeInTheDocument();
+    kinds = ["ORG_STRUCTURE", "PEOPLE_CREATE", "LEAVE_BALANCES"];
+  });
+
+  it("offers the template and the upload once a kind is chosen", () => {
+    show(null);
+    fireEvent.click(screen.getByRole("radio", { name: /^People/ }));
     expect(screen.getByRole("button", { name: /download xlsx template/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /choose file/i })).toBeInTheDocument();
   });
@@ -108,5 +138,34 @@ describe("PeopleImportContainer", () => {
     expect(screen.getByText(/11 people imported from people.csv/i)).toBeInTheDocument();
     expect(screen.getByText(/no invitations were sent, because a row failed/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /invite the 11 people created/i })).toBeInTheDocument();
+  });
+
+  it("says how many units a structure file will create", () => {
+    show(anImport({ kind: "ORG_STRUCTURE", status: "CHECKED", rowCount: 5, summary: { departments: 3, teams: 2 } }));
+    expect(screen.getByText("3 departments")).toBeInTheDocument();
+    expect(screen.getByText("2 teams")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Import 5 units" })).toBeInTheDocument();
+  });
+
+  it("lets the preview clear every unknown lead in one request carrying the import's version", () => {
+    rows = [partialMock<PeopleImportRowDTO>({
+      rowNumber: 3, name: "Engineering", status: "PENDING", cells: ["Department", "Engineering", null, "ghost@x.test"],
+      preview: null,
+      errors: [{ column: 3, columnHeader: "Lead", code: "IMP00229", params: ["ghost@x.test"] }],
+    })];
+    show(anImport({
+      kind: "ORG_STRUCTURE", status: "MAPPED", checkedAt: "2026-10-29T10:00:00Z", errorRowCount: 1,
+      headers: ["Type", "Name", "Parent", "Lead"],
+      mapping: { "0": "org:type", "1": "org:name", "2": "org:parent", "3": "org:lead" },
+      fields: [{ id: "org:type", header: "Type", required: true }, { id: "org:name", header: "Name", required: true }],
+      lastEditedByName: "Ada Lovelace", lastEditedAt: "2026-10-29T10:00:00Z",
+    }));
+    expect(screen.getByText(/last edited by ada lovelace/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Clear Unknown Leads" }));
+    expect(edit.mutate).toHaveBeenCalledWith(
+      { id: "imp-1", body: { version: 3, edits: [{ rowNumber: 3, column: 3, value: null }], removeRows: [] } },
+      expect.anything(),
+    );
+    rows = [];
   });
 });
