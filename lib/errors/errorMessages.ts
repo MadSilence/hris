@@ -60,6 +60,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AUTH00002: "Too many failed sign-in attempts. Try again later.",
   AUTH00003: "This password reset link is no longer valid. Ask for a new one.",
   AUTH00004: "The current password is not correct.",
+  AUTH00005: "This email confirmation link is no longer valid. Ask your administrator to enter the address again.",
 
   // AvatarBusinessError
   A00001: "Avatar upload request is invalid",
@@ -541,6 +542,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00035: "Choose a date that is still ahead.",
   U00036: "Somebody you chose cannot take these decisions: choose a colleague who works here and can sign in.",
   U00037: "Only a System Owner can impersonate a System Owner.",
+  U00038: "The confirmation link for the new email could not be sent. Try again shortly.",
 
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",

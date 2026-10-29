@@ -9,6 +9,8 @@ import {
   LoginRequest,
   LoginResponse,
   PasswordResetPeekResponse,
+  EmailChangePeekResponse,
+  EmailChangeConfirmResponse,
   RegisterRequest,
   ResetPasswordRequest,
 } from "@/api/modules/auth/dto";
@@ -66,6 +68,15 @@ class HrisApiAuthClient {
       token: payload.token,
       password: payload.password,
     });
+  }
+
+  /** A POST so the token stays out of access logs. Does not use the link. */
+  public async peekEmailChange(token: string): Promise<EmailChangePeekResponse> {
+    return hrisApiClient.post<EmailChangePeekResponse>(this.API_AUTH_PATH + "/email-change/peek", { token });
+  }
+
+  public async confirmEmailChange(token: string): Promise<EmailChangeConfirmResponse> {
+    return hrisApiClient.post<EmailChangeConfirmResponse>(this.API_AUTH_PATH + "/email-change/confirm", { token });
   }
 
   /** Signed in: not under `/auth`, and it travels with the session's Bearer. */

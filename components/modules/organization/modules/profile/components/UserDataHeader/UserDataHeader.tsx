@@ -602,6 +602,9 @@ function LifecycleNote({ user }: { user: User }) {
   if (user.accountLocked) {
     parts.push("Locked after too many failed sign-ins — send a password reset to unlock");
   }
+  if (user.pendingEmail) {
+    parts.push(`New email ${user.pendingEmail} waits for confirmation — the link was sent to it`);
+  }
 
   if (parts.length === 0) return null;
   // The dates are written in the reader's locale, which the server does not know: it renders "Dec 21,

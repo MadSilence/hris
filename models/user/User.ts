@@ -32,6 +32,8 @@ export type User = {
   /** The day a scheduled invitation will go out. Profile only. */
   inviteScheduledFor?: string | null;
   isEmailVerified?: boolean;
+  /** A new address waiting for its confirmation link; the person still signs in with `email`. */
+  pendingEmail?: string | null;
   jobId?: string | null;
   jobName?: string | null;
   /**

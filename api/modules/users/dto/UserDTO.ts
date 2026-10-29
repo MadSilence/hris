@@ -14,6 +14,8 @@ export type UserDTO = {
   inviteSentAt?: string | null;
   inviteScheduledFor?: string | null;
   isEmailVerified: boolean;
+  /** A new address waiting for its confirmation link; the login is still `email`. Profile only. */
+  pendingEmail?: string | null;
   jobId?: string | null;
   jobName?: string | null;
   /** Grade of the held position — derived by the backend, never written from here. */

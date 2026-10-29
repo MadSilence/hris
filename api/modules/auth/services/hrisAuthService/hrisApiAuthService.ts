@@ -10,6 +10,8 @@ import {
   LoginRequest,
   LoginResponse,
   PasswordResetPeekResponse,
+  EmailChangePeekResponse,
+  EmailChangeConfirmResponse,
   RegisterRequest,
   ResetPasswordRequest,
 } from "@/api/modules/auth/dto";
@@ -56,6 +58,14 @@ export class HrisApiAuthService {
 
   public async changePassword(payload: ChangePasswordRequest): Promise<void> {
     return hrisApiAuthClient.changePassword(payload);
+  }
+
+  public async peekEmailChange(token: string): Promise<EmailChangePeekResponse> {
+    return hrisApiAuthClient.peekEmailChange(token);
+  }
+
+  public async confirmEmailChange(token: string): Promise<EmailChangeConfirmResponse> {
+    return hrisApiAuthClient.confirmEmailChange(token);
   }
 }
 

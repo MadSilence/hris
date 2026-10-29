@@ -44,7 +44,7 @@ export const LEAVE_FOR_ROOT_ROUTE = "/leave-for-root";
 // `/m` is the mobile hand-off: a page reached by scanning a QR code on a screen somebody is already
 // signed in on, carrying a one-time token. Short because it is typed into nothing and scanned from a
 // phone camera, where every character is a pixel of the code.
-const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/reset-password", "/forgot-password", "/m"];
+const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/reset-password", "/forgot-password", "/confirm-email", "/m"];
 
 /** Where the app opens, and where signing in goes when nothing asked for somewhere else. */
 export const APP_HOME = "/dashboard";
