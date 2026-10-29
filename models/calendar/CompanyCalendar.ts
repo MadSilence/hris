@@ -34,7 +34,7 @@ export interface CompanyCalendarMark {
 
 /**
  * One person's leave on the board, clipped to the window. **A field that is missing is a field the reader
- * may not have** — the server leaves it out (the disclosure rule, `COMPANY_TIME_OFF_DESIGN.md` § 5):
+ * may not have** — the server leaves it out (the disclosure rule, `COMPANY_CALENDAR.md` § 6):
  * no `leaveTypeName` means the bar says "Time off" in a neutral tone; no `requestId` means it is not a link.
  * `status` is `PENDING` / `CANCELLATION_PENDING` only for a reader who may see a request still being decided.
  */

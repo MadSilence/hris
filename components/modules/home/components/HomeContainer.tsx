@@ -69,9 +69,9 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
 };
 
 /**
- * Home (`HOME_AND_SEARCH_DESIGN.md` § 4, as the owner answered it in sitting 2): a catalogue of widgets in
+ * Home (`HOME_AND_SEARCH.md` §§ 1–3, as the owner answered it in sitting 2): a catalogue of widgets in
  * groups, each person arranging their own. **No page gate** — `/403` sends a refused reader here, so a gate
- * would loop (trap 7.4). Each widget is offered only to a reader who may see it, loads and fails on its own,
+ * would loop (`HOME_AND_SEARCH.md` § 10, trap 4). Each widget is offered only to a reader who may see it, loads and fails on its own,
  * and sits in its own error boundary, so one widget never takes the page down with it.
  */
 export const HomeContainer: React.FC = () => {

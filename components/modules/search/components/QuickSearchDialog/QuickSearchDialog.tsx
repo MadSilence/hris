@@ -46,7 +46,7 @@ const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).map((word) => word[0]).join("").toUpperCase().slice(0, 2) || "?";
 
 /**
- * The quick-search window (`HOME_AND_SEARCH_DESIGN.md` § 5, H11: there is no results page). It opens
+ * The quick-search window (`HOME_AND_SEARCH.md` § 6, H11: there is no results page). It opens
  * from the sidebar's Search item and from Ctrl/Cmd + K, shows the best five of each kind the reader
  * may search, and "Show More" widens one kind in place.
  *

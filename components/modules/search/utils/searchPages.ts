@@ -31,7 +31,7 @@ const SYNONYMS: Record<string, string[]> = {
  * The pages index: the app's own destinations, as the sidebar already offers them to this reader,
  * plus every settings page whose resources the reader holds. **UX only** — `canAccess` decides what is
  * offered, and the destination refuses a reader on its own as it always has
- * (`HOME_AND_SEARCH_DESIGN.md` § 6, trap 8). It never decides which entities are searched.
+ * (`HOME_AND_SEARCH.md` § 6, trap 8). It never decides which entities are searched.
  */
 export const buildSearchPages = (
   appPages: SearchPage[],

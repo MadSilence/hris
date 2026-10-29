@@ -101,7 +101,7 @@ const holidayTitle = (m: CompanyCalendarMark): string => {
 
 const leaveLabel = (a: CompanyCalendarAbsence): string => a.leaveTypeName ?? "Time off";
 
-/** The tooltip is the explanation — there is no legend (`CALENDAR_PLAN.md`). */
+/** The tooltip is the explanation — there is no legend (`COMPANY_CALENDAR.md` § 7). */
 export const leaveTitle = (a: CompanyCalendarAbsence): string => {
   const dates = a.startDate === a.endDate ? a.startDate : `${a.startDate} – ${a.endDate}`;
   const parts = [leaveLabel(a), dates];

@@ -9,7 +9,7 @@ import { cn } from "@/public/desact/src/components/ui/utils";
 
 /**
  * One widget on home: a Title Case heading, at most one action beside it, and the widget's own body
- * (HOME_AND_SEARCH_DESIGN.md § 4.2). One level of card — what is inside separates by space, not by boxes.
+ * (HOME_AND_SEARCH.md § 1). One level of card — what is inside separates by space, not by boxes.
  */
 export const HomeCard: React.FC<{
   title: string;

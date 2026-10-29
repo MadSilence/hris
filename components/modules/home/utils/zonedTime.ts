@@ -1,8 +1,8 @@
 import { partsToISO } from "@/lib/date";
 
 /**
- * The calendar date in a zone, as `yyyy-MM-dd`. Home's "today" is the company's (HOME_AND_SEARCH_DESIGN.md
- * § 7.7), not the browser's: somebody reading at 01:00 in New York for a company in Warsaw is already on
+ * The calendar date in a zone, as `yyyy-MM-dd`. Home's "today" is the company's (HOME_AND_SEARCH.md
+ * § 10, trap 7), not the browser's: somebody reading at 01:00 in New York for a company in Warsaw is already on
  * Warsaw's tomorrow. The locale below only names the parts; nothing is displayed in it.
  */
 export const isoDateInZone = (now: Date, zone: string | null | undefined): string => {

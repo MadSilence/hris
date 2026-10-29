@@ -1,4 +1,4 @@
-/** Home's two reads of its own (`HOME_AND_SEARCH_DESIGN.md` § 4.1). Every other widget reads its module's endpoint. */
+/** Home's two reads of its own (`HOME_AND_SEARCH.md` §§ 4–5). Every other widget reads its module's endpoint. */
 
 export type WhosOutRange = "TODAY" | "WEEK";
 export type WhosOutAudience = "TEAM" | "EVERYONE";

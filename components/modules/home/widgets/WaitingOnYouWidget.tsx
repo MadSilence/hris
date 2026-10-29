@@ -39,7 +39,7 @@ const RequesterName: React.FC<{ requestId: string }> = ({ requestId }) => {
 
 /**
  * Leave requests and cancellations waiting for the reader's decision, newest first. Hidden when nothing
- * waits: a "nothing to decide" card on every employee's home is noise (HOME_AND_SEARCH_DESIGN.md § 4).
+ * waits: a "nothing to decide" card on every employee's home is noise (HOME_AND_SEARCH.md § 2).
  */
 export const WaitingOnYouWidget: React.FC = () => {
   const query = useTimeOffRequestsAwaitingMe();
