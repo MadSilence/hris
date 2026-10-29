@@ -9,6 +9,7 @@ import type { CompanyCalendarGroup, CompanyCalendarUser } from "@/models/calenda
 jest.mock("@/components/modules/calendar/hooks/useCompanyCalendar", () => ({
   useCompanyCalendarPeople: jest.fn(),
   useCompanyCalendarMarks: jest.fn(),
+  useCompanyCalendarAbsences: () => ({ data: [], isError: false, refetch: jest.fn() }),
 }));
 
 jest.mock("@/components/modules/settings/shared/UserChip/UserChip", () => ({

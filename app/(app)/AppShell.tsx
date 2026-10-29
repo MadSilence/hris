@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar, { NavItem } from "@/components/layout/Sidebar/Sidebar";
 import Home from "@/public/icons/home.svg";
 import Inbox from "@/public/icons/inbox.svg";
@@ -29,6 +29,7 @@ import { useUnreadNotificationsCount } from "@/components/modules/notifications/
 import { ForbiddenError } from "@/components/clients/exceptions";
 import UserSettingsProvider from "@/components/providers/UserSettingsProvider";
 import { useWelcome } from "@/components/modules/firstRun/hooks";
+import { QuickSearchDialog, useQuickSearchShortcut, type SearchPage } from "@/components/modules/search";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -41,6 +42,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const { isImpersonating } = useImpersonationContext();
   const logout = useLogoutAction();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const openSearch = useCallback(() => setIsSearchOpen(true), []);
+  useQuickSearchShortcut(openSearch);
 
   // A full navigation to `/login` on this same host — the company's own login. Leaves for it even if
   // clearing the cookies failed: staying would only 401. The remembered company is kept on purpose.
@@ -88,10 +92,12 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     // Beside the inbox: where tasks assigned to me land, a preboarding's included once the person
     // registers (LIFECYCLE_PROCESSES.md § 5.3). Everyone has one.
     { label: "Tasks", href: "/tasks", Icon: ListChecks as NavItem["Icon"] },
+    // Opens the quick-search window in place; there is no results page (H11). Ctrl/Cmd + K does the same.
     {
       label: "Search",
-      href: "/search",
+      href: "#quick-search",
       Icon: Search,
+      onSelect: openSearch,
     },
     {
       label: "Organization",
@@ -147,6 +153,10 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
 
   const top = allTopItems.filter(filterItem);
   const bottom = allBottomItems.filter(filterItem);
+  // The window's "Go To" list starts from what the sidebar already offers this reader.
+  const appPages: SearchPage[] = top
+    .filter((item) => !item.onSelect)
+    .map((item) => ({ label: item.label, href: item.href }));
 
   const profile = useMemo(() => {
     const fullName = user
@@ -176,6 +186,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         // and this is the offer to come back to it rather than a second interruption.
         showFinishProfile={Boolean(welcome?.outstanding) && !isImpersonating}
       />
+
+      <QuickSearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} appPages={appPages}/>
 
       <ChangePasswordModal
         open={isChangePasswordOpen}

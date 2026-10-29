@@ -6,6 +6,8 @@ import type { FilterDTO } from "@/models/user/fields";
 export const COMPANY_CALENDAR_PEOPLE_QUERY_KEY = "company-calendar-people";
 export const COMPANY_CALENDAR_GROUPS_QUERY_KEY = "company-calendar-groups";
 export const COMPANY_CALENDAR_MARKS_QUERY_KEY = "company-calendar-marks";
+export const COMPANY_CALENDAR_ABSENCES_QUERY_KEY = "company-calendar-absences";
+export const COMPANY_CALENDAR_CAPACITY_QUERY_KEY = "company-calendar-capacity";
 
 const PAGE_SIZE = 25;
 
@@ -97,5 +99,50 @@ export const useCompanyCalendarMarks = ({
     queryKey: [COMPANY_CALENDAR_MARKS_QUERY_KEY, from, to, userIds.join(",")],
     queryFn: () => companyCalendarService.marks({ from, to, userIds }),
     enabled: Boolean(from && to) && userIds.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+/**
+ * The leave on the rows currently loaded — the same key shape as marks, cached on its own, so a holiday
+ * change and a leave change never invalidate each other.
+ */
+export const useCompanyCalendarAbsences = ({
+  from,
+  to,
+  userIds,
+}: {
+  from: string;
+  to: string;
+  userIds: string[];
+}) =>
+  useQuery({
+    queryKey: [COMPANY_CALENDAR_ABSENCES_QUERY_KEY, from, to, userIds.join(",")],
+    queryFn: () => companyCalendarService.absences({ from, to, userIds }),
+    enabled: Boolean(from && to) && userIds.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+/**
+ * The capacity mark for the window: company-wide on an ungrouped board (`groupBy` null), per team or
+ * department on a grouped one. An office grouping has no limits, so it asks nothing.
+ */
+export const useCompanyCalendarCapacity = ({
+  from,
+  to,
+  groupBy,
+  groupIds,
+  enabled = true,
+}: {
+  from: string;
+  to: string;
+  groupBy: CompanyCalendarGrouping | null;
+  groupIds: string[];
+  enabled?: boolean;
+}) =>
+  useQuery({
+    queryKey: [COMPANY_CALENDAR_CAPACITY_QUERY_KEY, from, to, groupBy ?? "", groupIds.join(",")],
+    queryFn: () => companyCalendarService.capacity({ from, to, groupBy, groupIds }),
+    enabled:
+      enabled && Boolean(from && to) && groupBy !== "OFFICE" && (groupBy === null || groupIds.length > 0),
     placeholderData: keepPreviousData,
   });

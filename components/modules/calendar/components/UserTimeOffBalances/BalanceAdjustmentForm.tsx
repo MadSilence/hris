@@ -95,7 +95,7 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
           />
         </div>
 
-        <Button onClick={handleAdjust} disabled={adjustMutation.isPending}>
+        <Button type="button" onClick={handleAdjust} disabled={adjustMutation.isPending}>
           Apply
         </Button>
       </div>

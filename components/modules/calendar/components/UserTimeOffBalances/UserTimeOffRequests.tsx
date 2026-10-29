@@ -114,7 +114,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
   const [error, setError] = useState<string | null>(null);
 
   const policyName = useMemo(() => {
-    const map = new Map((policies ?? []).map((p) => [p.id, p.displayName]));
+    const map = new Map((policies ?? []).map((p) => [p.id, p.name]));
     return (id: string) => map.get(id) ?? "Time off";
   }, [policies]);
 
@@ -328,7 +328,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                 <div className="flex flex-none items-center gap-1">
                   {canDecide && isPending && !isRejecting && (
                     <>
-                      <Button
+                      <Button type="button"
                         variant="ghost"
                         size="sm"
                         className="text-success-700 hover:text-success-800"
@@ -337,7 +337,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       >
                         Approve
                       </Button>
-                      <Button
+                      <Button type="button"
                         variant="ghost"
                         size="sm"
                         className="text-muted-foreground hover:text-destructive"
@@ -360,7 +360,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       product could move it out. These are the two answers. */}
                   {canDecide && awaitsCancellationAnswer && (
                     <>
-                      <Button
+                      <Button type="button"
                         variant="ghost"
                         size="sm"
                         className="text-success-700 hover:text-success-800"
@@ -369,7 +369,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       >
                         Confirm cancellation
                       </Button>
-                      <Button
+                      <Button type="button"
                         variant="ghost"
                         size="sm"
                         className="text-muted-foreground hover:text-destructive"
@@ -382,7 +382,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   )}
 
                   {isLive && !isEditing && !isCancelling && (
-                    <Button
+                    <Button type="button"
                       variant="ghost"
                       size="sm"
                       className="text-muted-foreground hover:text-brown-900"
@@ -394,7 +394,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   )}
 
                   {canCancel(request.status) && !isCancelling && !isEditing && (
-                    <Button
+                    <Button type="button"
                       variant="ghost"
                       size="sm"
                       className="text-muted-foreground hover:text-destructive"
@@ -420,14 +420,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onChange={setEditEnd}
                     disabled={editMutation.isPending}
                   />
-                  <Button
+                  <Button type="button"
                     size="sm"
                     onClick={() => submitEdit(request)}
                     disabled={editMutation.isPending || !editStart || !editEnd}
                   >
                     Save
                   </Button>
-                  <Button
+                  <Button type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => setEditingId(null)}
@@ -449,14 +449,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onChange={(e) => setCancelReason(e.currentTarget.value)}
                     disabled={cancelMutation.isPending}
                   />
-                  <Button
+                  <Button type="button"
                     size="sm"
                     onClick={() => submitCancel(request, cancelReason.trim())}
                     disabled={cancelMutation.isPending || !cancelReason.trim()}
                   >
                     Request cancellation
                   </Button>
-                  <Button
+                  <Button type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => setCancellingId(null)}
@@ -481,14 +481,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onChange={(e) => setRejectReason(e.currentTarget.value)}
                     disabled={isDeciding}
                   />
-                  <Button
+                  <Button type="button"
                     size="sm"
                     onClick={() => handleReject(request)}
                     disabled={isDeciding || !rejectReason.trim()}
                   >
                     Confirm
                   </Button>
-                  <Button
+                  <Button type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => setRejectingId(null)}

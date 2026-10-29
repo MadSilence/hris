@@ -2,14 +2,24 @@
 
 import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Users } from "lucide-react";
-import type { CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
+import type {
+  CompanyCalendarAbsence,
+  CompanyCalendarCapacity,
+  CompanyCalendarMark,
+  CompanyCalendarUser,
+} from "@/models/calendar";
+import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
 import { WEEKDAY_SHORT, toISO } from "@/components/modules/calendar/lib/dateRange";
 import {
   CompanyCalendarRow,
   CompanyCalendarSkeletonRow,
   boardGridTemplate,
+  useAbsencesByUser,
   useMarksByUser,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
+
+const NO_ABSENCES: CompanyCalendarAbsence[] = [];
+const NO_CAPACITY: CompanyCalendarCapacity[] = [];
 
 /** The scroll container's marker, so a group section can find it to keep its header in view. */
 export const CALENDAR_SCROLL_SELECTOR = "[data-calendar-scroll]";
@@ -20,6 +30,15 @@ type Props = {
   days: Date[];
   users: CompanyCalendarUser[];
   marks: CompanyCalendarMark[];
+  /** Leave on the same rows; what each bar carries was decided by the server. */
+  absences?: CompanyCalendarAbsence[];
+  /**
+   * Whether the reader may ask for leave on a row — their own, or one they may file for — and what to do
+   * with the days they drag across. Undefined for a row they may not.
+   */
+  requestFor?: (user: CompanyCalendarUser) => ((startISO: string, endISO: string) => void) | undefined;
+  /** Company-wide capacity marks, drawn under the day number of an ungrouped board. */
+  capacity?: CompanyCalendarCapacity[];
   todayISO: string;
   /** True for a day the company does not work — built from its configured working week. */
   isNonWorkingDay: (d: Date) => boolean;
@@ -46,6 +65,9 @@ export const CompanyCalendarBoard: FC<Props> = ({
   days,
   users,
   marks,
+  absences = NO_ABSENCES,
+  capacity = NO_CAPACITY,
+  requestFor,
   todayISO,
   isNonWorkingDay,
   density,
@@ -60,6 +82,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
 }) => {
   const dayISOs = useMemo(() => days.map(toISO), [days]);
   const marksByUser = useMarksByUser(marks);
+  const absencesByUser = useAbsencesByUser(absences);
+  const capacityByDay = useMemo(() => new Map(capacity.map((c) => [c.date, c])), [capacity]);
 
   const gridTemplateColumns = boardGridTemplate(days.length);
   const isGrouped = grouped !== undefined;
@@ -109,7 +133,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
     <div className="flex min-h-0 flex-1 flex-col">
       <style>{`@keyframes calFade{from{opacity:0}to{opacity:1}}`}</style>
 
-      <div ref={scrollRef} data-calendar-scroll="" className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={scrollRef} data-calendar-scroll="" className="min-h-0 flex-1 overflow-y-auto print:overflow-visible">
         <div key={animationKey} style={{ animation: "calFade 220ms ease-out" }}>
           {/* Header */}
           <div ref={headerRef} className="sticky top-0 z-20 grid w-full text-sm" style={{ gridTemplateColumns }}>
@@ -134,6 +158,11 @@ export const CompanyCalendarBoard: FC<Props> = ({
                   <div className={`text-xs ${today ? "font-semibold text-brown-800" : "text-foreground"}`}>
                     {d.getDate()}
                   </div>
+                  {capacityByDay.has(iso) ? (
+                    <div className="flex h-2 justify-center">
+                      <CapacityDot mark={capacityByDay.get(iso)!} who="anyone in the company" />
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -155,6 +184,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
                     key={u.id}
                     user={u}
                     marks={marksByUser.get(u.id) ?? []}
+                    absences={absencesByUser.get(u.id)}
+                    onSelectRange={requestFor?.(u)}
                     days={days}
                     dayISOs={dayISOs}
                     todayISO={todayISO}

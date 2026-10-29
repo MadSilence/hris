@@ -1,5 +1,7 @@
 import { internalApiClient } from "@/components/clients/apiClient";
 import type {
+  CompanyCalendarAbsence,
+  CompanyCalendarCapacity,
   CompanyCalendarGroup,
   CompanyCalendarGrouping,
   CompanyCalendarMark,
@@ -20,6 +22,13 @@ export type CompanyCalendarGroupsQuery = {
   q?: string;
   filters?: FilterDTO[];
   groupBy: CompanyCalendarGrouping;
+};
+
+export type CompanyCalendarCapacityQuery = {
+  from: string;
+  to: string;
+  groupBy: CompanyCalendarGrouping | null;
+  groupIds: string[];
 };
 
 export type CompanyCalendarMarksQuery = {
@@ -58,6 +67,25 @@ export class CompanyCalendarService {
   /** A read with a body: the id list is as long as the reader has scrolled. */
   public async marks(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarMark[]> {
     return internalApiClient.post<CompanyCalendarMark[]>("/calendar/company/marks", {
+      from: params.from,
+      to: params.to,
+      userIds: params.userIds,
+    });
+  }
+
+  /** The capacity mark: the days a group, or the company, is at its limit of people away. */
+  public async capacity(params: CompanyCalendarCapacityQuery): Promise<CompanyCalendarCapacity[]> {
+    return internalApiClient.post<CompanyCalendarCapacity[]>("/calendar/company/capacity", {
+      from: params.from,
+      to: params.to,
+      groupBy: params.groupBy,
+      groupIds: params.groupIds,
+    });
+  }
+
+  /** Leave on the same rows and window — a sibling of marks, cached under its own key. */
+  public async absences(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarAbsence[]> {
+    return internalApiClient.post<CompanyCalendarAbsence[]>("/calendar/company/absences", {
       from: params.from,
       to: params.to,
       userIds: params.userIds,

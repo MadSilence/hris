@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Bell, CheckCheck, Settings, Star, Trash2 } from "lucide-react";
 
@@ -25,11 +25,16 @@ import {
 } from "@/components/modules/notifications/components/notificationPresenter";
 import { NotificationActions } from "@/components/modules/notifications/components/NotificationActions";
 import { SearchBox } from "@/components/ui/SearchBox";
+import {
+  INBOX_FILTERS,
+  INBOX_FILTER_LABELS,
+  matchesInboxFilter,
+  needsAction,
+  parseInboxFilter,
+  type InboxFilter,
+} from "@/components/modules/notifications/utils/inboxFilters";
 
-type StatusFilter = "all" | "unread" | "starred";
 const ALL_CATEGORIES = "__all__";
-
-const STATUS_FILTERS: StatusFilter[] = ["all", "unread", "starred"];
 
 const NotificationRow: FC<{
   notification: Notification;
@@ -74,7 +79,7 @@ const NotificationRow: FC<{
       </div>
 
       <div className="flex shrink-0 items-start gap-1" onClick={(e) => e.stopPropagation()}>
-        <Button
+        <Button type="button"
           variant="ghost"
           size="icon"
           className="h-8 w-8"
@@ -84,7 +89,7 @@ const NotificationRow: FC<{
         >
           <Star className={cn("h-4 w-4", notification.starred ? "fill-warning-400 text-warning-400" : "text-brown-400")} />
         </Button>
-        <Button
+        <Button type="button"
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-brown-400 hover:text-destructive"
@@ -101,6 +106,8 @@ const NotificationRow: FC<{
 
 export const NotificationsInbox: FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: notifications, isLoading } = useNotifications();
 
   const markRead = useMarkNotificationRead();
@@ -109,7 +116,16 @@ export const NotificationsInbox: FC = () => {
   const setStarred = useSetNotificationStarred();
   const remove = useDeleteNotification();
 
-  const [status, setStatus] = useState<StatusFilter>("all");
+  /* The status filter lives in the URL (`?filter=needs-action`), so a link can open the inbox on it — home's
+     *Waiting on You* and the board's "Review" do (sitting 2, H5). */
+  const status: InboxFilter = parseInboxFilter(searchParams?.get("filter"));
+  const setStatus = (next: InboxFilter) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (next === "all") params.delete("filter");
+    else params.set("filter", next);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [query, setQuery] = useState("");
 
@@ -130,6 +146,7 @@ export const NotificationsInbox: FC = () => {
       all: all.length,
       unread: all.filter((n) => !n.read).length,
       starred: all.filter((n) => n.starred).length,
+      "needs-action": all.filter(needsAction).length,
     }),
     [all],
   );
@@ -142,9 +159,7 @@ export const NotificationsInbox: FC = () => {
   }, [all]);
 
   const filtered = useMemo(() => {
-    let rows = all;
-    if (status === "unread") rows = rows.filter((n) => !n.read);
-    else if (status === "starred") rows = rows.filter((n) => n.starred);
+    let rows = all.filter((n) => matchesInboxFilter(n, status));
     if (category !== ALL_CATEGORIES) rows = rows.filter((n) => n.category === category);
 
     /* Searched on what the reader can actually see — the presented title and message, not the raw
@@ -194,6 +209,8 @@ export const NotificationsInbox: FC = () => {
       ? "No unread notifications."
       : status === "starred"
         ? "No starred notifications."
+      : status === "needs-action"
+        ? "Nothing needs your action."
         : category !== ALL_CATEGORIES
           ? "Nothing in this category."
           : "No notifications yet.";
@@ -214,7 +231,7 @@ export const NotificationsInbox: FC = () => {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          <Button type="button"
             variant="outline"
             size="sm"
             onClick={() => markAllRead.mutate()}
@@ -235,17 +252,18 @@ export const NotificationsInbox: FC = () => {
         <SearchBox value={query} onChange={setQuery}/>
 
         <div className="flex gap-1">
-          {STATUS_FILTERS.map((f) => (
+          {INBOX_FILTERS.map((f) => (
             <button
               key={f}
               type="button"
+              aria-pressed={status === f}
               onClick={() => setStatus(f)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm capitalize transition-colors",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
                 status === f ? "bg-brown-100 text-brown-800" : "text-muted-foreground hover:bg-brown-50",
               )}
             >
-              {f}
+              {INBOX_FILTER_LABELS[f]}
               <span
                 className={cn(
                   "rounded-full px-1.5 text-xs",

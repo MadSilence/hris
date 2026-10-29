@@ -158,7 +158,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
                   <SelectContent>
                     {available.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.displayName || p.name}
+                        {p.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -222,10 +222,10 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
         </div>
 
         <div className="flex justify-end gap-2 border-t border-brown-100 px-6 py-4">
-          <Button variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
+          <Button type="button" variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
             Cancel
           </Button>
-          <Button
+          <Button type="button"
             onClick={handleSubmit}
             disabled={!policyId || createMutation.isPending || available.length === 0}
           >

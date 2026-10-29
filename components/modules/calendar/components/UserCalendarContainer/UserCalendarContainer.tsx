@@ -64,7 +64,7 @@ export const UserCalendarContainer: FC<Props> = ({
   );
 
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
-    const policyName = new Map((policies ?? []).map((p) => [p.id, p.displayName]));
+    const policyName = new Map((policies ?? []).map((p) => [p.id, p.name]));
     return (requests ?? [])
       .filter((r) => timeOffStatuses.includes(r.status))
       .map((r) => ({

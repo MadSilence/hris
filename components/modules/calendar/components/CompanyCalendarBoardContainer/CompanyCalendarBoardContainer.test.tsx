@@ -27,7 +27,14 @@ jest.mock("@/components/modules/calendar/hooks/useCompanyCalendar", () => ({
   useCompanyCalendarPeople: jest.fn(),
   useCompanyCalendarGroups: jest.fn(),
   useCompanyCalendarMarks: jest.fn(),
+  useCompanyCalendarAbsences: () => ({ data: [], isError: false, refetch: jest.fn() }),
+  useCompanyCalendarCapacity: () => ({ data: [] }),
 }));
+jest.mock("@/components/providers/CurrentUserProvider/CurrentUserProvider", () => ({
+  useCurrentUser: () => ({ userId: "me" }),
+}));
+jest.mock("@/components/auth/useAccess", () => ({ useCanAccess: () => false }));
+jest.mock("@/components/auth/PermissionGate", () => ({ PermissionGate: () => null }));
 jest.mock("@/components/modules/calendar/hooks/useCalendarViews", () => ({
   useCalendarViews: jest.fn(),
   useCalendarViewMutations: jest.fn(),
@@ -48,15 +55,15 @@ jest.mock("@/components/modules/calendar/components/CompanyCalendarToolbar/Compa
     <div>
       <span data-test="grouping">{props.grouping ?? "flat"}</span>
       <span data-test="options">{props.groupingOptions.join(",")}</span>
-      <button onClick={() => props.onGroupingChange("TEAM")}>group by team</button>
-      <button onClick={() => props.onGroupingChange(null)}>ungroup</button>
+      <button type="button" onClick={() => props.onGroupingChange("TEAM")}>group by team</button>
+      <button type="button" onClick={() => props.onGroupingChange(null)}>ungroup</button>
       {props.views.map((v) => (
-        <button key={v.id} onClick={() => props.onApplyView(v)}>
+        <button type="button" key={v.id} onClick={() => props.onApplyView(v)}>
           open {v.name}
         </button>
       ))}
-      <button onClick={() => props.onApplyView(null)}>all people</button>
-      <button onClick={() => props.onSaveView("Mine")}>save</button>
+      <button type="button" onClick={() => props.onApplyView(null)}>all people</button>
+      <button type="button" onClick={() => props.onSaveView("Mine")}>save</button>
     </div>
   ),
 }));

@@ -38,7 +38,7 @@ const BalanceItem: FC<{
   selected: boolean;
   onSelect: () => void;
 }> = ({ balance, policy, selected, onSelect }) => {
-  const name = policy?.displayName ?? "Time off";
+  const name = policy?.name ?? "Time off";
   const unit = policy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
   const unlimited = policy?.unlimitedQuota ?? false;
   const granted = grantedOf(balance);
@@ -152,7 +152,7 @@ export const BalancesPreviewModal: FC<Props> = ({
               <>
                 <div className="mb-3">
                   <p className="text-sm font-medium text-brown-900">
-                    {selectedPolicy?.displayName ?? "Time off"}
+                    {selectedPolicy?.name ?? "Time off"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {selectedPolicy?.unlimitedQuota
@@ -180,7 +180,7 @@ export const BalancesPreviewModal: FC<Props> = ({
         </div>
 
         <div className="flex justify-end border-t border-brown-100 px-6 py-4">
-          <Button variant="outline" onClick={onCloseAction}>Close</Button>
+          <Button type="button" variant="outline" onClick={onCloseAction}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>

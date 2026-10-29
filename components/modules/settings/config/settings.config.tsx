@@ -26,7 +26,7 @@ export const settingsGroups: SettingsGroup[] = [
     items: [
       { label: "Company", href: "/settings/general/company", resources: ["SETTINGS.GENERAL"] },
       { label: "Appearance", href: "/settings/general/customisation", resources: ["SETTINGS.GENERAL"] },
-      { label: "Dashboard", href: "/settings/general/dashboard", resources: ["SETTINGS.GENERAL"] },
+      { label: "Home", href: "/settings/general/dashboard", resources: ["SETTINGS.GENERAL"] },
       {
         label: "Legal Entities & Offices",
         href: "/settings/general/legal-entities",

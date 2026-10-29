@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, ReactNode } from "react";
 import { Bookmark, Check, ChevronLeft, ChevronRight, Filter as FilterIcon, Rows3, Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -54,6 +54,8 @@ type Props = {
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
+  /** Export and print, beside the period: what the board is, carried out or put on paper. */
+  actions?: ReactNode;
 };
 
 export const CompanyCalendarToolbar: FC<Props> = ({
@@ -77,6 +79,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   onPrev,
   onNext,
   onToday,
+  actions,
 }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
@@ -123,7 +126,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             reading it. */}
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+            <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
               <FilterIcon className="h-4 w-4" />
               Filter
               {filters.length > 0 ? (
@@ -136,10 +139,10 @@ export const CompanyCalendarToolbar: FC<Props> = ({
           <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
             <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
             <div className="mt-3 flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setDraft([])}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setDraft([])}>
                 Reset
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button type="button" size="sm" onClick={applyFilters}>
                 Apply
               </Button>
             </div>
@@ -151,7 +154,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
         {groupingOptions.length > 0 || grouping !== null ? (
           <Popover open={groupOpen} onOpenChange={setGroupOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+              <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
                 <Rows3 className="h-4 w-4" />
                 {grouping ? `Group: ${groupingLabel(grouping)}` : "Group"}
               </Button>
@@ -180,7 +183,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
 
         <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+            <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
               <Bookmark className="h-4 w-4" />
               {activeView ? activeView.name : "Views"}
             </Button>
@@ -215,7 +218,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 >
                   {v.name}
                 </button>
-                <Button
+                <Button type="button"
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
@@ -229,7 +232,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             ))}
 
             <div className="mt-1 border-t border-brown-100 pt-1">
-              <Button
+              <Button type="button"
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start"
@@ -265,13 +268,13 @@ export const CompanyCalendarToolbar: FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Previous" onClick={onPrev}>
+          <Button type="button" variant="outline" size="icon" className="h-9 w-9" aria-label="Previous" onClick={onPrev}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" className="h-9" onClick={onToday}>
+          <Button type="button" variant="outline" size="sm" className="h-9" onClick={onToday}>
             Today
           </Button>
-          <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Next" onClick={onNext}>
+          <Button type="button" variant="outline" size="icon" className="h-9 w-9" aria-label="Next" onClick={onNext}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -279,6 +282,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
         <div className="flex h-9 min-w-[190px] items-center justify-center rounded-md border border-brown-200 px-3 text-sm font-medium text-foreground">
           {periodLabel}
         </div>
+        {actions}
       </div>
 
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
@@ -302,10 +306,10 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             Opened in June it shows June.
           </p>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setSaveOpen(false)}>
+            <Button type="button" variant="ghost" onClick={() => setSaveOpen(false)}>
               Cancel
             </Button>
-            <Button
+            <Button type="button"
               disabled={!saveName.trim() || viewsBusy}
               onClick={() => {
                 onSaveView(saveName.trim());

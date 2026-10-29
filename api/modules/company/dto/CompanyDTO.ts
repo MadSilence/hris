@@ -18,6 +18,8 @@ export type CompanySettingsDTO = {
   weekStartDay: string;
   dailyNormMinutes?: number;
   attendanceRateAttributeId?: string | null;
+  /** The DATE field home reads birthdays from. Null: no birthdays on home. */
+  birthdayAttributeId?: string | null;
   /** 0 for a company whose settings row has not been written yet. */
   version?: number;
 };
@@ -41,6 +43,8 @@ export type UpdateCompanySettingsRequest = {
    * form does not carry it; `{ attributeId: null }` means no money in Attendance.
    */
   attendanceRate?: { attributeId: string | null } | null;
+  /** The DATE field home reads birthdays from (H7). The same shape: left out keeps it, `{ attributeId: null }` means none. */
+  birthdayField?: { attributeId: string | null } | null;
   /** The version the form was opened with; a stale one is refused with E00409. */
   version?: number;
 };

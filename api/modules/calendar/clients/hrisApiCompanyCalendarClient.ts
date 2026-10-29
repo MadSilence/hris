@@ -2,6 +2,8 @@ import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import type {
   CompanyCalendarGroup,
   CompanyCalendarGrouping,
+  CompanyCalendarAbsence,
+  CompanyCalendarCapacity,
   CompanyCalendarMark,
   CompanyCalendarPeoplePage,
 } from "@/models/calendar";
@@ -21,6 +23,22 @@ export type CompanyCalendarGroupsQuery = {
   q?: string;
   filters?: FilterDTO[] | null;
   groupBy: CompanyCalendarGrouping;
+};
+
+/** The board as a file: its window, search and filters. Exported flat, whatever the grouping. */
+export type CompanyCalendarExportRequest = {
+  from: string;
+  to: string;
+  q: string | null;
+  filters: FilterDTO[] | null;
+  format: "csv" | "xlsx";
+};
+
+export type CompanyCalendarCapacityQuery = {
+  from: string;
+  to: string;
+  groupBy: CompanyCalendarGrouping | null;
+  groupIds: string[];
 };
 
 export type CompanyCalendarMarksQuery = {
@@ -58,6 +76,30 @@ export class HrisApiCompanyCalendarClient {
       userIds: params.userIds,
     });
   }
+  /** A binary download; the body is passed through as the board sent it. */
+  public async export(body: CompanyCalendarExportRequest): Promise<Response> {
+    return hrisApiClient.postForBinary(`${this.BASE_PATH}/export?format=${body.format}`, body);
+  }
+
+  /** The days a group (or, ungrouped, the company) is at its limit of people away. */
+  public async capacity(params: CompanyCalendarCapacityQuery): Promise<CompanyCalendarCapacity[]> {
+    return hrisApiClient.post<CompanyCalendarCapacity[]>(`${this.BASE_PATH}/capacity`, {
+      from: params.from,
+      to: params.to,
+      groupBy: params.groupBy,
+      groupIds: params.groupIds,
+    });
+  }
+
+  /** Leave on the same rows and window; what each bar carries is decided by the server. */
+  public async absences(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarAbsence[]> {
+    return hrisApiClient.post<CompanyCalendarAbsence[]>(`${this.BASE_PATH}/absences`, {
+      from: params.from,
+      to: params.to,
+      userIds: params.userIds,
+    });
+  }
+
 }
 
 export const hrisApiCompanyCalendarClient = new HrisApiCompanyCalendarClient();

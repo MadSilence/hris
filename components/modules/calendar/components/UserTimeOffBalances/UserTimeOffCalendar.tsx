@@ -85,7 +85,7 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
 
         <Card className="h-fit gap-4 border-brown-100 p-6 lg:basis-1/3">
           <div className="flex items-center gap-2">
-            <Button className="flex-1" onClick={() => open()} disabled={!hasBalances}>
+            <Button type="button" className="flex-1" onClick={() => open()} disabled={!hasBalances}>
               <Plus className="h-4 w-4" />
               Request Time Off
             </Button>

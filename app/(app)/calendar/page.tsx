@@ -10,7 +10,7 @@ export default function CalendarPage() {
         <section className="flex flex-none flex-col gap-2">
           <h1 className="text-3xl font-semibold">Calendar</h1>
           <p className="max-w-2xl text-[var(--color-text-tertiary)]">
-            See when people across the company are off — public holidays now, time off coming soon.
+            See who is away, and which days are public holidays.
           </p>
         </section>
 

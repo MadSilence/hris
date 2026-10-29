@@ -1,3 +1,5 @@
+import type { HomeWidgetPlacement } from "@/models/home";
+
 /** One person's own preferences. Mirrors `UserSettingsDTO` on the backend. */
 export type UserDateFormat = "SYSTEM" | "DMY" | "MDY" | "YMD";
 export type UserTimeFormat = "SYSTEM" | "H24" | "H12";
@@ -13,6 +15,8 @@ export type UserSettingsDTO = {
   welcomeCompletedAt: string | null;
   /** "Delegate my approvals while I'm on leave" — on unless switched off. */
   delegateApprovalsOnLeave: boolean;
+  /** How this person arranged their home, in their order; empty is the default arrangement. */
+  homeLayout: HomeWidgetPlacement[];
 };
 
 export type UpdateUserSettingsRequest = {
@@ -23,4 +27,6 @@ export type UpdateUserSettingsRequest = {
   timeFormat?: UserTimeFormat;
   language?: string | null;
   delegateApprovalsOnLeave?: boolean;
+  /** The whole arrangement of home; an empty list goes back to the default. */
+  homeLayout?: HomeWidgetPlacement[];
 };

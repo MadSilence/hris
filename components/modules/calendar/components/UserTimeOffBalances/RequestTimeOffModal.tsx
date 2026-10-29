@@ -221,7 +221,7 @@ export const RequestTimeOffModal: FC<Props> = ({
                       : `${formatDayAmount(b.currentBalance)} ${p?.unit === TimeOffPolicyUnit.Hours ? "h" : "d"} left`;
                     return (
                       <SelectItem key={b.assignmentId} value={b.assignmentId}>
-                        {(p?.displayName ?? "Time off")} · {left}
+                        {(p?.name ?? "Time off")} · {left}
                       </SelectItem>
                     );
                   })}
@@ -305,7 +305,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             <div>
               <p className="text-xs uppercase tracking-wide text-brown-400">Policy</p>
               <p className="mt-0.5 truncate text-sm font-medium text-brown-900">
-                {policy?.displayName}
+                {policy?.name}
               </p>
             </div>
 
@@ -367,13 +367,13 @@ export const RequestTimeOffModal: FC<Props> = ({
 
         <div className="flex justify-end gap-2 border-t border-brown-100 px-6 py-4">
           {coverageWarning ? (
-            <Button onClick={onCloseAction}>Got it</Button>
+            <Button type="button" onClick={onCloseAction}>Got it</Button>
           ) : (
             <>
-          <Button variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
+          <Button type="button" variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit}>
+          <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
             {createMutation.isPending ? "Submitting…" : "Submit request"}
           </Button>
             </>

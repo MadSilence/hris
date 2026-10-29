@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import {
+  useCompanyCalendarAbsences,
   useCompanyCalendarMarks,
   useCompanyCalendarPeople,
 } from "@/components/modules/calendar/hooks/useCompanyCalendar";
@@ -15,6 +16,7 @@ import {
 import {
   CompanyCalendarRow,
   CompanyCalendarSkeletonRow,
+  useAbsencesByUser,
   useMarksByUser,
   type CompanyCalendarRowGeometry,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
@@ -23,7 +25,13 @@ import {
   groupTitle,
   placeholderRowCount,
 } from "@/components/modules/calendar/lib/grouping";
-import type { CompanyCalendarGroup, CompanyCalendarGrouping } from "@/models/calendar";
+import type {
+  CompanyCalendarCapacity,
+  CompanyCalendarGroup,
+  CompanyCalendarGrouping,
+  CompanyCalendarUser,
+} from "@/models/calendar";
+import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
 import type { FilterDTO } from "@/models/user/fields";
 
 type Shared = {
@@ -33,6 +41,8 @@ type Shared = {
   from: string;
   to: string;
   geometry: CompanyCalendarRowGeometry;
+  /** See the flat board's `requestFor`. */
+  requestFor?: (user: CompanyCalendarUser) => ((startISO: string, endISO: string) => void) | undefined;
 };
 
 type Props = Shared & {
@@ -40,6 +50,8 @@ type Props = Shared & {
   isLoading: boolean;
   collapsed: ReadonlySet<string>;
   onToggle: (key: string) => void;
+  /** Days each team or department is at its limit of people away. */
+  capacity?: CompanyCalendarCapacity[];
 };
 
 /**
@@ -55,6 +67,7 @@ export const CompanyCalendarGroupedRows: FC<Props> = ({
   isLoading,
   collapsed,
   onToggle,
+  capacity,
   ...shared
 }) => {
   if (isLoading && !groups) {
@@ -81,6 +94,7 @@ export const CompanyCalendarGroupedRows: FC<Props> = ({
             group={group}
             collapsed={collapsed.has(key)}
             onToggle={() => onToggle(key)}
+            capacity={group.id === null ? undefined : capacity?.filter((c) => c.groupId === group.id)}
             {...shared}
           />
         );
@@ -93,6 +107,7 @@ type SectionProps = Shared & {
   group: CompanyCalendarGroup;
   collapsed: boolean;
   onToggle: () => void;
+  capacity?: CompanyCalendarCapacity[];
 };
 
 const scrollerOf = (node: HTMLElement | null): HTMLElement | null =>
@@ -108,6 +123,8 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   geometry,
   collapsed,
   onToggle,
+  capacity,
+  requestFor,
 }) => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [nearScreen, setNearScreen] = useState(false);
@@ -160,6 +177,13 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
     refetch: refetchMarks,
   } = useCompanyCalendarMarks({ from, to, userIds });
   const marksByUser = useMarksByUser(marks ?? []);
+  const {
+    data: absences,
+    isError: absencesFailed,
+    error: absencesError,
+    refetch: refetchAbsences,
+  } = useCompanyCalendarAbsences({ from, to, userIds });
+  const absencesByUser = useAbsencesByUser(absences ?? []);
 
   // The next page of this group follows the scroll, like the flat board.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -193,7 +217,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   };
 
   const title = groupTitle(grouping, group);
-  const failed = peopleFailed || marksFailed;
+  const failed = peopleFailed || marksFailed || absencesFailed;
   const waiting = !collapsed && (!nearScreen || (isLoading && users.length === 0));
 
   return (
@@ -218,13 +242,34 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
             {group.count}
           </Badge>
         </button>
+        {capacity && capacity.length > 0 ? (
+          // The marks sit on the header's day columns, over the button, without taking its clicks.
+          <div
+            className="pointer-events-none absolute inset-0 grid items-center"
+            style={{ gridTemplateColumns: geometry.gridTemplateColumns }}
+          >
+            {capacity.map((mark) => {
+              const col = geometry.dayISOs.indexOf(mark.date);
+              if (col === -1) return null;
+              return (
+                <span
+                  key={mark.date}
+                  className="pointer-events-auto flex justify-center"
+                  style={{ gridColumn: col + 2, gridRow: 1 }}
+                >
+                  <CapacityDot mark={mark} who={`this ${grouping === "TEAM" ? "team" : "department"}`} />
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {collapsed ? null : failed ? (
         <ErrorState
           compact
-          error={peopleFailed ? peopleError : marksError}
-          onRetry={() => void (peopleFailed ? refetchPeople() : refetchMarks())}
+          error={peopleFailed ? peopleError : marksFailed ? marksError : absencesError}
+          onRetry={() => void (peopleFailed ? refetchPeople() : marksFailed ? refetchMarks() : refetchAbsences())}
         />
       ) : waiting ? (
         Array.from({ length: placeholderRowCount(group.count) }).map((_, r) => (
@@ -237,7 +282,14 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
       ) : (
         <>
           {users.map((u) => (
-            <CompanyCalendarRow key={u.id} user={u} marks={marksByUser.get(u.id) ?? []} {...geometry} />
+            <CompanyCalendarRow
+              key={u.id}
+              user={u}
+              marks={marksByUser.get(u.id) ?? []}
+              absences={absencesByUser.get(u.id)}
+              onSelectRange={requestFor?.(u)}
+              {...geometry}
+            />
           ))}
           {hasNextPage ? (
             <div ref={sentinelRef} className="flex justify-center py-3 text-xs text-muted-foreground">

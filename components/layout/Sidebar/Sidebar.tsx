@@ -31,6 +31,11 @@ export type NavItem = {
   href: string;
   Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   badge?: number;
+  /**
+   * An item that opens something in place instead of navigating — the Search item opens the
+   * quick-search window. It is never "active": there is no page behind it.
+   */
+  onSelect?: () => void;
 };
 
 export type SidebarProfile = {
@@ -104,10 +109,30 @@ const AppSidebar: FC<SidebarProps> = ({
   };
 
   const renderItem = (item: NavItem) => {
-    const active = isActive(item.href);
+    const active = !item.onSelect && isActive(item.href);
     const Icon = item.Icon;
     const badge = item.badge && item.badge > 0 ? item.badge : 0;
     const badgeLabel = badge > 99 ? "99+" : String(badge);
+    const targetClassName = [
+      "relative no-underline hover:no-underline",
+      collapsed ? "justify-center gap-0" : "gap-3",
+    ].join(" ");
+    const content = (
+      <>
+        {Icon ? <Icon aria-hidden focusable={false}/> : null}
+        {!collapsed ? <span>{item.label}</span> : null}
+
+        {badge > 0 ? (
+          collapsed ? (
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-(--sidebar-badge-bg)" aria-hidden/>
+          ) : (
+            <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-(--sidebar-badge-bg) px-1.5 text-xs font-medium text-(--sidebar-badge-fg)">
+              {badgeLabel}
+            </span>
+          )
+        ) : null}
+      </>
+    );
 
     return (
       <SidebarMenuItem key={item.href}>
@@ -129,26 +154,17 @@ const AppSidebar: FC<SidebarProps> = ({
             collapsed ? "size-10 px-0" : "w-full px-3",
           ].join(" ")}
         >
-          <Link
-            href={item.href}
-            className={[
-              "relative no-underline hover:no-underline",
-              collapsed ? "justify-center gap-0" : "gap-3",
-            ].join(" ")}
-          >
-            {Icon ? <Icon aria-hidden focusable={false}/> : null}
-            {!collapsed ? <span>{item.label}</span> : null}
-
-            {badge > 0 ? (
-              collapsed ? (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-(--sidebar-badge-bg)" aria-hidden/>
-              ) : (
-                <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-(--sidebar-badge-bg) px-1.5 text-xs font-medium text-(--sidebar-badge-fg)">
-                  {badgeLabel}
-                </span>
-              )
-            ) : null}
-          </Link>
+          {/* The menu button is a Slot: its one child must be the element itself, so the two cases are
+              written out rather than wrapped in a component that would swallow the ref. */}
+          {item.onSelect ? (
+            <button type="button" onClick={item.onSelect} className={targetClassName}>
+              {content}
+            </button>
+          ) : (
+            <Link href={item.href} className={targetClassName}>
+              {content}
+            </Link>
+          )}
         </SidebarMenuButton>
       </SidebarMenuItem>
     );

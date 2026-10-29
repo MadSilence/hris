@@ -5,6 +5,8 @@ import { useDebouncedValue } from "@/components/modules/organization/modules/pro
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import {
   useCompanyCalendarGroups,
+  useCompanyCalendarAbsences,
+  useCompanyCalendarCapacity,
   useCompanyCalendarMarks,
   useCompanyCalendarPeople,
 } from "@/components/modules/calendar/hooks/useCompanyCalendar";
@@ -14,12 +16,21 @@ import {
 } from "@/components/modules/calendar/hooks/useCalendarViews";
 import { CompanyCalendarBoard } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarBoard";
 import { CompanyCalendarGroupedRows } from "@/components/modules/calendar/components/CompanyCalendarGroupedRows/CompanyCalendarGroupedRows";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import {
+  BoardRequestTimeOff,
+  type BoardRequest,
+} from "@/components/modules/calendar/components/CompanyCalendarBoardContainer/BoardRequestTimeOff";
+import { AwaitingApprovalLine } from "@/components/modules/calendar/components/CompanyCalendarBoardContainer/AwaitingApprovalLine";
+import { CompanyCalendarExport } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarExport";
 import { boardGridTemplate } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
 import { CompanyCalendarToolbar } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarToolbar";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import type { CalendarView } from "@/models/calendarView";
-import type { CompanyCalendarGrouping } from "@/models/calendar";
+import type { CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
 import { availableGroupings, parseCalendarGrouping } from "@/components/modules/calendar/lib/grouping";
 import type { FilterDTO } from "@/models/user/fields";
 import {
@@ -108,6 +119,48 @@ export const CompanyCalendarBoardContainer: FC = () => {
     to: toISO(to),
     userIds: grouping === null ? userIds : [],
   });
+  const {
+    data: absences,
+    isError: absencesFailed,
+    error: absencesError,
+    refetch: refetchAbsences,
+  } = useCompanyCalendarAbsences({
+    from: toISO(from),
+    to: toISO(to),
+    userIds: grouping === null ? userIds : [],
+  });
+
+  // The capacity mark is a hint, not part of the board: a failed read draws no dot rather than
+  // replacing the board with an error, and the request form still decides.
+  const groupIds = useMemo(
+    () => (groups ?? []).map((g) => g.id).filter((id): id is string => id !== null),
+    [groups],
+  );
+  const { data: capacity } = useCompanyCalendarCapacity({
+    from: toISO(from),
+    to: toISO(to),
+    groupBy: grouping,
+    groupIds,
+  });
+
+  // Acting from the board (sitting 2, C7): anyone on their own row; on someone else's, a reader who may
+  // file leave for others. The server checks the person, row by row — this only decides what to offer.
+  const { userId: me } = useCurrentUser();
+  const mayFileForOthers = useCanAccess("PEOPLE.TIME_OFF_POLICIES", "EDIT");
+  const [boardRequest, setBoardRequest] = useState<BoardRequest | null>(null);
+  const requestFor = useCallback(
+    (u: CompanyCalendarUser) =>
+      u.id === me || mayFileForOthers
+        ? (start: string, end: string) =>
+            setBoardRequest({
+              userId: u.id,
+              name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
+              start,
+              end,
+            })
+        : undefined,
+    [me, mayFileForOthers],
+  );
 
   const goPrev = () => setAnchor((a) => (density === "week" ? addDays(a, -7) : addMonths(a, -1)));
   const goNext = () => setAnchor((a) => (density === "week" ? addDays(a, 7) : addMonths(a, 1)));
@@ -172,13 +225,20 @@ export const CompanyCalendarBoardContainer: FC = () => {
       ? `${MONTH_NAMES[from.getMonth()].slice(0, 3)} ${from.getDate()} – ${MONTH_NAMES[to.getMonth()].slice(0, 3)} ${to.getDate()}, ${to.getFullYear()}`
       : `${MONTH_NAMES[anchor.getMonth()]} ${anchor.getFullYear()}`;
 
-  const failed = grouping === null ? peopleFailed || marksFailed : groupsFailed;
-  const failure = grouping === null ? (peopleFailed ? peopleError : marksError) : groupsError;
+  const failed = grouping === null ? peopleFailed || marksFailed || absencesFailed : groupsFailed;
+  const failure =
+    grouping === null ? (peopleFailed ? peopleError : marksFailed ? marksError : absencesError) : groupsError;
   const retry = () =>
-    void (grouping !== null ? refetchGroups() : peopleFailed ? refetchPeople() : refetchMarks());
+    void (grouping !== null
+      ? refetchGroups()
+      : peopleFailed
+        ? refetchPeople()
+        : marksFailed
+          ? refetchMarks()
+          : refetchAbsences());
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4 print:h-auto">
       <CompanyCalendarToolbar
         query={query}
         onQueryChange={setQuery}
@@ -200,12 +260,17 @@ export const CompanyCalendarBoardContainer: FC = () => {
         onPrev={goPrev}
         onNext={goNext}
         onToday={goToday}
+        actions={<CompanyCalendarExport from={toISO(from)} to={toISO(to)} q={q} filters={filters} />}
       />
 
       {/* A failed fetch is not an empty company. The board's empty state says "nobody matches the
           current view", which is a claim about the data rather than a report about the request — so
           the failure takes the board's place and the toolbar stays, which is how the reader retries,
           clears a filter, or moves to another period. */}
+      <PermissionGate resource="PEOPLE.TIME_OFF" action="VIEW">
+        <AwaitingApprovalLine />
+      </PermissionGate>
+
       {failed ? (
         <ErrorState error={failure} onRetry={retry} />
       ) : (
@@ -213,6 +278,7 @@ export const CompanyCalendarBoardContainer: FC = () => {
           days={days}
           users={users}
           marks={marks ?? []}
+          absences={absences ?? []}
           todayISO={todayISO}
           isNonWorkingDay={isNonWorkingDay}
           density={density}
@@ -222,6 +288,8 @@ export const CompanyCalendarBoardContainer: FC = () => {
           isLoadingMore={isFetchingNextPage}
           onLoadMore={() => void fetchNextPage()}
           scrollResetKey={grouping ?? "flat"}
+          requestFor={requestFor}
+          capacity={grouping === null ? (capacity ?? []) : []}
           {...(grouping !== null
             ? {
                 isEmpty: !groupsLoading && (groups?.length ?? 0) === 0,
@@ -232,6 +300,8 @@ export const CompanyCalendarBoardContainer: FC = () => {
                     isLoading={groupsLoading}
                     collapsed={collapsed}
                     onToggle={toggleGroup}
+                    capacity={capacity ?? []}
+                    requestFor={requestFor}
                     q={q}
                     filters={filters}
                     from={toISO(from)}
@@ -250,6 +320,8 @@ export const CompanyCalendarBoardContainer: FC = () => {
             : {})}
         />
       )}
+
+      {boardRequest ? <BoardRequestTimeOff request={boardRequest} onClose={() => setBoardRequest(null)} /> : null}
     </div>
   );
 };

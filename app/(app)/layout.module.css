@@ -18,3 +18,24 @@
   overflow: auto;
   color: hsl(var(--text-body));
 }
+
+/* Printing a page (the company calendar's Print): the page itself, without the sidebar, and grown to
+   its content instead of scrolling inside the window. */
+@media print {
+  .frame {
+    display: block;
+    min-height: 0;
+  }
+
+  .frame > :first-child {
+    display: none;
+  }
+
+  .content {
+    height: auto;
+  }
+
+  .main {
+    overflow: visible;
+  }
+}
