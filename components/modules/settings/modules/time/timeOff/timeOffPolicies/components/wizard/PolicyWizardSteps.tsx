@@ -70,17 +70,20 @@ function Field({
   label,
   hint,
   htmlFor,
+  error,
   children,
 }: {
   label: string;
   hint?: string;
   htmlFor?: string;
+  error?: string | null;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
@@ -120,13 +123,15 @@ function Reveal({ children }: { children: ReactNode }) {
 
 // ── Step 1: Basics ───────────────────────────────────────────────────
 
-export const BasicsStep: FC<StepProps> = ({ values, set }) => (
+/** `nameError` is a refusal of the name by the server — a name already taken (TOP00004). */
+export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ values, set, nameError }) => (
   <div className="space-y-6">
     <StepIntro>Give the policy a name and the essentials. You can fine-tune the rules in the next steps.</StepIntro>
 
-    <Field label="Name" htmlFor="wiz-name">
+    <Field label="Name" htmlFor="wiz-name" error={nameError}>
       <Input
         id="wiz-name"
+        aria-invalid={nameError ? true : undefined}
         value={values.name}
         onChange={(e) => set("name", e.currentTarget.value)}
       />

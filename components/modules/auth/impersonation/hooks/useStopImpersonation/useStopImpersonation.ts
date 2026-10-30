@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { internalApiClient } from "@/components/clients/apiClient";
+import { internalApiClient, sessionNavigation } from "@/components/clients/apiClient";
+import { UnauthorizedError } from "@/components/clients/exceptions";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 
@@ -35,6 +36,15 @@ export function useStopImpersonation() {
 
       router.push("/organization/people");
       router.refresh();
+    },
+
+    // A 401 here is the backend refusing the actor a session of their own — blocked or terminated
+    // while impersonating. The impersonated token still works until it expires, so the session probe
+    // calls it alive and nothing would move: the actor would stay inside the subject's session. End it.
+    onError: async (error) => {
+      if (!(error instanceof UnauthorizedError)) return;
+      await internalApiClient.post("/auth/logout").catch(() => undefined);
+      sessionNavigation.redirectToLogin();
     },
   });
 }

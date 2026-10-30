@@ -12,7 +12,7 @@ import { Clock, ListChecks, Workflow } from "lucide-react";
 import styles from "./layout.module.css";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, isSystemOwner, ResourceCode, type AccessAction } from "@/models/access";
-import { settingsGroups } from "@/components/modules/settings/config/settings.config";
+import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
 import { Toaster } from "@/public/desact/src/components/ui/sonner";
 import { showError } from "@/lib/errors/errorToast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -65,10 +65,14 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   // through showActionError instead.
   useEffect(() => {
     const handleForbidden = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      showError(new ForbiddenError(typeof detail === "string" ? detail : undefined, {
-        code: "E00403",
+      const detail: unknown = (e as CustomEvent).detail;
+      const refusal = detail instanceof ForbiddenError ? detail : undefined;
+      // A refusal with a code of its own keeps it; a bare 403 reads as the generic E00403.
+      showError(new ForbiddenError(refusal?.message, {
+        code: refusal?.code ?? "E00403",
         status: 403,
+        params: refusal?.params,
+        requestId: refusal?.requestId,
       }));
     };
 
@@ -76,10 +80,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("hris:forbidden", handleForbidden);
   }, []);
 
-  // Settings hub is visible when the user can view at least one settings area.
-  const settingsResources: ResourceCode[] = settingsGroups
-    .flatMap((group) => group.items)
-    .flatMap((item) => item.resources ?? []);
+  // Settings hub is visible when the hub would offer the user at least one item.
+  const seesSettings = settingsGroups.some((group) => group.items.some((item) => canSeeSettingsItem(access, item)));
 
   const allTopItems: (NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction })[] = [
     { label: "Home", href: "/dashboard", Icon: Home },
@@ -131,14 +133,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     },
   ];
 
-  const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = [
-    {
-      label: "Settings",
-      href: "/settings",
-      Icon: Settings,
-      resources: settingsResources,
-    },
-  ];
+  const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = seesSettings
+    ? [{ label: "Settings", href: "/settings", Icon: Settings }]
+    : [];
 
   const filterItem = (item: NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction }) => {
     if (!item.resources || item.resources.length === 0) return true;

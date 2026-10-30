@@ -5,6 +5,7 @@ import {
   createTimeOffPolicyAction,
   type CreateTimeOffPolicyActionInput,
 } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/actions/createTimeOffPolicyAction";
+import { PolicyActionError } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/policyActionError";
 
 export const useCreateTimeOffPolicy = () => {
   const invalidateTimeOffPolicies = useInvalidateTimeOffPoliciesQuery();
@@ -14,9 +15,7 @@ export const useCreateTimeOffPolicy = () => {
       const result = await createTimeOffPolicyAction(payload);
 
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(
-          result.errorMessage || "Failed to create time off policy"
-        );
+        throw new PolicyActionError(result, "Failed to create time off policy");
       }
 
       return result;

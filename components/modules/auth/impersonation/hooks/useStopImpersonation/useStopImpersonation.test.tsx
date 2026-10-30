@@ -1,7 +1,8 @@
 import type { CapturedReactQueryOptions } from "@/test/types";
 import { partialMock } from "@/test/types";
 import { act, renderHook } from "@testing-library/react";
-import { internalApiClient } from "@/components/clients/apiClient";
+import { internalApiClient, sessionNavigation } from "@/components/clients/apiClient";
+import { UnauthorizedError } from "@/components/clients/exceptions";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useStopImpersonation } from "@/components/modules/auth/impersonation/hooks/useStopImpersonation/useStopImpersonation";
@@ -16,20 +17,27 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+// `mock` prefix: jest.mock factories may only reach variables named so.
+let mockCaptured: CapturedReactQueryOptions;
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
-  useMutation: (config: CapturedReactQueryOptions) => ({
-    mutateAsync: config.mutationFn,
-    mutate: async () => {
-      const result = await config.mutationFn();
-      config.onSuccess?.(result);
-      return result;
-    },
-  }),
+  useMutation: (config: CapturedReactQueryOptions) => {
+    mockCaptured = config;
+    return {
+      mutateAsync: config.mutationFn,
+      mutate: async () => {
+        const result = await config.mutationFn();
+        config.onSuccess?.(result);
+        return result;
+      },
+    };
+  },
 }));
 
 jest.mock("@/components/clients/apiClient", () => ({
   internalApiClient: { post: jest.fn() },
+  sessionNavigation: { redirectToLogin: jest.fn() },
 }));
 
 jest.mock("@/components/auth/permissionsStorage", () => ({
@@ -83,6 +91,28 @@ describe("useStopImpersonation", () => {
 
     expect(push).toHaveBeenCalledWith("/organization/people");
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it("signs out and opens the login page when the actor may no longer have a session", async () => {
+    renderHook(() => useStopImpersonation());
+
+    await act(async () => {
+      await mockCaptured.onError(new UnauthorizedError("Unauthorized", { status: 401 }));
+    });
+
+    expect(mockPost).toHaveBeenCalledWith("/auth/logout");
+    expect(sessionNavigation.redirectToLogin).toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("leaves any other refusal where it is", async () => {
+    renderHook(() => useStopImpersonation());
+
+    await act(async () => {
+      await mockCaptured.onError(new Error("Server down"));
+    });
+
+    expect(sessionNavigation.redirectToLogin).not.toHaveBeenCalled();
   });
 
   it("throws when request fails", async () => {

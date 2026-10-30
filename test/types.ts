@@ -15,6 +15,7 @@ export type CapturedReactQueryOptions = {
   queryFn: (...args: unknown[]) => unknown;
   mutationFn: (...args: unknown[]) => unknown;
   onSuccess: (...args: unknown[]) => unknown;
+  onError: (...args: unknown[]) => unknown;
 };
 
 /**

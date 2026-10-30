@@ -32,7 +32,7 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
 
   const onInvite = (checked: boolean) => {
     setError(null);
-    update.mutate({ id: anImport.id, body: { inviteAfter: checked } }, { onError: (e) => setError(messageForError(e)) });
+    update.mutate({ id: anImport.id, body: { version: anImport.version, inviteAfter: checked } }, { onError: (e) => setError(messageForError(e)) });
   };
 
   const onApply = () => {
@@ -43,7 +43,7 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
   // Changing the mapping again: saving it unchanged sends the import back to the Map step.
   const onBack = () => {
     setError(null);
-    update.mutate({ id: anImport.id, body: { mapping: anImport.mapping } }, { onError: (e) => setError(messageForError(e)) });
+    update.mutate({ id: anImport.id, body: { version: anImport.version, mapping: anImport.mapping } }, { onError: (e) => setError(messageForError(e)) });
   };
 
   return (

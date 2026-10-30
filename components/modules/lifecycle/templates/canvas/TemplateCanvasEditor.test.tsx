@@ -142,6 +142,8 @@ describe("TemplateCanvasEditor", () => {
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     act(() => canvas.onConnectAction("order", "setup"));
     expect(canvas.announcement).toMatch(/circle/);
+    // On screen as well, not only to a screen reader: a refused arrow otherwise shows nothing at all.
+    expect(screen.getByText(/would make the tasks wait for each other in a circle/)).toBeInTheDocument();
     expect(canvas.items.find((i) => i.key === "order")?.waitsFor).toEqual([]);
 
     act(() => canvas.onSelectEdgeAction("order->setup"));

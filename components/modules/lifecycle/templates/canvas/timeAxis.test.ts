@@ -3,6 +3,7 @@ import {
   BLOCK_H,
   BLOCK_W,
   boundsForOffsets,
+  boundsForTasks,
   buildAxis,
   columnAtX,
   columnOf,
@@ -142,5 +143,16 @@ describe("lanes and blocks", () => {
     expect(week.x).toBe(from.x);
     expect(week.x + week.width).toBe(to.x + to.width);
     expect(week.height).toBe(layout.height);
+  });
+
+  // Fit used to frame the whole axis — at least 104 days — so a short template opened at the minimum zoom.
+  it("fits the columns the tasks sit in, not the whole axis", () => {
+    const fit = boundsForTasks(layout);
+    const xs = [...layout.positions.values()].map((p) => p.x);
+    expect(fit.x).toBe(columnAtX(layout.axis, Math.min(...xs)).x);
+    const right = columnAtX(layout.axis, Math.max(...xs));
+    expect(fit.x + fit.width).toBe(right.x + right.width);
+    expect(fit.width).toBeLessThan(layout.axis.width);
+    expect(fit.height).toBe(layout.height);
   });
 });

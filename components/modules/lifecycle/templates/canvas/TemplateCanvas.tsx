@@ -22,12 +22,13 @@ import {
 import { Plus, TriangleAlert, UserRound } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { cn } from "@/public/desact/src/components/ui/utils";
-import { dayLabel, laneIdOf, wouldCreateCycle, type DraftItem } from "./draft";
+import { dayLabel, laneIdOf, type DraftItem } from "./draft";
 import { isTypingTarget, keyToCommand, type CanvasCommand } from "./keyboard";
 import {
   BLOCK_H,
   BLOCK_W,
   boundsForOffsets,
+  boundsForTasks,
   dayOneColumn,
   dropTarget,
   timingForColumn,
@@ -223,9 +224,7 @@ function TemplateCanvasInner({
 
   const fitPreset = useCallback((id: ZoomPreset, duration = 200) => {
     const p = ZOOM_PRESETS.find((z) => z.id === id) ?? ZOOM_PRESETS[1];
-    const bounds = id === "fit"
-      ? { x: 0, y: 0, width: layout.axis.width, height: Math.max(layout.height, BLOCK_H) }
-      : boundsForOffsets(layout, p.from, p.to);
+    const bounds = id === "fit" ? boundsForTasks(layout) : boundsForOffsets(layout, p.from, p.to);
     setPreset(id);
     void fitBounds(bounds, { padding: 0.04, duration });
   }, [fitBounds, layout]);
@@ -262,8 +261,9 @@ function TemplateCanvasInner({
     if (node.type === "task") onSelectBlockAction(node.id);
   };
 
-  const isValidConnection: IsValidConnection<Edge> = (c) =>
-    Boolean(c.source && c.target) && !wouldCreateCycle(items, c.target as string, c.source as string);
+  // A circle is not refused here: refused here, the drop did nothing at all and nobody learnt why. The
+  // editor's `connect` refuses it and says so (walk of 2026-10-30).
+  const isValidConnection: IsValidConnection<Edge> = (c) => Boolean(c.source && c.target);
 
   const onConnect = (c: Connection) => {
     if (c.source && c.target) onConnectAction(c.target, c.source);

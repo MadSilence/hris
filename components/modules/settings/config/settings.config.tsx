@@ -1,5 +1,5 @@
 import { SettingsLinkItem } from "@/components/modules/settings/components/SettingsCard/SettingsCard";
-import { ResourceCode } from "@/models/access";
+import { canAccess, type AccessAction, type AccessScope, type EffectiveAccess, type ResourceCode } from "@/models/access";
 import People from "@/public/icons/people.svg";
 import Calendar from "@/public/icons/calendar.svg";
 import Settings from "@/public/icons/settings.svg";
@@ -7,8 +7,24 @@ import Automation from "@/public/icons/automation.svg";
 import Admin from "@/public/icons/admin.svg";
 import Building from "@/public/icons/building.svg";
 
+/** A right that shows a settings item — for the items a VIEW does not describe. */
+export type SettingsGrant = { resource: ResourceCode; action: AccessAction; scope?: AccessScope };
+
 export type SettingsGroupItem = SettingsLinkItem & {
+  /** The item shows to a reader who may VIEW any of these. */
   resources?: ResourceCode[];
+  /** Instead of `resources`: the item shows to a reader holding any of these rights. */
+  grants?: SettingsGrant[];
+};
+
+/**
+ * Whether the menu offers an item to this reader — UX only; every page asks the backend again. The one
+ * check the settings hub, the sidebar's Settings entry and quick search share, so the three cannot disagree.
+ */
+export const canSeeSettingsItem = (access: EffectiveAccess | null | undefined, item: SettingsGroupItem): boolean => {
+  if (item.grants?.length) return item.grants.some((grant) => canAccess({ access, ...grant }));
+  if (!item.resources?.length) return true;
+  return item.resources.some((resource) => canAccess({ access, resource, action: "VIEW" }));
 };
 
 type SettingsGroup = {
@@ -47,7 +63,17 @@ export const settingsGroups: SettingsGroup[] = [
         href: "/settings/general/job-catalog",
         resources: ["JOBS.FAMILY", "JOBS.LEVEL_GROUP", "JOBS.LEVEL", "JOBS.TITLE"],
       },
-      { label: "Import & Export", href: "/settings/general/import", resources: ["SETTINGS.GENERAL"] },
+      {
+        label: "Import & Export",
+        href: "/settings/general/import",
+        // The rights of the three import kinds (I-B6): whoever may run one finds the page.
+        grants: [
+          { resource: "PEOPLE.PROFILE", action: "EDIT", scope: "COMPANY" },
+          { resource: "ORG.DEPARTMENT", action: "EDIT" },
+          { resource: "ORG.TEAM", action: "EDIT" },
+          { resource: "PEOPLE.TIME_OFF_POLICIES", action: "EDIT" },
+        ],
+      },
       {
         label: "Templates",
         href: "/settings/general/templates",

@@ -94,7 +94,9 @@ export type PeopleImportRowDTO = {
   errors: PeopleImportCellErrorDTO[];
 };
 
+/** `PATCH /people-imports/{id}` — refused with `IMP00113` when `version` is not the import's (I-B4). */
 export type PeopleImportUpdateRequest = {
+  version: number;
   mapping?: Record<string, string>;
   dateFormat?: PeopleImportDateFormat;
   decimalSeparator?: PeopleImportDecimalSeparator;

@@ -72,7 +72,13 @@ export const usePeopleImportRows = (id: string | undefined, errorsOnly: boolean,
   });
 };
 
-/** Every step answers the whole import; it becomes the page's state at once, and its rows are re-read. */
+/** Somebody else's save or check came first: the page is stale. */
+const IMPORT_CHANGED = "IMP00113";
+
+/**
+ * Every step answers the whole import; it becomes the page's state at once, and its rows are re-read. A step
+ * refused as stale reloads the import, so the change can be made again on what is there now.
+ */
 const useStepMutation = <V,>(run: (variables: V) => Promise<ActionResult<PeopleImportDTO>>) => {
   const queryClient = useQueryClient();
   return useMutation<PeopleImportDTO, Error, V>({
@@ -80,6 +86,11 @@ const useStepMutation = <V,>(run: (variables: V) => Promise<ActionResult<PeopleI
     onSuccess: (dto) => {
       queryClient.setQueryData(peopleImportQueryKeys.current, dto);
       void queryClient.invalidateQueries({ queryKey: ["PEOPLE_IMPORT", dto.id] });
+    },
+    onError: (error) => {
+      if (error instanceof PeopleImportActionError && error.result.code === IMPORT_CHANGED) {
+        void queryClient.invalidateQueries({ queryKey: ["PEOPLE_IMPORT"] });
+      }
     },
   });
 };

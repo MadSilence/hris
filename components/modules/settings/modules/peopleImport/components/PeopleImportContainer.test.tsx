@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 import type { PeopleImportDTO, PeopleImportKind, PeopleImportRowDTO } from "@/api/modules/peopleImport/dto";
 import { partialMock } from "@/test/types";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import { PeopleImportContainer } from "./PeopleImportContainer";
 
 let current: { data: PeopleImportDTO | null; isLoading: boolean; error: unknown } = {
@@ -79,6 +80,14 @@ const show = (data: PeopleImportDTO | null) => {
 };
 
 describe("PeopleImportContainer", () => {
+  it("tells somebody with no import right that the page is not theirs, with nothing to retry", () => {
+    current = { data: null, isLoading: false, error: new ForbiddenError("forbidden", { status: 403, code: "IMP00114" }) };
+    render(<PeopleImportContainer />);
+    expect(screen.getByText("Access denied")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /try again/i })).not.toBeInTheDocument();
+    current = { data: null, isLoading: false, error: null };
+  });
+
   it("asks what is being imported, in move-in order, before offering a template", () => {
     show(null);
     expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual([

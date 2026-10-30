@@ -12,16 +12,12 @@ import { messageForCode, messageForError } from "@/lib/errors/errorMessages";
 import { triggerExportDownload } from "@/components/modules/settings/shared/ExportDataModal/triggerExportDownload";
 import type { PeopleImportCellErrorDTO, PeopleImportDTO } from "@/api/modules/peopleImport/dto";
 import {
-  PeopleImportActionError,
-  useCurrentPeopleImport,
   useEditPeopleImportRows,
   usePeopleImportRows,
 } from "@/components/modules/settings/modules/peopleImport/hooks";
 
 /** The error a lead nobody has yet gets (S2-1) — what *Clear Unknown Leads* empties. */
 const LEAD_NOT_FOUND = "IMP00229";
-/** The import changed since the page was drawn: the editor reloads rather than overwrite it. */
-const IMPORT_CHANGED = "IMP00113";
 
 type Props = { anImport: PeopleImportDTO };
 
@@ -36,7 +32,6 @@ const key = (rowNumber: number, column: number) => `${rowNumber}:${column}`;
 export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
   const [showAll, setShowAll] = useState(false);
   const rows = usePeopleImportRows(anImport.id, !showAll);
-  const current = useCurrentPeopleImport();
   const edit = useEditPeopleImportRows();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [removed, setRemoved] = useState<Set<number>>(new Set());
@@ -57,11 +52,8 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
           setDrafts({});
           setRemoved(new Set());
         },
-        onError: (e) => {
-          setError(messageForError(e));
-          // Somebody else's edit or check came first: show theirs, then let this one be made again.
-          if (e instanceof PeopleImportActionError && e.result.code === IMPORT_CHANGED) void current.refetch();
-        },
+        // A stale page is reloaded by the hook; the message says to make the change again.
+        onError: (e) => setError(messageForError(e)),
       },
     );
   };

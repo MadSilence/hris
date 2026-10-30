@@ -14,6 +14,7 @@ import {
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { RequestTimeOffModal } from "@/components/modules/calendar/components/UserTimeOffBalances/RequestTimeOffModal";
 import {
   COMPANY_CALENDAR_ABSENCES_QUERY_KEY,
@@ -35,6 +36,7 @@ type Props = {
  */
 export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
   const queryClient = useQueryClient();
+  const { userId: me } = useCurrentUser();
   const { data: balances, isLoading, isError, error, refetch } = useEmployeeTimeOffBalancesByUser({
     userId: request.userId,
   });
@@ -81,6 +83,9 @@ export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
       policyMap={policyMap}
       initialStartDate={request.start}
       initialEndDate={request.end}
+      // On a colleague's row the dialog would otherwise look exactly like one's own request — and the
+      // balance beside it is theirs, which is easy to misread as yours (walk of 2026-10-30).
+      forName={request.userId === me ? undefined : request.name}
       onCloseAction={close}
     />
   );

@@ -161,14 +161,6 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     setIsEditOpen(false);
   };
 
-  /** A refused save leaves the policy untouched now, but the person still has to be told why. */
-  const handleEditSaveSafely = async (values: PolicyWizardValues) => {
-    try {
-      await handleEditSave(values);
-    } catch (error) {
-      showError(error);
-    }
-  };
 
   const handleDelete = async () => {
     if (!policy) return;
@@ -288,7 +280,9 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
         leaveTypeName={leaveType?.name}
         initialValues={editInitialValues}
         editImpact={editImpactQuery.data}
-        onSubmitAction={handleEditSaveSafely}
+        // A refusal is thrown to the wizard, which keeps it open and shows it in the form — under Name when
+        // the name is taken. A card here slid away before anybody read it (walk of 2026-10-30).
+        onSubmitAction={handleEditSave}
         onCancelAction={() => setIsEditOpen(false)}
       />
 

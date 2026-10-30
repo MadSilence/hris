@@ -1,5 +1,5 @@
-import { canAccess, type EffectiveAccess } from "@/models/access";
-import { settingsGroups } from "@/components/modules/settings/config/settings.config";
+import { type EffectiveAccess } from "@/models/access";
+import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
 
 /** A destination in the app, offered by name. */
 export type SearchPage = {
@@ -39,9 +39,7 @@ export const buildSearchPages = (
 ): SearchPage[] => {
   const settingsPages = settingsGroups.flatMap((group) =>
     group.items
-      .filter((item) =>
-        (item.resources ?? []).some((resource) => canAccess({ access, resource, action: "VIEW" })),
-      )
+      .filter((item) => Boolean(item.resources?.length || item.grants?.length) && canSeeSettingsItem(access, item))
       .map((item) => ({ label: item.label, href: item.href, section: `Settings · ${group.title}` })),
   );
   return [...appPages, ...settingsPages];

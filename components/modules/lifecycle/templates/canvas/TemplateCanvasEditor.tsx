@@ -93,6 +93,10 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // A refusal is the one notice a sighted reader needs too: a move or a new arrow shows itself on the
+  // canvas, a refused arrow shows nothing at all (walk of 2026-10-30). Cleared by the next change.
+  const [refusal, setRefusal] = useState<string | null>(null);
+  useEffect(() => setRefusal(null), [draft]);
   const [laneOpen, setLaneOpen] = useState(false);
 
   useEffect(() => setPreferred(readViewPreference()), []);
@@ -153,7 +157,9 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const connect = useCallback((dependentKey: string, predecessorKey: string) => {
     const result = addWait(items, dependentKey, predecessorKey);
     if (result.refused) {
-      setNotice("That arrow would make the tasks wait for each other in a circle, so it was not added.");
+      const message = "That arrow would make the tasks wait for each other in a circle, so it was not added.";
+      setNotice(message);
+      setRefusal(message);
       return;
     }
     setItems(() => result.items);
@@ -371,13 +377,14 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         )}
       </header>
 
-      {(saveError || notice || archived) && (
+      {(saveError || notice || refusal || archived) && (
         <div className="space-y-2 px-8">
           <FormError message={saveError} />
           {archived && (
             <p className="text-sm text-muted-foreground">An archived template cannot be changed or used. Unarchive it to edit it.</p>
           )}
           {notice && view === "list" && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
+          {refusal && view === "canvas" && <p className="text-sm text-warning-700">{refusal}</p>}
         </div>
       )}
 

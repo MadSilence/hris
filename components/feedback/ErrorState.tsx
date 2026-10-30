@@ -61,10 +61,14 @@ export const ErrorState: React.FC<{
         </p>
       )}
 
-      <Button type="button" variant="outline" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
-        <RotateCw className="mr-2 h-4 w-4" />
-        Try again
-      </Button>
+      {/* A refusal of rights answers the same however often it is asked; offering a retry promised
+          otherwise (the board's request dialog, walk of 2026-10-30). */}
+      {!(error instanceof ForbiddenError) && (
+        <Button type="button" variant="outline" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
+          <RotateCw className="mr-2 h-4 w-4" />
+          Try again
+        </Button>
+      )}
     </div>
   );
 };

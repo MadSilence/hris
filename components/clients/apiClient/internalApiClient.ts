@@ -236,11 +236,16 @@ export class InternalApiClient {
         }
         throw new UnauthorizedError(friendly, init);
       }
-      case 403:
+      case 403: {
+        // The error itself travels with the event, code included: a refusal with its own sentence
+        // (U00037, an owner impersonated by a non-owner) used to reach the card as a bare string and
+        // read as the generic "You do not have permission".
+        const forbidden = new ForbiddenError(friendly, init);
         if (typeof window !== "undefined" && method !== "GET") {
-          window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: friendly }));
+          window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: forbidden }));
         }
-        throw new ForbiddenError(friendly, init);
+        throw forbidden;
+      }
       case 409:
         throw new ConflictError(friendly, init);
       case 422:

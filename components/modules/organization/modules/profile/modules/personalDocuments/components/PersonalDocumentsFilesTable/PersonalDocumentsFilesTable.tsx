@@ -132,6 +132,9 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                   <button
                     type="button"
                     onClick={() => onToggleStar(document)}
+                    aria-label={document.isStarred ? "Unstar" : "Star"}
+                    aria-pressed={document.isStarred}
+                    title={document.isStarred ? "Unstar" : "Star"}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
                   >
                     <Star

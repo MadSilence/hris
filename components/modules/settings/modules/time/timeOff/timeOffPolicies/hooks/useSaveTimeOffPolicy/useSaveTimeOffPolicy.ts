@@ -6,6 +6,7 @@ import {
   saveTimeOffPolicyAction,
   type SaveTimeOffPolicyActionInput,
 } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/actions/saveTimeOffPolicyAction";
+import { PolicyActionError } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/policyActionError";
 
 /**
  * One call for the whole policy, replacing ten in a row.
@@ -22,7 +23,7 @@ export const useSaveTimeOffPolicy = () => {
       const result = await saveTimeOffPolicyAction(payload);
 
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage || "Failed to save the policy");
+        throw new PolicyActionError(result, "Failed to save the policy");
       }
 
       return result;

@@ -45,6 +45,7 @@ import {
   defaultPolicyWizardValues,
   validatePolicyStep,
 } from "./policyWizardTypes";
+import { PolicyActionError } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/policyActionError";
 
 const STEPS: {
   id: WizardStepId;
@@ -101,6 +102,7 @@ export const PolicyWizardModal: FC<Props> = ({
   const [stepIndex, setStepIndex] = useState(0);
   const [maxReached, setMaxReached] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -110,6 +112,7 @@ export const PolicyWizardModal: FC<Props> = ({
       setStepIndex(0);
       setMaxReached(mode === "edit" ? STEPS.length - 1 : 0);
       setError(null);
+      setNameError(null);
     }
   }, [isOpen, initialValues, mode]);
 
@@ -121,6 +124,7 @@ export const PolicyWizardModal: FC<Props> = ({
   const set = <K extends keyof PolicyWizardValues>(key: K, value: PolicyWizardValues[K]) => {
     setValues((prev) => ({ ...prev, [key]: value }));
     setError(null);
+    if (key === "name") setNameError(null);
   };
 
   const step = STEPS[stepIndex];
@@ -166,6 +170,13 @@ export const PolicyWizardModal: FC<Props> = ({
     try {
       await onSubmitAction(values, activate);
     } catch (e) {
+      const forName = e instanceof PolicyActionError ? e.fieldErrors?.name : undefined;
+      if (forName) {
+        // The name is on the first step: go there and say it under the field.
+        setNameError(forName);
+        setStepIndex(0);
+        return;
+      }
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setIsSaving(false);
@@ -184,7 +195,7 @@ export const PolicyWizardModal: FC<Props> = ({
   const renderStep = () => {
     switch (step.id) {
       case "basics":
-        return <BasicsStep values={values} set={set} />;
+        return <BasicsStep values={values} set={set} nameError={nameError} />;
       case "entitlement":
         return <EntitlementStep values={values} set={set} />;
       case "accrual":

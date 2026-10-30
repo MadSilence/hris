@@ -1,9 +1,8 @@
 "use client";
 
 import SettingsCard from "@/components/modules/settings/components/SettingsCard/SettingsCard";
-import { settingsGroups } from "@/components/modules/settings/config/settings.config";
+import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
 import { useAccess } from "@/components/auth/useAccess";
-import { canAccess } from "@/models/access";
 import React from "react";
 
 const SettingsContainer: React.FC = () => {
@@ -12,12 +11,7 @@ const SettingsContainer: React.FC = () => {
   const visibleGroups = settingsGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter(
-        (item) =>
-          !item.resources ||
-          item.resources.length === 0 ||
-          item.resources.some((resource) => canAccess({ access, resource, action: "VIEW" })),
-      ),
+      items: group.items.filter((item) => canSeeSettingsItem(access, item)),
     }))
     .filter((group) => group.items.length > 0);
 

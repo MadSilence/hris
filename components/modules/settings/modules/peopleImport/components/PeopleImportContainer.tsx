@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { AccessDenied } from "@/components/auth/AccessDenied";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import { useCurrentPeopleImport } from "@/components/modules/settings/modules/peopleImport/hooks";
 import { UploadStep } from "./UploadStep";
 import { MapStep } from "./MapStep";
@@ -28,6 +30,11 @@ export const PeopleImportContainer: React.FC = () => {
         <Skeleton className="h-32 w-full" />
       </div>
     );
+  }
+  // Somebody holding none of the import rights: the page is not theirs, and "Try again" would not change
+  // that (walk of 2026-10-30). The menu hides the entry from them; a typed address still lands here.
+  if (current.error instanceof ForbiddenError) {
+    return <AccessDenied />;
   }
   if (current.error) {
     return (

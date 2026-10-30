@@ -44,6 +44,8 @@ type Props = {
   policyMap: Map<string, TimeOffPolicy>;
   initialStartDate?: string;
   initialEndDate?: string;
+  /** Whose leave this is, when it is not the reader's own — the title names them. */
+  forName?: string;
   onCloseAction: () => void;
 };
 
@@ -65,6 +67,7 @@ export const RequestTimeOffModal: FC<Props> = ({
   policyMap,
   initialStartDate,
   initialEndDate,
+  forName,
   onCloseAction,
 }) => {
   const createMutation = useCreateTimeOffRequest();
@@ -198,7 +201,9 @@ export const RequestTimeOffModal: FC<Props> = ({
               <CalendarPlus className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle className="text-lg">Request time off</DialogTitle>
+              <DialogTitle className="text-lg">
+                {forName ? `Request time off for ${forName}` : "Request time off"}
+              </DialogTitle>
               <DialogDescription>Pick a policy and the dates — the request goes to the approver.</DialogDescription>
             </div>
           </div>

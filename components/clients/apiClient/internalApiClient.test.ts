@@ -56,6 +56,22 @@ describe("InternalApiClient", () => {
     await expect(client.post("/things")).rejects.toBeInstanceOf(ForbiddenError);
   });
 
+  // The card a refused write puts on screen reads the refusal's own code, not the generic E00403.
+  it("announces a refused write with its code", async () => {
+    mockLocation("/organization/people/1");
+    const announced: unknown[] = [];
+    const listener = (e: Event) => announced.push((e as CustomEvent).detail);
+    window.addEventListener("hris:forbidden", listener);
+    fetchMock.mockResolvedValueOnce(jsonResponse(403, { code: "U00037", message: "Only a System Owner…" }));
+
+    await expect(client.post("/auth/impersonate/start")).rejects.toBeInstanceOf(ForbiddenError);
+
+    window.removeEventListener("hris:forbidden", listener);
+    expect(announced).toHaveLength(1);
+    expect(announced[0]).toBeInstanceOf(ForbiddenError);
+    expect((announced[0] as ForbiddenError).code).toBe("U00037");
+  });
+
   // An expired access token is not a dead session. Tokens last 30 minutes and the refresh token
   // 30 days, so a working day used to end in a login screen with weeks of validity unused.
   it("renews the session on 401 and replays the request", async () => {

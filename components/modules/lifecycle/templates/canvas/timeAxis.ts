@@ -196,3 +196,16 @@ export const boundsForOffsets = (layout: Layout, from: number, to: number) => {
   const last = cols[cols.length - 1] ?? layout.axis.columns[layout.axis.columns.length - 1];
   return { x: first.x, y: 0, width: last.x + last.width - first.x, height: Math.max(layout.height, BLOCK_H) };
 };
+
+/**
+ * The rectangle *Fit* shows: the columns the tasks sit in, every lane. It used to be the whole axis, which is
+ * at least −14 … +90 days, so two tasks a few days apart were fitted at the minimum zoom with an unreadable
+ * ruler (walk of 2026-10-30) — and the whole axis is what *90 Days* already shows. No tasks: the whole axis.
+ */
+export const boundsForTasks = (layout: Layout) => {
+  const xs = [...layout.positions.values()].map((p) => p.x);
+  if (xs.length === 0) return { x: 0, y: 0, width: layout.axis.width, height: Math.max(layout.height, BLOCK_H) };
+  const left = columnAtX(layout.axis, Math.min(...xs));
+  const right = columnAtX(layout.axis, Math.max(...xs));
+  return { x: left.x, y: 0, width: right.x + right.width - left.x, height: Math.max(layout.height, BLOCK_H) };
+};

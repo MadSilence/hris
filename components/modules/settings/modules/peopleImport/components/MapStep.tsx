@@ -73,7 +73,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
   const onCheck = async () => {
     setError(null);
     try {
-      await update.mutateAsync({ id: anImport.id, body: { mapping, dateFormat, decimalSeparator: decimal } });
+      await update.mutateAsync({ id: anImport.id, body: { version: anImport.version, mapping, dateFormat, decimalSeparator: decimal } });
       await check.mutateAsync(anImport.id);
     } catch (e) {
       setError(messageForError(e));
