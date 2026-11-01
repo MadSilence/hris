@@ -78,6 +78,19 @@ export function buildEditableFields(
     out.push({ key: "sys:role", label: "Role", kind: "role", operations: ["ADD", "REMOVE"], valueSource: "roles" });
   }
 
+  // A time off policy is held, not set: Add starts it today, Remove ends it today. Sensitive, so the
+  // field's own EDIT grant is asked for as well as the right to manage policies — the server asks both.
+  const policy = fields?.find((f) => f.id === "sys:policy");
+  if (policy && policy.level === "EDIT" && canEdit("PEOPLE.TIME_OFF_POLICIES")) {
+    out.push({
+      key: "sys:policy",
+      label: policy.label ?? "Time off policies",
+      kind: "association",
+      operations: ["ADD", "REMOVE"],
+      valueSource: "policies",
+    });
+  }
+
   for (const f of fields ?? []) {
     // System fields are handled above; references included.
     if (f.isSystem || f.level !== "EDIT" || f.type === "PERSON") continue;

@@ -9,6 +9,8 @@ import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PolicyAssignmentWarning } from "./PolicyAssignmentWarning";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
 import { AssignmentHistoryList, HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+import { messageForError } from "@/lib/errors/errorMessages";
 
 import { useTimeOffPolicyAssignments } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffPolicyAssignments";
 import { useEndTimeOffPolicyAssignment } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useEndTimeOffPolicyAssignment";
@@ -25,12 +27,10 @@ type Props = {
 function AssignmentRow({
   assignment,
   onEnd,
-  ending,
   disabled,
 }: {
   assignment: TimeOffPolicyAssignment;
   onEnd: (assignment: TimeOffPolicyAssignment) => void;
-  ending: boolean;
   disabled: boolean;
 }) {
   // The person arrives with the assignment. Fetching them per row meant one request per assignee
@@ -51,14 +51,17 @@ function AssignmentRow({
         </span>
       </div>
 
+      {/*
+        Always visible: at `opacity-0` until hover it could not be reached on a touch screen at all.
+        Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 7.
+      */}
       {!disabled && (
         <button
           type="button"
           onClick={() => onEnd(assignment)}
-          disabled={ending}
           aria-label="End assignment"
           title="End assignment"
-          className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 opacity-0 transition hover:bg-brown-100 hover:text-danger-600 focus:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+          className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600"
         >
           <X className="h-4 w-4" />
         </button>
@@ -69,7 +72,8 @@ function AssignmentRow({
 
 export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchived }) => {
   const [assignOpen, setAssignOpen] = useState(false);
-  const [endingId, setEndingId] = useState<string | null>(null);
+  /** The assignment whose ending is being confirmed. */
+  const [ending, setEnding] = useState<TimeOffPolicyAssignment | null>(null);
   const [showEnded, setShowEnded] = useState(false);
   const [endError, setEndError] = useState<string | null>(null);
   /** Who was given the policy, by which rule or by hand, and when. */
@@ -88,21 +92,42 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   );
   const shown = showEnded ? [...active, ...ended] : active;
 
-  const handleEnd = async (assignment: TimeOffPolicyAssignment) => {
-    setEndingId(assignment.id);
+  const askEnd = (assignment: TimeOffPolicyAssignment) => {
+    setEndError(null);
+    setEnding(assignment);
+  };
+
+  // Ending is an Unassign, and an Unassign always confirms. The dialog stays open while it runs and
+  // while it fails, so a refusal is written inside the dialog that asked — it used to be a line above
+  // the list, and before that there was no catch at all.
+  const handleEnd = async () => {
+    if (!ending) return;
     setEndError(null);
     try {
-      await endMutation.mutateAsync({ assignmentId: assignment.id, policyId, effectiveTo: null });
+      await endMutation.mutateAsync({ assignmentId: ending.id, policyId, effectiveTo: null });
+      setEnding(null);
     } catch (error) {
-      // There was no catch at all: ending an assignment that the backend refuses looked exactly
-      // like ending one it accepted.
-      setEndError(
-        error instanceof Error ? error.message : "The assignment could not be ended.",
-      );
-    } finally {
-      setEndingId(null);
+      setEndError(messageForError(error));
     }
   };
+
+  const endModal = (
+    <ConfirmActionModal
+      isOpen={ending !== null}
+      title="End this assignment?"
+      description={
+        <>
+          {ending?.person?.name ?? "This person"} comes off {policyName} now. The assignment stays on
+          this tab among the ended ones.
+        </>
+      }
+      confirmLabel="End assignment"
+      isLoading={endMutation.isPending}
+      errorMessage={endError}
+      onConfirmAction={handleEnd}
+      onCancelAction={() => setEnding(null)}
+    />
+  );
 
   const assignModal = (
     <AssignPeopleModal
@@ -116,6 +141,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
       temporal
       invalidateKeys={[getTimeOffPolicyAssignmentsQueryKey(policyId)]}
       renderSelectionWarning={(userIds) => <PolicyAssignmentWarning policyId={policyId} userIds={userIds} />}
+      currentHolderIds={active.map((a) => a.userId)}
     />
   );
 
@@ -193,8 +219,6 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
         </div>
       </div>
 
-      {endError && <p className="flex-none text-sm text-destructive">{endError}</p>}
-
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="space-y-1">
@@ -213,8 +237,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
               <AssignmentRow
                 key={assignment.id}
                 assignment={assignment}
-                onEnd={handleEnd}
-                ending={endingId === assignment.id}
+                onEnd={askEnd}
                 disabled={isArchived || assignment.status !== TimeOffPolicyAssignmentStatus.Active}
               />
             ))}
@@ -223,6 +246,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
       </div>
 
       {assignModal}
+      {endModal}
     </div>
   );
 };

@@ -28,6 +28,7 @@ const SOURCE_LABELS: Record<string, string> = {
   teams: "Teams",
   calendars: "Holiday calendars",
   roles: "Roles",
+  policies: "Time off policies",
   people: "People",
 };
 

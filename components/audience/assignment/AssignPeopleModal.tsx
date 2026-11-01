@@ -73,6 +73,13 @@ export type AssignPeopleModalProps = {
    * there is no list to ask about, and the preview step counts who would be skipped.
    */
   renderSelectionWarning?: (userIds: string[]) => React.ReactNode;
+  /**
+   * People who already hold the target — the fallback for a reader who may not filter by the domain's
+   * field. A time off policy's holders are filtered out by `sys:policy`, but that field is sensitive:
+   * a reader who manages policies without seeing the field company-wide would have the filter refused,
+   * so for them the holders stay in the list, greyed and unpickable.
+   */
+  currentHolderIds?: string[];
 };
 
 /**
@@ -91,6 +98,7 @@ const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: strin
   "/teams": { column: teamColumn, excludeField: "sys:team" },
   "/departments": { column: departmentColumn, excludeField: "sys:department" },
   "/public-holiday-calendars": { column: calendarColumn, excludeField: "sys:calendar" },
+  "/time-off/policies": { excludeField: "sys:policy" },
 };
 
 const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
@@ -117,6 +125,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   temporal = false,
   invalidateKeys = [],
   renderSelectionWarning,
+  currentHolderIds,
 }) => {
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const queryClient = useQueryClient();
@@ -140,9 +149,19 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const pickerColumns = domain?.column ? [domain.column] : [];
   // "Not already assigned to this one" — which must keep people who are assigned to nothing at all,
   // hence includeEmpty. The picker only: see `liveSegment` for why the rule must not carry it.
-  const exclusionFilters: FilterDTO[] = domain
+  // A sensitive field filters only for a reader who sees it company-wide; the server refuses it otherwise.
+  const excludeFieldDto = domain ? fields?.find((f) => f.id === domain.excludeField) : undefined;
+  const canExcludeByField =
+    !!domain && (domain.excludeField !== "sys:policy" || (excludeFieldDto?.viewScopes ?? []).includes("COMPANY"));
+  const exclusionFilters: FilterDTO[] = domain && canExcludeByField
     ? [{ field: domain.excludeField, op: "neq", value: assignableId, includeEmpty: true }]
     : [];
+
+  const holders = React.useMemo(() => new Set(currentHolderIds ?? []), [currentHolderIds]);
+  const unavailableReason = React.useCallback(
+    (user: UserRefDTO) => (holders.has(user.id) ? "Already assigned" : null),
+    [holders],
+  );
 
   const previewManual = useAssignmentPreview(basePath, assignableId);
   const applyManual = useApplyAssignment(basePath, assignableId, invalidateKeys);
@@ -336,6 +355,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 onMetaChange={onMetaChange}
                 includeInactive={includeInactive}
                 onIncludeInactiveChange={setIncludeInactive}
+                unavailableReason={currentHolderIds && !canExcludeByField ? unavailableReason : undefined}
               />
 
               {/*

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { decodeJwt } from "jose";
 import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 type HrisJwtPayload = {
   sub?: string;
@@ -24,7 +25,7 @@ type HrisJwtPayload = {
  */
 export const GET = apiRequestWrapper(async () => {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token")?.value;
+  const accessToken = cookieStore.get(ACCESS_COOKIE)?.value;
 
   if (!accessToken) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

@@ -18,6 +18,7 @@ import {
 } from "@/models/automations";
 import { defaultTrigger } from "./draft";
 import { Field, SentenceCard } from "./SentenceCard";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const DIRECTIONS: { value: TriggerDirection; label: string }[] = [
   { value: "BEFORE", label: "Before" },
@@ -95,24 +96,31 @@ export function WhenCard({
             </Select>
           </Field>
           <Field label="Date" className="min-w-56 flex-1">
-            <Select
-              value={dateValueOf(trigger)}
-              onValueChange={(v) =>
-                v.startsWith(ATTRIBUTE_PREFIX)
-                  ? setTrigger({ field: "ATTRIBUTE", attributeId: v.slice(ATTRIBUTE_PREFIX.length) })
-                  : setTrigger({ field: v, attributeId: null })
-              }
-            >
-              <SelectTrigger aria-label="Date"><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>
-                {catalog.dateFields.filter((o) => o.value !== "ATTRIBUTE").map((o) => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                ))}
-                {catalog.dateAttributes.map((o) => (
-                  <SelectItem key={o.value} value={`${ATTRIBUTE_PREFIX}${o.value}`}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              aria-label="Date"
+              options={[
+                ...catalog.dateFields
+                  .filter((o) => o.value !== "ATTRIBUTE")
+                  .map((o) => ({ value: o.value, label: o.label, group: "Built In" })),
+                // Under its own heading: a company field can share a name with a built-in date ("Date of
+                // birth" is both), and two equal rows read as a duplicate.
+                ...catalog.dateAttributes.map((o) => ({
+                  value: `${ATTRIBUTE_PREFIX}${o.value}`,
+                  label: o.label,
+                  group: "Company Fields",
+                })),
+              ]}
+              value={dateValueOf(trigger) || null}
+              onChange={(v) => {
+                if (!v) return;
+                if (v.startsWith(ATTRIBUTE_PREFIX)) {
+                  setTrigger({ field: "ATTRIBUTE", attributeId: v.slice(ATTRIBUTE_PREFIX.length) });
+                } else {
+                  setTrigger({ field: v, attributeId: null });
+                }
+              }}
+              clearable={false}
+            />
           </Field>
           <label className="flex h-9 cursor-pointer items-center gap-2 text-sm text-foreground">
             <Checkbox checked={trigger.everyYear === true} onCheckedChange={(c) => setTrigger({ everyYear: c === true })} />
@@ -124,12 +132,13 @@ export function WhenCard({
       {trigger.type === "FIELD_CHANGED" && (
         <div className="flex flex-wrap items-end gap-3">
           <Field label="Field" required className="min-w-56 flex-1">
-            <Select value={trigger.field ?? ""} onValueChange={(v) => setTrigger({ field: v, from: null })}>
-              <SelectTrigger aria-label="Field"><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>
-                {catalog.changeableFields.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              aria-label="Field"
+              options={catalog.changeableFields.map((o) => ({ value: o.value, label: o.label }))}
+              value={trigger.field || null}
+              onChange={(v) => v && setTrigger({ field: v, from: null })}
+              clearable={false}
+            />
           </Field>
           {/* A custom field's journal line carries only the new value, so "from" cannot be matched (§ 2). */}
           {!fieldIsAttribute && (

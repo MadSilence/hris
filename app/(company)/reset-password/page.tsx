@@ -41,5 +41,5 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
     );
   }
 
-  return <ResetPasswordContainer token={token} firstName={peek.firstName} />;
+  return <ResetPasswordContainer token={token} firstName={peek.firstName} codeRequired={peek.codeRequired === true} />;
 }

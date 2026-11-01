@@ -13,6 +13,7 @@ import {
 import type { DepartmentPerson, DepartmentTreeNode } from "@/models/departments";
 
 import { useDepartmentBlocks } from "./DepartmentBlocksContext";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 /**
  * Every measurement the layout needs. The card is a fixed box on purpose: the block's height is
@@ -95,9 +96,7 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
             </span>
           )}
           {isArchived && (
-            <span className="flex-none rounded bg-brown-100 px-1 py-0.5 text-[10px] leading-none text-brown-500">
-              Archived
-            </span>
+            <StatusBadge status="archived" className="flex-none px-1 py-0.5 text-[10px] leading-none" />
           )}
         </button>
 

@@ -56,8 +56,9 @@ jest.mock("@/components/audience/AudienceBuilder", () => ({
   ),
 }));
 jest.mock("@/components/ui/SearchableSelect", () => ({
-  SearchableSelect: ({ options, value, onChange }: { options: { value: string; label: string }[]; value: string | null; onChange: (v: string | null) => void }) => (
-    <select aria-label="Target" value={value ?? ""} onChange={(e) => onChange(e.target.value || null)}>
+  // The action's target picker carries no label of its own; the trigger's date and field pickers do.
+  SearchableSelect: ({ options, value, onChange, "aria-label": label }: { options: { value: string; label: string }[]; value: string | null; onChange: (v: string | null) => void; "aria-label"?: string }) => (
+    <select aria-label={label ?? "Target"} value={value ?? ""} onChange={(e) => onChange(e.target.value || null)}>
       <option value="">Select</option>
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>

@@ -93,7 +93,7 @@ export function previewSentences(preview: SharePreview): string[] {
 }
 
 /**
- * Share a saved view with people, teams, departments or roles (PLATFORM_PLAN 4.7).
+ * Share a saved view with people, teams, departments or roles (`technical_documentation/PEOPLE_TABLE.md` § "Saved views and sharing").
  *
  * Owner only — the panel offers it on the owner's own views, and the backend refuses anybody else.
  * Every recipient sees the view under their own access; the warning says, before anything is shared,

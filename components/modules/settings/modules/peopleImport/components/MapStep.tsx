@@ -24,6 +24,7 @@ import {
 } from "@/components/modules/settings/modules/peopleImport/hooks";
 import { PreviewEditor } from "./PreviewEditor";
 import { IMPORT_KINDS } from "./importKinds";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** Radix refuses an empty value, so "not imported" has a name of its own. */
 const SKIP = "__skip__";
@@ -107,19 +108,21 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
                 <TableRow key={column} className="hover:bg-transparent">
                   <TableCell className="font-medium text-brown-800">{header}</TableCell>
                   <TableCell>
-                    <Select value={current} onValueChange={(value) => choose(column, value)} disabled={busy}>
-                      <SelectTrigger className="h-8 w-full max-w-xs" aria-label={`Field for ${header}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={SKIP}>Not imported</SelectItem>
-                        {anImport.fields.map((field) => (
-                          <SelectItem key={field.id} value={field.id}>
-                            {field.header}{field.required ? " *" : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      className="h-8 max-w-xs"
+                      aria-label={`Field for ${header}`}
+                      options={[
+                        { value: SKIP, label: "Not imported" },
+                        ...anImport.fields.map((field) => ({
+                          value: field.id,
+                          label: `${field.header}${field.required ? " *" : ""}`,
+                        })),
+                      ]}
+                      value={current}
+                      onChange={(value) => choose(column, value ?? SKIP)}
+                      disabled={busy}
+                      clearable={false}
+                    />
                     {current !== SKIP && !fieldsById.has(current) && (
                       <p className="mt-1 text-xs text-danger-700">You may not import this field.</p>
                     )}

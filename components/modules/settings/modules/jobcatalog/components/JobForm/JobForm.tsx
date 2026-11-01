@@ -9,17 +9,9 @@ import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { JobFamily, JobLevelGroup } from "@/models/job";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const DESCRIPTION_MAX = 300;
 const CODE_MAX = 64;
@@ -161,23 +153,16 @@ export const JobForm: FC<JobFormProps> = ({
           <div className="space-y-2">
             <RequiredLabel htmlFor="job-family" required>Family</RequiredLabel>
 
-            <Select
-              value={formik.values.familyId}
-              onValueChange={(value) => formik.setFieldValue("familyId", value)}
+            <SearchableSelect
+              id="job-family"
+              options={selectableFamilies.map((family) => ({ value: family.id, label: family.name }))}
+              value={formik.values.familyId || null}
+              onChange={(value) => formik.setFieldValue("familyId", value ?? "")}
+              placeholder="Pick a family"
               disabled={isLoading}
-            >
-              <SelectTrigger id="job-family" aria-invalid={!!formik.errors.familyId}>
-                <SelectValue placeholder="Pick a family"/>
-              </SelectTrigger>
-
-              <SelectContent>
-                {selectableFamilies.map((family) => (
-                  <SelectItem key={family.id} value={family.id}>
-                    {family.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              aria-invalid={!!formik.errors.familyId}
+              clearable={false}
+            />
 
             {formik.errors.familyId && (
               <p role="alert" className="text-sm text-destructive">{formik.errors.familyId}</p>
@@ -187,30 +172,20 @@ export const JobForm: FC<JobFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor="job-level">Level</Label>
 
-            <Select
-              value={formik.values.levelId}
-              onValueChange={(value) => formik.setFieldValue("levelId", value)}
+            <SearchableSelect
+              id="job-level"
+              options={[
+                { value: NO_LEVEL, label: "None" },
+                ...levelGroups.flatMap((group) =>
+                  group.levels.map((level) => ({ value: level.id, label: level.name, group: group.name })),
+                ),
+              ]}
+              value={formik.values.levelId || null}
+              onChange={(value) => formik.setFieldValue("levelId", value ?? NO_LEVEL)}
+              placeholder={isLevelsLoading ? "Loading…" : "None"}
               disabled={isLoading || isLevelsLoading}
-            >
-              <SelectTrigger id="job-level">
-                <SelectValue placeholder={isLevelsLoading ? "Loading…" : "None"}/>
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value={NO_LEVEL}>None</SelectItem>
-
-                {levelGroups.map((group) => (
-                  <SelectGroup key={group.id}>
-                    <SelectLabel>{group.name}</SelectLabel>
-                    {group.levels.map((level) => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
+              clearable={false}
+            />
           </div>
         </div>
 

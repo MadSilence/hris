@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { buildBrandStyleSheet } from "@/lib/theme/brandPalette";
 import { hrisCompanyAppearanceService } from "@/api/modules/company/modules/appearance/services";
 import { currentCompanySubdomain, publicAppearanceFor } from "@/api/modules/companyAddress";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 /**
  * Paints the company's brand before the first frame.
@@ -26,7 +27,7 @@ const BrandThemeStyle: React.FC = async () => {
   let styleSheet = "";
   let answeredWithSession = false;
 
-  if (cookieStore.get("access_token")?.value) {
+  if (cookieStore.get(ACCESS_COOKIE)?.value) {
     try {
       const appearance = await hrisCompanyAppearanceService.getAppearance();
       styleSheet = buildBrandStyleSheet(appearance.brandColor, appearance.sidebarContrast);

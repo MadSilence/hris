@@ -2,7 +2,6 @@
 
 import React from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
 import { FormError } from "@/components/feedback/FormError";
 import { formatDisplayDate } from "@/lib/date";
 import { messageForCode } from "@/lib/errors/errorMessages";
@@ -14,6 +13,7 @@ import {
   type AutomationPreview,
   type AutomationProblem,
 } from "@/models/automations";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -142,12 +142,14 @@ export function PreviewPanel({
           {preview.samples.length > 0 && (
             <Section title="Sample">
               {preview.matching.length > 0 && (
-                <Select value={samplePersonId ?? preview.samples[0]?.person.id ?? ""} onValueChange={onSampleChange}>
-                  <SelectTrigger aria-label="Sample person" className="h-8 bg-white text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {preview.matching.map((p) => <SelectItem key={p.id} value={p.id}>{p.name ?? p.id}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  aria-label="Sample person"
+                  className="h-8 bg-white text-sm"
+                  options={preview.matching.map((p) => ({ value: p.id, label: p.name ?? p.id }))}
+                  value={samplePersonId ?? preview.samples[0]?.person.id ?? null}
+                  onChange={(v) => v && onSampleChange(v)}
+                  clearable={false}
+                />
               )}
               <div className="space-y-3">
                 {preview.samples.map((s) => (

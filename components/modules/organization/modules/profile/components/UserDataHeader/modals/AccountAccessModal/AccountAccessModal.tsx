@@ -11,8 +11,12 @@ import {
   sendPasswordResetAction,
   unblockUserAction,
 } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
+import { endAllSessionsOfUserAction } from "@/components/modules/sessions/actions";
+import { withStepUpAction } from "@/components/modules/mfa/stepUp";
+import { resetUserMfaAction } from "@/components/modules/mfa/actions";
+import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 
-export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "RESET";
+export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA";
 
 type Props = {
   /** Which confirmation is open; null when none is. */
@@ -27,7 +31,7 @@ type Props = {
 };
 
 /**
- * The three account-access confirmations of the profile: Block, Unblock, Send Password Reset.
+ * The account-access confirmations of the profile: Block, Unblock, Send Password Reset, End All Sessions.
  *
  * Block and Unblock take an optional reason, and keep the dialog open on a refusal — the reason typed
  * is still there. A refused reset has nothing the dialog could fix (not registered, blocked, no
@@ -37,12 +41,15 @@ export function AccountAccessModal({
   kind, userId, fullName, accountLocked = false, onCloseAction, onChangedAction,
 }: Props) {
   const [reason, setReason] = useState("");
+  // Email is the channel an attacker most likely holds: the actor says they checked another way (§ 3.7).
+  const [verified, setVerified] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (kind) {
       setReason("");
+      setVerified(false);
       setError(null);
     }
   }, [kind]);
@@ -53,7 +60,8 @@ export function AccountAccessModal({
     setError(null);
     try {
       if (kind === "RESET") {
-        const res = await sendPasswordResetAction({ userId });
+        // A protected account's sign-in is changed only by an owner who confirms it is them (§ 3.8).
+        const res = await withStepUpAction(() => sendPasswordResetAction({ userId }));
         onCloseAction();
         if (res.status === ActionStatus.SUCCESS) {
           showSuccess(accountLocked
@@ -65,8 +73,35 @@ export function AccountAccessModal({
         return;
       }
 
+      if (kind === "RESET_MFA") {
+        const res = await withStepUpAction(() => resetUserMfaAction(userId, verified));
+        if (res.status === ActionStatus.SUCCESS) {
+          onCloseAction();
+          showSuccess(`${fullName}'s two-step sign-in was reset. They were signed out everywhere.`);
+        } else {
+          setError(res.errorMessage ?? null);
+        }
+        return;
+      }
+
+      if (kind === "END_SESSIONS") {
+        // Like a reset, nothing in the dialog could fix a refusal: it closes and the card says why.
+        const res = await endAllSessionsOfUserAction(userId);
+        onCloseAction();
+        if (res.status === ActionStatus.SUCCESS) {
+          const n = res.data?.ended ?? 0;
+          showSuccess(n === 0
+            ? `${fullName} was not signed in anywhere.`
+            : `${fullName} was signed out of ${n} ${n === 1 ? "session" : "sessions"}.`);
+        } else {
+          showActionError(res);
+        }
+        return;
+      }
+
       const submission = { userId, reason: reason.trim() || null };
-      const res = kind === "BLOCK" ? await blockUserAction(submission) : await unblockUserAction(submission);
+      const res = await withStepUpAction(() =>
+        kind === "BLOCK" ? blockUserAction(submission) : unblockUserAction(submission));
       if (res.status === ActionStatus.SUCCESS) {
         onCloseAction();
         await onChangedAction();
@@ -93,7 +128,15 @@ export function AccountAccessModal({
       onConfirmAction={confirm}
       onCancelAction={onCloseAction}
     >
-      {kind !== null && kind !== "RESET" && (
+      {kind === "RESET_MFA" && (
+        <div className="flex items-start gap-2">
+          <Checkbox id="account-access-verified" checked={verified} onCheckedChange={(v) => setVerified(Boolean(v))} disabled={busy} />
+          <Label htmlFor="account-access-verified" className="font-normal leading-snug">
+            I confirmed this request with {fullName} by a call or in person, not by email.
+          </Label>
+        </div>
+      )}
+      {(kind === "BLOCK" || kind === "UNBLOCK") && (
         <div className="space-y-1.5">
           <Label htmlFor="account-access-reason">Reason</Label>
           <Textarea
@@ -130,5 +173,15 @@ const COPY: Record<AccountAccessKind, (name: string, locked: boolean) => {
       ? `${name}'s account is locked after too many failed sign-ins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.`
       : `${name} will get an email with a link to set a new password. The link works for one hour.`,
     confirmLabel: "Send",
+  }),
+  RESET_MFA: (name) => ({
+    title: "Reset Two-Step Sign-In",
+    description: `${name}'s authenticator app, backup codes and remembered devices stop working, and they are signed out everywhere. If your company requires two-step sign-in, they set it up again at their next sign-in.`,
+    confirmLabel: "Reset",
+  }),
+  END_SESSIONS: (name) => ({
+    title: "End All Sessions",
+    description: `${name} will be signed out of every browser at once. They can sign in again straight away — to keep them out, block the account instead.`,
+    confirmLabel: "End Sessions",
   }),
 };

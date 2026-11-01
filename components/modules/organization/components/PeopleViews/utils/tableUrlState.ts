@@ -3,7 +3,7 @@ import type { ViewPayload, ViewSort } from "@/models/peopleView";
 
 /**
  * The People table's state in the page's own URL, so "send me what you are looking at" is a plain link
- * (PLATFORM_PLAN 4.7 — the share-by-token link this replaces was retired with it).
+ * (`PEOPLE_TABLE.md` § "Saved views and sharing" — the share-by-token link this replaces was retired with it).
  *
  * The link carries a definition, never data, and never anybody's access: whoever opens it gets the
  * table under their own, because the reader applies it through `applyPayload` like any saved view —

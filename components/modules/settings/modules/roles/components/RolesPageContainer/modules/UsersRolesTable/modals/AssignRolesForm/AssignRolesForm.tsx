@@ -23,6 +23,7 @@ import { isSystemOwner } from "@/models/access";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
 import { useRoleAccessPreview } from "@/components/modules/settings/modules/roles/hooks/useRoleAccessPreview";
 import { ResolvedAccessPanel } from "./ResolvedAccessPanel";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export type AssignRolesFormValues = {
   roleIds: string[];
@@ -270,7 +271,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
                     )}
 
                     {role.archived && (
-                      <Badge variant="outline" className="shrink-0">Archived</Badge>
+                      <StatusBadge status="archived" className="shrink-0" />
                     )}
                   </div>
                 </label>

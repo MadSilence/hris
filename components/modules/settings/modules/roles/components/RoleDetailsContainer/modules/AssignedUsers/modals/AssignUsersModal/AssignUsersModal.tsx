@@ -25,6 +25,9 @@ export const AssignUsersModal: React.FC<AssignUsersModalProps> = ({
     assignableName={roleName}
     noun="role"
     semantics="add"
+    // A role granted for a while — "access for two weeks" (ENTERPRISE_ACCESS_DESIGN.md § 4.6): the engine
+    // ends it the day after the last date.
+    temporal
     invalidateKeys={[rolesQueryKeys.roles()]}
   />
 );

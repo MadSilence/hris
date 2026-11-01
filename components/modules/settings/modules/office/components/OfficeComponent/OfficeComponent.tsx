@@ -8,11 +8,19 @@ import type { CreateOfficeActionInput } from "@/components/modules/settings/modu
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Building2, Download, Plus } from "lucide-react";
+import { Archive, ArchiveRestore, Building2, Download, Plus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { showActionError } from "@/lib/errors/errorToast";
+import {
+  useArchiveOfficeAction,
+  useRestoreOfficeAction,
+} from "@/components/modules/settings/modules/office/hooks/useArchiveOfficeAction";
+import type { AssignedUsersStrategy } from "@/components/modules/settings/modules/office/actions/archiveOfficeAction";
+import { ArchiveOfficeModal } from "@/components/modules/settings/modules/office/components/modals/ArchiveOfficeModal";
 import { CreateOfficeModal } from "@/components/modules/settings/modules/office/components/modals/CreateOfficeModal";
 import { CreateOfficeFormValues } from "../modals/CreateOfficeModal/CreateOfficeForm";
 import { OfficeSettingsSkeleton } from "./OfficeSettingsSkeleton";
@@ -37,6 +45,12 @@ export const OfficeComponent: FC<Props> = ({
   const [showArchived, setShowArchived] = useState(false);
 
   const createOfficeAction = useCreateOfficeAction();
+  const archiveAction = useArchiveOfficeAction();
+  const restoreAction = useRestoreOfficeAction();
+  // Archive is reached from the row as well as from the detail page, like every other list that
+  // has it (`technical_documentation/ui/ACTIONS_AND_MENUS.md` §§ 1–2). The dialog is the detail
+  // page's own: it asks what happens to the people assigned here.
+  const [archiving, setArchiving] = useState<Office | null>(null);
 
   const openCreate = () => {
     createOfficeAction.reset();
@@ -73,6 +87,27 @@ export const OfficeComponent: FC<Props> = ({
     };
 
     createOfficeAction.mutate(payload);
+  };
+
+  const handleArchive = (strategy: AssignedUsersStrategy) => {
+    if (!archiving) return;
+    archiveAction.mutate(
+      { id: archiving.id, assignedUsersStrategy: strategy },
+      {
+        onSuccess: (result) => {
+          setArchiving(null);
+          if (result.status === ActionStatus.ERROR) showActionError(result);
+        },
+      },
+    );
+  };
+
+  const handleRestore = (office: Office) => {
+    restoreAction.mutate(office.id, {
+      onSuccess: (result) => {
+        if (result.status === ActionStatus.ERROR) showActionError(result);
+      },
+    });
   };
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
@@ -171,6 +206,7 @@ export const OfficeComponent: FC<Props> = ({
               <TableHead className="w-[27%]">Address</TableHead>
               <TableHead className="w-[12.5%]">Email</TableHead>
               <TableHead className="w-[12.5%]">Phone</TableHead>
+              <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -211,6 +247,26 @@ export const OfficeComponent: FC<Props> = ({
                 <TableCell className="truncate text-muted-foreground">
                   {o.phone}
                 </TableCell>
+
+                <TableCell className="text-right">
+                  <PermissionGate resource="ORG.OFFICE" action="EDIT">
+                    <RowActionsMenu label="Office actions" stopPropagation>
+                      {o.archived ? (
+                        <RowAction
+                          icon={<ArchiveRestore className="h-4 w-4"/>}
+                          onClick={() => handleRestore(o)}
+                          disabled={restoreAction.isPending}
+                        >
+                          Unarchive
+                        </RowAction>
+                      ) : (
+                        <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => setArchiving(o)}>
+                          Archive
+                        </RowAction>
+                      )}
+                    </RowActionsMenu>
+                  </PermissionGate>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -236,6 +292,16 @@ export const OfficeComponent: FC<Props> = ({
           createOfficeAction.reset();
         }}
       />
+
+      {archiving && (
+        <ArchiveOfficeModal
+          isOpen
+          isLoading={archiveAction.isPending}
+          office={archiving}
+          onConfirmAction={handleArchive}
+          onRequestCloseAction={() => setArchiving(null)}
+        />
+      )}
 
       <ExportDataModal
         isOpen={isExportOpen}

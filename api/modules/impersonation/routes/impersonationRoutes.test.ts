@@ -117,7 +117,7 @@ describe("ImpersonationRoutes", () => {
     const setCookie = res.headers.get("set-cookie");
 
     expect(setCookie).toContain("access_token=new-access-token");
-    expect(setCookie).toContain("has_session=1");
+    expect(setCookie).toContain("__Host-has_session=1");
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("SameSite=lax");
     expect(setCookie).toContain("Path=/");
@@ -146,7 +146,7 @@ describe("ImpersonationRoutes", () => {
     const setCookie = res.headers.get("set-cookie");
 
     expect(setCookie).toContain("access_token=admin-access-token");
-    expect(setCookie).toContain("has_session=1");
+    expect(setCookie).toContain("__Host-has_session=1");
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("SameSite=lax");
     expect(setCookie).toContain("Path=/");

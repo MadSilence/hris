@@ -44,6 +44,7 @@ import {
   type FilterDTO,
   type ReferenceValueSource,
 } from "@/models/user/fields";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export type BulkEditTarget =
   | { kind: "ids"; userIds: string[] }
@@ -223,18 +224,15 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             {/* Field */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">Field</span>
-              <Select value={fieldKey} onValueChange={setFieldKey}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select a field" />
-                </SelectTrigger>
-                <SelectContent>
-                  {editableFields.map((f) => (
-                    <SelectItem key={f.key} value={f.key}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                className="h-9"
+                aria-label="Field"
+                options={editableFields.map((f) => ({ value: f.key, label: f.label }))}
+                value={fieldKey || null}
+                onChange={(v) => setFieldKey(v ?? "")}
+                placeholder="Select a field"
+                clearable={false}
+              />
             </div>
 
             {/* Operation (when more than one) */}
@@ -355,7 +353,7 @@ function ValueEditor({
 
   const type = field.attrType;
   if (type === "SELECT") {
-    return <SelectOne value={single} onChange={setSingle} options={field.options ?? []} placeholder="Select value" />;
+    return <SelectOne value={single} onChange={setSingle} options={field.options ?? []} placeholder="Select value" searchable />;
   }
   if (type === "MULTI_SELECT") {
     return (
@@ -401,12 +399,28 @@ function SelectOne({
   onChange,
   options,
   placeholder,
+  searchable = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   options: { id: string; label: string }[];
   placeholder: string;
+  /** Data — the company's records or a company-defined option list — is searched; a vocabulary is not. */
+  searchable?: boolean;
 }) {
+  if (searchable) {
+    return (
+      <SearchableSelect
+        className="h-9"
+        aria-label="Value"
+        options={options.map((o) => ({ value: o.id, label: o.label }))}
+        value={value || null}
+        onChange={(v) => onChange(v ?? "")}
+        placeholder={placeholder}
+        clearable={false}
+      />
+    );
+  }
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="h-9">
@@ -434,7 +448,7 @@ function RemoteSelect({
 }) {
   const { options, isLoading } = useAudienceFieldOptions(source);
   return (
-    <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select value"} />
+    <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select value"} searchable />
   );
 }
 
@@ -446,5 +460,5 @@ function RoleSelect({ value, onChange }: { value: string; onChange: (v: string) 
     staleTime: 5 * 60 * 1000,
   });
   const options = (data ?? []).map((r) => ({ id: r.id, label: r.name }));
-  return <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select role"} />;
+  return <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select role"} searchable />;
 }

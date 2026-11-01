@@ -4,13 +4,6 @@ import React, { useState } from "react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -24,6 +17,7 @@ import {
 } from "@/components/modules/settings/modules/general/companyProfile/hooks/useCompanySettings";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useInvalidateAttendance } from "@/components/modules/attendance/hooks";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** The stored choice is a field this reader's access does not list — it still shows, by what it is. */
 const HIDDEN_LABEL = "A field you cannot see";
@@ -104,25 +98,21 @@ export const AttendanceRateField: React.FC = () => {
         >
           <div className="w-64 space-y-1">
             <Label htmlFor="attendance-rate-field">Hourly Rate Field</Label>
-            <Select
-              value={value}
-              onValueChange={(next) => {
-                setDraft(next);
+            <SearchableSelect
+              id="attendance-rate-field"
+              options={[
+                { value: NONE_VALUE, label: NONE_LABEL },
+                ...(storedIsHidden ? [{ value: stored, label: HIDDEN_LABEL }] : []),
+                ...moneyFields.map((attribute) => ({ value: attribute.id, label: attribute.name })),
+              ]}
+              value={value || null}
+              onChange={(next) => {
+                setDraft(next ?? NONE_VALUE);
                 setError(null);
               }}
               disabled={!canEdit || update.isPending}
-            >
-              <SelectTrigger id="attendance-rate-field">
-                <SelectValue placeholder="Select"/>
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                <SelectItem value={NONE_VALUE}>{NONE_LABEL}</SelectItem>
-                {storedIsHidden && <SelectItem value={stored}>{HIDDEN_LABEL}</SelectItem>}
-                {moneyFields.map((attribute) => (
-                  <SelectItem key={attribute.id} value={attribute.id}>{attribute.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              clearable={false}
+            />
           </div>
           {canEdit && (
             <Button type="submit" disabled={!dirty || update.isPending} className="bg-brown-600 text-white hover:bg-brown-700">

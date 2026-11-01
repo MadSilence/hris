@@ -47,6 +47,7 @@ import {
   AudienceOption,
   useAudienceFieldOptions,
 } from "@/components/audience/hooks/useAudienceFieldOptions";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Props = {
   fields: FieldDTO[] | undefined;
@@ -317,23 +318,18 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     if (isMultiOp(op)) {
       return <MultiSelect options={options} values={values} onChange={onValues} loading={isLoading} />;
     }
-    // Hundreds of countries or time zones do not scroll well in a plain dropdown; they are searched.
-    if (source === "catalog") {
-      return <SearchableSelect options={options} value={value} onChange={onValue} />;
-    }
+    // Every option list here is data — the company's records, its own option lists, the world's
+    // countries and zones — so every one is searched (FORMS_AND_FIELDS.md § 7).
     return (
-      <Select value={value} onValueChange={onValue}>
-        <SelectTrigger className="h-9 w-44">
-          <SelectValue placeholder={isLoading ? "Loading…" : "Select value"} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((o) => (
-            <SelectItem key={o.id} value={o.id}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        className="h-9 w-44"
+        aria-label="Value"
+        options={options.map((o) => ({ value: o.id, label: o.label }))}
+        value={value || null}
+        onChange={(v) => v && onValue(v)}
+        placeholder={isLoading ? "Loading…" : "Select value"}
+        clearable={false}
+      />
     );
   }
 
@@ -441,59 +437,6 @@ const FieldPicker: React.FC<{
                 ))}
               </CommandGroup>
             ))}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-// ---- single select with search (Desact Command combobox) ---------------
-
-const SearchableSelect: React.FC<{
-  options: AudienceOption[];
-  value: string;
-  onChange: (v: string) => void;
-}> = ({ options, value, onChange }) => {
-  const [open, setOpen] = useState(false);
-  const picked = options.find((o) => o.id === value) ?? null;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-9 w-44 justify-between font-normal"
-        >
-          <span className={picked ? "truncate" : "truncate text-muted-foreground"}>
-            {picked ? picked.label : "Select value"}
-          </span>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search" className="h-9" />
-          <CommandList>
-            <CommandEmpty>No options</CommandEmpty>
-            <CommandGroup>
-              {options.map((o) => (
-                <CommandItem
-                  key={o.id}
-                  value={o.label}
-                  onSelect={() => {
-                    onChange(o.id);
-                    setOpen(false);
-                  }}
-                >
-                  <Check className={o.id === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
-                  {o.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

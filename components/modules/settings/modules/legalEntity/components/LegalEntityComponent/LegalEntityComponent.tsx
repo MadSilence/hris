@@ -10,11 +10,19 @@ import type { CreateLegalEntityActionInput, } from "@/components/modules/setting
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Building2, Download, Plus } from "lucide-react";
+import { Archive, ArchiveRestore, Building2, Download, Plus } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { showActionError } from "@/lib/errors/errorToast";
+import {
+  useArchiveLegalEntityAction,
+  useRestoreLegalEntityAction,
+} from "@/components/modules/settings/modules/legalEntity/hooks/useArchiveLegalEntityAction";
+import type { AssignedUsersStrategy } from "@/components/modules/settings/modules/legalEntity/actions/archiveLegalEntityAction";
+import { ArchiveLegalEntityModal } from "@/components/modules/settings/modules/legalEntity/components/modals/ArchiveLegalEntityModal";
 import {
   LegalEntitySettingsSkeleton
 } from "@/components/modules/settings/modules/legalEntity/components/LegalEntityComponent/LegalEntitySettingsSkeleton";
@@ -40,6 +48,12 @@ export const LegalEntityComponent: React.FC<Props> = ({
   const [showArchived, setShowArchived] = useState(false);
 
   const createLegalEntityAction = useCreateLegalEntityAction();
+  const archiveAction = useArchiveLegalEntityAction();
+  const restoreAction = useRestoreLegalEntityAction();
+  // Archive is reached from the row as well as from the detail page, like every other list that
+  // has it (`technical_documentation/ui/ACTIONS_AND_MENUS.md` §§ 1–2). The dialog is the detail
+  // page's own: it asks what happens to the people assigned here.
+  const [archiving, setArchiving] = useState<LegalEntity | null>(null);
   const router = useRouter();
 
   // Success closes the dialog; a refusal keeps it open with the reason in it. Closing on ERROR too
@@ -74,6 +88,27 @@ export const LegalEntityComponent: React.FC<Props> = ({
     };
 
     createLegalEntityAction.mutate(payload);
+  };
+
+  const handleArchive = (strategy: AssignedUsersStrategy) => {
+    if (!archiving) return;
+    archiveAction.mutate(
+      { id: archiving.id, assignedUsersStrategy: strategy },
+      {
+        onSuccess: (result) => {
+          setArchiving(null);
+          if (result.status === ActionStatus.ERROR) showActionError(result);
+        },
+      },
+    );
+  };
+
+  const handleRestore = (entity: LegalEntity) => {
+    restoreAction.mutate(entity.id, {
+      onSuccess: (result) => {
+        if (result.status === ActionStatus.ERROR) showActionError(result);
+      },
+    });
   };
 
   const handleExport = async ({ format }: ExportDataFormValues) => {
@@ -173,6 +208,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
                 <TableHead className="w-[27%]">Address</TableHead>
                 <TableHead className="w-[12.5%]">Registration Number</TableHead>
                 <TableHead className="w-[12.5%]">Tax ID</TableHead>
+                <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
 
@@ -213,6 +249,26 @@ export const LegalEntityComponent: React.FC<Props> = ({
                   <TableCell className="truncate text-muted-foreground">
                     {e.taxId}
                   </TableCell>
+
+                  <TableCell className="text-right">
+                    <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
+                      <RowActionsMenu label="Legal entity actions" stopPropagation>
+                        {e.archived ? (
+                          <RowAction
+                            icon={<ArchiveRestore className="h-4 w-4"/>}
+                            onClick={() => handleRestore(e)}
+                            disabled={restoreAction.isPending}
+                          >
+                            Unarchive
+                          </RowAction>
+                        ) : (
+                          <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => setArchiving(e)}>
+                            Archive
+                          </RowAction>
+                        )}
+                      </RowActionsMenu>
+                    </PermissionGate>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -239,6 +295,16 @@ export const LegalEntityComponent: React.FC<Props> = ({
           createLegalEntityAction.reset();
         }}
       />
+
+      {archiving && (
+        <ArchiveLegalEntityModal
+          isOpen
+          isLoading={archiveAction.isPending}
+          entity={archiving}
+          onConfirmAction={handleArchive}
+          onRequestCloseAction={() => setArchiving(null)}
+        />
+      )}
 
       <ExportDataModal
         isOpen={isExportModalOpen}

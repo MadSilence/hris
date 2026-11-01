@@ -35,7 +35,7 @@ describe("HrisApiImpersonationService", () => {
 
     jest
       .mocked(hrisApiImpersonationClient.start)
-      .mockResolvedValue(backendAnswer(body, "refresh_token=subject-refresh; Path=/; HttpOnly"));
+      .mockResolvedValue(backendAnswer(body, "__Host-refresh_token=subject-refresh; Path=/; HttpOnly"));
 
     const result = await hrisApiImpersonationService.start({
       targetUserId: "target-id",
@@ -59,7 +59,7 @@ describe("HrisApiImpersonationService", () => {
     jest.mocked(hrisApiImpersonationClient.start).mockResolvedValue(
       backendAnswer(
         { accessToken: "a", impersonating: true, actorId: "actor", subjectId: "subject" },
-        "refresh_token=the-subjects-token; Path=/; HttpOnly; SameSite=Lax"
+        "__Host-refresh_token=the-subjects-token; Path=/; HttpOnly; SameSite=Lax"
       )
     );
 
@@ -78,7 +78,7 @@ describe("HrisApiImpersonationService", () => {
 
     jest
       .mocked(hrisApiImpersonationClient.stop)
-      .mockResolvedValue(backendAnswer(body, "refresh_token=actor-refresh; Path=/"));
+      .mockResolvedValue(backendAnswer(body, "__Host-refresh_token=actor-refresh; Path=/"));
 
     const result = await hrisApiImpersonationService.stop();
 

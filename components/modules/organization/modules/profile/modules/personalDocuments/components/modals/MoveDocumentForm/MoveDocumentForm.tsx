@@ -5,8 +5,8 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export type MoveDocumentFolderOption = {
   id: string;
@@ -90,25 +90,19 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
       <div className="space-y-2">
         <RequiredLabel required>Destination Folder</RequiredLabel>
 
-        <Select
-          value={formik.values.folderId}
-          onValueChange={(value) => formik.setFieldValue("folderId", value)}
+        <SearchableSelect
+          aria-label="Destination folder"
+          options={[
+            { value: ROOT_FOLDER_ID, label: "None" },
+            ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
+          ]}
+          value={formik.values.folderId || null}
+          onChange={(value) => formik.setFieldValue("folderId", value ?? ROOT_FOLDER_ID)}
+          placeholder="Select folder"
           disabled={isLoading}
-        >
-          <SelectTrigger aria-invalid={!!formik.errors.folderId}>
-            <SelectValue placeholder="Select folder"/>
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value={ROOT_FOLDER_ID}>None</SelectItem>
-
-            {folders.map((folder) => (
-              <SelectItem key={folder.id} value={folder.id}>
-                {folder.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          aria-invalid={!!formik.errors.folderId}
+          clearable={false}
+        />
 
         {formik.errors.folderId && (
           <p role="alert" className="text-sm text-destructive">{formik.errors.folderId}</p>

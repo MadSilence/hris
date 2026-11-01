@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
@@ -35,6 +34,7 @@ import { Briefcase } from "lucide-react";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { JobFamilySkeleton } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/JobFamily/JobFamilySkeleton";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export type JobFamilyComponentProps = {
   jobFamilies: JobFamily[] | null | undefined;
@@ -319,9 +319,7 @@ const FamilySection: FC<FamilySectionProps> = ({
           {family.name}
           <span className="normal-case tracking-normal text-brown-400">({family.jobs.length})</span>
           {family.archived && (
-            <Badge variant="secondary" className="font-normal normal-case tracking-normal">
-              Archived
-            </Badge>
+            <StatusBadge status="archived" className="font-normal normal-case tracking-normal" />
           )}
         </span>
       </AccordionTrigger>
@@ -485,9 +483,7 @@ const JobRow: FC<JobRowProps> = ({
 
       <div>
         {job.archived ? (
-          <Badge variant="secondary" className="font-normal">
-            Archived
-          </Badge>
+          <StatusBadge status="archived" className="font-normal" />
         ) : (
           <span className="text-sm text-muted-foreground">Active</span>
         )}

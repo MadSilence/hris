@@ -3,7 +3,15 @@ import type { NextResponse } from "next/server";
 import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
 import { readRememberedCompany, rememberCompany } from "@/api/modules/companyAddress";
 
-type CookieOptions = { name: string; domain?: string; value: string; httpOnly?: boolean };
+type CookieOptions = {
+  name: string;
+  domain?: string;
+  value: string;
+  httpOnly?: boolean;
+  secure?: boolean;
+  path?: string;
+  sameSite?: string;
+};
 
 const responseCapturingCookies = () => {
   const written: CookieOptions[] = [];
@@ -22,8 +30,27 @@ describe("session cookies", () => {
 
     setSessionCookies(res, { accessToken: "access", refreshToken: "refresh" });
 
-    expect(written.map((c) => c.name).sort()).toEqual(["access_token", "has_session", "refresh_token"]);
+    expect(written.map((c) => c.name).sort()).toEqual([
+      "__Host-access_token",
+      "__Host-has_session",
+      "__Host-refresh_token",
+    ]);
     written.forEach((cookie) => expect(cookie.domain).toBeUndefined());
+  });
+
+  /*
+    The `__Host-` prefix is a promise the browser checks: Secure, Path=/, no Domain — or the cookie is
+    dropped without a word, and the person is simply never signed in (R1.1). Secure used to follow
+    NODE_ENV.
+  */
+  it("keep the promise the __Host- prefix makes: Secure and Path=/ on every one, the refresh token Strict", () => {
+    const { res, written } = responseCapturingCookies();
+
+    setSessionCookies(res, { accessToken: "access", refreshToken: "refresh" });
+
+    written.forEach((cookie) => expect(cookie).toMatchObject({ secure: true, path: "/" }));
+    expect(written.find((c) => c.name === "__Host-refresh_token")).toMatchObject({ sameSite: "strict" });
+    expect(written.find((c) => c.name === "__Host-access_token")).toMatchObject({ sameSite: "lax" });
   });
 
   it("remember the company on the parent domain, because the root is the one that reads it", () => {

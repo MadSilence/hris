@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { parseHost, requestHost, routeForHost } from "@/lib/companyAddress";
 
-/** The session's own cookies — `sessionCookies.ts`. `has_session` is not one: a script can remove it. */
-const SESSION_COOKIES = ["access_token", "refresh_token"];
+// The session's own cookies — `sessionCookies.ts`. The marker is not one: a script can remove it.
+import { SESSION_COOKIES } from "@/config/security/sessionCookieNames";
 
 /**
  * Routes a request by the host it came to — the root, or a company's own address — and sends somebody

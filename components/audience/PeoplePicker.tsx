@@ -136,6 +136,12 @@ export type PeoplePickerProps = {
   /** Must match what the caller will send on apply, or the preview count lies. */
   includeInactive?: boolean;
   onIncludeInactiveChange?: (next: boolean) => void;
+  /**
+   * Why a person cannot be picked here, or null when they can — "Already assigned" for somebody who
+   * already holds the target. For a target with no person field to exclude by (`extraFilters`); the
+   * row stays in the list, greyed, rather than disappearing.
+   */
+  unavailableReason?: (user: UserRefDTO) => string | null;
 };
 
 function fullName(u: UserRefDTO) {
@@ -163,6 +169,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   extraFilters,
   includeInactive = false,
   onIncludeInactiveChange,
+  unavailableReason,
 }) => {
   const [query, setQuery] = React.useState("");
   const q = useDebouncedValue(query.trim(), 300);
@@ -306,14 +313,23 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 </TableRow>
               )}
 
-              {matched.map((u) => (
+              {matched.map((u) => {
+                const unavailable = unavailableReason?.(u) ?? null;
+                return (
                 <TableRow
                   key={u.id}
-                  className="cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2"
-                  onClick={() => onToggle(u)}
+                  className={`border-brown-200 [&_td]:py-2 ${
+                    unavailable ? "text-muted-foreground" : "cursor-pointer hover:bg-brown-50"
+                  }`}
+                  onClick={unavailable ? undefined : () => onToggle(u)}
                 >
                   <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox checked={isSelected(u)} onCheckedChange={() => onToggle(u)} />
+                    <Checkbox
+                      checked={!unavailable && isSelected(u)}
+                      disabled={Boolean(unavailable)}
+                      onCheckedChange={() => onToggle(u)}
+                      aria-label={unavailable ? `${fullName(u)}: ${unavailable}` : undefined}
+                    />
                   </TableCell>
 
                   <TableCell>
@@ -324,7 +340,9 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                       </Avatar>
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-medium">{fullName(u)}</span>
-                        <span className="block truncate text-xs text-muted-foreground">{u.email}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {unavailable ? `${u.email ?? ""}${u.email ? " · " : ""}${unavailable}` : u.email}
+                        </span>
                       </span>
                     </div>
                   </TableCell>
@@ -333,7 +351,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                     <TableCell key={c.key}>{c.render(u)}</TableCell>
                   ))}
                 </TableRow>
-              ))}
+                );
+              })}
 
               {resolve.hasNextPage && (
                 <TableRow>

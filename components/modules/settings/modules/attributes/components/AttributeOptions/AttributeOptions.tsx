@@ -13,13 +13,6 @@ import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { OptionsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/OptionsEditor";
 import { ObjectFieldsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/ObjectFieldsEditor/ObjectFieldsEditor";
 import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
@@ -36,6 +29,7 @@ import { PRESET_COLORS } from "@/models/colors";
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface AttributeOptionsProps {
   attribute: Attribute;
@@ -250,18 +244,14 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       {groupOptions.length > 0 && (
         <div className="space-y-1.5">
           <Label htmlFor="attr-group">Group</Label>
-          <Select value={groupId} onValueChange={setGroupId} disabled={isPreset}>
-            <SelectTrigger id="attr-group">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {groupOptions.map((g) => (
-                <SelectItem key={g.id} value={g.id}>
-                  {g.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            id="attr-group"
+            options={groupOptions.map((g) => ({ value: g.id, label: g.name }))}
+            value={groupId || null}
+            onChange={(v) => v && setGroupId(v)}
+            disabled={isPreset}
+            clearable={false}
+          />
           {groupId !== attribute.groupId && (
             <p className="text-xs text-muted-foreground">
               Moving the attribute places it at the end of the target group.

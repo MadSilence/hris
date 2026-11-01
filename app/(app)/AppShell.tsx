@@ -30,6 +30,7 @@ import { ForbiddenError } from "@/components/clients/exceptions";
 import UserSettingsProvider from "@/components/providers/UserSettingsProvider";
 import { useWelcome } from "@/components/modules/firstRun/hooks";
 import { QuickSearchDialog, useQuickSearchShortcut, type SearchPage } from "@/components/modules/search";
+import { StepUpDialog } from "@/components/modules/mfa/stepUp";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -195,6 +196,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         <ImpersonationBanner/>
         <main className={styles.main}>{children}</main>
       </div>
+
+      {/* "Confirm it is you" — one dialog for every sensitive operation (MFA_DESIGN.md § 3.5). */}
+      <StepUpDialog/>
 
       <Toaster/>
     </div>

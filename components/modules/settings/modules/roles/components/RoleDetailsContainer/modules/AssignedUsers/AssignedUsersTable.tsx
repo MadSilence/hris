@@ -55,15 +55,15 @@ export default function AssignedUsersTable({
   return (
     <>
       <Card className="border-0 gap-3">
-        {/* An archived role still lists whoever held it, but it grants them nothing — say so here
-            rather than letting someone assign people to it and wonder why nothing happened. */}
+        {/* Archiving took the role from everybody (WALK_QUESTIONS § 22), so the list below is empty;
+            say why rather than letting someone try to assign people to it. */}
         {isArchived && (
           <div className="flex items-start gap-3 rounded-lg border border-warning-200 bg-warning-50 p-4">
             <Archive className="mt-0.5 h-5 w-5 shrink-0 text-warning-600"/>
             <div className="min-w-0 text-sm text-warning-800">
               <p className="font-medium">This role is archived</p>
               <p>
-                It grants nothing to the people below and cannot be assigned to anyone else.
+                Archiving took it from everyone who held it, and it cannot be assigned.
                 Unarchive it to start using it again.
               </p>
             </div>

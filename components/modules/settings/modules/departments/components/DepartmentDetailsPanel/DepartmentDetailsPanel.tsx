@@ -14,6 +14,7 @@ import type { DepartmentTreeNode } from "@/models/departments";
 import { DepartmentPeopleTab } from "@/components/modules/settings/modules/departments/components/DepartmentPeopleTab/DepartmentPeopleTab";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type Props = {
   department: DepartmentTreeNode;
@@ -87,9 +88,7 @@ export function DepartmentDetailsPanel({
           <div className="flex items-center gap-2">
             <h2 className="truncate text-lg font-semibold text-brown-900">{department.name}</h2>
             {isArchived && (
-              <span className="rounded bg-brown-100 px-1.5 py-0.5 text-xs font-medium text-brown-500">
-                Archived
-              </span>
+              <StatusBadge status="archived" className="px-1.5 py-0.5 text-xs" />
             )}
           </div>
           {department.code && (

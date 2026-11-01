@@ -4,7 +4,7 @@ import { CompleteRegisterRequest, LoginRequest, RegisterRequest } from "@/api/mo
 import { BadRequestError } from "@/components/clients/exceptions";
 import {
   hrisAuthSessionService,
-  type SessionTokens,
+  type SignInResult,
 } from "@/api/modules/auth/services/hrisAuthSessionService";
 
 export class AuthRoutes {
@@ -18,7 +18,7 @@ export class AuthRoutes {
    * Returns both tokens. The refresh one comes back as a `Set-Cookie` addressed to this server, so
    * it has to be read off the response — see `hrisAuthSessionService`.
    */
-  public async login(payload: LoginRequest): Promise<SessionTokens> {
+  public async login(payload: LoginRequest, trustedDeviceToken?: string): Promise<SignInResult> {
     if (!payload?.email || !payload?.password) {
       throw new BadRequestError("Missing email or password");
     }
@@ -27,7 +27,7 @@ export class AuthRoutes {
       throw new BadRequestError("Sign in at your company's address");
     }
 
-    return hrisAuthSessionService.login(payload);
+    return hrisAuthSessionService.login(payload, trustedDeviceToken);
   }
 
   public async register(payload: RegisterRequest) {

@@ -34,6 +34,8 @@ const SESSION_PROBE_PATH = "/api/me/access";
 let sessionProbe: Promise<boolean> | null = null;
 
 const REFRESH_PATH = "/api/auth/refresh";
+/** The backend's "confirm it is you" — a 403 that the step-up dialog answers. */
+export const STEP_UP_REQUIRED = "AUTH00009";
 let refreshInFlight: Promise<boolean> | null = null;
 
 /**
@@ -241,7 +243,9 @@ export class InternalApiClient {
         // (U00037, an owner impersonated by a non-owner) used to reach the card as a bare string and
         // read as the generic "You do not have permission".
         const forbidden = new ForbiddenError(friendly, init);
-        if (typeof window !== "undefined" && method !== "GET") {
+        // "Confirm it is you" (AUTH00009) is a question, not a refusal: the step-up dialog answers it and
+        // the call is replayed. Dispatched as a refusal it would paint "Access denied" (MFA_DESIGN.md § 9.1).
+        if (typeof window !== "undefined" && method !== "GET" && init.code !== STEP_UP_REQUIRED) {
           window.dispatchEvent(new CustomEvent("hris:forbidden", { detail: forbidden }));
         }
         throw forbidden;

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { BACKEND_UNAVAILABLE_CODE } from "@/components/clients/exceptions";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const cookieToken = cookieStore.get("access_token")?.value ?? "";
+    const cookieToken = cookieStore.get(ACCESS_COOKIE)?.value ?? "";
     const headerAuth = req.headers.get("authorization") || "";
     const ifNoneMatch = req.headers.get("if-none-match");
 

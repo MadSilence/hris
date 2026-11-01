@@ -4,6 +4,7 @@ import { assignUserRolesAction } from "@/components/modules/settings/modules/rol
 import { useInvalidateRolesQuery } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import { PEOPLE_SEARCH_QK } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearch";
 import { accessQueryKeys } from "@/components/auth/accessQueryKeys";
+import { withStepUpAction } from "@/components/modules/mfa/stepUp";
 
 export type AssignUserRolesPayload = {
   userId: string;
@@ -17,11 +18,12 @@ export const useAssignUserRolesAction = () => {
 
   return useMutation({
     mutationFn: async ({ userId, roleIds, currentRoleIds }: AssignUserRolesPayload) => {
-      const result = await assignUserRolesAction({
+      // Appointing an administrator asks "confirm it is you" first (MFA_DESIGN.md § 3.5), then replays.
+      const result = await withStepUpAction(() => assignUserRolesAction({
         userId,
         assignRoleIds: roleIds.filter((id) => !currentRoleIds.includes(id)),
         removeRoleIds: currentRoleIds.filter((id) => !roleIds.includes(id)),
-      });
+      }));
 
       if (result.status === ActionStatus.ERROR) {
         throw new Error(result.errorMessage ?? "Failed to update assigned roles");

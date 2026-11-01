@@ -19,17 +19,10 @@ jest.mock("@/components/modules/settings/shared/UserPickerField/UserPickerField"
     <button type="button" onClick={() => onChange({ id: "u-new", firstName: "Grace" })}>Pick Person</button>
   ),
 }));
-jest.mock("@/public/desact/src/components/ui/select", () => ({
-  Select: ({ onValueChange, children }: { onValueChange: (v: string) => void; children: React.ReactNode }) => (
-    <div>
-      <button type="button" onClick={() => onValueChange("t1")}>Choose Template</button>
-      {children}
-    </div>
+jest.mock("@/components/ui/SearchableSelect", () => ({
+  SearchableSelect: ({ onChange }: { onChange: (v: string | null) => void }) => (
+    <button type="button" onClick={() => onChange("t1")}>Choose Template</button>
   ),
-  SelectTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SelectValue: () => null,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SelectItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const preview: StartPreview = {

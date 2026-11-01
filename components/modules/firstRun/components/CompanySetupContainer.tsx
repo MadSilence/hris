@@ -25,6 +25,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
 import type { CompanySetupDataset, CompanySizeBand } from "@/api/modules/firstRun/dto";
 import { cn } from "@/public/desact/src/components/ui/utils";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /**
  * The list the owner picks from. Free text on the wire, so this can grow without a migration — which
@@ -182,18 +183,14 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <RequiredLabel htmlFor="setup-industry">What does the company do?</RequiredLabel>
-            <Select value={industry ?? undefined} onValueChange={setIndustry}>
-              <SelectTrigger id="setup-industry" className="w-full">
-                <SelectValue placeholder="Select an industry" />
-              </SelectTrigger>
-              <SelectContent>
-                {INDUSTRIES.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              id="setup-industry"
+              options={INDUSTRIES.map((name) => ({ value: name, label: name }))}
+              value={industry ?? null}
+              onChange={(v) => v && setIndustry(v)}
+              placeholder="Select an industry"
+              clearable={false}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">

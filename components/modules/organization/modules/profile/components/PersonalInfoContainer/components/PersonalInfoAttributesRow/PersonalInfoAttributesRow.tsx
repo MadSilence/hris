@@ -25,8 +25,8 @@ import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export type PersonalInfoAttributesRowProps = {
   attribute: Attribute;
@@ -294,19 +294,13 @@ function EditValue({
       const cur = rawValue == null || rawValue === "" ? undefined : String(rawValue);
 
       return (
-        <Select value={cur} onValueChange={(v) => onChange(v)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select…"/>
-          </SelectTrigger>
-
-          <SelectContent className="max-h-72">
-            {options.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          options={options}
+          value={cur || null}
+          onChange={(v) => v && onChange(v)}
+          placeholder="Select…"
+          clearable={false}
+        />
       );
     }
 
@@ -347,19 +341,13 @@ function EditValue({
       const cur = rawValue == null ? null : String(rawValue);
 
       return (
-        <Select value={cur ?? undefined} onValueChange={(v) => onChange(v)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select…"/>
-          </SelectTrigger>
-
-          <SelectContent>
-            {options.map((o) => (
-              <SelectItem key={o.id} value={o.id}>
-                {o.value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          options={options.map((o) => ({ value: o.id, label: o.value }))}
+          value={cur ?? null}
+          onChange={(v) => v && onChange(v)}
+          placeholder="Select…"
+          clearable={false}
+        />
       );
     }
 

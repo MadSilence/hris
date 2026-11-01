@@ -67,6 +67,7 @@ class HrisApiAuthClient {
     await hrisApiClient.post<void>(this.API_AUTH_PATH + "/password/reset", {
       token: payload.token,
       password: payload.password,
+      code: payload.code,
     });
   }
 

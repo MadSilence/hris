@@ -20,6 +20,8 @@ const LINK_NOT_VALID = "AUTH00003";
 type Props = {
   token: string;
   firstName: string | null;
+  /** Locked with a second factor (M5): a password alone does not open it, so the reset asks for a code. */
+  codeRequired?: boolean;
 };
 
 /**
@@ -30,7 +32,8 @@ type Props = {
  * which is why the refusal offers the way to a new link as well as saying so. The password rule is the
  * signup one, imported rather than copied — the same as the invitation screen.
  */
-export function ResetPasswordContainer({ token, firstName }: Props) {
+export function ResetPasswordContainer({ token, firstName, codeRequired = false }: Props) {
+  const [code, setCode] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [linkExpired, setLinkExpired] = useState(false);
@@ -43,7 +46,7 @@ export function ResetPasswordContainer({ token, firstName }: Props) {
     onSubmit: async (values) => {
       setError(null);
       setLinkExpired(false);
-      const res = await resetPasswordAction({ token, password: values.password });
+      const res = await resetPasswordAction({ token, password: values.password, code: codeRequired ? code.trim() : undefined });
       if (res.status === ActionStatus.SUCCESS) {
         setDone(true);
         return;
@@ -126,6 +129,24 @@ export function ResetPasswordContainer({ token, firstName }: Props) {
           <p className="text-sm text-muted-foreground">
             Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
           </p>
+
+          {codeRequired && (
+            <div className="space-y-2">
+              <RequiredLabel htmlFor="reset-password-code" required>Code</RequiredLabel>
+              <Input
+                id="reset-password-code"
+                value={code}
+                onChange={(e) => setCode(e.currentTarget.value)}
+                autoComplete="one-time-code"
+                disabled={busy}
+                className="font-mono tracking-widest"
+              />
+              <p className="text-sm text-muted-foreground">
+                Your account is locked after too many failed sign-ins. Enter the code from your authenticator app, or
+                one of your backup codes, to unlock it.
+              </p>
+            </div>
+          )}
 
           <FormError message={error} />
 

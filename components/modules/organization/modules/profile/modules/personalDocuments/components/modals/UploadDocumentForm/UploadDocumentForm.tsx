@@ -10,6 +10,7 @@ import { cn } from "@/public/desact/src/components/ui/utils";
 import { formatBytes } from "../../../utils/formatBytes";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export type FolderOption = {
   id: string;
@@ -239,21 +240,18 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
         <div className="space-y-2">
           <Label>Folder</Label>
 
-          <Select value={folderId} onValueChange={setFolderId} disabled={isLoading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select folder"/>
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value={ROOT_FOLDER_ID}>None</SelectItem>
-
-              {folders.map((folder) => (
-                <SelectItem key={folder.id} value={folder.id}>
-                  {folder.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            aria-label="Folder"
+            options={[
+              { value: ROOT_FOLDER_ID, label: "None" },
+              ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
+            ]}
+            value={folderId || null}
+            onChange={(v) => setFolderId(v ?? ROOT_FOLDER_ID)}
+            placeholder="Select folder"
+            disabled={isLoading}
+            clearable={false}
+          />
         </div>
 
         <div className="space-y-2">
@@ -281,21 +279,18 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
           <div className="space-y-2">
             <Label>Category</Label>
 
-            <Select value={categoryId} onValueChange={setCategoryId} disabled={isLoading}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category"/>
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value={NO_CATEGORY_ID}>None</SelectItem>
-
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              aria-label="Category"
+              options={[
+                { value: NO_CATEGORY_ID, label: "None" },
+                ...categories.map((category) => ({ value: category.id, label: category.name })),
+              ]}
+              value={categoryId || null}
+              onChange={(v) => setCategoryId(v ?? NO_CATEGORY_ID)}
+              placeholder="Select category"
+              disabled={isLoading}
+              clearable={false}
+            />
           </div>
         )}
       </div>

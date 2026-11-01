@@ -22,10 +22,48 @@ import { triggerExportPostDownload } from "@/components/modules/settings/shared/
 import type { AttendanceExportRequest, AttendanceReportRow } from "@/models/attendance";
 import type { FieldDTO } from "@/models/user/fields";
 import type { AttendanceView } from "./useAttendanceView";
-import { attendanceColumns, personName } from "./AttendanceTable";
+import { ATTENDANCE_COLUMNS, personName } from "./AttendanceTable";
 import { FilterBadge } from "./FilterBadge";
 
 const PREVIEW_ROWS = 5;
+
+type FileColumn = { key: string; label: string; value: (r: AttendanceReportRow) => string; numeric?: boolean };
+
+/** The file's word for a status — `AttendanceExportService.statusLabel`, which is not the directory's. */
+const fileStatus = (status: string | null) => {
+  switch (status) {
+    case "ACTIVE": return "Active";
+    case "ARCHIVED": return "Archived";
+    case "PROSPECTIVE": return "Prospective";
+    default: return status ?? "";
+  }
+};
+
+/**
+ * The summary sheet's columns, in the file's order — `AttendanceExportService.summaryColumns`. The
+ * table's columns are not these: the file adds Email and Status, and splits the amount from its
+ * currency so a spreadsheet can sum it. The preview promises the file, so it prints the file.
+ */
+const fileColumns = (money: boolean): FileColumn[] => [
+  { key: "email", label: "Email", value: (r) => r.person.email ?? "" },
+  { key: "status", label: "Status", value: (r) => fileStatus(r.person.status) },
+  ...ATTENDANCE_COLUMNS.map((column) => ({ ...column, numeric: true })),
+  ...(money
+    ? [
+      {
+        key: "amount",
+        label: "Amount",
+        value: (r: AttendanceReportRow) => (r.totals.amounts ?? []).map((a) => String(a.amount)).join(" + "),
+        numeric: true,
+      },
+      {
+        key: "currency",
+        label: "Currency",
+        value: (r: AttendanceReportRow) => (r.totals.amounts ?? []).map((a) => a.currency).join(" + "),
+      },
+    ]
+    : []),
+];
 
 type Props = {
   open: boolean;
@@ -79,8 +117,10 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
 
   const search = view.query.trim().length >= 2 ? view.query.trim() : null;
   const preview = rows.slice(0, PREVIEW_ROWS);
-  const columns = attendanceColumns(preview);
-  const money = columns.some((column) => column.key === "amount");
+  // The server sends money only to a reader who may see the rate, and only when time is priced — the
+  // same condition that puts Amount and Currency into the file.
+  const money = rows.some((row) => row.totals.amounts != null);
+  const columns = fileColumns(money);
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
@@ -117,22 +157,29 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
         </dl>
 
         {preview.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-brown-200">
-            <Table className="table-fixed text-xs">
+          <div className="overflow-x-auto rounded-lg border border-brown-200">
+            <Table className="text-xs">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[28%]">Name</TableHead>
+                  <TableHead>Name</TableHead>
                   {columns.map((column) => (
-                    <TableHead key={column.key} className="text-right">{column.label}</TableHead>
+                    <TableHead key={column.key} className={column.numeric ? "text-right" : undefined}>
+                      {column.label}
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {preview.map((row) => (
                   <TableRow key={row.person.id} className="hover:bg-transparent">
-                    <TableCell className="truncate">{personName(row.person)}</TableCell>
+                    <TableCell className="whitespace-nowrap">{personName(row.person)}</TableCell>
                     {columns.map((column) => (
-                      <TableCell key={column.key} className="text-right tabular-nums">{column.value(row)}</TableCell>
+                      <TableCell
+                        key={column.key}
+                        className={column.numeric ? "whitespace-nowrap text-right tabular-nums" : "whitespace-nowrap"}
+                      >
+                        {column.value(row)}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}

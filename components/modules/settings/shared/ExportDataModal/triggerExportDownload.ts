@@ -73,7 +73,7 @@ export const triggerExportPostDownload = async (
 };
 
 /** Hands the bytes to the browser under the name `Content-Disposition` gives, or the fallback. */
-const saveResponse = async (response: Response, fallbackName: string): Promise<void> => {
+export const saveResponse = async (response: Response, fallbackName: string): Promise<void> => {
   const blob = await response.blob();
   const objectUrl = URL.createObjectURL(blob);
 

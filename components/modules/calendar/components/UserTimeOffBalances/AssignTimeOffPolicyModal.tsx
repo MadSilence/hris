@@ -16,13 +16,6 @@ import {
 } from "@/public/desact/src/components/ui/dialog";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Label } from "@/public/desact/src/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
 import { Calendar } from "@/public/desact/src/components/ui/calendar";
 import { cn } from "@/public/desact/src/components/ui/utils";
@@ -32,6 +25,7 @@ import { useInvalidateEmployeeTimeOffBalancesQuery } from "@/components/modules/
 import { TimeOffPolicyStatus, TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Props = {
   isOpen: boolean;
@@ -147,22 +141,14 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
             <>
               <div className="space-y-1.5">
                 <RequiredLabel className="text-xs" required>Policy</RequiredLabel>
-                <Select
-                  value={policyId}
-                  onValueChange={setPolicyId}
+                <SearchableSelect
+                  options={available.map((p) => ({ value: p.id, label: p.name }))}
+                  value={policyId || null}
+                  onChange={(v) => setPolicyId(v ?? "")}
+                  placeholder="Select a policy"
                   disabled={createMutation.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a policy" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {available.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  clearable={false}
+                />
               </div>
 
               {noHireDate && (

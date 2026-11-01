@@ -12,6 +12,7 @@ import {
 import { cookies, headers as nextHeaders } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { isPublicBackendPath } from "@/config/security/publicBackendPaths";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 type HeaderReader = { get(name: string): string | null };
 
@@ -106,6 +107,28 @@ export class HrisApiClient {
     await this.checkResponseStatus(response);
 
     return { data: (await response.json()) as T, response };
+  }
+
+  /**
+   * A passthrough for SCIM (ENTERPRISE_ACCESS_DESIGN.md § 4.2): the IdP's request as it came, its own bearer
+   * token, the host's company named so Java can check it is the token's (A10). Nothing is logged here — the
+   * `Authorization` header is a credential (R2 point 4).
+   */
+  public async scim(path: string, init: { method: string; body?: string; authorization?: string; contentType?: string; subdomain: string }): Promise<Response> {
+    const headers = await this.prepareHeaders(path);
+    headers.set("Accept", "application/scim+json, application/json");
+    if (init.contentType) headers.set("Content-Type", init.contentType);
+    if (init.authorization) headers.set("Authorization", init.authorization);
+    headers.set("X-Company-Subdomain", init.subdomain);
+    return this.send(path, { method: init.method, body: init.body, headers, cache: "no-store" });
+  }
+
+  /** A POST with no body either way and headers of its own — sign-out, which sends only the refresh cookie. */
+  public async postNoContent(path: string, extraHeaders?: Record<string, string>): Promise<void> {
+    const headers = await this.prepareHeaders(path);
+    for (const [name, value] of Object.entries(extraHeaders ?? {})) headers.set(name, value);
+    const response = await this.send(path, { method: "POST", headers, cache: "no-store" });
+    await this.checkResponseStatus(response);
   }
 
   /**
@@ -222,7 +245,7 @@ export class HrisApiClient {
 
   private async prepareHeaders(path: string) {
     const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value ?? "";
+    const token = cookieStore.get(ACCESS_COOKIE)?.value ?? "";
     const headers = new Headers();
 
     if (!isPublicBackendPath(path) && token) {

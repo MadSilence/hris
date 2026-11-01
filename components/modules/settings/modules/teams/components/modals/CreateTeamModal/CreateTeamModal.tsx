@@ -11,9 +11,6 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { useCreateTeam } from "@/components/modules/settings/modules/teams/hooks/useCreateTeam/useCreateTeam";
 import {
   UserPickerField,
@@ -21,6 +18,7 @@ import {
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const ROOT_VALUE = "none";
 
@@ -90,20 +88,13 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-parent">Parent Team</Label>
-            <Select
+            <SearchableSelect
+              id="team-parent"
+              options={[{ value: ROOT_VALUE, label: "None" }, ...parentOptions.filter((t) => t.status === "ACTIVE").map((n) => ({ value: n.id, label: n.name }))]}
               value={formik.values.parentId || ROOT_VALUE}
-              onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
-            >
-              <SelectTrigger id="team-parent">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ROOT_VALUE}>None</SelectItem>
-                {parentOptions.filter((t) => t.status === "ACTIVE").map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => formik.setFieldValue("parentId", !v || v === ROOT_VALUE ? "" : v)}
+              clearable={false}
+            />
           </div>
 
           <div className="space-y-1.5">

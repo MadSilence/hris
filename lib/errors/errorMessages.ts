@@ -67,6 +67,22 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AUTH00003: "This password reset link is no longer valid. Ask for a new one.",
   AUTH00004: "The current password is not correct.",
   AUTH00005: "This email confirmation link is no longer valid. Ask your administrator to enter the address again.",
+  // Two-step sign-in (MFA_DESIGN.md § 8).
+  AUTH00006: "That code is not correct. Check your authenticator app and try again.",
+  AUTH00007: "The sign-in took too long or had too many attempts. Sign in again.",
+  AUTH00008: "That code is not correct.",
+  AUTH00009: "Confirm it is you to continue.",
+  AUTH00010: "Two-step sign-in is already on.",
+  AUTH00011: "Two-step sign-in is not on.",
+  AUTH00012: "The setup took more than ten minutes. Start again.",
+  AUTH00013: "Your company requires two-step sign-in for your account, so it cannot be switched off.",
+  AUTH00014: "Turn on two-step sign-in for yourself before requiring it of others.",
+  AUTH00015: "Every System Owner needs two-step sign-in before single sign-on can be required.",
+  AUTH00016: "Only a System Owner can change how this person signs in.",
+  AUTH00017: "Not while you are acting as somebody else.",
+  AUTH00018: "Reset your own two-step sign-in with a backup code instead.",
+  AUTH00019: "Two-step sign-in is not available on this server yet. Tell your administrator.",
+  AUTH00020: "Only a System Owner can change how people sign in.",
 
   // AvatarBusinessError
   A00001: "Avatar upload request is invalid",
@@ -128,6 +144,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00005: "Enter the length of a working day between 0:01 and 24:00.",
   CS00006: "Pick a money field for the hourly rate, or None.",
   CS00007: "Pick a date field for birthdays, or None.",
+  CS00008: "Choose who must use two-step sign-in.",
+  CS00009: "A device can be remembered for 0 to 30 days.",
+  CS00010: "A session may go unused for 15 minutes to 30 days.",
 
   // CompanySetupBusinessError
   CST0001: "This company has already been set up.",

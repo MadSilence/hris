@@ -29,6 +29,8 @@ import {
   deleteCompanyLogoAction,
   uploadCompanyLogoAction,
 } from "@/components/modules/settings/modules/general/companyProfile/actions/companyLogoActions";
+import { timeZoneChoices } from "@/lib/timeZones";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Saved = { version?: number } | undefined;
 
@@ -54,44 +56,6 @@ const DAYS: { value: string; label: string }[] = [
   { value: "FRIDAY", label: "Fri" },
   { value: "SATURDAY", label: "Sat" },
   { value: "SUNDAY", label: "Sun" },
-];
-
-/**
- * A curated list instead of the ~400 zones `Intl.supportedValuesOf("timeZone")` returns — nobody
- * scrolls to "America/Argentina/Catamarca", and a company clock only needs one zone per offset.
- *
- * The stored value stays IANA, not an abbreviation: only IANA knows when a zone changes offset, so
- * "Europe/Berlin" survives daylight saving where a literal "CET" would silently be an hour off for
- * half the year. The label carries the abbreviation people actually recognise.
- */
-const TIMEZONE_OPTIONS: { value: string; label: string }[] = [
-  { value: "Pacific/Honolulu", label: "HST — Honolulu (UTC−10)" },
-  { value: "America/Anchorage", label: "AKT — Anchorage (UTC−9)" },
-  { value: "America/Los_Angeles", label: "PT — Los Angeles, Vancouver (UTC−8)" },
-  { value: "America/Denver", label: "MT — Denver, Calgary (UTC−7)" },
-  { value: "America/Chicago", label: "CT — Chicago, Mexico City (UTC−6)" },
-  { value: "America/New_York", label: "ET — New York, Toronto (UTC−5)" },
-  { value: "America/Sao_Paulo", label: "BRT — São Paulo (UTC−3)" },
-  { value: "UTC", label: "UTC — Coordinated Universal Time" },
-  { value: "Europe/London", label: "GMT/BST — London, Dublin, Lisbon (UTC+0)" },
-  { value: "Africa/Lagos", label: "WAT — Lagos (UTC+1)" },
-  { value: "Europe/Berlin", label: "CET/CEST — Berlin, Paris, Madrid, Warsaw (UTC+1)" },
-  { value: "Africa/Johannesburg", label: "SAST — Johannesburg (UTC+2)" },
-  { value: "Europe/Athens", label: "EET/EEST — Athens, Helsinki, Kyiv (UTC+2)" },
-  { value: "Europe/Moscow", label: "MSK — Moscow, Istanbul (UTC+3)" },
-  { value: "Asia/Dubai", label: "GST — Dubai (UTC+4)" },
-  { value: "Asia/Karachi", label: "PKT — Karachi, Tashkent (UTC+5)" },
-  { value: "Asia/Kolkata", label: "IST — Delhi, Mumbai, Bengaluru (UTC+5:30)" },
-  // Kazakhstan moved to a single zone, UTC+5, in March 2024; Dhaka stayed at UTC+6.
-  { value: "Asia/Almaty", label: "ALMT — Almaty, Astana (UTC+5)" },
-  { value: "Asia/Dhaka", label: "BDT — Dhaka (UTC+6)" },
-  { value: "Asia/Bangkok", label: "ICT — Bangkok, Jakarta, Hanoi (UTC+7)" },
-  { value: "Asia/Shanghai", label: "CST — Shanghai, Beijing (UTC+8)" },
-  { value: "Asia/Singapore", label: "SGT — Singapore, Kuala Lumpur (UTC+8)" },
-  { value: "Asia/Tokyo", label: "JST — Tokyo (UTC+9)" },
-  { value: "Asia/Seoul", label: "KST — Seoul (UTC+9)" },
-  { value: "Australia/Sydney", label: "AEST/AEDT — Sydney, Melbourne (UTC+10)" },
-  { value: "Pacific/Auckland", label: "NZST/NZDT — Auckland (UTC+12)" },
 ];
 
 const initials = (name: string) =>
@@ -262,11 +226,16 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
 
   // A company already on a zone outside the shortlist keeps it — narrowing the menu must not
   // silently rewrite saved data the next time someone touches this form.
+  // The same offered zones as a person's own preference (`lib/timeZones`): stored as IANA so daylight
+  // saving keeps working, labelled by offset and city, and the company's zone kept even when it is not
+  // one of them.
   const timezoneOptions = useMemo(
     () =>
-      TIMEZONE_OPTIONS.some((option) => option.value === settings.timezone)
-        ? TIMEZONE_OPTIONS
-        : [{ value: settings.timezone, label: settings.timezone }, ...TIMEZONE_OPTIONS],
+      timeZoneChoices(settings.timezone).map((choice) => ({
+        value: choice.zone,
+        label: choice.label,
+        keywords: choice.keywords,
+      })),
     [settings.timezone],
   );
   const [workingDays, setWorkingDays] = useState<Set<string>>(new Set(settings.workingDays));
@@ -442,19 +411,15 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           description="The clock and the working week every calculated date is measured against."
         >
           <Field id="company-timezone" label="Timezone">
-            <Select value={timezone} onValueChange={setTimezone} disabled={saving}>
-              <SelectTrigger id="company-timezone" className="w-full">
-                <SelectValue placeholder="Select a timezone"/>
-              </SelectTrigger>
-
-              <SelectContent className="max-h-72">
-                {timezoneOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              id="company-timezone"
+              options={timezoneOptions}
+              value={timezone || null}
+              onChange={(v) => v && setTimezone(v)}
+              placeholder="Select a timezone"
+              disabled={saving}
+              clearable={false}
+            />
           </Field>
 
           <Field id="company-week-start" label="Week starts on" className="max-w-xs">

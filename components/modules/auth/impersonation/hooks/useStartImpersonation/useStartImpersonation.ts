@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { withStepUp } from "@/components/modules/mfa/stepUp";
 
 type StartResponse = {
   ok: boolean;
@@ -18,7 +19,8 @@ export function useStartImpersonation() {
 
   return useMutation({
     mutationFn: async ({ targetUserId }: { targetUserId: string }) => {
-      return internalApiClient.post<StartResponse>("/auth/impersonate/start", { targetUserId });
+      // Becoming somebody else asks "confirm it is you" first (MFA_DESIGN.md § 3.5); the start is replayed.
+      return withStepUp(() => internalApiClient.post<StartResponse>("/auth/impersonate/start", { targetUserId }));
     },
 
     onSuccess: (result) => {

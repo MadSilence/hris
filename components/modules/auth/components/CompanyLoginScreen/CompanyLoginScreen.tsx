@@ -4,6 +4,7 @@ import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import LoginContainer from "@/components/modules/auth/components/LoginContainer/LoginContainer";
 import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
 import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
+import type { PublicSso } from "@/api/modules/sso/ssoService";
 
 type Props = {
   appearance: PublicCompanyAppearance;
@@ -11,6 +12,11 @@ type Props = {
   changeCompanyHref: string;
   /** Where signing in goes, already checked on the server. */
   returnTo: string;
+  /** Whether the company signs in through its identity provider, and under whose name. */
+  sso?: PublicSso | null;
+  /** A second step after single sign-on, its challenge already in its cookie. */
+  initialMfa?: "CHALLENGE" | "ENROL";
+  ssoFailed?: boolean;
 };
 
 /**
@@ -26,7 +32,9 @@ type Props = {
  * is the brand's own tint from the first frame (`bg-brown-100` is re-hued by the brand palette), so the
  * image lands in a space already laid out and coloured for it — no fade, no shift.
  */
-export default function CompanyLoginScreen({ appearance, passwordChanged, changeCompanyHref, returnTo }: Props) {
+export default function CompanyLoginScreen({
+  appearance, passwordChanged, changeCompanyHref, returnTo, sso, initialMfa, ssoFailed,
+}: Props) {
   const headline = appearance.loginHeadline?.trim() || DEFAULT_LOGIN_HEADLINE;
   const subheadline = appearance.loginSubheadline?.trim() || DEFAULT_LOGIN_SUBHEADLINE;
   const backgroundUrl = appearance.loginImageUrl;
@@ -39,6 +47,9 @@ export default function CompanyLoginScreen({ appearance, passwordChanged, change
         subheadline={subheadline}
         changeCompanyHref={changeCompanyHref}
         returnTo={returnTo}
+        sso={sso ?? undefined}
+        initialMfa={initialMfa}
+        ssoFailed={ssoFailed}
       />
     </AuthScreen>
   );

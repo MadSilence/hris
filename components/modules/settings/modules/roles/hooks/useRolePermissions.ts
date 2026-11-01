@@ -4,6 +4,7 @@ import { RolePermissionsDTO, UpdateRolePermissionsRequest } from "@/api/modules/
 import { rolesQueryKeys } from "@/components/modules/settings/modules/roles/utils/rolesQueryKeys";
 import { useInvalidateAccessQuery } from "@/components/auth/useAccess";
 import { UnauthorizedError } from "@/components/clients/exceptions";
+import { withStepUp } from "@/components/modules/mfa/stepUp";
 
 export function useRolePermissions(roleId: string) {
   const { internalApiClient } = useAppDataContext();
@@ -17,8 +18,9 @@ export function useRolePermissions(roleId: string) {
   });
 
   const mutation = useMutation<void, Error, UpdateRolePermissionsRequest>({
+    // Adding or removing a SETTINGS.* MANAGE right asks "confirm it is you" first (MFA_DESIGN.md § 3.5).
     mutationFn: async (payload) =>
-      internalApiClient.put<void, UpdateRolePermissionsRequest>(`/roles/${roleId}/permissions`, payload),
+      withStepUp(() => internalApiClient.put<void, UpdateRolePermissionsRequest>(`/roles/${roleId}/permissions`, payload)),
     onSuccess: async () => {
       // The save bumped the role's version, which both matrices and the roles list carry — refetch all
       // three, or the next save from any of them would send the old number and be refused.

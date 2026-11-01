@@ -120,8 +120,8 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         </div>
 
         <p className="text-sm text-muted-foreground">
-          To take the role out of use without losing it, archive it instead — assignments are kept
-          and it can be restored.
+          To take the role out of use without losing its permissions, archive it instead — it can be
+          restored, though the people who held it lose it either way.
         </p>
 
         {errorMessage && (

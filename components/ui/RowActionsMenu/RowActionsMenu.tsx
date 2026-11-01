@@ -55,7 +55,16 @@ export const RowActionsMenu: React.FC<{
       </Button>
     </DropdownMenuTrigger>
 
-    <DropdownMenuContent align={align} className={cn("w-40 rounded-lg p-1", className)}>
+    {/*
+      The content is portalled, but React still bubbles its clicks up the component tree — through the
+      row. Stopping them only on the trigger let "Archive" open the confirm dialog and then the office
+      behind it (walk of 2026-11-01).
+    */}
+    <DropdownMenuContent
+      align={align}
+      className={cn("w-40 rounded-lg p-1", className)}
+      onClick={stopPropagation ? (e) => e.stopPropagation() : undefined}
+    >
       {children}
     </DropdownMenuContent>
   </DropdownMenu>

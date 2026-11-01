@@ -11,7 +11,6 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import {
   canBeInvited,
   formatUserStatus,
-  isActiveStatus,
   isProspectiveStatus,
 } from "@/models/user/status";
 import { formatDisplayDate } from "@/lib/date";
@@ -22,20 +21,24 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import {
   CalendarX,
   DoorOpen,
+  Download,
   KeyRound,
   Lock,
   LockOpen,
+  LogOut,
   Mail,
   Pencil,
   RefreshCw,
+  ShieldOff,
   Rocket,
   Trash2,
   UserMinus,
 } from "lucide-react";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { AccountStatusBadge, StatusBadge } from "@/components/ui/StatusBadge";
+import { AccountStatusBadge, StatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
 import { ChangePasswordModal } from "@/components/modules/auth/components/ChangePasswordModal";
+import { exportPersonalData } from "@/components/modules/organization/modules/profile/actions/exportPersonalData";
 import {
   AccountAccessModal,
   type AccountAccessKind,
@@ -50,7 +53,7 @@ import {
   terminateUserAction,
 } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
 import { InviteUserModal } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/InviteUserModal";
-import { showActionError } from "@/lib/errors/errorToast";
+import { showActionError, showError } from "@/lib/errors/errorToast";
 import { StartProcessModal } from "@/components/modules/lifecycle/start/StartProcessModal";
 import type { ProcessType } from "@/models/lifecycle";
 import {
@@ -243,13 +246,18 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const mayBlock = mayControlAccess && (user.accountStatus === "ACTIVE" || user.accountStatus === "INVITED");
   const mayUnblock = mayControlAccess && user.accountStatus === "BLOCKED";
   const maySendReset = mayControlAccess && user.accountStatus === "ACTIVE";
+  // Only an account that signs in has sessions to end.
+  const mayEndSessions = mayControlAccess && user.accountStatus === "ACTIVE";
+  // GDPR access and portability (P17): EDIT over the person, scoped — "carrying data out is an EDIT". Not
+  // while impersonating: the export is the actor's act, and Java refuses it inside an impersonation anyway.
+  const mayExportPersonalData = !impersonating && (user.capabilities?.["PEOPLE.PROFILE"] ?? []).includes("EDIT");
   const isLocked = Boolean(user.accountLocked);
   // Your own password, on your own profile — and not while impersonating. The screen says "own
   // profile" because the session is that person, but the human at the keyboard is somebody else, and
   // the dialog would ask for a password they do not have and must not set.
   const mayChangeOwnPassword = isOwnProfile && !impersonating;
   const hasPersonActions =
-    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset ||
+    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset || mayEndSessions || mayExportPersonalData ||
     (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || !isOwnProfile));
 
   const rawAvatarUrl =
@@ -301,16 +309,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     { id: user.status, name: formatUserStatus(user.status) },
                   ])}
                 >
-                  <Badge
-                    variant="outline"
-                    className={
-                      isActiveStatus(user.status)
-                        ? "border-success-200 bg-success-50 text-success-700"
-                        : ""
-                    }
-                  >
-                    {formatUserStatus(user.status)}
-                  </Badge>
+                  <UserStatusBadge status={user.status}/>
                 </PendingValue>
               )}
 
@@ -412,6 +411,24 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 {maySendReset && (
                   <RowAction icon={<KeyRound className="h-4 w-4"/>} onClick={() => setAccountAccess("RESET")}>
                     {isLocked ? "Send Password Reset to Unlock" : "Send Password Reset"}
+                  </RowAction>
+                )}
+                {mayExportPersonalData && (
+                  <RowAction
+                    icon={<Download className="h-4 w-4"/>}
+                    onClick={() => void exportPersonalData(user.id).catch((error: unknown) => showError(error))}
+                  >
+                    Export Personal Data
+                  </RowAction>
+                )}
+                {mayEndSessions && (
+                  <RowAction icon={<ShieldOff className="h-4 w-4"/>} onClick={() => setAccountAccess("RESET_MFA")}>
+                    Reset Two-Step Sign-In
+                  </RowAction>
+                )}
+                {mayEndSessions && (
+                  <RowAction icon={<LogOut className="h-4 w-4"/>} onClick={() => setAccountAccess("END_SESSIONS")}>
+                    End All Sessions
                   </RowAction>
                 )}
                 {mayBlock && (

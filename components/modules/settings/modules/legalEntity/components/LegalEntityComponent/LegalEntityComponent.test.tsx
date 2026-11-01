@@ -6,6 +6,11 @@ import { useCreateLegalEntityAction } from "@/components/modules/settings/module
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock("@/components/modules/settings/modules/legalEntity/hooks/useCreateLegalEntityAction");
+// The row menu's archive and unarchive: not what these tests are about.
+jest.mock("@/components/modules/settings/modules/legalEntity/hooks/useArchiveLegalEntityAction", () => ({
+  useArchiveLegalEntityAction: () => ({ mutate: jest.fn(), isPending: false }),
+  useRestoreLegalEntityAction: () => ({ mutate: jest.fn(), isPending: false }),
+}));
 jest.mock("@/components/auth/PermissionGate", () => ({
   PermissionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

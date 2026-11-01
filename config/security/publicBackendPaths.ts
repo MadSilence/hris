@@ -9,6 +9,11 @@ export const PUBLIC_BACKEND_EXACT_PATHS = [
   "/auth/register",
   "/auth/register/confirm",
   "/auth/refresh",
+  // Sign-out revokes by the refresh cookie (R1.1). A Bearer that has run out would be refused by the
+  // filter before the endpoint could end the session it belongs to.
+  "/auth/logout",
+  // The second step of a sign-in: there is no session yet, and somebody else's must not travel with it.
+  "/auth/mfa/verify",
 ] as const;
 
 export const PUBLIC_BACKEND_PREFIX_PATHS = [
@@ -31,6 +36,17 @@ export const PUBLIC_BACKEND_PREFIX_PATHS = [
   "/public/company-appearance/",
   // "Don't know your company address?": asked by somebody who cannot sign in.
   "/auth/company-addresses/",
+  // Setting up a required factor inside a sign-in — the challenge is the credential.
+  "/auth/mfa/enrol-at-sign-in/",
+  "/auth/mfa/enrol-at-sign-in/",
+  // Single sign-on before there is a session: the IdP's answer is the credential.
+  "/auth/sso/start",
+  "/auth/sso/callback",
+  "/auth/saml/",
+  "/public/company-sso/",
+  "/public/saml-metadata/",
+  // SCIM carries the IdP's own bearer token; a session from this browser must never ride along.
+  "/scim/v2/",
 ] as const;
 
 export const isPublicBackendPath = (path: string): boolean => {

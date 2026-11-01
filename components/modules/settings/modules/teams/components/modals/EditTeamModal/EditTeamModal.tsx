@@ -9,9 +9,6 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { useUpdateTeam } from "@/components/modules/settings/modules/teams/hooks/useUpdateTeam/useUpdateTeam";
 import {
   UserPickerField,
@@ -19,6 +16,7 @@ import {
 } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { TeamTreeNode } from "@/models/teams";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const ROOT_VALUE = "none";
 
@@ -134,20 +132,13 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
 
           <div className="space-y-1.5">
             <Label htmlFor="edit-team-parent">Parent Team</Label>
-            <Select
+            <SearchableSelect
+              id="edit-team-parent"
+              options={[{ value: ROOT_VALUE, label: "None" }, ...activeOptions.map((n) => ({ value: n.id, label: n.name }))]}
               value={formik.values.parentId || ROOT_VALUE}
-              onValueChange={(v) => formik.setFieldValue("parentId", v === ROOT_VALUE ? "" : v)}
-            >
-              <SelectTrigger id="edit-team-parent">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ROOT_VALUE}>None</SelectItem>
-                {activeOptions.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => formik.setFieldValue("parentId", !v || v === ROOT_VALUE ? "" : v)}
+              clearable={false}
+            />
           </div>
 
           <div className="space-y-1.5">

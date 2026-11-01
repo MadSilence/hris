@@ -5,9 +5,9 @@ import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesServi
 import { toActionError } from "@/lib/errors/withActionError";
 
 /**
- * Archive takes a role out of circulation without destroying it: assignments are kept, but the
- * role grants nothing until it is restored, and its holders are signed out so no stale token
- * carries the old rights.
+ * Archive takes a role out of circulation without destroying its permissions. It is taken from
+ * everybody who held it (WALK_QUESTIONS § 22) and they are signed out so no stale token carries the
+ * old rights; restoring brings the role back, not its holders.
  */
 export const archiveRoleAction = async (
   submission: ArchiveRoleActionInput

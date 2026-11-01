@@ -13,12 +13,16 @@ export type CompanyAddressReminderRequest = {
 /** Who a reset link is for — enough to greet them, nothing more. */
 export type PasswordResetPeekResponse = {
   firstName: string | null;
+  /** The account is locked and has a second factor: the page asks for a code too (M5). */
+  codeRequired?: boolean;
 };
 
 /** Setting a new password with the link. Uses the link, once; every existing session ends. */
 export type ResetPasswordRequest = {
   token: string;
   password: string;
+  /** A second-factor or backup code, when the link's account is locked and has a factor. */
+  code?: string;
 };
 
 /** The signed-in change. Ends every session of the person, the one making the change included. */

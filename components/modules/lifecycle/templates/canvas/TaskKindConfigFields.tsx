@@ -3,12 +3,10 @@
 import React from "react";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 import type { ProcessType, TaskKind } from "@/models/lifecycle";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** Field types the preboarding page cannot show — the backend refuses them there too. */
 const NOT_ON_PREBOARDING_PAGE = new Set(["PERSON", "REFERENCE", "OBJECT", "ADDRESS", "MONEY"]);
@@ -63,12 +61,14 @@ export function TaskKindConfigFields({ idPrefix, kind, type, attributeIds, categ
     return (
       <div className="space-y-1.5">
         <RequiredLabel htmlFor={`${idPrefix}-category`} required>Document Category</RequiredLabel>
-        <Select value={categoryId ?? ""} onValueChange={(v) => onChange({ categoryId: v || null })} disabled={disabled}>
-          <SelectTrigger id={`${idPrefix}-category`}><SelectValue placeholder="Select…" /></SelectTrigger>
-          <SelectContent>
-            {(categories ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          id={`${idPrefix}-category`}
+          options={(categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
+          value={categoryId ?? null}
+          onChange={(v) => onChange({ categoryId: v })}
+          placeholder="Select…"
+          disabled={disabled}
+        />
         {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). Only once the
             list has come back, so a slow read does not claim there are none. */}
         {!isLoadingCategories && (categories ?? []).length === 0 && (

@@ -7,13 +7,6 @@ import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
 import { isReferenceField, type FieldDTO, type ReferenceValueSource } from "@/models/user/fields";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { formatEmploymentType } from "@/models/user/employmentType";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -43,6 +36,7 @@ import {
 import { canEditSystemField, type SystemDraft } from "./systemDraft";
 import { ProvenanceMarker } from "@/components/audience/assignment/provenance/ProvenanceMarker";
 import type { AssignmentProvenance } from "@/models/automations";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /**
  * System fields that already live somewhere better on this page: the header shows the name badge
@@ -253,19 +247,17 @@ const ReferenceSelect: React.FC<{
   const { options, isLoading } = useReferenceOptions(source);
 
   return (
-    <Select value={value} onValueChange={onChange} disabled={isLoading}>
-      <SelectTrigger>
-        <SelectValue placeholder={isLoading ? "Loading…" : "Select"}/>
-      </SelectTrigger>
-      <SelectContent className="max-h-72">
-        <SelectItem value={NONE}>{NONE_LABEL}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.id} value={option.id}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <SearchableSelect
+      options={[
+        { value: NONE, label: NONE_LABEL },
+        ...options.map((option) => ({ value: option.id, label: option.label })),
+      ]}
+      value={value || null}
+      onChange={(v) => onChange(v ?? NONE)}
+      placeholder={isLoading ? "Loading…" : "Select"}
+      disabled={isLoading}
+      clearable={false}
+    />
   );
 };
 
@@ -367,6 +359,10 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
           values={user.calendars?.map((c) => ({ id: c.id, name: c.name }))}
         />
       );
+    // Read here, granted on the policy or in the Time Off tab: holding a policy is a dated assignment,
+    // which a value picker on the profile could not express.
+    case "sys:policy":
+      return <RefChips values={user.policies} />;
     case "sys:manager":
       return user.manager ? (
         <UserChip id={user.manager.id} name={user.manager.name} />

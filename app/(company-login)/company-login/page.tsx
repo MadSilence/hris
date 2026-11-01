@@ -1,11 +1,12 @@
 import CompanyLoginScreen from "@/components/modules/auth/components/CompanyLoginScreen";
+import { ssoService } from "@/api/modules/sso";
 import { currentCompanySubdomain, publicAppearanceFor } from "@/api/modules/companyAddress";
 import publicConfig from "@/config/publicConfig";
 import { rootOrigin, safeReturnPath } from "@/lib/companyAddress";
 import { DEFAULT_PUBLIC_COMPANY_APPEARANCE } from "@/models/company/PublicCompanyAppearance";
 
 type Props = {
-  searchParams: Promise<{ passwordChanged?: string; next?: string }>;
+  searchParams: Promise<{ passwordChanged?: string; next?: string; mfa?: string; sso?: string }>;
 };
 
 /**
@@ -22,9 +23,12 @@ type Props = {
 export const dynamic = "force-dynamic";
 
 export default async function CompanyLoginPage({ searchParams }: Props) {
-  const { passwordChanged, next } = await searchParams;
+  const { passwordChanged, next, mfa, sso: ssoResult } = await searchParams;
   const subdomain = await currentCompanySubdomain();
   const appearance = subdomain ? await publicAppearanceFor(subdomain) : DEFAULT_PUBLIC_COMPANY_APPEARANCE;
+  // Whether to offer the identity provider — read here, server-side, like the rest of the page (the login
+  // page is never repainted, COMPANY_ADDRESSES.md § 4).
+  const sso = subdomain ? await ssoService.publicSso(subdomain) : null;
 
   return (
     <CompanyLoginScreen
@@ -32,6 +36,10 @@ export default async function CompanyLoginPage({ searchParams }: Props) {
       passwordChanged={passwordChanged === "1"}
       changeCompanyHref={`${rootOrigin(publicConfig.web)}/login?another=1`}
       returnTo={safeReturnPath(next)}
+      sso={sso}
+      // After single sign-on, the second step continues here, the challenge already in its cookie.
+      initialMfa={mfa === "CHALLENGE" || mfa === "ENROL" ? mfa : undefined}
+      ssoFailed={ssoResult === "failed"}
     />
   );
 }

@@ -6,7 +6,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, Building2, Download, Mail, MapPin, Users } from "lucide-react";
+import { Building2, Download, Mail, MapPin, Users } from "lucide-react";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { Button } from "@/public/desact/src/components/ui/button";
@@ -43,6 +43,7 @@ import {
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { useDetachedPeopleImpact } from "@/components/modules/settings/shared/DetachedPeopleNotice";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
@@ -242,10 +243,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-semibold text-foreground">General Information</h2>
                   {isArchived && (
-                    <Badge variant="secondary" className="gap-1 font-normal">
-                      <Archive className="h-3 w-3"/>
-                      Archived
-                    </Badge>
+                    <StatusBadge status="archived" className="font-normal" />
                   )}
                   {office.isRemote && (
                     <Badge variant="secondary" className="font-normal">

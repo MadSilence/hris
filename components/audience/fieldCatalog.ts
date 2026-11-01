@@ -186,6 +186,7 @@ export const REFERENCE_RESOURCE: Partial<Record<ReferenceValueSource, ResourceCo
   jobs: "JOBS.TITLE",
   levels: "JOBS.LEVEL",
   roles: "ROLES.ROLE",
+  policies: "PEOPLE.TIME_OFF_POLICIES",
   people: "PEOPLE.PROFILE",
 };
 

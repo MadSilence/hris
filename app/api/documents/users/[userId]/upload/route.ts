@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { NextRequest } from "next/server";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 const BASE_URL =
   process.env.BACKEND_URL ||
@@ -16,7 +17,7 @@ export async function POST(
   const { userId } = await context.params;
 
   const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value ?? "";
+  const token = cookieStore.get(ACCESS_COOKIE)?.value ?? "";
 
   const formData = await req.formData();
 

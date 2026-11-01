@@ -5,9 +5,6 @@ import { FileSpreadsheet, FileText } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/public/desact/src/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Label } from "@/public/desact/src/components/ui/label";
@@ -16,6 +13,7 @@ import {
   triggerExportDownload,
   type ExportDataFormat,
 } from "@/components/modules/settings/shared/ExportDataModal";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Noun = "department" | "team";
 
@@ -118,18 +116,15 @@ export function ExportOrgTreeModal({
           {/* Target */}
           <div className="space-y-1.5">
             <Label htmlFor="export-node">{nounLabel}</Label>
-            <Select value={nodeId} onValueChange={setNodeId} disabled={nodes.length === 0}>
-              <SelectTrigger id="export-node" className="w-full">
-                <SelectValue placeholder={`Select a ${noun}`} />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {nodes.map((node) => (
-                  <SelectItem key={node.id} value={node.id}>
-                    <span style={{ paddingLeft: node.depth * 12 }}>{node.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              id="export-node"
+              options={nodes.map((node) => ({ value: node.id, label: node.name, depth: node.depth }))}
+              value={nodeId || null}
+              onChange={(v) => setNodeId(v ?? "")}
+              placeholder={`Select a ${noun}`}
+              disabled={nodes.length === 0}
+              clearable={false}
+            />
           </div>
 
           {/* Format */}

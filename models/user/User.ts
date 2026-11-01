@@ -46,6 +46,8 @@ export type User = {
   office?: { id: string; name: string } | null;
   legalEntity?: { id: string; name: string } | null;
   calendars?: { id: string; name: string; year: number }[];
+  /** `sys:policy`: the time off policies held now. */
+  policies?: { id: string; name: string }[];
   manager?: { id: string; name: string } | null;
   hireDate?: string | null;
   employmentType?: string | null;

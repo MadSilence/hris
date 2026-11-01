@@ -52,6 +52,7 @@ import {
   WizardTenureRule,
 } from "./policyWizardTypes";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export type WizardSetter = <K extends keyof PolicyWizardValues>(
   key: K,
@@ -697,22 +698,19 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
   return (
     <div className="space-y-2 border-t border-brown-100 pt-4">
       <Label htmlFor="appr-fallback-role">Fallback Approver</Label>
-      <Select value={current} onValueChange={choose}>
-        <SelectTrigger id="appr-fallback-role" className="w-full">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {values.apprFallbackDefault && (
-            <SelectItem value={FALLBACK_DEFAULT}>HR Admin, or System Owner without it (the default)</SelectItem>
-          )}
-          {[...known, ...live].map((r) => (
-            <SelectItem key={r.id} value={r.id}>
-              {r.name}
-            </SelectItem>
-          ))}
-          <SelectItem value={FALLBACK_NONE}>No Fallback</SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        id="appr-fallback-role"
+        options={[
+          ...(values.apprFallbackDefault
+            ? [{ value: FALLBACK_DEFAULT, label: "HR Admin, or System Owner without it (the default)" }]
+            : []),
+          ...[...known, ...live].map((r) => ({ value: r.id, label: r.name })),
+          { value: FALLBACK_NONE, label: "No Fallback" },
+        ]}
+        value={current || null}
+        onChange={(v) => v && choose(v)}
+        clearable={false}
+      />
       <p className="text-xs text-muted-foreground">
         A role whose holders decide any step nobody can: an approver who has left, a manager step for
         somebody with no manager, an approver away with nobody standing in.

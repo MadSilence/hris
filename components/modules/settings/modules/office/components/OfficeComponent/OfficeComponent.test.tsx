@@ -6,6 +6,11 @@ import { useCreateOfficeAction } from "@/components/modules/settings/modules/off
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock("@/components/modules/settings/modules/office/hooks/useCreateOfficeAction");
+// The row menu's archive and unarchive: not what these tests are about.
+jest.mock("@/components/modules/settings/modules/office/hooks/useArchiveOfficeAction", () => ({
+  useArchiveOfficeAction: () => ({ mutate: jest.fn(), isPending: false }),
+  useRestoreOfficeAction: () => ({ mutate: jest.fn(), isPending: false }),
+}));
 jest.mock("@/components/auth/PermissionGate", () => ({
   PermissionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

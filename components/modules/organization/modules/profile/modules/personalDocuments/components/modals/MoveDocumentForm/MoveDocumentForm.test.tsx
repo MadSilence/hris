@@ -25,38 +25,7 @@ beforeAll(() => {
   });
 });
 
-jest.mock("@/public/desact/src/components/ui/select", () => ({
-  Select: ({
-    value,
-    onValueChange,
-    disabled,
-    children,
-  }: {
-    value?: string;
-    onValueChange: (value: string) => void;
-    disabled?: boolean;
-    children: React.ReactNode;
-  }) => (
-    <select
-      aria-label="Destination folder"
-      value={value}
-      disabled={disabled}
-      onChange={(e) => onValueChange(e.currentTarget.value)}
-    >
-      {children}
-    </select>
-  ),
-  SelectTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  SelectValue: () => null,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  SelectItem: ({
-    value,
-    children,
-  }: {
-    value: string;
-    children: React.ReactNode;
-  }) => <option value={value}>{children}</option>,
-}));
+jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
 
 const folders = [
   {

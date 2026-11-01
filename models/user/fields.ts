@@ -51,6 +51,7 @@ export type ReferenceValueSource =
   | "teams"
   | "calendars"
   | "roles"
+  | "policies"
   | "people";
 
 /** Runtime companion to {@link ReferenceValueSource} — keep both in step. */
@@ -63,6 +64,7 @@ export const REFERENCE_VALUE_SOURCES = [
   "teams",
   "calendars",
   "roles",
+  "policies",
   "people",
 ] as const satisfies readonly ReferenceValueSource[];
 
@@ -174,6 +176,8 @@ export type UsersSearchItemDTO = {
   office?: RefDTO | null;
   legalEntity?: RefDTO | null;
   calendars?: CalendarRefDTO[];
+  /** `sys:policy`: the time off policies held now. Absent when the reader may not see the field. */
+  policies?: RefDTO[];
   manager?: PersonRefDTO | null;
   // Employment lifecycle columns on `users`.
   hireDate?: string | null;

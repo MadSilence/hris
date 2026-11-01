@@ -9,9 +9,6 @@ import {
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
@@ -31,6 +28,7 @@ import {
   type StartPreview,
   type StartProcessRequest,
 } from "@/models/lifecycle";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Props = {
   open: boolean;
@@ -173,14 +171,14 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
             <>
               <div className="space-y-1.5">
                 <RequiredLabel htmlFor="start-template" required>Template</RequiredLabel>
-                <Select value={templateId} onValueChange={setTemplateId}>
-                  <SelectTrigger id="start-template"><SelectValue placeholder="Select…" /></SelectTrigger>
-                  <SelectContent>
-                    {usable.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.name} ({t.taskCount})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  id="start-template"
+                  options={usable.map((t) => ({ value: t.id, label: t.name, hint: `${t.taskCount} ${t.taskCount === 1 ? "task" : "tasks"}` }))}
+                  value={templateId || null}
+                  onChange={(v) => setTemplateId(v ?? "")}
+                  placeholder="Select…"
+                  clearable={false}
+                />
                 {/* Only once the list has actually come back: an empty `data` while the query is in
                     flight told somebody who has templates that they have none, for as long as the
                     request took. */}

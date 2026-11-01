@@ -8,6 +8,7 @@ import type { DepartmentTreeNode } from "@/models/departments";
 import { cn } from "@/public/desact/src/components/ui/utils";
 
 import { useDepartmentCanvas } from "./DepartmentCanvasContext";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export const NODE_W = 200;
 export const NODE_H = 140;
@@ -72,9 +73,7 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
           {department.name}
         </p>
         {isArchived && (
-          <span className="mt-1 inline-block rounded bg-brown-100 px-1 py-0.5 text-[10px] leading-none text-brown-500">
-            Archived
-          </span>
+          <StatusBadge status="archived" className="mt-1 inline-block px-1 py-0.5 text-[10px] leading-none" />
         )}
       </div>
 

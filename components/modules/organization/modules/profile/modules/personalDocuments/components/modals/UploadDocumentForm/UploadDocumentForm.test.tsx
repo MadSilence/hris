@@ -30,6 +30,7 @@ beforeAll(() => {
 // are told apart by position (folder, visibility, category — the order they are rendered in) — a
 // label baked into the mock would have to be recomputed on every re-render, which is a race, not
 // a fixture.
+jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
 jest.mock("@/public/desact/src/components/ui/select", () => ({
   Select: ({
     value,
@@ -62,9 +63,9 @@ jest.mock("@/public/desact/src/components/ui/select", () => ({
   }) => <option value={value}>{children}</option>,
 }));
 
-const folderSelect = () => screen.getAllByRole("combobox")[0];
+const folderSelect = () => screen.getByLabelText("Folder");
 const visibilitySelect = () => screen.getAllByRole("combobox")[1];
-const categorySelect = () => screen.getAllByRole("combobox")[2];
+const categorySelect = () => screen.getByLabelText("Category");
 
 const folders = [
   { id: "folder-1", name: "Contracts" },

@@ -175,6 +175,8 @@ export default function PeopleTable({
               values={row.calendars?.map((c) => ({ id: c.id, name: c.name }))}
             />
           );
+        case "policy":
+          return <RefList values={row.policies} />;
         case "manager":
           return <PersonValue value={row.manager} />;
 

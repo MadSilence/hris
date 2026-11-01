@@ -19,13 +19,6 @@ import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Separator } from "@/public/desact/src/components/ui/separator";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import type { PublicHolidayTemplate } from "@/models/publicHolidays/template";
@@ -37,6 +30,7 @@ import {
   PublicHolidayTemplatePicker,
   templateDisplayName,
 } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayTemplatePicker";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** Radix Select cannot hold an empty value, so "no subdivision" needs a sentinel. */
 const NATIONAL = "__national__";
@@ -153,19 +147,16 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               {isRegionsFetching ? (
                 <Skeleton className="h-9 w-full"/>
               ) : (
-                <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                  <SelectTrigger id="template-region" className="w-full">
-                    <SelectValue/>
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    <SelectItem value={NATIONAL}>National holidays only</SelectItem>
-                    {regions.map((region) => (
-                      <SelectItem key={region.code} value={region.code}>
-                        {region.name} ({region.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  id="template-region"
+                  options={[
+                    { value: NATIONAL, label: "National holidays only" },
+                    ...regions.map((region) => ({ value: region.code, label: `${region.name} (${region.code})` })),
+                  ]}
+                  value={selectedRegion || null}
+                  onChange={(v) => setSelectedRegion(v ?? NATIONAL)}
+                  clearable={false}
+                />
               )}
 
               <p className="text-xs text-[var(--color-text-tertiary)]">

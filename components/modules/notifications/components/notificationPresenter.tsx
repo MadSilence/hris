@@ -438,6 +438,29 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         href: userId ? `/organization/people/${userId}/personal` : null,
       };
     }
+    case "SECURITY_CHANGED": {
+      // Every System Owner is told when somebody changes how people sign in (R2.4, MFA_DESIGN.md § 7).
+      const who = str(p.actorName) || "Somebody";
+      const whom = str(p.name);
+      const what: Record<string, string> = {
+        MFA_RESET: `reset ${whom || "a person"}'s two-step sign-in`,
+        MFA_POLICY_CHANGED: "changed who must use two-step sign-in",
+        IDENTITY_CONNECTION_UPDATED: "changed single sign-on",
+        SCIM_TOKEN_ISSUED: "issued a provisioning token",
+        IDP_GROUP_ROLES_CHANGED: "changed the roles an identity provider group grants",
+      };
+      const event = str(p.event);
+      const message = event === "SCIM_BLOCK_REFUSED"
+        ? `The identity provider tried to block ${whom || "a System Owner"}. A System Owner is never blocked that way.`
+        : `${who} ${what[event] ?? "changed sign-in security"}.`;
+      const securityUserId = str(p.userId);
+      return {
+        title: "Sign-in Security Changed",
+        message,
+        Icon: Lock,
+        href: securityUserId ? `/organization/people/${securityUserId}/personal` : "/settings/tech/login-and-sso",
+      };
+    }
     default:
       return {
         title: n.type.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),

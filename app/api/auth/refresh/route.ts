@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { withErrorMiddleware } from "@/api/middleware/errorMiddleware";
+import { UnauthorizedError } from "@/components/clients/exceptions";
 import {
   hrisAuthSessionService,
   REFRESH_COOKIE,
 } from "@/api/modules/auth/services/hrisAuthSessionService";
-import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
+import { clearSessionCookies, setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
 
 /**
- * Trades the refresh token for a new access token.
+ * Trades the refresh token for a new pair. The backend rotates the refresh token on every call (R1.1),
+ * so the new one is written back every time.
  *
- * Access tokens last 30 minutes and refresh tokens 14 days, so a working day used to end in a
- * login screen with 29 days of validity unused — the endpoint existed on the backend and nothing
- * could reach it, because the refresh cookie never made it past this server. A bare cookie flow, so
- * it is a route handler rather than an action.
+ * Two refusals are not the end of the session:
+ * - **`REFRESH_RACE`** — another tab of this browser renewed the same session a moment ago. The tabs
+ *   share the cookie jar, so this browser already holds the new cookies; the answer tells the caller
+ *   to retry its request rather than sign out.
+ * - every other 401 is: the cookies are cleared, so the next page goes to sign-in instead of trying a
+ *   token the server has already refused.
  */
 export const POST = withErrorMiddleware(async () => {
   const store = await cookies();
@@ -24,9 +28,20 @@ export const POST = withErrorMiddleware(async () => {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 
-  const tokens = await hrisAuthSessionService.refresh(refreshToken);
-
-  const res = NextResponse.json({ ok: true }, { status: 200 });
-  setSessionCookies(res, tokens);
-  return res;
+  try {
+    const tokens = await hrisAuthSessionService.refresh(refreshToken);
+    const res = NextResponse.json({ ok: true }, { status: 200 });
+    setSessionCookies(res, tokens);
+    return res;
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      if (error.code === "REFRESH_RACE") {
+        return NextResponse.json({ ok: true, raced: true }, { status: 200 });
+      }
+      const res = NextResponse.json({ ok: false }, { status: 401 });
+      clearSessionCookies(res);
+      return res;
+    }
+    throw error;
+  }
 });

@@ -3,6 +3,7 @@ import { apiRequestWrapper } from "@/api/utils/apiRequestWrapper";
 import { hrisApiRolesService } from "@/api/modules/roles/services/hrisRolesService";
 import { BadRequestError } from "@/components/clients/exceptions";
 import { UpdateRolePermissionsRequest } from "@/api/modules/roles/dto/RolePermissionsDTO";
+import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -33,14 +34,7 @@ export const PUT = apiRequestWrapper(async (req: Request, context: RouteContext)
   // Saving rotates perm_hash, which invalidates the acting user's current token.
   // Swap the cookie so the very next request does not 401 (same flow as login).
   const res = NextResponse.json({ ok: true }, { status: 200 });
-  res.cookies.set({
-    name: "access_token",
-    value: accessToken,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  });
+  setSessionCookies(res, { accessToken });
 
   return res;
 });

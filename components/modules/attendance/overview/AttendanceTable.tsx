@@ -23,7 +23,7 @@ export const personName = (p: AttendanceReportRow["person"]) =>
 
 type AttendanceColumn = { key: string; label: string; value: (r: AttendanceReportRow) => string };
 
-/** The columns, in order — the table and the export preview print the same ones. */
+/** The five numbers, in order — the table prints them, and the export preview prints them inside the file's own columns. */
 export const ATTENDANCE_COLUMNS: readonly AttendanceColumn[] = [
   { key: "expectedDays", label: "Expected Days", value: (r) => String(r.totals.expectedDays) },
   { key: "loggedDays", label: "Logged Days", value: (r) => String(r.totals.loggedDays) },

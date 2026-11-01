@@ -6,9 +6,6 @@ import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -21,6 +18,7 @@ import {
   preboardingFieldsAction,
 } from "@/components/modules/lifecycle/actions/preboardingActions";
 import { TASK_KIND_LABELS, describeDue, type PreboardingPage } from "@/models/lifecycle";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type PageTask = PreboardingPage["tasks"][number];
 type PageField = NonNullable<PageTask["fields"]>[number];
@@ -170,12 +168,15 @@ function FieldInput({ field, value, onChange, disabled }: {
       return (
         <div className="space-y-1.5">
           {label}
-          <Select value={typeof value === "string" ? value : ""} onValueChange={onChange} disabled={disabled}>
-            <SelectTrigger id={id}><SelectValue placeholder="Select…" /></SelectTrigger>
-            <SelectContent>
-              {field.options.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            id={id}
+            options={field.options.map((o) => ({ value: o.id, label: o.label }))}
+            value={typeof value === "string" && value ? value : null}
+            onChange={(v) => v && onChange(v)}
+            placeholder="Select…"
+            disabled={disabled}
+            clearable={false}
+          />
         </div>
       );
     case "MULTI_SELECT": {

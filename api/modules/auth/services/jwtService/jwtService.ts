@@ -4,6 +4,7 @@ import { jwksClient } from "@/api/clients/auth/jwksClient/jwksClient";
 import publicConfig from "@/config/publicConfig";
 import { AuthErrorMessage, UnauthorizedError } from "@/api/modules/auth/services/jwtService/unauthorizedError";
 import { SigningKeyUnavailableError } from "@/api/modules/auth/services/jwtService/signingKeyUnavailableError";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 export type TokenPayload = JwtPayload & {
   email?: string;
@@ -37,7 +38,7 @@ export class JwtService {
   }
 
   public async getEncodedToken(): Promise<string> {
-    const cookieToken = (await cookies()).get("access_token")?.value;
+    const cookieToken = (await cookies()).get(ACCESS_COOKIE)?.value;
     if (cookieToken) return cookieToken;
 
     const authHeader = (await headers()).get("Authorization"); // ✅ sync

@@ -9,6 +9,7 @@ import type {
   UpdateUserSettingsRequest,
   UserSettingsDTO,
 } from "@/api/modules/firstRun/dto";
+import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
 /** Whether this session still owes the product an answer, and which one. */
 export type FirstRunState = {
@@ -29,7 +30,7 @@ export type FirstRunState = {
  */
 const isImpersonatingSession = async (): Promise<boolean> => {
   try {
-    const token = (await cookies()).get("access_token")?.value;
+    const token = (await cookies()).get(ACCESS_COOKIE)?.value;
     return token ? Boolean((decodeJwt(token) as { imp?: boolean }).imp) : false;
   } catch {
     return false;

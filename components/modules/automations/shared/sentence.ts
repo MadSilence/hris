@@ -17,6 +17,7 @@ const SOURCE_TYPE: Partial<Record<ReferenceValueSource, AssignableType>> = {
   offices: "OFFICE",
   jobs: "JOB",
   calendars: "PUBLIC_HOLIDAY_CALENDAR",
+  policies: "TIME_OFF_POLICY",
 };
 
 const fieldOf = (fields: FieldDTO[] | undefined, key: string) =>

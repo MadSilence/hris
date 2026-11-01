@@ -13,6 +13,7 @@ import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import RolesTableSkeleton from "./RolesTableSkeleton";
 import { useRoleDeleteImpact } from "@/components/modules/settings/modules/roles/hooks/useRoleDeleteImpact";
 import RolesTableRowActions from "./RolesTableRowActions";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import {
   DeleteRoleModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/modals/DeleteRoleModal";
@@ -67,6 +68,28 @@ export default function RolesTable({
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRole, setDeleteRole] = useState<{ id: string; name: string } | null>(null);
+
+  /*
+    Archiving takes the role from everybody who holds it (owner, 2026-11-01, WALK_QUESTIONS § 22),
+    and unarchiving does not hand it back — so it confirms, naming how many people lose it.
+  */
+  const [archiveTarget, setArchiveTarget] = useState<{ id: string; name: string; userCount: number } | null>(null);
+  const [archivePending, setArchivePending] = useState(false);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+
+  const confirmArchive = async () => {
+    if (!archiveTarget) return;
+    setArchivePending(true);
+    setArchiveError(null);
+    try {
+      await onArchiveRole?.(archiveTarget.id, true);
+      setArchiveTarget(null);
+    } catch (error) {
+      setArchiveError(error instanceof Error ? error.message : "Failed to archive role");
+    } finally {
+      setArchivePending(false);
+    }
+  };
 
   // Only fetched while the dialog is open (the hook is disabled without an id).
   const deleteImpact = useRoleDeleteImpact(deleteOpen ? deleteRole?.id : null);
@@ -172,7 +195,10 @@ export default function RolesTable({
                       onRename={() => openRename(r)}
                       onDuplicate={() => openDuplicate(r)}
                       onDelete={() => openDelete(r)}
-                      onArchive={() => void onArchiveRole?.(r.id, true)}
+                      onArchive={() => {
+                        setArchiveError(null);
+                        setArchiveTarget({ id: r.id, name: r.name, userCount: r.userCount ?? 0 });
+                      }}
                       onRestore={() => void onArchiveRole?.(r.id, false)}
                       locked={r.systemOwner || r.isDefault}
                       archived={r.archived}
@@ -248,6 +274,21 @@ export default function RolesTable({
             // The error is surfaced inside the modal via errorMessage.
           }
         }}
+      />
+
+      <ConfirmActionModal
+        isOpen={archiveTarget !== null}
+        title={`Archive ${archiveTarget?.name ?? "role"}?`}
+        description={
+          archiveTarget && archiveTarget.userCount > 0
+            ? `It will be taken from ${archiveTarget.userCount} ${archiveTarget.userCount === 1 ? "person" : "people"}, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.`
+            : "Nobody holds it. Scheduled assignments of it are cancelled, and it can be unarchived later."
+        }
+        confirmLabel="Archive"
+        isLoading={archivePending}
+        errorMessage={archiveError}
+        onConfirmAction={confirmArchive}
+        onCancelAction={() => setArchiveTarget(null)}
       />
     </>
   );

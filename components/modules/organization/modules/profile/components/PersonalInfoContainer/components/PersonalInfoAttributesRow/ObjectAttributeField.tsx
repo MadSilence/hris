@@ -6,16 +6,10 @@ import { Plus, Trash2 } from "lucide-react";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { Button } from "@/public/desact/src/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/public/desact/src/components/ui/select";
 import { AttributeType } from "@/models/attribute";
 import { ObjectFieldDef, ObjectRecord } from "@/models/attribute/objectFields";
 import { getCatalogOptions, isManagedCatalogType } from "@/models/attribute/managedCatalogs";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 function inputType(t: AttributeType): string {
   if (t === AttributeType.NUMBER) return "number";
@@ -40,18 +34,13 @@ const RecordFieldsEditor: FC<{
         <div key={f.key} className="space-y-1">
           <Label className="text-xs">{f.label}</Label>
           {isManagedCatalogType(f.type) ? (
-            <Select value={cur || undefined} onValueChange={(v) => onChange({ ...record, [f.key]: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {getCatalogOptions(f.type).map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              options={getCatalogOptions(f.type)}
+              value={cur || null}
+              onChange={(v) => v && onChange({ ...record, [f.key]: v })}
+              placeholder="Select…"
+              clearable={false}
+            />
           ) : (
             <Input
               type={inputType(f.type)}

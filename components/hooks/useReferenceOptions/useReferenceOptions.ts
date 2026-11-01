@@ -20,6 +20,7 @@ export const REFERENCE_ENDPOINTS: Partial<Record<ReferenceValueSource, string>> 
   jobs: "/jobs",
   levels: "/job-levels",
   roles: "/roles",
+  policies: "/time-off/policies",
 };
 
 type RefRow = { id: string; name: string; year?: number };

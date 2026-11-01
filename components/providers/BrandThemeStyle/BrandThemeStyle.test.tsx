@@ -13,7 +13,7 @@ const publicAppearanceFor = jest.fn();
 
 jest.mock("next/headers", () => ({
   cookies: async () => ({
-    get: (name: string) => (name === "access_token" && cookieValue.current ? { value: cookieValue.current } : undefined),
+    get: (name: string) => (name === "__Host-access_token" && cookieValue.current ? { value: cookieValue.current } : undefined),
   }),
 }));
 
