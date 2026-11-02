@@ -28,6 +28,10 @@ export type TaskNodeData = {
   readOnly: boolean;
   onFocusAction: (key: string) => void;
   type?: ProcessType;
+  /** The lane's colour, as its left edge: whose task it is, at a glance. */
+  accent?: string;
+  /** The lane's colour, as the tint of the kind's icon. */
+  chip?: string;
 };
 export type TaskFlowNode = Node<TaskNodeData, "task">;
 
@@ -35,8 +39,9 @@ export type TaskFlowNode = Node<TaskNodeData, "task">;
 const COMPACT_BELOW = 0.6;
 
 /**
- * A task block: one line of title, one of meta — the kind as an icon, the day, and an hourglass when it
- * waits. White, a hairline border, no shadow at rest; a soft one while dragged (design direction).
+ * A task card: the kind as its own icon in the lane's colour, the title in full — wrapped onto as many lines
+ * as it needs, up to four — and under it the day, with an hourglass when it waits. White on the lane's tint,
+ * the lane's colour as its left edge, a soft shadow that lifts on hover and while dragged.
  */
 export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
   const compact = useStore((s) => s.transform[2] < COMPACT_BELOW);
@@ -55,19 +60,23 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       title={title}
       onFocus={() => data.onFocusAction(item.key)}
       className={cn(
-        "group flex h-full w-full flex-col justify-center rounded-lg border bg-white px-2.5 text-left outline-none",
-        "transition-shadow duration-150 motion-reduce:transition-none",
-        data.selected ? "border-brown-500 ring-2 ring-brown-300" : "border-brown-200 hover:border-brown-300",
+        "group flex h-full w-full flex-col justify-between gap-1 rounded-xl border-l-[3px] bg-white px-2.5 py-2 text-left outline-none",
+        "shadow-[0_1px_2px_rgba(60,40,30,0.08),0_1px_6px_rgba(60,40,30,0.06)] ring-1 ring-brown-900/5",
+        "transition-[box-shadow,transform] duration-150 hover:-translate-y-px hover:shadow-md motion-reduce:transition-none",
+        data.accent ?? "border-l-brown-300",
+        data.selected && "ring-2 ring-brown-500",
         dragging && "shadow-lg",
       )}
     >
       {!data.readOnly && (
         <Handle type="target" position={Position.Left} className="!h-2 !w-2 !border-brown-300 !bg-white" />
       )}
-      <span className="truncate text-sm font-medium leading-5 text-brown-900">{title}</span>
+      <span className="line-clamp-4 break-words text-[13px] font-medium leading-5 text-brown-900">{title}</span>
       {!compact && (
-        <span className="flex items-center gap-1 text-xs leading-4 text-muted-foreground">
-          <Icon className="h-3 w-3 shrink-0" aria-label={TASK_KIND_LABELS[item.kind]} />
+        <span className="flex items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
+          <span className={cn("grid h-4 w-4 shrink-0 place-items-center rounded", data.chip ?? "bg-brown-100 text-brown-700")}>
+            <Icon className="h-3 w-3" aria-label={TASK_KIND_LABELS[item.kind]} />
+          </span>
           <span className="truncate">{dayLabel(item, data.type)}</span>
           {item.waitsFor.length > 0 && <Hourglass className="h-3 w-3 shrink-0" aria-label="Waits for another task" />}
           {warn && <TriangleAlert className="h-3 w-3 shrink-0 text-warning-700" aria-label="Needs a person who can take it" />}
@@ -90,30 +99,32 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
 export type GridNodeData = {
   layout: Layout;
   readOnly: boolean;
+  /** Each lane's tint, by lane id. */
+  tints: Record<string, string>;
   onCellClickAction: (laneId: string, columnId: string, clientX: number, clientY: number) => void;
 };
 export type GridFlowNode = Node<GridNodeData, "grid">;
 
 /**
- * Day columns as hairlines, lanes as a barely-there alternating tint, and Day 1 as the one accent line
- * (research § B.4). Each lane × column cell is a place to click to add a task there.
+ * Day columns as hairlines, each lane in its person's tint, and Day 1 as the one accent line (research
+ * § B.4). Each lane × column cell is a place to click to add a task there.
  */
 export function GridNode({ data }: NodeProps<GridFlowNode>) {
   const { layout } = data;
   const dayOne = dayOneColumn(layout.axis);
   return (
     <div className="relative" style={{ width: layout.axis.width, height: layout.height }} aria-hidden>
-      {layout.lanes.map((lane, index) => (
+      {layout.lanes.map((lane) => (
         <div
           key={lane.id}
-          className={cn("absolute left-0 right-0 border-b border-brown-100/70", index % 2 === 1 && "bg-brown-50/40")}
+          className={cn("absolute left-0 right-0 border-b border-white", data.tints[lane.id])}
           style={{ top: lane.top, height: lane.height }}
         />
       ))}
       {layout.axis.columns.map((c) => (
         <div
           key={c.id}
-          className={cn("absolute top-0 border-l border-brown-100/60", c.kind === "beforeStart" && "bg-brown-50/70")}
+          className={cn("absolute top-0 border-l border-brown-200/40", c.kind === "beforeStart" && "bg-brown-100/40")}
           style={{ left: c.x, width: c.width, height: layout.height }}
         />
       ))}

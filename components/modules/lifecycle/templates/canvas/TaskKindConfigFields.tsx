@@ -48,7 +48,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
   const { data: groups } = useAttributeGroups();
-  const { data: categories, isLoading: isLoadingCategories } = useDocumentCategories();
+  const { data: categories } = useDocumentCategories();
   const attributes = (groups ?? []).flatMap((g) => g.attributes ?? [])
     .filter((a) => type !== "PREBOARDING" || !NOT_ON_PREBOARDING_PAGE.has(String(a.type)));
 
@@ -56,7 +56,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
     return (
       <div className="space-y-1.5">
         <RequiredLabel required>Fields</RequiredLabel>
-        <div className="max-h-40 overflow-y-auto rounded-md border border-brown-200 p-2">
+        <div className="max-h-48 overflow-y-auto">
           {attributes.length === 0 && <p className="text-xs text-muted-foreground">There are no fields to ask for.</p>}
           {attributes.map((a) => (
             <label key={a.id} className="flex items-center gap-2 py-0.5 text-sm">
@@ -77,26 +77,11 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   }
 
   if (kind === "DOCUMENT") {
+    // No category: the person uploads a document — any — and it closes the task (owner, 2026-11-02).
     return (
-      <div className="space-y-1.5">
-        <RequiredLabel htmlFor={`${idPrefix}-category`} required>Document Category</RequiredLabel>
-        <SearchableSelect
-          id={`${idPrefix}-category`}
-          options={(categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
-          value={categoryId ?? null}
-          onChange={(v) => onChange({ categoryId: v })}
-          placeholder="Select…"
-          disabled={disabled}
-        />
-        {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). Only once the
-            list has come back, so a slow read does not claim there are none. */}
-        {!isLoadingCategories && (categories ?? []).length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            No document categories yet — add them in Settings → People → Documents.
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground">Closes by itself once a file of this category is uploaded.</p>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        The person uploads a file here. It goes into their Documents and closes the task.
+      </p>
     );
   }
 
@@ -123,6 +108,12 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
               placeholder="Select a category…"
               disabled={disabled}
             />
+            {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). */}
+            {categories !== undefined && categories.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                No document categories yet — add them in Settings → People → Documents.
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Ticked with the file attached — a signed form, a receipt. It goes into the person&apos;s Documents.
             </p>

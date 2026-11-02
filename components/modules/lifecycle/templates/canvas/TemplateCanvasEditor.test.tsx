@@ -18,7 +18,8 @@ jest.mock("@/components/modules/lifecycle/hooks", () => ({
   useLifecycleTemplate: jest.fn(),
   useInvalidateLifecycle: () => jest.fn().mockResolvedValue(undefined),
 }));
-jest.mock("@/lib/errors/errorToast", () => ({ showSuccess: jest.fn(), showActionError: jest.fn() }));
+jest.mock("@/lib/errors/errorToast", () => ({ showSuccess: jest.fn(), showActionError: jest.fn(), showError: jest.fn() }));
+jest.mock("@/components/ui/DatePicker", () => ({ DatePicker: () => null }));
 jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
 jest.mock("@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups", () => ({
   useAttributeGroups: () => ({ data: [] }),
@@ -65,6 +66,7 @@ const setWidth = (width: number) => {
 
 describe("TemplateCanvasEditor", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     setWidth(1280);
     window.localStorage.clear();
     jest.mocked(useLifecycleTemplate).mockReturnValue(partialMock<ReturnType<typeof useLifecycleTemplate>>({
@@ -72,14 +74,46 @@ describe("TemplateCanvasEditor", () => {
     }));
   });
 
-  it("opens on the canvas, and Save stays off until something changes", () => {
+  it("opens on the timeline with no Save button, and says how the timeline is worked", () => {
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     expect(screen.getByTestId("canvas-stub")).toBeInTheDocument();
     expect(screen.getByLabelText("Template Name")).toHaveValue("Engineers");
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Timeline" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Lane" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Click a day in a person's row to add a task there/)).toBeInTheDocument();
+    expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  it("saves by itself a moment after a change, without closing what is open", async () => {
+    jest.mocked(saveTemplateAction).mockResolvedValue({ status: ActionStatus.SUCCESS, data: { ...template, version: 5 } });
+    render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
+    act(() => canvas.onSelectBlockAction("order"));
     fireEvent.change(screen.getByLabelText("Template Name"), { target: { value: "Engineers 2027" } });
-    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
-    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    expect(screen.getByText("Saving…")).toBeInTheDocument();
+
+    await waitFor(() => expect(saveTemplateAction).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    expect(jest.mocked(saveTemplateAction).mock.calls[0][0].body.name).toBe("Engineers 2027");
+    await waitFor(() => expect(screen.getByText("Saved")).toBeInTheDocument());
+    expect(screen.getByRole("complementary", { name: "Task Details" })).toBeInTheDocument();
+  });
+
+  it("does not save a draft the server would refuse, and says nothing while it is half-typed", async () => {
+    render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
+    fireEvent.change(screen.getByLabelText("Template Name"), { target: { value: "  " } });
+    await new Promise((r) => setTimeout(r, 1000));
+    expect(saveTemplateAction).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Not saved/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Give the template a name/)).not.toBeInTheDocument();
+  });
+
+  it("previews the person's own tasks", () => {
+    render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    const preview = screen.getByTestId("template-preview");
+    expect(preview).toHaveTextContent("Set up the laptop");
+    // The manager's task is not the person's to see.
+    expect(preview).not.toHaveTextContent("Order a laptop");
   });
 
   it("switches to the list and remembers the choice", () => {
@@ -97,7 +131,7 @@ describe("TemplateCanvasEditor", () => {
     setWidth(600);
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     expect(screen.getByTestId("template-list-view")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Canvas" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Timeline" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("canvas-stub")).not.toBeInTheDocument();
   });
 
@@ -128,10 +162,10 @@ describe("TemplateCanvasEditor", () => {
   it("adds a task where an empty cell was clicked", () => {
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     act(() => canvas.onCellClickAction("ONBOARDING_MANAGER", "d3", { left: 300, top: 120 }));
-    const card = screen.getByRole("dialog", { name: "Add Task" });
-    expect(card).toHaveTextContent("Onboarding Manager · 3 days after start");
-    fireEvent.change(screen.getByLabelText(/Title/, { selector: "#quick-add-title" }), { target: { value: "Welcome lunch" } });
-    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    const dialog = screen.getByRole("dialog", { name: "Add Task" });
+    expect(dialog).toHaveTextContent("Onboarding Manager · 3 days after start");
+    fireEvent.change(screen.getByLabelText(/Title/, { selector: "#add-task-title" }), { target: { value: "Welcome lunch" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add Task" }));
 
     const added = canvas.items.find((i) => i.title === "Welcome lunch");
     expect(added).toMatchObject({ dueKind: "OFFSET", offsetDays: 3, assigneeKind: "ONBOARDING_MANAGER" });
@@ -156,24 +190,23 @@ describe("TemplateCanvasEditor", () => {
     jest.mocked(saveTemplateAction).mockResolvedValue({ status: ActionStatus.SUCCESS, data: saved });
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     act(() => canvas.onMoveAction("setup", { dueKind: "OFFSET", offsetDays: 0 }, "TARGET"));
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    await waitFor(() => expect(saveTemplateAction).toHaveBeenCalled());
+    await waitFor(() => expect(saveTemplateAction).toHaveBeenCalled(), { timeout: 2000 });
     const body = jest.mocked(saveTemplateAction).mock.calls[0][0].body;
     expect(body.version).toBe(4);
     expect(body.items).toEqual([
       expect.objectContaining({ key: "order", waitsFor: [] }),
       expect.objectContaining({ key: "setup", offsetDays: 0, waitsFor: ["order"] }),
     ]);
-    await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeDisabled());
+    await waitFor(() => expect(screen.getByText("Saved")).toBeInTheDocument());
   });
 
   it("shows a refusal under the header and keeps the draft", async () => {
     jest.mocked(saveTemplateAction).mockResolvedValue({ status: ActionStatus.ERROR, errorMessage: "These tasks wait for each other in a circle." });
     render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
     fireEvent.change(screen.getByLabelText("Template Name"), { target: { value: "Engineers 2027" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByText("These tasks wait for each other in a circle.")).toBeInTheDocument();
+    expect(await screen.findByText("These tasks wait for each other in a circle.", {}, { timeout: 2000 })).toBeInTheDocument();
+    expect(screen.getByText("Not saved")).toBeInTheDocument();
     expect(screen.getByLabelText("Template Name")).toHaveValue("Engineers 2027");
   });
 });

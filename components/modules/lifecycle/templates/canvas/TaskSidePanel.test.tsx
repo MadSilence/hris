@@ -46,12 +46,13 @@ describe("TaskSidePanel", () => {
   it("edits the title, the kind and the description as they are typed", () => {
     const a = item("a");
     const { onChange } = setup(a, [a]);
-    fireEvent.change(screen.getByLabelText(/Title/), { target: { value: "Order a laptop" } });
+    // The title heads the panel and is edited in place: no "Title" label, only its accessible name.
+    fireEvent.change(screen.getByLabelText("Task Title"), { target: { value: "Order a laptop" } });
     expect(onChange).toHaveBeenLastCalledWith({ title: "Order a laptop" });
     fireEvent.change(screen.getByLabelText("Kind"), { target: { value: "DOCUMENT" } });
     // A kind change clears the category, so a document's never makes a to-do require a file by accident.
     expect(onChange).toHaveBeenLastCalledWith({ kind: "DOCUMENT", categoryId: null });
-    fireEvent.change(screen.getByLabelText("Description"), { target: { value: "Ask IT" } });
+    fireEvent.change(screen.getByLabelText("Task Description"), { target: { value: "Ask IT" } });
     expect(onChange).toHaveBeenLastCalledWith({ description: "Ask IT" });
   });
 

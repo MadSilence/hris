@@ -16,9 +16,11 @@ import type { Question } from "@/models/lifecycle";
  * preboarding page. Sent once: the task closes with the answers. The backend checks every answer; the
  * form only stops a send with a required question left empty, where the reader can see which.
  */
-export function QuestionnaireForm({ taskId, questions, onSubmit }: {
+export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }: {
   taskId: string;
   questions: Question[];
+  /** A preview: the questions can be tried, nothing is sent. */
+  sendDisabled?: boolean;
   onSubmit: (answers: Record<string, unknown>) => Promise<string | null>;
 }) {
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
@@ -120,7 +122,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit }: {
             );
         }
       })}
-      <Button type="button" size="sm" disabled={busy} onClick={() => void submit()}>Send Answers</Button>
+      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>Send Answers</Button>
       <FormError message={error} />
     </div>
   );

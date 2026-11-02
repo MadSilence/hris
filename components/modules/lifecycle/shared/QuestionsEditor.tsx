@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { Input } from "@/public/desact/src/components/ui/input";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/public/desact/src/components/ui/select";
@@ -39,9 +38,9 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium">Questions *</legend>
       {questions.length === 0 && <p className="text-xs text-muted-foreground">No questions yet.</p>}
-      <ol className="space-y-3">
+      <ol className="divide-y divide-brown-100">
         {questions.map((q, i) => (
-          <li key={q.id} className="space-y-2 rounded-md border border-brown-200 p-2">
+          <li key={q.id} className="space-y-2 py-3 first:pt-0">
             <Input
               aria-label={`Question ${i + 1}`}
               placeholder={`Question ${i + 1}`}
@@ -65,13 +64,10 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
               </label>
             </div>
             {isChoice(q.type) && (
-              <Textarea
-                aria-label="Options, one per line"
-                placeholder="One option per line"
-                rows={3}
-                value={(q.options ?? []).join("\n")}
+              <OptionCells
+                options={q.options ?? []}
                 disabled={disabled}
-                onChange={(e) => patch(i, { options: e.target.value.split("\n") })}
+                onChange={(options) => patch(i, { options })}
               />
             )}
             {!disabled && (
@@ -100,5 +96,46 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
       )}
       <p className="text-xs text-muted-foreground">The answers are kept on the person&apos;s Forms tab, even if the process is deleted.</p>
     </fieldset>
+  );
+}
+
+/**
+ * A choice's options, each in a cell of its own beside the others — not lines of one box — with a cell to add
+ * the next. Empty cells are left out when the question is saved.
+ */
+function OptionCells({ options, disabled, onChange }: {
+  options: string[];
+  disabled?: boolean;
+  onChange: (options: string[]) => void;
+}) {
+  const shown = options.length ? options : [""];
+  return (
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Options">
+      {shown.map((o, i) => (
+        <div key={i} className="relative">
+          <Input
+            aria-label={`Option ${i + 1}`}
+            placeholder={`Option ${i + 1}`}
+            value={o}
+            disabled={disabled}
+            className="h-8 w-32 pr-7 text-sm"
+            onChange={(e) => onChange(shown.map((x, j) => (j === i ? e.target.value : x)))}
+          />
+          {!disabled && shown.length > 1 && (
+            <button type="button" aria-label={`Remove option ${i + 1}`}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-brown-900"
+              onClick={() => onChange(shown.filter((_, j) => j !== i))}>
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      ))}
+      {!disabled && (
+        <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-brown-700" onClick={() => onChange([...shown, ""])}>
+          <Plus className="h-3.5 w-3.5" />
+          Option
+        </Button>
+      )}
+    </div>
   );
 }

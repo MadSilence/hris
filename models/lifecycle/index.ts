@@ -340,6 +340,15 @@ export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   QUESTIONNAIRE: "Questionnaire",
 };
 
+/** One line each, for choosing a kind: what the person is asked to do, and what closes it. */
+export const TASK_KIND_DESCRIPTIONS: Record<TaskKind, string> = {
+  TODO: "Something to do and tick off. Can ask for a file to be attached.",
+  FILL_FIELDS: "Fields of the profile to fill in. Closes when every one holds a value.",
+  DOCUMENT: "A file to upload into the person's documents. Closes when it arrives.",
+  ACKNOWLEDGE: "A file or a link to read and confirm. Only the person it is for can confirm.",
+  QUESTIONNAIRE: "Questions to answer. The answers are kept on the person's Forms tab.",
+};
+
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   SHORT_TEXT: "Short Text",
   LONG_TEXT: "Long Text",

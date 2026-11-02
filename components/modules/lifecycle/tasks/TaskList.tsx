@@ -6,7 +6,6 @@ import { CheckCircle2, Circle, Hourglass, MessageSquare, Pencil, TriangleAlert, 
 import { TASK_KIND_ICON } from "@/components/modules/lifecycle/templates/canvas/TaskKindIcon";
 import { Badge } from "@/public/desact/src/components/ui/badge";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { FormError } from "@/components/feedback/FormError";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { internalApiClient } from "@/components/clients/apiClient";
@@ -29,6 +28,7 @@ import { TaskMaterials, saveBlob } from "./TaskMaterials";
 import { TaskComments } from "./TaskComments";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { TaskFieldInput, canFillInPlace } from "./TaskFieldInput";
+import { FilePickButton } from "@/components/modules/lifecycle/shared/FilePickButton";
 
 
 type Props = {
@@ -48,6 +48,11 @@ type Props = {
   onEditAction?: (task: Task) => void;
   onCancelAction?: (task: Task) => void;
   busyTaskId?: string | null;
+  /**
+   * The template editor's preview of what the person sees: the rows as they will look, their fields usable,
+   * nothing sent — no button acts, and there are no comments or menus.
+   */
+  preview?: boolean;
 };
 
 /**
@@ -58,7 +63,7 @@ type Props = {
  */
 export function TaskList({
   tasks, showAssignee, showSubject, onCompleteAction, canComplete, isMine, onChangedAction, onEditAction,
-  onCancelAction, busyTaskId,
+  onCancelAction, busyTaskId, preview,
 }: Props) {
   return (
     <ul className="divide-y divide-brown-100 rounded-md border border-brown-200">
@@ -75,6 +80,7 @@ export function TaskList({
           onEditAction={onEditAction}
           onCancelAction={onCancelAction}
           busy={busyTaskId === task.id}
+          preview={preview}
         />
       ))}
     </ul>
@@ -82,7 +88,7 @@ export function TaskList({
 }
 
 function TaskRow({
-  task, showAssignee, showSubject, onCompleteAction, canComplete, mine, onChangedAction, onEditAction, onCancelAction, busy,
+  task, showAssignee, showSubject, onCompleteAction, canComplete, mine, onChangedAction, onEditAction, onCancelAction, busy, preview,
 }: {
   task: Task;
   showAssignee?: boolean;
@@ -94,6 +100,7 @@ function TaskRow({
   onEditAction?: Props["onEditAction"];
   onCancelAction?: Props["onCancelAction"];
   busy: boolean;
+  preview?: boolean;
 }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const Icon = TASK_KIND_ICON[task.kind];
@@ -153,7 +160,7 @@ function TaskRow({
         <TaskMaterials materials={task.materials ?? []} onOpenFile={openFile} />
 
         {open && (
-          <TaskBody task={task} mine={mine} canComplete={canComplete} busy={busy}
+          <TaskBody task={task} mine={mine} canComplete={canComplete} busy={busy} preview={preview}
             onCompleteAction={onCompleteAction} onChangedAction={onChangedAction} />
         )}
         {done && task.kind === "QUESTIONNAIRE" && (
@@ -162,7 +169,7 @@ function TaskRow({
           </Link>
         )}
 
-        <button
+        {!preview && <button
           type="button"
           className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-brown-900"
           aria-expanded={commentsOpen}
@@ -170,7 +177,7 @@ function TaskRow({
         >
           <MessageSquare className="h-3 w-3" />
           {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Comment"}
-        </button>
+        </button>}
         {commentsOpen && (
           <TaskComments
             load={() => loadComments(task.id)}
@@ -182,7 +189,7 @@ function TaskRow({
           />
         )}
       </div>
-      {live && (onEditAction || onCancelAction) && (
+      {live && !preview && (onEditAction || onCancelAction) && (
         <RowActionsMenu label="Task Actions" className="w-48">
           {onEditAction && (
             <RowAction icon={<Pencil className="h-4 w-4 text-muted-foreground" />} onClick={() => onEditAction(task)}>
@@ -201,11 +208,12 @@ function TaskRow({
 }
 
 /** What an open task asks for, in the row. */
-function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAction }: {
+function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, onChangedAction }: {
   task: Task;
   mine: boolean;
   canComplete: boolean;
   busy: boolean;
+  preview?: boolean;
   onCompleteAction?: Props["onCompleteAction"];
   onChangedAction?: Props["onChangedAction"];
 }) {
@@ -215,6 +223,8 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
   const [error, setError] = useState<string | null>(null);
   const [answering, setAnswering] = useState(false);
   const disabled = busy || working;
+  // What would act; in a preview it never does, while the fields stay usable.
+  const act = disabled || Boolean(preview);
 
   const run = async (body: () => Promise<void>) => {
     setWorking(true);
@@ -236,8 +246,8 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
     if (!onCompleteAction || !canComplete) return null;
     return (
       <div className="mt-3 space-y-2">
-        <Input type="file" aria-label="File" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={disabled} />
-        <Button type="button" size="sm" variant="outline" disabled={disabled || !file}
+        <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
+        <Button type="button" size="sm" variant="outline" disabled={act || !file}
           onClick={() => file && run(async () => {
             const doc = await upload(file);
             await onCompleteAction(task, doc.id);
@@ -258,7 +268,7 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
     if (!onCompleteAction || !canComplete) return null;
     return (
       <div className="mt-3">
-        <Button type="button" size="sm" variant="outline" disabled={disabled} onClick={() => run(async () => { await onCompleteAction(task); })}>
+        <Button type="button" size="sm" variant="outline" disabled={act} onClick={() => run(async () => { await onCompleteAction(task); })}>
           {task.kind === "ACKNOWLEDGE" ? "I Have Read It" : "Mark Done"}
         </Button>
         <FormError message={error} />
@@ -269,11 +279,13 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
   if (task.kind === "DOCUMENT") {
     return (
       <div className="mt-3 space-y-2">
-        <Input type="file" aria-label="File" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={disabled} />
-        <Button type="button" size="sm" variant="outline" disabled={disabled || !file}
+        <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
+        <Button type="button" size="sm" variant="outline" disabled={act || !file}
           onClick={() => file && run(async () => {
-            await upload(file);
-            await onChangedAction?.();
+            const doc = await upload(file);
+            // With no category the file closes the task itself; with one, its arrival does (the listener).
+            if (!task.category && onCompleteAction) await onCompleteAction(task, doc.id);
+            else await onChangedAction?.();
           })}
         >
           Upload
@@ -302,7 +314,7 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
             disabled={disabled}
           />
         ))}
-        <Button type="button" size="sm" variant="outline" disabled={disabled || Object.keys(values).length === 0}
+        <Button type="button" size="sm" variant="outline" disabled={act || Object.keys(values).length === 0}
           onClick={() => run(async () => {
             const res = await updateUserAttributesAction({ userId: task.subject.id, values });
             if (res.status !== ActionStatus.SUCCESS) {
@@ -326,7 +338,7 @@ function TaskBody({ task, mine, canComplete, busy, onCompleteAction, onChangedAc
   }
   return answering ? (
     <div className="mt-3">
-      <QuestionnaireForm taskId={task.id} questions={task.questions ?? []}
+      <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} sendDisabled={preview}
         onSubmit={async (answers) => {
           const res = await answerQuestionnaireAction({ id: task.id, answers });
           if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "The answers could not be sent.";

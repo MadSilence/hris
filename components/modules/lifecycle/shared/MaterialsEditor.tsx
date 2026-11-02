@@ -9,6 +9,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { uploadLifecycleFileAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import type { Material } from "@/models/lifecycle";
+import { FilePickButton } from "./FilePickButton";
 
 const isWebAddress = (url: string) => {
   try {
@@ -91,7 +92,7 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
         </ul>
       )}
       {!disabled && (
-        <div className="space-y-2 rounded-md border border-brown-200 p-2">
+        <div className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor={`${idPrefix}-link`} className="text-xs">Link</Label>
             <Input id={`${idPrefix}-link`} placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy} />
@@ -100,12 +101,8 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
           </div>
           <div className="space-y-1">
             <Label htmlFor={`${idPrefix}-file`} className="text-xs">File</Label>
-            <Input id={`${idPrefix}-file`} type="file" disabled={busy}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (file) void addFile(file);
-              }} />
+            <FilePickButton id={`${idPrefix}-file`} label="Attach File" disabled={busy}
+              onPickAction={(file) => { if (file) void addFile(file); }} />
           </div>
         </div>
       )}

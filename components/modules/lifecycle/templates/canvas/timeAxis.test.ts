@@ -1,4 +1,5 @@
 import {
+  blockHeight,
   BEFORE_START_W,
   BLOCK_H,
   BLOCK_W,
@@ -115,8 +116,18 @@ describe("lanes and blocks", () => {
     expect(a.x).toBe(b.x);
     expect(b.y - a.y).toBe(BLOCK_H + STACK_GAP);
     expect(layout.lanes[0].height).toBe(LANE_PAD * 2 + 2 * BLOCK_H + STACK_GAP);
-    expect(layout.lanes[1].height).toBe(LANE_PAD * 2 + BLOCK_H);
+    // A lane with one short block is still tall enough for a person's name on two lines.
+    expect(layout.lanes[1].height).toBeGreaterThan(LANE_PAD * 2 + BLOCK_H);
     expect(layout.lanes[1].top).toBe(layout.lanes[0].height);
+  });
+
+  it("makes a block as tall as its title needs, so a long title wraps instead of being cut", () => {
+    expect(blockHeight({ title: "Lunch" })).toBe(BLOCK_H);
+    const long = blockHeight({ title: "First week check-in with a long title to see wrapping" });
+    expect(long).toBeGreaterThan(BLOCK_H);
+    const many = [item({ key: "x", title: "First week check-in with a long title to see wrapping" }), item({ key: "y", title: "Short" })];
+    const placed = layoutTemplate(many, deriveLanes(many));
+    expect(placed.positions.get("y")!.y - placed.positions.get("x")!.y).toBe(long + STACK_GAP);
   });
 
   it("derives y from the lane: one lane per assignee, in a fixed order", () => {

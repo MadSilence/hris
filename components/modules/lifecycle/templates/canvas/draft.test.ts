@@ -88,7 +88,9 @@ describe("a draft and the template it saves as", () => {
     expect(write.version).toBe(3);
     expect(write.items.map((i) => i.key)).toEqual(["i1", "i3", "i2"]);
     expect(write.items.find((i) => i.key === "i3")).toMatchObject({ waitsFor: ["i1"], assigneeUserId: "u1" });
-    expect(write.items.find((i) => i.key === "i2")).toMatchObject({ dueKind: "BEFORE_START", offsetDays: null, config: { categoryId: "cat" } });
+    expect(write.items.find((i) => i.key === "i2")).toMatchObject({ dueKind: "BEFORE_START", offsetDays: null, config: { materials: null } });
+    // A document task names no category any more (owner, 2026-11-02): one an older template held is dropped.
+    expect(write.items.find((i) => i.key === "i2")?.config).not.toHaveProperty("categoryId");
   });
 
   it("is dirty only when something a save would send has changed", () => {

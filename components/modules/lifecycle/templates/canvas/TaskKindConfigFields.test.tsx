@@ -11,27 +11,34 @@ jest.mock("@/components/modules/organization/modules/profile/modules/personalDoc
   useDocumentCategories: jest.fn(),
 }));
 
-const renderDocumentTask = () =>
+const render_ = (kind: "DOCUMENT" | "TODO", categoryId: string | null) =>
   render(
-    <TaskKindConfigFields idPrefix="t" kind="DOCUMENT" type="ONBOARDING" attributeIds={[]} categoryId={null}
+    <TaskKindConfigFields idPrefix="t" kind={kind} type="ONBOARDING" attributeIds={[]} categoryId={categoryId}
       materials={[]} questions={[]} onChange={jest.fn()} />,
   );
 
-describe("TaskKindConfigFields — Upload Document", () => {
-  it("says where to add categories when the company has none", () => {
+describe("TaskKindConfigFields", () => {
+  it("asks no category of an Upload Document task: any document closes it", () => {
+    (useDocumentCategories as jest.Mock).mockReturnValue({ data: [{ id: "passport", name: "Passport" }], isLoading: false });
+    render_("DOCUMENT", null);
+    expect(screen.queryByLabelText(/Document Category/)).not.toBeInTheDocument();
+    expect(screen.getByText(/goes into their Documents and closes the task/)).toBeInTheDocument();
+  });
+
+  it("says where to add categories when a to-do requires a file and the company has none", () => {
     (useDocumentCategories as jest.Mock).mockReturnValue({ data: [], isLoading: false });
-    renderDocumentTask();
+    render_("TODO", "");
     expect(screen.getByText(/No document categories yet — add them in Settings → People → Documents/)).toBeInTheDocument();
   });
 
   it("says nothing while the categories are still loading, or when there are some", () => {
     (useDocumentCategories as jest.Mock).mockReturnValue({ data: undefined, isLoading: true });
-    const { unmount } = renderDocumentTask();
+    const { unmount } = render_("TODO", "");
     expect(screen.queryByText(/No document categories yet/)).not.toBeInTheDocument();
     unmount();
 
     (useDocumentCategories as jest.Mock).mockReturnValue({ data: [{ id: "passport", name: "Passport" }], isLoading: false });
-    renderDocumentTask();
+    render_("TODO", "passport");
     expect(screen.queryByText(/No document categories yet/)).not.toBeInTheDocument();
   });
 });

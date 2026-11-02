@@ -64,8 +64,9 @@ describe("TemplateCanvas", () => {
     expect(screen.getByRole("button", { name: /Order a laptop, 7 days before start, Onboarding Manager/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Set up the laptop, 1 day before start, The New Person, waits for 1 task/ })).toBeInTheDocument();
     expect(screen.getByText("The New Person")).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Zoom" })).toHaveTextContent("Before StartFirst Week90 DaysFit");
-    expect(screen.getByRole("button", { name: "First Week" })).toHaveAttribute("aria-pressed", "true");
+    // No zoom buttons on the canvas (owner, 2026-11-02): it opens on the first week; pinch, Ctrl/Cmd + scroll
+    // and Alt/Option + 1 zoom.
+    expect(screen.queryByRole("group", { name: "Zoom" })).not.toBeInTheDocument();
   });
 
   it("selects a block reached by Tab, and turns arrow keys on it into a day or a lane", () => {

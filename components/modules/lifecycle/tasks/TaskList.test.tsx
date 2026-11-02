@@ -57,11 +57,23 @@ describe("TaskList — done where shown", () => {
     expect(attach).toBeDisabled();
 
     const file = new File(["x"], "handover.pdf", { type: "application/pdf" });
-    fireEvent.change(screen.getByLabelText("File"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Choose File"), { target: { files: [file] } });
+    expect(screen.getByText("handover.pdf")).toBeInTheDocument();
     fireEvent.click(attach);
 
     await waitFor(() => expect(complete).toHaveBeenCalledWith(expect.objectContaining({ id: "t1" }), "doc1"));
     expect(documentService.uploadPersonalDocument).toHaveBeenCalledWith({ userId: "p1", file, categoryId: "cat1" });
+  });
+
+  it("closes an Upload Document task with no category with the file uploaded through it", async () => {
+    const complete = jest.fn();
+    (documentService.uploadPersonalDocument as jest.Mock).mockResolvedValue({ id: "doc2" });
+    render(<TaskList tasks={[task({ kind: "DOCUMENT" })]} onCompleteAction={complete} />);
+    const file = new File(["x"], "contract.pdf", { type: "application/pdf" });
+    fireEvent.change(screen.getByLabelText("Choose File"), { target: { files: [file] } });
+    fireEvent.click(screen.getByRole("button", { name: "Upload" }));
+    await waitFor(() => expect(complete).toHaveBeenCalledWith(expect.objectContaining({ id: "t1" }), "doc2"));
+    expect(documentService.uploadPersonalDocument).toHaveBeenCalledWith({ userId: "p1", file, categoryId: null });
   });
 
   it("lets only the assignee acknowledge", () => {

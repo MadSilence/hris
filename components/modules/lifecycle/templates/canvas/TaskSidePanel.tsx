@@ -10,7 +10,6 @@ import { Textarea } from "@/public/desact/src/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/public/desact/src/components/ui/select";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import {
   ACCESS_PROBLEM_LABELS,
@@ -26,6 +25,9 @@ import { dayLabel, wouldCreateCycle, type DraftItem } from "./draft";
 import { TaskKindConfigFields } from "./TaskKindConfigFields";
 
 type DueMode = "BEFORE" | "ON" | "AFTER" | "BEFORE_START";
+
+/** A field that reads as text until it is pointed at or typed in — the template name's own look. */
+const INLINE = "border-transparent bg-transparent px-2 py-1 shadow-none hover:border-brown-200 focus-visible:border-brown-300 focus-visible:bg-white";
 
 const dueModeOf = (i: DraftItem): DueMode => {
   if (i.dueKind === "BEFORE_START") return "BEFORE_START";
@@ -72,37 +74,42 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
   return (
     <aside
       aria-label="Task Details"
-      className="flex h-full w-full flex-col border-l border-brown-100 bg-white md:w-[400px]"
+      className="flex h-full w-full flex-col bg-brown-50/40 md:w-[400px]"
     >
-      <div className="flex items-center justify-between gap-2 px-5 pb-2 pt-4">
-        <h2 className="text-base font-semibold text-brown-900">Task</h2>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Close Panel" onClick={onClose}>
+      {/* The task's own title heads the panel and is edited where it stands, like the template's name: no
+          "Task" heading, no "Title" or "Description" label — a box appears on hover and while typing. */}
+      <div className="flex items-start gap-1 px-3 pb-1 pt-3">
+        <Textarea
+          id={`${id}-title`}
+          aria-label="Task Title"
+          rows={1}
+          value={item.title}
+          disabled={readOnly}
+          placeholder="Untitled task"
+          // A task added from the list arrives untitled; the title is where to start.
+          autoFocus={!item.title}
+          // A title is one line: a pasted line break becomes a space, and Enter adds none.
+          onChange={(e) => onChange({ title: e.target.value.replace(/[\r\n]+/g, " ") })}
+          onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+          className={`${INLINE} min-h-0 resize-none text-lg font-semibold leading-6 text-brown-900 [field-sizing:content]`}
+        />
+        <Button type="button" variant="ghost" size="icon" className="mt-0.5 h-8 w-8 shrink-0" aria-label="Close Panel" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 pb-5">
-        <div className="space-y-1.5">
-          <RequiredLabel htmlFor={`${id}-title`} required>Title</RequiredLabel>
-          <Input
-            id={`${id}-title`}
-            value={item.title}
-            disabled={readOnly}
-            // A task added from the list arrives untitled; the title is where to start.
-            autoFocus={!item.title}
-            onChange={(e) => onChange({ title: e.target.value })}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor={`${id}-description`}>Description</Label>
-          <Textarea
-            id={`${id}-description`}
-            value={item.description}
-            disabled={readOnly}
-            onChange={(e) => onChange({ description: e.target.value })}
-          />
-        </div>
+      {/* A little room at the top: an edited field's focus ring is drawn outside it, and the scroll box
+          clips whatever sticks out. */}
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-5 pb-5 pt-1">
+        <Textarea
+          id={`${id}-description`}
+          aria-label="Task Description"
+          value={item.description}
+          disabled={readOnly}
+          placeholder={readOnly ? "" : "Add a description"}
+          onChange={(e) => onChange({ description: e.target.value })}
+          className={`${INLINE} -mx-2 min-h-0 resize-none text-sm text-brown-700 [field-sizing:content]`}
+        />
 
         <div className="space-y-1.5">
           <Label htmlFor={`${id}-kind`}>Kind</Label>
@@ -223,7 +230,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           {others.length === 0 ? (
             <p className="text-xs text-muted-foreground">There are no other tasks to wait for.</p>
           ) : (
-            <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border border-brown-200 p-2">
+            <div className="max-h-48 space-y-1 overflow-y-auto">
               {others.map((other) => {
                 const checked = item.waitsFor.includes(other.key);
                 const circle = !checked && wouldCreateCycle(items, item.key, other.key);

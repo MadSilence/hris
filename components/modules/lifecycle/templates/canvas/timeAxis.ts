@@ -16,10 +16,27 @@ export const DAY_W = 128;
 export const WEEK_W = 168;
 export const MONTH_W = 184;
 export const BEFORE_START_W = 144;
-export const BLOCK_W = 116;
-export const BLOCK_H = 54;
+export const BLOCK_W = 120;
+/** The shortest block: a title on one line and the meta line under it. */
+export const BLOCK_H = 58;
+const TITLE_LINE_H = 20;
+/** About how many characters of a title fit on one line of a block. */
+const CHARS_PER_LINE = 15;
+const MAX_TITLE_LINES = 4;
+/** A lane is never shorter than this inside its padding: a person's name on two lines fits its header. */
+const MIN_LANE_STACK = BLOCK_H + 2 * TITLE_LINE_H;
+
+/**
+ * A block is as tall as its title needs — wrapped onto up to four lines, not cut at the first — so a long
+ * name reads in full on the timeline. Estimated from its length: the layout has to know it before anything
+ * is drawn.
+ */
+export const blockHeight = (item: Pick<DraftItem, "title">): number => {
+  const lines = Math.min(MAX_TITLE_LINES, Math.max(1, Math.ceil((item.title || "Untitled task").length / CHARS_PER_LINE)));
+  return BLOCK_H + (lines - 1) * TITLE_LINE_H;
+};
 export const STACK_GAP = 8;
-export const LANE_PAD = 12;
+export const LANE_PAD = 14;
 
 const DAYS_EACH_SIDE = 14;
 const WEEKS_UNTIL = 90;
@@ -150,13 +167,15 @@ export const layoutTemplate = (items: DraftItem[], lanes: Lane[], axis: Axis = b
   });
   cells.forEach((list) => list.sort((a, b) => (a.offsetDays ?? -1) - (b.offsetDays ?? -1)));
 
-  const stackOf = (laneId: LaneId) => Math.max(1, ...[...cells.entries()]
-    .filter(([cell]) => cell.startsWith(`${laneId}|`)).map(([, list]) => list.length));
+  // The tallest stack of the lane's cells, with each block as tall as its own title — and never less than a
+  // two-line name in the lane's header needs at the zoom the timeline opens on.
+  const stackOf = (laneId: LaneId) => Math.max(MIN_LANE_STACK, ...[...cells.entries()]
+    .filter(([cell]) => cell.startsWith(`${laneId}|`))
+    .map(([, list]) => list.reduce((sum, i) => sum + blockHeight(i), 0) + (list.length - 1) * STACK_GAP));
 
   let top = 0;
   const boxes: LaneBox[] = lanes.map((lane) => {
-    const n = stackOf(lane.id);
-    const height = LANE_PAD * 2 + n * BLOCK_H + (n - 1) * STACK_GAP;
+    const height = LANE_PAD * 2 + stackOf(lane.id);
     const box = { ...lane, top, height };
     top += height;
     return box;
@@ -167,12 +186,11 @@ export const layoutTemplate = (items: DraftItem[], lanes: Lane[], axis: Axis = b
     const [laneId] = cell.split("|");
     const lane = boxes.find((l) => l.id === laneId);
     if (!lane) return;
-    list.forEach((item, index) => {
+    let y = lane.top + LANE_PAD;
+    list.forEach((item) => {
       const column = columnOf(axis, item);
-      positions.set(item.key, {
-        x: column.x + (column.width - BLOCK_W) / 2,
-        y: lane.top + LANE_PAD + index * (BLOCK_H + STACK_GAP),
-      });
+      positions.set(item.key, { x: column.x + (column.width - BLOCK_W) / 2, y });
+      y += blockHeight(item) + STACK_GAP;
     });
   });
   return { axis, lanes: boxes, height: top, positions };

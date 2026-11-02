@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Hourglass, Plus, TriangleAlert } from "lucide-react";
+import { Hourglass, ListChecks, Plus, TriangleAlert } from "lucide-react";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
@@ -38,6 +39,23 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
   const laneLabel = (i: DraftItem) => lanes.find((l) => l.id === laneIdOf(i))?.label ?? "";
   const titleOf = (key: string) => items.find((i) => i.key === key)?.title || "Untitled task";
 
+  // Nothing yet: the whole place is the invitation, as every empty list in the product is — and the only way
+  // to add, so there is no Add Task button above it.
+  if (items.length === 0) {
+    return (
+      <div className="h-full" data-test="template-list-view">
+        <EmptyState
+          icon={<ListChecks className="h-6 w-6" />}
+          title="No tasks yet"
+          description="A process started from this template would have nothing to do. Add the first task."
+          onCreate={readOnly ? undefined : onAddAction}
+          createLabel="Add Task"
+          fill
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 px-1" data-test="template-list-view">
       {!readOnly && (
@@ -47,12 +65,6 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
             Add Task
           </Button>
         </div>
-      )}
-
-      {items.length === 0 && (
-        <p className="py-10 text-center text-sm text-muted-foreground">
-          No tasks yet. A process started from this template would have nothing to do.
-        </p>
       )}
 
       {PHASES.map((phase) => {

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { CheckCircle2, Circle, MessageSquare } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
@@ -20,6 +19,7 @@ import {
 } from "@/components/modules/lifecycle/actions/preboardingActions";
 import { TASK_KIND_LABELS, describeDue, requiresFile, type Material, type PreboardingPage } from "@/models/lifecycle";
 import { TaskFieldInput } from "@/components/modules/lifecycle/tasks/TaskFieldInput";
+import { FilePickButton } from "@/components/modules/lifecycle/shared/FilePickButton";
 import { TaskMaterials, saveBlob } from "@/components/modules/lifecycle/tasks/TaskMaterials";
 import { TaskComments } from "@/components/modules/lifecycle/tasks/TaskComments";
 import { QuestionnaireForm } from "@/components/modules/lifecycle/tasks/QuestionnaireForm";
@@ -50,7 +50,17 @@ const openFile = (token: string) => async (material: Material) => {
  * The joiner's preboarding page: their own tasks and nothing else — no people, no organisation
  * (design § 5.2). Each action answers with the page as it now is.
  */
-export function PreboardingPageContainer({ token, initialPage }: { token: string; initialPage: PreboardingPage }) {
+export function PreboardingPageContainer({ token, initialPage, preview, onOpenFile }: {
+  token: string;
+  initialPage: PreboardingPage;
+  /**
+   * The template editor's preview: the page as the joiner will see it, its fields usable, nothing sent —
+   * every button that would act stays off, and there are no comments.
+   */
+  preview?: boolean;
+  /** How a material file opens when there is no token to fetch it with — the preview's own route. */
+  onOpenFile?: (material: Material) => void;
+}) {
   const [page, setPage] = useState(initialPage);
   const open = page.tasks.filter((t) => t.status === "OPEN").length;
 
@@ -77,7 +87,7 @@ export function PreboardingPageContainer({ token, initialPage }: { token: string
               <div className="flex-1">
                 {/* The icon alone did not read as done in the walk (SWEEP S11): a finished task says so. */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className={`font-medium ${task.status === "DONE" ? "text-muted-foreground" : ""}`}>{task.title}</h2>
+                  <h2 className={`text-base font-medium leading-6 ${task.status === "DONE" ? "text-muted-foreground" : ""}`}>{task.title}</h2>
                   {task.status === "DONE" && <StatusBadge status="active" label="Done" />}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -85,13 +95,13 @@ export function PreboardingPageContainer({ token, initialPage }: { token: string
                   {task.dueDate ? ` · by ${formatDisplayDate(task.dueDate, { style: "medium" })}` : ""}
                 </p>
                 {task.description && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{task.description}</p>}
-                <TaskMaterials materials={task.materials ?? []} onOpenFile={openFile(token)} />
+                <TaskMaterials materials={task.materials ?? []} onOpenFile={onOpenFile ?? openFile(token)} />
               </div>
             </div>
             {task.status === "OPEN" && (
-              <TaskBody token={token} task={task} onPageAction={setPage} />
+              <TaskBody token={token} task={task} onPageAction={setPage} preview={preview} />
             )}
-            <PageComments token={token} task={task} />
+            {!preview && <PageComments token={token} task={task} />}
           </li>
         ))}
       </ul>
@@ -99,7 +109,9 @@ export function PreboardingPageContainer({ token, initialPage }: { token: string
   );
 }
 
-function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask; onPageAction: (p: PreboardingPage) => void }) {
+function TaskBody({ token, task, onPageAction, preview }: {
+  token: string; task: PageTask; onPageAction: (p: PreboardingPage) => void; preview?: boolean;
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -113,7 +125,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
   if (task.kind === "QUESTIONNAIRE") {
     return (
       <div className="pl-8">
-        <QuestionnaireForm taskId={task.id} questions={task.questions ?? []}
+        <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} sendDisabled={preview}
           onSubmit={async (answers) => {
             const res = await preboardingAnswerAction({ token, taskId: task.id, answers });
             if (res.status === ActionStatus.SUCCESS && res.data) {
@@ -132,7 +144,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
       <div className="space-y-2 pl-8">
         <Button type="button"
           size="sm"
-          disabled={busy}
+          disabled={busy || preview}
           onClick={async () => {
             setBusy(true);
             setError(null);
@@ -150,11 +162,11 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
   if (task.kind === "DOCUMENT" || task.kind === "TODO") {
     return (
       <div className="space-y-2 pl-8">
-        <Label htmlFor={`${task.id}-file`}>{task.categoryName ? `File: ${task.categoryName}` : "File"}</Label>
-        <Input id={`${task.id}-file`} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={busy} />
+        {task.categoryName && <Label htmlFor={`${task.id}-file`}>File: {task.categoryName}</Label>}
+        <FilePickButton id={`${task.id}-file`} file={file} disabled={busy} onPickAction={setFile} />
         <Button type="button"
           size="sm"
-          disabled={busy || !file}
+          disabled={busy || preview || !file}
           onClick={async () => {
             if (!file) return;
             setBusy(true);
@@ -181,7 +193,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
       ))}
       <Button type="button"
         size="sm"
-        disabled={busy || Object.keys(values).length === 0}
+        disabled={busy || preview || Object.keys(values).length === 0}
         onClick={async () => {
           setBusy(true);
           setError(null);

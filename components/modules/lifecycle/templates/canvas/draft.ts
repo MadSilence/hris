@@ -109,7 +109,8 @@ const configOf = (i: DraftItem): TemplateItemWrite["config"] => {
   const materials = i.materials.length ? i.materials : null;
   switch (i.kind) {
     case "FILL_FIELDS": return { attributeIds: i.attributeIds, materials };
-    case "DOCUMENT": return { categoryId: i.categoryId, materials };
+    // No category (owner, 2026-11-02): one an older template carried is dropped with its next save.
+    case "DOCUMENT": return { materials };
     case "TODO": return { categoryId: i.categoryId, materials };
     case "QUESTIONNAIRE": return { questions: i.questions, materials };
     default: return { materials };
@@ -271,7 +272,6 @@ export const draftProblems = (draft: TemplateDraft): string[] => {
     if (!i.title.trim()) problems.push("A task has no title.");
     else if (i.assigneeKind === "SPECIFIC_USER" && !i.assigneeUserId) problems.push(`${i.title.trim()}: choose who does it.`);
     else if (i.kind === "FILL_FIELDS" && i.attributeIds.length === 0) problems.push(`${i.title.trim()}: choose the fields to fill in.`);
-    else if (i.kind === "DOCUMENT" && !i.categoryId) problems.push(`${i.title.trim()}: choose a document category.`);
     else if (i.kind === "TODO" && i.categoryId === "") problems.push(`${i.title.trim()}: choose the category of the file it requires.`);
     else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(`${i.title.trim()}: attach a file or a link to acknowledge.`);
     else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(`${i.title.trim()}: add a question.`);

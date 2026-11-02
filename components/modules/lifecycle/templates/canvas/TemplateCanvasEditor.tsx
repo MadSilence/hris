@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Archive, ArchiveRestore, ChevronLeft, LayoutGrid, List, UserPlus } from "lucide-react";
+import { Archive, ArchiveRestore, Check, ChevronLeft, Eye, GanttChart, List, Loader2 } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
 import { useIsMobile } from "@/public/desact/src/components/ui/use-mobile";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -16,9 +15,8 @@ import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCa
 import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { showActionError, showSuccess } from "@/lib/errors/errorToast";
+import { showActionError } from "@/lib/errors/errorToast";
 import { useUnsavedChangesGuard } from "@/components/modules/automations/builder/useUnsavedChangesGuard";
 import {
   archiveTemplateAction,
@@ -48,7 +46,8 @@ import type { CanvasCommand } from "./keyboard";
 import { buildAxis, layoutTemplate, shiftDays, timingForColumn } from "./timeAxis";
 import { TemplateCanvas } from "./TemplateCanvas";
 import { TaskSidePanel } from "./TaskSidePanel";
-import { QuickAddCard } from "./QuickAddCard";
+import { AddTaskDialog } from "./AddTaskDialog";
+import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
 import { TemplateTaskListView } from "./TemplateTaskListView";
 import { effectiveView, readViewPreference, writeViewPreference, type EditorView } from "./viewPreference";
 
@@ -57,7 +56,22 @@ type Props = {
   templateId: string;
 };
 
-type QuickAdd = { laneId: string; columnId: string; left: number; top: number };
+type QuickAdd = { laneId: string; columnId: string };
+
+/** How long the editor waits after the last change before it saves: long enough not to save every keystroke. */
+const AUTOSAVE_DELAY_MS = 800;
+
+type SaveState = "saved" | "saving" | "blocked" | "failed";
+
+/** What a template of each type is, and how its timeline is worked — the line between the header and the canvas. */
+const INTRO: Record<ProcessType, string> = {
+  PREBOARDING: "The tasks a preboarding starts with, for somebody who has not signed in yet — their own tasks happen on one page behind a link.",
+  ONBOARDING: "The tasks an onboarding starts with, once the new person has signed in — theirs appear in their Tasks.",
+  OFFBOARDING: "The tasks an offboarding starts with, counted from the last working day — handing over, returning equipment, the exit interview.",
+};
+const HOW_TO = "Click a day in a person's row to add a task there; drag a task to move it in time or give it to somebody else; "
+  + "drag from a task's right edge to another task to make that one wait for it. Add Person puts somebody named on the timeline. "
+  + "Changes are saved as you make them, and processes already started keep their own copy.";
 
 const listHref = (type: ProcessType) => `/settings/automation/${type.toLowerCase()}`;
 
@@ -67,9 +81,11 @@ const listHref = (type: ProcessType) => `/settings/automation/${type.toLowerCase
  * runs down the side, and the tasks are blocks on it. An arrow from one block to another makes the second
  * wait for the first.
  *
- * <p>The template is edited as one draft and saved as one thing — Save is the one primary action, and
- * leaving with unsaved changes asks first. A block's place is derived from its task, never stored.
- * The list view is the same draft grouped by phase, and the only view on a small screen.
+ * <p>The template is edited as one draft and <b>saves itself</b> a moment after each change, as one thing; a
+ * draft a save would refuse (a task with no title, a named task naming nobody) waits quietly until it is
+ * complete, and leaving while something is not saved asks first. A save keeps the draft's own keys, so a selection and an open panel
+ * survive it. Preview shows the person's side. A block's place is derived from its task, never stored. The
+ * list view is the same draft grouped by phase, and the only view on a small screen.
  */
 export function TemplateCanvasEditor({ type, templateId }: Props) {
   const canEdit = useCanAccess("PEOPLE.LIFECYCLE_TEMPLATES", "EDIT");
@@ -90,14 +106,15 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const saving = useRef(false);
   const [notice, setNotice] = useState<string | null>(null);
   // A refusal is the one notice a sighted reader needs too: a move or a new arrow shows itself on the
   // canvas, a refused arrow shows nothing at all (walk of 2026-10-30). Cleared by the next change.
   const [refusal, setRefusal] = useState<string | null>(null);
   useEffect(() => setRefusal(null), [draft]);
-  const [laneOpen, setLaneOpen] = useState(false);
 
   useEffect(() => setPreferred(readViewPreference()), []);
 
@@ -114,7 +131,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const readOnly = !canEdit || archived;
   const view = effectiveView(preferred, narrow);
   const dirty = Boolean(draft && baseline && !sameDraft(draft, baseline));
-  const guard = useUnsavedChangesGuard(dirty && !busy);
+  const guard = useUnsavedChangesGuard(dirty);
 
   const items = useMemo(() => draft?.items ?? [], [draft]);
   const lanes = useMemo(() => deriveLanes(items, extraLanes, type), [items, extraLanes, type]);
@@ -216,34 +233,47 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     }
   }, [selectedEdgeId, selectedKey, selected, readOnly, lanes, moveItem, selectBlock, setItems]);
 
-  const save = async () => {
-    if (!draft) return;
-    setSaveError(null);
-    const problems = draftProblems(draft);
-    if (problems.length) {
-      setSaveError(problems.join(" "));
-      return;
-    }
-    setBusy(true);
+  /**
+   * One save of the draft as it was when the save began. The draft is not replaced by the answer: the template
+   * gives its items new ids on every save, and swapping them in would close the panel under the reader's
+   * cursor. The draft's keys go out as keys each time, which is all the arrows need.
+   */
+  const save = useCallback(async (sent: TemplateDraft) => {
+    if (saving.current) return;
+    saving.current = true;
+    setSaveState("saving");
     try {
-      const res = await saveTemplateAction({ id: templateId, body: draftToWrite(type, draft, version) });
+      const res = await saveTemplateAction({ id: templateId, body: draftToWrite(type, sent, version) });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
+        setSaveState("failed");
         setSaveError(res.errorMessage ?? "Something went wrong.");
         return;
       }
-      const saved = draftFromTemplate(res.data);
-      setBaseline(saved);
-      setDraft(saved);
+      setBaseline(sent);
       setVersion(res.data.version);
-      setSelectedKey(null);
-      setSelectedEdgeId(null);
-      setPanelOpen(false);
+      setSaveError(null);
+      setSaveState("saved");
       await invalidate();
-      showSuccess("Template saved.");
     } finally {
-      setBusy(false);
+      saving.current = false;
     }
-  };
+  }, [templateId, type, version, invalidate]);
+
+  // Saves itself a moment after the last change. A draft the server would refuse waits, saying why; a failed
+  // save is tried again on the next change, not in a loop.
+  useEffect(() => {
+    if (!draft || !baseline || readOnly || sameDraft(draft, baseline)) return;
+    const problems = draftProblems(draft);
+    if (problems.length) {
+      setSaveState("blocked");
+      setSaveError(problems.join(" "));
+      return;
+    }
+    // Fixed since: the reason it waited goes, and the status reads "Saving…" until the save lands.
+    setSaveState((state) => (state === "blocked" ? "saved" : state));
+    const timer = setTimeout(() => void save(draft), AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [draft, baseline, readOnly, save]);
 
   const archive = async () => {
     setArchiveError(null);
@@ -283,12 +313,18 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   }
 
   const quickAddLane = quickAdd ? laneById(quickAdd.laneId) : null;
+  const addPerson = (u: { id: string; firstName?: string | null; lastName?: string | null; email?: string | null }) => {
+    const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Named Person";
+    setExtraLanes((l) => [...l, { id: `USER:${u.id}`, assigneeKind: "SPECIFIC_USER", userId: u.id, label, problem: null }]);
+  };
   const quickAddColumn = quickAdd ? axis.columns.find((c) => c.id === quickAdd.columnId) ?? null : null;
   const quickAddTiming = quickAddColumn ? timingForColumn(quickAddColumn) : null;
   const removing = items.find((i) => i.key === confirmRemove) ?? null;
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    // Exactly the window, less the settings page's own padding (6rem): taller, and the page scrolled a little,
+    // carrying the whole editor with it.
+    <div className="flex h-[calc(100vh-6rem)] min-h-[560px] flex-col gap-4">
       <header className="flex flex-wrap items-center gap-3 px-8">
         <Link
           href={listHref(type)}
@@ -310,7 +346,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
             <span aria-hidden>·</span>
             <span>{items.length === 1 ? "1 task" : `${items.length} tasks`}</span>
             {archived && <StatusBadge status="archived" />}
-            {dirty && <span className="text-brown-600">Unsaved changes</span>}
+            {!readOnly && <SaveStatus state={dirty && saveState === "saved" ? "saving" : saveState} />}
           </div>
         </div>
 
@@ -327,42 +363,17 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
                   view === v ? "bg-brown-100 font-medium text-brown-900" : "text-brown-600 hover:bg-brown-50",
                 )}
               >
-                {v === "canvas" ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
-                {v === "canvas" ? "Canvas" : "List"}
+                {v === "canvas" ? <GanttChart className="h-4 w-4" /> : <List className="h-4 w-4" />}
+                {v === "canvas" ? "Timeline" : "List"}
               </button>
             ))}
           </div>
         )}
 
-        {!readOnly && view === "canvas" && (
-          <Popover open={laneOpen} onOpenChange={setLaneOpen}>
-            <PopoverTrigger asChild>
-              <Button type="button" variant="outline" className="gap-1.5">
-                <UserPlus className="h-4 w-4" />
-                Add Lane
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 space-y-2">
-              <p className="text-sm font-medium">A lane for a named person</p>
-              <p className="text-xs text-muted-foreground">
-                HR or IT are a named person, or the onboarding manager. A named person makes the template depend on them.
-              </p>
-              <UserPickerField
-                value={null}
-                onChange={(u) => {
-                  if (!u) return;
-                  const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Named Person";
-                  setExtraLanes((l) => [...l, { id: `USER:${u.id}`, assigneeKind: "SPECIFIC_USER", userId: u.id, label, problem: null }]);
-                  setLaneOpen(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        )}
-
-        {!readOnly && (
-          <Button type="button" onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
-        )}
+        <Button type="button" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
+          <Eye className="h-4 w-4" />
+          Preview
+        </Button>
 
         {canManage && (
           <RowActionsMenu label="Template Actions">
@@ -379,9 +390,16 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         )}
       </header>
 
-      {(saveError || notice || refusal || archived) && (
+      <div className="space-y-1 px-8 pb-4">
+        <p className="text-base text-muted-foreground/90">{INTRO[type]}</p>
+        {!readOnly && <p className="text-sm text-muted-foreground">{HOW_TO}</p>}
+      </div>
+
+      {((saveState === "failed" && saveError) || notice || refusal || archived) && (
         <div className="space-y-2 px-8">
-          <FormError message={saveError} />
+          {/* A draft that cannot be saved yet says nothing — it is half-typed, and the panel shows what is
+              missing; only a save the server refused is an error. */}
+          {saveState === "failed" && <FormError message={saveError} />}
           {archived && (
             <p className="text-sm text-muted-foreground">An archived template cannot be changed or used. Unarchive it to edit it.</p>
           )}
@@ -391,9 +409,9 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       )}
 
       <div className="flex min-h-0 flex-1 gap-0 px-8 pb-6">
-        <div className="relative min-w-0 flex-1">
+        <div className="relative min-w-0 flex-1 overflow-y-auto">
           {view === "canvas" ? (
-            <div className="relative h-[calc(100vh-220px)] min-h-[440px]">
+            <div className="relative h-full min-h-[320px]">
               <TemplateCanvas
                 type={type}
                 items={items}
@@ -406,25 +424,12 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
                 onSelectEdgeAction={(id) => { setSelectedEdgeId(id); setSelectedKey(null); setPanelOpen(false); }}
                 onMoveAction={moveItem}
                 onConnectAction={connect}
-                onCellClickAction={(laneId, columnId, point) => setQuickAdd({ laneId, columnId, ...point })}
-                onAddInLaneAction={(laneId, point) => setQuickAdd({ laneId, columnId: "d0", ...point })}
+                onCellClickAction={(laneId, columnId) => setQuickAdd({ laneId, columnId })}
+                onAddInLaneAction={(laneId) => setQuickAdd({ laneId, columnId: "d0" })}
+                onAddPersonAction={addPerson}
                 onCommandAction={runCommand}
                 announcement={notice}
               />
-              {items.length === 0 && !readOnly && !quickAdd && (
-                <p className="pointer-events-none absolute inset-x-0 top-1/2 text-center text-sm text-muted-foreground">
-                  Click any day in a lane to add a task there.
-                </p>
-              )}
-              {quickAdd && quickAddLane && quickAddTiming && (
-                <QuickAddCard
-                  left={Math.max(8, quickAdd.left)}
-                  top={Math.max(8, quickAdd.top)}
-                  where={`${quickAddLane.label} · ${dayLabel(quickAddTiming, type)}`}
-                  onAddAction={({ title, kind }) => addTask(quickAdd.laneId, quickAddTiming, title, kind)}
-                  onCancelAction={() => setQuickAdd(null)}
-                />
-              )}
             </div>
           ) : (
             <TemplateTaskListView
@@ -440,7 +445,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         </div>
 
         {selected && panelOpen && (
-          <div className={cn(narrow ? "fixed inset-0 z-30 bg-white" : "ml-4 h-[calc(100vh-220px)] min-h-[440px] overflow-hidden rounded-xl border border-brown-100")}>
+          <div className={cn(narrow ? "fixed inset-0 z-30 bg-white" : "ml-4 h-full overflow-hidden rounded-xl")}>
             <TaskSidePanel
               item={selected}
               items={items}
@@ -461,8 +466,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         destructive
         description={
           <>
-            <strong>{removing?.title || "This task"}</strong> leaves the template, with its arrows. Nothing changes
-            until you save, and processes already started keep their own copy.
+            <strong>{removing?.title || "This task"}</strong> leaves the template, with its arrows. Processes already
+            started keep their own copy.
           </>
         }
         onCancelAction={() => setConfirmRemove(null)}
@@ -482,17 +487,34 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
           <>
             <strong>{template?.name}</strong> can no longer be used to start a process. Processes already started
             from it keep their own copy. You can unarchive it later.
-            {dirty ? " Unsaved changes are not kept." : ""}
+            {dirty ? " Changes not saved yet are not kept." : ""}
           </>
         }
         onCancelAction={() => setConfirmArchive(false)}
         onConfirmAction={archive}
       />
 
+      <AddTaskDialog
+        open={quickAdd !== null && quickAddLane !== null && quickAddTiming !== null}
+        where={quickAddLane && quickAddTiming ? `${quickAddLane.label} · ${dayLabel(quickAddTiming, type)}` : ""}
+        onAddAction={({ title, kind }) => {
+          if (quickAdd && quickAddTiming) addTask(quickAdd.laneId, quickAddTiming, title, kind);
+        }}
+        onCancelAction={() => setQuickAdd(null)}
+      />
+
+      <TemplatePreviewDialog
+        open={previewOpen}
+        type={type}
+        name={draft.name}
+        items={items}
+        onCloseAction={() => setPreviewOpen(false)}
+      />
+
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave without saving?"
-        description="The changes to this template have not been saved."
+        title="Leave before it is saved?"
+        description={saveError ? `The last changes could not be saved: ${saveError}` : "The last changes are still being saved."}
         cancelText="Keep Editing"
         confirmText="Leave"
         onCancelAction={guard.stay}
@@ -502,4 +524,26 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       />
     </div>
   );
+}
+
+/** Saved, saving, or why not — said quietly beside the template's facts, in place of a Save button. */
+function SaveStatus({ state }: { state: SaveState }) {
+  if (state === "saving") {
+    return (
+      <span className="flex items-center gap-1" role="status">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Saving…
+      </span>
+    );
+  }
+  if (state === "saved") {
+    return (
+      <span className="flex items-center gap-1" role="status">
+        <Check className="h-3 w-3" />
+        Saved
+      </span>
+    );
+  }
+  if (state === "blocked") return null;
+  return <span className="text-warning-700" role="status">Not saved</span>;
 }
