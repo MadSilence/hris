@@ -1,7 +1,13 @@
-"use client";
+import { FC } from "react";
+import { PageGate } from "@/components/auth/PageGate";
+import { LifecycleTemplatesContainer } from "@/components/modules/lifecycle/templates/LifecycleTemplatesContainer";
 
-import { ComingSoonSettingsPage } from "@/components/modules/settings/components/ComingSoonSettingsPage";
+const OffboardingTemplatesSettingsPage: FC = () => (
+  <PageGate resource="PEOPLE.LIFECYCLE_TEMPLATES" action="VIEW">
+    <div className="px-8">
+      <LifecycleTemplatesContainer type="OFFBOARDING"/>
+    </div>
+  </PageGate>
+);
 
-export default function OffboardingSettingsPage() {
-  return <ComingSoonSettingsPage title="Offboarding" withHeader={false} />;
-}
+export default OffboardingTemplatesSettingsPage;

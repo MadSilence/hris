@@ -4,7 +4,7 @@ import React from "react";
 import { Hourglass, Plus, TriangleAlert } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { cn } from "@/public/desact/src/components/ui/utils";
-import { TASK_KIND_LABELS } from "@/models/lifecycle";
+import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
 import {
   dayLabel,
   laneIdOf,
@@ -18,6 +18,7 @@ import {
 import { TASK_KIND_ICON } from "./TaskKindIcon";
 
 type Props = {
+  type?: ProcessType;
   items: DraftItem[];
   lanes: Lane[];
   selectedKey: string | null;
@@ -33,7 +34,7 @@ const PHASES: Phase[] = ["BEFORE_START", "WEEK_1", "MONTH_1", "LATER"];
  * It is the accessible view (the canvas gives keyboard focus but no readable structure) and the only view
  * on a small screen (research § B.5).
  */
-export function TemplateTaskListView({ items, lanes, selectedKey, readOnly, onSelectAction, onAddAction }: Props) {
+export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly, onSelectAction, onAddAction }: Props) {
   const laneLabel = (i: DraftItem) => lanes.find((l) => l.id === laneIdOf(i))?.label ?? "";
   const titleOf = (key: string) => items.find((i) => i.key === key)?.title || "Untitled task";
 
@@ -60,7 +61,7 @@ export function TemplateTaskListView({ items, lanes, selectedKey, readOnly, onSe
         return (
           <section key={phase} aria-labelledby={`phase-${phase}`} className="space-y-2">
             <h3 id={`phase-${phase}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {PHASE_LABELS[phase]}
+              {phase === "BEFORE_START" && type === "OFFBOARDING" ? "By the Last Day" : PHASE_LABELS[phase]}
             </h3>
             <ul className="divide-y divide-brown-100 overflow-hidden rounded-lg border border-brown-100 bg-white">
               {inPhase.map((item) => {
@@ -80,7 +81,7 @@ export function TemplateTaskListView({ items, lanes, selectedKey, readOnly, onSe
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium text-brown-900">{item.title || "Untitled task"}</span>
                         <span className="block text-xs text-muted-foreground">
-                          {dayLabel(item)} · {laneLabel(item)}
+                          {dayLabel(item, type)} · {laneLabel(item)}
                         </span>
                         {item.waitsFor.length > 0 && (
                           <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

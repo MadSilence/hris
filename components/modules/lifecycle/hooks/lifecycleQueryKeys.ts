@@ -9,4 +9,6 @@ export const lifecycleQueryKeys = {
   deleteImpact: (id: string) => ["LIFECYCLE_PROCESS_DELETE_IMPACT", id] as const,
   myTasks: (includeDone: boolean) => ["MY_TASKS", includeDone] as const,
   myTasksRoot: ["MY_TASKS"] as const,
+  questionnaires: (userId: string) => ["LIFECYCLE_QUESTIONNAIRES", userId] as const,
+  questionnairesRoot: ["LIFECYCLE_QUESTIONNAIRES"] as const,
 };

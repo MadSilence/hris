@@ -17,6 +17,12 @@ import {
 } from "lucide-react";
 import type { Notification } from "@/models/notifications";
 
+/** "preboarding", "onboarding" or "offboarding" — the process a lifecycle notification is about. */
+const processKind = (p: Record<string, unknown>): string => {
+  const type = typeof p.processType === "string" ? p.processType : "";
+  return type === "ONBOARDING" ? "onboarding" : type === "OFFBOARDING" ? "offboarding" : "preboarding";
+};
+
 export type NotificationPresentation = {
   title: string;
   message: string;
@@ -334,9 +340,48 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         href: userId ? `/organization/people/${userId}/documents` : null,
       };
     }
+    case "LIFECYCLE_TASK_DUE": {
+      return {
+        title: "A Task Is Due",
+        message: `"${str(p.taskTitle) || "A task"}" in ${str(p.targetName) || "a person"}'s ${processKind(p)} is due today.`,
+        Icon: ListChecks,
+        href: "/tasks",
+      };
+    }
+    case "LIFECYCLE_TASK_OVERDUE": {
+      const processId = str(p.processId);
+      const who = str(p.assigneeName) ? ` ${str(p.assigneeName)} has not done it yet.` : "";
+      return {
+        title: "A Task Is Overdue",
+        message: `"${str(p.taskTitle) || "A task"}" in ${str(p.targetName) || "a person"}'s ${processKind(p)} was due ${
+          str(p.dueDate) ? formatDisplayDate(str(p.dueDate)) : "three days ago"}.${who}`,
+        Icon: TriangleAlert,
+        href: processId ? `/processes/${processId}` : "/tasks",
+      };
+    }
+    case "LIFECYCLE_TASK_COMMENTED": {
+      const processId = str(p.processId);
+      return {
+        title: "A New Comment",
+        message: `${str(p.authorName) || "Somebody"} commented on "${str(p.taskTitle) || "a task"}" in ${
+          str(p.targetName) || "a person"}'s ${processKind(p)}.`,
+        Icon: ListChecks,
+        href: p.forAssignee === true || !processId ? "/tasks" : `/processes/${processId}`,
+      };
+    }
     case "LIFECYCLE_TASKS_ASSIGNED": {
       const count = Number(p.taskCount) || 0;
-      const kind = str(p.processType) === "ONBOARDING" ? "onboarding" : "preboarding";
+      const kind = processKind(p);
+      // A task added to a running process, or given to somebody else (C2): one task, named.
+      if (str(p.assignedTaskTitle)) {
+        const dueOn = str(p.firstDueDate) ? ` It is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
+        return {
+          title: "A Task for You",
+          message: `"${str(p.assignedTaskTitle)}" in ${str(p.targetName) || "a person"}'s ${kind} is yours now.${dueOn}`,
+          Icon: ListChecks,
+          href: "/tasks",
+        };
+      }
       const due = str(p.firstDueDate) ? ` The first is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
       // A task that waited for another and has just opened (decision 10): one task, named.
       if (str(p.openedTaskTitle)) {
@@ -357,7 +402,7 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     }
     case "LIFECYCLE_PROCESS_STEP_FAILED": {
       const processId = str(p.processId);
-      const kind = str(p.processType) === "ONBOARDING" ? "onboarding" : "preboarding";
+      const kind = processKind(p);
       return {
         title: `A ${kind} step failed`,
         message: `${str(p.targetName) || "A person"}'s ${kind} stopped: a scheduled step could not be done, and what came after it was not started.`,

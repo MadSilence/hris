@@ -1,10 +1,14 @@
 /**
- * Preboarding and onboarding — templates, processes and tasks.
+ * Preboarding, onboarding and offboarding — templates, processes and tasks.
  * Design: (claude)/technical_documentation/LIFECYCLE_PROCESSES.md.
  */
 
-export type ProcessType = "PREBOARDING" | "ONBOARDING";
-export type TaskKind = "CHECKLIST" | "FILL_FIELDS" | "DOCUMENT";
+export type ProcessType = "PREBOARDING" | "ONBOARDING" | "OFFBOARDING";
+/**
+ * TODO: a tick, and a file when it names a category. ACKNOWLEDGE: HR's material and "I have read it", only by
+ * its assignee. QUESTIONNAIRE: questions defined on the template item.
+ */
+export type TaskKind = "TODO" | "FILL_FIELDS" | "DOCUMENT" | "ACKNOWLEDGE" | "QUESTIONNAIRE";
 export type DueKind = "OFFSET" | "BEFORE_START";
 /** LINE_MANAGER: a task an automation gave to "the manager" — it follows the reporting line; never in a template. */
 export type TemplateAssigneeKind = "TARGET" | "ONBOARDING_MANAGER" | "SPECIFIC_USER";
@@ -17,10 +21,42 @@ export type AssigneeProblem = "MISSING" | "LEFT" | "NOT_STARTED_DRAFT";
 
 export type Ref = { id: string; name: string | null };
 
+/** A file (uploaded to `/lifecycle/files`) or a link HR attaches to a task for whoever does it. */
+export type Material = {
+  type: "FILE" | "LINK";
+  fileId?: string | null;
+  url?: string | null;
+  name: string | null;
+};
+
+export type QuestionType =
+  | "SHORT_TEXT"
+  | "LONG_TEXT"
+  | "NUMBER"
+  | "DATE"
+  | "YES_NO"
+  | "SINGLE_CHOICE"
+  | "MULTIPLE_CHOICE";
+
+/** One question of a questionnaire. Its id is chosen by the editor and kept across saves. */
+export type Question = {
+  id: string;
+  label: string;
+  type: QuestionType;
+  options?: string[] | null;
+  required?: boolean | null;
+};
+
 export type TaskConfig = {
   attributeIds?: string[] | null;
+  /** DOCUMENT: the file's category. TODO: when set, the to-do requires a file of this category. */
   categoryId?: string | null;
+  materials?: Material[] | null;
+  questions?: Question[] | null;
 };
+
+/** Why an assignee cannot do a task as things stand — a warning, not a refusal. */
+export type AccessProblem = "CANNOT_EDIT_FIELDS" | "CANNOT_UPLOAD";
 
 export type TemplateSummary = {
   id: string;
@@ -50,6 +86,8 @@ export type TemplateItem = {
   config: TaskConfig;
   /** The ids of the items of the same template this one waits for — the arrows on the canvas. */
   waitsFor: string[];
+  /** A named person who cannot do this task for anybody. */
+  accessProblem?: AccessProblem | null;
 };
 
 export type Template = {
@@ -103,12 +141,65 @@ export type Task = {
   assignee: Ref | null;
   processId: string | null;
   processType: ProcessType | null;
-  fields: { id: string; name: string | null; type: string | null; filled: boolean }[] | null;
+  fields: {
+    id: string;
+    name: string | null;
+    type: string | null;
+    filled: boolean;
+    isRequired: boolean;
+    options: { id: string; label: string }[];
+  }[] | null;
   category: Ref | null;
   completedAt: string | null;
   /** WAITING: the tasks it still waits for — "Waiting for …". Empty otherwise. */
   waitingFor: Ref[];
+  materials: Material[];
+  /** QUESTIONNAIRE: what it asks; null for the other kinds. */
+  questions: Question[] | null;
+  commentCount: number;
 };
+
+export type TaskComment = {
+  id: string;
+  author: Ref | null;
+  body: string;
+  createdAt: string;
+  /** Written by whoever is reading. */
+  mine: boolean;
+};
+
+/** A questionnaire answered — a row of the profile's Forms tab. */
+export type QuestionnaireResponse = {
+  id: string;
+  title: string;
+  processType: ProcessType | null;
+  taskId: string | null;
+  submittedBy: Ref | null;
+  submittedAt: string;
+  answers: { questionId: string; label: string; type: QuestionType; value: unknown }[];
+};
+
+/** A task added to a running process; its date is a calendar day. */
+export type TaskAddRequest = {
+  kind: TaskKind;
+  title: string;
+  description: string | null;
+  dueDate: string | null;
+  assigneeKind: TemplateAssigneeKind;
+  assigneeUserId: string | null;
+  config: TaskConfig | null;
+};
+
+/** What changes about one task of a running process; a missing part stays as it is. */
+export type TaskUpdateRequest = {
+  title?: string | null;
+  description?: string | null;
+  dueDate?: string | null;
+  assigneeKind?: TemplateAssigneeKind | null;
+  assigneeUserId?: string | null;
+};
+
+export type LifecycleFile = { id: string; name: string; mimeType: string | null; sizeBytes: number };
 
 export type ItemOverride = {
   templateItemId: string;
@@ -146,6 +237,8 @@ export type PlannedTask = {
   config: TaskConfig;
   /** The template items this one waits for, among those the summary keeps. */
   waitsFor: string[];
+  /** The assignee cannot do it as things stand — said, not refused. */
+  accessProblem: AccessProblem | null;
 };
 
 export type StartPreview = {
@@ -202,6 +295,8 @@ export type ProcessDeleteImpact = {
   tasksDeleted: number;
   documentsKept: number;
   historyKept: boolean;
+  /** Questionnaires answered in it — the person's, so they stay. */
+  answersKept: number;
 };
 
 export type PreboardingPage = {
@@ -225,19 +320,44 @@ export type PreboardingPage = {
       options: { id: string; label: string }[];
     }[] | null;
     categoryName: string | null;
+    materials: Material[];
+    questions: Question[] | null;
+    commentCount: number;
   }[];
 };
 
 export const PROCESS_TYPE_LABELS: Record<ProcessType, string> = {
   PREBOARDING: "Preboarding",
   ONBOARDING: "Onboarding",
+  OFFBOARDING: "Offboarding",
 };
 
 export const TASK_KIND_LABELS: Record<TaskKind, string> = {
-  CHECKLIST: "Checklist",
+  TODO: "To-do",
   FILL_FIELDS: "Fill In Fields",
   DOCUMENT: "Upload Document",
+  ACKNOWLEDGE: "Acknowledge",
+  QUESTIONNAIRE: "Questionnaire",
 };
+
+export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
+  SHORT_TEXT: "Short Text",
+  LONG_TEXT: "Long Text",
+  NUMBER: "Number",
+  DATE: "Date",
+  YES_NO: "Yes or No",
+  SINGLE_CHOICE: "One Choice",
+  MULTIPLE_CHOICE: "Several Choices",
+};
+
+export const ACCESS_PROBLEM_LABELS: Record<AccessProblem, string> = {
+  CANNOT_EDIT_FIELDS: "Cannot edit these fields",
+  CANNOT_UPLOAD: "Cannot upload this person's documents",
+};
+
+/** A to-do that names a category requires a file of it, which closes it. */
+export const requiresFile = (task: { kind: TaskKind; category?: Ref | null; categoryName?: string | null }) =>
+  task.kind === "TODO" && Boolean(task.category ?? task.categoryName);
 
 /** What a template may name — LINE_MANAGER is an automation's, never offered here. */
 export const ASSIGNEE_KIND_LABELS: Record<TemplateAssigneeKind, string> = {
@@ -260,11 +380,27 @@ export const ASSIGNEE_PROBLEM_LABELS: Record<AssigneeProblem, string> = {
   NOT_STARTED_DRAFT: "Not an employee yet",
 };
 
-/** "7 days before start", "On the start day", "3 days after start", "By the start day". */
-export const describeDue = (dueKind: DueKind, offsetDays: number | null | undefined): string => {
-  if (dueKind === "BEFORE_START") return "By the start day";
+/**
+ * "7 days before start", "On the start day", "3 days after start", "By the start day" — or, for an offboarding,
+ * counted from the last working day: "By the last day", "2 days after the last day".
+ */
+export const describeDue = (dueKind: DueKind, offsetDays: number | null | undefined, type?: ProcessType | null): string => {
+  const leaving = type === "OFFBOARDING";
+  if (dueKind === "BEFORE_START") return leaving ? "By the last day" : "By the start day";
   const n = offsetDays ?? 0;
-  if (n === 0) return "On the start day";
+  if (n === 0) return leaving ? "On the last day" : "On the start day";
   const days = Math.abs(n) === 1 ? "1 day" : `${Math.abs(n)} days`;
+  if (leaving) return n < 0 ? `${days} before the last day` : `${days} after the last day`;
   return n < 0 ? `${days} before start` : `${days} after start`;
+};
+
+/**
+ * An assignee kind as an offboarding says it: the leaver, and the manager who runs it — the same role the
+ * product calls the onboarding manager everywhere else.
+ */
+export const assigneeKindLabel = (kind: TemplateAssigneeKind, type?: ProcessType | null): string => {
+  if (type !== "OFFBOARDING") return ASSIGNEE_KIND_LABELS[kind];
+  if (kind === "TARGET") return "The Leaver";
+  if (kind === "ONBOARDING_MANAGER") return "Offboarding Manager";
+  return ASSIGNEE_KIND_LABELS[kind];
 };

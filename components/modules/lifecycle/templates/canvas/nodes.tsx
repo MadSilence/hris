@@ -14,7 +14,7 @@ import {
 } from "@xyflow/react";
 import { Hourglass, Plus, TriangleAlert } from "lucide-react";
 import { cn } from "@/public/desact/src/components/ui/utils";
-import { TASK_KIND_LABELS } from "@/models/lifecycle";
+import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
 import { dayLabel, type DraftItem } from "./draft";
 import { BLOCK_H, BLOCK_W, dayOneColumn, type Layout } from "./timeAxis";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
@@ -27,6 +27,7 @@ export type TaskNodeData = {
   selected: boolean;
   readOnly: boolean;
   onFocusAction: (key: string) => void;
+  type?: ProcessType;
 };
 export type TaskFlowNode = Node<TaskNodeData, "task">;
 
@@ -50,7 +51,7 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       tabIndex={0}
       data-test="task-block"
       aria-pressed={data.selected}
-      aria-label={`${title}, ${dayLabel(item)}, ${data.laneLabel}${item.waitsFor.length ? `, waits for ${item.waitsFor.length} task${item.waitsFor.length === 1 ? "" : "s"}` : ""}`}
+      aria-label={`${title}, ${dayLabel(item, data.type)}, ${data.laneLabel}${item.waitsFor.length ? `, waits for ${item.waitsFor.length} task${item.waitsFor.length === 1 ? "" : "s"}` : ""}`}
       title={title}
       onFocus={() => data.onFocusAction(item.key)}
       className={cn(
@@ -67,7 +68,7 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       {!compact && (
         <span className="flex items-center gap-1 text-xs leading-4 text-muted-foreground">
           <Icon className="h-3 w-3 shrink-0" aria-label={TASK_KIND_LABELS[item.kind]} />
-          <span className="truncate">{dayLabel(item)}</span>
+          <span className="truncate">{dayLabel(item, data.type)}</span>
           {item.waitsFor.length > 0 && <Hourglass className="h-3 w-3 shrink-0" aria-label="Waits for another task" />}
           {warn && <TriangleAlert className="h-3 w-3 shrink-0 text-warning-700" aria-label="Needs a person who can take it" />}
         </span>

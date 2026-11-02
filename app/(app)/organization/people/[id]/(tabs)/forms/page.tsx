@@ -1,5 +1,7 @@
-import { ProfileComingSoonTab } from "@/components/modules/organization/modules/profile/components/ProfileComingSoonTab";
+import { PersonFormsTab } from "@/components/modules/lifecycle/questionnaires/PersonFormsTab";
 
-export default function FormsTabPage() {
-  return <ProfileComingSoonTab title="Forms"/>;
+/** The person's answered questionnaires (DECISIONS.md § "Lifecycle tasks", E1). */
+export default async function FormsTabPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <PersonFormsTab userId={id}/>;
 }

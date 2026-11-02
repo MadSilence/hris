@@ -26,7 +26,7 @@ type Props = {
  */
 export function QuickAddCard({ left, top, where, onAddAction, onCancelAction }: Props) {
   const [title, setTitle] = useState("");
-  const [kind, setKind] = useState<TaskKind>("CHECKLIST");
+  const [kind, setKind] = useState<TaskKind>("TODO");
   const [error, setError] = useState<string | null>(null);
 
   const submit = (e: React.FormEvent) => {

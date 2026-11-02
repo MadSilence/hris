@@ -18,7 +18,9 @@ import { formatDisplayDate } from "@/lib/date";
 import { previewStartAction, startProcessAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { useInvalidateLifecycle, useLifecycleTemplates } from "@/components/modules/lifecycle/hooks";
 import {
+  ACCESS_PROBLEM_LABELS,
   ASSIGNEE_PROBLEM_LABELS,
+  assigneeKindLabel,
   PROCESS_TYPE_LABELS,
   TASK_KIND_LABELS,
   describeDue,
@@ -191,7 +193,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
               </div>
 
               <div className="space-y-1.5">
-                <RequiredLabel required>Onboarding Manager</RequiredLabel>
+                <RequiredLabel required>{assigneeKindLabel("ONBOARDING_MANAGER", type)}</RequiredLabel>
                 <UserPickerField value={manager} onChange={setManager} />
                 <p className="text-xs text-muted-foreground">Follows the process through. Anybody who works here can be one.</p>
                 {fieldErrors.managerUserId && <p role="alert" className="text-xs text-destructive">{fieldErrors.managerUserId}</p>}
@@ -218,8 +220,8 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
           ) : preview && (
             <>
               <p className="text-sm">
-                <span className="font-medium">{preview.templateName}</span> · starts{" "}
-                {formatDisplayDate(preview.anchorDate ?? hireDate, { style: "medium" })} · onboarding manager{" "}
+                <span className="font-medium">{preview.templateName}</span> · {type === "OFFBOARDING" ? "last day" : "starts"}{" "}
+                {formatDisplayDate(preview.anchorDate ?? hireDate, { style: "medium" })} · {type === "OFFBOARDING" ? "offboarding" : "onboarding"} manager{" "}
                 {preview.manager?.name ?? manager?.firstName ?? "—"}
               </p>
               <ul className="divide-y divide-brown-100 rounded-md border border-brown-200">
@@ -252,7 +254,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                             </p>
                           )}
                           <p className="text-xs text-muted-foreground">
-                            {TASK_KIND_LABELS[t.kind]} · {describeDue(t.dueKind, t.offsetDays)}
+                            {TASK_KIND_LABELS[t.kind]} · {describeDue(t.dueKind, t.offsetDays, type)}
                             {t.dueDate ? ` (${formatDisplayDate(t.dueDate, { style: "medium" })})` : ""} · done by{" "}
                             {e.assignee ? e.assignee.firstName : t.assigneeName ?? "nobody"}
                           </p>
@@ -286,6 +288,15 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                           {e.removed ? <Undo2 className="h-4 w-4" /> : <X className="h-4 w-4" />}
                         </Button>
                       </div>
+                      {/* C4: said, not refused — access can be granted after the start. A new assignee is
+                          checked again by the start itself. */}
+                      {!e.removed && !problem && !e.assignee && t.accessProblem && (
+                        <p role="status" className="flex items-center gap-1.5 text-xs text-warning-700">
+                          <TriangleAlert className="h-3.5 w-3.5" />
+                          {t.assigneeName ? `${t.assigneeName}: ` : ""}
+                          {ACCESS_PROBLEM_LABELS[t.accessProblem]}. Grant it, or choose somebody who can.
+                        </p>
+                      )}
                       {!e.removed && (problem || e.assignee) && (
                         <div className="space-y-1.5">
                           {problem && (

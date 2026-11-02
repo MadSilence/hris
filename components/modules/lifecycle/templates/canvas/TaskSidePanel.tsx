@@ -13,9 +13,11 @@ import {
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import {
+  ACCESS_PROBLEM_LABELS,
   ASSIGNEE_KIND_LABELS,
   ASSIGNEE_PROBLEM_LABELS,
   TASK_KIND_LABELS,
+  assigneeKindLabel,
   type ProcessType,
   type TaskKind,
   type TemplateAssigneeKind,
@@ -65,6 +67,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
   }, [item.key, item.offsetDays]);
 
   const others = items.filter((i) => i.key !== item.key);
+  const leaving = type === "OFFBOARDING";
 
   return (
     <aside
@@ -103,7 +106,9 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
 
         <div className="space-y-1.5">
           <Label htmlFor={`${id}-kind`}>Kind</Label>
-          <Select value={item.kind} disabled={readOnly} onValueChange={(v) => onChange({ kind: v as TaskKind })}>
+          {/* A document's category does not make a to-do require a file by accident: it is chosen again. */}
+          <Select value={item.kind} disabled={readOnly}
+            onValueChange={(v) => onChange({ kind: v as TaskKind, categoryId: v === "DOCUMENT" && item.kind === "DOCUMENT" ? item.categoryId : null })}>
             <SelectTrigger id={`${id}-kind`}><SelectValue /></SelectTrigger>
             <SelectContent>
               {(Object.keys(TASK_KIND_LABELS) as TaskKind[]).map((k) => (
@@ -119,6 +124,8 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           type={type}
           attributeIds={item.attributeIds}
           categoryId={item.categoryId}
+          materials={item.materials}
+          questions={item.questions}
           disabled={readOnly}
           onChange={onChange}
         />
@@ -148,15 +155,15 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             >
               <SelectTrigger id={`${id}-due`} className="flex-1"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="BEFORE">Days Before Start</SelectItem>
-                <SelectItem value="ON">On the Start Day</SelectItem>
-                <SelectItem value="AFTER">Days After Start</SelectItem>
-                <SelectItem value="BEFORE_START">By the Start Day</SelectItem>
+                <SelectItem value="BEFORE">{leaving ? "Days Before the Last Day" : "Days Before Start"}</SelectItem>
+                <SelectItem value="ON">{leaving ? "On the Last Day" : "On the Start Day"}</SelectItem>
+                <SelectItem value="AFTER">{leaving ? "Days After the Last Day" : "Days After Start"}</SelectItem>
+                <SelectItem value="BEFORE_START">{leaving ? "By the Last Day" : "By the Start Day"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <p className="text-xs text-muted-foreground">
-            {dayLabel(item)}. Calendar days; a date on a weekend stays where it falls.
+            {dayLabel(item, type)}. Calendar days; a date on a weekend stays where it falls.
           </p>
         </div>
 
@@ -175,7 +182,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             <SelectTrigger id={`${id}-assignee`}><SelectValue /></SelectTrigger>
             <SelectContent>
               {(Object.keys(ASSIGNEE_KIND_LABELS) as TemplateAssigneeKind[]).map((k) => (
-                <SelectItem key={k} value={k}>{ASSIGNEE_KIND_LABELS[k]}</SelectItem>
+                <SelectItem key={k} value={k}>{assigneeKindLabel(k, type)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -195,6 +202,13 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
               <TriangleAlert className="h-3.5 w-3.5" />
               {item.assigneeName ? `${item.assigneeName}: ` : ""}
               {ASSIGNEE_PROBLEM_LABELS[item.assigneeProblem]}. Choose somebody else.
+            </p>
+          )}
+          {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && item.accessProblem && (
+            <p role="status" className="flex items-center gap-1.5 text-xs text-warning-700">
+              <TriangleAlert className="h-3.5 w-3.5" />
+              {item.assigneeName ? `${item.assigneeName}: ` : ""}
+              {ACCESS_PROBLEM_LABELS[item.accessProblem]} for anybody. Grant it, or give the task to somebody who can.
             </p>
           )}
           {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && (
@@ -227,7 +241,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
                     <span className="min-w-0">
                       <span className="block truncate">{other.title || "Untitled task"}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {circle ? "Waits for this task already, so it would make a circle" : dayLabel(other)}
+                        {circle ? "Waits for this task already, so it would make a circle" : dayLabel(other, type)}
                       </span>
                     </span>
                   </label>

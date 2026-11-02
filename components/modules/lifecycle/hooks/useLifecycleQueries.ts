@@ -7,6 +7,7 @@ import type {
   ProcessDeleteImpact,
   ProcessSummary,
   ProcessType,
+  QuestionnaireResponse,
   Task,
   Template,
   TemplateSummary,
@@ -68,6 +69,15 @@ export const useMyTasks = (includeDone: boolean) => {
   });
 };
 
+/** A person's answered questionnaires — the profile's Forms tab (DECISIONS.md § "Lifecycle tasks", E1). */
+export const useQuestionnaires = (userId: string) => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<QuestionnaireResponse[]>({
+    queryKey: lifecycleQueryKeys.questionnaires(userId),
+    queryFn: () => internalApiClient.get<QuestionnaireResponse[]>(`/lifecycle/users/${userId}/questionnaires`),
+  });
+};
+
 /** Everything a lifecycle mutation can have changed. */
 export const useInvalidateLifecycle = () => {
   const queryClient = useQueryClient();
@@ -77,5 +87,6 @@ export const useInvalidateLifecycle = () => {
     queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.processesRoot }),
     queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.processRoot }),
     queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot }),
+    queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.questionnairesRoot }),
   ]);
 };

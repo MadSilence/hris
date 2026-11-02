@@ -30,7 +30,7 @@ type Props = {
 };
 
 export const templateHref = (type: ProcessType, id: string) =>
-  `/settings/automation/${type === "ONBOARDING" ? "onboarding" : "preboarding"}/${id}`;
+  `/settings/automation/${type.toLowerCase()}/${id}`;
 
 /**
  * Settings → Preboarding / Onboarding: the templates processes are started from. A quiet list — the name,
@@ -96,7 +96,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
           // "an onboarding", "a preboarding": the article follows the word, and a template literal
           // that always writes "a" produced "a onboarding" on one of the two tabs.
           description={`A template is the list of tasks ${
-            type === "ONBOARDING" ? "an" : "a"
+            type === "PREBOARDING" ? "a" : "an"
           } ${PROCESS_TYPE_LABELS[type].toLowerCase()} starts with.`}
           onCreate={() => setAdding(true)}
           createLabel="Add Template"

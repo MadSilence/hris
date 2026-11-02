@@ -37,14 +37,14 @@ const preview: StartPreview = {
   managerProblem: null,
   tasks: [
     {
-      templateItemId: "i1", position: 0, kind: "CHECKLIST", title: "Say hello", description: null,
+      templateItemId: "i1", position: 0, kind: "TODO", title: "Say hello", description: null,
       dueKind: "OFFSET", offsetDays: -7, dueDate: "2026-10-07", assigneeKind: "TARGET",
-      assigneeUserId: "p1", assigneeName: "Alan Turing", assigneeProblem: null, config: {}, waitsFor: [],
+      assigneeUserId: "p1", assigneeName: "Alan Turing", assigneeProblem: null, config: {}, waitsFor: [], accessProblem: null,
     },
     {
-      templateItemId: "i2", position: 1, kind: "CHECKLIST", title: "Welcome call", description: null,
+      templateItemId: "i2", position: 1, kind: "TODO", title: "Welcome call", description: null,
       dueKind: "OFFSET", offsetDays: 1, dueDate: "2026-10-15", assigneeKind: "SPECIFIC_USER",
-      assigneeUserId: "gone", assigneeName: "Old Colleague", assigneeProblem: "LEFT", config: {}, waitsFor: [],
+      assigneeUserId: "gone", assigneeName: "Old Colleague", assigneeProblem: "LEFT", config: {}, waitsFor: [], accessProblem: null,
     },
   ],
 };
@@ -95,7 +95,7 @@ describe("StartProcessModal", () => {
 
     const rows = screen.getAllByRole("listitem");
     expect(rows[0]).toHaveTextContent("Say hello");
-    expect(rows[0]).toHaveTextContent("Checklist");
+    expect(rows[0]).toHaveTextContent("To-do");
     expect(rows[1]).toHaveTextContent("Welcome call");
   });
 

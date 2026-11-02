@@ -59,7 +59,7 @@ type Props = {
 
 type QuickAdd = { laneId: string; columnId: string; left: number; top: number };
 
-const listHref = (type: ProcessType) => `/settings/automation/${type === "ONBOARDING" ? "onboarding" : "preboarding"}`;
+const listHref = (type: ProcessType) => `/settings/automation/${type.toLowerCase()}`;
 
 /**
  * Settings → Onboarding / Preboarding → one template, as a canvas (DECISIONS.md § "Automations and the
@@ -117,8 +117,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const guard = useUnsavedChangesGuard(dirty && !busy);
 
   const items = useMemo(() => draft?.items ?? [], [draft]);
-  const lanes = useMemo(() => deriveLanes(items, extraLanes), [items, extraLanes]);
-  const axis = useMemo(() => buildAxis(items), [items]);
+  const lanes = useMemo(() => deriveLanes(items, extraLanes, type), [items, extraLanes, type]);
+  const axis = useMemo(() => buildAxis(items, type), [items, type]);
   const layout = useMemo(() => layoutTemplate(items, lanes, axis), [items, lanes, axis]);
   const selected = items.find((i) => i.key === selectedKey) ?? null;
 
@@ -139,8 +139,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     const lane = laneById(laneId);
     const sameLane = laneIdOf(item) === lane.id;
     patchItem(key, { ...timing, ...(sameLane ? {} : assigneeOfLane(lane)) });
-    setNotice(`${item.title || "Untitled task"} moved to ${dayLabel(timing)}, ${lane.label}.`);
-  }, [items, laneById, patchItem]);
+    setNotice(`${item.title || "Untitled task"} moved to ${dayLabel(timing, type)}, ${lane.label}.`);
+  }, [items, laneById, patchItem, type]);
 
   const selectBlock = useCallback((key: string | null) => {
     setSelectedKey(key);
@@ -179,6 +179,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       ...assigneeOfLane(lane),
       attributeIds: [],
       categoryId: null,
+      materials: [],
+      questions: [],
       waitsFor: [],
     };
     setItems((list) => [...list, item]);
@@ -393,6 +395,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
           {view === "canvas" ? (
             <div className="relative h-[calc(100vh-220px)] min-h-[440px]">
               <TemplateCanvas
+                type={type}
                 items={items}
                 layout={layout}
                 readOnly={readOnly}
@@ -417,7 +420,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
                 <QuickAddCard
                   left={Math.max(8, quickAdd.left)}
                   top={Math.max(8, quickAdd.top)}
-                  where={`${quickAddLane.label} · ${dayLabel(quickAddTiming)}`}
+                  where={`${quickAddLane.label} · ${dayLabel(quickAddTiming, type)}`}
                   onAddAction={({ title, kind }) => addTask(quickAdd.laneId, quickAddTiming, title, kind)}
                   onCancelAction={() => setQuickAdd(null)}
                 />
@@ -425,12 +428,13 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
             </div>
           ) : (
             <TemplateTaskListView
+              type={type}
               items={items}
               lanes={lanes}
               selectedKey={selectedKey}
               readOnly={readOnly}
               onSelectAction={(key) => selectBlock(key)}
-              onAddAction={() => addTask("TARGET", { dueKind: "OFFSET", offsetDays: 0 }, "", "CHECKLIST")}
+              onAddAction={() => addTask("TARGET", { dueKind: "OFFSET", offsetDays: 0 }, "", "TODO")}
             />
           )}
         </div>

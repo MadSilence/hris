@@ -10,11 +10,13 @@ import { HomeCard, HomeCardLink, HomeEmpty, HomeRowsSkeleton } from "@/component
 
 export const PROCESSES_LIMIT = 5;
 const IN_FLIGHT = new Set<ProcessSummary["status"]>(["PLANNED", "IN_PROGRESS", "PARTIALLY_FAILED"]);
-const TYPE_LABELS: Record<ProcessSummary["type"], string> = { PREBOARDING: "Preboarding", ONBOARDING: "Onboarding" };
+const TYPE_LABELS: Record<ProcessSummary["type"], string> = {
+  PREBOARDING: "Preboarding", ONBOARDING: "Onboarding", OFFBOARDING: "Offboarding",
+};
 
 /**
- * Preboarding and onboarding in flight within the reader's scope — the list `/processes` shows, open only,
- * soonest start first. (There is no offboarding process in the product: leaving is a status, not a process.)
+ * Preboarding, onboarding and offboarding in flight within the reader's scope — the list `/processes` shows,
+ * open only, soonest date first.
  */
 export const ProcessesWidget: React.FC = () => {
   const query = useLifecycleProcesses(false);

@@ -15,7 +15,7 @@ import type { Template } from "@/models/lifecycle";
 
 const item = (key: string, over: Partial<DraftItem> = {}): DraftItem => ({
   key,
-  kind: "CHECKLIST",
+  kind: "TODO",
   title: key.toUpperCase(),
   description: "",
   dueKind: "OFFSET",
@@ -26,6 +26,8 @@ const item = (key: string, over: Partial<DraftItem> = {}): DraftItem => ({
   assigneeProblem: null,
   attributeIds: [],
   categoryId: null,
+  materials: [],
+  questions: [],
   waitsFor: [],
   ...over,
 });
@@ -63,7 +65,7 @@ describe("a draft and the template it saves as", () => {
     id: "t1", type: "ONBOARDING", name: "Engineers", description: null, archivedAt: null, version: 3,
     items: [
       {
-        id: "i1", position: 0, kind: "CHECKLIST", title: "Order a laptop", description: null, dueKind: "OFFSET",
+        id: "i1", position: 0, kind: "TODO", title: "Order a laptop", description: null, dueKind: "OFFSET",
         offsetDays: -7, assigneeKind: "ONBOARDING_MANAGER", assigneeUserId: null, assigneeName: null,
         assigneeProblem: null, config: {}, waitsFor: [],
       },
@@ -73,7 +75,7 @@ describe("a draft and the template it saves as", () => {
         assigneeProblem: null, config: { categoryId: "cat" }, waitsFor: [],
       },
       {
-        id: "i3", position: 2, kind: "CHECKLIST", title: "Set up the laptop", description: null, dueKind: "OFFSET",
+        id: "i3", position: 2, kind: "TODO", title: "Set up the laptop", description: null, dueKind: "OFFSET",
         offsetDays: -1, assigneeKind: "SPECIFIC_USER", assigneeUserId: "u1", assigneeName: "Linus",
         assigneeProblem: null, config: {}, waitsFor: ["i1"],
       },
@@ -122,5 +124,36 @@ describe("words", () => {
     expect(dayLabel({ dueKind: "OFFSET", offsetDays: 3 })).toBe("3 days after start");
     expect(dayLabel({ dueKind: "OFFSET", offsetDays: -1 })).toBe("1 day before start");
     expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null })).toBe("By the start day");
+  });
+});
+
+describe("what a task carries (DECISIONS.md § \"Lifecycle tasks\")", () => {
+  const draft = (items: DraftItem[]) => ({ name: "T", description: "", items });
+
+  it("writes a to-do's required file, a questionnaire's questions and anybody's material", () => {
+    const link = { type: "LINK" as const, url: "https://example.test", name: "Guide" };
+    const write = draftToWrite("ONBOARDING", draft([
+      item("todo", { kind: "TODO", categoryId: "cat1", materials: [link] }),
+      item("q", { kind: "QUESTIONNAIRE", questions: [{ id: "q1", label: "Why?", type: "LONG_TEXT", required: true }] }),
+      item("ack", { kind: "ACKNOWLEDGE", materials: [link] }),
+    ]));
+    const byKey = Object.fromEntries(write.items.map((i) => [i.key, i.config]));
+    expect(byKey.todo).toEqual({ categoryId: "cat1", materials: [link] });
+    expect(byKey.q).toEqual({ questions: [{ id: "q1", label: "Why?", type: "LONG_TEXT", required: true }], materials: null });
+    expect(byKey.ack).toEqual({ materials: [link] });
+  });
+
+  it("will not save an acknowledgement with nothing to read, or a questionnaire with no question", () => {
+    expect(draftProblems(draft([item("ack", { kind: "ACKNOWLEDGE", title: "Read" })])))
+      .toContain("Read: attach a file or a link to acknowledge.");
+    expect(draftProblems(draft([item("q", { kind: "QUESTIONNAIRE", title: "Ask" })])))
+      .toContain("Ask: add a question.");
+  });
+
+  it("counts an offboarding from the last working day, and calls its people what they are", () => {
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, "OFFBOARDING")).toBe("Last Day");
+    expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, "OFFBOARDING")).toBe("By the last day");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: -2 }, "OFFBOARDING")).toBe("2 days before the last day");
+    expect(deriveLanes([], [], "OFFBOARDING").map((l) => l.label)).toEqual(["The Leaver", "Offboarding Manager"]);
   });
 });

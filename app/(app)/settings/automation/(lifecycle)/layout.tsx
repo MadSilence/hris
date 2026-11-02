@@ -49,12 +49,10 @@ const tabs: Tab[] = [
     label: "Offboarding",
     href: "/settings/automation/offboarding",
     icon: UserMinus,
-    // What the "Offboarding" settings entry was gated by before it became a tab; offboarding
-    // templates are not built — the design defers them (technical_documentation/LIFECYCLE_PROCESSES.md).
-    resource: "SETTINGS.GENERAL",
+    resource: "PEOPLE.LIFECYCLE_TEMPLATES",
     title: "Offboarding",
     description:
-      "What happens when somebody leaves the company — handing over their work, returning equipment, closing access.",
+      "The task lists an offboarding starts with, counted from the last working day — handing over work, returning equipment, the exit interview.",
   },
 ];
 
@@ -116,7 +114,6 @@ export default function LifecycleSettingsLayout({ children }: { children: ReactN
           </Tabs>
         </div>
 
-        {/* Not padded here: the Offboarding tab is the shared coming-soon page, which pads itself. */}
         {children}
       </div>
     </PermissionGate>

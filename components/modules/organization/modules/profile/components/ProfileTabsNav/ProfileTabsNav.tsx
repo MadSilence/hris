@@ -18,9 +18,10 @@ type TabDef = {
 };
 
 /**
- * The order is the owner's. Public Profile, Salary, Forms, Tasks and Notes are UI only for now —
- * each opens `ProfileComingSoonTab` — and carry no resource: they are ungated until there is
- * something behind them worth a permission.
+ * The order is the owner's. Public Profile, Salary, Tasks and Notes are UI only for now — each opens
+ * `ProfileComingSoonTab` — and carry no resource: they are ungated until there is something behind them
+ * worth a permission. Forms carries none either: it shows the person's answered questionnaires, and the
+ * backend gives the processes right all of them and the person what they answered themself.
  */
 const TABS: TabDef[] = [
   { id: "public-profile", label: "Public Profile" },

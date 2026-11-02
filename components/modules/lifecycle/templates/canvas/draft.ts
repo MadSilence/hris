@@ -6,8 +6,11 @@
  * So the list view, the side panel and the canvas all edit this one shape.
  */
 import {
-  ASSIGNEE_KIND_LABELS,
+  assigneeKindLabel,
+  type AccessProblem,
   type AssigneeProblem,
+  type Material,
+  type Question,
   type DueKind,
   type ProcessType,
   type TaskKind,
@@ -31,9 +34,16 @@ export type DraftItem = {
   assigneeName: string | null;
   assigneeProblem: AssigneeProblem | null;
   attributeIds: string[];
+  /** DOCUMENT: the file's category. TODO: when set, the to-do requires a file of it (B2). */
   categoryId: string | null;
+  /** HR's files and links, on any kind (B1). */
+  materials: Material[];
+  /** QUESTIONNAIRE: its questions (A5). */
+  questions: Question[];
   /** Keys of the tasks this one waits for. */
   waitsFor: string[];
+  /** A named person who cannot do it for anybody — read from the saved template, not worked out here (C4). */
+  accessProblem?: AccessProblem | null;
 };
 
 export type TemplateDraft = {
@@ -62,6 +72,9 @@ export const draftFromTemplate = (template: Template): TemplateDraft => ({
     assigneeProblem: i.assigneeProblem,
     attributeIds: i.config?.attributeIds ?? [],
     categoryId: i.config?.categoryId ?? null,
+    materials: i.config?.materials ?? [],
+    questions: i.config?.questions ?? [],
+    accessProblem: i.accessProblem ?? null,
     waitsFor: (i.waitsFor ?? []).filter((id) => template.items.some((other) => other.id === id)),
   })),
 });
@@ -87,10 +100,21 @@ const itemToWrite = (i: DraftItem): TemplateItemWrite => ({
   offsetDays: i.dueKind === "BEFORE_START" ? null : i.offsetDays ?? 0,
   assigneeKind: i.assigneeKind,
   assigneeUserId: i.assigneeKind === "SPECIFIC_USER" ? i.assigneeUserId : null,
-  config: i.kind === "FILL_FIELDS" ? { attributeIds: i.attributeIds }
-    : i.kind === "DOCUMENT" ? { categoryId: i.categoryId } : null,
+  config: configOf(i),
   waitsFor: i.waitsFor,
 });
+
+/** What the kind needs, and the material any kind may carry — the backend drops what a kind does not use. */
+const configOf = (i: DraftItem): TemplateItemWrite["config"] => {
+  const materials = i.materials.length ? i.materials : null;
+  switch (i.kind) {
+    case "FILL_FIELDS": return { attributeIds: i.attributeIds, materials };
+    case "DOCUMENT": return { categoryId: i.categoryId, materials };
+    case "TODO": return { categoryId: i.categoryId, materials };
+    case "QUESTIONNAIRE": return { questions: i.questions, materials };
+    default: return { materials };
+  }
+};
 
 /** Two drafts say the same thing — what the dirty guard asks. */
 export const sameDraft = (a: TemplateDraft, b: TemplateDraft) =>
@@ -119,12 +143,12 @@ export const laneIdOf = (i: Pick<DraftItem, "assigneeKind" | "assigneeUserId">):
  * in the order they first appear, then the ones added here that hold no task yet. There is no line
  * manager lane: a template's manager is the process's onboarding manager.
  */
-export const deriveLanes = (items: DraftItem[], extra: Lane[] = []): Lane[] => {
+export const deriveLanes = (items: DraftItem[], extra: Lane[] = [], type?: ProcessType): Lane[] => {
   const lanes: Lane[] = [
-    { id: "TARGET", assigneeKind: "TARGET", userId: null, label: ASSIGNEE_KIND_LABELS.TARGET, problem: null },
+    { id: "TARGET", assigneeKind: "TARGET", userId: null, label: assigneeKindLabel("TARGET", type), problem: null },
     {
       id: "ONBOARDING_MANAGER", assigneeKind: "ONBOARDING_MANAGER", userId: null,
-      label: ASSIGNEE_KIND_LABELS.ONBOARDING_MANAGER, problem: null,
+      label: assigneeKindLabel("ONBOARDING_MANAGER", type), problem: null,
     },
   ];
   const seen = new Set(lanes.map((l) => l.id));
@@ -200,19 +224,25 @@ const MINUS = "−";
 
 /**
  * "By the start day", "Day 1", "3 days after start", "3 days before start" — as people say them, and
- * agreeing with the ruler's "+3". Offsets count calendar days (decision 12).
+ * agreeing with the ruler's "+3". Offsets count calendar days (decision 12). An offboarding counts from the
+ * last working day instead: "By the last day", "Last Day", "2 days after the last day".
  */
-export const dayLabel = (i: Pick<DraftItem, "dueKind" | "offsetDays">): string => {
-  if (i.dueKind === "BEFORE_START") return "By the start day";
+export const dayLabel = (i: Pick<DraftItem, "dueKind" | "offsetDays">, type?: ProcessType): string => {
+  const leaving = type === "OFFBOARDING";
+  if (i.dueKind === "BEFORE_START") return leaving ? "By the last day" : "By the start day";
   const n = i.offsetDays ?? 0;
-  if (n === 0) return "Day 1";
+  if (n === 0) return leaving ? "Last Day" : "Day 1";
   const days = Math.abs(n) === 1 ? "1 day" : `${Math.abs(n)} days`;
+  if (leaving) return n > 0 ? `${days} after the last day` : `${days} before the last day`;
   return n > 0 ? `${days} after start` : `${days} before start`;
 };
 
+/** The anchor's own day on the ruler: Day 1, or an offboarding's Last Day. */
+export const anchorDayLabel = (type?: ProcessType) => (type === "OFFBOARDING" ? "Last Day" : "Day 1");
+
 /** A compact day for the ruler: "−3", "Day 1", "+5". */
-export const shortDay = (offset: number): string =>
-  offset === 0 ? "Day 1" : offset < 0 ? `${MINUS}${Math.abs(offset)}` : `+${offset}`;
+export const shortDay = (offset: number, type?: ProcessType): string =>
+  offset === 0 ? anchorDayLabel(type) : offset < 0 ? `${MINUS}${Math.abs(offset)}` : `+${offset}`;
 
 export type Phase = "BEFORE_START" | "WEEK_1" | "MONTH_1" | "LATER";
 
@@ -242,6 +272,10 @@ export const draftProblems = (draft: TemplateDraft): string[] => {
     else if (i.assigneeKind === "SPECIFIC_USER" && !i.assigneeUserId) problems.push(`${i.title.trim()}: choose who does it.`);
     else if (i.kind === "FILL_FIELDS" && i.attributeIds.length === 0) problems.push(`${i.title.trim()}: choose the fields to fill in.`);
     else if (i.kind === "DOCUMENT" && !i.categoryId) problems.push(`${i.title.trim()}: choose a document category.`);
+    else if (i.kind === "TODO" && i.categoryId === "") problems.push(`${i.title.trim()}: choose the category of the file it requires.`);
+    else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(`${i.title.trim()}: attach a file or a link to acknowledge.`);
+    else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(`${i.title.trim()}: add a question.`);
+    else if (i.kind === "QUESTIONNAIRE" && i.questions.some((q) => !q.label.trim())) problems.push(`${i.title.trim()}: a question has no text.`);
   });
   return problems;
 };

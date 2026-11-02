@@ -33,10 +33,14 @@ import {
 } from "@/components/modules/lifecycle/hooks";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import { TaskList } from "@/components/modules/lifecycle/tasks/TaskList";
-import { PROCESS_TYPE_LABELS } from "@/models/lifecycle";
+import { PROCESS_TYPE_LABELS, assigneeKindLabel, type Task } from "@/models/lifecycle";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { cancelProcessTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { ProcessStatusBadge } from "./ProcessStatusBadge";
+import { ProcessTaskDialog } from "./ProcessTaskDialog";
 
-type Dialog = "complete" | "cancel" | "archive" | "delete" | "manager" | "revoke" | null;
+type Dialog = "complete" | "cancel" | "archive" | "delete" | "manager" | "revoke" | "task" | "cancelTask" | null;
 
 /** One process: its tasks, who runs it, the hire date it was planned against, and what can be done to it. */
 export function ProcessDetailContainer({ processId }: { processId: string }) {
@@ -46,6 +50,10 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
   const [manager, setManager] = useState<PickedUser | null>(null);
   const [busyTask, setBusyTask] = useState<string | null>(null);
   const impact = useProcessDeleteImpact(processId, dialog === "delete");
+  // The task being edited or cancelled; null with the task dialog open means a new one.
+  const [taskOf, setTaskOf] = useState<Task | null>(null);
+  const canEdit = useCanAccess("PEOPLE.LIFECYCLE_PROCESSES", "EDIT");
+  const { userId: me } = useCurrentUser();
 
   if (error) return <ErrorState error={error} />;
   if (isLoading || !process) {
@@ -53,6 +61,9 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
   }
 
   const open = !process.closedAt;
+  const leaving = process.type === "OFFBOARDING";
+  // The same role either way; an offboarding calls it by its own name (Q4 of 2026-11-02).
+  const managerLabel = assigneeKindLabel("ONBOARDING_MANAGER", process.type);
   const act = async (result: Promise<{ status: ActionStatus; errorMessage?: string }>, success?: string) => {
     const res = await result;
     if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
@@ -79,8 +90,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           <p className="text-sm text-muted-foreground">
             {[
               `From ${process.templateName}`,
-              `Starts ${formatDisplayDate(process.anchorDate, { style: "medium" })}`,
-              `Onboarding manager: ${process.manager?.name ?? "nobody"}`,
+              `${leaving ? "Last day" : "Starts"} ${formatDisplayDate(process.anchorDate, { style: "medium" })}`,
+              `${leaving ? "Offboarding" : "Onboarding"} manager: ${process.manager?.name ?? "nobody"}`,
               process.type === "PREBOARDING" ? (process.linkActive ? "Preboarding link active" : "No active preboarding link") : null,
             ].filter(Boolean).join(" · ")}
           </p>
@@ -97,7 +108,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             <RowActionsMenu label="Process Actions" className="w-56">
               {open && (
                 <RowAction icon={<UserRoundCog className="h-4 w-4 text-muted-foreground" />} onClick={() => { setManager(null); setDialog("manager"); }}>
-                  Change Onboarding Manager
+                  Change {managerLabel}
                 </RowAction>
               )}
               {open && process.type === "PREBOARDING" && (
@@ -152,7 +163,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             <CalendarClock className="mt-0.5 h-4 w-4 text-warning-700" />
             <div>
               <p className="font-medium text-warning-800">
-                The hire date moved from {formatDisplayDate(process.anchorDrift.from, { style: "medium" })} to{" "}
+                {leaving ? "The last working day" : "The hire date"} moved from {formatDisplayDate(process.anchorDrift.from, { style: "medium" })} to{" "}
                 {formatDisplayDate(process.anchorDrift.to, { style: "medium" })}.
               </p>
               <p className="text-warning-800/80">
@@ -179,7 +190,14 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Tasks</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-medium">Tasks</h2>
+          {open && canEdit && (
+            <Button type="button" variant="outline" size="sm" onClick={() => { setTaskOf(null); setDialog("task"); }}>
+              Add Task
+            </Button>
+          )}
+        </div>
         {process.tasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">This process has no tasks.</p>
         ) : (
@@ -187,15 +205,20 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             tasks={process.tasks}
             showAssignee
             busyTaskId={busyTask}
-            onCompleteAction={async (task) => {
+            canComplete={() => canEdit}
+            isMine={(task) => task.assignee?.id === me}
+            onCompleteAction={async (task, documentId) => {
               setBusyTask(task.id);
               try {
-                const problem = await act(completeProcessTaskAction({ id: process.id, taskId: task.id }));
+                const problem = await act(completeProcessTaskAction({ id: process.id, taskId: task.id, documentId }));
                 if (problem) showActionError({ errorMessage: problem });
               } finally {
                 setBusyTask(null);
               }
             }}
+            onChangedAction={async () => { await invalidate(); }}
+            onEditAction={open && canEdit ? (task) => { setTaskOf(task); setDialog("task"); } : undefined}
+            onCancelAction={open && canEdit ? (task) => { setTaskOf(task); setDialog("cancelTask"); } : undefined}
           />
         )}
       </section>
@@ -277,6 +300,9 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           <>
             <p>{impact.data.tasksDeleted} task(s) will be deleted.</p>
             <p>{impact.data.documentsKept} document(s) stay in {process.target.name}&apos;s file.</p>
+            {impact.data.answersKept > 0 && (
+              <p>{impact.data.answersKept} answered questionnaire(s) stay on {process.target.name}&apos;s Forms tab.</p>
+            )}
             <p>The history of what happened is kept.</p>
           </>
         ) : impact.isError ? (
@@ -286,9 +312,33 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         )}
       </ConfirmDialog>
 
+      <ProcessTaskDialog
+        process={process}
+        task={taskOf}
+        open={dialog === "task"}
+        onCloseAction={() => setDialog(null)}
+        onSavedAction={async () => { await invalidate(); setDialog(null); }}
+      />
+
+      <ConfirmDialog
+        open={dialog === "cancelTask"}
+        title="Cancel Task"
+        confirmLabel="Cancel Task"
+        destructive
+        onCancelAction={() => setDialog(null)}
+        onConfirmAction={async () => {
+          if (!taskOf) return null;
+          const problem = await act(cancelProcessTaskAction({ id: process.id, taskId: taskOf.id }));
+          if (!problem) setDialog(null);
+          return problem;
+        }}
+      >
+        <p>&ldquo;{taskOf?.title}&rdquo; will not be done. A task waiting for it opens now, as if it were done.</p>
+      </ConfirmDialog>
+
       <ConfirmDialog
         open={dialog === "manager"}
-        title="Change Onboarding Manager"
+        title={`Change ${managerLabel}`}
         confirmLabel="Change"
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
@@ -299,9 +349,9 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         }}
       >
         <div className="space-y-1.5">
-          <Label>Onboarding Manager</Label>
+          <Label>{managerLabel}</Label>
           <UserPickerField value={manager} onChange={setManager} />
-          <p className="text-xs">Their open tasks as onboarding manager move to the new one.</p>
+          <p className="text-xs">Their open tasks as {managerLabel.toLowerCase()} move to the new one.</p>
         </div>
       </ConfirmDialog>
     </div>

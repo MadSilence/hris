@@ -21,7 +21,7 @@ import { deriveLanes, type DraftItem } from "./draft";
 
 const item = (over: Partial<DraftItem>): DraftItem => ({
   key: over.key ?? "k",
-  kind: "CHECKLIST",
+  kind: "TODO",
   title: "Task",
   description: "",
   dueKind: "OFFSET",
@@ -32,6 +32,8 @@ const item = (over: Partial<DraftItem>): DraftItem => ({
   assigneeProblem: null,
   attributeIds: [],
   categoryId: null,
+  materials: [],
+  questions: [],
   waitsFor: [],
   ...over,
 });

@@ -18,7 +18,7 @@ jest.mock("@/components/modules/settings/shared/UserPickerField/UserPickerField"
 
 const item = (key: string, over: Partial<DraftItem> = {}): DraftItem => ({
   key,
-  kind: "CHECKLIST",
+  kind: "TODO",
   title: `Task ${key}`,
   description: "",
   dueKind: "OFFSET",
@@ -29,6 +29,8 @@ const item = (key: string, over: Partial<DraftItem> = {}): DraftItem => ({
   assigneeProblem: null,
   attributeIds: [],
   categoryId: null,
+  materials: [],
+  questions: [],
   waitsFor: [],
   ...over,
 });
@@ -47,7 +49,8 @@ describe("TaskSidePanel", () => {
     fireEvent.change(screen.getByLabelText(/Title/), { target: { value: "Order a laptop" } });
     expect(onChange).toHaveBeenLastCalledWith({ title: "Order a laptop" });
     fireEvent.change(screen.getByLabelText("Kind"), { target: { value: "DOCUMENT" } });
-    expect(onChange).toHaveBeenLastCalledWith({ kind: "DOCUMENT" });
+    // A kind change clears the category, so a document's never makes a to-do require a file by accident.
+    expect(onChange).toHaveBeenLastCalledWith({ kind: "DOCUMENT", categoryId: null });
     fireEvent.change(screen.getByLabelText("Description"), { target: { value: "Ask IT" } });
     expect(onChange).toHaveBeenLastCalledWith({ description: "Ask IT" });
   });

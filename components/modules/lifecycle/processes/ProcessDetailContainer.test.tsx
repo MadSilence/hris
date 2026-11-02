@@ -7,6 +7,10 @@ import type { Process } from "@/models/lifecycle";
 jest.mock("@/components/auth/PermissionGate", () => ({
   PermissionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock("@/components/auth/useAccess", () => ({ useCanAccess: () => true }));
+jest.mock("@/components/providers/CurrentUserProvider/CurrentUserProvider", () => ({
+  useCurrentUser: () => ({ userId: "me" }),
+}));
 jest.mock("@/components/modules/lifecycle/actions/lifecycleActions");
 jest.mock("@/components/modules/lifecycle/hooks", () => ({
   useLifecycleProcess: jest.fn(),

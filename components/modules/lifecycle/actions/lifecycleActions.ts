@@ -8,7 +8,11 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiLifecycleService } from "@/api/modules/lifecycle/services";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 import type {
+  LifecycleFile,
   Process,
+  TaskAddRequest,
+  TaskComment,
+  TaskUpdateRequest,
   ProcessStatus,
   StartPreview,
   StartProcessRequest,
@@ -51,8 +55,23 @@ export async function startProcessAction(input: { userId: string; body: StartPro
 export async function closeProcessAction(input: { id: string; outcome: ProcessStatus }): Promise<ActionResult<Process>> {
   return run("closeProcessAction", () => hrisApiLifecycleService.close(input.id, input.outcome));
 }
-export async function completeProcessTaskAction(input: { id: string; taskId: string }): Promise<ActionResult<Process>> {
-  return run("completeProcessTaskAction", () => hrisApiLifecycleService.completeProcessTask(input.id, input.taskId));
+export async function completeProcessTaskAction(
+  input: { id: string; taskId: string; documentId?: string | null },
+): Promise<ActionResult<Process>> {
+  return run("completeProcessTaskAction", () =>
+    hrisApiLifecycleService.completeProcessTask(input.id, input.taskId, input.documentId));
+}
+// Editing a running process (DECISIONS.md § "Lifecycle tasks", C2)
+export async function addProcessTaskAction(input: { id: string; body: TaskAddRequest }): Promise<ActionResult<Process>> {
+  return run("addProcessTaskAction", () => hrisApiLifecycleService.addProcessTask(input.id, input.body));
+}
+export async function updateProcessTaskAction(
+  input: { id: string; taskId: string; body: TaskUpdateRequest },
+): Promise<ActionResult<Process>> {
+  return run("updateProcessTaskAction", () => hrisApiLifecycleService.updateProcessTask(input.id, input.taskId, input.body));
+}
+export async function cancelProcessTaskAction(input: { id: string; taskId: string }): Promise<ActionResult<Process>> {
+  return run("cancelProcessTaskAction", () => hrisApiLifecycleService.cancelProcessTask(input.id, input.taskId));
 }
 export async function changeProcessManagerAction(input: { id: string; managerUserId: string }): Promise<ActionResult<Process>> {
   return run("changeProcessManagerAction", () => hrisApiLifecycleService.changeManager(input.id, input.managerUserId));
@@ -77,6 +96,23 @@ export async function deleteProcessAction(id: string): Promise<ActionResult<void
 }
 
 // My tasks
-export async function completeMyTaskAction(id: string): Promise<ActionResult<Task>> {
-  return run("completeMyTaskAction", () => hrisApiLifecycleService.completeMyTask(id));
+export async function completeMyTaskAction(input: { id: string; documentId?: string | null }): Promise<ActionResult<Task>> {
+  return run("completeMyTaskAction", () => hrisApiLifecycleService.completeMyTask(input.id, input.documentId));
+}
+export async function answerQuestionnaireAction(
+  input: { id: string; answers: Record<string, unknown> },
+): Promise<ActionResult<Task>> {
+  return run("answerQuestionnaireAction", () => hrisApiLifecycleService.answerQuestionnaire(input.id, input.answers));
+}
+export async function addTaskCommentAction(input: { id: string; body: string }): Promise<ActionResult<TaskComment[]>> {
+  return run("addTaskCommentAction", () => hrisApiLifecycleService.addTaskComment(input.id, input.body));
+}
+
+// Material: a file HR attaches to a task (B1). Multipart, so it travels as FormData.
+export async function uploadLifecycleFileAction(form: FormData): Promise<ActionResult<LifecycleFile>> {
+  return run("uploadLifecycleFileAction", async () => {
+    const file = form.get("file");
+    if (!(file instanceof File)) throw new Error("No file was attached.");
+    return hrisApiLifecycleService.uploadFile(file);
+  });
 }

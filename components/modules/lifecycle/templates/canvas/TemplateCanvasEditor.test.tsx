@@ -47,12 +47,12 @@ const template: Template = {
   id: "t1", type: "ONBOARDING", name: "Engineers", description: null, archivedAt: null, version: 4,
   items: [
     {
-      id: "order", position: 0, kind: "CHECKLIST", title: "Order a laptop", description: null, dueKind: "OFFSET",
+      id: "order", position: 0, kind: "TODO", title: "Order a laptop", description: null, dueKind: "OFFSET",
       offsetDays: -7, assigneeKind: "ONBOARDING_MANAGER", assigneeUserId: null, assigneeName: null,
       assigneeProblem: null, config: {}, waitsFor: [],
     },
     {
-      id: "setup", position: 1, kind: "CHECKLIST", title: "Set up the laptop", description: null, dueKind: "OFFSET",
+      id: "setup", position: 1, kind: "TODO", title: "Set up the laptop", description: null, dueKind: "OFFSET",
       offsetDays: -1, assigneeKind: "TARGET", assigneeUserId: null, assigneeName: null,
       assigneeProblem: null, config: {}, waitsFor: ["order"],
     },

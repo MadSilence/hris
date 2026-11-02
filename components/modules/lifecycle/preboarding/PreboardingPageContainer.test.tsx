@@ -9,7 +9,7 @@ type PageTask = PreboardingPage["tasks"][number];
 
 const task = (id: string, over: Partial<PageTask> = {}): PageTask => ({
   id,
-  kind: "CHECKLIST",
+  kind: "TODO",
   title: `Task ${id}`,
   description: null,
   status: "OPEN",
@@ -17,6 +17,9 @@ const task = (id: string, over: Partial<PageTask> = {}): PageTask => ({
   dueDate: null,
   fields: null,
   categoryName: null,
+  materials: [],
+  questions: null,
+  commentCount: 0,
   ...over,
 });
 

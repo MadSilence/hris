@@ -22,6 +22,7 @@ import {
 import { Plus, TriangleAlert, UserRound } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { cn } from "@/public/desact/src/components/ui/utils";
+import type { ProcessType } from "@/models/lifecycle";
 import { dayLabel, laneIdOf, type DraftItem } from "./draft";
 import { isTypingTarget, keyToCommand, type CanvasCommand } from "./keyboard";
 import {
@@ -60,6 +61,8 @@ export const ZOOM_PRESETS: { id: ZoomPreset; label: string; from: number; to: nu
 ];
 
 export type CanvasProps = {
+  /** Whose dates the ruler names: Day 1 for joining, Last Day for leaving. */
+  type?: ProcessType;
   items: DraftItem[];
   layout: Layout;
   readOnly: boolean;
@@ -148,7 +151,7 @@ function LaneHeaders({ layout, readOnly, onAdd }: { layout: Layout; readOnly: bo
 }
 
 function TemplateCanvasInner({
-  items, layout, readOnly, selectedKey, selectedEdgeId, onSelectBlockAction, onFocusBlockAction, onSelectEdgeAction, onMoveAction,
+  type, items, layout, readOnly, selectedKey, selectedEdgeId, onSelectBlockAction, onFocusBlockAction, onSelectEdgeAction, onMoveAction,
   onConnectAction, onCellClickAction, onAddInLaneAction, onCommandAction, announcement,
 }: CanvasProps) {
   const { fitBounds } = useReactFlow();
@@ -186,7 +189,7 @@ function TemplateCanvasInner({
       id: item.key,
       type: "task",
       position: layout.positions.get(item.key) ?? { x: 0, y: 0 },
-      data: { item, laneLabel: laneLabel(item), selected: item.key === selectedKey, readOnly, onFocusAction: onFocusBlockAction },
+      data: { item, laneLabel: laneLabel(item), selected: item.key === selectedKey, readOnly, onFocusAction: onFocusBlockAction, type },
       draggable: !readOnly,
       connectable: !readOnly,
       width: BLOCK_W,
@@ -194,7 +197,7 @@ function TemplateCanvasInner({
       style: { width: BLOCK_W, height: BLOCK_H },
     }));
     return [grid, ...tasks];
-  }, [items, layout, readOnly, selectedKey, laneLabel, onFocusBlockAction, onCellClickAction]);
+  }, [items, layout, readOnly, selectedKey, laneLabel, onFocusBlockAction, onCellClickAction, type]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(computedNodes);
   // Carry React Flow's own measurement over to the recomputed nodes. A node handed back without
@@ -240,7 +243,7 @@ function TemplateCanvasInner({
   const moveText = (item: DraftItem, node: Node) => {
     const { column, lane } = dropTarget(layout, node.position);
     const timing = timingForColumn(column, item);
-    return { timing, lane, text: `${dayLabel(timing)} · ${lane.label}` };
+    return { timing, lane, text: `${dayLabel(timing, type)} · ${lane.label}` };
   };
 
   const onNodeDrag: OnNodeDrag<Node> = (_e, node) => {

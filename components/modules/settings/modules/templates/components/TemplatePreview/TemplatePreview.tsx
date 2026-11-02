@@ -410,7 +410,7 @@ const linkTo = (item: TemplateRecordedItem): string | null => {
     case "SECTION":
       return "/settings/people/attributes";
     case "PROCESS":
-      return `/settings/automation/${item.subtype === "PREBOARDING" ? "preboarding" : "onboarding"}/${item.objectId}`;
+      return `/settings/automation/${String(item.subtype ?? "ONBOARDING").toLowerCase()}/${item.objectId}`;
     default:
       return null;
   }

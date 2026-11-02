@@ -21,6 +21,7 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import {
   CalendarX,
   DoorOpen,
+  DoorClosed,
   Download,
   KeyRound,
   Lock,
@@ -233,6 +234,9 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // Preboarding is for somebody with no account; onboarding for somebody who is in the system.
   const mayPreboard = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus);
   const mayOnboard = !isOwnProfile && !isArchived && Boolean(user.accountStatus) && user.accountStatus !== "DRAFT";
+  // An offboarding counts from the last working day, so it needs the termination recorded — before or after
+  // the day itself (DECISIONS.md § "Lifecycle tasks", D1).
+  const mayOffboard = !isOwnProfile && Boolean(user.terminationDate) && user.accountStatus !== "DRAFT";
   // BLOCK is scoped on the person, so the server's per-target answer decides — not "do I hold it
   // anywhere". Never on the own profile: blocking yourself is refused (U00010), and your own password
   // is changed, not reset.
@@ -258,7 +262,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const mayChangeOwnPassword = isOwnProfile && !impersonating;
   const hasPersonActions =
     mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset || mayEndSessions || mayExportPersonalData ||
-    (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || !isOwnProfile));
+    (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || mayOffboard || !isOwnProfile));
 
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
@@ -406,6 +410,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 {canManageProfiles && mayOnboard && (
                   <RowAction icon={<Rocket className="h-4 w-4"/>} onClick={() => setStartType("ONBOARDING")}>
                     Start Onboarding
+                  </RowAction>
+                )}
+                {canManageProfiles && mayOffboard && (
+                  <RowAction icon={<DoorClosed className="h-4 w-4"/>} onClick={() => setStartType("OFFBOARDING")}>
+                    Start Offboarding
                   </RowAction>
                 )}
                 {maySendReset && (

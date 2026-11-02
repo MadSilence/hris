@@ -13,7 +13,8 @@ jest.mock("@/components/modules/organization/modules/profile/modules/personalDoc
 
 const renderDocumentTask = () =>
   render(
-    <TaskKindConfigFields idPrefix="t" kind="DOCUMENT" type="ONBOARDING" attributeIds={[]} categoryId={null} onChange={jest.fn()} />,
+    <TaskKindConfigFields idPrefix="t" kind="DOCUMENT" type="ONBOARDING" attributeIds={[]} categoryId={null}
+      materials={[]} questions={[]} onChange={jest.fn()} />,
   );
 
 describe("TaskKindConfigFields — Upload Document", () => {

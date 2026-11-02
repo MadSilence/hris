@@ -1,27 +1,50 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, MessageSquare } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import { Input } from "@/public/desact/src/components/ui/input";
 import { Label } from "@/public/desact/src/components/ui/label";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
+import { showError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { formatDisplayDate } from "@/lib/date";
 import {
+  preboardingAnswerAction,
+  preboardingCommentAction,
+  preboardingCommentsAction,
   preboardingCompleteAction,
   preboardingDocumentAction,
   preboardingFieldsAction,
 } from "@/components/modules/lifecycle/actions/preboardingActions";
-import { TASK_KIND_LABELS, describeDue, type PreboardingPage } from "@/models/lifecycle";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { TASK_KIND_LABELS, describeDue, requiresFile, type Material, type PreboardingPage } from "@/models/lifecycle";
+import { TaskFieldInput } from "@/components/modules/lifecycle/tasks/TaskFieldInput";
+import { TaskMaterials, saveBlob } from "@/components/modules/lifecycle/tasks/TaskMaterials";
+import { TaskComments } from "@/components/modules/lifecycle/tasks/TaskComments";
+import { QuestionnaireForm } from "@/components/modules/lifecycle/tasks/QuestionnaireForm";
 
 type PageTask = PreboardingPage["tasks"][number];
-type PageField = NonNullable<PageTask["fields"]>[number];
+
+/**
+ * A material file, through the page's own route: the token travels in the body, never in the address, and
+ * the backend hands out only a file one of the joiner's own tasks names.
+ */
+const openFile = (token: string) => async (material: Material) => {
+  if (!material.fileId) return;
+  try {
+    // Raw fetch on purpose: the page has no session, so InternalApiClient's renewal has nothing to renew.
+    const res = await fetch(`/api/public/preboarding/files/${material.fileId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    if (!res.ok) throw new Error("This file is not available any more.");
+    saveBlob(await res.blob(), material.name ?? "file");
+  } catch (e) {
+    showError(e);
+  }
+};
 
 /**
  * The joiner's preboarding page: their own tasks and nothing else — no people, no organisation
@@ -61,12 +84,14 @@ export function PreboardingPageContainer({ token, initialPage }: { token: string
                   {TASK_KIND_LABELS[task.kind]} · {describeDue(task.dueKind, null)}
                   {task.dueDate ? ` · by ${formatDisplayDate(task.dueDate, { style: "medium" })}` : ""}
                 </p>
-                {task.description && <p className="mt-1 text-sm text-muted-foreground">{task.description}</p>}
+                {task.description && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{task.description}</p>}
+                <TaskMaterials materials={task.materials ?? []} onOpenFile={openFile(token)} />
               </div>
             </div>
             {task.status === "OPEN" && (
               <TaskBody token={token} task={task} onPageAction={setPage} />
             )}
+            <PageComments token={token} task={task} />
           </li>
         ))}
       </ul>
@@ -85,7 +110,24 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
     else setError(res.errorMessage ?? null);
   };
 
-  if (task.kind === "CHECKLIST") {
+  if (task.kind === "QUESTIONNAIRE") {
+    return (
+      <div className="pl-8">
+        <QuestionnaireForm taskId={task.id} questions={task.questions ?? []}
+          onSubmit={async (answers) => {
+            const res = await preboardingAnswerAction({ token, taskId: task.id, answers });
+            if (res.status === ActionStatus.SUCCESS && res.data) {
+              onPageAction(res.data);
+              return null;
+            }
+            return res.errorMessage ?? "The answers could not be sent.";
+          }}
+        />
+      </div>
+    );
+  }
+
+  if ((task.kind === "TODO" && !requiresFile(task)) || task.kind === "ACKNOWLEDGE") {
     return (
       <div className="space-y-2 pl-8">
         <Button type="button"
@@ -97,14 +139,15 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
             try { finish(await preboardingCompleteAction({ token, taskId: task.id })); } finally { setBusy(false); }
           }}
         >
-          Mark Done
+          {task.kind === "ACKNOWLEDGE" ? "I Have Read It" : "Mark Done"}
         </Button>
         <FormError message={error} />
       </div>
     );
   }
 
-  if (task.kind === "DOCUMENT") {
+  // A document task, or a to-do that requires a file: the upload closes it (B2).
+  if (task.kind === "DOCUMENT" || task.kind === "TODO") {
     return (
       <div className="space-y-2 pl-8">
         <Label htmlFor={`${task.id}-file`}>{task.categoryName ? `File: ${task.categoryName}` : "File"}</Label>
@@ -123,7 +166,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
             try { finish(await preboardingDocumentAction(form)); } finally { setBusy(false); }
           }}
         >
-          Upload
+          {task.kind === "TODO" ? "Attach and Mark Done" : "Upload"}
         </Button>
         <FormError message={error} />
       </div>
@@ -134,7 +177,7 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
   return (
     <div className="space-y-3 pl-8">
       {fields.map((f) => (
-        <FieldInput key={f.id} field={f} value={values[f.id]} onChange={(v) => setValues((all) => ({ ...all, [f.id]: v }))} disabled={busy} />
+        <TaskFieldInput key={f.id} field={f} value={values[f.id]} onChange={(v) => setValues((all) => ({ ...all, [f.id]: v }))} disabled={busy} />
       ))}
       <Button type="button"
         size="sm"
@@ -152,77 +195,26 @@ function TaskBody({ token, task, onPageAction }: { token: string; task: PageTask
   );
 }
 
-/** The field kinds a person with no account may be asked for. Anything else is refused by the template. */
-function FieldInput({ field, value, onChange, disabled }: {
-  field: PageField; value: unknown; onChange: (v: unknown) => void; disabled: boolean;
-}) {
-  const id = `field-${field.id}`;
-  const label = (
-    <RequiredLabel htmlFor={id} required={field.isRequired}>
-      {field.name}{field.isFilled ? " ✓" : ""}
-    </RequiredLabel>
+/** The comments of one task — the preboarding's messages (C3): the joiner asks, whoever runs it answers. */
+function PageComments({ token, task }: { token: string; task: PageTask }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="pl-8">
+      <button
+        type="button"
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-brown-900"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <MessageSquare className="h-3 w-3" />
+        {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Ask a Question"}
+      </button>
+      {open && (
+        <TaskComments
+          load={() => preboardingCommentsAction({ token, taskId: task.id })}
+          send={(body) => preboardingCommentAction({ token, taskId: task.id, body })}
+        />
+      )}
+    </div>
   );
-
-  switch (field.type) {
-    case "SELECT":
-      return (
-        <div className="space-y-1.5">
-          {label}
-          <SearchableSelect
-            id={id}
-            options={field.options.map((o) => ({ value: o.id, label: o.label }))}
-            value={typeof value === "string" && value ? value : null}
-            onChange={(v) => v && onChange(v)}
-            placeholder="Select…"
-            disabled={disabled}
-            clearable={false}
-          />
-        </div>
-      );
-    case "MULTI_SELECT": {
-      const picked = Array.isArray(value) ? (value as string[]) : [];
-      return (
-        <div className="space-y-1.5">
-          {label}
-          {field.options.map((o) => (
-            <label key={o.id} className="flex items-center gap-2 text-sm">
-              <Checkbox
-                checked={picked.includes(o.id)}
-                disabled={disabled}
-                onCheckedChange={(c) => onChange(c ? [...picked, o.id] : picked.filter((x) => x !== o.id))}
-              />
-              {o.label}
-            </label>
-          ))}
-        </div>
-      );
-    }
-    case "CHECKBOX":
-      return (
-        <label className="flex items-center gap-2 text-sm">
-          <Checkbox id={id} checked={value === true} disabled={disabled} onCheckedChange={(c) => onChange(c === true)} />
-          {field.name}{field.isFilled ? " ✓" : ""}
-        </label>
-      );
-    case "DATE":
-      return (
-        <div className="space-y-1.5">
-          {label}
-          <DatePicker id={id} value={typeof value === "string" ? value : ""} onChange={onChange} disabled={disabled} ariaLabel={field.name} />
-        </div>
-      );
-    default:
-      return (
-        <div className="space-y-1.5">
-          {label}
-          <Input
-            id={id}
-            type={field.type === "NUMBER" ? "number" : field.type === "EMAIL" ? "email" : field.type === "URL" ? "url" : field.type === "PHONE" ? "tel" : "text"}
-            value={typeof value === "string" ? value : ""}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={disabled}
-          />
-        </div>
-      );
-  }
 }

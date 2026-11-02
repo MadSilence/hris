@@ -5,7 +5,9 @@ import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
-import type { ProcessType, TaskKind } from "@/models/lifecycle";
+import type { Material, ProcessType, Question, TaskKind } from "@/models/lifecycle";
+import { MaterialsEditor } from "@/components/modules/lifecycle/shared/MaterialsEditor";
+import { QuestionsEditor } from "@/components/modules/lifecycle/shared/QuestionsEditor";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** Field types the preboarding page cannot show — the backend refuses them there too. */
@@ -17,15 +19,32 @@ type Props = {
   type: ProcessType;
   attributeIds: string[];
   categoryId: string | null;
+  materials: Material[];
+  questions: Question[];
   disabled?: boolean;
-  onChange: (patch: { attributeIds?: string[]; categoryId?: string | null }) => void;
+  onChange: (patch: { attributeIds?: string[]; categoryId?: string | null; materials?: Material[]; questions?: Question[] }) => void;
 };
 
 /**
- * What a "Fill In Fields" or "Upload Document" task needs: which fields, which document category. The
- * pickers the template dialog had, moved here when the editor became a canvas.
+ * What a task of each kind needs: which fields, which document category, whether a to-do requires a file,
+ * the questions of a questionnaire — and the material any task may carry (DECISIONS.md § "Lifecycle tasks").
+ * Shared by the template's side panel and a task added to a running process.
  */
-export function TaskKindConfigFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, onChange }: Props) {
+export function TaskKindConfigFields(props: Props) {
+  const { idPrefix, kind, materials, questions, disabled, onChange } = props;
+  return (
+    <div className="space-y-5">
+      <KindFields {...props} />
+      {kind === "QUESTIONNAIRE" && (
+        <QuestionsEditor idPrefix={idPrefix} questions={questions} disabled={disabled} onChange={(q) => onChange({ questions: q })} />
+      )}
+      <MaterialsEditor idPrefix={idPrefix} materials={materials} disabled={disabled} required={kind === "ACKNOWLEDGE"}
+        onChange={(m) => onChange({ materials: m })} />
+    </div>
+  );
+}
+
+function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, onChange }: Props) {
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
   const { data: groups } = useAttributeGroups();
@@ -78,6 +97,46 @@ export function TaskKindConfigFields({ idPrefix, kind, type, attributeIds, categ
         )}
         <p className="text-xs text-muted-foreground">Closes by itself once a file of this category is uploaded.</p>
       </div>
+    );
+  }
+
+  if (kind === "TODO") {
+    const requires = categoryId !== null;
+    return (
+      <div className="space-y-1.5">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox
+            checked={requires}
+            disabled={disabled}
+            onCheckedChange={(on) => onChange({ categoryId: on ? (categories ?? [])[0]?.id ?? "" : null })}
+          />
+          Requires a File
+        </label>
+        {requires && (
+          <>
+            <SearchableSelect
+              id={`${idPrefix}-category`}
+              aria-label="Category of the file"
+              options={(categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
+              value={categoryId || null}
+              onChange={(v) => onChange({ categoryId: v ?? "" })}
+              placeholder="Select a category…"
+              disabled={disabled}
+            />
+            <p className="text-xs text-muted-foreground">
+              Ticked with the file attached — a signed form, a receipt. It goes into the person&apos;s Documents.
+            </p>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  if (kind === "ACKNOWLEDGE") {
+    return (
+      <p className="text-xs text-muted-foreground">
+        The person reads what is attached and presses I Have Read It; the moment is recorded. Only they can do it.
+      </p>
     );
   }
 

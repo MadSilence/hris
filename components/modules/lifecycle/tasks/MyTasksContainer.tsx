@@ -13,8 +13,8 @@ import { useInvalidateLifecycle, useMyTasks } from "@/components/modules/lifecyc
 import { TaskList } from "./TaskList";
 
 /**
- * The Tasks tab: what is assigned to me. Deliberately small — the full Tasks feature (ad-hoc tasks,
- * comments) is a later design. This is where a preboarding's open tasks land once the person registers.
+ * The Tasks tab: what is assigned to me, each done in its own row. Ad-hoc tasks are a later design. This is
+ * where a preboarding's open tasks land once the person registers.
  */
 export function MyTasksContainer() {
   const [includeDone, setIncludeDone] = useState(false);
@@ -40,23 +40,24 @@ export function MyTasksContainer() {
           fill
           icon={<ListChecks className="h-6 w-6" />}
           title="Nothing to do"
-          description="Tasks assigned to you by a preboarding or an onboarding appear here."
+          description="Tasks assigned to you by a preboarding, an onboarding or an offboarding appear here."
         />
       ) : (
         <TaskList
           tasks={data ?? []}
           showSubject
           busyTaskId={busy}
-          onCompleteAction={async (task) => {
+          onCompleteAction={async (task, documentId) => {
             setBusy(task.id);
             try {
-              const res = await completeMyTaskAction(task.id);
+              const res = await completeMyTaskAction({ id: task.id, documentId });
               if (res.status !== ActionStatus.SUCCESS) showActionError(res);
               await invalidate();
             } finally {
               setBusy(null);
             }
           }}
+          onChangedAction={async () => { await invalidate(); }}
         />
       )}
       </div>

@@ -7,7 +7,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiLifecycleService } from "@/api/modules/lifecycle/services";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
-import type { PreboardingPage } from "@/models/lifecycle";
+import type { PreboardingPage, TaskComment } from "@/models/lifecycle";
 
 async function run<T>(context: string, body: () => Promise<T>): Promise<ActionResult<T>> {
   try {
@@ -40,4 +40,26 @@ export async function preboardingDocumentAction(form: FormData): Promise<ActionR
     if (!(file instanceof File)) throw new Error("No file was attached.");
     return hrisApiLifecycleService.preboardingDocument(token, taskId, file);
   });
+}
+
+export async function preboardingAnswerAction(
+  input: { token: string; taskId: string; answers: Record<string, unknown> },
+): Promise<ActionResult<PreboardingPage>> {
+  return run("preboardingAnswerAction", () =>
+    hrisApiLifecycleService.preboardingAnswer(input.token, input.taskId, input.answers));
+}
+
+/**
+ * The comments of one of the joiner's tasks. A read, but an action: the page has no session, so there is no
+ * route handler to go through, and the token must travel in a body.
+ */
+export async function preboardingCommentsAction(input: { token: string; taskId: string }): Promise<ActionResult<TaskComment[]>> {
+  return run("preboardingCommentsAction", () => hrisApiLifecycleService.preboardingComments(input.token, input.taskId));
+}
+
+export async function preboardingCommentAction(
+  input: { token: string; taskId: string; body: string },
+): Promise<ActionResult<TaskComment[]>> {
+  return run("preboardingCommentAction", () =>
+    hrisApiLifecycleService.preboardingComment(input.token, input.taskId, input.body));
 }

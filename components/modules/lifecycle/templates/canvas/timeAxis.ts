@@ -10,6 +10,7 @@
  * <p>Pure functions only: the canvas, the drag, the keyboard and the tests all ask the same questions.
  */
 import { laneIdOf, shortDay, type DraftItem, type Lane, type LaneId } from "./draft";
+import type { ProcessType } from "@/models/lifecycle";
 
 export const DAY_W = 128;
 export const WEEK_W = 168;
@@ -43,7 +44,8 @@ export type Axis = { columns: Column[]; width: number };
 type Timing = Pick<DraftItem, "dueKind" | "offsetDays">;
 
 /** The axis for these tasks: at least −14 … +90, and wider when a task lies outside. */
-export const buildAxis = (items: Timing[]): Axis => {
+export const buildAxis = (items: Timing[], type?: ProcessType): Axis => {
+  const day = (offset: number) => shortDay(offset, type);
   const offsets = items.filter((i) => i.dueKind === "OFFSET").map((i) => i.offsetDays ?? 0);
   const min = Math.min(-DAYS_EACH_SIDE, ...offsets);
   const max = Math.max(WEEKS_UNTIL, ...offsets);
@@ -53,26 +55,26 @@ export const buildAxis = (items: Timing[]): Axis => {
   const weeksBefore = Math.ceil((-DAYS_EACH_SIDE - min) / 7);
   for (let k = weeksBefore; k >= 1; k--) {
     const start = -DAYS_EACH_SIDE - 7 * k;
-    spans.push({ id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W, label: shortDay(start), caption: `to ${shortDay(start + 6)}` });
+    spans.push({ id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W, label: day(start), caption: `to ${day(start + 6)}` });
   }
   for (let d = -DAYS_EACH_SIDE; d <= DAYS_EACH_SIDE; d++) {
     if (d === 0) {
-      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: "Before Start", caption: null });
+      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: type === "OFFBOARDING" ? "By Last Day" : "Before Start", caption: null });
     }
-    spans.push({ id: `d${d}`, kind: "day", start: d, end: d, width: DAY_W, label: shortDay(d), caption: null });
+    spans.push({ id: `d${d}`, kind: "day", start: d, end: d, width: DAY_W, label: day(d), caption: null });
   }
   let start = DAYS_EACH_SIDE + 1;
   while (start <= WEEKS_UNTIL || start <= max) {
     if (start <= WEEKS_UNTIL) {
       spans.push({
         id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W,
-        label: `Week ${Math.floor(start / 7) + 1}`, caption: shortDay(start),
+        label: `Week ${Math.floor(start / 7) + 1}`, caption: day(start),
       });
       start += 7;
     } else {
       spans.push({
         id: `m${start}`, kind: "month", start, end: start + 29, width: MONTH_W,
-        label: `Month ${Math.floor(start / 30) + 1}`, caption: shortDay(start),
+        label: `Month ${Math.floor(start / 30) + 1}`, caption: day(start),
       });
       start += 30;
     }
