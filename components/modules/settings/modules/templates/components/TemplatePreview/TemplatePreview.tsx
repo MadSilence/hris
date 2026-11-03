@@ -203,7 +203,8 @@ const ItemRow: React.FC<{
   const [open, setOpen] = React.useState(false);
   const outcome = OUTCOME[item.outcome];
   const canInclude = item.type !== "SECTION" && item.outcome !== "DROPPED" && item.outcome !== "EXISTING";
-  const hasDetail = item.grants.length > 0 || item.tasks.length > 0;
+  const questions = item.questions ?? [];
+  const hasDetail = item.grants.length > 0 || item.tasks.length > 0 || questions.length > 0;
 
   return (
     <li className="space-y-2 px-4 py-3">
@@ -257,7 +258,9 @@ const ItemRow: React.FC<{
         {hasDetail && (
           <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             {open ? <ChevronDown className="h-4 w-4"/> : <ChevronRight className="h-4 w-4"/>}
-            {item.grants.length > 0 ? `${item.grants.filter((g) => g.selected).length} of ${item.grants.length} Grants` : `${item.tasks.length} Tasks`}
+            {item.grants.length > 0
+              ? `${item.grants.filter((g) => g.selected).length} of ${item.grants.length} Grants`
+              : questions.length > 0 ? `${questions.length} Entries` : `${item.tasks.length} Tasks`}
           </Button>
         )}
       </div>
@@ -268,6 +271,11 @@ const ItemRow: React.FC<{
           disabled={disabled || !item.include || item.outcome === "EXISTING"}
           onChange={(keys) => onChoose({ grants: keys })}
         />
+      )}
+      {open && questions.length > 0 && (
+        <ol className="ml-7 list-decimal space-y-1 pl-4 text-sm">
+          {questions.map((q, i) => <li key={`${i}-${q}`}>{q}</li>)}
+        </ol>
       )}
       {open && item.tasks.length > 0 && (
         <ul className="ml-7 space-y-1 text-sm">
@@ -399,6 +407,7 @@ const RECORD_TYPE: Record<TemplateRecordedItem["type"], string> = {
   FIELD: "Field",
   ROLE: "Role",
   PROCESS: "Checklist",
+  FORM: "Review Form",
 };
 
 const linkTo = (item: TemplateRecordedItem): string | null => {
@@ -411,6 +420,8 @@ const linkTo = (item: TemplateRecordedItem): string | null => {
       return "/settings/people/attributes";
     case "PROCESS":
       return `/settings/automation/${String(item.subtype ?? "ONBOARDING").toLowerCase()}/${item.objectId}`;
+    case "FORM":
+      return `/reviews/forms/${item.objectId}`;
     default:
       return null;
   }
@@ -426,6 +437,8 @@ const typeLabel = (item: TemplateItemDTO): string => {
       return "Role";
     case "PROCESS":
       return "Checklist";
+    case "FORM":
+      return "Review Form";
   }
 };
 

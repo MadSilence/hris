@@ -15,6 +15,7 @@ import {
   ACCESS_PROBLEM_LABELS,
   ASSIGNEE_KIND_LABELS,
   ASSIGNEE_PROBLEM_LABELS,
+  EDITABLE_TASK_KINDS,
   TASK_KIND_LABELS,
   assigneeKindLabel,
   type ProcessType,
@@ -118,7 +119,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             onValueChange={(v) => onChange({ kind: v as TaskKind, categoryId: v === "DOCUMENT" && item.kind === "DOCUMENT" ? item.categoryId : null })}>
             <SelectTrigger id={`${id}-kind`}><SelectValue /></SelectTrigger>
             <SelectContent>
-              {(Object.keys(TASK_KIND_LABELS) as TaskKind[]).map((k) => (
+              {EDITABLE_TASK_KINDS.map((k) => (
                 <SelectItem key={k} value={k}>{TASK_KIND_LABELS[k]}</SelectItem>
               ))}
             </SelectContent>

@@ -21,6 +21,7 @@ import {
 import { useAssignableOptions } from "@/components/modules/automations/shared/useAutomationNames";
 import { PlaceholderTextField } from "./PlaceholderTextField";
 import { Field } from "./SentenceCard";
+import { StartReviewEditor } from "./StartReviewEditor";
 
 type Props = {
   action: ActionSpec;
@@ -336,6 +337,8 @@ export function ActionEditor({ action, index, catalog, onChange }: Props) {
           label="Policy"
         />
       )}
+
+      {action.type === "START_REVIEW" && <StartReviewEditor action={action} prefix={prefix} onChange={set} />}
     </div>
   );
 }

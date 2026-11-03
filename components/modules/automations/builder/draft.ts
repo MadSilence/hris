@@ -46,6 +46,8 @@ export const newAction = (type: AutomationActionType): ActionSpec => {
       return { type, offsetDays: 0, assignee: { kind: "MANAGER" }, title: "", description: "", dueOffsetDays: null };
     case "GRANT_TIME_OFF_POLICY":
       return { type, offsetDays: 0, policyId: null };
+    case "START_REVIEW":
+      return { type, offsetDays: 0, templateCycleId: null, reviewWindows: [], releaseOffsetDays: null };
     default:
       return { type, offsetDays: 0, assignableType: null, assignableId: null };
   }

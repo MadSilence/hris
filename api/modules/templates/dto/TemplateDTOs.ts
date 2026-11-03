@@ -1,5 +1,5 @@
 /** Mirrors `TemplateDTOs` on the backend: the template catalogue (TEMPLATES_DESIGN.md § 4.2). */
-export type TemplateKind = "FIELD_SET" | "ROLE" | "PROCESS";
+export type TemplateKind = "FIELD_SET" | "ROLE" | "PROCESS" | "REVIEW_FORM";
 
 export type TemplateSummaryDTO = {
   key: string;
@@ -33,7 +33,7 @@ export type TemplateChoicesRequest = {
   items?: TemplateItemChoice[];
 };
 
-export type TemplateItemType = "SECTION" | "FIELD" | "ROLE" | "PROCESS";
+export type TemplateItemType = "SECTION" | "FIELD" | "ROLE" | "PROCESS" | "FORM";
 export type TemplateOutcome = "NEW" | "EXISTING" | "CLASH" | "DROPPED";
 
 export type TemplateGrantDTO = {
@@ -84,6 +84,8 @@ export type TemplateItemDTO = {
   readers: string[];
   grants: TemplateGrantDTO[];
   tasks: TemplateTaskDTO[];
+  /** For a review form: its entries' texts in order. */
+  questions?: string[];
 };
 
 export type TemplatePartDTO = {

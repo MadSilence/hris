@@ -8,7 +8,7 @@ import Search from "@/public/icons/search.svg";
 import People from "@/public/icons/people.svg";
 import Calendar from "@/public/icons/calendar.svg";
 import Settings from "@/public/icons/settings.svg";
-import { Clock, ListChecks, Workflow } from "lucide-react";
+import { ClipboardCheck, Clock, ListChecks, Workflow } from "lucide-react";
 import styles from "./layout.module.css";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, isSystemOwner, ResourceCode, type AccessAction } from "@/models/access";
@@ -131,6 +131,13 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       href: "/processes",
       Icon: Workflow as NavItem["Icon"],
       resources: ["PEOPLE.LIFECYCLE_PROCESSES"],
+    },
+    // Performance reviews (REVIEWS_DESIGN.md § 12.1): everybody's — anybody may have a review to write or to read.
+    // Overview sends somebody who does not run cycles on to My Reviews.
+    {
+      label: "Reviews",
+      href: "/reviews",
+      Icon: ClipboardCheck as NavItem["Icon"],
     },
   ];
 

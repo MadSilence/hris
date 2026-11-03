@@ -9,12 +9,15 @@ import {
   useProfileEditGuard,
 } from "@/components/modules/organization/modules/profile/context/ProfileEditGuard";
 import type { ResourceCode } from "@/models/access";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
 
 type TabDef = {
   id: string;
   label: string;
   /** Undefined = always visible. Otherwise the tab is hidden without VIEW on this resource. */
   resource?: ResourceCode;
+  /** Shown also to the person and to their line manager, whatever their rights. */
+  personAndManager?: boolean;
 };
 
 /**
@@ -31,6 +34,9 @@ const TABS: TabDef[] = [
   { id: "salary", label: "Salary" },
   { id: "attendance", label: "Attendance", resource: "PEOPLE.ATTENDANCE" },
   { id: "forms", label: "Forms" },
+  // The person, their line manager and REVIEWS.RESULT holders (DECISIONS.md § "Performance reviews — the second
+  // sitting", Q6); each sees a different part, and the backend answers which (REVIEWS_DESIGN.md § 12.6).
+  { id: "reviews", label: "Reviews", resource: "REVIEWS.RESULT", personAndManager: true },
   { id: "tasks", label: "Tasks" },
   { id: "notes", label: "Notes" },
 ];
@@ -43,9 +49,12 @@ type Props = {
    * on them" — and was a second copy of the permission model besides.
    */
   capabilities?: Record<string, string[]>;
+  /** The person's line manager today, for the tabs the manager sees without a right. */
+  managerId?: string | null;
 };
 
-export function ProfileTabsNav({ userId, capabilities }: Props) {
+export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
+  const { user: viewer } = useCurrentUser();
   const pathname = usePathname();
   const router = useRouter();
   const base = `/organization/people/${userId}`;
@@ -60,7 +69,9 @@ export function ProfileTabsNav({ userId, capabilities }: Props) {
   const canSeeTab = (resource: ResourceCode) =>
     (capabilities?.[resource] ?? []).includes("VIEW");
 
-  const visibleTabs = TABS.filter((tab) => !tab.resource || canSeeTab(tab.resource));
+  const personOrManager = Boolean(viewer?.id) && (viewer?.id === userId || viewer?.id === managerId);
+  const visibleTabs = TABS.filter((tab) =>
+    !tab.resource || canSeeTab(tab.resource) || (tab.personAndManager && personOrManager));
 
   const active =
     visibleTabs.find((tab) => pathname === `${base}/${tab.id}`)?.id ?? "personal";

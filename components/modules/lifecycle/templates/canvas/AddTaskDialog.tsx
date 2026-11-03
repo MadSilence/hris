@@ -8,7 +8,7 @@ import {
 } from "@/public/desact/src/components/ui/dialog";
 import { cn } from "@/public/desact/src/components/ui/utils";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { TASK_KIND_DESCRIPTIONS, TASK_KIND_LABELS, type TaskKind } from "@/models/lifecycle";
+import { EDITABLE_TASK_KINDS, TASK_KIND_DESCRIPTIONS, TASK_KIND_LABELS, type TaskKind } from "@/models/lifecycle";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
 
 type Props = {
@@ -19,7 +19,7 @@ type Props = {
   onCancelAction: () => void;
 };
 
-const KINDS = Object.keys(TASK_KIND_LABELS) as TaskKind[];
+const KINDS: TaskKind[] = EDITABLE_TASK_KINDS;
 
 /**
  * Adding a task from the timeline — a cell clicked, or a lane's own add button: a title and a kind, and the

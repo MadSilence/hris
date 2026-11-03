@@ -44,7 +44,7 @@ import {
 import { RuleStatusBadge } from "@/components/modules/automations/shared/AutomationStatusBadge";
 import { DefinitionView } from "@/components/modules/automations/shared/DefinitionView";
 import { conditionsSentence, typesInDefinition } from "@/components/modules/automations/shared/sentence";
-import { useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
+import { startsReviews, useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
 import { RunLog } from "@/components/modules/automations/runs/RunLog";
 import { VersionsTab } from "@/components/modules/automations/versions/VersionsTab";
 import type { AutomationActivationResult, AutomationDefinition, AutomationPreview, BackfillChoice } from "@/models/automations";
@@ -159,7 +159,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const problems = preview?.problems ?? [];
 
   // ── names for the sentences ─────────────────────────────────────────────────────────────────
-  const names = useAutomationNames(typesInDefinition(definition, fields), true);
+  const names = useAutomationNames(typesInDefinition(definition, fields), true, startsReviews(definition));
 
   // ── publish ─────────────────────────────────────────────────────────────────────────────────
   const [publishOpen, setPublishOpen] = useState(false);

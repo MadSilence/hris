@@ -9,7 +9,7 @@ import {
   type AutomationDefinition,
 } from "@/models/automations";
 import { conditionsSentence, typesInDefinition } from "./sentence";
-import { useAutomationNames } from "./useAutomationNames";
+import { startsReviews, useAutomationNames } from "./useAutomationNames";
 
 function Clause({ word, children }: { word: string; children: React.ReactNode }) {
   return (
@@ -26,7 +26,7 @@ function Clause({ word, children }: { word: string; children: React.ReactNode })
  */
 export function DefinitionView({ definition }: { definition: AutomationDefinition }) {
   const { data: fields } = useUserFields();
-  const names = useAutomationNames(typesInDefinition(definition, fields), true);
+  const names = useAutomationNames(typesInDefinition(definition, fields), true, startsReviews(definition));
 
   return (
     <div className="divide-y divide-brown-100">

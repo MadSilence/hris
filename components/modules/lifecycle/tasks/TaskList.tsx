@@ -163,8 +163,18 @@ function TaskRow({
           <TaskBody task={task} mine={mine} canComplete={canComplete} busy={busy} preview={preview}
             onCompleteAction={onCompleteAction} onChangedAction={onChangedAction} />
         )}
+        {done && task.kind === "APPROVE_REVIEW" && mine && (
+          <Link href={`/reviews/steps/by-task/${task.id}`} className="mt-2 block w-fit text-xs underline underline-offset-4">
+            See the Review
+          </Link>
+        )}
+        {done && task.kind === "REVIEW" && mine && (
+          <Link href={`/reviews/write/by-task/${task.id}`} className="mt-2 block w-fit text-xs underline underline-offset-4">
+            See the Review
+          </Link>
+        )}
         {done && task.kind === "QUESTIONNAIRE" && (
-          <Link href={`/organization/people/${task.subject.id}/forms`} className="mt-2 inline-block text-xs underline underline-offset-4">
+          <Link href={`/organization/people/${task.subject.id}/forms`} className="mt-2 block w-fit text-xs underline underline-offset-4">
             See the Answers
           </Link>
         )}
@@ -241,6 +251,31 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   /** Into the person's Documents, under the task's category: one place for files (B2). */
   const upload = async (picked: File) =>
     documentService.uploadPersonalDocument({ userId: task.subject.id, file: picked, categoryId: task.category?.id ?? null });
+
+  // A review is written on its own page and closes when it is submitted there (REVIEWS_DESIGN.md § 8.1).
+  if (task.kind === "REVIEW") {
+    if (!mine || preview) return null;
+    return (
+      <div className="mt-3">
+        <Button asChild size="sm" variant="outline">
+          <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">Write the Review</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // The steps of a review are done on their own pages, and close there (REVIEWS_PLAN.md 10.2–10.3).
+  if (task.kind === "NOMINATE_PEERS" || task.kind === "APPROVE_PEERS" || task.kind === "APPROVE_REVIEW") {
+    if (!mine || preview) return null;
+    const label = task.kind === "NOMINATE_PEERS" ? "Nominate Peers" : task.kind === "APPROVE_PEERS" ? "Approve Peers" : "Open the Review";
+    return (
+      <div className="mt-3">
+        <Button asChild size="sm" variant="outline">
+          <Link href={`/reviews/steps/by-task/${task.id}`} className="no-underline">{label}</Link>
+        </Button>
+      </div>
+    );
+  }
 
   if (task.kind === "TODO" && requiresFile(task)) {
     if (!onCompleteAction || !canComplete) return null;

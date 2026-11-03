@@ -3,6 +3,7 @@
  * Design and API: (claude)/technical_design/AUTOMATIONS_DESIGN.md § 8.
  * Mirrors hris-api `features/automations/dto/AutomationDTOs` and `features/automations/model/*`.
  */
+import type { ReviewKind } from "@/models/reviews";
 import type { Segment } from "@/models/segment/Segment";
 import type { HolidayCalendarBindingRef } from "@/models/publicHolidays/binding";
 
@@ -24,7 +25,8 @@ export type AutomationActionType =
   | "CREATE_TASK"
   | "ASSIGN"
   | "UNASSIGN"
-  | "GRANT_TIME_OFF_POLICY";
+  | "GRANT_TIME_OFF_POLICY"
+  | "START_REVIEW";
 export type AutomationLatePolicy = "RUN_LATE" | "SKIP";
 export type AutomationRunStatus = "SCHEDULED" | "IN_PROGRESS" | "DONE" | "SKIPPED" | "FAILED" | "CANCELLED";
 export type AutomationStepStatus = "SCHEDULED" | "DONE" | "SKIPPED" | "FAILED" | "CANCELLED" | "STOPPED";
@@ -143,6 +145,22 @@ export type ActionSpec = {
   assignableId?: string | null;
   /** GRANT_TIME_OFF_POLICY */
   policyId?: string | null;
+  /** START_REVIEW: the review cycle template a one-person review is started from (REVIEWS_PLAN.md 11.3). */
+  templateCycleId?: string | null;
+  /** START_REVIEW: each kind of the template's window, in calendar days from the moment. */
+  reviewWindows?: ReviewWindowSpec[] | null;
+  /** START_REVIEW, a template that releases its results on a date: that date, in days from the moment. */
+  releaseOffsetDays?: number | null;
+};
+
+/** One kind of review of a START_REVIEW action, counted in days from the moment as a task's due offset is. */
+export type ReviewWindowSpec = {
+  kind: ReviewKind;
+  opensOffsetDays?: number | null;
+  dueOffsetDays?: number | null;
+  /** Peers the person nominates only. */
+  nominationOffsetDays?: number | null;
+  approvalOffsetDays?: number | null;
 };
 
 export type AutomationDefinition = {

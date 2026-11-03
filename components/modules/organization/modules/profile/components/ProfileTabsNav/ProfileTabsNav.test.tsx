@@ -9,6 +9,11 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
 
+let viewerId = "someone-else";
+jest.mock("@/components/providers/CurrentUserProvider", () => ({
+  useCurrentUser: () => ({ user: { id: viewerId } }),
+}));
+
 /**
  * The tabs read one thing: what the server says this caller may do **to this person**. The client
  * deriving it from its own scope names is what this replaced, and a missing map is what once hid
@@ -18,6 +23,8 @@ jest.mock("next/navigation", () => ({
 describe("ProfileTabsNav", () => {
   // Radix puts `role="tab"` on the anchor it renders through `asChild`, so the trigger is a tab
   // rather than a link as far as the accessibility tree is concerned.
+  beforeEach(() => { viewerId = "someone-else"; });
+
   // Public Profile, Salary, Forms, Tasks and Notes are UI only and carry no resource yet.
   const UNGATED = ["Public Profile", "Personal Info", "Salary", "Forms", "Tasks", "Notes"];
 
@@ -65,5 +72,26 @@ describe("ProfileTabsNav", () => {
     render(<ProfileTabsNav userId="u1"/>);
 
     expect(tabNames()).toEqual(UNGATED);
+  });
+
+  // Q6: Reviews shows to the person, their line manager and REVIEWS.RESULT holders — nobody else.
+  it("shows Reviews to the person themself", () => {
+    viewerId = "u1";
+    render(<ProfileTabsNav userId="u1"/>);
+    expect(tabNames()).toContain("Reviews");
+  });
+
+  it("shows Reviews to the person's line manager", () => {
+    viewerId = "boss";
+    render(<ProfileTabsNav userId="u1" managerId="boss"/>);
+    expect(tabNames()).toContain("Reviews");
+  });
+
+  it("shows Reviews to a holder of the result right on this person, and hides it from anybody else", () => {
+    const { unmount } = render(<ProfileTabsNav userId="u1" managerId="boss" capabilities={{ "REVIEWS.RESULT": ["VIEW"] }}/>);
+    expect(tabNames()).toContain("Reviews");
+    unmount();
+    render(<ProfileTabsNav userId="u1" managerId="boss"/>);
+    expect(tabNames()).not.toContain("Reviews");
   });
 });

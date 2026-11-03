@@ -6,6 +6,7 @@ import {
   Briefcase,
   CalendarClock,
   CheckCircle2,
+  ClipboardCheck,
   FileText,
   ListChecks,
   Lock,
@@ -506,6 +507,142 @@ export const presentNotification = (n: Notification): NotificationPresentation =
         href: securityUserId ? `/organization/people/${securityUserId}/personal` : "/settings/tech/login-and-sso",
       };
     }
+    // Performance reviews (REVIEWS_DESIGN.md § 8.3). A review's own page is the reviewer's; a cycle's is its runner's.
+    case "REVIEW_CYCLE_LAUNCHED": {
+      const due = str(p.firstDueOn) ? ` The first is due ${formatDisplayDate(str(p.firstDueOn))}.` : "";
+      return {
+        title: "Reviews to Write",
+        message: `${str(p.cycleName) || "A review cycle"} has started and asks you for reviews.${due}`,
+        Icon: ClipboardCheck,
+        href: "/reviews/me",
+      };
+    }
+    case "REVIEW_ASSIGNED": {
+      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
+      return {
+        title: "A Review for You",
+        message: `You are asked to write a ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"}.`,
+        Icon: ClipboardCheck,
+        href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_DUE_SOON": {
+      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
+      const due = str(p.dueDate) ? ` on ${formatDisplayDate(str(p.dueDate))}` : " in two days";
+      return {
+        title: "Review Due Soon",
+        message: `Your ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"} is due${due}.`,
+        Icon: CalendarClock,
+        href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_DUE": {
+      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
+      return {
+        title: "Review Due Today",
+        message: `Your ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"} is due today.`,
+        Icon: CalendarClock,
+        href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_REMINDER": {
+      return {
+        title: "Your Review Is Waiting",
+        message: `You are reminded to write your ${reviewKind(p.kind)} in ${str(p.cycleName) || "a review cycle"}.`,
+        Icon: Bell,
+        href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_OVERDUE": {
+      return {
+        title: "Review Overdue",
+        message: `${str(p.reviewerName) || "A reviewer"} has not written the ${reviewKind(p.kind)} of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "your cycle"}, due ${formatDisplayDate(str(p.dueDate))}.`,
+        Icon: TriangleAlert,
+        href: str(p.cycleId) ? `/reviews/cycles/${str(p.cycleId)}` : "/reviews",
+      };
+    }
+    case "REVIEW_DECLINED": {
+      return {
+        title: "Peer Review Declined",
+        message: `${str(p.reviewerName) || "A colleague"} declined to review ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "your cycle"}. You may ask somebody else.`,
+        Icon: XCircle,
+        href: str(p.cycleId) ? `/reviews/cycles/${str(p.cycleId)}` : "/reviews",
+      };
+    }
+    case "REVIEW_SELF_SUBMITTED": {
+      return {
+        title: "Self Review In",
+        message: `${str(p.subjectName) || "One of your people"} submitted their self review in ${str(p.cycleName) || "a review cycle"}.`,
+        Icon: CheckCircle2,
+        href: "/reviews/me",
+      };
+    }
+    case "REVIEW_SHARED": {
+      return {
+        title: "Your Review Is Ready",
+        message: `Your review in ${str(p.cycleName) || "a review cycle"} has been shared with you.`,
+        Icon: ClipboardCheck,
+        href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_AMENDED": {
+      return {
+        title: "Your Review Was Updated",
+        message: `Your manager updated your review in ${str(p.cycleName) || "a review cycle"}. Read the new version and acknowledge it again.`,
+        Icon: ClipboardCheck,
+        href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_ACKNOWLEDGED": {
+      return {
+        title: "Review Acknowledged",
+        message: `${str(p.subjectName) || "One of your people"} read their review in ${str(p.cycleName) || "a review cycle"}${p.commented === true ? " and left a comment" : ""}.`,
+        Icon: CheckCircle2,
+        href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_PEERS_TO_APPROVE": {
+      return {
+        title: "Peers to Approve",
+        message: `${str(p.subjectName) || "One of your people"} nominated their peers in ${str(p.cycleName) || "a review cycle"}. Approve them, or change the list first.`,
+        Icon: ClipboardCheck,
+        href: n.targetId ? `/reviews/nominations/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_PEERS_APPROVED": {
+      return {
+        title: "Your Peers Were Approved",
+        message: p.autoApproved === true
+          ? `Nobody changed your nomination in ${str(p.cycleName) || "a review cycle"} by the approval date, so your peers stood and were asked.`
+          : `Your peers in ${str(p.cycleName) || "a review cycle"} were approved and asked for their reviews.`,
+        Icon: CheckCircle2,
+        href: n.targetId ? `/reviews/nominations/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_TO_APPROVE": {
+      return {
+        title: "A Review to Approve",
+        message: `The manager review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} waits for your approval.`,
+        Icon: ClipboardCheck,
+        href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_APPROVED": {
+      return {
+        title: "Your Review Was Approved",
+        message: `Your review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} was approved.`,
+        Icon: CheckCircle2,
+        href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
+    case "REVIEW_SENT_BACK": {
+      return {
+        title: "Your Review Was Sent Back",
+        message: `Your review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} was sent back with a comment. Change it and submit it again.`,
+        Icon: TriangleAlert,
+        href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
+      };
+    }
     default:
       return {
         title: n.type.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -515,6 +652,11 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       };
   }
 };
+
+function reviewKind(kind: unknown): string {
+  return kind === "SELF" ? "self review" : kind === "MANAGER" ? "manager review" : kind === "PEER" ? "peer review"
+    : kind === "UPWARD" ? "upward review" : "review";
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   APPROVALS: "Approvals",

@@ -8,7 +8,24 @@ export type ProcessType = "PREBOARDING" | "ONBOARDING" | "OFFBOARDING";
  * TODO: a tick, and a file when it names a category. ACKNOWLEDGE: HR's material and "I have read it", only by
  * its assignee. QUESTIONNAIRE: questions defined on the template item.
  */
-export type TaskKind = "TODO" | "FILL_FIELDS" | "DOCUMENT" | "ACKNOWLEDGE" | "QUESTIONNAIRE";
+export type TaskKind =
+  | "TODO"
+  | "FILL_FIELDS"
+  | "DOCUMENT"
+  | "ACKNOWLEDGE"
+  | "QUESTIONNAIRE"
+  | "REVIEW"
+  | "NOMINATE_PEERS"
+  | "APPROVE_PEERS"
+  | "APPROVE_REVIEW";
+
+/** A review and its steps — nominating and approving peers, approving a manager review — come only from a review cycle. */
+export type ReviewTaskKind = "REVIEW" | "NOMINATE_PEERS" | "APPROVE_PEERS" | "APPROVE_REVIEW";
+export const REVIEW_TASK_KINDS: ReviewTaskKind[] = ["REVIEW", "NOMINATE_PEERS", "APPROVE_PEERS", "APPROVE_REVIEW"];
+export const isReviewTaskKind = (k: TaskKind): k is ReviewTaskKind => (REVIEW_TASK_KINDS as TaskKind[]).includes(k);
+
+/** The kinds a template or a running process may be given. */
+export type EditableTaskKind = Exclude<TaskKind, ReviewTaskKind>;
 export type DueKind = "OFFSET" | "BEFORE_START";
 /** LINE_MANAGER: a task an automation gave to "the manager" — it follows the reporting line; never in a template. */
 export type TemplateAssigneeKind = "TARGET" | "ONBOARDING_MANAGER" | "SPECIFIC_USER";
@@ -338,6 +355,10 @@ export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   DOCUMENT: "Upload Document",
   ACKNOWLEDGE: "Acknowledge",
   QUESTIONNAIRE: "Questionnaire",
+  REVIEW: "Review",
+  NOMINATE_PEERS: "Nominate Peers",
+  APPROVE_PEERS: "Approve Peers",
+  APPROVE_REVIEW: "Approve Review",
 };
 
 /** One line each, for choosing a kind: what the person is asked to do, and what closes it. */
@@ -347,7 +368,16 @@ export const TASK_KIND_DESCRIPTIONS: Record<TaskKind, string> = {
   DOCUMENT: "A file to upload into the person's documents. Closes when it arrives.",
   ACKNOWLEDGE: "A file or a link to read and confirm. Only the person it is for can confirm.",
   QUESTIONNAIRE: "Questions to answer. The answers are kept on the person's Forms tab.",
+  REVIEW: "A performance review to write. Closes when it is submitted.",
+  NOMINATE_PEERS: "Colleagues to nominate for a performance review. Closes when the nomination is sent.",
+  APPROVE_PEERS: "Peers somebody nominated, to approve. Closes when they are approved.",
+  APPROVE_REVIEW: "A manager review to approve before it is shared. Closes when approved or sent back.",
 };
+
+/** The kinds a template or process editor offers — every kind but a review's and its steps'. */
+export const EDITABLE_TASK_KINDS = (Object.keys(TASK_KIND_LABELS) as TaskKind[]).filter(
+  (k): k is EditableTaskKind => !isReviewTaskKind(k),
+);
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   SHORT_TEXT: "Short Text",

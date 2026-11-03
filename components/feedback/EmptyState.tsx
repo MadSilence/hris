@@ -42,13 +42,18 @@ export const EmptyState: React.FC<{
    * (`flex-1 min-h-0` inside a column that knows one).
    */
   fill?: boolean;
+  /**
+   * A smaller block for a list that is one section of a page — "To Write" on My Reviews, the reviewers of a
+   * cycle — where the full-size block would outweigh the sections around it. Same parts, less room.
+   */
+  compact?: boolean;
   className?: string;
-}> = ({ icon, title, description, onCreate, createLabel, action, fill, className }) => {
+}> = ({ icon, title, description, onCreate, createLabel, action, fill, compact, className }) => {
   const create = onCreate;
 
   const body = (
     <>
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brown-50 text-brown-500">
+      <div className={`flex items-center justify-center rounded-full bg-brown-50 text-brown-500 ${compact ? "h-10 w-10 [&>svg]:h-5 [&>svg]:w-5" : "h-14 w-14"}`}>
         {icon}
       </div>
       <div className="space-y-1">
@@ -62,7 +67,9 @@ export const EmptyState: React.FC<{
     </>
   );
 
-  const shell = `flex w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-brown-300 px-6 py-12 text-center ${
+  const shell = `flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-brown-300 px-6 text-center ${
+    compact ? "gap-3 py-6" : "gap-4 py-12"
+  } ${
     fill ? "h-full" : ""
   } ${className ?? ""}`;
 

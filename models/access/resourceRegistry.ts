@@ -150,6 +150,27 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedScopes: PERSONAL_SCOPES,
       },
       {
+        code: "REVIEWS.FORM",
+        label: "Review forms",
+        description: "The questionnaires review cycles ask reviewers to fill in. Edit writes them; Manage archives and deletes.",
+        supportedActions: ALL_ACTIONS,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "REVIEWS.CYCLE",
+        label: "Review cycles",
+        description: "Running review cycles. View sees them and who has written what, never what was written; Manage creates, launches and runs them.",
+        supportedActions: ["VIEW", "MANAGE"],
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "REVIEWS.RESULT",
+        label: "Review results",
+        description: "Reading what reviewers wrote about a person, and their rating. The scope decides whose.",
+        supportedActions: ["VIEW"],
+        supportedScopes: PERSONAL_SCOPES,
+      },
+      {
         code: "PEOPLE.ATTENDANCE",
         label: "Attendance",
         description:

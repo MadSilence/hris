@@ -8,7 +8,7 @@ import { PageGate } from "@/components/auth/PageGate";
 import { TemplatesCatalogue } from "@/components/modules/settings/modules/templates";
 import type { TemplateKind } from "@/api/modules/templates/dto";
 
-const KINDS: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS"];
+const KINDS: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS", "REVIEW_FORM"];
 
 /**
  * Settings → General → Templates — the "quick setup" corner beside Import and Export
@@ -34,13 +34,14 @@ function TemplatesSettings() {
         { resource: "ROLES.ROLE", action: "VIEW" },
         { resource: "PEOPLE.ATTRIBUTES", action: "VIEW" },
         { resource: "PEOPLE.LIFECYCLE_TEMPLATES", action: "VIEW" },
+        { resource: "REVIEWS.FORM", action: "VIEW" },
       ]}
     >
       <div className="space-y-6 px-8 pb-10">
         <div className="space-y-4">
           <SettingsPageHeader title="Templates" backHref="/settings"/>
           <PageDescription className="text-base text-muted-foreground/90">
-            Ready-made roles, profile fields and onboarding checklists. Open one to see exactly what it would
+            Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would
             create in your company, adjust it, and apply it as a copy you can change afterwards.
           </PageDescription>
         </div>

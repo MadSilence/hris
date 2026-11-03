@@ -10,6 +10,8 @@ import { useDebouncedValue } from "@/components/modules/organization/modules/pro
 import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve";
 import { emptySegment, type UserRefDTO } from "@/models/segment/Segment";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { useQuery } from "@tanstack/react-query";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
 
 export type PickedUser = {
   id: string;
@@ -26,6 +28,11 @@ type Props = {
   allowClear?: boolean;
   disabled?: boolean;
   id?: string;
+  /**
+   * A read route that answers `?q=` with people, used instead of the directory's search — for a picker an ordinary
+   * employee must be able to use whatever their directory rights (the Nominate Peers page, REVIEWS_PLAN.md 11.0).
+   */
+  searchPath?: string;
 };
 
 function fullName(u: { firstName?: string | null; lastName?: string | null; email?: string | null }): string {
@@ -41,6 +48,18 @@ function initials(u: { firstName?: string | null; lastName?: string | null; emai
   return (u.email ?? "?").slice(0, 2).toUpperCase();
 }
 
+/** People from a scoped read route ({@code searchPath}), one page: the route caps what it answers. */
+function usePathSearch(path: string | undefined, open: boolean, q: string) {
+  const { internalApiClient } = useAppDataContext();
+  const term = q.trim().length >= 2 ? q.trim() : "";
+  const query = useQuery<UserRefDTO[]>({
+    queryKey: ["USER_PICKER_SEARCH", path, term],
+    queryFn: () => internalApiClient.get<UserRefDTO[]>(term ? `${path}?q=${encodeURIComponent(term)}` : path ?? ""),
+    enabled: Boolean(path) && open,
+  });
+  return { items: query.data ?? [], isLoading: query.isLoading };
+}
+
 export function UserPickerField({
   value,
   onChange,
@@ -48,16 +67,17 @@ export function UserPickerField({
   allowClear = true,
   disabled,
   id,
+  searchPath,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query, 300);
 
-  const { items, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useSegmentResolve(
-    emptySegment(),
-    open,
-    debounced,
-  );
+  const directory = useSegmentResolve(emptySegment(), open && !searchPath, debounced);
+  const scoped = usePathSearch(searchPath, open, debounced);
+  const { items, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = searchPath
+    ? { ...scoped, hasNextPage: false, isFetchingNextPage: false, fetchNextPage: () => Promise.resolve() }
+    : directory;
 
   const listRef = useRef<HTMLDivElement>(null);
   const onScroll = () => {

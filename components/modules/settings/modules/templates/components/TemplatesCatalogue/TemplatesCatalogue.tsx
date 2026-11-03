@@ -13,18 +13,20 @@ import type { TemplateKind, TemplateSummaryDTO } from "@/api/modules/templates/d
 import { useTemplates } from "@/components/modules/settings/modules/templates/hooks";
 
 /** The order the owner asked for (T1): field sets first, then roles, then checklists. */
-export const TEMPLATE_KIND_ORDER: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS"];
+export const TEMPLATE_KIND_ORDER: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS", "REVIEW_FORM"];
 
 export const TEMPLATE_KIND_LABEL: Record<TemplateKind, string> = {
   FIELD_SET: "Field Sets",
   ROLE: "Roles",
   PROCESS: "Onboarding Checklists",
+  REVIEW_FORM: "Review Forms",
 };
 
 const KIND_DESCRIPTION: Record<TemplateKind, string> = {
   FIELD_SET: "A section of the profile and the fields in it.",
   ROLE: "A role with its permissions and field access.",
   PROCESS: "A checklist for a new joiner's first days, ready for the canvas.",
+  REVIEW_FORM: "A performance review form, ready for a review cycle.",
 };
 
 export interface TemplatesCatalogueProps {

@@ -1,7 +1,7 @@
 import { hrisApiTemplatesService } from "@/api/modules/templates/services";
 import type { TemplateChoicesRequest, TemplateKind } from "@/api/modules/templates/dto";
 
-const KINDS: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS"];
+const KINDS: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS", "REVIEW_FORM"];
 
 export class TemplatesRoutes {
   public async list(request: Request) {

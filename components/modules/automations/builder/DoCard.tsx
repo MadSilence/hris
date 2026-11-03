@@ -14,6 +14,7 @@ import {
   Trash2,
   UserMinus,
   UserPlus,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/public/desact/src/components/ui/button";
 import {
@@ -44,6 +45,7 @@ export const ACTION_ICONS: Record<AutomationActionType, React.ComponentType<{ cl
   ASSIGN: UserPlus,
   UNASSIGN: UserMinus,
   GRANT_TIME_OFF_POLICY: CalendarCheck,
+  START_REVIEW: ClipboardCheck,
 };
 
 /**

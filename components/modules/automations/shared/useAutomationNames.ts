@@ -6,7 +6,13 @@ import { useReferenceOptions, type ReferenceOption } from "@/components/hooks/us
 import { getTimeOffPoliciesQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
 import { timeOffPoliciesService } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/services/timeOffPoliciesService";
 import type { ReferenceValueSource } from "@/models/user/fields";
-import type { AssignableType } from "@/models/automations";
+import type { AssignableType, AutomationDefinition } from "@/models/automations";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { useReviewCycleTemplates } from "@/components/modules/reviews/hooks";
+
+/** Whether a definition starts reviews, and so needs the review templates' names. */
+export const startsReviews = (definition: AutomationDefinition | null | undefined) =>
+  Boolean(definition?.actions.some((a) => a.type === "START_REVIEW"));
 
 /** Where each assignable type's catalogue comes from — the same catalogues the profile pickers read. */
 export const ASSIGNABLE_SOURCE: Record<Exclude<AssignableType, "TIME_OFF_POLICY">, ReferenceValueSource> = {
@@ -46,7 +52,7 @@ export const useAssignableOptions = (type: AssignableType | null | undefined) =>
  * one id → name map. Only the catalogues for the types in `types` are fetched; they are cached for
  * five minutes, so a list of twenty rules asks each catalogue once.
  */
-export const useAutomationNames = (types: ReadonlySet<AssignableType>, withRoles = false) => {
+export const useAutomationNames = (types: ReadonlySet<AssignableType>, withRoles = false, withReviewTemplates = false) => {
   const roles = useReferenceOptions("roles", types.has("ROLE") || withRoles);
   const teams = useReferenceOptions("teams", types.has("TEAM"));
   const departments = useReferenceOptions("departments", types.has("DEPARTMENT"));
@@ -55,13 +61,17 @@ export const useAutomationNames = (types: ReadonlySet<AssignableType>, withRoles
   const jobs = useReferenceOptions("jobs", types.has("JOB"));
   const calendars = useReferenceOptions("calendars", types.has("PUBLIC_HOLIDAY_CALENDAR"));
   const policies = usePolicyOptions(types.has("TIME_OFF_POLICY"));
+  // A "Start a Review" action names its template (REVIEWS_PLAN.md 11.3); asked only of somebody who may see cycles.
+  const canSeeCycles = useCanAccess("REVIEWS.CYCLE", "VIEW");
+  const templates = useReviewCycleTemplates(withReviewTemplates && canSeeCycles);
 
   return useMemo(() => {
     const targets = new Map<string, string>();
     for (const list of [roles, teams, departments, legalEntities, offices, jobs, calendars, policies]) {
       for (const option of list.options) targets.set(option.id, option.label);
     }
+    for (const t of templates.data ?? []) targets.set(t.id, t.name);
     const roleNames = new Map(roles.options.map((o) => [o.id, o.label] as const));
     return { targets, roles: roleNames };
-  }, [roles, teams, departments, legalEntities, offices, jobs, calendars, policies]);
+  }, [roles, teams, departments, legalEntities, offices, jobs, calendars, policies, templates.data]);
 };

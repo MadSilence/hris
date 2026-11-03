@@ -21,6 +21,7 @@ import { addProcessTaskAction, updateProcessTaskAction } from "@/components/modu
 import { TaskKindConfigFields } from "@/components/modules/lifecycle/templates/canvas/TaskKindConfigFields";
 import {
   ASSIGNEE_KIND_LABELS,
+  EDITABLE_TASK_KINDS,
   TASK_KIND_LABELS,
   assigneeKindLabel,
   type Material,
@@ -179,7 +180,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
                     onValueChange={(v) => patch({ kind: v as TaskKind, categoryId: null, attributeIds: [], questions: [] })}>
                     <SelectTrigger id="process-task-kind"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(TASK_KIND_LABELS) as TaskKind[]).map((k) => (
+                      {EDITABLE_TASK_KINDS.map((k) => (
                         <SelectItem key={k} value={k}>{TASK_KIND_LABELS[k]}</SelectItem>
                       ))}
                     </SelectContent>

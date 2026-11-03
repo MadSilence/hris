@@ -14,7 +14,7 @@ import { useUserFields } from "@/components/modules/organization/hooks/useUserFi
 import { useAutomations } from "@/components/modules/automations/hooks";
 import { RuleStatusBadge } from "@/components/modules/automations/shared/AutomationStatusBadge";
 import { ruleSentence, typesInDefinition } from "@/components/modules/automations/shared/sentence";
-import { useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
+import { startsReviews, useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
 import { STARTERS, type StarterId } from "@/components/modules/automations/builder/draft";
 import { formatMoment, type AssignableType, type AutomationRuleSummary } from "@/models/automations";
 
@@ -53,7 +53,8 @@ export function AutomationsListContainer() {
     for (const r of all) typesInDefinition(r.definition, fields).forEach((t) => set.add(t));
     return set;
   }, [all, fields]);
-  const names = useAutomationNames(types, all.some((r) => r.definition?.actions.some((a) => a.recipients?.some((x) => x.kind === "ROLE"))));
+  const names = useAutomationNames(types, all.some((r) => r.definition?.actions.some((a) => a.recipients?.some((x) => x.kind === "ROLE"))),
+    all.some((r) => startsReviews(r.definition)));
 
   const rows = useMemo(() => source.map((rule) => ({
     rule,

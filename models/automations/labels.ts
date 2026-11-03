@@ -44,6 +44,7 @@ export const ACTION_LABELS: Record<AutomationActionType, string> = {
   ASSIGN: "Assign",
   UNASSIGN: "Unassign",
   GRANT_TIME_OFF_POLICY: "Grant Time Off Policy",
+  START_REVIEW: "Start a Review",
 };
 
 export const RECIPIENT_LABELS: Record<RecipientKind, string> = {
@@ -210,6 +211,10 @@ export const actionSentence = (
       return `Unassign ${target(action.assignableType, action.assignableId)}`;
     case "GRANT_TIME_OFF_POLICY":
       return `Grant ${target("TIME_OFF_POLICY", action.policyId)}`;
+    case "START_REVIEW": {
+      const template = action.templateCycleId ? names.targets?.get(action.templateCycleId) : undefined;
+      return `Start a review: ${template ?? "a review template"}`;
+    }
     default:
       return "Do something";
   }

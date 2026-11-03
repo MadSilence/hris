@@ -17,6 +17,7 @@ jest.mock("@/components/modules/organization/hooks/useUserFields/useUserFields",
 }));
 jest.mock("@/components/modules/automations/shared/useAutomationNames", () => ({
   useAutomationNames: () => ({ targets: new Map([["berlin", "Berlin Office"], ["cal-de", "Germany 2026"]]), roles: new Map() }),
+  startsReviews: () => false,
 }));
 
 const runs = { scheduled: 1, inProgress: 0, done: 5, skipped: 2, failed: 0, cancelled: 0 };

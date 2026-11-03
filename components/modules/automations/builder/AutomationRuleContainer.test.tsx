@@ -46,6 +46,7 @@ jest.mock("@/components/modules/automations/shared/useAutomationNames", () => ({
     roles: new Map(),
   }),
   useAssignableOptions: () => ({ options: [{ id: "cal-de", label: "Germany 2026" }], isLoading: false }),
+  startsReviews: () => false,
 }));
 jest.mock("@/components/hooks/useReferenceOptions", () => ({ useReferenceOptions: () => ({ options: [], isLoading: false }) }));
 jest.mock("@/components/audience/AudienceBuilder", () => ({
