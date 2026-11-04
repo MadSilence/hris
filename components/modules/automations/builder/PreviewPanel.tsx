@@ -107,6 +107,12 @@ export function PreviewPanel({
                 {preview.matchingCount > 8 ? `, and ${preview.matchingCount - 8} more` : ""}
               </p>
             )}
+            {preview.messagesPerFiring > 1 && (
+              <p className={`m-0 text-body ${preview.messagesPerFiring > preview.volumeThreshold ? "text-status-pending-text" : "text-tertiary"}`}
+                data-test="preview-volume">
+                One firing sends about {preview.messagesPerFiring} notifications and emails.
+              </p>
+            )}
             {preview.pastMomentCount > 0 && (
               <p className="m-0 text-body text-tertiary" data-test="preview-past">
                 {plural(preview.pastMomentCount, "person is", "people are")} already past the moment — they are

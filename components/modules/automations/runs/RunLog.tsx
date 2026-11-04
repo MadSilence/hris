@@ -125,6 +125,9 @@ export function RunLog({ ruleId }: { ruleId: string }) {
         {runs.data && (
           <span className="text-body text-tertiary">
             {runs.data.totalElements} {runs.data.totalElements === 1 ? "run" : "runs"}
+            {(runs.data.outsideScope ?? 0) > 0 && (
+              <span data-test="outside-scope">, and {runs.data.outsideScope} about people outside your access</span>
+            )}
           </span>
         )}
       </div>

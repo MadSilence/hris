@@ -15,6 +15,7 @@ import type {
   AutomationRuleSummary,
   AutomationRun,
   AutomationRunStatus,
+  AutomationTemplate,
   AutomationVersion,
   LiveAssignmentCreated,
   LiveAssignmentPreview,
@@ -43,6 +44,17 @@ export const useAutomations = (includeArchived: boolean) => {
   return useQuery<AutomationRuleSummary[]>({
     queryKey: automationQueryKeys.list(includeArchived),
     queryFn: () => internalApiClient.get<AutomationRuleSummary[]>(`/automations${includeArchived ? "?includeArchived=true" : ""}`),
+  });
+};
+
+/** The shipped starting points (D3). Static per release — kept for the session. */
+export const useAutomationTemplates = (enabled = true) => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<AutomationTemplate[]>({
+    queryKey: automationQueryKeys.templates,
+    queryFn: () => internalApiClient.get<AutomationTemplate[]>("/automations/templates"),
+    staleTime: Infinity,
+    enabled,
   });
 };
 

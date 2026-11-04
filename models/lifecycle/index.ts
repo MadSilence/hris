@@ -17,7 +17,9 @@ export type TaskKind =
   | "REVIEW"
   | "NOMINATE_PEERS"
   | "APPROVE_PEERS"
-  | "APPROVE_REVIEW";
+  | "APPROVE_REVIEW"
+  /** An automation asks for approval before its run goes on; decided with Approve / Decline on the task. */
+  | "APPROVE_AUTOMATION";
 
 /** A review and its steps — nominating and approving peers, approving a manager review — come only from a review cycle. */
 export type ReviewTaskKind = "REVIEW" | "NOMINATE_PEERS" | "APPROVE_PEERS" | "APPROVE_REVIEW";
@@ -25,7 +27,7 @@ export const REVIEW_TASK_KINDS: ReviewTaskKind[] = ["REVIEW", "NOMINATE_PEERS", 
 export const isReviewTaskKind = (k: TaskKind): k is ReviewTaskKind => (REVIEW_TASK_KINDS as TaskKind[]).includes(k);
 
 /** The kinds a template or a running process may be given. */
-export type EditableTaskKind = Exclude<TaskKind, ReviewTaskKind>;
+export type EditableTaskKind = Exclude<TaskKind, ReviewTaskKind | "APPROVE_AUTOMATION">;
 export type DueKind = "OFFSET" | "BEFORE_START";
 /** LINE_MANAGER: a task an automation gave to "the manager" — it follows the reporting line; never in a template. */
 export type TemplateAssigneeKind = "TARGET" | "ONBOARDING_MANAGER" | "SPECIFIC_USER";
@@ -359,6 +361,7 @@ export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   NOMINATE_PEERS: "Nominate peers",
   APPROVE_PEERS: "Approve peers",
   APPROVE_REVIEW: "Approve review",
+  APPROVE_AUTOMATION: "Approve",
 };
 
 /** One line each, for choosing a kind: what the person is asked to do, and what closes it. */
@@ -372,11 +375,12 @@ export const TASK_KIND_DESCRIPTIONS: Record<TaskKind, string> = {
   NOMINATE_PEERS: "Colleagues to nominate for a performance review. Closes when the nomination is sent.",
   APPROVE_PEERS: "Peers somebody nominated, to approve. Closes when they are approved.",
   APPROVE_REVIEW: "A manager review to approve before it is shared. Closes when approved or sent back.",
+  APPROVE_AUTOMATION: "An automation waits for this approval. Closes when approved or declined.",
 };
 
 /** The kinds a template or process editor offers — every kind but a review's and its steps'. */
 export const EDITABLE_TASK_KINDS = (Object.keys(TASK_KIND_LABELS) as TaskKind[]).filter(
-  (k): k is EditableTaskKind => !isReviewTaskKind(k),
+  (k): k is EditableTaskKind => !isReviewTaskKind(k) && k !== "APPROVE_AUTOMATION",
 );
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {

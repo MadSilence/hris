@@ -11,6 +11,9 @@ import type {
   AutomationRuleSummary,
   AutomationRun,
   AutomationRunStatus,
+  AutomationSimulation,
+  AutomationTemplate,
+  AutomationTestResult,
   AutomationVersion,
   CreateAutomationRequest,
   EnableAutomationRequest,
@@ -25,6 +28,7 @@ import type {
 } from "@/models/automations";
 
 type Body = Record<string, unknown>;
+type AutomationDefinitionBody = import("@/models/automations").AutomationDefinition;
 const body = <T,>(value: T) => value as unknown as Body;
 
 export type AutomationRunsQuery = {
@@ -100,6 +104,30 @@ export class HrisApiAutomationsClient {
   }
   cancelRun(runId: string) {
     return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/cancel`);
+  }
+
+  // trying a rule, copying it, its owner (second round: D1–D4, E2, E3)
+  test(request: { definition: AutomationDefinitionBody; personId: string; actionIndex?: number | null }) {
+    return hrisApiClient.post<AutomationTestResult>("/automations/test", body(request));
+  }
+  simulate(request: { definition: AutomationDefinitionBody; personId: string }) {
+    return hrisApiClient.post<AutomationSimulation>("/automations/simulate", body(request));
+  }
+  templates() {
+    return hrisApiClient.get<AutomationTemplate[]>("/automations/templates");
+  }
+  duplicate(id: string) {
+    return hrisApiClient.post<AutomationRule>(`/automations/${id}/duplicate`);
+  }
+  changeOwner(id: string, userId: string) {
+    return hrisApiClient.post<AutomationRule>(`/automations/${id}/owner`, body({ userId }));
+  }
+  takeOver(id: string) {
+    return hrisApiClient.post<AutomationRule>(`/automations/${id}/take-over`);
+  }
+  // an automation's approval, decided by its approver from the task (C3)
+  decideApproval(taskId: string, approve: boolean, comment?: string | null) {
+    return hrisApiClient.post<void>(`/automations/approvals/${taskId}/${approve ? "approve" : "decline"}`, body({ comment }));
   }
 
   // live assignment rules — checked against the target's own module right, not SETTINGS.AUTOMATIONS

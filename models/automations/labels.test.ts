@@ -25,6 +25,10 @@ describe("automation sentences", () => {
 });
 
 describe("reasonText", () => {
+  it("reads a pause about the author in words, with what happened", () => {
+    expect(reasonText("AUTHOR_LEFT: its author has left")).toBe("Paused — its author has left");
+  });
+
   it("words a known reason and keeps its detail", () => {
     expect(reasonText("MISSING_PLACEHOLDER: managerName")).toBe("Failed: {managerName} has no value");
     expect(reasonText("NO_LONGER_MATCHES")).toBe("Skipped: no longer matches the conditions");

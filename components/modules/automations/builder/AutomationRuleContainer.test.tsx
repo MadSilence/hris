@@ -34,6 +34,7 @@ jest.mock("@/components/modules/automations/hooks", () => ({
   unwrapAction: jest.requireActual("@/components/modules/automations/hooks/useAutomationQueries").unwrapAction,
   useAutomation: jest.fn(),
   useAutomationCatalog: () => ({ data: catalog, isLoading: false, error: null }),
+  useAutomationTemplates: () => ({ data: [], isLoading: false, error: null }),
   useAutomationPreview: jest.fn(),
   useInvalidateAutomations: () => jest.fn().mockResolvedValue(undefined),
 }));
@@ -87,6 +88,7 @@ const catalog: AutomationCatalog = {
   placeholders: ["firstName", "lastName", "startDate", "managerName"],
   recipientKinds: { SEND_EMAIL: ["PERSON", "MANAGER", "USER"], NOTIFY: ["PERSON", "MANAGER", "ROLE", "USER"], CREATE_TASK: ["PERSON", "MANAGER"] },
   defaultLateWindowDays: 30,
+  events: [],
 };
 
 const previewOf = (over: Partial<AutomationPreview> = {}): AutomationPreview => ({
@@ -96,6 +98,8 @@ const previewOf = (over: Partial<AutomationPreview> = {}): AutomationPreview => 
   backfillCandidates: [],
   upcoming: [{ date: "2026-10-20", person: { id: "p1", name: "Anna Schmidt" }, position: 0, actionType: "SEND_EMAIL", summary: "Email the person: Welcome", late: false }],
   eventDriven: false,
+  messagesPerFiring: 1,
+  volumeThreshold: 200,
   samples: [],
   assignments: [],
   conflicts: [],
@@ -151,17 +155,16 @@ describe("AutomationRuleContainer — composing a rule", () => {
     expect(definition.actions[0]).toEqual(expect.objectContaining({ type: "ASSIGN", assignableType: "PUBLIC_HOLIDAY_CALENDAR", assignableId: "cal-de" }));
   });
 
-  it("inserts a placeholder chip at the caret, not by hand", () => {
+  it("inserts a placeholder typed after @, not by hand", () => {
     search = new URLSearchParams("starter=welcome-email");
     render(<AutomationRuleContainer ruleId={null} />);
 
-    // A single action opens on its own.
+    // A single action opens on its own. Typing "@fir" opens the list; picking stores {firstName}.
     const subject = screen.getByLabelText(/^Subject/) as HTMLInputElement;
-    fireEvent.change(subject, { target: { value: "Hello  today" } });
-    subject.setSelectionRange(6, 6);
-    fireEvent.click(within(screen.getByRole("group", { name: "Insert into Subject" })).getByRole("button", { name: "First name" }));
+    fireEvent.change(subject, { target: { value: "Hello @fir", selectionStart: 10 } });
+    fireEvent.click(within(screen.getByRole("listbox", { name: "Fields for Subject" })).getByRole("button", { name: /First name/ }));
 
-    expect(subject.value).toBe("Hello {firstName} today");
+    expect(subject.value).toBe("Hello {firstName}");
   });
 });
 
@@ -207,7 +210,7 @@ describe("AutomationRuleContainer — publishing", () => {
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/settings/automation/automations/rule-new"));
     expect(createAutomationAction).toHaveBeenCalledWith(expect.objectContaining({ name: "Welcome email" }));
-    expect(enableAutomationAction).toHaveBeenCalledWith({ id: "rule-new", body: { backfill: "ALL" } });
+    expect(enableAutomationAction).toHaveBeenCalledWith({ id: "rule-new", body: { backfill: "ALL", confirmVolume: false } });
   });
 
   it("enables forward only by default", async () => {
@@ -218,7 +221,7 @@ describe("AutomationRuleContainer — publishing", () => {
     fireEvent.click(publishButton());
     fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Publish" }));
 
-    await waitFor(() => expect(enableAutomationAction).toHaveBeenCalledWith({ id: "rule-new", body: { backfill: "NONE" } }));
+    await waitFor(() => expect(enableAutomationAction).toHaveBeenCalledWith({ id: "rule-new", body: { backfill: "NONE", confirmVolume: false } }));
   });
 
   const existing = partialMock<AutomationRule>({
@@ -241,7 +244,7 @@ describe("AutomationRuleContainer — publishing", () => {
 
   const editExisting = async () => {
     (useAutomation as jest.Mock).mockReturnValue({ data: existing, error: null, isLoading: false });
-    nextPreview = previewOf({ inFlight: { scheduledRuns: 23, inProgressRuns: 2, completedRuns: 140, wouldCancel: 4, wouldAdd: 6 } });
+    nextPreview = previewOf({ inFlight: { scheduledRuns: 23, inProgressRuns: 2, completedRuns: 140, wouldCancel: 4, wouldAdd: 6, waitingRuns: 0 } });
     render(<AutomationRuleContainer ruleId="rule-1" />);
     // Nothing changed yet: there is nothing to publish.
     expect(publishButton()).toBeDisabled();

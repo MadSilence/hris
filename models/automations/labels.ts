@@ -8,11 +8,13 @@ import type {
   ActionSpec,
   AssignableType,
   AutomationActionType,
+  AutomationEvent,
   AutomationRuleStatus,
   AutomationRunStatus,
   AutomationStepStatus,
   AutomationTriggerType,
   CatalogOption,
+  OnTimeout,
   RecipientKind,
   RecipientSpec,
   TriggerSpec,
@@ -25,6 +27,8 @@ export const TRIGGER_LABELS: Record<AutomationTriggerType, string> = {
   FIELD_CHANGED: "A field changes",
   TERMINATION_SCHEDULED: "A termination Is recorded",
   LAST_WORKING_DAY_ARRIVES: "The last working day arrives",
+  EVENT: "Something happens",
+  SCHEDULE: "On a schedule",
 };
 
 /** One line under each trigger in the picker: what makes it fire. */
@@ -35,6 +39,26 @@ export const TRIGGER_HINTS: Record<AutomationTriggerType, string> = {
   FIELD_CHANGED: "Every time the field changes, optionally from one value to another.",
   TERMINATION_SCHEDULED: "The day a termination is recorded.",
   LAST_WORKING_DAY_ARRIVES: "Counts from the person's last working day.",
+  EVENT: "Time off requested or decided, a process completed, a review submitted or shared.",
+  SCHEDULE: "Every day, week, month or quarter, for everybody who matches.",
+};
+
+export const EVENT_LABELS: Record<AutomationEvent, string> = {
+  TIME_OFF_REQUESTED: "Time off is requested",
+  TIME_OFF_APPROVED: "Time off is approved",
+  TIME_OFF_REJECTED: "Time off is rejected",
+  TIME_OFF_CANCELLED: "Time off is cancelled",
+  PROCESS_COMPLETED: "A process is completed",
+  REVIEW_SUBMITTED: "A review is submitted",
+  REVIEW_SHARED: "A review is shared with the person",
+};
+
+export const WEEKDAY_LABELS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+export const ON_TIMEOUT_LABELS: Record<OnTimeout, string> = {
+  CONTINUE: "Go on with the rest",
+  STOP: "Stop the rest",
+  STOP_AND_TELL: "Stop the rest and tell me",
 };
 
 export const ACTION_LABELS: Record<AutomationActionType, string> = {
@@ -45,6 +69,8 @@ export const ACTION_LABELS: Record<AutomationActionType, string> = {
   UNASSIGN: "Unassign",
   GRANT_TIME_OFF_POLICY: "Grant time off policy",
   START_REVIEW: "Start a review",
+  WAIT_UNTIL: "Wait until",
+  REQUEST_APPROVAL: "Ask for approval",
 };
 
 export const RECIPIENT_LABELS: Record<RecipientKind, string> = {
@@ -53,6 +79,10 @@ export const RECIPIENT_LABELS: Record<RecipientKind, string> = {
   ONBOARDING_MANAGER: "Their onboarding manager",
   ROLE: "Everyone with a role",
   USER: "A named person",
+  DEPARTMENT_HEAD: "The head of their department",
+  MANAGERS_MANAGER: "Their manager's manager",
+  APPROVER: "The approver",
+  REVIEWER: "The reviewer",
 };
 
 export const ASSIGNABLE_LABELS: Record<AssignableType, string> = {
@@ -102,6 +132,7 @@ export const STEP_STATUS_LABELS: Record<AutomationStepStatus, string> = {
   FAILED: "Failed",
   CANCELLED: "Cancelled",
   STOPPED: "Stopped",
+  WAITING: "Waiting",
 };
 
 /** The built-in dates, for a reader without the catalogue (it needs MANAGE). */
@@ -142,7 +173,32 @@ export const triggerSentence = (
     case "FIELD_CHANGED": {
       const label = lookups.changeableFields?.find((o) => o.value === trigger.field)?.label ?? "a field";
       const fromTo = [trigger.from ? ` from ${trigger.from}` : "", trigger.to ? ` to ${trigger.to}` : ""].join("");
-      return `When ${lower(label)} changes${fromTo}`;
+      const recorded = trigger.when === "RECORDED" ? ", when it is recorded" : "";
+      return `When ${lower(label)} changes${fromTo}${recorded}`;
+    }
+    case "EVENT": {
+      const what = trigger.event ? lower(EVENT_LABELS[trigger.event]) : "something happens";
+      const days = trigger.days ?? 0;
+      if (!trigger.anchor || trigger.anchor === "EVENT") return `When ${what}`;
+      const day = trigger.anchor === "LEAVE_START" ? "the first day of the leave" : "the last day of the leave";
+      const when = trigger.direction === "ON" || days === 0 ? `on ${day}`
+        : `${plural(days, "day")} ${trigger.direction === "AFTER" ? "after" : "before"} ${day}`;
+      return `When ${what}, ${when}`;
+    }
+    case "SCHEDULE": {
+      switch (trigger.frequency) {
+        case "DAILY":
+          return "Every day";
+        case "WEEKLY":
+          return `Every ${WEEKDAY_LABELS[(trigger.weekday ?? 1) - 1] ?? "week"}`;
+        case "MONTHLY":
+          return trigger.dayOfMonth === 0 ? "On the last day of every month" : `On day ${trigger.dayOfMonth ?? 1} of every month`;
+        case "QUARTERLY":
+          return trigger.dayOfMonth === 0 ? "On the last day of every quarter's first month"
+            : `On day ${trigger.dayOfMonth ?? 1} of every quarter`;
+        default:
+          return "On a schedule";
+      }
     }
     case "DATE_OFFSET": {
       const fieldLabel =
@@ -173,6 +229,14 @@ const recipientWord = (r: RecipientSpec, names: { roles?: Map<string, string>; p
       return (r.roleId && names.roles?.get(r.roleId)) ? `everyone with ${names.roles.get(r.roleId)}` : "everyone with a role";
     case "USER":
       return (r.userId && names.people?.get(r.userId)) || "a named person";
+    case "DEPARTMENT_HEAD":
+      return "the head of their department";
+    case "MANAGERS_MANAGER":
+      return "their manager's manager";
+    case "APPROVER":
+      return "the approver";
+    case "REVIEWER":
+      return "the reviewer";
     default:
       return "somebody";
   }
@@ -215,6 +279,13 @@ export const actionSentence = (
       const template = action.templateCycleId ? names.targets?.get(action.templateCycleId) : undefined;
       return `Start a review: ${template ?? "a review template"}`;
     }
+    case "WAIT_UNTIL": {
+      const what = action.until === "TASK_DONE" ? `task ${(action.taskStep ?? 0) + 1} is done`
+        : action.until === "FIELD_FILLED" ? "a field is filled" : "something";
+      return `Wait until ${what}, at most ${plural(action.maxDays ?? 0, "day")}`;
+    }
+    case "REQUEST_APPROVAL":
+      return `Ask ${action.assignee ? recipientWord(action.assignee, names) : "somebody"} to approve${action.title ? `: ${action.title}` : ""}`;
     default:
       return "Do something";
   }
@@ -240,6 +311,14 @@ const REASON_TEXTS: Record<string, string> = {
   OUTRANKED: "Skipped: a more specific place gives this person their holiday calendar",
   MISSING_PLACEHOLDER: "Failed: a placeholder has no value",
   STRUCTURAL: "Failed: something the rule uses is gone",
+  CONDITION_NOT_MET: "Skipped: its \"only if\" did not hold",
+  OBJECT_CLOSED: "Cancelled: the leave it counted from was cancelled or rejected",
+  MISSED: "Missed: the engine did not run on that day",
+  TIMED_OUT: "Waited as long as it may",
+  DECLINED: "Declined",
+  NO_APPROVER: "Failed: nobody to approve it",
+  AUTHOR_LEFT: "Paused",
+  AUTHOR_LACKS_RIGHT: "Paused",
 };
 
 /**

@@ -18,6 +18,7 @@ import { showError } from "@/lib/errors/errorToast";
 import { documentService } from "@/components/modules/organization/modules/profile/modules/personalDocuments/services/documentService";
 import { updateUserAttributesAction } from "@/components/modules/organization/modules/profile/actions/updateUserAttributesAction";
 import { addTaskCommentAction, answerQuestionnaireAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
+import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import {
   PROCESS_TYPE_LABELS,
   TASK_KIND_LABELS,
@@ -262,6 +263,25 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
         <Button asChild size="sm" variant="secondary">
           <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">Write the review</Link>
         </Button>
+      </div>
+    );
+  }
+
+  // An automation's approval (C3): decided here, by its approver or their delegate.
+  if (task.kind === "APPROVE_AUTOMATION") {
+    if (!mine || preview) return null;
+    const decide = (approve: boolean) => run(async () => {
+      const result = await decideAutomationApprovalAction({ taskId: task.id, approve });
+      if (result.status === ActionStatus.ERROR) throw new Error(result.errorMessage ?? "The decision was not saved.");
+      await onChangedAction?.();
+    });
+    return (
+      <div className="mt-3 space-y-2">
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" size="sm" onClick={() => void decide(true)} disabled={disabled}>Approve</Button>
+          <Button type="button" size="sm" variant="secondary" onClick={() => void decide(false)} disabled={disabled}>Decline</Button>
+        </div>
+        <FormError message={error} />
       </div>
     );
   }

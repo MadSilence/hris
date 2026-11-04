@@ -11,7 +11,15 @@ jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 jest.mock("@/components/auth/PermissionGate", () => ({
   PermissionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock("@/components/modules/automations/hooks", () => ({ useAutomations: jest.fn() }));
+jest.mock("@/components/modules/automations/hooks", () => ({
+  useAutomations: jest.fn(),
+  useAutomationTemplates: () => ({
+    data: [{ key: "welcome-email", name: "Welcome email before the first day", description: "Three days before.",
+      category: "Onboarding", definition: { trigger: { type: "PERSON_HIRED" }, conditions: { filters: [], excludeUserIds: [] }, actions: [] } }],
+    isLoading: false,
+    error: null,
+  }),
+}));
 jest.mock("@/components/modules/organization/hooks/useUserFields/useUserFields", () => ({
   useUserFields: () => ({ data: [{ id: "sys:office", key: "sys:office", label: "Office", valueSource: "offices" }] }),
 }));
@@ -93,7 +101,7 @@ describe("AutomationsListContainer", () => {
 
     expect(screen.getByText("Automate the first rule")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Welcome email before the first day/ }));
-    expect(push).toHaveBeenCalledWith("/settings/automation/automations/new?starter=welcome-email");
+    expect(push).toHaveBeenCalledWith("/settings/automation/automations/new?template=welcome-email");
   });
 
   it("says when the list could not be read, rather than that it is empty", () => {

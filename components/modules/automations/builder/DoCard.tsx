@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Add01Icon, ArrowDown01Icon, ArrowDown02Icon, ArrowRight01Icon, ArrowUp02Icon, CalendarCheckIn01Icon, CheckListIcon, Delete02Icon, Mail01Icon, Notification01Icon, TaskDone01Icon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, ArrowDown01Icon, ArrowDown02Icon, ArrowRight01Icon, ArrowUp02Icon, CalendarCheckIn01Icon, CheckListIcon, Delete02Icon, Mail01Icon, Notification01Icon, TaskDone01Icon, Clock01Icon, CheckmarkBadge01Icon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import {
@@ -22,6 +22,7 @@ import {
   type AutomationDefinition,
 } from "@/models/automations";
 import { ActionEditor } from "./ActionEditor";
+import type { FieldDTO } from "@/models/user/fields";
 import { newAction } from "./draft";
 import { SentenceCard } from "./SentenceCard";
 
@@ -33,6 +34,8 @@ export const ACTION_ICONS: Record<AutomationActionType, IconSvgElement> = {
   UNASSIGN: UserRemove01Icon,
   GRANT_TIME_OFF_POLICY: CalendarCheckIn01Icon,
   START_REVIEW: TaskDone01Icon,
+  WAIT_UNTIL: Clock01Icon,
+  REQUEST_APPROVAL: CheckmarkBadge01Icon,
 };
 
 /**
@@ -43,11 +46,16 @@ export function DoCard({
   definition,
   catalog,
   names,
+  fields,
+  isLoadingFields,
   onChange,
 }: {
   definition: AutomationDefinition;
   catalog: AutomationCatalog;
   names: { targets: Map<string, string>; roles: Map<string, string> };
+  /** The person fields an "only if" may filter on — the conditions' own. */
+  fields?: FieldDTO[];
+  isLoadingFields?: boolean;
   onChange: (patch: Partial<AutomationDefinition>) => void;
 }) {
   const actions = definition.actions;
@@ -118,6 +126,10 @@ export function DoCard({
                       action={action}
                       index={i}
                       catalog={catalog}
+                      trigger={definition.trigger}
+                      actions={actions}
+                      fields={fields}
+                      isLoadingFields={isLoadingFields}
                       onChange={(next) => setActions(actions.map((a, k) => (k === i ? next : a)))}
                     />
                   </div>

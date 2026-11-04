@@ -18,7 +18,16 @@ import {
   type AutomationCatalog,
   type RecipientKind,
   type RecipientSpec,
+  type TriggerSpec,
+  type WaitUntil,
+  type OnTimeout,
+  ON_TIMEOUT_LABELS,
+  actionSentence,
 } from "@/models/automations";
+import type { FieldDTO } from "@/models/user/fields";
+import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
+import { emptySegment } from "@/models/segment/Segment";
+import { placeholdersFor } from "./draft";
 import { useAssignableOptions } from "@/components/modules/automations/shared/useAutomationNames";
 import { PlaceholderTextField } from "./PlaceholderTextField";
 import { Field } from "./SentenceCard";
@@ -28,6 +37,13 @@ type Props = {
   action: ActionSpec;
   index: number;
   catalog: AutomationCatalog;
+  /** The rule's trigger: an event adds its placeholders and its recipients (A3, A5). */
+  trigger?: TriggerSpec;
+  /** The rule's actions: a wait for a task chooses one of the tasks before it (C2). */
+  actions?: ActionSpec[];
+  /** The person fields an "only if" filters on (C1). */
+  fields?: FieldDTO[];
+  isLoadingFields?: boolean;
   onChange: (next: ActionSpec) => void;
 };
 
@@ -209,14 +225,78 @@ function TargetPicker({
   );
 }
 
+/** The fields a wait can watch (C2): the person's dates and links; a company field comes from the field list. */
+const WAITABLE_FIELDS: { value: string; label: string }[] = [
+  { value: "sys:hire_date", label: "Hire date" },
+  { value: "sys:probation_end", label: "Probation end" },
+  { value: "sys:termination_date", label: "Last working day" },
+  { value: "sys:manager", label: "Manager" },
+  { value: "sys:job", label: "Position" },
+  { value: "sys:office", label: "Office" },
+  { value: "sys:legal_entity", label: "Legal entity" },
+  { value: "sys:department", label: "Department" },
+];
+
+/** C2: a wait and an approval always have a longest wait, and say what happens then. */
+function HoldingLimits({ action, prefix, set }: { action: ActionSpec; prefix: string; set: (p: Partial<ActionSpec>) => void }) {
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      <Field label="At most (days)" htmlFor={`${prefix}-max`} className="w-32" required>
+        <Input id={`${prefix}-max`} type="number" min={1} max={365} value={String(action.maxDays ?? "")}
+          onChange={(e) => set({ maxDays: e.target.value === "" ? null : toInt(e.target.value) })} />
+      </Field>
+      <Field label="Then" className="w-64">
+        <Select value={action.onTimeout ?? "STOP_AND_TELL"} onValueChange={(v) => set({ onTimeout: v as OnTimeout })}>
+          <SelectTrigger aria-label="Then"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(ON_TIMEOUT_LABELS) as OnTimeout[]).map((k) => <SelectItem key={k} value={k}>{ON_TIMEOUT_LABELS[k]}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Field>
+    </div>
+  );
+}
+
+/** C1: "only if" — a condition on the person checked when this step runs; false skips it, the rest goes on. */
+function OnlyIf({ action, fields, isLoadingFields, set }: {
+  action: ActionSpec;
+  fields?: FieldDTO[];
+  isLoadingFields: boolean;
+  set: (p: Partial<ActionSpec>) => void;
+}) {
+  const on = action.condition != null;
+  return (
+    <div className="space-y-2 border-t border-divider pt-3">
+      <label className="flex cursor-pointer items-center gap-2 text-body text-primary">
+        <input type="checkbox" checked={on} onChange={(e) => set({ condition: e.target.checked ? emptySegment() : null })} />
+        Only if…
+      </label>
+      {on && action.condition && (
+        <>
+          <AudienceBuilder
+            fields={fields}
+            isLoadingFields={isLoadingFields}
+            value={action.condition.filters}
+            onChange={(filters) => set({ condition: { ...action.condition!, filters } })}
+          />
+          <p className="m-0 text-hint text-tertiary">Checked on the day this step runs. When it does not hold, this step is skipped and the rest goes on.</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 /**
  * One action, edited in place under its row — the rule stays visible above and below it (design
  * direction: the object stays in view). Each type reads only its own fields.
  */
-export function ActionEditor({ action, index, catalog, onChange }: Props) {
+export function ActionEditor({ action, index, catalog, trigger, actions = [], fields, isLoadingFields = false, onChange }: Props) {
   const set = (patch: Partial<ActionSpec>) => onChange({ ...action, ...patch });
-  const kinds = catalog.recipientKinds[action.type] ?? ["PERSON", "MANAGER", "USER"];
-  const placeholders = catalog.placeholders;
+  const event = trigger?.type === "EVENT" ? catalog.events?.find((e) => e.value === trigger.event) : undefined;
+  const kinds: RecipientKind[] = [...(catalog.recipientKinds[action.type] ?? ["PERSON", "MANAGER", "USER"]),
+    ...(event?.recipientKinds ?? [])];
+  const placeholders = trigger ? placeholdersFor(catalog, trigger) : catalog.placeholders;
+  const taskSteps = actions.map((a, i) => ({ a, i })).filter(({ a, i }) => a.type === "CREATE_TASK" && i < index);
   const assignTypes = catalog.assignableTypes.filter((t) => t !== "TIME_OFF_POLICY");
   const prefix = `action-${index}`;
 
@@ -340,6 +420,77 @@ export function ActionEditor({ action, index, catalog, onChange }: Props) {
       )}
 
       {action.type === "START_REVIEW" && <StartReviewEditor action={action} prefix={prefix} onChange={set} />}
+
+      {action.type === "WAIT_UNTIL" && (
+        <>
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="Until" required className="w-56">
+              <Select value={action.until ?? "TASK_DONE"} onValueChange={(v) => set({ until: v as WaitUntil, taskStep: null, field: null })}>
+                <SelectTrigger aria-label="Until"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TASK_DONE">A task of this rule is done</SelectItem>
+                  <SelectItem value="FIELD_FILLED">A field is filled</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            {(action.until ?? "TASK_DONE") === "TASK_DONE" ? (
+              <Field label="Task" required className="min-w-64 flex-1">
+                <Select value={action.taskStep == null ? "" : String(action.taskStep)} onValueChange={(v) => set({ taskStep: Number(v) })}>
+                  <SelectTrigger aria-label="Task"><SelectValue placeholder={taskSteps.length ? "Select" : "Add a task before this wait"} /></SelectTrigger>
+                  <SelectContent>
+                    {taskSteps.map(({ a, i }) => <SelectItem key={i} value={String(i)}>{`${i + 1}. ${actionSentence(a)}`}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+            ) : (
+              <Field label="Field" required className="min-w-64 flex-1">
+                <SearchableSelect
+                  aria-label="Field"
+                  options={WAITABLE_FIELDS.concat((fields ?? []).filter((f) => f.key?.startsWith("attr:"))
+                    .map((f) => ({ value: f.key, label: f.label ?? f.key })))}
+                  value={action.field ?? null}
+                  onChange={(v) => set({ field: v })}
+                />
+              </Field>
+            )}
+          </div>
+          <HoldingLimits action={action} prefix={prefix} set={set} />
+        </>
+      )}
+
+      {action.type === "REQUEST_APPROVAL" && (
+        <>
+          <Field label="Who approves" required>
+            <RecipientRow
+              recipient={action.assignee ?? { kind: "MANAGER" }}
+              kinds={kinds}
+              onChange={(assignee) => set({ assignee })}
+            />
+          </Field>
+          <PlaceholderTextField
+            id={`${prefix}-approval-title`}
+            label="What is asked"
+            required
+            value={action.title ?? ""}
+            onChange={(title) => set({ title })}
+            placeholders={placeholders}
+          />
+          <PlaceholderTextField
+            id={`${prefix}-approval-description`}
+            label="Description"
+            multiline
+            value={action.description ?? ""}
+            onChange={(description) => set({ description })}
+            placeholders={placeholders}
+          />
+          <p className="m-0 text-hint text-tertiary">
+            The approver gets a task with Approve and Decline. The steps after this one wait for the answer; a decline stops them.
+          </p>
+          <HoldingLimits action={action} prefix={prefix} set={set} />
+        </>
+      )}
+
+      <OnlyIf action={action} fields={fields} isLoadingFields={isLoadingFields} set={set} />
     </div>
   );
 }

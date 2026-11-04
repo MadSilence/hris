@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { reasonText } from "@/models/automations";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Delete02Icon, PlayIcon, PowerIcon, PowerOffIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Notification01Icon, PlayIcon, PowerIcon, PowerOffIcon, UserSwitchIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
@@ -23,6 +24,9 @@ import {
   disableAutomationAction,
   enableAutomationAction,
   publishAutomationAction,
+  duplicateAutomationAction,
+  changeAutomationOwnerAction,
+  takeOverAutomationAction,
   renameAutomationAction,
   resumeAutomationAction,
   unarchiveAutomationAction,
@@ -31,6 +35,7 @@ import {
   unwrapAction,
   useAutomation,
   useAutomationCatalog,
+  useAutomationTemplates,
   useAutomationPreview,
   useInvalidateAutomations,
 } from "@/components/modules/automations/hooks";
@@ -41,12 +46,14 @@ import { startsReviews, useAutomationNames } from "@/components/modules/automati
 import { RunLog } from "@/components/modules/automations/runs/RunLog";
 import { VersionsTab } from "@/components/modules/automations/versions/VersionsTab";
 import type { AutomationActivationResult, AutomationDefinition, AutomationPreview, BackfillChoice } from "@/models/automations";
-import { emptyDefinition, sameDefinition, starterDraft, type Draft } from "./draft";
+import { emptyDefinition, sameDefinition, starterDraft, templateDraft, type Draft } from "./draft";
 import { WhenCard } from "./WhenCard";
 import { ForWhomCard } from "./ForWhomCard";
 import { DoCard } from "./DoCard";
 import { PreviewPanel } from "./PreviewPanel";
 import { EnableDialog, PublishDialog, type PublishChoices } from "./PublishDialog";
+import { TryItPanel } from "./TryItPanel";
+import { AlsoTellDialog, ChangeOwnerDialog } from "./OwnerDialogs";
 import { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
 import { Field } from "./SentenceCard";
 import { bindingSourceLabel } from "@/models/publicHolidays/binding";
@@ -75,6 +82,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const canManage = useCanAccess("SETTINGS.AUTOMATIONS", "MANAGE");
   const rule = useAutomation(ruleId);
   const catalog = useAutomationCatalog(canManage);
+  const templates = useAutomationTemplates(!ruleId && Boolean(searchParams.get("template")));
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const invalidate = useInvalidateAutomations();
 
@@ -96,11 +104,16 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       setBaseline(loaded);
       setDraft(loaded);
     } else {
-      const start = starterDraft(searchParams.get("starter")) ?? { name: "", description: "", definition: emptyDefinition() };
+      // A shipped template (D3) waits for the gallery to arrive; a starter link of before still works.
+      const templateKey = searchParams.get("template");
+      if (templateKey && !templates.data && !templates.error) return;
+      const fromTemplate = templateKey ? templates.data?.find((t) => t.key === templateKey) : undefined;
+      const start = (fromTemplate ? templateDraft(fromTemplate) : null)
+        ?? starterDraft(searchParams.get("starter")) ?? { name: "", description: "", definition: emptyDefinition() };
       setBaseline({ name: "", description: "", definition: emptyDefinition() });
       setDraft(start);
     }
-  }, [ruleId, rule.data, baseline, searchParams]);
+  }, [ruleId, rule.data, baseline, searchParams, templates.data, templates.error]);
 
   const definition = draft?.definition ?? null;
   const definitionKey = useMemo(() => JSON.stringify(definition), [definition]);
@@ -196,12 +209,13 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
         if (definitionChanged) {
           unwrapAction(await publishAutomationAction({
             id,
-            body: { definition: draft.definition, inFlight: choices.inFlight, expectedVersionNo: rule.data?.versionNo ?? null },
+            body: { definition: draft.definition, inFlight: choices.inFlight, expectedVersionNo: rule.data?.versionNo ?? null,
+              confirmVolume: choices.confirmVolume },
           }));
         }
       }
       if (choices.enable) {
-        unwrapAction(await enableAutomationAction({ id, body: { backfill: choices.backfill } }));
+        unwrapAction(await enableAutomationAction({ id, body: { backfill: choices.backfill, confirmVolume: choices.confirmVolume } }));
       }
       setBaseline(draft);
       setPublishOpen(false);
@@ -254,10 +268,33 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
     }
   };
 
-  const enable = (backfill: BackfillChoice) => runAct(async () => {
-    const r = unwrapAction(await enableAutomationAction({ id: ruleId as string, body: { backfill } }));
+  const enable = (backfill: BackfillChoice, confirmVolume = false) => runAct(async () => {
+    const r = unwrapAction(await enableAutomationAction({ id: ruleId as string, body: { backfill, confirmVolume } }));
     showSuccess(activationText(r, "enabled"));
   }, true);
+  // E2–E4, D4: who stands behind the rule, who else hears of it, a copy of it.
+  const [ownerOpen, setOwnerOpen] = useState(false);
+  const [alsoOpen, setAlsoOpen] = useState(false);
+  const closeOwnerDialogs = () => { setOwnerOpen(false); setAlsoOpen(false); };
+  const changeOwner = (userId: string) => runAct(async () => {
+    unwrapAction(await changeAutomationOwnerAction({ id: ruleId as string, userId }));
+    closeOwnerDialogs();
+    showSuccess("The owner is changed.");
+  }, true);
+  const takeOver = () => runAct(async () => {
+    unwrapAction(await takeOverAutomationAction(ruleId as string));
+    showSuccess("You own this automation now.");
+  }, false);
+  const saveAlsoTell = (userIds: string[]) => runAct(async () => {
+    unwrapAction(await renameAutomationAction({ id: ruleId as string,
+      body: { name: rule.data?.name ?? draft?.name ?? "", description: rule.data?.description ?? null, alsoNotifyUserIds: userIds } }));
+    closeOwnerDialogs();
+    showSuccess("Saved.");
+  }, true);
+  const duplicate = () => runAct(async () => {
+    const copy = unwrapAction(await duplicateAutomationAction(ruleId as string));
+    router.push(`${LIST_HREF}/${copy.id}`);
+  }, false);
   const disable = () => runAct(async () => {
     const r = unwrapAction(await disableAutomationAction(ruleId as string));
     showSuccess(activationText(r, "disabled"));
@@ -315,6 +352,19 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       ) : (
         <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setConfirm("archive"); }}>
           Archive
+        </RowAction>
+      )}
+      {status !== "ARCHIVED" && (
+        <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate()}>Duplicate</RowAction>
+      )}
+      {status !== "ARCHIVED" && (
+        <RowAction icon={<Icon icon={UserSwitchIcon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setOwnerOpen(true); }}>
+          Change owner
+        </RowAction>
+      )}
+      {status !== "ARCHIVED" && (
+        <RowAction icon={<Icon icon={Notification01Icon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setAlsoOpen(true); }}>
+          Also tell…
         </RowAction>
       )}
       {/* A rule that has run for somebody cannot be deleted — archive it (DELETION.md rule 4). */}
@@ -375,7 +425,8 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
               matchingCount={previewFresh && preview ? preview.matchingCount : null}
               onChange={setDefinition}
             />
-            <DoCard definition={definition} catalog={catalog.data} names={names} onChange={setDefinition} />
+            <DoCard definition={definition} catalog={catalog.data} names={names} fields={fields}
+              isLoadingFields={fieldsLoading} onChange={setDefinition} />
           </div>
         )}
       </div>
@@ -390,6 +441,14 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
           onSampleChange={setSamplePersonId}
           targetName={(id) => names.targets.get(id)}
         />
+        <div className="mt-4">
+          <TryItPanel
+            definition={definition}
+            disabled={!previewFresh || (preview?.problems.length ?? 0) > 0}
+            person={(samplePersonId ? preview?.matching.find((p) => p.id === samplePersonId) ?? preview?.samples.find((s) => s.person.id === samplePersonId)?.person : null)
+              ?? preview?.samples[0]?.person ?? preview?.matching[0] ?? null}
+          />
+        </div>
       </div>
     </div>
   );
@@ -415,12 +474,30 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
         <p className="-mt-3 text-right text-hint text-tertiary" data-test="publish-gate">{gateReason}</p>
       )}
 
+      {rule.data && canManage && !systemOwned && status !== "ARCHIVED"
+        && (rule.data.authorActive === false || rule.data.pausedReason?.startsWith("AUTHOR_")) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text"
+          data-test="author-gone">
+          <span>
+            {rule.data.authorActive === false
+              ? `Its owner${rule.data.author?.name ? `, ${rule.data.author.name},` : ""} has left or cannot sign in, so it no longer runs.`
+              : "Its owner may no longer do everything it does, so it is paused."}{" "}
+            Take it over to run it in your name.
+          </span>
+          <Button type="button" size="sm" variant="secondary" onClick={() => void takeOver()} disabled={acting}>Take over</Button>
+        </div>
+      )}
+
       {status === "PAUSED" && rule.data?.pausedReason && (
         <div className="flex items-start gap-3 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
           <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
           <div>
             <p className="m-0 font-medium">This automation is paused</p>
-            <p className="m-0">{rule.data.pausedReason} Fix what it points at, publish, and resume it from the menu.</p>
+            <p className="m-0">
+              {reasonText(rule.data.pausedReason)}
+              {/* A pause about the author is undone by taking the rule over (the banner above), not by a fix. */}
+              {rule.data.pausedReason.startsWith("AUTHOR_") ? "" : " Fix what it points at, publish, and resume it from the menu."}
+            </p>
           </div>
         </div>
       )}
@@ -452,6 +529,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
         matchingCount={preview?.matchingCount ?? null}
         isLoading={publishing}
         errorMessage={publishError}
+        volume={preview ? { messages: preview.messagesPerFiring, threshold: preview.volumeThreshold } : null}
         onConfirm={(choices) => void publish(choices)}
         onCancel={() => setPublishOpen(false)}
       />
@@ -461,9 +539,15 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
         pastMomentCount={!definitionChanged && previewFresh ? preview?.pastMomentCount ?? null : null}
         isLoading={acting}
         errorMessage={actError}
-        onConfirm={(backfill) => void enable(backfill)}
+        volume={preview ? { messages: preview.messagesPerFiring, threshold: preview.volumeThreshold } : null}
+        onConfirm={(backfill, confirmVolume) => void enable(backfill, confirmVolume)}
         onCancel={() => setEnableOpen(false)}
       />
+
+      <ChangeOwnerDialog isOpen={ownerOpen} isLoading={acting} errorMessage={actError}
+        onConfirm={(userId) => void changeOwner(userId)} onCancel={() => setOwnerOpen(false)} />
+      <AlsoTellDialog isOpen={alsoOpen} current={rule.data?.alsoNotify ?? []} isLoading={acting} errorMessage={actError}
+        onConfirm={(ids) => void saveAlsoTell(ids)} onCancel={() => setAlsoOpen(false)} />
 
       <ConfirmActionModal
         isOpen={confirm === "archive"}

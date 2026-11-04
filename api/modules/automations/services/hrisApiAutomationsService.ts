@@ -1,6 +1,7 @@
 import { hrisApiAutomationsClient, type AutomationRunsQuery } from "@/api/modules/automations/clients/hrisApiAutomationsClient";
 import type {
   AssignableType,
+  AutomationDefinition,
   AutomationPreviewRequest,
   CreateAutomationRequest,
   EnableAutomationRequest,
@@ -31,6 +32,15 @@ export class HrisApiAutomationsService {
     hrisApiAutomationsClient.personRuns(personId, page, size);
   retryRun = (runId: string) => hrisApiAutomationsClient.retryRun(runId);
   cancelRun = (runId: string) => hrisApiAutomationsClient.cancelRun(runId);
+  test = (request: { definition: AutomationDefinition; personId: string; actionIndex?: number | null }) =>
+    hrisApiAutomationsClient.test(request);
+  simulate = (request: { definition: AutomationDefinition; personId: string }) => hrisApiAutomationsClient.simulate(request);
+  templates = () => hrisApiAutomationsClient.templates();
+  duplicate = (id: string) => hrisApiAutomationsClient.duplicate(id);
+  changeOwner = (id: string, userId: string) => hrisApiAutomationsClient.changeOwner(id, userId);
+  takeOver = (id: string) => hrisApiAutomationsClient.takeOver(id);
+  decideApproval = (taskId: string, approve: boolean, comment?: string | null) =>
+    hrisApiAutomationsClient.decideApproval(taskId, approve, comment);
 
   liveRulePreview = (request: LiveAssignmentRequest) => hrisApiAutomationsClient.liveRulePreview(request);
   liveRuleCreate = (request: LiveAssignmentRequest) => hrisApiAutomationsClient.liveRuleCreate(request);

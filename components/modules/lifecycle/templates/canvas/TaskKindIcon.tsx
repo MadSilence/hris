@@ -13,4 +13,5 @@ export const TASK_KIND_ICON: Record<TaskKind, IconSvgElement> = {
   NOMINATE_PEERS: UserAdd01Icon,
   APPROVE_PEERS: UserCheck01Icon,
   APPROVE_REVIEW: ShieldCheckIcon,
+  APPROVE_AUTOMATION: ShieldCheckIcon,
 };

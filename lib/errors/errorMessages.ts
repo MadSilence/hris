@@ -580,6 +580,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AU00015: "{0} cannot be assigned by an automation.",
   AU00016: "This automation is a place's Holiday Calendar. Change it on that office, legal entity or the public holidays page.",
   AU00020: "You cannot set up an automation that does this, because you could not do it by hand: {0}.",
+  AU00021: "This person cannot own this automation: {0}.",
+  AU00022: "One firing of this automation sends {0} messages. Confirm it to publish.",
+  AU00023: "Choose a person of this company to try it with.",
+  AU00024: "This approval is not waiting for you.",
 
   // ReviewBusinessError — performance reviews: forms so far (REVIEWS_DESIGN.md § 10).
   RV00001: "That review form could not be found.",

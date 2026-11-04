@@ -22,7 +22,11 @@ export const defaultTrigger = (type: AutomationTriggerType): TriggerSpec => {
     case "DATE_OFFSET":
       return { type, field: "HIRE_DATE", direction: "BEFORE", days: 3, everyYear: false };
     case "FIELD_CHANGED":
-      return { type, field: null, from: null, to: null };
+      return { type, field: null, from: null, to: null, when: "EFFECTIVE" };
+    case "EVENT":
+      return { type, event: "TIME_OFF_APPROVED", eventConditions: null, anchor: "EVENT", direction: "ON", days: 0 };
+    case "SCHEDULE":
+      return { type, frequency: "WEEKLY", weekday: 1, dayOfMonth: null };
     default:
       return { type };
   }
@@ -48,6 +52,10 @@ export const newAction = (type: AutomationActionType): ActionSpec => {
       return { type, offsetDays: 0, policyId: null };
     case "START_REVIEW":
       return { type, offsetDays: 0, templateCycleId: null, reviewWindows: [], releaseOffsetDays: null };
+    case "WAIT_UNTIL":
+      return { type, offsetDays: 0, until: "TASK_DONE", taskStep: null, field: null, maxDays: 14, onTimeout: "STOP_AND_TELL" };
+    case "REQUEST_APPROVAL":
+      return { type, offsetDays: 0, assignee: { kind: "MANAGER" }, title: "", maxDays: 7, onTimeout: "STOP_AND_TELL" };
     default:
       return { type, offsetDays: 0, assignableType: null, assignableId: null };
   }
@@ -141,6 +149,37 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
 
 export const starterDraft = (id: string | null | undefined): Draft | null =>
   STARTERS.find((s) => s.id === id)?.draft() ?? null;
+
+/** A shipped template (D3) as a draft: its definition, with an empty audience when it has none. */
+export const templateDraft = (t: { name: string; description: string; definition: AutomationDefinition }): Draft => ({
+  name: t.name,
+  description: t.description,
+  definition: {
+    ...emptyDefinition(),
+    ...t.definition,
+    conditions: t.definition.conditions ?? emptySegment(),
+  },
+});
+
+/** The placeholders an action may use under this trigger: the person's, and an event's own (A3). */
+export const placeholdersFor = (
+  catalog: { placeholders: string[]; events?: { value: string; placeholders: string[] }[] },
+  trigger: TriggerSpec,
+): string[] => {
+  const extra = trigger.type === "EVENT" ? catalog.events?.find((e) => e.value === trigger.event)?.placeholders ?? [] : [];
+  return [...catalog.placeholders, ...extra];
+};
+
+/**
+ * The text after an "@" the caret sits in, or null: "Hello @fir|" → { start: 6, query: "fir" }. Typing "@" opens the
+ * placeholder list (A3); the token stored is still `{name}`.
+ */
+export const mentionAt = (text: string, caret: number): { start: number; query: string } | null => {
+  const before = text.slice(0, caret);
+  const m = /(^|[^\w{])@(\w*)$/.exec(before);
+  if (!m) return null;
+  return { start: caret - m[2].length - 1, query: m[2] };
+};
 
 /** Order-sensitive on purpose: the action list's order is the author's and is part of the rule. */
 export const sameDefinition = (a: AutomationDefinition | null | undefined, b: AutomationDefinition | null | undefined) =>

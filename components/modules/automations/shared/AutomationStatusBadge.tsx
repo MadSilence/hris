@@ -38,6 +38,7 @@ const STEP: Record<AutomationStepStatus, StatusTone> = {
   FAILED: "declined",
   CANCELLED: "archived",
   STOPPED: "archived",
+  WAITING: "pending",
 };
 
 export function RuleStatusBadge({ status }: { status: AutomationRuleStatus }) {

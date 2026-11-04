@@ -12,7 +12,10 @@ import type {
   AutomationPreview,
   AutomationPreviewRequest,
   AutomationRule,
+  AutomationDefinition,
   AutomationRun,
+  AutomationSimulation,
+  AutomationTestResult,
   CreateAutomationRequest,
   EnableAutomationRequest,
   LiveAssignmentCreated,
@@ -67,6 +70,26 @@ export async function retryAutomationRunAction(runId: string): Promise<ActionRes
 }
 export async function cancelAutomationRunAction(runId: string): Promise<ActionResult<AutomationRun>> {
   return run("cancelAutomationRunAction", () => hrisApiAutomationsService.cancelRun(runId));
+}
+
+// Trying a rule — a POST, because it carries the draft (D1, D2).
+export async function testAutomationAction(input: { definition: AutomationDefinition; personId: string; actionIndex?: number | null }): Promise<ActionResult<AutomationTestResult>> {
+  return run("testAutomationAction", () => hrisApiAutomationsService.test(input));
+}
+export async function simulateAutomationAction(input: { definition: AutomationDefinition; personId: string }): Promise<ActionResult<AutomationSimulation>> {
+  return run("simulateAutomationAction", () => hrisApiAutomationsService.simulate(input));
+}
+export async function duplicateAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
+  return run("duplicateAutomationAction", () => hrisApiAutomationsService.duplicate(id));
+}
+export async function changeAutomationOwnerAction(input: { id: string; userId: string }): Promise<ActionResult<AutomationRule>> {
+  return run("changeAutomationOwnerAction", () => hrisApiAutomationsService.changeOwner(input.id, input.userId));
+}
+export async function takeOverAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
+  return run("takeOverAutomationAction", () => hrisApiAutomationsService.takeOver(id));
+}
+export async function decideAutomationApprovalAction(input: { taskId: string; approve: boolean; comment?: string | null }): Promise<ActionResult<void>> {
+  return run("decideAutomationApprovalAction", () => hrisApiAutomationsService.decideApproval(input.taskId, input.approve, input.comment));
 }
 
 // Live assignment rules — the assignment modal's segment mode.

@@ -62,7 +62,23 @@ export function EnableChoice({
   );
 }
 
-export type PublishChoices = { inFlight: InFlightChoice; enable: boolean; backfill: BackfillChoice };
+export type PublishChoices = { inFlight: InFlightChoice; enable: boolean; backfill: BackfillChoice; confirmVolume: boolean };
+
+/** A11: one firing sends this many messages; above the threshold the author confirms it. */
+export type Volume = { messages: number; threshold: number } | null;
+
+/** The confirmation tick for a firing that sends more than the threshold. */
+function VolumeConfirm({ volume, checked, onChange }: { volume: Volume; checked: boolean; onChange: (v: boolean) => void }) {
+  if (!volume || volume.messages <= volume.threshold) return null;
+  return (
+    <label className="flex cursor-pointer items-start gap-2 rounded-control bg-status-pending-bg px-3 py-2 text-body text-status-pending-text">
+      <Checkbox checked={checked} onCheckedChange={(c) => onChange(c === true)} aria-label="Confirm the number of messages" className="mt-0.5" />
+      <span>One firing sends about {volume.messages} notifications and emails at once. I mean it.</span>
+    </label>
+  );
+}
+
+const overVolume = (volume: Volume) => volume != null && volume.messages > volume.threshold;
 
 /**
  * Publishing writes the next immutable version. Two questions, each asked only when it applies: what
@@ -80,10 +96,12 @@ export function PublishDialog({
   matchingCount,
   isLoading,
   errorMessage,
+  volume = null,
   onConfirm,
   onCancel,
 }: {
   isOpen: boolean;
+  volume?: Volume;
   isNew: boolean;
   versionNo: number;
   inFlight: InFlightImpact | null;
@@ -99,12 +117,14 @@ export function PublishDialog({
   const [inFlightChoice, setInFlightChoice] = useState<InFlightChoice>("KEEP");
   const [enable, setEnable] = useState(isNew);
   const [backfill, setBackfill] = useState<BackfillChoice>("NONE");
+  const [confirmVolume, setConfirmVolume] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
     setInFlightChoice("KEEP");
     setEnable(isNew);
     setBackfill("NONE");
+    setConfirmVolume(false);
   }, [isOpen, isNew]);
 
   const underWay = inFlight ? inFlight.scheduledRuns + inFlight.inProgressRuns : 0;
@@ -160,14 +180,23 @@ export function PublishDialog({
             </div>
           )}
 
+          {askInFlight && inFlight && inFlight.waitingRuns > 0 && (
+            <p className="m-0 text-hint text-tertiary">
+              {plural(inFlight.waitingRuns, "run is", "runs are")} waiting for a task, a field or an approval — they stay
+              on version {versionNo} either way.
+            </p>
+          )}
+
+          <VolumeConfirm volume={volume} checked={confirmVolume} onChange={setConfirmVolume} />
+
           <FormError message={errorMessage} />
         </div>
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
           <Button type="button"
-            onClick={() => onConfirm({ inFlight: inFlightChoice, enable: canEnable && enable, backfill })}
-            disabled={isLoading}
+            onClick={() => onConfirm({ inFlight: inFlightChoice, enable: canEnable && enable, backfill, confirmVolume })}
+            disabled={isLoading || (overVolume(volume) && !confirmVolume)}
           >
             {isLoading ? "Publishing…" : "Publish"}
           </Button>
@@ -183,6 +212,7 @@ export function EnableDialog({
   pastMomentCount,
   isLoading,
   errorMessage,
+  volume = null,
   onConfirm,
   onCancel,
 }: {
@@ -190,12 +220,17 @@ export function EnableDialog({
   pastMomentCount: number | null;
   isLoading: boolean;
   errorMessage: string | null;
-  onConfirm: (backfill: BackfillChoice) => void;
+  volume?: Volume;
+  onConfirm: (backfill: BackfillChoice, confirmVolume: boolean) => void;
   onCancel: () => void;
 }) {
   const [backfill, setBackfill] = useState<BackfillChoice>("NONE");
+  const [confirmVolume, setConfirmVolume] = useState(false);
   useEffect(() => {
-    if (isOpen) setBackfill("NONE");
+    if (isOpen) {
+      setBackfill("NONE");
+      setConfirmVolume(false);
+    }
   }, [isOpen]);
 
   return (
@@ -206,10 +241,11 @@ export function EnableDialog({
           <DialogDescription>From now on the rule runs on its own. Who should it cover?</DialogDescription>
         </DialogHeader>
         <EnableChoice value={backfill} onChange={setBackfill} pastMomentCount={pastMomentCount} />
+        <VolumeConfirm volume={volume} checked={confirmVolume} onChange={setConfirmVolume} />
         <FormError message={errorMessage} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-          <Button type="button" onClick={() => onConfirm(backfill)} disabled={isLoading}>{isLoading ? "Enabling…" : "Enable"}</Button>
+          <Button type="button" onClick={() => onConfirm(backfill, confirmVolume)} disabled={isLoading || (overVolume(volume) && !confirmVolume)}>{isLoading ? "Enabling…" : "Enable"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

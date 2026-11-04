@@ -16,8 +16,15 @@ import {
   type AutomationTriggerType,
   type TriggerDirection,
   type TriggerSpec,
+  type AutomationEvent,
+  type ChangeTiming,
+  type EventAnchor,
+  type ScheduleFrequency,
+  EVENT_LABELS,
+  WEEKDAY_LABELS,
 } from "@/models/automations";
 import { defaultTrigger } from "./draft";
+import { EventConditionEditor } from "./EventConditionEditor";
 import { Field, SentenceCard } from "./SentenceCard";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
@@ -153,6 +160,133 @@ export function WhenCard({
         </div>
       )}
 
+      {trigger.type === "FIELD_CHANGED" && (
+        <div className="space-y-2">
+          <Field label="A change dated ahead fires" className="w-full sm:w-96">
+            <Select value={trigger.when ?? "EFFECTIVE"} onValueChange={(v) => setTrigger({ when: v as ChangeTiming })}>
+              <SelectTrigger aria-label="A change dated ahead fires"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="EFFECTIVE">On the day it takes effect</SelectItem>
+                <SelectItem value="RECORDED">On the day it is recorded</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <p className="m-0 text-hint text-tertiary">
+            Once, when the change happens. To give or keep something while a person is in a department or an office, use
+            &quot;Someone starts matching&quot; instead — it also takes it back when they leave.
+          </p>
+        </div>
+      )}
+
+      {trigger.type === "EVENT" && (() => {
+        const option = catalog.events?.find((e) => e.value === trigger.event);
+        return (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <Field label="Event" required className="min-w-56 flex-1">
+                <Select value={trigger.event ?? ""}
+                  onValueChange={(v) => setTrigger({ event: v as AutomationEvent, eventConditions: null, anchor: "EVENT" })}>
+                  <SelectTrigger aria-label="Event"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    {(catalog.events ?? []).map((e) => <SelectItem key={e.value} value={e.value}>{EVENT_LABELS[e.value]}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              {option?.countsFromLeave && (
+                <Field label="Count from" className="w-56">
+                  <Select value={trigger.anchor ?? "EVENT"} onValueChange={(v) => setTrigger({ anchor: v as EventAnchor })}>
+                    <SelectTrigger aria-label="Count from"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EVENT">The event itself</SelectItem>
+                      <SelectItem value="LEAVE_START">The first day of the leave</SelectItem>
+                      <SelectItem value="LEAVE_END">The last day of the leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+              {trigger.anchor && trigger.anchor !== "EVENT" && (
+                <>
+                  {trigger.direction !== "ON" && (
+                    <Field label="Days" htmlFor="event-days" className="w-24">
+                      <Input id="event-days" type="number" min={0} value={String(trigger.days ?? 0)}
+                        onChange={(e) => setTrigger({ days: toDays(e.target.value) })} />
+                    </Field>
+                  )}
+                  <Field label="Direction" className="w-32">
+                    <Select value={trigger.direction ?? "ON"} onValueChange={(v) => setTrigger({ direction: v as TriggerDirection })}>
+                      <SelectTrigger aria-label="Direction"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {DIRECTIONS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </>
+              )}
+            </div>
+            {option && (
+              <Field label="Only when the event">
+                <EventConditionEditor value={trigger.eventConditions} event={option}
+                  onChange={(eventConditions) => setTrigger({ eventConditions })} />
+              </Field>
+            )}
+            {option?.countsFromLeave && trigger.anchor && trigger.anchor !== "EVENT" && (
+              <p className="m-0 text-hint text-tertiary">
+                A leave moved later moves these steps with it; a leave cancelled or rejected cancels them.
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
+      {trigger.type === "SCHEDULE" && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="How often" className="w-44">
+              <Select value={trigger.frequency ?? "WEEKLY"}
+                onValueChange={(v) => {
+                  const f = v as ScheduleFrequency;
+                  setTrigger({ frequency: f, weekday: f === "WEEKLY" ? trigger.weekday ?? 1 : null,
+                    dayOfMonth: f === "MONTHLY" || f === "QUARTERLY" ? trigger.dayOfMonth ?? 1 : null });
+                }}>
+                <SelectTrigger aria-label="How often"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DAILY">Every day</SelectItem>
+                  <SelectItem value="WEEKLY">Every week</SelectItem>
+                  <SelectItem value="MONTHLY">Every month</SelectItem>
+                  <SelectItem value="QUARTERLY">Every quarter</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            {trigger.frequency === "WEEKLY" && (
+              <Field label="On" className="w-44">
+                <Select value={String(trigger.weekday ?? 1)} onValueChange={(v) => setTrigger({ weekday: Number(v) })}>
+                  <SelectTrigger aria-label="Weekday"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {WEEKDAY_LABELS.map((d, i) => <SelectItem key={d} value={String(i + 1)}>{d}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+            {(trigger.frequency === "MONTHLY" || trigger.frequency === "QUARTERLY") && (
+              <Field label="On day" className="w-44">
+                <Select value={String(trigger.dayOfMonth ?? 1)} onValueChange={(v) => setTrigger({ dayOfMonth: Number(v) })}>
+                  <SelectTrigger aria-label="Day of the month"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <SelectItem key={d} value={String(d)}>{d}</SelectItem>)}
+                    <SelectItem value="0">The last day</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          </div>
+          <p className="m-0 text-hint text-tertiary">
+            In the company&apos;s time zone, for every person who matches on that day. A day the engine missed is caught up
+            once, late.
+          </p>
+        </div>
+      )}
+
+      {trigger.type !== "SCHEDULE" && trigger.type !== "EVENT" && (
       <div>
         <button
           type="button"
@@ -202,6 +336,7 @@ export function WhenCard({
           </div>
         )}
       </div>
+      )}
     </SentenceCard>
   );
 }
