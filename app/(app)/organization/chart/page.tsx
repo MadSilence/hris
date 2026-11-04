@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 
 import OrgChartContainer from "@/components/modules/organization/orgChart/OrgChartContainer";
 import { useAccess, useCanAccess } from "@/components/auth/useAccess";
@@ -13,5 +13,10 @@ export default function OrganizationChartPage() {
   if (loading) return null;
   if (!canViewPeople) return <AccessDenied/>;
 
-  return <OrgChartContainer/>;
+  // The container reads `?person=`; a static route must keep useSearchParams under a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <OrgChartContainer/>
+    </Suspense>
+  );
 }

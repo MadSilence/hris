@@ -325,9 +325,8 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   {canDecide && isPending && !isRejecting && (
                     <>
                       <Button type="button"
-                        variant="ghost"
+                        variant="approve"
                         size="sm"
-                        className="text-status-approved-text hover:text-status-approved-text"
                         onClick={() => handleApprove(request)}
                         disabled={isDeciding}
                       >

@@ -7,7 +7,6 @@ import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
-import { Badge } from "@/components/desact/badge";
 import {
   canBeInvited,
   formatUserStatus,
@@ -15,10 +14,10 @@ import {
 } from "@/models/user/status";
 import { formatDisplayDate } from "@/lib/date";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/desact/button";
-import { Separator } from "@/components/desact/separator";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
-import { CalendarRemove01Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { CalendarRemove01Icon, HierarchySquare02Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -249,6 +248,13 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
     mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset || mayEndSessions || mayExportPersonalData ||
     (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || mayOffboard || !isOwnProfile));
 
+  const teamFact = user.teams && user.teams.length > 0
+    ? { label: user.teams.length === 1 ? "Team" : "Teams", value: user.teams.map((t) => t.name).join(", ") }
+    : user.department?.name
+      ? { label: "Department", value: user.department.name }
+      : null;
+  const tenure = tenureOf(user.hireDate);
+
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
 
@@ -257,74 +263,71 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   return (
     <div>
       <header className="pb-6">
-        <div className="grid grid-cols-[auto_1fr_auto] items-start gap-6">
-          <div className="relative">
-            <Avatar key={avatarUrl ?? "avatar-fallback"} className="size-28">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName}/> : null}
-              <AvatarFallback className="text-page-title">
-                {initialsOf(fullName)}
-              </AvatarFallback>
-            </Avatar>
-
-            {/* Own photo is always editable; someone else's needs profile EDIT. */}
-            <PermissionGate
-              resource={isOwnProfile ? undefined : "PEOPLE.PROFILE"}
-              action="EDIT"
+        {/* One row (design fixes of 2026-11-04, fix 5): the avatar, the name over the job title, the facts a
+            reader looks for — manager, team, time with us — and the actions on the right. */}
+        <div className="flex items-center gap-4">
+          {/* Own photo is always editable; someone else's needs profile EDIT. The pencil shows on hover and
+              focus only; on a touch screen, which has no hover, it stays as a small badge in the corner. */}
+          <PermissionGate
+            resource={isOwnProfile ? undefined : "PEOPLE.PROFILE"}
+            action="EDIT"
+            fallback={<ProfileAvatar url={avatarUrl} fullName={fullName} />}
+          >
+            <button
+              type="button"
+              aria-label="Change photo"
+              disabled={isAvatarLoading}
+              onClick={() => setIsAvatarModalOpen(true)}
+              className="group relative shrink-0 rounded-pill"
             >
-              <Button type="button"
-                size="icon"
-                variant="secondary"
-                className="absolute right-1 bottom-1 rounded-pill"
-                aria-label="Edit photo"
-                disabled={isAvatarLoading}
-                onClick={() => setIsAvatarModalOpen(true)}
+              <ProfileAvatar url={avatarUrl} fullName={fullName} />
+              <span
+                aria-hidden
+                className={[
+                  "absolute inset-0 grid place-items-center rounded-pill bg-inverse/35 text-on-inverse opacity-0",
+                  "transition-opacity duration-(--duration-hover) group-hover:opacity-100 group-focus-visible:opacity-100",
+                  "pointer-coarse:inset-auto pointer-coarse:-right-0.5 pointer-coarse:-bottom-0.5 pointer-coarse:size-[18px]",
+                  "pointer-coarse:border pointer-coarse:border-divider pointer-coarse:bg-card pointer-coarse:text-tertiary pointer-coarse:opacity-100",
+                ].join(" ")}
               >
-                <Icon icon={PencilEdit02Icon} size="sm" />
-              </Button>
-            </PermissionGate>
-          </div>
+                <Icon icon={PencilEdit02Icon} size="sm" className="pointer-coarse:size-[11px]" />
+              </span>
+            </button>
+          </PermissionGate>
 
-          <div className="min-w-0">
-            <h1 className="text-page-title leading-tight text-primary">{fullName}</h1>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-10 gap-y-2">
+            <div className="min-w-0 lg:mr-14">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-section-title text-primary">{fullName}</h1>
+                {user.status && (
+                  <PendingValue
+                    steps={pendingSteps(scheduledChanges, "sys:status", [
+                      { id: user.status, name: formatUserStatus(user.status) },
+                    ])}
+                  >
+                    <UserStatusBadge status={user.status}/>
+                  </PendingValue>
+                )}
+                {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
+                <AccountStatusBadge accountStatus={user.accountStatus}/>
+                {isLocked && <StatusBadge status="inactive" label="Locked"/>}
+              </div>
+              {user.jobName && <p className="mt-1 truncate text-body text-secondary">{user.jobName}</p>}
+              {user.email && <p className="truncate text-hint text-tertiary">{user.email}</p>}
+            </div>
 
-            {user.email && (
-              <p className="mt-1 truncate text-body text-tertiary">{user.email}</p>
+            {user.manager && (
+              <HeaderFact label="Manager">
+                <Link href={`/organization/people/${user.manager.id}`} className="inline-flex items-center gap-1.5 text-primary no-underline hover:underline">
+                  <Avatar className="size-5">
+                    <AvatarFallback name={user.manager.name} className="text-hint">{initialsOf(user.manager.name).slice(0, 1)}</AvatarFallback>
+                  </Avatar>
+                  {user.manager.name}
+                </Link>
+              </HeaderFact>
             )}
-
-            <div className="flex items-center gap-3 flex-wrap mt-3">
-              {user.status && (
-                <PendingValue
-                  steps={pendingSteps(scheduledChanges, "sys:status", [
-                    { id: user.status, name: formatUserStatus(user.status) },
-                  ])}
-                >
-                  <UserStatusBadge status={user.status}/>
-                </PendingValue>
-              )}
-
-              {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
-              <AccountStatusBadge accountStatus={user.accountStatus}/>
-
-              {isLocked && <StatusBadge status="inactive" label="Locked"/>}
-
-              {user.jobName && <Badge variant="outline">{user.jobName}</Badge>}
-
-              {user.department?.name && (
-                <Badge variant="outline">{user.department.name}</Badge>
-              )}
-
-              {user.office?.name && <Badge variant="outline">{user.office.name}</Badge>}
-            </div>
-
-            <LifecycleNote user={user} />
-
-            <div className="mt-2 -ml-2 empty:hidden">
-              <ScheduledChangesPanel
-                userId={user.id}
-                changes={scheduledChanges ?? []}
-                onChangedAction={() => refreshUser(user.id)}
-              />
-            </div>
+            {teamFact && <HeaderFact label={teamFact.label}>{teamFact.value}</HeaderFact>}
+            {tenure && <HeaderFact label="With us">{tenure}</HeaderFact>}
           </div>
 
           {/*
@@ -366,6 +369,13 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             */}
             {hasPersonActions && (
               <RowActionsMenu label="Person actions">
+                {/* The chart opens with this person picked and centred (`?person=`). Shown whenever the menu is. */}
+                <RowAction
+                  icon={<Icon icon={HierarchySquare02Icon} size="sm" />}
+                  onClick={() => router.push(`/organization/chart?person=${encodeURIComponent(user.id)}`)}
+                >
+                  View in org chart
+                </RowAction>
                 {/* In the kebab like every other action on a profile — the own one is no exception. */}
                 {mayChangeOwnPassword && (
                   <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setIsChangePasswordOpen(true)}>
@@ -461,7 +471,15 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
           </div>
         </div>
 
-        <Separator className="mt-6"/>
+        <LifecycleNote user={user} />
+
+        <div className="mt-2 -ml-2 empty:hidden">
+          <ScheduledChangesPanel
+            userId={user.id}
+            changes={scheduledChanges ?? []}
+            onChangedAction={() => refreshUser(user.id)}
+          />
+        </div>
       </header>
 
       <UpdateUserAvatarModal
@@ -625,6 +643,48 @@ function LifecycleNote({ user }: { user: User }) {
       {parts.join(" · ")}
     </p>
   );
+}
+
+/** A label over a value, as the header's facts read. */
+function HeaderFact({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-label font-normal text-tertiary">{label}</p>
+      <div className="mt-1 truncate text-body font-medium text-primary">{children}</div>
+    </div>
+  );
+}
+
+function ProfileAvatar({ url, fullName }: { url: string | null; fullName: string }) {
+  return (
+    <Avatar key={url ?? "avatar-fallback"} className="size-14">
+      {url ? <AvatarImage src={url} alt={fullName}/> : null}
+      {/* The name picks the tag colour (SPEC § 4.7) — without it every face was gray. */}
+      <AvatarFallback name={fullName} className="text-card-title">{initialsOf(fullName)}</AvatarFallback>
+    </Avatar>
+  );
+}
+
+/**
+ * Time with the company, the way the header says it: "3 weeks", "7 months", "2 y 7 m", "2 years". Nothing
+ * before the first day — somebody who has not started has no tenure.
+ */
+export function tenureOf(hireDate: string | null | undefined, today: Date = new Date()): string | null {
+  if (!hireDate) return null;
+  const [y, m, d] = hireDate.slice(0, 10).split("-").map(Number);
+  const start = new Date(y, m - 1, d);
+  if (start > today) return null;
+  let months = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
+  if (today.getDate() < start.getDate()) months -= 1;
+  if (months < 1) {
+    const weeks = Math.max(1, Math.floor((today.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000)));
+    return weeks === 1 ? "1 week" : `${weeks} weeks`;
+  }
+  if (months < 12) return months === 1 ? "1 month" : `${months} months`;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (rest === 0) return years === 1 ? "1 year" : `${years} years`;
+  return `${years} y ${rest} m`;
 }
 
 function initialsOf(name: string) {

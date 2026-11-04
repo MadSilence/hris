@@ -226,7 +226,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       />
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-subtle">
+        <TabsList>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Icon icon={Building03Icon} size="sm" />
             General information

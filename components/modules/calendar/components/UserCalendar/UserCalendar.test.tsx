@@ -83,10 +83,17 @@ describe("UserCalendar — what a caller is told", () => {
       renderDay: (d) => day(d.iso, ""),
     });
 
-    // Only the ends are ringed, so a run reads as one run.
-    const cell = (iso: string) => screen.getByTestId(`day-${iso}`).closest("div[class*=\"min-h-\"]");
-    expect(cell("2026-10-07")).toHaveClass("ring-2");
-    expect(cell("2026-10-08")).not.toHaveClass("ring-2");
-    expect(cell("2026-10-09")).toHaveClass("ring-2");
+    // One soft band over the run, not a box per day: three columns from Wednesday (design fixes, fix 2).
+    const bands = document.querySelectorAll("span.bg-accent-subtle");
+    expect(bands).toHaveLength(1);
+    expect(bands[0]).toHaveAttribute("data-band-start", "2");
+    expect(bands[0]).toHaveAttribute("data-band-len", "3");
+
+    // Only the ends carry their number in a soft circle, so a run reads as one run.
+    const dayNumber = (iso: string) =>
+      screen.getByTestId(`day-${iso}`).closest("div[class*=\"min-h-\"]")?.querySelector("span");
+    expect(dayNumber("2026-10-07")).toHaveClass("bg-accent-muted");
+    expect(dayNumber("2026-10-08")).not.toHaveClass("bg-accent-muted");
+    expect(dayNumber("2026-10-09")).toHaveClass("bg-accent-muted");
   });
 });

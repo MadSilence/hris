@@ -47,7 +47,6 @@ const tabs: Tab[] = [
 ];
 
 /** The column count the tab strip needs; a class per count, because Tailwind cannot build one at runtime. */
-const GRID_COLUMNS: Record<number, string> = { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" };
 
 /**
  * Reviews (technical_design/REVIEWS_DESIGN.md § 12): one heading over a tab per page, each tab its own route and
@@ -75,7 +74,7 @@ export default function ReviewsLayout({ children }: { children: ReactNode }) {
 
       {visibleTabs.length > 1 && (
         <Tabs value={activeTab.id} className="w-full">
-          <TabsList className={`grid w-full max-w-xl ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-subtle`}>
+          <TabsList>
             {visibleTabs.map((tab) => {
               const shownIcon = tab.icon;
               return (

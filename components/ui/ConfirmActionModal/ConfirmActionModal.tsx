@@ -60,7 +60,7 @@ export const ConfirmActionModal: React.FC<{
       if (!open && !isLoading) onCancelAction();
     }}
   >
-    <AlertDialogContent className="max-w-md">
+    <AlertDialogContent>
       <AlertDialogHeader>
         {/* Neutral, destructive or not (SPEC § 4.6): red belongs to the confirming button alone. */}
         <AlertDialogTitle>{title}</AlertDialogTitle>

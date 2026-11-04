@@ -62,7 +62,7 @@ export const RowActionsMenu: React.FC<{
     */}
     <DropdownMenuContent
       align={align}
-      className={cn("w-40 rounded-control p-1", className)}
+      className={cn("min-w-40 p-1", className)}
       onClick={stopPropagation ? (e) => e.stopPropagation() : undefined}
     >
       {children}

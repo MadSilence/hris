@@ -2,7 +2,8 @@
 
 import { CanvasMessage } from "@/components/ui/Canvas";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { SidebarRightIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -57,7 +58,9 @@ export default function OrgChartContainer() {
     [canDrop, setManager],
   );
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // `?person=<id>` — "View in org chart" on a profile opens the chart with that person picked and centred.
+  const focusId = useSearchParams().get("person");
+  const [selectedId, setSelectedId] = useState<string | null>(focusId);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [panelOpen, setPanelOpen] = useState(true);
   const [recenterNonce, setRecenterNonce] = useState(0);
@@ -81,6 +84,15 @@ export default function OrgChartContainer() {
     setPanelOpen(true);
     setRecenterNonce((n) => n + 1);
   }, []);
+
+  // Centre once, when the chart has the person; after that the reader steers.
+  const focused = useRef(false);
+  useEffect(() => {
+    if (focused.current || !focusId || !forest.byId.has(focusId)) return;
+    focused.current = true;
+    // A frame later, so the canvas's own fit-to-view on its first render does not undo the centring.
+    requestAnimationFrame(() => setRecenterNonce((n) => n + 1));
+  }, [focusId, forest]);
 
   const selectedUser = selectedId ? forest.byId.get(selectedId) ?? null : null;
   const manager =

@@ -241,7 +241,7 @@ export const PolicyWizardModal: FC<Props> = ({
           if (!open) requestClose();
         }}
       >
-        <DialogContent hideClose className="max-w-5xl gap-0 overflow-hidden p-0">
+        <DialogContent hideClose size="lg" className="gap-0 overflow-hidden p-0">
           <div className="flex h-[86vh] max-h-[880px]">
             {/* Vertical step sidebar */}
             <aside className="hidden w-64 shrink-0 flex-col border-r border-divider bg-subtle/40 p-5 sm:flex">

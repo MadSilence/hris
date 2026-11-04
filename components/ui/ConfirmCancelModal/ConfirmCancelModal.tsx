@@ -38,7 +38,7 @@ export const ConfirmCancelModal: FC<ConfirmCancelModalProps> = ({
         if (!open) onCancelAction();
       }}
     >
-      <AlertDialogContent className="max-w-sm">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

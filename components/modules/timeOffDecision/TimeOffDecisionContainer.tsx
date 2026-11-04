@@ -2,7 +2,7 @@
 
 import React, { useId, useState } from "react";
 import Link from "next/link";
-import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/desact/button";
@@ -193,9 +193,8 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
         <div>
           {isCancellation ? (
             <div className="flex gap-2">
-              <Button type="button" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
+              <Button type="button" variant="approve" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
                 requestId, userId: request.userId, decision: "CONFIRM" }))}>
-                <Icon icon={Tick02Icon} size="sm" />
                 Approve cancellation
               </Button>
               <Button type="button" variant="secondary" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
@@ -218,8 +217,7 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
             </div>
           ) : (
             <div className="flex gap-2">
-              <Button type="button" disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
-                <Icon icon={Tick02Icon} size="sm" />
+              <Button type="button" variant="approve" disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
                 Approve
               </Button>
               <Button type="button" variant="secondary" disabled={busy} onClick={() => setRejecting(true)}>

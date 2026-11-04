@@ -424,7 +424,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
       </div>
 
       <Tabs defaultValue="holidays" className="flex min-h-0 flex-1 flex-col gap-4">
-        <TabsList className="grid w-full flex-none grid-cols-2 bg-subtle">
+        <TabsList className="flex-none">
           <TabsTrigger value="holidays" className="flex items-center gap-2">
             <Icon icon={Calendar03Icon} size="sm" />
             Holidays

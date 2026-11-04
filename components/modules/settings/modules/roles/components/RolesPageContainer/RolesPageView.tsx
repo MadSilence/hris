@@ -93,7 +93,7 @@ export default function RolesPageView({
       <CardHeader className="px-0 py-0 shrink-0">
         <div className="space-y-3">
           <Tabs value={view} onValueChange={(v) => onViewChange(v as RolesTableView)}>
-            <TabsList className="grid grid-cols-2 bg-subtle w-[320px]">
+            <TabsList className="w-fit">
               <TabsTrigger value="roles" className="flex items-center gap-2">
                 <Icon icon={Shield01Icon} size="sm" />
                 Roles

@@ -100,7 +100,7 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
       )}
 
       <Tabs defaultValue="table" className="w-full">
-        <TabsList className="grid w-full max-w-xs grid-cols-2 bg-subtle">
+        <TabsList>
           <TabsTrigger value="table">Table</TabsTrigger>
           <TabsTrigger value="nine-box">9-Box</TabsTrigger>
         </TabsList>

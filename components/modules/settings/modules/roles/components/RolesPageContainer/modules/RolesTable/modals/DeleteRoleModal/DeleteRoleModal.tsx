@@ -49,7 +49,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         if (!open && !isLoading) onRequestCloseAction();
       }}
     >
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={Alert02Icon} />

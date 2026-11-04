@@ -504,7 +504,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       {ruleId ? (
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-fit bg-subtle">
+          <TabsList>
             <TabsTrigger value="rule">Rule</TabsTrigger>
             <TabsTrigger value="runs">Run log</TabsTrigger>
             <TabsTrigger value="versions">Versions</TabsTrigger>

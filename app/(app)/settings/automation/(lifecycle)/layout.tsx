@@ -58,7 +58,6 @@ const tabs: Tab[] = [
 ];
 
 /** The column count the tab strip needs; a class per count, because Tailwind cannot build one at runtime. */
-const GRID_COLUMNS: Record<number, string> = { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" };
 
 /**
  * Settings → Preboarding, Onboarding & Offboarding: one header and a tab per process, the way Legal
@@ -98,7 +97,7 @@ export default function LifecycleSettingsLayout({ children }: { children: ReactN
 
         <div className="px-8">
           <Tabs value={activeTab.id} className="w-full">
-            <TabsList className={`grid w-full ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-subtle`}>
+            <TabsList>
               {visibleTabs.map((tab) => {
                 const shownIcon = tab.icon;
 

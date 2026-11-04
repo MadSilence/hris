@@ -3,20 +3,20 @@
 import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Add01Icon, CalendarLock01Icon, ShieldCheckIcon, Wallet01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { Button } from "@/components/desact/button";
 import { Card } from "@/components/desact/card";
-import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { RequestTimeOffModal } from "./RequestTimeOffModal";
 import { BalancesPreviewModal } from "./BalancesPreviewModal";
 import { RequestsPreviewModal } from "./RequestsPreviewModal";
 import { AssignTimeOffPolicyModal } from "./AssignTimeOffPolicyModal";
+import { TimeOffSidePanel } from "./TimeOffSidePanel";
 
 type Props = { userId: string };
 
@@ -75,7 +75,7 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
   return (
     <>
       <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="min-w-0 lg:basis-2/3">
+        <div className="min-w-0 lg:flex-1">
           <UserCalendarContainer
             userId={userId}
             variant="compact"
@@ -84,42 +84,40 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           />
         </div>
 
-        <Card className="h-fit gap-4 border-divider p-6 lg:basis-1/3">
+        <Card className="h-fit gap-6 border-divider p-5 lg:w-[340px] lg:shrink-0">
           <div className="flex items-center gap-2">
-            <Button type="button" className="flex-1" onClick={() => open()} disabled={!hasBalances}>
+            <Button type="button" onClick={() => open()} disabled={!hasBalances}>
               <Icon icon={Add01Icon} size="sm" />
               Request time off
             </Button>
+            {/* Without an assignment there is no balance and no way to request — so the people who
+                manage policies get the entry point here, on the person, not only in settings. */}
+            <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
+              <Button type="button" variant="secondary" onClick={() => setAssignOpen(true)}>
+                Assign policy
+              </Button>
+            </PermissionGate>
 
-            {/* Everything else the tab does, in the kebab beside the one primary action. The menu
-                always has Requests, so it is never empty. */}
-            <RowActionsMenu label="Time off actions">
-              {/* Without an assignment there is no balance and no way to request — so the people who
-                  manage policies get the entry point here, on the person, not only in settings. */}
-              <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
-                <RowAction icon={<Icon icon={ShieldCheckIcon} size="sm" />} onClick={() => setAssignOpen(true)}>
-                  Assign policy
-                </RowAction>
-              </PermissionGate>
-              {/* Request history + Cancel: the calendar alone cannot undo a booked absence. */}
-              <RowAction icon={<Icon icon={CalendarLock01Icon} size="sm" />} onClick={() => setRequestsOpen(true)}>
-                Requests
-              </RowAction>
-              <RowAction
-                icon={<Icon icon={Wallet01Icon} size="sm" />}
-                onClick={() => setPreviewOpen(true)}
-                disabled={!hasBalances}
-              >
-                Balances
-              </RowAction>
-            </RowActionsMenu>
           </div>
 
-          <p className="text-body text-tertiary">
-            {hasBalances
-              ? "Click a day on the calendar, or drag across several, to request time off for them."
-              : "No time-off policy is assigned yet, so there is nothing to request against."}
-          </p>
+          {hasBalances && balances ? (
+            <TimeOffSidePanel userId={userId} balances={balances} policyMap={policyMap} />
+          ) : (
+            <p className="text-body text-tertiary">No time off policy is assigned yet.</p>
+          )}
+
+          {/* The history and the ledger, as links under the panel: a kebab beside the two buttons did not fit
+              the 340 px panel and pushed the page sideways (walk of 2026-11-04). Requests carry Cancel too. */}
+          <div className="flex items-center gap-4 border-t border-divider pt-3">
+            <Button type="button" variant="link" size="sm" onClick={() => setRequestsOpen(true)}>
+              All requests
+            </Button>
+            {hasBalances && (
+              <Button type="button" variant="link" size="sm" onClick={() => setPreviewOpen(true)}>
+                Balance history
+              </Button>
+            )}
+          </div>
         </Card>
       </div>
 

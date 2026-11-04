@@ -140,7 +140,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
       </div>
 
       <Tabs defaultValue="people" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-subtle">
+        <TabsList>
           <TabsTrigger value="people">By person</TabsTrigger>
           <TabsTrigger value="reviewers">By reviewer</TabsTrigger>
           <TabsTrigger value="calibration">Calibration</TabsTrigger>

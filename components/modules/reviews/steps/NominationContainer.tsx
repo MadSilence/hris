@@ -140,7 +140,7 @@ function NominationView({ n }: { n: Nomination }) {
 
       {acting && (
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="button" disabled={busy} onClick={send}>
+          <Button type="button" variant={n.canApprove ? "approve" : "primary"} disabled={busy} onClick={send}>
             {n.canApprove ? "Approve peers" : "Send nomination"}
           </Button>
           <span className="text-hint text-tertiary">{picked.length} of {n.peerMin}–{n.peerMax}</span>

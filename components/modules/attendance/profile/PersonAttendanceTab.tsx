@@ -10,7 +10,6 @@ import { Label } from "@/components/desact/label";
 import { Textarea } from "@/components/desact/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { TimePicker } from "@/components/ui/TimePicker";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -68,9 +67,12 @@ export const beyondNormNotice = (days: AttendanceLogDay[], minutes: number | nul
   return parts.length ? parts.join(" ") : null;
 };
 
-/** Hours as the calendar marks them — a day's under its number, and the month's total beneath. */
-const HoursBadge: FC<{ minutes: number }> = ({ minutes }) => (
-  <span className="rounded-tag bg-mist/70 px-2 py-1 text-hint font-medium tabular-nums text-secondary">
+/**
+ * Hours as the calendar marks them — a day's under its number, and the month's total beneath. Inside the
+ * picked range the chip turns white, so it still reads on the band.
+ */
+const HoursBadge: FC<{ minutes: number; onBand?: boolean }> = ({ minutes, onBand = false }) => (
+  <span className={`rounded-tag px-2 py-1 text-hint font-medium tabular-nums text-secondary ${onBand ? "bg-card" : "bg-mist/70"}`}>
     {formatMinutes(minutes)}
   </span>
 );
@@ -87,6 +89,15 @@ const HoursBadge: FC<{ minutes: number }> = ({ minutes }) => (
  * writes the same span to each picked day, weekends and leave included — the form says when that goes
  * beyond a day's norm rather than skipping the day.
  */
+/** A duration as a button or a total says it: "3 h", "1 h 30 m", "45 m". */
+export const formatDuration = (minutes: number): string => {
+  const whole = Math.max(0, Math.round(minutes));
+  const h = Math.floor(whole / 60);
+  const m = whole % 60;
+  if (h === 0) return `${m} m`;
+  return m === 0 ? `${h} h` : `${h} h ${m} m`;
+};
+
 export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const todayISO = useMemo(() => dateToISO(new Date()), []);
   const [month, setMonth] = useState(monthOf(todayISO));
@@ -123,6 +134,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   const minutes = spanMinutes(draft.from, draft.to);
+  // What the button promises: the span on every picked day (one day when amending).
+  const totalMinutes = minutes === null ? null : minutes * (editing ? 1 : pickedDates.length);
   const suggestion = !editing && draft.from === "" && draft.to === "" && draft.description === "" ? lastFilled : null;
   // Amending replaces the span's own minutes, so it must not be counted twice against the day.
   const noticeDays = editing
@@ -195,7 +208,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             toolbar="split"
             renderDay={(day) => {
               const logged = byDate.get(day.iso)?.loggedMinutes ?? 0;
-              return logged > 0 ? <div className="flex justify-center pt-2"><HoursBadge minutes={logged}/></div> : null;
+              const onBand = day.iso >= range.start && day.iso <= range.end;
+              return logged > 0 ? <div className="flex justify-center pt-2"><HoursBadge minutes={logged} onBand={onBand}/></div> : null;
             }}
             footer={() => (
               <div className="flex items-center justify-end gap-2 text-body text-tertiary">
@@ -209,15 +223,17 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         {canLog && (
           <Card className="min-h-0 gap-4 border-divider p-6 xl:w-80 xl:shrink-0">
             <div className="space-y-1">
-              <h3 className="text-body font-semibold text-primary">{editing ? "Edit time" : "Log hours"}</h3>
-              <p className="min-h-5 text-body text-tertiary">{rangeLabel}</p>
-            </div>
-
-            {!editing && (
-              <p className="text-body text-tertiary">
-                Drag across the calendar to pick more than one day — the times below are logged on each of them.
+              <h3 className="text-card-title text-primary">{editing ? "Edit time" : "Log hours"}</h3>
+              <p className="flex min-h-5 items-center gap-2 text-body text-secondary">
+                {rangeLabel}
+                {!single && (
+                  <span className="rounded-pill bg-mist px-2 text-hint font-semibold text-secondary">
+                    {pickedDates.length} days
+                  </span>
+                )}
               </p>
-            )}
+              {!editing && <p className="text-hint text-tertiary">Pick a day, or drag across several.</p>}
+            </div>
 
             <form
               noValidate
@@ -229,7 +245,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             >
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <RequiredLabel htmlFor="attendance-from" required>From</RequiredLabel>
+                  <Label htmlFor="attendance-from">From</Label>
                   <TimePicker
                     id="attendance-from"
                     value={draft.from}
@@ -238,7 +254,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <RequiredLabel htmlFor="attendance-to" required>To</RequiredLabel>
+                  <Label htmlFor="attendance-to">To</Label>
                   <TimePicker
                     id="attendance-to"
                     value={draft.to}
@@ -248,13 +264,23 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 </div>
               </div>
 
+              {minutes !== null && (
+                <p className="text-hint tabular-nums text-tertiary">
+                  {single || editing
+                    ? `${formatDuration(minutes)} in total`
+                    : `${formatDuration(minutes)} a day · ${formatDuration(totalMinutes ?? 0)} in total`}
+                </p>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="attendance-description">Description</Label>
+                <Label htmlFor="attendance-description">
+                  Note <span className="font-normal text-tertiary">(optional)</span>
+                </Label>
                 <Textarea
                   id="attendance-description"
                   rows={3}
                   value={draft.description}
-                  placeholder={suggestion?.description || undefined}
+                  placeholder={suggestion?.description || "What did you work on?"}
                   onChange={(event) => setDraft((d) => ({ ...d, description: event.target.value }))}
                 />
               </div>
@@ -282,7 +308,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                   </Button>
                 )}
                 <Button type="submit" className="flex-1" disabled={busy || minutes === null}>
-                  {editing ? "Save changes" : "Log hours"}
+                  {editing ? "Save changes" : totalMinutes !== null ? `Log ${formatDuration(totalMinutes)}` : "Log hours"}
                 </Button>
               </div>
             </form>
@@ -300,7 +326,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               <TableHead className="w-24">From</TableHead>
               <TableHead className="w-24">To</TableHead>
               <TableHead className="w-24">Hours</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Note</TableHead>
               {canLog && <TableHead className="w-12"/>}
             </TableRow>
           </TableHeader>

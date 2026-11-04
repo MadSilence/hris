@@ -68,7 +68,7 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle className="truncate">{document?.name ?? "Preview"}</DialogTitle>
           <DialogDescription>

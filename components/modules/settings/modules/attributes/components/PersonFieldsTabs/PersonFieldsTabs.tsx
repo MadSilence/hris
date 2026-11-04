@@ -22,7 +22,7 @@ import {
  */
 export const PersonFieldsTabs: FC = () => (
   <Tabs defaultValue="custom" className="w-full">
-    <TabsList className="grid w-full grid-cols-2 bg-subtle">
+    <TabsList>
       <TabsTrigger value="custom" className="flex items-center gap-2">
         <Icon icon={PreferenceHorizontalIcon} size="sm" />
         Custom fields

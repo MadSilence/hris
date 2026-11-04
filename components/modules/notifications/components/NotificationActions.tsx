@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useId, useState } from "react";
-import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -113,11 +113,11 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
     return (
       <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
         <Button type="button"
+          variant="approve"
           size="sm"
           disabled={busy}
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "CONFIRM" }))}
         >
-          <Icon icon={Tick02Icon} size="sm" />
           Approve cancellation
         </Button>
         <Button type="button"
@@ -168,8 +168,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button type="button" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
-            <Icon icon={Tick02Icon} size="sm" />
+          <Button type="button" variant="approve" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
             Approve
           </Button>
           <Button type="button" size="sm" variant="secondary" onClick={() => setRejecting(true)} disabled={busy}>

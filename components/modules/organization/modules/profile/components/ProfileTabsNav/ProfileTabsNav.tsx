@@ -79,16 +79,12 @@ export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
   return (
     <>
       <Tabs value={active} className="w-full">
-        <TabsList
-          // Scrolls rather than squeezes: at a narrow pane equal columns cut every label short
-          // ("Public Prof|Personal Inf"). Each tab keeps its full label and the row grows to fit.
-          className="flex w-full justify-start overflow-x-auto bg-subtle"
-        >
+        <TabsList>
           {visibleTabs.map((tab) => {
             const href = `${base}/${tab.id}`;
 
             return (
-              <TabsTrigger key={tab.id} value={tab.id} className="flex-1 shrink-0 whitespace-nowrap" asChild>
+              <TabsTrigger key={tab.id} value={tab.id} asChild>
                 <Link
                   href={href}
                   className="no-underline"

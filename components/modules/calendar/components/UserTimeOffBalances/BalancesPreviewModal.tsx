@@ -120,7 +120,7 @@ export const BalancesPreviewModal: FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
-      <DialogContent hideClose className="max-w-3xl overflow-hidden p-0">
+      <DialogContent hideClose size="lg" className="overflow-hidden p-0">
         <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">

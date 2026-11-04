@@ -278,7 +278,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3 space-y-2">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" size="sm" onClick={() => void decide(true)} disabled={disabled}>Approve</Button>
+          <Button type="button" variant="approve" size="sm" onClick={() => void decide(true)} disabled={disabled}>Approve</Button>
           <Button type="button" size="sm" variant="secondary" onClick={() => void decide(false)} disabled={disabled}>Decline</Button>
         </div>
         <FormError message={error} />

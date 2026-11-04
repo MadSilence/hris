@@ -4,15 +4,13 @@ import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
-import { Calendar03Icon, CalendarAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/desact/dialog";
@@ -29,9 +27,9 @@ import { useTimeOffOverlaps } from "@/components/modules/settings/modules/time/t
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FormError } from "@/components/feedback/FormError";
+import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
 
 type Props = {
   isOpen: boolean;
@@ -45,7 +43,8 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const prettyISO = (iso: string) => format(isoToDate(iso), "MMM d, yyyy");
+// The reader's own date format (lib/date), as everywhere else — not a hard-coded "Nov 11, 2026".
+const prettyISO = (iso: string) => formatDisplayDate(iso, { style: "medium" });
 
 // Inclusive calendar-day count, matching the backend duration (ChronoUnit.DAYS + 1).
 const inclusiveDays = (start: string, end: string): number => {
@@ -190,26 +189,19 @@ export const RequestTimeOffModal: FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
-      <DialogContent hideClose className="max-w-3xl overflow-hidden p-0">
-        <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5 text-left">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">
-              <Icon icon={CalendarAdd01Icon} />
-            </div>
-            <div>
-              <DialogTitle className="text-section-title">
-                {forName ? `Request time off for ${forName}` : "Request time off"}
-              </DialogTitle>
-              <DialogDescription>Pick a policy and the dates — the request goes to the approver.</DialogDescription>
-            </div>
-          </div>
+      <DialogContent hideClose size="lg" aria-describedby={undefined} className="overflow-hidden p-0">
+        {/* A plain head: the title says what this is (design fixes of 2026-11-04, fix 10). */}
+        <DialogHeader className="px-6 pt-5 text-left">
+          <DialogTitle className="text-section-title">
+            {forName ? `Request time off for ${forName}` : "Request time off"}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-6 px-6 py-5 md:grid-cols-[1fr_260px]">
+        <div className="grid items-start gap-6 px-6 pb-5 md:grid-cols-[minmax(0,1fr)_280px]">
           {/* Form */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <RequiredLabel className="text-hint" required>Policy</RequiredLabel>
+              <Label>Policy</Label>
               <SearchableSelect
                 options={selectable.map((b) => {
                   const p = policyMap.get(b.policyId);
@@ -227,7 +219,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="space-y-1.5">
-              <RequiredLabel className="text-hint" required>Dates</RequiredLabel>
+              <Label>Dates</Label>
               <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -256,11 +248,12 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="req-reason" className="text-hint">
-                Reason
+              <Label htmlFor="req-reason">
+                Note <span className="font-normal text-tertiary">(optional)</span>
               </Label>
               <Textarea
                 id="req-reason"
+                placeholder="Anything your manager should know"
                 value={reason}
                 onChange={(e) => setReason(e.currentTarget.value)}
                 rows={3}
@@ -298,18 +291,21 @@ export const RequestTimeOffModal: FC<Props> = ({
           </div>
 
           {/* Summary */}
-          <aside className="flex flex-col gap-3 rounded-card border border-divider bg-subtle/40 p-4">
+          <aside className="flex flex-col gap-3 rounded-popover border border-divider bg-subtle p-4">
             <div>
-              <p className="text-hint text-tertiary">Policy</p>
-              <p className="mt-0.5 truncate text-body font-medium text-primary">
-                {policy?.name}
+              <p className="text-label font-normal text-tertiary">Policy</p>
+              <p className="mt-1 flex items-center gap-2 truncate text-card-title text-primary">
+                {policy && (
+                  <span aria-hidden className={cn("size-2 shrink-0 rounded-pill", TAG_CLASSES[toTagColor(policy.leaveTypeColor)].dot)} />
+                )}
+                {policy?.name ?? "—"}
               </p>
             </div>
 
             <div className="flex items-center justify-between text-body">
               <span className="text-tertiary">Available</span>
               <span className="font-medium text-primary">
-                {selected ? (unlimited ? "Unlimited" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : ""}
+                {selected ? (unlimited ? "No limit" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : "—"}
               </span>
             </div>
 
@@ -318,27 +314,22 @@ export const RequestTimeOffModal: FC<Props> = ({
                 Duration{isWorkingDays ? <span className="text-hint"> · working days</span> : null}
               </span>
               <span className="font-medium text-primary">
-                {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : ""}
+                {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "—"}
               </span>
             </div>
 
             {!unlimited && selected && days > 0 && (
               <div className="flex items-center justify-between border-t border-divider pt-3 text-body">
-                <span className="text-tertiary">Balance after</span>
+                <span className="text-tertiary">Left after</span>
                 <span className={cn("font-medium", insufficient ? "text-danger-text" : "text-primary")}>
                   {formatDayAmount(remainingAfter)} {unit}
                 </span>
               </div>
             )}
 
-            {insufficient ? (
+            {insufficient && (
               <p className="text-hint text-status-pending-icon">
-                Exceeds the available balance — it may be rejected depending on the policy.
-              </p>
-            ) : (
-              <p className="mt-auto flex items-center gap-1.5 text-hint text-tertiary">
-                <Icon icon={Calendar03Icon} size="sm" />
-                Tip: click or drag days on the calendar to preset dates.
+                That is more than is left — it may be rejected, depending on the policy.
               </p>
             )}
           </aside>
@@ -371,7 +362,11 @@ export const RequestTimeOffModal: FC<Props> = ({
             Cancel
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
-            {createMutation.isPending ? "Submitting…" : "Submit request"}
+            {createMutation.isPending
+              ? "Requesting…"
+              : days > 0 && unit === "d"
+                ? `Request ${formatDayAmount(days)} ${days === 1 ? "day" : "days"}`
+                : "Request time off"}
           </Button>
             </>
           )}

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ArrowDown02Icon, ArrowUp02Icon, Delete02Icon, Download01Icon, FolderTransferIcon, PencilEdit02Icon, StarIcon, StarOffIcon, ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { ArrowDown02Icon, ArrowUp02Icon, Delete02Icon, Download01Icon, FolderTransferIcon, PencilEdit02Icon, SquareLock02Icon, StarIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
@@ -85,7 +85,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
               <SortableHead field="size" label="Size" sort={sort} onSortChange={onSortChange}/>
               <SortableHead
                 field="createdAt"
-                label="Uploaded at"
+                label="Uploaded"
                 sort={sort}
                 onSortChange={onSortChange}
               />
@@ -96,7 +96,20 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
 
           <TableBody>
             {documents.map((document) => (
-              <TableRow key={document.id}>
+              <TableRow
+                key={document.id}
+                // Double click, or Enter on the focused row, opens the preview (design fixes of 2026-11-04, fix 8).
+                tabIndex={0}
+                className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
+                onDoubleClick={() => {
+                  if (onPreview && isPreviewable(document.mimeType)) onPreview(document);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && event.target === event.currentTarget && onPreview && isPreviewable(document.mimeType)) {
+                    onPreview(document);
+                  }
+                }}
+              >
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
@@ -115,19 +128,20 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 </TableCell>
 
                 <TableCell>
-                  {document.visibility === "HR_ONLY" ? (
-                    <Badge variant="outline" className="gap-1 font-normal">
-                      <Icon icon={ViewOffSlashIcon} size="sm" />
-                      HR only
-                    </Badge>
-                  ) : (
-                    <span className="text-tertiary">Visible</span>
-                  )}
+                  {/* Who can open it: the two values say so in words, not "Visible" against a badge. */}
+                  <span className="inline-flex items-center gap-1.5 text-secondary">
+                    <Icon
+                      icon={document.visibility === "HR_ONLY" ? SquareLock02Icon : ViewIcon}
+                      size="sm"
+                      className="size-3.5 text-tertiary"
+                    />
+                    {document.visibility === "HR_ONLY" ? "HR only" : "Employee"}
+                  </span>
                 </TableCell>
 
-                <TableCell>{formatBytes(document.sizeBytes)}</TableCell>
+                <TableCell className="tabular-nums">{formatBytes(document.sizeBytes)}</TableCell>
 
-                <TableCell>{formatDisplayDate(document.createdAt)}</TableCell>
+                <TableCell className="tabular-nums">{formatDisplayDate(document.createdAt, { style: "medium" })}</TableCell>
 
                 <TableCell className="text-center">
                   <button
@@ -169,13 +183,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                       </a>
                     </DropdownMenuItem>
 
-                    <RowAction
-                      icon={document.isStarred ? <Icon icon={StarOffIcon} size="sm" /> : <Icon icon={StarIcon} size="sm" />}
-                      onClick={() => onToggleStar(document)}
-                    >
-                      {document.isStarred ? "Remove star" : "Add star"}
-                    </RowAction>
-
+                    {/* No star here: the row's own star button does it, one click away. */}
                     {onRename ? (
                       <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onRename(document)}>
                         Rename

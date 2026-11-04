@@ -53,8 +53,11 @@ import {
   PersonalDocumentsTrash,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsTrash";
 import { Button } from "@/components/desact/button";
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, FolderAddIcon, Upload04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
+import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
+import { useUser } from "@/components/hooks/useUser/useUser";
 
 type PersonalDocumentsContainerProps = {
   userId: string;
@@ -131,6 +134,18 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const canEdit = isOwnSpace || hasEditPermission;
   const canManage = isOwnSpace || hasManagePermission;
 
+  // The drop overlay says whose documents a file lands in.
+  const { data: owner } = useUser(userId);
+  const ownerLabel = isOwnSpace ? "your" : owner?.firstName ? `${owner.firstName}’s` : "these";
+
+  /*
+   * Nothing at all in this person's space — not a folder that happens to be empty, not a search that missed.
+   * Then the toolbar has nothing to act on and goes (design fixes of 2026-11-04, fix 7); the empty state
+   * carries the two actions instead.
+   */
+  const isFiltered = search.trim() !== "" || starredOnly || hrOnly;
+  const isBlank = isEmpty && !isFiltered && breadcrumbs.length <= 1;
+
   const [showTrash, setShowTrash] = useState(false);
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [addDocumentOpen, setAddDocumentOpen] = useState(false);
@@ -169,7 +184,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   return (
     <>
       <Card
-        className="relative flex h-full flex-col border-0 px-8 pt-8 pb-8"
+        className="relative flex h-full flex-col border-0 px-8 pt-6 pb-8"
         onDragEnter={(e) => {
           if (!canEdit || !e.dataTransfer.types.includes("Files")) return;
           dragDepth.current += 1;
@@ -193,17 +208,21 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
           if (dropped.length > 0) void uploadFiles(dropped);
         }}
       >
+        {/* The drop target (SPEC § 2: the accent's subtle tint and its outline). Nothing marks the zone at rest. */}
         {isDraggingOver && (
-          <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-control border-2 border-dashed border-strong bg-subtle/90">
-            <p className="font-medium text-primary">
-              Drop to upload into this folder
+          <div className="pointer-events-none absolute inset-x-8 top-4 bottom-4 z-10 flex flex-col items-center justify-center gap-2 rounded-card border-[1.5px] border-accent bg-accent-subtle text-accent-text">
+            <Icon icon={Upload04Icon} />
+            <p className="text-body font-semibold">Drop to upload</p>
+            <p className="text-hint text-secondary">
+              Goes to {breadcrumbs.length > 1 ? breadcrumbs[breadcrumbs.length - 1].name : `${ownerLabel} documents`}
             </p>
           </div>
         )}
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
+          {/* The trash stays reachable while the space is blank: what was deleted is still in it. */}
           <div className="flex flex-none items-center gap-4">
-            <PersonalDocumentsToolbar
+            {!(isBlank && !showTrash) && <PersonalDocumentsToolbar
               search={search}
               onSearchChange={setSearch}
               starredOnly={starredOnly}
@@ -214,20 +233,24 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               onUploadFromLocal={() => setAddDocumentOpen(true)}
               onCreateFolder={() => setCreateFolderOpen(true)}
               canEdit={canEdit}
-            />
+            />}
 
             <div className="ml-auto flex items-center gap-3">
               {canManage && (
-                <Button type="button"
-                  variant="secondary"
-                  size="icon"
-                  aria-label="Trash"
-                  aria-pressed={showTrash}
-                  title="Trash"
-                  onClick={() => setShowTrash((v) => !v)}
-                >
-                  <Icon icon={Delete02Icon} size="sm" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button type="button"
+                      variant="secondary"
+                      size="icon"
+                      aria-label="Trash"
+                      aria-pressed={showTrash}
+                      onClick={() => setShowTrash((v) => !v)}
+                    >
+                      <Icon icon={Delete02Icon} size="sm" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Trash</TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -254,8 +277,31 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               <div className="rounded-control border bg-card">
                 <ErrorState error={error} compact/>
               </div>
+            ) : isBlank ? (
+              <EmptyState
+                scene="documents"
+                className="pt-8"
+                title="No documents yet"
+                description={canEdit
+                  ? "Contracts, IDs and certificates live here.\nDrop files here or upload them below."
+                  : "Contracts, IDs and certificates live here."}
+                action={canEdit ? (
+                  <div className="flex gap-2">
+                    <Button type="button" onClick={() => setAddDocumentOpen(true)}>
+                      <Icon icon={Upload04Icon} size="sm" />
+                      Upload file
+                    </Button>
+                    <Button type="button" variant="secondary" onClick={() => setCreateFolderOpen(true)}>
+                      <Icon icon={FolderAddIcon} size="sm" />
+                      New folder
+                    </Button>
+                  </div>
+                ) : undefined}
+              />
+            ) : isEmpty && isFiltered ? (
+              <NoResults title="No documents match" hint="Try a different search or filter." />
             ) : isEmpty ? (
-              <PersonalDocumentsEmptyState/>
+              <PersonalDocumentsEmptyState title="This folder is empty" description="Drop files here or use Add." />
             ) : (
               <div className="space-y-8">
                 <PersonalDocumentsFoldersSection

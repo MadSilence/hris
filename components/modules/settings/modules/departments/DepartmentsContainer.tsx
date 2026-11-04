@@ -641,7 +641,7 @@ export default function DepartmentsContainer() {
       <div className="mb-3 flex flex-none items-center gap-3">
         {BLOCKS_VIEW_ENABLED && (
           <Tabs value={view} onValueChange={(next) => setView(next as ViewMode)}>
-            <TabsList className="grid h-9 w-[220px] grid-cols-2 bg-subtle">
+            <TabsList className="w-fit">
               <TabsTrigger value="chart" className="flex items-center gap-2">
                 <Icon icon={HierarchyIcon} size="sm" />
                 Chart
@@ -763,7 +763,7 @@ export default function DepartmentsContainer() {
             {UNASSIGNED_TAB_ENABLED && canSeePeople && (
               <div className="flex-none border-b border-divider px-4 py-2.5">
                 <Tabs value={panelMode} onValueChange={(next) => setPanelMode(next as PanelMode)}>
-                  <TabsList className="grid h-9 w-full grid-cols-2 bg-subtle">
+                  <TabsList>
                     <TabsTrigger value="details">Details</TabsTrigger>
                     <TabsTrigger value="unassigned" className="flex items-center gap-1.5">
                       Unassigned

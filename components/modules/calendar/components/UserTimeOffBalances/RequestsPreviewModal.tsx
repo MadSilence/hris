@@ -27,7 +27,7 @@ type Props = {
 export const RequestsPreviewModal: FC<Props> = ({ isOpen, userId, onCloseAction }) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-control bg-subtle text-secondary">

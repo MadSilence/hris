@@ -63,7 +63,7 @@ export const EmptyState: React.FC<{
     <Illustration scene={scene} size={compact ? "s" : "m"} />
     <div className="flex flex-col gap-1">
       <p className={compact ? "text-body font-medium text-primary" : "text-section-title text-primary"}>{title}</p>
-      <p className="mx-auto max-w-sm text-body text-tertiary">{description}</p>
+      <p className="mx-auto max-w-sm text-body whitespace-pre-line text-tertiary">{description}</p>
     </div>
     {action ??
       (onCreate && createLabel ? (

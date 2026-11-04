@@ -199,7 +199,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <TabsList className="grid w-full max-w-xs grid-cols-2 bg-subtle">
+          <TabsList>
             <TabsTrigger value="questions">Questions</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>

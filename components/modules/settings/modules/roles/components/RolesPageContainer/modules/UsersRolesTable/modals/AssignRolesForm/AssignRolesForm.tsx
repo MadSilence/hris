@@ -198,7 +198,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       {/* The three tabs answer the two questions an admin has here: which roles, and what those
           roles actually add up to. The preview follows the *selection*, not what is saved. */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as AssignRolesTab)}>
-        <TabsList className="grid w-full grid-cols-3 bg-subtle">
+        <TabsList>
           <TabsTrigger value="roles">Assigned roles</TabsTrigger>
           <TabsTrigger value="permissions">Resolved permissions</TabsTrigger>
           <TabsTrigger value="fields">Resolved field visibility</TabsTrigger>

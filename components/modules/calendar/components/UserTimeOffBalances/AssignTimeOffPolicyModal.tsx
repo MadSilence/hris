@@ -1,12 +1,12 @@
 "use client";
 
 import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact";
-import { dateToISO, isoToDate } from "@/lib/date";
+import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { FC, useMemo, useState } from "react";
 import { Calendar03Icon, ShieldCheckIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-import { format } from "date-fns";
+
 
 import {
   Dialog,
@@ -39,7 +39,7 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const prettyISO = (iso: string) => format(isoToDate(iso), "MMM d, yyyy");
+const prettyISO = (iso: string) => formatDisplayDate(iso, { style: "medium" });
 
 /**
  * Assigning a policy from the person's card rather than from the policy's own settings page. The
@@ -118,7 +118,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !createMutation.isPending) onCloseAction(); }}>
-      <DialogContent hideClose className="max-w-lg overflow-hidden p-0">
+      <DialogContent hideClose className="overflow-hidden p-0">
         <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5 text-left">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">

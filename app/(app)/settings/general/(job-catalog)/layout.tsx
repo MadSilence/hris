@@ -53,7 +53,7 @@ export default function SettingsJobCatalogLayout({
 
       <div className="px-8">
         <Tabs value={activeTab.id} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-subtle">
+          <TabsList>
             {tabs.map((tab) => {
               const shownIcon = tab.icon;
 

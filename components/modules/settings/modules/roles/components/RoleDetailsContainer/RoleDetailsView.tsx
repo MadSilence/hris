@@ -29,7 +29,7 @@ export default function RoleDetailsView({ roleId, roleName, isDefaultRole = fals
     <div className="px-8 space-y-4">
 
       <Tabs defaultValue="assigned" className="w-full">
-        <TabsList className="grid grid-cols-4 w-full bg-subtle">
+        <TabsList>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
             Assigned users

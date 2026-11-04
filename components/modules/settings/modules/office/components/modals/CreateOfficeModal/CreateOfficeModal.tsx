@@ -57,7 +57,8 @@ export const CreateOfficeModal: FC<Props> = ({
       >
         <DialogContent
           hideClose
-          className="max-w-2xl overflow-hidden p-0"
+          size="lg"
+          className="overflow-hidden p-0"
         >
           <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
             <DialogTitle>Create office</DialogTitle>

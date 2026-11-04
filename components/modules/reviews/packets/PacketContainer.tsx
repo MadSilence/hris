@@ -64,7 +64,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
         {p.canApprove && (
           <>
             <Button type="button" variant="secondary" onClick={() => setSendingBack(true)}>Send back</Button>
-            <Button type="button" onClick={() => setApproving(true)}>Approve</Button>
+            <Button type="button" variant="approve" onClick={() => setApproving(true)}>Approve</Button>
           </>
         )}
       </div>

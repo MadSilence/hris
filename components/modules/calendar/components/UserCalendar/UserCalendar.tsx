@@ -56,8 +56,8 @@ type Props = {
   onSelectRange?: (startISO: string, endISO: string) => void;
   /**
    * The span drawn as picked, after the drag has finished — `onSelectRange` reports it, this keeps it
-   * on screen. A single day is `start === end`. The run is filled, and its first and last day carry a
-   * ring, so a span of one and a span of five are obviously the same kind of thing.
+   * on screen. A single day is `start === end`. The run is one soft band per week row, and its first and last
+   * day carry their number in a soft circle, so a span of one and a span of five are the same kind of thing.
    */
   selectedRange?: { start: string; end: string } | null;
   /**
@@ -128,6 +128,18 @@ const timeOffStyle = (tone: CalendarTimeOffEvent["tone"], color?: string | null)
     backgroundSize: "4px 4px",
   };
 };
+
+type Range = { start: string; end: string } | null;
+
+/** The columns a range covers in one week row, or null when it does not touch it. */
+const bandInWeek = (week: DayCell[], range: Range): { start: number; len: number } | null => {
+  if (!range) return null;
+  const cols = week.map((c, i) => (c.iso >= range.start && c.iso <= range.end ? i : -1)).filter((i) => i >= 0);
+  return cols.length ? { start: cols[0], len: cols[cols.length - 1] - cols[0] + 1 } : null;
+};
+
+/** The first and last day of a range carry their number in a soft accent circle. */
+const isRangeEnd = (iso: string, range: Range) => Boolean(range && (iso === range.start || iso === range.end));
 
 /**
  * Lays out the time-off events overlapping one week as continuous bars: each event is clipped to the
@@ -376,6 +388,9 @@ export const UserCalendar: FC<Props> = ({
           weeks.map((week, wIdx) => {
             const segments = buildWeekSegments(week, timeOff);
             const weekInfo = dayInfo[wIdx];
+            // The drag in progress wins over the range already picked: it is what the hand is doing.
+            const band = selRange ?? selectedRange;
+            const weekBand = bandInWeek(week, band);
             return (
               <div key={`week-${wIdx}`} className={`relative ${gridClass}`}>
                 {week.map((cell, dIdx) => {
@@ -383,10 +398,6 @@ export const UserCalendar: FC<Props> = ({
                   const holidayTitle = cell.dayHolidays
                     .map((h) => (h.calendarName ? `${h.name} · ${h.calendarName}` : h.name))
                     .join("\n");
-                  const inSelection = Boolean(selRange && cell.iso >= selRange.start && cell.iso <= selRange.end);
-                  const picked = Boolean(
-                    selectedRange && cell.iso >= selectedRange.start && cell.iso <= selectedRange.end,
-                  );
                   return (
                     <div
                       key={cell.iso}
@@ -399,13 +410,7 @@ export const UserCalendar: FC<Props> = ({
                         "border-b border-divider",
                         dIdx < week.length - 1 ? "border-r" : "",
                         selectable ? "cursor-pointer select-none" : "",
-                        inSelection || picked
-                          ? "bg-accent-subtle"
-                          : !cell.inMonth ? "bg-subtle/30" : cell.isToday ? "bg-subtle" : cell.isWeekend ? "bg-subtle/40" : "",
-                        // Only the ends are ringed, so a run reads as one run and not as five boxes.
-                        picked && (cell.iso === selectedRange?.start || cell.iso === selectedRange?.end)
-                          ? "ring-2 ring-inset ring-accent-ring"
-                          : "",
+                        !cell.inMonth ? "bg-subtle/30" : cell.isToday ? "bg-subtle" : cell.isWeekend ? "bg-subtle/40" : "",
                       ].join(" ")}
                     >
                       <div className="relative z-10 flex items-center justify-between px-1.5 pt-1">
@@ -414,7 +419,9 @@ export const UserCalendar: FC<Props> = ({
                             "inline-flex h-5 min-w-5 items-center justify-center rounded-pill px-1 text-hint",
                             cell.isToday
                               ? "bg-accent font-semibold text-on-accent"
-                              : cell.inMonth
+                              : isRangeEnd(cell.iso, band)
+                                ? "bg-accent-muted font-semibold text-accent-text"
+                                : cell.inMonth
                                 ? "text-primary"
                                 : "text-disabled",
                           ].join(" ")}
@@ -436,6 +443,21 @@ export const UserCalendar: FC<Props> = ({
                     </div>
                   );
                 })}
+
+                {/* The picked range as one soft band per week row, laid over the day borders (design fixes of
+                    2026-11-04, fix 2) — one shape for a run, not a box per day. It grows with the drag, unanimated. */}
+                {weekBand ? (
+                  <span
+                    aria-hidden="true"
+                    data-band-start={weekBand.start}
+                    data-band-len={weekBand.len}
+                    className="pointer-events-none absolute bottom-1 top-1 rounded-popover bg-accent-subtle"
+                    style={{
+                      left: `calc(${weekBand.start} * 100% / 7 + 4px)`,
+                      width: `calc(${weekBand.len} * 100% / 7 - 8px)`,
+                    }}
+                  />
+                ) : null}
 
                 {/* Continuous time-off bars for this week, laid over the day cells. An equal gap is
                     left on every OUTER edge — top/bottom (drawn from the cell's top border, not from

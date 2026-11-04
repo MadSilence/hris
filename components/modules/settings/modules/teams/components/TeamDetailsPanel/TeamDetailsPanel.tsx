@@ -138,7 +138,7 @@ export function TeamDetailsPanel({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="grid w-full flex-none grid-cols-2 bg-subtle">
+        <TabsList className="flex-none">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Icon icon={InformationCircleIcon} size="sm" />
             Overview

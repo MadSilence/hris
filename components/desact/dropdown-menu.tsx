@@ -16,7 +16,7 @@ const menuSurface =
   "z-50 min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-popover border border-divider bg-overlay p-1 text-primary shadow-popover";
 
 const menuItem = cn(
-  "relative flex h-8 cursor-default items-center gap-2 rounded-control px-2 text-body outline-hidden select-none",
+  "relative flex h-8 cursor-default items-center gap-2 rounded-control px-2 text-body whitespace-nowrap outline-hidden select-none",
   "focus:bg-accent-subtle data-[highlighted]:bg-accent-subtle",
   "data-[disabled]:pointer-events-none data-[disabled]:text-disabled",
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='text-'])]:text-tertiary",
