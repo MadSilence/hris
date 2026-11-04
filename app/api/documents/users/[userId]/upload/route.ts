@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { NextRequest } from "next/server";
 import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
+import { backendTunnelHeaders } from "@/config/backendTunnel";
 
 const BASE_URL =
   process.env.BACKEND_URL ||
@@ -23,11 +24,11 @@ export async function POST(
 
   const response = await fetch(`${BASE_URL}/documents/users/${userId}/upload`, {
     method: "POST",
-    headers: token
-      ? {
-        Authorization: `Bearer ${token}`,
-      }
-      : undefined,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // TEMPORARY — the ngrok tunnel; remove with config/backendTunnel.ts.
+      ...backendTunnelHeaders(),
+    },
     body: formData,
     cache: "no-store",
   });

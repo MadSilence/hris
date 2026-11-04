@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { BACKEND_UNAVAILABLE_CODE } from "@/components/clients/exceptions";
 import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
+import { backendTunnelHeaders } from "@/config/backendTunnel";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ export async function GET(req: NextRequest) {
     headers.set("cache-control", "no-store");
     headers.set("Authorization", headerAuth || `Bearer ${cookieToken}`);
     if (ifNoneMatch) headers.set("If-None-Match", ifNoneMatch);
+    // TEMPORARY — the ngrok tunnel; remove with config/backendTunnel.ts.
+    for (const [name, value] of Object.entries(backendTunnelHeaders())) headers.set(name, value);
 
     const res = await fetch(`${backendBase}/me/access`, {
       method: "GET",

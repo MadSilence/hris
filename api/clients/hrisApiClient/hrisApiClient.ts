@@ -11,6 +11,7 @@ import {
 } from "@/components/clients/exceptions";
 import { cookies, headers as nextHeaders } from "next/headers";
 import publicConfig from "@/config/publicConfig";
+import { backendTunnelHeaders } from "@/config/backendTunnel";
 import { isPublicBackendPath } from "@/config/security/publicBackendPaths";
 import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
 
@@ -253,6 +254,10 @@ export class HrisApiClient {
     }
 
     for (const [name, value] of Object.entries(callerHeaders(await incomingHeaders()))) {
+      headers.set(name, value);
+    }
+    // TEMPORARY — the ngrok tunnel; remove with config/backendTunnel.ts.
+    for (const [name, value] of Object.entries(backendTunnelHeaders())) {
       headers.set(name, value);
     }
 
