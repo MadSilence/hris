@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Download, Trash2 } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Delete02Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForCode, messageForError } from "@/lib/errors/errorMessages";
@@ -92,45 +93,45 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-medium text-brown-800">
+          <p className="text-body font-medium text-primary">
             {anImport.errorRowCount} {anImport.errorRowCount === 1 ? "row has" : "rows have"} errors. Nothing is
             imported until there are none — fix them here, or in the file.
           </p>
           {anImport.lastEditedByName && anImport.lastEditedAt && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Last edited by {anImport.lastEditedByName} · {new Date(anImport.lastEditedAt).toLocaleString()}
             </p>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
           {unknownLeads.length > 0 && (
-            <Button type="button" variant="outline" size="sm" disabled={edit.isPending}
+            <Button type="button" variant="secondary" size="sm" disabled={edit.isPending}
               onClick={() => send(unknownLeads, [])}>
-              Clear Unknown Leads
+              Clear unknown leads
             </Button>
           )}
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
-            {showAll ? "Show Rows with Errors" : "Show All Rows"}
+            {showAll ? "Show rows with errors" : "Show all rows"}
           </Button>
           <Button type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="gap-1.5"
             onClick={() => void triggerExportDownload(`/api/people-imports/${anImport.id}/error-file`, "xlsx").catch(() => undefined)}
           >
-            <Download className="h-4 w-4" />
-            Download File with Errors
+            <Icon icon={Download01Icon} size="sm" />
+            Download file with errors
           </Button>
         </div>
       </div>
 
-      <div className="max-h-[32rem] overflow-auto rounded-lg border border-brown-200">
-        <Table className="text-sm">
+      <div className="max-h-[32rem] overflow-auto rounded-control border border-divider">
+        <Table className="text-body">
           <TableHeader>
             <TableRow>
               <TableHead className="w-14">Row</TableHead>
               {columns.map((c) => <TableHead key={c} className="min-w-40">{anImport.headers[c]}</TableHead>)}
-              <TableHead className="min-w-48">Row Errors</TableHead>
+              <TableHead className="min-w-48">Row errors</TableHead>
               <TableHead className="w-12"><span className="sr-only">Remove</span></TableHead>
             </TableRow>
           </TableHeader>
@@ -139,14 +140,14 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
               const gone = removed.has(row.rowNumber);
               return (
                 <TableRow key={row.rowNumber} className={gone ? "align-top opacity-40" : "align-top hover:bg-transparent"}>
-                  <TableCell className="tabular-nums text-muted-foreground">{row.rowNumber}</TableCell>
+                  <TableCell className="tabular-nums text-tertiary">{row.rowNumber}</TableCell>
                   {columns.map((c) => {
                     const k = key(row.rowNumber, c);
                     const cellErrors = errorsIn(row.errors, c);
                     return (
                       <TableCell key={c}>
                         <Input
-                          className={cellErrors.length > 0 ? "h-8 border-danger-500" : "h-8"}
+                          className={cellErrors.length > 0 ? "h-8 border-status-declined-fill" : "h-8"}
                           aria-label={`${anImport.headers[c]}, row ${row.rowNumber}`}
                           aria-invalid={cellErrors.length > 0}
                           maxLength={1000}
@@ -155,13 +156,13 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                           onChange={(e) => setDrafts((d) => ({ ...d, [k]: e.target.value }))}
                         />
                         {cellErrors.map((e, i) => (
-                          <p key={i} className="mt-1 text-xs text-danger-700">{messageForCode(e.code, undefined, e.params)}</p>
+                          <p key={i} className="mt-1 text-hint text-status-declined-text">{messageForCode(e.code, undefined, e.params)}</p>
                         ))}
                       </TableCell>
                     );
                   })}
                   <TableCell>
-                    <ul className="space-y-1 text-xs text-danger-700">
+                    <ul className="space-y-1 text-hint text-status-declined-text">
                       {rowLevel(row.errors).map((e, i) => (
                         <li key={i}>
                           {e.columnHeader && <span className="font-medium">{e.columnHeader}: </span>}
@@ -171,7 +172,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                     </ul>
                   </TableCell>
                   <TableCell>
-                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8"
+                    <Button type="button" variant="ghost" size="icon-sm"
                       aria-label={gone ? `Keep row ${row.rowNumber}` : `Remove row ${row.rowNumber}`}
                       disabled={edit.isPending}
                       onClick={() => setRemoved((s) => {
@@ -181,7 +182,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                         return next;
                       })}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Icon icon={Delete02Icon} size="sm" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -194,12 +195,12 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
       <FormError message={error} />
       <div className="flex flex-wrap gap-2">
         <Button type="button" disabled={changes === 0 || edit.isPending} onClick={onSave}>
-          {edit.isPending ? "Checking every row…" : "Save and Check"}
+          {edit.isPending ? "Checking every row…" : "Save and check"}
         </Button>
         {changes > 0 && (
           <Button type="button" variant="ghost" disabled={edit.isPending}
             onClick={() => { setDrafts({}); setRemoved(new Set()); }}>
-            Undo Changes
+            Undo changes
           </Button>
         )}
       </div>

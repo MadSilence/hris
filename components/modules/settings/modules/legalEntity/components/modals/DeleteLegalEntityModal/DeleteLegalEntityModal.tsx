@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import { LegalEntity } from "@/models/legalEntity";
 import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
 import { DetachedPeopleNotice } from "@/components/modules/settings/shared/DetachedPeopleNotice";
@@ -66,7 +66,7 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading || impactLoading}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
             onClick={(event) => {
               event.preventDefault();
               onConfirmAction();

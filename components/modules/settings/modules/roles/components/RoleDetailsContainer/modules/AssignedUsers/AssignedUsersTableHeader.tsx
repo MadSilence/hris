@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Button } from "@/components/desact/button";
+import { Add01Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
@@ -41,13 +42,13 @@ export default function AssignedUsersTableHeader({
             title={assignDisabledReason}
             className="gap-1.5"
           >
-            <Plus className="h-4 w-4"/>
+            <Icon icon={Add01Icon} size="sm" />
             Assign
           </Button>
         </PermissionGate>
 
-        <Button type="button" size="icon" variant="outline" onClick={onExportClick} aria-label="Export">
-          <Download className="h-4 w-4"/>
+        <Button type="button" size="icon" variant="secondary" onClick={onExportClick} aria-label="Export">
+          <Icon icon={Download01Icon} size="sm" />
         </Button>
       </div>
     </div>

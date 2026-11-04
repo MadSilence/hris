@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { TaskSidePanel } from "./TaskSidePanel";
 import type { DraftItem } from "./draft";
 
-jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
+jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
 jest.mock("@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups", () => ({
   useAttributeGroups: () => ({ data: [{ id: "g", attributes: [{ id: "phone", name: "Emergency phone", type: "PHONE" }, { id: "boss", name: "Mentor", type: "PERSON" }] }] }),
 }));
@@ -47,12 +47,12 @@ describe("TaskSidePanel", () => {
     const a = item("a");
     const { onChange } = setup(a, [a]);
     // The title heads the panel and is edited in place: no "Title" label, only its accessible name.
-    fireEvent.change(screen.getByLabelText("Task Title"), { target: { value: "Order a laptop" } });
+    fireEvent.change(screen.getByLabelText("Task title"), { target: { value: "Order a laptop" } });
     expect(onChange).toHaveBeenLastCalledWith({ title: "Order a laptop" });
     fireEvent.change(screen.getByLabelText("Kind"), { target: { value: "DOCUMENT" } });
     // A kind change clears the category, so a document's never makes a to-do require a file by accident.
     expect(onChange).toHaveBeenLastCalledWith({ kind: "DOCUMENT", categoryId: null });
-    fireEvent.change(screen.getByLabelText("Task Description"), { target: { value: "Ask IT" } });
+    fireEvent.change(screen.getByLabelText("Task description"), { target: { value: "Ask IT" } });
     expect(onChange).toHaveBeenLastCalledWith({ description: "Ask IT" });
   });
 
@@ -72,7 +72,7 @@ describe("TaskSidePanel", () => {
   it("changes who does it — the lane — including a named person", () => {
     const a = item("a");
     const { onChange } = setup(a, [a]);
-    fireEvent.change(screen.getByLabelText("Done By"), { target: { value: "ONBOARDING_MANAGER" } });
+    fireEvent.change(screen.getByLabelText("Done by"), { target: { value: "ONBOARDING_MANAGER" } });
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ assigneeKind: "ONBOARDING_MANAGER", assigneeUserId: null }));
 
     const named = item("b", { assigneeKind: "SPECIFIC_USER" });
@@ -101,7 +101,7 @@ describe("TaskSidePanel", () => {
     const { onChange, onRemove } = setup(b, [a, b]);
     fireEvent.click(screen.getByLabelText("Waits for Task a"));
     expect(onChange).toHaveBeenLastCalledWith({ waitsFor: [] });
-    fireEvent.click(screen.getByRole("button", { name: /Remove Task/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Remove task/ }));
     expect(onRemove).toHaveBeenCalled();
   });
 

@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
+import Link from "next/link";
+import { Button } from "@/components/desact/button";
+import { ErrorPage } from "@/components/feedback/ErrorPage";
 
 /**
- * The route-level net for the signed-in shell.
+ * The route-level net for the signed-in shell — SPEC § 12's 500.
  *
  * Next.js renders this in place of the page segment when something throws during render, keeping
  * the layout — sidebar, navigation, header — mounted. Before it existed there was no `error.tsx`
@@ -16,7 +17,9 @@ import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
  * as it crosses the RSC boundary, so the class is gone and only a developer's sentence is left —
  * the first smoke run found "Cannot reach the API at http://localhost:8081 — is the backend
  * running?" on screen. In production the message is stripped anyway and `digest` identifies it in
- * the server log.
+ * the server log, which is why it is the error ID shown.
+ *
+ * SPEC's example line is "Your work is saved." — not said here, because nothing guarantees it.
  */
 export default function AppError({
   error,
@@ -30,11 +33,21 @@ export default function AppError({
   }, [error]);
 
   return (
-    <ErrorState
-      error={error}
-      title="Something went wrong"
-      message={FALLBACK_ERROR_MESSAGE}
-      onRetry={reset}
+    <ErrorPage
+      scene="something-broke"
+      title="Something broke on our side"
+      line="Try again in a moment."
+      reference={error.digest}
+      actions={
+        <>
+          <Button type="button" onClick={reset}>
+            Try again
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/dashboard">Go to home</Link>
+          </Button>
+        </>
+      }
     />
   );
 }

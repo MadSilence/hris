@@ -1,5 +1,6 @@
 import * as React from "react";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import type { BreadcrumbItem } from "@/components/modules/organization/modules/profile/modules/personalDocuments/types/personalDocuments.types";
 
 type PersonalDocumentsBreadcrumbsProps = {
@@ -12,7 +13,7 @@ export const PersonalDocumentsBreadcrumbs: React.FC<PersonalDocumentsBreadcrumbs
   onNavigate,
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-1 text-sm">
+    <div className="flex flex-wrap items-center gap-1 text-body">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
 
@@ -24,13 +25,13 @@ export const PersonalDocumentsBreadcrumbs: React.FC<PersonalDocumentsBreadcrumbs
               onClick={() => !isLast && onNavigate(index)}
               className={
                 isLast
-                  ? "cursor-default font-medium text-foreground"
-                  : "text-muted-foreground transition-colors hover:text-foreground"
+                  ? "cursor-default font-medium text-primary"
+                  : "text-tertiary transition-colors hover:text-primary"
               }
             >
               {item.name}
             </button>
-            {!isLast && <ChevronRight className="h-4 w-4 text-muted-foreground"/>}
+            {!isLast && <Icon icon={ArrowRight01Icon} size="sm" className="text-tertiary" />}
           </React.Fragment>
         );
       })}

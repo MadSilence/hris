@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { confirmEmailChangeAction } from "@/components/modules/emailChange/actions/emailChangeActions";
@@ -38,28 +38,28 @@ export function ConfirmEmailContainer({ token, firstName, newEmail }: Props) {
 
   if (done) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-        <h1 className="text-4xl font-medium">Email Confirmed</h1>
-        <p className="text-md text-muted-foreground">
-          From now on you sign in with <span className="font-medium text-foreground">{newEmail}</span>.
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-page-title">Email confirmed</h1>
+        <p className="text-body text-tertiary">
+          From now on you sign in with <span className="font-medium text-primary">{newEmail}</span>.
         </p>
         <Button asChild>
-          <a href="/login">Sign In</a>
+          <a href="/login">Sign in</a>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-6 text-center">
-      <h1 className="text-4xl font-medium">{firstName ? `Hi ${firstName}` : "Confirm Your Email"}</h1>
-      <p className="text-md text-muted-foreground">
-        Confirm <span className="font-medium text-foreground">{newEmail}</span> as your new sign-in email. Until
+    <div className="flex flex-col items-center gap-6 text-center">
+      <h1 className="text-page-title">{firstName ? `Hi ${firstName}` : "Confirm your email"}</h1>
+      <p className="text-body text-tertiary">
+        Confirm <span className="font-medium text-primary">{newEmail}</span> as your new sign-in email. Until
         you do, you keep signing in with your current address.
       </p>
       <FormError message={error} />
-      <Button type="button" onClick={confirm} disabled={busy} className="h-11 w-full max-w-xs">
-        {busy ? "Confirming…" : "Confirm Email"}
+      <Button type="button" onClick={confirm} disabled={busy} size="lg" className="w-full">
+        {busy ? "Confirming…" : "Confirm email"}
       </Button>
     </div>
   );

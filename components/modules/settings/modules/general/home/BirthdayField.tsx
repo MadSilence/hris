@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -77,11 +77,11 @@ export const BirthdayField: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="birthday-field-heading">
       <div>
-        <h2 id="birthday-field-heading" className="text-lg font-semibold">Birthday Field</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 id="birthday-field-heading" className="text-section-title">Birthday field</h2>
+        <p className="text-body text-tertiary">
           The date field home&apos;s Celebrations reads birthdays from, shown as day and month only. A birthday is
           listed only to people whose role may see this field for everyone — set that in{" "}
-          <Link href="/settings/people/roles" className="font-medium text-brown-600 hover:underline">Employee Roles &amp; Access</Link>,
+          <Link href="/settings/people/roles" className="font-medium text-accent-text underline-offset-4 hover:underline">Employee Roles &amp; Access</Link>,
           under field access. By default nobody but the person sees their own.
         </p>
       </div>
@@ -96,9 +96,9 @@ export const BirthdayField: React.FC = () => {
             event.preventDefault();
             void save();
           }}
-        >
+ >
           <div className="w-64 space-y-1">
-            <Label htmlFor="birthday-field">Birthday Field</Label>
+            <Label htmlFor="birthday-field">Birthday field</Label>
             <SearchableSelect
               id="birthday-field"
               options={[
@@ -116,7 +116,7 @@ export const BirthdayField: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <Button type="submit" disabled={!dirty || update.isPending} className="bg-brown-600 text-white hover:bg-brown-700">
+            <Button type="submit" disabled={!dirty || update.isPending} >
               Save
             </Button>
           )}

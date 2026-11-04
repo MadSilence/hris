@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { formatMinutes, type AttendanceReportRow } from "@/models/attendance";
 import { formatAmounts } from "@/components/modules/attendance/lib";
@@ -25,11 +25,11 @@ type AttendanceColumn = { key: string; label: string; value: (r: AttendanceRepor
 
 /** The five numbers, in order — the table prints them, and the export preview prints them inside the file's own columns. */
 export const ATTENDANCE_COLUMNS: readonly AttendanceColumn[] = [
-  { key: "expectedDays", label: "Expected Days", value: (r) => String(r.totals.expectedDays) },
-  { key: "loggedDays", label: "Logged Days", value: (r) => String(r.totals.loggedDays) },
-  { key: "expectedHours", label: "Expected Hours", value: (r) => formatMinutes(r.totals.expectedMinutes) },
-  { key: "loggedHours", label: "Logged Hours", value: (r) => formatMinutes(r.totals.loggedMinutes) },
-  { key: "overtimeHours", label: "Overtime Hours", value: (r) => formatMinutes(r.totals.overtimeMinutes) },
+  { key: "expectedDays", label: "Expected days", value: (r) => String(r.totals.expectedDays) },
+  { key: "loggedDays", label: "Logged days", value: (r) => String(r.totals.loggedDays) },
+  { key: "expectedHours", label: "Expected hours", value: (r) => formatMinutes(r.totals.expectedMinutes) },
+  { key: "loggedHours", label: "Logged hours", value: (r) => formatMinutes(r.totals.loggedMinutes) },
+  { key: "overtimeHours", label: "Overtime hours", value: (r) => formatMinutes(r.totals.overtimeMinutes) },
 ];
 
 const AMOUNT_COLUMN: AttendanceColumn = {
@@ -73,9 +73,9 @@ export const AttendanceTable: React.FC<Props> = ({
   }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
   return (
-    <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-brown-200 bg-white">
+    <div className="min-h-0 flex-1 overflow-auto rounded-control border border-divider bg-card">
       <Table className="table-fixed">
-        <TableHeader className="sticky top-0 z-10 bg-white">
+        <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow>
             <TableHead className="w-[32%]">Name</TableHead>
             {columns.map((column) => (
@@ -126,7 +126,7 @@ export const AttendanceTable: React.FC<Props> = ({
         </TableBody>
       </Table>
       {hasNextPage && (
-        <div ref={sentinel} className="py-3 text-center text-sm text-muted-foreground">
+        <div ref={sentinel} className="py-3 text-center text-body text-tertiary">
           {isFetchingNextPage ? "Loading more…" : ""}
         </div>
       )}

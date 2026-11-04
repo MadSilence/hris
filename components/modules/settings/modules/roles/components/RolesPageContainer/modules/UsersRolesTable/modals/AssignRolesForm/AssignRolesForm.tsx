@@ -4,23 +4,23 @@ import { FC, Fragment, FormEvent, useEffect, useMemo, useState } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Badge } from "@/components/desact/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/public/desact/src/components/ui/tooltip";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/tooltip";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { DialogFooter } from "@/components/desact/dialog";
 
 import { Role } from "@/models/role/Role";
 import { UsersSearchItemDTO } from "@/models/user/fields";
 import { useAccess } from "@/components/auth/useAccess";
 import { isSystemOwner } from "@/models/access";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import { useRoleAccessPreview } from "@/components/modules/settings/modules/roles/hooks/useRoleAccessPreview";
 import { ResolvedAccessPanel } from "./ResolvedAccessPanel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -173,7 +173,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       <div className="mb-8 mt-4 flex items-center gap-4">
         <Avatar className="h-16 w-16 shrink-0">
           {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={fullName} /> : null}
-          <AvatarFallback className="bg-brown-100 font-semibold text-brown-700">
+          <AvatarFallback className="bg-mist font-semibold text-secondary">
             {initials}
           </AvatarFallback>
         </Avatar>
@@ -182,13 +182,13 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
           <h3 className="truncate font-semibold">{fullName}</h3>
 
           {user?.email && (
-            <p className="truncate text-sm text-muted-foreground">
+            <p className="truncate text-body text-tertiary">
               {user.email}
             </p>
           )}
 
           {user?.status && (
-            <Badge variant="secondary" className="mt-1">
+            <Badge variant="neutral" className="mt-1">
               {user.status}
             </Badge>
           )}
@@ -198,10 +198,10 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       {/* The three tabs answer the two questions an admin has here: which roles, and what those
           roles actually add up to. The preview follows the *selection*, not what is saved. */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as AssignRolesTab)}>
-        <TabsList className="grid w-full grid-cols-3 bg-brown-50">
-          <TabsTrigger value="roles">Assigned Roles</TabsTrigger>
-          <TabsTrigger value="permissions">Resolved Permissions</TabsTrigger>
-          <TabsTrigger value="fields">Resolved Field Visibility</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-subtle">
+          <TabsTrigger value="roles">Assigned roles</TabsTrigger>
+          <TabsTrigger value="permissions">Resolved permissions</TabsTrigger>
+          <TabsTrigger value="fields">Resolved field visibility</TabsTrigger>
         </TabsList>
 
         <TabsContent value="permissions" className="mt-4 max-h-[320px] overflow-y-auto">
@@ -226,7 +226,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       <TooltipProvider delayDuration={200}>
         <div className="space-y-2">
           {visibleRoles.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No roles available</div>
+            <div className="text-body text-tertiary">No roles available</div>
           ) : (
             visibleRoles.map((role) => {
               const checked = formik.values.roleIds.includes(role.id);
@@ -247,10 +247,10 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
 
               const row = (
                 <label
-                  className={`flex items-center gap-3 rounded-md px-2 py-2 ${
-                    locked ? "cursor-default" : "cursor-pointer hover:bg-brown-50"
+                  className={`flex items-center gap-3 rounded-control px-2 py-2 ${
+                    locked ? "cursor-default" : "cursor-pointer hover:bg-subtle"
                   }`}
-                >
+ >
                   <Checkbox
                     checked={role.isDefault ? true : checked}
                     onCheckedChange={() => {
@@ -260,14 +260,14 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
                   />
 
                   <div className="flex min-w-0 items-center gap-2">
-                    <div className="truncate text-sm font-medium">{role.name}</div>
+                    <div className="truncate text-body font-medium">{role.name}</div>
 
                     {role.systemOwner && (
-                      <Badge variant="secondary" className="shrink-0">System</Badge>
+                      <Badge variant="neutral" className="shrink-0">System</Badge>
                     )}
 
                     {role.isDefault && (
-                      <Badge variant="secondary" className="shrink-0">Default</Badge>
+                      <Badge variant="neutral" className="shrink-0">Default</Badge>
                     )}
 
                     {role.archived && (
@@ -300,19 +300,19 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
         {hasChanges ? (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={isLoading}
             onClick={handleReset}
-          >
+ >
             Reset
           </Button>
         ) : (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             disabled={isLoading}
             onClick={onCancelAction}
-          >
+ >
             Cancel
           </Button>
         )}
@@ -320,8 +320,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
         <Button
           type="submit"
           disabled={isLoading || !hasChanges || !user}
-          className="bg-brown-600 text-white hover:bg-brown-700"
-        >
+ >
           Apply
         </Button>
       </DialogFooter>

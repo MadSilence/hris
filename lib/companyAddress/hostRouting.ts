@@ -20,8 +20,11 @@ export type HostRoute =
 /** Pages that exist only on the root. Matched as a path or a path prefix. */
 export const ROOT_ONLY_PATHS = ["/about", "/pricing", "/products", "/solutions", "/trial", "/find-company"];
 
-/** Reachable on either host: the BFF, and the refusal page. */
-const EITHER_PATHS = ["/api", "/403"];
+/**
+ * Reachable on either host: the BFF, the refusal page, and the home-screen icon — the only icon whose address
+ * has no extension, so the matcher in `middleware.ts` does not wave it through by itself.
+ */
+const EITHER_PATHS = ["/api", "/403", "/apple-icon"];
 
 /** The company login's own route, so it can own the whole screen. Its only address is `/login`. */
 export const COMPANY_LOGIN_ROUTE = "/company-login";

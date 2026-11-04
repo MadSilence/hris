@@ -34,12 +34,12 @@ describe("TemplateTaskListView", () => {
   it("groups the tasks by phase, in timeline order, saying the day and who does it", () => {
     render(<TemplateTaskListView items={items} lanes={deriveLanes(items)} selectedKey={null} onSelectAction={jest.fn()} onAddAction={jest.fn()} />);
 
-    const before = within(screen.getByRole("region", { name: "Before Start" }));
+    const before = within(screen.getByRole("region", { name: "Before start" }));
     expect(before.getAllByRole("button").map((b) => b.textContent)).toEqual([
       expect.stringContaining("Order a laptop"),
       expect.stringContaining("Passport"),
     ]);
-    expect(before.getByText("7 days before start · Onboarding Manager")).toBeInTheDocument();
+    expect(before.getByText("7 days before start · Onboarding manager")).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Week 1" })).getByText("Day 1 · Linus")).toBeInTheDocument();
     expect(screen.getByText("Waits for Order a laptop")).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Month 1" })).getByText("First month check-in")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("TemplateTaskListView", () => {
     expect(screen.getByRole("button", { name: /Passport/ })).toHaveAttribute("aria-current", "true");
     fireEvent.click(screen.getByRole("button", { name: /Set up the laptop/ }));
     expect(onSelect).toHaveBeenCalledWith("setup");
-    fireEvent.click(screen.getByRole("button", { name: "Add Task" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add task" }));
     expect(onAdd).toHaveBeenCalled();
   });
 });

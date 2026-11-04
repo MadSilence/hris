@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { BalancePreview } from "./BalancePreview";
@@ -48,11 +48,11 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div className="rounded-lg border border-brown-200 p-5">
-        <p className="text-sm font-medium text-brown-800">{anImport.fileName} has no errors.</p>
+      <div className="rounded-card border border-divider p-5">
+        <p className="text-body font-medium text-primary">{anImport.fileName} has no errors.</p>
         {anImport.kind !== "PEOPLE_CREATE" && <KindSummary anImport={anImport} />}
         {anImport.kind === "PEOPLE_CREATE" && (
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-brown-700">
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-secondary">
           <li><strong>{people(anImport.rowCount)}</strong> will be created, each as a draft profile.</li>
           {anImport.startLaterCount > 0 && (
             <li>
@@ -72,7 +72,7 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
       </div>
 
       {anImport.canInvite && withEmail > 0 && (
-        <label className="flex items-start gap-3 text-sm">
+        <label className="flex items-start gap-3 text-body">
           <Checkbox
             checked={anImport.inviteAfter}
             disabled={busy}
@@ -80,8 +80,8 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
             aria-label="Invite everybody with an email once the import is done"
           />
           <span>
-            <span className="font-medium text-brown-800">Invite everybody with an email once the import is done</span>
-            <span className="block text-muted-foreground">
+            <span className="font-medium text-primary">Invite everybody with an email once the import is done</span>
+            <span className="block text-tertiary">
               {people(withEmail)} will get an invitation to sign in — only after every row has been created.
             </span>
           </span>
@@ -94,13 +94,13 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
         <Button type="button" onClick={onApply} disabled={busy}>
           {apply.isPending ? "Starting…" : `Import ${IMPORT_KINDS[anImport.kind].noun(anImport.rowCount)}`}
         </Button>
-        <Button type="button" variant="outline" onClick={onBack} disabled={busy}>Change Mapping</Button>
+        <Button type="button" variant="secondary" onClick={onBack} disabled={busy}>Change mapping</Button>
         <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}
         >
-          Discard Import
+          Discard import
         </Button>
       </div>
     </div>
@@ -115,7 +115,7 @@ const KindSummary: React.FC<Props> = ({ anImport }) => {
     const departments = count(anImport.summary.departments);
     const teams = count(anImport.summary.teams);
     return (
-      <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-brown-700">
+      <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-secondary">
         <li>
           <strong>{departments} {departments === 1 ? "department" : "departments"}</strong> and{" "}
           <strong>{teams} {teams === 1 ? "team" : "teams"}</strong> will be created, parents first, all at once.
@@ -128,7 +128,7 @@ const KindSummary: React.FC<Props> = ({ anImport }) => {
   const unchanged = count(anImport.summary.unchanged);
   return (
     <div className="mt-3 flex flex-col gap-3">
-      <ul className="list-disc space-y-1 pl-5 text-sm text-brown-700">
+      <ul className="list-disc space-y-1 pl-5 text-body text-secondary">
         <li><strong>{toSet} {toSet === 1 ? "balance" : "balances"}</strong> will be set, all at once.</li>
         {unchanged > 0 && <li>{unchanged} {unchanged === 1 ? "is" : "are"} already at the target and will not change.</li>}
         <li>Each balance is set as of its date. Leave already booked for later dates is subtracted on its own.</li>

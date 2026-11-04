@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { UserPlus, Users, X } from "lucide-react";
+import { Cancel01Icon, UserAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -135,29 +136,29 @@ export function TeamPeopleTab({
   if (isEmpty) {
     return (
       <div className="flex h-full min-h-0 flex-col items-center justify-center gap-3 px-6 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-100 text-brown-500">
-          <Users className="h-5 w-5" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-mist text-tertiary">
+          <Icon icon={UserGroupIcon} />
         </div>
         <div>
           {limited && total > 0 ? (
             // A roster is people data: the reader sees the team and its size, not people outside
             // their access (decided 2026-10-27).
             <>
-              <p className="text-sm font-medium text-brown-900">{total} {total === 1 ? "person" : "people"}, none you can see</p>
-              <p className="mt-1 text-sm text-brown-400">Only the people your access covers are listed.</p>
+              <p className="text-body font-medium text-primary">{total} {total === 1 ? "person" : "people"}, none you can see</p>
+              <p className="mt-1 text-body text-tertiary">Only the people your access covers are listed.</p>
             </>
           ) : (
             <>
-              <p className="text-sm font-medium text-brown-900">No people in this team yet</p>
-              <p className="mt-1 text-sm text-brown-400">Assign people to see them here.</p>
+              <p className="text-body font-medium text-primary">No people in this team yet</p>
+              <p className="mt-1 text-body text-tertiary">Assign people to see them here.</p>
             </>
           )}
         </div>
         <PermissionGate resource="ORG.TEAM" action="EDIT">
           {!isArchived && (
             <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="mt-1 gap-1.5">
-              <UserPlus className="h-4 w-4" />
-              Add Member
+              <Icon icon={UserAdd01Icon} size="sm" />
+              Add member
             </Button>
           )}
         </PermissionGate>
@@ -176,15 +177,15 @@ export function TeamPeopleTab({
         <PermissionGate resource="ORG.TEAM" action="EDIT">
           {!isArchived && (
             <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">
-              <UserPlus className="h-4 w-4" />
-              Add Member
+              <Icon icon={UserAdd01Icon} size="sm" />
+              Add member
             </Button>
           )}
         </PermissionGate>
       </div>
 
       {hasChildren && (
-        <label className="flex flex-none cursor-pointer select-none items-center gap-2 text-xs text-brown-600">
+        <label className="flex flex-none cursor-pointer select-none items-center gap-2 text-hint text-secondary">
           <Checkbox
             checked={includeSubNodes}
             onCheckedChange={(v) => setIncludeSubNodes(v === true)}
@@ -194,7 +195,7 @@ export function TeamPeopleTab({
       )}
 
       {limited && !error ? (
-        <p className="flex-none text-xs text-muted-foreground">Only the people your access covers are listed.</p>
+        <p className="flex-none text-hint text-tertiary">Only the people your access covers are listed.</p>
       ) : null}
 
       {/* List (the only scroll area) */}
@@ -203,8 +204,8 @@ export function TeamPeopleTab({
           <div className="space-y-1">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center gap-2 px-1 py-2">
-                <div className="h-6 w-6 flex-none animate-pulse rounded-full bg-brown-100" />
-                <div className="h-3.5 w-32 animate-pulse rounded bg-brown-100" />
+                <div className="h-6 w-6 flex-none shimmer rounded-pill bg-mist" />
+                <div className="h-3.5 w-32 shimmer rounded-tag bg-mist" />
               </div>
             ))}
           </div>
@@ -215,7 +216,7 @@ export function TeamPeopleTab({
         ) : items.length === 0 ? (
           <ListEmptyState
             query={query}
-            icon={<Users className="h-7 w-7" />}
+            scene="team-and-org"
             title={`No people in this ${'team'} yet`}
             description="Assign people to see them here."
             noResultsHint="Try a different name or email."
@@ -225,8 +226,8 @@ export function TeamPeopleTab({
             {items.map((member) => (
               <div
                 key={member.id}
-                className={`group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50 ${
-                  member.id === highlightUserId ? "bg-warning-50 ring-1 ring-warning-200" : ""
+                className={`group flex items-center justify-between gap-2 rounded-control py-1 pl-3 pr-1 hover:bg-subtle ${
+                  member.id === highlightUserId ? "bg-search-highlight" : ""
                 }`}
               >
                 <UserChip
@@ -244,16 +245,16 @@ export function TeamPeopleTab({
                       onClick={() => setRemoveTarget(member)}
                       disabled={removingId === member.id}
                       aria-label={`Remove ${member.firstName ?? member.email}`}
-                      className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600 disabled:opacity-50"
+                      className="flex h-7 w-7 flex-none items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text disabled:opacity-50"
                     >
-                      <X className="h-4 w-4" />
+                      <Icon icon={Cancel01Icon} size="sm" />
                     </button>
                   )}
                 </PermissionGate>
               </div>
             ))}
             {isFetchingNextPage && (
-              <p className="py-2 text-center text-xs text-brown-400">Loading more…</p>
+              <p className="py-2 text-center text-hint text-tertiary">Loading more…</p>
             )}
           </div>
         )}
@@ -263,7 +264,7 @@ export function TeamPeopleTab({
 
       <ConfirmActionModal
         isOpen={removeTarget !== null}
-        title="Remove From Team"
+        title="Remove from team"
         description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be in this team. They keep their account and everything else.`}
         confirmLabel="Remove"
         destructive

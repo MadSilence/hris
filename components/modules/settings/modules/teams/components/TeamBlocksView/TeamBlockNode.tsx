@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { ChevronUp, Folder } from "lucide-react";
+import { ArrowUp01Icon, Folder01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { PersonChip } from "@/components/ui/PersonChip";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import {
   personDisplayName,
   personInitials,
@@ -70,11 +71,11 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
     <div
       style={{ width: BLOCK_W, height }}
       className={cn(
-        "nopan flex flex-col rounded-xl border bg-white transition-shadow",
-        selected ? "border-brown-300 shadow-md ring-1 ring-brown-200" : "border-brown-200 shadow-sm",
-        matched && "border-warning-400 ring-2 ring-warning-300 ring-inset",
+        "nopan flex flex-col rounded-popover border bg-card transition-shadow",
+        selected ? "border-accent shadow-raised ring-1 ring-accent-ring" : "border-divider shadow-raised",
+        matched && "bg-search-highlight ring-2 ring-strong ring-inset",
         dimmed && "opacity-35",
-        isArchived && "border-dashed bg-brown-50/60",
+        isArchived && "border-dashed bg-subtle/60",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />
@@ -88,19 +89,19 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
           }}
           className="nodrag flex min-w-0 flex-1 items-center gap-2 text-left"
         >
-          <Folder className="h-4 w-4 flex-none text-brown-500" />
-          <span className="truncate text-sm font-semibold text-brown-900">{team.name}</span>
+          <Icon icon={Folder01Icon} size="sm" className="flex-none text-tertiary" />
+          <span className="truncate text-body font-semibold text-primary">{team.name}</span>
           {team.code && (
-            <span className="flex-none rounded border border-brown-200 bg-brown-50 px-1 py-0.5 font-mono text-[10px] leading-none text-brown-500">
+            <span className="flex-none rounded-tag border border-divider bg-subtle px-1 py-0.5 font-mono text-hint leading-none text-tertiary">
               {team.code}
             </span>
           )}
           {isArchived && (
-            <StatusBadge status="archived" className="flex-none px-1 py-0.5 text-[10px] leading-none" />
+            <StatusBadge status="archived" className="flex-none px-1 py-0.5 text-hint leading-none" />
           )}
         </button>
 
-        <span className="flex-none whitespace-nowrap text-[11px] text-brown-500">
+        <span className="flex-none whitespace-nowrap text-hint text-tertiary">
           {team.memberCount} here
           {team.totalPeople !== team.memberCount && ` · ${team.totalPeople} total`}
         </span>
@@ -108,7 +109,7 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
 
       <div className="min-h-0 flex-1 px-3 pb-3">
         {people.length === 0 ? (
-          <p className="text-xs text-brown-400">No people here yet.</p>
+          <p className="text-hint text-tertiary">No people here yet.</p>
         ) : (
           <div
             className="grid"
@@ -151,7 +152,7 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
               ctx.onToggleExpanded(team.id);
             }}
             style={{ height: MORE_ROW_H }}
-            className="nodrag flex items-center text-xs text-brown-500 underline-offset-2 hover:text-brown-800 hover:underline"
+            className="nodrag flex items-center text-hint text-tertiary underline-offset-2 hover:text-primary hover:underline"
           >
             {expanded ? "Show less" : `+${hidden} more`}
           </button>
@@ -167,14 +168,14 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
             e.stopPropagation();
             ctx.onToggleCollapse(team.id);
           }}
-          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-full border border-brown-200 bg-white px-1.5 text-brown-500 shadow-sm transition-colors hover:border-brown-300 hover:text-brown-800"
+          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
           aria-label={branchCollapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
           title={branchCollapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
         >
           {branchCollapsed ? (
-            <span className="text-[11px] font-semibold leading-none">{childCount}</span>
+            <span className="text-hint font-semibold leading-none">{childCount}</span>
           ) : (
-            <ChevronUp className="h-3.5 w-3.5" />
+            <Icon icon={ArrowUp01Icon} size="sm" />
           )}
         </button>
       )}

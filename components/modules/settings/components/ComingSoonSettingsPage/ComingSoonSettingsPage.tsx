@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Hourglass } from "lucide-react";
+
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState";
 
@@ -25,7 +25,7 @@ export const ComingSoonSettingsPage: React.FC<Props> = ({ title, withHeader = tr
   <div className="flex flex-col gap-6 px-8">
     {withHeader ? <SettingsPageHeader title={title} backHref="/settings" /> : null}
     <EmptyState
-      icon={<Hourglass className="h-6 w-6" />}
+      scene="company-hub"
       title={`${title} is not available yet`}
       description="This part of settings is planned and has not been built. Nothing here changes how the product works today."
     />

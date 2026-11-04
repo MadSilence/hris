@@ -82,8 +82,8 @@ function TeamBlocksInner({
         proOptions={{ hideAttribution: true }}
         className="bg-transparent"
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1.5} color="var(--brown-200)" />
-        <Controls showInteractive={false} className="!rounded-lg !border !border-brown-200 !bg-white !shadow-sm" />
+        <Background variant={BackgroundVariant.Dots} gap={16} size={1.5} color="var(--canvas-dot)" />
+        <Controls showInteractive={false} className="!rounded-control !border !border-divider !bg-card !shadow-card" />
       </ReactFlow>
     </TeamBlocksProvider>
   );

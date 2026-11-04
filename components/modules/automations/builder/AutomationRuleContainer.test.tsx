@@ -65,9 +65,9 @@ jest.mock("@/components/ui/SearchableSelect", () => ({
     </select>
   ),
 }));
-jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
-// The dropdown renders its items inline, so "Add Action" and the row kebab are plain buttons here.
-jest.mock("@/public/desact/src/components/ui/dropdown-menu", () => ({
+jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
+// The dropdown renders its items inline, so "Add action" and the row kebab are plain buttons here.
+jest.mock("@/components/desact/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -79,7 +79,7 @@ jest.mock("@/public/desact/src/components/ui/dropdown-menu", () => ({
 
 const catalog: AutomationCatalog = {
   triggers: ["PERSON_HIRED", "DATE_OFFSET", "JOINS_SEGMENT", "FIELD_CHANGED", "TERMINATION_SCHEDULED", "LAST_WORKING_DAY_ARRIVES"],
-  dateFields: [{ value: "HIRE_DATE", label: "Hire Date" }, { value: "PROBATION_END", label: "Probation End" }],
+  dateFields: [{ value: "HIRE_DATE", label: "Hire date" }, { value: "PROBATION_END", label: "Probation end" }],
   dateAttributes: [],
   changeableFields: [{ value: "manager", label: "Manager" }],
   actions: ["SEND_EMAIL", "NOTIFY", "CREATE_TASK", "ASSIGN", "UNASSIGN", "GRANT_TIME_OFF_POLICY"],
@@ -141,7 +141,7 @@ describe("AutomationRuleContainer — composing a rule", () => {
 
     const when = screen.getByRole("region", { name: "When" });
     expect(within(when).getByText("5 days after the hire date")).toBeInTheDocument();
-    expect(within(screen.getByRole("region", { name: "For Whom" })).getByText(/people whose Office is Berlin/)).toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "For whom" })).getByText(/people whose Office is Berlin/)).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Do" })).getByText("Assign holiday calendar Germany 2026")).toBeInTheDocument();
 
     await waitFor(() => expect(lastPreviewRequest().definition.actions).toHaveLength(1));
@@ -159,7 +159,7 @@ describe("AutomationRuleContainer — composing a rule", () => {
     const subject = screen.getByLabelText(/^Subject/) as HTMLInputElement;
     fireEvent.change(subject, { target: { value: "Hello  today" } });
     subject.setSelectionRange(6, 6);
-    fireEvent.click(within(screen.getByRole("group", { name: "Insert into Subject" })).getByRole("button", { name: "First Name" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Insert into Subject" })).getByRole("button", { name: "First name" }));
 
     expect(subject.value).toBe("Hello {firstName} today");
   });
@@ -200,9 +200,9 @@ describe("AutomationRuleContainer — publishing", () => {
 
     fireEvent.click(publishButton());
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByRole("checkbox", { name: "Enable It Now" })).toBeChecked();
+    expect(within(dialog).getByRole("checkbox", { name: "Enable it now" })).toBeChecked();
     expect(within(dialog).getByText(/Also 3 people whose moment has already passed/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("radio", { name: "Also People Who Already Match" }));
+    fireEvent.click(within(dialog).getByRole("radio", { name: "Also people who already match" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Publish" }));
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/settings/automation/automations/rule-new"));
@@ -257,7 +257,7 @@ describe("AutomationRuleContainer — publishing", () => {
     expect(within(dialog).getByText("25 runs are under way")).toBeInTheDocument();
     expect(within(dialog).getByText(/140 completed runs are unaffected/)).toBeInTheDocument();
     // An enabled rule is not asked whether to enable it.
-    expect(within(dialog).queryByRole("checkbox", { name: "Enable It Now" })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("checkbox", { name: "Enable it now" })).not.toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Publish" }));
 
     await waitFor(() => expect(publishAutomationAction).toHaveBeenCalledWith({
@@ -271,7 +271,7 @@ describe("AutomationRuleContainer — publishing", () => {
     const dialog = await editExisting();
 
     expect(within(dialog).getByText(/4 cancelled, 6 added/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("radio", { name: "Move Everyone to the New Version" }));
+    fireEvent.click(within(dialog).getByRole("radio", { name: "Move everyone to the new version" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Publish" }));
 
     await waitFor(() => expect(publishAutomationAction).toHaveBeenCalledWith({

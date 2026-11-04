@@ -4,7 +4,8 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import * as React from "react";
 import { FC, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Globe2, Languages, MapPin } from "lucide-react";
+import { Calendar03Icon, Globe02Icon, LanguageSkillIcon, Location01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -13,12 +14,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+
+import { Label } from "@/components/desact/label";
+import { Separator } from "@/components/desact/separator";
+import { Skeleton } from "@/components/desact/skeleton";
 
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import type { PublicHolidayTemplate } from "@/models/publicHolidays/template";
@@ -31,6 +32,7 @@ import {
   templateDisplayName,
 } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayTemplatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { TagChip } from "@/components/ui/TagChip";
 
 /** Radix Select cannot hold an empty value, so "no subdivision" needs a sentinel. */
 const NATIONAL = "__national__";
@@ -114,7 +116,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
         <div className="space-y-6 px-8 py-7">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">
+            <p className="text-body font-medium text-primary">
               Template
             </p>
 
@@ -130,7 +132,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
             )}
 
             {!isLoading && templates.length === 0 ? (
-              <p className="text-xs text-[var(--color-text-tertiary)]">
+              <p className="text-hint text-tertiary">
                 No public holiday templates are available yet.
               </p>
             ) : null}
@@ -159,7 +161,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
                 />
               )}
 
-              <p className="text-xs text-[var(--color-text-tertiary)]">
+              <p className="text-hint text-tertiary">
                 A region adds the days that apply only there on top of the national ones.
               </p>
             </div>
@@ -174,7 +176,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               disabled={isLoading}
               onClick={requestClose}
             >
@@ -202,12 +204,12 @@ type TemplateSummaryProps = {
 const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
   if (!template) {
     return (
-      <div className="flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-        <CalendarDays className="mb-3 h-7 w-7 text-[var(--color-text-tertiary)]"/>
+      <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
+        <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
 
-        <p className="text-sm font-medium">Select a template</p>
+        <p className="text-body font-medium">Select a template</p>
 
-        <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+        <p className="mt-1 text-hint text-tertiary">
           Template details will appear here.
         </p>
       </div>
@@ -222,24 +224,20 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
         <div className="flex flex-wrap items-center gap-2">
           <CountryFlag countryCode={template.countryCode}/>
 
-          <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+          <p className="text-body font-semibold text-primary">
             {templateDisplayName(template)}
           </p>
 
           {template.regional ? (
-            <Badge className="border-purple-200 bg-purple-100 text-purple-800">
-              Regional
-            </Badge>
+            // A kind, not a status: the tag palette (SPEC § 4.7).
+            <TagChip color="plum">Regional</TagChip>
           ) : (
-            // eslint-disable-next-line no-restricted-syntax -- a kind (national / regional), not a status
-            <Badge className="border-blue-200 bg-blue-100 text-blue-800">
-              National
-            </Badge>
+            <TagChip color="ocean">National</TagChip>
           )}
         </div>
 
         {template.description ? (
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-tertiary)]">
+          <p className="mt-2 text-body leading-6 text-tertiary">
             {template.description}
           </p>
         ) : null}
@@ -249,13 +247,13 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <SummaryRow
-          icon={<Globe2 className="size-4"/>}
+          icon={<Icon icon={Globe02Icon} size="sm" />}
           label="Country"
           value={`${template.countryName} (${template.countryCode})`}
         />
 
         <SummaryRow
-          icon={<MapPin className="size-4"/>}
+          icon={<Icon icon={Location01Icon} size="sm" />}
           label="Region"
           value={
             template.regionName && template.regionCode
@@ -265,13 +263,13 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
         />
 
         <SummaryRow
-          icon={<Languages className="size-4"/>}
+          icon={<Icon icon={LanguageSkillIcon} size="sm" />}
           label="Language"
           value={template.languageCode.toUpperCase()}
         />
 
         <SummaryRow
-          icon={<CalendarDays className="size-4"/>}
+          icon={<Icon icon={Calendar03Icon} size="sm" />}
           label="Supported years"
           value={formatSupportedYears(template)}
         />
@@ -289,11 +287,11 @@ type SummaryRowProps = {
 const SummaryRow: FC<SummaryRowProps> = ({ icon, label, value }) => {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-[var(--color-text-tertiary)]">{icon}</span>
+      <span className="mt-0.5 text-tertiary">{icon}</span>
 
       <div>
-        <p className="text-xs text-[var(--color-text-tertiary)]">{label}</p>
-        <p className="mt-0.5 text-sm font-medium text-[var(--color-text-primary)]">
+        <p className="text-hint text-tertiary">{label}</p>
+        <p className="mt-0.5 text-body font-medium text-primary">
           {value}
         </p>
       </div>

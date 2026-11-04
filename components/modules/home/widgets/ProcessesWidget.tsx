@@ -25,7 +25,7 @@ export const ProcessesWidget: React.FC = () => {
     .sort((a, b) => a.anchorDate.localeCompare(b.anchorDate));
 
   return (
-    <HomeCard title="Processes in Progress" action={<HomeCardLink href="/processes">See All</HomeCardLink>}>
+    <HomeCard title="Processes in progress" action={<HomeCardLink href="/processes">See all</HomeCardLink>}>
       {query.isLoading ? (
         <HomeRowsSkeleton rows={3} avatar={false} />
       ) : query.error ? (
@@ -38,17 +38,17 @@ export const ProcessesWidget: React.FC = () => {
             const done = process.taskCount - process.openTaskCount;
             return (
               <li key={process.id}>
-                <Link href={`/processes/${process.id}`} className="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-brown-50">
+                <Link href={`/processes/${process.id}`} className="-mx-2 flex items-center justify-between gap-3 rounded-control px-2 py-1.5 hover:bg-subtle">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-brown-900">{process.target.name ?? "Unnamed"}</span>
-                    <span className="block truncate text-xs text-muted-foreground">
+                    <span className="block truncate text-body font-medium text-primary">{process.target.name ?? "Unnamed"}</span>
+                    <span className="block truncate text-hint text-tertiary">
                       {TYPE_LABELS[process.type]} · {formatDisplayDate(process.anchorDate, { style: "medium" })}
                     </span>
                   </span>
-                  <span className="shrink-0 text-right text-xs text-brown-700">
+                  <span className="shrink-0 text-right text-hint text-secondary">
                     {done}/{process.taskCount} done
                     {process.overdueTaskCount > 0 && (
-                      <span className="block font-medium text-danger-600">{process.overdueTaskCount} overdue</span>
+                      <span className="block font-medium text-danger-text">{process.overdueTaskCount} overdue</span>
                     )}
                   </span>
                 </Link>

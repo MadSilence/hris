@@ -2,10 +2,11 @@
 
 import { FC, useState } from "react";
 import Link from "next/link";
-import { Check, Pencil, Shield, X } from "lucide-react";
+import { Cancel01Icon, PencilEdit02Icon, Shield01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Button } from "@/components/desact/button";
+import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
 import type { PublicHolidayDriftApplyResult } from "@/api/modules/publicHolidays/calendars/dto";
 import {
@@ -54,15 +55,15 @@ type DriftDetails = {
 type Outcome = { label: string; className: string };
 
 const OUTCOMES: Record<string, Outcome> = {
-  APPLIED: { label: "Applied", className: "text-success-700" },
-  DISMISSED: { label: "Dismissed", className: "text-brown-500" },
-  SUPERSEDED: { label: "Replaced by a newer check of the source", className: "text-brown-500" },
+  APPLIED: { label: "Applied", className: "text-status-approved-text" },
+  DISMISSED: { label: "Dismissed", className: "text-tertiary" },
+  SUPERSEDED: { label: "Replaced by a newer check of the source", className: "text-tertiary" },
 };
 
 /** The same statuses, read as the answers to a conflict. */
 const CONFLICT_OUTCOMES: Record<string, Outcome> = {
-  APPLIED: { label: "The source's version was taken", className: "text-success-700" },
-  DISMISSED: { label: "Your version was kept", className: "text-brown-500" },
+  APPLIED: { label: "The source's version was taken", className: "text-status-approved-text" },
+  DISMISSED: { label: "Your version was kept", className: "text-tertiary" },
   SUPERSEDED: OUTCOMES.SUPERSEDED,
 };
 
@@ -169,8 +170,8 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
     const outcome = (conflict ? CONFLICT_OUTCOMES : OUTCOMES)[source.status ?? ""];
     return (
       <div className="mt-2 flex flex-col gap-1">
-        {outcome && <p className={cn("text-xs font-medium", outcome.className)}>{outcome.label}</p>}
-        {applied && <p className="text-xs text-brown-500">{resultSummary(applied)}</p>}
+        {outcome && <p className={cn("text-hint font-medium", outcome.className)}>{outcome.label}</p>}
+        {applied && <p className="text-hint text-tertiary">{resultSummary(applied)}</p>}
       </div>
     );
   }
@@ -213,7 +214,7 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         : `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} the changed days and will be recalculated:`;
 
   return (
-    <div className="mt-3 flex flex-col gap-2 text-xs text-brown-700" onClick={(e) => e.stopPropagation()}>
+    <div className="mt-3 flex flex-col gap-2 text-hint text-secondary" onClick={(e) => e.stopPropagation()}>
       {details.changes.length > 0 && (
         <ul className="flex flex-col gap-0.5">
           {details.changes.map((change, index) => (
@@ -221,12 +222,12 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
               {conflict ? describeConflict(change) : describeDriftChange(change)}
             </li>
           ))}
-          {moreChanges > 0 && <li className="text-brown-500">and {plural(moreChanges, "more change", "more changes")}</li>}
+          {moreChanges > 0 && <li className="text-tertiary">and {plural(moreChanges, "more change", "more changes")}</li>}
         </ul>
       )}
 
       {conflict && (
-        <p className="text-brown-500">Your version stays in force until someone takes the source&apos;s.</p>
+        <p className="text-tertiary">Your version stays in force until someone takes the source&apos;s.</p>
       )}
 
       <p>
@@ -244,7 +245,7 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         </ul>
       )}
       {hiddenRequests > 0 && (
-        <p className="text-brown-500">
+        <p className="text-tertiary">
           and {plural(hiddenRequests, "request", "requests")} by people whose leave you cannot see
         </p>
       )}
@@ -252,17 +253,17 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
       {conflict ? (
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" disabled={busy} onClick={dismissDrift}>
-            <Shield className="h-4 w-4" />
-            Keep Ours
+            <Icon icon={Shield01Icon} size="sm" />
+            Keep ours
           </Button>
-          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={applyDrift}>
-            <Check className="h-4 w-4" />
-            Take Theirs
+          <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={applyDrift}>
+            <Icon icon={Tick02Icon} size="sm" />
+            Take theirs
           </Button>
           {calendarHref && (
             <Button size="sm" variant="ghost" asChild>
               <Link href={calendarHref}>
-                <Pencil className="h-4 w-4" />
+                <Icon icon={PencilEdit02Icon} size="sm" />
                 Edit
               </Link>
             </Button>
@@ -271,11 +272,11 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
       ) : (
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" disabled={busy} onClick={applyDrift}>
-            <Check className="h-4 w-4" />
-            Apply Changes
+            <Icon icon={Tick02Icon} size="sm" />
+            Apply changes
           </Button>
-          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={dismissDrift}>
-            <X className="h-4 w-4" />
+          <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={dismissDrift}>
+            <Icon icon={Cancel01Icon} size="sm" />
             Dismiss
           </Button>
         </div>

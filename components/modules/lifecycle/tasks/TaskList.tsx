@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Circle, Hourglass, MessageSquare, Pencil, TriangleAlert, XCircle } from "lucide-react";
+import { Alert02Icon, CancelCircleIcon, CheckmarkCircle02Icon, CircleIcon, HourglassIcon, Message01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TASK_KIND_ICON } from "@/components/modules/lifecycle/templates/canvas/TaskKindIcon";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { internalApiClient } from "@/components/clients/apiClient";
@@ -66,7 +68,7 @@ export function TaskList({
   onCancelAction, busyTaskId, preview,
 }: Props) {
   return (
-    <ul className="divide-y divide-brown-100 rounded-md border border-brown-200">
+    <ul className="divide-y divide-divider rounded-control border border-divider">
       {tasks.map((task) => (
         <TaskRow
           key={task.id}
@@ -103,7 +105,7 @@ function TaskRow({
   preview?: boolean;
 }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const Icon = TASK_KIND_ICON[task.kind];
+  const kindIcon = TASK_KIND_ICON[task.kind];
   const done = task.status === "DONE";
   const cancelled = task.status === "CANCELLED";
   const open = task.status === "OPEN";
@@ -117,31 +119,31 @@ function TaskRow({
   return (
     <li className="flex items-start gap-3 px-4 py-3" data-testid="task-row">
       {done ? (
-        <CheckCircle2 className="mt-0.5 h-5 w-5 text-success-600" aria-label="Done" />
+        <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label="Done" />
       ) : waiting ? (
-        <Hourglass className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label="Waiting" />
+        <Icon icon={HourglassIcon} className="mt-0.5 text-tertiary" label="Waiting" />
       ) : (
-        <Circle className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label={cancelled ? "Cancelled" : "Open"} />
+        <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label={cancelled ? "Cancelled" : "Open"} />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`font-medium ${cancelled ? "line-through text-muted-foreground" : waiting ? "text-muted-foreground" : ""}`}>{task.title}</span>
-          <Badge variant="outline" className="gap-1">
-            <Icon className="h-3 w-3" />
+          <span className={`font-medium ${cancelled ? "line-through text-tertiary" : waiting ? "text-tertiary" : ""}`}>{task.title}</span>
+          <Badge variant="outline">
+            <Icon icon={kindIcon} size="sm" className="size-3.5" />
             {TASK_KIND_LABELS[task.kind]}
           </Badge>
           {task.processType && <Badge variant="outline">{PROCESS_TYPE_LABELS[task.processType]}</Badge>}
-          {overdue && <Badge variant="outline" className="border-warning-200 bg-warning-50 text-warning-700">Due</Badge>}
+          {overdue && <StatusBadge status="pending" label="Due" size="sm" />}
           {cancelled && <Badge variant="outline">Cancelled</Badge>}
           {waiting && (
-            <Badge variant="outline" className="gap-1 text-muted-foreground">
-              <Hourglass className="h-3 w-3" />
+            <Badge variant="outline" className="gap-1 text-tertiary">
+              <Icon icon={HourglassIcon} size="sm" />
               {waitingFor ? `Waiting for ${waitingFor}` : "Waiting"}
             </Badge>
           )}
         </div>
-        {task.description && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{task.description}</p>}
-        <p className="mt-1 text-xs text-muted-foreground">
+        {task.description && <p className="mt-1 whitespace-pre-wrap text-body text-tertiary">{task.description}</p>}
+        <p className="mt-1 text-hint text-tertiary">
           {[
             task.dueDate ? `${waiting ? "Planned for" : "Due"} ${formatDisplayDate(task.dueDate, { style: "medium" })}` : null,
             showSubject && task.subject ? `About ${task.subject.name ?? ""}` : null,
@@ -150,12 +152,12 @@ function TaskRow({
           ].filter(Boolean).join(" · ")}
         </p>
         {task.kind === "FILL_FIELDS" && task.fields && (
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-hint text-tertiary">
             {task.fields.map((f) => `${f.name ?? "Field"}${f.filled ? " ✓" : ""}`).join(", ")}
           </p>
         )}
         {(task.kind === "DOCUMENT" || requiresFile(task)) && task.category && (
-          <p className="mt-1 text-xs text-muted-foreground">A file in {task.category.name ?? "the named category"}</p>
+          <p className="mt-1 text-hint text-tertiary">A file in {task.category.name ?? "the named category"}</p>
         )}
         <TaskMaterials materials={task.materials ?? []} onOpenFile={openFile} />
 
@@ -164,28 +166,28 @@ function TaskRow({
             onCompleteAction={onCompleteAction} onChangedAction={onChangedAction} />
         )}
         {done && task.kind === "APPROVE_REVIEW" && mine && (
-          <Link href={`/reviews/steps/by-task/${task.id}`} className="mt-2 block w-fit text-xs underline underline-offset-4">
-            See the Review
+          <Link href={`/reviews/steps/by-task/${task.id}`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
+            See the review
           </Link>
         )}
         {done && task.kind === "REVIEW" && mine && (
-          <Link href={`/reviews/write/by-task/${task.id}`} className="mt-2 block w-fit text-xs underline underline-offset-4">
-            See the Review
+          <Link href={`/reviews/write/by-task/${task.id}`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
+            See the review
           </Link>
         )}
         {done && task.kind === "QUESTIONNAIRE" && (
-          <Link href={`/organization/people/${task.subject.id}/forms`} className="mt-2 block w-fit text-xs underline underline-offset-4">
-            See the Answers
+          <Link href={`/organization/people/${task.subject.id}/forms`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
+            See the answers
           </Link>
         )}
 
         {!preview && <button
           type="button"
-          className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-brown-900"
+          className="mt-2 inline-flex items-center gap-1 text-hint text-tertiary hover:text-primary"
           aria-expanded={commentsOpen}
           onClick={() => setCommentsOpen((o) => !o)}
         >
-          <MessageSquare className="h-3 w-3" />
+          <Icon icon={Message01Icon} size="sm" />
           {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Comment"}
         </button>}
         {commentsOpen && (
@@ -200,15 +202,15 @@ function TaskRow({
         )}
       </div>
       {live && !preview && (onEditAction || onCancelAction) && (
-        <RowActionsMenu label="Task Actions" className="w-48">
+        <RowActionsMenu label="Task actions" className="w-48">
           {onEditAction && (
-            <RowAction icon={<Pencil className="h-4 w-4 text-muted-foreground" />} onClick={() => onEditAction(task)}>
-              Edit Task
+            <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => onEditAction(task)}>
+              Edit task
             </RowAction>
           )}
           {onCancelAction && (
-            <RowActionDestructive icon={<XCircle className="h-4 w-4" />} onClick={() => onCancelAction(task)}>
-              Cancel Task
+            <RowActionDestructive icon={<Icon icon={CancelCircleIcon} size="sm" />} onClick={() => onCancelAction(task)}>
+              Cancel task
             </RowActionDestructive>
           )}
         </RowActionsMenu>
@@ -257,8 +259,8 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     if (!mine || preview) return null;
     return (
       <div className="mt-3">
-        <Button asChild size="sm" variant="outline">
-          <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">Write the Review</Link>
+        <Button asChild size="sm" variant="secondary">
+          <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">Write the review</Link>
         </Button>
       </div>
     );
@@ -267,10 +269,10 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   // The steps of a review are done on their own pages, and close there (REVIEWS_PLAN.md 10.2–10.3).
   if (task.kind === "NOMINATE_PEERS" || task.kind === "APPROVE_PEERS" || task.kind === "APPROVE_REVIEW") {
     if (!mine || preview) return null;
-    const label = task.kind === "NOMINATE_PEERS" ? "Nominate Peers" : task.kind === "APPROVE_PEERS" ? "Approve Peers" : "Open the Review";
+    const label = task.kind === "NOMINATE_PEERS" ? "Nominate peers" : task.kind === "APPROVE_PEERS" ? "Approve peers" : "Open the review";
     return (
       <div className="mt-3">
-        <Button asChild size="sm" variant="outline">
+        <Button asChild size="sm" variant="secondary">
           <Link href={`/reviews/steps/by-task/${task.id}`} className="no-underline">{label}</Link>
         </Button>
       </div>
@@ -282,13 +284,13 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
-        <Button type="button" size="sm" variant="outline" disabled={act || !file}
+        <Button type="button" size="sm" variant="secondary" disabled={act || !file}
           onClick={() => file && run(async () => {
             const doc = await upload(file);
             await onCompleteAction(task, doc.id);
           })}
         >
-          Attach and Mark Done
+          Attach and mark done
         </Button>
         <FormError message={error} />
       </div>
@@ -298,13 +300,13 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   if (task.kind === "TODO" || task.kind === "ACKNOWLEDGE") {
     // An acknowledgement is only its assignee's to give; somebody else sees it waiting for them.
     if (task.kind === "ACKNOWLEDGE" && !mine) {
-      return <p className="mt-2 text-xs text-muted-foreground">Waiting for {task.assignee?.name ?? "its assignee"} to confirm they have read it.</p>;
+      return <p className="mt-2 text-hint text-tertiary">Waiting for {task.assignee?.name ?? "its assignee"} to confirm they have read it.</p>;
     }
     if (!onCompleteAction || !canComplete) return null;
     return (
       <div className="mt-3">
-        <Button type="button" size="sm" variant="outline" disabled={act} onClick={() => run(async () => { await onCompleteAction(task); })}>
-          {task.kind === "ACKNOWLEDGE" ? "I Have Read It" : "Mark Done"}
+        <Button type="button" size="sm" variant="secondary" disabled={act} onClick={() => run(async () => { await onCompleteAction(task); })}>
+          {task.kind === "ACKNOWLEDGE" ? "I have read it" : "Mark done"}
         </Button>
         <FormError message={error} />
       </div>
@@ -315,7 +317,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
-        <Button type="button" size="sm" variant="outline" disabled={act || !file}
+        <Button type="button" size="sm" variant="secondary" disabled={act || !file}
           onClick={() => file && run(async () => {
             const doc = await upload(file);
             // With no category the file closes the task itself; with one, its arrival does (the listener).
@@ -334,8 +336,8 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     const fields = task.fields ?? [];
     if (!canFillInPlace(fields)) {
       return (
-        <Button size="sm" variant="outline" className="mt-3" asChild>
-          <Link href={`/organization/people/${task.subject.id}/personal`}>Fill In on the Profile</Link>
+        <Button size="sm" variant="secondary" className="mt-3" asChild>
+          <Link href={`/organization/people/${task.subject.id}/personal`}>Fill in on the profile</Link>
         </Button>
       );
     }
@@ -349,7 +351,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
             disabled={disabled}
           />
         ))}
-        <Button type="button" size="sm" variant="outline" disabled={act || Object.keys(values).length === 0}
+        <Button type="button" size="sm" variant="secondary" disabled={act || Object.keys(values).length === 0}
           onClick={() => run(async () => {
             const res = await updateUserAttributesAction({ userId: task.subject.id, values });
             if (res.status !== ActionStatus.SUCCESS) {
@@ -369,7 +371,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
 
   // A questionnaire: only its assignee answers, once.
   if (!mine) {
-    return <p className="mt-2 text-xs text-muted-foreground">Waiting for {task.assignee?.name ?? "its assignee"} to answer.</p>;
+    return <p className="mt-2 text-hint text-tertiary">Waiting for {task.assignee?.name ?? "its assignee"} to answer.</p>;
   }
   return answering ? (
     <div className="mt-3">
@@ -383,7 +385,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
       />
     </div>
   ) : (
-    <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setAnswering(true)}>
+    <Button type="button" size="sm" variant="secondary" className="mt-3" onClick={() => setAnswering(true)}>
       Answer
     </Button>
   );
@@ -410,8 +412,8 @@ async function openFile(material: Material) {
 /** Shown beside a task the person it goes to cannot do as things stand (C4). */
 export function AccessWarning({ text }: { text: string }) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-warning-700">
-      <TriangleAlert className="h-3 w-3" />
+    <span className="inline-flex items-center gap-1 text-hint text-status-pending-text">
+      <Icon icon={Alert02Icon} size="sm" />
       {text}
     </span>
   );

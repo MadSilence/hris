@@ -11,8 +11,8 @@ jest.mock("@/components/layout/SettingsPageHeader/SettingsPageHeader", () => ({
 
 const company: Company = {
   id: "company-1",
-  name: "SixSoftware",
-  subdomain: "sixsoftware",
+  name: "Acme",
+  subdomain: "acme",
   companyLogo: null,
   description: "We build things.",
   website: "https://six.example",
@@ -135,7 +135,7 @@ describe("CompanyProfileSettingsComponent", () => {
     expect(screen.getByText(/company name is required/i)).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
 
-    fireEvent.change(nameInput(), { target: { value: "SixSoftware" } });
+    fireEvent.change(nameInput(), { target: { value: "Acme" } });
 
     for (const day of ["Mon", "Tue", "Wed", "Thu", "Fri"]) {
       fireEvent.click(screen.getByRole("button", { name: day }));
@@ -154,7 +154,7 @@ describe("CompanyProfileSettingsComponent", () => {
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
     expect(querySaveButton()).not.toBeInTheDocument();
-    expect(nameInput()).toHaveValue("SixSoftware");
+    expect(nameInput()).toHaveValue("Acme");
     expect(screen.getByRole("button", { name: "Sun" })).toHaveAttribute("aria-pressed", "false");
   });
 

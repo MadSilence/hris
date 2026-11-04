@@ -78,9 +78,9 @@ describe("pendingSteps", () => {
 describe("labelOfChange", () => {
   it("names each kind", () => {
     expect(labelOfChange(change({}))).toBe("Office Starts: Paris");
-    expect(labelOfChange(change({ kind: "TERMINATION" }))).toBe("Employment Ends");
+    expect(labelOfChange(change({ kind: "TERMINATION" }))).toBe("Employment ends");
     expect(labelOfChange(change({ kind: "TASK_DUE", subject: "Laptop", fieldId: null, value: null }))).toBe(
-      "Task Due: Laptop",
+      "Task due: Laptop",
     );
   });
 });

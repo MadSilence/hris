@@ -8,7 +8,7 @@ export const INBOX_FILTER_LABELS: Record<InboxFilter, string> = {
   all: "All",
   unread: "Unread",
   starred: "Starred",
-  "needs-action": "Needs Action",
+  "needs-action": "Needs action",
 };
 
 /** Where home's *Waiting on You* "See All" leads (sitting 2, H5). */

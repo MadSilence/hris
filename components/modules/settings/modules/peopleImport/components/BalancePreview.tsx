@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { usePeopleImportRows } from "@/components/modules/settings/modules/peopleImport/hooks";
 
@@ -18,17 +18,17 @@ export const BalancePreview: React.FC<{ importId: string }> = ({ importId }) => 
   if (rows.error) return <ErrorState error={rows.error} compact onRetry={() => void rows.refetch()} />;
 
   return (
-    <div className="max-h-80 overflow-auto rounded-lg border border-brown-200">
-      <Table className="text-sm">
+    <div className="max-h-80 overflow-auto rounded-control border border-divider">
+      <Table className="text-body">
         <TableHeader>
           <TableRow>
             <TableHead className="w-14">Row</TableHead>
             <TableHead>Person</TableHead>
-            <TableHead>As Of</TableHead>
+            <TableHead>As of</TableHead>
             <TableHead className="text-right">Now</TableHead>
             <TableHead className="text-right">Target</TableHead>
             <TableHead className="text-right">Difference</TableHead>
-            <TableHead className="text-right">Carried Over</TableHead>
+            <TableHead className="text-right">Carried over</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -38,7 +38,7 @@ export const BalancePreview: React.FC<{ importId: string }> = ({ importId }) => 
             const difference = String(p.difference ?? "0");
             return (
               <TableRow key={row.rowNumber} className="hover:bg-transparent">
-                <TableCell className="tabular-nums text-muted-foreground">{row.rowNumber}</TableCell>
+                <TableCell className="tabular-nums text-tertiary">{row.rowNumber}</TableCell>
                 <TableCell>{row.name ?? "—"}</TableCell>
                 <TableCell className="tabular-nums">{String(p.asOf ?? "—")}</TableCell>
                 <TableCell className="text-right tabular-nums">{String(p.current ?? "—")} {u}</TableCell>

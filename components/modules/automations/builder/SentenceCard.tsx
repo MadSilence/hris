@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 /**
@@ -24,14 +24,14 @@ export function SentenceCard({
 }) {
   return (
     <section aria-label={word} className={cn("relative", className)}>
-      <div className="rounded-xl border border-brown-100 bg-white p-5">
+      <div className="rounded-card border border-divider bg-card p-5">
         <header className="mb-4 flex items-baseline gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-brown-500">{word}</span>
-          {summary ? <span className="min-w-0 truncate text-sm text-muted-foreground">{summary}</span> : null}
+          <span className="text-hint font-semibold text-tertiary">{word}</span>
+          {summary ? <span className="min-w-0 truncate text-body text-tertiary">{summary}</span> : null}
         </header>
         <div className="space-y-4">{children}</div>
       </div>
-      {!last && <div aria-hidden className="ml-8 h-5 w-px bg-brown-200" />}
+      {!last && <div aria-hidden className="ml-8 h-5 w-px bg-divider" />}
     </section>
   );
 }
@@ -54,11 +54,11 @@ export function Field({
 }) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <RequiredLabel htmlFor={htmlFor} required={required} className="text-sm font-normal text-muted-foreground">
+      <RequiredLabel htmlFor={htmlFor} required={required} className="text-body font-normal text-tertiary">
         {label}
       </RequiredLabel>
       {children}
-      {hint ? <p className="m-0 text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="m-0 text-hint text-tertiary">{hint}</p> : null}
     </div>
   );
 }

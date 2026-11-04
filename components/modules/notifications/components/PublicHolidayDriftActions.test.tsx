@@ -97,7 +97,7 @@ describe("PublicHolidayDriftActions", () => {
     });
 
     render(<PublicHolidayDriftActions notification={openDrift(details)} />);
-    await userEvent.click(screen.getByRole("button", { name: /Apply Changes/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Apply changes/ }));
 
     expect(applyMutateAsync).toHaveBeenCalledWith({ driftId: "drift-1" });
     expect(invalidateNotifications).toHaveBeenCalled();
@@ -201,14 +201,14 @@ describe("PublicHolidayDriftActions — a conflict on days the company edited", 
     ).toBeInTheDocument();
     expect(screen.getByText(/Your version stays in force until someone takes the source's/)).toBeInTheDocument();
     expect(screen.getByText(/would be recalculated if you take the source's version/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Apply Changes/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Apply changes/ })).not.toBeInTheDocument();
   });
 
   it("keeps ours by dismissing — no day changes", async () => {
     dismissMutateAsync.mockResolvedValue(undefined);
 
     render(<PublicHolidayDriftActions notification={openConflict()} />);
-    await userEvent.click(screen.getByRole("button", { name: /Keep Ours/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Keep ours/ }));
 
     expect(dismissMutateAsync).toHaveBeenCalledWith({ driftId: "drift-1" });
     expect(applyMutateAsync).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe("PublicHolidayDriftActions — a conflict on days the company edited", 
     });
 
     render(<PublicHolidayDriftActions notification={openConflict()} />);
-    await userEvent.click(screen.getByRole("button", { name: /Take Theirs/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Take theirs/ }));
 
     expect(applyMutateAsync).toHaveBeenCalledWith({ driftId: "drift-1" });
   });

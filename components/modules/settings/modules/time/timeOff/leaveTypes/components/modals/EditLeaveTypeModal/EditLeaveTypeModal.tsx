@@ -7,10 +7,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { LeaveTypeForm, type LeaveTypeFormValues } from "../LeaveTypeForm";
 import type { LeaveType } from "@/models/timeOff";
+import { toTagColor } from "@/lib/theme/tags";
 
 type Props = {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export const EditLeaveTypeModal: FC<Props> = ({
         }}
       >
         <DialogContent hideClose className="max-w-2xl overflow-hidden p-0">
-          <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
+          <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
             <DialogTitle>Edit leave type</DialogTitle>
             <DialogDescription>Update this leave type&apos;s details.</DialogDescription>
           </DialogHeader>
@@ -66,7 +67,7 @@ export const EditLeaveTypeModal: FC<Props> = ({
                 name: leaveType.name,
                 description: leaveType.description ?? "",
                 category: leaveType.category ?? "",
-                color: leaveType.color ?? "#b08968",
+                color: toTagColor(leaveType.color),
               }}
               onCancelAction={requestClose}
               onDirtyChangeAction={setIsDirty}

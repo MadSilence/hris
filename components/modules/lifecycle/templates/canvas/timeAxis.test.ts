@@ -42,7 +42,7 @@ const item = (over: Partial<DraftItem>): DraftItem => ({
 describe("the piecewise time axis", () => {
   const axis = buildAxis([]);
 
-  it("is a day per column around the start, Before Start just left of Day 1, then weeks to day 90", () => {
+  it("is a day per column around the start, Before start just left of Day 1, then weeks to day 90", () => {
     const ids = axis.columns.map((c) => c.id);
     expect(ids[0]).toBe("d-14");
     expect(ids.indexOf("before-start")).toBe(ids.indexOf("d0") - 1);
@@ -92,7 +92,7 @@ describe("the piecewise time axis", () => {
     expect(timingForColumn(before, { dueKind: "OFFSET", offsetDays: 2 })).toEqual({ dueKind: "BEFORE_START", offsetDays: null });
   });
 
-  it("moves a day at a time, and out of Before Start to the day either side", () => {
+  it("moves a day at a time, and out of Before start to the day either side", () => {
     expect(shiftDays({ dueKind: "OFFSET", offsetDays: 2 }, 1)).toEqual({ dueKind: "OFFSET", offsetDays: 3 });
     expect(shiftDays({ dueKind: "OFFSET", offsetDays: 2 }, -7)).toEqual({ dueKind: "OFFSET", offsetDays: -5 });
     expect(shiftDays({ dueKind: "BEFORE_START", offsetDays: null }, 1)).toEqual({ dueKind: "OFFSET", offsetDays: 0 });

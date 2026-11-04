@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { CalendarPlus, Clock } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { CalendarAdd01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { HomeCard } from "@/components/modules/home/components/HomeCard";
@@ -19,21 +20,21 @@ export const QuickActionsWidget: React.FC = () => {
   const canLog = useCanAccess("PEOPLE.ATTENDANCE", "EDIT");
 
   return (
-    <HomeCard title="Quick Actions">
+    <HomeCard title="Quick actions">
       <div className="flex flex-wrap gap-2">
         {canRequest && userId && (
-          <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Button asChild variant="secondary" size="sm" className="gap-1.5">
             <Link href={`/organization/people/${userId}/time-off?request=1`}>
-              <CalendarPlus className="h-4 w-4" />
-              Request Time Off
+              <Icon icon={CalendarAdd01Icon} size="sm" />
+              Request time off
             </Link>
           </Button>
         )}
         {canLog && userId && (
-          <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Button asChild variant="secondary" size="sm" className="gap-1.5">
             <Link href={`/organization/people/${userId}/attendance`}>
-              <Clock className="h-4 w-4" />
-              Log Time
+              <Icon icon={Clock01Icon} size="sm" />
+              Log time
             </Link>
           </Button>
         )}

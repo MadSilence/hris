@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { NodRing } from "@/components/desact/nod";
 
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import {
@@ -12,17 +13,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Checkbox } from "@/components/desact/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 
 import { USER_STATUSES, formatUserStatus } from "@/models/user/status";
 import type { FieldDTO } from "@/models/user/fields";
@@ -45,6 +46,7 @@ import {
   type ReferenceValueSource,
 } from "@/models/user/fields";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { InlineAlert } from "@/components/desact/alert";
 
 export type BulkEditTarget =
   | { kind: "ids"; userIds: string[] }
@@ -190,22 +192,22 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
 
         {outOfScope ? (
           <div className="flex flex-col gap-3 py-1">
-            <p className="text-sm">
+            <p className="text-body">
               {outOfScope.blocked?.length}{" "}
               {outOfScope.blocked?.length === 1 ? "person is" : "people are"} outside your access
               scope and will not be changed.
             </p>
 
-            <div className="max-h-56 overflow-y-auto rounded-md border border-brown-200">
-              <table className="w-full text-sm">
+            <div className="max-h-56 overflow-y-auto rounded-control border border-divider">
+              <table className="w-full text-body">
                 <tbody>
                   {outOfScope.blocked?.map((b) => (
-                    <tr key={b.userId} className="border-b border-brown-100 last:border-0">
+                    <tr key={b.userId} className="border-b border-divider last:border-0">
                       <td className="px-3 py-2">
                         <div className="font-medium">{fullName(b)}</div>
-                        <div className="text-xs text-muted-foreground">{b.email}</div>
+                        <div className="text-hint text-tertiary">{b.email}</div>
                       </td>
-                      <td className="px-3 py-2 text-right text-xs text-muted-foreground">
+                      <td className="px-3 py-2 text-right text-hint text-tertiary">
                         Outside your access
                       </td>
                     </tr>
@@ -215,15 +217,15 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             </div>
           </div>
         ) : jobId ? (
-          <div className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
+          <div className="flex items-center gap-3 py-6 text-body text-tertiary">
+            <NodRing size="sm" label="" />
             Applying… {job.data ? `(${job.data.summary?.created ?? 0}/${job.data.summary?.total ?? "?"})` : ""}
           </div>
         ) : (
           <div className="flex flex-col gap-3 py-1">
             {/* Field */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Field</span>
+              <span className="text-hint font-medium text-tertiary">Field</span>
               <SearchableSelect
                 className="h-9"
                 aria-label="Field"
@@ -238,7 +240,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             {/* Operation (when more than one) */}
             {field && field.operations.length > 1 ? (
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">Action</span>
+                <span className="text-hint font-medium text-tertiary">Action</span>
                 <Select value={operation} onValueChange={(v) => setOperation(v as BulkOperation)}>
                   <SelectTrigger className="h-9">
                     <SelectValue />
@@ -257,7 +259,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             {/* Value */}
             {field && !isClear ? (
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">Value</span>
+                <span className="text-hint font-medium text-tertiary">Value</span>
                 <ValueEditor
                   field={field}
                   single={single}
@@ -271,13 +273,10 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             ) : null}
 
             {isStatus && confirming ? (
-              <div className="flex items-start gap-2 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                <span>
-                  This changes the status of {targetLabel} to{" "}
-                  <b>{formatUserStatus(single)}</b>. Click Confirm to proceed.
-                </span>
-              </div>
+              <InlineAlert tone="pending" icon={Alert02Icon}>
+                This changes the status of {targetLabel} to{" "}
+                <b>{formatUserStatus(single)}</b>. Click Confirm to proceed.
+              </InlineAlert>
             ) : null}
 
             {bulkEdit.isError ? <FormError message={messageForError(bulkEdit.error)}/> : null}
@@ -357,11 +356,11 @@ function ValueEditor({
   }
   if (type === "MULTI_SELECT") {
     return (
-      <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-md border p-2">
+      <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-control border p-2">
         {(field.options ?? []).map((o) => {
           const checked = multi.includes(o.id);
           return (
-            <label key={o.id} className="flex items-center gap-2 text-sm">
+            <label key={o.id} className="flex items-center gap-2 text-body">
               <Checkbox
                 checked={checked}
                 onCheckedChange={(v) =>
@@ -377,7 +376,7 @@ function ValueEditor({
   }
   if (type === "CHECKBOX") {
     return (
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-body">
         <Checkbox checked={bool} onCheckedChange={(v) => setBool(v === true)} />
         {bool ? "Checked" : "Unchecked"}
       </label>

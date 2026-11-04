@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 
 /**
  * The job catalog, waiting.
@@ -17,14 +17,14 @@ import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
 export const JobFamilySkeleton: React.FC<{ families?: number }> = ({ families = 4 }) => (
   <div className="space-y-4 pt-2">
     {Array.from({ length: families }).map((_, i) => (
-      <div key={i} className="rounded-xl border border-brown-200 px-3 py-3">
+      <div key={i} className="rounded-popover border border-divider px-3 py-3">
         <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_48px] items-center gap-4">
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="h-4 w-10" />
           <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-5 w-20 rounded-pill" />
           <Skeleton className="h-4 w-14" />
-          <Skeleton className="h-8 w-8 justify-self-end rounded-md" />
+          <Skeleton className="h-8 w-8 justify-self-end rounded-control" />
         </div>
       </div>
     ))}

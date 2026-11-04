@@ -27,7 +27,7 @@ const fillAndSubmit = async (current: string, next: string, confirm: string) => 
   if (current) await user.type(screen.getByLabelText(/^current password/i), current);
   await user.type(screen.getByLabelText(/^new password/i), next);
   await user.type(screen.getByLabelText(/^confirm password/i), confirm);
-  await user.click(screen.getByRole("button", { name: "Change Password" }));
+  await user.click(screen.getByRole("button", { name: "Change password" }));
 };
 
 describe("ChangePasswordModal", () => {
@@ -51,8 +51,9 @@ describe("ChangePasswordModal", () => {
 
     await fillAndSubmit("Wrong1!!", "Password1!", "Password1!");
 
+    // Under the field (the field's own error), not in a toast that slides away.
     const field = await screen.findByText("The current password is not correct.");
-    expect(field.tagName).toBe("P");
+    expect(field.closest("p[role=alert]")).not.toBeNull();
     expect(logout).not.toHaveBeenCalled();
     expect(passwordChangeNavigation.toLogin).not.toHaveBeenCalled();
   });

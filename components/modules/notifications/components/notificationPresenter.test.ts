@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { presentNotification } from "./notificationPresenter";
 import type { Notification } from "@/models/notifications";
 
@@ -82,7 +82,7 @@ describe("presentNotification", () => {
   });
 
   describe("time off, to the requester", () => {
-    it("says who approved it and links to their own Time Off tab", () => {
+    it("says who approved it and links to their own Time off tab", () => {
       const view = presentNotification(
         notification({
           type: "TIMEOFF_REQUEST_APPROVED",
@@ -143,11 +143,11 @@ describe("presentNotification", () => {
         notification({ type: "ACCOUNT_LOCKED", params: { userId: "u42", name: "Ada Lovelace" } }),
       );
 
-      expect(view.title).toBe("Account Locked");
+      expect(view.title).toBe("Account locked");
       expect(view.message).toBe(
         "Ada Lovelace's account was locked after too many failed sign-in attempts. Send them a password reset to unlock it.",
       );
-      expect(view.Icon).toBe(Lock);
+      expect(view.icon).toBe(SquareLock02Icon);
       expect(view.href).toBe("/organization/people/u42/personal");
     });
 
@@ -213,7 +213,7 @@ describe("a holiday conflict — the source changed days the company edited", ()
 
   it("asks about the edited days and blocks nothing while open", () => {
     const p = conflict("OPEN");
-    expect(p.title).toBe("Your Holiday Edits Differ from the Source");
+    expect(p.title).toBe("Your holiday edits differ from the source");
     expect(p.message).toMatch(/changed days you edited: 1 changed\./);
     expect(p.message).toMatch(/Your version stays in force until someone takes the source's\.$/);
   });
@@ -259,7 +259,7 @@ describe("approvals for somebody else", () => {
         params: { userId: "u-1", policyName: "Annual Leave", startDate: "2026-12-21", endDate: "2026-12-24", previousAmount: "4", amount: "3" },
       }),
     );
-    expect(view.title).toBe("Time Off Re-priced");
+    expect(view.title).toBe("Time off re-priced");
     expect(view.message).toMatch(/^The holidays under your Annual Leave request .+ changed, so it now costs 3 days instead of 4 days\.$/);
     expect(view.href).toBe("/organization/people/u-1/time-off");
   });
@@ -271,7 +271,7 @@ describe("approvals for somebody else", () => {
         params: { delegatorName: "Anna Approver", startDate: "2026-11-02", endDate: "2026-11-06", delegationSource: "LEAVE" },
       }),
     );
-    expect(view.title).toBe("Approvals Delegated to You");
+    expect(view.title).toBe("Approvals delegated to you");
     expect(view.message).toMatch(/^Anna Approver delegated their leave approvals to you · .+, while they are on leave\./);
     expect(view.href).toBe("/preferences");
   });
@@ -292,7 +292,7 @@ describe("approvals for somebody else", () => {
         notification({ type: "AUTOMATION_TASK_ASSIGNED", params: { taskTitle: "Prepare a desk", personName: "Anna", ruleName: "First day", dueDate: "2026-11-03" } }),
       );
 
-      expect(view.title).toBe("A Task for You");
+      expect(view.title).toBe("A task for you");
       expect(view.message).toMatch(/^Prepare a desk for Anna — set by the automation First day. Due .+.$/);
       expect(view.href).toBe("/tasks");
     });
@@ -302,7 +302,7 @@ describe("approvals for somebody else", () => {
         notification({ type: "AUTOMATION_RUN_FAILED", params: { automationRuleId: "r1", ruleName: "Welcome", personName: "Anna", error: "MISSING_PLACEHOLDER: managerName" } }),
       );
 
-      expect(view.title).toBe("Automation Failed");
+      expect(view.title).toBe("Automation failed");
       expect(view.message).toBe("Welcome could not finish for Anna: MISSING_PLACEHOLDER: managerName. Open its run log to retry.");
       expect(view.href).toBe("/settings/automation/automations/r1");
     });
@@ -312,7 +312,7 @@ describe("approvals for somebody else", () => {
         notification({ type: "AUTOMATION_RULE_PAUSED", params: { automationRuleId: "r1", ruleName: "Berlin calendar", reason: "The calendar was archived." } }),
       );
 
-      expect(view.title).toBe("Automation Paused");
+      expect(view.title).toBe("Automation paused");
       expect(view.message).toBe("Berlin calendar was paused: something it uses is gone. The calendar was archived. Fix it and resume the rule.");
       expect(view.href).toBe("/settings/automation/automations/r1");
     });

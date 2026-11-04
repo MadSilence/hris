@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { EyeOff, FolderPlus, Plus, Star, Upload } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/public/desact/src/components/ui/dropdown-menu";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Add01Icon, FolderAddIcon, StarIcon, Upload01Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/desact/dropdown-menu";
+import { cn } from "@/lib/cn";
 import { SearchBox } from "@/components/ui/SearchBox";
 
 type PersonalDocumentsToolbarProps = {
@@ -42,48 +43,48 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       <SearchBox value={search} onChange={onSearchChange}/>
 
       <Button type="button"
-        variant="outline"
+        variant="secondary"
         size="icon"
         aria-label="Show starred only"
         aria-pressed={starredOnly}
         title="Show starred only"
         onClick={() => onStarredOnlyChange(!starredOnly)}
-        className={cn(starredOnly && "border-brown-300 bg-brown-50")}
-      >
-        <Star className={cn("h-4 w-4", starredOnly && "fill-current text-warning-500")}/>
+        className={cn(starredOnly && "border-field bg-subtle")}
+ >
+        <Icon icon={StarIcon} className={cn("h-4 w-4", starredOnly && "fill-current text-status-pending-icon")} />
       </Button>
 
       {showHrOnlyFilter && (
         <Button type="button"
-          variant="outline"
+          variant="secondary"
           size="icon"
           aria-label="Show HR-only documents"
           aria-pressed={hrOnly}
           title="Show HR-only documents"
           onClick={() => onHrOnlyChange(!hrOnly)}
-          className={cn(hrOnly && "border-brown-300 bg-brown-50")}
-        >
-          <EyeOff className={cn("h-4 w-4", hrOnly && "text-brown-700")}/>
+          className={cn(hrOnly && "border-field bg-subtle")}
+ >
+          <Icon icon={ViewOffSlashIcon} className={cn("h-4 w-4", hrOnly && "text-secondary")} />
         </Button>
       )}
 
       {canEdit && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" className="ml-auto bg-brown-600 text-white hover:bg-brown-700">
-              <Plus className="mr-2 h-4 w-4"/>
+            <Button type="button" className="ml-auto">
+              <Icon icon={Add01Icon} size="sm" />
               Add
             </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={onCreateFolder} className="cursor-pointer">
-              <FolderPlus className="mr-2 h-4 w-4"/>
-              Add Folder
+              <Icon icon={FolderAddIcon} size="sm" />
+              Add folder
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onUploadFromLocal} className="cursor-pointer">
-              <Upload className="mr-2 h-4 w-4"/>
+              <Icon icon={Upload01Icon} size="sm" />
               Upload documents
             </DropdownMenuItem>
           </DropdownMenuContent>

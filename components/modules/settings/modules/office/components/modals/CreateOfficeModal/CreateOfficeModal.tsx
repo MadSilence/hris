@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   CreateOfficeForm,
@@ -59,7 +59,7 @@ export const CreateOfficeModal: FC<Props> = ({
           hideClose
           className="max-w-2xl overflow-hidden p-0"
         >
-          <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
+          <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
             <DialogTitle>Create office</DialogTitle>
             <DialogDescription>
               Add office details and address information.

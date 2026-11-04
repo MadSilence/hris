@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useAssignmentByTask } from "@/components/modules/reviews/hooks";
 
@@ -14,5 +14,5 @@ export function ReviewByTaskRedirect({ taskId }: { taskId: string }) {
     if (found.data) router.replace(`/reviews/write/${found.data.assignmentId}`);
   }, [found.data, router]);
   if (found.error) return <div className="mx-auto max-w-3xl"><ErrorState error={found.error} /></div>;
-  return <Skeleton className="mx-auto h-64 w-full max-w-3xl rounded-xl" aria-busy="true" />;
+  return <Skeleton className="mx-auto h-64 w-full max-w-3xl rounded-popover" aria-busy="true" />;
 }

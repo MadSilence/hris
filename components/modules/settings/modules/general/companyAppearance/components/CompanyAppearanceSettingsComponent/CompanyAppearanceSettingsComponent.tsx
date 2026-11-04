@@ -1,24 +1,30 @@
 "use client";
 
 import { ChangeEvent, FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ImageIcon, ImagePlus, Palette } from "lucide-react";
+import { Image01Icon, ImageAdd01Icon, PaintBoardIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Switch } from "@/public/desact/src/components/ui/switch";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Switch } from "@/components/desact/switch";
+import { cn } from "@/lib/cn";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { BRAND_STEPS, buildBrandPalette, isBrandColorUsedAsIs } from "@/lib/theme/brandPalette";
-import { isValidHex } from "@/lib/theme/oklch";
-import { AppearancePreview } from "@/components/modules/settings/modules/general/companyAppearance/components/AppearancePreview";
 import {
-  BRAND_PRESETS,
-  DEFAULT_BRAND_SWATCH,
-} from "@/components/modules/settings/modules/general/companyAppearance/utils/brandPresets";
+  ACCENT_PRESET_LABELS,
+  ACCENT_PRESETS,
+  DEFAULT_ACCENT,
+  deriveAccentInputs,
+  isAccentPreset,
+  isHexColor,
+  type AccentPreset,
+} from "@/lib/theme/accent";
+import { AppearancePreview } from "@/components/modules/settings/modules/general/companyAppearance/components/AppearancePreview";
 import type { CompanyAppearance } from "@/models/company/CompanyAppearance";
 import type { UpdateCompanyAppearanceRequest } from "@/api/modules/company/modules/appearance/dto";
+import { FieldError } from "@/components/desact/field-error";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   appearance: CompanyAppearance;
@@ -32,6 +38,7 @@ type Props = {
   saveError: string | null;
   imageError: string | null;
   companyName?: string | null;
+  logoUrl?: string | null;
 };
 
 const MAX_HEADLINE = 120;
@@ -50,12 +57,12 @@ const Section: FC<{
 }> = ({ icon, title, description, children }) => (
   <section className="flex flex-col gap-5">
     <div>
-      <h2 className="m-0 flex items-center gap-2 text-sm font-semibold text-foreground">
+      <h2 className="m-0 flex items-center gap-2 text-body font-semibold text-primary">
         {icon}
         {title}
       </h2>
 
-      <p className="m-0 mt-1.5 text-sm text-muted-foreground">{description}</p>
+      <p className="m-0 mt-1.5 text-body text-tertiary">{description}</p>
     </div>
 
     {children}
@@ -77,8 +84,8 @@ const ToggleRow: FC<{
     <Label
       htmlFor={id}
       className={cn(
-        "mb-0 text-sm font-normal leading-5",
-        disabled && "text-muted-foreground",
+        "mb-0 text-body font-normal leading-5",
+        disabled && "text-tertiary",
       )}
     >
       {label}
@@ -97,24 +104,23 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   saveError,
   imageError,
   companyName,
+  logoUrl,
 }) => {
-  const [brandColor, setBrandColor] = useState<string | null>(appearance.brandColor);
-  const [customHex, setCustomHex] = useState(appearance.brandColor ?? "");
+  const [accent, setAccent] = useState<string | null>(appearance.accent);
+  const [customHex, setCustomHex] = useState(isAccentPreset(appearance.accent) ? "" : appearance.accent ?? "");
   const [headline, setHeadline] = useState(appearance.loginHeadline ?? "");
   const [subheadline, setSubheadline] = useState(appearance.loginSubheadline ?? "");
   const [imageOnLogin, setImageOnLogin] = useState(appearance.useImageOnLogin);
   const [imageOnDashboard, setImageOnDashboard] = useState(appearance.useImageOnDashboard);
-  const [sidebarContrast, setSidebarContrast] = useState(appearance.sidebarContrast);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dirty =
-    brandColor !== appearance.brandColor ||
+    accent !== appearance.accent ||
     headline !== (appearance.loginHeadline ?? "") ||
     subheadline !== (appearance.loginSubheadline ?? "") ||
     imageOnLogin !== appearance.useImageOnLogin ||
-    imageOnDashboard !== appearance.useImageOnDashboard ||
-    sidebarContrast !== appearance.sidebarContrast;
+    imageOnDashboard !== appearance.useImageOnDashboard;
 
   /**
    * The version the form was opened with, sent back on save so a colleague's save in between is
@@ -129,51 +135,56 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
     if (!dirty) setVersion(appearance.version);
   }, [dirty, appearance.version]);
 
-  const customHexInvalid = customHex.trim().length > 0 && !isValidHex(normaliseHex(customHex));
+  const customHexInvalid = customHex.trim().length > 0 && !isHexColor(normaliseHex(customHex));
 
-  const generatedScale = useMemo(
-    () => (brandColor ? buildBrandPalette(brandColor)?.scale ?? null : null),
-    [brandColor],
+  /** A preset is shown selected; a custom colour selects none of them. */
+  const selectedPreset: AccentPreset | null = accent === null ? DEFAULT_ACCENT : isAccentPreset(accent) ? accent : null;
+
+  /**
+   * Whether a custom colour's links had to be darkened to read at 4.5:1 (SPEC § 4.4). The fill stays the
+   * colour as picked; the admin is told, in the package's own words.
+   */
+  const adjusted = useMemo(
+    () => (accent && !isAccentPreset(accent) && isHexColor(accent) ? deriveAccentInputs(accent).adjusted : false),
+    [accent],
   );
 
-  const handlePresetClick = (color: string | null) => {
-    setBrandColor(color);
-    setCustomHex(color ?? "");
+  const handlePresetClick = (preset: AccentPreset) => {
+    setAccent(preset === DEFAULT_ACCENT ? null : preset);
+    setCustomHex("");
   };
 
   const handleCustomHexChange = (value: string) => {
     setCustomHex(value);
 
     if (value.trim().length === 0) {
-      setBrandColor(null);
+      setAccent(null);
       return;
     }
 
     const normalised = normaliseHex(value);
 
-    if (isValidHex(normalised)) {
-      setBrandColor(normalised);
+    if (isHexColor(normalised)) {
+      setAccent(normalised);
     }
   };
 
   const handleCancel = () => {
-    setBrandColor(appearance.brandColor);
-    setCustomHex(appearance.brandColor ?? "");
+    setAccent(appearance.accent);
+    setCustomHex(isAccentPreset(appearance.accent) ? "" : appearance.accent ?? "");
     setHeadline(appearance.loginHeadline ?? "");
     setSubheadline(appearance.loginSubheadline ?? "");
     setImageOnLogin(appearance.useImageOnLogin);
     setImageOnDashboard(appearance.useImageOnDashboard);
-    setSidebarContrast(appearance.sidebarContrast);
   };
 
   const handleSave = async () => {
     const saved = await onSave({
-      brandColor,
+      accent,
       loginHeadline: headline.trim() || null,
       loginSubheadline: subheadline.trim() || null,
       useImageOnLogin: imageOnLogin,
       useImageOnDashboard: imageOnDashboard,
-      sidebarContrast,
       version,
     });
     // Following the read is not enough here: a headline saved as "  Welcome " comes back trimmed, the
@@ -201,8 +212,8 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
         <SettingsPageHeader title="Appearance" backHref="/settings"/>
 
         <PageDescription>
-          How the workspace looks to everyone in your company: one seed colour generates the whole
-          palette the app paints with, and one uploaded image can back the login screen, the
+          How the workspace looks to everyone in your company: your color marks what to act on —
+          buttons, links, the active page — and one uploaded image can back the sign-in screen, the
           dashboard, or both. The preview on the right shows the result before anyone else sees it.
         </PageDescription>
       </div>
@@ -213,96 +224,68 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
            takes it back off the layout. */}
         <div className="-mx-1 flex min-h-0 flex-col gap-7 overflow-y-auto px-1">
           <Section
-            icon={<Palette className="h-4 w-4"/>}
-            title="Brand colour"
-            description="Surfaces stay near-grey and only actions carry the full colour, whichever you pick."
+            icon={<Icon icon={PaintBoardIcon} size="sm" />}
+            title="Workspace color"
+            description="Your color marks the one thing to act on. Text, surfaces and status colors stay noddo's, whichever you pick."
           >
-            <div className="flex flex-wrap gap-3">
-              {BRAND_PRESETS.map((preset) => {
-                const selected = brandColor === preset.color;
+            {/* The ten presets of SPEC § 4.3. Each swatch is the preset's own colour — the only place a component
+                paints a HEX, because the swatch is the value being chosen. */}
+            <div className="flex flex-wrap gap-3" role="group" aria-label="Workspace colors">
+              {(Object.keys(ACCENT_PRESETS) as AccentPreset[]).map((preset) => {
+                const selected = selectedPreset === preset;
 
                 return (
                   <button
-                    key={preset.id}
+                    key={preset}
                     type="button"
-                    onClick={() => handlePresetClick(preset.color)}
-                    aria-label={preset.label}
+                    onClick={() => handlePresetClick(preset)}
+                    aria-label={ACCENT_PRESET_LABELS[preset]}
                     aria-pressed={selected}
-                    title={preset.label}
+                    title={ACCENT_PRESET_LABELS[preset]}
                     disabled={saving}
                     className={cn(
-                      "grid h-9 w-9 place-items-center rounded-full transition-shadow",
-                      selected
-                        ? "ring-2 ring-brown-600 ring-offset-2"
-                        : "ring-1 ring-black/10 hover:ring-black/25",
+                      "grid size-9 place-items-center rounded-pill transition-shadow duration-(--duration-hover)",
+                      selected ? "ring-2 ring-primary ring-offset-2" : "ring-1 ring-divider hover:ring-strong",
                     )}
-                    style={{ backgroundColor: preset.color ?? DEFAULT_BRAND_SWATCH }}
+                    style={{ backgroundColor: ACCENT_PRESETS[preset] }}
                   >
-                    {selected ? <Check className="h-4 w-4 text-white"/> : null}
+                    {selected ? <Icon icon={Tick02Icon} size="sm" className="text-on-inverse" /> : null}
                   </button>
                 );
               })}
             </div>
 
             <div className="flex items-center gap-3">
-              <Label htmlFor="brand-hex" className="mb-0 shrink-0 leading-5">Custom Colour</Label>
+              <Label htmlFor="accent-hex" className="mb-0 shrink-0">Custom color</Label>
 
               <Input
-                id="brand-hex"
+                id="accent-hex"
                 value={customHex}
-                placeholder={DEFAULT_BRAND_SWATCH}
+                placeholder="#2f63c4"
                 onChange={(e) => handleCustomHexChange(e.currentTarget.value)}
                 aria-invalid={customHexInvalid}
                 disabled={saving}
-                className="w-28 shrink-0"
+                className="w-28 shrink-0 font-mono"
               />
 
-              {generatedScale ? (
-                <div className="flex h-9 flex-1 overflow-hidden rounded-lg">
-                  {BRAND_STEPS.map((step) => (
-                    <span
-                      key={step}
-                      className="h-full flex-1"
-                      style={{ backgroundColor: generatedScale[step] }}
-                      title={`${step} — ${generatedScale[step]}`}
-                    />
-                  ))}
-                </div>
+              {accent && !isAccentPreset(accent) && isHexColor(accent) ? (
+                <span aria-hidden className="size-9 shrink-0 rounded-control ring-1 ring-divider" style={{ backgroundColor: accent }} />
               ) : (
-                <p className="m-0 text-xs text-muted-foreground">
-                  Leave empty to keep the default palette.
-                </p>
+                <p className="m-0 text-hint text-tertiary">Leave empty to use a preset.</p>
               )}
             </div>
 
             {customHexInvalid ? (
-              <p className="m-0 -mt-2 text-xs text-destructive">
-                Enter a hex colour such as #2563eb.
-              </p>
+              <FieldError>Enter a color as #rrggbb, like #2f63c4.</FieldError>
             ) : null}
 
-            {/* Buttons wear the picked colour exactly, unless white text on it would not read or it
-                would break hover and pressed shades — then they get the nearest safe shade, and the
-                swatch above no longer matches them, which is worth saying. */}
-            {brandColor && generatedScale && !isBrandColorUsedAsIs(brandColor) ? (
-              <p className="m-0 -mt-2 text-xs text-muted-foreground">
-                Buttons use an adjusted shade of this colour so their text stays readable.
-              </p>
-            ) : null}
-
-            <ToggleRow
-              id="sidebar-contrast"
-              label="Make sidebar contrast"
-              checked={sidebarContrast}
-              disabled={saving}
-              onChange={setSidebarContrast}
-            />
+            {adjusted ? <p className="m-0 -mt-2 text-hint text-tertiary">We adjusted your color for readability.</p> : null}
           </Section>
 
-          <div className="border-t border-brown-200"/>
+          <div className="border-t border-divider"/>
 
           <Section
-            icon={<ImageIcon className="h-4 w-4"/>}
+            icon={<Icon icon={Image01Icon} size="sm" />}
             title="Sign in experience"
             description="The artwork and the words people meet before they are signed in."
           >
@@ -313,10 +296,10 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImage || removingImage}
                 className={cn(
-                  "relative h-32 w-64 shrink-0 overflow-hidden rounded-xl transition-colors",
+                  "relative h-32 w-64 shrink-0 overflow-hidden rounded-popover transition-colors",
                   hasImage
                     ? "hover:opacity-90"
-                    : "grid place-items-center border border-dashed border-brown-200 bg-brown-50/60 px-3 text-center text-xs text-muted-foreground hover:bg-brown-50",
+                    : "grid place-items-center border border-dashed border-divider bg-subtle/60 px-3 text-center text-hint text-tertiary hover:bg-subtle",
                 )}
               >
                 {appearance.loginImageUrl ? (
@@ -332,23 +315,23 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                   </>
                 ) : (
                   <span className="flex flex-col items-center gap-1.5">
-                    <ImagePlus className="h-5 w-5 text-brown-400"/>
+                    <Icon icon={ImageAdd01Icon} className="text-tertiary" />
                     Click to choose an image
                   </span>
                 )}
               </button>
 
               <div className="flex min-w-0 flex-col items-start gap-2.5">
-                <p className="m-0 text-sm font-medium">Login screen</p>
+                <p className="m-0 text-body font-medium">Login screen</p>
 
-                <p className="m-0 text-sm text-muted-foreground">
+                <p className="m-0 text-body text-tertiary">
                   PNG, JPEG or WebP, up to 10 MB. The image is stored as soon as it is uploaded.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingImage || removingImage}
@@ -359,7 +342,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                   {hasImage ? (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => onRemoveLoginImage()}
                       disabled={uploadingImage || removingImage}
@@ -389,7 +372,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
               />
             </div>
 
-            {imageError ? <p className="m-0 text-sm text-destructive">{imageError}</p> : null}
+            {imageError ? <FormError message={imageError} /> : null}
 
             <input
               ref={fileInputRef}
@@ -426,11 +409,11 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
             </div>
           </Section>
 
-          {saveError ? <p className="m-0 text-sm text-destructive">{saveError}</p> : null}
+          {saveError ? <FormError message={saveError} /> : null}
 
           {dirty ? (
             <div className="mt-auto flex items-center justify-end gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={handleCancel} disabled={saving}>
+              <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>
                 Cancel
               </Button>
 
@@ -442,14 +425,14 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
         </div>
 
         <AppearancePreview
-          brandColor={brandColor}
+          accent={accent}
           loginImageUrl={appearance.loginImageUrl}
           headline={headline}
           subheadline={subheadline}
           companyName={companyName}
+          logoUrl={logoUrl}
           imageOnLogin={imageOnLogin}
           imageOnDashboard={imageOnDashboard}
-          sidebarContrast={sidebarContrast}
         />
       </div>
     </div>

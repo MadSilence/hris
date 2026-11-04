@@ -5,12 +5,12 @@ import { NONE_LABEL } from "@/models/select";
 /** What a dated assignment touches, as a label names it. */
 const ASSIGNABLE_LABELS: Record<string, string> = {
   OFFICE: "Office",
-  LEGAL_ENTITY: "Legal Entity",
+  LEGAL_ENTITY: "Legal entity",
   DEPARTMENT: "Department",
   TEAM: "Team",
   JOB: "Job",
   ROLE: "Role",
-  PUBLIC_HOLIDAY_CALENDAR: "Holiday Calendar",
+  PUBLIC_HOLIDAY_CALENDAR: "Holiday calendar",
 };
 
 /** The value a change carries, as a reader reads it: a status by its word, a reference by its name. */
@@ -20,17 +20,17 @@ export const valueLabelOf = (change: ScheduledChange): string => {
   return change.value.name ?? "";
 };
 
-/** One line naming the change — a label, so Title Case (`NAMING.md`). */
+/** One line naming the change — a label, so sentence case (`NAMING.md`). */
 export const labelOfChange = (change: ScheduledChange): string => {
   switch (change.kind) {
     case "TERMINATION":
-      return "Employment Ends";
+      return "Employment ends";
     case "EMPLOYMENT_START":
-      return "Employment Starts";
+      return "Employment starts";
     case "INVITATION":
-      return "Invitation Goes Out";
+      return "Invitation goes out";
     case "TASK_DUE":
-      return change.subject ? `Task Due: ${change.subject}` : "Task Due";
+      return change.subject ? `Task due: ${change.subject}` : "Task due";
     case "ASSIGNMENT_START":
     case "ASSIGNMENT_END": {
       const type = change.labelKey.split(".")[1] ?? "";
@@ -46,7 +46,7 @@ export const labelOfChange = (change: ScheduledChange): string => {
 
 /** What Change Date edits, by kind — the day a person reads it as, not the engine's effective day. */
 export const rescheduleDateLabelOf = (change: ScheduledChange): string =>
-  change.kind === "TERMINATION" ? "Last Working Day" : "Send On";
+  change.kind === "TERMINATION" ? "Last working day" : "Send on";
 
 /** The fields that hold several values; every other field holds one. */
 const MULTI_VALUED = new Set(["sys:role", "sys:team", "sys:calendar"]);

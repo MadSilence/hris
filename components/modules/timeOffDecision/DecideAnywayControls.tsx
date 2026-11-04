@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { useDecideAnyway } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideAnyway";
@@ -13,7 +13,7 @@ type Props = {
   requesterName?: string | null;
   /** Called after the decision went through, for the caller to refresh what it shows. */
   onDecided?: () => void | Promise<unknown>;
-  size?: "sm" | "default";
+  size?: "sm" | "md";
 };
 
 /**
@@ -62,29 +62,29 @@ export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName
 
   return (
     <>
-      <Button type="button" variant="outline" size={size} onClick={() => setOpen("APPROVE")} disabled={decide.isPending}>
-        Approve Anyway
+      <Button type="button" variant="secondary" size={size} onClick={() => setOpen("APPROVE")} disabled={decide.isPending}>
+        Approve anyway
       </Button>
       <Button
         type="button"
         variant="ghost"
         size={size}
-        className="text-muted-foreground hover:text-destructive"
+        className="text-tertiary hover:text-danger-text"
         onClick={() => setOpen("REJECT")}
         disabled={decide.isPending}
       >
-        Reject Anyway
+        Reject anyway
       </Button>
 
       <ConfirmActionModal
         isOpen={open !== null}
-        title={open === "REJECT" ? "Reject Anyway?" : "Approve Anyway?"}
+        title={open === "REJECT" ? "Reject anyway?" : "Approve anyway?"}
         description={
           open === "REJECT"
             ? `The request of ${who} is rejected now, over the approvers who have not answered yet. It is recorded as an override.`
             : `The request of ${who} is approved now, whatever approval steps are still open. It is recorded as an override.`
         }
-        confirmLabel={open === "REJECT" ? "Reject Anyway" : "Approve Anyway"}
+        confirmLabel={open === "REJECT" ? "Reject anyway" : "Approve anyway"}
         destructive={open === "REJECT"}
         isLoading={decide.isPending}
         errorMessage={error}

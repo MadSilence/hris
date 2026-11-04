@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { applyBrandTheme } from "@/lib/theme/applyBrandTheme";
+import { applyAccent } from "@/lib/theme/accent";
 import { companyAppearanceService } from "@/components/modules/settings/modules/general/companyAppearance/services/companyAppearanceService";
 import {
   deleteLoginImageAction,
@@ -22,9 +22,9 @@ export const useCompanyAppearance = () =>
 /**
  * Shared success path for every appearance mutation.
  *
- * The palette is rendered by a server component, so the saved colour has to be pushed into the live
- * document somehow. `applyBrandTheme` rewrites that one `<style>` element directly instead of
- * `router.refresh()`, which would refetch the entire route tree to change ten CSS variables.
+ * The accent is put on `<html>` by the root layout on the server, so the saved colour has to be pushed into
+ * the live document somehow. `applyAccent` sets it on that element directly instead of `router.refresh()`,
+ * which would refetch the entire route tree to change one attribute.
  */
 const useAppearanceMutationSuccess = () => {
   const queryClient = useQueryClient();
@@ -36,7 +36,7 @@ const useAppearanceMutationSuccess = () => {
     }
 
     queryClient.setQueryData(COMPANY_APPEARANCE_QUERY_KEY, data);
-    applyBrandTheme(data.brandColor, data.sidebarContrast);
+    applyAccent(document.documentElement, data.accent);
   };
 };
 

@@ -1,23 +1,24 @@
 "use client";
 
 import { FC, useEffect, useState, ReactNode } from "react";
-import { Bookmark, Check, ChevronLeft, ChevronRight, Filter as FilterIcon, Rows3, Search, Trash2 } from "lucide-react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Bookmark01Icon, Delete02Icon, FilterHorizontalIcon, LayoutTable01Icon, Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Badge } from "@/components/desact/badge";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/public/desact/src/components/ui/popover";
+} from "@/components/desact/popover";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import type { CalendarView } from "@/models/calendarView";
@@ -110,7 +111,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
     <div className="flex flex-none flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative w-[240px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
+          <Icon icon={Search01Icon} size="sm" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tertiary" />
           <Input
             value={query}
             onChange={(e) => onQueryChange(e.currentTarget.value)}
@@ -126,11 +127,11 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             reading it. */}
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
-              <FilterIcon className="h-4 w-4" />
+            <Button type="button" variant="secondary" className="gap-1.5">
+              <Icon icon={FilterHorizontalIcon} size="sm" />
               Filter
               {filters.length > 0 ? (
-                <Badge variant="secondary" className="ml-1 px-1.5">
+                <Badge variant="neutral" className="ml-1 px-1.5">
                   {filters.length}
                 </Badge>
               ) : null}
@@ -154,8 +155,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
         {groupingOptions.length > 0 || grouping !== null ? (
           <Popover open={groupOpen} onOpenChange={setGroupOpen}>
             <PopoverTrigger asChild>
-              <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
-                <Rows3 className="h-4 w-4" />
+              <Button type="button" variant="secondary" className="gap-1.5">
+                <Icon icon={LayoutTable01Icon} size="sm" />
                 {grouping ? `Group: ${groupingLabel(grouping)}` : "Group"}
               </Button>
             </PopoverTrigger>
@@ -169,12 +170,12 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                     setGroupOpen(false);
                   }}
                   className={[
-                    "flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm hover:bg-brown-50",
-                    option === grouping ? "font-medium text-brown-800" : "text-brown-600",
+                    "flex w-full items-center justify-between rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
+                    option === grouping ? "font-medium text-primary" : "text-secondary",
                   ].join(" ")}
                 >
                   {option ? groupingLabel(option) : "None"}
-                  {option === grouping ? <Check className="h-3.5 w-3.5" /> : null}
+                  {option === grouping ? <Icon icon={Tick02Icon} size="sm" /> : null}
                 </button>
               ))}
             </PopoverContent>
@@ -183,8 +184,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
 
         <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
-              <Bookmark className="h-4 w-4" />
+            <Button type="button" variant="secondary" className="gap-1.5">
+              <Icon icon={Bookmark01Icon} size="sm" />
               {activeView ? activeView.name : "Views"}
             </Button>
           </PopoverTrigger>
@@ -196,8 +197,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 setViewsOpen(false);
               }}
               className={[
-                "flex w-full items-center rounded px-2 py-1.5 text-left text-sm hover:bg-brown-50",
-                activeViewId === null ? "font-medium text-brown-800" : "text-brown-600",
+                "flex w-full items-center rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
+                activeViewId === null ? "font-medium text-primary" : "text-secondary",
               ].join(" ")}
             >
               All people
@@ -212,8 +213,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                     setViewsOpen(false);
                   }}
                   className={[
-                    "flex-1 truncate rounded px-2 py-1.5 text-left text-sm hover:bg-brown-50",
-                    v.id === activeViewId ? "font-medium text-brown-800" : "text-brown-600",
+                    "flex-1 truncate rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
+                    v.id === activeViewId ? "font-medium text-primary" : "text-secondary",
                   ].join(" ")}
                 >
                   {v.name}
@@ -226,12 +227,12 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                   disabled={viewsBusy}
                   onClick={() => onDeleteView(v)}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Icon icon={Delete02Icon} size="sm" />
                 </Button>
               </div>
             ))}
 
-            <div className="mt-1 border-t border-brown-100 pt-1">
+            <div className="mt-1 border-t border-divider pt-1">
               <Button type="button"
                 variant="ghost"
                 size="sm"
@@ -251,15 +252,15 @@ export const CompanyCalendarToolbar: FC<Props> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center rounded-md border border-brown-200 p-0.5">
+        <div className="flex items-center rounded-control border border-divider p-0.5">
           {(["week", "month"] as Density[]).map((d) => (
             <button
               key={d}
               type="button"
               onClick={() => onDensityChange(d)}
               className={[
-                "rounded px-3 py-1 text-sm capitalize transition-colors",
-                density === d ? "bg-brown-100 font-medium text-brown-800" : "text-brown-500 hover:text-brown-700",
+                "rounded-control px-3 py-1 text-body capitalize transition-colors",
+                density === d ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
               ].join(" ")}
             >
               {d}
@@ -268,18 +269,18 @@ export const CompanyCalendarToolbar: FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-1">
-          <Button type="button" variant="outline" size="icon" className="h-9 w-9" aria-label="Previous" onClick={onPrev}>
-            <ChevronLeft className="h-4 w-4" />
+          <Button type="button" variant="secondary" size="icon" aria-label="Previous" onClick={onPrev}>
+            <Icon icon={ArrowLeft01Icon} size="sm" />
           </Button>
-          <Button type="button" variant="outline" size="sm" className="h-9" onClick={onToday}>
+          <Button type="button" variant="secondary" onClick={onToday}>
             Today
           </Button>
-          <Button type="button" variant="outline" size="icon" className="h-9 w-9" aria-label="Next" onClick={onNext}>
-            <ChevronRight className="h-4 w-4" />
+          <Button type="button" variant="secondary" size="icon" aria-label="Next" onClick={onNext}>
+            <Icon icon={ArrowRight01Icon} size="sm" />
           </Button>
         </div>
 
-        <div className="flex h-9 min-w-[190px] items-center justify-center rounded-md border border-brown-200 px-3 text-sm font-medium text-foreground">
+        <div className="flex h-9 min-w-[190px] items-center justify-center rounded-control border border-divider px-3 text-body font-medium text-primary">
           {periodLabel}
         </div>
         {actions}
@@ -301,7 +302,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
               }
             }}
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-hint text-tertiary">
             A view remembers the filters, the grouping and the week/month choice — not the period.
             Opened in June it shows June.
           </p>

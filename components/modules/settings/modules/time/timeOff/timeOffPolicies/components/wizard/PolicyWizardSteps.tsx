@@ -1,19 +1,20 @@
 "use client";
 
 import { FC, ReactNode } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Switch } from "@/components/desact/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import {
   TimeOffPolicyCarryoverExpiryType,
   TimeOffPolicyCarryoverExpiryUnit,
@@ -53,6 +54,8 @@ import {
 } from "./policyWizardTypes";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
+import { InlineAlert } from "@/components/desact/alert";
 
 export type WizardSetter = <K extends keyof PolicyWizardValues>(
   key: K,
@@ -64,7 +67,7 @@ type StepProps = { values: PolicyWizardValues; set: WizardSetter };
 // ── Shared helpers ───────────────────────────────────────────────────
 
 function StepIntro({ children }: { children: ReactNode }) {
-  return <p className="text-sm leading-relaxed text-muted-foreground">{children}</p>;
+  return <p className="text-body leading-relaxed text-tertiary">{children}</p>;
 }
 
 function Field({
@@ -84,8 +87,8 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {error && <FormError message={error} />}
+      {hint && <p className="text-hint text-tertiary">{hint}</p>}
     </div>
   );
 }
@@ -107,10 +110,10 @@ function ToggleField({
   return (
     <div className="py-1">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-body font-medium text-primary">{label}</p>
         <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
       </div>
-      {hint && <p className="mt-0.5 max-w-[85%] text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="mt-0.5 max-w-[85%] text-hint text-tertiary">{hint}</p>}
     </div>
   );
 }
@@ -118,7 +121,7 @@ function ToggleField({
 /** Indented group for fields revealed by a toggle — shows they belong together. */
 function Reveal({ children }: { children: ReactNode }) {
   return (
-    <div className="ml-0.5 space-y-4 border-l-2 border-brown-100 pl-4">{children}</div>
+    <div className="ml-0.5 space-y-4 border-l-2 border-divider pl-4">{children}</div>
   );
 }
 
@@ -329,7 +332,7 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
     )}
 
     {values.renewalType === TimeOffPolicyRenewalType.Anniversary && (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         The balance renews on each employee&apos;s work anniversary (their hire date).
       </p>
     )}
@@ -417,7 +420,7 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
       </Reveal>
     )}
 
-    <div className="border-t border-brown-100 pt-5">
+    <div className="border-t border-divider pt-5">
       <ToggleField
         label="Allow negative balance"
         hint="Let employees request more than their current balance."
@@ -563,7 +566,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
       </Field>
     </div>
 
-    <div className="border-t border-brown-100 pt-5">
+    <div className="border-t border-divider pt-5">
       <ToggleField
         label="Allow requests in the past"
         checked={values.reqAllowPastRequests}
@@ -696,8 +699,8 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
   };
 
   return (
-    <div className="space-y-2 border-t border-brown-100 pt-4">
-      <Label htmlFor="appr-fallback-role">Fallback Approver</Label>
+    <div className="space-y-2 border-t border-divider pt-4">
+      <Label htmlFor="appr-fallback-role">Fallback approver</Label>
       <SearchableSelect
         id="appr-fallback-role"
         options={[
@@ -705,21 +708,21 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
             ? [{ value: FALLBACK_DEFAULT, label: "HR Admin, or System Owner without it (the default)" }]
             : []),
           ...[...known, ...live].map((r) => ({ value: r.id, label: r.name })),
-          { value: FALLBACK_NONE, label: "No Fallback" },
+          { value: FALLBACK_NONE, label: "No fallback" },
         ]}
         value={current || null}
         onChange={(v) => v && choose(v)}
         clearable={false}
       />
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         A role whose holders decide any step nobody can: an approver who has left, a manager step for
         somebody with no manager, an approver away with nobody standing in.
       </p>
       {none && (
-        <p role="alert" className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
+        <InlineAlert tone="pending">
           Without a fallback, a request whose approver has left or is away with nobody standing in waits
           for an administrator to approve it anyway.
-        </p>
+        </InlineAlert>
       )}
     </div>
   );
@@ -756,14 +759,14 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
       {values.apprRequiresApproval && (
         <Reveal>
           <div className="space-y-2">
-            <Label>Approval Chain</Label>
+            <Label>Approval chain</Label>
             <div className="space-y-2">
               {values.apprApprovers.map((approver, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 rounded-lg border border-brown-200 px-3 py-2"
+                  className="flex items-center gap-3 rounded-control border border-divider px-3 py-2"
                 >
-                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brown-100 text-xs font-semibold text-brown-700">
+                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-pill bg-mist text-hint font-semibold text-secondary">
                     {index + 1}
                   </span>
 
@@ -797,7 +800,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                         />
                       </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-hint text-tertiary">
                         The employee&apos;s manager
                       </span>
                     )}
@@ -807,19 +810,19 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                     type="button"
                     onClick={() => removeApprover(index)}
                     disabled={values.apprApprovers.length <= 1}
-                    className="flex-none text-brown-400 hover:text-danger-600 disabled:opacity-40"
+                    className="flex-none text-tertiary hover:text-danger-text disabled:opacity-40"
                     aria-label="Remove step"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Icon icon={Delete02Icon} size="sm" />
                   </button>
                 </div>
               ))}
             </div>
-            <Button type="button" variant="outline" size="sm" className="mt-1 gap-1.5" onClick={addApprover}>
-              <Plus className="h-4 w-4" />
+            <Button type="button" variant="secondary" size="sm" className="mt-1 gap-1.5" onClick={addApprover}>
+              <Icon icon={Add01Icon} size="sm" />
               Add approval step
             </Button>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Manager steps route to each employee&apos;s manager; specific-user steps always go to the
               chosen person.
             </p>
@@ -827,8 +830,8 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
 
           {/* One question with three answers, replacing two switches that described the same
               mechanism twice and could not express "any two of these three" between them. */}
-          <div className="space-y-2 border-t border-brown-100 pt-4">
-            <Label>How Do They Decide?</Label>
+          <div className="space-y-2 border-t border-divider pt-4">
+            <Label>How do they decide?</Label>
             <Select
               value={values.apprMode}
               onValueChange={(v) => set("apprMode", v as PolicyWizardValues["apprMode"])}
@@ -845,7 +848,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
 
             {values.apprMode === "N_OF_M" && (
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-sm text-muted-foreground">Any</span>
+                <span className="text-body text-tertiary">Any</span>
                 {/* The sentence "Any [N] of the 3 listed" reads well on screen and reaches a screen
                     reader as an unnamed spinbutton, so the field carries its own name. */}
                 <Input
@@ -857,7 +860,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                   className="h-9 w-20"
                   aria-label={`How many approvals are required, out of the ${values.apprApprovers.length} listed`}
                 />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-body text-tertiary">
                   of the {values.apprApprovers.length} listed
                 </span>
               </div>
@@ -888,7 +891,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
       <Reveal>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label>Waiting Period</Label>
+            <Label>Waiting period</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -915,7 +918,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
           </div>
 
           <div className="space-y-1">
-            <Label>Counted From</Label>
+            <Label>Counted from</Label>
             <Select
               value={values.eligReference}
               onValueChange={(v) => set("eligReference", v as TimeOffEligibilityReference)}
@@ -932,7 +935,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
             </Select>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-hint text-tertiary">
           Probation-end isn&apos;t enforced yet (no probation date on employees) — requests against it
           are allowed until that exists.
         </p>
@@ -951,9 +954,9 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
     return (
       <div className="space-y-6">
         <StepIntro>How entitlement is earned over time.</StepIntro>
-        <p className="rounded-lg border border-brown-200 bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
+        <p className="rounded-card border border-divider bg-subtle px-4 py-3 text-body text-tertiary">
           This policy grants its entitlement upfront, so there&apos;s nothing to accrue. Switch the
-          granting mode to <span className="font-medium text-foreground">Accrued</span> in the
+          granting mode to <span className="font-medium text-primary">Accrued</span> in the
           Entitlement step to configure how it&apos;s earned.
         </p>
       </div>
@@ -967,8 +970,8 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
     return (
       <div className="space-y-6">
         <StepIntro>How entitlement is earned over time.</StepIntro>
-        <p className="rounded-lg border border-brown-200 bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
-          This policy has an <span className="font-medium text-foreground">unlimited</span> quota,
+        <p className="rounded-card border border-divider bg-subtle px-4 py-3 text-body text-tertiary">
+          This policy has an <span className="font-medium text-primary">unlimited</span> quota,
           so there is no yearly total to earn a share of and nothing here would be read. Set a yearly
           quota in the Entitlement step to accrue against it.
         </p>
@@ -1074,16 +1077,16 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
 
       <div className="space-y-2">
         {values.tenureRules.length === 0 && (
-          <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
+          <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
             No tenure rewards. Everyone gets the base entitlement.
           </p>
         )}
 
         {values.tenureRules.map((row, index) => (
           <div key={index} className="flex items-end gap-2.5">
-            <span className="pb-2 text-sm text-muted-foreground">After</span>
+            <span className="pb-2 text-body text-tertiary">After</span>
             <div className="space-y-1">
-              <Label className="text-xs">Years of Service</Label>
+              <Label className="text-hint">Years of service</Label>
               <Input
                 type="number"
                 min={0}
@@ -1093,9 +1096,9 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
                 onChange={(e) => patchRow(index, { yearsOfService: e.target.value })}
               />
             </div>
-            <span className="pb-2 text-sm text-muted-foreground">grant</span>
+            <span className="pb-2 text-body text-tertiary">grant</span>
             <div className="space-y-1">
-              <Label className="text-xs">Bonus Days</Label>
+              <Label className="text-hint">Bonus days</Label>
               <Input
                 type="number"
                 min={0}
@@ -1109,17 +1112,17 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
             <button
               type="button"
               onClick={() => removeRow(index)}
-              className="pb-2 flex-none text-brown-400 hover:text-danger-600"
+              className="pb-2 flex-none text-tertiary hover:text-danger-text"
               aria-label="Remove tenure tier"
             >
-              <Trash2 className="h-4 w-4" />
+              <Icon icon={Delete02Icon} size="sm" />
             </button>
           </div>
         ))}
       </div>
 
-      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={addRow}>
-        <Plus className="h-4 w-4" />
+      <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={addRow}>
+        <Icon icon={Add01Icon} size="sm" />
         Add tenure tier
       </Button>
     </div>
@@ -1171,7 +1174,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
       <div className="space-y-2">
         {values.restrictions.length === 0 && (
-          <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
+          <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
             No restrictions. Requests are allowed all year, however many people are away.
           </p>
         )}
@@ -1179,24 +1182,24 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
         {values.restrictions.map((row, index) => {
           const blackout = row.type === TimeOffRestrictionType.Blackout;
           return (
-            <div key={index} className="space-y-2 rounded-lg border border-brown-200 px-3 py-3">
+            <div key={index} className="space-y-2 rounded-control border border-divider px-3 py-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-brown-900">
+                <span className="text-body font-medium text-primary">
                   {RESTRICTION_LABEL[row.type]}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeRow(index)}
-                  className="flex-none text-brown-400 hover:text-danger-600"
+                  className="flex-none text-tertiary hover:text-danger-text"
                   aria-label="Remove restriction"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Icon icon={Delete02Icon} size="sm" />
                 </button>
               </div>
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="flex-1 space-y-1">
-                  <Label className="text-xs">Name</Label>
+                  <Label className="text-hint">Name</Label>
                   <Input
                     placeholder={blackout ? "Year-end freeze" : "Keep the desk covered"}
                     value={row.name}
@@ -1207,7 +1210,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                 {blackout ? (
                   <>
                     <div className="space-y-1">
-                      <Label className="text-xs">From</Label>
+                      <Label className="text-hint">From</Label>
                       <DatePicker
                         value={row.startDate}
                         ariaLabel="Blackout start"
@@ -1216,7 +1219,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">To</Label>
+                      <Label className="text-hint">To</Label>
                       <DatePicker
                         value={row.endDate}
                         ariaLabel="Blackout end"
@@ -1227,7 +1230,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                   </>
                 ) : (
                   <div className="space-y-1">
-                    <Label className="text-xs">Max People Away</Label>
+                    <Label className="text-hint">Max people away</Label>
                     <Input
                       type="number"
                       min={0}
@@ -1242,7 +1245,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Applies To</Label>
+                  <Label className="text-hint">Applies to</Label>
                   <Select
                     value={row.scope}
                     onValueChange={(v) => patchRow(index, { scope: v as TimeOffRestrictionScope })}
@@ -1263,7 +1266,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">When It Applies</Label>
+                  <Label className="text-hint">When it applies</Label>
                   <Select
                     value={row.behavior}
                     onValueChange={(v) =>
@@ -1286,7 +1289,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
                 {blackout && (
                   <div className="space-y-1">
-                    <Label className="text-xs">Repeats</Label>
+                    <Label className="text-hint">Repeats</Label>
                     <Select
                       value={row.recurrence}
                       onValueChange={(v) =>
@@ -1316,22 +1319,22 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           className="gap-1.5"
           onClick={() => addRow(TimeOffRestrictionType.Blackout)}
         >
-          <Plus className="h-4 w-4" />
+          <Icon icon={Add01Icon} size="sm" />
           Add a blackout
         </Button>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           className="gap-1.5"
           onClick={() => addRow(TimeOffRestrictionType.CoverageCap)}
         >
-          <Plus className="h-4 w-4" />
+          <Icon icon={Add01Icon} size="sm" />
           Add a coverage cap
         </Button>
       </div>
@@ -1391,8 +1394,8 @@ export const EditingStep: FC<StepProps> = ({ values, set }) => (
 function Summary({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium text-foreground">{value}</span>
+      <span className="text-body text-tertiary">{label}</span>
+      <span className="text-body font-medium text-primary">{value}</span>
     </div>
   );
 }
@@ -1435,17 +1438,17 @@ export const ReviewStep: FC<{
           : "Review the policy before creating it. You can go back to any step to adjust."}
       </StepIntro>
 
-      <div className="rounded-lg border border-brown-200 p-4">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+      <div className="rounded-card border border-divider p-4">
+        <p className="mb-1 text-hint font-semibold text-tertiary">
           {leaveTypeName ? `Leave type: ${leaveTypeName}` : "New policy"}
         </p>
-        <p className="text-lg font-semibold text-foreground">{values.name || "Untitled policy"}</p>
+        <p className="text-section-title text-primary">{values.name || "Untitled policy"}</p>
         {values.description && (
-          <p className="mt-1 text-sm text-muted-foreground">{values.description}</p>
+          <p className="mt-1 text-body text-tertiary">{values.description}</p>
         )}
       </div>
 
-      <div className="divide-y divide-brown-100 rounded-lg border border-brown-200 px-4 py-1.5">
+      <div className="divide-y divide-divider rounded-card border border-divider px-4 py-1.5">
         <Summary label="Unit" value={values.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
         <Summary label="Pay type" value={values.paid ? "Paid" : "Unpaid"} />
         <Summary label="Quota" value={quota} />
@@ -1462,7 +1465,7 @@ export const ReviewStep: FC<{
         <Summary label="Approval" value={approvalSummary(values)} />
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         {mode === "edit"
           ? "Every section above is saved together — if anything is refused, nothing changes."
           : "Anything here can be changed later, including the steps you skipped."}

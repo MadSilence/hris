@@ -1,7 +1,7 @@
 "use client";
 
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
+import { Button } from "@/components/desact/button";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableSkeleton from "./AssignedUsersTableSkeleton";
 import RemoveAssignedUserDialog from "./modals/RemoveAssignedUserDialog";
@@ -45,14 +45,14 @@ export default function AssignedUsersTableContent({
 
   return (
     <div className="max-h-[calc(100svh-328px)] overflow-y-auto">
-      <table className="w-full caption-bottom text-sm">
-        <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+      <table className="w-full caption-bottom text-body">
+        <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
           <TableRow>
             <TableHead className="pl-4">User</TableHead>
             <TableHead>Position</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Added On</TableHead>
-            <TableHead>Added By</TableHead>
+            <TableHead>Added on</TableHead>
+            <TableHead>Added by</TableHead>
             <TableHead className="w-10"/>
           </TableRow>
         </TableHeader>
@@ -67,7 +67,7 @@ export default function AssignedUsersTableContent({
                 `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Unnamed";
 
               return (
-                <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">
+                <TableRow key={u.id} className="group border-divider hover:bg-subtle [&_td]:py-2">
                   <TableCell className="py-2 pl-4">
                     <UserChip
                       id={u.id}
@@ -79,15 +79,15 @@ export default function AssignedUsersTableContent({
                     />
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground">{u.jobName}</TableCell>
+                  <TableCell className="text-tertiary">{u.jobName}</TableCell>
 
                   <TableCell>
                     <UserStatusBadge status={u.status}/>
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground">{formatDate(u.assignedAt)}</TableCell>
+                  <TableCell className="text-tertiary">{formatDate(u.assignedAt)}</TableCell>
 
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-tertiary">
                     {u.assignedByName && u.assignedByName !== "System" ? (
                       <UserChip name={u.assignedByName}/>
                     ) : (
@@ -102,7 +102,7 @@ export default function AssignedUsersTableContent({
                         <Button type="button"
                           variant="ghost"
                           size="icon"
-                          className="text-danger-600"
+                          className="text-danger-text"
                           aria-label="Remove user"
                           disabled
                           title="The default role can't be removed"
@@ -118,7 +118,7 @@ export default function AssignedUsersTableContent({
                             <Button type="button"
                               variant="ghost"
                               size="icon"
-                              className="text-danger-600 hover:text-danger-700"
+                              className="text-danger-text hover:text-status-declined-text"
                               aria-label="Remove user"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -137,7 +137,7 @@ export default function AssignedUsersTableContent({
           {!isLoading && !hasData && (
             <TableRow>
               <TableCell colSpan={6}>
-                <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
+                <div className="py-6 text-center text-body text-tertiary">{emptyText}</div>
               </TableCell>
             </TableRow>
           )}
@@ -146,7 +146,7 @@ export default function AssignedUsersTableContent({
 
       {hasMore && (
         <div className="flex justify-center py-3">
-          <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+          <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? "Loading…" : "Load more"}
           </Button>
         </div>

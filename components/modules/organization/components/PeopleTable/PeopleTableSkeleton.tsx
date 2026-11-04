@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 
 type SkeletonColumn = { id: string; label?: string };
 
@@ -31,21 +31,21 @@ const PLACEHOLDER_COLUMNS: SkeletonColumn[] = [
 const BAR_WIDTHS = ["w-32", "w-24", "w-36", "w-20", "w-28"];
 
 const Bar: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={`h-3.5 animate-pulse rounded bg-brown-100 ${className ?? ""}`} />
+  <div className={`h-3.5 shimmer rounded-tag bg-mist ${className ?? ""}`} />
 );
 
 export const PeopleTableSkeleton: React.FC<Props> = ({ columns, rows = 10 }) => {
   const cols = columns && columns.length > 0 ? columns : PLACEHOLDER_COLUMNS;
 
   return (
-    <table className="w-full caption-bottom table-fixed text-sm" aria-hidden>
-      <TableHeader className="sticky top-0 z-10 bg-background [&_tr]:border-brown-200">
+    <table className="w-full caption-bottom table-fixed text-body" aria-hidden>
+      <TableHeader className="sticky top-0 z-10 bg-page [&_tr]:border-divider">
         <TableRow>
           <TableHead className="w-12" />
           {cols.map((column, i) => (
             <TableHead key={column.id} className="truncate">
               {column.label ? (
-                <span className="truncate text-foreground">{column.label}</span>
+                <span className="truncate text-primary">{column.label}</span>
               ) : (
                 <Bar className={BAR_WIDTHS[i % BAR_WIDTHS.length]} />
               )}
@@ -56,9 +56,9 @@ export const PeopleTableSkeleton: React.FC<Props> = ({ columns, rows = 10 }) => 
 
       <TableBody>
         {Array.from({ length: rows }).map((_, rowIndex) => (
-          <TableRow key={`skeleton-${rowIndex}`} className="border-brown-200 [&_td]:py-2">
+          <TableRow key={`skeleton-${rowIndex}`} className="border-divider [&_td]:py-2">
             <TableCell className="w-12">
-              <div className="h-4 w-4 animate-pulse rounded-[4px] bg-brown-100" />
+              <div className="h-4 w-4 shimmer rounded-glyph bg-mist" />
             </TableCell>
 
             {cols.map((column, colIndex) => (
@@ -66,7 +66,7 @@ export const PeopleTableSkeleton: React.FC<Props> = ({ columns, rows = 10 }) => 
                 {colIndex === 0 ? (
                   // The first column is the person: avatar and name, same shape as the real chip.
                   <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 shrink-0 animate-pulse rounded-full bg-brown-100" />
+                    <div className="h-6 w-6 shrink-0 shimmer rounded-pill bg-mist" />
                     <Bar className="w-28" />
                   </div>
                 ) : (

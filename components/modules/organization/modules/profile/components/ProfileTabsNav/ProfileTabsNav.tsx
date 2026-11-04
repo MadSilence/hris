@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   useProfileEditGuard,
@@ -27,10 +27,10 @@ type TabDef = {
  * backend gives the processes right all of them and the person what they answered themself.
  */
 const TABS: TabDef[] = [
-  { id: "public-profile", label: "Public Profile" },
-  { id: "personal", label: "Personal Info" },
+  { id: "public-profile", label: "Public profile" },
+  { id: "personal", label: "Personal info" },
   { id: "documents", label: "Documents", resource: "PEOPLE.DOCUMENTS" },
-  { id: "time-off", label: "Time Off", resource: "PEOPLE.TIME_OFF" },
+  { id: "time-off", label: "Time off", resource: "PEOPLE.TIME_OFF" },
   { id: "salary", label: "Salary" },
   { id: "attendance", label: "Attendance", resource: "PEOPLE.ATTENDANCE" },
   { id: "forms", label: "Forms" },
@@ -82,7 +82,7 @@ export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
         <TabsList
           // Scrolls rather than squeezes: at a narrow pane equal columns cut every label short
           // ("Public Prof|Personal Inf"). Each tab keeps its full label and the row grows to fit.
-          className="flex w-full justify-start overflow-x-auto bg-brown-50"
+          className="flex w-full justify-start overflow-x-auto bg-subtle"
         >
           {visibleTabs.map((tab) => {
             const href = `${base}/${tab.id}`;

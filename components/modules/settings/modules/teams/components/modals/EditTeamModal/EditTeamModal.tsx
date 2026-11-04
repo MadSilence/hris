@@ -5,10 +5,10 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { useUpdateTeam } from "@/components/modules/settings/modules/teams/hooks/useUpdateTeam/useUpdateTeam";
 import {
   UserPickerField,
@@ -17,6 +17,8 @@ import {
 import type { TeamTreeNode } from "@/models/teams";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 
 const ROOT_VALUE = "none";
 
@@ -106,7 +108,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
               onBlur={formik.handleBlur}
             />
             {formik.touched.name && formik.errors.name && (
-              <p role="alert" className="text-xs text-danger-500">{formik.errors.name}</p>
+              <FieldError>{formik.errors.name}</FieldError>
             )}
           </div>
 
@@ -131,7 +133,7 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-team-parent">Parent Team</Label>
+            <Label htmlFor="edit-team-parent">Parent team</Label>
             <SearchableSelect
               id="edit-team-parent"
               options={[{ value: ROOT_VALUE, label: "None" }, ...activeOptions.map((n) => ({ value: n.id, label: n.name }))]}
@@ -142,19 +144,17 @@ export function EditTeamModal({ open, onClose, team, parentOptions }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Team Lead</Label>
+            <Label>Team lead</Label>
             <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
 
           {updateTeam.isError && (
-            <p className="text-sm text-danger-500">
-              {(updateTeam.error as Error)?.message ?? "An error occurred."}
-            </p>
+            <FormError message={(updateTeam.error as Error)?.message ?? "An error occurred."} />
           )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>

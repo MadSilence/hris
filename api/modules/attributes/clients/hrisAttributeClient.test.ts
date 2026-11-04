@@ -29,11 +29,11 @@ describe("HrisAttributeClient — the version the edit form sends back", () => {
   it("setAttributeOptions sends the options with the attribute's version", async () => {
     jest.mocked(hrisApiClient.put).mockResolvedValue(undefined);
 
-    await hrisAttributeClient.setAttributeOptions("a1", [{ id: "o1", value: "S", color: "#AABBCC" }], 6);
+    await hrisAttributeClient.setAttributeOptions("a1", [{ id: "o1", value: "S", color: "ocean" }], 6);
 
     expect(jest.mocked(hrisApiClient.put).mock.calls[0]).toStrictEqual([
       "/attributes/a1/options",
-      { options: [{ id: "o1", value: "S", color: "#AABBCC" }], version: 6 },
+      { options: [{ id: "o1", value: "S", color: "ocean" }], version: 6 },
     ]);
   });
 });

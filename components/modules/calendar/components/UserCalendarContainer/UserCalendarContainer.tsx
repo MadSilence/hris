@@ -65,6 +65,7 @@ export const UserCalendarContainer: FC<Props> = ({
 
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
     const policyName = new Map((policies ?? []).map((p) => [p.id, p.name]));
+    const policyColor = new Map((policies ?? []).map((p) => [p.id, p.leaveTypeColor ?? null]));
     return (requests ?? [])
       .filter((r) => timeOffStatuses.includes(r.status))
       .map((r) => ({
@@ -73,6 +74,7 @@ export const UserCalendarContainer: FC<Props> = ({
         startDate: r.startDate,
         endDate: r.endDate,
         tone: r.status === TimeOffRequestStatus.Approved ? "approved" : "pending",
+        color: policyColor.get(r.policyId) ?? null,
       }));
   }, [requests, policies, timeOffStatuses]);
 

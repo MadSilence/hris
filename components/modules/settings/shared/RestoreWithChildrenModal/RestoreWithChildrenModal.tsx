@@ -9,9 +9,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
 import { formatDisplayDate } from "@/lib/date";
 import {
   initialSelection,
@@ -21,7 +21,7 @@ import {
 
 type Props = {
   isOpen: boolean;
-  /** "Unarchive Department" — Title Case, it is a label. */
+  /** "Unarchive department" — sentence case, like every label (SPEC § 1). */
   title: string;
   /** The name of the record being restored. */
   name: string;
@@ -89,14 +89,14 @@ export function RestoreWithChildrenModal({
           </DialogDescription>
         </DialogHeader>
 
-        <ul className="max-h-80 space-y-1 overflow-y-auto rounded-lg border border-brown-200 p-2">
+        <ul className="max-h-80 space-y-1 overflow-y-auto rounded-control border border-divider p-2">
           {items.map((item) => {
             const checkboxId = `restore-child-${item.id}`;
             return (
               <li key={item.id} className={indentFor(item.depth)}>
                 <label
                   htmlFor={checkboxId}
-                  className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-brown-50"
+                  className="flex cursor-pointer items-start gap-3 rounded-control px-2 py-1.5 text-body hover:bg-subtle"
                 >
                   <Checkbox
                     id={checkboxId}
@@ -108,10 +108,10 @@ export function RestoreWithChildrenModal({
                     }
                   />
                   <span className="min-w-0">
-                    <span className="font-medium text-brown-900">{item.name}</span>
-                    {item.detail && <span className="ml-1.5 text-muted-foreground">{item.detail}</span>}
+                    <span className="font-medium text-primary">{item.name}</span>
+                    {item.detail && <span className="ml-1.5 text-tertiary">{item.detail}</span>}
                     {!item.archivedWithParent && (
-                      <span className="block text-xs text-muted-foreground">
+                      <span className="block text-hint text-tertiary">
                         {item.archivedAt
                           ? `Archived separately on ${formatDisplayDate(item.archivedAt, { style: "medium" })}`
                           : "Archived separately"}
@@ -124,14 +124,14 @@ export function RestoreWithChildrenModal({
           })}
         </ul>
 
-        <p className="m-0 text-sm text-muted-foreground">
+        <p className="m-0 text-body text-tertiary">
           People the archive removed are not put back; assign them again where they belong.
         </p>
 
         <FormError message={errorMessage} />
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancelAction} disabled={isLoading}>
+          <Button type="button" variant="secondary" onClick={onCancelAction} disabled={isLoading}>
             Cancel
           </Button>
           <Button type="button" onClick={submit} disabled={isLoading}>

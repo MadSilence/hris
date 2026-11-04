@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -77,8 +77,8 @@ export const AttendanceRateField: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="attendance-rate-heading">
       <div>
-        <h2 id="attendance-rate-heading" className="text-lg font-semibold">Hourly Rate</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 id="attendance-rate-heading" className="text-section-title">Hourly rate</h2>
+        <p className="text-body text-tertiary">
           The money field Attendance prices logged time from. A person&apos;s rate is copied into each entry when
           the time is logged, so a later change never re-prices a day already logged. Amounts are shown only to
           people who may see this field.
@@ -95,9 +95,9 @@ export const AttendanceRateField: React.FC = () => {
             event.preventDefault();
             void save();
           }}
-        >
+ >
           <div className="w-64 space-y-1">
-            <Label htmlFor="attendance-rate-field">Hourly Rate Field</Label>
+            <Label htmlFor="attendance-rate-field">Hourly rate field</Label>
             <SearchableSelect
               id="attendance-rate-field"
               options={[
@@ -115,7 +115,7 @@ export const AttendanceRateField: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <Button type="submit" disabled={!dirty || update.isPending} className="bg-brown-600 text-white hover:bg-brown-700">
+            <Button type="submit" disabled={!dirty || update.isPending} >
               Save
             </Button>
           )}

@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -28,34 +29,34 @@ export function CalibrationSessionsTab({ cycleId, canAdd }: { cycleId: string; c
   const [adding, setAdding] = useState(false);
 
   if (sessions.error) return <ErrorState error={sessions.error} />;
-  if (!sessions.data) return <Skeleton className="h-32 w-full rounded-xl" aria-busy="true" />;
+  if (!sessions.data) return <Skeleton className="h-32 w-full rounded-popover" aria-busy="true" />;
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
-        <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+        <p className="min-w-0 flex-1 text-body text-tertiary">
           Line up final ratings across managers, each change with a reason, and set each person&apos;s potential for the
           9-box. Only people whose review is not shared yet can change.
         </p>
         {canAdd && (
           <Button type="button" onClick={() => setAdding(true)}>
-            <Plus className="mr-1 h-4 w-4" />Add Session
+            <Icon icon={Add01Icon} size="sm" />Add session
           </Button>
         )}
       </div>
       {sessions.data.length === 0 ? (
-        <p className="rounded-xl border border-brown-100 bg-white px-5 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-card border border-divider bg-card px-5 py-6 text-center text-body text-tertiary">
           No calibration sessions yet.
         </p>
       ) : (
         <ul className="space-y-2">
           {sessions.data.map((s) => (
-            <li key={s.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-brown-100 bg-white px-5 py-3">
-              <Link href={`/reviews/calibrations/${s.id}`} className="font-medium text-brown-900 underline-offset-4 hover:underline">
+            <li key={s.id} className="flex flex-wrap items-center gap-3 rounded-card border border-divider bg-card px-5 py-3">
+              <Link href={`/reviews/calibrations/${s.id}`} className="font-medium text-accent-text underline-offset-4 hover:underline">
                 {s.name}
               </Link>
               <CalibrationStatusBadge status={s.status} />
-              <span className="text-xs text-muted-foreground">
+              <span className="text-hint text-tertiary">
                 {s.people} {s.people === 1 ? "person" : "people"} · {s.calibrated} calibrated
                 {s.createdByName ? ` · added by ${s.createdByName}` : ""} · {formatDisplayDate(s.createdAt, { style: "medium" })}
               </span>
@@ -108,7 +109,7 @@ function AddSessionDialog({ cycleId, open, onCloseAction }: { cycleId: string; o
       <DialogContent className="sm:max-w-2xl">
         <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
           <DialogHeader>
-            <DialogTitle>Add Session</DialogTitle>
+            <DialogTitle>Add session</DialogTitle>
             <DialogDescription>
               With no conditions, everybody in the cycle is in the session. Who is in it is read now, once.
             </DialogDescription>
@@ -123,7 +124,7 @@ function AddSessionDialog({ cycleId, open, onCloseAction }: { cycleId: string; o
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy || !name.trim()}>{busy ? "Adding…" : "Add"}</Button>
           </DialogFooter>
         </form>

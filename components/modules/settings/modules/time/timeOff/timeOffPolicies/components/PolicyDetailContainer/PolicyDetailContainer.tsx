@@ -1,19 +1,20 @@
 "use client";
 
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { showError } from "@/lib/errors/errorToast";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, Pencil, Play, Trash2, Users } from "lucide-react";
+import { Archive02Icon, Delete02Icon, PencilEdit02Icon, PlayIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/public/desact/src/components/ui/tabs";
+} from "@/components/desact/tabs";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 
 import { PolicyOverview } from "./PolicyOverview";
@@ -185,7 +186,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     return (
       <div className="px-8 pt-2">
         <SettingsPageHeader title="Policy" backHref={listHref} />
-        <Skeleton className="mt-6 h-40 w-full rounded-lg" />
+        <Skeleton className="mt-6 h-40 w-full rounded-control" />
       </div>
     );
   }
@@ -203,47 +204,47 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
           <div className="flex items-center gap-2.5">
             <StatusBadge status={status}/>
             {leaveType && (
-              <span className="text-sm text-muted-foreground">in {leaveType.name}</span>
+              <span className="text-body text-tertiary">in {leaveType.name}</span>
             )}
           </div>
 
           <div className="flex items-center gap-2">
             {isDraft && (
               <Button type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="gap-1.5"
                 onClick={() => activateMutation.mutate({ id: policy.id })}
               >
-                <Play className="h-4 w-4" />
+                <Icon icon={PlayIcon} size="sm" />
                 Activate
               </Button>
             )}
             {policy.status === TimeOffPolicyStatus.Active && (
               <Button type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="gap-1.5"
                 onClick={() => archiveMutation.mutateAsync({ id: policy.id }).catch(showError)}
               >
-                <Archive className="h-4 w-4" />
+                <Icon icon={Archive02Icon} size="sm" />
                 Archive
               </Button>
             )}
             {isDraft && (
               <Button type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="gap-1.5 text-danger-600 hover:text-danger-700"
+                className="gap-1.5 text-danger-text hover:text-status-declined-text"
                 onClick={() => setIsDeleteOpen(true)}
               >
-                <Trash2 className="h-4 w-4" />
+                <Icon icon={Delete02Icon} size="sm" />
                 Delete
               </Button>
             )}
             {!isArchived && (
               <Button type="button" size="sm" className="gap-1.5" onClick={() => setIsEditOpen(true)}>
-                <Pencil className="h-4 w-4" />
+                <Icon icon={PencilEdit02Icon} size="sm" />
                 Edit
               </Button>
             )}
@@ -255,7 +256,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
         <TabsList className="flex-none">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assignments" className="gap-1.5">
-            <Users className="h-4 w-4" />
+            <Icon icon={UserGroupIcon} size="sm" />
             Assignments
           </TabsTrigger>
         </TabsList>

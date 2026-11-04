@@ -6,8 +6,8 @@ import { DeleteProfileModal } from "./modals/DeleteProfileModal";
 import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Badge } from "@/components/desact/badge";
 import {
   canBeInvited,
   formatUserStatus,
@@ -15,26 +15,11 @@ import {
 } from "@/models/user/status";
 import { formatDisplayDate } from "@/lib/date";
 import { useRouter } from "next/navigation";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Button } from "@/components/desact/button";
+import { Separator } from "@/components/desact/separator";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
-import {
-  CalendarX,
-  DoorOpen,
-  DoorClosed,
-  Download,
-  KeyRound,
-  Lock,
-  LockOpen,
-  LogOut,
-  Mail,
-  Pencil,
-  RefreshCw,
-  ShieldOff,
-  Rocket,
-  Trash2,
-  UserMinus,
-} from "lucide-react";
+import { CalendarRemove01Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { AccountStatusBadge, StatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
@@ -197,12 +182,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
       <div className="px-8">
         <header className="py-6">
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
-            <div className="w-28 h-28 rounded-full bg-muted animate-pulse"/>
+            <div className="w-28 h-28 rounded-pill bg-mist shimmer"/>
             <div className="space-y-3">
-              <div className="h-7 w-56 bg-muted rounded-md animate-pulse"/>
-              <div className="h-4 w-72 bg-muted rounded-md animate-pulse"/>
+              <div className="h-7 w-56 bg-mist rounded-tag shimmer"/>
+              <div className="h-4 w-72 bg-mist rounded-tag shimmer"/>
             </div>
-            <div className="h-9 w-28 bg-muted rounded-md animate-pulse"/>
+            <div className="h-9 w-28 bg-mist rounded-control shimmer"/>
           </div>
         </header>
       </div>
@@ -276,7 +261,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
           <div className="relative">
             <Avatar key={avatarUrl ?? "avatar-fallback"} className="size-28">
               {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName}/> : null}
-              <AvatarFallback className="text-2xl">
+              <AvatarFallback className="text-page-title">
                 {initialsOf(fullName)}
               </AvatarFallback>
             </Avatar>
@@ -288,22 +273,22 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             >
               <Button type="button"
                 size="icon"
-                variant="outline"
-                className="absolute right-1 bottom-1 rounded-full"
+                variant="secondary"
+                className="absolute right-1 bottom-1 rounded-pill"
                 aria-label="Edit photo"
                 disabled={isAvatarLoading}
                 onClick={() => setIsAvatarModalOpen(true)}
               >
-                <Pencil className="w-4 h-4"/>
+                <Icon icon={PencilEdit02Icon} size="sm" />
               </Button>
             </PermissionGate>
           </div>
 
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold leading-tight text-foreground">{fullName}</h1>
+            <h1 className="text-page-title leading-tight text-primary">{fullName}</h1>
 
             {user.email && (
-              <p className="mt-1 truncate text-sm text-muted-foreground">{user.email}</p>
+              <p className="mt-1 truncate text-body text-tertiary">{user.email}</p>
             )}
 
             <div className="flex items-center gap-3 flex-wrap mt-3">
@@ -350,14 +335,14 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             {mayImpersonate && (
               <PermissionGate resource="SETTINGS.IMPERSONATION" action="MANAGE">
                 <Button type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   aria-label="Login as user"
                   title="Login as user"
                   disabled={startImpersonation.isPending}
                   onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
                 >
-                  <RefreshCw className="w-4 h-4"/>
+                  <Icon icon={Refresh01Icon} size="sm" />
                 </Button>
               </PermissionGate>
             )}
@@ -365,12 +350,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             {mayInvite && (
               <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
                 <Button type="button"
-                  variant={isInvited ? "outline" : "default"}
+                  variant={isInvited ? "secondary" : "primary"}
                   className="gap-1.5"
                   onClick={() => setIsInviteOpen(true)}
                 >
-                  <Mail className="h-4 w-4"/>
-                  {isInvited ? "Resend Invitation" : "Invite"}
+                  <Icon icon={Mail01Icon} size="sm" />
+                  {isInvited ? "Resend invitation" : "Invite"}
                 </Button>
               </PermissionGate>
             )}
@@ -380,16 +365,16 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               only BLOCK — a security officer, say — still gets the menu, with only its access items.
             */}
             {hasPersonActions && (
-              <RowActionsMenu label="Person Actions">
+              <RowActionsMenu label="Person actions">
                 {/* In the kebab like every other action on a profile — the own one is no exception. */}
                 {mayChangeOwnPassword && (
-                  <RowAction icon={<KeyRound className="h-4 w-4"/>} onClick={() => setIsChangePasswordOpen(true)}>
-                    Change Password
+                  <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setIsChangePasswordOpen(true)}>
+                    Change password
                   </RowAction>
                 )}
                 {canManageProfiles && user.inviteScheduledFor && (
                   <RowAction
-                    icon={<CalendarX className="h-4 w-4"/>}
+                    icon={<Icon icon={CalendarRemove01Icon} size="sm" />}
                     onClick={async () => {
                       const res = await cancelInviteAction({ userId: user.id });
                       if (res.status === ActionStatus.SUCCESS) {
@@ -399,76 +384,76 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                       }
                     }}
                   >
-                    Cancel Scheduled Invitation
+                    Cancel scheduled invitation
                   </RowAction>
                 )}
                 {canManageProfiles && mayPreboard && (
-                  <RowAction icon={<DoorOpen className="h-4 w-4"/>} onClick={() => setStartType("PREBOARDING")}>
-                    Start Preboarding
+                  <RowAction icon={<Icon icon={DoorIcon} size="sm" />} onClick={() => setStartType("PREBOARDING")}>
+                    Start preboarding
                   </RowAction>
                 )}
                 {canManageProfiles && mayOnboard && (
-                  <RowAction icon={<Rocket className="h-4 w-4"/>} onClick={() => setStartType("ONBOARDING")}>
-                    Start Onboarding
+                  <RowAction icon={<Icon icon={Rocket01Icon} size="sm" />} onClick={() => setStartType("ONBOARDING")}>
+                    Start onboarding
                   </RowAction>
                 )}
                 {canManageProfiles && mayOffboard && (
-                  <RowAction icon={<DoorClosed className="h-4 w-4"/>} onClick={() => setStartType("OFFBOARDING")}>
-                    Start Offboarding
+                  <RowAction icon={<Icon icon={DoorLockIcon} size="sm" />} onClick={() => setStartType("OFFBOARDING")}>
+                    Start offboarding
                   </RowAction>
                 )}
                 {maySendReset && (
-                  <RowAction icon={<KeyRound className="h-4 w-4"/>} onClick={() => setAccountAccess("RESET")}>
-                    {isLocked ? "Send Password Reset to Unlock" : "Send Password Reset"}
+                  <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setAccountAccess("RESET")}>
+                    {isLocked ? "Send password reset to unlock" : "Send password reset"}
                   </RowAction>
                 )}
                 {mayExportPersonalData && (
                   <RowAction
-                    icon={<Download className="h-4 w-4"/>}
+                    icon={<Icon icon={Download01Icon} size="sm" />}
                     onClick={() => void exportPersonalData(user.id).catch((error: unknown) => showError(error))}
                   >
-                    Export Personal Data
+                    Export personal data
                   </RowAction>
                 )}
                 {mayEndSessions && (
-                  <RowAction icon={<ShieldOff className="h-4 w-4"/>} onClick={() => setAccountAccess("RESET_MFA")}>
-                    Reset Two-Step Sign-In
+                  <RowAction icon={<Icon icon={ShieldOffIcon} size="sm" />} onClick={() => setAccountAccess("RESET_MFA")}>
+                    Reset two-step sign-in
                   </RowAction>
                 )}
                 {mayEndSessions && (
-                  <RowAction icon={<LogOut className="h-4 w-4"/>} onClick={() => setAccountAccess("END_SESSIONS")}>
-                    End All Sessions
+                  <RowAction icon={<Icon icon={Logout01Icon} size="sm" />} onClick={() => setAccountAccess("END_SESSIONS")}>
+                    End all sessions
                   </RowAction>
                 )}
                 {mayBlock && (
-                  <RowAction icon={<Lock className="h-4 w-4"/>} onClick={() => setAccountAccess("BLOCK")}>
-                    Block Account
+                  <RowAction icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setAccountAccess("BLOCK")}>
+                    Block account
                   </RowAction>
                 )}
                 {mayUnblock && (
-                  <RowAction icon={<LockOpen className="h-4 w-4"/>} onClick={() => setAccountAccess("UNBLOCK")}>
-                    Unblock Account
+                  <RowAction icon={<Icon icon={SquareUnlock02Icon} size="sm" />} onClick={() => setAccountAccess("UNBLOCK")}>
+                    Unblock account
                   </RowAction>
                 )}
                 {mayTerminate && (
                   <RowAction
-                    icon={<UserMinus className="h-4 w-4"/>}
+                    icon={<Icon icon={UserRemove01Icon} size="sm" />}
                     onClick={() => setIsTerminateOpen(true)}
                     disabled={isTerminated || isTerminationPending}
                   >
                     {isTerminated
-                      ? "Already Terminated"
+                      ? "Already terminated"
                       : isTerminationPending
                         ? `Leaving ${formatDisplayDate(String(user.terminationDate))}`
-                        : "Terminate Employment"}
+                        : "Terminate employment"}
                   </RowAction>
                 )}
                 {canManageProfiles && !isOwnProfile && (
                   <RowActionDestructive
-                    icon={<Trash2 className="h-4 w-4"/>}
+                    icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => setIsDeleteOpen(true)}
                   >
-                    Delete Profile
+                    Delete profile
                   </RowActionDestructive>
                 )}
               </RowActionsMenu>
@@ -636,7 +621,7 @@ function LifecycleNote({ user }: { user: User }) {
   // The dates are written in the reader's locale, which the server does not know: it renders "Dec 21,
   // 2026", the browser "21 Dec 2026", and React threw a hydration error over it (walk of 2026-10-26).
   return (
-    <p className="mt-2 text-sm text-muted-foreground" suppressHydrationWarning>
+    <p className="mt-2 text-body text-tertiary" suppressHydrationWarning>
       {parts.join(" · ")}
     </p>
   );

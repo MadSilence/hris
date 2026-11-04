@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Building2, Shield, User, Users, X } from "lucide-react";
+import { Building03Icon, Cancel01Icon, Shield01Icon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +12,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -38,6 +39,7 @@ import {
   usePeopleViewShares,
   useSharePreview,
 } from "@/components/modules/organization/components/PeopleViews/hooks/usePeopleViews";
+import { NodRing } from "@/components/desact/nod";
 
 /** A grantee picked in the dialog and not shared yet. */
 type PendingGrantee = ShareGrantee & { name: string };
@@ -50,17 +52,17 @@ const GRANTEE_TYPES: { value: ShareGranteeType; label: string }[] = [
 ];
 
 const PERMISSIONS: { value: SharePermission; label: string }[] = [
-  { value: "VIEW", label: "Can View" },
-  { value: "EDIT", label: "Can Edit" },
+  { value: "VIEW", label: "Can view" },
+  { value: "EDIT", label: "Can edit" },
 ];
 
 const REFERENCE_SOURCE = { TEAM: "teams", DEPARTMENT: "departments", ROLE: "roles" } as const;
 
 const GRANTEE_ICON: Record<ShareGranteeType, React.ReactNode> = {
-  PERSON: <User className="h-4 w-4 text-muted-foreground" />,
-  TEAM: <Users className="h-4 w-4 text-muted-foreground" />,
-  DEPARTMENT: <Building2 className="h-4 w-4 text-muted-foreground" />,
-  ROLE: <Shield className="h-4 w-4 text-muted-foreground" />,
+  PERSON: <Icon icon={UserIcon} size="sm" className="text-tertiary" />,
+  TEAM: <Icon icon={UserGroupIcon} size="sm" className="text-tertiary" />,
+  DEPARTMENT: <Icon icon={Building03Icon} size="sm" className="text-tertiary" />,
+  ROLE: <Icon icon={Shield01Icon} size="sm" className="text-tertiary" />,
 };
 
 const TYPE_LABEL: Record<ShareGranteeType, string> = {
@@ -166,7 +168,7 @@ export function ShareViewDialog({
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Select value={type} onValueChange={(v) => setType(v as ShareGranteeType)}>
-                <SelectTrigger className="h-9 w-36" aria-label="Share With">
+                <SelectTrigger className="h-9 w-36" aria-label="Share with">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -201,11 +203,11 @@ export function ShareViewDialog({
             </div>
 
             {pending.length ? (
-              <ul className="flex flex-col gap-1" aria-label="To Share">
+              <ul className="flex flex-col gap-1" aria-label="To share">
                 {pending.map((p) => (
                   <li key={`${p.granteeType}:${p.granteeId}`} className="flex items-center gap-2 py-1">
                     {GRANTEE_ICON[p.granteeType]}
-                    <span className="min-w-0 flex-1 truncate text-sm">{p.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-body">{p.name}</span>
                     <PermissionSelect
                       value={p.permission}
                       label={`${p.name} Permission`}
@@ -215,12 +217,11 @@ export function ShareViewDialog({
                     />
                     <Button type="button"
                       variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      aria-label={`Do Not Share With ${p.name}`}
+                      size="icon-sm"
+                      aria-label={`Do not share with ${p.name}`}
                       onClick={() => setPending((prev) => prev.filter((q) => q !== p))}
                     >
-                      <X className="h-4 w-4" />
+                      <Icon icon={Cancel01Icon} size="sm" />
                     </Button>
                   </li>
                 ))}
@@ -228,7 +229,7 @@ export function ShareViewDialog({
             ) : null}
 
             {pending.length ? (
-              <div className="rounded-md bg-brown-50 px-3 py-2 text-xs text-muted-foreground" aria-live="polite">
+              <div className="rounded-tag bg-subtle px-3 py-2 text-hint text-tertiary" aria-live="polite">
                 {previewLoading && !preview ? (
                   <span>Checking who will see what…</span>
                 ) : sentences.length ? (
@@ -250,20 +251,20 @@ export function ShareViewDialog({
             <FormError message={mutations.share.error?.message} />
 
             <section className="flex flex-col gap-1">
-              <h3 className="text-xs font-medium text-muted-foreground">Shared With</h3>
+              <h3 className="text-hint font-medium text-tertiary">Shared with</h3>
               {sharesLoading ? (
-                <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+                <div className="flex justify-center py-1"><NodRing size="sm" /></div>
               ) : shares.length === 0 ? (
-                <p className="py-1 text-sm text-muted-foreground">Not shared with anyone yet.</p>
+                <p className="py-1 text-body text-tertiary">Not shared with anyone yet.</p>
               ) : (
-                <ul className="flex flex-col gap-1" aria-label="Shared With">
+                <ul className="flex flex-col gap-1" aria-label="Shared with">
                   {shares.map((s) => {
                     const name = s.granteeName ?? `Removed ${TYPE_LABEL[s.granteeType]}`;
                     return (
                       <li key={s.id} className="flex items-center gap-2 py-1">
                         {GRANTEE_ICON[s.granteeType]}
                         <span
-                          className={`min-w-0 flex-1 truncate text-sm ${s.granteeName ? "" : "text-muted-foreground"}`}
+                          className={`min-w-0 flex-1 truncate text-body ${s.granteeName ? "" : "text-tertiary"}`}
                         >
                           {name}
                         </span>
@@ -296,7 +297,7 @@ export function ShareViewDialog({
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove Access"
+        title="Remove access"
         description={`${removing?.granteeName ?? "This grantee"} will no longer see “${view?.name ?? ""}”.`}
         confirmLabel="Remove"
         isLoading={mutations.unshare.isPending}
@@ -328,7 +329,7 @@ function PermissionSelect({
 }) {
   return (
     <Select value={value} onValueChange={(v) => onChange(v as SharePermission)}>
-      <SelectTrigger className="h-8 w-28 text-xs" aria-label={label}>
+      <SelectTrigger className="h-8 w-28 text-hint" aria-label={label}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

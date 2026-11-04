@@ -2,8 +2,8 @@
  * One colour per lane, so whose a task is reads at a glance: the lane's stripe and tint, its avatar, and
  * the accent on each of its blocks. By the lane's place on the canvas — the person the process is about
  * first, the manager second, then each named person — so a colour stays with a lane while the template is
- * edited. Colour here means "whose", nothing else: a categorical palette, from hues no status uses, so it never
- * reads as one (`STATUS_AND_BADGES.md` § 3).
+ * edited. Colour here means "whose", nothing else: the tag palette of the design system (SPEC § 4.7), which no
+ * status and no accent uses, so it never reads as one. Gray is left out: a gray lane would read as inactive.
  */
 export type LaneColor = {
   /** The lane's band behind its tasks. */
@@ -17,12 +17,13 @@ export type LaneColor = {
 };
 
 const PALETTE: LaneColor[] = [
-  { tint: "bg-indigo-50/70", stripe: "bg-indigo-400", avatar: "bg-indigo-100 text-indigo-800", accent: "border-l-indigo-400" },
-  { tint: "bg-fuchsia-50/70", stripe: "bg-fuchsia-400", avatar: "bg-fuchsia-100 text-fuchsia-800", accent: "border-l-fuchsia-400" },
-  { tint: "bg-cyan-50/70", stripe: "bg-cyan-400", avatar: "bg-cyan-100 text-cyan-800", accent: "border-l-cyan-400" },
-  { tint: "bg-violet-50/70", stripe: "bg-violet-400", avatar: "bg-violet-100 text-violet-800", accent: "border-l-violet-400" },
-  { tint: "bg-pink-50/70", stripe: "bg-pink-400", avatar: "bg-pink-100 text-pink-800", accent: "border-l-pink-400" },
-  { tint: "bg-purple-50/70", stripe: "bg-purple-400", avatar: "bg-purple-100 text-purple-800", accent: "border-l-purple-400" },
+  { tint: "bg-tag-ocean-bg/60", stripe: "bg-tag-ocean-bar", avatar: "bg-tag-ocean-bg text-tag-ocean-text", accent: "border-l-tag-ocean-bar" },
+  { tint: "bg-tag-berry-bg/60", stripe: "bg-tag-berry-bar", avatar: "bg-tag-berry-bg text-tag-berry-text", accent: "border-l-tag-berry-bar" },
+  { tint: "bg-tag-teal-bg/60", stripe: "bg-tag-teal-bar", avatar: "bg-tag-teal-bg text-tag-teal-text", accent: "border-l-tag-teal-bar" },
+  { tint: "bg-tag-bronze-bg/60", stripe: "bg-tag-bronze-bar", avatar: "bg-tag-bronze-bg text-tag-bronze-text", accent: "border-l-tag-bronze-bar" },
+  { tint: "bg-tag-plum-bg/60", stripe: "bg-tag-plum-bar", avatar: "bg-tag-plum-bg text-tag-plum-text", accent: "border-l-tag-plum-bar" },
+  { tint: "bg-tag-indigo-bg/60", stripe: "bg-tag-indigo-bar", avatar: "bg-tag-indigo-bg text-tag-indigo-text", accent: "border-l-tag-indigo-bar" },
+  { tint: "bg-tag-cocoa-bg/60", stripe: "bg-tag-cocoa-bar", avatar: "bg-tag-cocoa-bg text-tag-cocoa-text", accent: "border-l-tag-cocoa-bar" },
 ];
 
 export const laneColor = (index: number): LaneColor => PALETTE[((index % PALETTE.length) + PALETTE.length) % PALETTE.length];

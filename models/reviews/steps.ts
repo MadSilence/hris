@@ -17,9 +17,9 @@ export function stepHref(kind: ReviewStepKind, participantId: string): string {
 }
 
 export const REVIEW_STEP_LABELS: Record<ReviewStepKind, string> = {
-  NOMINATE_PEERS: "Nominate Peers",
-  APPROVE_PEERS: "Approve Peers",
-  APPROVE_REVIEW: "Approve Review",
+  NOMINATE_PEERS: "Nominate peers",
+  APPROVE_PEERS: "Approve peers",
+  APPROVE_REVIEW: "Approve review",
 };
 
 /**

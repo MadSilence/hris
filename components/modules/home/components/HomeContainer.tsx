@@ -2,9 +2,10 @@
 
 import React, { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { SlidersHorizontal } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { PreferenceHorizontalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorBoundary } from "@/components/feedback/ErrorBoundary";
 import { useAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -42,16 +43,16 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
   return (
     <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-semibold text-brown-900">
+        <h1 className="text-page-title text-primary">
           {inBrowser ? greetingFor(hour) : "Welcome"}
           {name ? `, ${name}` : ""}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body text-tertiary">
           {inBrowser ? `${weekdayOf(today)}, ${formatDisplayDate(today, { style: "medium" })}` : "\u00a0"}
           {count > 0 && (
             <>
               {" · "}
-              <Link href="/inbox?filter=unread" className="font-medium text-brown-700 hover:underline">
+              <Link href="/inbox?filter=unread" className="font-medium text-accent-text underline-offset-4 hover:underline">
                 Unread: {count}
               </Link>
             </>
@@ -59,8 +60,8 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
         </p>
       </div>
       {onCustomize && (
-        <Button type="button" variant="outline" size="sm" className="gap-1.5 self-start md:self-auto" onClick={onCustomize}>
-          <SlidersHorizontal className="h-4 w-4" />
+        <Button type="button" variant="secondary" size="sm" className="gap-1.5 self-start md:self-auto" onClick={onCustomize}>
+          <Icon icon={PreferenceHorizontalIcon} size="sm" />
           Customize
         </Button>
       )}
@@ -99,7 +100,7 @@ export const HomeContainer: React.FC = () => {
   if (customizing) {
     return (
       <div className="flex max-w-3xl flex-col gap-6">
-        <h1 className="text-3xl font-semibold text-brown-900">Customize Home</h1>
+        <h1 className="text-page-title text-primary">Customize home</h1>
         <CustomizeHome
           available={available}
           stored={stored}
@@ -122,9 +123,9 @@ export const HomeContainer: React.FC = () => {
       <Greeting onCustomize={settings.error ? undefined : () => setCustomizing(true)} />
 
       {shown.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-brown-200 px-4 py-12 text-center">
-          <p className="text-sm text-muted-foreground">Every widget is hidden.</p>
-          <Button type="button" variant="link" onClick={() => setCustomizing(true)}>Customize Home</Button>
+        <div className="rounded-card border border-dashed border-divider px-4 py-12 text-center">
+          <p className="text-body text-tertiary">Every widget is hidden.</p>
+          <Button type="button" variant="link" onClick={() => setCustomizing(true)}>Customize home</Button>
         </div>
       ) : (
         HOME_GROUPS.map((group) => {
@@ -132,7 +133,7 @@ export const HomeContainer: React.FC = () => {
           if (entries.length === 0) return null;
           return (
             <section key={group} className="flex flex-col gap-3" aria-label={HOME_GROUP_LABELS[group]}>
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-brown-400">{HOME_GROUP_LABELS[group]}</h2>
+              <h2 className="text-hint font-semibold text-tertiary">{HOME_GROUP_LABELS[group]}</h2>
               <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {entries.map(({ widget }) => (
                   <ErrorBoundary key={widget.id}>

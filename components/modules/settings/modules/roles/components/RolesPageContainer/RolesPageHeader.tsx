@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Button } from "@/components/desact/button";
+import { Add01Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { AddRoleModal } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modals/AddRoleModal";
 import { ExportRolesModal } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modals/ExportRolesModal";
 import { PermissionGate } from "@/components/auth/PermissionGate";
@@ -36,18 +37,18 @@ export default function RolesPageHeader({
       <div className="flex items-center gap-2">
         <PermissionGate resource="ROLES.ROLE" action="EDIT">
           <Button type="button" onClick={() => setAddOpen(true)} className="gap-1.5">
-            <Plus className="h-4 w-4"/>
-            Add Role
+            <Icon icon={Add01Icon} size="sm" />
+            Add role
           </Button>
         </PermissionGate>
 
         <Button type="button"
           size="icon"
-          variant="outline"
+          variant="secondary"
           onClick={() => setExportOpen(true)}
           aria-label="Export roles"
         >
-          <Download className="h-4 w-4"/>
+          <Icon icon={Download01Icon} size="sm" />
         </Button>
       </div>
 

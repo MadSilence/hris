@@ -1,0 +1,366 @@
+/*
+ * The app's one stylesheet. Everything visual comes from the noddo design system: `noddo/tokens.css` is the
+ * package's file, copied unchanged — edit `noddo/tokens.json` upstream and copy both again, never this one
+ * by hand. The rules live in the package's SPEC.md; `(claude)/development_plan/REDESIGN_PLAN.md` says how
+ * the app was moved onto it.
+ *
+ * Tailwind knows nothing but the system. Its default palette, radii, shadows, type scale and weights are
+ * switched off below, so an old class (`bg-brown-50`, `text-sm`, `rounded-lg`, `font-bold`) produces no CSS
+ * at all — and `test/designSystemGuard.test.ts` fails the build on one rather than letting it vanish quietly.
+ */
+@import "tailwindcss";
+
+/* Unlayered on purpose: it must outrank everything in Tailwind's layers. */
+@import "./noddo/tokens.css";
+
+/*
+ * The package names the families ("Inter"); next/font serves them under generated names
+ * (`styles/fonts/fonts.ts`). Same stacks as tokens.css otherwise.
+ */
+:root {
+  --font-text: var(--font-family-inter), "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-family-inter-tight), "Inter Tight", var(--font-family-inter), system-ui, sans-serif;
+  --font-mono: var(--font-family-jetbrains-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+ * `reference` — the theme names below are the package's own custom properties, so Tailwind must not emit a
+ * second definition of them; `inline` — a utility reads the property directly (`bg-accent` →
+ * `var(--accent)`), so it follows `data-accent` and `data-theme` wherever they are set.
+ */
+@theme inline reference {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-*: initial;
+  --font-*: initial;
+  --font-weight-*: initial;
+  --tracking-*: initial;
+  --animate-*: initial;
+  --ease-*: initial;
+
+  /* Text (SPEC § 4.2) */
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-disabled: var(--text-disabled);
+  --color-on-inverse: var(--text-inverse);
+
+  /* Surfaces */
+  --color-page: var(--surface-page);
+  --color-card: var(--surface-card);
+  --color-overlay: var(--surface-overlay);
+  --color-subtle: var(--surface-subtle);
+  --color-mist: var(--surface-mist);
+  --color-row-hover: var(--surface-row-hover);
+  --color-canvas: var(--surface-canvas);
+  --color-inverse: var(--surface-inverse);
+
+  /* Borders */
+  --color-divider: var(--border-divider);
+  --color-field: var(--border-field);
+  --color-field-hover: var(--border-field-hover);
+  --color-strong: var(--border-strong);
+
+  /* The workspace accent (SPEC § 4.4) */
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-ring: var(--accent-ring);
+  --color-accent-text: var(--accent-text);
+  --color-approve-ring: var(--approve-ring);
+  --color-focus-ring: var(--focus-ring);
+  --color-selection: var(--selection);
+
+  /* Destructive (SPEC § 4.6) */
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+
+  /* Statuses (SPEC § 4.5) — never themed */
+  --color-status-approved-fill: var(--status-approved-fill);
+  --color-status-approved-bg: var(--status-approved-bg);
+  --color-status-approved-text: var(--status-approved-text);
+  --color-status-approved-border: var(--status-approved-border);
+  --color-status-approved-icon: var(--status-approved-icon);
+  --color-status-pending-fill: var(--status-pending-fill);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-text: var(--status-pending-text);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-status-pending-icon: var(--status-pending-icon);
+  --color-status-in-progress-fill: var(--status-in-progress-fill);
+  --color-status-in-progress-bg: var(--status-in-progress-bg);
+  --color-status-in-progress-text: var(--status-in-progress-text);
+  --color-status-in-progress-border: var(--status-in-progress-border);
+  --color-status-in-progress-icon: var(--status-in-progress-icon);
+  --color-status-scheduled-fill: var(--status-scheduled-fill);
+  --color-status-scheduled-bg: var(--status-scheduled-bg);
+  --color-status-scheduled-text: var(--status-scheduled-text);
+  --color-status-scheduled-border: var(--status-scheduled-border);
+  --color-status-scheduled-icon: var(--status-scheduled-icon);
+  --color-status-declined-fill: var(--status-declined-fill);
+  --color-status-declined-bg: var(--status-declined-bg);
+  --color-status-declined-text: var(--status-declined-text);
+  --color-status-declined-border: var(--status-declined-border);
+  --color-status-declined-icon: var(--status-declined-icon);
+  --color-status-info-fill: var(--status-info-fill);
+  --color-status-info-bg: var(--status-info-bg);
+  --color-status-info-text: var(--status-info-text);
+  --color-status-info-border: var(--status-info-border);
+  --color-status-info-icon: var(--status-info-icon);
+  --color-status-draft-fill: var(--status-draft-fill);
+  --color-status-draft-bg: var(--status-draft-bg);
+  --color-status-draft-text: var(--status-draft-text);
+  --color-status-draft-border: var(--status-draft-border);
+  --color-status-draft-icon: var(--status-draft-icon);
+  --color-status-inactive-fill: var(--status-inactive-fill);
+  --color-status-inactive-bg: var(--status-inactive-bg);
+  --color-status-inactive-text: var(--status-inactive-text);
+  --color-status-inactive-border: var(--status-inactive-border);
+  --color-status-inactive-icon: var(--status-inactive-icon);
+  --color-status-archived-fill: var(--status-archived-fill);
+  --color-status-archived-bg: var(--status-archived-bg);
+  --color-status-archived-text: var(--status-archived-text);
+  --color-status-archived-border: var(--status-archived-border);
+  --color-status-archived-icon: var(--status-archived-icon);
+
+  /* Tags — user-chosen colours (SPEC § 4.7) */
+  --color-tag-gray-bg: var(--tag-gray-bg);
+  --color-tag-gray-text: var(--tag-gray-text);
+  --color-tag-gray-bar: var(--tag-gray-bar);
+  --color-tag-berry-bg: var(--tag-berry-bg);
+  --color-tag-berry-text: var(--tag-berry-text);
+  --color-tag-berry-bar: var(--tag-berry-bar);
+  --color-tag-plum-bg: var(--tag-plum-bg);
+  --color-tag-plum-text: var(--tag-plum-text);
+  --color-tag-plum-bar: var(--tag-plum-bar);
+  --color-tag-indigo-bg: var(--tag-indigo-bg);
+  --color-tag-indigo-text: var(--tag-indigo-text);
+  --color-tag-indigo-bar: var(--tag-indigo-bar);
+  --color-tag-ocean-bg: var(--tag-ocean-bg);
+  --color-tag-ocean-text: var(--tag-ocean-text);
+  --color-tag-ocean-bar: var(--tag-ocean-bar);
+  --color-tag-teal-bg: var(--tag-teal-bg);
+  --color-tag-teal-text: var(--tag-teal-text);
+  --color-tag-teal-bar: var(--tag-teal-bar);
+  --color-tag-cocoa-bg: var(--tag-cocoa-bg);
+  --color-tag-cocoa-text: var(--tag-cocoa-text);
+  --color-tag-cocoa-bar: var(--tag-cocoa-bar);
+  --color-tag-bronze-bg: var(--tag-bronze-bg);
+  --color-tag-bronze-text: var(--tag-bronze-text);
+  --color-tag-bronze-bar: var(--tag-bronze-bar);
+
+  /* Charts (SPEC § 15) */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-seq-1: var(--chart-seq-1);
+  --color-chart-seq-2: var(--chart-seq-2);
+  --color-chart-seq-3: var(--chart-seq-3);
+  --color-chart-seq-4: var(--chart-seq-4);
+  --color-chart-seq-5: var(--chart-seq-5);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+  --color-chart-other: var(--chart-other);
+  --color-chart-positive: var(--chart-positive);
+  --color-chart-neutral: var(--chart-neutral);
+  --color-chart-negative: var(--chart-negative);
+
+  /* Everything else with a colour of its own */
+  --color-tooltip: var(--tooltip-bg);
+  --color-on-tooltip: var(--tooltip-text);
+  --color-scrim: var(--scrim);
+  --color-search-highlight: var(--search-highlight);
+  --color-canvas-dot: var(--canvas-dot);
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-icon: var(--sidebar-icon);
+  --color-sidebar-item-hover: var(--sidebar-item-hover);
+  --color-sidebar-item-active: var(--sidebar-item-active-bg);
+  --color-sidebar-item-active-text: var(--sidebar-item-active-text);
+  --color-sidebar-counter: var(--sidebar-counter-bg);
+  --color-sidebar-counter-text: var(--sidebar-counter-text);
+  --color-sidebar-wordmark: var(--sidebar-wordmark);
+  --color-sidebar-focus: var(--sidebar-focus);
+
+  /* Radii (SPEC § 8). `glyph` is § 8's one exception: the 4 px corner of the 16 px row checkbox. */
+  --radius-tag: var(--radius-tag);
+  --radius-control: var(--radius-control);
+  --radius-popover: var(--radius-popover);
+  --radius-card: var(--radius-card);
+  --radius-panel: var(--radius-panel);
+  --radius-pill: var(--radius-pill);
+  --radius-glyph: 4px;
+
+  /* Depth (SPEC § 7): level 0 … level 4 */
+  --shadow-card: var(--shadow-0);
+  --shadow-raised: var(--shadow-1);
+  --shadow-popover: var(--shadow-2);
+  --shadow-dialog: var(--shadow-3);
+  --shadow-drag: var(--shadow-4);
+  /* The field focus halo of SPEC § 13.1: 3 px of the muted accent around the accent border. */
+  --shadow-focus: 0 0 0 3px var(--accent-muted);
+
+  /* Type (SPEC § 5). The sizes repeat tokens.json's `typography`; the families are set in the base layer. */
+  --font-sans: var(--font-text);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+  --font-weight-normal: var(--weight-regular);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+
+  --text-greeting: 32px;
+  --text-greeting--line-height: 40px;
+  --text-greeting--letter-spacing: -0.02em;
+  --text-greeting--font-weight: 600;
+  --text-page-title: 24px;
+  --text-page-title--line-height: 32px;
+  --text-page-title--letter-spacing: -0.02em;
+  --text-page-title--font-weight: 600;
+  --text-section-title: 18px;
+  --text-section-title--line-height: 26px;
+  --text-section-title--letter-spacing: -0.01em;
+  --text-section-title--font-weight: 600;
+  --text-card-title: 15px;
+  --text-card-title--line-height: 22px;
+  --text-card-title--font-weight: 600;
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-label: 13px;
+  --text-label--line-height: 18px;
+  --text-label--font-weight: 500;
+  --text-hint: 12px;
+  --text-hint--line-height: 16px;
+  --text-number: 32px;
+  --text-number--line-height: 40px;
+  --text-number--letter-spacing: -0.02em;
+  --text-number--font-weight: 500;
+  --text-code: 13px;
+  --text-code--line-height: 18px;
+
+  /* Motion (SPEC § 11) */
+  --ease-standard: var(--ease-standard);
+  --ease-exit: var(--ease-exit);
+  --ease-nod: var(--nod-ease);
+  --animate-nod: nod var(--nod-duration-loader) var(--nod-ease) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-text);
+    color: var(--text-primary);
+    background: var(--surface-page);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* Inter Tight from 18 px up, Inter below (SPEC § 5). */
+  .text-greeting,
+  .text-page-title,
+  .text-section-title,
+  .text-number {
+    font-family: var(--font-heading);
+  }
+
+  .text-number,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background-color: var(--selection);
+    color: var(--text-primary);
+  }
+
+  input,
+  textarea,
+  [contenteditable] {
+    caret-color: var(--accent);
+  }
+
+  /* SPEC § 13.1: buttons, links, chips and toggles; fields and rows override it in their own primitive. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* A skeleton's surface: Mist with a soft band of light passing over it. */
+@utility shimmer {
+  background-color: var(--surface-mist);
+  background-image: linear-gradient(90deg, var(--surface-mist) 0%, var(--surface-subtle) 50%, var(--surface-mist) 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* The nod (SPEC § 11): the ring drops 7/40, overshoots 2/40, settles, holds, returns. */
+@keyframes nod {
+  0% { transform: translateY(-17.5%); }
+  22% { transform: translateY(5%); }
+  32% { transform: translateY(0); }
+  84% { transform: translateY(0); }
+  94%, 100% { transform: translateY(-17.5%); }
+}
+
+/* Skeletons shimmer softly; they never pulse (SPEC § 12). */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes accordion-open {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/*
+ * Overlays fade in by `data-state`, which every Radix primitive sets; the timings are SPEC § 11's. Nothing
+ * animates on its way out, deliberately and against the package's "closing takes 70 %": Radix unmounts a
+ * closing overlay only when the exit animation's `animationend` arrives, and when it is missed (a hidden
+ * pane, a background tab) the closed overlay stays mounted at full opacity and takes every click on the
+ * page. It happened twice, on a dialog's Cancel and on deleting a folder.
+ */
+[data-motion="menu"][data-state="open"] { animation: fade-in var(--duration-menu) var(--ease-standard); }
+[data-motion="dialog"][data-state="open"] { animation: fade-in var(--duration-dialog) var(--ease-standard); }
+[data-motion="panel"][data-state="open"] { animation: panel-in var(--duration-dialog) var(--ease-standard); }
+[data-motion="reveal"][data-state="open"] { animation: accordion-open var(--duration-reorder) var(--ease-standard); }

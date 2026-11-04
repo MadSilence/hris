@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dialog";
+import { cn } from "@/lib/cn";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { EDITABLE_TASK_KINDS, TASK_KIND_DESCRIPTIONS, TASK_KIND_LABELS, type TaskKind } from "@/models/lifecycle";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
+import { Icon } from "@/components/desact/icon";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   open: boolean;
@@ -53,7 +55,7 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
       <DialogContent className="sm:max-w-2xl">
         <form onSubmit={submit} className="space-y-5">
           <DialogHeader>
-            <DialogTitle>Add Task</DialogTitle>
+            <DialogTitle>Add task</DialogTitle>
             <DialogDescription>{where}</DialogDescription>
           </DialogHeader>
 
@@ -70,14 +72,14 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
                 setError(null);
               }}
             />
-            {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+            {error && <FormError message={error} />}
           </div>
 
           <fieldset className="space-y-2">
-            <legend className="mb-2 text-sm font-medium">Kind of Task</legend>
+            <legend className="mb-2 text-body font-medium">Kind of task</legend>
             <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Kind">
               {KINDS.map((k) => {
-                const Icon = TASK_KIND_ICON[k];
+                const shownIcon = TASK_KIND_ICON[k];
                 const checked = kind === k;
                 return (
                   <button
@@ -87,19 +89,19 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
                     aria-checked={checked}
                     onClick={() => setKind(k)}
                     className={cn(
-                      "flex items-start gap-3 rounded-lg p-3 text-left transition-colors",
-                      checked ? "bg-brown-100 ring-2 ring-brown-400" : "bg-brown-50/60 hover:bg-brown-100/70",
+                      "flex items-start gap-3 rounded-control p-3 text-left transition-colors",
+                      checked ? "bg-accent-subtle ring-2 ring-accent-ring" : "bg-subtle hover:bg-mist",
                     )}
                   >
                     <span className={cn(
-                      "grid h-8 w-8 shrink-0 place-items-center rounded-md",
-                      checked ? "bg-white text-brown-900" : "bg-white/70 text-brown-600",
+                      "grid h-8 w-8 shrink-0 place-items-center rounded-control",
+                      checked ? "bg-card text-primary" : "bg-card/70 text-secondary",
                     )}>
-                      <Icon className="h-4 w-4" />
+                      <Icon icon={shownIcon} size="sm" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-medium text-brown-900">{TASK_KIND_LABELS[k]}</span>
-                      <span className="block text-xs text-muted-foreground">{TASK_KIND_DESCRIPTIONS[k]}</span>
+                      <span className="block text-body font-medium text-primary">{TASK_KIND_LABELS[k]}</span>
+                      <span className="block text-hint text-tertiary">{TASK_KIND_DESCRIPTIONS[k]}</span>
                     </span>
                   </button>
                 );
@@ -108,8 +110,8 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
           </fieldset>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onCancelAction}>Cancel</Button>
-            <Button type="submit">Add Task</Button>
+            <Button type="button" variant="secondary" onClick={onCancelAction}>Cancel</Button>
+            <Button type="submit">Add task</Button>
           </DialogFooter>
         </form>
       </DialogContent>

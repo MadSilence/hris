@@ -4,13 +4,14 @@ import React, { FormEvent, useState } from "react";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
 import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { remindCompanyAddressesAction } from "@/components/modules/companyAddress/actions/companyAddressActions";
+import { FieldError } from "@/components/desact/field-error";
 
 type Values = { email: string };
 
@@ -66,11 +67,11 @@ export function FindCompanyContainer() {
       <AuthScreen className="flex-1">
         <div className="w-full space-y-8 text-center">
           <div className="space-y-3">
-            <h1 className="text-4xl font-medium">Check Your Email</h1>
-            <p className="text-md text-muted-foreground" role="status">{FIND_COMPANY_SENT_MESSAGE}</p>
+            <h1 className="text-greeting">Check your email</h1>
+            <p className="text-body text-tertiary" role="status">{FIND_COMPANY_SENT_MESSAGE}</p>
           </div>
-          <Button asChild variant="outline" className="h-11 w-full bg-transparent">
-            <Link href="/login">Back to Sign In</Link>
+          <Button size="lg" asChild variant="secondary" className="w-full">
+            <Link href="/login">Back to sign in</Link>
           </Button>
         </div>
       </AuthScreen>
@@ -81,15 +82,15 @@ export function FindCompanyContainer() {
     <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">Find Your Company</h1>
-          <p className="text-md text-muted-foreground">
+          <h1 className="text-greeting">Find your company</h1>
+          <p className="text-body text-tertiary">
             Enter the email address you sign in with, and we will email you the addresses of your companies.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="find-company-email">Email Address</Label>
+            <Label htmlFor="find-company-email">Email address</Label>
             <Input
               id="find-company-email"
               name="email"
@@ -102,18 +103,18 @@ export function FindCompanyContainer() {
               aria-invalid={Boolean(formik.errors.email)}
             />
             {formik.errors.email && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.email}</p>
+              <FieldError>{formik.errors.email}</FieldError>
             )}
           </div>
 
           <FormError message={error} />
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
-            {busy ? "Sending…" : "Email Me My Addresses"}
+          <Button size="lg" type="submit" disabled={busy} className="w-full">
+            {busy ? "Sending…" : "Email me my addresses"}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/login" className="underline-offset-4 hover:underline">Back to Sign In</Link>
+          <p className="text-center text-body text-tertiary">
+            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">Back to sign in</Link>
           </p>
         </form>
       </div>

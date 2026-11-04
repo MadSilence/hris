@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Input } from "@/components/desact/input";
+import { Checkbox } from "@/components/desact/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -62,7 +62,7 @@ export function TaskFieldInput({ field, value, onChange, disabled }: {
         <div className="space-y-1.5">
           {label}
           {field.options.map((o) => (
-            <label key={o.id} className="flex items-center gap-2 text-sm">
+            <label key={o.id} className="flex items-center gap-2 text-body">
               <Checkbox
                 checked={picked.includes(o.id)}
                 disabled={disabled}
@@ -76,7 +76,7 @@ export function TaskFieldInput({ field, value, onChange, disabled }: {
     }
     case "CHECKBOX":
       return (
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-body">
           <Checkbox id={id} checked={value === true} disabled={disabled} onCheckedChange={(c) => onChange(c === true)} />
           {name}{field.isFilled ? " ✓" : ""}
         </label>

@@ -4,7 +4,7 @@
  * driving a portal listbox jsdom can barely open.
  *
  * Use it as the module factory:
- *   jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
+ *   jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
  *
  * The label comes from `SelectTrigger`'s `aria-label`; the options from every `SelectItem` inside
  * `SelectContent`, in order.

@@ -13,7 +13,6 @@ export default function PublicLayout({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const isDesact = pathname?.startsWith("/desact");
   // The sign-in screens paint their own backdrop edge to edge, between the navbar and the footer.
   const isAuthScreen = AUTH_SCREEN_PATHS.includes(pathname ?? "");
 
@@ -22,13 +21,7 @@ export default function PublicLayout({
       <Navbar/>
 
       <main
-        className={
-          isAuthScreen
-            ? "flex flex-1 flex-col"
-            : isDesact
-              ? "flex-1 px-0 py-0"
-              : "mx-auto w-full max-w-6xl flex-1 px-4 py-10"
-        }
+        className={isAuthScreen ? "flex flex-1 flex-col" : "mx-auto w-full max-w-6xl flex-1 px-4 py-10"}
       >
         {children}
       </main>

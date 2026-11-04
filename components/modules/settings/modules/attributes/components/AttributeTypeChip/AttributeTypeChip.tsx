@@ -1,61 +1,39 @@
 "use client";
 
 import { FC } from "react";
-import {
-  AlignLeft,
-  Banknote,
-  Boxes,
-  Calendar,
-  Clock,
-  Coins,
-  Globe,
-  Hash,
-  Languages,
-  Link,
-  Link2,
-  List,
-  ListChecks,
-  Mail,
-  MapPin,
-  Phone,
-  SquareCheck,
-  Type,
-  User,
-} from "lucide-react";
+import { Calendar03Icon, CallIcon, CheckListIcon, CheckmarkSquare02Icon, Clock01Icon, Coins01Icon, Globe02Icon, GridTableIcon, LanguageSkillIcon, LeftToRightListBulletIcon, Link01Icon, Location01Icon, Mail01Icon, Money03Icon, PackageIcon, TextAlignLeftIcon, TextFontIcon, UserIcon } from "@hugeicons/core-free-icons";
 
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Badge } from "@/components/desact/badge";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { AttributeType } from "@/models/attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils/attributeTypeUtils";
 
-const TYPE_ICONS: Record<AttributeType, FC<{ className?: string }>> = {
-  [AttributeType.TEXT]: Type,
-  [AttributeType.LONG_TEXT]: AlignLeft,
-  [AttributeType.SELECT]: List,
-  [AttributeType.PERSON]: User,
-  [AttributeType.CHECKBOX]: SquareCheck,
-  [AttributeType.NUMBER]: Hash,
-  [AttributeType.MULTI_SELECT]: ListChecks,
-  [AttributeType.DATE]: Calendar,
-  [AttributeType.EMAIL]: Mail,
-  [AttributeType.URL]: Link,
-  [AttributeType.PHONE]: Phone,
-  [AttributeType.COUNTRY]: Globe,
-  [AttributeType.LANGUAGE]: Languages,
-  [AttributeType.TIMEZONE]: Clock,
-  [AttributeType.CURRENCY]: Banknote,
-  [AttributeType.OBJECT]: Boxes,
-  [AttributeType.ADDRESS]: MapPin,
-  [AttributeType.MONEY]: Coins,
-  [AttributeType.REFERENCE]: Link2,
+const TYPE_ICONS: Record<AttributeType, IconSvgElement> = {
+  [AttributeType.TEXT]: TextFontIcon,
+  [AttributeType.LONG_TEXT]: TextAlignLeftIcon,
+  [AttributeType.SELECT]: LeftToRightListBulletIcon,
+  [AttributeType.PERSON]: UserIcon,
+  [AttributeType.CHECKBOX]: CheckmarkSquare02Icon,
+  [AttributeType.NUMBER]: GridTableIcon,
+  [AttributeType.MULTI_SELECT]: CheckListIcon,
+  [AttributeType.DATE]: Calendar03Icon,
+  [AttributeType.EMAIL]: Mail01Icon,
+  [AttributeType.URL]: Link01Icon,
+  [AttributeType.PHONE]: CallIcon,
+  [AttributeType.COUNTRY]: Globe02Icon,
+  [AttributeType.LANGUAGE]: LanguageSkillIcon,
+  [AttributeType.TIMEZONE]: Clock01Icon,
+  [AttributeType.CURRENCY]: Money03Icon,
+  [AttributeType.OBJECT]: PackageIcon,
+  [AttributeType.ADDRESS]: Location01Icon,
+  [AttributeType.MONEY]: Coins01Icon,
+  [AttributeType.REFERENCE]: Link01Icon,
 };
 
-/** Attribute type shown as a chip — mirrors the leave-type category chip (icon + soft outline). */
-export const AttributeTypeChip: FC<{ type: AttributeType }> = ({ type }) => {
-  const Icon = TYPE_ICONS[type] ?? Type;
-  return (
-    <Badge variant="outline" className="gap-1 border-brown-200 bg-brown-50 font-normal text-brown-600">
-      <Icon className="h-3 w-3" />
-      {getAttributeTypeLabel(type)}
-    </Badge>
-  );
-};
+/** Attribute type shown as a chip — mirrors the leave-type category chip (an icon and a word). */
+export const AttributeTypeChip: FC<{ type: AttributeType }> = ({ type }) => (
+  <Badge variant="neutral">
+    <Icon icon={TYPE_ICONS[type] ?? TextFontIcon} size="sm" className="size-3.5" />
+    {getAttributeTypeLabel(type)}
+  </Badge>
+);

@@ -4,12 +4,13 @@ import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 /** Matches the column and the backend's JobTextRules. */
 const DESCRIPTION_MAX = 300;
@@ -113,7 +114,7 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
           />
 
           {formik.errors.name && (
-            <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+            <FieldError>{formik.errors.name}</FieldError>
           )}
         </div>
 
@@ -131,14 +132,14 @@ export const JobFamilyForm: FC<JobFamilyFormProps> = ({
           />
 
           <div className="flex items-center justify-between">
-            <p role="alert" className="text-sm text-destructive">{formik.errors.description ?? ""}</p>
-            <p className="text-xs text-muted-foreground">{remaining} characters left</p>
+            <FieldError>{formik.errors.description ?? ""}</FieldError>
+            <p className="text-hint text-tertiary">{remaining} characters left</p>
           </div>
         </div>
       </div>
 
-      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
-        <Button type="button" variant="outline" disabled={isLoading} onClick={onCancelAction}>
+      <DialogFooter className="mt-6 border-t border-divider pt-4">
+        <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
           Cancel
         </Button>
 

@@ -81,14 +81,14 @@ describe("WelcomeContainer", () => {
    * then submitted the preferences form — whose success handler leaves for the dashboard. One click
    * and step two was gone. Seen by a person, not by a suite.
    */
-  it("goes to step two on Next, and does not finish the welcome", () => {
+  it("goes to step two on Continue, and does not finish the welcome", () => {
     render(<WelcomeContainer />);
 
-    expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
+    expect(screen.getByText(/Step 1 of 2/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByText("Step 2 of 2")).toBeInTheDocument();
+    expect(screen.getByText(/Step 2 of 2/)).toBeInTheDocument();
     expect(completeWelcomeAction).not.toHaveBeenCalled();
   });
 

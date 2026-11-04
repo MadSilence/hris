@@ -65,12 +65,12 @@ export const MyLeaveWidget: React.FC = () => {
     .slice(0, UPCOMING_LIMIT);
 
   const action = canRequest && userId && current.length > 0
-    ? <HomeCardLink href={`/organization/people/${userId}/time-off?request=1`}>Request Time Off</HomeCardLink>
+    ? <HomeCardLink href={`/organization/people/${userId}/time-off?request=1`}>Request time off</HomeCardLink>
     : undefined;
 
   if (!userId || balances.isLoading || policies.isLoading || requests.isLoading) {
     return (
-      <HomeCard title="My Time Off">
+      <HomeCard title="My time off">
         <HomeRowsSkeleton rows={2} avatar={false} />
       </HomeCard>
     );
@@ -78,14 +78,14 @@ export const MyLeaveWidget: React.FC = () => {
   const error = balances.error ?? requests.error;
   if (error) {
     return (
-      <HomeCard title="My Time Off">
+      <HomeCard title="My time off">
         <ErrorState error={error} compact onRetry={() => void (balances.error ? balances.refetch() : requests.refetch())} />
       </HomeCard>
     );
   }
 
   return (
-    <HomeCard title="My Time Off" action={action}>
+    <HomeCard title="My time off" action={action}>
       {current.length === 0 ? (
         <HomeEmpty>No time-off policy applies to you yet.</HomeEmpty>
       ) : (
@@ -93,10 +93,10 @@ export const MyLeaveWidget: React.FC = () => {
           {current.map((balance) => {
             const policy = policyMap.get(balance.policyId);
             return (
-              <li key={balance.id} className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="truncate text-brown-800">{policy?.name ?? "Time Off"}</span>
-                <span className="shrink-0 text-muted-foreground">
-                  <span className="font-semibold text-brown-900">{formatDayAmount(balance.currentBalance)}</span>{" "}
+              <li key={balance.id} className="flex items-baseline justify-between gap-3 text-body">
+                <span className="truncate text-primary">{policy?.name ?? "Time off"}</span>
+                <span className="shrink-0 text-tertiary">
+                  <span className="font-semibold text-primary">{formatDayAmount(balance.currentBalance)}</span>{" "}
                   {unitOf(policy, balance.currentBalance)} left
                 </span>
               </li>
@@ -106,13 +106,13 @@ export const MyLeaveWidget: React.FC = () => {
       )}
 
       {upcoming.length > 0 && (
-        <div className="flex flex-col gap-1 border-t border-brown-100 pt-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-brown-400">Coming Up</p>
+        <div className="flex flex-col gap-1 border-t border-divider pt-3">
+          <p className="text-hint font-medium text-tertiary">Coming up</p>
           {upcoming.map((request) => (
-            <p key={request.id} className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="truncate text-brown-800">{dates(request)}</span>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                {request.status === "APPROVED" ? policyMap.get(request.policyId)?.name ?? "Approved" : "Waiting for Approval"}
+            <p key={request.id} className="flex items-baseline justify-between gap-3 text-body">
+              <span className="truncate text-primary">{dates(request)}</span>
+              <span className="shrink-0 text-hint text-tertiary">
+                {request.status === "APPROVED" ? policyMap.get(request.policyId)?.name ?? "Approved" : "Waiting for approval"}
               </span>
             </p>
           ))}

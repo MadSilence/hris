@@ -7,10 +7,10 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { useCreateTeam } from "@/components/modules/settings/modules/teams/hooks/useCreateTeam/useCreateTeam";
 import {
   UserPickerField,
@@ -19,6 +19,7 @@ import {
 import type { TeamTreeNode } from "@/models/teams";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FieldError } from "@/components/desact/field-error";
 
 const ROOT_VALUE = "none";
 
@@ -76,7 +77,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           <div className="space-y-1.5">
             <RequiredLabel htmlFor="team-name" required>Name</RequiredLabel>
             <Input id="team-name" name="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} />
-            {formik.touched.name && formik.errors.name && <p role="alert" className="text-xs text-danger-500">{formik.errors.name}</p>}
+            {formik.touched.name && formik.errors.name && <FieldError>{formik.errors.name}</FieldError>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="team-code">Code</Label>
@@ -87,7 +88,7 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
             <Input id="team-description" name="description" value={formik.values.description} onChange={formik.handleChange} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="team-parent">Parent Team</Label>
+            <Label htmlFor="team-parent">Parent team</Label>
             <SearchableSelect
               id="team-parent"
               options={[{ value: ROOT_VALUE, label: "None" }, ...parentOptions.filter((t) => t.status === "ACTIVE").map((n) => ({ value: n.id, label: n.name }))]}
@@ -98,13 +99,13 @@ export function CreateTeamModal({ open, onClose, parentOptions, defaultParentId 
           </div>
 
           <div className="space-y-1.5">
-            <Label>Team Lead</Label>
+            <Label>Team lead</Label>
             <UserPickerField value={lead} onChange={setLead} placeholder="Search for a person" />
           </div>
           <FormError message={createTeam.error ? messageForError(createTeam.error) : null} />
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={createTeam.isPending}>Cancel</Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={createTeam.isPending}>
             {createTeam.isPending ? "Adding…" : "Add"}
           </Button>

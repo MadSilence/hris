@@ -37,20 +37,20 @@ describe("PeopleViewsPanel", () => {
   it("keeps my views and the ones shared with me apart, with whose each is and what I may do", () => {
     render(<PeopleViewsPanel {...props()} />);
 
-    const own = screen.getByRole("region", { name: "My Views" });
+    const own = screen.getByRole("region", { name: "My views" });
     expect(within(own).getByText("Engineering")).toBeInTheDocument();
     expect(within(own).queryByText("Hiring")).not.toBeInTheDocument();
 
-    const shared = screen.getByRole("region", { name: "Shared With Me" });
+    const shared = screen.getByRole("region", { name: "Shared with me" });
     expect(within(shared).getByText("Hiring")).toBeInTheDocument();
-    expect(within(shared).getByText("Olga Owner · Can Edit")).toBeInTheDocument();
-    expect(within(shared).getByText("Hugo Hr · Can View")).toBeInTheDocument();
+    expect(within(shared).getByText("Olga Owner · Can edit")).toBeInTheDocument();
+    expect(within(shared).getByText("Hugo Hr · Can view")).toBeInTheDocument();
   });
 
-  it("has no Shared With Me section when nothing is shared", () => {
+  it("has no Shared with me section when nothing is shared", () => {
     render(<PeopleViewsPanel {...props({ views: [mine] })} />);
 
-    expect(screen.queryByRole("region", { name: "Shared With Me" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Shared with me" })).not.toBeInTheDocument();
   });
 
   it("opens a shared view like any other", () => {
@@ -62,12 +62,12 @@ describe("PeopleViewsPanel", () => {
     expect(onApplyView).toHaveBeenCalledWith(readOnly);
   });
 
-  it("offers Save a Copy, not Save Changes, on a view shared to view only", () => {
+  it("offers Save a copy, not Save changes, on a view shared to view only", () => {
     const onSaveActiveCopy = jest.fn();
     render(<PeopleViewsPanel {...props({ activeViewId: "v-read", dirty: true, onSaveActiveCopy })} />);
 
-    expect(screen.queryByRole("button", { name: "Save Changes" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Save a Copy" }));
+    expect(screen.queryByRole("button", { name: "Save changes" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save a copy" }));
     expect(onSaveActiveCopy).toHaveBeenCalled();
   });
 
@@ -75,16 +75,16 @@ describe("PeopleViewsPanel", () => {
     const onUpdateActive = jest.fn();
     render(<PeopleViewsPanel {...props({ activeViewId: "v-edit", dirty: true, onUpdateActive })} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     expect(onUpdateActive).toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: "Save a Copy" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save a copy" })).not.toBeInTheDocument();
   });
 
   it("copies the page's own address instead of minting a share link", () => {
     const onCopyLink = jest.fn();
     render(<PeopleViewsPanel {...props({ onCopyLink })} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy Link" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
     expect(onCopyLink).toHaveBeenCalled();
     expect(screen.queryByText(/share link/i)).not.toBeInTheDocument();
   });

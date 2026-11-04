@@ -7,7 +7,7 @@ import {
   assignedUsersQueryKey,
 } from "@/components/audience/assignment/hooks/useAssignedUsers";
 import AssignedUsersPanel from "@/components/modules/settings/shared/AssignedUsersPanel/AssignedUsersPanel";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Badge } from "@/components/desact/badge";
 
 const BASE_PATH = "/public-holiday-calendars";
 
@@ -47,12 +47,12 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
       isLoadingMore={isFetchingNextPage}
       onLoadMore={() => void fetchNextPage()}
       secondaryColumn={{
-        header: "Holiday Calendars",
+        header: "Holiday calendars",
         render: (u) =>
           u.calendars && u.calendars.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {u.calendars.map((c) => (
-                <Badge key={c.id} variant="secondary" className="font-normal">
+                <Badge key={c.id} variant="neutral" className="font-normal">
                   {c.name}
                 </Badge>
               ))}

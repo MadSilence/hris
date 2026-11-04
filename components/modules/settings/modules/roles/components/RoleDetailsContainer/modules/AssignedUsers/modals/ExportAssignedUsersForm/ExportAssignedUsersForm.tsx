@@ -3,11 +3,13 @@
 import { FC, FormEvent, useCallback } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileTextIcon, Xls01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { FieldError } from "@/components/desact/field-error";
 
 export type ExportAssignedUsersFormat = "csv" | "xlsx";
 
@@ -67,7 +69,7 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
-        <div className="text-sm font-medium">Format</div>
+        <div className="text-body font-medium">Format</div>
 
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -75,21 +77,21 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
             onClick={() => formik.setFieldValue("format", "csv")}
             disabled={isLoading}
             className={[
-              "rounded-lg border p-4 text-left transition",
+              "rounded-card border p-4 text-left transition",
               formik.values.format === "csv"
-                ? "border-brown-600 bg-brown-50"
-                : "border-brown-200 hover:bg-brown-50",
+                ? "border-accent-ring bg-accent-subtle"
+                : "border-divider hover:bg-subtle",
             ].join(" ")}
-          >
+ >
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-brown-600"/>
+              <Icon icon={FileTextIcon} size="sm" className="text-secondary" />
               <div className="font-medium">CSV</div>
-              <Badge variant="secondary" className="ml-auto">
+              <Badge variant="neutral" className="ml-auto">
                 Lightweight
               </Badge>
             </div>
 
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-hint text-tertiary">
               Best for simple imports and quick viewing.
             </div>
           </button>
@@ -99,33 +101,31 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
             onClick={() => formik.setFieldValue("format", "xlsx")}
             disabled={isLoading}
             className={[
-              "rounded-lg border p-4 text-left transition",
+              "rounded-card border p-4 text-left transition",
               formik.values.format === "xlsx"
-                ? "border-brown-600 bg-brown-50"
-                : "border-brown-200 hover:bg-brown-50",
+                ? "border-accent-ring bg-accent-subtle"
+                : "border-divider hover:bg-subtle",
             ].join(" ")}
-          >
+ >
             <div className="flex items-center gap-2">
-              <FileSpreadsheet className="h-4 w-4 text-brown-600"/>
+              <Icon icon={Xls01Icon} size="sm" className="text-secondary" />
               <div className="font-medium">XLSX</div>
-              <Badge variant="secondary" className="ml-auto">
+              <Badge variant="neutral" className="ml-auto">
                 Recommended
               </Badge>
             </div>
 
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-hint text-tertiary">
               Better for structured data and multiple sheets.
             </div>
           </button>
         </div>
 
         {formik.errors.format && (
-          <p className="text-sm text-destructive">
-            {String(formik.errors.format)}
-          </p>
+          <FieldError>{String(formik.errors.format)}</FieldError>
         )}
 
-        <div className="rounded-md bg-brown-50 px-4 py-3 text-xs text-muted-foreground">
+        <div className="rounded-tag bg-subtle px-4 py-3 text-hint text-tertiary">
           Included: user name, email, position.
         </div>
       </div>
@@ -133,18 +133,17 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
       <DialogFooter className="mt-8">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
-        >
+ >
           Cancel
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-brown-600 text-white hover:bg-brown-700"
-        >
+ >
           Export
         </Button>
       </DialogFooter>

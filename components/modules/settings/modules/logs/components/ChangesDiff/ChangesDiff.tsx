@@ -18,15 +18,15 @@ export const ChangesDiff: React.FC<{ changes: Record<string, unknown> }> = ({ ch
   if (entries.length === 0) return null;
 
   return (
-    <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-1 text-sm">
+    <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-1 text-body">
       {entries.map(([field, value]) => {
         const pair = (value ?? {}) as { old?: unknown; new?: unknown };
         return (
           <React.Fragment key={field}>
-            <dt className="truncate font-medium text-muted-foreground">{humanise(field)}</dt>
+            <dt className="truncate font-medium text-tertiary">{humanise(field)}</dt>
             <dd className="flex min-w-0 flex-wrap items-center gap-2">
               <Value value={pair.old} muted/>
-              <span aria-hidden className="text-muted-foreground">→</span>
+              <span aria-hidden className="text-tertiary">→</span>
               <Value value={pair.new}/>
             </dd>
           </React.Fragment>
@@ -43,9 +43,9 @@ const Value: React.FC<{ value: unknown; muted?: boolean }> = ({ value, muted }) 
   return (
     <span
       className={[
-        "max-w-full truncate rounded px-1.5 py-0.5",
-        muted ? "bg-muted text-muted-foreground line-through decoration-muted-foreground/40" : "bg-muted/60 text-foreground",
-        empty ? "italic" : "",
+        "max-w-full truncate rounded-control px-1.5 py-0.5",
+        muted ? "bg-mist text-tertiary line-through decoration-tertiary/40" : "bg-mist/60 text-primary",
+        empty ? "" : "",
       ]
         .filter(Boolean)
         .join(" ")}

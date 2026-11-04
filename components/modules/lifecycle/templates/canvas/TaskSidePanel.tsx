@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Hourglass, Trash2, TriangleAlert, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Alert02Icon, Cancel01Icon, Delete02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import {
   ACCESS_PROBLEM_LABELS,
@@ -28,7 +29,7 @@ import { TaskKindConfigFields } from "./TaskKindConfigFields";
 type DueMode = "BEFORE" | "ON" | "AFTER" | "BEFORE_START";
 
 /** A field that reads as text until it is pointed at or typed in — the template name's own look. */
-const INLINE = "border-transparent bg-transparent px-2 py-1 shadow-none hover:border-brown-200 focus-visible:border-brown-300 focus-visible:bg-white";
+const INLINE = "border-transparent bg-transparent px-2 py-1 shadow-none hover:border-divider focus-visible:border-field focus-visible:bg-card";
 
 const dueModeOf = (i: DraftItem): DueMode => {
   if (i.dueKind === "BEFORE_START") return "BEFORE_START";
@@ -74,15 +75,15 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
 
   return (
     <aside
-      aria-label="Task Details"
-      className="flex h-full w-full flex-col bg-brown-50/40 md:w-[400px]"
+      aria-label="Task details"
+      className="flex h-full w-full flex-col bg-subtle/40 md:w-[400px]"
     >
       {/* The task's own title heads the panel and is edited where it stands, like the template's name: no
           "Task" heading, no "Title" or "Description" label — a box appears on hover and while typing. */}
       <div className="flex items-start gap-1 px-3 pb-1 pt-3">
         <Textarea
           id={`${id}-title`}
-          aria-label="Task Title"
+          aria-label="Task title"
           rows={1}
           value={item.title}
           disabled={readOnly}
@@ -92,10 +93,10 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           // A title is one line: a pasted line break becomes a space, and Enter adds none.
           onChange={(e) => onChange({ title: e.target.value.replace(/[\r\n]+/g, " ") })}
           onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
-          className={`${INLINE} min-h-0 resize-none text-lg font-semibold leading-6 text-brown-900 [field-sizing:content]`}
+          className={`${INLINE} min-h-0 resize-none text-section-title leading-6 text-primary [field-sizing:content]`}
         />
-        <Button type="button" variant="ghost" size="icon" className="mt-0.5 h-8 w-8 shrink-0" aria-label="Close Panel" onClick={onClose}>
-          <X className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="icon-sm" className="mt-0.5 shrink-0" aria-label="Close panel" onClick={onClose}>
+          <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       </div>
 
@@ -104,12 +105,12 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-5 pb-5 pt-1">
         <Textarea
           id={`${id}-description`}
-          aria-label="Task Description"
+          aria-label="Task description"
           value={item.description}
           disabled={readOnly}
           placeholder={readOnly ? "" : "Add a description"}
           onChange={(e) => onChange({ description: e.target.value })}
-          className={`${INLINE} -mx-2 min-h-0 resize-none text-sm text-brown-700 [field-sizing:content]`}
+          className={`${INLINE} -mx-2 min-h-0 resize-none text-body text-secondary [field-sizing:content]`}
         />
 
         <div className="space-y-1.5">
@@ -163,20 +164,20 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             >
               <SelectTrigger id={`${id}-due`} className="flex-1"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="BEFORE">{leaving ? "Days Before the Last Day" : "Days Before Start"}</SelectItem>
-                <SelectItem value="ON">{leaving ? "On the Last Day" : "On the Start Day"}</SelectItem>
-                <SelectItem value="AFTER">{leaving ? "Days After the Last Day" : "Days After Start"}</SelectItem>
-                <SelectItem value="BEFORE_START">{leaving ? "By the Last Day" : "By the Start Day"}</SelectItem>
+                <SelectItem value="BEFORE">{leaving ? "Days before the last day" : "Days before start"}</SelectItem>
+                <SelectItem value="ON">{leaving ? "On the last day" : "On the start day"}</SelectItem>
+                <SelectItem value="AFTER">{leaving ? "Days after the last day" : "Days after start"}</SelectItem>
+                <SelectItem value="BEFORE_START">{leaving ? "By the last day" : "By the start day"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-hint text-tertiary">
             {dayLabel(item, type)}. Calendar days; a date on a weekend stays where it falls.
           </p>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor={`${id}-assignee`}>Done By</Label>
+          <Label htmlFor={`${id}-assignee`}>Done by</Label>
           <Select
             value={item.assigneeKind}
             disabled={readOnly}
@@ -206,37 +207,37 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             />
           )}
           {item.assigneeKind === "SPECIFIC_USER" && item.assigneeProblem && (
-            <p role="alert" className="flex items-center gap-1.5 text-xs text-warning-700">
-              <TriangleAlert className="h-3.5 w-3.5" />
+            <p role="alert" className="flex items-center gap-1.5 text-hint text-status-pending-text">
+              <Icon icon={Alert02Icon} size="sm" />
               {item.assigneeName ? `${item.assigneeName}: ` : ""}
               {ASSIGNEE_PROBLEM_LABELS[item.assigneeProblem]}. Choose somebody else.
             </p>
           )}
           {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && item.accessProblem && (
-            <p role="status" className="flex items-center gap-1.5 text-xs text-warning-700">
-              <TriangleAlert className="h-3.5 w-3.5" />
+            <p role="status" className="flex items-center gap-1.5 text-hint text-status-pending-text">
+              <Icon icon={Alert02Icon} size="sm" />
               {item.assigneeName ? `${item.assigneeName}: ` : ""}
               {ACCESS_PROBLEM_LABELS[item.accessProblem]} for anybody. Grant it, or give the task to somebody who can.
             </p>
           )}
           {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               A named person makes the template depend on them; the start of a process asks again if they have left.
             </p>
           )}
         </div>
 
         <fieldset className="space-y-1.5">
-          <legend className="text-sm font-medium">Waits For</legend>
+          <legend className="text-body font-medium">Waits for</legend>
           {others.length === 0 ? (
-            <p className="text-xs text-muted-foreground">There are no other tasks to wait for.</p>
+            <p className="text-hint text-tertiary">There are no other tasks to wait for.</p>
           ) : (
             <div className="max-h-48 space-y-1 overflow-y-auto">
               {others.map((other) => {
                 const checked = item.waitsFor.includes(other.key);
                 const circle = !checked && wouldCreateCycle(items, item.key, other.key);
                 return (
-                  <label key={other.key} className={`flex items-start gap-2 py-0.5 text-sm ${circle ? "text-muted-foreground" : ""}`}>
+                  <label key={other.key} className={`flex items-start gap-2 py-0.5 text-body ${circle ? "text-tertiary" : ""}`}>
                     <Checkbox
                       className="mt-0.5"
                       checked={checked}
@@ -248,7 +249,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
                     />
                     <span className="min-w-0">
                       <span className="block truncate">{other.title || "Untitled task"}</span>
-                      <span className="block text-xs text-muted-foreground">
+                      <span className="block text-hint text-tertiary">
                         {circle ? "Waits for this task already, so it would make a circle" : dayLabel(other, type)}
                       </span>
                     </span>
@@ -257,18 +258,18 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
               })}
             </div>
           )}
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-            <Hourglass className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <p className="flex items-start gap-1.5 text-hint text-tertiary">
+            <Icon icon={HourglassIcon} size="sm" className="mt-0.5 shrink-0" />
             Until those are done, this task shows as waiting and its assignee is not told.
           </p>
         </fieldset>
       </div>
 
       {!readOnly && (
-        <div className="border-t border-brown-100 px-5 py-3">
-          <Button type="button" variant="ghost" className="gap-1.5 text-danger-600 hover:text-danger-700" onClick={onRemove}>
-            <Trash2 className="h-4 w-4" />
-            Remove Task
+        <div className="border-t border-divider px-5 py-3">
+          <Button type="button" variant="ghost" className="gap-1.5 text-danger-text hover:text-status-declined-text" onClick={onRemove}>
+            <Icon icon={Delete02Icon} size="sm" />
+            Remove task
           </Button>
         </div>
       )}

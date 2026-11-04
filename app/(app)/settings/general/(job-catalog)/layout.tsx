@@ -3,25 +3,26 @@
 import { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, ListTree } from "lucide-react";
+import { HierarchySquare02Icon, Layers01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 const tabs = [
   {
     id: "job-catalog",
-    label: "Job Catalog",
+    label: "Job catalog",
     href: "/settings/general/job-catalog",
-    icon: ListTree,
+    icon: HierarchySquare02Icon,
     description:
       "Build your organization's job structure. Group positions into job families, assign each job a level, and keep a single consistent catalog that roles, compensation, and reporting can rely on.",
   },
   {
     id: "job-levels",
-    label: "Job Levels",
+    label: "Job levels",
     href: "/settings/general/job-levels",
-    icon: Layers,
+    icon: Layers01Icon,
     description:
       "Define the levels a job can sit at, grouped the way your organization thinks about seniority.",
   },
@@ -45,16 +46,16 @@ export default function SettingsJobCatalogLayout({
         {/* The page is titled by the tab it is on — it must not claim to be one of its own children. */}
         <SettingsPageHeader title={activeTab.label} backHref="/settings"/>
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           {activeTab.description}
         </PageDescription>
       </div>
 
       <div className="px-8">
         <Tabs value={activeTab.id} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+          <TabsList className="grid w-full grid-cols-2 bg-subtle">
             {tabs.map((tab) => {
-              const Icon = tab.icon;
+              const shownIcon = tab.icon;
 
               return (
                 <TabsTrigger
@@ -64,7 +65,7 @@ export default function SettingsJobCatalogLayout({
                   className="flex items-center gap-2"
                 >
                   <Link href={tab.href} className="no-underline">
-                    <Icon className="h-4 w-4"/>
+                    <Icon icon={shownIcon} size="sm" />
                     {tab.label}
                   </Link>
                 </TabsTrigger>

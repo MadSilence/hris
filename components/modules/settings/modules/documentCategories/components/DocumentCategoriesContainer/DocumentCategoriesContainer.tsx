@@ -2,13 +2,14 @@
 
 import { FC, FormEvent, useEffect, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { Lock, Pencil, Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Delete02Icon, PencilEdit02Icon, SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Switch } from "@/components/desact/switch";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import type { DocumentCategoryDTO } from "@/api/modules/documents/dto";
 import {
   useDocumentCategories,
@@ -36,7 +37,6 @@ import {
   useSaveDocumentCategory,
 } from "@/components/modules/settings/modules/documentCategories/hooks/useDocumentCategoryMutations";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { Tags } from "lucide-react";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { DocumentCategoriesSkeleton } from "./DocumentCategoriesSkeleton";
@@ -73,11 +73,11 @@ export const DocumentCategoriesContainer: FC = () => {
         search={{ value: query, onChange: setQuery }}
         primary={
           <Button type="button"
-            className="bg-brown-600 text-white hover:bg-brown-700"
+            
             onClick={() => setIsCreateOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4"/>
-            Add Category
+ >
+            <Icon icon={Add01Icon} size="sm" />
+            Add category
           </Button>
         }
       />
@@ -87,31 +87,31 @@ export const DocumentCategoriesContainer: FC = () => {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
-          icon={<Tags className="h-7 w-7"/>}
+          scene="documents"
           title="No categories yet"
           description="Until a category exists documents cannot be labelled, and the category picker stays hidden on upload."
           noResultsHint="Try a different category name."
           onCreate={() => setIsCreateOpen(true)}
-          createLabel="Add Category"
+          createLabel="Add category"
         />
       ) : (
-        <div className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+        <div className="divide-y divide-divider rounded-control border border-divider">
           {rows.map((category) => (
             <div key={category.id} className="flex items-center gap-4 px-4 py-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-medium text-foreground">
+                  <span className="truncate text-body font-medium text-primary">
                     {category.name}
                   </span>
                   {category.isSystem && (
-                    <Badge variant="secondary" className="font-normal">System</Badge>
+                    <Badge variant="neutral" className="font-normal">System</Badge>
                   )}
                   {!category.isActive && (
                     <Badge variant="outline" className="font-normal">Inactive</Badge>
                   )}
                 </div>
                 {category.description && (
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  <p className="mt-0.5 truncate text-hint text-tertiary">
                     {category.description}
                   </p>
                 )}
@@ -119,30 +119,28 @@ export const DocumentCategoriesContainer: FC = () => {
 
               {category.isSystem ? (
                 <span
-                  className="text-brown-300"
+                  className="text-disabled"
                   title="System categories can't be edited or deleted"
-                >
-                  <Lock className="h-4 w-4"/>
+ >
+                  <Icon icon={SquareLock02Icon} size="sm" />
                 </span>
               ) : (
                 <div className="flex items-center gap-1">
                   <Button type="button"
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
+                    size="icon-sm"
                     aria-label={`Edit ${category.name}`}
                     onClick={() => setEditing(category)}
-                  >
-                    <Pencil className="h-4 w-4"/>
+ >
+                    <Icon icon={PencilEdit02Icon} size="sm" />
                   </Button>
                   <Button type="button"
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    size="icon-sm" className="text-tertiary hover:text-danger-text"
                     aria-label={`Delete ${category.name}`}
                     onClick={() => setToDelete(category)}
-                  >
-                    <Trash2 className="h-4 w-4"/>
+ >
+                    <Icon icon={Delete02Icon} size="sm" />
                   </Button>
                 </div>
               )}
@@ -182,7 +180,7 @@ export const DocumentCategoriesContainer: FC = () => {
             remove.reset();
           }
         }}
-      >
+ >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete category</AlertDialogTitle>
@@ -200,7 +198,7 @@ export const DocumentCategoriesContainer: FC = () => {
             <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               disabled={remove.isPending}
-              className="bg-danger-600 text-white hover:bg-danger-700"
+              destructive
               onClick={async (e) => {
                 e.preventDefault();
                 if (!toDelete) return;
@@ -211,7 +209,7 @@ export const DocumentCategoriesContainer: FC = () => {
                   // Shown above.
                 }
               }}
-            >
+ >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -286,10 +284,10 @@ const CategoryFormModal: FC<{
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-brown-200 px-3 py-2.5">
+          <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
             <div>
-              <Label htmlFor="category-active" className="text-sm">Active</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label htmlFor="category-active" className="text-body">Active</Label>
+              <p className="text-hint text-tertiary">
                 Inactive categories stay on existing documents but are not offered on upload.
               </p>
             </div>
@@ -302,14 +300,13 @@ const CategoryFormModal: FC<{
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={isLoading} onClick={onCancelAction}>
+            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !name.trim()}
-              className="bg-brown-600 text-white hover:bg-brown-700"
-            >
+ >
               {isLoading ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>

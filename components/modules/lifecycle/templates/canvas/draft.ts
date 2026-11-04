@@ -161,7 +161,7 @@ export const deriveLanes = (items: DraftItem[], extra: Lane[] = [], type?: Proce
       id,
       assigneeKind: "SPECIFIC_USER",
       userId: i.assigneeUserId,
-      label: i.assigneeUserId ? i.assigneeName || "Named Person" : "Nobody Chosen",
+      label: i.assigneeUserId ? i.assigneeName || "Named person" : "Nobody chosen",
       problem: i.assigneeUserId ? i.assigneeProblem : "MISSING",
     });
   }
@@ -232,14 +232,14 @@ export const dayLabel = (i: Pick<DraftItem, "dueKind" | "offsetDays">, type?: Pr
   const leaving = type === "OFFBOARDING";
   if (i.dueKind === "BEFORE_START") return leaving ? "By the last day" : "By the start day";
   const n = i.offsetDays ?? 0;
-  if (n === 0) return leaving ? "Last Day" : "Day 1";
+  if (n === 0) return leaving ? "Last day" : "Day 1";
   const days = Math.abs(n) === 1 ? "1 day" : `${Math.abs(n)} days`;
   if (leaving) return n > 0 ? `${days} after the last day` : `${days} before the last day`;
   return n > 0 ? `${days} after start` : `${days} before start`;
 };
 
 /** The anchor's own day on the ruler: Day 1, or an offboarding's Last Day. */
-export const anchorDayLabel = (type?: ProcessType) => (type === "OFFBOARDING" ? "Last Day" : "Day 1");
+export const anchorDayLabel = (type?: ProcessType) => (type === "OFFBOARDING" ? "Last day" : "Day 1");
 
 /** A compact day for the ruler: "−3", "Day 1", "+5". */
 export const shortDay = (offset: number, type?: ProcessType): string =>
@@ -248,7 +248,7 @@ export const shortDay = (offset: number, type?: ProcessType): string =>
 export type Phase = "BEFORE_START" | "WEEK_1" | "MONTH_1" | "LATER";
 
 export const PHASE_LABELS: Record<Phase, string> = {
-  BEFORE_START: "Before Start",
+  BEFORE_START: "Before start",
   WEEK_1: "Week 1",
   MONTH_1: "Month 1",
   LATER: "Later",

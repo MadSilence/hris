@@ -19,7 +19,7 @@ const AttendanceSettingsPage: FC = () => (
       <div className="px-8 space-y-4">
         <SettingsPageHeader title="Attendance" backHref="/settings"/>
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           What Attendance expects of people. Everybody works the company week at the company&apos;s working-day
           length, unless they have a personal schedule: hours per weekday, from a date on. Leave is not charged
           for a day with no hours, and time logged beyond a day&apos;s hours is overtime.

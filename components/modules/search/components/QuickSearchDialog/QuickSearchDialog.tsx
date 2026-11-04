@@ -2,21 +2,22 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, FileText } from "lucide-react";
+import { ArrowDown01Icon, FileTextIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Command,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/public/desact/src/components/ui/command";
+} from "@/components/desact/command";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+} from "@/components/desact/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { AccountStatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { NoResults } from "@/components/feedback/EmptyState";
@@ -32,6 +33,7 @@ import {
 } from "@/components/modules/search/utils";
 import { isActiveStatus } from "@/models/user/status";
 import type { SearchGroup, SearchItem, SearchKind } from "@/models/search";
+import { NodRing } from "@/components/desact/nod";
 
 const DEBOUNCE_MS = 200;
 
@@ -121,18 +123,18 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
           <CommandItem
             value={`more:${group.kind}`}
             onSelect={() => setExpanded((current) => [...current, group.kind])}
-            className="text-muted-foreground"
+            className="text-tertiary"
           >
-            <ChevronDown aria-hidden/>
-            <span>Show More</span>
-            <span className="ml-auto text-xs">
+            <Icon icon={ArrowDown01Icon} aria-hidden />
+            <span>Show more</span>
+            <span className="ml-auto text-hint">
               {group.truncated ? `${group.total}+` : group.total}
             </span>
           </CommandItem>
         ) : null}
 
         {search.isExpanding(group.kind) ? (
-          <div role="status" className="px-2 py-1.5 text-xs text-muted-foreground">Loading…</div>
+          <div className="flex justify-center px-2 py-1.5"><NodRing size="sm" /></div>
         ) : null}
       </CommandGroup>
     );
@@ -143,30 +145,30 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
       <CommandGroup heading={heading}>
         {visiblePages.map((page) => (
           <CommandItem key={page.href} value={`page:${page.href}`} onSelect={() => go(page.href)}>
-            <FileText aria-hidden/>
+            <Icon icon={FileTextIcon} aria-hidden />
             <span className="truncate">{page.label}</span>
             {page.section ? (
-              <span className="ml-auto truncate text-xs text-muted-foreground">{page.section}</span>
+              <span className="ml-auto truncate text-hint text-tertiary">{page.section}</span>
             ) : null}
           </CommandItem>
         ))}
         {searching && !pagesExpanded && pages.length > visiblePages.length ? (
-          <CommandItem value="more:pages" onSelect={() => setPagesExpanded(true)} className="text-muted-foreground">
-            <ChevronDown aria-hidden/>
-            <span>Show More</span>
-            <span className="ml-auto text-xs">{pages.length}</span>
+          <CommandItem value="more:pages" onSelect={() => setPagesExpanded(true)} className="text-tertiary">
+            <Icon icon={ArrowDown01Icon} aria-hidden />
+            <span>Show more</span>
+            <span className="ml-auto text-hint">{pages.length}</span>
           </CommandItem>
         ) : null}
       </CommandGroup>
     ) : null;
 
   const renderResults = () => {
-    if (!searching) return renderPages("Go To");
+    if (!searching) return renderPages("Go to");
     if (search.error) {
       return <ErrorState error={search.error} compact onRetry={() => void search.refetch()}/>;
     }
     if (search.isLoading) {
-      return <div role="status" className="px-4 py-6 text-center text-sm text-muted-foreground">Searching…</div>;
+      return <div role="status" className="px-4 py-6 text-center text-body text-tertiary">Searching…</div>;
     }
     if (!hasServerHits && visiblePages.length === 0) {
       return <NoResults hint="Try a different name."/>;
@@ -189,7 +191,7 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
         <Command
           shouldFilter={false}
           loop
-          className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2"
+          className="[&_[cmdk-group-heading]]:text-tertiary **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2"
         >
           <CommandInput value={term} onValueChange={handleTermChange} placeholder="Search" inputMode="search"/>
           <CommandList className="max-h-[min(420px,60vh)]">
@@ -205,11 +207,11 @@ const PersonHit: React.FC<{ item: SearchItem }> = ({ item }) => (
   <>
     <Avatar className="size-7 shrink-0">
       <AvatarImage src={item.avatarUrl ?? undefined} alt=""/>
-      <AvatarFallback className="text-[10px] font-semibold">{initials(item.title)}</AvatarFallback>
+      <AvatarFallback className="text-hint font-semibold">{initials(item.title)}</AvatarFallback>
     </Avatar>
     <span className="flex min-w-0 flex-col">
       <span className="truncate">{item.title}</span>
-      {item.subtitle ? <span className="truncate text-xs text-muted-foreground">{item.subtitle}</span> : null}
+      {item.subtitle ? <span className="truncate text-hint text-tertiary">{item.subtitle}</span> : null}
     </span>
     {/* An active colleague needs no chip — every hit would carry one. Leavers and starters do (H9). */}
     <span className="ml-auto flex shrink-0 gap-1">
@@ -222,6 +224,6 @@ const PersonHit: React.FC<{ item: SearchItem }> = ({ item }) => (
 const EntityHit: React.FC<{ item: SearchItem }> = ({ item }) => (
   <span className="flex min-w-0 flex-1 items-baseline gap-2">
     <span className="truncate">{item.title}</span>
-    {item.subtitle ? <span className="ml-auto truncate text-xs text-muted-foreground">{item.subtitle}</span> : null}
+    {item.subtitle ? <span className="ml-auto truncate text-hint text-tertiary">{item.subtitle}</span> : null}
   </span>
 );

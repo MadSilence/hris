@@ -1,10 +1,11 @@
 "use client";
 
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { formatDisplayDate } from "@/lib/date";
 import { FC, useMemo, useState } from "react";
-import { CalendarX2 } from "lucide-react";
+import { CalendarRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { useCancelTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCancelTimeOffRequest";
@@ -14,32 +15,34 @@ import { useDecideCancellation } from "@/components/modules/settings/modules/tim
 import { useEditTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useEditTimeOffRequest";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { cn } from "@/public/desact/src/components/ui/utils";
+
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import type { TimeOffRequest } from "@/models/timeOff";
 import { DecideAnywayControls } from "@/components/modules/timeOffDecision";
+import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = { userId: string };
 
-
-const STATUS_STYLE: Record<TimeOffRequestStatus, string> = {
-  [TimeOffRequestStatus.Pending]: "border-warning-200 bg-warning-50 text-warning-700",
-  [TimeOffRequestStatus.Approved]: "border-success-200 bg-success-50 text-success-700",
-  [TimeOffRequestStatus.CancellationPending]: "border-warning-200 bg-warning-50 text-warning-700",
-  [TimeOffRequestStatus.Rejected]: "border-danger-200 bg-danger-50 text-danger-700",
-  [TimeOffRequestStatus.Cancelled]: "border-brown-200 bg-brown-50 text-brown-500",
+/** Time off's lifecycle (SPEC § 4.5): Pending → Approved | Declined; cancelled is kept for history. */
+const STATUS_TONE: Record<TimeOffRequestStatus, StatusTone> = {
+  [TimeOffRequestStatus.Pending]: "pending",
+  [TimeOffRequestStatus.Approved]: "approved",
+  [TimeOffRequestStatus.CancellationPending]: "pending",
+  [TimeOffRequestStatus.Rejected]: "declined",
+  [TimeOffRequestStatus.Cancelled]: "archived",
 };
 
 const STATUS_LABEL: Record<TimeOffRequestStatus, string> = {
@@ -219,7 +222,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
     return (
       <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-lg" />
+          <Skeleton key={i} className="h-14 w-full rounded-control" />
         ))}
       </div>
     );
@@ -264,17 +267,17 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
         </Select>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <FormError message={error} />}
 
       {rows.length === 0 ? (
-        <div className="flex items-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-6 text-sm text-muted-foreground">
-          <CalendarX2 className="h-5 w-5 text-brown-400" />
+        <div className="flex items-center gap-3 rounded-card border border-dashed border-divider px-4 py-6 text-body text-tertiary">
+          <Icon icon={CalendarRemove01Icon} className="text-tertiary" />
           {filtered
             ? "No requests match these filters."
             : "No time off requests yet."}
         </div>
       ) : (
-      <div className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+      <div className="divide-y divide-divider rounded-control border border-divider">
         {rows.map((request) => {
           const isPending = request.status === TimeOffRequestStatus.Pending;
           const isRejecting = rejectingId === request.id;
@@ -291,19 +294,12 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-brown-900">
+                    <p className="truncate text-body font-medium text-primary">
                       {policyName(request.policyId)}
                     </p>
-                    <span
-                      className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px] font-medium leading-none",
-                        STATUS_STYLE[request.status],
-                      )}
-                    >
-                      {STATUS_LABEL[request.status]}
-                    </span>
+                    <StatusBadge status={STATUS_TONE[request.status]} label={STATUS_LABEL[request.status]} size="sm" />
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="mt-0.5 text-hint text-tertiary">
                     {formatDisplayDate(request.startDate)} → {formatDisplayDate(request.endDate)} ·{" "}
                     {formatDayAmount(request.requestedAmount)} d
                     {request.reason ? <span> · {request.reason}</span> : null}
@@ -312,13 +308,13 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   {/* The reason travelled from the backend all along and nothing rendered it, so a
                       rejection read as a bare red badge and the requester had to go and ask. */}
                   {request.status === TimeOffRequestStatus.Rejected && request.rejectionReason && (
-                    <p className="mt-1 text-xs text-danger-700">
+                    <p className="mt-1 text-hint text-status-declined-text">
                       <span className="font-medium">Reason:</span> {request.rejectionReason}
                     </p>
                   )}
 
                   {request.status === TimeOffRequestStatus.CancellationPending && (
-                    <p className="mt-1 text-xs text-warning-700">
+                    <p className="mt-1 text-hint text-status-pending-text">
                       Waiting for the approver to confirm the cancellation
                       {request.cancellationReason ? ` · ${request.cancellationReason}` : ""}
                     </p>
@@ -331,7 +327,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-success-700 hover:text-success-800"
+                        className="text-status-approved-text hover:text-status-approved-text"
                         onClick={() => handleApprove(request)}
                         disabled={isDeciding}
                       >
@@ -340,7 +336,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-tertiary hover:text-danger-text"
                         onClick={() => {
                           setRejectingId(request.id);
                           setRejectReason("");
@@ -363,7 +359,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-success-700 hover:text-success-800"
+                        className="text-status-approved-text hover:text-status-approved-text"
                         onClick={() => handleCancellationDecision(request, "CONFIRM")}
                         disabled={isDeciding}
                       >
@@ -372,7 +368,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       <Button type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-tertiary hover:text-danger-text"
                         onClick={() => handleCancellationDecision(request, "DECLINE")}
                         disabled={isDeciding}
                       >
@@ -385,7 +381,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     <Button type="button"
                       variant="ghost"
                       size="sm"
-                      className="text-muted-foreground hover:text-brown-900"
+                      className="text-tertiary hover:text-primary"
                       onClick={() => startEditing(request)}
                       disabled={editMutation.isPending}
                     >
@@ -397,7 +393,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     <Button type="button"
                       variant="ghost"
                       size="sm"
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-tertiary hover:text-danger-text"
                       onClick={() => handleCancel(request)}
                       disabled={cancelMutation.isPending}
                     >
@@ -414,7 +410,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onChange={setEditStart}
                     disabled={editMutation.isPending}
                   />
-                  <span className="text-xs text-muted-foreground">to</span>
+                  <span className="text-hint text-tertiary">to</span>
                   <DatePicker
                     value={editEnd}
                     onChange={setEditEnd}
@@ -428,7 +424,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     Save
                   </Button>
                   <Button type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => setEditingId(null)}
                     disabled={editMutation.isPending}
@@ -457,7 +453,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     Request cancellation
                   </Button>
                   <Button type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => setCancellingId(null)}
                     disabled={cancelMutation.isPending}
@@ -489,7 +485,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     Confirm
                   </Button>
                   <Button type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => setRejectingId(null)}
                     disabled={isDeciding}

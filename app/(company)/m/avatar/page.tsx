@@ -30,8 +30,8 @@ export default async function MobileAvatarPage({ searchParams }: Props) {
   if (!usable || !token) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
-        <h1 className="text-xl font-semibold text-foreground">This code has expired</h1>
-        <p className="max-w-xs text-muted-foreground">
+        <h1 className="text-section-title text-primary">This code has expired</h1>
+        <p className="max-w-xs text-tertiary">
           Codes last a few minutes and work once. Show a new one on your computer and scan it again.
         </p>
       </div>

@@ -15,7 +15,7 @@ const HomeSettingsPage: FC = () => (
       <div className="px-8 space-y-4">
         <SettingsPageHeader title="Home" backHref="/settings"/>
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           What everybody&apos;s home can show. Each person chooses and arranges their own widgets; the company
           decides where the data behind them comes from.
         </PageDescription>

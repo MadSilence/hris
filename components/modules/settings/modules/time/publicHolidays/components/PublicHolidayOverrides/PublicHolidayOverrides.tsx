@@ -1,9 +1,10 @@
 "use client";
 
 import { FC } from "react";
-import { Undo2 } from "lucide-react";
+import { Undo02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { PublicHolidayOverride } from "@/models/publicHolidays/holiday";
 import { formatDisplayDate } from "@/lib/date";
@@ -25,7 +26,7 @@ export const describeProviderVersion = (override: PublicHolidayOverride): string
  */
 export const PublicHolidayEditedMarker: FC<{ override: PublicHolidayOverride }> = ({ override }) => (
   <span
-    className="ml-2 text-xs font-normal text-brown-400"
+    className="ml-2 text-hint font-normal text-tertiary"
     title={`Edited by your company. ${describeProviderVersion(override)}`}
   >
     Edited
@@ -40,11 +41,11 @@ export const PublicHolidayOverrideRowActions: FC<{
 }> = ({ override, disabled, onRevert }) => (
   <RowActionsMenu label="Holiday actions" disabled={disabled}>
     <RowAction
-      icon={<Undo2 className="h-4 w-4 text-muted-foreground" />}
+      icon={<Icon icon={Undo02Icon} size="sm" className="text-tertiary" />}
       onClick={() => onRevert(override)}
       title={describeProviderVersion(override)}
     >
-      Revert to Provider
+      Revert to provider
     </RowAction>
   </RowActionsMenu>
 );
@@ -62,18 +63,18 @@ export const RemovedProviderDays: FC<{
   if (overrides.length === 0) return null;
 
   return (
-    <section className="flex-none space-y-2" aria-label="Removed Provider Days">
+    <section className="flex-none space-y-2" aria-label="Removed provider days">
       <div>
-        <h3 className="text-sm font-semibold text-foreground">Removed Provider Days</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-body font-semibold text-primary">Removed provider days</h3>
+        <p className="text-body text-tertiary">
           The provider lists these days; your company removed them from this calendar.
         </p>
       </div>
-      <ul className="divide-y divide-brown-100">
+      <ul className="divide-y divide-divider">
         {overrides.map((override) => (
-          <li key={override.id} className="flex items-center justify-between gap-4 py-1.5 text-sm">
-            <span className="text-muted-foreground">
-              <span className="font-medium text-foreground">{override.providerName}</span>
+          <li key={override.id} className="flex items-center justify-between gap-4 py-1.5 text-body">
+            <span className="text-tertiary">
+              <span className="font-medium text-primary">{override.providerName}</span>
               {" · "}
               {span(override.providerHolidayDate, override.providerEndDate)}
             </span>
@@ -85,8 +86,8 @@ export const RemovedProviderDays: FC<{
                 disabled={disabled}
                 onClick={() => onRevert(override)}
               >
-                <Undo2 className="h-4 w-4" />
-                Revert to Provider
+                <Icon icon={Undo02Icon} size="sm" />
+                Revert to provider
               </Button>
             )}
           </li>

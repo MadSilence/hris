@@ -53,7 +53,7 @@ const bound: HolidayCalendarBinding = {
   calendarId: "cal-de",
   calendarName: "Germany 2026",
   ruleId: "rule-1",
-  ruleName: "Holiday Calendar · Office Berlin → Germany 2026",
+  ruleName: "Holiday calendar · Office Berlin → Germany 2026",
   ruleStatus: "ENABLED",
   inheriting: 12,
 };
@@ -91,7 +91,7 @@ describe("HolidayCalendarBindingSection", () => {
 
     expect(await screen.findByText("Germany 2026")).toBeInTheDocument();
     expect(screen.getByText(/12 people inherit it/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Run Log" })).toHaveAttribute("href", "/settings/automation/automations/rule-1");
+    expect(screen.getByRole("link", { name: "Run log" })).toHaveAttribute("href", "/settings/automation/automations/rule-1");
     expect(screen.getByRole("button", { name: "Change" })).toBeInTheDocument();
     expect(holidayCalendarBindingsService.get).toHaveBeenCalledWith("OFFICE", "berlin");
   });
@@ -102,7 +102,7 @@ describe("HolidayCalendarBindingSection", () => {
 
     expect(await screen.findByText("None")).toBeInTheDocument();
     expect(screen.getByText(/legal entity's calendar, or the company default/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Set Calendar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Set calendar" })).toBeInTheDocument();
   });
 
   it("previews the counts before anything is applied, then applies", async () => {
@@ -112,7 +112,7 @@ describe("HolidayCalendarBindingSection", () => {
     renderSection();
 
     await screen.findByText("None");
-    fireEvent.click(screen.getByRole("button", { name: "Set Calendar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set calendar" }));
     // An archived calendar is not offered; an inactive one is.
     expect(screen.queryByRole("radio", { name: "Old Calendar" })).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "United Kingdom 2026" })).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("HolidayCalendarBindingSection", () => {
     renderSection();
 
     await screen.findByText("None");
-    fireEvent.click(screen.getByRole("button", { name: "Set Calendar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set calendar" }));
     fireEvent.click(screen.getByRole("radio", { name: "Germany 2026" }));
     fireEvent.click(screen.getByRole("button", { name: "Review" }));
     fireEvent.click(await screen.findByRole("button", { name: "Apply" }));

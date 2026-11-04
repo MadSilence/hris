@@ -1,7 +1,8 @@
 "use client";
 
 import { FC } from "react";
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
 import { useAttributeDeleteImpact } from "@/components/modules/settings/modules/attributes/hooks/useDeleteImpact";
@@ -54,8 +55,8 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-3 text-left">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-danger-100 text-danger-600">
-              <Trash2 className="h-5 w-5"/>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+              <Icon icon={Delete02Icon} />
             </span>
             <div className="space-y-1">
               <AlertDialogTitle>Delete attribute</AlertDialogTitle>
@@ -67,14 +68,14 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
           </div>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
+            <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
 
             <div>
-              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">Warning</h4>
 
-              <div className="space-y-1 text-sm text-danger-700">
+              <div className="space-y-1 text-body text-secondary">
                 {hasOptions && (
                   <p>
                     All options associated with this attribute will also be
@@ -140,7 +141,7 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Delete attribute
           </AlertDialogAction>

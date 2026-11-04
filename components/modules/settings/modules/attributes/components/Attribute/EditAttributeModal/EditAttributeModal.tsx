@@ -1,14 +1,15 @@
 "use client";
 
 import { FC, useRef } from "react";
-import { Pencil } from "lucide-react";
+import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { FormError } from "@/components/feedback/FormError";
 import { Attribute, AttributePatch } from "@/models/attribute/Attribute";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
@@ -67,8 +68,8 @@ export const EditAttributeModal: FC<EditAttributeModalProps> = ({
       >
         <DialogHeader>
           <div className="flex items-center gap-3 text-left">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
-              <Pencil className="h-5 w-5" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+              <Icon icon={PencilEdit02Icon} />
             </span>
             <div className="space-y-1">
               <DialogTitle>Edit attribute</DialogTitle>

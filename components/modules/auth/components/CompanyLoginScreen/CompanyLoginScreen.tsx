@@ -25,12 +25,11 @@ type Props = {
  * **A server component, and that is the requirement, not a detail** (`technical_documentation/
  * COMPANY_ADDRESSES.md` § 4, the login page is never repainted). Everything the company configured arrives in this HTML:
  * the headline and subheadline as text, the background as an `<img>` with its URL, the colour through
- * `BrandThemeStyle` in `<head>` from the same read. Nothing here fetches in the browser, so nothing can
+ * `workspaceAccent` on `<html>` from the same read. Nothing here fetches in the browser, so nothing can
  * change after the first frame. Only the form itself hydrates, and it already shows the right words.
  *
- * The only thing that arrives later is the picture's bytes. It is preloaded, and the surface beneath it
- * is the brand's own tint from the first frame (`bg-brown-100` is re-hued by the brand palette), so the
- * image lands in a space already laid out and coloured for it — no fade, no shift.
+ * The only things that arrive later are the bytes of the picture and the logo. The picture is preloaded
+ * over a Mist surface already laid out for it, and the logo's box is capped, so neither shifts anything.
  */
 export default function CompanyLoginScreen({
   appearance, passwordChanged, changeCompanyHref, returnTo, sso, initialMfa, ssoFailed,
@@ -40,7 +39,13 @@ export default function CompanyLoginScreen({
   const backgroundUrl = appearance.loginImageUrl;
 
   return (
-    <AuthScreen data-test="company-login" backgroundUrl={backgroundUrl} className="min-h-screen">
+    <AuthScreen
+      data-test="company-login"
+      backgroundUrl={backgroundUrl}
+      logoUrl={appearance.logoUrl}
+      poweredBy
+      className="min-h-screen"
+    >
       <LoginContainer
         passwordChanged={passwordChanged}
         headline={headline}

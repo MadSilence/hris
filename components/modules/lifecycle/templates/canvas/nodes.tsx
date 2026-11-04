@@ -12,8 +12,9 @@ import {
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import { Hourglass, Plus, TriangleAlert } from "lucide-react";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Add01Icon, Alert02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { cn } from "@/lib/cn";
 import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
 import { dayLabel, type DraftItem } from "./draft";
 import { BLOCK_H, BLOCK_W, dayOneColumn, type Layout } from "./timeAxis";
@@ -46,7 +47,7 @@ const COMPACT_BELOW = 0.6;
 export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
   const compact = useStore((s) => s.transform[2] < COMPACT_BELOW);
   const { item } = data;
-  const Icon = TASK_KIND_ICON[item.kind];
+  const kindIcon = TASK_KIND_ICON[item.kind];
   const title = item.title || "Untitled task";
   const warn = item.assigneeKind === "SPECIFIC_USER" && (item.assigneeProblem !== null || !item.assigneeUserId);
 
@@ -60,26 +61,26 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       title={title}
       onFocus={() => data.onFocusAction(item.key)}
       className={cn(
-        "group flex h-full w-full flex-col justify-between gap-1 rounded-xl border-l-[3px] bg-white px-2.5 py-2 text-left outline-none",
-        "shadow-[0_1px_2px_rgba(60,40,30,0.08),0_1px_6px_rgba(60,40,30,0.06)] ring-1 ring-brown-900/5",
-        "transition-[box-shadow,transform] duration-150 hover:-translate-y-px hover:shadow-md motion-reduce:transition-none",
-        data.accent ?? "border-l-brown-300",
-        data.selected && "ring-2 ring-brown-500",
-        dragging && "shadow-lg",
+        "group flex h-full w-full flex-col justify-between gap-1 rounded-popover border-l-[3px] bg-card px-2.5 py-2 text-left outline-none",
+        "shadow-raised",
+        "transition-[box-shadow,transform] duration-(--duration-hover) hover:-translate-y-px hover:shadow-popover motion-reduce:transition-none",
+        data.accent ?? "border-l-field",
+        data.selected && "ring-2 ring-accent",
+        dragging && "shadow-drag",
       )}
     >
       {!data.readOnly && (
-        <Handle type="target" position={Position.Left} className="!h-2 !w-2 !border-brown-300 !bg-white" />
+        <Handle type="target" position={Position.Left} className="!h-2 !w-2 !border-field !bg-card" />
       )}
-      <span className="line-clamp-4 break-words text-[13px] font-medium leading-5 text-brown-900">{title}</span>
+      <span className="line-clamp-4 break-words text-label font-medium leading-5 text-primary">{title}</span>
       {!compact && (
-        <span className="flex items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
-          <span className={cn("grid h-4 w-4 shrink-0 place-items-center rounded", data.chip ?? "bg-brown-100 text-brown-700")}>
-            <Icon className="h-3 w-3" aria-label={TASK_KIND_LABELS[item.kind]} />
+        <span className="flex items-center gap-1.5 text-hint leading-4 text-tertiary">
+          <span className={cn("grid h-4 w-4 shrink-0 place-items-center rounded-tag", data.chip ?? "bg-mist text-secondary")}>
+            <Icon icon={kindIcon} size="sm" className="size-3.5" label={TASK_KIND_LABELS[item.kind]} />
           </span>
           <span className="truncate">{dayLabel(item, data.type)}</span>
-          {item.waitsFor.length > 0 && <Hourglass className="h-3 w-3 shrink-0" aria-label="Waits for another task" />}
-          {warn && <TriangleAlert className="h-3 w-3 shrink-0 text-warning-700" aria-label="Needs a person who can take it" />}
+          {item.waitsFor.length > 0 && <Icon icon={HourglassIcon} size="sm" className="shrink-0" label="Waits for another task" />}
+          {warn && <Icon icon={Alert02Icon} size="sm" className="shrink-0 text-status-pending-text" label="Needs a person who can take it" />}
         </span>
       )}
       {!data.readOnly && (
@@ -87,7 +88,7 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
           type="source"
           position={Position.Right}
           aria-label="Drag to the task that waits for this one"
-          className="!h-2.5 !w-2.5 !border-brown-400 !bg-white opacity-60 group-hover:opacity-100"
+          className="!h-2.5 !w-2.5 !border-strong !bg-card opacity-60 group-hover:opacity-100"
         />
       )}
     </div>
@@ -117,18 +118,18 @@ export function GridNode({ data }: NodeProps<GridFlowNode>) {
       {layout.lanes.map((lane) => (
         <div
           key={lane.id}
-          className={cn("absolute left-0 right-0 border-b border-white", data.tints[lane.id])}
+          className={cn("absolute left-0 right-0 border-b border-card", data.tints[lane.id])}
           style={{ top: lane.top, height: lane.height }}
         />
       ))}
       {layout.axis.columns.map((c) => (
         <div
           key={c.id}
-          className={cn("absolute top-0 border-l border-brown-200/40", c.kind === "beforeStart" && "bg-brown-100/40")}
+          className={cn("absolute top-0 border-l border-divider/40", c.kind === "beforeStart" && "bg-mist/40")}
           style={{ left: c.x, width: c.width, height: layout.height }}
         />
       ))}
-      <div className="absolute top-0 w-0.5 bg-primary" style={{ left: dayOne.x - 1, height: layout.height }} />
+      <div className="absolute top-0 w-0.5 bg-accent" style={{ left: dayOne.x - 1, height: layout.height }} />
       {!data.readOnly && layout.lanes.map((lane) => layout.axis.columns.map((c) => (
         <div
           key={`${lane.id}|${c.id}`}
@@ -137,7 +138,7 @@ export function GridNode({ data }: NodeProps<GridFlowNode>) {
           style={{ left: c.x, top: lane.top, width: c.width, height: lane.height }}
           onClick={(e) => data.onCellClickAction(lane.id, c.id, e.clientX, e.clientY)}
         >
-          <Plus className="h-4 w-4 text-brown-300 opacity-0 transition-opacity group-hover:opacity-100" />
+          <Icon icon={Add01Icon} size="sm" className="text-disabled opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
       )))}
     </div>
@@ -156,7 +157,7 @@ export function WaitsForEdgeView({ id, sourceX, sourceY, targetX, targetY, sourc
       id={id}
       path={path}
       markerEnd={markerEnd}
-      style={{ stroke: data?.selected ? "var(--brown-700)" : "var(--brown-400)", strokeWidth: data?.selected ? 2.5 : 1.5 }}
+      style={{ stroke: data?.selected ? "var(--accent)" : "var(--border-strong)", strokeWidth: data?.selected ? 2.5 : 1.5 }}
     />
   );
 }

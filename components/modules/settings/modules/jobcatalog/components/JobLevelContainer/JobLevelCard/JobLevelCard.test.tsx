@@ -59,13 +59,13 @@ describe("JobLevelCard", () => {
     expect(rungs).toEqual(["Junior", "Mid", "Senior"]);
   });
 
-  it("hides level actions until Manage Group is pressed", () => {
+  it("hides level actions until Manage group is pressed", () => {
     const props = renderCard(false);
 
     expect(screen.queryByLabelText("Move level up")).not.toBeInTheDocument();
-    expect(screen.queryByText("Add Level")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add level")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Manage Group/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Manage group/ }));
     expect(props.onToggleManaging).toHaveBeenCalledTimes(1);
   });
 
@@ -73,7 +73,7 @@ describe("JobLevelCard", () => {
     renderCard(true);
 
     expect(screen.getAllByLabelText("Move level up")).toHaveLength(3);
-    expect(screen.getByText("Add Level")).toBeInTheDocument();
+    expect(screen.getByText("Add level")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Done/ })).toBeInTheDocument();
   });
 
@@ -124,7 +124,7 @@ describe("JobLevelCard", () => {
     const user = userEvent.setup();
     const props = renderCard(true);
 
-    await user.click(screen.getByLabelText("Track Actions"));
+    await user.click(screen.getByLabelText("Track actions"));
     await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
 
     expect(props.onDeleteGroup).toHaveBeenCalledWith(props.group);

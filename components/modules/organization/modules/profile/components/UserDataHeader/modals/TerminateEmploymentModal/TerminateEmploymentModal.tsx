@@ -3,7 +3,8 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
 import { useQuery } from "@tanstack/react-query";
-import { UserMinus } from "lucide-react";
+import { UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -12,18 +13,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Switch } from "@/components/desact/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import type {
   LeaverReassignment,
@@ -39,6 +40,7 @@ import {
 import { DatePicker } from "@/components/ui/DatePicker";
 import { dateToISO, formatDisplayDate } from "@/lib/date";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { InlineAlert } from "@/components/desact/alert";
 
 const REASONS: { id: TerminationReason; label: string }[] = [
   { id: "VOLUNTARY", label: "Voluntary — the person resigned" },
@@ -140,8 +142,8 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
       <DialogContent hideClose className="sm:max-w-xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger-50 text-danger-600">
-              <UserMinus className="h-5 w-5"/>
+            <span className="flex h-9 w-9 items-center justify-center rounded-control bg-subtle text-secondary">
+              <Icon icon={UserRemove01Icon} />
             </span>
             <div>
               <DialogTitle>Terminate employment</DialogTitle>
@@ -157,7 +159,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="last-working-day" required>Last Working Day</RequiredLabel>
+              <RequiredLabel htmlFor="last-working-day" required>Last working day</RequiredLabel>
               <DatePicker
                 id="last-working-day"
                 value={lastWorkingDay}
@@ -185,10 +187,10 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-brown-200 px-3 py-2.5">
+          <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
             <div>
-              <Label htmlFor="rehire-eligible" className="text-sm">Eligible for Rehire</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label htmlFor="rehire-eligible" className="text-body">Eligible for rehire</Label>
+              <p className="text-hint text-tertiary">
                 The first thing anyone asks when this person applies again.
               </p>
             </div>
@@ -221,12 +223,12 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             />
           )}
 
-          <div className="rounded-lg border border-warning-200 bg-warning-50 p-3.5">
-            <p className="mb-1.5 text-sm font-medium text-warning-900">What this will do</p>
+          <InlineAlert tone="pending">
+            <p className="mb-1.5 text-body font-medium text-status-pending-text">What this will do</p>
             {impactLoading ? (
-              <p className="text-sm text-warning-800">Checking…</p>
+              <p className="text-body text-status-pending-text">Checking…</p>
             ) : (
-              <ul className="space-y-1 text-sm text-warning-800">
+              <ul className="space-y-1 text-body text-status-pending-text">
                 {/* The change lands on the day after the last working day (WALK_QUESTIONS § 14); until
                     then the person is an employee like any other — the whole of the last day included,
                     which is why a last day of today still reads "the end of today", not "now". */}
@@ -266,16 +268,16 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                 ) : null}
               </ul>
             )}
-          </div>
+          </InlineAlert>
 
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={isLoading} onClick={onCancelAction}>
+            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !lastWorkingDay}
-              className="bg-danger-600 text-white hover:bg-danger-700"
+              variant="destructive-confirm"
             >
               {isLoading ? "Terminating…" : "Terminate"}
             </Button>

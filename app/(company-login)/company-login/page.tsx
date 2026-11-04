@@ -14,7 +14,7 @@ type Props = {
  * address of its own.
  *
  * Dynamic by nature: the page depends on the host, so it can never be built once and corrected in the
- * browser. The appearance is read here and in `BrandThemeStyle` through one cached read, so the colour
+ * browser. The appearance is read here and in `workspaceAccent` through one cached read, so the colour
  * and the words in this response are the same answer.
  *
  * `next` is where the person was going when the middleware sent them here; it is checked on the server,

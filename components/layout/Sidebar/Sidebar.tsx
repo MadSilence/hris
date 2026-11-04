@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import type { ComponentType, FC, SVGProps } from "react";
+import { useEffect, useState, type FC } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { KeyRound, LogOut, UserRound, SlidersHorizontal, Sparkles } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage, } from "@/public/desact/src/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
-import { RowAction } from "@/components/ui/RowActionsMenu";
+  Key01Icon,
+  Logout01Icon,
+  PreferenceHorizontalIcon,
+  Search01Icon,
+  SparklesIcon,
+  UserIcon,
+} from "@hugeicons/core-free-icons";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/desact/dropdown-menu";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import {
   Sidebar,
   SidebarContent,
@@ -23,25 +28,22 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-} from "@/public/desact/src/components/ui/sidebar";
+} from "@/components/desact/sidebar";
+import { NoddoWordmark } from "@/components/brand";
+import { RowAction } from "@/components/ui/RowActionsMenu";
 import { Company } from "@/models/company";
 
 export type NavItem = {
   label: string;
   href: string;
-  Icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  icon: IconSvgElement;
   badge?: number;
-  /**
-   * An item that opens something in place instead of navigating — the Search item opens the
-   * quick-search window. It is never "active": there is no page behind it.
-   */
-  onSelect?: () => void;
 };
 
 export type SidebarProfile = {
   id: string;
   name: string;
-  role?: string;
+  email?: string;
   avatarUrl?: string | null;
 };
 
@@ -52,20 +54,22 @@ type SidebarProps = {
   bottomItems: NavItem[];
   profile: SidebarProfile;
   company?: Company;
+  /** Opens the quick-search window — the search row, and ⌘K / Ctrl+K anywhere. */
+  onSearch: () => void;
   /** Ends the session on this browser. */
   onSignOut: () => void;
   /** Absent when the password is not the signed-in person's to change — an impersonated session. */
   onChangePassword?: () => void;
   /**
-   * Offered while there is still something on the welcome worth doing — no photo, a field of their
-   * own left blank. Absent otherwise, because a menu item that opens a finished form is a control
-   * that cannot work.
+   * Offered while there is still something on the welcome worth doing — no photo, a field of their own
+   * left blank. Absent otherwise, because a menu item that opens a finished form is a control that cannot
+   * work.
    */
   showFinishProfile?: boolean;
 };
 
-const getInitials = (name: string) => {
-  const initials = name
+const initialsOf = (name: string) =>
+  name
     .trim()
     .split(/\s+/)
     .filter(Boolean)
@@ -74,9 +78,20 @@ const getInitials = (name: string) => {
     .toUpperCase()
     .slice(0, 2);
 
-  return initials || "U";
+/** "⌘K" on Apple keyboards, "Ctrl K" elsewhere — read after mount, so the server's render and the first client render agree. */
+const useSearchShortcutLabel = () => {
+  const [label, setLabel] = useState("Ctrl K");
+  useEffect(() => {
+    if (/Mac|iPhone|iPad/.test(navigator.platform)) setLabel("⌘K");
+  }, []);
+  return label;
 };
 
+/**
+ * The navigation column of SPEC § 13.6, top to bottom: the company's logo slot, search (⌘K), the items, a
+ * spacer, Settings, the noddo wordmark — 12 px, gray, the one place noddo appears in the app's chrome — a
+ * divider, and the profile block.
+ */
 const AppSidebar: FC<SidebarProps> = ({
   collapsed = false,
   onToggle,
@@ -84,229 +99,167 @@ const AppSidebar: FC<SidebarProps> = ({
   bottomItems,
   profile,
   company,
+  onSearch,
   onSignOut,
   onChangePassword,
   showFinishProfile = false,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const searchShortcut = useSearchShortcutLabel();
 
-  const profileHref = profile.id
-    ? `/organization/people/${profile.id}/personal`
-    : "/organization/people";
-
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
-
-  const open = !collapsed;
+  const profileHref = profile.id ? `/organization/people/${profile.id}/personal` : "/organization/people";
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   const handleOpenChange = (nextOpen: boolean) => {
-    const nextCollapsed = !nextOpen;
-
-    if (nextCollapsed !== collapsed) {
+    if (nextOpen === collapsed) {
       onToggle?.();
     }
   };
 
   const renderItem = (item: NavItem) => {
-    const active = !item.onSelect && isActive(item.href);
-    const Icon = item.Icon;
+    const active = isActive(item.href);
     const badge = item.badge && item.badge > 0 ? item.badge : 0;
-    const badgeLabel = badge > 99 ? "99+" : String(badge);
-    const targetClassName = [
-      "relative no-underline hover:no-underline",
-      collapsed ? "justify-center gap-0" : "gap-3",
-    ].join(" ");
-    const content = (
-      <>
-        {Icon ? <Icon aria-hidden focusable={false}/> : null}
-        {!collapsed ? <span>{item.label}</span> : null}
-
-        {badge > 0 ? (
-          collapsed ? (
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-(--sidebar-badge-bg)" aria-hidden/>
-          ) : (
-            <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-(--sidebar-badge-bg) px-1.5 text-xs font-medium text-(--sidebar-badge-fg)">
-              {badgeLabel}
-            </span>
-          )
-        ) : null}
-      </>
-    );
 
     return (
       <SidebarMenuItem key={item.href}>
-        <SidebarMenuButton
-          asChild
-          isActive={active}
-          tooltip={item.label}
-          aria-current={active ? "page" : undefined}
-          className={[
-            "mx-auto h-10 rounded-lg text-sm font-normal",
-            "text-sidebar-foreground/80",
-            "hover:bg-(--sidebar-item-hover-bg)",
-            "hover:text-(--sidebar-item-hover-fg)",
-            "data-[active=true]:bg-(--sidebar-item-active-bg)",
-            "data-[active=true]:text-(--sidebar-item-active-fg)",
-            "data-[active=true]:font-normal",
-            "[&_svg]:size-4",
-            "[&_svg]:text-(--sidebar-item-icon)",
-            collapsed ? "size-10 px-0" : "w-full px-3",
-          ].join(" ")}
-        >
-          {/* The menu button is a Slot: its one child must be the element itself, so the two cases are
-              written out rather than wrapped in a component that would swallow the ref. */}
-          {item.onSelect ? (
-            <button type="button" onClick={item.onSelect} className={targetClassName}>
-              {content}
-            </button>
-          ) : (
-            <Link href={item.href} className={targetClassName}>
-              {content}
-            </Link>
-          )}
+        <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+          <Link href={item.href} aria-current={active ? "page" : undefined}>
+            <Icon icon={item.icon} />
+            <span>{item.label}</span>
+            {badge > 0 &&
+              (collapsed ? (
+                <span aria-hidden className="absolute top-1.5 right-1.5 size-2 rounded-pill bg-sidebar-counter" />
+              ) : (
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-pill bg-sidebar-counter px-1.5 text-hint font-medium text-sidebar-counter-text tabular-nums">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              ))}
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
   };
 
+  const companyName = company?.name ?? "";
+
   return (
-    <SidebarProvider open={open} onOpenChange={handleOpenChange}>
-      <Sidebar
-        collapsible="icon"
-        className="
-          group/sidebar
-          [&_[data-sidebar=header]]:p-2
-          [&_[data-sidebar=content]]:px-2
-          [&_[data-sidebar=footer]]:p-2
-          [&_[data-sidebar=menu]]:gap-1
-        "
-      >
-        <SidebarRail/>
+    <SidebarProvider open={!collapsed} onOpenChange={handleOpenChange}>
+      <Sidebar>
+        <SidebarRail />
 
-        <SidebarHeader>
-          <div className="relative flex h-12 items-center">
-            <div
-              className={[
-                "group/logo relative flex min-w-0 items-center",
-                collapsed ? "w-10 justify-center" : "flex-1",
-              ].join(" ")}
+        <SidebarHeader className="pb-1">
+          <div className="flex h-10 items-center gap-2 group-data-[state=collapsed]:justify-center">
+            <Link
+              href="/dashboard"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded-control group-data-[state=collapsed]:flex-none"
+              aria-label={companyName ? `${companyName} home` : "Home"}
             >
-              <Link
-                href="/dashboard"
-                className={[
-                  "min-w-0 items-center rounded-lg no-underline hover:no-underline",
-                  collapsed
-                    ? "flex size-10 justify-center p-0"
-                    : "flex flex-1 gap-3 px-2 py-2",
-                ].join(" ")}
-              >
-                <Avatar className="size-8 shrink-0 rounded-lg">
-                  <AvatarImage
-                    src={company?.companyLogo ?? undefined}
-                    alt={company?.name ?? "Company logo"}
-                  />
-                  <AvatarFallback className="rounded-lg text-xs font-semibold">
-                    {getInitials(company?.name ?? "Company")}
-                  </AvatarFallback>
-                </Avatar>
-
-                {!collapsed ? (
-                  <span className="truncate text-[15px] font-semibold">
-            {company?.name ?? "Loading..."}
-          </span>
-                ) : null}
-              </Link>
-
-              <SidebarTrigger
-                aria-label="Toggle sidebar"
-                className={[
-                  "size-8",
-                  collapsed
-                    ? "absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/logo:opacity-100"
-                    : "ml-auto",
-                ].join(" ")}
-              />
-            </div>
+              {company?.companyLogo ? (
+                // The company's logo is primary (SPEC § 2): up to 160 × 32 expanded, a 32 px mark collapsed.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.companyLogo}
+                  alt={companyName}
+                  className="h-8 max-w-40 object-contain object-left group-data-[state=collapsed]:size-8 group-data-[state=collapsed]:object-cover"
+                />
+              ) : (
+                <>
+                  {/* No logo: the first letter on an accent square, radius 8 (SPEC § 4.7). */}
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-control bg-accent text-body font-semibold text-on-accent">
+                    {companyName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="truncate text-body font-semibold text-primary group-data-[state=collapsed]:hidden">
+                    {companyName}
+                  </span>
+                </>
+              )}
+            </Link>
+            <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
           </div>
+
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="Search" onClick={onSearch} className="font-normal text-tertiary">
+                <Icon icon={Search01Icon} />
+                <span>Search</span>
+                <kbd className="ml-auto font-sans text-hint text-tertiary group-data-[state=collapsed]:hidden">
+                  {searchShortcut}
+                </kbd>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarHeader>
 
         <SidebarContent>
           <SidebarMenu>{topItems.map(renderItem)}</SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter>
+        <SidebarFooter className="gap-3">
+          {collapsed && <SidebarTrigger className="mx-auto" />}
           <SidebarMenu>{bottomItems.map(renderItem)}</SidebarMenu>
 
-          <SidebarSeparator className="!mx-[-8px] !w-[calc(100%+16px)] !max-w-none"/>
+          <div className="flex px-2 text-sidebar-wordmark group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0">
+            <NoddoWordmark tone="mono" height={12} />
+          </div>
+
+          <SidebarSeparator className="-mx-3 w-auto" />
 
           <SidebarMenu>
             <SidebarMenuItem>
               {/*
-                The user menu. There was no way to sign out anywhere in the app, and Change Password sat
-                in the profile header for want of anywhere else (technical_documentation/COMPANY_ADDRESSES.md). The block is
-                the trigger; the items follow ACTIONS_AND_MENUS §§ 2–3 through RowAction. Sign Out is
-                not destructive — nothing is lost — so it takes no separator and no red.
+                The user menu: the profile block is its trigger; the items follow ACTIONS_AND_MENUS §§ 2–3
+                through RowAction. Sign out is not destructive — nothing is lost — so it takes no separator
+                and no red.
               */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     tooltip={profile.name}
-                    aria-label="User menu"
-                    className={[
-                      "mx-auto hover:bg-sidebar-accent/60 data-[state=open]:bg-sidebar-accent/60",
-                      collapsed ? "size-10 justify-center gap-0 px-0" : "h-12 w-full gap-3 px-2",
-                    ].join(" ")}
+                    aria-label="Your account"
+                    className="h-12 gap-2 data-[state=open]:bg-sidebar-item-hover group-data-[state=collapsed]:size-10"
                   >
-                    <Avatar className="size-8 shrink-0">
-                      <AvatarImage
-                        src={profile.avatarUrl ?? undefined}
-                        alt={profile.name}
-                      />
-                      <AvatarFallback className="text-xs font-semibold">
-                        {getInitials(profile.name)}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    {!collapsed ? (
-                      <span className="flex min-w-0 flex-col text-left">
-                        <span className="truncate text-sm font-medium">
-                          {profile.name}
-                        </span>
-
-                        {profile.role ? (
-                          <span className="truncate text-xs text-sidebar-foreground/55">
-                            {profile.role}
-                          </span>
-                        ) : null}
-                      </span>
-                    ) : null}
+                    {profile.name ? (
+                      <Avatar className="size-8">
+                        <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
+                        <AvatarFallback name={profile.name} className="text-hint">
+                          {initialsOf(profile.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      // Still loading: a shimmering circle (SPEC § 12), not a "?" that reads as an unknown person.
+                      <Skeleton className="size-8 shrink-0 rounded-pill" />
+                    )}
+                    <span className="flex min-w-0 flex-col text-left group-data-[state=collapsed]:hidden">
+                      <span className="truncate text-body font-medium text-primary">{profile.name}</span>
+                      {profile.email && <span className="truncate text-hint font-normal text-tertiary">{profile.email}</span>}
+                    </span>
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent side="top" align="start" className="w-40 rounded-lg p-1">
-                  <RowAction icon={<UserRound className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push(profileHref)}>
-                    My Profile
+                <DropdownMenuContent side="top" align="start" className="w-56">
+                  <RowAction icon={<Icon icon={UserIcon} size="sm" />} onClick={() => router.push(profileHref)}>
+                    My profile
                   </RowAction>
 
-                  {showFinishProfile ? (
-                    <RowAction icon={<Sparkles className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push("/welcome?again=1")}>
-                      Finish Your Profile
+                  {showFinishProfile && (
+                    <RowAction icon={<Icon icon={SparklesIcon} size="sm" />} onClick={() => router.push("/welcome?again=1")}>
+                      Finish your profile
                     </RowAction>
-                  ) : null}
+                  )}
 
-                  <RowAction icon={<SlidersHorizontal className="h-4 w-4 text-muted-foreground"/>} onClick={() => router.push("/preferences")}>
-                    My Preferences
+                  <RowAction icon={<Icon icon={PreferenceHorizontalIcon} size="sm" />} onClick={() => router.push("/preferences")}>
+                    My preferences
                   </RowAction>
 
-                  {onChangePassword ? (
-                    <RowAction icon={<KeyRound className="h-4 w-4 text-muted-foreground"/>} onClick={onChangePassword}>
-                      Change Password
+                  {onChangePassword && (
+                    <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={onChangePassword}>
+                      Change password
                     </RowAction>
-                  ) : null}
+                  )}
 
-                  <RowAction icon={<LogOut className="h-4 w-4 text-muted-foreground"/>} onClick={onSignOut}>
-                    Sign Out
+                  <RowAction icon={<Icon icon={Logout01Icon} size="sm" />} onClick={onSignOut}>
+                    Sign out
                   </RowAction>
                 </DropdownMenuContent>
               </DropdownMenu>

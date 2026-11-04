@@ -10,9 +10,9 @@ const AttributesSettingsPage: FC = () => (
   <PageGate resource="PEOPLE.ATTRIBUTES" action="VIEW">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
-        <SettingsPageHeader title="Person Information" backHref="/settings"/>
+        <SettingsPageHeader title="Person information" backHref="/settings"/>
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           Every field a person has. <span className="font-medium">Custom fields</span> are the ones
           your company defines — grouped into sections, with their own types, validation and
           sensitivity. <span className="font-medium">System fields</span> are built in and read-only:

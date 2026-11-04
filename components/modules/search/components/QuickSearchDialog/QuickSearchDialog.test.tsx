@@ -105,10 +105,10 @@ describe("QuickSearchDialog", () => {
 
     openWithKeyboard();
     expect(await screen.findByPlaceholderText("Search")).toBeInTheDocument();
-    expect(screen.getByText("Go To")).toBeInTheDocument();
+    expect(screen.getByText("Go to")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     // A settings page the reader holds the resource for, and not one they do not.
-    expect(screen.getByText("Employee Roles & Access")).toBeInTheDocument();
+    expect(screen.getByText("Employee roles & access")).toBeInTheDocument();
     expect(screen.queryByText("Logs")).not.toBeInTheDocument();
     expect(searchMock).not.toHaveBeenCalled();
 
@@ -126,7 +126,7 @@ describe("QuickSearchDialog", () => {
 
     expect(await screen.findByText("Anna Person1")).toBeInTheDocument();
     const headings = Array.from(document.querySelectorAll("[cmdk-group-heading]")).map((h) => h.textContent);
-    expect(headings).toEqual(["People", "Time Off Policies", "Roles"]);
+    expect(headings).toEqual(["People", "Time off policies", "Roles"]);
     // A kind the server left out is not drawn — not even as an empty heading.
     expect(screen.queryByText("Departments")).not.toBeInTheDocument();
 
@@ -144,7 +144,7 @@ describe("QuickSearchDialog", () => {
     expect(searchMock).not.toHaveBeenCalled();
   });
 
-  it("Show More widens that kind inside the window", async () => {
+  it("Show more widens that kind inside the window", async () => {
     renderShell();
     openWithKeyboard();
     typeTerm("an");
@@ -152,11 +152,11 @@ describe("QuickSearchDialog", () => {
     const people = (await screen.findByText("Anna Person1")).closest("[cmdk-group]") as HTMLElement;
     expect(within(people).queryByText("Anna Person6")).not.toBeInTheDocument();
 
-    fireEvent.click(within(people).getByText("Show More"));
+    fireEvent.click(within(people).getByText("Show more"));
 
     expect(await within(people).findByText("Anna Person7")).toBeInTheDocument();
     expect(searchMock).toHaveBeenCalledWith({ q: "an", kinds: ["PEOPLE"], limit: 50 });
-    expect(within(people).queryByText("Show More")).not.toBeInTheDocument();
+    expect(within(people).queryByText("Show more")).not.toBeInTheDocument();
     // The other kinds are still there.
     expect(screen.getByText("Annalist")).toBeInTheDocument();
   });

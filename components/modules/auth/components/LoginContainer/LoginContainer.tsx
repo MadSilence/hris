@@ -7,6 +7,8 @@ import { MfaSignInStep } from "@/components/modules/auth/components/MfaSignInSte
 import { messageForError } from "@/lib/errors/errorMessages";
 import { APP_HOME } from "@/lib/companyAddress";
 import type { PublicSso } from "@/api/modules/sso/ssoService";
+import { Button } from "@/components/desact/button";
+import { InlineAlert } from "@/components/desact/alert";
 
 export const PASSWORD_CHANGED_NOTICE = "Your password was changed. Sign in with the new one.";
 
@@ -26,7 +28,7 @@ type LoginContainerProps = {
   ssoFailed?: boolean;
 };
 
-const PROVIDER_NAME: Record<string, string> = { OKTA: "Okta", ENTRA: "Microsoft", OTHER: "Single Sign-On" };
+const PROVIDER_NAME: Record<string, string> = { OKTA: "Okta", ENTRA: "Microsoft", OTHER: "Single sign-on" };
 
 export const SSO_FAILED_NOTICE = "We could not sign you in with your identity provider. Please try again, or check your company address.";
 
@@ -69,8 +71,8 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
         // A full navigation, not router.push, on purpose.
         //
         // The root layout is what reads the session cookie and paints the company's brand
-        // (BrandThemeStyle). A client-side push keeps the layout that rendered for the *logged-out*
-        // login page — no cookie, no brand — so the app came up in the shipped brown and only
+        // (workspaceAccent). A client-side push keeps the layout that rendered for the *logged-out*
+        // login page — no cookie, no brand — so the app came up in the default accent and only
         // corrected itself whenever something later forced a hard load. Signing in changes identity;
         // re-rendering everything from the server is the honest response, and it costs one load.
         window.location.assign(returnTo);
@@ -97,31 +99,28 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
     );
   }
 
+  // SSO is a secondary button (SPEC § 2), even when it is the only way in: the accent is the company's
+  // primary action inside the product, and signing in through somebody else's page is not one.
   const ssoButton = ssoOn ? (
-    <a
-      href={ssoHref}
-      className="flex h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-    >
-      Sign in with {PROVIDER_NAME[sso?.provider ?? "OTHER"]}
-    </a>
+    <Button asChild variant="secondary" size="lg" className="w-full">
+      <a href={ssoHref}>Sign in with {PROVIDER_NAME[sso?.provider ?? "OTHER"]}</a>
+    </Button>
   ) : null;
 
   if (ssoOn && !showPassword) {
     return (
       <div className="w-full space-y-6">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">{headline}</h1>
-          {subheadline && <p className="text-md text-[var(--color-text-tertiary)]">{subheadline}</p>}
+          <h1 className="text-page-title">{headline}</h1>
+          {subheadline && <p className="text-body text-secondary">{subheadline}</p>}
         </div>
         {ssoFailed && (
-          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
-            {SSO_FAILED_NOTICE}
-          </p>
+          <InlineAlert tone="declined">{SSO_FAILED_NOTICE}</InlineAlert>
         )}
         {ssoButton}
-        <button type="button" className="mx-auto block text-sm text-brown-600 underline" onClick={() => setShowPassword(true)}>
-          System Owner? Sign in with a password
-        </button>
+        <Button type="button" variant="link" className="mx-auto flex" onClick={() => setShowPassword(true)}>
+          System owner? Sign in with a password
+        </Button>
       </div>
     );
   }
@@ -131,9 +130,7 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
     {ssoButton && (
       <div className="space-y-3">
         {ssoFailed && (
-          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
-            {SSO_FAILED_NOTICE}
-          </p>
+          <InlineAlert tone="declined">{SSO_FAILED_NOTICE}</InlineAlert>
         )}
       </div>
     )}
@@ -155,10 +152,10 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
     />
     {ssoButton && (
       <div className="space-y-3">
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-brown-200" />
+        <div className="flex items-center gap-3 text-hint text-tertiary">
+          <span className="h-px flex-1 bg-divider" />
           or
-          <span className="h-px flex-1 bg-brown-200" />
+          <span className="h-px flex-1 bg-divider" />
         </div>
         {ssoButton}
       </div>

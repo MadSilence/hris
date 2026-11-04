@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, FilePlus2, FileText } from "lucide-react";
+import { FileAddIcon, FileTextIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
+import { cn } from "@/lib/cn";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -22,6 +23,7 @@ import {
   useTemplates,
 } from "@/components/modules/settings/modules/templates/hooks";
 import type { TemplateSummaryDTO } from "@/api/modules/templates/dto";
+import { FieldError } from "@/components/desact/field-error";
 
 const LIBRARY_HREF = "/settings/general/templates?kind=REVIEW_FORM";
 const BLANK = "blank";
@@ -149,29 +151,29 @@ export function AddReviewFormDialog({ open, onCloseAction, onAddedAction, existi
         <DialogContent className="sm:max-w-2xl">
           <form onSubmit={submit} className="space-y-5">
             <DialogHeader>
-              <DialogTitle>Add Form</DialogTitle>
+              <DialogTitle>Add form</DialogTitle>
               <DialogDescription>
                 Start blank or from one of the library&apos;s forms. Either way the editor opens next, and everything in it
                 can be changed.
               </DialogDescription>
             </DialogHeader>
 
-            <div role="radiogroup" aria-label="Start From" className="grid gap-2 sm:grid-cols-2">
+            <div role="radiogroup" aria-label="Start from" className="grid gap-2 sm:grid-cols-2">
               <ChoiceCard
                 selected={choice === BLANK}
                 disabled={busy}
-                icon={<FilePlus2 className="h-4 w-4" />}
-                title="Blank Form"
+                icon={<Icon icon={FileAddIcon} size="sm" />}
+                title="Blank form"
                 summary="No questions yet — write your own."
                 onSelect={() => { setChoice(BLANK); setError(null); }}
               />
-              {templates.isLoading && [0, 1, 2].map((i) => <Skeleton key={i} className="h-[76px] rounded-xl" />)}
+              {templates.isLoading && [0, 1, 2].map((i) => <Skeleton key={i} className="h-[76px] rounded-popover" />)}
               {library.map((t) => (
                 <ChoiceCard
                   key={t.key}
                   selected={choice === t.key}
                   disabled={busy}
-                  icon={<FileText className="h-4 w-4" />}
+                  icon={<Icon icon={FileTextIcon} size="sm" />}
                   title={t.title}
                   summary={t.summary}
                   meta={meta(t)}
@@ -196,24 +198,24 @@ export function AddReviewFormDialog({ open, onCloseAction, onAddedAction, existi
                   id="new-review-form-name"
                   value={name}
                   disabled={busy}
-                  placeholder="Self Review, Manager Review…"
+                  placeholder="Self review, manager review…"
                   aria-invalid={nameError ? true : undefined}
                   onChange={(e) => { setName(e.target.value); setNameError(null); }}
                 />
-                {nameError && <p role="alert" className="text-xs text-destructive">{nameError}</p>}
+                {nameError && <FieldError>{nameError}</FieldError>}
               </div>
             )}
 
             <FormError message={error} />
 
             <DialogFooter className="items-center sm:justify-between">
-              <Link href={LIBRARY_HREF} className="text-sm text-muted-foreground underline-offset-4 hover:text-brown-900 hover:underline">
-                Browse the Library
+              <Link href={LIBRARY_HREF} className="text-body text-accent-text underline-offset-4 hover:underline">
+                Browse the library
               </Link>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={requestClose} disabled={busy}>Cancel</Button>
+                <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>Cancel</Button>
                 <Button type="submit" disabled={busy || (template !== null && (!preview.data || templateBlocked))}>
-                  {busy ? "Adding…" : addedBefore ? "Open It" : "Add"}
+                  {busy ? "Adding…" : addedBefore ? "Open it" : "Add"}
                 </Button>
               </div>
             </DialogFooter>
@@ -253,23 +255,23 @@ function ChoiceCard({ selected, disabled, icon, title, summary, meta, onSelect }
       disabled={disabled}
       onClick={onSelect}
       className={cn(
-        "relative flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brown-300",
-        selected ? "border-brown-400 bg-brown-50/70" : "border-brown-100 hover:border-brown-200 hover:bg-brown-50/40",
+        "relative flex items-start gap-3 rounded-card border px-4 py-3 text-left transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-field",
+        selected ? "border-accent-ring bg-accent-subtle" : "border-divider hover:border-field hover:bg-subtle",
       )}
     >
       <span className={cn(
-        "mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg",
-        selected ? "bg-brown-600 text-white" : "bg-brown-50 text-brown-600",
+        "mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-control",
+        selected ? "bg-accent text-on-accent" : "bg-subtle text-secondary",
       )}>
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-brown-900">{title}</span>
-        <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{summary}</span>
-        {meta && <span className="mt-1 block text-xs text-brown-600">{meta}</span>}
+        <span className="block text-body font-medium text-primary">{title}</span>
+        <span className="mt-0.5 line-clamp-2 block text-hint text-tertiary">{summary}</span>
+        {meta && <span className="mt-1 block text-hint text-secondary">{meta}</span>}
       </span>
-      {selected && <Check className="absolute right-3 top-3 h-4 w-4 text-brown-700" aria-hidden="true" />}
+      {selected && <Icon icon={Tick02Icon} size="sm" className="absolute right-3 top-3 text-secondary" />}
     </button>
   );
 }
@@ -285,22 +287,20 @@ function TemplateNote({ loading, finalName, renamed, blocked, addedBefore, reaso
   if (loading || !finalName) return <Skeleton className="h-5 w-80" />;
   if (addedBefore) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Added here before as <span className="font-medium text-brown-900">{finalName}</span>, and kept as it has been
+      <p className="text-body text-tertiary">
+        Added here before as <span className="font-medium text-primary">{finalName}</span>, and kept as it has been
         changed since. Open it — and duplicate it there for a variant — or start blank.
       </p>
     );
   }
   if (blocked) {
     return (
-      <p className="text-sm text-destructive">
-        {reason ?? `“${finalName}” is taken here too. Rename the company’s own form first, or start blank.`}
-      </p>
+      <FormError message={reason ?? `“${finalName}” is taken here too. Rename the company’s own form first, or start blank.`} />
     );
   }
   return (
-    <p className="text-sm text-muted-foreground">
-      Adds <span className="font-medium text-brown-900">{finalName}</span>
+    <p className="text-body text-tertiary">
+      Adds <span className="font-medium text-primary">{finalName}</span>
       {renamed ? " — the library’s name is already taken here." : "."}
     </p>
   );

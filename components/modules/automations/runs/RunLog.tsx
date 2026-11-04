@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, History, RotateCcw, XCircle } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { ArrowDown01Icon, ArrowRight01Icon, ArrowTurnBackwardIcon, CancelCircleIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { PermissionGate } from "@/components/auth/PermissionGate";
@@ -55,12 +56,12 @@ function RunActions({ run, onDone }: { run: AutomationRun; onDone: () => void })
     <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
       {run.status === "FAILED" ? (
         <Button type="button" variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("retry"); }}>
-          <RotateCcw className="h-3.5 w-3.5" />
+          <Icon icon={ArrowTurnBackwardIcon} size="sm" />
           Retry
         </Button>
       ) : (
         <Button type="button" variant="ghost" size="sm" className="gap-1.5" disabled={busy} onClick={(e) => { e.stopPropagation(); void act("cancel"); }}>
-          <XCircle className="h-3.5 w-3.5" />
+          <Icon icon={CancelCircleIcon} size="sm" />
           Cancel
         </Button>
       )}
@@ -73,17 +74,17 @@ export function RunSteps({ run }: { run: AutomationRun }) {
   return (
     <ol className="m-0 list-none space-y-2 p-0" aria-label="Steps">
       {run.steps.map((s) => (
-        <li key={s.id} className="grid grid-cols-[6rem_1fr_auto] items-start gap-3 text-sm">
-          <span className="tabular-nums text-muted-foreground">{formatDisplayDate(s.effectiveDate ?? s.plannedDate, { style: "medium" })}</span>
+        <li key={s.id} className="grid grid-cols-[6rem_1fr_auto] items-start gap-3 text-body">
+          <span className="tabular-nums text-tertiary">{formatDisplayDate(s.effectiveDate ?? s.plannedDate, { style: "medium" })}</span>
           <span className="min-w-0">
-            <span className="block text-foreground">{s.summary}</span>
+            <span className="block text-primary">{s.summary}</span>
             {(s.reason || s.ranLate) && (
-              <span className={`block text-xs ${s.status === "FAILED" ? "text-danger-700" : "text-muted-foreground"}`}>
+              <span className={`block text-hint ${s.status === "FAILED" ? "text-status-declined-text" : "text-tertiary"}`}>
                 {reasonText(s.reason) || "Ran late"}
               </span>
             )}
             {s.plannedDate && s.effectiveDate && s.plannedDate !== s.effectiveDate && (
-              <span className="block text-xs text-muted-foreground">
+              <span className="block text-hint text-tertiary">
                 Planned for {formatDisplayDate(s.plannedDate, { style: "medium" })}
               </span>
             )}
@@ -117,12 +118,12 @@ export function RunLog({ ruleId }: { ruleId: string }) {
         >
           <SelectTrigger className="h-9 w-48" aria-label="Status"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All Statuses</SelectItem>
+            <SelectItem value={ALL}>All statuses</SelectItem>
             {STATUSES.map((s) => <SelectItem key={s} value={s}>{RUN_STATUS_LABELS[s]}</SelectItem>)}
           </SelectContent>
         </Select>
         {runs.data && (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-body text-tertiary">
             {runs.data.totalElements} {runs.data.totalElements === 1 ? "run" : "runs"}
           </span>
         )}
@@ -132,7 +133,7 @@ export function RunLog({ ruleId }: { ruleId: string }) {
         <ErrorState error={runs.error} compact onRetry={() => void runs.refetch()} />
       ) : !runs.isLoading && rows.length === 0 ? (
         <EmptyState
-          icon={<History className="h-6 w-6" />}
+          scene="automations"
           title={status ? `No ${RUN_STATUS_LABELS[status].toLowerCase()} runs` : "No runs yet"}
           description={status ? "Try another status." : "Every time the rule fires for somebody, the run is listed here with what each step did."}
         />
@@ -157,7 +158,7 @@ export function RunLog({ ruleId }: { ruleId: string }) {
                   <TableCell />
                   <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16 rounded-pill" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-28" /></TableCell>
@@ -169,23 +170,23 @@ export function RunLog({ ruleId }: { ruleId: string }) {
                 return (
                   <React.Fragment key={run.id}>
                     <TableRow className="cursor-pointer" onClick={() => setOpen(isOpen ? null : run.id)} aria-expanded={isOpen}>
-                      <TableCell className="text-muted-foreground">
-                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      <TableCell className="text-tertiary">
+                        {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" /> : <Icon icon={ArrowRight01Icon} size="sm" />}
                       </TableCell>
                       <TableCell className="font-medium">
                         {run.person ? (
-                          <Link href={`/organization/people/${run.person.id}`} onClick={(e) => e.stopPropagation()} className="text-foreground no-underline hover:underline">
+                          <Link href={`/organization/people/${run.person.id}`} onClick={(e) => e.stopPropagation()} className="text-primary no-underline hover:underline">
                             {run.person.name}
                           </Link>
                         ) : null}
                       </TableCell>
-                      <TableCell className="tabular-nums text-muted-foreground">v{run.versionNo}</TableCell>
+                      <TableCell className="tabular-nums text-tertiary">v{run.versionNo}</TableCell>
                       <TableCell><RunStatusBadge status={run.status} /></TableCell>
-                      <TableCell className="max-w-72 text-sm text-muted-foreground">
-                        <span className={run.status === "FAILED" ? "text-danger-700" : undefined}>{runReason(run)}</span>
+                      <TableCell className="max-w-72 text-body text-tertiary">
+                        <span className={run.status === "FAILED" ? "text-status-declined-text" : undefined}>{runReason(run)}</span>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{formatMoment(run.createdAt)}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{formatMoment(run.finishedAt)}</TableCell>
+                      <TableCell className="text-body text-tertiary">{formatMoment(run.createdAt)}</TableCell>
+                      <TableCell className="text-body text-tertiary">{formatMoment(run.finishedAt)}</TableCell>
                       <TableCell className="text-right"><RunActions run={run} onDone={() => void invalidate()} /></TableCell>
                     </TableRow>
                     {isOpen && (
@@ -205,9 +206,9 @@ export function RunLog({ ruleId }: { ruleId: string }) {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-end gap-2">
-          <Button type="button" variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-          <span className="text-sm text-muted-foreground">{page + 1} / {totalPages}</span>
-          <Button type="button" variant="outline" size="sm" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <Button type="button" variant="secondary" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+          <span className="text-body text-tertiary">{page + 1} / {totalPages}</span>
+          <Button type="button" variant="secondary" size="sm" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
         </div>
       )}
     </div>

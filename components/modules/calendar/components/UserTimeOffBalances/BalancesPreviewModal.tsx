@@ -2,7 +2,8 @@
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
-import { Wallet } from "lucide-react";
+import { Wallet01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -10,9 +11,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { cn } from "@/lib/cn";
 
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
@@ -49,23 +50,23 @@ const BalanceItem: FC<{
       type="button"
       onClick={onSelect}
       className={cn(
-        "w-full rounded-lg border p-3 text-left transition-colors",
-        selected ? "border-brown-300 bg-brown-50" : "border-brown-200 hover:border-brown-300 hover:bg-brown-50/40",
+        "w-full rounded-control border p-3 text-left transition-colors",
+        selected ? "border-accent-ring bg-accent-subtle" : "border-divider hover:border-field hover:bg-subtle",
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-sm font-medium text-brown-900" title={name}>{name}</p>
-        <span className="rounded border border-brown-200 bg-white px-1.5 py-0.5 text-[10px] leading-none text-brown-500">
+        <p className="truncate text-body font-medium text-primary" title={name}>{name}</p>
+        <span className="rounded-tag border border-divider bg-card px-1.5 py-0.5 text-hint leading-none text-tertiary">
           {balance.year}
         </span>
       </div>
-      <div className="mt-1.5 text-sm">
+      <div className="mt-1.5 text-body">
         {unlimited ? (
-          <span className="font-semibold text-brown-900">Unlimited</span>
+          <span className="font-semibold text-primary">Unlimited</span>
         ) : (
           <>
-            <span className="font-semibold text-brown-900">{formatDayAmount(balance.currentBalance)}</span>
-            <span className="text-muted-foreground"> {unit} left</span>
+            <span className="font-semibold text-primary">{formatDayAmount(balance.currentBalance)}</span>
+            <span className="text-tertiary"> {unit} left</span>
           </>
         )}
       </div>
@@ -73,7 +74,7 @@ const BalanceItem: FC<{
       {/* What the number is made of. "20 left" used to mean the same thing whether the missing days
           were taken or merely asked for, and whether five of them expire in March. */}
       {!unlimited && (balance.pendingBalance > 0 || balance.remainingCarryover > 0) && (
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-hint text-tertiary">
           {balance.pendingBalance > 0 && (
             <>
               {formatDayAmount(balance.pendingBalance)} awaiting a decision
@@ -86,8 +87,8 @@ const BalanceItem: FC<{
         </p>
       )}
       {!unlimited && (
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-brown-100">
-          <div className="h-full rounded-full bg-brown-400" style={{ width: `${pct}%` }} />
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-pill bg-mist">
+          <div className="h-full rounded-pill bg-strong" style={{ width: `${pct}%` }} />
         </div>
       )}
     </button>
@@ -120,13 +121,13 @@ export const BalancesPreviewModal: FC<Props> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
       <DialogContent hideClose className="max-w-3xl overflow-hidden p-0">
-        <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5">
+        <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brown-200 bg-white text-brown-600">
-              <Wallet className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">
+              <Icon icon={Wallet01Icon} />
             </div>
             <div>
-              <DialogTitle className="text-lg">Time off balances</DialogTitle>
+              <DialogTitle className="text-section-title">Time off balances</DialogTitle>
               <DialogDescription>Balances by policy and their accrual history.</DialogDescription>
             </div>
           </div>
@@ -134,7 +135,7 @@ export const BalancesPreviewModal: FC<Props> = ({
 
         <div className="grid gap-0 md:grid-cols-[260px_1fr]">
           {/* Balances list */}
-          <div className="max-h-[60vh] space-y-2 overflow-y-auto border-b border-brown-100 p-4 md:border-b-0 md:border-r">
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto border-b border-divider p-4 md:border-b-0 md:border-r">
             {balances.map((b) => (
               <BalanceItem
                 key={b.id}
@@ -151,10 +152,10 @@ export const BalancesPreviewModal: FC<Props> = ({
             {selected ? (
               <>
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-brown-900">
+                  <p className="text-body font-medium text-primary">
                     {selectedPolicy?.name ?? "Time off"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-hint text-tertiary">
                     {selectedPolicy?.unlimitedQuota
                       ? `${formatDayAmount(selected.usedBalance)} ${unit} used · ${selected.year}`
                       : `${formatDayAmount(selected.currentBalance)} ${unit} left of ${formatDayAmount(grantedOf(selected))} · ${selected.year}`}
@@ -170,17 +171,17 @@ export const BalancesPreviewModal: FC<Props> = ({
                   </div>
                 )}
 
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">History</p>
+                <p className="mb-2 text-hint font-semibold text-tertiary">History</p>
                 <BalanceLedger balanceId={selected.id} periodEnd={selected.periodEnd} />
               </>
             ) : (
-              <p className="py-6 text-center text-sm text-muted-foreground">No balances to show.</p>
+              <p className="py-6 text-center text-body text-tertiary">No balances to show.</p>
             )}
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-brown-100 px-6 py-4">
-          <Button type="button" variant="outline" onClick={onCloseAction}>Close</Button>
+        <div className="flex justify-end border-t border-divider px-6 py-4">
+          <Button type="button" variant="secondary" onClick={onCloseAction}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>

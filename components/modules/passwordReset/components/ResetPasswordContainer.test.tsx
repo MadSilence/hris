@@ -18,7 +18,7 @@ const fill = async (password: string, confirm: string) => {
   const user = userEvent.setup();
   await user.type(screen.getByLabelText(/^new password/i), password);
   await user.type(screen.getByLabelText(/^confirm password/i), confirm);
-  await user.click(screen.getByRole("button", { name: "Set Password" }));
+  await user.click(screen.getByRole("button", { name: "Set password" }));
 };
 
 describe("ResetPasswordContainer", () => {
@@ -31,7 +31,7 @@ describe("ResetPasswordContainer", () => {
   it("asks for both fields before sending anything", async () => {
     render(<ResetPasswordContainer token="t1" firstName="Ada" />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Set Password" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Set password" }));
 
     expect(await screen.findByText("Please enter a password.")).toBeInTheDocument();
     expect(screen.getByText("Please confirm your password.")).toBeInTheDocument();
@@ -62,8 +62,8 @@ describe("ResetPasswordContainer", () => {
     await fill("Password1!", "Password1!");
 
     await waitFor(() => expect(mockedReset).toHaveBeenCalledWith({ token: "t1", password: "Password1!" }));
-    expect(await screen.findByRole("heading", { name: "Password Changed" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sign In" })).toHaveAttribute("href", "/login");
+    expect(await screen.findByRole("heading", { name: "Password changed" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
   });
 
   it("says a stale link is stale and offers a new one", async () => {
@@ -77,6 +77,6 @@ describe("ResetPasswordContainer", () => {
     await fill("Password1!", "Password1!");
 
     expect(await screen.findByText("This password reset link is no longer valid. Ask for a new one.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Request a New Link" })).toHaveAttribute("href", "/forgot-password");
+    expect(screen.getByRole("link", { name: "Request a new link" })).toHaveAttribute("href", "/forgot-password");
   });
 });

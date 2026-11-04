@@ -3,5 +3,5 @@
 import { ComingSoonSettingsPage } from "@/components/modules/settings/components/ComingSoonSettingsPage";
 
 export default function SubscriptionSettingsPage() {
-  return <ComingSoonSettingsPage title="Subscription Management" />;
+  return <ComingSoonSettingsPage title="Subscription management" />;
 }

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import CurrentUserProvider from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import CompanyDataProvider from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
-import { Toaster } from "@/public/desact/src/components/ui/sonner";
+import { Toaster } from "@/components/desact/sonner";
 
 /**
  * The two screens that come before the product: the company's setup and a person's welcome.
@@ -16,7 +16,7 @@ export default function FirstRunLayout({ children }: { children: ReactNode }) {
   return (
     <CurrentUserProvider>
       <CompanyDataProvider>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-page">
           {children}
           <Toaster />
         </div>

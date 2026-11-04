@@ -9,7 +9,7 @@ export const USER_STATUSES = ["PROSPECTIVE", "ACTIVE", "ARCHIVED"] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
 const LABELS: Record<string, string> = {
-  PROSPECTIVE: "Not Started",
+  PROSPECTIVE: "Not started",
   ACTIVE: "Active",
   ARCHIVED: "Archived",
 };

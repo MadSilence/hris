@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { UserRoundPen } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { UserEdit01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { FilterChip } from "@/components/ui/FilterChip";
 
 /**
  * Switches the people directory between the employees and the people nobody has started yet.
@@ -30,16 +31,9 @@ export const DraftsToggle: React.FC<{
   if (count === 0) return null;
 
   return (
-    <Button
-      type="button"
-      variant={showingDrafts ? "default" : "outline"}
-      size="sm"
-      className="gap-1.5"
-      aria-pressed={showingDrafts}
-      onClick={() => onChange(!showingDrafts)}
-    >
-      <UserRoundPen className="h-4 w-4" />
+    <FilterChip selected={showingDrafts} onClick={() => onChange(!showingDrafts)}>
+      {!showingDrafts && <Icon icon={UserEdit01Icon} size="sm" />}
       Drafts ({count})
-    </Button>
+    </FilterChip>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 /**
  * A page's heading row that stays in view while the content under it scrolls — for an editor whose
@@ -38,8 +38,8 @@ export function StickyPageBar({ children, className }: { children: React.ReactNo
       className={cn(
         "sticky -top-px z-20 -mt-4 py-4",
         stuck
-          ? "[border-image:linear-gradient(to_top,var(--color-brown-100)_1px,#fff_1px)_fill_0//0_100vmax]"
-          : "[border-image:linear-gradient(#fff,#fff)_fill_0//0_100vmax]",
+          ? "[border-image:linear-gradient(to_top,var(--border-divider)_1px,var(--surface-page)_1px)_fill_0//0_100vmax]"
+          : "[border-image:linear-gradient(var(--surface-page),var(--surface-page))_fill_0//0_100vmax]",
         className,
       )}
     >

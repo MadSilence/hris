@@ -3,7 +3,7 @@
 import React from "react";
 import { ATTRIBUTE_TYPES_CREATABLE, AttributeType } from "@/models/attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
 
 type TypeSelectProps = {
   value: AttributeType;

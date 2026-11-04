@@ -3,16 +3,17 @@
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { useArchiveTeam } from "@/components/modules/settings/modules/teams/hooks/useArchiveTeam/useArchiveTeam";
 import type { TeamTreeNode } from "@/models/teams";
 import type {
   TeamArchiveChildrenStrategy,
   TeamArchiveMembersStrategy,
 } from "@/models/teams/ArchiveTeamPayload";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   open: boolean;
@@ -77,7 +78,7 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
           <DialogTitle>Archive &ldquo;{team.name}&rdquo;</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 py-2 text-sm text-brown-700">
+        <div className="space-y-5 py-2 text-body text-secondary">
           <p>
             Archiving hides this team from active views. Choose how to handle its sub-teams and
             members.
@@ -157,14 +158,12 @@ export function ArchiveTeamModal({ open, onClose, team, allTeams, onArchived }: 
           )}
 
           {archiveTeam.isError && (
-            <p className="text-danger-500">
-              {(archiveTeam.error as Error)?.message ?? "An error occurred."}
-            </p>
+            <FormError message={(archiveTeam.error as Error)?.message ?? "An error occurred."} />
           )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={archiveTeam.isPending}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={archiveTeam.isPending}>
             Cancel
           </Button>
           <Button type="button" onClick={handleArchive} disabled={archiveTeam.isPending}>

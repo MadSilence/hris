@@ -2,10 +2,11 @@
 
 import React from "react";
 import Image from "next/image";
-import { Building2 } from "lucide-react";
+import { Building03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 import { BLOCK_W } from "./DepartmentBlockNode";
 
@@ -32,24 +33,24 @@ export function CompanyBlockNode({ data }: NodeProps<CompanyBlockFlowNode>) {
     <div
       style={{ width: BLOCK_W, height: COMPANY_BLOCK_H }}
       className={cn(
-        "nopan flex items-center gap-3 rounded-xl border border-brown-200 bg-white px-4 shadow-sm",
+        "nopan flex items-center gap-3 rounded-card border border-divider bg-card px-4 shadow-card",
         dimmed && "opacity-35",
       )}
     >
-      <div className="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-lg bg-brown-100 text-brown-600">
+      <div className="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-control bg-mist text-secondary">
         {logo ? (
           <Image src={logo} alt="" width={40} height={40} className="h-full w-full object-cover" />
         ) : (
-          <Building2 className="h-5 w-5" />
+          <Icon icon={Building03Icon} />
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-brown-900">{name}</p>
-        <p className="mt-0.5 text-[11px] text-brown-500">
-          <span className="font-semibold text-brown-700">{peopleAssigned}</span>{" "}
+        <p className="truncate text-body font-semibold text-primary">{name}</p>
+        <p className="mt-0.5 text-hint text-tertiary">
+          <span className="font-semibold text-secondary">{peopleAssigned}</span>{" "}
           {peopleAssigned === 1 ? "person" : "people"} ·{" "}
-          <span className="font-semibold text-brown-700">{departmentCount}</span>{" "}
+          <span className="font-semibold text-secondary">{departmentCount}</span>{" "}
           {departmentCount === 1 ? "department" : "departments"}
         </p>
       </div>

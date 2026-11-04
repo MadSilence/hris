@@ -17,7 +17,7 @@ jest.mock("@/components/providers/CurrentUserProvider", () => ({
 /**
  * The tabs read one thing: what the server says this caller may do **to this person**. The client
  * deriving it from its own scope names is what this replaced, and a missing map is what once hid
- * Documents and Time Off from everybody — so both the presence and the absence of a capability are
+ * Documents and Time off from everybody — so both the presence and the absence of a capability are
  * pinned here.
  */
 describe("ProfileTabsNav", () => {
@@ -25,8 +25,8 @@ describe("ProfileTabsNav", () => {
   // rather than a link as far as the accessibility tree is concerned.
   beforeEach(() => { viewerId = "someone-else"; });
 
-  // Public Profile, Salary, Forms, Tasks and Notes are UI only and carry no resource yet.
-  const UNGATED = ["Public Profile", "Personal Info", "Salary", "Forms", "Tasks", "Notes"];
+  // Public profile, Salary, Forms, Tasks and Notes are UI only and carry no resource yet.
+  const UNGATED = ["Public profile", "Personal info", "Salary", "Forms", "Tasks", "Notes"];
 
   const tabNames = () => screen.getAllByRole("tab").map((tab) => tab.textContent);
 
@@ -42,9 +42,9 @@ describe("ProfileTabsNav", () => {
     );
 
     expect(tabNames()).toEqual([
-      "Public Profile", "Personal Info", "Documents", "Time Off", "Salary", "Forms", "Tasks", "Notes",
+      "Public profile", "Personal info", "Documents", "Time off", "Salary", "Forms", "Tasks", "Notes",
     ]);
-    expect(screen.getByRole("tab", { name: "Time Off" })).toHaveAttribute(
+    expect(screen.getByRole("tab", { name: "Time off" })).toHaveAttribute(
       "href",
       "/organization/people/u1/time-off"
     );
@@ -56,7 +56,7 @@ describe("ProfileTabsNav", () => {
     );
 
     expect(tabNames()).toEqual([
-      "Public Profile", "Personal Info", "Documents", "Salary", "Forms", "Tasks", "Notes",
+      "Public profile", "Personal info", "Documents", "Salary", "Forms", "Tasks", "Notes",
     ]);
   });
 

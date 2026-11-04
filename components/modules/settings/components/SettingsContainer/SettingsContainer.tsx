@@ -22,8 +22,8 @@ const SettingsContainer: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className="min-w-0">
-                <h1 className="text-[40px] leading-tight">Settings</h1>
-                <p className="text-[13px] text-muted-foreground mt-1">Configure your organization and people settings</p>
+                <h1 className="text-greeting leading-tight">Settings</h1>
+                <p className="text-label text-tertiary mt-1">Configure your organization and people settings</p>
               </div>
             </div>
           </div>

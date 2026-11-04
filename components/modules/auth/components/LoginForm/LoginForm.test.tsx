@@ -106,7 +106,8 @@ describe("LoginForm", () => {
 
     expect(screen.getByLabelText(/email address/i)).toBeDisabled();
     expect(screen.getByLabelText(/password/i)).toBeDisabled();
-    expect(screen.getByRole("button", { name: /signing in/i })).toBeDisabled();
+    // A button in progress is busy, not disabled (SPEC § 12): it keeps its look and ignores a second click.
+    expect(screen.getByRole("button", { name: /signing in/i })).toHaveAttribute("aria-busy", "true");
 
     await user.click(screen.getByRole("button", { name: /signing in/i }));
 
@@ -116,7 +117,7 @@ describe("LoginForm", () => {
   it("offers a way to a new password", () => {
     renderForm();
 
-    expect(screen.getByRole("link", { name: "Forgot Password?" })).toHaveAttribute("href", "/forgot-password");
+    expect(screen.getByRole("link", { name: "Forgot password?" })).toHaveAttribute("href", "/forgot-password");
   });
 
   it("shows a notice when there is one", () => {

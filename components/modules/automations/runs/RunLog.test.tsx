@@ -21,7 +21,7 @@ jest.mock("@/components/modules/automations/hooks", () => ({
   useAutomationRuns: jest.fn(),
   useInvalidateAutomations: () => invalidate,
 }));
-jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
+jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
 
 const run = (over: Partial<AutomationRun>): AutomationRun => ({
   id: "run-1",

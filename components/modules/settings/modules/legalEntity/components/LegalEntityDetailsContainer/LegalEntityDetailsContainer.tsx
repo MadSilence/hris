@@ -6,15 +6,16 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Download, MapPin, Users } from "lucide-react";
+import { Building03Icon, Download01Icon, Location01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Separator } from "@/components/desact/separator";
 import { HolidayCalendarBindingSection } from "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import LegalEntityAssignedUsersTab from "@/components/modules/settings/modules/legalEntity/components/LegalEntityAssignedUsersTab/LegalEntityAssignedUsersTab";
 import { useLegalEntity } from "@/components/modules/settings/modules/legalEntity/hooks/useLegalEntity";
 import { useUpdateLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useUpdateLegalEntityAction";
@@ -141,7 +142,7 @@ export default function LegalEntityDetailsContainer({
   }
 
   if (!entity) {
-    return <div className="px-8 py-6 text-sm text-muted-foreground">Not found</div>;
+    return <div className="px-8 py-6 text-body text-tertiary">Not found</div>;
   }
 
   const current = values ?? mapEntity(entity);
@@ -213,14 +214,14 @@ export default function LegalEntityDetailsContainer({
       />
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+        <TabsList className="grid w-full grid-cols-2 bg-subtle">
           <TabsTrigger value="general" className="flex items-center gap-2">
-            <Building2 className="w-4 h-4"/>
-            General Information
+            <Icon icon={Building03Icon} size="sm" />
+            General information
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
-            <Users className="w-4 h-4"/>
-            Assigned Users
+            <Icon icon={UserGroupIcon} size="sm" />
+            Assigned users
           </TabsTrigger>
         </TabsList>
 
@@ -229,12 +230,12 @@ export default function LegalEntityDetailsContainer({
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-foreground">General Information</h2>
+                  <h2 className="text-section-title text-primary">General information</h2>
                   {isArchived && (
                     <StatusBadge status="archived" className="font-normal" />
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body text-tertiary">
                   Registration, tax, and address details for this legal entity.
                 </p>
               </div>
@@ -244,7 +245,7 @@ export default function LegalEntityDetailsContainer({
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
                       >
@@ -253,7 +254,7 @@ export default function LegalEntityDetailsContainer({
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
@@ -261,7 +262,7 @@ export default function LegalEntityDetailsContainer({
                       </Button>
                     </PermissionGate>
                     <Button type="button"
-                      variant="outline"
+                      variant="secondary"
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
@@ -280,7 +281,7 @@ export default function LegalEntityDetailsContainer({
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
@@ -290,11 +291,11 @@ export default function LegalEntityDetailsContainer({
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button"
                         size="icon"
-                        variant="outline"
+                        variant="secondary"
                         aria-label="Export legal entity"
                         onClick={() => setIsExportOpen(true)}
                       >
-                        <Download className="h-4 w-4"/>
+                        <Icon icon={Download01Icon} size="sm" />
                       </Button>
                     </PermissionGate>
                   </>
@@ -306,11 +307,11 @@ export default function LegalEntityDetailsContainer({
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button"
                         size="icon"
-                        variant="outline"
+                        variant="secondary"
                         aria-label="Export legal entity"
                         onClick={() => setIsExportOpen(true)}
                       >
-                        <Download className="h-4 w-4"/>
+                        <Icon icon={Download01Icon} size="sm" />
                       </Button>
                     </PermissionGate>
                   </>
@@ -322,7 +323,7 @@ export default function LegalEntityDetailsContainer({
 
             <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
-        <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
+        <SectionTitle icon={<Icon icon={Building03Icon} />} title="General"/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
@@ -357,7 +358,7 @@ export default function LegalEntityDetailsContainer({
                 className="min-h-28"
               />
             ) : (
-              <p className="text-sm text-foreground">
+              <p className="text-body text-primary">
                 {current.description}
               </p>
             )}
@@ -368,7 +369,7 @@ export default function LegalEntityDetailsContainer({
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<MapPin className="h-5 w-5"/>} title="Address"/>
+        <SectionTitle icon={<Icon icon={Location01Icon} />} title="Address"/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
@@ -466,7 +467,7 @@ export default function LegalEntityDetailsContainer({
 const SectionTitle = ({ icon, title }: SectionTitleProps) => (
   <div className="flex items-center gap-2">
     {icon}
-    <h2 className="text-base font-semibold">{title}</h2>
+    <h2 className="text-body font-semibold">{title}</h2>
   </div>
 );
 
@@ -476,7 +477,7 @@ const Field = ({ label, value, isEditing, onChange }: FieldProps) => (
     {isEditing ? (
       <Input value={value} onChange={(event) => onChange(event.target.value)}/>
     ) : (
-      <p className="text-sm text-foreground">{value}</p>
+      <p className="text-body text-primary">{value}</p>
     )}
   </div>
 );

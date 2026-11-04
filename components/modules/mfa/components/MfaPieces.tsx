@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import QRCode from "qrcode";
-import { Copy, Download } from "lucide-react";
+import { Copy01Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 
@@ -24,7 +25,7 @@ export const CodeField: React.FC<{
   autoFocus?: boolean;
 }> = ({ id, value, onChange, backup = false, disabled, autoFocus }) => (
   <div className="space-y-2">
-    <RequiredLabel htmlFor={id} required>{backup ? "Backup Code" : "Code"}</RequiredLabel>
+    <RequiredLabel htmlFor={id} required>{backup ? "Backup code" : "Code"}</RequiredLabel>
     <Input
       id={id}
       value={value}
@@ -34,7 +35,7 @@ export const CodeField: React.FC<{
       maxLength={backup ? 14 : 6}
       disabled={disabled}
       autoFocus={autoFocus}
-      className="h-11 font-mono tracking-widest"
+      className="h-11 font-mono"
     />
   </div>
 );
@@ -50,7 +51,7 @@ export const TotpEnrolment: React.FC<{
   error?: string | null;
   onConfirm: (code: string) => void | Promise<void>;
   confirmLabel?: string;
-}> = ({ otpauthUri, secret, busy, error, onConfirm, confirmLabel = "Turn On" }) => {
+}> = ({ otpauthUri, secret, busy, error, onConfirm, confirmLabel = "Turn on" }) => {
   const [qr, setQr] = React.useState<string | null>(null);
   const [showKey, setShowKey] = React.useState(false);
   const [code, setCode] = React.useState("");
@@ -73,33 +74,33 @@ export const TotpEnrolment: React.FC<{
         if (code.trim()) void onConfirm(code.trim());
       }}
     >
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body text-tertiary">
         Scan this with an authenticator app — Google Authenticator, Microsoft Authenticator, 1Password or any other —
         then type the six-digit code it shows.
       </p>
       <div className="flex justify-center">
         {qr ? (
           // eslint-disable-next-line @next/next/no-img-element -- a data URL drawn here, nothing to optimise
-          <img src={qr} alt="QR code for your authenticator app" width={200} height={200} className="rounded-md border border-brown-200" />
+          <img src={qr} alt="QR code for your authenticator app" width={200} height={200} className="rounded-control border border-divider" />
         ) : (
-          <div className="h-[200px] w-[200px] rounded-md border border-dashed border-brown-200" />
+          <div className="h-[200px] w-[200px] rounded-control border border-dashed border-divider" />
         )}
       </div>
       {showKey ? (
         <div className="space-y-1 text-center">
-          <p className="text-xs text-muted-foreground">Enter this key in the app instead:</p>
-          <code className="block break-all rounded bg-brown-50 px-2 py-1.5 font-mono text-sm tracking-wider">
+          <p className="text-hint text-tertiary">Enter this key in the app instead:</p>
+          <code className="block break-all rounded-control bg-subtle px-2 py-1.5 font-mono text-body">
             {secret.replace(/(.{4})/g, "$1 ").trim()}
           </code>
         </div>
       ) : (
-        <button type="button" className="mx-auto block text-sm text-brown-600 underline" onClick={() => setShowKey(true)}>
+        <button type="button" className="mx-auto block text-body text-secondary underline" onClick={() => setShowKey(true)}>
           Can&apos;t scan? Enter a key instead
         </button>
       )}
       <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} />
       <FormError message={error} />
-      <Button type="submit" className="h-11 w-full" disabled={busy || code.trim().length < 6}>
+      <Button size="lg" type="submit" className="w-full" disabled={busy || code.trim().length < 6}>
         {busy ? `${confirmLabel}…` : confirmLabel}
       </Button>
     </form>
@@ -130,21 +131,21 @@ export const BackupCodesSheet: React.FC<{
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body text-tertiary">
         Keep these somewhere safe. If you lose your phone, each one signs you in once. They are not shown again.
       </p>
-      <ul className="grid grid-cols-2 gap-2 rounded-lg border border-brown-200 bg-brown-50 p-3 font-mono text-sm">
+      <ul className="grid grid-cols-2 gap-2 rounded-control border border-divider bg-subtle p-3 font-mono text-body">
         {codes.map((c) => (
           <li key={c}>{c}</li>
         ))}
       </ul>
       <div className="flex gap-2">
-        <Button type="button" variant="outline" className="gap-1.5" onClick={() => void navigator.clipboard?.writeText(text)}>
-          <Copy className="h-4 w-4" />
+        <Button type="button" variant="secondary" className="gap-1.5" onClick={() => void navigator.clipboard?.writeText(text)}>
+          <Icon icon={Copy01Icon} size="sm" />
           Copy
         </Button>
-        <Button type="button" variant="outline" className="gap-1.5" onClick={download}>
-          <Download className="h-4 w-4" />
+        <Button type="button" variant="secondary" className="gap-1.5" onClick={download}>
+          <Icon icon={Download01Icon} size="sm" />
           Download
         </Button>
       </div>
@@ -152,7 +153,7 @@ export const BackupCodesSheet: React.FC<{
         <Checkbox id="mfa-codes-saved" checked={saved} onCheckedChange={(v) => setSaved(Boolean(v))} />
         <Label htmlFor="mfa-codes-saved">I have saved these codes</Label>
       </div>
-      <Button type="button" className="h-11 w-full" disabled={!saved} onClick={onDone}>
+      <Button size="lg" type="button" className="w-full" disabled={!saved} onClick={onDone}>
         {doneLabel}
       </Button>
     </div>

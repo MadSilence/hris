@@ -3,7 +3,8 @@
 import React, { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Send, UserMinus, UserPlus } from "lucide-react";
+import { SentIcon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
@@ -11,13 +12,13 @@ import { AccessDenied } from "@/components/auth/AccessDenied";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, ResourceCode } from "@/models/access";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
   id: string;
   label: string;
   href: string;
-  icon: typeof Send;
+  icon: IconSvgElement;
   resource: ResourceCode;
   title: string;
   description: string;
@@ -28,7 +29,7 @@ const tabs: Tab[] = [
     id: "preboarding",
     label: "Preboarding",
     href: "/settings/automation/preboarding",
-    icon: Send,
+    icon: SentIcon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
     title: "Preboarding",
     description:
@@ -38,7 +39,7 @@ const tabs: Tab[] = [
     id: "onboarding",
     label: "Onboarding",
     href: "/settings/automation/onboarding",
-    icon: UserPlus,
+    icon: UserAdd01Icon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
     title: "Onboarding",
     description:
@@ -48,7 +49,7 @@ const tabs: Tab[] = [
     id: "offboarding",
     label: "Offboarding",
     href: "/settings/automation/offboarding",
-    icon: UserMinus,
+    icon: UserRemove01Icon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
     title: "Offboarding",
     description:
@@ -90,21 +91,21 @@ export default function LifecycleSettingsLayout({ children }: { children: ReactN
         <div className="px-8 space-y-4">
           <SettingsPageHeader title={activeTab.title} backHref="/settings"/>
 
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             {activeTab.description}
           </PageDescription>
         </div>
 
         <div className="px-8">
           <Tabs value={activeTab.id} className="w-full">
-            <TabsList className={`grid w-full ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-brown-50`}>
+            <TabsList className={`grid w-full ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-subtle`}>
               {visibleTabs.map((tab) => {
-                const Icon = tab.icon;
+                const shownIcon = tab.icon;
 
                 return (
                   <TabsTrigger key={tab.id} value={tab.id} asChild className="flex items-center gap-2">
                     <Link href={tab.href} className="no-underline">
-                      <Icon className="h-4 w-4"/>
+                      <Icon icon={shownIcon} size="sm" />
                       {tab.label}
                     </Link>
                   </TabsTrigger>

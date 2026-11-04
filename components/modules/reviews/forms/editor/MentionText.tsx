@@ -7,7 +7,7 @@ export function MentionText({ text }: { text: string }) {
     <>
       {splitMentions(text).map((s, i) =>
         s.token
-          ? <mark key={i} data-token={s.token} className="rounded bg-brown-100 px-0.5 text-inherit">{s.text}</mark>
+          ? <mark key={i} data-token={s.token} className="rounded-control bg-mist px-0.5 text-inherit">{s.text}</mark>
           : <React.Fragment key={i}>{s.text}</React.Fragment>,
       )}
     </>

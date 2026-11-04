@@ -4,9 +4,9 @@ import { FC, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormError } from "@/components/feedback/FormError";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import {
   useAdjustEmployeeTimeOffBalance,
 } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useAdjustEmployeeTimeOffBalance";
@@ -68,12 +68,12 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
   };
 
   return (
-    <div className="space-y-3 rounded-lg border border-brown-200 p-3.5">
-      <p className="text-sm font-medium text-foreground">Manual adjustment</p>
+    <div className="space-y-3 rounded-control border border-divider p-3.5">
+      <p className="text-body font-medium text-primary">Manual adjustment</p>
 
       <div className="flex items-end gap-2">
         <div className="w-28 space-y-1.5">
-          <Label htmlFor={`adj-amount-${balanceId}`} className="text-xs">
+          <Label htmlFor={`adj-amount-${balanceId}`} className="text-hint">
             Amount ({unit})
           </Label>
           <Input
@@ -86,7 +86,7 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
         </div>
 
         <div className="flex-1 space-y-1.5">
-          <Label htmlFor={`adj-reason-${balanceId}`} className="text-xs">Reason</Label>
+          <Label htmlFor={`adj-reason-${balanceId}`} className="text-hint">Reason</Label>
           <Input
             id={`adj-reason-${balanceId}`}
             value={reason}
@@ -102,7 +102,7 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
 
       <FormError message={error}/>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         Use a negative amount to deduct. This adds an entry to the ledger.
       </p>
     </div>

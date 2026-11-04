@@ -1,28 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  Bell,
-  CalendarCheck,
-  ChevronDown,
-  ChevronRight,
-  ListChecks,
-  Mail,
-  Plus,
-  Trash2,
-  UserMinus,
-  UserPlus,
-  ClipboardCheck,
-} from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Add01Icon, ArrowDown01Icon, ArrowDown02Icon, ArrowRight01Icon, ArrowUp02Icon, CalendarCheckIn01Icon, CheckListIcon, Delete02Icon, Mail01Icon, Notification01Icon, TaskDone01Icon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+} from "@/components/desact/dropdown-menu";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import {
@@ -38,14 +25,14 @@ import { ActionEditor } from "./ActionEditor";
 import { newAction } from "./draft";
 import { SentenceCard } from "./SentenceCard";
 
-export const ACTION_ICONS: Record<AutomationActionType, React.ComponentType<{ className?: string }>> = {
-  SEND_EMAIL: Mail,
-  NOTIFY: Bell,
-  CREATE_TASK: ListChecks,
-  ASSIGN: UserPlus,
-  UNASSIGN: UserMinus,
-  GRANT_TIME_OFF_POLICY: CalendarCheck,
-  START_REVIEW: ClipboardCheck,
+export const ACTION_ICONS: Record<AutomationActionType, IconSvgElement> = {
+  SEND_EMAIL: Mail01Icon,
+  NOTIFY: Notification01Icon,
+  CREATE_TASK: CheckListIcon,
+  ASSIGN: UserAdd01Icon,
+  UNASSIGN: UserRemove01Icon,
+  GRANT_TIME_OFF_POLICY: CalendarCheckIn01Icon,
+  START_REVIEW: TaskDone01Icon,
 };
 
 /**
@@ -89,14 +76,14 @@ export function DoCard({
   return (
     <SentenceCard word="Do" summary={actions.length ? `${actions.length} ${actions.length === 1 ? "action" : "actions"}, in this order` : "Nothing yet"} last>
       {actions.length === 0 ? (
-        <p className="m-0 text-sm text-muted-foreground">Add what should happen — an email, a task, an assignment.</p>
+        <p className="m-0 text-body text-tertiary">Add what should happen — an email, a task, an assignment.</p>
       ) : (
         <ol className="m-0 list-none space-y-2 p-0">
           {actions.map((action, i) => {
-            const Icon = ACTION_ICONS[action.type];
+            const actionIcon = ACTION_ICONS[action.type];
             const isOpen = open === i;
             return (
-              <li key={i} className="rounded-lg border border-brown-100">
+              <li key={i} className="rounded-control border border-divider">
                 <div className="flex items-center gap-3 px-3 py-2.5">
                   <button
                     type="button"
@@ -104,29 +91,29 @@ export function DoCard({
                     onClick={() => setOpen(isOpen ? null : i)}
                     aria-expanded={isOpen}
                   >
-                    {isOpen ? <ChevronDown className="h-4 w-4 flex-none text-muted-foreground" /> : <ChevronRight className="h-4 w-4 flex-none text-muted-foreground" />}
-                    <Icon className="h-4 w-4 flex-none text-brown-500" />
+                    {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" className="flex-none text-tertiary" /> : <Icon icon={ArrowRight01Icon} size="sm" className="flex-none text-tertiary" />}
+                    <Icon icon={actionIcon} size="sm" className="flex-none text-tertiary" />
                     <span className="min-w-0">
-                      <span className="block truncate text-sm text-foreground">
+                      <span className="block truncate text-body text-primary">
                         {actionSentence(action, { targets: names.targets, roles: names.roles })}
                       </span>
-                      <span className="block text-xs text-muted-foreground">{offsetText(action.offsetDays)}</span>
+                      <span className="block text-hint text-tertiary">{offsetText(action.offsetDays)}</span>
                     </span>
                   </button>
                   <RowActionsMenu label={`Actions for step ${i + 1}`}>
-                    <RowAction icon={<ArrowUp className="h-4 w-4 text-muted-foreground" />} onClick={() => move(i, -1)} disabled={i === 0}>
-                      Move Up
+                    <RowAction icon={<Icon icon={ArrowUp02Icon} size="sm" className="text-tertiary" />} onClick={() => move(i, -1)} disabled={i === 0}>
+                      Move up
                     </RowAction>
-                    <RowAction icon={<ArrowDown className="h-4 w-4 text-muted-foreground" />} onClick={() => move(i, 1)} disabled={i === actions.length - 1}>
-                      Move Down
+                    <RowAction icon={<Icon icon={ArrowDown02Icon} size="sm" className="text-tertiary" />} onClick={() => move(i, 1)} disabled={i === actions.length - 1}>
+                      Move down
                     </RowAction>
-                    <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => setRemoving(i)}>
+                    <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setRemoving(i)}>
                       Remove
                     </RowActionDestructive>
                   </RowActionsMenu>
                 </div>
                 {isOpen && (
-                  <div className="border-t border-brown-100 px-4 py-4">
+                  <div className="border-t border-divider px-4 py-4">
                     <ActionEditor
                       action={action}
                       index={i}
@@ -143,17 +130,17 @@ export function DoCard({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button type="button" variant="outline" size="sm" className="gap-1.5">
-            <Plus className="h-4 w-4" />
-            Add Action
+          <Button type="button" variant="secondary" size="sm" className="gap-1.5">
+            <Icon icon={Add01Icon} size="sm" />
+            Add action
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 rounded-lg p-1">
+        <DropdownMenuContent align="start" className="w-56 rounded-control p-1">
           {catalog.actions.map((type) => {
-            const Icon = ACTION_ICONS[type];
+            const actionIcon = ACTION_ICONS[type];
             return (
-              <DropdownMenuItem key={type} onClick={() => add(type)} className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer">
-                <Icon className="h-4 w-4 text-muted-foreground" />
+              <DropdownMenuItem key={type} onClick={() => add(type)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+                <Icon icon={actionIcon} size="sm" className="text-tertiary" />
                 {ACTION_LABELS[type]}
               </DropdownMenuItem>
             );
@@ -163,7 +150,7 @@ export function DoCard({
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove Action"
+        title="Remove action"
         description="This action is taken out of the draft. Nothing changes until you publish."
         confirmLabel="Remove"
         destructive

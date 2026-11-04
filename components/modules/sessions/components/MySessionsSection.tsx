@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Monitor } from "lucide-react";
+import { ComputerIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -61,17 +62,17 @@ export const MySessionsSection: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+      <ul className="divide-y divide-divider rounded-control border border-divider">
         {rows.map((s) => (
           <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="flex min-w-0 items-center gap-3">
-              <Monitor className="h-5 w-5 flex-none text-brown-400" />
+              <Icon icon={ComputerIcon} className="flex-none text-tertiary" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-medium text-foreground">{describeUserAgent(s.userAgent)}</span>
-                  {s.isCurrent && <StatusBadge status="active" label="This Browser" />}
+                  <span className="truncate text-body font-medium text-primary">{describeUserAgent(s.userAgent)}</span>
+                  {s.isCurrent && <StatusBadge status="active" label="This browser" />}
                 </div>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="truncate text-hint text-tertiary">
                   {METHOD_LABEL[s.authMethod]} · signed in {formatDisplayDate(s.createdAt, { style: "medium" })} ·
                   last active {formatDisplayDate(s.lastSeenAt, { style: "medium" })}
                   {s.ip ? ` · ${s.ip}` : ""}
@@ -81,12 +82,12 @@ export const MySessionsSection: React.FC = () => {
             {!s.isCurrent && (
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={endOne.isPending && endOne.variables === s.id}
                 onClick={() => endOne.mutate(s.id, { onError: (error) => showError(error) })}
               >
-                Sign Out
+                Sign out
               </Button>
             )}
           </li>
@@ -94,8 +95,8 @@ export const MySessionsSection: React.FC = () => {
       </ul>
 
       {others.length > 0 && (
-        <Button type="button" variant="outline" onClick={() => setConfirmOthers(true)}>
-          Sign Out Everywhere Else
+        <Button type="button" variant="secondary" onClick={() => setConfirmOthers(true)}>
+          Sign out everywhere else
         </Button>
       )}
 
@@ -103,7 +104,7 @@ export const MySessionsSection: React.FC = () => {
         isOpen={confirmOthers}
         title="Sign out everywhere else?"
         description={`${others.length} other ${others.length === 1 ? "browser is" : "browsers are"} signed in as you. They are signed out at once; this one stays.`}
-        confirmLabel="Sign Out"
+        confirmLabel="Sign out"
         isLoading={endOthers.isPending}
         errorMessage={othersError}
         onConfirmAction={endAllOthers}

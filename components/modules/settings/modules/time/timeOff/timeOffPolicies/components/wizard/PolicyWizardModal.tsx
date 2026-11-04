@@ -1,30 +1,19 @@
 "use client";
 
-import { ComponentType, FC, useEffect, useMemo, useState } from "react";
-import {
-  CalendarClock,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  FileText,
-  PencilLine,
-  RefreshCw,
-  UserCheck,
-  Users,
-} from "lucide-react";
+import { FC, useEffect, useMemo, useState } from "react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Calendar03Icon, CalendarLock01Icon, CheckmarkCircle02Icon, FileTextIcon, PencilEdit01Icon, Refresh01Icon, Task01Icon, UserCheck01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
+import { StepRing } from "@/components/ui/Stepper";
 import {
   AccrualStep,
   ApprovalsStep,
@@ -46,25 +35,27 @@ import {
   validatePolicyStep,
 } from "./policyWizardTypes";
 import { PolicyActionError } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/policyActionError";
+import { FormError } from "@/components/feedback/FormError";
+import { InlineAlert } from "@/components/desact/alert";
 
 const STEPS: {
   id: WizardStepId;
   title: string;
   subtitle: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: IconSvgElement;
 }[] = [
-  { id: "basics", title: "Basics", subtitle: "Name, unit, visibility", icon: FileText },
-  { id: "entitlement", title: "Entitlement", subtitle: "Quota & renewal", icon: CalendarClock },
-  { id: "accrual", title: "Accrual", subtitle: "Earning over time", icon: RefreshCw },
-  { id: "carryover", title: "Carryover & balance", subtitle: "Rollover & negatives", icon: RefreshCw },
-  { id: "counting", title: "Counting", subtitle: "How days are counted", icon: CalendarDays },
-  { id: "requests", title: "Requests", subtitle: "How employees request", icon: ClipboardList },
-  { id: "approvals", title: "Approvals", subtitle: "Who signs off", icon: UserCheck },
-  { id: "tenure", title: "Tenure rewards", subtitle: "Extra days by service", icon: CalendarClock },
-  { id: "eligibility", title: "Eligibility", subtitle: "Waiting period", icon: CalendarClock },
-  { id: "restrictions", title: "Restrictions", subtitle: "When leave is blocked", icon: Users },
-  { id: "editing", title: "Editing", subtitle: "Who can edit requests", icon: PencilLine },
-  { id: "review", title: "Review", subtitle: "Confirm", icon: CheckCircle2 },
+  { id: "basics", title: "Basics", subtitle: "Name, unit, visibility", icon: FileTextIcon },
+  { id: "entitlement", title: "Entitlement", subtitle: "Quota & renewal", icon: CalendarLock01Icon },
+  { id: "accrual", title: "Accrual", subtitle: "Earning over time", icon: Refresh01Icon },
+  { id: "carryover", title: "Carryover & balance", subtitle: "Rollover & negatives", icon: Refresh01Icon },
+  { id: "counting", title: "Counting", subtitle: "How days are counted", icon: Calendar03Icon },
+  { id: "requests", title: "Requests", subtitle: "How employees request", icon: Task01Icon },
+  { id: "approvals", title: "Approvals", subtitle: "Who signs off", icon: UserCheck01Icon },
+  { id: "tenure", title: "Tenure rewards", subtitle: "Extra days by service", icon: CalendarLock01Icon },
+  { id: "eligibility", title: "Eligibility", subtitle: "Waiting period", icon: CalendarLock01Icon },
+  { id: "restrictions", title: "Restrictions", subtitle: "When leave is blocked", icon: UserGroupIcon },
+  { id: "editing", title: "Editing", subtitle: "Who can edit requests", icon: PencilEdit01Icon },
+  { id: "review", title: "Review", subtitle: "Confirm", icon: CheckmarkCircle02Icon },
 ];
 
 type Props = {
@@ -128,7 +119,6 @@ export const PolicyWizardModal: FC<Props> = ({
   };
 
   const step = STEPS[stepIndex];
-  const StepIcon = step.icon;
   const isLast = stepIndex === STEPS.length - 1;
   const busy = isLoading || isSaving;
 
@@ -221,13 +211,13 @@ export const PolicyWizardModal: FC<Props> = ({
           <>
             <ReviewStep values={values} leaveTypeName={leaveTypeName} mode={mode} />
             {mode === "edit" && editImpact && editImpact.affectedRequests > 0 && (
-              <div className="mt-4 rounded-lg border border-warning-200 bg-warning-50 px-4 py-3">
-                <p className="text-sm font-medium text-warning-900">
+              <InlineAlert tone="pending" className="mt-4">
+                <p className="font-medium">
                   {editImpact.affectedRequests} absence
                   {editImpact.affectedRequests === 1 ? " was" : "s were"} counted under the current
                   rules
                 </p>
-                <p className="mt-1 text-xs text-warning-800">
+                <p className="mt-1 text-hint">
                   {editImpact.inProgressRequests > 0
                     ? `${editImpact.inProgressRequests} of them ${editImpact.inProgressRequests === 1 ? "is" : "are"} already under way. `
                     : ""}
@@ -236,7 +226,7 @@ export const PolicyWizardModal: FC<Props> = ({
                   <span className="font-medium">not recalculated</span> — what was decided stays
                   decided. The new rules apply to what is requested from now on.
                 </p>
-              </div>
+              </InlineAlert>
             )}
           </>
         );
@@ -254,13 +244,13 @@ export const PolicyWizardModal: FC<Props> = ({
         <DialogContent hideClose className="max-w-5xl gap-0 overflow-hidden p-0">
           <div className="flex h-[86vh] max-h-[880px]">
             {/* Vertical step sidebar */}
-            <aside className="hidden w-64 shrink-0 flex-col border-r border-brown-100 bg-brown-50/40 p-5 sm:flex">
+            <aside className="hidden w-64 shrink-0 flex-col border-r border-divider bg-subtle/40 p-5 sm:flex">
               <DialogHeader className="mb-5 space-y-1 text-left">
-                <DialogTitle className="text-base">
+                <DialogTitle className="text-body">
                   {mode === "edit" ? "Edit policy" : "Create policy"}
                 </DialogTitle>
                 {leaveTypeName && (
-                  <p className="text-xs text-muted-foreground">in {leaveTypeName}</p>
+                  <p className="text-hint text-tertiary">in {leaveTypeName}</p>
                 )}
               </DialogHeader>
 
@@ -276,33 +266,22 @@ export const PolicyWizardModal: FC<Props> = ({
                       disabled={!clickable}
                       onClick={() => goTo(index)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors",
-                        isActive ? "bg-white shadow-sm" : "hover:bg-white/60",
+                        "flex w-full items-center gap-3 rounded-control px-2.5 py-2 text-left transition-colors",
+                        isActive ? "bg-card shadow-card" : "hover:bg-card/60",
                         !clickable && "cursor-not-allowed opacity-60",
                       )}
                     >
-                      <span
-                        className={cn(
-                          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                          isActive
-                            ? "border-brown-700 bg-brown-50 text-brown-700"
-                            : isDone
-                              ? "border-brown-700 bg-brown-700 text-white"
-                              : "border-brown-300 bg-white text-brown-400",
-                        )}
-                      >
-                        {isDone ? <Check className="h-3.5 w-3.5" /> : index + 1}
-                      </span>
+                      <StepRing state={isActive ? "current" : isDone ? "done" : "ahead"} number={index + 1} />
                       <span className="min-w-0">
                         <span
                           className={cn(
-                            "block text-sm font-medium",
-                            isActive ? "text-brown-800" : "text-brown-600",
+                            "block text-body font-medium",
+                            isActive ? "text-primary" : "text-secondary",
                           )}
                         >
                           {s.title}
                         </span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="block truncate text-hint text-tertiary">
                           {s.subtitle}
                         </span>
                       </span>
@@ -314,17 +293,17 @@ export const PolicyWizardModal: FC<Props> = ({
 
             {/* Step content */}
             <div className="flex min-w-0 flex-1 flex-col">
-              <div className="flex flex-none items-center justify-between gap-3 border-b border-brown-100 px-6 py-4">
+              <div className="flex flex-none items-center justify-between gap-3 border-b border-divider px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brown-100 text-brown-700">
-                    <StepIcon className="h-5 w-5" />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-control bg-mist text-secondary">
+                    <Icon icon={step.icon} />
                   </span>
                   <div>
-                    <h2 className="text-lg font-semibold leading-tight text-foreground">{step.title}</h2>
-                    <p className="text-sm text-muted-foreground">{step.subtitle}</p>
+                    <h2 className="text-section-title leading-tight text-primary">{step.title}</h2>
+                    <p className="text-body text-tertiary">{step.subtitle}</p>
                   </div>
                 </div>
-                <span className="shrink-0 text-xs font-medium text-brown-400">
+                <span className="shrink-0 text-hint font-medium text-tertiary">
                   Step {stepIndex + 1} of {STEPS.length}
                 </span>
               </div>
@@ -333,17 +312,17 @@ export const PolicyWizardModal: FC<Props> = ({
                 <div className="mx-auto max-w-2xl">{renderStep()}</div>
               </div>
 
-              <div className="flex-none space-y-3 border-t border-brown-100 px-6 py-4">
-                {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex-none space-y-3 border-t border-divider px-6 py-4">
+                {error && <FormError message={error} />}
                 <div className="flex items-center justify-between">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     onClick={handleBack}
                     disabled={stepIndex === 0 || busy}
                     className="gap-1"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <Icon icon={ArrowLeft01Icon} size="sm" />
                     Back
                   </Button>
 
@@ -360,7 +339,7 @@ export const PolicyWizardModal: FC<Props> = ({
                         <>
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="secondary"
                             onClick={() => handleSave(false)}
                             disabled={busy}
                           >
@@ -374,7 +353,7 @@ export const PolicyWizardModal: FC<Props> = ({
                     ) : (
                       <Button type="button" onClick={handleNext} disabled={busy} className="gap-1">
                         Next
-                        <ChevronRight className="h-4 w-4" />
+                        <Icon icon={ArrowRight01Icon} size="sm" />
                       </Button>
                     )}
                   </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FC } from "react";
-import { Check, Copy, RefreshCw } from "lucide-react";
+import { Copy01Icon, Refresh01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -10,16 +11,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { CalendarFeedKind } from "@/api/modules/calendarFeeds/dto";
 import {
   issueCalendarFeedAction,
   rotateCalendarFeedAction,
 } from "../../../actions/calendarFeedActions";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   isOpen: boolean;
@@ -116,32 +118,32 @@ export const SubscribeCalendarModal: FC<Props> = ({
         </DialogHeader>
 
         <div className="space-y-2 py-2">
-          <Label htmlFor="feed-url">Subscription Link</Label>
+          <Label htmlFor="feed-url">Subscription link</Label>
           <div className="flex items-center gap-2">
             <Input id="feed-url" readOnly value={isLoading ? "Loading…" : url} />
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="icon"
               aria-label="Copy link"
               disabled={isLoading || !url}
               onClick={handleCopy}
             >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Icon icon={Tick02Icon} size="sm" /> : <Icon icon={Copy01Icon} size="sm" />}
             </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-hint text-tertiary">
             Anyone with this link can read the calendar. Reset it if it ends up somewhere it should
             not be — existing subscriptions stop working immediately.
           </p>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <FormError message={error} />}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" disabled={isLoading} onClick={handleRotate}>
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button type="button" variant="secondary" disabled={isLoading} onClick={handleRotate}>
+            <Icon icon={Refresh01Icon} size="sm" />
             Reset link
           </Button>
           <Button type="button" onClick={onCloseAction}>

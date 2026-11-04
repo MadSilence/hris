@@ -1,10 +1,12 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { NodRing } from "@/components/desact/nod";
+import { FormError } from "@/components/feedback/FormError";
 
 export interface PreviewDocumentModalProps {
   isOpen: boolean;
@@ -75,14 +77,14 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-[24rem] items-center justify-center overflow-hidden rounded-lg border border-brown-200 bg-brown-50">
-          {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        <div className="flex min-h-[24rem] items-center justify-center overflow-hidden rounded-control border border-divider bg-subtle">
+          {isLoading && <NodRing size="md" />}
 
           {!isLoading && error && (
             <div className="space-y-3 p-6 text-center">
-              <p className="text-sm text-destructive">{error}</p>
+              <FormError message={error} />
               {document && (
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="secondary" size="sm" asChild>
                   <a href={getDownloadUrl(document.id)} download>Download instead</a>
                 </Button>
               )}

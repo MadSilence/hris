@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import QRCode from "qrcode";
-import { Loader2, QrCode, Upload } from "lucide-react";
+import { QrCodeIcon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { NodRing } from "@/components/desact/nod";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Button } from "@/components/desact/button";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
 import { issueAvatarUploadTokenAction } from "@/components/modules/firstRun/actions";
@@ -64,7 +66,6 @@ export const AvatarWithQr: React.FC<{
 
   /*
     The photo arriving is what closes the code, and it is the only signal there is.
-
     A one-time token is spent by the upload, so a code left on screen afterwards is a picture of
     something that no longer works — and the person, who is holding their phone and has just seen
     "That's your photo", would be looking at it wondering whether to scan again. The new avatar
@@ -122,24 +123,24 @@ export const AvatarWithQr: React.FC<{
     <div className="flex flex-col items-center gap-4">
       <Avatar className="size-28">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName} /> : null}
-        <AvatarFallback className="text-2xl">{initialsOf(fullName)}</AvatarFallback>
+        <AvatarFallback className="text-page-title">{initialsOf(fullName)}</AvatarFallback>
       </Avatar>
 
       {qr ? (
         <div className="flex flex-col items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL drawn in this browser */}
-          <img src={qr.dataUrl} alt="Scan to upload a photo from your phone" className="rounded-md border border-brown-200" />
-          <p className="max-w-[14rem] text-center text-xs text-muted-foreground">
+          <img src={qr.dataUrl} alt="Scan to upload a photo from your phone" className="rounded-control border border-divider" />
+          <p className="max-w-[14rem] text-center text-hint text-tertiary">
             Scan it with your phone&apos;s camera. The code works once, for the next few minutes.
           </p>
           <Button key="hide-qr" type="button" variant="ghost" size="sm" onClick={() => setQr(null)}>
-            Hide Code
+            Hide code
           </Button>
         </div>
       ) : (
-        <Button key="show-qr" type="button" variant="outline" size="sm" className="gap-1.5" onClick={showQr} disabled={issuing}>
-          {issuing ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
-          Use My Phone
+        <Button key="show-qr" type="button" variant="secondary" size="sm" className="gap-1.5" onClick={showQr} disabled={issuing}>
+          {issuing ? <NodRing size="sm" label="" /> : <Icon icon={QrCodeIcon} size="sm" />}
+          Use my phone
         </Button>
       )}
 
@@ -151,8 +152,8 @@ export const AvatarWithQr: React.FC<{
         onClick={() => fileInput.current?.click()}
         disabled={uploading}
       >
-        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-        Upload From This Computer
+        {uploading ? <NodRing size="sm" label="" /> : <Icon icon={Upload01Icon} size="sm" />}
+        Upload from this computer
       </Button>
 
       <input

@@ -2,9 +2,10 @@
 
 import { FC, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { ArrowTurnBackwardIcon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -27,6 +28,8 @@ import {
 import {
   PersonalDocumentsEmptyState,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsEmptyState";
+import { NodRing } from "@/components/desact/nod";
+import { FormError } from "@/components/feedback/FormError";
 
 const trashKey = (userId: string) => ["DOCUMENTS_TRASH", userId];
 
@@ -82,7 +85,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
   const isBusy = restore.isPending || purge.isPending;
 
   if (isLoading) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>;
+    return <div className="flex justify-center py-6"><NodRing size="md" /></div>;
   }
 
   // Every failure used to read "You don't have access to this person's deleted documents." — the
@@ -101,7 +104,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
   if (rows.length === 0) {
     return (
       <PersonalDocumentsEmptyState
-        icon={<Trash2 className="h-6 w-6"/>}
+        icon={<Icon icon={Delete02Icon} size="lg" />}
         title="Nothing in the trash"
         description="Deleted documents wait here until they are restored or permanently removed."
       />
@@ -110,18 +113,18 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
 
   return (
     <div className="space-y-2">
-      {actionError && <p className="text-sm text-destructive">{actionError}</p>}
+      {actionError && <FormError message={actionError} />}
 
-      <div className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+      <div className="divide-y divide-divider rounded-control border border-divider">
         {rows.map((document) => (
           <div key={document.id} className="flex items-center gap-3 px-4 py-3">
-            <span className="shrink-0 text-muted-foreground [&_svg]:h-5 [&_svg]:w-5">
+            <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
               {getDocumentFileIcon(document.mimeType)}
             </span>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{document.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="truncate text-body font-medium">{document.name}</p>
+              <p className="text-hint text-tertiary">
                 {formatBytes(document.sizeBytes)} · uploaded {formatDisplayDate(document.createdAt)}
               </p>
             </div>
@@ -132,21 +135,21 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               disabled={isBusy}
               onClick={() => restore.mutate(document.id)}
             >
-              <RotateCcw className="mr-2 h-4 w-4"/>
+              <Icon icon={ArrowTurnBackwardIcon} size="sm" />
               Restore
             </Button>
 
             <Button type="button"
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-destructive"
+              className="text-tertiary hover:text-danger-text"
               disabled={isBusy}
               onClick={() => {
                 purge.reset();
                 setPendingPurge(document);
               }}
             >
-              <Trash2 className="mr-2 h-4 w-4"/>
+              <Icon icon={Delete02Icon} size="sm" />
               Delete forever
             </Button>
           </div>

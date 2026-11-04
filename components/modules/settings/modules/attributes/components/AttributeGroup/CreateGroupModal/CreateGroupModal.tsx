@@ -1,13 +1,15 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Layers } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Layers01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
   CreateGroupForm,
   CreateGroupFormValues,
 } from "@/components/modules/settings/modules/attributes/components/AttributeGroup/CreateGroupForm";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
+import { InlineAlert } from "@/components/desact/alert";
 
 type CreateGroupModalProps = {
   isOpen: boolean;
@@ -61,8 +63,8 @@ export const CreateGroupModal: FC<CreateGroupModalProps> = ({
         >
           <DialogHeader>
             <div className="flex items-center gap-3 text-left">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
-                <Layers className="h-5 w-5" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+                <Icon icon={Layers01Icon} />
               </span>
               <div className="space-y-1">
                 <DialogTitle>Create section</DialogTitle>
@@ -74,12 +76,9 @@ export const CreateGroupModal: FC<CreateGroupModalProps> = ({
           </DialogHeader>
 
           {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
+            <InlineAlert tone="declined">
               {errorMessage}
-            </p>
+            </InlineAlert>
           )}
 
           <CreateGroupForm

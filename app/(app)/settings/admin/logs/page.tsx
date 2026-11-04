@@ -13,7 +13,7 @@ const LogsSettingsPage: React.FC = () => {
         <div className="px-8 space-y-2 shrink-0">
           <SettingsPageHeader title={"Logs"} backHref="/settings"/>
 
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             Everything that has happened in this company — who did it, when, and what changed. The
             list is read-only; open a row to see the details behind it.
           </PageDescription>

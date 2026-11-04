@@ -87,32 +87,32 @@ describe("JobFamilyComponent", () => {
   it("hides row actions and the add affordance until edit mode is entered", () => {
     renderComponent();
 
-    expect(screen.queryByLabelText("Position Actions")).not.toBeInTheDocument();
-    expect(screen.queryByText("Add Job")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Position actions")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add job")).not.toBeInTheDocument();
 
     enterEditMode();
 
-    expect(screen.getByLabelText("Position Actions")).toBeInTheDocument();
-    expect(screen.getByText("Add Job")).toBeInTheDocument();
+    expect(screen.getByLabelText("Position actions")).toBeInTheDocument();
+    expect(screen.getByText("Add job")).toBeInTheDocument();
   });
 
-  it("swaps the empty-state block for Add Job in edit mode", () => {
+  it("swaps the empty-state block for Add job in edit mode", () => {
     renderComponent({ jobFamilies: [family({ jobs: [], assignedUsersCount: 0 })] });
 
     expect(screen.getByText("No positions in this family yet")).toBeInTheDocument();
-    expect(screen.queryByText("Add Job")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add job")).not.toBeInTheDocument();
 
     enterEditMode();
 
     expect(screen.queryByText("No positions in this family yet")).not.toBeInTheDocument();
-    expect(screen.getByText("Add Job")).toBeInTheDocument();
+    expect(screen.getByText("Add job")).toBeInTheDocument();
   });
 
-  it("offers Add Job for the family it sits in", () => {
+  it("offers Add job for the family it sits in", () => {
     const props = renderComponent();
 
     enterEditMode();
-    fireEvent.click(screen.getByText("Add Job"));
+    fireEvent.click(screen.getByText("Add job"));
 
     expect(props.onCreateJob).toHaveBeenCalledWith(expect.objectContaining({ id: "fam-1" }));
   });
@@ -122,7 +122,7 @@ describe("JobFamilyComponent", () => {
     const props = renderComponent();
 
     enterEditMode();
-    await user.click(screen.getByLabelText("Position Actions"));
+    await user.click(screen.getByLabelText("Position actions"));
     await user.click(await screen.findByRole("menuitem", { name: "Archive" }));
 
     expect(props.onArchiveJob).toHaveBeenCalledWith(expect.objectContaining({ id: "job-1" }));
@@ -133,7 +133,7 @@ describe("JobFamilyComponent", () => {
     const props = renderComponent({ jobFamilies: [family({ jobs: [job({ archived: true })] })] });
 
     enterEditMode();
-    await user.click(screen.getByLabelText("Position Actions"));
+    await user.click(screen.getByLabelText("Position actions"));
 
     // Plain text item, no icon — same as every other entry in the menu.
     expect(await screen.findByRole("menuitem", { name: "Unarchive" })).toHaveTextContent(/^Unarchive$/);

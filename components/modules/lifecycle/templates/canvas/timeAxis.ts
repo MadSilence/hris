@@ -76,7 +76,7 @@ export const buildAxis = (items: Timing[], type?: ProcessType): Axis => {
   }
   for (let d = -DAYS_EACH_SIDE; d <= DAYS_EACH_SIDE; d++) {
     if (d === 0) {
-      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: type === "OFFBOARDING" ? "By Last Day" : "Before Start", caption: null });
+      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: type === "OFFBOARDING" ? "By last day" : "Before start", caption: null });
     }
     spans.push({ id: `d${d}`, kind: "day", start: d, end: d, width: DAY_W, label: day(d), caption: null });
   }

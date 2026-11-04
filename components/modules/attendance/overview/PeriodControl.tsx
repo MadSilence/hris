@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { DateRangePicker } from "@/components/ui/DatePicker";
 import { formatMonthLabel, shiftMonth } from "@/components/modules/attendance/lib";
 
@@ -25,21 +26,21 @@ export const PeriodControl: React.FC<Props> = ({ month, range, onMonthChange, on
   <div className="flex items-center gap-2">
     {!range && (
       <>
-        <Button type="button" variant="outline" size="icon" aria-label="Previous Month"
+        <Button type="button" variant="secondary" size="icon" aria-label="Previous month"
                 onClick={() => onMonthChange(shiftMonth(month, -1))}>
-          <ChevronLeft className="h-4 w-4"/>
+          <Icon icon={ArrowLeft01Icon} size="sm" />
         </Button>
-        <span className="min-w-36 text-center text-sm font-medium" aria-live="polite">{formatMonthLabel(month)}</span>
-        <Button type="button" variant="outline" size="icon" aria-label="Next Month"
+        <span className="min-w-36 text-center text-body font-medium" aria-live="polite">{formatMonthLabel(month)}</span>
+        <Button type="button" variant="secondary" size="icon" aria-label="Next month"
                 onClick={() => onMonthChange(shiftMonth(month, 1))}>
-          <ChevronRight className="h-4 w-4"/>
+          <Icon icon={ArrowRight01Icon} size="sm" />
         </Button>
       </>
     )}
     <DateRangePicker
       value={range}
       onChange={onRangeChange}
-      placeholder="Custom Range"
+      placeholder="Custom range"
       maxDays={MAX_DAYS}
       ariaLabel="Custom range"
       className={range ? "w-72" : "w-40"}

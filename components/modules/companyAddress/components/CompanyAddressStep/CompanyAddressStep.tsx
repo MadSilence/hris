@@ -2,9 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
 import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import {
   companyHost,
@@ -13,6 +13,7 @@ import {
   TYPED_COMPANY_COOKIE,
   type WebAddressConfig,
 } from "@/lib/companyAddress";
+import { FormError } from "@/components/feedback/FormError";
 
 export enum CompanyAddressStepMessages {
   Required = "Please enter your company address.",
@@ -71,8 +72,8 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
     <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">Sign in to your company</h1>
-          <p className="text-md text-[var(--color-text-tertiary)]">
+          <h1 className="text-greeting">Sign in to your company</h1>
+          <p className="text-body text-tertiary">
             {offered
               ? "Continue to the company you signed in to last time, or choose another."
               : <>Enter your company&apos;s address — the one you sign in at.</>}
@@ -81,17 +82,17 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
 
         {offered ? (
           <div className="space-y-3">
-            <Button type="button" className="h-11 w-full" onClick={() => goTo(offered)}>
+            <Button size="lg" type="button" className="w-full" onClick={() => goTo(offered)}>
               Continue to {companyHost(offered, web)}
             </Button>
-            <Button type="button" variant="outline" className="h-11 w-full bg-transparent" onClick={() => setChooseAnother(true)}>
+            <Button size="lg" type="button" variant="secondary" className="w-full" onClick={() => setChooseAnother(true)}>
               Use another company
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="company-address">Company Address</Label>
+              <Label htmlFor="company-address">Company address</Label>
 
               <div className="flex items-center gap-2">
                 <Input
@@ -110,20 +111,20 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
                   className="h-11"
                   autoFocus
                 />
-                <span className="shrink-0 text-sm text-[var(--color-text-tertiary)]">{suffix}</span>
+                <span className="shrink-0 text-body text-tertiary">{suffix}</span>
               </div>
 
               {error && (
-                <p className="text-sm text-destructive" role="alert">{error}</p>
+                <FormError message={error} />
               )}
             </div>
 
-            <Button type="submit" className="h-11 w-full">Continue</Button>
+            <Button size="lg" type="submit" className="w-full">Continue</Button>
           </form>
         )}
 
-        <p className="text-center text-sm text-muted-foreground">
-          <Link href="/find-company" className="underline-offset-4 hover:underline">
+        <p className="text-center text-body text-tertiary">
+          <Link href="/find-company" className="text-accent-text underline-offset-4 hover:underline">
             Forgot company address?
           </Link>
         </p>

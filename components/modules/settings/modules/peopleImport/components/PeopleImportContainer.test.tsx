@@ -83,7 +83,7 @@ describe("PeopleImportContainer", () => {
   it("tells somebody with no import right that the page is not theirs, with nothing to retry", () => {
     current = { data: null, isLoading: false, error: new ForbiddenError("forbidden", { status: 403, code: "IMP00114" }) };
     render(<PeopleImportContainer />);
-    expect(screen.getByText("Access denied")).toBeInTheDocument();
+    expect(screen.getByText("This page is private")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /try again/i })).not.toBeInTheDocument();
     current = { data: null, isLoading: false, error: null };
   });
@@ -91,7 +91,7 @@ describe("PeopleImportContainer", () => {
   it("asks what is being imported, in move-in order, before offering a template", () => {
     show(null);
     expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual([
-      expect.stringContaining("Structure"), expect.stringContaining("People"), expect.stringContaining("Leave Balances"),
+      expect.stringContaining("Structure"), expect.stringContaining("People"), expect.stringContaining("Leave balances"),
     ]);
     expect(screen.queryByRole("button", { name: /download xlsx template/i })).not.toBeInTheDocument();
   });
@@ -115,13 +115,13 @@ describe("PeopleImportContainer", () => {
     show(anImport({ status: "UPLOADED" }));
     expect(screen.getByText("people.csv")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Field for Email" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Check File" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Check file" })).toBeEnabled();
   });
 
   it("does not let a file be checked until both names are mapped", () => {
     show(anImport({ status: "MAPPED", mapping: { "0": "sys:first_name" } }));
     expect(screen.getByText(/still to match: last name/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Check File" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Check file" })).toBeDisabled();
   });
 
   it("says what will happen before anything is created", () => {
@@ -170,7 +170,7 @@ describe("PeopleImportContainer", () => {
       lastEditedByName: "Ada Lovelace", lastEditedAt: "2026-10-29T10:00:00Z",
     }));
     expect(screen.getByText(/last edited by ada lovelace/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Clear Unknown Leads" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear unknown leads" }));
     expect(edit.mutate).toHaveBeenCalledWith(
       { id: "imp-1", body: { version: 3, edits: [{ rowNumber: 3, column: 3, value: null }], removeRows: [] } },
       expect.anything(),

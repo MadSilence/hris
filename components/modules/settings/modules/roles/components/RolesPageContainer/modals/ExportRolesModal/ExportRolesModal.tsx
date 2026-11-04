@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
   ExportRolesForm,
   ExportRolesFormValues

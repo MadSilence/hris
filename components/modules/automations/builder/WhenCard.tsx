@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Input } from "@/components/desact/input";
+import { Checkbox } from "@/components/desact/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import {
   TRIGGER_HINTS,
   TRIGGER_LABELS,
@@ -71,7 +72,7 @@ export function WhenCard({
             ))}
           </SelectContent>
         </Select>
-        <p className="m-0 text-xs text-muted-foreground">{TRIGGER_HINTS[trigger.type]}</p>
+        <p className="m-0 text-hint text-tertiary">{TRIGGER_HINTS[trigger.type]}</p>
       </Field>
 
       {trigger.type === "DATE_OFFSET" && (
@@ -101,13 +102,13 @@ export function WhenCard({
               options={[
                 ...catalog.dateFields
                   .filter((o) => o.value !== "ATTRIBUTE")
-                  .map((o) => ({ value: o.value, label: o.label, group: "Built In" })),
+                  .map((o) => ({ value: o.value, label: o.label, group: "Built in" })),
                 // Under its own heading: a company field can share a name with a built-in date ("Date of
                 // birth" is both), and two equal rows read as a duplicate.
                 ...catalog.dateAttributes.map((o) => ({
                   value: `${ATTRIBUTE_PREFIX}${o.value}`,
                   label: o.label,
-                  group: "Company Fields",
+                  group: "Company fields",
                 })),
               ]}
               value={dateValueOf(trigger) || null}
@@ -122,9 +123,9 @@ export function WhenCard({
               clearable={false}
             />
           </Field>
-          <label className="flex h-9 cursor-pointer items-center gap-2 text-sm text-foreground">
+          <label className="flex h-9 cursor-pointer items-center gap-2 text-body text-primary">
             <Checkbox checked={trigger.everyYear === true} onCheckedChange={(c) => setTrigger({ everyYear: c === true })} />
-            Every Year
+            Every year
           </label>
         </div>
       )}
@@ -156,36 +157,36 @@ export function WhenCard({
         <button
           type="button"
           onClick={() => setAdvanced((v) => !v)}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          className="flex items-center gap-1 text-hint text-tertiary hover:text-primary"
           aria-expanded={advanced}
         >
-          {advanced ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-          If the Date Is Already Past
+          {advanced ? <Icon icon={ArrowDown01Icon} size="sm" /> : <Icon icon={ArrowRight01Icon} size="sm" />}
+          If the date Is already past
         </button>
         {advanced && (
-          <div className="mt-3 space-y-3 rounded-lg bg-brown-50/60 p-4">
+          <div className="mt-3 space-y-3 rounded-control bg-subtle/60 p-4">
             <RadioGroup
               value={definition.latePolicy ?? "RUN_LATE"}
               onValueChange={(v) => onChange({ latePolicy: v as AutomationDefinition["latePolicy"] })}
               className="gap-2"
             >
-              <label className="flex cursor-pointer items-start gap-2 text-sm">
+              <label className="flex cursor-pointer items-start gap-2 text-body">
                 <RadioGroupItem value="RUN_LATE" className="mt-0.5" />
                 <span>
-                  <span className="block text-foreground">Run Late</span>
-                  <span className="block text-xs text-muted-foreground">Do it today, and say in the run log that it ran late.</span>
+                  <span className="block text-primary">Run late</span>
+                  <span className="block text-hint text-tertiary">Do it today, and say in the run log that it ran late.</span>
                 </span>
               </label>
-              <label className="flex cursor-pointer items-start gap-2 text-sm">
+              <label className="flex cursor-pointer items-start gap-2 text-body">
                 <RadioGroupItem value="SKIP" className="mt-0.5" />
                 <span>
-                  <span className="block text-foreground">Skip</span>
-                  <span className="block text-xs text-muted-foreground">Leave it out — a dated email sent days late can be worse than none.</span>
+                  <span className="block text-primary">Skip</span>
+                  <span className="block text-hint text-tertiary">Leave it out — a dated email sent days late can be worse than none.</span>
                 </span>
               </label>
             </RadioGroup>
             <Field
-              label="How Late Is Too Late (Days)"
+              label="How late is too late (Days)"
               htmlFor="late-window"
               className="w-56"
               hint={`Older than this is skipped either way, so an import does not send a welcome to everyone. Default ${catalog.defaultLateWindowDays}.`}

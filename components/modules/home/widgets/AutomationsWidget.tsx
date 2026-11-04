@@ -26,7 +26,7 @@ export const AutomationsWidget: React.FC = () => {
   const attention = rules.filter(needsAttention).sort((a, b) => b.runs.failed - a.runs.failed);
 
   return (
-    <HomeCard title="Automations" action={<HomeCardLink href={RULES_HREF}>See All</HomeCardLink>}>
+    <HomeCard title="Automations" action={<HomeCardLink href={RULES_HREF}>See all</HomeCardLink>}>
       {query.isLoading ? (
         <HomeRowsSkeleton rows={2} avatar={false} />
       ) : query.error ? (
@@ -38,12 +38,12 @@ export const AutomationsWidget: React.FC = () => {
           <dl className="grid grid-cols-3 gap-2 text-center">
             {[
               { label: "Enabled", value: enabled },
-              { label: "Scheduled Runs", value: scheduled },
-              { label: "Failed Runs", value: failed },
+              { label: "Scheduled runs", value: scheduled },
+              { label: "Failed runs", value: failed },
             ].map((stat) => (
-              <div key={stat.label} className="rounded-md bg-brown-50 px-2 py-2">
-                <dd className="text-lg font-semibold text-brown-900">{stat.value}</dd>
-                <dt className="text-[11px] text-muted-foreground">{stat.label}</dt>
+              <div key={stat.label} className="rounded-control bg-subtle px-2 py-2">
+                <dd className="text-section-title text-primary">{stat.value}</dd>
+                <dt className="text-hint text-tertiary">{stat.label}</dt>
               </div>
             ))}
           </dl>
@@ -53,9 +53,9 @@ export const AutomationsWidget: React.FC = () => {
             <ul className="flex flex-col gap-1">
               {attention.slice(0, AUTOMATIONS_LIMIT).map((rule) => (
                 <li key={rule.id}>
-                  <Link href={`${RULES_HREF}/${rule.id}`} className="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-brown-50">
-                    <span className="truncate text-sm font-medium text-brown-900">{rule.name}</span>
-                    <span className="shrink-0 text-xs font-medium text-danger-600">
+                  <Link href={`${RULES_HREF}/${rule.id}`} className="-mx-2 flex items-center justify-between gap-3 rounded-control px-2 py-1.5 hover:bg-subtle">
+                    <span className="truncate text-body font-medium text-primary">{rule.name}</span>
+                    <span className="shrink-0 text-hint font-medium text-danger-text">
                       {rule.status === "PAUSED" ? "Paused" : `${rule.runs.failed} failed`}
                     </span>
                   </Link>

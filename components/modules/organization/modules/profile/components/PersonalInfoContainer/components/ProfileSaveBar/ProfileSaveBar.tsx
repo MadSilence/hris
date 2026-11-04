@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 
 type Props = {
   /** How many fields differ from what was loaded. The bar is not drawn at zero. */
@@ -39,17 +39,17 @@ export const ProfileSaveBar: React.FC<Props> = ({
     <div
       role="region"
       aria-label="Unsaved changes"
-      className="sticky bottom-0 z-10 flex items-center justify-between gap-3 rounded-md border border-brown-200 bg-background px-4 py-3 shadow-md"
+      className="sticky bottom-0 z-10 flex items-center justify-between gap-3 rounded-control border border-divider bg-page px-4 py-3 shadow-raised"
     >
-      <span className="text-sm font-medium text-foreground">{unsavedChangesLabel(changeCount)}</span>
+      <span className="text-body font-medium text-primary">{unsavedChangesLabel(changeCount)}</span>
 
       <div className="flex min-w-0 items-center gap-2">
         {error && (
-          <span role="alert" className="truncate text-sm text-destructive">
+          <span role="alert" className="truncate text-body text-danger-text">
             {error}
           </span>
         )}
-        <Button type="button" variant="outline" size="sm" onClick={onDiscard} disabled={isSaving}>
+        <Button type="button" variant="secondary" size="sm" onClick={onDiscard} disabled={isSaving}>
           Discard
         </Button>
         <Button type="button" size="sm" onClick={onSave} disabled={isSaving || saveBlocked || changeCount === 0}>

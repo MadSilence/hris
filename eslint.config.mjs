@@ -5,10 +5,10 @@ import { FlatCompat } from "@eslint/eslintrc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const RAW_STATUS_HUE =
-  "/(^|[\\s:])(bg|text|border|ring|fill|stroke|from|to|via|divide|outline|decoration|placeholder|accent|caret|shadow)(-[a-z]+)?-(red|rose|green|emerald|lime|amber|yellow|orange|blue|sky|teal)-[0-9]/";
-const RAW_STATUS_HUE_MESSAGE =
-  "Use a semantic colour token (success-*, danger-*, warning-*, info-*) instead of a raw Tailwind hue — ui/STATUS_AND_BADGES.md § 3.";
+const RAW_HUE =
+  "/(^|[\\s:])(bg|text|border|ring|fill|stroke|from|to|via|divide|outline|decoration|placeholder|accent|caret|shadow)(-[a-z]+)?-(brown|gray|slate|zinc|neutral|stone|red|rose|pink|fuchsia|purple|violet|indigo|green|emerald|lime|amber|yellow|orange|blue|sky|cyan|teal|success|danger|warning|info)-[0-9]/";
+const RAW_HUE_MESSAGE =
+  "Use a role of the noddo design system (text-secondary, bg-subtle, bg-accent, bg-status-approved-bg, a tag colour…) instead of a palette step — styles/globals.css lists them.";
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -26,9 +26,6 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "coverage/**",
-      // Vendored Desact UI kit and its component gallery — excluded from tsconfig for the same
-      // reason. We consume its components; we do not hold its source to this project's rules.
-      "public/desact/**",
       "next-env.d.ts",
     ],
   },
@@ -48,22 +45,21 @@ const eslintConfig = [
           destructuredArrayIgnorePattern: "^_",
         },
       ],
-      // A status colour is a semantic token — `success-*`, `danger-*`, `warning-*`, `info-*` —
-      // never a raw Tailwind hue (`technical_documentation/ui/STATUS_AND_BADGES.md` § 3). The
-      // scales are exact copies of green/red/amber/blue, so the conversion of 2026-09-21 moved
-      // no pixel; this rule is what keeps the raw hues from growing back. A categorical palette
-      // (a chip per field type) is not a status and says so with an eslint-disable comment.
+      // Every colour is a role of the noddo design system (`styles/globals.css`): text, surface, border,
+      // accent, status, tag. A palette step — `brown-50`, `blue-700`, `success-600` — produces no CSS at
+      // all since Tailwind's palette was switched off, so this rule says so in the editor;
+      // `test/designSystemGuard.test.ts` says it for everything else. A category takes the tag palette.
       "no-restricted-syntax": [
         "error",
         {
-          selector: `Literal[value=${RAW_STATUS_HUE}]`,
-          message: RAW_STATUS_HUE_MESSAGE,
+          selector: `Literal[value=${RAW_HUE}]`,
+          message: RAW_HUE_MESSAGE,
         },
         {
-          selector: `TemplateElement[value.raw=${RAW_STATUS_HUE}]`,
-          message: RAW_STATUS_HUE_MESSAGE,
+          selector: `TemplateElement[value.raw=${RAW_HUE}]`,
+          message: RAW_HUE_MESSAGE,
         },
-        // A button with no `type` is a submit button inside any form it ends up in, and the vendored
+        // A button with no `type` is a submit button inside any form it ends up in, and Desact's
         // Button sets no default. It swallowed a step of the welcome once (NEED_TO_DISCUSS § 20); the
         // owner chose this rule over changing the kit (2026-10-27). `react/button-has-type` sees only
         // the native element, so the selector covers `<Button>` too. `asChild` renders its child's tag.

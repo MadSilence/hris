@@ -157,7 +157,7 @@ describe("TemplatePreview", () => {
     setUp(role({ outcome: "CLASH", reason: "The company already has a role called “HR Admin”.", existingName: "HR Admin" }));
     render(<TemplatePreview templateKey="role.hr-admin"/>);
 
-    expect(screen.getByText("Name Taken")).toBeInTheDocument();
+    expect(screen.getByText("Name taken")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: /what to do with hr admin/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /nothing to create/i })).toBeDisabled();
   });

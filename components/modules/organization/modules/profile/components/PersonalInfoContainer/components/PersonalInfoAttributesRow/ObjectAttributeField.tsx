@@ -1,11 +1,12 @@
 "use client";
 
 import { FC } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Button } from "@/components/desact/button";
 import { AttributeType } from "@/models/attribute";
 import { ObjectFieldDef, ObjectRecord } from "@/models/attribute/objectFields";
 import { getCatalogOptions, isManagedCatalogType } from "@/models/attribute/managedCatalogs";
@@ -32,7 +33,7 @@ const RecordFieldsEditor: FC<{
       const cur = record[f.key] == null ? "" : String(record[f.key]);
       return (
         <div key={f.key} className="space-y-1">
-          <Label className="text-xs">{f.label}</Label>
+          <Label className="text-hint">{f.label}</Label>
           {isManagedCatalogType(f.type) ? (
             <SearchableSelect
               options={getCatalogOptions(f.type)}
@@ -59,9 +60,9 @@ const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> =
     {fields.map((f) => {
       const v = record[f.key];
       return (
-        <div key={f.key} className="flex gap-2 text-sm">
-          <dt className="text-muted-foreground">{f.label}:</dt>
-          <dd className="text-foreground">{v == null ? "" : String(v)}</dd>
+        <div key={f.key} className="flex gap-2 text-body">
+          <dt className="text-tertiary">{f.label}:</dt>
+          <dd className="text-primary">{v == null ? "" : String(v)}</dd>
         </div>
       );
     })}
@@ -72,11 +73,11 @@ const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> =
 
 export const ObjectRecordsView: FC<{ fields: ObjectFieldDef[]; value: unknown }> = ({ fields, value }) => {
   const records = asRecords(value);
-  if (records.length === 0) return <span className="italic text-muted-foreground">None</span>;
+  if (records.length === 0) return <span className="text-tertiary">None</span>;
   return (
     <div className="space-y-2">
       {records.map((rec, i) => (
-        <div key={i} className="rounded-md border border-brown-100 px-3 py-2">
+        <div key={i} className="rounded-control border border-divider px-3 py-2">
           <RecordFieldsView fields={fields} record={rec} />
         </div>
       ))}
@@ -93,7 +94,7 @@ export const ObjectRecordsEditor: FC<{
   return (
     <div className="space-y-3">
       {records.map((rec, i) => (
-        <div key={i} className="space-y-2 rounded-md border border-brown-200 p-3">
+        <div key={i} className="space-y-2 rounded-control border border-divider p-3">
           <RecordFieldsEditor
             fields={fields}
             record={rec}
@@ -103,16 +104,16 @@ export const ObjectRecordsEditor: FC<{
             <button
               type="button"
               onClick={() => onChange(records.filter((_, idx) => idx !== i))}
-              className="flex items-center gap-1 text-xs text-brown-400 hover:text-danger-600"
+              className="flex items-center gap-1 text-hint text-tertiary hover:text-danger-text"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Icon icon={Delete02Icon} size="sm" />
               Remove
             </button>
           </div>
         </div>
       ))}
-      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => onChange([...records, {}])}>
-        <Plus className="h-4 w-4" />
+      <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={() => onChange([...records, {}])}>
+        <Icon icon={Add01Icon} size="sm" />
         Add
       </Button>
     </div>
@@ -124,7 +125,7 @@ export const ObjectRecordsEditor: FC<{
 export const SingleRecordView: FC<{ fields: ObjectFieldDef[]; value: unknown }> = ({ fields, value }) => {
   const record = asRecords(value)[0];
   const isEmpty = !record || fields.every((f) => record[f.key] == null || record[f.key] === "");
-  if (isEmpty) return <span className="italic text-muted-foreground">Not set</span>;
+  if (isEmpty) return <span className="text-tertiary">Not set</span>;
   return <RecordFieldsView fields={fields} record={record} />;
 };
 

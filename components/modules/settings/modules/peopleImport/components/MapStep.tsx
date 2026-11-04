@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
 import type {
@@ -85,16 +85,16 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
     <div className="flex max-w-5xl flex-col gap-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <p className="text-sm font-medium text-brown-800">{anImport.fileName}</p>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">{IMPORT_KINDS[anImport.kind].title}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body font-medium text-primary">{anImport.fileName}</p>
+          <p className="text-hint text-tertiary">{IMPORT_KINDS[anImport.kind].title}</p>
+          <p className="text-body text-tertiary">
             {anImport.rowCount} {anImport.rowCount === 1 ? "row" : "rows"} · Match each column to a field, or leave it out.
           </p>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-brown-200">
-        <Table className="text-sm">
+      <div className="overflow-hidden rounded-control border border-divider">
+        <Table className="text-body">
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/2">Column in the file</TableHead>
@@ -106,7 +106,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
               const current = mapping[String(column)] ?? SKIP;
               return (
                 <TableRow key={column} className="hover:bg-transparent">
-                  <TableCell className="font-medium text-brown-800">{header}</TableCell>
+                  <TableCell className="font-medium text-primary">{header}</TableCell>
                   <TableCell>
                     <SearchableSelect
                       className="h-8 max-w-xs"
@@ -124,7 +124,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
                       clearable={false}
                     />
                     {current !== SKIP && !fieldsById.has(current) && (
-                      <p className="mt-1 text-xs text-danger-700">You may not import this field.</p>
+                      <p className="mt-1 text-hint text-status-declined-text">You may not import this field.</p>
                     )}
                   </TableCell>
                 </TableRow>
@@ -137,8 +137,8 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       {/* A structure file has no dates and no numbers to read. */}
       {anImport.kind !== "ORG_STRUCTURE" && (
       <div className="flex flex-wrap gap-6">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-brown-700">Dates written as text</span>
+        <label className="flex flex-col gap-1 text-body">
+          <span className="text-secondary">Dates written as text</span>
           <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as PeopleImportDateFormat)} disabled={busy}>
             <SelectTrigger className="h-8 w-48" aria-label="Date format">
               <SelectValue />
@@ -149,10 +149,10 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
               ))}
             </SelectContent>
           </Select>
-          <span className="text-xs text-muted-foreground">2026-03-04 is always read. Real date cells in XLSX need no answer.</span>
+          <span className="text-hint text-tertiary">2026-03-04 is always read. Real date cells in XLSX need no answer.</span>
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-brown-700">Numbers written as</span>
+        <label className="flex flex-col gap-1 text-body">
+          <span className="text-secondary">Numbers written as</span>
           <Select value={decimal} onValueChange={(v) => setDecimal(v as PeopleImportDecimalSeparator)} disabled={busy}>
             <SelectTrigger className="h-8 w-48" aria-label="Decimal separator">
               <SelectValue />
@@ -167,21 +167,21 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
 
       <FormError message={error} />
       {missingRequired.length > 0 && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body text-tertiary">
           Still to match: {missingRequired.map((f) => f.header).join(", ")}.
         </p>
       )}
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={() => void onCheck()} disabled={busy || missingRequired.length > 0}>
-          {check.isPending ? "Checking every row…" : checkedWithErrors ? "Check Again" : "Check File"}
+          {check.isPending ? "Checking every row…" : checkedWithErrors ? "Check again" : "Check file"}
         </Button>
         <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}
         >
-          Discard Import
+          Discard import
         </Button>
       </div>
 

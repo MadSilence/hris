@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useId, useRef, useState } from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Input } from "@/components/desact/input";
+import { cn } from "@/lib/cn";
 import {
   insertMention,
   mentionOptions,
@@ -16,8 +16,8 @@ import {
  * after an inserted token, so the element is drawn here with the same classes.
  */
 const TEXTAREA = cn(
-  "resize-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus:border-ring aria-invalid:ring-destructive/20 aria-invalid:border-destructive flex field-sizing-content min-h-20 w-full rounded-lg border border-brown-300 bg-input-background px-3 py-3 text-base transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-  "hover:border-brown-400",
+  "resize-none placeholder:text-tertiary focus-visible:border-accent focus-visible:ring-accent-ring/50 focus:border-accent aria-invalid:ring-status-declined-border/20 aria-invalid:border-danger flex field-sizing-content min-h-20 w-full rounded-control border border-field bg-card px-3 py-3 text-body transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-body",
+  "hover:border-strong",
 );
 
 type Props = {
@@ -123,14 +123,14 @@ export function MentionField({
         aria-hidden
         data-test="mention-mirror"
         className={cn(
-          "pointer-events-none absolute inset-0 overflow-hidden rounded-lg border border-transparent bg-input-background text-base text-transparent md:text-sm",
+          "pointer-events-none absolute inset-0 overflow-hidden rounded-control border border-transparent bg-card text-body text-transparent md:text-body",
           box,
           className,
         )}
       >
         {splitMentions(value).map((s, i) =>
           s.token
-            ? <mark key={i} data-token={s.token} className="rounded bg-brown-200/80 text-transparent">{s.text}</mark>
+            ? <mark key={i} data-token={s.token} className="rounded-control bg-divider/80 text-transparent">{s.text}</mark>
             : <span key={i}>{s.text}</span>,
         )}
         {/* A trailing newline in a textarea opens a line the mirror would otherwise not have. */}
@@ -158,7 +158,7 @@ export function MentionField({
           id={listId}
           role="listbox"
           aria-label="Mentions"
-          className="absolute left-0 top-full z-20 mt-1 w-72 rounded-lg border border-brown-200 bg-white py-1 text-sm shadow-md"
+          className="absolute left-0 top-full z-20 mt-1 w-72 rounded-control border border-divider bg-card py-1 text-body shadow-raised"
         >
           {options.map((o, i) => (
             <li
@@ -166,13 +166,13 @@ export function MentionField({
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
-              className={cn("cursor-pointer px-3 py-1.5", i === active && "bg-brown-50")}
+              className={cn("cursor-pointer px-3 py-1.5", i === active && "bg-subtle")}
               // Keeps the focus in the field, so the caret is where the token goes.
               onMouseDown={(e) => { e.preventDefault(); choose(o.token); }}
               onMouseEnter={() => setActive(i)}
             >
-              <span className="font-medium text-brown-900">@{o.token}</span>
-              <span className="ml-2 text-xs text-muted-foreground">{o.label}</span>
+              <span className="font-medium text-primary">@{o.token}</span>
+              <span className="ml-2 text-hint text-tertiary">{o.label}</span>
             </li>
           ))}
         </ul>

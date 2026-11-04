@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useMemo } from "react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Badge } from "@/components/desact/badge";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
 import { isReferenceField, type FieldDTO, type FilterDTO } from "@/models/user/fields";
 import { describeFilter } from "./describeFilters";
@@ -17,7 +17,7 @@ export const FilterBadge: FC<{ filter: FilterDTO; fields: FieldDTO[] }> = ({ fil
   const names = useMemo(() => new Map(options.map((o) => [o.id, o.label])), [options]);
 
   return (
-    <Badge variant="secondary" className="font-normal">
+    <Badge variant="neutral" className="font-normal">
       {describeFilter(filter, fields, source ? names : undefined)}
     </Badge>
   );

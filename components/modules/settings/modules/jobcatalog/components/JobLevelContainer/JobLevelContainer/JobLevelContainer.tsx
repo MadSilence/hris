@@ -144,7 +144,7 @@ export default function JobLevelContainer() {
   };
 
   if (error) {
-    return <div className="py-10 text-sm text-muted-foreground">Failed to load job levels</div>;
+    return <div className="py-10 text-body text-tertiary">Failed to load job levels</div>;
   }
 
   const isSavingName =

@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ChevronRight, ScrollText } from "lucide-react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { ChangesDiff } from "@/components/modules/settings/modules/logs/components/ChangesDiff/ChangesDiff";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
@@ -12,10 +13,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+} from "@/components/desact/table";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Badge } from "@/components/desact/badge";
 import type { ActivityLogEntry } from "@/models/activityLog";
+import { NodRing } from "@/components/desact/nod";
 
 const COLUMNS = 6;
 
@@ -79,7 +81,7 @@ export const LogsTable: React.FC<{
      */
     <div ref={scroller} className="min-h-0 flex-1 overflow-auto">
       <Table stickyHeader>
-        <TableHeader className="sticky top-0 z-10 bg-background">
+        <TableHeader className="sticky top-0 z-10 bg-page">
           <TableRow>
             <TableHead className="w-[9rem]">When</TableHead>
             <TableHead className="w-[14rem]">Who</TableHead>
@@ -112,7 +114,7 @@ export const LogsTable: React.FC<{
                     onClick={() => toggle(row.id)}
                     aria-expanded={open}
                   >
-                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    <TableCell className="whitespace-nowrap text-body text-tertiary">
                       {formatWhen(row.createdAt)}
                     </TableCell>
 
@@ -121,19 +123,19 @@ export const LogsTable: React.FC<{
                     </TableCell>
 
                     <TableCell>
-                      <span className="text-sm text-foreground">{row.actionLabel}</span>
+                      <span className="text-body text-primary">{row.actionLabel}</span>
                       {row.module && (
-                        <Badge variant="secondary" className="ml-2 font-normal">
+                        <Badge variant="neutral" className="ml-2 font-normal">
                           {humanise(row.module)}
                         </Badge>
                       )}
                     </TableCell>
 
-                    <TableCell className="text-sm">
+                    <TableCell className="text-body">
                       {row.objectName ? (
-                        <span className="text-foreground">{row.objectName}</span>
+                        <span className="text-primary">{row.objectName}</span>
                       ) : (
-                        <span className="text-muted-foreground">{humanise(row.objectType)}</span>
+                        <span className="text-tertiary">{humanise(row.objectType)}</span>
                       )}
                     </TableCell>
 
@@ -141,21 +143,22 @@ export const LogsTable: React.FC<{
                       {row.targetUserId || row.targetUserName ? (
                         <UserChip id={row.targetUserId} name={row.targetUserName ?? "Deleted person"}/>
                       ) : (
-                        <span className="text-sm text-muted-foreground">—</span>
+                        <span className="text-body text-tertiary">—</span>
                       )}
                     </TableCell>
 
                     <TableCell>
-                      <ChevronRight
-                        className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`}
-                        aria-hidden
+                      <Icon
+                        icon={ArrowRight01Icon}
+                        size="sm"
+                        className={`text-tertiary transition-transform duration-(--duration-menu) ${open ? "rotate-90" : ""}`}
                       />
                     </TableCell>
                   </TableRow>
 
                   {open && (
                     <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={COLUMNS} className="bg-muted/30">
+                      <TableCell colSpan={COLUMNS} className="bg-mist/30">
                         <RowDetail row={row}/>
                       </TableCell>
                     </TableRow>
@@ -170,7 +173,7 @@ export const LogsTable: React.FC<{
                 {/* Nothing to create from a journal: it is written by the rest of the product. */}
                 <ListEmptyState
                   query={query}
-                  icon={<ScrollText className="h-7 w-7"/>}
+                  scene="notes"
                   title="Nothing recorded yet"
                   description="Everything people do in this company shows up here."
                   noResultsHint="Try a different name, period or module."
@@ -185,7 +188,7 @@ export const LogsTable: React.FC<{
           apart from "there was nothing left to fetch". */}
       <div ref={sentinel} data-has-more={hasMore}/>
       {isLoadingMore && (
-        <div className="py-3 text-center text-sm text-muted-foreground">Loading…</div>
+        <div className="flex justify-center py-3"><NodRing size="sm" /></div>
       )}
     </div>
   );
@@ -193,7 +196,7 @@ export const LogsTable: React.FC<{
 
 const Actor: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
   if (row.actorType === "SYSTEM" && !row.actorName) {
-    return <span className="text-sm text-muted-foreground">{row.source ?? "System"}</span>;
+    return <span className="text-body text-tertiary">{row.source ?? "System"}</span>;
   }
 
   return (
@@ -201,10 +204,10 @@ const Actor: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
       <UserChip id={row.actorUserId} name={row.actorName ?? "Deleted person"}/>
       {/* Decided by a person, applied by a process — the same shape impersonation uses. */}
       {row.source && (
-        <div className="pl-8 text-xs text-muted-foreground">applied by {row.source}</div>
+        <div className="pl-8 text-hint text-tertiary">applied by {row.source}</div>
       )}
       {row.impersonatedBy && (
-        <div className="pl-8 text-xs text-warning-700">while acting as somebody else</div>
+        <div className="pl-8 text-hint text-status-pending-text">while acting as somebody else</div>
       )}
     </div>
   );
@@ -221,7 +224,7 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
     <div className="space-y-4 py-2">
       {changes && Object.keys(changes).length > 0 && <ChangesDiff changes={changes}/>}
 
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs text-muted-foreground md:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-hint text-tertiary md:grid-cols-4">
         <Fact label="Action" value={row.action}/>
         <Fact label="Actor role" value={row.actorRole}/>
         <Fact label="Actor type" value={row.actorType}/>
@@ -233,13 +236,13 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
       </dl>
 
       {row.mentions && row.mentions.length > 0 && (
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-1 text-xs sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-1 text-hint sm:grid-cols-2">
           {row.mentions.map((m) => (
             <div key={m.key} className="min-w-0">
-              <dt className="text-[11px] uppercase tracking-wide text-muted-foreground/70">{mentionLabel(m.key)}</dt>
-              <dd className="truncate text-foreground" title={m.id}>
+              <dt className="text-hint text-tertiary/70">{mentionLabel(m.key)}</dt>
+              <dd className="truncate text-primary" title={m.id}>
                 {m.name ?? "Unknown"}
-                {m.gone && <span className="text-muted-foreground"> · deleted since</span>}
+                {m.gone && <span className="text-tertiary"> · deleted since</span>}
               </dd>
             </div>
           ))}
@@ -247,9 +250,9 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
       )}
 
       {Object.keys(rest).length > 0 && (
-        <details className="text-xs">
-          <summary className="cursor-pointer text-muted-foreground">Everything else the row carries</summary>
-          <pre className="mt-2 overflow-auto rounded bg-background p-3 text-[11px] leading-relaxed">
+        <details className="text-hint">
+          <summary className="cursor-pointer text-tertiary">Everything else the row carries</summary>
+          <pre className="mt-2 overflow-auto rounded-tag bg-page p-3 text-hint leading-relaxed">
             {JSON.stringify(rest, null, 2)}
           </pre>
         </details>
@@ -261,8 +264,8 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
 const Fact: React.FC<{ label: string; value: string | null }> = ({ label, value }) =>
   value ? (
     <div className="min-w-0">
-      <dt className="text-[11px] uppercase tracking-wide text-muted-foreground/70">{label}</dt>
-      <dd className="truncate text-foreground" title={value}>
+      <dt className="text-hint text-tertiary/70">{label}</dt>
+      <dd className="truncate text-primary" title={value}>
         {value}
       </dd>
     </div>

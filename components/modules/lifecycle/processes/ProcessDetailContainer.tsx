@@ -2,11 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import {
-  Archive, ArchiveRestore, CalendarClock, CheckCheck, Link2, Link2Off, Trash2, UserRoundCog, XCircle,
-} from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Archive02Icon, ArchiveArrowUpIcon, CalendarLock01Icon, CancelCircleIcon, Delete02Icon, Link01Icon, TickDouble02Icon, Unlink01Icon, UserSettings01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -39,6 +38,7 @@ import { useCurrentUser } from "@/components/providers/CurrentUserProvider/Curre
 import { cancelProcessTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { ProcessStatusBadge } from "./ProcessStatusBadge";
 import { ProcessTaskDialog } from "./ProcessTaskDialog";
+import { InlineAlert } from "@/components/desact/alert";
 
 type Dialog = "complete" | "cancel" | "archive" | "delete" | "manager" | "revoke" | "task" | "cancelTask" | null;
 
@@ -57,7 +57,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading || !process) {
-    return <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-16 animate-pulse rounded-md bg-muted" />)}</div>;
+    return <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-16 shimmer rounded-control bg-mist" />)}</div>;
   }
 
   const open = !process.closedAt;
@@ -77,9 +77,9 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-semibold text-brown-900">
+            <h1 className="text-page-title text-primary">
               {PROCESS_TYPE_LABELS[process.type]} for{" "}
-              <Link className="underline-offset-4 hover:underline" href={`/organization/people/${process.target.id}/personal`}>
+              <Link className="text-accent-text underline-offset-4 hover:underline" href={`/organization/people/${process.target.id}/personal`}>
                 {process.target.name}
               </Link>
             </h1>
@@ -87,7 +87,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             {/* Said in the text line only, an archived process looked like any other (walk, SWEEP S11). */}
             {process.archivedAt && <StatusBadge status="archived" />}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             {[
               `From ${process.templateName}`,
               `${leaving ? "Last day" : "Starts"} ${formatDisplayDate(process.anchorDate, { style: "medium" })}`,
@@ -100,42 +100,42 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
           <div className="flex items-center gap-2">
             {open && (
-              <Button type="button" variant="outline" className="gap-1.5" onClick={() => setDialog("complete")}>
-                <CheckCheck className="h-4 w-4" />
-                Mark as Complete
+              <Button type="button" variant="secondary" className="gap-1.5" onClick={() => setDialog("complete")}>
+                <Icon icon={TickDouble02Icon} size="sm" />
+                Mark as complete
               </Button>
             )}
-            <RowActionsMenu label="Process Actions" className="w-56">
+            <RowActionsMenu label="Process actions" className="w-56">
               {open && (
-                <RowAction icon={<UserRoundCog className="h-4 w-4 text-muted-foreground" />} onClick={() => { setManager(null); setDialog("manager"); }}>
+                <RowAction icon={<Icon icon={UserSettings01Icon} size="sm" className="text-tertiary" />} onClick={() => { setManager(null); setDialog("manager"); }}>
                   Change {managerLabel}
                 </RowAction>
               )}
               {open && process.type === "PREBOARDING" && (
                 <RowAction
-                  icon={<Link2 className="h-4 w-4 text-muted-foreground" />}
+                  icon={<Icon icon={Link01Icon} size="sm" className="text-tertiary" />}
                   onClick={async () => {
                     const problem = await act(reissuePreboardingLinkAction(process.id), "A new preboarding link was sent.");
                     if (problem) showActionError({ errorMessage: problem });
                   }}
                 >
-                  Send a New Link
+                  Send a new link
                 </RowAction>
               )}
               {open && process.type === "PREBOARDING" && process.linkActive && (
-                <RowAction icon={<Link2Off className="h-4 w-4 text-muted-foreground" />} onClick={() => setDialog("revoke")}>
-                  Revoke Link
+                <RowAction icon={<Icon icon={Unlink01Icon} size="sm" className="text-tertiary" />} onClick={() => setDialog("revoke")}>
+                  Revoke link
                 </RowAction>
               )}
               {open && (
-                <RowAction icon={<XCircle className="h-4 w-4 text-muted-foreground" />} onClick={() => setDialog("cancel")}>
-                  Cancel Process
+                <RowAction icon={<Icon icon={CancelCircleIcon} size="sm" className="text-tertiary" />} onClick={() => setDialog("cancel")}>
+                  Cancel process
                 </RowAction>
               )}
               <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="MANAGE">
                 {process.archivedAt ? (
                   <RowAction
-                    icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />}
+                    icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />}
                     onClick={async () => {
                       const problem = await act(unarchiveProcessAction(process.id));
                       if (problem) showActionError({ errorMessage: problem });
@@ -144,11 +144,11 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
                     Unarchive
                   </RowAction>
                 ) : (
-                  <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => setDialog("archive")}>
+                  <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setDialog("archive")}>
                     Archive
                   </RowAction>
                 )}
-                <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => setDialog("delete")}>
+                <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setDialog("delete")}>
                   Delete
                 </RowActionDestructive>
               </PermissionGate>
@@ -158,48 +158,50 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
       </header>
 
       {process.anchorDrift && (
-        <div className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-warning-200 bg-warning-50 px-4 py-3" role="status">
-          <div className="flex items-start gap-2 text-sm">
-            <CalendarClock className="mt-0.5 h-4 w-4 text-warning-700" />
-            <div>
-              <p className="font-medium text-warning-800">
-                {leaving ? "The last working day" : "The hire date"} moved from {formatDisplayDate(process.anchorDrift.from, { style: "medium" })} to{" "}
-                {formatDisplayDate(process.anchorDrift.to, { style: "medium" })}.
-              </p>
-              <p className="text-warning-800/80">
+        <InlineAlert
+          tone="pending"
+          icon={CalendarLock01Icon}
+          title={
+            <>
+              {leaving ? "The last working day" : "The hire date"} moved from {formatDisplayDate(process.anchorDrift.from, { style: "medium" })} to{" "}
+              {formatDisplayDate(process.anchorDrift.to, { style: "medium" })}.
+            </>
+          }
+          action={
+            <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
+              <Button type="button"
+                size="sm"
+                onClick={async () => {
+                  const problem = await act(rebaseProcessAction(process.id), "Dates recalculated.");
+                  if (problem) showActionError({ errorMessage: problem });
+                }}
+              >
+                Recalculate dates
+              </Button>
+            </PermissionGate>
+          }
+        >
+              <p>
                 {process.anchorDrift.changes.length === 0
                   ? "No open task changes date."
                   : `${process.anchorDrift.changes.length} open task(s) would move: `
                     + process.anchorDrift.changes.map((c) =>
                       `${c.title} (${formatDisplayDate(c.from ?? "")} → ${formatDisplayDate(c.to ?? "")})`).join(", ")}
               </p>
-            </div>
-          </div>
-          <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
-            <Button type="button"
-              size="sm"
-              onClick={async () => {
-                const problem = await act(rebaseProcessAction(process.id), "Dates recalculated.");
-                if (problem) showActionError({ errorMessage: problem });
-              }}
-            >
-              Recalculate Dates
-            </Button>
-          </PermissionGate>
-        </div>
+        </InlineAlert>
       )}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-medium">Tasks</h2>
+          <h2 className="text-section-title">Tasks</h2>
           {open && canEdit && (
-            <Button type="button" variant="outline" size="sm" onClick={() => { setTaskOf(null); setDialog("task"); }}>
-              Add Task
+            <Button type="button" variant="secondary" size="sm" onClick={() => { setTaskOf(null); setDialog("task"); }}>
+              Add task
             </Button>
           )}
         </div>
         {process.tasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">This process has no tasks.</p>
+          <p className="text-body text-tertiary">This process has no tasks.</p>
         ) : (
           <TaskList
             tasks={process.tasks}
@@ -225,8 +227,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "complete"}
-        title="Mark as Complete"
-        confirmLabel="Mark as Complete"
+        title="Mark as complete"
+        confirmLabel="Mark as complete"
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(closeProcessAction({ id: process.id, outcome: "COMPLETED" }));
@@ -239,8 +241,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "cancel"}
-        title="Cancel Process"
-        confirmLabel="Cancel Process"
+        title="Cancel process"
+        confirmLabel="Cancel process"
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(closeProcessAction({ id: process.id, outcome: "CANCELLED" }));
@@ -253,7 +255,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "archive"}
-        title="Archive Process"
+        title="Archive process"
         confirmLabel="Archive"
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
@@ -267,7 +269,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "revoke"}
-        title="Revoke Link"
+        title="Revoke link"
         confirmLabel="Revoke"
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
@@ -281,7 +283,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "delete"}
-        title="Delete Process"
+        title="Delete process"
         confirmLabel="Delete"
         destructive
         // Seen live: Delete was pressable while the dialog still said "Working out what this removes…".
@@ -322,8 +324,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "cancelTask"}
-        title="Cancel Task"
-        confirmLabel="Cancel Task"
+        title="Cancel task"
+        confirmLabel="Cancel task"
         destructive
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
@@ -351,7 +353,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         <div className="space-y-1.5">
           <Label>{managerLabel}</Label>
           <UserPickerField value={manager} onChange={setManager} />
-          <p className="text-xs">Their open tasks as {managerLabel.toLowerCase()} move to the new one.</p>
+          <p className="text-hint">Their open tasks as {managerLabel.toLowerCase()} move to the new one.</p>
         </div>
       </ConfirmDialog>
     </div>

@@ -64,7 +64,7 @@ describe("TrialForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("allows uppercase letters, spaces and hyphens in company name", async () => {
+  it("allows capital letters, spaces and hyphens in company name", async () => {
     const user = userEvent.setup();
 
     renderForm();

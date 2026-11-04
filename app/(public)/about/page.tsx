@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, } from "@/components/desact/card";
 
 export default function AboutPage() {
   return (
     <div className="flex flex-col gap-10">
       <section className="space-y-4">
-        <h1 className="text-5xl font-medium">About SixSoftware</h1>
-        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+        <h1 className="text-greeting">About noddo</h1>
+        <p className="max-w-2xl text-section-title text-tertiary">
           We build HR software that feels clear, secure, and human.
         </p>
       </section>
@@ -19,7 +19,7 @@ export default function AboutPage() {
           <CardContent>
             <p>
               We’re a product team from Warsaw building HR software that feels
-              human. SixSoftware helps HR teams streamline operations without
+              human. noddo helps HR teams streamline operations without
               sacrificing employee experience.
             </p>
           </CardContent>
@@ -31,7 +31,7 @@ export default function AboutPage() {
           </CardHeader>
 
           <CardContent>
-            <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-text-tertiary)]">
+            <ul className="list-disc space-y-2 pl-5 text-body text-tertiary">
               <li>Clarity over complexity</li>
               <li>Respect for people’s time</li>
               <li>Security and privacy by default</li>

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ClipboardCheck, FilePlus, LayoutTemplate, Plus } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Add01Icon, ArrowDown01Icon, FileAddIcon, Layout01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+} from "@/components/desact/dropdown-menu";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
@@ -73,9 +74,9 @@ export function ReviewsOverviewContainer() {
       ) : isLoading ? (
         <ul className="space-y-2" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <li key={i} className="flex h-[76px] items-center gap-4 rounded-xl border border-brown-100 px-5">
-              <div className="h-4 w-56 animate-pulse rounded bg-muted" />
-              <div className="ml-auto h-3 w-32 animate-pulse rounded bg-muted" />
+            <li key={i} className="flex h-[76px] items-center gap-4 rounded-card border border-divider px-5">
+              <div className="h-4 w-56 shimmer rounded-tag bg-mist" />
+              <div className="ml-auto h-3 w-32 shimmer rounded-tag bg-mist" />
             </li>
           ))}
         </ul>
@@ -83,12 +84,12 @@ export function ReviewsOverviewContainer() {
         <ListEmptyState
           query={query}
           archivedView={showClosed}
-          icon={<ClipboardCheck className="h-6 w-6" />}
+          scene="reviews-and-one-on-ones"
           title="No review cycles yet"
           description="A cycle asks a group of people to review themselves and each other, and their managers to review them, on dates you set."
           archivedDescription="No closed review cycles."
           onCreate={() => router.push("/reviews/cycles/new")}
-          createLabel="Add Cycle"
+          createLabel="Add cycle"
           createAccess={{ resource: "REVIEWS.CYCLE", action: "MANAGE" }}
         />
       ) : (
@@ -99,8 +100,8 @@ export function ReviewsOverviewContainer() {
 
       {!showClosed && !query.trim() && (templates.data ?? []).length > 0 && (
         <section className="space-y-2 pt-4" aria-labelledby="review-templates">
-          <h2 id="review-templates" className="text-sm font-medium text-brown-900">Templates</h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 id="review-templates" className="text-body font-medium text-primary">Templates</h2>
+          <p className="text-hint text-tertiary">
             Never launched themselves: a cycle is added from one, or an automation starts one for a person.
           </p>
           <ul className="space-y-2">
@@ -127,8 +128,8 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
   if (templates.length === 0) {
     return (
       <Button type="button" className="gap-1.5" onClick={onBlank}>
-        <Plus className="h-4 w-4" />
-        Add Cycle
+        <Icon icon={Add01Icon} size="sm" />
+        Add cycle
       </Button>
     );
   }
@@ -136,21 +137,21 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button type="button" className="gap-1.5" disabled={busy}>
-          <Plus className="h-4 w-4" />
-          Add Cycle
-          <ChevronDown className="h-4 w-4 opacity-70" />
+          <Icon icon={Add01Icon} size="sm" />
+          Add cycle
+          <Icon icon={ArrowDown01Icon} size="sm" className="opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-lg p-1">
-        <DropdownMenuItem onClick={onBlank} className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer">
-          <FilePlus className="h-4 w-4 text-muted-foreground" />
-          Blank Cycle
+      <DropdownMenuContent align="end" className="w-56 rounded-control p-1">
+        <DropdownMenuItem onClick={onBlank} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+          <Icon icon={FileAddIcon} size="sm" className="text-tertiary" />
+          Blank cycle
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="px-2.5 py-1 text-xs font-normal text-muted-foreground">From a Template</DropdownMenuLabel>
+        <DropdownMenuLabel className="px-2.5 py-1 text-hint font-normal text-tertiary">From a template</DropdownMenuLabel>
         {templates.map((t) => (
-          <DropdownMenuItem key={t.id} onClick={() => onTemplate(t.id)} className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer">
-            <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+          <DropdownMenuItem key={t.id} onClick={() => onTemplate(t.id)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+            <Icon icon={Layout01Icon} size="sm" className="text-tertiary" />
             <span className="truncate">{t.name}</span>
           </DropdownMenuItem>
         ))}
@@ -177,23 +178,23 @@ function CycleRow({ cycle: c, onOpen }: { cycle: CycleSummary; onOpen: () => voi
       data-test="review-cycle-row"
       onClick={onOpen}
       onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
-      className="flex cursor-pointer flex-col gap-3 rounded-xl border border-brown-100 bg-white px-5 py-4 transition-colors hover:border-brown-200 hover:bg-brown-50/40 sm:flex-row sm:items-center"
+      className="flex cursor-pointer flex-col gap-3 rounded-card border border-divider bg-card px-5 py-4 transition-colors hover:border-divider hover:bg-subtle/40 sm:flex-row sm:items-center"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate font-medium text-brown-900">{c.name}</span>
+          <span className="truncate font-medium text-primary">{c.name}</span>
           {c.template ? <StatusBadge status="draft" label="Template" /> : <CycleStatusBadge status={c.status} />}
         </div>
-        <div className="mt-0.5 truncate text-xs text-muted-foreground">{facts}</div>
+        <div className="mt-0.5 truncate text-hint text-tertiary">{facts}</div>
       </div>
       {c.status !== "DRAFT" && (
         <div className="w-full shrink-0 sm:w-56">
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-hint text-tertiary">
             <span>{c.submitted} of {c.assignments} submitted</span>
-            {c.overdue > 0 && <span className="text-warning-700">{c.overdue} overdue</span>}
+            {c.overdue > 0 && <span className="text-status-pending-text">{c.overdue} overdue</span>}
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-brown-100" aria-hidden>
-            <div className="h-full rounded-full bg-brown-500" style={{ width: `${percent}%` }} />
+          <div className="mt-1 h-1.5 overflow-hidden rounded-pill bg-mist" aria-hidden>
+            <div className="h-full rounded-pill bg-accent" style={{ width: `${percent}%` }} />
           </div>
         </div>
       )}

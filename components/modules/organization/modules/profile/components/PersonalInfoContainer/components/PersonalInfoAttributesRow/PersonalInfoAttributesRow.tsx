@@ -22,11 +22,13 @@ import {
   SingleRecordEditor,
 } from "./ObjectAttributeField";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+
+import { Input } from "@/components/desact/input";
+import { Textarea } from "@/components/desact/textarea";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { TagChip } from "@/components/ui/TagChip";
+import { FormError } from "@/components/feedback/FormError";
 
 export type PersonalInfoAttributesRowProps = {
   attribute: Attribute;
@@ -66,23 +68,23 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
 
   return (
     <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-5 py-4">
-      <div className="text-sm text-muted-foreground">
+      <div className="text-body text-tertiary">
         <span>{attribute.name}</span>
         {attribute.required && (
-          <span className="ml-0.5 text-destructive" title="Required">*</span>
+          <span className="ml-0.5 text-danger-text" title="Required">*</span>
         )}
         {attribute.description && (
-          <p className="mt-0.5 text-xs text-muted-foreground/80">
+          <p className="mt-0.5 text-hint text-tertiary/80">
             {attribute.description}
           </p>
         )}
       </div>
-      <div className="text-sm text-foreground">
+      <div className="text-body text-primary">
         {masked ? (
           // The server sent a placeholder, not a value — render it as-is. Going through the
           // type-specific renderers would turn "••••" into "Not set" for options and dates.
           <span
-            className="text-muted-foreground"
+            className="text-tertiary"
             title="You don't have access to this field's value"
           >
             {rawValue == null ? "" : String(rawValue)}
@@ -92,7 +94,7 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
         ) : (
           <>
             <EditValue attribute={attribute} rawValue={rawValue} onChange={onChange!}/>
-            {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+            {error && <FormError message={error} />}
           </>
         )}
       </div>
@@ -110,14 +112,14 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     rawValue === undefined ||
     (typeof rawValue === "string" && rawValue.trim() === "")
   ) {
-    return <span className="text-muted-foreground italic">Not set</span>;
+    return <span className="text-tertiary">Not set</span>;
   }
 
   switch (t) {
     case AttributeType.URL: {
       const href = String(rawValue);
       return (
-        <a href={href} target="_blank" rel="noreferrer" className="text-brown-600 hover:underline break-all">
+        <a href={href} target="_blank" rel="noreferrer" className="break-all text-accent-text underline-offset-4 hover:underline">
           {href}
         </a>
       );
@@ -126,7 +128,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     case AttributeType.EMAIL: {
       const email = String(rawValue);
       return (
-        <a href={`mailto:${email}`} className="text-brown-600 hover:underline break-all">
+        <a href={`mailto:${email}`} className="break-all text-accent-text underline-offset-4 hover:underline">
           {email}
         </a>
       );
@@ -135,7 +137,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     case AttributeType.PHONE: {
       const phone = String(rawValue);
       return (
-        <a href={`tel:${phone.replace(/\s+/g, "")}`} className="text-brown-600 hover:underline">
+        <a href={`tel:${phone.replace(/\s+/g, "")}`} className="text-accent-text underline-offset-4 hover:underline">
           {phone}
         </a>
       );
@@ -150,7 +152,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       const { label, color } = resolveSingleOption(attribute, rawValue);
 
       if (!label) {
-        return <span className="text-muted-foreground italic">Not set</span>;
+        return <span className="text-tertiary">Not set</span>;
       }
 
       return <OptionBadge label={label} color={color}/>;
@@ -160,7 +162,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       const parts = resolveMultiOptions(attribute, rawValue);
 
       if (!parts.length) {
-        return <span className="text-muted-foreground italic">Not set</span>;
+        return <span className="text-tertiary">Not set</span>;
       }
 
       return (
@@ -216,19 +218,9 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
   }
 }
 
+/** An option of a list field, as the tag it is (SPEC § 13.4): its colour's dot and its name. */
 function OptionBadge({ label, color }: { label: string; color?: string }) {
-  return (
-    <Badge variant="secondary" className="gap-1.5 font-normal">
-      {color && (
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
-          style={{ backgroundColor: color }}
-          aria-hidden
-        />
-      )}
-      {label}
-    </Badge>
-  );
+  return <TagChip color={color}>{label}</TagChip>;
 }
 
 /* ---------- Edit ---------- */

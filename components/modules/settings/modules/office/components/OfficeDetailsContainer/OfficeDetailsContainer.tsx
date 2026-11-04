@@ -6,16 +6,17 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Download, Mail, MapPin, Users } from "lucide-react";
+import { Building03Icon, Download01Icon, Location01Icon, Mail01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Button } from "@/components/desact/button";
+import { Badge } from "@/components/desact/badge";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Separator } from "@/components/desact/separator";
+import { Checkbox } from "@/components/desact/checkbox";
 import { HolidayCalendarBindingSection } from "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding";
 
 import { useOffice } from "@/components/modules/settings/modules/office/hooks/useOffice";
@@ -29,7 +30,7 @@ import type { AssignedUsersStrategy } from "@/components/modules/settings/module
 import { DeleteOfficeModal } from "@/components/modules/settings/modules/office/components/modals/DeleteOfficeModal";
 import { ArchiveOfficeModal } from "@/components/modules/settings/modules/office/components/modals/ArchiveOfficeModal";
 import { OfficeSkeleton } from "@/components/modules/settings/modules/office/components/OfficeDetailsContainer/OfficeSkeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import OfficeAssignedUsersTab from "@/components/modules/settings/modules/office/components/OfficeAssignedUsersTab/OfficeAssignedUsersTab";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -143,7 +144,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 
   if (!office) {
     return (
-      <div className="px-8 py-6 text-sm text-muted-foreground">
+      <div className="px-8 py-6 text-body text-tertiary">
         Office not found
       </div>
     );
@@ -225,14 +226,14 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       />
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+        <TabsList className="grid w-full grid-cols-2 bg-subtle">
           <TabsTrigger value="general" className="flex items-center gap-2">
-            <Building2 className="w-4 h-4"/>
-            General Information
+            <Icon icon={Building03Icon} size="sm" />
+            General information
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
-            <Users className="w-4 h-4"/>
-            Assigned Users
+            <Icon icon={UserGroupIcon} size="sm" />
+            Assigned users
           </TabsTrigger>
         </TabsList>
 
@@ -241,17 +242,17 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-foreground">General Information</h2>
+                  <h2 className="text-section-title text-primary">General information</h2>
                   {isArchived && (
                     <StatusBadge status="archived" className="font-normal" />
                   )}
                   {office.isRemote && (
-                    <Badge variant="secondary" className="font-normal">
+                    <Badge variant="neutral" className="font-normal">
                       Remote
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body text-tertiary">
                   Contact and address details for this office.
                 </p>
               </div>
@@ -261,7 +262,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
                       >
@@ -270,7 +271,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
@@ -278,7 +279,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                       </Button>
                     </PermissionGate>
                     <Button type="button"
-                      variant="outline"
+                      variant="secondary"
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
@@ -297,7 +298,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
                       <Button type="button"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
@@ -307,11 +308,11 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button"
                         size="icon"
-                        variant="outline"
+                        variant="secondary"
                         aria-label="Export office"
                         onClick={() => setIsExportOpen(true)}
                       >
-                        <Download className="h-4 w-4"/>
+                        <Icon icon={Download01Icon} size="sm" />
                       </Button>
                     </PermissionGate>
                   </>
@@ -323,11 +324,11 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button"
                         size="icon"
-                        variant="outline"
+                        variant="secondary"
                         aria-label="Export office"
                         onClick={() => setIsExportOpen(true)}
                       >
-                        <Download className="h-4 w-4"/>
+                        <Icon icon={Download01Icon} size="sm" />
                       </Button>
                     </PermissionGate>
                   </>
@@ -339,7 +340,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 
             <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
-        <SectionTitle icon={<Building2 className="h-5 w-5"/>} title="General"/>
+        <SectionTitle icon={<Icon icon={Building03Icon} />} title="General"/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
@@ -352,7 +353,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
           <div className="space-y-2">
             <Label htmlFor="office-remote">Remote</Label>
             {isEditing ? (
-              <label className="flex items-center gap-2 text-sm text-foreground">
+              <label className="flex items-center gap-2 text-body text-primary">
                 <Checkbox
                   id="office-remote"
                   checked={current.isRemote}
@@ -361,7 +362,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 People here work from anywhere in the office&apos;s country
               </label>
             ) : (
-              <p className="text-sm text-foreground">{current.isRemote ? "Yes" : "No"}</p>
+              <p className="text-body text-primary">{current.isRemote ? "Yes" : "No"}</p>
             )}
           </div>
 
@@ -376,7 +377,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 className="min-h-28"
               />
             ) : (
-              <p className="text-sm text-foreground">
+              <p className="text-body text-primary">
                 {current.description}
               </p>
             )}
@@ -387,7 +388,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<MapPin className="h-5 w-5"/>} title="Address"/>
+        <SectionTitle icon={<Icon icon={Location01Icon} />} title="Address"/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
@@ -430,7 +431,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<Mail className="h-5 w-5"/>} title="Contact"/>
+        <SectionTitle icon={<Icon icon={Mail01Icon} />} title="Contact"/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
@@ -507,7 +508,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 const SectionTitle = ({ icon, title }: SectionTitleProps) => (
   <div className="flex items-center gap-2">
     {icon}
-    <h2 className="text-base font-semibold">{title}</h2>
+    <h2 className="text-body font-semibold">{title}</h2>
   </div>
 );
 
@@ -517,7 +518,7 @@ const Field = ({ label, value, isEditing, onChange }: FieldProps) => (
     {isEditing ? (
       <Input value={value} onChange={(event) => onChange(event.target.value)}/>
     ) : (
-      <p className="text-sm text-foreground">{value}</p>
+      <p className="text-body text-primary">{value}</p>
     )}
   </div>
 );

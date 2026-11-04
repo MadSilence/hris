@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { messageForCode } from "@/lib/errors/errorMessages";
 import type { PeopleImportDTO } from "@/api/modules/peopleImport/dto";
@@ -29,30 +29,30 @@ export const CheckErrors: React.FC<Props> = ({ anImport }) => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-brown-800">
+        <p className="text-body font-medium text-primary">
           {`${list.length} ${list.length === 1 ? "row needs" : "rows need"} attention.`}
         </p>
       </div>
 
-      <div className="max-h-[28rem] overflow-auto rounded-lg border border-brown-200">
-        <Table className="text-sm">
+      <div className="max-h-[28rem] overflow-auto rounded-control border border-divider">
+        <Table className="text-body">
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">Row</TableHead>
               <TableHead className="w-48">Name</TableHead>
-              <TableHead>What Is Wrong</TableHead>
+              <TableHead>What Is wrong</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {list.map((row) => (
               <TableRow key={row.rowNumber} className="align-top hover:bg-transparent">
-                <TableCell className="tabular-nums text-muted-foreground">{row.rowNumber}</TableCell>
+                <TableCell className="tabular-nums text-tertiary">{row.rowNumber}</TableCell>
                 <TableCell className="truncate">{row.name ?? "—"}</TableCell>
                 <TableCell>
                   <ul className="space-y-1">
                     {row.errors.map((error, index) => (
                       <li key={index}>
-                        {error.columnHeader && <span className="font-medium text-brown-800">{error.columnHeader}: </span>}
+                        {error.columnHeader && <span className="font-medium text-primary">{error.columnHeader}: </span>}
                         {messageForCode(error.code, undefined, error.params)}
                       </li>
                     ))}

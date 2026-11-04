@@ -2,7 +2,8 @@
 
 import { FC } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +11,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import {
   RolePermissionChange,
   SCOPE_CHOICE_LABELS,
@@ -46,20 +47,20 @@ export const RolePermissionsSummaryModal: FC<RolePermissionsSummaryModalProps> =
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-brown-200 divide-y divide-brown-200">
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-control border border-divider divide-y divide-divider">
           {changes.map((change) => (
             <div
               key={`${change.resourceCode}:${change.action}`}
               className="flex items-center justify-between gap-4 px-4 py-2.5"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{change.resourceLabel}</p>
-                <p className="text-xs text-muted-foreground">{change.action}</p>
+                <p className="truncate text-body font-medium">{change.resourceLabel}</p>
+                <p className="text-hint text-tertiary">{change.action}</p>
               </div>
 
-              <div className="flex flex-none items-center gap-2 text-sm">
-                <span className="text-muted-foreground">{SCOPE_CHOICE_LABELS[change.from]}</span>
-                <ArrowRight className="h-3.5 w-3.5 text-brown-400"/>
+              <div className="flex flex-none items-center gap-2 text-body">
+                <span className="text-tertiary">{SCOPE_CHOICE_LABELS[change.from]}</span>
+                <Icon icon={ArrowRight02Icon} size="sm" className="text-tertiary" />
                 <span className="font-medium">{SCOPE_CHOICE_LABELS[change.to]}</span>
               </div>
             </div>
@@ -69,7 +70,7 @@ export const RolePermissionsSummaryModal: FC<RolePermissionsSummaryModalProps> =
         <FormError message={errorMessage} />
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancelAction} disabled={isSaving}>
+          <Button type="button" variant="secondary" onClick={onCancelAction} disabled={isSaving}>
             Cancel
           </Button>
           <Button type="button" onClick={onConfirmAction} disabled={isSaving}>

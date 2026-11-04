@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { ClipboardCheck } from "lucide-react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+
+import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatDisplayDate } from "@/lib/date";
@@ -17,11 +17,11 @@ import { PacketStatusBadge } from "@/components/modules/reviews/shared/ReviewBad
 export function PersonReviewsTab({ userId }: { userId: string }) {
   const reviews = usePersonReviews(userId);
   if (reviews.error) return <div className="px-8"><ErrorState error={reviews.error} /></div>;
-  if (!reviews.data) return <div className="px-8"><Skeleton className="h-40 w-full rounded-xl" aria-busy="true" /></div>;
+  if (!reviews.data) return <div className="px-8"><Skeleton className="h-40 w-full rounded-popover" aria-busy="true" /></div>;
   if (reviews.data.length === 0) {
     return (
       <div className="px-8">
-        <EmptyState icon={<ClipboardCheck className="h-6 w-6" />} title="No reviews"
+        <EmptyState scene="reviews-and-one-on-ones" title="No reviews"
           description="Reviews from performance review cycles appear here once there is one you can read." />
       </div>
     );
@@ -31,13 +31,13 @@ export function PersonReviewsTab({ userId }: { userId: string }) {
       {reviews.data.map((p) => (
         <li key={p.participantId}>
           <Link href={`/reviews/packets/${p.participantId}`}
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-brown-100 bg-white px-5 py-3 no-underline hover:border-brown-200 hover:bg-brown-50/40">
-            <span className="font-medium text-brown-900">{p.cycleName}</span>
+            className="flex flex-wrap items-center gap-3 rounded-card border border-divider bg-card px-5 py-3 no-underline hover:border-divider hover:bg-subtle/40">
+            <span className="font-medium text-primary">{p.cycleName}</span>
             <PacketStatusBadge status={p.status} />
             {p.finalRating != null && (
-              <span className="text-sm text-muted-foreground">Rating {p.finalRating}{p.finalRatingLabel ? ` · ${p.finalRatingLabel}` : ""}</span>
+              <span className="text-body text-tertiary">Rating {p.finalRating}{p.finalRatingLabel ? ` · ${p.finalRatingLabel}` : ""}</span>
             )}
-            <span className="ml-auto text-xs text-muted-foreground">
+            <span className="ml-auto text-hint text-tertiary">
               {p.sharedAt ? `Shared ${formatDisplayDate(p.sharedAt, { style: "medium" })}` : "Not shared yet"}
             </span>
           </Link>

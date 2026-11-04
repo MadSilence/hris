@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Archive } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Archive02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { FilterChip } from "@/components/ui/FilterChip";
 
 /**
  * Switches the list between two views: **only archived**, or **everything else**.
@@ -35,15 +36,9 @@ export const ArchivedToggle: React.FC<{
   if (count === 0) return null;
 
   return (
-    <Button
-      type="button"
-      variant={showingArchived ? "default" : "outline"}
-      className="h-9 gap-1.5"
-      aria-pressed={showingArchived}
-      onClick={() => onChange(!showingArchived)}
-    >
-      <Archive className="h-4 w-4" />
+    <FilterChip selected={showingArchived} onClick={() => onChange(!showingArchived)}>
+      {!showingArchived && <Icon icon={Archive02Icon} size="sm" />}
       Archived ({count})
-    </Button>
+    </FilterChip>
   );
 };

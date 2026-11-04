@@ -1,7 +1,8 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useImpersonationContext } from "@/components/providers/ImpersonationProvider";
 import { useStopImpersonation } from "@/components/modules/auth/impersonation/hooks/useStopImpersonation";
@@ -20,21 +21,22 @@ export function ImpersonationBanner() {
   const displayName = fullName || user?.email || "this user";
 
   return (
-    <div className="flex items-center justify-between gap-4 border-b bg-warning-50 px-6 py-3 text-sm text-warning-900">
+    // A page banner states the state of the whole page, and stays neutral (SPEC § 13.7).
+    <div className="flex items-center justify-between gap-4 border-b border-divider bg-mist px-6 py-3 text-body text-primary">
       <div className="flex min-w-0 items-center gap-2">
-        <AlertTriangle className="h-4 w-4 shrink-0"/>
+        <Icon icon={Alert02Icon} size="sm" className="shrink-0" />
         <span className="truncate">
           You are viewing the app as <strong>{displayName}</strong>.
         </span>
       </div>
 
       <Button type="button"
-        variant="outline"
+        variant="secondary"
         size="sm"
         disabled={stopImpersonation.isPending}
         onClick={() => stopImpersonation.mutate()}
       >
-        {stopImpersonation.isPending ? "Returning..." : "Stop Impersonation"}
+        {stopImpersonation.isPending ? "Returning…" : "Stop impersonation"}
       </Button>
     </div>
   );

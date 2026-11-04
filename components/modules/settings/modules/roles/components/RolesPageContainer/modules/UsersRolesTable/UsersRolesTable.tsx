@@ -1,20 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import UsersRolesTableSkeleton from "./UsersRolesTableSkeleton";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
 import { Role } from "@/models/role/Role";
 import { UsersSearchItemDTO } from "@/models/user/fields";
 import { useCanAccess } from "@/components/auth/useAccess";
 import {
   AssignRolesModal
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
-import { Users } from "lucide-react";
-import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 export interface UsersRolesTableProps {
   userRows?: UsersSearchItemDTO[];
@@ -55,11 +54,11 @@ export default function UsersRolesTable({
   return (
     <>
       <Table className="table-fixed" stickyHeader>
-        <TableHeader className="sticky top-0 z-10 bg-white">
+        <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow>
             <TableHead className="w-1/3 pl-4">User</TableHead>
             <TableHead className="w-1/3">Position</TableHead>
-            <TableHead className="w-1/3">Assigned Roles</TableHead>
+            <TableHead className="w-1/3">Assigned roles</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -76,7 +75,7 @@ export default function UsersRolesTable({
                 return (
                   <TableRow
                     key={u.id}
-                    className={`border-brown-200 ${canAssignRoles ? "cursor-pointer hover:bg-brown-50" : ""}`}
+                    className={`border-divider ${canAssignRoles ? "cursor-pointer hover:bg-subtle" : ""}`}
                     onClick={() => {
                       if (canAssignRoles) setSelectedUser(u);
                     }}
@@ -92,13 +91,13 @@ export default function UsersRolesTable({
                       />
                     </TableCell>
 
-                    <TableCell className="w-1/3 text-muted-foreground">{u.jobName}</TableCell>
+                    <TableCell className="w-1/3 text-tertiary">{u.jobName}</TableCell>
 
                     <TableCell className="w-1/3">
                       {u.roles?.length ? (
                         <div className="flex flex-wrap gap-1.5">
                           {u.roles.map((r) => (
-                            <Badge key={r.id} variant="secondary" className="font-normal">
+                            <Badge key={r.id} variant="neutral" className="font-normal">
                               {r.name}
                             </Badge>
                           ))}
@@ -120,7 +119,7 @@ export default function UsersRolesTable({
                   */}
                   <ListEmptyState
                     query={query}
-                    icon={<Users className="h-7 w-7"/>}
+                    scene="team-and-org"
                     title="No people yet"
                     description="People appear here once they are added to the organization."
                     noResultsHint="Try a different name or email."
@@ -133,7 +132,7 @@ export default function UsersRolesTable({
 
       {hasMore && (
         <div className="flex justify-center py-3">
-          <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+          <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? "Loading…" : "Load more"}
           </Button>
         </div>

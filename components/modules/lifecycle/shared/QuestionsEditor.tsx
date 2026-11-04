@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Add01Icon, ArrowDown02Icon, ArrowUp02Icon, Cancel01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { QUESTION_TYPE_LABELS, type Question, type QuestionType } from "@/models/lifecycle";
 
 const isChoice = (t: QuestionType) => t === "SINGLE_CHOICE" || t === "MULTIPLE_CHOICE";
@@ -36,9 +37,9 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium">Questions *</legend>
-      {questions.length === 0 && <p className="text-xs text-muted-foreground">No questions yet.</p>}
-      <ol className="divide-y divide-brown-100">
+      <legend className="text-body font-medium">Questions *</legend>
+      {questions.length === 0 && <p className="text-hint text-tertiary">No questions yet.</p>}
+      <ol className="divide-y divide-divider">
         {questions.map((q, i) => (
           <li key={q.id} className="space-y-2 py-3 first:pt-0">
             <Input
@@ -58,7 +59,7 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
                   ))}
                 </SelectContent>
               </Select>
-              <label className="flex items-center gap-1.5 text-xs">
+              <label className="flex items-center gap-1.5 text-hint">
                 <Checkbox checked={Boolean(q.required)} disabled={disabled} onCheckedChange={(c) => patch(i, { required: c === true })} />
                 Required
               </label>
@@ -73,14 +74,14 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
             {!disabled && (
               <div className="flex justify-end gap-1">
                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
-                  <ArrowUp className="h-3.5 w-3.5" />
+                  <Icon icon={ArrowUp02Icon} size="sm" />
                 </Button>
                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label="Move down" disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
-                  <ArrowDown className="h-3.5 w-3.5" />
+                  <Icon icon={ArrowDown02Icon} size="sm" />
                 </Button>
                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label="Remove question"
                   onClick={() => onChange(questions.filter((_, j) => j !== i))}>
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Icon icon={Delete02Icon} size="sm" />
                 </Button>
               </div>
             )}
@@ -88,13 +89,13 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
         ))}
       </ol>
       {!disabled && (
-        <Button type="button" size="sm" variant="outline" className="gap-1.5"
+        <Button type="button" size="sm" variant="secondary" className="gap-1.5"
           onClick={() => onChange([...questions, { id: newId(), label: "", type: "SHORT_TEXT", required: false }])}>
-          <Plus className="h-3.5 w-3.5" />
-          Add Question
+          <Icon icon={Add01Icon} size="sm" />
+          Add question
         </Button>
       )}
-      <p className="text-xs text-muted-foreground">The answers are kept on the person&apos;s Forms tab, even if the process is deleted.</p>
+      <p className="text-hint text-tertiary">The answers are kept on the person&apos;s Forms tab, even if the process is deleted.</p>
     </fieldset>
   );
 }
@@ -118,21 +119,21 @@ function OptionCells({ options, disabled, onChange }: {
             placeholder={`Option ${i + 1}`}
             value={o}
             disabled={disabled}
-            className="h-8 w-32 pr-7 text-sm"
+            className="h-8 w-32 pr-7 text-body"
             onChange={(e) => onChange(shown.map((x, j) => (j === i ? e.target.value : x)))}
           />
           {!disabled && shown.length > 1 && (
             <button type="button" aria-label={`Remove option ${i + 1}`}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-brown-900"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-control p-0.5 text-tertiary hover:text-primary"
               onClick={() => onChange(shown.filter((_, j) => j !== i))}>
-              <X className="h-3.5 w-3.5" />
+              <Icon icon={Cancel01Icon} size="sm" />
             </button>
           )}
         </div>
       ))}
       {!disabled && (
-        <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-brown-700" onClick={() => onChange([...shown, ""])}>
-          <Plus className="h-3.5 w-3.5" />
+        <Button type="button" variant="ghost" size="sm" className="gap-1 text-secondary" onClick={() => onChange([...shown, ""])}>
+          <Icon icon={Add01Icon} size="sm" />
           Option
         </Button>
       )}

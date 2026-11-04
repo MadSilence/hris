@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+import { Input } from "@/components/desact/input";
+import { Textarea } from "@/components/desact/textarea";
+import { Checkbox } from "@/components/desact/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import type { AnswerValue, ReviewQuestion, ScalePoint } from "@/models/reviews";
 
 export type AnswerState = { value: AnswerValue; comment: string };
@@ -35,10 +35,10 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
                 <button key={p.value} type="button" role="radio" aria-checked={on} disabled={disabled}
                   onClick={() => set(on ? null : p.value)}
                   className={cn(
-                    "rounded-lg border px-2 py-2 text-center text-xs transition-colors",
-                    on ? "border-brown-600 bg-brown-50 text-brown-900" : "border-brown-100 text-muted-foreground hover:border-brown-300",
+                    "rounded-control border px-2 py-2 text-center text-hint transition-colors",
+                    on ? "border-accent bg-accent-subtle text-primary" : "border-divider text-tertiary hover:border-field",
                   )}>
-                  <span className="block text-sm font-semibold text-brown-900">{p.value}</span>
+                  <span className="block text-body font-semibold text-primary">{p.value}</span>
                   {p.label}
                 </button>
               );
@@ -66,8 +66,8 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
         <RadioGroup aria-label={q.label} disabled={disabled}
           value={value.value === true ? "yes" : value.value === false ? "no" : ""}
           onValueChange={(v) => set(v === "yes")} className="flex gap-6">
-          <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="yes" />Yes</label>
-          <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="no" />No</label>
+          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />Yes</label>
+          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />No</label>
         </RadioGroup>
       );
     case "SINGLE_CHOICE":
@@ -75,7 +75,7 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
         <RadioGroup aria-label={q.label} disabled={disabled} value={typeof value.value === "string" ? value.value : ""}
           onValueChange={set} className="space-y-1.5">
           {(q.options ?? []).map((o) => (
-            <label key={o} className="flex items-center gap-2 text-sm"><RadioGroupItem value={o} />{o}</label>
+            <label key={o} className="flex items-center gap-2 text-body"><RadioGroupItem value={o} />{o}</label>
           ))}
         </RadioGroup>
       );
@@ -84,7 +84,7 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
       return (
         <div className="space-y-1.5" role="group" aria-label={q.label}>
           {(q.options ?? []).map((o) => (
-            <label key={o} className="flex items-center gap-2 text-sm">
+            <label key={o} className="flex items-center gap-2 text-body">
               <Checkbox checked={chosen.includes(o)} disabled={disabled}
                 onCheckedChange={(c) => set(c === true ? [...chosen, o] : chosen.filter((x) => x !== o))} />
               {o}

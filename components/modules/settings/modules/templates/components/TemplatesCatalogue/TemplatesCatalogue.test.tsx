@@ -39,7 +39,7 @@ describe("TemplatesCatalogue", () => {
   it("groups the catalogue by kind, field sets first", () => {
     render(<TemplatesCatalogue/>);
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(["Field Sets", "Roles", "Onboarding Checklists"]);
+    expect(headings).toEqual(["Field sets", "Roles", "Onboarding checklists"]);
   });
 
   /** "Applied", not "still there" — and a newer version says so. */
@@ -51,7 +51,7 @@ describe("TemplatesCatalogue", () => {
     expect(row).toHaveAttribute("href", "/settings/general/templates/field-set.work-authorisation");
   });
 
-  it("shows one kind when asked, for Add from Library", () => {
+  it("shows one kind when asked, for Add from library", () => {
     render(<TemplatesCatalogue kind="FIELD_SET"/>);
     expect(screen.getByText("Work Authorisation")).toBeInTheDocument();
     expect(screen.queryByText("HR Admin")).not.toBeInTheDocument();

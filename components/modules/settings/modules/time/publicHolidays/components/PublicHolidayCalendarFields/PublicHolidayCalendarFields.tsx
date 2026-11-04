@@ -2,19 +2,20 @@
 
 import type { FC } from "react";
 
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import {
   PublicHolidayCalendarWeekendSubstitution
 } from "@/api/modules/publicHolidays/calendars/dto";
+import { FieldError } from "@/components/desact/field-error";
 
 /** Wording aimed at an admin, not at the enum. */
 const SUBSTITUTION_LABELS: Record<PublicHolidayCalendarWeekendSubstitution, string> = {
@@ -68,7 +69,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
     <div className="space-y-2">
       <Label htmlFor={`${idPrefix}-name`}>Name</Label>
       <div className="flex items-center gap-2">
-        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg border border-brown-200 bg-brown-50">
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-control border border-divider bg-subtle">
           <CountryFlag countryCode={countryCode} title={countryName} />
         </span>
         <Input
@@ -79,7 +80,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
           aria-invalid={!!nameError}
         />
       </div>
-      {nameError && <p className="text-sm text-destructive">{nameError}</p>}
+      {nameError && <FieldError>{nameError}</FieldError>}
     </div>
 
     <div className="space-y-2">

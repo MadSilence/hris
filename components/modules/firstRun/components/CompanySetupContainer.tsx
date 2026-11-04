@@ -2,16 +2,17 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Building2, Check, Loader2, Users } from "lucide-react";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { NodRing } from "@/components/desact/nod";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { CountryPicker } from "@/components/modules/firstRun/components/CountryPicker";
@@ -24,7 +25,11 @@ import { submitCompanySetupAction } from "@/components/modules/firstRun/actions"
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
 import type { CompanySetupDataset, CompanySizeBand } from "@/api/modules/firstRun/dto";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
+import { Stepper } from "@/components/ui/Stepper";
+import { NoddoWordmark } from "@/components/brand";
+import { Illustration } from "@/components/illustrations/Illustration";
+import { Banner } from "@/components/desact/alert";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /**
@@ -33,16 +38,16 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
  */
 const INDUSTRIES = [
   "Software & IT",
-  "Professional Services",
-  "Finance & Insurance",
+  "Professional services",
+  "Finance & insurance",
   "Healthcare",
   "Manufacturing",
-  "Retail & E-commerce",
+  "Retail & e-commerce",
   "Education",
   "Hospitality",
   "Construction",
-  "Transport & Logistics",
-  "Public Sector",
+  "Transport & logistics",
+  "Public sector",
   "Non-profit",
   "Other",
 ];
@@ -57,28 +62,28 @@ const SIZE_BANDS: { value: CompanySizeBand; label: string }[] = [
 const DATASETS: { value: CompanySetupDataset; title: string; body: string }[] = [
   {
     value: "SAMPLE",
-    title: "Example Company",
+    title: "Example company",
     body:
       "Offices, departments, job titles, leave policies and a set of people sized to your answer — " +
       "enough to see how every screen looks before you put anything real in.",
   },
   {
     value: "EMPTY",
-    title: "Start Empty",
+    title: "Start empty",
     body:
       "Nothing but your own account. Everything is here — the fields, the roles, the leave types — " +
       "and none of it is filled in with anybody imaginary.",
   },
   {
     value: "DEFAULT",
-    title: "Full Demo",
+    title: "Full demo",
     body:
       "The complete demo company: fifty people whatever your size, with every feature exercised. " +
       "The most to look at, and the most to clear out afterwards.",
   },
 ];
 
-const STEPS = ["Your Company", "What to Start With"] as const;
+const STEPS = ["Your company", "What to start with"] as const;
 
 /**
  * @param companyName read on the server by the page, not from the company provider: the heading says
@@ -151,19 +156,20 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
   const selectedCountry = countries.data?.find((c) => c.code === countryCode) ?? null;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center gap-8 px-4 py-16">
-      <header className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">
-          Step {step + 1} of {STEPS.length}
-        </p>
-        <h1 className="text-3xl font-semibold leading-tight text-foreground">
+    // noddo's own screen (SPEC § 2): the company has a name and nothing else yet, so the wordmark heads it.
+    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-8 px-4 py-8 sm:py-12">
+      <NoddoWordmark height={24} />
+      <div className="flex flex-1 flex-col justify-center gap-8">
+      <header className="flex flex-col gap-4">
+        <Stepper steps={STEPS} current={step} />
+        <h1 className="text-page-title text-primary">
           {step === 0
             ? companyName
               ? `Welcome to ${companyName}`
               : "Welcome"
             : "What should we start you with?"}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-body text-secondary">
           {step === 0
             ? "Three questions, so the product arrives set up rather than blank. You can change any of it later."
             : "Whichever you pick, every feature is switched on. This is only about what is in it on day one."}
@@ -171,12 +177,9 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
       </header>
 
       {setup.data?.status === "FAILED" && setup.data.errorDetail && (
-        <div className="flex items-start gap-2 rounded-md border border-brown-200 bg-brown-50 px-4 py-3 text-sm text-brown-800">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-          <span>
-            The last attempt stopped: {setup.data.errorDetail}. Your answers are still here — try again.
-          </span>
-        </div>
+        <Banner icon={Alert02Icon}>
+          The last attempt stopped: {setup.data.errorDetail}. Your answers are still here — try again.
+        </Banner>
       )}
 
       {step === 0 ? (
@@ -221,7 +224,7 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
               onChange={setCountryCode}
               disabled={countries.isLoading}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               {selectedCountry
                 ? `Sets your time zone to ${selectedCountry.timezone}, starts the week on ` +
                   `${selectedCountry.weekStartDay.toLowerCase()}, and builds that country's public holiday calendar.`
@@ -238,18 +241,24 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
               onClick={() => setDataset(option.value)}
               aria-pressed={dataset === option.value}
               className={cn(
-                "flex w-full items-start gap-3 rounded-md border px-4 py-3 text-left transition-colors",
+                "flex w-full items-start gap-3 rounded-card border bg-card px-4 py-3 text-left transition-colors",
                 dataset === option.value
-                  ? "border-foreground bg-brown-50"
-                  : "border-brown-200 hover:bg-brown-50/60",
+                  ? "border-accent bg-accent-subtle"
+                  : "border-divider hover:bg-row-hover",
               )}
             >
-              <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border border-brown-300 bg-background">
-                {dataset === option.value && <Check className="h-3.5 w-3.5" />}
+              {/* A radio's look (SPEC § 13.12): a 16 px circle, an accent dot when chosen. */}
+              <span
+                className={cn(
+                  "mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-pill border-[1.5px] bg-card",
+                  dataset === option.value ? "border-accent" : "border-strong",
+                )}
+              >
+                {dataset === option.value && <span className="h-2 w-2 rounded-pill bg-accent" />}
               </span>
               <span className="flex flex-col gap-1">
-                <span className="font-medium text-foreground">{option.title}</span>
-                <span className="text-sm text-muted-foreground">{option.body}</span>
+                <span className="font-medium text-primary">{option.title}</span>
+                <span className="text-body text-tertiary">{option.body}</span>
               </span>
             </button>
           ))}
@@ -258,7 +267,7 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
 
       <div className="flex items-center justify-between gap-3">
         {step > 0 ? (
-          <Button type="button" variant="ghost" onClick={() => setStep(0)} disabled={submitting}>
+          <Button type="button" variant="secondary" onClick={() => setStep(0)} disabled={submitting}>
             Back
           </Button>
         ) : (
@@ -271,13 +280,13 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
           // unanswered "what does your company do" is a toll gate.
           // `type` and `key` for the same reason as the welcome's footer — a `Button` defaults to
           // submit, and React reuses one DOM node for both branches of this ternary.
-          <Button key="next" type="button" onClick={() => setStep(1)}>Next</Button>
+          <Button key="next" type="button" onClick={() => setStep(1)}>Continue</Button>
         ) : (
-          <Button key="submit" type="button" onClick={submit} disabled={submitting}>
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            Set Up My Company
+          <Button key="submit" type="button" onClick={submit} loading={submitting}>
+            {submitting ? "Setting up…" : "Set up my company"}
           </Button>
         )}
+      </div>
       </div>
     </div>
   );
@@ -287,23 +296,19 @@ export const CompanySetupContainer: React.FC<{ companyName: string | null }> = (
  * What the wait looks like.
  *
  * <p>The step is named, not spun at: a hundred and fifty people plus a holiday calendar fetched from
- * a third party takes long enough that a bare spinner reads as a hang.
+ * a third party takes long enough that a bare spinner reads as a hang. Splash B of SPEC § 3 — white, the
+ * Ink wordmark, the ring — the first load of a new workspace.
  */
 const BuildingView: React.FC<{ step: string | null; dataset: CompanySetupDataset }> = ({ step, dataset }) => (
-  <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center gap-4 px-4 text-center">
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50">
-      {dataset === "EMPTY" ? (
-        <Building2 className="h-6 w-6 text-brown-700" />
-      ) : (
-        <Users className="h-6 w-6 text-brown-700" />
-      )}
-    </div>
-    <h1 className="text-2xl font-semibold text-foreground">Setting up your company</h1>
-    <p className="flex items-center gap-2 text-muted-foreground">
-      <Loader2 className="h-4 w-4 animate-spin" />
+  <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center gap-4 bg-card px-4 text-center">
+    <NoddoWordmark height={32} className="mb-4" />
+    <Illustration scene={dataset === "EMPTY" ? "company-hub" : "team-and-org"} />
+    <h1 className="text-page-title text-primary">Setting up your company</h1>
+    <p className="flex items-center gap-2 text-body text-secondary">
+      <NodRing size="sm" label="" />
       {step ?? "Getting started"}
     </p>
-    <p className="text-sm text-muted-foreground">
+    <p className="text-body text-tertiary">
       This takes a few moments. You can leave this page — it will pick up where it left off.
     </p>
   </div>

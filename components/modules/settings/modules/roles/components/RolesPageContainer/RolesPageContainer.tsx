@@ -81,7 +81,6 @@ const RolesPageContainer: React.FC = () => {
 
   /*
     What the roles table shows: the archived view or everything else, narrowed by the search.
-
     Archived roles used to be listed alongside active ones and marked with a badge, on the argument
     that a role granting nothing to the people who hold it is what an admin needs to notice. The
     toggle answers that better — it is one tap, it carries the count, and the list stops mixing two

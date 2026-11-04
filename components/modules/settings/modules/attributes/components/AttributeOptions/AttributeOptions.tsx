@@ -10,9 +10,9 @@ import {
 } from "@/models/attribute";
 import { Attribute, AttributePatch } from "@/models/attribute/Attribute";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { OptionsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/OptionsEditor";
 import { ObjectFieldsEditor } from "@/components/modules/settings/modules/attributes/components/Attribute/ObjectFieldsEditor/ObjectFieldsEditor";
 import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
@@ -25,11 +25,12 @@ import {
   parseObjectFields,
   serializeObjectFields,
 } from "@/models/attribute/objectFields";
-import { PRESET_COLORS } from "@/models/colors";
+import { TAG_COLOR_SEQUENCE } from "@/lib/theme/tags";
 import { sortBySortOrder } from "../../hooks/utils/useReorderAction";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FieldError } from "@/components/desact/field-error";
 
 interface AttributeOptionsProps {
   attribute: Attribute;
@@ -124,7 +125,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       .map((o): AttributeOptionUpsert => ({
         id: o.id,
         value: o.value ?? "",
-        color: o.color ?? PRESET_COLORS[0],
+        color: o.color ?? TAG_COLOR_SEQUENCE[0],
         sortOrder: o.sortOrder ?? 0,
       }));
 
@@ -150,7 +151,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
         {
           id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 9),
           value: "",
-          color: PRESET_COLORS[0],
+          color: TAG_COLOR_SEQUENCE[0],
           sortOrder: 1,
           createdAt: "",
           createdBy: "",
@@ -227,7 +228,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
           onChange={(e) => setName(e.currentTarget.value)}
         />
         {!name.trim() && (
-          <p className="text-xs text-destructive">A name is required.</p>
+          <FieldError>A name is required.</FieldError>
         )}
       </div>
 
@@ -235,7 +236,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
         <RequiredLabel required>Type</RequiredLabel>
         <div className="flex items-center gap-2">
           <AttributeTypeChip type={type} />
-          <span className="text-xs text-muted-foreground">
+          <span className="text-hint text-tertiary">
             Can&apos;t be changed after the attribute is created.
           </span>
         </div>
@@ -253,7 +254,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
             clearable={false}
           />
           {groupId !== attribute.groupId && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Moving the attribute places it at the end of the target group.
             </p>
           )}
@@ -306,7 +307,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {type === AttributeType.NUMBER && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-dec-scale">Decimal Scale</Label>
+          <Label htmlFor="attr-dec-scale">Decimal scale</Label>
           <Input
             id="attr-dec-scale"
             type="number"
@@ -318,7 +319,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
               setDecScale(v === "" ? null : Number(v));
             }}
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-hint text-tertiary">
             Chooses how new values are stored (decimal vs whole numbers). Values saved earlier keep
             their current form.
           </p>
@@ -334,8 +335,8 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       </div>
 
-      <div className="mt-6 flex justify-end gap-2 border-t border-brown-100 pt-4">
-        <Button type="button" variant="outline" onClick={cancel} disabled={isSaving}>
+      <div className="mt-6 flex justify-end gap-2 border-t border-divider pt-4">
+        <Button type="button" variant="secondary" onClick={cancel} disabled={isSaving}>
           Cancel
         </Button>
         <Button type="button" onClick={save} disabled={isPreset || !name.trim() || isSaving}>

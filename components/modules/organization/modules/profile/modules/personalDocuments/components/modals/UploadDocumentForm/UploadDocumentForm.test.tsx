@@ -31,7 +31,7 @@ beforeAll(() => {
 // label baked into the mock would have to be recomputed on every re-render, which is a race, not
 // a fixture.
 jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
-jest.mock("@/public/desact/src/components/ui/select", () => ({
+jest.mock("@/components/desact/select", () => ({
   Select: ({
     value,
     onValueChange,

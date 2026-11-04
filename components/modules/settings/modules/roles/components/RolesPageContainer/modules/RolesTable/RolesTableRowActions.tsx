@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Archive, ArchiveRestore, Copy, Pencil, Trash2 } from "lucide-react";
+import { Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
@@ -26,22 +27,22 @@ export default function RolesTableRowActions({
   archived = false,
 }: RolesTableRowActionsProps) {
   return (
-    <RowActionsMenu label="Role Actions">
+    <RowActionsMenu label="Role actions">
       <PermissionGate resource="ROLES.ROLE" action="EDIT">
-        <RowAction icon={<Pencil className="h-4 w-4" />} onClick={onRename} disabled={locked}>
+        <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onRename} disabled={locked}>
           Rename
         </RowAction>
 
-        <RowAction icon={<Copy className="h-4 w-4" />} onClick={onDuplicate}>
+        <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={onDuplicate}>
           Duplicate
         </RowAction>
 
         {archived ? (
-          <RowAction icon={<ArchiveRestore className="h-4 w-4" />} onClick={onRestore}>
+          <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />} onClick={onRestore}>
             Unarchive
           </RowAction>
         ) : (
-          <RowAction icon={<Archive className="h-4 w-4" />} onClick={onArchive} disabled={locked}>
+          <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive} disabled={locked}>
             Archive
           </RowAction>
         )}
@@ -49,7 +50,7 @@ export default function RolesTableRowActions({
 
       <PermissionGate resource="ROLES.ROLE" action="MANAGE">
         <RowActionDestructive
-          icon={<Trash2 className="h-4 w-4" />}
+          icon={<Icon icon={Delete02Icon} size="sm" />}
           onClick={onDelete}
           disabled={locked}
         >

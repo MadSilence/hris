@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type FC } from "react";
-import { Clock } from "lucide-react";
+import { Clock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { cn } from "@/lib/cn";
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, "0"));
 const MINUTES = Array.from({ length: 12 }, (_, step) => String(step * 5).padStart(2, "0"));
@@ -51,8 +52,8 @@ export const TimePicker: FC<Props> = ({
 
   const cell = (selected: boolean) =>
     cn(
-      "w-full rounded-md px-3 py-1.5 text-center text-sm tabular-nums transition-colors",
-      selected ? "bg-brown-700 text-white" : "text-foreground hover:bg-brown-100",
+      "w-full rounded-control px-3 py-1.5 text-center text-body tabular-nums transition-colors",
+      selected ? "bg-accent text-on-accent" : "text-primary hover:bg-mist",
     );
 
   return (
@@ -64,14 +65,14 @@ export const TimePicker: FC<Props> = ({
           disabled={disabled}
           aria-label={ariaLabel}
           className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-lg border border-brown-300 bg-input-background px-3 text-sm outline-none transition-colors",
-            "hover:border-brown-400 disabled:cursor-not-allowed disabled:opacity-50",
-            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            "flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-body outline-none transition-colors",
+            "hover:border-strong disabled:cursor-not-allowed disabled:opacity-50",
+            "focus-visible:border-accent focus-visible:ring-accent-ring/50 focus-visible:ring-[3px]",
             className,
           )}
         >
-          <Clock className="size-4 shrink-0 text-brown-400" aria-hidden />
-          <span className={cn("min-w-0 flex-1 truncate text-left tabular-nums", !value && "text-muted-foreground")}>
+          <Icon icon={Clock01Icon} size="sm" className="shrink-0 text-tertiary" />
+          <span className={cn("min-w-0 flex-1 truncate text-left tabular-nums", !value && "text-tertiary")}>
             {value || placeholder}
           </span>
         </button>
@@ -93,7 +94,7 @@ export const TimePicker: FC<Props> = ({
               </button>
             ))}
           </div>
-          <div className="w-px bg-brown-100" aria-hidden />
+          <div className="w-px bg-mist" aria-hidden />
           <div className="flex max-h-56 w-16 flex-col gap-0.5 overflow-y-auto" role="listbox" aria-label="Minute">
             {MINUTES.map((option) => (
               <button

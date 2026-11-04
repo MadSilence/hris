@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
 import { AttributeType, hasDefaultValueSupport, isTextConstrainedType } from "@/models/attribute";
 import { SettingToggle } from "@/components/modules/settings/modules/attributes/components/shared/SettingToggle";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -46,7 +46,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
 
   return (
     <div className="space-y-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-brown-400">
+      <p className="text-hint font-semibold text-tertiary">
         Validation &amp; rules
       </p>
 
@@ -79,7 +79,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
 
       {hasDefault && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-cfg-default">Default Value</Label>
+          <Label htmlFor="attr-cfg-default">Default value</Label>
           <Input
             id="attr-cfg-default"
             type={defaultInputType}
@@ -126,7 +126,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {(isText || isLongText) && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-length">Min Length</Label>
+            <Label htmlFor="attr-cfg-min-length">Min length</Label>
             <Input
               type="number"
               id="attr-cfg-min-length"
@@ -136,7 +136,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-length">Max Length</Label>
+            <Label htmlFor="attr-cfg-max-length">Max length</Label>
             <Input
               type="number"
               id="attr-cfg-max-length"
@@ -158,7 +158,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             onChange={(e) => onChange({ regex: e.currentTarget.value })}
           />
           {type === AttributeType.PHONE && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Phone numbers are always checked for 7–15 digits. A pattern adds a stricter format on top.
             </p>
           )}
@@ -192,7 +192,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {isMulti && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-select">Min Selected</Label>
+            <Label htmlFor="attr-cfg-min-select">Min selected</Label>
             <Input
               type="number"
               id="attr-cfg-min-select"
@@ -202,7 +202,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-select">Max Selected</Label>
+            <Label htmlFor="attr-cfg-max-select">Max selected</Label>
             <Input
               type="number"
               id="attr-cfg-max-select"

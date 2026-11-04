@@ -259,7 +259,7 @@ export default function JobFamilyContainer() {
 
   if (error) {
     return (
-      <div className="py-10 text-sm text-muted-foreground">Failed to load job families</div>
+      <div className="py-10 text-body text-tertiary">Failed to load job families</div>
     );
   }
 
@@ -355,7 +355,7 @@ export default function JobFamilyContainer() {
         <RestoreWithChildrenModal
           key={restoreTarget.id}
           isOpen
-          title="Unarchive Job Family"
+          title="Unarchive job family"
           name={restoreTarget.name}
           childNoun="positions"
           items={restoreFlow.items}

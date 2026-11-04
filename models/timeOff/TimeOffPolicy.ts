@@ -61,4 +61,7 @@ export interface TimeOffPolicy {
   updatedBy: string | null;
 
   version: number;
+
+  /** The tag colour of the policy's leave type — what a person's own calendar paints their leave in. Only the list carries it. */
+  leaveTypeColor?: string | null;
 }

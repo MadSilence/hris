@@ -70,22 +70,22 @@ describe("ScheduledChangesPanel", () => {
   it("lists each change with its date and who scheduled it, and offers only what the kind allows", () => {
     renderPanel([termination, task]);
 
-    fireEvent.click(screen.getByRole("button", { name: /Scheduled Changes \(2\)/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Scheduled changes \(2\)/ }));
 
     const list = screen.getByRole("list", { name: "Scheduled changes" });
     const rows = within(list).getAllByRole("listitem");
     expect(rows).toHaveLength(2);
 
-    expect(within(rows[0]).getByText("Employment Ends")).toBeInTheDocument();
+    expect(within(rows[0]).getByText("Employment ends")).toBeInTheDocument();
     expect(within(rows[0]).getByText(new RegExp(formatDisplayDate("2026-10-31", { style: "medium" })))).toBeInTheDocument();
     expect(within(rows[0]).getByText("Scheduled by Grace Hopper")).toBeInTheDocument();
     expect(within(rows[0]).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
-    expect(within(rows[0]).getByRole("button", { name: "Change Date" })).toBeInTheDocument();
+    expect(within(rows[0]).getByRole("button", { name: "Change date" })).toBeInTheDocument();
 
-    expect(within(rows[1]).getByText("Task Due: Return the laptop")).toBeInTheDocument();
+    expect(within(rows[1]).getByText("Task due: Return the laptop")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Scheduled by a process")).toBeInTheDocument();
     expect(within(rows[1]).queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
-    expect(within(rows[1]).queryByRole("button", { name: "Change Date" })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole("button", { name: "Change date" })).not.toBeInTheDocument();
   });
 
   it("cancels after a confirmation, then re-reads the list and the person", async () => {
@@ -93,11 +93,11 @@ describe("ScheduledChangesPanel", () => {
     const onChanged = jest.fn();
     renderPanel([termination], onChanged);
 
-    fireEvent.click(screen.getByRole("button", { name: /Scheduled Changes \(1\)/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Scheduled changes \(1\)/ }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(mockedCancel).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancel Change" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel change" }));
 
     await waitFor(() => expect(mockedCancel).toHaveBeenCalledWith({ userId: "u1", changeId: "t1" }));
     await waitFor(() => expect(onChanged).toHaveBeenCalled());
@@ -109,9 +109,9 @@ describe("ScheduledChangesPanel", () => {
     const onChanged = jest.fn();
     renderPanel([termination], onChanged);
 
-    fireEvent.click(screen.getByRole("button", { name: /Scheduled Changes/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Scheduled changes/ }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cancel Change" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel change" }));
 
     expect(await screen.findByText("This change is no longer scheduled.")).toBeInTheDocument();
     expect(onChanged).not.toHaveBeenCalled();
@@ -121,9 +121,9 @@ describe("ScheduledChangesPanel", () => {
     mockedReschedule.mockResolvedValue({ status: ActionStatus.SUCCESS });
     renderPanel([termination]);
 
-    fireEvent.click(screen.getByRole("button", { name: /Scheduled Changes/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Change Date" }));
-    expect(screen.getByText("Last Working Day")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Scheduled changes/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Change date" }));
+    expect(screen.getByText("Last working day")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 

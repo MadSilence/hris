@@ -1,17 +1,18 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import { ArrowDown01Icon, ArrowUp01Icon, Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Input } from "@/components/desact/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/select";
+import { cn } from "@/lib/cn";
 
 export type SearchFieldMode = {
   value: string;
@@ -57,7 +58,7 @@ export function SearchField({
   return (
     <div
       className={cn(
-        "flex h-9 items-center gap-1 rounded-lg border border-brown-200 bg-white pr-1",
+        "flex h-9 items-center gap-1 rounded-control border border-divider bg-card pr-1",
         className,
       )}
     >
@@ -65,7 +66,7 @@ export function SearchField({
         <Select value={mode} onValueChange={onModeChange}>
           <SelectTrigger
             aria-label="Search in"
-            className="h-7 w-[124px] flex-none border-0 bg-transparent pl-2.5 text-sm shadow-none focus:ring-0"
+            className="h-7 w-[124px] flex-none border-0 bg-transparent pl-2.5 text-body shadow-none focus:ring-0"
           >
             <SelectValue />
           </SelectTrigger>
@@ -80,7 +81,7 @@ export function SearchField({
       )}
 
       <div className="relative min-w-0 flex-1">
-        <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brown-400" />
+        <Icon icon={Search01Icon} size="sm" className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-tertiary" />
         <Input
           value={value}
           onChange={(e) => onChange(e.currentTarget.value)}
@@ -96,12 +97,12 @@ export function SearchField({
               onChange("");
             }
           }}
-          className="h-7 border-0 pl-7 text-sm shadow-none focus-visible:ring-0"
+          className="h-7 border-0 pl-7 text-body shadow-none focus-visible:ring-0"
         />
       </div>
 
       {showCounter && (
-        <span className="flex-none whitespace-nowrap px-1 text-xs tabular-nums text-brown-500">
+        <span className="flex-none whitespace-nowrap px-1 text-hint tabular-nums text-tertiary">
           {matchCount === 0 ? "0 results" : `${activeMatch ?? 1} of ${matchCount}`}
         </span>
       )}
@@ -112,17 +113,17 @@ export function SearchField({
             type="button"
             onClick={onPrev}
             aria-label="Previous match"
-            className="flex h-6 w-6 items-center justify-center rounded text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+            className="flex h-6 w-6 items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
           >
-            <ChevronUp className="h-3.5 w-3.5" />
+            <Icon icon={ArrowUp01Icon} size="sm" />
           </button>
           <button
             type="button"
             onClick={onNext}
             aria-label="Next match"
-            className="flex h-6 w-6 items-center justify-center rounded text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+            className="flex h-6 w-6 items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
           >
-            <ChevronDown className="h-3.5 w-3.5" />
+            <Icon icon={ArrowDown01Icon} size="sm" />
           </button>
         </span>
       )}
@@ -132,9 +133,9 @@ export function SearchField({
           type="button"
           onClick={() => onChange("")}
           aria-label="Clear search"
-          className="flex h-6 w-6 flex-none items-center justify-center rounded text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+          className="flex h-6 w-6 flex-none items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
         >
-          <X className="h-3.5 w-3.5" />
+          <Icon icon={Cancel01Icon} size="sm" />
         </button>
       )}
     </div>

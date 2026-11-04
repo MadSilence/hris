@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { formatDisplayDate } from "@/lib/date";
 import { formatDayAmount, type TimeOffDecisionContext, type TimeOffRequest } from "@/models/timeOff";
@@ -46,14 +46,14 @@ export const WaitingOnYouWidget: React.FC = () => {
 
   if (query.isLoading) {
     return (
-      <HomeCard title="Waiting on You">
+      <HomeCard title="Waiting on you">
         <HomeRowsSkeleton rows={2} avatar={false} />
       </HomeCard>
     );
   }
   if (query.error || !query.data) {
     return (
-      <HomeCard title="Waiting on You">
+      <HomeCard title="Waiting on you">
         <ErrorState error={query.error} compact onRetry={() => void query.refetch()} />
       </HomeCard>
     );
@@ -66,20 +66,20 @@ export const WaitingOnYouWidget: React.FC = () => {
 
   return (
     <HomeCard
-      title="Waiting on You"
-      action={<HomeCardLink href={NEEDS_ACTION_INBOX_HREF}>See All ({query.data.length})</HomeCardLink>}
+      title="Waiting on you"
+      action={<HomeCardLink href={NEEDS_ACTION_INBOX_HREF}>See all ({query.data.length})</HomeCardLink>}
     >
       <ul className="flex flex-col gap-1">
         {newest.map((request) => (
           <li key={request.id}>
-            <Link href={`/time-off/requests/${request.id}`} className="-mx-2 flex flex-col rounded-md px-2 py-1.5 hover:bg-brown-50">
-              <span className="truncate text-sm font-medium text-brown-900">
+            <Link href={`/time-off/requests/${request.id}`} className="-mx-2 flex flex-col rounded-control px-2 py-1.5 hover:bg-subtle">
+              <span className="truncate text-body font-medium text-primary">
                 <RequesterName requestId={request.id} />
-                <span className="font-normal text-muted-foreground">
+                <span className="font-normal text-tertiary">
                   {request.status === "CANCELLATION_PENDING" ? " asks to cancel time off" : " requests time off"}
                 </span>
               </span>
-              <span className="truncate text-xs text-muted-foreground">
+              <span className="truncate text-hint text-tertiary">
                 {dates(request)} · {formatDayAmount(request.requestedAmount)} {request.requestedAmount === 1 ? "day" : "days"}
                 {request.awaitingOnBehalfOfName ? ` · for ${request.awaitingOnBehalfOfName}` : ""}
               </span>

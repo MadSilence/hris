@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Textarea } from "@/components/desact/textarea";
+import { Checkbox } from "@/components/desact/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
@@ -81,8 +81,8 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
                 {label}
                 <RadioGroup id={id} className="flex gap-4" value={value === true ? "yes" : value === false ? "no" : ""}
                   onValueChange={(v) => set(q.id, v === "yes")} disabled={busy}>
-                  <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="yes" />Yes</label>
-                  <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="no" />No</label>
+                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />Yes</label>
+                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />No</label>
                 </RadioGroup>
               </div>
             );
@@ -92,7 +92,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
                 {label}
                 <RadioGroup id={id} value={typeof value === "string" ? value : ""} onValueChange={(v) => set(q.id, v)} disabled={busy}>
                   {(q.options ?? []).map((o) => (
-                    <label key={o} className="flex items-center gap-2 text-sm"><RadioGroupItem value={o} />{o}</label>
+                    <label key={o} className="flex items-center gap-2 text-body"><RadioGroupItem value={o} />{o}</label>
                   ))}
                 </RadioGroup>
               </div>
@@ -103,7 +103,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
               <div key={q.id} className="space-y-1.5">
                 {label}
                 {(q.options ?? []).map((o) => (
-                  <label key={o} className="flex items-center gap-2 text-sm">
+                  <label key={o} className="flex items-center gap-2 text-body">
                     <Checkbox checked={picked.includes(o)} disabled={busy}
                       onCheckedChange={(c) => set(q.id, c ? [...picked, o] : picked.filter((x) => x !== o))} />
                     {o}
@@ -122,7 +122,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
             );
         }
       })}
-      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>Send Answers</Button>
+      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>Send answers</Button>
       <FormError message={error} />
     </div>
   );

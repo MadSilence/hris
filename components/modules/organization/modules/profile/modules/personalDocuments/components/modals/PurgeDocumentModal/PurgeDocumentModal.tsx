@@ -11,8 +11,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { AlertTriangle, Trash2 } from "lucide-react";
+} from "@/components/desact/alert-dialog";
+import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 export interface PurgeDocumentModalProps {
   isOpen: boolean;
@@ -48,8 +49,8 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <Trash2 className="h-5 w-5"/>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon={Delete02Icon} />
             Delete forever
           </AlertDialogTitle>
 
@@ -59,12 +60,12 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
+            <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-danger-800">There is no trash after this</h4>
-              <p className="text-sm text-danger-700">
+              <h4 className="mb-1 font-medium text-primary">There is no trash after this</h4>
+              <p className="text-body text-secondary">
                 Leaving the document where it is deletes it automatically once the retention period
                 ends.
               </p>
@@ -84,7 +85,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Delete forever
           </AlertDialogAction>

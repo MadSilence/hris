@@ -4,10 +4,11 @@ import { FC, FormEvent, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export type CreateDocumentsFolderFormValues = {
   name: string;
@@ -78,7 +79,7 @@ export const CreateDocumentsFolderForm: FC<
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="folder-name" required>Folder Name</RequiredLabel>
+        <RequiredLabel htmlFor="folder-name" required>Folder name</RequiredLabel>
 
         <Input
           id="folder-name"
@@ -92,9 +93,9 @@ export const CreateDocumentsFolderForm: FC<
         />
 
         {formik.errors.name ? (
-          <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+          <FieldError>{formik.errors.name}</FieldError>
         ) : (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-hint text-tertiary">
             Minimum 2 characters.
           </p>
         )}
@@ -103,18 +104,17 @@ export const CreateDocumentsFolderForm: FC<
       <DialogFooter className="mt-8">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
-        >
+ >
           Cancel
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-brown-600 text-white hover:bg-brown-700"
-        >
+ >
           Create
         </Button>
       </DialogFooter>

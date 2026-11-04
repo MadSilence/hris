@@ -16,6 +16,6 @@ describe("the capacity mark", () => {
 
   it("is red where a request is refused and amber where it is warned", () => {
     render(<CapacityDot mark={{ date: "2026-11-04", behavior: "WARN" }} who="this team" />);
-    expect(screen.getByRole("img").className).toContain("bg-warning-500");
+    expect(screen.getByRole("img").className).toContain("bg-status-pending-fill");
   });
 });

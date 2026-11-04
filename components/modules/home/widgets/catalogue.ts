@@ -38,7 +38,7 @@ const can = (resource: Parameters<typeof canAccess>[0]["resource"], action: Para
 export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   {
     id: "waiting-on-you",
-    title: "Waiting on You",
+    title: "Waiting on you",
     description: "Leave requests waiting for your decision. Shown only while something waits.",
     group: "PERSONAL",
     isAvailable: can("PEOPLE.TIME_OFF", "VIEW"),
@@ -46,7 +46,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "my-tasks",
-    title: "My Tasks",
+    title: "My tasks",
     description: "Open tasks assigned to you.",
     group: "PERSONAL",
     isAvailable: everyone,
@@ -54,7 +54,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "my-time-off",
-    title: "My Time Off",
+    title: "My time off",
     description: "What is left on your policies, and your next leave.",
     group: "PERSONAL",
     isAvailable: can("PEOPLE.TIME_OFF", "VIEW"),
@@ -62,7 +62,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "whos-out",
-    title: "Who's Out",
+    title: "Who's out",
     description: "Who is away today or this week, in your team or the whole company.",
     group: "COMPANY",
     isAvailable: can("PEOPLE.CALENDAR", "VIEW"),
@@ -78,7 +78,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "upcoming-holidays",
-    title: "Upcoming Holidays",
+    title: "Upcoming holidays",
     description: "Your next public holidays.",
     group: "COMPANY",
     isAvailable: everyone,
@@ -86,7 +86,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "processes",
-    title: "Processes in Progress",
+    title: "Processes in progress",
     description: "Onboarding and preboarding in flight.",
     group: "HR",
     isAvailable: can("PEOPLE.LIFECYCLE_PROCESSES", "VIEW"),
@@ -102,7 +102,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "quick-actions",
-    title: "Quick Actions",
+    title: "Quick actions",
     description: "Request time off or log time in one click.",
     group: "UTILITIES",
     isAvailable: (access) =>
@@ -112,7 +112,7 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "company-time",
-    title: "Company Time",
+    title: "Company time",
     description: "The company's local time.",
     group: "UTILITIES",
     isAvailable: everyone,

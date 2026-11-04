@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, type FC } from "react";
-import { Globe2 } from "lucide-react";
+import { Globe02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 const isCountryCode = (code: string) => /^[A-Za-z]{2}$/.test(code);
 
@@ -29,10 +30,7 @@ export const CountryFlag: FC<Props> = ({ countryCode, className, title }) => {
 
   if (!isCountryCode(code)) {
     return (
-      <Globe2
-        aria-hidden
-        className={cn("size-4 shrink-0 text-[var(--color-text-tertiary)]", className)}
-      />
+      <Icon icon={Globe02Icon} className={cn("size-4 shrink-0 text-tertiary", className)} />
     );
   }
 
@@ -43,8 +41,8 @@ export const CountryFlag: FC<Props> = ({ countryCode, className, title }) => {
       <span
         title={label}
         className={cn(
-          "inline-flex h-4 shrink-0 items-center rounded-[3px] border border-brown-200 bg-brown-50 px-1",
-          "font-mono text-[10px] leading-none tracking-tight text-brown-600",
+          "inline-flex h-4 shrink-0 items-center rounded-glyph border border-divider bg-subtle px-1",
+          "font-mono text-hint leading-none text-secondary",
           className,
         )}
       >
@@ -64,7 +62,7 @@ export const CountryFlag: FC<Props> = ({ countryCode, className, title }) => {
       decoding="async"
       onError={() => setFailed(true)}
       className={cn(
-        "h-4 w-6 shrink-0 rounded-[2px] border border-black/10 object-cover",
+        "h-4 w-6 shrink-0 rounded-glyph border border-divider object-cover",
         className,
       )}
     />

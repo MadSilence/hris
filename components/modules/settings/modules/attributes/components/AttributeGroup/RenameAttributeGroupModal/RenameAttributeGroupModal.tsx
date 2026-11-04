@@ -1,13 +1,15 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Pencil } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   RenameAttributeGroupForm,
   RenameAttributeGroupFormValues,
 } from "@/components/modules/settings/modules/attributes/components/AttributeGroup/RenameAttributeGroupForm";
+import { InlineAlert } from "@/components/desact/alert";
 
 type RenameAttributeGroupModalProps = {
   isOpen: boolean;
@@ -65,11 +67,11 @@ export const RenameAttributeGroupModal: FC<
         >
           <DialogHeader>
             <div className="flex items-center gap-3 text-left">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
-                <Pencil className="h-5 w-5" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+                <Icon icon={PencilEdit02Icon} />
               </span>
               <div className="space-y-1">
-                <DialogTitle>Edit Section</DialogTitle>
+                <DialogTitle>Edit section</DialogTitle>
                 <DialogDescription>
                   Update the section name and the description shown under it.
                 </DialogDescription>
@@ -78,12 +80,9 @@ export const RenameAttributeGroupModal: FC<
           </DialogHeader>
 
           {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
+            <InlineAlert tone="declined">
               {errorMessage}
-            </p>
+            </InlineAlert>
           )}
 
           <RenameAttributeGroupForm

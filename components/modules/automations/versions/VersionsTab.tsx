@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight, GitCommitVertical } from "lucide-react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Badge } from "@/components/desact/badge";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatMoment } from "@/models/automations";
@@ -24,11 +25,11 @@ export function VersionsTab({ ruleId, currentVersionNo }: { ruleId: string; curr
   }
   const list = versions.data ?? [];
   if (list.length === 0) {
-    return <EmptyState icon={<GitCommitVertical className="h-6 w-6" />} title="No versions yet" description="Each publish adds a version here." />;
+    return <EmptyState scene="automations" title="No versions yet" description="Each publish adds a version here." />;
   }
 
   return (
-    <ul className="m-0 list-none divide-y divide-brown-100 rounded-xl border border-brown-100 bg-white p-0">
+    <ul className="m-0 list-none divide-y divide-divider rounded-popover border border-divider bg-card p-0">
       {list.map((v) => {
         const isOpen = open === v.versionNo;
         return (
@@ -39,10 +40,10 @@ export function VersionsTab({ ruleId, currentVersionNo }: { ruleId: string; curr
               onClick={() => setOpen(isOpen ? null : v.versionNo)}
               aria-expanded={isOpen}
             >
-              {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-              <span className="font-medium text-foreground">Version {v.versionNo}</span>
+              {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" className="text-tertiary" /> : <Icon icon={ArrowRight01Icon} size="sm" className="text-tertiary" />}
+              <span className="font-medium text-primary">Version {v.versionNo}</span>
               {v.versionNo === currentVersionNo && <Badge variant="outline">Current</Badge>}
-              <span className="ml-auto text-sm text-muted-foreground">
+              <span className="ml-auto text-body text-tertiary">
                 {[v.createdBy?.name, formatMoment(v.createdAt)].filter(Boolean).join(" · ")}
               </span>
             </button>

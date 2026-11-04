@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Input } from "@/components/desact/input";
+import { cn } from "@/lib/cn";
 
 /**
  * The search box that sits at the left of a list toolbar.
@@ -28,7 +29,7 @@ export const SearchBox: React.FC<{
   "aria-label"?: string;
 }> = ({ value, onChange, className, fullWidth = false, "aria-label": ariaLabel = "Search" }) => (
   <div className={cn("relative", fullWidth ? "w-full" : "w-[260px]", className)}>
-    <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400" />
+    <Icon icon={Search01Icon} size="sm" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary" />
     <Input
       value={value}
       onChange={(e) => onChange(e.currentTarget.value)}

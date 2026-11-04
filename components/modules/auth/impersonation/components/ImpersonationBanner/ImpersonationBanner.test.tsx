@@ -105,6 +105,6 @@ describe("ImpersonationBanner", () => {
     render(<ImpersonationBanner/>);
 
     expect(screen.getByRole("button")).toBeDisabled();
-    expect(screen.getByRole("button")).toHaveTextContent("Returning...");
+    expect(screen.getByRole("button")).toHaveTextContent("Returning…");
   });
 });

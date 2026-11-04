@@ -3,13 +3,14 @@
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { useDeleteDepartment } from "@/components/modules/settings/modules/departments/hooks/useDeleteDepartment/useDeleteDepartment";
 import type { DepartmentTreeNode } from "@/models/departments";
 import type { DepartmentChildrenStrategy, DepartmentMembersStrategy } from "@/models/departments/DeleteDepartmentPayload";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   open: boolean;
@@ -69,7 +70,7 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
           <DialogTitle>Delete &ldquo;{department.name}&rdquo;</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 py-2 text-sm text-brown-700">
+        <div className="space-y-5 py-2 text-body text-secondary">
           <p>This action cannot be undone. Choose how to handle existing children and members.</p>
 
           {hasChildren && (
@@ -144,14 +145,12 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
           )}
 
           {deleteDepartment.isError && (
-            <p className="text-danger-500">
-              {(deleteDepartment.error as Error)?.message ?? "An error occurred."}
-            </p>
+            <FormError message={(deleteDepartment.error as Error)?.message ?? "An error occurred."} />
           )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={deleteDepartment.isPending}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={deleteDepartment.isPending}>
             Cancel
           </Button>
           <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteDepartment.isPending}>

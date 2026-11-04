@@ -2,8 +2,8 @@
 
 import React, { FormEvent, useState } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -12,6 +12,7 @@ import {
   type PasswordValues,
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { acceptInviteAction } from "@/components/modules/invitation/actions/acceptInviteAction";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
   token: string;
@@ -57,24 +58,24 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
 
   if (done) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-        <h1 className="text-4xl font-medium">You Are In</h1>
-        <p className="text-md text-muted-foreground">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-page-title">You&apos;re in</h1>
+        <p className="text-body text-tertiary">
           Your password is set. Sign in with {email ?? "your email address"} to continue.
         </p>
         <Button asChild>
-          <a href="/login">Go to Sign In</a>
+          <a href="/login">Go to sign in</a>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-xl items-center justify-center py-12">
+    <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">{firstName ? `Welcome, ${firstName}` : "Welcome"}</h1>
-          <p className="mx-auto max-w-xl text-md text-muted-foreground">
+          <h1 className="text-page-title">{firstName ? `Welcome, ${firstName}` : "Welcome"}</h1>
+          <p className="text-body text-secondary">
             {companyName ? `You have been invited to join ${companyName}. ` : "You have been invited. "}
             Set a password to sign in{email ? ` as ${email}` : ""}.
           </p>
@@ -94,12 +95,12 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
               aria-invalid={Boolean(formik.errors.password)}
             />
             {formik.errors.password && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.password}</p>
+              <FieldError>{formik.errors.password}</FieldError>
             )}
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="invite-password-repeat" required>Confirm Password</RequiredLabel>
+            <RequiredLabel htmlFor="invite-password-repeat" required>Confirm password</RequiredLabel>
             <Input
               id="invite-password-repeat"
               name="confirmPassword"
@@ -111,18 +112,18 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
               aria-invalid={Boolean(formik.errors.confirmPassword)}
             />
             {formik.errors.confirmPassword && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.confirmPassword}</p>
+              <FieldError>{formik.errors.confirmPassword}</FieldError>
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
           </p>
 
           <FormError message={error} />
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
-            {busy ? "Saving…" : "Set Password"}
+          <Button type="submit" disabled={busy} size="lg" className="w-full">
+            {busy ? "Saving…" : "Set password"}
           </Button>
         </form>
       </div>

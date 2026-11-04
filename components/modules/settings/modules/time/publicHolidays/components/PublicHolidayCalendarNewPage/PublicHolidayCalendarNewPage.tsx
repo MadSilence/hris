@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays } from "lucide-react";
+import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { PublicHolidayCalendarFields } from "../PublicHolidayCalendarFields";
 import { PublicHolidayYearSelect } from "../PublicHolidayYearSelect";
@@ -54,7 +55,7 @@ export function PublicHolidayCalendarNewPage() {
   const templateRegion = searchParams.get("region") ?? "";
 
   const [draftName, setDraftName] = useState(
-    templateId ? "" : "New Public Holiday Calendar",
+    templateId ? "" : "New public holiday calendar",
   );
   const [draftYear, setDraftYear] = useState(CURRENT_YEAR);
   const [draftCountry, setDraftCountry] = useState("");
@@ -241,7 +242,7 @@ export function PublicHolidayCalendarNewPage() {
       <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
         <div className="shrink-0 px-8 pt-2">
           <SettingsPageHeader
-            title="New Public Holiday Calendar"
+            title="New public holiday calendar"
             backHref="/settings/time/public-holidays"
           />
           <div className="space-y-4 pt-5">
@@ -259,7 +260,7 @@ export function PublicHolidayCalendarNewPage() {
       <div className="shrink-0 px-8 pt-2">
         <div className="flex items-center justify-between gap-4">
           <SettingsPageHeader
-            title="New Public Holiday Calendar"
+            title="New public holiday calendar"
             backHref="/settings/time/public-holidays"
           />
           <Button type="button" onClick={handleSubmit} disabled={!isFormValid || isLoading}>
@@ -288,16 +289,16 @@ export function PublicHolidayCalendarNewPage() {
 
         <div className="flex items-end justify-between gap-4 pb-4 pt-6">
           <div>
-            <h2 className="mb-1 text-sm font-semibold text-[var(--color-text-primary)]">
+            <h2 className="mb-1 text-body font-semibold text-primary">
               Holiday days
             </h2>
-            <p className="text-sm text-[var(--color-text-tertiary)]">
+            <p className="text-body text-tertiary">
               Add all public holiday days for this calendar.
               {templateId && isPreviewFetching ? (
                 <span className="ml-2">Loading {draftYear}…</span>
               ) : previewFailed ? null : (
                 draftHolidays.length > 0 && (
-                  <span className="ml-2 font-medium text-[var(--color-text-primary)]">
+                  <span className="ml-2 font-medium text-primary">
                     {totalDraftDays(draftHolidays)}{" "}
                     {totalDraftDays(draftHolidays) === 1 ? "day" : "days"} added
                   </span>
@@ -330,14 +331,14 @@ export function PublicHolidayCalendarNewPage() {
             compact
           />
         ) : draftHolidays.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-            <div className="mb-3 rounded-2xl bg-brown-50 p-3">
-              <CalendarDays className="h-6 w-6 text-[var(--color-text-tertiary)]" />
+          <div className="flex flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
+            <div className="mb-3 rounded-card bg-subtle p-3">
+              <Icon icon={Calendar03Icon} size="lg" className="text-tertiary" />
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">
+            <p className="text-body font-medium text-primary">
               No holidays yet
             </p>
-            <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
+            <p className="mt-1 text-body text-tertiary">
               Add your first holiday day below.
             </p>
             <div className="mt-4">

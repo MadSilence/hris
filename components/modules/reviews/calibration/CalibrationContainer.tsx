@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { EyeOff, Lock, Pencil } from "lucide-react";
+import { PencilEdit02Icon, SquareLock02Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Textarea } from "@/components/desact/textarea";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -56,7 +57,7 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
     return (
       <div className="mx-auto max-w-6xl space-y-4" aria-busy="true">
         <Skeleton className="h-10 w-80" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-popover" />
       </div>
     );
   }
@@ -77,29 +78,29 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
         <SettingsPageHeader title={s.name} backHref={`/reviews/cycles/${s.cycleId}`} className="min-w-0 flex-1" />
         <CalibrationStatusBadge status={s.status} />
         {s.canEdit && (
-          <RowActionsMenu label="Session Actions">
-            <RowActionDestructive icon={<Lock className="h-4 w-4" />} onClick={() => setClosing(true)}>
-              Close Session
+          <RowActionsMenu label="Session actions">
+            <RowActionDestructive icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setClosing(true)}>
+              Close session
             </RowActionDestructive>
           </RowActionsMenu>
         )}
       </div>
-      <p className="-mt-4 text-sm text-muted-foreground">
+      <p className="-mt-4 text-body text-tertiary">
         {s.cycleName} · {s.rows.length + s.hidden} people
         {s.closedAt ? ` · closed ${formatDisplayDate(s.closedAt, { style: "medium" })}` : ""}.
         {" "}A changed rating becomes the person&apos;s final rating; the manager review stays as written. Calibrating
         does not share or approve anything.
       </p>
       {s.hidden > 0 && (
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <EyeOff className="h-4 w-4" />
+        <p className="flex items-center gap-2 text-body text-tertiary">
+          <Icon icon={ViewOffSlashIcon} size="sm" />
           {s.hidden} {s.hidden === 1 ? "person" : "people"} in this session {s.hidden === 1 ? "is" : "are"} outside the
           results you can read, and not shown.
         </p>
       )}
 
       <Tabs defaultValue="table" className="w-full">
-        <TabsList className="grid w-full max-w-xs grid-cols-2 bg-brown-50">
+        <TabsList className="grid w-full max-w-xs grid-cols-2 bg-subtle">
           <TabsTrigger value="table">Table</TabsTrigger>
           <TabsTrigger value="nine-box">9-Box</TabsTrigger>
         </TabsList>
@@ -117,8 +118,8 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
 
       <ConfirmDialog
         open={closing}
-        title="Close Session"
-        confirmLabel="Close Session"
+        title="Close session"
+        confirmLabel="Close session"
         destructive
         onCancelAction={() => setClosing(false)}
         onConfirmAction={async () => {
@@ -151,21 +152,21 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
   };
   if (s.rows.length === 0) {
     return (
-      <EmptyState compact icon={<EyeOff className="h-5 w-5" />} title="Nobody to calibrate here"
+      <EmptyState compact scene="reviews-and-one-on-ones" title="Nobody to calibrate here"
         description="The people of this session are outside the results you may read." />
     );
   }
   return (
-    <div className="overflow-x-auto rounded-xl border border-brown-100 bg-white">
-      <table className="w-full text-sm">
-        <thead className="text-left text-xs text-muted-foreground">
-          <tr className="border-b border-brown-100">
+    <div className="overflow-x-auto rounded-popover border border-divider bg-card">
+      <table className="w-full text-body">
+        <thead className="text-left text-hint text-tertiary">
+          <tr className="border-b border-divider">
             <th className="px-4 py-2 font-medium">Person</th>
             <th className="px-4 py-2 font-medium">Department</th>
             <th className="px-4 py-2 font-medium">Manager</th>
             <th className="px-4 py-2 font-medium">Status</th>
-            <th className="px-4 py-2 font-medium">Manager Rating</th>
-            <th className="px-4 py-2 font-medium">Final Rating</th>
+            <th className="px-4 py-2 font-medium">Manager rating</th>
+            <th className="px-4 py-2 font-medium">Final rating</th>
             <th className="px-4 py-2 font-medium">Potential</th>
             <th className="px-4 py-2" />
           </tr>
@@ -174,22 +175,22 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
           {s.rows.map((r) => {
             const editable = s.canEdit && r.editable;
             return (
-              <tr key={r.participantId} className="border-b border-brown-50 align-top last:border-0" data-test="calibration-row">
-                <td className="px-4 py-2 text-brown-900">{r.subject.name}</td>
+              <tr key={r.participantId} className="border-b border-divider align-top last:border-0" data-test="calibration-row">
+                <td className="px-4 py-2 text-primary">{r.subject.name}</td>
                 <td className="px-4 py-2">{r.department ?? "—"}</td>
                 <td className="px-4 py-2">{r.manager?.name ?? "—"}</td>
                 <td className="px-4 py-2"><PacketStatusBadge status={r.status} /></td>
                 <td className="px-4 py-2">{r.managerReviewIn ? label(r.managerRating) : "Not in yet"}</td>
                 <td className="px-4 py-2">
-                  <div className="text-brown-900">{label(r.finalRating)}</div>
+                  <div className="text-primary">{label(r.finalRating)}</div>
                   {r.calibrated && (
-                    <div className="max-w-xs text-xs text-muted-foreground">
+                    <div className="max-w-xs text-hint text-tertiary">
                       Calibrated{r.calibratedBy ? ` by ${r.calibratedBy.name}` : ""}
                       {r.calibrationReason ? `: ${r.calibrationReason}` : ""}
                     </div>
                   )}
                   {!editable && r.lockedReason && (
-                    <div className="max-w-xs text-xs text-muted-foreground" data-test="locked-hint">
+                    <div className="max-w-xs text-hint text-tertiary" data-test="locked-hint">
                       Read-only: {r.lockedReason}.
                     </div>
                   )}
@@ -200,7 +201,7 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
                       onValueChange={(v) => onPotential(r, v === NONE ? null : (v as ReviewPotential))}>
                       <SelectTrigger className="h-8 w-32" aria-label={`Potential of ${r.subject.name}`}><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={NONE}>No Potential</SelectItem>
+                        <SelectItem value={NONE}>No potential</SelectItem>
                         {REVIEW_POTENTIALS.map((p) => <SelectItem key={p} value={p}>{REVIEW_POTENTIAL_LABELS[p]}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -208,9 +209,9 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
                 </td>
                 <td className="px-4 py-2 text-right">
                   {editable && r.managerReviewIn && (
-                    <RowActionsMenu label="Person Actions">
-                      <RowAction icon={<Pencil className="h-4 w-4 text-muted-foreground" />} onClick={() => onAdjust(r)}>
-                        Change Rating
+                    <RowActionsMenu label="Person actions">
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => onAdjust(r)}>
+                        Change rating
                       </RowAction>
                     </RowActionsMenu>
                   )}
@@ -267,7 +268,7 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
           <DialogHeader>
-            <DialogTitle>Change Rating</DialogTitle>
+            <DialogTitle>Change rating</DialogTitle>
             <DialogDescription>
               {row.subject.name}&apos;s final rating. Their manager gave {row.managerRating ?? "no rating"}; what the
               manager wrote stays as it is. The change and its reason are recorded.
@@ -275,7 +276,7 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
           </DialogHeader>
           <div className="mt-4 space-y-4">
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="calibration-rating">Final Rating</RequiredLabel>
+              <RequiredLabel htmlFor="calibration-rating">Final rating</RequiredLabel>
               <Select value={rating} onValueChange={setRating}>
                 <SelectTrigger id="calibration-rating"><SelectValue placeholder="Select a rating" /></SelectTrigger>
                 <SelectContent>
@@ -287,14 +288,14 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
               <RequiredLabel htmlFor="calibration-reason">Reason</RequiredLabel>
               <Textarea id="calibration-reason" value={reason} maxLength={2000} rows={3}
                 onChange={(e) => setReason(e.target.value)} placeholder="Why the rating changes" />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-hint text-tertiary">
                 Read by the manager, the approver and HR. Never shown to {row.subject.name.split(" ")[0]}.
               </p>
             </div>
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy || !changed || !reason.trim()}>
               {busy ? "Saving…" : "Save"}
             </Button>

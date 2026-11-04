@@ -80,7 +80,7 @@ describe("DelegateApprovalsSection", () => {
   it("proposes the person's manager, and adds a delegation for the dates chosen", async () => {
     render(<DelegateApprovalsSection />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Add Delegation/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Add delegation/ }));
     expect(screen.getByTestId("delegate-picker")).toHaveTextContent("picked carl");
 
     fireEvent.click(screen.getByRole("button", { name: "Add" }));

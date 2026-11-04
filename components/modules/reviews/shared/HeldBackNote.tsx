@@ -1,5 +1,6 @@
 import React from "react";
-import { EyeOff } from "lucide-react";
+import { ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 /**
  * Anonymous peer or upward reviews in but not shown: fewer are in than the cycle's threshold, so the server kept them
@@ -14,9 +15,9 @@ export function HeldBackNote({ count, threshold, kind = "peer" }: {
   if (count <= 0) return null;
   const reviews = count === 1 ? `1 anonymous ${kind} review is in` : `${count} anonymous ${kind} reviews are in`;
   return (
-    <p className="flex items-start gap-2 rounded-xl border border-dashed border-brown-200 px-4 py-3 text-sm text-muted-foreground"
+    <p className="flex items-start gap-2 rounded-card border border-dashed border-divider px-4 py-3 text-body text-tertiary"
       data-test="peers-held-back">
-      <EyeOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+      <Icon icon={ViewOffSlashIcon} size="sm" className="mt-0.5 shrink-0" />
       <span>
         {reviews} and held back to keep its writers anonymous — shown once there are {threshold ?? 3}.
       </span>

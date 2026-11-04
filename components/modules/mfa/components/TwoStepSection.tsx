@@ -1,20 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { KeyRound, Monitor } from "lucide-react";
+import { ComputerIcon, Key01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -70,15 +71,15 @@ export const TwoStepSection: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-brown-200 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-card border border-divider px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <KeyRound className="h-5 w-5 flex-none text-brown-400" />
+          <Icon icon={Key01Icon} className="flex-none text-tertiary" />
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">Authenticator App</span>
+              <span className="text-body font-medium text-primary">Authenticator app</span>
               <StatusBadge status={s.enrolled ? "active" : "inactive"} label={s.enrolled ? "On" : "Off"} />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               {s.enrolled
                 ? `${s.backupCodesLeft} backup ${s.backupCodesLeft === 1 ? "code" : "codes"} left.`
                 : s.required
@@ -90,46 +91,46 @@ export const TwoStepSection: React.FC = () => {
         <div className="flex flex-none gap-2">
           {s.enrolled ? (
             <>
-              <Button type="button" variant="outline" size="sm" onClick={regenerate}>New Backup Codes</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={regenerate}>New backup codes</Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={s.required}
                 title={s.required ? "Your company requires two-step sign-in" : undefined}
                 onClick={() => setDialog("disable")}
               >
-                Switch Off
+                Switch off
               </Button>
             </>
           ) : (
-            <Button type="button" size="sm" onClick={() => setDialog("setup")}>Set Up</Button>
+            <Button type="button" size="sm" onClick={() => setDialog("setup")}>Set up</Button>
           )}
         </div>
       </div>
 
       {s.trustedDevices.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-foreground">Remembered Devices</h3>
-          <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+          <h3 className="text-body font-medium text-primary">Remembered devices</h3>
+          <ul className="divide-y divide-divider rounded-control border border-divider">
             {s.trustedDevices.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                 <div className="flex min-w-0 items-center gap-3">
-                  <Monitor className="h-4 w-4 flex-none text-brown-400" />
-                  <p className="truncate text-sm">
+                  <Icon icon={ComputerIcon} size="sm" className="flex-none text-tertiary" />
+                  <p className="truncate text-body">
                     {describeUserAgent(d.label)}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-hint text-tertiary">
                       {" "}· remembered {formatDisplayDate(d.createdAt, { style: "medium" })} · until{" "}
                       {formatDisplayDate(d.expiresAt, { style: "medium" })}
                     </span>
                   </p>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={() => void forget(d.id)}>Forget</Button>
+                <Button type="button" variant="secondary" size="sm" onClick={() => void forget(d.id)}>Forget</Button>
               </li>
             ))}
           </ul>
           {s.trustedDevices.length > 1 && (
-            <Button type="button" variant="outline" size="sm" onClick={() => void forget()}>Forget All</Button>
+            <Button type="button" variant="secondary" size="sm" onClick={() => void forget()}>Forget all</Button>
           )}
         </div>
       )}
@@ -139,7 +140,7 @@ export const TwoStepSection: React.FC = () => {
       <Dialog open={dialog === "codes"} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>New Backup Codes</DialogTitle>
+            <DialogTitle>New backup codes</DialogTitle>
             <DialogDescription>The old codes no longer work.</DialogDescription>
           </DialogHeader>
           {codes && <BackupCodesSheet codes={codes} onDone={() => setDialog(null)} />}
@@ -192,7 +193,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
     <Dialog open={open} onOpenChange={(o) => !o && !busy && !codes && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Set Up Two-Step Sign-In</DialogTitle>
+          <DialogTitle>Set up two-step sign-in</DialogTitle>
           <DialogDescription>
             {codes ? "Two-step sign-in is on." : enrolment ? "Add your account to an authenticator app." : "Enter your password to begin."}
           </DialogDescription>
@@ -261,17 +262,17 @@ const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       <DialogContent className="sm:max-w-md">
         <form className="space-y-4" onSubmit={submit}>
           <DialogHeader>
-            <DialogTitle>Switch Off Two-Step Sign-In?</DialogTitle>
+            <DialogTitle>Switch off two-step sign-in?</DialogTitle>
             <DialogDescription>Your password alone will sign you in again, and remembered devices are forgotten.</DialogDescription>
           </DialogHeader>
           <CodeField id="mfa-disable-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
-          <button type="button" className="text-sm text-brown-600 underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
+          <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
             {backup ? "Use the app instead" : "Use a backup code"}
           </button>
           <FormError message={error} />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancel</Button>
-            <Button type="submit" disabled={busy || !value.trim()}>{busy ? "Switch Off…" : "Switch Off"}</Button>
+            <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>Cancel</Button>
+            <Button type="submit" disabled={busy || !value.trim()}>{busy ? "Switch off…" : "Switch off"}</Button>
           </div>
         </form>
       </DialogContent>

@@ -30,7 +30,7 @@ const applicationMock = useTemplateApplication as jest.MockedFunction<typeof use
 const mutateAsync = jest.fn();
 
 const selfTemplate = {
-  key: "review-form-self", version: 1, kind: "REVIEW_FORM" as const, title: "Self Review",
+  key: "review-form-self", version: 1, kind: "REVIEW_FORM" as const, title: "Self review",
   summary: "Look back over the period.", changelog: null, itemCount: 5, suggested: false,
   appliedVersion: null, appliedAt: null,
 };
@@ -40,7 +40,7 @@ const previewOf = (finalName: string, extra: Partial<TemplateItemDTO> = {}): Tem
   parts: [partialMock<TemplatePartDTO>({
     key: "review-form-self",
     items: [partialMock<TemplateItemDTO>({
-      ref: "form", type: "FORM", name: "Self Review", finalName, outcome: "NEW", renameTaken: false, reason: null, ...extra,
+      ref: "form", type: "FORM", name: "Self review", finalName, outcome: "NEW", renameTaken: false, reason: null, ...extra,
     })],
   })],
 });
@@ -109,18 +109,18 @@ describe("AddReviewFormDialog", () => {
 describe("AddReviewFormDialog from the library", () => {
   it("offers the library's forms beside a blank one", () => {
     renderDialog();
-    expect(screen.getByRole("radio", { name: /Blank Form/ })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByRole("radio", { name: /Self Review/ })).toHaveTextContent("Look back over the period.");
+    expect(screen.getByRole("radio", { name: /Blank form/ })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /Self review/ })).toHaveTextContent("Look back over the period.");
   });
 
   it("applies the chosen form with the preview's fingerprint and opens what it created", async () => {
     previewMock.mockReturnValue(partialMock<ReturnType<typeof useTemplatePreview>>({
-      data: previewOf("Self Review (template)"), isLoading: false,
+      data: previewOf("Self review (template)"), isLoading: false,
     }));
     mutateAsync.mockResolvedValue({ status: ActionStatus.SUCCESS, data: { id: "app-1" } });
     const { onAdded, rerender } = renderWithRerender();
 
-    fireEvent.click(screen.getByRole("radio", { name: /Self Review/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /Self review/ }));
     expect(screen.getByText(/already taken here/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/Name/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
@@ -136,10 +136,10 @@ describe("AddReviewFormDialog from the library", () => {
 
   it("does not offer Add while the library's name is taken twice", () => {
     previewMock.mockReturnValue(partialMock<ReturnType<typeof useTemplatePreview>>({
-      data: previewOf("Self Review (template)", { renameTaken: true }), isLoading: false,
+      data: previewOf("Self review (template)", { renameTaken: true }), isLoading: false,
     }));
     renderDialog();
-    fireEvent.click(screen.getByRole("radio", { name: /Self Review/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /Self review/ }));
     expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
   });
 });
@@ -154,14 +154,14 @@ const renderWithRerender = () => {
 describe("AddReviewFormDialog with a library form added before", () => {
   it("opens the company's copy instead of applying the template again", async () => {
     previewMock.mockReturnValue(partialMock<ReturnType<typeof useTemplatePreview>>({
-      data: previewOf("Self Review", { outcome: "EXISTING", existingName: "Self Review" }), isLoading: false,
+      data: previewOf("Self review", { outcome: "EXISTING", existingName: "Self review" }), isLoading: false,
     }));
     const onAdded = jest.fn();
     render(<AddReviewFormDialog open onCloseAction={jest.fn()} onAddedAction={onAdded}
-      existingForms={[{ id: "form-3", name: "Self Review" }]} />);
+      existingForms={[{ id: "form-3", name: "Self review" }]} />);
 
-    fireEvent.click(screen.getByRole("radio", { name: /Self Review/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Open It" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Self review/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Open it" }));
 
     await waitFor(() => expect(onAdded).toHaveBeenCalledWith({ id: "form-3" }));
     expect(mutateAsync).not.toHaveBeenCalled();

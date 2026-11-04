@@ -13,6 +13,9 @@ import {
   HomeRowsSkeleton,
   HomeToggle,
 } from "@/components/modules/home/components/HomeCard";
+import { cn } from "@/lib/cn";
+import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const PENDING = new Set(["PENDING", "CANCELLATION_PENDING"]);
 
@@ -24,7 +27,7 @@ const dates = (person: WhosOutPerson) =>
 /**
  * Who is away (sitting 2, H6): the reader's team and department, or everyone; today, or the rest of the week.
  * "Away" is the server's answer — only on a day the person would have worked — and so is everything said about
- * the leave: a type the reader may not know arrives without a name or a colour and reads "Time Off".
+ * the leave: a type the reader may not know arrives without a name or a colour and reads "Away" (SPEC § 13.13).
  */
 export const WhosOutWidget: React.FC = () => {
   const [range, setRange] = useState<WhosOutRange>("TODAY");
@@ -34,19 +37,19 @@ export const WhosOutWidget: React.FC = () => {
   const empty = range === "TODAY" ? "Everyone's in today." : "Everyone's in for the rest of the week.";
 
   return (
-    <HomeCard title="Who's Out" action={<HomeCardLink href="/calendar">Open Calendar</HomeCardLink>}>
+    <HomeCard title="Who's out" action={<HomeCardLink href="/calendar">Open calendar</HomeCardLink>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <HomeToggle<WhosOutAudience>
           label="Whose absences"
           value={audience}
           onChange={setAudience}
-          options={[{ value: "TEAM", label: "My Team" }, { value: "EVERYONE", label: "Everyone" }]}
+          options={[{ value: "TEAM", label: "My team" }, { value: "EVERYONE", label: "Everyone" }]}
         />
         <HomeToggle<WhosOutRange>
           label="When"
           value={range}
           onChange={setRange}
-          options={[{ value: "TODAY", label: "Today" }, { value: "WEEK", label: "This Week" }]}
+          options={[{ value: "TODAY", label: "Today" }, { value: "WEEK", label: "This week" }]}
         />
       </div>
 
@@ -57,8 +60,8 @@ export const WhosOutWidget: React.FC = () => {
       ) : audience === "TEAM" && !query.data.hasTeam ? (
         <div className="flex flex-col items-start gap-2">
           <HomeEmpty>You are not in a team or a department yet.</HomeEmpty>
-          <button type="button" className="text-sm font-medium text-brown-600 hover:underline" onClick={() => setAudience("EVERYONE")}>
-            Show Everyone
+          <button type="button" className="text-body font-medium text-secondary hover:underline" onClick={() => setAudience("EVERYONE")}>
+            Show everyone
           </button>
         </div>
       ) : query.data.people.length === 0 ? (
@@ -76,22 +79,18 @@ export const WhosOutWidget: React.FC = () => {
               aside={
                 <div className="flex shrink-0 items-center gap-2">
                   {PENDING.has(person.status) && (
-                    <span className="rounded-full border border-warning-200 bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-700">
-                      Pending
-                    </span>
+                    <StatusBadge status="pending" size="sm" />
                   )}
-                  <span className="flex items-center gap-1.5 text-xs text-brown-700">
-                    {person.leaveTypeColor && (
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: person.leaveTypeColor }} aria-hidden />
-                    )}
-                    {person.leaveTypeName ?? "Time Off"}
+                  <span className="flex items-center gap-1.5 text-hint text-secondary">
+                    <span aria-hidden className={cn("size-2 rounded-pill", TAG_CLASSES[toTagColor(person.leaveTypeColor)].dot)} />
+                    {person.leaveTypeName ?? "Away"}
                   </span>
                 </div>
               }
             />
           ))}
           {query.data.more > 0 && (
-            <p className="pt-1 text-xs text-muted-foreground">And {query.data.more} more on the calendar.</p>
+            <p className="pt-1 text-hint text-tertiary">And {query.data.more} more on the calendar.</p>
           )}
         </div>
       )}

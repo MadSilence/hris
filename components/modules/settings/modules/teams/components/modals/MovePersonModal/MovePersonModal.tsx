@@ -9,10 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import type { TeamMoveMode } from "@/components/modules/settings/modules/teams/hooks/useMovePersonToTeam/useMovePersonToTeam";
 
 type Props = {
@@ -60,19 +60,19 @@ export function MovePersonModal({
 
         <div className="space-y-4 py-2">
           {isRemoval ? (
-            <p className="text-sm text-brown-600">
+            <p className="text-body text-secondary">
               {personName} will be removed from {sourceName ?? "this team"}. Other team memberships
               stay as they are.
             </p>
           ) : (
             <RadioGroup value={mode} onValueChange={(v) => onModeChange(v as TeamMoveMode)}>
-              <div className="flex items-start gap-2.5 rounded-lg border border-brown-200 p-3">
+              <div className="flex items-start gap-2.5 rounded-control border border-divider p-3">
                 <RadioGroupItem value="move" id="move-person-move" className="mt-0.5" />
                 <div>
                   <Label htmlFor="move-person-move" className="cursor-pointer">
                     Move to {targetName}
                   </Label>
-                  <p className="mt-0.5 text-xs text-brown-500">
+                  <p className="mt-0.5 text-hint text-tertiary">
                     {sourceName
                       ? `Removes ${personName} from ${sourceName} and adds them to ${targetName}.`
                       : `Adds ${personName} to ${targetName}.`}
@@ -80,13 +80,13 @@ export function MovePersonModal({
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 rounded-lg border border-brown-200 p-3">
+              <div className="flex items-start gap-2.5 rounded-control border border-divider p-3">
                 <RadioGroupItem value="add" id="move-person-add" className="mt-0.5" />
                 <div>
                   <Label htmlFor="move-person-add" className="cursor-pointer">
                     Add to {targetName} as well
                   </Label>
-                  <p className="mt-0.5 text-xs text-brown-500">
+                  <p className="mt-0.5 text-hint text-tertiary">
                     Keeps every current team; {personName} ends up on both.
                   </p>
                 </div>
@@ -98,7 +98,7 @@ export function MovePersonModal({
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
           <Button type="button" onClick={onConfirm} disabled={isPending}>

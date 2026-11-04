@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { NodRing } from "@/components/desact/nod";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
@@ -19,6 +19,10 @@ import { PersonalPreferencesForm } from "@/components/modules/firstRun/component
 import { completeWelcomeAction } from "@/components/modules/firstRun/actions";
 import { WELCOME_QK, useWelcome } from "@/components/modules/firstRun/hooks";
 import type { Attribute } from "@/models/attribute/Attribute";
+import { Stepper } from "@/components/ui/Stepper";
+import { Illustration } from "@/components/illustrations/Illustration";
+
+const WELCOME_STEPS = ["About you", "Your preferences"] as const;
 
 const ATTR_PREFIX = "attr:";
 
@@ -94,7 +98,7 @@ export const WelcomeContainer: React.FC = () => {
   if (!welcome.data || groups.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <NodRing size="md" label="" className="text-tertiary" />
       </div>
     );
   }
@@ -120,17 +124,19 @@ export const WelcomeContainer: React.FC = () => {
   };
 
   return (
+    // The first welcome is already in the company's brand (SPEC § 2): its accent, the Onboarding illustration.
     <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-8 px-4 py-16">
-      <header className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Step {step + 1} of 2</p>
-        <h1 className="text-3xl font-semibold leading-tight text-foreground">
+      <header className="flex flex-col gap-4">
+        {step === 0 && <Illustration scene="onboarding" size="m" className="self-start" />}
+        <Stepper steps={WELCOME_STEPS} current={step} />
+        <h1 className="text-greeting text-primary">
           {step === 0
             ? firstName
               ? `Welcome, ${firstName}`
               : "Welcome"
             : "How would you like things shown?"}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-body text-secondary">
           {step === 0
             ? editable.length
               ? "A photo so colleagues can put a face to your name, and anything of yours that is still blank."
@@ -153,11 +159,11 @@ export const WelcomeContainer: React.FC = () => {
               // Not an error and not an empty state to apologise for: there is genuinely nothing this
               // person owns about themselves to fill in, so the step is the photo. The sentence is
               // true for everybody — the owner of the company is not "your HR team".
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body text-tertiary">
                 Everything else about you lives on your profile, where you can change it any time.
               </p>
             ) : (
-              <div className="divide-y divide-brown-100">
+              <div className="divide-y divide-divider">
                 {editable.map((attribute) => (
                   <PersonalInfoAttributesRow
                     key={attribute.id}
@@ -199,9 +205,8 @@ export const WelcomeContainer: React.FC = () => {
         </Button>
 
         {step === 0 ? (
-          <Button key="next" type="button" onClick={saveStepOne} disabled={busy}>
-            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            Next
+          <Button key="next" type="button" onClick={saveStepOne} loading={busy}>
+            {busy ? "Saving…" : "Continue"}
           </Button>
         ) : (
           <Button key="finish" type="submit" form="welcome-preferences">

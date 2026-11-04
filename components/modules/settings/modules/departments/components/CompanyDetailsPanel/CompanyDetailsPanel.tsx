@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Building2 } from "lucide-react";
+import { Building03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 type Props = {
   name: string;
@@ -14,32 +15,32 @@ export function CompanyDetailsPanel({ name, logo, topLevelCount, totalCount }: P
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-xl bg-brown-100 text-brown-600">
+        <div className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-popover bg-mist text-secondary">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={logo} alt="" className="h-full w-full object-cover" />
           ) : (
-            <Building2 className="h-5 w-5" />
+            <Icon icon={Building03Icon} />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-brown-400">Company</p>
-          <h2 className="truncate text-lg font-semibold text-brown-900">{name}</h2>
+          <p className="text-hint font-medium text-tertiary">Company</p>
+          <h2 className="truncate text-section-title text-primary">{name}</h2>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-brown-200 p-3.5">
-          <p className="mb-1 text-xs text-brown-500">Top-level departments</p>
-          <p className="text-2xl font-semibold leading-none text-brown-900">{topLevelCount}</p>
+        <div className="rounded-control border border-divider p-3.5">
+          <p className="mb-1 text-hint text-tertiary">Top-level departments</p>
+          <p className="text-page-title leading-none text-primary">{topLevelCount}</p>
         </div>
-        <div className="rounded-lg border border-brown-200 p-3.5">
-          <p className="mb-1 text-xs text-brown-500">All departments</p>
-          <p className="text-2xl font-semibold leading-none text-brown-900">{totalCount}</p>
+        <div className="rounded-control border border-divider p-3.5">
+          <p className="mb-1 text-hint text-tertiary">All departments</p>
+          <p className="text-page-title leading-none text-primary">{totalCount}</p>
         </div>
       </div>
 
-      <p className="text-sm leading-relaxed text-brown-500">
+      <p className="text-body leading-relaxed text-tertiary">
         Select a department on the chart to view and edit its details. Use the expand controls on each
         card to reveal sub-departments.
       </p>

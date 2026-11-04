@@ -40,12 +40,12 @@ describe("PublicHolidayEditedMarker", () => {
 });
 
 describe("PublicHolidayOverrideRowActions", () => {
-  it("offers Revert to Provider from the row's menu", async () => {
+  it("offers Revert to provider from the row's menu", async () => {
     const onRevert = jest.fn();
     render(<PublicHolidayOverrideRowActions override={override()} onRevert={onRevert} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Holiday actions" }));
-    await userEvent.click(await screen.findByRole("menuitem", { name: /Revert to Provider/ }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: /Revert to provider/ }));
 
     expect(onRevert).toHaveBeenCalledWith(expect.objectContaining({ id: "o-1" }));
   });
@@ -54,14 +54,14 @@ describe("PublicHolidayOverrideRowActions", () => {
 describe("RemovedProviderDays", () => {
   const removed = override({ id: "o-2", holidayId: null, providerName: "Summer Bank Holiday", providerHolidayDate: "2026-08-31", providerEndDate: "2026-08-31" });
 
-  it("lists the provider's days the company removed, each with Revert to Provider", async () => {
+  it("lists the provider's days the company removed, each with Revert to provider", async () => {
     const onRevert = jest.fn();
     render(<RemovedProviderDays overrides={[removed]} canRevert onRevert={onRevert} />);
 
-    expect(screen.getByRole("heading", { name: "Removed Provider Days" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Removed provider days" })).toBeInTheDocument();
     expect(screen.getByText("Summer Bank Holiday")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: /Revert to Provider/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Revert to provider/ }));
     expect(onRevert).toHaveBeenCalledWith(removed);
   });
 

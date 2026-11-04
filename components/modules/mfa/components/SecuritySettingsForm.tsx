@@ -3,10 +3,10 @@
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -77,7 +77,7 @@ export const SecuritySettingsForm: React.FC = () => {
   return (
     <div className="max-w-xl space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="security-mfa-required">Two-Step Sign-In Required For</Label>
+        <Label htmlFor="security-mfa-required">Two-step sign-in required for</Label>
         <Select value={s.mfaRequired} onValueChange={(v) => setDraft((d) => ({ ...d, mfaRequired: v as MfaRequirement }))}>
           <SelectTrigger id="security-mfa-required"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -86,7 +86,7 @@ export const SecuritySettingsForm: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-hint text-tertiary">
           Administrators are System Owners and everyone who can manage settings, block people or act as somebody
           else — {s.privilegedCount} {s.privilegedCount === 1 ? "person" : "people"} today.
           {settings.data!.requiredWithoutFactor > 0 &&
@@ -96,7 +96,7 @@ export const SecuritySettingsForm: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="security-remember">Remember a Device For</Label>
+        <Label htmlFor="security-remember">Remember a device for</Label>
         <Select value={String(s.mfaRememberDays)} onValueChange={(v) => setDraft((d) => ({ ...d, mfaRememberDays: Number(v) }))}>
           <SelectTrigger id="security-remember"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -105,11 +105,11 @@ export const SecuritySettingsForm: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">System Owners are always asked for the code.</p>
+        <p className="text-hint text-tertiary">System Owners are always asked for the code.</p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="security-idle">Sign Out After Being Unused For</Label>
+        <Label htmlFor="security-idle">Sign out after being unused for</Label>
         <Select value={String(s.sessionIdleMinutes)} onValueChange={(v) => setDraft((d) => ({ ...d, sessionIdleMinutes: Number(v) }))}>
           <SelectTrigger id="security-idle"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -118,14 +118,14 @@ export const SecuritySettingsForm: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">However active, a session ends after 30 days.</p>
+        <p className="text-hint text-tertiary">However active, a session ends after 30 days.</p>
       </div>
 
       <FormError message={error} />
       <div className="flex gap-2">
         <Button type="button" onClick={save} disabled={!dirty || busy}>{busy ? "Saving…" : "Save"}</Button>
         {dirty && (
-          <Button type="button" variant="outline" onClick={() => setDraft({})} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={() => setDraft({})} disabled={busy}>Cancel</Button>
         )}
       </div>
     </div>

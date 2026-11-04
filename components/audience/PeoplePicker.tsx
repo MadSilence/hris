@@ -1,23 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { Filter, Trash2, Users } from "lucide-react";
+import { Delete02Icon, FilterHorizontalIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+} from "@/components/desact/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/public/desact/src/components/ui/popover";
+} from "@/components/desact/popover";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
@@ -42,7 +43,7 @@ export const rolesColumn: PeopleColumn = {
     return (
       <div className="flex flex-wrap gap-1">
         {roles.map((r) => (
-          <Badge key={r.id} variant="secondary" className="font-normal">
+          <Badge key={r.id} variant="neutral" className="font-normal">
             {r.name}
           </Badge>
         ))}
@@ -62,7 +63,7 @@ const orgRefColumn = (key: string, header: string): PeopleColumn => ({
   render: (u) => {
     const ref = orgRefOf(u, key);
     return ref ? (
-      <Badge variant="secondary" className="font-normal">
+      <Badge variant="neutral" className="font-normal">
         {ref.name}
       </Badge>
     ) : (
@@ -88,7 +89,7 @@ export const teamColumn: PeopleColumn = {
     return (
       <div className="flex flex-wrap gap-1">
         {teams.map((t) => (
-          <Badge key={t.id} variant="secondary" className="font-normal">
+          <Badge key={t.id} variant="neutral" className="font-normal">
             {t.name}
           </Badge>
         ))}
@@ -107,7 +108,7 @@ export const calendarColumn: PeopleColumn = {
     return (
       <div className="flex flex-wrap gap-1">
         {calendars.map((c) => (
-          <Badge key={c.id} variant="secondary" className="font-normal">
+          <Badge key={c.id} variant="neutral" className="font-normal">
             {c.name}
           </Badge>
         ))}
@@ -235,11 +236,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
         <div className="flex items-center gap-1.5">
           <Popover open={open} onOpenChange={openChange}>
             <PopoverTrigger asChild>
-              <Button type="button" variant="outline" className="gap-1.5">
-                <Filter className="h-4 w-4" />
+              <Button type="button" variant="secondary" className="gap-1.5">
+                <Icon icon={FilterHorizontalIcon} size="sm" />
                 Filter
                 {filterCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 min-w-5 justify-center px-1 font-normal">
+                  <Badge variant="neutral" className="ml-1 h-5 min-w-5 justify-center px-1 font-normal">
                     {filterCount}
                   </Badge>
                 )}
@@ -255,7 +256,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 includeInactive={includeInactive}
                 onIncludeInactiveChange={onIncludeInactiveChange}
               />
-              <div className="mt-3 flex items-center justify-end gap-2 border-t border-brown-100 pt-3">
+              <div className="mt-3 flex items-center justify-end gap-2 border-t border-divider pt-3">
                 <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
                   Reset
                 </Button>
@@ -269,12 +270,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
           {filterCount > 0 && (
             <Button type="button"
               variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-danger-600 hover:text-danger-700"
+              size="icon" className="text-danger-text hover:text-status-declined-text"
               aria-label="Clear all filters"
               onClick={clearAll}
             >
-              <Trash2 className="h-4 w-4" />
+              <Icon icon={Delete02Icon} size="sm" />
             </Button>
           )}
         </div>
@@ -285,8 +285,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       {/* Fixed-height table area so the modal keeps a constant size */}
       <div className="h-[380px] overflow-y-auto">
         {resolve.isLoading || matched.length > 0 ? (
-          <table className="w-full caption-bottom text-sm">
-            <TableHeader className="sticky top-0 z-10 bg-white [&_tr]:border-brown-200">
+          <table className="w-full caption-bottom text-body">
+            <TableHeader className="sticky top-0 z-10 bg-card [&_tr]:border-divider">
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox
@@ -307,7 +307,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             <TableBody>
               {resolve.isLoading && matched.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={colCount} className="py-6 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={colCount} className="py-6 text-center text-body text-tertiary">
                     Loading…
                   </TableCell>
                 </TableRow>
@@ -318,8 +318,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 return (
                 <TableRow
                   key={u.id}
-                  className={`border-brown-200 [&_td]:py-2 ${
-                    unavailable ? "text-muted-foreground" : "cursor-pointer hover:bg-brown-50"
+                  className={`border-divider [&_td]:py-2 ${
+                    unavailable ? "text-tertiary" : "cursor-pointer hover:bg-subtle"
                   }`}
                   onClick={unavailable ? undefined : () => onToggle(u)}
                 >
@@ -336,11 +336,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                     <div className="flex items-center gap-2.5">
                       <Avatar className="h-7 w-7 shrink-0">
                         {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt={fullName(u)} /> : null}
-                        <AvatarFallback className="text-[11px]">{initials(u)}</AvatarFallback>
+                        <AvatarFallback className="text-hint">{initials(u)}</AvatarFallback>
                       </Avatar>
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium">{fullName(u)}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="block truncate text-body font-medium">{fullName(u)}</span>
+                        <span className="block truncate text-hint text-tertiary">
                           {unavailable ? `${u.email ?? ""}${u.email ? " · " : ""}${unavailable}` : u.email}
                         </span>
                       </span>
@@ -358,7 +358,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 <TableRow>
                   <TableCell colSpan={colCount} className="py-2 text-center">
                     <Button type="button"
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => resolve.fetchNextPage()}
                       disabled={resolve.isFetchingNextPage}
@@ -380,11 +380,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
 const EmptyState: React.FC<{ hasFilters: boolean }> = ({ hasFilters }) => (
   <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50 text-brown-400">
-      <Users className="h-6 w-6" />
+    <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
+      <Icon icon={UserGroupIcon} size="lg" />
     </div>
-    <p className="text-sm font-medium">No people found</p>
-    <p className="max-w-[280px] text-xs text-muted-foreground">
+    <p className="text-body font-medium">No people found</p>
+    <p className="max-w-[280px] text-hint text-tertiary">
       {hasFilters
         ? "Nobody matches the current filters or search. Try loosening them."
         : "There are no people to show yet."}

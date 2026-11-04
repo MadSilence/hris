@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
@@ -55,7 +56,7 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose Peers</DialogTitle>
+          <DialogTitle>Choose peers</DialogTitle>
           <DialogDescription>
             Colleagues who review {person.subject.name}. They have {person.peers} now; this cycle asks for
             {person.peerMin != null ? ` ${person.peerMin}` : ""}–{person.peerMax ?? ""}. Each is asked at once and gets a task.
@@ -63,11 +64,11 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
         </DialogHeader>
         <div className="space-y-2">
           {picked.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded-lg border border-brown-100 px-3 py-1.5 text-sm">
+            <div key={p.id} className="flex items-center justify-between rounded-control border border-divider px-3 py-1.5 text-body">
               {nameOf(p)}
-              <button type="button" aria-label={`Remove ${nameOf(p)}`} className="text-muted-foreground hover:text-brown-900"
+              <button type="button" aria-label={`Remove ${nameOf(p)}`} className="text-tertiary hover:text-primary"
                 onClick={() => setPicked(picked.filter((x) => x.id !== p.id))}>
-                <X className="h-4 w-4" />
+                <Icon icon={Cancel01Icon} size="sm" />
               </button>
             </div>
           ))}
@@ -75,13 +76,13 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
             <UserPickerField value={null} placeholder="Add a person"
               onChange={(u) => u && !picked.some((x) => x.id === u.id) && u.id !== person.subject.userId && setPicked([...picked, u])} />
           )}
-          {room <= 0 && <p className="text-sm text-muted-foreground">This person already has the most peers the cycle allows.</p>}
+          {room <= 0 && <p className="text-body text-tertiary">This person already has the most peers the cycle allows.</p>}
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
           <Button type="button" onClick={() => void save()} disabled={busy || picked.length === 0}>
-            {busy ? "Asking…" : "Ask Them"}
+            {busy ? "Asking…" : "Ask them"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -123,7 +124,7 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Hand to Someone Else</DialogTitle>
+          <DialogTitle>Hand to someone else</DialogTitle>
           <DialogDescription>
             The {REVIEW_KIND_LABELS[target.kind].toLowerCase()} of {target.subjectName}, now with {target.reviewerName}. Anything
             already typed goes with it.
@@ -131,13 +132,13 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-1.5">
-          <RequiredLabel required>New Reviewer</RequiredLabel>
+          <RequiredLabel required>New reviewer</RequiredLabel>
           <UserPickerField value={picked} onChange={setPicked} />
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy || !picked}>{busy ? "Handing On…" : "Hand On"}</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" onClick={() => void save()} disabled={busy || !picked}>{busy ? "Handing on…" : "Hand on"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -189,20 +190,20 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Dates</DialogTitle>
+          <DialogTitle>Edit dates</DialogTitle>
           <DialogDescription>Open reviews take the new due date, and their reminders move with it.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           {cycle.kinds.map((k) => (
             <div key={k.kind} className="grid grid-cols-[1fr_1fr_1fr] items-end gap-2">
-              <span className="pb-2 text-sm font-medium text-brown-900">{REVIEW_KIND_LABELS[k.kind]}</span>
+              <span className="pb-2 text-body font-medium text-primary">{REVIEW_KIND_LABELS[k.kind]}</span>
               <div className="space-y-1">
-                <RequiredLabel htmlFor={`dates-${k.kind}-opens`}>Opens On</RequiredLabel>
+                <RequiredLabel htmlFor={`dates-${k.kind}-opens`}>Opens on</RequiredLabel>
                 <DatePicker id={`dates-${k.kind}-opens`} value={dates[k.kind]?.opensOn ?? ""} clearable
                   onChange={(v) => setDates({ ...dates, [k.kind]: { ...dates[k.kind], opensOn: v } })} />
               </div>
               <div className="space-y-1">
-                <RequiredLabel htmlFor={`dates-${k.kind}-due`} required>Due On</RequiredLabel>
+                <RequiredLabel htmlFor={`dates-${k.kind}-due`} required>Due on</RequiredLabel>
                 <DatePicker id={`dates-${k.kind}-due`} value={dates[k.kind]?.dueOn ?? ""}
                   onChange={(v) => setDates({ ...dates, [k.kind]: { ...dates[k.kind], dueOn: v } })} />
               </div>
@@ -210,14 +211,14 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
           ))}
           {releases && (
             <div className="max-w-xs space-y-1">
-              <RequiredLabel htmlFor="dates-release" required>Release Date</RequiredLabel>
+              <RequiredLabel htmlFor="dates-release" required>Release date</RequiredLabel>
               <DatePicker id="dates-release" value={release} onChange={setRelease} />
             </div>
           )}
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
           <Button type="button" onClick={() => void save()} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         </DialogFooter>
       </DialogContent>

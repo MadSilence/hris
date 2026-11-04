@@ -1,22 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Copy } from "lucide-react";
+import { Copy01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Textarea } from "@/components/desact/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -43,11 +44,11 @@ const MODE_LABEL: Record<IdentityConnectionDTO["ssoMode"], string> = {
 
 const CopyField: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <div className="space-y-1">
-    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="text-hint text-tertiary">{label}</p>
     <div className="flex items-center gap-2">
-      <code className="min-w-0 flex-1 truncate rounded bg-brown-50 px-2 py-1.5 text-xs">{value}</code>
-      <Button type="button" variant="outline" size="icon" aria-label={`Copy ${label}`} onClick={() => void navigator.clipboard?.writeText(value)}>
-        <Copy className="h-4 w-4" />
+      <code className="min-w-0 flex-1 truncate rounded-tag bg-subtle px-2 py-1.5 text-hint">{value}</code>
+      <Button type="button" variant="secondary" size="icon" aria-label={`Copy ${label}`} onClick={() => void navigator.clipboard?.writeText(value)}>
+        <Icon icon={Copy01Icon} size="sm" />
       </Button>
     </div>
   </div>
@@ -132,12 +133,12 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-medium text-foreground">Single Sign-On</h2>
+        <h2 className="text-section-title text-primary">Single sign-on</h2>
         <StatusBadge status={c.ssoMode === "OFF" ? "inactive" : "active"} label={c.ssoMode === "OFF" ? "Off" : c.ssoMode === "REQUIRED" ? "Required" : "Optional"} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="idp-provider">Identity Provider</Label>
+          <Label htmlFor="idp-provider">Identity provider</Label>
           <Select value={draft.provider} onValueChange={(v) => set("provider", v as typeof draft.provider)}>
             <SelectTrigger id="idp-provider"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -152,7 +153,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <Select value={draft.protocol} onValueChange={(v) => set("protocol", v as typeof draft.protocol)}>
             <SelectTrigger id="idp-protocol"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="OIDC">OpenID Connect</SelectItem>
+              <SelectItem value="OIDC">OpenID connect</SelectItem>
               <SelectItem value="SAML">SAML 2.0</SelectItem>
             </SelectContent>
           </Select>
@@ -165,7 +166,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <div className="space-y-2">
             <Label htmlFor="idp-issuer">Issuer</Label>
             <Input id="idp-issuer" value={draft.issuer} onChange={(e) => set("issuer", e.currentTarget.value)} />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               {draft.provider === "ENTRA"
                 ? "Your tenant's own issuer, https://login.microsoftonline.com/<tenant id>/v2.0 — never “common”."
                 : "For Okta, https://<your org>.okta.com or an authorization server's address."}
@@ -177,7 +178,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               <Input id="idp-client-id" value={draft.clientId} onChange={(e) => set("clientId", e.currentTarget.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="idp-client-secret">Client Secret</Label>
+              <Label htmlFor="idp-client-secret">Client secret</Label>
               <Input
                 id="idp-client-secret"
                 type="password"
@@ -185,35 +186,35 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
                 value={draft.clientSecret}
                 onChange={(e) => set("clientSecret", e.currentTarget.value)}
               />
-              <p className="text-xs text-muted-foreground">{c.clientSecretSet ? "Set. Type a new one to replace it." : "Not set."}</p>
+              <p className="text-hint text-tertiary">{c.clientSecretSet ? "Set. Type a new one to replace it." : "Not set."}</p>
             </div>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
           <CopyField label="Entity ID — paste into the identity provider" value={c.samlEntityId} />
-          <CopyField label="Assertion Consumer Service URL" value={c.samlAcsUrl} />
+          <CopyField label="Assertion consumer service URL" value={c.samlAcsUrl} />
           <div className="space-y-2">
-            <Label htmlFor="idp-metadata">Identity Provider Metadata URL</Label>
+            <Label htmlFor="idp-metadata">Identity provider metadata URL</Label>
             <Input id="idp-metadata" value={draft.samlMetadataUrl} onChange={(e) => set("samlMetadataUrl", e.currentTarget.value)} />
-            <p className="text-xs text-muted-foreground">Read on save for the entity ID, sign-in address and signing certificates.</p>
+            <p className="text-hint text-tertiary">Read on save for the entity ID, sign-in address and signing certificates.</p>
           </div>
           {!draft.samlMetadataUrl && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="idp-entity">IdP Entity ID</Label>
+                  <Label htmlFor="idp-entity">IdP entity ID</Label>
                   <Input id="idp-entity" value={draft.samlIdpEntityId} onChange={(e) => set("samlIdpEntityId", e.currentTarget.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="idp-sso">IdP Sign-In URL</Label>
+                  <Label htmlFor="idp-sso">IdP sign-in URL</Label>
                   <Input id="idp-sso" value={draft.samlIdpSsoUrl} onChange={(e) => set("samlIdpSsoUrl", e.currentTarget.value)} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="idp-certs">Signing Certificates</Label>
+                <Label htmlFor="idp-certs">Signing certificates</Label>
                 <Textarea id="idp-certs" rows={4} value={draft.samlIdpCertificates} onChange={(e) => set("samlIdpCertificates", e.currentTarget.value)} />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-hint text-tertiary">
                   {c.samlCertificatesSet ? "Set. Paste new PEM certificates to replace them — two during a rotation." : "PEM, one or two."}
                 </p>
               </div>
@@ -224,7 +225,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="idp-mode">Single Sign-On</Label>
+          <Label htmlFor="idp-mode">Single sign-on</Label>
           <Select value={draft.ssoMode} onValueChange={(v) => set("ssoMode", v as typeof draft.ssoMode)}>
             <SelectTrigger id="idp-mode"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -234,14 +235,14 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
             </SelectContent>
           </Select>
           {draft.ssoMode === "REQUIRED" && c.ssoMode !== "REQUIRED" && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Saving signs out everyone who signed in with a password, except the System Owners. Every System Owner needs
               two-step sign-in first.
             </p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="idp-hours">A Single Sign-On Session Lasts</Label>
+          <Label htmlFor="idp-hours">A single sign-on session lasts</Label>
           <Select value={String(draft.ssoSessionHours)} onValueChange={(v) => set("ssoSessionHours", Number(v))}>
             <SelectTrigger id="idp-hours"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -256,7 +257,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       <FormError message={error} />
       <div className="flex gap-2">
         <Button type="button" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
-        {c.configured && <Button type="button" variant="outline" onClick={test}>Test Connection</Button>}
+        {c.configured && <Button type="button" variant="secondary" onClick={test}>Test connection</Button>}
       </div>
     </section>
   );
@@ -292,13 +293,13 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-medium text-foreground">Provisioning (SCIM)</h2>
+        <h2 className="text-section-title text-primary">Provisioning (SCIM)</h2>
         <div className="flex items-center gap-2">
           <Checkbox id="scim-on" checked={c.scimEnabled} onCheckedChange={(v) => void toggle(Boolean(v))} />
           <Label htmlFor="scim-on">Let the identity provider link people and push groups</Label>
         </div>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body text-tertiary">
         The identity provider links people already here by email and can block or unblock them; it never adds or
         deletes a person, or changes their name or email.
       </p>
@@ -308,16 +309,16 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           {tokens.isLoading ? (
             <Skeleton className="h-16 w-full" />
           ) : (
-            <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
-              {(tokens.data ?? []).length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No tokens yet.</li>}
+            <ul className="divide-y divide-divider rounded-control border border-divider">
+              {(tokens.data ?? []).length === 0 && <li className="px-4 py-3 text-body text-tertiary">No tokens yet.</li>}
               {(tokens.data ?? []).map((t) => (
                 <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <code className="text-sm">{t.publicId}</code>
+                      <code className="text-body">{t.publicId}</code>
                       {t.revokedAt ? <StatusBadge status="archived" label="Revoked" /> : <StatusBadge status="active" label="Live" />}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-hint text-tertiary">
                       Issued {formatDisplayDate(t.createdAt, { style: "medium" })} ·{" "}
                       {t.expiresAt ? `expires ${formatDisplayDate(t.expiresAt, { style: "medium" })}` : "no expiry"} ·{" "}
                       {t.lastUsedAt ? `last used ${formatDisplayDate(t.lastUsedAt, { style: "medium" })}` : "never used"}
@@ -327,7 +328,7 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
                   {!t.revokedAt && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={async () => {
                         const res = await revokeScimTokenAction(t.id);
@@ -342,9 +343,9 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               ))}
             </ul>
           )}
-          <Button type="button" variant="outline" disabled={live.length >= 2} onClick={() => setIssuing(true)}
+          <Button type="button" variant="secondary" disabled={live.length >= 2} onClick={() => setIssuing(true)}
             title={live.length >= 2 ? "Two tokens are live: revoke one first" : undefined}>
-            Issue Token
+            Issue token
           </Button>
         </>
       )}
@@ -352,7 +353,7 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       <Dialog open={issuing} onOpenChange={(o) => { if (!o) { setIssuing(false); setSecret(null); setError(null); } }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{secret ? "Copy the Token Now" : "Issue a Provisioning Token"}</DialogTitle>
+            <DialogTitle>{secret ? "Copy the token now" : "Issue a provisioning token"}</DialogTitle>
             <DialogDescription>
               {secret
                 ? "It is shown this once and never again. Paste it into the identity provider, test the connection, then revoke the old token."
@@ -417,8 +418,8 @@ const GroupsPanel: React.FC = () => {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-medium text-foreground">Groups</h2>
-      <p className="text-sm text-muted-foreground">
+      <h2 className="text-section-title text-primary">Groups</h2>
+      <p className="text-body text-tertiary">
         Groups the identity provider pushed, and the roles their members hold. A role given here is the identity
         provider&apos;s: it goes when the person leaves the group, unless it was also given by hand.
       </p>
@@ -427,20 +428,20 @@ const GroupsPanel: React.FC = () => {
       ) : groups.error ? (
         <ErrorState error={groups.error} />
       ) : (groups.data ?? []).length === 0 ? (
-        <p className="text-sm text-muted-foreground">No groups pushed yet.</p>
+        <p className="text-body text-tertiary">No groups pushed yet.</p>
       ) : (
-        <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+        <ul className="divide-y divide-divider rounded-control border border-divider">
           {(groups.data ?? []).map((g) => (
             <li key={g.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
               <div className="min-w-0">
-                <p className="text-sm font-medium">{g.displayName}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-body font-medium">{g.displayName}</p>
+                <p className="text-hint text-tertiary">
                   {g.memberCount} {g.memberCount === 1 ? "member" : "members"} ·{" "}
                   {g.roles.length ? g.roles.map((r) => r.name).join(", ") : "no roles"}
                   {g.roles.some((r) => r.grantsAdministration) && " · gives IT the right to appoint administrators"}
                 </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => open(g)}>Roles</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => open(g)}>Roles</Button>
             </li>
           ))}
         </ul>
@@ -474,10 +475,10 @@ const GroupsPanel: React.FC = () => {
               </li>
             ))}
           </ul>
-          <p className="text-xs text-muted-foreground">The System Owner and default roles are never given by a group.</p>
+          <p className="text-hint text-tertiary">The System Owner and default roles are never given by a group.</p>
           <FormError message={error} />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setEditing(null)} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={() => setEditing(null)} disabled={busy}>Cancel</Button>
             <Button type="button" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
           </div>
         </DialogContent>

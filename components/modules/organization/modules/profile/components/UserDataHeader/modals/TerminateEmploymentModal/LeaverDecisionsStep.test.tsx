@@ -14,7 +14,7 @@ type PickerProps = { id?: string; value: { id: string } | null; onChange: (u: { 
 jest.mock("@/components/modules/settings/shared/UserPickerField/UserPickerField", () => ({
   UserPickerField: ({ id, value, onChange }: PickerProps) => (
     <button type="button" data-test={`picker-${id}`} onClick={() => onChange({ id: "erin", firstName: "Erin" })}>
-      {value ? `picked ${value.id}` : "Reassign To…"}
+      {value ? `picked ${value.id}` : "Reassign to…"}
     </button>
   ),
 }));
@@ -108,7 +108,7 @@ describe("LeaverDecisionsStep", () => {
     render(<LeaverDecisionsStep fullName="Julian" decisions={withProcesses} value={NO_REASSIGNMENT} onChange={jest.fn()} />);
 
     const group = screen.getByTestId("leaver-group-processesTo");
-    expect(within(group).getByText("Processes They Manage (1)")).toBeInTheDocument();
+    expect(within(group).getByText("Processes they manage (1)")).toBeInTheDocument();
     expect(within(group).getByText("Onboarding of Abigail Young")).toBeInTheDocument();
     expect(within(group).getByText(/Unchosen, they go to Mia Manager, their manager/)).toBeInTheDocument();
   });

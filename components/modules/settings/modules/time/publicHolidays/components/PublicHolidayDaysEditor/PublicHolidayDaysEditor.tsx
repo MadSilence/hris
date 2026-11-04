@@ -1,10 +1,11 @@
 "use client";
 
 import { FC } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import {
   Select,
@@ -12,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { PublicHolidayDayPart } from "@/api/modules/publicHolidays/holidays/dto";
 import {
   TableBody,
@@ -20,7 +21,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
+import { FieldError } from "@/components/desact/field-error";
 
 export type DraftHoliday = {
   localId: string;
@@ -50,18 +52,15 @@ type Props = {
   disabled?: boolean;
 };
 
-const FieldError: FC<{ message?: string }> = ({ message }) =>
-  message ? <p className="mt-1 text-xs text-destructive">{message}</p> : null;
-
 /**
  * Rows read as a table, not as a wall of boxes: every field hides its border until you point at it
  * (or focus it — you still have to see where you are typing). Invalid fields keep their border, or
  * the error message below would have nothing to point at.
  */
 const QUIET_FIELD =
-  "border-transparent bg-transparent hover:border-brown-300 focus-visible:border-ring " +
+  "border-transparent bg-transparent hover:border-field focus-visible:border-accent " +
   // The date field hands focus to its popover, so the border needs the open state to hold on to.
-  "data-[state=open]:border-brown-400 aria-invalid:border-destructive data-[invalid]:border-destructive";
+  "data-[state=open]:border-strong aria-invalid:border-danger data-[invalid]:border-danger";
 
 export const PublicHolidayDaysEditor: FC<Props> = ({
   holidays,
@@ -101,12 +100,12 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
   return (
     <div className="space-y-2">
       {holidays.length > 0 && (
-        <table className="w-full caption-bottom table-fixed text-sm">
+        <table className="w-full caption-bottom table-fixed text-body">
           {/* The caller owns the scroll container, so the header can stick to its top. */}
-          <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+          <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
             <TableRow>
               <TableHead className="w-44">Date</TableHead>
-              <TableHead className="w-44">End Date</TableHead>
+              <TableHead className="w-44">End date</TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="w-32">Length</TableHead>
               <TableHead className="w-12">
@@ -120,7 +119,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
               const rowErrors = errors[holiday.localId];
 
               return (
-                <TableRow key={holiday.localId} className="border-brown-100 align-top">
+                <TableRow key={holiday.localId} className="border-divider align-top">
                   <TableCell className="py-1.5 pr-2">
                     <DatePicker
                       value={holiday.holidayDate}
@@ -132,7 +131,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       invalid={!!rowErrors?.holidayDate}
                       className={QUIET_FIELD}
                     />
-                    <FieldError message={rowErrors?.holidayDate} />
+                    <FieldError>{rowErrors?.holidayDate}</FieldError>
                   </TableCell>
 
                   <TableCell className="py-1.5 pr-2">
@@ -145,7 +144,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       invalid={!!rowErrors?.endDate}
                       className={QUIET_FIELD}
                     />
-                    <FieldError message={rowErrors?.endDate} />
+                    <FieldError>{rowErrors?.endDate}</FieldError>
                   </TableCell>
 
                   <TableCell className="py-1.5 pr-2">
@@ -159,7 +158,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       aria-invalid={!!rowErrors?.name}
                       className={QUIET_FIELD}
                     />
-                    <FieldError message={rowErrors?.name} />
+                    <FieldError>{rowErrors?.name}</FieldError>
                   </TableCell>
 
                   <TableCell className="py-1.5 pr-2">
@@ -186,9 +185,9 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       disabled={disabled}
                       onClick={() => handleRemove(holiday.localId)}
                       aria-label="Remove holiday"
-                      className="text-[var(--color-text-tertiary)] hover:text-danger-600"
+                      className="text-tertiary hover:text-danger-text"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Icon icon={Delete02Icon} size="sm" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -200,14 +199,14 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
 
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         size="sm"
         disabled={disabled}
         onClick={handleAdd}
         className="mt-2"
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Add Holiday Day
+        <Icon icon={Add01Icon} size="sm" />
+        Add holiday day
       </Button>
     </div>
   );

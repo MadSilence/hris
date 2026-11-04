@@ -2,15 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, ShieldAlert } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+import { ArrowDown01Icon, ArrowRight01Icon, ShieldAlertIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
-import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
+import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -30,14 +31,16 @@ import {
   useTemplateApplication,
   useTemplatePreview,
 } from "@/components/modules/settings/modules/templates/hooks";
+import { FieldError } from "@/components/desact/field-error";
+import { InlineAlert } from "@/components/desact/alert";
 
 const BACK = "/settings/general/templates";
 
 /** The preview's outcomes on the shared chip (STATUS_AND_BADGES.md § 1): the mapping is all a caller writes. */
-const OUTCOME: Record<TemplateOutcome, { status: EntityStatus; label: string }> = {
-  NEW: { status: "active", label: "New" },
-  EXISTING: { status: "inactive", label: "Already There" },
-  CLASH: { status: "draft", label: "Name Taken" },
+const OUTCOME: Record<TemplateOutcome, { status: StatusTone; label: string }> = {
+  NEW: { status: "scheduled", label: "New" },
+  EXISTING: { status: "inactive", label: "Already there" },
+  CLASH: { status: "pending", label: "Name taken" },
   DROPPED: { status: "archived", label: "Dropped" },
 };
 
@@ -105,7 +108,7 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
       <div className="space-y-4">
         <SettingsPageHeader title={data?.title ?? "Template"} backHref={BACK}/>
         {data && (
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             {data.summary} Version {data.version}. Applying copies it into the company: what it creates is
             yours to change afterwards, and nothing links it back to the template.
           </PageDescription>
@@ -119,9 +122,9 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
       ) : (
         <>
           {notice && (
-            <div role="status" className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800">
+            <InlineAlert tone="pending">
               {notice}
-            </div>
+            </InlineAlert>
           )}
 
           {data.parts.map((part) => (
@@ -135,11 +138,11 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
 
           <FormError message={applyError}/>
 
-          <div className="flex items-center justify-end gap-3 border-t border-brown-100 pt-4">
-            <span className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-end gap-3 border-t border-divider pt-4">
+            <span className="text-body text-tertiary">
               {summaryLine(data.counts)}
             </span>
-            <Button asChild variant="outline">
+            <Button asChild variant="secondary">
               <Link href={BACK} className="no-underline">Cancel</Link>
             </Button>
             <Button
@@ -147,7 +150,7 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
               onClick={() => void onApply()}
               disabled={apply.isPending || preview.isFetching || data.counts.create === 0}
             >
-              {data.counts.create === 0 ? "Nothing to Create" : `Apply · ${data.counts.create} to Create`}
+              {data.counts.create === 0 ? "Nothing to create" : `Apply · ${data.counts.create} to create`}
             </Button>
           </div>
         </>
@@ -170,16 +173,16 @@ const PartSection: React.FC<{
 }> = ({ part, onToggle, onChoose }) => (
   <section className="space-y-2" aria-label={part.title}>
     {part.root ? null : (
-      <div className="flex items-start gap-3 rounded-md bg-brown-50 px-4 py-3">
+      <div className="flex items-start gap-3 rounded-control bg-subtle px-4 py-3">
         <Checkbox
           id={`include-${part.key}`}
           checked={part.included}
           onCheckedChange={(v) => onToggle(Boolean(v))}
           aria-label={`Include ${part.title}`}
         />
-        <label htmlFor={`include-${part.key}`} className="min-w-0 text-sm">
+        <label htmlFor={`include-${part.key}`} className="min-w-0 text-body">
           <span className="font-medium">Include {part.title}</span>
-          <span className="block text-muted-foreground">
+          <span className="block text-tertiary">
             {part.appliedBefore
               ? "Applied before — its fields are already in the company, so it is not needed again."
               : "This template uses fields from it. Left out, what points at those fields is dropped."}
@@ -187,7 +190,7 @@ const PartSection: React.FC<{
         </label>
       </div>
     )}
-    <ul className={`divide-y divide-brown-100 rounded-lg border border-brown-200 ${part.included ? "" : "opacity-60"}`}>
+    <ul className={`divide-y divide-divider rounded-control border border-divider ${part.included ? "" : "opacity-60"}`}>
       {part.items.map((item) => (
         <ItemRow key={item.ref} item={item} disabled={!part.included} onChoose={(patch) => onChoose(item.ref, patch)}/>
       ))}
@@ -221,14 +224,14 @@ const ItemRow: React.FC<{
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.finalName}</span>
-            <span className="text-xs text-muted-foreground">{typeLabel(item)}</span>
+            <span className="text-hint text-tertiary">{typeLabel(item)}</span>
             <StatusBadge status={outcome.status} label={outcome.label}/>
             {item.sensitive && <Badge variant="outline">Sensitive</Badge>}
           </div>
-          {item.reason && <p className="text-sm text-muted-foreground">{item.reason}</p>}
+          {item.reason && <p className="text-body text-tertiary">{item.reason}</p>}
           {item.type === "FIELD" && item.sensitive && item.outcome !== "EXISTING" && item.include && (
-            <p className="flex items-center gap-1 text-sm text-muted-foreground">
-              <ShieldAlert className="h-4 w-4"/>
+            <p className="flex items-center gap-1 text-body text-tertiary">
+              <Icon icon={ShieldAlertIcon} size="sm" />
               {item.readers.length === 0
                 ? "Only the System Owner will see it until a role is given access."
                 : `Seen by ${item.readers.join(", ")} and the System Owner.`}
@@ -248,16 +251,16 @@ const ItemRow: React.FC<{
                 </SelectContent>
               </Select>
               {item.renameTaken && (
-                <p role="alert" className="pt-1 text-sm text-destructive">
+                <FieldError>
                   “{item.finalName}” is taken too. Skip it, or rename the company&apos;s own first.
-                </p>
+                </FieldError>
               )}
             </div>
           )}
         </div>
         {hasDetail && (
           <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-            {open ? <ChevronDown className="h-4 w-4"/> : <ChevronRight className="h-4 w-4"/>}
+            {open ? <Icon icon={ArrowDown01Icon} size="sm" /> : <Icon icon={ArrowRight01Icon} size="sm" />}
             {item.grants.length > 0
               ? `${item.grants.filter((g) => g.selected).length} of ${item.grants.length} Grants`
               : questions.length > 0 ? `${questions.length} Entries` : `${item.tasks.length} Tasks`}
@@ -273,18 +276,18 @@ const ItemRow: React.FC<{
         />
       )}
       {open && questions.length > 0 && (
-        <ol className="ml-7 list-decimal space-y-1 pl-4 text-sm">
+        <ol className="ml-7 list-decimal space-y-1 pl-4 text-body">
           {questions.map((q, i) => <li key={`${i}-${q}`}>{q}</li>)}
         </ol>
       )}
       {open && item.tasks.length > 0 && (
-        <ul className="ml-7 space-y-1 text-sm">
+        <ul className="ml-7 space-y-1 text-body">
           {item.tasks.map((t) => (
-            <li key={t.key} className={t.dropped ? "text-muted-foreground line-through" : ""}>
+            <li key={t.key} className={t.dropped ? "text-tertiary line-through" : ""}>
               <span>{dueLabel(t.dueKind, t.offsetDays)} · {t.title}</span>
-              <span className="text-muted-foreground"> — {assigneeLabel(t.assignee)}</span>
+              <span className="text-tertiary"> — {assigneeLabel(t.assignee)}</span>
               {t.dropped && t.reason && <span className="block no-underline">{t.reason}</span>}
-              {t.droppedFields.map((f) => <span key={f} className="block text-muted-foreground">{f}</span>)}
+              {t.droppedFields.map((f) => <span key={f} className="block text-tertiary">{f}</span>)}
             </li>
           ))}
         </ul>
@@ -321,22 +324,22 @@ const GrantList: React.FC<{
         className="mt-0.5"
       />
       <div className="min-w-0">
-        <span className={g.dropped ? "text-muted-foreground line-through" : ""}>
+        <span className={g.dropped ? "text-tertiary line-through" : ""}>
           {g.label} · {g.action} · {g.scopes.map(scopeLabel).join(", ")}
         </span>
         {g.existingField && (
-          <span className="ml-2 text-xs text-muted-foreground">
+          <span className="ml-2 text-hint text-tertiary">
             Existing field · {g.valueCount ?? 0} {g.valueCount === 1 ? "value" : "values"}
           </span>
         )}
         {g.sensitive && <Badge variant="outline" className="ml-2">Sensitive</Badge>}
-        {g.dropped && g.reason && <span className="block text-xs text-muted-foreground">{g.reason}</span>}
+        {g.dropped && g.reason && <span className="block text-hint text-tertiary">{g.reason}</span>}
       </div>
     </li>
   );
 
   return (
-    <div className="ml-7 grid gap-4 text-sm md:grid-cols-2">
+    <div className="ml-7 grid gap-4 text-body md:grid-cols-2">
       {permissions.length > 0 && (
         <div className="space-y-1">
           <p className="font-medium">Permissions</p>
@@ -345,7 +348,7 @@ const GrantList: React.FC<{
       )}
       {fields.length > 0 && (
         <div className="space-y-1">
-          <p className="font-medium">Field Access</p>
+          <p className="font-medium">Field access</p>
           <ul className="space-y-1">{fields.map(row)}</ul>
         </div>
       )}
@@ -359,8 +362,8 @@ const TemplateResult: React.FC<{ applicationId: string }> = ({ applicationId }) 
   return (
     <div className="space-y-6 px-8 pb-10">
       <div className="space-y-4">
-        <SettingsPageHeader title={data ? `${data.templateTitle} Applied` : "Template Applied"} backHref={BACK}/>
-        <PageDescription className="text-base text-muted-foreground/90">
+        <SettingsPageHeader title={data ? `${data.templateTitle} Applied` : "Template applied"} backHref={BACK}/>
+        <PageDescription className="text-body text-tertiary/90">
           Everything below is an ordinary part of the company now. Change it on its own page.
         </PageDescription>
       </div>
@@ -369,21 +372,21 @@ const TemplateResult: React.FC<{ applicationId: string }> = ({ applicationId }) 
       ) : !data ? (
         <PreviewSkeleton/>
       ) : (
-        <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+        <ul className="divide-y divide-divider rounded-control border border-divider">
           {data.items.map((i) => <ResultRow key={`${i.templateKey}/${i.ref}`} item={i}/>)}
         </ul>
       )}
-      <Button asChild variant="outline">
-        <Link href={BACK} className="no-underline">Back to Templates</Link>
+      <Button asChild variant="secondary">
+        <Link href={BACK} className="no-underline">Back to templates</Link>
       </Button>
     </div>
   );
 };
 
-const RESULT: Record<TemplateRecordedItem["outcome"], { status: EntityStatus; label: string }> = {
-  CREATED: { status: "active", label: "Created" },
-  EXISTING: { status: "inactive", label: "Already There" },
-  SKIPPED: { status: "draft", label: "Skipped" },
+const RESULT: Record<TemplateRecordedItem["outcome"], { status: StatusTone; label: string }> = {
+  CREATED: { status: "approved", label: "Created" },
+  EXISTING: { status: "inactive", label: "Already there" },
+  SKIPPED: { status: "inactive", label: "Skipped" },
   DROPPED: { status: "archived", label: "Dropped" },
 };
 
@@ -393,11 +396,11 @@ const ResultRow: React.FC<{ item: TemplateRecordedItem }> = ({ item }) => {
     <li className="space-y-1 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         {href ? <Link href={href} className="font-medium">{item.objectName}</Link> : <span className="font-medium">{item.objectName}</span>}
-        <span className="text-xs text-muted-foreground">{RECORD_TYPE[item.type]}</span>
+        <span className="text-hint text-tertiary">{RECORD_TYPE[item.type]}</span>
         <StatusBadge status={RESULT[item.outcome].status} label={RESULT[item.outcome].label}/>
       </div>
-      {item.reason && <p className="text-sm text-muted-foreground">{item.reason}</p>}
-      {(item.notes ?? []).map((n) => <p key={n} className="text-sm text-muted-foreground">{n}</p>)}
+      {item.reason && <p className="text-body text-tertiary">{item.reason}</p>}
+      {(item.notes ?? []).map((n) => <p key={n} className="text-body text-tertiary">{n}</p>)}
     </li>
   );
 };
@@ -407,7 +410,7 @@ const RECORD_TYPE: Record<TemplateRecordedItem["type"], string> = {
   FIELD: "Field",
   ROLE: "Role",
   PROCESS: "Checklist",
-  FORM: "Review Form",
+  FORM: "Review form",
 };
 
 const linkTo = (item: TemplateRecordedItem): string | null => {
@@ -438,7 +441,7 @@ const typeLabel = (item: TemplateItemDTO): string => {
     case "PROCESS":
       return "Checklist";
     case "FORM":
-      return "Review Form";
+      return "Review form";
   }
 };
 
@@ -449,7 +452,7 @@ const scopeLabel = (s: string) => {
     case "COMPANY":
       return "Company";
     case "DIRECT_REPORTS":
-      return "Direct Reports";
+      return "Direct reports";
     case "SELF":
       return "Own";
     default:
@@ -466,7 +469,7 @@ const dueLabel = (dueKind: string, offsetDays: number | null) => {
 const assigneeLabel = (a: string) => (a === "TARGET" ? "the new joiner" : a === "ONBOARDING_MANAGER" ? "the onboarding manager" : a);
 
 const PreviewSkeleton: React.FC = () => (
-  <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200" aria-busy="true">
+  <ul className="divide-y divide-divider rounded-control border border-divider" aria-busy="true">
     {[0, 1, 2, 3].map((i) => (
       <li key={i} className="flex items-center gap-3 px-4 py-3">
         <Skeleton className="h-4 w-4"/>

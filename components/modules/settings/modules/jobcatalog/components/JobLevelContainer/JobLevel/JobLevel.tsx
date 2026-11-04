@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Layers, Plus } from "lucide-react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 import { JobLevel as JobLevelModel, JobLevelGroup } from "@/models/job";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { JobLevelCard } from "@/components/modules/settings/modules/jobcatalog/components/JobLevelContainer/JobLevelCard/JobLevelCard";
 import { JobLevelSkeleton } from "@/components/modules/settings/modules/jobcatalog/components/JobLevelContainer/JobLevel/JobLevelSkeleton";
@@ -58,8 +59,8 @@ export const JobLevel: React.FC<JobLevelProps> = ({
   const addButton = (
     <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
       <Button type="button" className="shrink-0 gap-1.5" onClick={onCreateGroup}>
-        <Plus className="h-4 w-4"/>
-        Add Track
+        <Icon icon={Add01Icon} size="sm" />
+        Add track
       </Button>
     </PermissionGate>
   );
@@ -68,10 +69,10 @@ export const JobLevel: React.FC<JobLevelProps> = ({
   <div className="space-y-8">
     <div className="space-y-4 pt-2 pb-1">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">
-          Job Level Groups <span className="font-normal text-brown-400">({groups.length})</span>
+        <h2 className="text-section-title text-primary">
+          Job Level Groups <span className="font-normal text-tertiary">({groups.length})</span>
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body text-tertiary">
           Group job levels into career tracks and define the progression employees move through
           within each.
         </p>
@@ -87,12 +88,12 @@ export const JobLevel: React.FC<JobLevelProps> = ({
       ) : visible.length === 0 ? (
         <ListEmptyState
           query={query}
-          icon={<Layers className="h-7 w-7"/>}
+          scene="goals-and-growth"
           title="No career tracks yet"
           description="A track groups job levels into the progression somebody moves through. Add the first one to start placing jobs on it."
           noResultsHint="Try a different track or level name."
           onCreate={onCreateGroup}
-          createLabel="Add Track"
+          createLabel="Add track"
           createAccess={{ resource: "JOBS.LEVEL_GROUP" }}
         />
       ) : (

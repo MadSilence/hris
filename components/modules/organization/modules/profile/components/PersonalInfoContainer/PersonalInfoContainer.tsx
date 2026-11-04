@@ -23,8 +23,8 @@ import { sortBySortOrder } from "@/components/modules/settings/modules/attribute
 import { useActiveSectionScroll } from "@/components/modules/organization/modules/profile/hooks/useActiveSectionScroll";
 import { useProfileEditGuard } from "@/components/modules/organization/modules/profile/context/ProfileEditGuard";
 import { Loader } from "@/components/ui/Loader";
-import { Card } from "@/public/desact/src/components/ui/card";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Card } from "@/components/desact/card";
+import { Button } from "@/components/desact/button";
 import { ProfileSectionCard, SectionEditButton } from "./components/ProfileSectionCard";
 import { useSWRConfig } from "swr";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -267,10 +267,10 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       const after = ids.findIndex((g) => g.name === POSITION_HISTORY_AFTER_GROUP);
       ids.splice(after === -1 ? ids.length : after + 1, 0, {
         id: POSITION_HISTORY_SECTION_ID,
-        name: "Position History",
+        name: "Position history",
       });
     }
-    if (canSeeAutomationRuns) ids.push({ id: AUTOMATION_RUNS_SECTION_ID, name: "Automation Runs" });
+    if (canSeeAutomationRuns) ids.push({ id: AUTOMATION_RUNS_SECTION_ID, name: "Automation runs" });
     return ids;
   }, [systemGroups, showPositionHistory, canSeeAutomationRuns]);
 
@@ -421,7 +421,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     }
     if (isChanged) return null;
     return (
-      <Button type="button" variant="outline" size="sm" onClick={() => closeGroup(groupId)} disabled={isSaving}>
+      <Button type="button" variant="secondary" size="sm" onClick={() => closeGroup(groupId)} disabled={isSaving}>
         Cancel
       </Button>
     );
@@ -441,7 +441,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   if (error) {
     return (
       <Card className="p-6">
-        <div className="text-sm text-danger-600">Failed to load</div>
+        <div className="text-body text-danger-text">Failed to load</div>
       </Card>
     );
   }
@@ -463,7 +463,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       : null;
 
   return (
-    <div className="grid h-full min-h-0 w-full grid-cols-[260px_1fr] gap-7 bg-background">
+    <div className="grid h-full min-h-0 w-full grid-cols-[260px_1fr] gap-7 bg-page">
         <PersonalInfoSidebar
           sections={sections}
           activeId={activeId || sections[0]?.id}
@@ -481,7 +481,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
               return [{
                 id,
                 content: (
-                  <ProfileSectionCard title="Automation Runs">
+                  <ProfileSectionCard title="Automation runs">
                     <PersonAutomationRuns personId={user.id}/>
                   </ProfileSectionCard>
                 ),

@@ -1,9 +1,10 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, ArchiveRestore, Clock, Copy, Download, Eye, Play, Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Download01Icon, PlayIcon, ViewIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
@@ -13,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal";
 import type { ExportDataFormValues } from "@/components/modules/settings/shared/ExportDataModal/ExportDataForm";
@@ -107,8 +108,8 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
   const addPolicyButton = (
     <Button type="button" className="gap-1.5" onClick={onCreateAction}>
-      <Plus className="h-4 w-4" />
-      Add Policy
+      <Icon icon={Add01Icon} size="sm" />
+      Add policy
     </Button>
   );
 
@@ -117,7 +118,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
           <SettingsPageHeader title={title ?? "Time off"} backHref={backHref ?? "/settings"} />
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             Define leave types and quota rules for your organization. Use the table below to review,
             search and navigate to specific policies.
           </PageDescription>
@@ -125,8 +126,8 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
         {/* Info block */}
         <div className="space-y-1 pb-1 pt-5">
-          <h2 className="text-lg font-semibold text-foreground">Leave policies</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-section-title text-primary">Leave policies</h2>
+          <p className="text-body text-tertiary">
             Every leave policy in your company. Archived ones are behind the toggle.
           </p>
         </div>
@@ -138,11 +139,11 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
           secondary={
             <Button type="button"
               size="icon"
-              variant="outline"
+              variant="secondary"
               aria-label="Export policies"
               onClick={() => setIsExportOpen(true)}
             >
-              <Download className="h-4 w-4" />
+              <Icon icon={Download01Icon} size="sm" />
             </Button>
           }
           primary={addPolicyButton}
@@ -152,21 +153,21 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
       <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
         {!isLoading && !hasPolicies ? (
           <ListEmptyState
-            icon={<Clock className="h-7 w-7" />}
+            scene="time-off"
             title="No time off policies yet"
             description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
             onCreate={onCreateAction}
-            createLabel="Add Policy"
+            createLabel="Add policy"
             className="min-h-72 flex-1"
           />
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <table className="w-full caption-bottom text-sm table-fixed">
-              <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+            <table className="w-full caption-bottom text-body table-fixed">
+              <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                 <TableRow>
                   <TableHead className="pl-4">Policy</TableHead>
                   <TableHead>Unit</TableHead>
-                  <TableHead>Pay Type</TableHead>
+                  <TableHead>Pay type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
@@ -181,13 +182,13 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                       <ListEmptyState
                         query={query}
                         archivedView={showArchived}
-                        icon={<Clock className="h-7 w-7" />}
+                        scene="time-off"
                         title="No time off policies yet"
                         description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
                         noResultsHint="Try a different policy name or unit."
                         archivedDescription="Archived policies will appear here."
                         onCreate={onCreateAction}
-                        createLabel="Add Policy"
+                        createLabel="Add policy"
                       />
                     </TableCell>
                   </TableRow>
@@ -197,16 +198,16 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                     return (
                       <TableRow
                         key={policy.id}
-                        className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                        className="group border-divider cursor-pointer hover:bg-subtle [&_td]:py-2"
                         onClick={() => onOpenAction(policy)}
                       >
                         <TableCell className="py-3 pl-4">
                           <span className="font-medium text-primary">{policy.name}</span>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-tertiary">
                           {policy.unit === "DAYS" ? "Days" : "Hours"}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-tertiary">
                           {policy.paid ? "Paid" : "Unpaid"}
                         </TableCell>
                         <TableCell>
@@ -214,9 +215,9 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
-                            <RowActionsMenu label="Policy Actions">
+                            <RowActionsMenu label="Policy actions">
                               <RowAction
-                                icon={<Eye className="h-4 w-4" />}
+                                icon={<Icon icon={ViewIcon} size="sm" />}
                                 onClick={() => onOpenAction(policy)}
                               >
                                 Open
@@ -225,7 +226,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                               {/* A policy is nine sections and a wizard; copying one was the
                                   only way to start from something that already works. */}
                               <RowAction
-                                icon={<Copy className="h-4 w-4" />}
+                                icon={<Icon icon={Copy01Icon} size="sm" />}
                                 onClick={() => onDuplicateAction(policy)}
                               >
                                 Duplicate
@@ -233,7 +234,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
                               {policy.status === TimeOffPolicyStatus.Draft && (
                                 <RowAction
-                                  icon={<Play className="h-4 w-4" />}
+                                  icon={<Icon icon={PlayIcon} size="sm" />}
                                   onClick={() => onActivateAction(policy)}
                                 >
                                   Activate
@@ -242,7 +243,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
                               {policy.status === TimeOffPolicyStatus.Active && (
                                 <RowAction
-                                  icon={<Archive className="h-4 w-4" />}
+                                  icon={<Icon icon={Archive02Icon} size="sm" />}
                                   onClick={() => onArchiveAction(policy)}
                                 >
                                   Archive
@@ -261,7 +262,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                               */}
                               {policy.status === TimeOffPolicyStatus.Archived && (
                                 <RowAction
-                                  icon={<ArchiveRestore className="h-4 w-4" />}
+                                  icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                                   onClick={() => onUnarchiveAction(policy)}
                                 >
                                   Unarchive
@@ -270,7 +271,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
                               {policy.status === TimeOffPolicyStatus.Draft && (
                                 <RowActionDestructive
-                                  icon={<Trash2 className="h-4 w-4" />}
+                                  icon={<Icon icon={Delete02Icon} size="sm" />}
                                   onClick={() => onDeleteAction(policy)}
                                 >
                                   Delete
@@ -301,5 +302,4 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
     </div>
   );
 };
-
 

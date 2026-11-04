@@ -16,9 +16,9 @@ import {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-brown-200 p-4">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">{title}</h3>
-      <div className="divide-y divide-brown-100">{children}</div>
+    <div className="rounded-card border border-divider p-4">
+      <h3 className="mb-2 text-hint font-semibold text-tertiary">{title}</h3>
+      <div className="divide-y divide-divider">{children}</div>
     </div>
   );
 }
@@ -27,8 +27,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-right text-sm font-medium text-foreground">{value}</span>
+      <span className="text-body text-tertiary">{label}</span>
+      <span className="text-right text-body font-medium text-primary">{value}</span>
     </div>
   );
 }

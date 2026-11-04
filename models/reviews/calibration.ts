@@ -6,9 +6,9 @@ export type PerformanceBand = "LOW" | "MID" | "HIGH";
 export const PERFORMANCE_BANDS: PerformanceBand[] = ["HIGH", "MID", "LOW"];
 
 export const PERFORMANCE_BAND_LABELS: Record<PerformanceBand, string> = {
-  HIGH: "High Performance",
-  MID: "Mid Performance",
-  LOW: "Low Performance",
+  HIGH: "High performance",
+  MID: "Mid performance",
+  LOW: "Low performance",
 };
 
 /**

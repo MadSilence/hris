@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
 import {
   AddRoleForm,

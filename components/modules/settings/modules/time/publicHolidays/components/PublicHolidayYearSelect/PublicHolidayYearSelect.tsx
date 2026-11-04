@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 
 const CURRENT_YEAR = new Date().getFullYear();
 /** How far either side of today the dropdown reaches when it has to offer every year. */

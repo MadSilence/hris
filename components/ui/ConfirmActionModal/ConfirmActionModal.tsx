@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle } from "lucide-react";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -12,7 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 
 /**
  * The confirmation the five acts always get: Archive, Delete, Unassign, Remove, Duplicate.
@@ -63,10 +62,8 @@ export const ConfirmActionModal: React.FC<{
   >
     <AlertDialogContent className="max-w-md">
       <AlertDialogHeader>
-        <AlertDialogTitle className={destructive ? "flex items-center gap-2 text-danger-600" : undefined}>
-          {destructive && <AlertTriangle className="h-5 w-5" />}
-          {title}
-        </AlertDialogTitle>
+        {/* Neutral, destructive or not (SPEC § 4.6): red belongs to the confirming button alone. */}
+        <AlertDialogTitle>{title}</AlertDialogTitle>
         <AlertDialogDescription>{description}</AlertDialogDescription>
       </AlertDialogHeader>
 
@@ -83,7 +80,7 @@ export const ConfirmActionModal: React.FC<{
             event.preventDefault();
             void onConfirmAction();
           }}
-          className={destructive ? "bg-danger-600 text-white hover:bg-danger-700" : undefined}
+          destructive={destructive}
         >
           {isLoading ? `${confirmLabel}…` : confirmLabel}
         </AlertDialogAction>

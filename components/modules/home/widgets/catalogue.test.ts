@@ -49,7 +49,7 @@ describe("home's catalogue", () => {
     expect(ids(null)).toEqual(["my-tasks", "upcoming-holidays", "company-time"]);
   });
 
-  it("offers Quick Actions when either action is possible, and not otherwise", () => {
+  it("offers Quick actions when either action is possible, and not otherwise", () => {
     expect(ids(accessWith({ "PEOPLE.ATTENDANCE": { EDIT: ["SELF"] } }))).toContain("quick-actions");
     expect(ids(accessWith({ "PEOPLE.TIME_OFF": { VIEW: ["SELF"] } }))).not.toContain("quick-actions");
   });

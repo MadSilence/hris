@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { CalendarDays } from "lucide-react";
+import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +10,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { showSuccess } from "@/lib/errors/errorToast";
@@ -92,7 +93,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
+            <Icon icon={Calendar03Icon} />
             Holiday Calendar for {placeName}
           </DialogTitle>
           <DialogDescription>
@@ -105,7 +106,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
         <FormError message={error ? messageForError(error) : null} />
 
         {preview.data === undefined ? (
-          <div className="max-h-72 space-y-2 overflow-y-auto" role="radiogroup" aria-label="Holiday Calendar">
+          <div className="max-h-72 space-y-2 overflow-y-auto" role="radiogroup" aria-label="Holiday calendar">
             {calendars.map((c) => (
               <Choice key={c.id} label={c.name} selected={choice === c.id} onSelect={() => setChoice(c.id)} />
             ))}
@@ -114,10 +115,10 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
         ) : (
           <div className="space-y-2" data-test="binding-preview">
             {previewLines(preview.data, current?.calendarName ?? null).map((line) => (
-              <p key={line} className="m-0 text-sm text-foreground">{line}</p>
+              <p key={line} className="m-0 text-body text-primary">{line}</p>
             ))}
             {preview.data.keepOwnPeople.length > 0 && (
-              <p className="m-0 text-xs text-muted-foreground">
+              <p className="m-0 text-hint text-tertiary">
                 Keeping their own: {preview.data.keepOwnPeople.map((p) => p.name ?? "Unnamed").join(", ")}
                 {preview.data.keepOwn > preview.data.keepOwnPeople.length ? ", …" : ""}
               </p>
@@ -128,7 +129,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
         <DialogFooter>
           {preview.data === undefined ? (
             <>
-              <Button type="button" variant="outline" onClick={onRequestCloseAction} disabled={busy}>
+              <Button type="button" variant="secondary" onClick={onRequestCloseAction} disabled={busy}>
                 Cancel
               </Button>
               <Button type="button" onClick={onReview} disabled={busy || unchanged}>
@@ -137,7 +138,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
             </>
           ) : (
             <>
-              <Button type="button" variant="outline" onClick={resetPreview} disabled={busy}>
+              <Button type="button" variant="secondary" onClick={resetPreview} disabled={busy}>
                 Back
               </Button>
               <Button type="button" onClick={() => void onApply()} disabled={busy}>
@@ -163,18 +164,18 @@ function Choice({ label, selected, onSelect, muted = false }: {
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors ${
-        selected ? "border-brown-400 bg-brown-50" : "border-brown-200 hover:bg-brown-50"
+      className={`flex w-full items-center gap-3 rounded-control border p-3 text-left text-body transition-colors ${
+        selected ? "border-accent-ring bg-accent-subtle" : "border-divider hover:bg-subtle"
       }`}
     >
       <span
-        className={`flex h-4 w-4 flex-none items-center justify-center rounded-full border ${
-          selected ? "border-brown-500" : "border-brown-300"
+        className={`flex h-4 w-4 flex-none items-center justify-center rounded-pill border ${
+          selected ? "border-accent" : "border-field"
         }`}
       >
-        {selected && <span className="h-2 w-2 rounded-full bg-brown-500" />}
+        {selected && <span className="h-2 w-2 rounded-pill bg-accent" />}
       </span>
-      <span className={muted ? "text-muted-foreground" : "text-foreground"}>{label}</span>
+      <span className={muted ? "text-tertiary" : "text-primary"}>{label}</span>
     </button>
   );
 }

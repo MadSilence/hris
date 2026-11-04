@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Users } from "lucide-react";
+import { UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { SearchField } from "@/components/ui/SearchField";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import type { TeamPerson } from "@/models/teams";
 
 export type TeamSearchMode = "units" | "people";
@@ -87,13 +88,13 @@ export function TeamSearchBar({
       />
 
       {showResults && (
-        <div className="absolute left-0 right-0 top-11 z-20 max-h-80 overflow-y-auto rounded-lg border border-brown-200 bg-white py-1 shadow-lg">
+        <div className="absolute left-0 right-0 top-11 z-20 max-h-80 overflow-y-auto rounded-control border border-divider bg-card py-1 shadow-popover">
           {peopleLoading ? (
-            <p className="px-3 py-3 text-sm text-brown-400">Searching…</p>
+            <p className="px-3 py-3 text-body text-tertiary">Searching…</p>
           ) : peopleResults.length === 0 ? (
             <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
-              <Users className="h-5 w-5 text-brown-300" />
-              <p className="text-sm text-brown-500">No people match “{query}”</p>
+              <Icon icon={UserGroupIcon} className="text-disabled" />
+              <p className="text-body text-tertiary">No people match “{query}”</p>
             </div>
           ) : (
             peopleResults.map(({ key, person, teamId }) => {
@@ -103,21 +104,21 @@ export function TeamSearchBar({
                   key={key}
                   type="button"
                   onClick={() => onPersonSelect({ key, person, teamId })}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-brown-50"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-subtle"
                 >
                   <Avatar className="h-7 w-7 flex-none">
                     {person.avatarUrl && <AvatarImage src={person.avatarUrl} alt="" />}
-                    <AvatarFallback className="text-[10px]">{initials(person)}</AvatarFallback>
+                    <AvatarFallback className="text-hint">{initials(person)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-brown-900">
+                    <span className="block truncate text-body text-primary">
                       {personName(person)}
                     </span>
                     {person.jobName && (
-                      <span className="block truncate text-xs text-brown-400">{person.jobName}</span>
+                      <span className="block truncate text-hint text-tertiary">{person.jobName}</span>
                     )}
                   </span>
-                  <span className="flex-none truncate text-xs text-brown-500">{teamName}</span>
+                  <span className="flex-none truncate text-hint text-tertiary">{teamName}</span>
                 </button>
               );
             })

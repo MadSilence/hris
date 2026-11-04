@@ -33,19 +33,19 @@ export const PersonalInfoSidebar: React.FC<Props> = ({ sections, activeId, onSel
               onClick={() => onSelect(section.id)}
               aria-current={isActive ? "true" : undefined}
               className={[
-                "group relative flex w-full items-center gap-2 rounded-lg py-2 pl-4 pr-3 text-left",
-                "text-sm transition-colors",
+                "group relative flex w-full items-center gap-2 rounded-control py-2 pl-4 pr-3 text-left",
+                "text-body transition-colors",
                 isActive
-                  ? "bg-brown-50 font-medium text-brown-800"
-                  : "text-muted-foreground hover:bg-brown-50/60 hover:text-foreground",
+                  ? "bg-accent-muted font-medium text-accent-text"
+                  : "text-tertiary hover:bg-subtle/60 hover:text-primary",
               ].join(" ")}
             >
               {/* The marker, not a border: a border would shift the label by a pixel on select. */}
               <span
                 aria-hidden
                 className={[
-                  "absolute left-1 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full transition-colors",
-                  isActive ? "bg-brown-600" : "bg-transparent",
+                  "absolute left-1 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-pill transition-colors",
+                  isActive ? "bg-accent" : "bg-transparent",
                 ].join(" ")}
               />
 

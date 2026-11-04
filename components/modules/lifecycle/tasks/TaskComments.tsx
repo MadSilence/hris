@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { Textarea } from "@/components/desact/textarea";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { formatDisplayDate } from "@/lib/date";
@@ -57,14 +57,14 @@ export function TaskComments({ load, send }: {
   };
 
   return (
-    <div className="mt-3 space-y-3 rounded-md bg-brown-50 p-3" data-test="task-comments">
-      {comments === null && !error && <p className="text-xs text-muted-foreground">Loading comments…</p>}
-      {comments?.length === 0 && <p className="text-xs text-muted-foreground">No comments yet.</p>}
+    <div className="mt-3 space-y-3 rounded-control bg-subtle p-3" data-test="task-comments">
+      {comments === null && !error && <p className="text-hint text-tertiary">Loading comments…</p>}
+      {comments?.length === 0 && <p className="text-hint text-tertiary">No comments yet.</p>}
       {comments && comments.length > 0 && (
         <ul className="space-y-2">
           {comments.map((c) => (
-            <li key={c.id} className={`text-sm ${c.mine ? "pl-6" : "pr-6"}`}>
-              <p className="text-xs text-muted-foreground">
+            <li key={c.id} className={`text-body ${c.mine ? "pl-6" : "pr-6"}`}>
+              <p className="text-hint text-tertiary">
                 {c.mine ? "You" : c.author?.name ?? "Somebody"} · {formatDisplayDate(c.createdAt, { style: "medium" })}
               </p>
               <p className="whitespace-pre-wrap">{c.body}</p>

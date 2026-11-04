@@ -8,8 +8,8 @@ export default function CalendarPage() {
     <PageGate resource="PEOPLE.CALENDAR" action="VIEW">
       <div className="flex h-[calc(100svh-6rem)] flex-col gap-5">
         <section className="flex flex-none flex-col gap-2">
-          <h1 className="text-3xl font-semibold">Calendar</h1>
-          <p className="max-w-2xl text-[var(--color-text-tertiary)]">
+          <h1 className="text-page-title">Calendar</h1>
+          <p className="max-w-2xl text-tertiary">
             See who is away, and which days are public holidays.
           </p>
         </section>

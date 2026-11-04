@@ -24,16 +24,16 @@ function mockStub(name: string) {
   const Stub = () => <div>{`${name} body`}</div>;
   return Stub;
 }
-jest.mock("@/components/modules/home/widgets/WaitingOnYouWidget", () => ({ WaitingOnYouWidget: mockStub("Waiting on You") }));
-jest.mock("@/components/modules/home/widgets/MyTasksWidget", () => ({ MyTasksWidget: mockStub("My Tasks") }));
-jest.mock("@/components/modules/home/widgets/MyLeaveWidget", () => ({ MyLeaveWidget: mockStub("My Time Off") }));
-jest.mock("@/components/modules/home/widgets/WhosOutWidget", () => ({ WhosOutWidget: mockStub("Who's Out") }));
+jest.mock("@/components/modules/home/widgets/WaitingOnYouWidget", () => ({ WaitingOnYouWidget: mockStub("Waiting on you") }));
+jest.mock("@/components/modules/home/widgets/MyTasksWidget", () => ({ MyTasksWidget: mockStub("My tasks") }));
+jest.mock("@/components/modules/home/widgets/MyLeaveWidget", () => ({ MyLeaveWidget: mockStub("My time off") }));
+jest.mock("@/components/modules/home/widgets/WhosOutWidget", () => ({ WhosOutWidget: mockStub("Who's out") }));
 jest.mock("@/components/modules/home/widgets/CelebrationsWidget", () => ({ CelebrationsWidget: mockStub("Celebrations") }));
-jest.mock("@/components/modules/home/widgets/UpcomingHolidaysWidget", () => ({ UpcomingHolidaysWidget: mockStub("Upcoming Holidays") }));
+jest.mock("@/components/modules/home/widgets/UpcomingHolidaysWidget", () => ({ UpcomingHolidaysWidget: mockStub("Upcoming holidays") }));
 jest.mock("@/components/modules/home/widgets/ProcessesWidget", () => ({ ProcessesWidget: mockStub("Processes") }));
 jest.mock("@/components/modules/home/widgets/AutomationsWidget", () => ({ AutomationsWidget: mockStub("Automations") }));
-jest.mock("@/components/modules/home/widgets/QuickActionsWidget", () => ({ QuickActionsWidget: mockStub("Quick Actions") }));
-jest.mock("@/components/modules/home/widgets/ClockWidget", () => ({ ClockWidget: mockStub("Company Time") }));
+jest.mock("@/components/modules/home/widgets/QuickActionsWidget", () => ({ QuickActionsWidget: mockStub("Quick actions") }));
+jest.mock("@/components/modules/home/widgets/ClockWidget", () => ({ ClockWidget: mockStub("Company time") }));
 
 const accessWith = (permissions: Partial<Record<ResourceCode, ResourceAccess>>): EffectiveAccess => ({
   systemOwner: false, permissions, fields: {}, moduleSummary: {}, accessHash: "h",
@@ -86,15 +86,15 @@ describe("HomeContainer", () => {
     given(EMPLOYEE);
     render(<HomeContainer />);
 
-    expect(screen.getByText("Who's Out body")).toBeInTheDocument();
+    expect(screen.getByText("Who's out body")).toBeInTheDocument();
     expect(screen.getByText("Celebrations body")).toBeInTheDocument();
-    expect(screen.getByText("My Tasks body")).toBeInTheDocument();
+    expect(screen.getByText("My tasks body")).toBeInTheDocument();
     // No PEOPLE.TIME_OFF, no lifecycle, no automations, no actions to take.
-    expect(screen.queryByText("Waiting on You body")).not.toBeInTheDocument();
-    expect(screen.queryByText("My Time Off body")).not.toBeInTheDocument();
+    expect(screen.queryByText("Waiting on you body")).not.toBeInTheDocument();
+    expect(screen.queryByText("My time off body")).not.toBeInTheDocument();
     expect(screen.queryByText("Processes body")).not.toBeInTheDocument();
     expect(screen.queryByText("Automations body")).not.toBeInTheDocument();
-    expect(screen.queryByText("Quick Actions body")).not.toBeInTheDocument();
+    expect(screen.queryByText("Quick actions body")).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "HR" })).not.toBeInTheDocument();
   });
 
@@ -109,7 +109,7 @@ describe("HomeContainer", () => {
     expect(screen.queryByText("Celebrations body")).not.toBeInTheDocument();
     const company = screen.getByRole("region", { name: "Company" });
     const bodies = within(company).getAllByText(/ body$/).map((node) => node.textContent);
-    expect(bodies).toEqual(["Upcoming Holidays body", "Who's Out body"]);
+    expect(bodies).toEqual(["Upcoming holidays body", "Who's out body"]);
   });
 
   it("offers in Customize only what the reader may see, and saves a hide and a move in one write", async () => {
@@ -121,7 +121,7 @@ describe("HomeContainer", () => {
     expect(screen.queryByTestId("customize-waiting-on-you")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("switch", { name: "Show Celebrations" }));
-    fireEvent.click(screen.getByRole("button", { name: "Move Upcoming Holidays Up" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move Upcoming holidays Up" }));
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
@@ -144,7 +144,7 @@ describe("HomeContainer", () => {
     expect(screen.queryByText("Celebrations body")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Customize" }));
-    fireEvent.click(screen.getByRole("button", { name: "Reset to Default" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reset to default" }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith([]));
   });
 
@@ -157,7 +157,7 @@ describe("HomeContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
 
     expect(await screen.findByText("Could not save.")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Customize Home" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Customize home" })).toBeInTheDocument();
   });
 
   it("draws no widget before it knows what the reader may see", () => {

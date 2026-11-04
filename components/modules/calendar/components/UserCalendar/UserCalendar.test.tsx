@@ -7,7 +7,7 @@ jest.mock("@/components/providers/CompanyDataProvider/CompanyDataProvider", () =
 
 /**
  * The day facts a caller is handed, and the month it is told about (Attendance's profile tab). The
- * grid is shared with Time Off, so what is guarded here is that a caller is told the truth about a
+ * grid is shared with Time off, so what is guarded here is that a caller is told the truth about a
  * day — a holiday and a day of leave are exactly the days that have no norm.
  */
 const holidays = [{ id: "h1", name: "Autumn Day", date: "2026-10-05" }];

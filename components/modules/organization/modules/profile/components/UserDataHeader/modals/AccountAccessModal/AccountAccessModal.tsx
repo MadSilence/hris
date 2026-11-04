@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Label } from "@/components/desact/label";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
@@ -14,7 +14,7 @@ import {
 import { endAllSessionsOfUserAction } from "@/components/modules/sessions/actions";
 import { withStepUpAction } from "@/components/modules/mfa/stepUp";
 import { resetUserMfaAction } from "@/components/modules/mfa/actions";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Checkbox } from "@/components/desact/checkbox";
 
 export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA";
 
@@ -158,30 +158,30 @@ const COPY: Record<AccountAccessKind, (name: string, locked: boolean) => {
   confirmLabel: string;
 }> = {
   BLOCK: (name) => ({
-    title: "Block Account",
+    title: "Block account",
     description: `${name} will be signed out everywhere and will not be able to sign in until the account is unblocked.`,
     confirmLabel: "Block",
   }),
   UNBLOCK: (name) => ({
-    title: "Unblock Account",
+    title: "Unblock account",
     description: `${name} will be able to sign in again.`,
     confirmLabel: "Unblock",
   }),
   RESET: (name, locked) => ({
-    title: locked ? "Send Password Reset to Unlock" : "Send Password Reset",
+    title: locked ? "Send password reset to unlock" : "Send password reset",
     description: locked
       ? `${name}'s account is locked after too many failed sign-ins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.`
       : `${name} will get an email with a link to set a new password. The link works for one hour.`,
     confirmLabel: "Send",
   }),
   RESET_MFA: (name) => ({
-    title: "Reset Two-Step Sign-In",
+    title: "Reset two-step sign-in",
     description: `${name}'s authenticator app, backup codes and remembered devices stop working, and they are signed out everywhere. If your company requires two-step sign-in, they set it up again at their next sign-in.`,
     confirmLabel: "Reset",
   }),
   END_SESSIONS: (name) => ({
-    title: "End All Sessions",
+    title: "End all sessions",
     description: `${name} will be signed out of every browser at once. They can sign in again straight away — to keep them out, block the account instead.`,
-    confirmLabel: "End Sessions",
+    confirmLabel: "End sessions",
   }),
 };

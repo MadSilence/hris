@@ -4,14 +4,15 @@ import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Switch } from "@/public/desact/src/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Switch } from "@/components/desact/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 type Template = {
   id: string;
@@ -165,10 +166,10 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4 rounded-md bg-brown-50 px-4 py-3">
+        <div className="flex items-center justify-between gap-4 rounded-control bg-subtle px-4 py-3">
           <div className="min-w-0">
-            <div className="text-sm font-medium">Choose from a template</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-body font-medium">Choose from a template</div>
+            <div className="text-hint text-tertiary">
               Pick a ready configuration and customize it in the future.
             </div>
           </div>
@@ -184,7 +185,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
 
         {!formik.values.useTemplate && (
           <div className="space-y-2">
-            <RequiredLabel htmlFor="role-name" required>Role Name</RequiredLabel>
+            <RequiredLabel htmlFor="role-name" required>Role name</RequiredLabel>
             <Input
               id="role-name"
               value={formik.values.name}
@@ -196,7 +197,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
               aria-invalid={!!formik.errors.name}
             />
             {formik.errors.name && (
-              <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+              <FieldError>{formik.errors.name}</FieldError>
             )}
           </div>
         )}
@@ -215,7 +216,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
               aria-invalid={!!formik.errors.description}
             />
             {formik.errors.description && (
-              <p role="alert" className="text-sm text-destructive">{formik.errors.description}</p>
+              <FieldError>{formik.errors.description}</FieldError>
             )}
           </div>
         )}
@@ -246,17 +247,15 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
               </Select>
 
               {formik.errors.templateId && (
-                <p className="text-sm text-destructive">
-                  {formik.errors.templateId}
-                </p>
+                <FieldError>{formik.errors.templateId}</FieldError>
               )}
 
               {selectedTemplate?.description && (
-                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+                <p className="text-hint text-tertiary">{selectedTemplate.description}</p>
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body text-tertiary">
               The next step previews exactly what the template creates in your company — and lets you
               rename it if a role of that name exists — before anything is applied.
             </p>
@@ -267,7 +266,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
       <DialogFooter className="mt-8">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
         >

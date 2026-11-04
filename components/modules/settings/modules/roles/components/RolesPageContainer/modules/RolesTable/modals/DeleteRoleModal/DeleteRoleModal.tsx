@@ -11,8 +11,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { AlertTriangle, Trash2 } from "lucide-react";
+} from "@/components/desact/alert-dialog";
+import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { RoleDeleteImpactDTO } from "@/api/modules/roles/dto/RoleDeleteImpactDTO";
 import { messageForError } from "@/lib/errors/errorMessages";
 
@@ -50,8 +51,8 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
     >
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <AlertTriangle className="h-5 w-5"/>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon={Alert02Icon} />
             Delete role
           </AlertDialogTitle>
 
@@ -66,14 +67,14 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
+            <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div className="min-w-0 flex-1">
-              <h4 className="mb-1 font-medium text-danger-800">What this affects</h4>
+              <h4 className="mb-1 font-medium text-primary">What this affects</h4>
 
               {isImpactLoading && (
-                <p className="text-sm text-danger-700">Checking what depends on this role…</p>
+                <p className="text-body text-secondary">Checking what depends on this role…</p>
               )}
 
               {/*
@@ -83,19 +84,19 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
                 to tell an empty role from an unreachable API before pressing Delete.
               */}
               {!isImpactLoading && !impact && !!impactError && (
-                <p className="text-sm text-danger-700">
+                <p className="text-body text-secondary">
                   {messageForError(impactError)} Until then, how many people this affects is unknown.
                 </p>
               )}
 
               {!isImpactLoading && !impact && !impactError && (
-                <p className="text-sm text-danger-700">
+                <p className="text-body text-secondary">
                   Users assigned to this role may lose access to systems and workflows.
                 </p>
               )}
 
               {!isImpactLoading && impact && (
-                <ul className="space-y-1 text-sm text-danger-700">
+                <ul className="space-y-1 text-body text-secondary">
                   <li>
                     <strong>{impact.peopleCount}</strong>{" "}
                     {impact.peopleCount === 1 ? "person holds" : "people hold"} this role.
@@ -119,7 +120,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body text-tertiary">
           To take the role out of use without losing its permissions, archive it instead — it can be
           restored, though the people who held it lose it either way.
         </p>
@@ -143,9 +144,9 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
               event.preventDefault();
               void onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
-            <Trash2 className="mr-2 h-4 w-4"/>
+            <Icon icon={Delete02Icon} size="sm" />
             Delete role
           </AlertDialogAction>
         </AlertDialogFooter>

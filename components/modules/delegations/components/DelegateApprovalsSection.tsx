@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Switch } from "@/components/desact/switch";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -101,12 +102,12 @@ export const DelegateApprovalsSection: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 rounded-lg border border-brown-200 p-4">
+      <div className="flex items-start justify-between gap-4 rounded-card border border-divider p-4">
         <div className="min-w-0">
-          <Label htmlFor="delegate-on-leave" className="font-medium text-brown-900">
+          <Label htmlFor="delegate-on-leave" className="font-medium text-primary">
             Delegate My Approvals While I&apos;m on Leave
           </Label>
-          <p className="mt-0.5 text-sm text-muted-foreground">
+          <p className="mt-0.5 text-body text-tertiary">
             When your own leave is approved, the requests waiting on you also go to your manager for those days.
           </p>
         </div>
@@ -130,23 +131,23 @@ export const DelegateApprovalsSection: React.FC = () => {
       ) : (
         <>
           <section className="space-y-2">
-            <p className="text-sm font-medium text-brown-800">Your Delegations</p>
+            <p className="text-body font-medium text-primary">Your delegations</p>
             {(delegations.data?.given ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">You have not delegated your approvals.</p>
+              <p className="text-body text-tertiary">You have not delegated your approvals.</p>
             ) : (
-              <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+              <ul className="divide-y divide-divider rounded-control border border-divider">
                 {delegations.data?.given.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-body">
                     <span>
                       To <strong className="font-medium">{d.delegate.name ?? "a colleague"}</strong> · {range(d)}
-                      {d.active && <span className="text-muted-foreground"> · In force now</span>}
-                      {d.source === "LEAVE" && <span className="text-muted-foreground"> · For your leave</span>}
+                      {d.active && <span className="text-tertiary"> · In force now</span>}
+                      {d.source === "LEAVE" && <span className="text-tertiary"> · For your leave</span>}
                     </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-tertiary hover:text-danger-text"
                       onClick={() => {
                         setRemoveError(null);
                         setRemoving(d);
@@ -162,12 +163,12 @@ export const DelegateApprovalsSection: React.FC = () => {
 
           {(delegations.data?.received ?? []).length > 0 && (
             <section className="space-y-2">
-              <p className="text-sm font-medium text-brown-800">Delegated to You</p>
-              <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+              <p className="text-body font-medium text-primary">Delegated to you</p>
+              <ul className="divide-y divide-divider rounded-control border border-divider">
                 {delegations.data?.received.map((d) => (
-                  <li key={d.id} className="px-4 py-2.5 text-sm">
+                  <li key={d.id} className="px-4 py-2.5 text-body">
                     From <strong className="font-medium">{d.delegator.name ?? "a colleague"}</strong> · {range(d)}
-                    {d.active && <span className="text-muted-foreground"> · In force now</span>}
+                    {d.active && <span className="text-tertiary"> · In force now</span>}
                   </li>
                 ))}
               </ul>
@@ -175,7 +176,7 @@ export const DelegateApprovalsSection: React.FC = () => {
           )}
 
           {adding ? (
-            <form onSubmit={submit} noValidate className="space-y-4 rounded-lg border border-brown-200 p-4">
+            <form onSubmit={submit} noValidate className="space-y-4 rounded-card border border-divider p-4">
               <div className="space-y-2">
                 <RequiredLabel htmlFor="delegation-dates" required>Dates</RequiredLabel>
                 <DateRangePicker id="delegation-dates" value={dates} onChange={setDates} ariaLabel="Delegation dates" />
@@ -188,7 +189,7 @@ export const DelegateApprovalsSection: React.FC = () => {
                   onChange={setDelegate}
                   placeholder="Select a person"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-hint text-tertiary">
                   They are asked beside you; whoever answers first decides, on your behalf.
                 </p>
               </div>
@@ -203,9 +204,9 @@ export const DelegateApprovalsSection: React.FC = () => {
               </div>
             </form>
           ) : (
-            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={startAdding}>
-              <Plus className="h-4 w-4" />
-              Add Delegation
+            <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={startAdding}>
+              <Icon icon={Add01Icon} size="sm" />
+              Add delegation
             </Button>
           )}
         </>
@@ -213,7 +214,7 @@ export const DelegateApprovalsSection: React.FC = () => {
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove Delegation?"
+        title="Remove delegation?"
         description={
           removing
             ? `${removing.delegate.name ?? "Your delegate"} stops being asked for you from now on.`

@@ -1,7 +1,8 @@
 "use client";
 
 import { FC } from "react";
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
+import { InlineAlert } from "@/components/desact/alert";
 
 type Props = {
   isOpen: boolean;
@@ -58,8 +60,8 @@ export const JobLevelDeleteModal: FC<Props> = ({
     <AlertDialogContent>
       <AlertDialogHeader>
         <div className="flex items-center gap-3 text-left">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-danger-100 text-danger-600">
-            <Trash2 className="h-5 w-5"/>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+            <Icon icon={Delete02Icon} />
           </span>
           <div className="space-y-1">
             <AlertDialogTitle className="capitalize">Delete {entityLabel}</AlertDialogTitle>
@@ -71,14 +73,14 @@ export const JobLevelDeleteModal: FC<Props> = ({
         </div>
       </AlertDialogHeader>
 
-      <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+      <div className="rounded-card border border-divider bg-mist p-4">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600"/>
+          <Icon icon={Alert02Icon} className="mt-0.5 shrink-0 text-secondary" />
 
           <div>
-            <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
+            <h4 className="mb-1 font-medium text-primary">Warning</h4>
 
-            <div className="space-y-1 text-sm text-danger-700">
+            <div className="space-y-1 text-body text-secondary">
               {affectedLevels !== undefined && affectedLevels > 0 && (
                 <p>
                   <strong>{affectedLevels}</strong> level{affectedLevels === 1 ? "" : "s"} in this
@@ -112,12 +114,9 @@ export const JobLevelDeleteModal: FC<Props> = ({
       </div>
 
       {errorMessage && (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-        >
+        <InlineAlert tone="declined">
           {errorMessage}
-        </p>
+        </InlineAlert>
       )}
 
       <AlertDialogFooter>
@@ -130,7 +129,7 @@ export const JobLevelDeleteModal: FC<Props> = ({
             e.preventDefault();
             onConfirmAction();
           }}
-          className="bg-danger-600 text-white hover:bg-danger-700"
+          destructive
         >
           Delete {entityLabel}
         </AlertDialogAction>

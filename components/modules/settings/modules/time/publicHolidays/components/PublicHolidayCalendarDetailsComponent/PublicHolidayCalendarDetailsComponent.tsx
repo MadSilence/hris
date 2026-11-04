@@ -3,17 +3,18 @@
 import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePublicHolidayCalendars";
 import { FC, useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, CalendarPlus, Download, Pencil, Rss, Users, X } from "lucide-react";
+import { Calendar03Icon, CalendarAdd01Icon, Cancel01Icon, Download01Icon, PencilEdit02Icon, RssIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Button } from "@/components/desact/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import { isoToDate } from "@/components/ui/DatePicker";
@@ -61,6 +62,7 @@ import {
   ExportDataFormValues,
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   calendar: PublicHolidayCalendar;
@@ -395,40 +397,40 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
           <div className="flex items-center gap-3">
             <Button type="button"
               size="icon"
-              variant="outline"
+              variant="secondary"
               aria-label="Subscribe in your calendar app"
               title="Subscribe in your calendar app"
               onClick={() => setIsSubscribeOpen(true)}
             >
-              <Rss className="h-4 w-4" />
+              <Icon icon={RssIcon} size="sm" />
             </Button>
             {canManage ? (
               <Button type="button"
                 size="icon"
-                variant="outline"
+                variant="secondary"
                 aria-label="Export calendar"
                 onClick={() => setIsExportOpen(true)}
               >
-                <Download className="h-4 w-4" />
+                <Icon icon={Download01Icon} size="sm" />
               </Button>
             ) : null}
             <StatusBadge status={status}/>
           </div>
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
+        <p className="max-w-2xl text-body text-tertiary">
           This is the holiday-days section for this calendar — review and edit the days below, and
           manage who this calendar is assigned to.
         </p>
       </div>
 
       <Tabs defaultValue="holidays" className="flex min-h-0 flex-1 flex-col gap-4">
-        <TabsList className="grid w-full flex-none grid-cols-2 bg-brown-50">
+        <TabsList className="grid w-full flex-none grid-cols-2 bg-subtle">
           <TabsTrigger value="holidays" className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4" />
+            <Icon icon={Calendar03Icon} size="sm" />
             Holidays
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+            <Icon icon={UserGroupIcon} size="sm" />
             Assigned people
           </TabsTrigger>
         </TabsList>
@@ -437,15 +439,15 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
           {isEditing ? (
             <div className="flex h-full min-h-0 flex-col gap-5">
               <div className="flex flex-none items-center justify-between gap-4">
-                <h3 className="text-sm font-semibold text-foreground">Edit calendar</h3>
+                <h3 className="text-body font-semibold text-primary">Edit calendar</h3>
                 <div className="flex gap-2">
                   <Button type="button"
-                    variant="outline"
+                    variant="secondary"
                     className="gap-1.5"
                     disabled={isSaving}
                     onClick={cancelEditMode}
                   >
-                    <X className="h-4 w-4" />
+                    <Icon icon={Cancel01Icon} size="sm" />
                     Cancel
                   </Button>
                   <Button type="button" disabled={!isEditFormValid || isSaving} onClick={handleSave}>
@@ -475,13 +477,13 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
               <div className="flex flex-none items-end justify-between gap-4">
                 <div>
-                  <h2 className="mb-1 text-sm font-semibold text-[var(--color-text-primary)]">
+                  <h2 className="mb-1 text-body font-semibold text-primary">
                     Holiday days
                   </h2>
-                  <p className="text-sm text-[var(--color-text-tertiary)]">
+                  <p className="text-body text-tertiary">
                     Add all public holiday days for this calendar.
                     {editedHolidays.length > 0 && (
-                      <span className="ml-2 font-medium text-[var(--color-text-primary)]">
+                      <span className="ml-2 font-medium text-primary">
                         {totalDraftDays(editedHolidays)}{" "}
                         {totalDraftDays(editedHolidays) === 1 ? "day" : "days"} added
                       </span>
@@ -500,19 +502,19 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   errors={holidayErrors}
                   disabled={isSaving}
                 />
-                {generalError && <p className="mt-2 text-sm text-destructive">{generalError}</p>}
+                {generalError && <FormError message={generalError} />}
               </div>
 
-              {saveError && <p className="flex-none text-sm text-destructive">{saveError}</p>}
+              {saveError && <FormError message={saveError} />}
             </div>
           ) : (
             <div className="flex h-full min-h-0 flex-col gap-6">
               {/* Info block */}
               <div className="flex-none space-y-1 pb-1 pt-2">
-                <h2 className="text-lg font-semibold text-foreground">
-                  <span className="font-normal text-brown-400">{holidays.length}</span> Holidays
+                <h2 className="text-section-title text-primary">
+                  <span className="font-normal text-tertiary">{holidays.length}</span> Holidays
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body text-tertiary">
                   Public holiday days included in this calendar.
                 </p>
               </div>
@@ -534,12 +536,12 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
                   {canManage && canFillYear && (
                     <Button type="button"
-                      variant="outline"
+                      variant="secondary"
                       className="gap-1.5"
                       disabled={fillYear.isPending}
                       onClick={handleFillYear}
                     >
-                      <CalendarPlus className="h-4 w-4" />
+                      <Icon icon={CalendarAdd01Icon} size="sm" />
                       {fillYear.isPending ? "Loading…" : `Load ${year}`}
                     </Button>
                   )}
@@ -547,31 +549,31 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
                 {canManage ? (
                   <Button type="button" className="gap-1.5" onClick={enterEditMode}>
-                    <Pencil className="h-4 w-4" />
+                    <Icon icon={PencilEdit02Icon} size="sm" />
                     Edit
                   </Button>
                 ) : null}
               </div>
 
               {fillMessage && (
-                <p className="flex-none text-sm text-muted-foreground">{fillMessage}</p>
+                <p className="flex-none text-body text-tertiary">{fillMessage}</p>
               )}
               {revertMessage && (
-                <p className="flex-none text-sm text-muted-foreground">{revertMessage}</p>
+                <p className="flex-none text-body text-tertiary">{revertMessage}</p>
               )}
 
               {isHolidaysLoading ? (
-                <div className="min-h-0 flex-1 pr-1 text-sm text-muted-foreground">
+                <div className="min-h-0 flex-1 pr-1 text-body text-tertiary">
                   Loading {year}…
                 </div>
               ) : visibleHolidays.length > 0 ? (
                 <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                   {/* Same columns as the editor, so switching into Edit does not move anything. */}
-                  <table className="w-full caption-bottom table-fixed text-sm">
-                    <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+                  <table className="w-full caption-bottom table-fixed text-body">
+                    <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                       <TableRow>
                         <TableHead className="w-44">Date</TableHead>
-                        <TableHead className="w-44">End Date</TableHead>
+                        <TableHead className="w-44">End date</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead className="w-12">
                           <span className="sr-only">Actions</span>
@@ -585,21 +587,21 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                         const override = overrideByHoliday.get(holiday.id);
 
                         return (
-                          <TableRow key={holiday.id} className="border-brown-100 [&_td]:py-2">
-                            <TableCell className="text-muted-foreground">
+                          <TableRow key={holiday.id} className="border-divider [&_td]:py-2">
+                            <TableCell className="text-tertiary">
                               {formatHolidayDate(holiday.holidayDate)}
                               {holiday.observedDate &&
                                 holiday.observedDate !== holiday.holidayDate && (
-                                  <span className="ml-2 text-xs text-brown-400">
+                                  <span className="ml-2 text-hint text-tertiary">
                                     observed {formatHolidayDate(holiday.observedDate)}
                                   </span>
                                 )}
                             </TableCell>
-                            <TableCell className="text-muted-foreground">
+                            <TableCell className="text-tertiary">
                               {isSpan ? (
                                 <span className="flex items-baseline gap-2">
                                   {formatHolidayDate(holiday.endDate)}
-                                  <span className="text-xs text-brown-400">
+                                  <span className="text-hint text-tertiary">
                                     {holidaySpanDays(holiday.holidayDate, holiday.endDate)} days
                                   </span>
                                 </span>
@@ -610,7 +612,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                             <TableCell className="font-medium">
                               {holiday.name}
                               {holiday.dayPart === PublicHolidayDayPart.HalfDay && (
-                                <span className="ml-2 rounded bg-brown-100 px-1.5 py-0.5 text-[10px] font-normal text-brown-600">
+                                <span className="ml-2 rounded-tag bg-mist px-1.5 py-0.5 text-hint font-normal text-secondary">
                                   Half day
                                 </span>
                               )}
@@ -632,27 +634,27 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   </table>
                 </div>
               ) : holidaySearch ? (
-                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
-                  <p className="text-sm font-medium text-foreground">
+                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
+                  <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
+                  <p className="text-body font-medium text-primary">
                     No holidays match your search
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">Try a different name or date.</p>
+                  <p className="mt-1 text-body text-tertiary">Try a different name or date.</p>
                 </div>
               ) : !canManage ? (
-                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 text-center">
-                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
-                  <p className="text-sm font-medium text-foreground">No holidays for {year}</p>
+                <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
+                  <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
+                  <p className="text-body font-medium text-primary">No holidays for {year}</p>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={enterEditMode}
-                  className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-brown-300 px-6 py-10 text-center transition-colors hover:border-brown-400 hover:bg-brown-50"
+                  className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed border-field px-6 py-10 text-center transition-colors hover:border-strong hover:bg-subtle"
                 >
-                  <CalendarDays className="mb-3 h-6 w-6 text-brown-400" />
-                  <p className="text-sm font-medium text-foreground">Click to start editing</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
+                  <p className="text-body font-medium text-primary">Click to start editing</p>
+                  <p className="mt-1 text-body text-tertiary">
                     {canFillYear
                       ? `Add holiday days for ${year}, or load them from the source above.`
                       : `Add holiday days for ${year} to this calendar.`}

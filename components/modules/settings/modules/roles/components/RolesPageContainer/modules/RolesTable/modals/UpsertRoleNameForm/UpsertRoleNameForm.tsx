@@ -3,12 +3,13 @@
 import { FC, FormEvent, useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export type UpsertRoleNameFormValues = {
   name: string;
@@ -105,7 +106,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="role-name" required>Role Name</RequiredLabel>
+        <RequiredLabel htmlFor="role-name" required>Role name</RequiredLabel>
 
         <Input
           id="role-name"
@@ -118,9 +119,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
         />
 
         {formik.errors.name && (
-          <p className="text-sm text-destructive">
-            {formik.errors.name}
-          </p>
+          <FieldError>{formik.errors.name}</FieldError>
         )}
       </div>
 
@@ -141,18 +140,17 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
       <DialogFooter className="mt-8">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
-        >
+ >
           Cancel
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading || !canSubmit}
-          className="bg-brown-600 text-white hover:bg-brown-700"
-        >
+ >
           {submitText}
         </Button>
       </DialogFooter>

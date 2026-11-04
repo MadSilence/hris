@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronRight, LayoutTemplate } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Badge } from "@/components/desact/badge";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -16,10 +17,10 @@ import { useTemplates } from "@/components/modules/settings/modules/templates/ho
 export const TEMPLATE_KIND_ORDER: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS", "REVIEW_FORM"];
 
 export const TEMPLATE_KIND_LABEL: Record<TemplateKind, string> = {
-  FIELD_SET: "Field Sets",
+  FIELD_SET: "Field sets",
   ROLE: "Roles",
-  PROCESS: "Onboarding Checklists",
-  REVIEW_FORM: "Review Forms",
+  PROCESS: "Onboarding checklists",
+  REVIEW_FORM: "Review forms",
 };
 
 const KIND_DESCRIPTION: Record<TemplateKind, string> = {
@@ -61,7 +62,7 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
         <CatalogueSkeleton/>
       ) : (data ?? []).filter((t) => !kind || t.kind === kind).length === 0 ? (
         <EmptyState
-          icon={<LayoutTemplate className="h-6 w-6 text-brown-600"/>}
+          scene="forms"
           title="No templates to apply"
           description="Templates appear here for what you may set up: roles, profile fields or onboarding checklists."
         />
@@ -74,10 +75,10 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
           return (
             <section key={k} className="space-y-2" aria-labelledby={`templates-${k}`}>
               <div>
-                <h2 id={`templates-${k}`} className="text-base font-semibold">{TEMPLATE_KIND_LABEL[k]}</h2>
-                <p className="text-sm text-muted-foreground">{KIND_DESCRIPTION[k]}</p>
+                <h2 id={`templates-${k}`} className="text-body font-semibold">{TEMPLATE_KIND_LABEL[k]}</h2>
+                <p className="text-body text-tertiary">{KIND_DESCRIPTION[k]}</p>
               </div>
-              <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+              <ul className="divide-y divide-divider rounded-control border border-divider">
                 {rows.map((t) => <TemplateRow key={t.key} template={t}/>)}
               </ul>
             </section>
@@ -94,26 +95,26 @@ const TemplateRow: React.FC<{ template: TemplateSummaryDTO }> = ({ template }) =
     <li>
       <Link
         href={`/settings/general/templates/${encodeURIComponent(template.key)}`}
-        className="flex items-center gap-4 px-4 py-3 no-underline hover:bg-brown-50"
+        className="flex items-center gap-4 px-4 py-3 no-underline hover:bg-subtle"
       >
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-foreground">{template.title}</span>
+            <span className="font-medium text-primary">{template.title}</span>
             {template.suggested && <Badge variant="outline">Suggested</Badge>}
             {template.appliedVersion != null && (
-              <Badge variant="outline" className="border-brown-200 bg-brown-50 text-brown-600">
+              <Badge variant="outline" className="border-divider bg-subtle text-secondary">
                 Applied v{template.appliedVersion}
                 {template.appliedAt ? ` · ${formatDisplayDate(template.appliedAt, { style: "medium" })}` : ""}
               </Badge>
             )}
             {newer && <Badge variant="outline">v{template.version} Available</Badge>}
           </div>
-          <p className="text-sm text-muted-foreground">{template.summary}</p>
+          <p className="text-body text-tertiary">{template.summary}</p>
         </div>
-        <span className="shrink-0 text-sm text-muted-foreground">
+        <span className="shrink-0 text-body text-tertiary">
           {template.itemCount} {template.itemCount === 1 ? "item" : "items"}
         </span>
-        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground"/>
+        <Icon icon={ArrowRight01Icon} size="sm" className="shrink-0 text-tertiary" />
       </Link>
     </li>
   );
@@ -122,7 +123,7 @@ const TemplateRow: React.FC<{ template: TemplateSummaryDTO }> = ({ template }) =
 const CatalogueSkeleton: React.FC = () => (
   <div className="space-y-2" aria-busy="true">
     <Skeleton className="h-5 w-40"/>
-    <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+    <ul className="divide-y divide-divider rounded-control border border-divider">
       {[0, 1, 2].map((i) => (
         <li key={i} className="flex items-center gap-4 px-4 py-3">
           <div className="flex-1 space-y-2">

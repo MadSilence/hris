@@ -1,17 +1,18 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Download } from "lucide-react";
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+} from "@/components/desact/dialog";
+import { Switch } from "@/components/desact/switch";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { FormError } from "@/components/feedback/FormError";
 import { ForbiddenError } from "@/components/clients/exceptions";
@@ -131,11 +132,11 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
     <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
       <Button type="button"
         size="icon"
-        variant="outline"
+        variant="secondary"
         aria-label="Export people"
         onClick={() => setOpen(true)}
       >
-        <Download className="h-4 w-4" />
+        <Icon icon={Download01Icon} size="sm" />
       </Button>
 
       <Dialog
@@ -154,10 +155,10 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
 
           <FormError message={errorMessage} />
 
-          <label className="flex items-start justify-between gap-4 rounded-md border border-brown-200 px-4 py-3">
+          <label className="flex items-start justify-between gap-4 rounded-control border border-divider px-4 py-3">
             <span>
-              <span className="block text-sm font-medium">Export all columns</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
+              <span className="block text-body font-medium">Export all columns</span>
+              <span className="mt-0.5 block text-hint text-tertiary">
                 Every column you are allowed to see, not only the ones shown.
               </span>
             </span>

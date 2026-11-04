@@ -3,9 +3,11 @@
 import React, { FormEvent, useCallback } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
+import { FormError } from "@/components/feedback/FormError";
 
 export type PasswordValues = {
   password: string;
@@ -51,44 +53,13 @@ export const passwordSchema = yup.object({
     .nonNullable(),
 });
 
-type FieldErrorProps = {
-  message?: string;
-};
-
-function FieldError({ message }: FieldErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p className="text-sm text-destructive" role="alert">
-      {message}
-    </p>
-  );
-}
-
-type ApiErrorProps = {
-  message?: string;
-};
-
-function ApiErrorMessage({ message }: ApiErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p
-      className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-      role="alert"
-    >
-      {message}
-    </p>
-  );
-}
-
 function ConfirmHeader() {
   return (
     <div className="space-y-3 text-center">
-      <h1 className="text-4xl font-medium">Set your password</h1>
+      <h1 className="text-greeting">Set your password</h1>
 
-      <p className="mx-auto max-w-xl text-md text-[var(--color-text-tertiary)]">
-        Create a strong password for your SixSoftware account.
+      <p className="mx-auto max-w-xl text-body text-tertiary">
+        Create a strong password for your noddo account.
       </p>
     </div>
   );
@@ -103,24 +74,24 @@ export type SignInAddress = {
 function ConfirmSuccessBlock({ signInAddress }: { signInAddress?: SignInAddress }) {
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-      <h1 className="text-4xl font-medium">Password set</h1>
+      <h1 className="text-greeting">Password set</h1>
 
-      <p className="text-md text-[var(--color-text-tertiary)]">
+      <p className="text-body text-tertiary">
         Your password has been created. You can now sign in and continue setting
         up your company.
       </p>
 
       {signInAddress ? (
-        <p className="text-md text-[var(--color-text-tertiary)]">
+        <p className="text-body text-tertiary">
           Your company signs in at{" "}
-          <strong className="font-medium text-[var(--color-text-primary)]">{signInAddress.label}</strong>
+          <strong className="font-medium text-primary">{signInAddress.label}</strong>
           {" "}— keep that address.
         </p>
       ) : null}
 
-      <p className="text-sm text-[var(--color-text-tertiary)]">
+      <p className="text-body text-tertiary">
         Head over to your company&apos;s{" "}
-        <a href={signInAddress?.href ?? "/login"} className="underline underline-offset-4">
+        <a href={signInAddress?.href ?? "/login"} className="text-accent-text underline-offset-4 hover:underline">
           login page
         </a>{" "}
         to get started.
@@ -197,11 +168,11 @@ export default function ConfirmTrialForm({
               aria-invalid={!!formik.errors.password}
             />
 
-            <FieldError message={formik.errors.password}/>
+            <FieldError>{formik.errors.password}</FieldError>
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="confirm-password-repeat" required>Confirm Password</RequiredLabel>
+            <RequiredLabel htmlFor="confirm-password-repeat" required>Confirm password</RequiredLabel>
 
             <Input
               id="confirm-password-repeat"
@@ -217,17 +188,17 @@ export default function ConfirmTrialForm({
               aria-invalid={!!formik.errors.confirmPassword}
             />
 
-            <FieldError message={formik.errors.confirmPassword}/>
+            <FieldError>{formik.errors.confirmPassword}</FieldError>
           </div>
 
-          <p className="text-sm text-[var(--color-text-tertiary)]">
+          <p className="text-body text-tertiary">
             Use at least 8 characters with upper &amp; lower case letters, a
             number, and a symbol.
           </p>
 
-          <ApiErrorMessage message={apiError}/>
+          <FormError message={apiError} />
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
+          <Button size="lg" type="submit" disabled={busy} className="w-full">
             {busy ? "Saving…" : "Set password"}
           </Button>
         </form>

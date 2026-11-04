@@ -77,7 +77,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
         ))}
 
         {attributesNotice && (
-          <div className="mb-6 rounded-lg border border-dashed border-brown-200 px-4 py-6 text-sm text-muted-foreground">
+          <div className="mb-6 rounded-card border border-dashed border-divider px-4 py-6 text-body text-tertiary">
             {attributesNotice}
           </div>
         )}
@@ -91,7 +91,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
           >
             <ProfileSectionCard title={group.name} actions={renderGroupActions?.(group.id)}>
               {group.attributes.length ? (
-                <div className="divide-y divide-brown-100">
+                <div className="divide-y divide-divider">
                   {group.attributes
                     .slice()
                     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -109,7 +109,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
                     ))}
                 </div>
               ) : (
-                <div className="py-4 text-sm text-muted-foreground">No attributes</div>
+                <div className="py-4 text-body text-tertiary">No attributes</div>
               )}
             </ProfileSectionCard>
           </div>

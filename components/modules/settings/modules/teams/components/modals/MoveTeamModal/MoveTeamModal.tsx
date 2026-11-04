@@ -2,7 +2,8 @@
 
 import React from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -10,8 +11,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import type { TeamTreeNode } from "@/models/teams";
 
 type Props = {
@@ -49,17 +50,17 @@ export function MoveTeamModal({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="flex items-center gap-3 rounded-lg border border-brown-200 bg-brown-50 p-3">
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-brown-900">
+          <div className="flex items-center gap-3 rounded-control border border-divider bg-subtle p-3">
+            <span className="min-w-0 flex-1 truncate text-body font-medium text-primary">
               {team.name}
             </span>
-            <ArrowRight className="h-4 w-4 flex-none text-brown-400" />
-            <span className="min-w-0 flex-1 truncate text-right text-sm font-medium text-brown-900">
+            <Icon icon={ArrowRight02Icon} size="sm" className="flex-none text-tertiary" />
+            <span className="min-w-0 flex-1 truncate text-right text-body font-medium text-primary">
               {target ? target.name : "Top level"}
             </span>
           </div>
 
-          <p className="text-sm text-brown-600">
+          <p className="text-body text-secondary">
             {peopleCount} {peopleCount === 1 ? "person" : "people"}
             {subCount > 0 && ` · ${subCount} sub-${subCount === 1 ? "team" : "teams"}`}
             {" — everything inside moves with it."}
@@ -69,7 +70,7 @@ export function MoveTeamModal({
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
           <Button type="button" onClick={onConfirm} disabled={isPending}>

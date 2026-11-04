@@ -4,9 +4,12 @@ import { FormEvent, useCallback } from "react";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { FieldError } from "@/components/desact/field-error";
+import { FormError } from "@/components/feedback/FormError";
+import { InlineAlert } from "@/components/desact/alert";
 import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
 
 export type LoginFormValues = {
@@ -56,36 +59,6 @@ function sanitize(values: LoginFormValues): LoginFormValues {
   };
 }
 
-type FieldErrorProps = {
-  message?: string;
-};
-
-function FieldError({ message }: FieldErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p className="text-sm text-destructive" role="alert">
-      {message}
-    </p>
-  );
-}
-
-type ApiErrorProps = {
-  message?: string;
-};
-
-function ApiErrorMessage({ message }: ApiErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p
-      className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-      role="alert"
-    >
-      {message}
-    </p>
-  );
-}
 
 export default function LoginForm({
   onSubmitAction,
@@ -134,25 +107,18 @@ export default function LoginForm({
     <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">{headline}</h1>
+          <h1 className="text-page-title">{headline}</h1>
 
-          <p className="text-md text-[var(--color-text-tertiary)]">
+          <p className="text-body text-secondary">
             {subheadline}
           </p>
         </div>
 
-        {notice && (
-          <p
-            className="rounded-md border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700"
-            role="status"
-          >
-            {notice}
-          </p>
-        )}
+        {notice && <InlineAlert tone="approved">{notice}</InlineAlert>}
 
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email Address</Label>
+            <Label htmlFor="login-email">Email address</Label>
 
             <Input
               id="login-email"
@@ -165,11 +131,10 @@ export default function LoginForm({
               }
               disabled={busy}
               required
-              className="h-11"
               aria-invalid={!!formik.errors.email}
             />
 
-            <FieldError message={formik.errors.email}/>
+            <FieldError>{formik.errors.email}</FieldError>
           </div>
 
           <div className="space-y-2">
@@ -186,32 +151,31 @@ export default function LoginForm({
               }
               disabled={busy}
               required
-              className="h-11"
               aria-invalid={!!formik.errors.password}
             />
 
-            <FieldError message={formik.errors.password}/>
+            <FieldError>{formik.errors.password}</FieldError>
           </div>
 
-          <ApiErrorMessage message={apiError}/>
+          <FormError message={apiError} />
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
+          <Button type="submit" size="lg" loading={busy} className="w-full">
             {busy ? "Signing in…" : "Sign in"}
           </Button>
 
         </form>
 
-        <div className="space-y-2 text-center text-sm text-muted-foreground">
+        <div className="space-y-2 text-center text-body text-tertiary">
           <p>
-            <Link href="/forgot-password" className="underline-offset-4 hover:underline">
-              Forgot Password?
+            <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">
+              Forgot password?
             </Link>
           </p>
 
           {changeCompanyHref ? (
             <p>
               Not your company?{" "}
-              <a href={changeCompanyHref} className="underline underline-offset-4">
+              <a href={changeCompanyHref} className="text-accent-text underline-offset-4 hover:underline">
                 Sign in to another one
               </a>
             </p>

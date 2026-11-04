@@ -54,7 +54,7 @@ const notification = (over: Partial<Notification>): Notification => ({
 const open = { type: "TIME_OFF_REQUEST", id: "r", status: "PENDING", open: true, details: null };
 const closed = { ...open, status: "APPROVED", open: false };
 
-describe("NotificationsInbox — Needs Action (sitting 2, H5)", () => {
+describe("NotificationsInbox — Needs action (sitting 2, H5)", () => {
   beforeEach(() => {
     mockQuery = "";
   });
@@ -71,10 +71,10 @@ describe("NotificationsInbox — Needs Action (sitting 2, H5)", () => {
     });
     render(<NotificationsInbox />);
 
-    expect(screen.getByRole("button", { name: /Needs Action/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /Needs action/ })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(/Waiting Wanda/)).toBeInTheDocument();
     expect(screen.queryByText(/Answered Aron/)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/requested/)).toHaveLength(1);
+    expect(screen.getAllByText(/ requested \d/)).toHaveLength(1);
   });
 
   it("says nothing needs action when every question has been answered", () => {
@@ -89,7 +89,7 @@ describe("NotificationsInbox — Needs Action (sitting 2, H5)", () => {
     answer({ isLoading: false, data: [] });
     render(<NotificationsInbox />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Needs Action/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Needs action/ }));
     expect(mockReplace).toHaveBeenLastCalledWith("/inbox?filter=needs-action", { scroll: false });
 
     fireEvent.click(screen.getByRole("button", { name: /^All/ }));

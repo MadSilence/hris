@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/components/desact/card";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 
 export default function HomePage() {
   return (
@@ -9,11 +9,11 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="text-center flex flex-col items-center gap-6 py-10">
-        <h1 className="text-5xl font-medium">
+        <h1 className="text-greeting">
           HRIS your team will actually enjoy
         </h1>
 
-        <p className="text-lg text-[var(--color-text-tertiary)] max-w-2xl">
+        <p className="text-section-title text-tertiary max-w-2xl">
           Centralize employee records, documents, time off and working
           hours—beautifully simple, tenant-ready, and fast.
         </p>
@@ -31,7 +31,7 @@ export default function HomePage() {
 
       {/* TRUST */}
       <section className="flex flex-col items-center gap-6">
-        <p className="text-sm text-[var(--color-text-tertiary)]">
+        <p className="text-body text-tertiary">
           Trusted by teams like
         </p>
 
@@ -39,7 +39,7 @@ export default function HomePage() {
           {["Acme", "Polar", "Nimbus", "Zento", "Volt"].map((name) => (
             <div
               key={name}
-              className="px-4 py-2 border rounded-lg text-sm text-[var(--color-text-tertiary)]"
+              className="px-4 py-2 border rounded-card text-body text-tertiary"
             >
               {name}
             </div>
@@ -51,17 +51,17 @@ export default function HomePage() {
       <section className="grid gap-6 md:grid-cols-3">
         {[
           {
-            title: "Employee Records",
+            title: "Employee records",
             body: "Single source of truth for profiles, docs, and lifecycle events—secure and searchable.",
             link: "/products#records",
           },
           {
-            title: "Time Off",
+            title: "Time off",
             body: "Policies, approvals, accruals and carry-over, automated and audit-ready.",
             link: "/products#time-off",
           },
           {
-            title: "Working Hours",
+            title: "Working hours",
             body: "Lightweight timesheets and attendance with review and exports.",
             link: "/products#working-hours",
           },
@@ -76,7 +76,7 @@ export default function HomePage() {
             </CardContent>
 
             <CardFooter>
-              <Link href={f.link} className="text-sm underline">
+              <Link href={f.link} className="text-body text-accent-text underline-offset-4 hover:underline">
                 Learn more →
               </Link>
             </CardFooter>
@@ -93,7 +93,7 @@ export default function HomePage() {
             link: "/solutions#hr",
           },
           {
-            title: "For People Managers",
+            title: "For people managers",
             body: "Approvals, schedules, and team insights in one place.",
             link: "/solutions#people-managers",
           },
@@ -108,7 +108,7 @@ export default function HomePage() {
             </CardContent>
 
             <CardFooter>
-              <Link href={s.link} className="text-sm underline">
+              <Link href={s.link} className="text-body text-accent-text underline-offset-4 hover:underline">
                 Explore →
               </Link>
             </CardFooter>
@@ -125,8 +125,8 @@ export default function HomePage() {
         ].map(([value, label]) => (
           <Card key={value}>
             <CardContent className="flex flex-col items-center gap-2">
-              <div className="text-3xl font-semibold">{value}</div>
-              <div className="text-sm text-[var(--color-text-tertiary)]">
+              <div className="text-page-title">{value}</div>
+              <div className="text-body text-tertiary">
                 {label}
               </div>
             </CardContent>
@@ -159,11 +159,11 @@ export default function HomePage() {
       <section>
         <Card>
           <CardContent className="flex flex-col gap-4">
-            <blockquote className="italic text-lg">
-              “SixSoftware is the first HR system our managers actually like using.”
+            <blockquote className="text-section-title">
+              “noddo is the first HR system our managers actually like using.”
             </blockquote>
 
-            <div className="text-sm text-[var(--color-text-tertiary)]">
+            <div className="text-body text-tertiary">
               — Marta Kowalska, People Ops, Nimbus
             </div>
           </CardContent>
@@ -172,7 +172,7 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section className="flex flex-col gap-6">
-        <h2 className="text-3xl font-medium">FAQ</h2>
+        <h2 className="text-page-title">FAQ</h2>
 
         <div className="grid gap-6 md:grid-cols-3">
           {[

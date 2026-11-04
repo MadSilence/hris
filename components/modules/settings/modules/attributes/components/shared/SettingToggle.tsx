@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+import { Switch } from "@/components/desact/switch";
 
 /**
  * One on/off setting inside the attribute modals: label + optional hint on the left, switch on the
@@ -24,8 +24,8 @@ export function SettingToggle({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        <p className="text-body font-medium text-primary">{label}</p>
+        {hint && <p className="text-hint text-tertiary">{hint}</p>}
       </div>
       <Switch
         checked={checked}

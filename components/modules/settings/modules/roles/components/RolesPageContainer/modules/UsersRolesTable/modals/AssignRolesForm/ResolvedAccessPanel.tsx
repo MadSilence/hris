@@ -1,8 +1,9 @@
 "use client";
 
 import { FC } from "react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/desact/badge";
+import { ShieldCheckIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   RoleAccessPreviewField,
   RoleAccessPreviewResource,
@@ -44,16 +45,16 @@ export const ResolvedAccessPanel: FC<ResolvedAccessPanelProps> = ({
   emptyText,
 }) => {
   if (isLoading) {
-    return <p className="py-6 text-sm text-muted-foreground">Resolving access…</p>;
+    return <p className="py-6 text-body text-tertiary">Resolving access…</p>;
   }
 
   if (systemOwner) {
     return (
-      <div className="flex items-start gap-3 rounded-lg border border-brown-200 bg-brown-50 p-4">
-        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brown-600" />
-        <div className="text-sm">
+      <div className="flex items-start gap-3 rounded-card border border-divider bg-subtle p-4">
+        <Icon icon={ShieldCheckIcon} className="mt-0.5 shrink-0 text-secondary" />
+        <div className="text-body">
           <p className="font-medium">Full access</p>
-          <p className="text-muted-foreground">
+          <p className="text-tertiary">
             This selection includes the System Owner role, which grants everything and bypasses
             field-level restrictions. Listing individual rights here would understate it.
           </p>
@@ -63,11 +64,11 @@ export const ResolvedAccessPanel: FC<ResolvedAccessPanelProps> = ({
   }
 
   if (!rows || rows.length === 0) {
-    return <p className="py-6 text-sm text-muted-foreground">{emptyText}</p>;
+    return <p className="py-6 text-body text-tertiary">{emptyText}</p>;
   }
 
   return (
-    <ul className="divide-y divide-brown-100">
+    <ul className="divide-y divide-divider">
       {rows.map((row) => {
         const key = "resourceCode" in row ? row.resourceCode : row.fieldKey;
         const isCustomField = "source" in row && row.source === "custom";
@@ -75,15 +76,15 @@ export const ResolvedAccessPanel: FC<ResolvedAccessPanelProps> = ({
         return (
           <li key={key} className="flex items-center justify-between gap-3 py-2">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-sm">{row.label}</span>
+              <span className="truncate text-body">{row.label}</span>
               {isCustomField && (
-                <Badge variant="secondary" className="shrink-0">Custom</Badge>
+                <Badge variant="neutral" className="shrink-0">Custom</Badge>
               )}
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
               <Badge variant="outline">{ACTION_LABELS[row.action] ?? row.action}</Badge>
-              <span className="text-xs text-muted-foreground">{scopeText(row.scopes)}</span>
+              <span className="text-hint text-tertiary">{scopeText(row.scopes)}</span>
             </div>
           </li>
         );

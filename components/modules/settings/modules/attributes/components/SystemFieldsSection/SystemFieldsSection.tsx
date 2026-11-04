@@ -1,15 +1,16 @@
 "use client";
 
 import { FC, useMemo } from "react";
-import { Lock } from "lucide-react";
+import { SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Badge } from "@/components/desact/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/public/desact/src/components/ui/accordion";
+} from "@/components/desact/accordion";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
 import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
 import { isReferenceField, type FieldDTO } from "@/models/user/fields";
@@ -82,34 +83,34 @@ export const SystemFieldsSection: FC = () => {
       <Accordion type="multiple" defaultValue={groups.map(([name]) => name)} className="space-y-2">
         {groups.map(([name, groupFields]) => (
           <AccordionItem key={name} value={name} className="border-b-0">
-            <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+            <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
               <span className="flex items-center gap-2">
                 {name}
-                <span className="normal-case tracking-normal text-brown-400">
+                <span className="normal-case text-tertiary">
                   ({groupFields.length})
                 </span>
-                <Badge variant="secondary" className="font-normal normal-case tracking-normal">
+                <Badge variant="neutral" className="font-normal normal-case">
                   System
                 </Badge>
               </span>
             </AccordionTrigger>
 
             <AccordionContent className="pt-2">
-              <div className="divide-y divide-brown-100">
+              <div className="divide-y divide-divider">
                 {groupFields.map((field) => (
                   <div key={field.id} className={`${GRID} min-h-11 px-3 py-1.5`}>
-                    <span className="truncate text-sm text-foreground">{field.label}</span>
+                    <span className="truncate text-body text-primary">{field.label}</span>
                     <span>
                       <AttributeTypeChip type={field.type} />
                     </span>
-                    <span className="truncate text-sm text-muted-foreground">
+                    <span className="truncate text-body text-tertiary">
                       {fieldDetails(field)}
                     </span>
                     <span
-                      className="flex justify-end text-brown-300"
+                      className="flex justify-end text-disabled"
                       title="System fields can't be edited or deleted"
                     >
-                      <Lock className="h-4 w-4" />
+                      <Icon icon={SquareLock02Icon} size="sm" />
                     </span>
                   </div>
                 ))}

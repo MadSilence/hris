@@ -16,7 +16,7 @@ export default function TeamsPage() {
       <div className="flex-none space-y-3">
         <SettingsPageHeader title="Teams" backHref="/settings" />
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           Teams group people around projects and responsibilities, and one person can be on several. Switch between the structure chart and blocks of people, search by team or by person, and turn on Edit to move teams and people around.
         </PageDescription>
       </div>

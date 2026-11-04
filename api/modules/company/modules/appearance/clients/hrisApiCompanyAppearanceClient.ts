@@ -42,17 +42,18 @@ export class HrisApiCompanyAppearanceClient {
       `/public/company-appearance/${encodeURIComponent(subdomain)}`,
     );
     return {
-      brandColor: dto?.brandColor ?? null,
+      accent: dto?.accent ?? null,
       loginHeadline: dto?.loginHeadline ?? null,
       loginSubheadline: dto?.loginSubheadline ?? null,
       loginImageUrl: companyMapper.resolveBackendAssetUrl(dto?.loginImageUrl),
+      logoUrl: companyMapper.resolveBackendAssetUrl(dto?.logoUrl),
     };
   }
 
   /** The backend returns a backend-relative `/uploads/...` path; the browser needs an absolute URL. */
   private toModel(dto: CompanyAppearanceDTO): CompanyAppearance {
     return {
-      brandColor: dto.brandColor ?? null,
+      accent: dto.accent ?? null,
       loginImageUrl: companyMapper.resolveBackendAssetUrl(dto.loginImageUrl),
       loginHeadline: dto.loginHeadline ?? null,
       loginSubheadline: dto.loginSubheadline ?? null,
@@ -60,7 +61,6 @@ export class HrisApiCompanyAppearanceClient {
       // shown nowhere.
       useImageOnLogin: dto.useImageOnLogin ?? false,
       useImageOnDashboard: dto.useImageOnDashboard ?? false,
-      sidebarContrast: dto.sidebarContrast ?? false,
       // Named here because this mapper lists its fields: left out, the form would never have a
       // version to send back, and every save would skip the check silently.
       version: dto.version,

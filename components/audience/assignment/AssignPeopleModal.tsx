@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { FormError } from "@/components/feedback/FormError";
-import { AlertTriangle, ArrowLeft, Check, Repeat } from "lucide-react";
+import { Alert02Icon, ArrowLeft02Icon, RepeatIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -13,8 +14,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import {
   PeoplePicker,
   officeColumn,
@@ -327,13 +328,13 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
           ) : (
             <div className="space-y-3">
               {temporal && !live && (
-                <div className="flex flex-wrap gap-4 rounded-md border border-brown-200 px-4 py-3">
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-muted-foreground">Effective from *</span>
+                <div className="flex flex-wrap gap-4 rounded-control border border-divider px-4 py-3">
+                  <label className="flex flex-col gap-1 text-body">
+                    <span className="text-tertiary">Effective from *</span>
                     <DatePicker value={effectiveFrom} onChange={setEffectiveFrom} ariaLabel="Effective from" className="w-44" />
                   </label>
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-muted-foreground">Effective to</span>
+                  <label className="flex flex-col gap-1 text-body">
+                    <span className="text-tertiary">Effective to</span>
                     <DatePicker value={effectiveTo} onChange={setEffectiveTo} ariaLabel="Effective to" className="w-44" />
                   </label>
                 </div>
@@ -366,8 +367,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 whole point, and `ResolvedUser.isActive` says so.
               */}
               {includeInactive && (
-                <p className="flex items-start gap-2 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+                <p className="flex items-start gap-2 rounded-control bg-subtle px-4 py-3 text-body text-primary">
+                  <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
                   People who have left can be found this way but not assigned — they will be listed as
                   skipped. People who have not started yet, drafts included, are assigned normally.
                 </p>
@@ -378,8 +379,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 : null}
 
               {overCap && (
-                <p className="flex items-start gap-2 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+                <p className="flex items-start gap-2 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
+                  <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
                   You’ve selected {manual.size}. Add up to {MANUAL_CAP} manually, or use “select
                   everyone who matches” for larger groups.
                 </p>
@@ -395,17 +396,17 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
             <Button type="button" onClick={onCloseAction}>Done</Button>
           ) : step === "preview" ? (
             <>
-              <Button type="button" variant="outline" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
-                <ArrowLeft className="h-4 w-4" />
+              <Button type="button" variant="secondary" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
+                <Icon icon={ArrowLeft02Icon} size="sm" />
                 Back
               </Button>
               <Button type="button" onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
-                {busy ? "Applying…" : live ? "Create Live Rule" : `Add ${people(previewSummary?.willAssign ?? 0)}`}
+                {busy ? "Applying…" : live ? "Create live rule" : `Add ${people(previewSummary?.willAssign ?? 0)}`}
               </Button>
             </>
           ) : (
             <>
-              <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
+              <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
                 Cancel
               </Button>
               <Button type="button" onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
@@ -421,8 +422,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
 /** Said plainly, where the reader chooses it: a filter here is a promise about the future too. */
 const LiveRuleNote: React.FC<{ temporal: boolean }> = ({ temporal }) => (
-  <div className="flex items-start gap-3 rounded-md bg-info-50 px-4 py-3 text-sm text-info-800" data-test="live-rule-note">
-    <Repeat className="mt-0.5 h-4 w-4 flex-none" />
+  <div className="flex items-start gap-3 rounded-control bg-status-info-bg px-4 py-3 text-body text-status-info-text" data-test="live-rule-note">
+    <Icon icon={RepeatIcon} size="sm" className="mt-0.5 flex-none" />
     <div>
       <p className="m-0 font-medium">Everyone who matches now, and anyone who matches later.</p>
       <p className="m-0">
@@ -444,27 +445,27 @@ const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; noun: stri
   const lines = skipCountLines(summary.skippedByReason);
   return (
     <div className="space-y-4 px-1 py-6" data-test="assignment-preview">
-      <p className="m-0 text-base font-medium text-foreground">
+      <p className="m-0 text-body font-medium text-primary">
         {people(summary.willAssign)} will be assigned{summary.skipped > 0 ? `, ${summary.skipped} skipped` : ""}.
       </p>
       {lines.length > 0 && (
-        <ul className="m-0 list-none space-y-1 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+        <ul className="m-0 list-none space-y-1 rounded-control bg-subtle px-4 py-3 text-body text-primary">
           {lines.map((l) => <li key={l.reason}>{l.text}</li>)}
         </ul>
       )}
       {summary.conflicts > 0 && (
-        <p className="m-0 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
+        <p className="m-0 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
           {people(summary.conflicts)} already {summary.conflicts === 1 ? "has" : "have"} a {noun} from another live
           rule. That rule keeps it; this one does not overwrite it.
         </p>
       )}
       {live ? (
-        <p className="m-0 text-sm text-muted-foreground">
+        <p className="m-0 text-body text-tertiary">
           This creates a live rule — everyone who matches now, and anyone who matches later. You can find
           it, change it or switch it off in Settings → Automation.
         </p>
       ) : (
-        <p className="m-0 text-sm text-muted-foreground">
+        <p className="m-0 text-body text-tertiary">
           These people are assigned by hand, once. No rule takes a hand assignment away.
         </p>
       )}
@@ -478,12 +479,12 @@ const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> 
   return (
     <div className="space-y-4 px-1 py-6">
       <div className="flex items-start gap-3">
-        <Check className="mt-0.5 h-5 w-5 flex-none text-success-600" />
+        <Icon icon={Tick02Icon} className="mt-0.5 flex-none text-status-approved-icon" />
         <div>
-          <p className="m-0 font-medium text-foreground">
+          <p className="m-0 font-medium text-primary">
             Live rule “{result.ruleName}” created.
           </p>
-          <p className="m-0 mt-1 text-sm text-muted-foreground">
+          <p className="m-0 mt-1 text-body text-tertiary">
             {people(result.appliedNow)} added to the {noun} now
             {result.willAssign > result.appliedNow ? `, ${result.willAssign - result.appliedNow} more on their own date` : ""}.
             Anyone who matches later is added too.
@@ -491,13 +492,13 @@ const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> 
         </div>
       </div>
       {lines.length > 0 && (
-        <ul className="m-0 list-none space-y-1 rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+        <ul className="m-0 list-none space-y-1 rounded-control bg-subtle px-4 py-3 text-body text-primary">
           {lines.map((l) => <li key={l.reason}>{l.text}</li>)}
         </ul>
       )}
       <PermissionGate resource="SETTINGS.AUTOMATIONS" action="VIEW">
-        <Link href={`/settings/automation/automations/${result.ruleId}`} className="text-sm">
-          Open the Rule
+        <Link href={`/settings/automation/automations/${result.ruleId}`} className="text-body">
+          Open the rule
         </Link>
       </PermissionGate>
     </div>
@@ -519,28 +520,28 @@ const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, no
     <div className="space-y-4 px-1 py-6">
       <div className="flex items-start gap-3">
         {failed > 0 ? (
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-warning-600" />
+          <Icon icon={Alert02Icon} className="mt-0.5 flex-none text-status-pending-icon" />
         ) : (
-          <Check className="mt-0.5 h-5 w-5 flex-none text-success-600" />
+          <Icon icon={Tick02Icon} className="mt-0.5 flex-none text-status-approved-icon" />
         )}
         <div>
-          <p className="font-medium text-foreground">
+          <p className="font-medium text-primary">
             {created} of {total} {total === 1 ? "person" : "people"} added to the {noun}.
           </p>
           {created === 0 && (
-            <p className="mt-1 text-sm text-muted-foreground">Nothing changed.</p>
+            <p className="mt-1 text-body text-tertiary">Nothing changed.</p>
           )}
         </div>
       </div>
 
       {skipped > 0 && (
-        <div className="rounded-md bg-brown-50 px-4 py-3 text-sm text-brown-800">
+        <div className="rounded-control bg-subtle px-4 py-3 text-body text-primary">
           {skippedDetail ?? `${skipped} ${skipped === 1 ? "person was" : "people were"} skipped.`}
         </div>
       )}
 
       {failed > 0 && (
-        <div className="space-y-2 rounded-md bg-danger-50 px-4 py-3 text-sm text-danger-800">
+        <div className="space-y-2 rounded-control bg-status-declined-bg px-4 py-3 text-body text-status-declined-text">
           <p className="font-medium">
             {failed} {failed === 1 ? "person" : "people"} could not be added.
           </p>

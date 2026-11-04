@@ -1,9 +1,12 @@
 "use client";
 
+import { Illustration } from "@/components/illustrations/Illustration";
+import { Progress } from "@/components/desact/progress";
 import React, { useState } from "react";
-import { CheckCircle2, Circle, MessageSquare } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { CheckmarkCircle02Icon, CircleIcon, Message01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
 import { showError } from "@/lib/errors/errorToast";
@@ -65,36 +68,42 @@ export function PreboardingPageContainer({ token, initialPage, preview, onOpenFi
   const open = page.tasks.filter((t) => t.status === "OPEN").length;
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 py-8">
-      <header className="space-y-2 text-center">
-        <h1 className="text-4xl font-medium">{page.firstName ? `Welcome, ${page.firstName}` : "Welcome"}</h1>
-        <p className="text-md text-muted-foreground">
+    <div className="w-full space-y-8 py-8">
+      <header className="flex flex-col items-center gap-3 text-center">
+        <Illustration scene={open === 0 ? "all-caught-up" : "onboarding"} />
+        <h1 className="text-greeting">{page.firstName ? `Welcome, ${page.firstName}` : "Welcome"}</h1>
+        <p className="text-body text-secondary">
           {page.companyName ? `A few things to do before you start at ${page.companyName}` : "A few things to do before you start"}
           {page.startDate ? ` on ${formatDisplayDate(page.startDate, { style: "medium" })}` : ""}.
         </p>
-        <p className="text-sm text-muted-foreground">
-          {open === 0 ? "You are all done. Thank you." : `${open} of ${page.tasks.length} still to do. This link stays valid, so you can come back.`}
-        </p>
+        {page.tasks.length > 0 && (
+          <div className="flex w-full max-w-xs flex-col gap-1.5">
+            <Progress value={((page.tasks.length - open) / page.tasks.length) * 100} aria-label="Tasks done" />
+            <p className="text-hint text-tertiary">
+              {open === 0 ? "You're all done. Thank you." : `${page.tasks.length - open} of ${page.tasks.length} done. This link stays valid, so you can come back.`}
+            </p>
+          </div>
+        )}
       </header>
 
       <ul className="space-y-4">
         {page.tasks.map((task) => (
-          <li key={task.id} className="space-y-3 rounded-lg border border-brown-200 p-4" data-testid="preboarding-task">
+          <li key={task.id} className="space-y-3 rounded-card border border-divider bg-card p-4 shadow-card" data-testid="preboarding-task">
             <div className="flex items-start gap-3">
               {task.status === "DONE"
-                ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-success-600" aria-label="Done" />
-                : <Circle className="mt-0.5 h-5 w-5 text-muted-foreground" aria-label="To do" />}
+                ? <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label="Done" />
+                : <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label="To do" />}
               <div className="flex-1">
                 {/* The icon alone did not read as done in the walk (SWEEP S11): a finished task says so. */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className={`text-base font-medium leading-6 ${task.status === "DONE" ? "text-muted-foreground" : ""}`}>{task.title}</h2>
+                  <h2 className={`text-body font-medium leading-6 ${task.status === "DONE" ? "text-tertiary" : ""}`}>{task.title}</h2>
                   {task.status === "DONE" && <StatusBadge status="active" label="Done" />}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-hint text-tertiary">
                   {TASK_KIND_LABELS[task.kind]} · {describeDue(task.dueKind, null)}
                   {task.dueDate ? ` · by ${formatDisplayDate(task.dueDate, { style: "medium" })}` : ""}
                 </p>
-                {task.description && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{task.description}</p>}
+                {task.description && <p className="mt-1 whitespace-pre-wrap text-body text-tertiary">{task.description}</p>}
                 <TaskMaterials materials={task.materials ?? []} onOpenFile={onOpenFile ?? openFile(token)} />
               </div>
             </div>
@@ -151,7 +160,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
             try { finish(await preboardingCompleteAction({ token, taskId: task.id })); } finally { setBusy(false); }
           }}
         >
-          {task.kind === "ACKNOWLEDGE" ? "I Have Read It" : "Mark Done"}
+          {task.kind === "ACKNOWLEDGE" ? "I have read it" : "Mark done"}
         </Button>
         <FormError message={error} />
       </div>
@@ -178,7 +187,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
             try { finish(await preboardingDocumentAction(form)); } finally { setBusy(false); }
           }}
         >
-          {task.kind === "TODO" ? "Attach and Mark Done" : "Upload"}
+          {task.kind === "TODO" ? "Attach and mark done" : "Upload"}
         </Button>
         <FormError message={error} />
       </div>
@@ -214,12 +223,12 @@ function PageComments({ token, task }: { token: string; task: PageTask }) {
     <div className="pl-8">
       <button
         type="button"
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-brown-900"
+        className="inline-flex items-center gap-1 text-hint text-tertiary hover:text-primary"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        <MessageSquare className="h-3 w-3" />
-        {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Ask a Question"}
+        <Icon icon={Message01Icon} size="sm" />
+        {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Ask a question"}
       </button>
       {open && (
         <TaskComments

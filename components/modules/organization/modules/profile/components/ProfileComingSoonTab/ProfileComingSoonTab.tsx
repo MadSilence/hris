@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Hourglass } from "lucide-react";
+
 import { EmptyState } from "@/components/feedback/EmptyState";
 
 type Props = {
@@ -19,7 +19,7 @@ type Props = {
 export const ProfileComingSoonTab: React.FC<Props> = ({ title }) => (
   <EmptyState
     fill
-    icon={<Hourglass className="h-6 w-6"/>}
+    scene="company-hub"
     title={`${title} is not available yet`}
     description="This part of the profile is planned and has not been built. Nothing here changes how the product works today."
   />

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -32,13 +32,13 @@ export const ConnectIdentityProvider: React.FC<{ provider: string | null; connec
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body text-tertiary">
         {connected
           ? `Your account is connected to ${NAME[provider ?? "OTHER"]}.`
           : `Sign in with ${NAME[provider ?? "OTHER"]} as well as your password. A System Owner connects here, never by email.`}
       </p>
       <FormError message={error} />
-      <Button type="button" variant="outline" onClick={connect} disabled={busy}>
+      <Button type="button" variant="secondary" onClick={connect} disabled={busy}>
         {busy ? "Connecting…" : `Connect ${NAME[provider ?? "OTHER"]}`}
       </Button>
     </div>

@@ -22,9 +22,9 @@ describe("ConfirmEmailContainer", () => {
     confirm.mockResolvedValue({ status: ActionStatus.SUCCESS, data: { email: "ada.new@example.com", subdomain: "acme" } });
     render(<ConfirmEmailContainer token="t" firstName="Ada" newEmail="ada.new@example.com" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Confirm Email" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm email" }));
 
-    await waitFor(() => expect(screen.getByText("Email Confirmed")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Email confirmed")).toBeInTheDocument());
     expect(confirm).toHaveBeenCalledWith("t");
   });
 
@@ -36,7 +36,7 @@ describe("ConfirmEmailContainer", () => {
     });
     render(<ConfirmEmailContainer token="t" firstName={null} newEmail="ada.new@example.com" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Confirm Email" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm email" }));
 
     await waitFor(() => expect(screen.getByText("This email confirmation link is no longer valid.")).toBeInTheDocument());
   });

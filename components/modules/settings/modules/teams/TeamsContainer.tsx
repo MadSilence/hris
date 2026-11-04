@@ -3,16 +3,8 @@
 import { CanvasLoading, CanvasMessage } from "@/components/ui/Canvas";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Archive,
-  Download,
-  LayoutGrid,
-  Network,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Plus,
-} from "lucide-react";
+import { Add01Icon, ArrowLeft01Icon, ArrowRight01Icon, Download01Icon, GridViewIcon, HierarchyIcon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   DndContext,
   PointerSensor,
@@ -21,11 +13,12 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
+import { FilterChip } from "@/components/ui/FilterChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import { useUrlState } from "@/components/utils/useUrlState";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
@@ -528,7 +521,7 @@ export default function TeamsContainer() {
           <span>No teams yet.</span>
           <PermissionGate resource="ORG.TEAM" action="EDIT">
             <Button type="button" size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
-              <Plus className="h-4 w-4" />
+              <Icon icon={Add01Icon} size="sm" />
               Create your first team
             </Button>
           </PermissionGate>
@@ -550,7 +543,7 @@ export default function TeamsContainer() {
           handlers={blocksHandlers}
           banner={
             dndEnabled ? (
-              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-lg border border-brown-200 bg-white/90 px-3 py-1.5 text-xs text-brown-500 shadow-sm">
+              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
                 Drag a person onto another team to move them. Drop them on the Unassigned tab
                 to take them out.
               </div>
@@ -578,14 +571,14 @@ export default function TeamsContainer() {
         />
 
         {editMode && canEdit && (
-          <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-lg border border-brown-200 bg-white/90 px-3 py-1.5 text-xs text-brown-500 shadow-sm">
+          <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
             Drag a team onto another to move it. Drop it on the company card to make it
             top-level.
           </div>
         )}
 
         {noUnitMatches && (
-          <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-lg border border-brown-200 bg-white px-3 py-1.5 text-sm text-brown-500 shadow-sm">
+          <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-control border border-divider bg-card px-3 py-1.5 text-body text-tertiary shadow-card">
             No teams match “{debouncedQuery}”
           </div>
         )}
@@ -660,13 +653,13 @@ export default function TeamsContainer() {
       <div className="mb-3 flex flex-none items-center gap-3">
         {BLOCKS_VIEW_ENABLED && (
           <Tabs value={view} onValueChange={(next) => setView(next as ViewMode)}>
-            <TabsList className="grid h-9 w-[220px] grid-cols-2 bg-brown-50">
+            <TabsList className="grid h-9 w-[220px] grid-cols-2 bg-subtle">
               <TabsTrigger value="chart" className="flex items-center gap-2">
-                <Network className="h-4 w-4" />
+                <Icon icon={HierarchyIcon} size="sm" />
                 Chart
               </TabsTrigger>
               <TabsTrigger value="blocks" className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4" />
+                <Icon icon={GridViewIcon} size="sm" />
                 Blocks
               </TabsTrigger>
             </TabsList>
@@ -689,25 +682,21 @@ export default function TeamsContainer() {
           canSearchPeople={canSeePeople && PEOPLE_SEARCH_ENABLED}
         />
 
-        <Button
-          type="button"
-          variant={includeArchived ? "default" : "outline"}
-          className="h-9 flex-none gap-1.5"
-          aria-pressed={includeArchived}
+        <FilterChip
+          selected={includeArchived}
+          className="flex-none"
           onClick={() => setIncludeArchived((current) => !current)}
         >
-          <Archive className="h-4 w-4" />
           Show archived
-        </Button>
+        </FilterChip>
 
         <div className="ml-auto flex flex-none items-center gap-3">
           <PermissionGate resource="ORG.TEAM" action="EDIT">
             <Button
-              type="button"
-              className="h-9 gap-1.5"
+              type="button" className="gap-1.5"
               onClick={() => setCreateParentId(defaultNewParentId)}
             >
-              <Plus className="h-4 w-4" />
+              <Icon icon={Add01Icon} size="sm" />
               Add
             </Button>
           </PermissionGate>
@@ -715,16 +704,16 @@ export default function TeamsContainer() {
           {canEdit && (
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={() => setEditMode(!editMode)}
               className={[
                 "h-9 gap-1.5",
                 // Outline either way — Add is the only primary button here — so edit mode has to
                 // announce itself some other way.
-                editMode ? "border-brown-400 bg-brown-50 text-brown-700" : "",
+                editMode ? "border-strong bg-subtle text-secondary" : "",
               ].join(" ")}
             >
-              <Pencil className="h-4 w-4" />
+              <Icon icon={PencilEdit02Icon} size="sm" />
               {editMode ? "Done" : "Edit"}
             </Button>
           )}
@@ -732,14 +721,13 @@ export default function TeamsContainer() {
           <Button
             type="button"
             size="icon"
-            variant="outline"
-            className="h-9 w-9"
+            variant="secondary"
             aria-label="Export a team"
             title="Export a team"
             disabled={allFlat.length === 0}
             onClick={() => setIsExportOpen(true)}
           >
-            <Download className="h-4 w-4" />
+            <Icon icon={Download01Icon} size="sm" />
           </Button>
         </div>
       </div>
@@ -750,8 +738,8 @@ export default function TeamsContainer() {
         collisionDetection={underPointer}
         onDragEnd={handlePersonDragEnd}
       >
-        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-xl border border-brown-200">
-          <div className="relative min-w-0 flex-1 bg-brown-50/40">{renderCanvasArea()}</div>
+        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-popover border border-divider">
+          <div className="relative min-w-0 flex-1 bg-subtle/40">{renderCanvasArea()}</div>
 
           {/*
             * The collapse control is a tab on the panel's edge rather than a row inside it: a header
@@ -765,33 +753,33 @@ export default function TeamsContainer() {
             title={isPanelCollapsed ? "Expand the panel" : "Collapse the panel"}
             className={[
               "absolute top-1/2 z-10 flex h-14 w-5 -translate-y-1/2 items-center justify-center",
-              "rounded-l-md border border-r-0 border-brown-200 bg-white text-brown-400 shadow-sm",
-              "hover:bg-brown-50 hover:text-brown-700",
+              "rounded-l-control border border-r-0 border-divider bg-card text-tertiary shadow-card",
+              "hover:bg-subtle hover:text-secondary",
               isPanelCollapsed ? "right-0" : "right-[380px]",
             ].join(" ")}
           >
             {isPanelCollapsed ? (
-              <ChevronLeft className="h-4 w-4" />
+              <Icon icon={ArrowLeft01Icon} size="sm" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <Icon icon={ArrowRight01Icon} size="sm" />
             )}
           </button>
 
           <div
             className={[
-              "flex flex-none flex-col overflow-hidden border-brown-200 bg-white",
+              "flex flex-none flex-col overflow-hidden border-divider bg-card",
               "transition-[width] duration-150",
               isPanelCollapsed ? "w-0 border-l-0" : "w-[380px] border-l",
             ].join(" ")}
           >
             {UNASSIGNED_TAB_ENABLED && canSeePeople && (
-              <div className="flex-none border-b border-brown-200 px-4 py-2.5">
+              <div className="flex-none border-b border-divider px-4 py-2.5">
                 <Tabs value={panelMode} onValueChange={(next) => setPanelMode(next as PanelMode)}>
-                  <TabsList className="grid h-9 w-full grid-cols-2 bg-brown-50">
+                  <TabsList className="grid h-9 w-full grid-cols-2 bg-subtle">
                     <TabsTrigger value="details">Details</TabsTrigger>
                     <TabsTrigger value="unassigned" className="flex items-center gap-1.5">
                       Unassigned
-                      <span className="rounded bg-brown-200/60 px-1 text-[10px] leading-4 tabular-nums text-brown-600">
+                      <span className="rounded-tag bg-divider/60 px-1 text-hint leading-4 tabular-nums text-secondary">
                         {membership.unassigned.length}
                       </span>
                     </TabsTrigger>
@@ -923,7 +911,7 @@ export default function TeamsContainer() {
         <RestoreWithChildrenModal
           key={restoreTarget.id}
           isOpen
-          title="Unarchive Team"
+          title="Unarchive team"
           name={restoreTarget.name}
           childNoun="sub-teams"
           items={restoreFlow.items}

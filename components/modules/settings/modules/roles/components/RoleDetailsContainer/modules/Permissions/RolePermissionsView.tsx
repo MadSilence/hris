@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle } from "lucide-react";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/public/desact/src/components/ui/accordion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
 import { ACCESS_ACTIONS, AccessAction, RESOURCE_GROUPS, ResourceCode } from "@/models/access";
 import {
   availableScopeChoices,
@@ -33,9 +34,9 @@ const GRID = "grid grid-cols-[minmax(0,1fr)_170px_170px_170px_170px] items-cente
 
 // Dot before a cell's value: blue = unsaved change, gray = no access, green = granted.
 function dotClass(current: ScopeChoice, server: ScopeChoice): string {
-  if (current !== server) return "bg-info-500";
-  if (current === "NONE") return "bg-brown-300";
-  return "bg-success-500";
+  if (current !== server) return "bg-status-info-fill";
+  if (current === "NONE") return "bg-strong";
+  return "bg-status-approved-fill";
 }
 
 export interface RolePermissionsViewProps {
@@ -84,7 +85,7 @@ export default function RolePermissionsView({
   return (
     <div>
       <div
-        className={`${GRID} sticky top-0 z-10 bg-white px-1 pb-3 pt-1 text-sm font-medium text-foreground`}
+        className={`${GRID} sticky top-0 z-10 bg-card px-1 pb-3 pt-1 text-body font-medium text-primary`}
       >
         <div>Resource</div>
         {ACCESS_ACTIONS.map((action) => (
@@ -93,7 +94,7 @@ export default function RolePermissionsView({
       </div>
 
       {readOnlyReason && (
-        <p className="mt-3 rounded-md bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
+        <p className="mt-3 rounded-control bg-subtle px-4 py-3 text-body text-tertiary">
           {readOnlyReason}
         </p>
       )}
@@ -106,7 +107,7 @@ export default function RolePermissionsView({
       >
         {visibleGroups.map((group) => (
           <AccordionItem key={group.id} value={group.id} className="border-b-0">
-            <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+            <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
               {group.label}
             </AccordionTrigger>
 
@@ -119,15 +120,15 @@ export default function RolePermissionsView({
                   return (
                     <div
                       key={resource.code}
-                      className={`${GRID} border-b border-brown-100 px-1 py-2 last:border-b-0`}
+                      className={`${GRID} border-b border-divider px-1 py-2 last:border-b-0`}
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium">{resource.label}</p>
-                        <p className="text-xs text-muted-foreground">{resource.description}</p>
+                        <p className="text-body font-medium">{resource.label}</p>
+                        <p className="text-hint text-tertiary">{resource.description}</p>
 
                         {missingView && (
-                          <p className="mt-1 flex items-center gap-1.5 text-xs text-warning-700">
-                            <AlertTriangle className="h-3.5 w-3.5"/>
+                          <p className="mt-1 flex items-center gap-1.5 text-hint text-status-pending-text">
+                            <Icon icon={Alert02Icon} size="sm" />
                             Without view access this role cannot open the related pages.
                           </p>
                         )}
@@ -138,7 +139,7 @@ export default function RolePermissionsView({
 
                         if (!supported) {
                           return (
-                            <div key={action} className="text-center text-sm text-muted-foreground">
+                            <div key={action} className="text-center text-body text-tertiary">
                               —
                             </div>
                           );
@@ -161,7 +162,7 @@ export default function RolePermissionsView({
                             >
                               <SelectTrigger className="w-full">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass(current, server)}`}/>
+                                  <span className={`h-2 w-2 shrink-0 rounded-pill ${dotClass(current, server)}`}/>
                                   <SelectValue/>
                                 </span>
                               </SelectTrigger>
@@ -182,8 +183,8 @@ export default function RolePermissionsView({
                                 type="button"
                                 disabled={readOnly}
                                 onClick={() => onEditFilters?.(resource.code, action)}
-                                className={`self-start text-xs underline-offset-2 hover:underline ${
-                                  conditions === 0 ? "text-warning-700" : "text-muted-foreground"
+                                className={`self-start text-hint underline-offset-2 hover:underline ${
+                                  conditions === 0 ? "text-status-pending-text" : "text-tertiary"
                                 }`}
                               >
                                 {conditions === 0
@@ -203,7 +204,7 @@ export default function RolePermissionsView({
         ))}
 
         {visibleGroups.length === 0 && (
-          <p className="px-1 py-6 text-sm text-muted-foreground">
+          <p className="px-1 py-6 text-body text-tertiary">
             No permissions match “{query.trim()}”.
           </p>
         )}

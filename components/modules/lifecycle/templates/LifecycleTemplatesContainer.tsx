@@ -2,8 +2,9 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, ListChecks, Pencil, Plus, Trash2, TriangleAlert } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Add01Icon, Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -69,8 +70,8 @@ export function LifecycleTemplatesContainer({ type }: Props) {
         primary={
           <PermissionGate resource="PEOPLE.LIFECYCLE_TEMPLATES" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={() => setAdding(true)}>
-              <Plus className="h-4 w-4" />
-              Add Template
+              <Icon icon={Add01Icon} size="sm" />
+              Add template
             </Button>
           </PermissionGate>
         }
@@ -81,9 +82,9 @@ export function LifecycleTemplatesContainer({ type }: Props) {
       ) : isLoading ? (
         <ul className="space-y-2" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <li key={i} className="flex h-[72px] items-center gap-4 rounded-xl border border-brown-100 px-5">
-              <div className="h-4 w-48 animate-pulse rounded bg-muted" />
-              <div className="ml-auto h-3 w-28 animate-pulse rounded bg-muted" />
+            <li key={i} className="flex h-[72px] items-center gap-4 rounded-card border border-divider px-5">
+              <div className="h-4 w-48 shimmer rounded-tag bg-mist" />
+              <div className="ml-auto h-3 w-28 shimmer rounded-tag bg-mist" />
             </li>
           ))}
         </ul>
@@ -91,7 +92,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
         <ListEmptyState
           query={query}
           archivedView={showArchived}
-          icon={<ListChecks className="h-6 w-6" />}
+          scene="onboarding"
           title={`No ${PROCESS_TYPE_LABELS[type].toLowerCase()} templates yet`}
           // "an onboarding", "a preboarding": the article follows the word, and a template literal
           // that always writes "a" produced "a onboarding" on one of the two tabs.
@@ -99,7 +100,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
             type === "PREBOARDING" ? "a" : "an"
           } ${PROCESS_TYPE_LABELS[type].toLowerCase()} starts with.`}
           onCreate={() => setAdding(true)}
-          createLabel="Add Template"
+          createLabel="Add template"
           createAccess={{ resource: "PEOPLE.LIFECYCLE_TEMPLATES", action: "EDIT" }}
         />
       ) : (
@@ -113,20 +114,20 @@ export function LifecycleTemplatesContainer({ type }: Props) {
               data-test="template-row"
               onClick={() => open(t)}
               onKeyDown={(e) => { if (e.key === "Enter") open(t); }}
-              className="flex cursor-pointer items-center gap-4 rounded-xl border border-brown-100 bg-white px-5 py-4 transition-colors hover:border-brown-200 hover:bg-brown-50/40"
+              className="flex cursor-pointer items-center gap-4 rounded-card border border-divider bg-card px-5 py-4 transition-colors hover:border-divider hover:bg-subtle/40"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-medium text-brown-900">{t.name}</span>
+                  <span className="truncate font-medium text-primary">{t.name}</span>
                   {t.archivedAt && <StatusBadge status="archived" />}
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
+                <div className="mt-0.5 text-hint text-tertiary">
                   {t.taskCount === 1 ? "1 task" : `${t.taskCount} tasks`} · Updated {formatDisplayDate(t.updatedAt)}
                   {t.description ? ` · ${t.description}` : ""}
                 </div>
                 {t.hasProblems && (
-                  <div className="mt-1 flex items-center gap-1 text-xs text-warning-700">
-                    <TriangleAlert className="h-3.5 w-3.5" />
+                  <div className="mt-1 flex items-center gap-1 text-hint text-status-pending-text">
+                    <Icon icon={Alert02Icon} size="sm" />
                     Names somebody who cannot take a task
                   </div>
                 )}
@@ -134,15 +135,15 @@ export function LifecycleTemplatesContainer({ type }: Props) {
               <TemplateSparkline offsets={t.dayOffsets ?? []} />
               <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 <PermissionGate resource="PEOPLE.LIFECYCLE_TEMPLATES" action="MANAGE">
-                  <RowActionsMenu label="Template Actions">
+                  <RowActionsMenu label="Template actions">
                     {!t.archivedAt && (
-                      <RowAction icon={<Pencil className="h-4 w-4 text-muted-foreground" />} onClick={() => open(t)}>
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => open(t)}>
                         Edit
                       </RowAction>
                     )}
                     {t.archivedAt ? (
                       <RowAction
-                        icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />}
+                        icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />}
                         onClick={async () => {
                           const problem = await run(unarchiveTemplateAction(t.id));
                           if (problem) showActionError({ errorMessage: problem });
@@ -151,11 +152,11 @@ export function LifecycleTemplatesContainer({ type }: Props) {
                         Unarchive
                       </RowAction>
                     ) : (
-                      <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => setConfirm({ kind: "archive", template: t })}>
+                      <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setConfirm({ kind: "archive", template: t })}>
                         Archive
                       </RowAction>
                     )}
-                    <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => setConfirm({ kind: "delete", template: t })}>
+                    <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setConfirm({ kind: "delete", template: t })}>
                       Delete
                     </RowActionDestructive>
                   </RowActionsMenu>
@@ -179,7 +180,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
 
       <ConfirmDialog
         open={confirm?.kind === "archive"}
-        title="Archive Template"
+        title="Archive template"
         confirmLabel="Archive"
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -196,7 +197,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
 
       <ConfirmDialog
         open={confirm?.kind === "delete"}
-        title="Delete Template"
+        title="Delete template"
         confirmLabel="Delete"
         destructive
         onCancelAction={() => setConfirm(null)}

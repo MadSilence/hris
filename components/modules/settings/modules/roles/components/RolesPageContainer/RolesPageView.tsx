@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
-import { Shield, Users } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/desact/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
+import { Shield01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import RolesPageHeader from "./RolesPageHeader";
 import RolesTable from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/RolesTable/RolesTable";
@@ -92,14 +93,14 @@ export default function RolesPageView({
       <CardHeader className="px-0 py-0 shrink-0">
         <div className="space-y-3">
           <Tabs value={view} onValueChange={(v) => onViewChange(v as RolesTableView)}>
-            <TabsList className="grid grid-cols-2 bg-brown-50 w-[320px]">
+            <TabsList className="grid grid-cols-2 bg-subtle w-[320px]">
               <TabsTrigger value="roles" className="flex items-center gap-2">
-                <Shield className="w-4 h-4"/>
+                <Icon icon={Shield01Icon} size="sm" />
                 Roles
               </TabsTrigger>
 
               <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="w-4 h-4"/>
+                <Icon icon={UserGroupIcon} size="sm" />
                 Users
               </TabsTrigger>
             </TabsList>

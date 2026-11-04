@@ -14,8 +14,8 @@ import { startsReviews, useAutomationNames } from "./useAutomationNames";
 function Clause({ word, children }: { word: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[6rem_1fr] gap-4 py-3">
-      <span className="text-xs font-semibold uppercase tracking-wide text-brown-500">{word}</span>
-      <div className="min-w-0 text-sm text-foreground">{children}</div>
+      <span className="text-hint font-semibold text-tertiary">{word}</span>
+      <div className="min-w-0 text-body text-primary">{children}</div>
     </div>
   );
 }
@@ -29,23 +29,23 @@ export function DefinitionView({ definition }: { definition: AutomationDefinitio
   const names = useAutomationNames(typesInDefinition(definition, fields), true, startsReviews(definition));
 
   return (
-    <div className="divide-y divide-brown-100">
+    <div className="divide-y divide-divider">
       <Clause word="When">
         {triggerSentence(definition.trigger)}
-        {definition.latePolicy === "SKIP" && <span className="text-muted-foreground"> · skipped if the date is already past</span>}
+        {definition.latePolicy === "SKIP" && <span className="text-tertiary"> · skipped if the date is already past</span>}
       </Clause>
-      <Clause word="For Whom">{conditionsSentence(definition.conditions, fields, names.targets)}</Clause>
+      <Clause word="For whom">{conditionsSentence(definition.conditions, fields, names.targets)}</Clause>
       <Clause word="Do">
         <ol className="m-0 list-decimal space-y-2 pl-5">
           {definition.actions.map((a, i) => (
             <li key={i}>
               <span>{actionSentence(a, { targets: names.targets, roles: names.roles })}</span>
-              <span className="text-muted-foreground"> · {offsetText(a.offsetDays)}</span>
+              <span className="text-tertiary"> · {offsetText(a.offsetDays)}</span>
               {a.type === "SEND_EMAIL" && a.body && (
-                <p className="m-0 mt-1 whitespace-pre-line text-xs text-muted-foreground">{a.body}</p>
+                <p className="m-0 mt-1 whitespace-pre-line text-hint text-tertiary">{a.body}</p>
               )}
               {a.type === "CREATE_TASK" && a.description && (
-                <p className="m-0 mt-1 whitespace-pre-line text-xs text-muted-foreground">{a.description}</p>
+                <p className="m-0 mt-1 whitespace-pre-line text-hint text-tertiary">{a.description}</p>
               )}
             </li>
           ))}

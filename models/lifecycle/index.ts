@@ -351,14 +351,14 @@ export const PROCESS_TYPE_LABELS: Record<ProcessType, string> = {
 
 export const TASK_KIND_LABELS: Record<TaskKind, string> = {
   TODO: "To-do",
-  FILL_FIELDS: "Fill In Fields",
-  DOCUMENT: "Upload Document",
+  FILL_FIELDS: "Fill in fields",
+  DOCUMENT: "Upload document",
   ACKNOWLEDGE: "Acknowledge",
   QUESTIONNAIRE: "Questionnaire",
   REVIEW: "Review",
-  NOMINATE_PEERS: "Nominate Peers",
-  APPROVE_PEERS: "Approve Peers",
-  APPROVE_REVIEW: "Approve Review",
+  NOMINATE_PEERS: "Nominate peers",
+  APPROVE_PEERS: "Approve peers",
+  APPROVE_REVIEW: "Approve review",
 };
 
 /** One line each, for choosing a kind: what the person is asked to do, and what closes it. */
@@ -380,13 +380,13 @@ export const EDITABLE_TASK_KINDS = (Object.keys(TASK_KIND_LABELS) as TaskKind[])
 );
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  SHORT_TEXT: "Short Text",
-  LONG_TEXT: "Long Text",
+  SHORT_TEXT: "Short text",
+  LONG_TEXT: "Long text",
   NUMBER: "Number",
   DATE: "Date",
-  YES_NO: "Yes or No",
-  SINGLE_CHOICE: "One Choice",
-  MULTIPLE_CHOICE: "Several Choices",
+  YES_NO: "Yes or no",
+  SINGLE_CHOICE: "One choice",
+  MULTIPLE_CHOICE: "Several choices",
 };
 
 export const ACCESS_PROBLEM_LABELS: Record<AccessProblem, string> = {
@@ -400,16 +400,16 @@ export const requiresFile = (task: { kind: TaskKind; category?: Ref | null; cate
 
 /** What a template may name — LINE_MANAGER is an automation's, never offered here. */
 export const ASSIGNEE_KIND_LABELS: Record<TemplateAssigneeKind, string> = {
-  TARGET: "The New Person",
-  ONBOARDING_MANAGER: "Onboarding Manager",
-  SPECIFIC_USER: "Specific Person",
+  TARGET: "The new person",
+  ONBOARDING_MANAGER: "Onboarding manager",
+  SPECIFIC_USER: "Specific person",
 };
 
 export const PROCESS_STATUS_LABELS: Record<ProcessStatus, string> = {
   PLANNED: "Planned",
-  IN_PROGRESS: "In Progress",
+  IN_PROGRESS: "In progress",
   COMPLETED: "Completed",
-  PARTIALLY_FAILED: "Partially Failed",
+  PARTIALLY_FAILED: "Partially failed",
   CANCELLED: "Cancelled",
 };
 
@@ -439,7 +439,7 @@ export const describeDue = (dueKind: DueKind, offsetDays: number | null | undefi
  */
 export const assigneeKindLabel = (kind: TemplateAssigneeKind, type?: ProcessType | null): string => {
   if (type !== "OFFBOARDING") return ASSIGNEE_KIND_LABELS[kind];
-  if (kind === "TARGET") return "The Leaver";
-  if (kind === "ONBOARDING_MANAGER") return "Offboarding Manager";
+  if (kind === "TARGET") return "The leaver";
+  if (kind === "ONBOARDING_MANAGER") return "Offboarding manager";
   return ASSIGNEE_KIND_LABELS[kind];
 };

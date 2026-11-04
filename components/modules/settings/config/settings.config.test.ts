@@ -12,10 +12,10 @@ const reader = (permissions: Grants): EffectiveAccess => ({
   accessHash: "h",
 });
 
-const importItem = settingsGroups.flatMap((group) => group.items).find((item) => item.label === "Import & Export")!;
+const importItem = settingsGroups.flatMap((group) => group.items).find((item) => item.label === "Import & export")!;
 
 /** I-B6: whoever may run one of the three import kinds finds the page, and nobody else is offered it. */
-describe("the Import & Export entry", () => {
+describe("the Import & export entry", () => {
   it.each<[string, Grants]>([
     ["a company-wide profile editor", { "PEOPLE.PROFILE": { EDIT: ["COMPANY"] } }],
     ["a department editor", { "ORG.DEPARTMENT": { EDIT: ["COMPANY"] } }],

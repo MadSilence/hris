@@ -1,20 +1,20 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/components/desact/card";
+import { Button } from "@/components/desact/button";
 
 const products = [
   {
     id: "records",
-    title: "Employee Records",
+    title: "Employee records",
     body: "Profiles, docs, contracts and lifecycle changes in one place. RoleDTO-based access and full history.",
   },
   {
     id: "time-off",
-    title: "Time Off",
+    title: "Time off",
     body: "Policies, balances, approvals and accruals with regional holidays and carry-over rules.",
   },
   {
     id: "working-hours",
-    title: "Working Hours",
+    title: "Working hours",
     body: "Timesheets, attendance and review flows with CSV/Excel exports.",
   },
 ];
@@ -23,8 +23,8 @@ export default function ProductsPage() {
   return (
     <div className="flex flex-col gap-10">
       <section className="space-y-4">
-        <h1 className="text-5xl font-medium">Products</h1>
-        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+        <h1 className="text-greeting">Products</h1>
+        <p className="max-w-2xl text-section-title text-tertiary">
           Modular building blocks designed to work beautifully together.
         </p>
       </section>

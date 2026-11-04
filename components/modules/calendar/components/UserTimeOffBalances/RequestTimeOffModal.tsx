@@ -4,7 +4,8 @@ import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
-import { CalendarDays, CalendarPlus, Users } from "lucide-react";
+import { Calendar03Icon, CalendarAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
@@ -14,13 +15,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { Calendar } from "@/public/desact/src/components/ui/calendar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { Calendar } from "@/components/desact/calendar";
+import { cn } from "@/lib/cn";
 
 import { useCreateTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCreateTimeOffRequest";
 import { useTimeOffRequestDuration } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestDuration";
@@ -30,6 +31,7 @@ import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   isOpen: boolean;
@@ -189,13 +191,13 @@ export const RequestTimeOffModal: FC<Props> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
       <DialogContent hideClose className="max-w-3xl overflow-hidden p-0">
-        <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5 text-left">
+        <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5 text-left">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brown-200 bg-white text-brown-600">
-              <CalendarPlus className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">
+              <Icon icon={CalendarAdd01Icon} />
             </div>
             <div>
-              <DialogTitle className="text-lg">
+              <DialogTitle className="text-section-title">
                 {forName ? `Request time off for ${forName}` : "Request time off"}
               </DialogTitle>
               <DialogDescription>Pick a policy and the dates — the request goes to the approver.</DialogDescription>
@@ -207,7 +209,7 @@ export const RequestTimeOffModal: FC<Props> = ({
           {/* Form */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <RequiredLabel className="text-xs" required>Policy</RequiredLabel>
+              <RequiredLabel className="text-hint" required>Policy</RequiredLabel>
               <SearchableSelect
                 options={selectable.map((b) => {
                   const p = policyMap.get(b.policyId);
@@ -225,19 +227,19 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="space-y-1.5">
-              <RequiredLabel className="text-xs" required>Dates</RequiredLabel>
+              <RequiredLabel className="text-hint" required>Dates</RequiredLabel>
               <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     disabled={createMutation.isPending}
                     className={cn(
                       "w-full justify-start font-normal",
-                      !startDate && "text-muted-foreground",
+                      !startDate && "text-tertiary",
                     )}
                   >
-                    <CalendarDays className="h-4 w-4" />
+                    <Icon icon={Calendar03Icon} size="sm" />
                     {dateLabel}
                   </Button>
                 </PopoverTrigger>
@@ -254,7 +256,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="req-reason" className="text-xs">
+              <Label htmlFor="req-reason" className="text-hint">
                 Reason
               </Label>
               <Textarea
@@ -267,75 +269,75 @@ export const RequestTimeOffModal: FC<Props> = ({
             </div>
 
             {days > 0 && overlapPeople.length > 0 && (
-              <div className="rounded-lg border border-brown-200 bg-brown-50/40 p-3">
-                <p className="flex items-center gap-1.5 text-xs font-medium text-brown-900">
-                  <Users className="h-3.5 w-3.5" />
+              <div className="rounded-control border border-divider bg-subtle/40 p-3">
+                <p className="flex items-center gap-1.5 text-hint font-medium text-primary">
+                  <Icon icon={UserGroupIcon} size="sm" />
                   {overlapPeople.length === 1
                     ? "1 colleague is already away then"
                     : `${overlapPeople.length} colleagues are already away then`}
                 </p>
                 <ul className="mt-2 space-y-1">
                   {overlapPeople.slice(0, 5).map((p) => (
-                    <li key={p.name} className="flex items-center justify-between gap-3 text-xs">
-                      <span className="truncate text-brown-900">{p.name}</span>
-                      <span className="shrink-0 text-muted-foreground">
+                    <li key={p.name} className="flex items-center justify-between gap-3 text-hint">
+                      <span className="truncate text-primary">{p.name}</span>
+                      <span className="shrink-0 text-tertiary">
                         {p.start === p.end ? prettyISO(p.start) : `${prettyISO(p.start)} – ${prettyISO(p.end)}`}
                       </span>
                     </li>
                   ))}
                 </ul>
                 {overlapPeople.length > 5 && (
-                  <p className="mt-1.5 text-xs text-muted-foreground">
+                  <p className="mt-1.5 text-hint text-tertiary">
                     and {overlapPeople.length - 5} more
                   </p>
                 )}
               </div>
             )}
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <FormError message={error} />}
           </div>
 
           {/* Summary */}
-          <aside className="flex flex-col gap-3 rounded-xl border border-brown-200 bg-brown-50/40 p-4">
+          <aside className="flex flex-col gap-3 rounded-card border border-divider bg-subtle/40 p-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-brown-400">Policy</p>
-              <p className="mt-0.5 truncate text-sm font-medium text-brown-900">
+              <p className="text-hint text-tertiary">Policy</p>
+              <p className="mt-0.5 truncate text-body font-medium text-primary">
                 {policy?.name}
               </p>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Available</span>
-              <span className="font-medium text-brown-900">
+            <div className="flex items-center justify-between text-body">
+              <span className="text-tertiary">Available</span>
+              <span className="font-medium text-primary">
                 {selected ? (unlimited ? "Unlimited" : `${formatDayAmount(selected.currentBalance)} ${unit}`) : ""}
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                Duration{isWorkingDays ? <span className="text-xs"> · working days</span> : null}
+            <div className="flex items-center justify-between text-body">
+              <span className="text-tertiary">
+                Duration{isWorkingDays ? <span className="text-hint"> · working days</span> : null}
               </span>
-              <span className="font-medium text-brown-900">
+              <span className="font-medium text-primary">
                 {days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : ""}
               </span>
             </div>
 
             {!unlimited && selected && days > 0 && (
-              <div className="flex items-center justify-between border-t border-brown-200 pt-3 text-sm">
-                <span className="text-muted-foreground">Balance after</span>
-                <span className={cn("font-medium", insufficient ? "text-danger-600" : "text-brown-900")}>
+              <div className="flex items-center justify-between border-t border-divider pt-3 text-body">
+                <span className="text-tertiary">Balance after</span>
+                <span className={cn("font-medium", insufficient ? "text-danger-text" : "text-primary")}>
                   {formatDayAmount(remainingAfter)} {unit}
                 </span>
               </div>
             )}
 
             {insufficient ? (
-              <p className="text-xs text-warning-600">
+              <p className="text-hint text-status-pending-icon">
                 Exceeds the available balance — it may be rejected depending on the policy.
               </p>
             ) : (
-              <p className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CalendarDays className="h-3.5 w-3.5" />
+              <p className="mt-auto flex items-center gap-1.5 text-hint text-tertiary">
+                <Icon icon={Calendar03Icon} size="sm" />
                 Tip: click or drag days on the calendar to preset dates.
               </p>
             )}
@@ -343,11 +345,11 @@ export const RequestTimeOffModal: FC<Props> = ({
         </div>
 
         {coverageWarning && (
-          <div className="border-t border-warning-200 bg-warning-50 px-6 py-4">
-            <p className="text-sm font-medium text-warning-900">
+          <div className="border-t border-status-pending-border bg-status-pending-bg px-6 py-4">
+            <p className="text-body font-medium text-status-pending-text">
               Your request was submitted.
             </p>
-            <p className="mt-1 text-xs text-warning-800">
+            <p className="mt-1 text-hint text-status-pending-text">
               This policy warns when too many people are away at once, and{" "}
               {coverageWarning.length === 1
                 ? "one of your days is"
@@ -360,12 +362,12 @@ export const RequestTimeOffModal: FC<Props> = ({
           </div>
         )}
 
-        <div className="flex justify-end gap-2 border-t border-brown-100 px-6 py-4">
+        <div className="flex justify-end gap-2 border-t border-divider px-6 py-4">
           {coverageWarning ? (
             <Button type="button" onClick={onCloseAction}>Got it</Button>
           ) : (
             <>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={createMutation.isPending}>
             Cancel
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>

@@ -26,8 +26,8 @@ export const CapacityDot: FC<{ mark: CompanyCalendarCapacity; who: string }> = (
       title={title}
       data-behavior={mark.behavior}
       className={[
-        "inline-block h-2 w-2 rounded-full",
-        mark.behavior === "BLOCK" ? "bg-danger-500" : "bg-warning-500",
+        "inline-block h-2 w-2 rounded-pill",
+        mark.behavior === "BLOCK" ? "bg-status-declined-fill" : "bg-status-pending-fill",
       ].join(" ")}
     />
   );

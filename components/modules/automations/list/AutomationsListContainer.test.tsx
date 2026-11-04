@@ -92,7 +92,7 @@ describe("AutomationsListContainer", () => {
     render(<AutomationsListContainer />);
 
     expect(screen.getByText("Automate the first rule")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Welcome Email Before the First Day/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Welcome email before the first day/ }));
     expect(push).toHaveBeenCalledWith("/settings/automation/automations/new?starter=welcome-email");
   });
 

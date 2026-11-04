@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type FC } from "react";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { Search01Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from "@/public/desact/src/components/ui/popover";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/popover";
+import { cn } from "@/lib/cn";
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import type { PublicHolidayTemplate } from "@/models/publicHolidays/template";
 
@@ -42,7 +43,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
   value,
   onChange,
   disabled = false,
-  placeholder = "Choose from template...",
+  placeholder = "Choose from a template",
   id,
 }) => {
   const [open, setOpen] = useState(false);
@@ -131,15 +132,15 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
         <div
           ref={boxRef}
           className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-lg border border-brown-300 bg-input-background px-3 text-sm transition-colors",
-            !disabled && "cursor-text hover:border-brown-400",
+            "flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-body transition-colors",
+            !disabled && "cursor-text hover:border-strong",
             disabled && "cursor-not-allowed opacity-50",
-            open && "border-brown-400",
+            open && "border-strong",
           )}
           onClick={() => !disabled && setOpen(true)}
         >
           {open ? (
-            <Search className="size-4 shrink-0 text-brown-400" aria-hidden />
+            <Icon icon={Search01Icon} size="sm" className="shrink-0 text-tertiary" />
           ) : (
             selected && <CountryFlag countryCode={selected.countryCode} />
           )}
@@ -155,7 +156,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
             /* Closed, the field is a label for the current choice — only the open state is typable. */
             readOnly={!open}
             value={open ? query : selected ? templateDisplayName(selected) : ""}
-            placeholder={open ? "Search templates..." : placeholder}
+            placeholder={open ? "Search templates" : placeholder}
             onChange={(event) => setQuery(event.currentTarget.value)}
             /*
              * Opening on focus is wrong: a dialog autofocuses its first field, so the list flashed
@@ -170,8 +171,8 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
               }
             }}
             className={cn(
-              "h-full min-w-0 flex-1 truncate border-0 bg-transparent p-0 text-sm text-brown-900 outline-none",
-              "placeholder:text-muted-foreground disabled:cursor-not-allowed",
+              "h-full min-w-0 flex-1 truncate border-0 bg-transparent p-0 text-body text-primary outline-none",
+              "placeholder:text-tertiary disabled:cursor-not-allowed",
               !open && "cursor-pointer",
             )}
           />
@@ -187,9 +188,9 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
               event.stopPropagation();
               setOpen((current) => !current);
             }}
-            className="flex shrink-0 items-center text-brown-400 disabled:cursor-not-allowed"
+            className="flex shrink-0 items-center text-tertiary disabled:cursor-not-allowed"
           >
-            <ChevronsUpDown className="size-4" aria-hidden />
+            <Icon icon={UnfoldMoreIcon} size="sm" />
           </button>
         </div>
       </PopoverAnchor>
@@ -211,7 +212,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
         className="max-h-72 w-[var(--radix-popover-trigger-width)] overflow-y-auto overscroll-contain p-1"
       >
         {filtered.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
+          <p className="px-2 py-6 text-center text-body text-tertiary">
             No templates found
           </p>
         ) : (
@@ -226,15 +227,15 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
                 aria-selected={isSelected}
                 onClick={() => select(template.id)}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-brown-50",
-                  isSelected && "bg-brown-50",
+                  "flex w-full items-center gap-2 rounded-control px-2 py-1.5 text-left text-body transition-colors hover:bg-subtle",
+                  isSelected && "bg-subtle",
                 )}
               >
                 <CountryFlag countryCode={template.countryCode} />
-                <span className="min-w-0 flex-1 truncate text-brown-900">
+                <span className="min-w-0 flex-1 truncate text-primary">
                   {templateDisplayName(template)}
                 </span>
-                {isSelected && <Check className="size-4 flex-none text-brown-600" />}
+                {isSelected && <Icon icon={Tick02Icon} size="sm" className="flex-none text-secondary" />}
               </button>
             );
           })

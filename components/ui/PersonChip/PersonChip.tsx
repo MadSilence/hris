@@ -2,8 +2,9 @@
 
 import React from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Badge } from "@/components/desact/badge";
+import { cn } from "@/lib/cn";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   name: string;
@@ -46,70 +47,46 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
 ) {
   const title = [name, jobName, archived ? "Archived" : null].filter(Boolean).join(" · ");
 
+  // A node on a canvas (SPEC § 13.8): a card with the level-1 shadow; selected wears the accent's tint, a
+  // search match the accent ring, an archived person a dashed edge.
   const shared = cn(
-    "border bg-white transition-colors",
-    selected
-      ? "border-brown-300 bg-brown-100"
-      : "border-brown-200 hover:border-brown-300 hover:bg-brown-50",
-    matched && "border-warning-400 ring-2 ring-warning-300",
+    "border bg-card transition-colors duration-(--duration-hover)",
+    selected ? "border-accent-ring bg-accent-subtle" : "border-divider hover:border-strong hover:bg-subtle",
+    matched && "border-accent ring-2 ring-accent-ring",
     dimmed && "opacity-35",
-    archived && "border-dashed bg-brown-50/70",
-    draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+    archived && "border-dashed bg-subtle",
+    draggable ? "cursor-grab active:cursor-grabbing active:shadow-drag" : "cursor-pointer",
     className,
   );
 
   if (variant === "card") {
     return (
-      <div ref={ref} title={title} className={cn("flex flex-col items-center gap-1 rounded-lg p-2", shared)} {...rest}>
-        <Avatar className="h-9 w-9 flex-none">
+      <div ref={ref} title={title} className={cn("flex flex-col items-center gap-1 rounded-popover p-2 shadow-raised", shared)} {...rest}>
+        <Avatar className="size-9 flex-none">
           {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-          <AvatarFallback className="text-[11px]">{initials}</AvatarFallback>
+          <AvatarFallback name={name} className="text-hint">{initials}</AvatarFallback>
         </Avatar>
         <span className="w-full text-center">
-          <span className="line-clamp-2 text-[11px] font-medium leading-tight text-brown-900">
-            {name}
-          </span>
-          {jobName && !archived && (
-            <span className="mt-0.5 block truncate text-[10px] leading-tight text-brown-400">
-              {jobName}
-            </span>
-          )}
-          {archived && (
-            <span className="mt-0.5 block truncate text-[10px] leading-tight text-brown-500">
-              Archived
-            </span>
-          )}
+          <span className="line-clamp-2 text-hint font-medium text-primary">{name}</span>
+          {jobName && !archived && <span className="mt-0.5 block truncate text-hint text-tertiary">{jobName}</span>}
+          {archived && <span className="mt-0.5 block truncate text-hint text-tertiary">Archived</span>}
         </span>
-        {badge && (
-          <span className="rounded bg-brown-100 px-1 py-0.5 text-[9px] uppercase leading-none text-brown-500">
-            {badge}
-          </span>
-        )}
+        {badge && <Badge size="sm">{badge}</Badge>}
       </div>
     );
   }
 
   return (
-    <div ref={ref} title={title} className={cn("flex items-center gap-2 rounded-lg px-2 py-1.5", shared)} {...rest}>
-      <Avatar className="h-6 w-6 flex-none">
+    <div ref={ref} title={title} className={cn("flex items-center gap-2 rounded-control px-2 py-1.5", shared)} {...rest}>
+      <Avatar className="size-[22px] flex-none">
         {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-        <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
+        <AvatarFallback name={name} className="text-hint">{initials}</AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-medium leading-tight text-brown-900">
-          {name}
-        </span>
-        {(jobName || archived) && (
-          <span className="block truncate text-[10px] leading-tight text-brown-400">
-            {archived ? "Archived" : jobName}
-          </span>
-        )}
+        <span className="block truncate text-hint font-medium text-primary">{name}</span>
+        {(jobName || archived) && <span className="block truncate text-hint text-tertiary">{archived ? "Archived" : jobName}</span>}
       </span>
-      {badge && (
-        <span className="flex-none rounded bg-brown-100 px-1 py-0.5 text-[9px] uppercase leading-none text-brown-500">
-          {badge}
-        </span>
-      )}
+      {badge && <Badge size="sm" className="flex-none">{badge}</Badge>}
     </div>
   );
 });

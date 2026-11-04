@@ -2,14 +2,15 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, Copy, Heading, Plus, Trash2 } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Heading01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
+} from "@/components/desact/dropdown-menu";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { StickyPageBar } from "@/components/layout/StickyPageBar";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -36,6 +37,7 @@ import { copyOf, draftOf, markOverall, move, newQuestion, problemsOf, sameDraft,
 import { QuestionCard } from "./QuestionCard";
 import { MentionField } from "./MentionField";
 import { FormPreview } from "./FormPreview";
+import { FieldError } from "@/components/desact/field-error";
 
 const FORMS_HREF = "/reviews/forms";
 
@@ -90,8 +92,8 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
     return (
       <div className="mx-auto max-w-4xl space-y-4" aria-busy="true">
         <Skeleton className="h-10 w-72" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-popover" />
+        <Skeleton className="h-40 w-full rounded-popover" />
       </div>
     );
   }
@@ -171,23 +173,23 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
               </Button>
             )}
             {(canEdit || canManage) && (
-              <RowActionsMenu label="Form Actions">
+              <RowActionsMenu label="Form actions">
                 {canEdit && (
-                  <RowAction icon={<Copy className="h-4 w-4 text-muted-foreground" />} onClick={() => void duplicate()}>
+                  <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate()}>
                     Duplicate
                   </RowAction>
                 )}
                 {canManage && (archived ? (
-                  <RowAction icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />} onClick={() => void unarchive()}>
+                  <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>
                     Unarchive
                   </RowAction>
                 ) : (
-                  <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => setConfirm("archive")}>
+                  <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setConfirm("archive")}>
                     Archive
                   </RowAction>
                 ))}
                 {canManage && (
-                  <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => setConfirm("delete")}>
+                  <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setConfirm("delete")}>
                     Delete
                   </RowActionDestructive>
                 )}
@@ -197,17 +199,17 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <TabsList className="grid w-full max-w-xs grid-cols-2 bg-brown-50">
+          <TabsList className="grid w-full max-w-xs grid-cols-2 bg-subtle">
             <TabsTrigger value="questions">Questions</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>
           {!readOnly && (gateReason || dirty) && (
-            <p className="text-xs text-muted-foreground">{gateReason ?? "You have unsaved changes."}</p>
+            <p className="text-hint text-tertiary">{gateReason ?? "You have unsaved changes."}</p>
           )}
         </div>
       </StickyPageBar>
       {archived && (
-        <p className="rounded-lg border border-brown-100 bg-brown-50/60 px-4 py-3 text-sm text-brown-800">
+        <p className="rounded-card border border-divider bg-subtle/60 px-4 py-3 text-body text-primary">
           This form is archived and cannot be changed or chosen for a review cycle.
           {canManage && " Unarchive it to edit it."}
         </p>
@@ -215,7 +217,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
       <FormError message={saveError} />
 
         <TabsContent value="questions" className="mt-0 space-y-4">
-          <section className="space-y-4 rounded-xl border border-brown-100 bg-white p-5">
+          <section className="space-y-4 rounded-card border border-divider bg-card p-5">
             <div className="space-y-1.5">
               <RequiredLabel htmlFor="review-form-name" required>Name</RequiredLabel>
               <Input
@@ -225,7 +227,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
                 aria-invalid={nameError ? true : undefined}
                 onChange={(e) => { patch({ name: e.target.value }); setNameError(null); }}
               />
-              {nameError && <p role="alert" className="text-xs text-destructive">{nameError}</p>}
+              {nameError && <FieldError>{nameError}</FieldError>}
             </div>
             <div className="space-y-1.5">
               <RequiredLabel htmlFor="review-form-description">Introduction</RequiredLabel>
@@ -237,7 +239,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
                 disabled={readOnly}
                 onChange={(description) => patch({ description })}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-hint text-tertiary">
                 Shown to the reviewer above the questions. Here and in every question, type @ to name the person
                 reviewed (@subject, @subjectFullName), their manager (@manager) or the cycle (@cycle).
               </p>
@@ -245,9 +247,9 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
           </section>
 
           {draft.questions.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-brown-200 px-6 py-10 text-center">
-              <p className="text-sm font-medium text-brown-900">No questions yet</p>
-              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+            <div className="rounded-card border border-dashed border-divider px-6 py-10 text-center">
+              <p className="text-body font-medium text-primary">No questions yet</p>
+              <p className="mx-auto mt-1 max-w-md text-body text-tertiary">
                 {readOnly
                   ? "Nobody has added a question to this form."
                   : "Add the questions a reviewer answers. Group them under sections, and type @ where a name belongs: @subject for the person reviewed, @manager for their manager, @cycle for the cycle."}
@@ -278,9 +280,9 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
             <div className="flex flex-wrap gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="outline" className="gap-1.5">
-                    <Plus className="h-4 w-4" />
-                    Add Question
+                  <Button type="button" variant="secondary" className="gap-1.5">
+                    <Icon icon={Add01Icon} size="sm" />
+                    Add question
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
@@ -289,9 +291,9 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button type="button" variant="ghost" className="gap-1.5 text-brown-700" onClick={() => add("SECTION")}>
-                <Heading className="h-4 w-4" />
-                Add Section
+              <Button type="button" variant="ghost" className="gap-1.5 text-secondary" onClick={() => add("SECTION")}>
+                <Icon icon={Heading01Icon} size="sm" />
+                Add section
               </Button>
             </div>
           )}
@@ -303,7 +305,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
       <ConfirmDialog
         open={confirm === "archive"}
-        title="Archive Form"
+        title="Archive form"
         confirmLabel="Archive"
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -322,7 +324,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
       <ConfirmDialog
         open={confirm === "delete"}
-        title="Delete Form"
+        title="Delete form"
         confirmLabel="Delete"
         destructive
         onCancelAction={() => setConfirm(null)}
@@ -342,7 +344,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave Without Saving?"
+        title="Leave without saving?"
         description="The changes to this form are only on this page. Leaving now discards them."
         cancelText="Stay"
         confirmText="Leave"

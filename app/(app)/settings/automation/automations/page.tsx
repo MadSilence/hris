@@ -11,7 +11,7 @@ const AutomationsSettingsPage: React.FC = () => (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-6 overflow-hidden">
       <div className="shrink-0 space-y-2 px-8">
         <SettingsPageHeader title="Automations" backHref="/settings"/>
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           Rules that do something on their own when something happens to a person — an email before
           the first day, a task for the manager, the holiday calendar of their office. Assigning by a
           filter in the assignment window makes a rule here too.

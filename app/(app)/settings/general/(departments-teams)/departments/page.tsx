@@ -16,7 +16,7 @@ export default function DepartmentsPage() {
       <div className="flex-none space-y-3">
         <SettingsPageHeader title="Departments" backHref="/settings" />
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           Two views of the same structure: a chart of how departments nest, and blocks showing who sits where. Search by department or by person, and turn on Edit to move departments and people around.
         </PageDescription>
       </div>

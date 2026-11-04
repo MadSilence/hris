@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Columns3, Filter as FilterIcon, Pencil, Plus, Upload } from "lucide-react";
+import { Add01Icon, FilterHorizontalIcon, LayoutThreeColumnIcon, PencilEdit02Icon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/public/desact/src/components/ui/popover";
+} from "@/components/desact/popover";
 
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
@@ -82,12 +83,12 @@ export default function PeopleTopbar({
   const resetFilters = () => setDraft([]);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 bg-background py-2">
+    <div className="flex flex-wrap items-center justify-between gap-3 bg-page py-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="gap-1.5">
-              <Columns3 className="h-4 w-4" />
+            <Button type="button" variant="secondary" size="sm" className="gap-1.5">
+              <Icon icon={LayoutThreeColumnIcon} size="sm" />
               Columns
             </Button>
           </PopoverTrigger>
@@ -102,8 +103,8 @@ export default function PeopleTopbar({
 
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="gap-1.5">
-              <FilterIcon className="h-4 w-4" />
+            <Button type="button" variant="secondary" size="sm" className="gap-1.5">
+              <Icon icon={FilterHorizontalIcon} size="sm" />
               Filter
             </Button>
           </PopoverTrigger>
@@ -136,7 +137,7 @@ export default function PeopleTopbar({
         {selectedCount > 0 ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
             <Button type="button" size="sm" className="gap-1.5" onClick={() => onEditSelectedAction?.()}>
-              <Pencil className="h-4 w-4" />
+              <Icon icon={PencilEdit02Icon} size="sm" />
               Edit
             </Button>
           </PermissionGate>
@@ -167,9 +168,9 @@ export default function PeopleTopbar({
           */}
         {onAddPersonAction ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
-            <Button asChild variant="outline" className="gap-1.5">
+            <Button asChild variant="secondary" className="gap-1.5">
               <Link href="/settings/general/import">
-                <Upload className="h-4 w-4" />
+                <Icon icon={Upload01Icon} size="sm" />
                 Import
               </Link>
             </Button>
@@ -179,8 +180,8 @@ export default function PeopleTopbar({
         {onAddPersonAction ? (
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onAddPersonAction}>
-              <Plus className="h-4 w-4" />
-              Add Person
+              <Icon icon={Add01Icon} size="sm" />
+              Add person
             </Button>
           </PermissionGate>
         ) : null}

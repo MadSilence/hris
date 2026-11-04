@@ -19,12 +19,13 @@ import {
   type NodeMouseHandler,
   type OnNodeDrag,
 } from "@xyflow/react";
-import { Plus, TriangleAlert, UserPlus } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
+import { Add01Icon, Alert02Icon, UserAdd01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { initialsOf, laneColor } from "./laneColors";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Button } from "@/components/desact/button";
+import { cn } from "@/lib/cn";
 import type { ProcessType } from "@/models/lifecycle";
 import { dayLabel, laneIdOf, type DraftItem } from "./draft";
 import { isTypingTarget, keyToCommand, type CanvasCommand } from "./keyboard";
@@ -59,9 +60,9 @@ export type ZoomPreset = "beforeStart" | "firstWeek" | "ninetyDays" | "fit";
 
 /** In the words of the domain, not percentages (research § B.3). */
 export const ZOOM_PRESETS: { id: ZoomPreset; label: string; from: number; to: number }[] = [
-  { id: "beforeStart", label: "Before Start", from: -14, to: 0 },
+  { id: "beforeStart", label: "Before start", from: -14, to: 0 },
   // A few days either side of Day 1, at a zoom where a block and a person's name read in full.
-  { id: "firstWeek", label: "First Week", from: -2, to: 6 },
+  { id: "firstWeek", label: "First week", from: -2, to: 6 },
   { id: "ninetyDays", label: "90 Days", from: 0, to: 90 },
   { id: "fit", label: "Fit", from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY },
 ];
@@ -101,7 +102,7 @@ function Ruler({ layout }: { layout: Layout }) {
   const { x, zoom } = useViewport();
   const dayOne = dayOneColumn(layout.axis);
   return (
-    <div className="relative h-full overflow-hidden bg-white" aria-hidden>
+    <div className="relative h-full overflow-hidden bg-card" aria-hidden>
       {layout.axis.columns.map((c) => {
         const left = x + c.x * zoom;
         const width = c.width * zoom;
@@ -109,11 +110,11 @@ function Ruler({ layout }: { layout: Layout }) {
         return (
           <div
             key={c.id}
-            className="absolute top-0 flex h-full flex-col items-center justify-center overflow-hidden whitespace-nowrap border-l border-brown-100 px-1 text-center"
+            className="absolute top-0 flex h-full flex-col items-center justify-center overflow-hidden whitespace-nowrap border-l border-divider px-1 text-center"
             style={{ left, width }}
           >
-            <span className={cn("text-xs font-medium", c.id === dayOne.id ? "text-primary" : "text-brown-700")}>{c.label}</span>
-            {c.caption && width > 60 && <span className="text-[11px] text-muted-foreground">{c.caption}</span>}
+            <span className={cn("text-hint font-medium", c.id === dayOne.id ? "text-primary" : "text-secondary")}>{c.label}</span>
+            {c.caption && width > 60 && <span className="text-hint text-tertiary">{c.caption}</span>}
           </div>
         );
       })}
@@ -134,25 +135,25 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
   const { y, zoom } = useViewport();
   const [picking, setPicking] = useState(false);
   return (
-    <div className="relative h-full overflow-hidden bg-white">
+    <div className="relative h-full overflow-hidden bg-card">
       {layout.lanes.map((lane, index) => (
         <div
           key={lane.id}
-          className="absolute left-0 right-0 flex items-start gap-2 overflow-hidden border-b border-white px-3 pt-3"
+          className="absolute left-0 right-0 flex items-start gap-2 overflow-hidden border-b border-card px-3 pt-3"
           style={{ top: y + lane.top * zoom, height: lane.height * zoom }}
         >
-          <span className={cn("absolute bottom-1 left-0 top-1 w-1 rounded-r", laneColor(index).stripe)} aria-hidden />
+          <span className={cn("absolute bottom-1 left-0 top-1 w-1 rounded-r-control", laneColor(index).stripe)} aria-hidden />
           <span
-            className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold", laneColor(index).avatar)}
+            className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-pill text-hint font-semibold", laneColor(index).avatar)}
             aria-hidden
           >
             {initialsOf(lane.label)}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block break-words text-sm font-medium leading-5 text-brown-900">{lane.label}</span>
+            <span className="block break-words text-body font-medium leading-5 text-primary">{lane.label}</span>
             {lane.problem && (
-              <span className="flex items-center gap-1 text-xs text-warning-700">
-                <TriangleAlert className="h-3 w-3" />
+              <span className="flex items-center gap-1 text-hint text-status-pending-text">
+                <Icon icon={Alert02Icon} size="sm" />
                 {lane.problem === "MISSING" ? "Nobody chosen" : lane.problem === "LEFT" ? "Has left" : "Not started"}
               </span>
             )}
@@ -162,10 +163,10 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
               variant="ghost"
               size="icon"
               className="h-7 w-7 shrink-0"
-              aria-label={`Add Task for ${lane.label}`}
+              aria-label={`Add task for ${lane.label}`}
               onClick={() => onAdd(lane.id, { left: LANE_HEADER_W + 8, top: RULER_H + Math.max(0, y + lane.top * zoom) })}
             >
-              <Plus className="h-4 w-4" />
+              <Icon icon={Add01Icon} size="sm" />
             </Button>
           )}
         </div>
@@ -174,14 +175,14 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
         <div className="absolute left-0 right-0 px-3 pt-2" style={{ top: y + layout.height * zoom }}>
           <Popover open={picking} onOpenChange={setPicking}>
             <PopoverTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-brown-700">
-                <UserPlus className="h-4 w-4" />
-                Add Person
+              <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-secondary">
+                <Icon icon={UserAdd01Icon} size="sm" />
+                Add person
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80 space-y-2">
-              <p className="text-sm font-medium">Add a person to the timeline</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-body font-medium">Add a person to the timeline</p>
+              <p className="text-hint text-tertiary">
                 Somebody named — HR, IT, a buddy. A named person makes the template depend on them.
               </p>
               <UserPickerField
@@ -299,7 +300,7 @@ function TemplateCanvasInner({
       source: on,
       target: item.key,
       data: { selected: id === selectedEdgeId },
-      markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: id === selectedEdgeId ? "var(--brown-700)" : "var(--brown-400)" },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: id === selectedEdgeId ? "var(--accent)" : "var(--border-strong)" },
       interactionWidth: 18,
     };
   })), [items, selectedEdgeId]);
@@ -369,12 +370,12 @@ function TemplateCanvasInner({
 
   return (
     <div
-      className="relative grid h-full min-h-[420px] overflow-hidden bg-white"
+      className="relative grid h-full min-h-[420px] overflow-hidden bg-card"
       style={{ gridTemplateColumns: `${LANE_HEADER_W}px 1fr`, gridTemplateRows: `${RULER_H}px 1fr` }}
       onKeyDown={onKeyDown}
       data-test="template-canvas"
     >
-      <div className="bg-white" />
+      <div className="bg-card" />
       <Ruler layout={layout} />
       <LaneHeaders layout={layout} readOnly={readOnly} onAdd={onAddInLaneAction} onAddPerson={onAddPersonAction} />
       <div ref={paneRef} className="relative min-h-0" onWheelCapture={onWheelCapture}>
@@ -413,7 +414,7 @@ function TemplateCanvasInner({
         </ReactFlow>
 
         {dragHint && (
-          <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-md bg-brown-900 px-2.5 py-1 text-xs text-white shadow">
+          <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-tag bg-inverse px-2.5 py-1 text-hint text-on-inverse shadow-card">
             {dragHint}
           </div>
         )}

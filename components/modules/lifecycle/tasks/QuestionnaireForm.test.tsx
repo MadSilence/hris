@@ -14,7 +14,7 @@ describe("QuestionnaireForm", () => {
   it("does not send with a required question empty, and says which", async () => {
     const submit = jest.fn();
     render(<QuestionnaireForm taskId="t1" questions={questions} onSubmit={submit} />);
-    fireEvent.click(screen.getByRole("button", { name: "Send Answers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send answers" }));
     expect(await screen.findByText(/How was the first week\?/, { selector: "[role=alert], p, div" })).toBeInTheDocument();
     expect(submit).not.toHaveBeenCalled();
   });
@@ -24,7 +24,7 @@ describe("QuestionnaireForm", () => {
     render(<QuestionnaireForm taskId="t1" questions={questions} onSubmit={submit} />);
     fireEvent.change(screen.getByLabelText(/How was the first week/), { target: { value: "Good" } });
     fireEvent.click(screen.getByRole("checkbox", { name: "Jira" }));
-    fireEvent.click(screen.getByRole("button", { name: "Send Answers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send answers" }));
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ q1: "Good", q2: ["Jira"] }));
   });
 });

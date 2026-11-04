@@ -19,12 +19,12 @@ import type {
 } from "./index";
 
 export const TRIGGER_LABELS: Record<AutomationTriggerType, string> = {
-  PERSON_HIRED: "Someone Is Hired",
-  DATE_OFFSET: "A Date Comes Round",
-  JOINS_SEGMENT: "Someone Starts Matching",
-  FIELD_CHANGED: "A Field Changes",
-  TERMINATION_SCHEDULED: "A Termination Is Recorded",
-  LAST_WORKING_DAY_ARRIVES: "The Last Working Day Arrives",
+  PERSON_HIRED: "Someone Is hired",
+  DATE_OFFSET: "A date comes round",
+  JOINS_SEGMENT: "Someone starts matching",
+  FIELD_CHANGED: "A field changes",
+  TERMINATION_SCHEDULED: "A termination Is recorded",
+  LAST_WORKING_DAY_ARRIVES: "The last working day arrives",
 };
 
 /** One line under each trigger in the picker: what makes it fire. */
@@ -38,43 +38,43 @@ export const TRIGGER_HINTS: Record<AutomationTriggerType, string> = {
 };
 
 export const ACTION_LABELS: Record<AutomationActionType, string> = {
-  SEND_EMAIL: "Send Email",
-  NOTIFY: "Send Notification",
-  CREATE_TASK: "Create Task",
+  SEND_EMAIL: "Send email",
+  NOTIFY: "Send notification",
+  CREATE_TASK: "Create task",
   ASSIGN: "Assign",
   UNASSIGN: "Unassign",
-  GRANT_TIME_OFF_POLICY: "Grant Time Off Policy",
-  START_REVIEW: "Start a Review",
+  GRANT_TIME_OFF_POLICY: "Grant time off policy",
+  START_REVIEW: "Start a review",
 };
 
 export const RECIPIENT_LABELS: Record<RecipientKind, string> = {
-  PERSON: "The Person",
-  MANAGER: "Their Manager",
-  ONBOARDING_MANAGER: "Their Onboarding Manager",
-  ROLE: "Everyone With a Role",
-  USER: "A Named Person",
+  PERSON: "The person",
+  MANAGER: "Their manager",
+  ONBOARDING_MANAGER: "Their onboarding manager",
+  ROLE: "Everyone with a role",
+  USER: "A named person",
 };
 
 export const ASSIGNABLE_LABELS: Record<AssignableType, string> = {
   ROLE: "Role",
-  TIME_OFF_POLICY: "Time Off Policy",
+  TIME_OFF_POLICY: "Time off policy",
   TEAM: "Team",
   DEPARTMENT: "Department",
-  LEGAL_ENTITY: "Legal Entity",
+  LEGAL_ENTITY: "Legal entity",
   OFFICE: "Office",
   JOB: "Position",
-  PUBLIC_HOLIDAY_CALENDAR: "Holiday Calendar",
+  PUBLIC_HOLIDAY_CALENDAR: "Holiday calendar",
 };
 
 export const PLACEHOLDER_LABELS: Record<string, string> = {
-  firstName: "First Name",
-  lastName: "Last Name",
-  fullName: "Full Name",
-  startDate: "Start Date",
-  lastWorkingDay: "Last Working Day",
-  managerName: "Manager Name",
-  companyName: "Company Name",
-  jobTitle: "Job Title",
+  firstName: "First name",
+  lastName: "Last name",
+  fullName: "Full name",
+  startDate: "Start date",
+  lastWorkingDay: "Last working day",
+  managerName: "Manager name",
+  companyName: "Company name",
+  jobTitle: "Job title",
   office: "Office",
   department: "Department",
 };
@@ -88,7 +88,7 @@ export const RULE_STATUS_LABELS: Record<AutomationRuleStatus, string> = {
 
 export const RUN_STATUS_LABELS: Record<AutomationRunStatus, string> = {
   SCHEDULED: "Scheduled",
-  IN_PROGRESS: "In Progress",
+  IN_PROGRESS: "In progress",
   DONE: "Done",
   SKIPPED: "Skipped",
   FAILED: "Failed",
@@ -106,10 +106,10 @@ export const STEP_STATUS_LABELS: Record<AutomationStepStatus, string> = {
 
 /** The built-in dates, for a reader without the catalogue (it needs MANAGE). */
 const DATE_FIELD_LABELS: Record<string, string> = {
-  HIRE_DATE: "Hire Date",
-  PROBATION_END: "Probation End",
-  LAST_WORKING_DAY: "Last Working Day",
-  DATE_OF_BIRTH: "Date of Birth",
+  HIRE_DATE: "Hire date",
+  PROBATION_END: "Probation end",
+  LAST_WORKING_DAY: "Last working day",
+  DATE_OF_BIRTH: "Date of birth",
 };
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -121,7 +121,7 @@ export const offsetText = (days: number | null | undefined): string => {
   return `${plural(Math.abs(d), "day")} ${d > 0 ? "after" : "before"}`;
 };
 
-/** A Title Case label inside a sentence: "Hire Date" reads "the hire date". */
+/** A Title Case label inside a sentence: "Hire date" reads "the hire date". */
 const lower = (label: string) => label.toLowerCase();
 
 /** The "When …" half of a rule as prose. `dateFields`/`changeableFields` are the catalogue's labels. */

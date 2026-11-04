@@ -2,11 +2,12 @@
 
 import React, { useId, useState } from "react";
 import Link from "next/link";
-import { Check, X } from "lucide-react";
+import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -108,78 +109,78 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
   return (
     <div className="flex max-w-3xl flex-col gap-6 px-8 py-6">
       <div>
-        <p className="text-sm text-muted-foreground">{STATUS_LABELS[request.status] ?? request.status}</p>
-        <h1 className="text-2xl font-semibold text-brown-900">
-          <Link href={`/organization/people/${request.userId}`} className="hover:underline">
+        <p className="text-body text-tertiary">{STATUS_LABELS[request.status] ?? request.status}</p>
+        <h1 className="text-page-title text-primary">
+          <Link href={`/organization/people/${request.userId}`} className="text-accent-text underline-offset-4 hover:underline">
             {requesterName ?? "An employee"}
           </Link>
         </h1>
-        <p className="mt-1 text-sm text-brown-700">
+        <p className="mt-1 text-body text-secondary">
           {range(request)} · {days(request.requestedAmount)}
         </p>
-        {request.reason && <p className="mt-2 text-sm text-brown-700">“{request.reason}”</p>}
+        {request.reason && <p className="mt-2 text-body text-secondary">“{request.reason}”</p>}
         {awaitingYou && answeringAs === "DELEGATE" && answeringOnBehalfOfName && (
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-body text-tertiary">
             You are answering for {answeringOnBehalfOfName}, who delegated their approvals to you.
           </p>
         )}
         {awaitingYou && answeringAs === "FALLBACK" && (
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-body text-tertiary">
             This reached you because nobody in the approval chain can answer it.
           </p>
         )}
         {request.decidedAnyway && (
-          <p className="mt-2 text-sm text-muted-foreground">Decided over the approval chain by an administrator.</p>
+          <p className="mt-2 text-body text-tertiary">Decided over the approval chain by an administrator.</p>
         )}
       </div>
 
       {steps.length > 0 && <ApprovalSteps steps={steps} />}
 
-      <section className="rounded-lg border border-brown-200 p-4">
-        <p className="text-sm font-medium text-brown-800">Balance on this policy</p>
+      <section className="rounded-card border border-divider p-4">
+        <p className="text-body font-medium text-primary">Balance on this policy</p>
         {balance ? (
-          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
-            <dt className="text-muted-foreground">Available</dt>
+          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-body sm:grid-cols-3">
+            <dt className="text-tertiary">Available</dt>
             <dd className="sm:col-span-2 tabular-nums">{days(balance.currentBalance)}</dd>
-            <dt className="text-muted-foreground">Reserved by requests awaiting an answer</dt>
+            <dt className="text-tertiary">Reserved by requests awaiting an answer</dt>
             <dd className="sm:col-span-2 tabular-nums">{days(balance.pendingBalance)}</dd>
-            <dt className="text-muted-foreground">Period</dt>
+            <dt className="text-tertiary">Period</dt>
             <dd className="sm:col-span-2">
               {formatDisplayDate(balance.periodStart)}
               {balance.periodEnd ? ` – ${formatDisplayDate(balance.periodEnd)}` : " onwards"}
             </dd>
           </dl>
         ) : (
-          <p className="mt-1 text-sm text-muted-foreground">No balance for the period this request falls in.</p>
+          <p className="mt-1 text-body text-tertiary">No balance for the period this request falls in.</p>
         )}
       </section>
 
-      <section className="rounded-lg border border-brown-200 p-4">
-        <p className="text-sm font-medium text-brown-800">Their other leave around these dates</p>
+      <section className="rounded-card border border-divider p-4">
+        <p className="text-body font-medium text-primary">Their other leave around these dates</p>
         {otherLeave.length === 0 ? (
-          <p className="mt-1 text-sm text-muted-foreground">None within a month either side.</p>
+          <p className="mt-1 text-body text-tertiary">None within a month either side.</p>
         ) : (
-          <ul className="mt-2 space-y-1 text-sm">
+          <ul className="mt-2 space-y-1 text-body">
             {otherLeave.map((r) => (
               <li key={r.id}>
                 {range(r)} · {days(r.requestedAmount)} ·{" "}
-                <span className="text-muted-foreground">{STATUS_LABELS[r.status] ?? r.status}</span>
+                <span className="text-tertiary">{STATUS_LABELS[r.status] ?? r.status}</span>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      <section className="rounded-lg border border-brown-200 p-4">
-        <p className="text-sm font-medium text-brown-800">Also away over these dates</p>
+      <section className="rounded-card border border-divider p-4">
+        <p className="text-body font-medium text-primary">Also away over these dates</p>
         {peersAway.length === 0 ? (
-          <p className="mt-1 text-sm text-muted-foreground">Nobody they work with.</p>
+          <p className="mt-1 text-body text-tertiary">Nobody they work with.</p>
         ) : (
-          <ul className="mt-2 space-y-1 text-sm">
+          <ul className="mt-2 space-y-1 text-body">
             {peersAway.map((p) => (
               <li key={`${p.userId}-${p.startDate}`}>
                 {p.firstName} {p.lastName} · {range(p)}
-                {p.status === "PENDING" && <span className="text-muted-foreground"> · not yet approved</span>}
+                {p.status === "PENDING" && <span className="text-tertiary"> · not yet approved</span>}
               </li>
             ))}
           </ul>
@@ -194,12 +195,12 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
             <div className="flex gap-2">
               <Button type="button" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
                 requestId, userId: request.userId, decision: "CONFIRM" }))}>
-                <Check className="h-4 w-4" />
-                Approve Cancellation
+                <Icon icon={Tick02Icon} size="sm" />
+                Approve cancellation
               </Button>
-              <Button type="button" variant="outline" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => void run(() => decideCancellation.mutateAsync({
                 requestId, userId: request.userId, decision: "DECLINE" }))}>
-                <X className="h-4 w-4" />
+                <Icon icon={Cancel01Icon} size="sm" />
                 Decline
               </Button>
             </div>
@@ -218,11 +219,11 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
           ) : (
             <div className="flex gap-2">
               <Button type="button" disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
-                <Check className="h-4 w-4" />
+                <Icon icon={Tick02Icon} size="sm" />
                 Approve
               </Button>
-              <Button type="button" variant="outline" disabled={busy} onClick={() => setRejecting(true)}>
-                <X className="h-4 w-4" />
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => setRejecting(true)}>
+                <Icon icon={Cancel01Icon} size="sm" />
                 Reject
               </Button>
             </div>
@@ -231,8 +232,8 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
       )}
 
       {canDecideAnyway && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-brown-100 pt-4">
-          <p className="mr-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 border-t border-divider pt-4">
+          <p className="mr-2 text-body text-tertiary">
             {awaitingYou ? "Or decide over the chain:" : "You may decide over the approval chain."}
           </p>
           <DecideAnywayControls
@@ -272,23 +273,23 @@ export const approvalStepLine = (step: TimeOffApprovalStepDTO): { asked: string;
 };
 
 const ApprovalSteps: React.FC<{ steps: TimeOffApprovalStepDTO[] }> = ({ steps }) => (
-  <section className="rounded-lg border border-brown-200 p-4">
-    <p className="text-sm font-medium text-brown-800">Approval</p>
-    <ol className="mt-2 space-y-1.5 text-sm">
+  <section className="rounded-card border border-divider p-4">
+    <p className="text-body font-medium text-primary">Approval</p>
+    <ol className="mt-2 space-y-1.5 text-body">
       {steps.map((step) => {
         const line = approvalStepLine(step);
         return (
           <li key={step.approvalOrder} className="flex gap-2">
-            <span className="text-muted-foreground tabular-nums">{step.approvalOrder}.</span>
+            <span className="text-tertiary tabular-nums">{step.approvalOrder}.</span>
             <span>
-              <span className="text-muted-foreground">Asked:</span> {line.asked}
+              <span className="text-tertiary">Asked:</span> {line.asked}
               {line.answered ? (
                 <>
                   {" · "}
-                  <span className="text-muted-foreground">Answered by</span> {line.answered}
+                  <span className="text-tertiary">Answered by</span> {line.answered}
                 </>
               ) : (
-                <span className="text-muted-foreground"> · Not answered yet</span>
+                <span className="text-tertiary"> · Not answered yet</span>
               )}
             </span>
           </li>

@@ -3,9 +3,10 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, CalendarClock, CalendarPlus, Copy, EyeOff, FileSearch, Lock, Repeat, Send, TriangleAlert, UserMinus, UserPlus, Undo2, Users } from "lucide-react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Alert02Icon, CalendarAdd01Icon, CalendarLock01Icon, Copy01Icon, FileSearchIcon, Notification01Icon, RepeatIcon, SentIcon, SquareLock02Icon, Undo02Icon, UserAdd01Icon, UserRemove01Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -75,8 +76,8 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
     return (
       <div className="mx-auto max-w-6xl space-y-4" aria-busy="true">
         <Skeleton className="h-10 w-80" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-popover" />
+        <Skeleton className="h-64 w-full rounded-popover" />
       </div>
     );
   }
@@ -108,23 +109,23 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
         <SettingsPageHeader title={c.name} backHref="/reviews" className="min-w-0 flex-1" />
         <CycleStatusBadge status={c.status} />
         {canManage && (
-          <RowActionsMenu label="Cycle Actions">
+          <RowActionsMenu label="Cycle actions">
             {active && (
-              <RowAction icon={<CalendarClock className="h-4 w-4 text-muted-foreground" />} onClick={() => setEditingDates(true)}>
-                Edit Dates
+              <RowAction icon={<Icon icon={CalendarLock01Icon} size="sm" className="text-tertiary" />} onClick={() => setEditingDates(true)}>
+                Edit dates
               </RowAction>
             )}
             {/* A new draft from this cycle, dates cleared or moved (REVIEWS_PLAN.md 11.1). */}
-            <RowAction icon={<Copy className="h-4 w-4 text-muted-foreground" />} disabled={copies.busy}
+            <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} disabled={copies.busy}
               onClick={() => void copies.duplicate(c.id)}>
               Duplicate
             </RowAction>
-            <RowAction icon={<CalendarPlus className="h-4 w-4 text-muted-foreground" />} onClick={() => setRepeating(true)}>
+            <RowAction icon={<Icon icon={CalendarAdd01Icon} size="sm" className="text-tertiary" />} onClick={() => setRepeating(true)}>
               Repeat…
             </RowAction>
             {active && (
-              <RowActionDestructive icon={<Lock className="h-4 w-4" />} onClick={() => setConfirm({ kind: "close" })}>
-                Close Cycle
+              <RowActionDestructive icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setConfirm({ kind: "close" })}>
+                Close cycle
               </RowActionDestructive>
             )}
           </RowActionsMenu>
@@ -139,9 +140,9 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
       </div>
 
       <Tabs defaultValue="people" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-brown-50">
-          <TabsTrigger value="people">By Person</TabsTrigger>
-          <TabsTrigger value="reviewers">By Reviewer</TabsTrigger>
+        <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-subtle">
+          <TabsTrigger value="people">By person</TabsTrigger>
+          <TabsTrigger value="reviewers">By reviewer</TabsTrigger>
           <TabsTrigger value="calibration">Calibration</TabsTrigger>
           <TabsTrigger value="results">Results</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -149,7 +150,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
         <TabsContent value="people" className="mt-4">
           {data.people.length === 0 ? (
-            <EmptyState compact icon={<Users className="h-5 w-5" />} title="Nobody takes part"
+            <EmptyState compact scene="team-and-org" title="Nobody takes part"
               description="Everybody who took part has been removed from this cycle." />
           ) : (
           <ul className="space-y-2">
@@ -175,18 +176,18 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
         <TabsContent value="reviewers" className="mt-4">
           {data.reviewers.length === 0 ? (
-            <EmptyState compact icon={<Users className="h-5 w-5" />} title="Nobody has a review to write"
+            <EmptyState compact scene="team-and-org" title="Nobody has a review to write"
               description="A reviewer appears here once the cycle asks them to write — peers once they are chosen." />
           ) : (
-          <div className="overflow-x-auto rounded-xl border border-brown-100 bg-white">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
-                <tr className="border-b border-brown-100">
+          <div className="overflow-x-auto rounded-popover border border-divider bg-card">
+            <table className="w-full text-body">
+              <thead className="text-left text-hint text-tertiary">
+                <tr className="border-b border-divider">
                   <th className="px-4 py-2 font-medium">Reviewer</th>
                   <th className="px-4 py-2 font-medium">Submitted</th>
                   <th className="px-4 py-2 font-medium">Overdue</th>
-                  <th className="px-4 py-2 font-medium">Peer Reviews</th>
-                  <th className="px-4 py-2 font-medium">Next Due</th>
+                  <th className="px-4 py-2 font-medium">Peer reviews</th>
+                  <th className="px-4 py-2 font-medium">Next due</th>
                   <th className="px-4 py-2" />
                 </tr>
               </thead>
@@ -194,21 +195,21 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
                 {data.reviewers.map((r) => {
                   const open = data.assignments.filter((a) => a.reviewer.userId === r.reviewer.userId && a.status === "OPEN");
                   return (
-                    <tr key={r.reviewer.userId} className="border-b border-brown-50 last:border-0">
-                      <td className="px-4 py-2 text-brown-900">
+                    <tr key={r.reviewer.userId} className="border-b border-divider last:border-0">
+                      <td className="px-4 py-2 text-primary">
                         {r.reviewer.name}
-                        {r.leftCompany && <span className="ml-2 text-xs text-muted-foreground">Left</span>}
+                        {r.leftCompany && <span className="ml-2 text-hint text-tertiary">Left</span>}
                       </td>
                       <td className="px-4 py-2">{r.submitted} of {r.total}</td>
-                      <td className={`px-4 py-2 ${r.overdue > 0 ? "text-warning-700" : ""}`}>{r.overdue}</td>
+                      <td className={`px-4 py-2 ${r.overdue > 0 ? "text-status-pending-text" : ""}`}>{r.overdue}</td>
                       <td className="px-4 py-2">{r.peerReviews}</td>
                       <td className="px-4 py-2">{r.nearestDueOn ? formatDisplayDate(r.nearestDueOn, { style: "medium" }) : "—"}</td>
                       <td className="px-4 py-2 text-right">
                         {manage && open.length > 0 && (
-                          <RowActionsMenu label="Reviewer Actions">
-                            <RowAction icon={<Bell className="h-4 w-4 text-muted-foreground" />}
+                          <RowActionsMenu label="Reviewer actions">
+                            <RowAction icon={<Icon icon={Notification01Icon} size="sm" className="text-tertiary" />}
                               onClick={() => void act(nudgeReviewsAction(open.map((a) => a.id)), "Reminder sent.")}>
-                              Send a Reminder
+                              Send a reminder
                             </RowAction>
                           </RowActionsMenu>
                         )}
@@ -245,8 +246,8 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
       <ConfirmDialog
         open={confirm?.kind === "close"}
-        title="Close Cycle"
-        confirmLabel="Close Cycle"
+        title="Close cycle"
+        confirmLabel="Close cycle"
         destructive
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -266,7 +267,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
       <ConfirmDialog
         open={confirm?.kind === "share"}
-        title="Share on the Manager's Behalf"
+        title="Share on the manager's behalf"
         confirmLabel="Share"
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -289,7 +290,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
       <ConfirmDialog
         open={confirm?.kind === "remove"}
-        title="Remove from Cycle"
+        title="Remove from cycle"
         confirmLabel="Remove"
         destructive
         onCancelAction={() => setConfirm(null)}
@@ -313,9 +314,9 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
 function Fact({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="rounded-xl border border-brown-100 bg-white px-5 py-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`text-xl font-semibold ${warn ? "text-warning-700" : "text-brown-900"}`}>{value}</div>
+    <div className="rounded-card border border-divider bg-card px-5 py-3">
+      <div className="text-hint text-tertiary">{label}</div>
+      <div className={`text-section-title ${warn ? "text-status-pending-text" : "text-primary"}`}>{value}</div>
     </div>
   );
 }
@@ -347,71 +348,71 @@ function PersonCard({
   // A manager review waiting for its approver is not shared by anybody (REVIEWS_PLAN.md 10.3).
   const shareable = canShareOnBehalf && !removed && p.managerReviewIn && !p.shared && (p.approver == null || p.approvedAt != null);
   return (
-    <li className={`rounded-xl border border-brown-100 bg-white px-5 py-4 ${removed ? "opacity-60" : ""}`}>
+    <li className={`rounded-card border border-divider bg-card px-5 py-4 ${removed ? "opacity-60" : ""}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium text-brown-900">{p.subject.name}</span>
+        <span className="font-medium text-primary">{p.subject.name}</span>
         <PacketStatusBadge status={p.status} />
-        {p.leftCompany && <span className="text-xs text-muted-foreground">Left the company</span>}
-        <span className="text-xs text-muted-foreground">
+        {p.leftCompany && <span className="text-hint text-tertiary">Left the company</span>}
+        <span className="text-hint text-tertiary">
           {p.manager ? `Manager in this cycle: ${p.manager.name}` : "No manager review"}
         </span>
         {p.managerChanged && !removed && (
-          <span className="flex items-center gap-1 text-xs text-warning-700">
-            <TriangleAlert className="h-3.5 w-3.5" />
+          <span className="flex items-center gap-1 text-hint text-status-pending-text">
+            <Icon icon={Alert02Icon} size="sm" />
             Manager changed since launch{p.currentManager ? ` — now ${p.currentManager.name}` : ""}
           </span>
         )}
         {belowThreshold && (
-          <span className="flex items-center gap-1 text-xs text-warning-700" data-test="below-threshold">
-            <EyeOff className="h-3.5 w-3.5" />
+          <span className="flex items-center gap-1 text-hint text-status-pending-text" data-test="below-threshold">
+            <Icon icon={ViewOffSlashIcon} size="sm" />
             Fewer peers than the anonymity threshold of {threshold} — their reviews stay hidden
           </span>
         )}
         {canReadResults && p.finalRating != null && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-hint text-tertiary">
             Rating: {p.finalRating}{rating ? ` · ${rating}` : ""}{p.calibrated ? " · calibrated" : ""}
           </span>
         )}
         {p.approver && !removed && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-hint text-tertiary">
             {p.approvedAt ? `Approved by ${p.approver.name}` : p.status === "AWAITING_APPROVAL" ? `Waiting for approval by ${p.approver.name}` : ""}
           </span>
         )}
         {p.nominationStatus && !removed && (
-          <span className={`text-xs ${p.nominationStatus === "APPROVED" ? "text-muted-foreground" : "text-warning-700"}`}
+          <span className={`text-hint ${p.nominationStatus === "APPROVED" ? "text-tertiary" : "text-status-pending-text"}`}
             data-test="nomination-status">
             Peers: {REVIEW_NOMINATION_STATUS_LABELS[p.nominationStatus]}
             {p.nominationStatus === "AWAITING_APPROVAL" ? ` (${p.nominatedPeers} nominated)` : ""}
           </span>
         )}
         {p.upwardReviews > 0 && !removed && (
-          <span className="text-xs text-muted-foreground">Upward {p.upwardReviews}</span>
+          <span className="text-hint text-tertiary">Upward {p.upwardReviews}</span>
         )}
         <div className="ml-auto flex items-center gap-2">
           {hasPeers && !removed && (
-            <span className={`text-xs ${p.peerMin != null && p.peers < p.peerMin ? "text-warning-700" : "text-muted-foreground"}`}>
+            <span className={`text-hint ${p.peerMin != null && p.peers < p.peerMin ? "text-status-pending-text" : "text-tertiary"}`}>
               Peers {p.peers}/{p.peerMin}–{p.peerMax}
             </span>
           )}
           {(canReadResults || p.managerReviewIn) && (
-            <Link href={`/reviews/packets/${p.participantId}`} className="text-xs underline underline-offset-4">
+            <Link href={`/reviews/packets/${p.participantId}`} className="text-hint text-accent-text underline-offset-4 hover:underline">
               Open
             </Link>
           )}
           {manage && !removed && (
-            <RowActionsMenu label="Person Actions">
+            <RowActionsMenu label="Person actions">
               {hasPeers && (
-                <RowAction icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} onClick={onChoosePeers}>
-                  Choose Peers
+                <RowAction icon={<Icon icon={UserAdd01Icon} size="sm" className="text-tertiary" />} onClick={onChoosePeers}>
+                  Choose peers
                 </RowAction>
               )}
               {shareable && (
-                <RowAction icon={<Send className="h-4 w-4 text-muted-foreground" />} onClick={onShare}>
+                <RowAction icon={<Icon icon={SentIcon} size="sm" className="text-tertiary" />} onClick={onShare}>
                   Share on the Manager&apos;s Behalf
                 </RowAction>
               )}
-              <RowActionDestructive icon={<UserMinus className="h-4 w-4" />} onClick={onRemove}>
-                Remove from Cycle
+              <RowActionDestructive icon={<Icon icon={UserRemove01Icon} size="sm" />} onClick={onRemove}>
+                Remove from cycle
               </RowActionDestructive>
             </RowActionsMenu>
           )}
@@ -421,22 +422,22 @@ function PersonCard({
       {shown.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2">
           {shown.map((a) => (
-            <li key={a.id} className="flex items-center gap-2 rounded-lg border border-brown-100 px-3 py-1.5 text-xs">
-              <span className="text-muted-foreground">{REVIEW_KIND_LABELS[a.kind]}</span>
-              <span className="text-brown-900">{a.reviewer.name}</span>
+            <li key={a.id} className="flex items-center gap-2 rounded-control border border-divider px-3 py-1.5 text-hint">
+              <span className="text-tertiary">{REVIEW_KIND_LABELS[a.kind]}</span>
+              <span className="text-primary">{a.reviewer.name}</span>
               <AssignmentStatusBadge status={a.status} overdue={a.overdue} />
               {manage && a.status === "OPEN" && (
-                <RowActionsMenu label="Review Actions">
-                  <RowAction icon={<Bell className="h-4 w-4 text-muted-foreground" />} onClick={() => onNudge(a)}>
-                    Send a Reminder
+                <RowActionsMenu label="Review actions">
+                  <RowAction icon={<Icon icon={Notification01Icon} size="sm" className="text-tertiary" />} onClick={() => onNudge(a)}>
+                    Send a reminder
                   </RowAction>
                   {a.kind !== "SELF" && (
-                    <RowAction icon={<Repeat className="h-4 w-4 text-muted-foreground" />} onClick={() => onReassign(a)}>
-                      Hand to Someone Else
+                    <RowAction icon={<Icon icon={RepeatIcon} size="sm" className="text-tertiary" />} onClick={() => onReassign(a)}>
+                      Hand to someone else
                     </RowAction>
                   )}
                   {a.kind === "PEER" && (
-                    <RowActionDestructive icon={<Undo2 className="h-4 w-4" />} onClick={() => onWithdraw(a)}>
+                    <RowActionDestructive icon={<Icon icon={Undo02Icon} size="sm" />} onClick={() => onWithdraw(a)}>
                       Withdraw
                     </RowActionDestructive>
                   )}
@@ -453,30 +454,30 @@ function PersonCard({
 function SettingsView({ overview }: { overview: CycleOverview }) {
   const c = overview.cycle;
   return (
-    <div className="space-y-4 rounded-xl border border-brown-100 bg-white p-5 text-sm">
-      {c.description && <p className="text-muted-foreground">{c.description}</p>}
+    <div className="space-y-4 rounded-card border border-divider bg-card p-5 text-body">
+      {c.description && <p className="text-tertiary">{c.description}</p>}
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
         <Row label="Launched">{c.launchedAt ? formatDisplayDate(c.launchedAt, { style: "medium" }) : "—"}</Row>
-        <Row label="Run By">{c.ownerName ?? "—"}</Row>
-        <Row label="Hired On or Before">{c.eligibleHiredBefore ? formatDisplayDate(c.eligibleHiredBefore, { style: "medium" }) : "Anybody"}</Row>
+        <Row label="Run by">{c.ownerName ?? "—"}</Row>
+        <Row label="Hired on or before">{c.eligibleHiredBefore ? formatDisplayDate(c.eligibleHiredBefore, { style: "medium" }) : "Anybody"}</Row>
         <Row label="Results">
           {REVIEW_SHARING_LABEL[c.sharingMode]}
           {c.sharingMode === "RELEASED_ON_DATE" && c.releaseDate ? ` — ${formatDisplayDate(c.releaseDate, { style: "medium" })}` : ""}
         </Row>
       </dl>
       <div>
-        <h3 className="mb-2 font-medium text-brown-900">Reviews</h3>
+        <h3 className="mb-2 font-medium text-primary">Reviews</h3>
         {c.approvalMode !== "NONE" && (
-          <p className="text-muted-foreground">
+          <p className="text-tertiary">
             Manager reviews are approved by {c.approvalMode === "PERSON" ? c.approverName ?? "a named person" : REVIEW_APPROVAL_MODE_LABELS[c.approvalMode].toLowerCase()} before they are shared.
           </p>
         )}
         <ul className="space-y-1">
           {c.kinds.map((k) => (
             <li key={k.kind} className="flex flex-wrap items-center gap-x-2">
-              <FileSearch className="h-4 w-4 text-muted-foreground" />
+              <Icon icon={FileSearchIcon} size="sm" className="text-tertiary" />
               <span className="font-medium">{REVIEW_KIND_LABELS[k.kind]}</span>
-              <span className="text-muted-foreground">
+              <span className="text-tertiary">
                 {k.formName ?? "No form"} · {k.questionCount} questions
                 {k.opensOn ? ` · opens ${formatDisplayDate(k.opensOn, { style: "medium" })}` : ""}
                 {k.dueOn ? ` · due ${formatDisplayDate(k.dueOn, { style: "medium" })}` : ""}
@@ -494,16 +495,16 @@ function SettingsView({ overview }: { overview: CycleOverview }) {
         </ul>
       </div>
       <div>
-        <h3 className="mb-2 font-medium text-brown-900">Rating Scale</h3>
+        <h3 className="mb-2 font-medium text-primary">Rating scale</h3>
         <ol className="flex flex-wrap gap-2">
           {c.scale.map((s) => (
-            <li key={s.value} className="rounded-lg border border-brown-100 px-3 py-1.5">
+            <li key={s.value} className="rounded-control border border-divider px-3 py-1.5">
               <span className="font-semibold">{s.value}</span> · {s.label}
             </li>
           ))}
         </ol>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         A launched cycle keeps its forms, kinds, scale and anonymity; only the dates change, from Edit Dates.
       </p>
     </div>
@@ -513,8 +514,8 @@ function SettingsView({ overview }: { overview: CycleOverview }) {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-brown-900">{children}</dd>
+      <dt className="text-hint text-tertiary">{label}</dt>
+      <dd className="text-primary">{children}</dd>
     </div>
   );
 }

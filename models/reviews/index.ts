@@ -72,11 +72,11 @@ export type ReviewFormWrite = {
 /** What a reviewer answers with, in the order the editor offers them. A section is offered apart. */
 export const REVIEW_QUESTION_TYPE_LABELS: Record<Exclude<ReviewQuestionType, "SECTION">, string> = {
   RATING: "Rating",
-  LONG_TEXT: "Long Text",
-  SHORT_TEXT: "Short Text",
-  SINGLE_CHOICE: "One Choice",
-  MULTIPLE_CHOICE: "Several Choices",
-  YES_NO: "Yes or No",
+  LONG_TEXT: "Long text",
+  SHORT_TEXT: "Short text",
+  SINGLE_CHOICE: "One choice",
+  MULTIPLE_CHOICE: "Several choices",
+  YES_NO: "Yes or no",
   NUMBER: "Number",
   DATE: "Date",
 };
@@ -114,10 +114,10 @@ export type ReviewNominationStatus = "NOMINATING" | "AWAITING_APPROVAL" | "APPRO
 export const REVIEW_KINDS: ReviewKind[] = ["SELF", "MANAGER", "PEER", "UPWARD"];
 
 export const REVIEW_KIND_LABELS: Record<ReviewKind, string> = {
-  SELF: "Self Review",
-  MANAGER: "Manager Review",
-  PEER: "Peer Review",
-  UPWARD: "Upward Review",
+  SELF: "Self review",
+  MANAGER: "Manager review",
+  PEER: "Peer review",
+  UPWARD: "Upward review",
 };
 
 export const REVIEW_KIND_DESCRIPTIONS: Record<ReviewKind, string> = {
@@ -140,7 +140,7 @@ export const REVIEW_APPROVAL_MODE_LABELS: Record<ReviewApprovalMode, string> = {
 
 export const REVIEW_NOMINATION_STATUS_LABELS: Record<ReviewNominationStatus, string> = {
   NOMINATING: "Nominating",
-  AWAITING_APPROVAL: "Awaiting Approval",
+  AWAITING_APPROVAL: "Awaiting approval",
   APPROVED: "Approved",
 };
 
@@ -152,16 +152,16 @@ export const REVIEW_CYCLE_STATUS_LABELS: Record<ReviewCycleStatus, string> = {
 
 export const REVIEW_ASSIGNMENT_STATUS_LABELS: Record<ReviewAssignmentStatus, string> = {
   NOMINATED: "Nominated",
-  OPEN: "Not Submitted",
+  OPEN: "Not submitted",
   SUBMITTED: "Submitted",
   DECLINED: "Declined",
-  REASSIGNED: "Handed On",
+  REASSIGNED: "Handed on",
   CANCELLED: "Withdrawn",
 };
 
 export const REVIEW_PARTICIPANT_STATUS_LABELS: Record<ReviewParticipantStatus, string> = {
   COLLECTING: "Collecting",
-  AWAITING_APPROVAL: "Awaiting Approval",
+  AWAITING_APPROVAL: "Awaiting approval",
   SHARED: "Shared",
   ACKNOWLEDGED: "Acknowledged",
   REMOVED: "Removed",

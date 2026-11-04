@@ -36,7 +36,7 @@ export const currentCompanySubdomain = async (): Promise<string | null> => {
 /**
  * The login page's appearance for an address, read once per request.
  *
- * **One read for the whole response.** `BrandThemeStyle` in the root layout paints the colour and the
+ * **One read for the whole response.** `workspaceAccent` in the root layout paints the colour and the
  * login page renders the texts and the background; both come through here, so the colour in `<head>`
  * and the headline in `<body>` are the same answer. Two reads could straddle a save and paint a page
  * that changes on the next load.

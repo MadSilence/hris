@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Label } from "@/components/desact/label";
 
 /**
  * A field label, with a grey asterisk when the field is required.
@@ -25,7 +25,7 @@ export const RequiredLabel: React.FC<{
   <Label htmlFor={htmlFor} className={className}>
     {children}
     {required && (
-      <span className="text-muted-foreground" aria-hidden>
+      <span className="text-tertiary" aria-hidden>
         {" "}
         *
       </span>

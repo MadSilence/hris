@@ -81,7 +81,7 @@ describe("InviteUserModal", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByText("Ada Lovelace has an unfinished preboarding.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText(/End It Early/));
+    fireEvent.click(screen.getByLabelText(/End it early/));
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
     await waitFor(() =>
@@ -93,7 +93,7 @@ describe("InviteUserModal", () => {
   it("needs a day before it schedules", async () => {
     renderModal({ email: "ada@example.com" });
 
-    fireEvent.click(screen.getByLabelText("On a Date"));
+    fireEvent.click(screen.getByLabelText("On a date"));
     fireEvent.click(await screen.findByRole("button", { name: "Schedule" }));
 
     expect(await screen.findByText("Pick the day to send it.")).toBeInTheDocument();

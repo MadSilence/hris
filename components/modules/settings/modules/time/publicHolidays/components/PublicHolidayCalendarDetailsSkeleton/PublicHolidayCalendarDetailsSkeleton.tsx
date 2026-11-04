@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 
 export const PublicHolidayCalendarDetailsSkeleton: React.FC = () => {
   return (
@@ -8,16 +8,16 @@ export const PublicHolidayCalendarDetailsSkeleton: React.FC = () => {
       <div className="flex flex-none flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-control" />
             <Skeleton className="h-8 w-56" />
           </div>
-          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-20 rounded-pill" />
         </div>
         <Skeleton className="h-4 w-full max-w-2xl" />
       </div>
 
       {/* Tabs */}
-      <Skeleton className="h-10 w-full flex-none rounded-md" />
+      <Skeleton className="h-10 w-full flex-none rounded-control" />
 
       {/* Holidays tab content */}
       <div className="flex min-h-0 flex-1 flex-col gap-6">
@@ -35,7 +35,7 @@ export const PublicHolidayCalendarDetailsSkeleton: React.FC = () => {
 
         {/* Table */}
         <div className="min-h-0 flex-1 overflow-hidden pr-1">
-          <div className="flex gap-4 border-b border-brown-200 pb-2 pl-4">
+          <div className="flex gap-4 border-b border-divider pb-2 pl-4">
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-1/2" />
           </div>

@@ -1,8 +1,26 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import AppShell from "./AppShell";
 import { hrisFirstRunService } from "@/api/modules/firstRun/services";
+import { hrisApiCompanyService } from "@/api/modules/company/services";
+
+/**
+ * Inside a workspace the tab reads "Acme · noddo", and a page puts its own name in front: "Calendar · Acme ·
+ * noddo" (SPEC § 2). Without the company's name — a hiccup reading it — the product's name alone.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const { name } = await hrisApiCompanyService.getCompany();
+    // `absolute`, not `default`: a default is itself run through the root layout's "%s · noddo" and came
+    // out "Acme · noddo · noddo". SPEC § 2: the page title is "Acme · noddo", a page under it "People · Acme · noddo".
+    if (name) return { title: { absolute: `${name} · noddo`, template: `%s · ${name} · noddo` } };
+  } catch {
+    // the root layout's "noddo" stands
+  }
+  return {};
+}
 
 /**
  * The gate in front of the whole signed-in app.

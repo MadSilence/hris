@@ -21,14 +21,14 @@ const answer = (data: Partial<Celebrations>) =>
 const admin = (yes: boolean) => jest.mocked(useCanAccess).mockReturnValue(yes);
 
 describe("CelebrationsWidget", () => {
-  it("shows today by default and widens to the next week under Show Upcoming", () => {
+  it("shows today by default and widens to the next week under Show upcoming", () => {
     admin(false);
     answer({});
     render(<CelebrationsWidget />);
     expect(useCelebrations).toHaveBeenLastCalledWith(false);
     expect(screen.getByText("Nothing to celebrate today.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Show Upcoming" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show upcoming" }));
     expect(useCelebrations).toHaveBeenLastCalledWith(true);
   });
 
@@ -45,8 +45,8 @@ describe("CelebrationsWidget", () => {
     render(<CelebrationsWidget />);
 
     expect(screen.getByText("Birthday")).toBeInTheDocument();
-    expect(screen.getByText("5 Years at the Company")).toBeInTheDocument();
-    expect(screen.getByText("Joins the Company")).toBeInTheDocument();
+    expect(screen.getByText("5 Years at the company")).toBeInTheDocument();
+    expect(screen.getByText("Joins the company")).toBeInTheDocument();
     expect(screen.getByText("Today", { selector: "span" })).toBeInTheDocument();
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument();
   });
@@ -57,7 +57,7 @@ describe("CelebrationsWidget", () => {
     render(<CelebrationsWidget />);
 
     expect(screen.getByText(/"Date of birth" is\s+not visible to your role for everyone/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open Roles" })).toHaveAttribute("href", "/settings/people/roles");
+    expect(screen.getByRole("link", { name: "Open roles" })).toHaveAttribute("href", "/settings/people/roles");
   });
 
   it("tells an administrator where to choose the field when none is chosen", () => {
@@ -65,7 +65,7 @@ describe("CelebrationsWidget", () => {
     answer({ birthdays: "OFF", birthdayFieldName: null });
     render(<CelebrationsWidget />);
 
-    expect(screen.getByRole("link", { name: "Choose One" })).toHaveAttribute("href", "/settings/general/dashboard");
+    expect(screen.getByRole("link", { name: "Choose one" })).toHaveAttribute("href", "/settings/general/dashboard");
   });
 
   it("says nothing about hidden birthdays to somebody who could not change it", () => {

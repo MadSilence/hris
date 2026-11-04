@@ -19,8 +19,8 @@ describe("AddPersonModal", () => {
     const onClose = jest.fn();
     render(<AddPersonModal open onCloseAction={onClose} />);
 
-    fireEvent.change(screen.getByLabelText("First Name *"), { target: { value: "Ada" } });
-    fireEvent.change(screen.getByLabelText("Last Name *"), { target: { value: "Lovelace" } });
+    fireEvent.change(screen.getByLabelText("First name *"), { target: { value: "Ada" } });
+    fireEvent.change(screen.getByLabelText("Last name *"), { target: { value: "Lovelace" } });
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     await waitFor(() =>
@@ -53,8 +53,8 @@ describe("AddPersonModal", () => {
     });
     render(<AddPersonModal open onCloseAction={jest.fn()} />);
 
-    fireEvent.change(screen.getByLabelText("First Name *"), { target: { value: "Ada" } });
-    fireEvent.change(screen.getByLabelText("Last Name *"), { target: { value: "Lovelace" } });
+    fireEvent.change(screen.getByLabelText("First name *"), { target: { value: "Ada" } });
+    fireEvent.change(screen.getByLabelText("Last name *"), { target: { value: "Lovelace" } });
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "ada@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 

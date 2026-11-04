@@ -5,9 +5,9 @@ import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -19,6 +19,7 @@ import {
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { changePasswordAction } from "@/components/modules/auth/actions/changePasswordAction";
 import { useLogoutAction } from "@/components/modules/auth/hooks/useLogoutAction";
+import { FieldError } from "@/components/desact/field-error";
 
 export type ChangePasswordValues = PasswordValues & { currentPassword: string };
 
@@ -137,7 +138,7 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
         aria-invalid={Boolean(formik.errors[name])}
       />
       {formik.errors[name] && (
-        <p role="alert" className="text-xs text-destructive">{formik.errors[name]}</p>
+        <FieldError>{formik.errors[name]}</FieldError>
       )}
     </div>
   );
@@ -148,18 +149,18 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
         <DialogContent className="sm:max-w-md">
           <form onSubmit={handleSubmit} noValidate>
             <DialogHeader>
-              <DialogTitle>Change Password</DialogTitle>
+              <DialogTitle>Change password</DialogTitle>
               <DialogDescription>
                 You will be signed out everywhere, here included, and sign in again with the new password.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {field("currentPassword", "change-password-current", "Current Password", "current-password")}
-              {field("password", "change-password-new", "New Password", "new-password")}
-              {field("confirmPassword", "change-password-confirm", "Confirm Password", "new-password")}
+              {field("currentPassword", "change-password-current", "Current password", "current-password")}
+              {field("password", "change-password-new", "New password", "new-password")}
+              {field("confirmPassword", "change-password-confirm", "Confirm password", "new-password")}
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-hint text-tertiary">
                 Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
               </p>
 
@@ -167,11 +168,11 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={requestClose} disabled={busy}>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>
                 Cancel
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? "Changing…" : "Change Password"}
+                {busy ? "Changing…" : "Change password"}
               </Button>
             </DialogFooter>
           </form>

@@ -2,18 +2,8 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  Check,
-  ChevronsDownUp,
-  ChevronsUpDown,
-  Copy,
-  Download,
-  GripVertical,
-  Lock,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Add01Icon, Copy01Icon, Delete02Icon, Download01Icon, DragDropVerticalIcon, PencilEdit02Icon, SquareLock02Icon, Tick02Icon, UnfoldLessIcon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   closestCorners,
   DndContext,
@@ -32,14 +22,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Button } from "@/components/desact/button";
+import { Badge } from "@/components/desact/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/public/desact/src/components/ui/accordion";
+} from "@/components/desact/accordion";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
@@ -429,39 +419,37 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
         <div className="flex items-center gap-2">
           <Button type="button"
             variant="ghost"
-            size="sm"
-            className="h-9 gap-1.5 text-brown-600"
+            className="gap-1.5 text-secondary"
             onClick={toggleAll}
             disabled={display.length === 0}
           >
-            {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
+            {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
             {allOpen ? "Collapse all" : "Expand all"}
           </Button>
 
           {/* A section with its fields, ready-made (TEMPLATES_DESIGN.md § 4.3): the field sets of the catalogue. */}
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
-            <Button asChild variant="outline" className="h-9">
+            <Button asChild variant="secondary">
               <Link href="/settings/general/templates?kind=FIELD_SET" className="no-underline">
-                Add from Library
+                Add from library
               </Link>
             </Button>
           </PermissionGate>
 
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onCreateGroup}>
-              <Plus className="h-4 w-4"/>
-              Add Section
+              <Icon icon={Add01Icon} size="sm" />
+              Add section
             </Button>
           </PermissionGate>
 
           <Button type="button"
             size="icon"
-            variant="outline"
-            className="h-9 w-9"
+            variant="secondary"
             onClick={() => setIsExportOpen(true)}
             aria-label="Export attributes"
           >
-            <Download className="h-4 w-4"/>
+            <Icon icon={Download01Icon} size="sm" />
           </Button>
         </div>
       </div>
@@ -470,7 +458,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
       <div className="-mx-1 max-h-[calc(100svh-300px)] overflow-y-auto px-1">
         {/* Column header lives inside the scroll box (same width context as the rows → aligned)
             and sticks to the top so it stays visible while the list scrolls. */}
-        <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
+        <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
           <div>Name</div>
           <div>Type</div>
           <div>Details</div>
@@ -519,18 +507,18 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
 
           <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0, 0, 1)" }}>
             {activeGroup ? (
-              <div className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 shadow-lg">
+              <div className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary shadow-popover">
                 <span className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-brown-300"/>
+                  <Icon icon={DragDropVerticalIcon} size="sm" className="text-disabled" />
                   {activeGroup.name}
-                  <span className="normal-case tracking-normal text-brown-400">
+                  <span className="normal-case text-tertiary">
                     ({activeGroup.attributes?.length ?? 0})
                   </span>
                 </span>
               </div>
             ) : activeAttribute ? (
-              <div className="flex items-center gap-2 rounded-md border border-brown-100 bg-white px-3 py-2 text-sm font-medium text-foreground shadow-lg">
-                <GripVertical className="h-4 w-4 text-brown-300"/>
+              <div className="flex items-center gap-2 rounded-control border border-divider bg-card px-3 py-2 text-body font-medium text-primary shadow-popover">
+                <Icon icon={DragDropVerticalIcon} size="sm" className="text-disabled" />
                 {activeAttribute.name}
               </div>
             ) : null}
@@ -554,7 +542,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
   );
 };
 
-// --- Sortable group (brown bar + its attribute rows) -----------------------
+// --- Sortable group (its header bar + its attribute rows) ------------------
 
 type SortableGroupProps = {
   group: AttributeGroup;
@@ -610,7 +598,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
       className="border-b-0"
     >
       <div className="relative">
-        <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 pr-9 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+        <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 pr-9 text-body font-semibold text-secondary hover:no-underline">
           <span className="flex items-center gap-2">
             <span
               {...(dndEnabled ? dragAttrs : {})}
@@ -619,14 +607,14 @@ const SortableGroup: FC<SortableGroupProps> = ({
               className={`inline-flex ${dndEnabled ? "cursor-grab" : "cursor-default"}`}
               aria-label="Drag to reorder section"
             >
-              <GripVertical className="h-4 w-4 shrink-0 text-brown-300"/>
+              <Icon icon={DragDropVerticalIcon} size="sm" className="shrink-0 text-disabled" />
             </span>
             {group.name}
-            <span className="normal-case tracking-normal text-brown-400">
+            <span className="normal-case text-tertiary">
               ({attributes.length})
             </span>
             {group.isSystem ? (
-              <Badge variant="secondary" className="font-normal normal-case tracking-normal">
+              <Badge variant="neutral" className="font-normal normal-case">
                 System
               </Badge>
             ) : null}
@@ -646,7 +634,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
               {/* Section rename/delete live behind the edit affordance now. Preset sections ship with
                   the product, so the menu is disabled rather than failing on save. */}
               <RowActionsMenu
-                label="Section Actions"
+                label="Section actions"
                 disabled={group.isSystem}
                 title={group.isSystem ? "System sections can't be edited or deleted" : undefined}
                 stopPropagation
@@ -654,7 +642,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
                   {/* Opens the section's name-and-description form, so it is Edit, not Rename. */}
                   <RowAction
-                    icon={<Pencil className="h-4 w-4"/>}
+                    icon={<Icon icon={PencilEdit02Icon} size="sm" />}
                     onClick={() => onRenameGroup(group)}
                   >
                     Edit
@@ -663,7 +651,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
 
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
                   <RowActionDestructive
-                    icon={<Trash2 className="h-4 w-4"/>}
+                    icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteGroup(group)}
                   >
                     Delete
@@ -674,7 +662,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
               <Button type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+                className="h-7 w-7 text-secondary hover:bg-mist"
                 aria-label="Done editing section"
                 title="Done"
                 onClick={(e) => {
@@ -682,14 +670,14 @@ const SortableGroup: FC<SortableGroupProps> = ({
                   onToggleEditing();
                 }}
               >
-                <Check className="h-4 w-4"/>
+                <Icon icon={Tick02Icon} size="sm" />
               </Button>
               </>
             ) : (
               <Button type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+                className="h-7 w-7 text-secondary hover:bg-mist"
                 aria-label="Edit section"
                 title="Edit section"
                 onClick={(e) => {
@@ -697,7 +685,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                   onToggleEditing();
                 }}
               >
-                <Pencil className="h-4 w-4"/>
+                <Icon icon={PencilEdit02Icon} size="sm" />
               </Button>
             )}
           </div>
@@ -707,7 +695,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
       <AccordionContent>
         <div ref={setDropRef} className="pb-2">
           {description && (
-            <p className="whitespace-pre-line px-3 pb-2 pt-1 text-sm text-muted-foreground">
+            <p className="whitespace-pre-line px-3 pb-2 pt-1 text-body text-tertiary">
               {description}
             </p>
           )}
@@ -737,11 +725,11 @@ const SortableGroup: FC<SortableGroupProps> = ({
               <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
                 <button
                   type="button"
-                  className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
+                  className="mt-2 flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle"
                   onClick={handleCreateAttribute}
                 >
-                  <Plus className="h-4 w-4"/>
-                  Add Attribute
+                  <Icon icon={Add01Icon} size="sm" />
+                  Add attribute
                 </button>
               </PermissionGate>
 
@@ -789,7 +777,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={notLast ? "border-b border-brown-100" : ""}>
+    <div ref={setNodeRef} style={style} className={notLast ? "border-b border-divider" : ""}>
       <div className={`${GRID} min-h-11 px-3 py-1.5`}>
         <div className="flex min-w-0 items-center gap-2">
           <span
@@ -798,28 +786,28 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             className={`inline-flex ${dndEnabled ? "cursor-grab" : "cursor-default"}`}
             aria-label="Drag to reorder attribute"
           >
-            <GripVertical className="h-4 w-4 shrink-0 text-brown-300"/>
+            <Icon icon={DragDropVerticalIcon} size="sm" className="shrink-0 text-disabled" />
           </span>
-          <span className="truncate text-sm font-medium text-foreground" title={attribute.name}>
+          <span className="truncate text-body font-medium text-primary" title={attribute.name}>
             {attribute.name}
           </span>
           {attribute.required && (
-            <span className="shrink-0 text-danger-500" title="Required" aria-label="Required">
+            <span className="shrink-0 text-danger-text" title="Required" aria-label="Required">
               *
             </span>
           )}
           {isPreset && (
-            <Badge variant="secondary" className="shrink-0 font-normal">
+            <Badge variant="neutral" className="shrink-0 font-normal">
               System
             </Badge>
           )}
           {attribute.sensitive && (
             <Badge
-              variant="outline"
-              className="shrink-0 gap-1 border-warning-300 bg-warning-50 font-normal text-warning-700"
+              variant="neutral"
+              className="shrink-0"
               title="Access isn't granted automatically; people without it see a placeholder"
             >
-              <Lock className="h-3 w-3" />
+              <Icon icon={SquareLock02Icon} size="sm" />
               Sensitive
             </Badge>
           )}
@@ -829,7 +817,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
           <AttributeTypeChip type={attribute.type} />
         </div>
 
-        <div className="truncate text-sm text-muted-foreground" title={details}>
+        <div className="truncate text-body text-tertiary" title={details}>
           {details}
         </div>
 
@@ -842,20 +830,20 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
               ]}
             >
               <RowActionsMenu
-                label="Attribute Actions"
+                label="Attribute actions"
                 disabled={isPreset || isSavingAttribute}
                 title={isPreset ? "System attributes can't be edited" : undefined}
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
                   <RowAction
-                    icon={<Pencil className="h-4 w-4"/>}
+                    icon={<Icon icon={PencilEdit02Icon} size="sm" />}
                     onClick={() => onEditAttribute(attribute)}
                   >
                     Edit
                   </RowAction>
 
                   <RowAction
-                    icon={<Copy className="h-4 w-4"/>}
+                    icon={<Icon icon={Copy01Icon} size="sm" />}
                     onClick={() => onDuplicateAttribute(attribute)}
                   >
                     Duplicate
@@ -864,7 +852,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
 
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="MANAGE">
                   <RowActionDestructive
-                    icon={<Trash2 className="h-4 w-4"/>}
+                    icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteAttribute(attribute)}
                   >
                     Delete

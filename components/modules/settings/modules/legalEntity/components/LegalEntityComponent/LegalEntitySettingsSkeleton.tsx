@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
 
 /**
  * The legal entities table, waiting.
@@ -21,20 +21,20 @@ import {
  */
 export const LegalEntitySettingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 6 }) => (
   <Table className="table-fixed">
-    <TableHeader className="[&_tr]:border-brown-200 [&_tr]:border-t-0">
+    <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
       <TableRow>
         <TableHead className="w-[22%]">Name</TableHead>
         <TableHead className="w-[13%]">Country</TableHead>
-        <TableHead className="w-[13%]">Assigned Users</TableHead>
+        <TableHead className="w-[13%]">Assigned users</TableHead>
         <TableHead className="w-[27%]">Address</TableHead>
-        <TableHead className="w-[12.5%]">Registration Number</TableHead>
+        <TableHead className="w-[12.5%]">Registration number</TableHead>
         <TableHead className="w-[12.5%]">Tax ID</TableHead>
       </TableRow>
     </TableHeader>
 
     <TableBody>
       {Array.from({ length: rows }).map((_, i) => (
-        <TableRow key={i} className="border-brown-200 hover:bg-transparent [&_td]:py-2">
+        <TableRow key={i} className="border-divider hover:bg-transparent [&_td]:py-2">
           <TableCell className="py-3"><Skeleton className="h-4 w-3/4"/></TableCell>
           <TableCell className="py-3"><Skeleton className="h-4 w-2/3"/></TableCell>
           <TableCell className="py-3"><Skeleton className="h-4 w-1/3"/></TableCell>

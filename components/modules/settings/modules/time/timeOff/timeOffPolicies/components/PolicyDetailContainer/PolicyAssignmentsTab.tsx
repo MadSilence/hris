@@ -1,10 +1,11 @@
 "use client";
 
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useState } from "react";
-import { UserPlus, Users, X } from "lucide-react";
+import { Cancel01Icon, UserAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PolicyAssignmentWarning } from "./PolicyAssignmentWarning";
 import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
@@ -17,6 +18,7 @@ import { useEndTimeOffPolicyAssignment } from "@/components/modules/settings/mod
 import { getTimeOffPolicyAssignmentsQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
 import { TimeOffPolicyAssignmentStatus } from "@/api/modules/timeOff/timeOffPolicyAssignments/dto/TimeOffPolicyAssignmentStatus";
 import type { TimeOffPolicyAssignment } from "@/models/timeOff";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
   policyId: string;
@@ -38,14 +40,14 @@ function AssignmentRow({
   const name = assignment.person?.name ?? "Unnamed";
 
   return (
-    <div className="group flex items-center justify-between gap-2 rounded-md py-1 pl-3 pr-1 hover:bg-brown-50">
+    <div className="group flex items-center justify-between gap-2 rounded-control py-1 pl-3 pr-1 hover:bg-subtle">
       <div className="flex min-w-0 items-center gap-3">
         <UserChip
           id={assignment.userId}
           name={name}
           avatarUrl={assignment.person?.avatarUrl}
         />
-        <span className="hidden text-xs text-muted-foreground sm:inline">
+        <span className="hidden text-hint text-tertiary sm:inline">
           from {assignment.effectiveFrom}
           {assignment.effectiveTo ? ` to ${assignment.effectiveTo}` : ""}
         </span>
@@ -61,9 +63,9 @@ function AssignmentRow({
           onClick={() => onEnd(assignment)}
           aria-label="End assignment"
           title="End assignment"
-          className="flex h-7 w-7 flex-none items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600"
+          className="flex h-7 w-7 flex-none items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text"
         >
-          <X className="h-4 w-4" />
+          <Icon icon={Cancel01Icon} size="sm" />
         </button>
       )}
     </div>
@@ -147,7 +149,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
 
   const assignButton = !isArchived && (
     <Button type="button" size="sm" className="gap-1.5" onClick={() => setAssignOpen(true)}>
-      <UserPlus className="h-4 w-4" />
+      <Icon icon={UserAdd01Icon} size="sm" />
       Assign people
     </Button>
   );
@@ -174,12 +176,12 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   if (!isLoading && !error && active.length === 0 && ended.length === 0) {
     return (
       <>
-        <div className="flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
-          <div className="mb-4 rounded-2xl bg-brown-50 p-4">
-            <Users className="h-7 w-7 text-brown-600" />
+        <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-12 text-center">
+          <div className="mb-4 rounded-card bg-subtle p-4">
+            <Icon icon={UserGroupIcon} size="lg" className="text-secondary" />
           </div>
-          <h3 className="text-base font-semibold text-foreground">No one is assigned yet</h3>
-          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+          <h3 className="text-body font-semibold text-primary">No one is assigned yet</h3>
+          <p className="mt-2 max-w-md text-body text-tertiary">
             Assign this policy to people — individually or by segment — to give them this time off.
           </p>
           {assignButton && <div className="mt-5">{assignButton}</div>}
@@ -198,7 +200,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           {isLoading ? (
             <Skeleton className="h-4 w-28" />
           ) : error ? null : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body text-tertiary">
               {active.length} {active.length === 1 ? "person" : "people"} assigned
             </p>
           )}
@@ -206,7 +208,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             <Button type="button"
               variant="ghost"
               size="sm"
-              className="text-xs text-muted-foreground"
+              className="text-hint text-tertiary"
               onClick={() => setShowEnded((v) => !v)}
             >
               {showEnded ? "Hide" : "Show"} {ended.length} ended
@@ -224,13 +226,13 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           <div className="space-y-1">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center gap-2 px-1 py-2">
-                <Skeleton className="h-6 w-6 flex-none rounded-full" />
+                <Skeleton className="h-6 w-6 flex-none rounded-pill" />
                 <Skeleton className="h-3.5 w-32" />
               </div>
             ))}
           </div>
         ) : error ? (
-          <p className="py-6 text-center text-sm text-danger-500">Failed to load assignments.</p>
+          <FieldError className="py-6 text-center">Failed to load assignments.</FieldError>
         ) : (
           <div className="flex flex-col">
             {shown.map((assignment) => (

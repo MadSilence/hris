@@ -29,7 +29,7 @@ export const IMPORT_KINDS: Record<PeopleImportKind, ImportKindCopy> = {
     noun: plural("person", "people"),
   },
   LEAVE_BALANCES: {
-    title: "Leave Balances",
+    title: "Leave balances",
     description:
       "Each person's balance on a date, per policy — a target, not an addition, so the same file twice changes nothing. The policy must be assigned first.",
     noun: plural("balance", "balances"),

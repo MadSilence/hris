@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Repeat } from "lucide-react";
+import { RepeatIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { showError, showSuccess } from "@/lib/errors/errorToast";
 import { useReturnToRule } from "@/components/modules/automations/hooks";
 import type { AssignableType, AssignmentProvenance } from "@/models/automations";
@@ -52,8 +53,8 @@ export const ProvenanceMarker: React.FC<{
   return (
     <div className="mt-1 space-y-0.5" data-test={`provenance-${fieldId}`}>
       {fromRule.map((p) => (
-        <p key={p.assignableId} className="m-0 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Repeat className="h-3 w-3 flex-none" />
+        <p key={p.assignableId} className="m-0 flex items-center gap-1.5 text-hint text-tertiary">
+          <Icon icon={RepeatIcon} size="sm" className="flex-none" />
           {p.source
             ? <>From {bindingSourceLabel(p.source)}</>
             : SINGLE_VALUED.has(type) || (fromRule.length === 1 && entries.length === 1)
@@ -62,7 +63,7 @@ export const ProvenanceMarker: React.FC<{
         </p>
       ))}
       {overridingBinding?.overriddenSource && canEdit && (
-        <p className="m-0 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+        <p className="m-0 flex flex-wrap items-center gap-1.5 text-hint text-tertiary">
           Set by hand, in place of {overridingBinding.overriddenSource.calendarName ?? "the calendar"} from{" "}
           {bindingSourceLabel(overridingBinding.overriddenSource)}.
           <ReturnToRuleButton
@@ -75,7 +76,7 @@ export const ProvenanceMarker: React.FC<{
         </p>
       )}
       {overriding && canEdit && (
-        <p className="m-0 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+        <p className="m-0 flex flex-wrap items-center gap-1.5 text-hint text-tertiary">
           Set by hand — the rule “{overriding.overriddenRule?.name}” would set something else.
           <ReturnToRuleButton
             userId={userId}
@@ -113,9 +114,9 @@ const ReturnToRuleButton: React.FC<{
       type="button"
       onClick={() => void onReturn()}
       disabled={returnToRule.isPending}
-      className="font-medium text-foreground underline-offset-2 hover:underline disabled:opacity-50"
+      className="font-medium text-primary underline-offset-2 hover:underline disabled:opacity-50"
     >
-      Return to Rule
+      Return to rule
     </button>
   );
 };

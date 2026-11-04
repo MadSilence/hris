@@ -1,18 +1,19 @@
 "use client";
 
 import { FC } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Button } from "@/components/desact/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { AttributeType } from "@/models/attribute";
 import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import {
@@ -51,12 +52,12 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
   return (
     <div className="space-y-2">
       <Label>Sub-fields</Label>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         The fields of each record (e.g. Institution, Degree, Year).
       </p>
 
       {fields.length === 0 && (
-        <p className="rounded-lg border border-dashed border-brown-200 px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
           No sub-fields yet. Add at least one.
         </p>
       )}
@@ -65,7 +66,7 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
         <div className="space-y-2">
           {/* Column headers once, not above every row — repeating them made each row a different
               height than its neighbours and forced a margin hack on the delete button. */}
-          <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 px-1 text-hint text-tertiary">
             <span className="flex-1">Label</span>
             <span className="w-36">Type</span>
             <span className="w-9" aria-hidden />
@@ -104,13 +105,12 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 shrink-0 text-brown-500 hover:text-destructive"
+                  size="icon" className="shrink-0 text-tertiary hover:text-danger-text"
                   onClick={() => removeField(index)}
                   disabled={disabled}
                   aria-label={`Remove sub-field ${index + 1}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Icon icon={Delete02Icon} size="sm" />
                 </Button>
               </div>
             ))}
@@ -122,9 +122,9 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
         type="button"
         onClick={addField}
         disabled={disabled}
-        className="flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Plus className="h-4 w-4" />
+        <Icon icon={Add01Icon} size="sm" />
         Add sub-field
       </button>
     </div>

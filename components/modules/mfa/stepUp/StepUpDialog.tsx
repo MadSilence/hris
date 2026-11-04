@@ -9,9 +9,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -70,7 +70,7 @@ export const StepUpDialog: React.FC = () => {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={submit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Confirm It Is You</DialogTitle>
+            <DialogTitle>Confirm it Is you</DialogTitle>
             <DialogDescription>
               {enrolled
                 ? "This needs a fresh code from your authenticator app."
@@ -80,7 +80,7 @@ export const StepUpDialog: React.FC = () => {
           {status.isLoading ? null : enrolled ? (
             <>
               <CodeField id="step-up-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
-              <button type="button" className="text-sm text-brown-600 underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
+              <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
                 {backup ? "Use the app instead" : "Use a backup code"}
               </button>
             </>
@@ -100,7 +100,7 @@ export const StepUpDialog: React.FC = () => {
           )}
           <FormError message={error} />
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => finish(false)} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy || !value.trim()}>{busy ? "Confirming…" : "Confirm"}</Button>
           </DialogFooter>
         </form>

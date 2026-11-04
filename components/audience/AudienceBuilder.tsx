@@ -1,22 +1,23 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Plus, Trash2, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Add01Icon, Cancel01Icon, Delete02Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Badge } from "@/components/desact/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/public/desact/src/components/ui/popover";
+} from "@/components/desact/popover";
 import {
   Command,
   CommandEmpty,
@@ -24,7 +25,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/public/desact/src/components/ui/command";
+} from "@/components/desact/command";
 import { useAccess } from "@/components/auth/useAccess";
 import {
   UserPickerField,
@@ -34,7 +35,7 @@ import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
 import type { AttributeType } from "@/models/attribute/AttributeType";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Checkbox } from "@/components/desact/checkbox";
 import {
   AudienceField,
   AudienceOperator,
@@ -171,7 +172,7 @@ export const AudienceBuilder: React.FC<Props> = ({
   return (
     <div className="flex flex-col gap-2">
       {onIncludeInactiveChange && (
-        <label className="flex cursor-pointer items-center gap-2 self-end text-xs text-muted-foreground">
+        <label className="flex cursor-pointer items-center gap-2 self-end text-hint text-tertiary">
           <Checkbox
             checked={includeInactive}
             onCheckedChange={(checked) => onIncludeInactiveChange(checked === true)}
@@ -221,7 +222,7 @@ export const AudienceBuilder: React.FC<Props> = ({
 
                 {/* Only an exclusion has an opinion about people with no value at all. */}
                 {isNegativeOperator(r.op) && (
-                  <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                  <label className="flex cursor-pointer items-center gap-2 text-hint text-tertiary">
                     <Checkbox
                       checked={r.includeEmpty}
                       onCheckedChange={(checked) => patch(r.id, { includeEmpty: checked === true })}
@@ -238,9 +239,9 @@ export const AudienceBuilder: React.FC<Props> = ({
               size="icon"
               onClick={() => removeRow(r.id)}
               aria-label="Remove filter"
-              className="ml-auto h-9 w-9 text-danger-600 hover:text-danger-700"
+              className="ml-auto h-9 w-9 text-danger-text hover:text-status-declined-text"
             >
-              <Trash2 className="h-4 w-4" />
+              <Icon icon={Delete02Icon} size="sm" />
             </Button>
           </div>
         );
@@ -248,8 +249,8 @@ export const AudienceBuilder: React.FC<Props> = ({
 
       {allComplete && (
         <div>
-          <Button type="button" variant="ghost" size="sm" onClick={addRow} className="gap-1.5 text-muted-foreground">
-            <Plus className="h-4 w-4" />
+          <Button type="button" variant="ghost" size="sm" onClick={addRow} className="gap-1.5 text-tertiary">
+            <Icon icon={Add01Icon} size="sm" />
             Add filter
           </Button>
         </div>
@@ -339,7 +340,7 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
       return (
         <div className="flex items-center gap-1">
           <DatePicker className="h-9 w-36" value={value} onChange={onValue} ariaLabel="From" />
-          <span className="text-sm text-muted-foreground">…</span>
+          <span className="text-body text-tertiary">…</span>
           <DatePicker className="h-9 w-36" value={valueTo} onChange={onValueTo} ariaLabel="To" />
         </div>
       );
@@ -353,7 +354,7 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     return (
       <div className="flex items-center gap-1">
         <Input className="h-9 w-32" type={inputType} value={value} onChange={(e) => onValue(e.target.value)} />
-        <span className="text-sm text-muted-foreground">…</span>
+        <span className="text-body text-tertiary">…</span>
         <Input className="h-9 w-32" type={inputType} value={valueTo} onChange={(e) => onValueTo(e.target.value)} />
       </div>
     );
@@ -375,7 +376,7 @@ const FIELD_GROUP_ORDER: AudienceField["group"][] = ["System", "Org", "Custom"];
 const FIELD_GROUP_LABELS: Record<AudienceField["group"], string> = {
   System: "Person",
   Org: "Organization",
-  Custom: "Custom Fields",
+  Custom: "Custom fields",
 };
 
 /**
@@ -402,17 +403,16 @@ const FieldPicker: React.FC<{
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           role="combobox"
           aria-expanded={open}
           aria-label="Field"
-          disabled={loading}
-          className="h-9 w-44 justify-between font-normal"
+          disabled={loading} className="w-44 justify-between font-normal"
         >
-          <span className={picked ? "truncate" : "truncate text-muted-foreground"}>
+          <span className={picked ? "truncate" : "truncate text-tertiary"}>
             {picked ? picked.label : loading ? "Loading fields…" : "Select field"}
           </span>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          <Icon icon={UnfoldMoreIcon} size="sm" className="shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-0" align="start">
@@ -431,7 +431,7 @@ const FieldPicker: React.FC<{
                       setOpen(false);
                     }}
                   >
-                    <Check className={f.key === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
+                    <Icon icon={Tick02Icon} className={f.key === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
                     {f.label}
                   </CommandItem>
                 ))}
@@ -464,14 +464,13 @@ const MultiSelect: React.FC<{
         <PopoverTrigger asChild>
           <Button
             type="button"
-            variant="outline"
-            role="combobox"
-            className="h-9 w-44 justify-between font-normal"
+            variant="secondary"
+            role="combobox" className="w-44 justify-between font-normal"
           >
-            <span className="truncate text-muted-foreground">
+            <span className="truncate text-tertiary">
               {values.length ? `${values.length} selected` : loading ? "Loading…" : "Select values"}
             </span>
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+            <Icon icon={UnfoldMoreIcon} size="sm" className="shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0" align="start">
@@ -482,11 +481,7 @@ const MultiSelect: React.FC<{
               <CommandGroup>
                 {options.map((o) => (
                   <CommandItem key={o.id} value={o.label} onSelect={() => toggle(o.id)}>
-                    <Check
-                      className={
-                        values.includes(o.id) ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"
-                      }
-                    />
+                    <Icon icon={Tick02Icon} className={ values.includes(o.id) ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0" } />
                     {o.label}
                   </CommandItem>
                 ))}
@@ -497,7 +492,7 @@ const MultiSelect: React.FC<{
       </Popover>
 
       {selectedOptions.map((o) => (
-        <Badge key={o.id} variant="secondary" className="gap-1 font-normal">
+        <Badge key={o.id} variant="neutral" className="gap-1 font-normal">
           {o.label}
           <button
             type="button"
@@ -505,7 +500,7 @@ const MultiSelect: React.FC<{
             aria-label={`Remove ${o.label}`}
             className="opacity-60 hover:opacity-100"
           >
-            <X className="h-3 w-3" />
+            <Icon icon={Cancel01Icon} size="sm" />
           </button>
         </Badge>
       ))}

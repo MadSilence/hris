@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Textarea } from "@/components/desact/textarea";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
@@ -42,7 +42,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
   const [sendBackComment, setSendBackComment] = useState("");
 
   if (packet.error) return <div className="mx-auto max-w-4xl"><ErrorState error={packet.error} /></div>;
-  if (!packet.data) return <Skeleton className="mx-auto h-96 w-full max-w-4xl rounded-xl" aria-busy="true" />;
+  if (!packet.data) return <Skeleton className="mx-auto h-96 w-full max-w-4xl rounded-popover" aria-busy="true" />;
   const p = packet.data;
   const isSubject = user?.id === p.subject.userId;
   // Somebody who runs cycles may share on the manager's behalf (A5); the manager shares their own.
@@ -52,23 +52,23 @@ export function PacketContainer({ participantId }: { participantId: string }) {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-16">
       <div className="flex flex-wrap items-center gap-3">
-        <SettingsPageHeader title={isSubject ? "Your Review" : p.subject.name} backHref={isSubject ? "/reviews/me" : undefined}
+        <SettingsPageHeader title={isSubject ? "Your review" : p.subject.name} backHref={isSubject ? "/reviews/me" : undefined}
           className="min-w-0 flex-1" />
         <PacketStatusBadge status={p.status} />
         {p.canShare && (
           <Button type="button" onClick={() => setSharing(true)}>
-            {onBehalf ? "Share on the Manager's Behalf" : `Share With ${p.subject.name.split(" ")[0]}`}
+            {onBehalf ? "Share on the manager's behalf" : `Share with ${p.subject.name.split(" ")[0]}`}
           </Button>
         )}
         {p.canAcknowledge && <Button type="button" onClick={() => setAcknowledging(true)}>Acknowledge</Button>}
         {p.canApprove && (
           <>
-            <Button type="button" variant="outline" onClick={() => setSendingBack(true)}>Send Back</Button>
+            <Button type="button" variant="secondary" onClick={() => setSendingBack(true)}>Send back</Button>
             <Button type="button" onClick={() => setApproving(true)}>Approve</Button>
           </>
         )}
       </div>
-      <p className="-mt-3 text-sm text-muted-foreground">
+      <p className="-mt-3 text-body text-tertiary">
         {p.cycleName}
         {p.manager ? ` · manager ${p.manager.name}` : ""}
         {p.sharedAt ? ` · shared ${formatDisplayDate(p.sharedAt, { style: "medium" })}` : " · not shared yet"}
@@ -80,12 +80,12 @@ export function PacketContainer({ participantId }: { participantId: string }) {
       </p>
 
       {rating && (
-        <div className="rounded-xl border border-brown-100 bg-white px-5 py-4">
-          <div className="text-xs text-muted-foreground">Overall Rating</div>
-          <div className="text-xl font-semibold text-brown-900">{rating.value} · {rating.label}</div>
+        <div className="rounded-card border border-divider bg-card px-5 py-4">
+          <div className="text-hint text-tertiary">Overall rating</div>
+          <div className="text-section-title text-primary">{rating.value} · {rating.label}</div>
           {/* Never sent to the person reviewed (A26): the rating is theirs, why it moved is the reviewers'. */}
           {p.calibration && (
-            <p className="mt-1 text-xs text-muted-foreground" data-test="calibration-note">
+            <p className="mt-1 text-hint text-tertiary" data-test="calibration-note">
               Calibrated{p.calibration.managerRating != null ? ` from ${p.calibration.managerRating}` : ""}
               {p.calibration.by ? ` by ${p.calibration.by.name}` : ""}
               {p.calibration.at ? ` on ${formatDisplayDate(p.calibration.at, { style: "medium" })}` : ""}
@@ -93,27 +93,27 @@ export function PacketContainer({ participantId }: { participantId: string }) {
             </p>
           )}
           {p.potential && (
-            <p className="mt-1 text-xs text-muted-foreground">Potential: {REVIEW_POTENTIAL_LABELS[p.potential]}</p>
+            <p className="mt-1 text-hint text-tertiary">Potential: {REVIEW_POTENTIAL_LABELS[p.potential]}</p>
           )}
         </div>
       )}
 
       {p.acknowledgedAt && (
-        <div className="rounded-xl border border-brown-100 bg-brown-50/50 px-5 py-3 text-sm">
-          <span className="font-medium text-brown-900">
+        <div className="rounded-card border border-divider bg-subtle/50 px-5 py-3 text-body">
+          <span className="font-medium text-primary">
             {isSubject ? "You acknowledged" : `${p.subject.name.split(" ")[0]} acknowledged`} this review on{" "}
             {formatDisplayDate(p.acknowledgedAt, { style: "medium" })}.
           </span>
-          {p.acknowledgementComment && <p className="mt-1 whitespace-pre-line text-brown-800">{p.acknowledgementComment}</p>}
+          {p.acknowledgementComment && <p className="mt-1 whitespace-pre-line text-primary">{p.acknowledgementComment}</p>}
         </div>
       )}
 
       {p.managerReview ? <AnswersView block={p.managerReview} scale={p.scale} mentions={p.mentions} />
-        : <p className="text-sm text-muted-foreground">The manager review is not in yet.</p>}
-      {p.self && <AnswersView block={p.self} scale={p.scale} mentions={p.mentions} title={isSubject ? "Your Self Review" : undefined} />}
+        : <p className="text-body text-tertiary">The manager review is not in yet.</p>}
+      {p.self && <AnswersView block={p.self} scale={p.scale} mentions={p.mentions} title={isSubject ? "Your self review" : undefined} />}
       {(p.peers.length > 0 || p.peersHeldBack > 0) && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
+          <h2 className="text-body font-medium text-tertiary">
             Peer Reviews — {isSubject ? "" : `${p.subject.name.split(" ")[0]} never sees these`}
           </h2>
           {p.peers.map((b) => <AnswersView key={b.assignmentId} block={b} scale={p.scale} mentions={p.mentions} />)}
@@ -122,7 +122,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
       )}
       {(p.upward.length > 0 || p.upwardHeldBack > 0) && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Upward Reviews — from direct reports, anonymous</h2>
+          <h2 className="text-body font-medium text-tertiary">Upward reviews — from direct reports, anonymous</h2>
           {p.upward.map((b) => <AnswersView key={b.assignmentId} block={b} scale={p.scale} mentions={p.mentions} />)}
           <HeldBackNote count={p.upwardHeldBack} threshold={p.upwardThreshold} kind="upward" />
         </div>
@@ -130,7 +130,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
 
       <ConfirmDialog
         open={approving}
-        title="Approve Review"
+        title="Approve review"
         confirmLabel="Approve"
         onCancelAction={() => setApproving(false)}
         onConfirmAction={async () => {
@@ -151,8 +151,8 @@ export function PacketContainer({ participantId }: { participantId: string }) {
 
       <ConfirmDialog
         open={sendingBack}
-        title="Send Back"
-        confirmLabel="Send Back"
+        title="Send back"
+        confirmLabel="Send back"
         onCancelAction={() => setSendingBack(false)}
         onConfirmAction={async () => {
           if (!sendBackComment.trim()) return "Say what should change.";
@@ -172,7 +172,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
 
       <ConfirmDialog
         open={sharing}
-        title="Share Review"
+        title="Share review"
         confirmLabel="Share"
         onCancelAction={() => setSharing(false)}
         onConfirmAction={async () => {
@@ -193,7 +193,7 @@ export function PacketContainer({ participantId }: { participantId: string }) {
 
       <ConfirmDialog
         open={acknowledging}
-        title="Acknowledge Review"
+        title="Acknowledge review"
         confirmLabel="Acknowledge"
         onCancelAction={() => setAcknowledging(false)}
         onConfirmAction={async () => {

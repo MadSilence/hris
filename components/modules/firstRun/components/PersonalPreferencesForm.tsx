@@ -2,16 +2,16 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { NodRing } from "@/components/desact/nod";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -108,7 +108,7 @@ export const PersonalPreferencesForm: React.FC<{
   return (
     <form id={formId} onSubmit={save} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <RequiredLabel htmlFor="settings-timezone">Time Zone</RequiredLabel>
+        <RequiredLabel htmlFor="settings-timezone">Time zone</RequiredLabel>
         {/*
           Searchable, not a plain Select: there are four hundred zones, and a reader who knows they
           are in Warsaw should type it rather than scroll past Africa.
@@ -121,14 +121,14 @@ export const PersonalPreferencesForm: React.FC<{
           clearable={false}
           disabled={isLoading}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-hint text-tertiary">
           When something happened is shown in this zone. Dates in the calendar sense — a hire date, a
           day of leave — are the same day for everybody and do not move.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <RequiredLabel htmlFor="settings-date-format">Date Format</RequiredLabel>
+        <RequiredLabel htmlFor="settings-date-format">Date format</RequiredLabel>
         <Select
           value={dateFormat}
           onValueChange={(v) => setDateFormat(v as DisplayDateFormat)}
@@ -149,7 +149,7 @@ export const PersonalPreferencesForm: React.FC<{
       {!hideSubmit && (
         <div className="flex justify-end">
           <Button type="submit" disabled={saving || isLoading}>
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving && <NodRing size="sm" label="" />}
             Save
           </Button>
         </div>

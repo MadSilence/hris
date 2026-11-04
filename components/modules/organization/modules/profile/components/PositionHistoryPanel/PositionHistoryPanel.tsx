@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { History } from "lucide-react";
 
 import type { User } from "@/models/user/User";
 import type { PositionChangeReason } from "@/models/user/PositionHistoryEntry";
 import { formatDisplayDate } from "@/lib/date";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import {
   Table,
   TableBody,
@@ -16,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
 import {
   ProfileSectionCard,
 } from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/ProfileSectionCard";
@@ -34,7 +33,7 @@ export const POSITION_CHANGE_REASON_LABELS: Record<PositionChangeReason, string>
   FAMILY_DELETED: "Job family deleted",
 };
 
-const COLUMNS = ["From", "Position", "Previous Position", "Reason"] as const;
+const COLUMNS = ["From", "Position", "Previous position", "Reason"] as const;
 const SKELETON_ROWS = 3;
 
 type Props = {
@@ -76,7 +75,7 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
       return (
         <EmptyState
           className="my-4"
-          icon={<History className="h-6 w-6"/>}
+          scene="notes"
           title="No position changes yet"
           description="When this person is given a position, or it changes, the date and the position appear here."
         />
@@ -110,8 +109,8 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
                 </TableCell>
                 {/* A cleared position is an empty cell — the reason column says why it is empty. */}
                 <TableCell>{entry.jobName ?? ""}</TableCell>
-                <TableCell className="text-muted-foreground">{entry.previousJobName ?? ""}</TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-tertiary">{entry.previousJobName ?? ""}</TableCell>
+                <TableCell className="text-tertiary">
                   {POSITION_CHANGE_REASON_LABELS[entry.reason] ?? entry.reason}
                 </TableCell>
               </TableRow>
@@ -122,13 +121,13 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
   };
 
   return (
-    <section aria-label="Position History" className={className}>
-      <ProfileSectionCard title="Position History">
+    <section aria-label="Position history" className={className}>
+      <ProfileSectionCard title="Position history">
         {/*
           Honest about the dates: until changes can be dated in advance, the day a position took
           effect is the day somebody recorded it.
         */}
-        <p className="pt-3 text-sm text-muted-foreground">
+        <p className="pt-3 text-body text-tertiary">
           Each date is the day the change was recorded.
         </p>
         {renderBody()}

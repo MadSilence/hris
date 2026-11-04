@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
@@ -154,7 +154,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <form onSubmit={submit} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{adding ? "Add Task" : "Edit Task"}</DialogTitle>
+              <DialogTitle>{adding ? "Add task" : "Edit task"}</DialogTitle>
               <DialogDescription>
                 {adding
                   ? "Its person hears about it at once. It is dated from this process, so moving the process's date moves it too."
@@ -206,7 +206,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="process-task-assignee">Done By</Label>
+              <Label htmlFor="process-task-assignee">Done by</Label>
               <Select value={form.assigneeKind} disabled={busy}
                 onValueChange={(v) => patch({ assigneeKind: v as TemplateAssigneeKind })}>
                 <SelectTrigger id="process-task-assignee"><SelectValue /></SelectTrigger>
@@ -223,8 +223,8 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
 
             <FormError message={error} />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={requestClose} disabled={busy}>Cancel</Button>
-              <Button type="submit" disabled={busy}>{busy ? "Saving…" : adding ? "Add Task" : "Save"}</Button>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>Cancel</Button>
+              <Button type="submit" disabled={busy}>{busy ? "Saving…" : adding ? "Add task" : "Save"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

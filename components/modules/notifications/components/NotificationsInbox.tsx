@@ -3,10 +3,11 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Bell, CheckCheck, Settings, Star, Trash2 } from "lucide-react";
+import { Delete02Icon, Notification01Icon, Settings01Icon, StarIcon, TickDouble02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Button } from "@/components/desact/button";
+import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
 import { useNotifications } from "@/components/modules/notifications/hooks/useNotifications";
 import {
@@ -43,34 +44,34 @@ const NotificationRow: FC<{
   onDelete: (n: Notification) => void;
   busy: boolean;
 }> = ({ notification, onOpen, onToggleStar, onDelete, busy }) => {
-  const { title, message, Icon, href } = presentNotification(notification);
+  const { title, message, icon, href } = presentNotification(notification);
   const clickable = href !== null || !notification.read;
 
   return (
     <div
       className={cn(
-        "group flex gap-3 rounded-lg border border-brown-200 p-4 transition-colors",
-        !notification.read && "bg-brown-50/60",
-        clickable && "cursor-pointer hover:border-brown-300",
+        "group flex gap-3 rounded-card border border-divider p-4 transition-colors",
+        !notification.read && "bg-subtle/60",
+        clickable && "cursor-pointer hover:border-field",
       )}
       onClick={() => onOpen(notification)}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white">
-        <Icon className="h-5 w-5 text-brown-600" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-card">
+        <Icon icon={icon} className="text-secondary" />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          {/* The titles are written in Title Case where they are built; `capitalize` here title-cased every
+          {/* The titles are written in sentence case where they are built; `capitalize` here title-cased every
               word on top of that and produced "Holidays Changed At The Source". */}
-          <p className="truncate font-medium text-brown-900">{title}</p>
-          {!notification.read && <span className="h-2 w-2 shrink-0 rounded-full bg-brown-600" />}
+          <p className="truncate font-medium text-primary">{title}</p>
+          {!notification.read && <span className="h-2 w-2 shrink-0 rounded-pill bg-accent" />}
         </div>
-        {message && <p className="mt-0.5 text-sm text-muted-foreground">{message}</p>}
+        {message && <p className="mt-0.5 text-body text-tertiary">{message}</p>}
         <div className="mt-1 flex items-center gap-2">
-          <p className="text-xs text-muted-foreground">{timeAgo(notification.createdAt)}</p>
+          <p className="text-hint text-tertiary">{timeAgo(notification.createdAt)}</p>
           {notification.category && (
-            <span className="rounded-full bg-brown-100 px-2 py-0.5 text-[11px] font-medium text-brown-600">
+            <span className="rounded-pill bg-mist px-2 py-0.5 text-hint font-medium text-secondary">
               {categoryLabel(notification.category)}
             </span>
           )}
@@ -81,23 +82,21 @@ const NotificationRow: FC<{
       <div className="flex shrink-0 items-start gap-1" onClick={(e) => e.stopPropagation()}>
         <Button type="button"
           variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+          size="icon-sm"
           aria-label={notification.starred ? "Unstar" : "Star"}
           disabled={busy}
           onClick={() => onToggleStar(notification)}
         >
-          <Star className={cn("h-4 w-4", notification.starred ? "fill-warning-400 text-warning-400" : "text-brown-400")} />
+          <Icon icon={StarIcon} className={cn("h-4 w-4", notification.starred ? "fill-status-pending-icon text-status-pending-icon" : "text-tertiary")} />
         </Button>
         <Button type="button"
           variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-brown-400 hover:text-destructive"
+          size="icon-sm" className="text-tertiary hover:text-danger-text"
           aria-label="Delete"
           disabled={busy}
           onClick={() => onDelete(notification)}
         >
-          <Trash2 className="h-4 w-4" />
+          <Icon icon={Delete02Icon} size="sm" />
         </Button>
       </div>
     </div>
@@ -220,29 +219,29 @@ export const NotificationsInbox: FC = () => {
       <div className="shrink-0 space-y-4">
       <section className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-brown-900">Inbox</h1>
+          <h1 className="text-page-title text-primary">Inbox</h1>
           {/* Nothing is known before the first answer, so the line says nothing rather than "caught up". */}
           {isLoading ? (
-            <div aria-hidden className="mt-2 h-4 w-28 animate-pulse rounded bg-brown-100" />
+            <div aria-hidden className="mt-2 h-4 w-28 shimmer rounded-tag bg-mist" />
           ) : (
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-body text-tertiary">
               {counts.unread > 0 ? `${counts.unread} unread` : "You're all caught up"}
             </p>
           )}
         </div>
         <div className="flex items-center gap-2">
           <Button type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending || counts.unread === 0}
           >
-            <CheckCheck className="h-4 w-4" />
+            <Icon icon={TickDouble02Icon} size="sm" />
             Mark all as read
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Notification preferences" asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Notification preferences" asChild>
             <Link href="/preferences">
-              <Settings className="h-4 w-4 text-brown-500" />
+              <Icon icon={Settings01Icon} size="sm" className="text-tertiary" />
             </Link>
           </Button>
         </div>
@@ -259,15 +258,15 @@ export const NotificationsInbox: FC = () => {
               aria-pressed={status === f}
               onClick={() => setStatus(f)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
-                status === f ? "bg-brown-100 text-brown-800" : "text-muted-foreground hover:bg-brown-50",
+                "flex items-center gap-1.5 rounded-control px-3 py-1.5 text-body transition-colors",
+                status === f ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
               )}
             >
               {INBOX_FILTER_LABELS[f]}
               <span
                 className={cn(
-                  "rounded-full px-1.5 text-xs",
-                  status === f ? "bg-brown-200 text-brown-700" : "bg-brown-100 text-brown-500",
+                  "rounded-pill px-1.5 text-hint",
+                  status === f ? "bg-accent text-on-accent" : "bg-mist text-tertiary",
                 )}
               >
                 {counts[f]}
@@ -284,10 +283,10 @@ export const NotificationsInbox: FC = () => {
                 type="button"
                 onClick={() => setCategory(c)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  "rounded-pill border px-3 py-1 text-hint font-medium transition-colors",
                   category === c
-                    ? "border-brown-300 bg-brown-100 text-brown-800"
-                    : "border-brown-200 text-muted-foreground hover:bg-brown-50",
+                    ? "border-inverse bg-inverse text-on-inverse"
+                    : "border-divider text-tertiary hover:bg-subtle",
                 )}
               >
                 {c === ALL_CATEGORIES ? "All categories" : categoryLabel(c)}
@@ -302,19 +301,19 @@ export const NotificationsInbox: FC = () => {
       {isLoading ? (
         <div className="flex flex-col gap-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-lg border border-brown-200 bg-brown-50" />
+            <div key={i} className="h-20 shimmer rounded-control border border-divider bg-subtle" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-brown-200 px-4 py-16 text-center">
-          <Bell className="h-8 w-8 text-brown-300" />
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
+        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
+          <Icon icon={Notification01Icon} size="lg" className="text-disabled" />
+          <p className="text-body text-tertiary">{emptyText}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
           {groups.map(({ group, items }) => (
             <div key={group.key} className="flex flex-col gap-2">
-              <p className="px-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+              <p className="px-1 text-hint font-semibold text-tertiary">
                 {group.label}
               </p>
               {items.map((n) => (

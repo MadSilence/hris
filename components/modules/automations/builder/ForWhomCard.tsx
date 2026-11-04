@@ -29,12 +29,12 @@ export function ForWhomCard({
   const segment = definition.conditions;
   return (
     <SentenceCard
-      word="For Whom"
+      word="For whom"
       summary={
         <>
           {summary}
           {matchingCount != null && (
-            <span className="ml-2 text-foreground" data-test="for-whom-count">
+            <span className="ml-2 text-primary" data-test="for-whom-count">
               · {matchingCount} {matchingCount === 1 ? "person matches" : "people match"} now
             </span>
           )}
@@ -47,7 +47,7 @@ export function ForWhomCard({
         value={segment.filters}
         onChange={(filters) => onChange({ conditions: { ...segment, filters } })}
       />
-      <p className="m-0 text-xs text-muted-foreground">
+      <p className="m-0 text-hint text-tertiary">
         With no conditions the rule is for everyone. The conditions are checked when a run is planned
         and again just before each step.
       </p>

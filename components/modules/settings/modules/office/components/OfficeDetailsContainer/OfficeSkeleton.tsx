@@ -1,10 +1,10 @@
-import { Separator } from "@/public/desact/src/components/ui/separator";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Separator } from "@/components/desact/separator";
+import { Skeleton } from "@/components/desact/skeleton";
 
 export const OfficeSkeleton = () => (
   <div className="space-y-8 px-8">
     <div className="flex items-center gap-4">
-      <Skeleton className="h-10 w-10 rounded-full"/>
+      <Skeleton className="h-10 w-10 rounded-pill"/>
       <Skeleton className="h-9 w-64"/>
     </div>
 

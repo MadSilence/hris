@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import { formatDisplayDate } from "@/lib/date";
 import type { Task } from "@/models/lifecycle";
 import { useMyTasks } from "@/components/modules/lifecycle/hooks";
@@ -29,7 +29,7 @@ export const MyTasksWidget: React.FC = () => {
   const open = (query.data ?? []).filter((task) => task.status === "OPEN" || task.status === "WAITING").sort(byDue);
 
   return (
-    <HomeCard title="My Tasks" action={<HomeCardLink href="/tasks">See All</HomeCardLink>}>
+    <HomeCard title="My tasks" action={<HomeCardLink href="/tasks">See all</HomeCardLink>}>
       {query.isLoading ? (
         <HomeRowsSkeleton rows={3} avatar={false} />
       ) : query.error ? (
@@ -40,15 +40,15 @@ export const MyTasksWidget: React.FC = () => {
         <ul className="flex flex-col gap-1">
           {open.slice(0, MY_TASKS_LIMIT).map((task) => (
             <li key={task.id}>
-              <Link href="/tasks" className="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-brown-50">
+              <Link href="/tasks" className="-mx-2 flex items-center justify-between gap-3 rounded-control px-2 py-1.5 hover:bg-subtle">
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium text-brown-900">{task.title}</span>
+                  <span className="block truncate text-body font-medium text-primary">{task.title}</span>
                   {task.subject?.name && (
-                    <span className="block truncate text-xs text-muted-foreground">For {task.subject.name}</span>
+                    <span className="block truncate text-hint text-tertiary">For {task.subject.name}</span>
                   )}
                 </span>
                 {task.dueDate && (
-                  <span className={cn("shrink-0 text-xs", task.dueReached ? "font-medium text-danger-600" : "text-muted-foreground")}>
+                  <span className={cn("shrink-0 text-hint", task.dueReached ? "font-medium text-danger-text" : "text-tertiary")}>
                     {task.status === "WAITING" ? "Waiting · " : ""}
                     {formatDisplayDate(task.dueDate, { style: "medium", hideYear: true })}
                   </span>

@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import { Office } from "@/models/office";
 import type { DetachedPeopleImpact } from "@/models/user/DetachedPeopleImpact";
 import { DetachedPeopleNotice } from "@/components/modules/settings/shared/DetachedPeopleNotice";
@@ -61,7 +61,7 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
           {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires
               onOpenChange — adding a handler here called onRequestCloseAction twice per click. */}
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction disabled={isLoading || impactLoading} className="bg-danger-600 text-white hover:bg-danger-700" onClick={(event) => {
+          <AlertDialogAction disabled={isLoading || impactLoading} destructive onClick={(event) => {
               event.preventDefault();
               onConfirmAction();
             }}>

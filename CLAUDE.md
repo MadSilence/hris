@@ -9,8 +9,11 @@ Tech stack:
 - TypeScript
 - TanStack Query (feature modules)
 - SWR (auth/user/company providers — legacy global state)
-- Desact UI (Radix-based components)
-- Tailwind utility classes
+- The noddo design system: `styles/noddo/` (SPEC, tokens — never edited by hand), `styles/globals.css` (the
+  only stylesheet), Desact — our Radix kit in `components/desact/` — and Hugeicons. How it fits together:
+  `(claude)/technical_documentation/ui/DESIGN_SYSTEM.md`. Read `styles/noddo/SPEC.md` before building UI.
+- Tailwind utility classes — **only the system's**: Tailwind's own palette, sizes, radii and shadows are switched
+  off, and `test/designSystemGuard.test.ts` fails on them
 
 Architecture:
 
@@ -38,7 +41,9 @@ Architecture:
 
 - app/ → routes (Next.js App Router)
 - components/
-  - ui/ → base reusable components (Desact-based)
+  - desact/ → the kit: buttons, fields, overlays, `Icon`, `NodRing`, `InlineAlert`/`Banner`, `FieldError`
+  - ui/ → the app's shared pieces on top of it (`StatusBadge`, `TagChip`, `FilterChip`, `Stepper`…)
+  - brand/, illustrations/ → the noddo wordmark and the ring illustrations
   - modules/ → domain modules (settings, organization, etc.) ← **follow this for new features**
   - layout/ → layout components (Sidebar, SettingsPageHeader, etc.)
   - auth/ → PermissionGate, PermissionsContext, AccessDenied
@@ -277,9 +282,10 @@ Two things that are easy to get wrong:
 
 - Use Tailwind utility classes. Avoid inline styles.
 - Keep `className` readable (no excessive chaining).
-- Match the existing module's approach: the feature modules use Tailwind exclusively. A few older shared pieces (`ui/Loader`, `ui/NavbarLink`, `app/(app)/layout`) still use `.module.css` alongside Tailwind.
-- Do not create new `.module.css` files unless the target module already uses CSS modules and there is a strong reason.
-- If a component uses `.module.css` but can be reasonably migrated to Tailwind during the task, prefer Tailwind.
+- Tailwind only — the last `.module.css` files went in the redesign. Colours, type, radii and shadows are the
+  system's roles (`text-secondary`, `bg-subtle`, `text-body`, `rounded-card`, `shadow-popover`…); a raw HEX lives
+  only in `components/brand/` and the accent code.
+- Sentence case for every label (`(claude)/technical_documentation/ui/NAMING.md`); an ellipsis is `…`.
 - Before building new UI, inspect nearby modules and match their spacing, borders, typography, hover states, rounded corners, and layout style.
 - Do not introduce new visual language or redesign patterns unless explicitly requested.
 
@@ -361,7 +367,8 @@ existing naming conventions.
 
 # Important Constraints
 
-- Do not introduce new dependencies without the owner's approval. Two were approved: `qrcode` (plus
+- Do not introduce new dependencies without the owner's approval. Approved: `@hugeicons/react` and
+  `@hugeicons/core-free-icons`, the design system's icons (2026-11-03); `qrcode` (plus
   its types), for the QR code beside the avatar — it runs in the browser because the backend should
   not produce an image it does not store; and `@xyflow/react` (React Flow), for the org chart, the
   department and team canvases and the lifecycle template canvas

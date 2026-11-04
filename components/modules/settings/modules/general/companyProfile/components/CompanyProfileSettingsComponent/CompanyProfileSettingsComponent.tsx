@@ -1,21 +1,22 @@
 "use client";
 
 import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Building2, Clock, Globe } from "lucide-react";
+import { Building03Icon, Clock01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/select";
+import { cn } from "@/lib/cn";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import type { Company } from "@/models/company/Company";
@@ -31,6 +32,8 @@ import {
 } from "@/components/modules/settings/modules/general/companyProfile/actions/companyLogoActions";
 import { timeZoneChoices } from "@/lib/timeZones";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FieldError } from "@/components/desact/field-error";
+import { FormError } from "@/components/feedback/FormError";
 
 type Saved = { version?: number } | undefined;
 
@@ -71,12 +74,12 @@ const Section: FC<{
 }> = ({ icon, title, description, children }) => (
   <section className="flex flex-col gap-5">
     <div>
-      <h2 className="m-0 flex items-center gap-2 text-sm font-semibold text-foreground">
+      <h2 className="m-0 flex items-center gap-2 text-body font-semibold text-primary">
         {icon}
         {title}
       </h2>
 
-      <p className="m-0 mt-1.5 text-sm text-muted-foreground">{description}</p>
+      <p className="m-0 mt-1.5 text-body text-tertiary">{description}</p>
     </div>
 
     {children}
@@ -119,12 +122,12 @@ const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
 
   return (
     <div className="grid gap-2">
-      <Label className="mb-0">Sign-in Address</Label>
+      <Label className="mb-0">Sign-in address</Label>
 
       <div className="flex h-9 min-w-0 items-center justify-between gap-2">
-        <span data-test="company-sign-in-address" className="truncate text-sm text-foreground">{address}</span>
+        <span data-test="company-sign-in-address" className="truncate text-body text-primary">{address}</span>
 
-        <Button type="button" variant="outline" size="sm" onClick={copy}>
+        <Button type="button" variant="secondary" size="sm" onClick={copy}>
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>
@@ -177,8 +180,8 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="m-0 text-sm font-medium">Logo</p>
-      <p className="m-0 text-sm text-muted-foreground">
+      <p className="m-0 text-body font-medium">Logo</p>
+      <p className="m-0 text-body text-tertiary">
         {hasLogo
           ? "Shown in the sidebar and at the top of the org chart."
           : "Until one is uploaded, the initials stand in for it."}
@@ -194,11 +197,11 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
             if (file) void upload(file);
           }}
         />
-        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? "Working…" : hasLogo ? "Replace" : "Upload Logo"}
+        <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+          {busy ? "Working…" : hasLogo ? "Replace" : "Upload logo"}
         </Button>
         {hasLogo ? (
-          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void remove()}>
+          <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => void remove()}>
             Remove
           </Button>
         ) : null}
@@ -349,7 +352,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
          takes it back off the layout. */}
       <div className="-mx-1 grid min-h-0 flex-1 grid-cols-2 gap-16 overflow-y-auto px-1">
         <Section
-          icon={<Building2 className="h-4 w-4"/>}
+          icon={<Icon icon={Building03Icon} size="sm" />}
           title="Company identity"
           description="How the company is named and introduced across the workspace."
         >
@@ -368,12 +371,12 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </div>
 
           {nameMissing ? (
-            <p className="m-0 -mt-2 text-xs text-destructive">A company name is required.</p>
+            <FieldError>A company name is required.</FieldError>
           ) : null}
 
           <Field id="company-website" label="Website">
             <div className="relative">
-              <Globe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brown-400"/>
+              <Icon icon={Globe02Icon} size="sm" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tertiary" />
 
               <Input
                 id="company-website"
@@ -396,9 +399,9 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </Field>
 
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-xl">
+            <Avatar className="h-16 w-16 rounded-popover">
               <AvatarImage src={company.companyLogo ?? undefined} alt={company.name}/>
-              <AvatarFallback className="rounded-xl text-base">{initials(company.name)}</AvatarFallback>
+              <AvatarFallback className="rounded-popover text-body">{initials(company.name)}</AvatarFallback>
             </Avatar>
 
             <LogoControls hasLogo={!!company.companyLogo} onChanged={onLogoChanged}/>
@@ -406,7 +409,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
         </Section>
 
         <Section
-          icon={<Clock className="h-4 w-4"/>}
+          icon={<Icon icon={Clock01Icon} size="sm" />}
           title="Localization &amp; time"
           description="The clock and the working week every calculated date is measured against."
         >
@@ -439,7 +442,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </Field>
 
           <div className="grid gap-2">
-            <Label className="mb-0">Working Days</Label>
+            <Label className="mb-0">Working days</Label>
 
             <div className="flex flex-wrap gap-2">
               {DAYS.map((day) => {
@@ -453,10 +456,10 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
                     aria-pressed={on}
                     disabled={saving}
                     className={cn(
-                      "h-9 rounded-lg px-4 text-sm transition-colors",
+                      "h-9 rounded-control px-4 text-body transition-colors",
                       on
-                        ? "bg-brown-600 font-medium text-white"
-                        : "bg-brown-50 text-[var(--color-text-secondary)] hover:bg-brown-100",
+                        ? "bg-accent font-medium text-on-accent"
+                        : "bg-subtle text-secondary hover:bg-mist",
                     )}
                   >
                     {day.label}
@@ -466,18 +469,18 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
             </div>
 
             {noWorkingDays ? (
-              <p className="m-0 text-xs text-destructive">Select at least one working day.</p>
+              <FieldError>Select at least one working day.</FieldError>
             ) : null}
           </div>
         </Section>
       </div>
 
-      {profileError ? <p className="m-0 text-sm text-destructive">{profileError}</p> : null}
-      {settingsError ? <p className="m-0 text-sm text-destructive">{settingsError}</p> : null}
+      {profileError ? <FormError message={profileError} /> : null}
+      {settingsError ? <FormError message={settingsError} /> : null}
 
       {dirty ? (
         <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={handleCancel} disabled={saving}>
+          <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>
             Cancel
           </Button>
 

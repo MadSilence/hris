@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Archive, ArchiveRestore, Crosshair, Info, Pencil, Trash2, Users } from "lucide-react";
+import { Archive02Icon, ArchiveArrowUpIcon, Delete02Icon, InformationCircleIcon, PencilEdit02Icon, Target02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Tabs, TabsList, TabsTrigger, TabsContent,
-} from "@/public/desact/src/components/ui/tabs";
+} from "@/components/desact/tabs";
 import {
   RowAction,
   RowActionDestructive,
@@ -30,7 +31,7 @@ type Props = {
 
 function DepartmentIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 16 16" fill="none" className="text-brown-600">
+    <svg width="26" height="26" viewBox="0 0 16 16" fill="none" className="text-secondary">
       <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" fill="currentColor" fillOpacity="0.2" />
       <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086l1 1H13.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" strokeWidth="1.2" />
     </svg>
@@ -42,7 +43,7 @@ function LeadSection({ department }: { department: DepartmentTreeNode }) {
 
   return (
     <div>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Department Lead</h3>
+      <h3 className="mb-2 text-hint font-semibold text-tertiary">Department lead</h3>
 
       {lead ? (
         <UserChip
@@ -51,10 +52,10 @@ function LeadSection({ department }: { department: DepartmentTreeNode }) {
           firstName={lead.firstName}
           lastName={lead.lastName}
           avatarUrl={lead.avatarUrl}
-          className="hover:bg-brown-50 hover:shadow-none"
+          className="hover:bg-subtle hover:shadow-none"
         />
       ) : (
-        <p className="text-sm text-brown-400">No lead assigned.</p>
+        <p className="text-body text-tertiary">No lead assigned.</p>
       )}
     </div>
   );
@@ -81,18 +82,18 @@ export function DepartmentDetailsPanel({
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
       {/* Header */}
       <div className="flex flex-none items-start gap-4">
-        <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-brown-100">
+        <div className="flex h-12 w-12 flex-none items-center justify-center rounded-popover bg-mist">
           <DepartmentIcon />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h2 className="truncate text-lg font-semibold text-brown-900">{department.name}</h2>
+            <h2 className="truncate text-section-title text-primary">{department.name}</h2>
             {isArchived && (
-              <StatusBadge status="archived" className="px-1.5 py-0.5 text-xs" />
+              <StatusBadge status="archived" className="px-1.5 py-0.5 text-hint" />
             )}
           </div>
           {department.code && (
-            <span className="mt-1 inline-block rounded border border-brown-200 bg-brown-50 px-1.5 py-0.5 font-mono text-xs text-brown-500">
+            <span className="mt-1 inline-block rounded-tag border border-divider bg-subtle px-1.5 py-0.5 font-mono text-hint text-tertiary">
               {department.code}
             </span>
           )}
@@ -104,30 +105,30 @@ export function DepartmentDetailsPanel({
             onClick={onRecenter}
             aria-label="Center on chart"
             title="Center on chart"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+            className="flex h-8 w-8 items-center justify-center rounded-control text-tertiary hover:bg-mist hover:text-secondary"
           >
-            <Crosshair className="h-4 w-4" />
+            <Icon icon={Target02Icon} size="sm" />
           </button>
 
-          <RowActionsMenu label="Department Actions">
+          <RowActionsMenu label="Department actions">
             <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
               {!isArchived && (
-                <RowAction icon={<Pencil className="h-4 w-4" />} onClick={onEdit}>
+                <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onEdit}>
                   Edit
                 </RowAction>
               )}
               {isArchived ? (
-                <RowAction icon={<ArchiveRestore className="h-4 w-4" />} onClick={onActivate}>
+                <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />} onClick={onActivate}>
                   Unarchive
                 </RowAction>
               ) : (
-                <RowAction icon={<Archive className="h-4 w-4" />} onClick={onArchive}>
+                <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive}>
                   Archive
                 </RowAction>
               )}
             </PermissionGate>
             <PermissionGate resource="ORG.DEPARTMENT" action="MANAGE">
-              <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={onDelete}>
+              <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={onDelete}>
                 Delete
               </RowActionDestructive>
             </PermissionGate>
@@ -137,13 +138,13 @@ export function DepartmentDetailsPanel({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="grid w-full flex-none grid-cols-2 bg-brown-50">
+        <TabsList className="grid w-full flex-none grid-cols-2 bg-subtle">
           <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Info className="h-4 w-4" />
+            <Icon icon={InformationCircleIcon} size="sm" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="people" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+            <Icon icon={UserGroupIcon} size="sm" />
             People
           </TabsTrigger>
         </TabsList>
@@ -151,11 +152,11 @@ export function DepartmentDetailsPanel({
         <TabsContent value="overview" className="mt-5 -mx-1.5 min-h-0 flex-1 space-y-5 overflow-y-auto px-1.5">
           {/* Description */}
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Description</h3>
+            <h3 className="mb-2 text-hint font-semibold text-tertiary">Description</h3>
             {department.description ? (
-              <p className="text-sm leading-relaxed text-brown-700">{department.description}</p>
+              <p className="text-body leading-relaxed text-secondary">{department.description}</p>
             ) : (
-              <p className="text-sm text-brown-400">No description.</p>
+              <p className="text-body text-tertiary">No description.</p>
             )}
           </div>
 
@@ -164,29 +165,29 @@ export function DepartmentDetailsPanel({
 
           {/* Parent department */}
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">Parent department</h3>
-            <p className="text-sm text-brown-700">{parentName ?? "None (top-level)"}</p>
+            <h3 className="mb-2 text-hint font-semibold text-tertiary">Parent department</h3>
+            <p className="text-body text-secondary">{parentName ?? "None (top-level)"}</p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Direct people</p>
-              <p className="text-2xl font-semibold leading-none text-brown-900">{department.memberCount}</p>
+            <div className="rounded-control border border-divider p-3.5">
+              <p className="mb-1 text-hint text-tertiary">Direct people</p>
+              <p className="text-page-title leading-none text-primary">{department.memberCount}</p>
             </div>
-            <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Direct sub-departments</p>
-              <p className="text-2xl font-semibold leading-none text-brown-900">{department.directSubNodes}</p>
+            <div className="rounded-control border border-divider p-3.5">
+              <p className="mb-1 text-hint text-tertiary">Direct sub-departments</p>
+              <p className="text-page-title leading-none text-primary">{department.directSubNodes}</p>
             </div>
-            <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Total people</p>
-              <p className="text-2xl font-semibold leading-none text-brown-900">{department.totalPeople}</p>
-              <p className="mt-1 text-[10px] leading-none text-brown-400">incl. all sub-departments</p>
+            <div className="rounded-control border border-divider p-3.5">
+              <p className="mb-1 text-hint text-tertiary">Total people</p>
+              <p className="text-page-title leading-none text-primary">{department.totalPeople}</p>
+              <p className="mt-1 text-hint leading-none text-tertiary">incl. all sub-departments</p>
             </div>
-            <div className="rounded-lg border border-brown-200 p-3.5">
-              <p className="mb-1 text-xs text-brown-500">Total sub-departments</p>
-              <p className="text-2xl font-semibold leading-none text-brown-900">{department.totalSubNodes}</p>
-              <p className="mt-1 text-[10px] leading-none text-brown-400">all levels below</p>
+            <div className="rounded-control border border-divider p-3.5">
+              <p className="mb-1 text-hint text-tertiary">Total sub-departments</p>
+              <p className="text-page-title leading-none text-primary">{department.totalSubNodes}</p>
+              <p className="mt-1 text-hint leading-none text-tertiary">all levels below</p>
             </div>
           </div>
         </TabsContent>

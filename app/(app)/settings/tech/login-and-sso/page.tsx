@@ -17,7 +17,7 @@ export default function LoginSsoSettingsPage() {
       <SettingsPageHeader title="Login & SSO" backHref="/settings" />
       <PageDescription>How people sign in to the company, and how long a sign-in lasts.</PageDescription>
       <section className="space-y-4">
-        <h2 className="text-lg font-medium text-foreground">Sign-in Security</h2>
+        <h2 className="text-section-title text-primary">Sign-in security</h2>
         <SecuritySettingsForm />
       </section>
       {canIdentity && <IdentitySettings />}

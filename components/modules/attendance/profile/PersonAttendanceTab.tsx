@@ -1,13 +1,14 @@
 "use client";
 
 import { FC, useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Info, Pencil, Trash2, Wand2 } from "lucide-react";
+import { Delete02Icon, InformationCircleIcon, MagicWand01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Card } from "@/public/desact/src/components/ui/card";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Button } from "@/components/desact/button";
+import { Card } from "@/components/desact/card";
+import { Label } from "@/components/desact/label";
+import { Textarea } from "@/components/desact/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { TimePicker } from "@/components/ui/TimePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
@@ -69,7 +70,7 @@ export const beyondNormNotice = (days: AttendanceLogDay[], minutes: number | nul
 
 /** Hours as the calendar marks them — a day's under its number, and the month's total beneath. */
 const HoursBadge: FC<{ minutes: number }> = ({ minutes }) => (
-  <span className="rounded-md bg-brown-100/70 px-2 py-1 text-xs font-medium tabular-nums text-brown-700">
+  <span className="rounded-tag bg-mist/70 px-2 py-1 text-hint font-medium tabular-nums text-secondary">
     {formatMinutes(minutes)}
   </span>
 );
@@ -197,7 +198,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               return logged > 0 ? <div className="flex justify-center pt-2"><HoursBadge minutes={logged}/></div> : null;
             }}
             footer={() => (
-              <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center justify-end gap-2 text-body text-tertiary">
                 <span>Total</span>
                 <HoursBadge minutes={log.data?.totals.loggedMinutes ?? 0}/>
               </div>
@@ -206,14 +207,14 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         </div>
 
         {canLog && (
-          <Card className="min-h-0 gap-4 border-brown-100 p-6 xl:w-80 xl:shrink-0">
+          <Card className="min-h-0 gap-4 border-divider p-6 xl:w-80 xl:shrink-0">
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-foreground">{editing ? "Edit Time" : "Log Hours"}</h3>
-              <p className="min-h-5 text-sm text-muted-foreground">{rangeLabel}</p>
+              <h3 className="text-body font-semibold text-primary">{editing ? "Edit time" : "Log hours"}</h3>
+              <p className="min-h-5 text-body text-tertiary">{rangeLabel}</p>
             </div>
 
             {!editing && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body text-tertiary">
                 Drag across the calendar to pick more than one day — the times below are logged on each of them.
               </p>
             )}
@@ -259,15 +260,15 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               </div>
 
               {suggestion && (
-                <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setDraft(suggestion)}>
-                  <Wand2 className="h-4 w-4"/>
-                  Quick Fill
+                <Button type="button" variant="secondary" size="sm" className="w-full" onClick={() => setDraft(suggestion)}>
+                  <Icon icon={MagicWand01Icon} size="sm" />
+                  Quick fill
                 </Button>
               )}
 
               {notice && (
-                <p className="flex items-start gap-2 rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-800" role="status">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0"/>
+                <p className="flex items-start gap-2 rounded-control bg-status-pending-bg px-3 py-2 text-body text-status-pending-text" role="status">
+                  <Icon icon={InformationCircleIcon} size="sm" className="mt-0.5 shrink-0" />
                   <span>{notice}</span>
                 </p>
               )}
@@ -276,12 +277,12 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
               <div className="flex gap-2">
                 {editing && (
-                  <Button type="button" variant="outline" className="flex-1" onClick={() => { setEditing(null); setDraft(EMPTY); setFormError(null); }}>
+                  <Button type="button" variant="secondary" className="flex-1" onClick={() => { setEditing(null); setDraft(EMPTY); setFormError(null); }}>
                     Cancel
                   </Button>
                 )}
                 <Button type="submit" className="flex-1" disabled={busy || minutes === null}>
-                  {editing ? "Save Changes" : "Log Hours"}
+                  {editing ? "Save changes" : "Log hours"}
                 </Button>
               </div>
             </form>
@@ -306,12 +307,12 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
           <TableBody>
             {pickedEntries.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={6} className="py-6 text-center text-body text-tertiary">
                   {single ? "Nothing logged on this day." : "Nothing logged on these days."}
                 </TableCell>
               </TableRow>
             ) : pickedEntries.map((entry) => (
-              <TableRow key={entry.id} className={editing?.id === entry.id ? "bg-brown-50" : undefined}>
+              <TableRow key={entry.id} className={editing?.id === entry.id ? "bg-accent-subtle" : undefined}>
                 {!single && (
                   <TableCell className="whitespace-nowrap">
                     {inBrowser ? formatDisplayDate(entry.workDate, { style: "medium" }) : null}
@@ -323,9 +324,9 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
                 {canLog && (
                   <TableCell>
-                    <RowActionsMenu label="Entry Actions">
-                      <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => startEditing(entry)}>Edit</RowAction>
-                      <RowActionDestructive icon={<Trash2 className="h-4 w-4"/>} onClick={() => setRemoving(entry)}>
+                    <RowActionsMenu label="Entry actions">
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => startEditing(entry)}>Edit</RowAction>
+                      <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setRemoving(entry)}>
                         Delete
                       </RowActionDestructive>
                     </RowActionsMenu>
@@ -339,7 +340,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Delete Entry"
+        title="Delete entry"
         description={removing
           ? `${removing.startTime}–${removing.endTime}${removing.description ? ` · ${removing.description}` : ""} will be removed from ${inBrowser ? formatDisplayDate(removing.workDate, { style: "medium" }) : removing.workDate}.`
           : ""}

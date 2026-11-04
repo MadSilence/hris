@@ -1,7 +1,8 @@
 "use client";
 
 import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Users } from "lucide-react";
+import { UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import type {
   CompanyCalendarAbsence,
   CompanyCalendarCapacity,
@@ -136,8 +137,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
       <div ref={scrollRef} data-calendar-scroll="" className="min-h-0 flex-1 overflow-y-auto print:overflow-visible">
         <div key={animationKey} style={{ animation: "calFade 220ms ease-out" }}>
           {/* Header */}
-          <div ref={headerRef} className="sticky top-0 z-20 grid w-full text-sm" style={{ gridTemplateColumns }}>
-            <div className="sticky left-0 z-30 flex items-center border-b border-r border-brown-200 bg-white px-3 py-2 text-xs font-medium text-brown-600">
+          <div ref={headerRef} className="sticky top-0 z-20 grid w-full text-body" style={{ gridTemplateColumns }}>
+            <div className="sticky left-0 z-30 flex items-center border-b border-r border-divider bg-card px-3 py-2 text-hint font-medium text-secondary">
               People
             </div>
             {days.map((d, i) => {
@@ -148,14 +149,19 @@ export const CompanyCalendarBoard: FC<Props> = ({
                 <div
                   key={`h-${iso}`}
                   className={[
-                    "border-b border-r border-brown-100 px-1 py-1.5 text-center",
-                    today ? "bg-brown-100" : weekend ? "bg-brown-50" : "bg-white",
+                    "border-b border-r border-divider px-1 py-1.5 text-center",
+                    weekend ? "bg-subtle" : "bg-card",
                   ].join(" ")}
                 >
-                  <div className={`text-[10px] uppercase ${today ? "text-brown-700" : "text-brown-400"}`}>
+                  <div className={`text-hint ${today ? "font-medium text-accent-text" : "text-tertiary"}`}>
                     {density === "week" ? WEEKDAY_SHORT[d.getDay()] : WEEKDAY_NARROW[d.getDay()]}
                   </div>
-                  <div className={`text-xs ${today ? "font-semibold text-brown-800" : "text-foreground"}`}>
+                  {/* Today: the date in an accent circle (SPEC § 13.13). */}
+                  <div
+                    className={`mx-auto inline-flex size-6 items-center justify-center rounded-pill text-hint tabular-nums ${
+                      today ? "bg-accent font-semibold text-on-accent" : "text-primary"
+                    }`}
+                  >
                     {d.getDate()}
                   </div>
                   {capacityByDay.has(iso) ? (
@@ -196,7 +202,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
                 ))}
 
           {!isGrouped && hasMore ? (
-            <div ref={sentinelRef} className="flex justify-center py-3 text-xs text-muted-foreground">
+            <div ref={sentinelRef} className="flex justify-center py-3 text-hint text-tertiary">
               {isLoadingMore ? "Loading…" : ""}
             </div>
           ) : null}
@@ -205,11 +211,11 @@ export const CompanyCalendarBoard: FC<Props> = ({
 
       {showEmpty ? (
         <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50 text-brown-400">
-            <Users className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
+            <Icon icon={UserGroupIcon} size="lg" />
           </div>
-          <p className="text-sm font-medium text-foreground">No people to show</p>
-          <p className="max-w-sm text-sm text-muted-foreground">Nobody matches the current view.</p>
+          <p className="text-body font-medium text-primary">No people to show</p>
+          <p className="max-w-sm text-body text-tertiary">Nobody matches the current view.</p>
         </div>
       ) : null}
     </div>

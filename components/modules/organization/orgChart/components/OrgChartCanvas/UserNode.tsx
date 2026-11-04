@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { ChevronUp } from "lucide-react";
+import { ArrowUp01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { cn } from "@/lib/cn";
 import type { OrgChartUser } from "@/models/orgChart/OrgChartUser";
 
 import { useOrgChartCanvas } from "./OrgChartCanvasContext";
@@ -48,11 +49,11 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
   return (
     <div
       className={cn(
-        "relative flex h-[132px] w-[240px] flex-col rounded-xl border bg-white p-3.5 transition-shadow",
+        "relative flex h-[132px] w-[240px] flex-col rounded-popover border bg-card p-3.5 transition-shadow",
         selected
-          ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
-          : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
-        isDropTarget && "border-success-400 ring-2 ring-success-300",
+          ? "border-accent bg-card shadow-raised ring-1 ring-accent-ring"
+          : "border-divider shadow-card hover:border-field hover:shadow-raised",
+        isDropTarget && "border-dashed border-accent-ring bg-accent-subtle",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />
@@ -61,13 +62,13 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
       <div className="flex flex-none items-center gap-2.5">
         <Avatar className="h-10 w-10 flex-none">
           {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={name} /> : null}
-          <AvatarFallback className="text-xs">{initials(user)}</AvatarFallback>
+          <AvatarFallback className="text-hint">{initials(user)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold leading-snug text-brown-900" title={name}>
+          <p className="truncate text-body font-semibold leading-snug text-primary" title={name}>
             {name}
           </p>
-          <p className="truncate text-xs text-brown-500" title={user.jobName ?? undefined}>
+          <p className="truncate text-hint text-tertiary" title={user.jobName ?? undefined}>
             {user.jobName}
           </p>
         </div>
@@ -76,7 +77,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
       {/* Department */}
       <div className="mt-2.5 flex-1 overflow-hidden">
         {user.department ? (
-          <span className="inline-block max-w-full truncate rounded border border-brown-200 bg-brown-50 px-1.5 py-0.5 text-[11px] leading-none text-brown-600">
+          <span className="inline-block max-w-full truncate rounded-tag border border-divider bg-subtle px-1.5 py-0.5 text-hint leading-none text-secondary">
             {user.department.name}
           </span>
         ) : null}
@@ -85,19 +86,19 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
       {/* Footer: status + reports */}
       <div
         className={cn(
-          "flex flex-none items-center justify-between gap-2 border-t pt-2 text-[11px] leading-none",
-          selected ? "border-brown-300" : "border-brown-100",
+          "flex flex-none items-center justify-between gap-2 border-t pt-2 text-hint leading-none",
+          selected ? "border-accent-ring" : "border-divider",
         )}
       >
         {/* No status when the caller may not see it — "Suspended" would be a claim nobody made. */}
         {user.status ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium",
-              isActive ? "bg-success-50 text-success-700" : "bg-brown-100 text-brown-500",
+              "inline-flex items-center gap-1 rounded-pill px-1.5 py-0.5 font-medium",
+              isActive ? "bg-status-approved-bg text-status-approved-text" : "bg-mist text-tertiary",
             )}
           >
-            <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-success-500" : "bg-brown-400")} />
+            <span className={cn("h-1.5 w-1.5 rounded-pill", isActive ? "bg-status-approved-fill" : "bg-strong")} />
             {isActive ? "Active" : "Suspended"}
           </span>
         ) : (
@@ -105,8 +106,8 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
         )}
 
         {hasChildren ? (
-          <span className="text-brown-500">
-            <span className="font-semibold text-brown-700">{childCount}</span> reports
+          <span className="text-tertiary">
+            <span className="font-semibold text-secondary">{childCount}</span> reports
           </span>
         ) : null}
       </div>
@@ -120,14 +121,14 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
             e.stopPropagation();
             onToggleCollapse(user.id);
           }}
-          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-full border border-brown-200 bg-white px-1.5 text-brown-500 shadow-sm transition-colors hover:border-brown-300 hover:text-brown-800"
+          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
           aria-label={collapsed ? `Expand ${childCount} reports` : "Collapse"}
           title={collapsed ? `Expand ${childCount} reports` : "Collapse"}
         >
           {collapsed ? (
-            <span className="text-[11px] font-semibold leading-none">{childCount}</span>
+            <span className="text-hint font-semibold leading-none">{childCount}</span>
           ) : (
-            <ChevronUp className="h-3.5 w-3.5" />
+            <Icon icon={ArrowUp01Icon} size="sm" />
           )}
         </button>
       )}

@@ -5,7 +5,7 @@ export const HOME_GROUPS = ["PERSONAL", "COMPANY", "HR", "UTILITIES"] as const;
 export type HomeGroup = (typeof HOME_GROUPS)[number];
 
 export const HOME_GROUP_LABELS: Record<HomeGroup, string> = {
-  PERSONAL: "For You",
+  PERSONAL: "For you",
   COMPANY: "Company",
   HR: "HR",
   UTILITIES: "Utilities",

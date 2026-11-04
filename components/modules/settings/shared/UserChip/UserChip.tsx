@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { cn } from "@/lib/cn";
 
 export interface UserChipProps {
   id?: string | null;
@@ -46,13 +46,13 @@ export default function UserChip({
     <>
       <Avatar className="h-6 w-6 shrink-0">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt={name}/> : null}
-        <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+        <AvatarFallback className="text-hint">{initials}</AvatarFallback>
       </Avatar>
-      <span className="truncate text-sm font-medium text-foreground">{name}</span>
+      <span className="truncate text-body font-medium text-primary">{name}</span>
     </>
   );
 
-  const base = "inline-flex max-w-full items-center gap-2 rounded-md -mx-1.5 px-1.5 py-1";
+  const base = "inline-flex max-w-full items-center gap-2 rounded-control -mx-1.5 px-1.5 py-1";
 
   if (!id) {
     return <span className={cn(base, className)}>{inner}</span>;
@@ -61,7 +61,7 @@ export default function UserChip({
   return (
     <Link
       href={`/organization/people/${id}/personal`}
-      className={cn(base, "no-underline transition-colors hover:bg-white hover:shadow-sm", className)}
+      className={cn(base, "no-underline transition-colors hover:bg-card hover:shadow-card", className)}
       onClick={(e) => e.stopPropagation()}
     >
       {inner}

@@ -2,18 +2,21 @@
 
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar, { NavItem } from "@/components/layout/Sidebar/Sidebar";
-import Home from "@/public/icons/home.svg";
-import Inbox from "@/public/icons/inbox.svg";
-import Search from "@/public/icons/search.svg";
-import People from "@/public/icons/people.svg";
-import Calendar from "@/public/icons/calendar.svg";
-import Settings from "@/public/icons/settings.svg";
-import { ClipboardCheck, Clock, ListChecks, Workflow } from "lucide-react";
-import styles from "./layout.module.css";
+import {
+  Calendar03Icon,
+  CheckListIcon,
+  Clock01Icon,
+  Home01Icon,
+  InboxIcon,
+  Settings01Icon,
+  StarIcon,
+  UserGroupIcon,
+  WorkflowSquare03Icon,
+} from "@hugeicons/core-free-icons";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, isSystemOwner, ResourceCode, type AccessAction } from "@/models/access";
 import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
-import { Toaster } from "@/public/desact/src/components/ui/sonner";
+import { Toaster } from "@/components/desact/sonner";
 import { showError } from "@/lib/errors/errorToast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
@@ -85,33 +88,16 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const seesSettings = settingsGroups.some((group) => group.items.some((item) => canSeeSettingsItem(access, item)));
 
   const allTopItems: (NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction })[] = [
-    { label: "Home", href: "/dashboard", Icon: Home },
-    {
-      label: "Inbox",
-      href: "/inbox",
-      Icon: Inbox,
-      badge: unreadCount ?? 0,
-    },
+    { label: "Home", href: "/dashboard", icon: Home01Icon },
+    { label: "Inbox", href: "/inbox", icon: InboxIcon, badge: unreadCount ?? 0 },
     // Beside the inbox: where tasks assigned to me land, a preboarding's included once the person
     // registers (LIFECYCLE_PROCESSES.md § 5.3). Everyone has one.
-    { label: "Tasks", href: "/tasks", Icon: ListChecks as NavItem["Icon"] },
-    // Opens the quick-search window in place; there is no results page (H11). Ctrl/Cmd + K does the same.
-    {
-      label: "Search",
-      href: "#quick-search",
-      Icon: Search,
-      onSelect: openSearch,
-    },
-    {
-      label: "Organization",
-      href: "/organization/people",
-      Icon: People,
-      resources: ["PEOPLE.PROFILE"],
-    },
+    { label: "Tasks", href: "/tasks", icon: CheckListIcon },
+    { label: "Organization", href: "/organization/people", icon: UserGroupIcon, resources: ["PEOPLE.PROFILE"] },
     {
       label: "Calendar",
       href: "/calendar",
-      Icon: Calendar,
+      icon: Calendar03Icon,
       resources: ["PEOPLE.CALENDAR"],
       // A grant that reaches nobody but yourself builds a board with one row; the item is offered
       // only when the scope reaches further. `canAccess` without a scope passed on any grant at all.
@@ -119,30 +105,15 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     },
     // The company's attendance, for those who manage it (MANAGE). Everybody logs their own time on
     // their profile; the overview is not theirs to see.
-    {
-      label: "Attendance",
-      href: "/attendance",
-      Icon: Clock as NavItem["Icon"],
-      resources: ["PEOPLE.ATTENDANCE"],
-      action: "MANAGE",
-    },
-    {
-      label: "Processes",
-      href: "/processes",
-      Icon: Workflow as NavItem["Icon"],
-      resources: ["PEOPLE.LIFECYCLE_PROCESSES"],
-    },
+    { label: "Attendance", href: "/attendance", icon: Clock01Icon, resources: ["PEOPLE.ATTENDANCE"], action: "MANAGE" },
+    { label: "Processes", href: "/processes", icon: WorkflowSquare03Icon, resources: ["PEOPLE.LIFECYCLE_PROCESSES"] },
     // Performance reviews (REVIEWS_DESIGN.md § 12.1): everybody's — anybody may have a review to write or to read.
     // Overview sends somebody who does not run cycles on to My Reviews.
-    {
-      label: "Reviews",
-      href: "/reviews",
-      Icon: ClipboardCheck as NavItem["Icon"],
-    },
+    { label: "Reviews", href: "/reviews", icon: StarIcon },
   ];
 
   const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = seesSettings
-    ? [{ label: "Settings", href: "/settings", Icon: Settings }]
+    ? [{ label: "Settings", href: "/settings", icon: Settings01Icon }]
     : [];
 
   const filterItem = (item: NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction }) => {
@@ -158,10 +129,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
 
   const top = allTopItems.filter(filterItem);
   const bottom = allBottomItems.filter(filterItem);
-  // The window's "Go To" list starts from what the sidebar already offers this reader.
-  const appPages: SearchPage[] = top
-    .filter((item) => !item.onSelect)
-    .map((item) => ({ label: item.label, href: item.href }));
+  // The window's "Go to" list starts from what the sidebar already offers this reader.
+  const appPages: SearchPage[] = top.map((item) => ({ label: item.label, href: item.href }));
 
   const profile = useMemo(() => {
     const fullName = user
@@ -169,14 +138,14 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       : "";
     return {
       id: user?.id ?? "",
-      name: fullName || "Loading...",
-      role: user?.email || undefined,
+      name: fullName,
+      email: user?.email || undefined,
       avatarUrl: user?.avatarUrl ?? null,
     };
   }, [user]);
 
   return (
-    <div className={styles.frame}>
+    <div className="grid min-h-dvh grid-cols-[auto_minmax(0,1fr)] bg-page print:block print:min-h-0">
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((current) => !current)}
@@ -184,6 +153,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         bottomItems={bottom}
         profile={profile}
         company={company}
+        onSearch={openSearch}
         onSignOut={handleSignOut}
         // An impersonated session's password is the subject's, and not the actor's to change.
         onChangePassword={isImpersonating ? undefined : () => setIsChangePasswordOpen(true)}
@@ -199,9 +169,10 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         onCloseAction={() => setIsChangePasswordOpen(false)}
       />
 
-      <div className={styles.content}>
+      {/* Printing a page (the company calendar's Print): the page alone, grown to its content. */}
+      <div className="flex h-dvh min-w-0 flex-col print:h-auto">
         <ImpersonationBanner/>
-        <main className={styles.main}>{children}</main>
+        <main className="min-w-0 flex-1 overflow-auto print:overflow-visible">{children}</main>
       </div>
 
       {/* "Confirm it is you" — one dialog for every sensitive operation (MFA_DESIGN.md § 3.5). */}
@@ -227,7 +198,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <ImpersonationProvider>
           <UserSettingsProvider>
             <LayoutContent>
-              <div className="px-16 pt-16 pb-8">
+              {/* Page padding (SPEC § 6): 32 px, 24 below a 1280 px viewport. */}
+              <div className="px-(--page-padding-narrow) py-(--page-padding-narrow) xl:px-(--page-padding) xl:py-(--page-padding)">
                 {children}
               </div>
             </LayoutContent>

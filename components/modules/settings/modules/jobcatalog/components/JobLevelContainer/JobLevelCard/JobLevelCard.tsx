@@ -1,11 +1,12 @@
 "use client";
 
 import { FC, ReactNode, useState } from "react";
-import { ArrowRight, Briefcase, Check, ChevronDown, ChevronUp, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { Add01Icon, ArrowDown01Icon, ArrowRight02Icon, ArrowUp01Icon, Briefcase01Icon, Delete02Icon, PencilEdit02Icon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { JobLevel, JobLevelGroup } from "@/models/job";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Separator } from "@/public/desact/src/components/ui/separator";
+import { Button } from "@/components/desact/button";
+import { Separator } from "@/components/desact/separator";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 
@@ -47,9 +48,9 @@ export const JobLevelCard: FC<Props> = ({
   const hiddenCount = sortedLevels.length - DEFAULT_VISIBLE;
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-brown-200 bg-white p-6 shadow-sm">
+    <article className="flex h-full flex-col rounded-card border border-divider bg-card p-6 shadow-card">
       <header className="flex items-start justify-between gap-3">
-        <h3 className="truncate text-lg font-semibold text-foreground">{group.name}</h3>
+        <h3 className="truncate text-section-title text-primary">{group.name}</h3>
 
         <PermissionGate
           anyOf={[
@@ -58,16 +59,16 @@ export const JobLevelCard: FC<Props> = ({
           ]}
         >
           {managing && (
-            <RowActionsMenu label="Track Actions">
+            <RowActionsMenu label="Track actions">
               <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
-                <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditGroup(group)}>
+                <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditGroup(group)}>
                   Rename
                 </RowAction>
               </PermissionGate>
 
               <PermissionGate resource="JOBS.LEVEL_GROUP" action="MANAGE">
                 <RowActionDestructive
-                  icon={<Trash2 className="h-4 w-4"/>}
+                  icon={<Icon icon={Delete02Icon} size="sm" />}
                   onClick={() => onDeleteGroup(group)}
                 >
                   Delete
@@ -81,13 +82,13 @@ export const JobLevelCard: FC<Props> = ({
       {/* Statistics */}
       <div className="mt-4 flex items-stretch">
         <Stat
-          icon={<Users className="h-6 w-6"/>}
+          icon={<Icon icon={UserGroupIcon} size="lg" />}
           value={String(group.assignedUsersCount)}
           label={group.assignedUsersCount === 1 ? "Employee" : "Employees"}
         />
-        <div className="mx-4 w-px bg-brown-200"/>
+        <div className="mx-4 w-px bg-divider"/>
         <Stat
-          icon={<Briefcase className="h-6 w-6"/>}
+          icon={<Icon icon={Briefcase01Icon} size="lg" />}
           value={String(group.assignedJobsCount)}
           label={group.assignedJobsCount === 1 ? "Position" : "Positions"}
         />
@@ -98,7 +99,7 @@ export const JobLevelCard: FC<Props> = ({
       {/* Levels — vertical career progression */}
       <div className="flex-1">
         {sortedLevels.length === 0 && !managing ? (
-          <div className="flex w-full items-center justify-center rounded-md border border-dashed border-brown-300 bg-brown-50/60 px-3 py-2 text-sm text-brown-600">
+          <div className="flex w-full items-center justify-center rounded-control border border-dashed border-field bg-subtle/60 px-3 py-2 text-body text-secondary">
             No levels yet
           </div>
         ) : (
@@ -109,14 +110,14 @@ export const JobLevelCard: FC<Props> = ({
               return (
                 <li key={level.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full border-2 border-brown-400 bg-white"/>
+                    <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-pill border-2 border-strong bg-card"/>
                     {connectorBelow && (
-                      <span className="my-1 w-px flex-1 bg-brown-200"/>
+                      <span className="my-1 w-px flex-1 bg-divider"/>
                     )}
                   </div>
 
                   <div className={`flex min-w-0 flex-1 items-center gap-2 ${connectorBelow ? "pb-4" : ""}`}>
-                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                    <p className="min-w-0 flex-1 truncate text-body font-medium text-primary">
                       {level.name}
                     </p>
 
@@ -139,13 +140,13 @@ export const JobLevelCard: FC<Props> = ({
             {collapsed && (
               <li className="flex gap-3">
                 <div className="flex flex-col items-center">
-                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full border-2 border-brown-300 bg-brown-50"/>
+                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-pill border-2 border-field bg-subtle"/>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
-                  className="rounded-md bg-brown-50 px-2 py-1 text-sm font-medium text-brown-600 transition-colors hover:bg-brown-100"
+                  className="rounded-control bg-subtle px-2 py-1 text-body font-medium text-secondary transition-colors hover:bg-mist"
                 >
                   +{hiddenCount} more levels
                 </button>
@@ -158,7 +159,7 @@ export const JobLevelCard: FC<Props> = ({
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="mt-3 text-sm font-medium text-brown-600 transition-colors hover:text-brown-700"
+            className="mt-3 text-body font-medium text-secondary transition-colors hover:text-secondary"
           >
             Show less
           </button>
@@ -168,11 +169,11 @@ export const JobLevelCard: FC<Props> = ({
           <PermissionGate resource="JOBS.LEVEL" action="EDIT">
             <button
               type="button"
-              className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
+              className="mt-2 flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle"
               onClick={() => onCreateLevel(group)}
             >
-              <Plus className="h-4 w-4"/>
-              Add Level
+              <Icon icon={Add01Icon} size="sm" />
+              Add level
             </button>
           </PermissionGate>
         )}
@@ -188,14 +189,14 @@ export const JobLevelCard: FC<Props> = ({
       >
         <Button type="button"
           variant="ghost"
-          className="group mt-1 w-full justify-between px-2 text-brown-600 hover:bg-brown-50 hover:text-brown-700"
+          className="group mt-1 w-full justify-between px-2 text-secondary hover:bg-subtle hover:text-secondary"
           onClick={onToggleManaging}
         >
-          <span className="text-sm font-medium">{managing ? "Done" : "Manage Group"}</span>
+          <span className="text-body font-medium">{managing ? "Done" : "Manage group"}</span>
           {managing ? (
-            <Check className="h-4 w-4"/>
+            <Icon icon={Tick02Icon} size="sm" />
           ) : (
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5"/>
+            <Icon icon={ArrowRight02Icon} size="sm" className="transition-transform group-hover:translate-x-0.5" />
           )}
         </Button>
       </PermissionGate>
@@ -205,10 +206,10 @@ export const JobLevelCard: FC<Props> = ({
 
 const Stat = ({ icon, value, label }: { icon: ReactNode; value: string; label: string }) => (
   <div className="flex flex-1 items-center gap-3">
-    <span className="text-brown-400">{icon}</span>
+    <span className="text-tertiary">{icon}</span>
     <div>
-      <p className="text-xl font-semibold leading-none text-foreground">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+      <p className="text-section-title leading-none text-primary">{value}</p>
+      <p className="mt-1 text-hint text-tertiary">{label}</p>
     </div>
   </div>
 );
@@ -240,34 +241,34 @@ const LevelActions: FC<LevelActionsProps> = ({
     <Button type="button"
       variant="ghost"
       size="icon"
-      className="h-7 w-7 text-brown-500 hover:bg-brown-100"
+      className="h-7 w-7 text-tertiary hover:bg-mist"
       aria-label="Move level up"
       disabled={first || disabled}
       onClick={onUp}
     >
-      <ChevronUp className="h-4 w-4"/>
+      <Icon icon={ArrowUp01Icon} size="sm" />
     </Button>
 
     <Button type="button"
       variant="ghost"
       size="icon"
-      className="h-7 w-7 text-brown-500 hover:bg-brown-100"
+      className="h-7 w-7 text-tertiary hover:bg-mist"
       aria-label="Move level down"
       disabled={last || disabled}
       onClick={onDown}
     >
-      <ChevronDown className="h-4 w-4"/>
+      <Icon icon={ArrowDown01Icon} size="sm" />
     </Button>
 
-    <RowActionsMenu label="Level Actions">
+    <RowActionsMenu label="Level actions">
         <PermissionGate resource="JOBS.LEVEL" action="EDIT">
-          <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={onEdit}>
+          <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onEdit}>
             Rename
           </RowAction>
         </PermissionGate>
 
         <PermissionGate resource="JOBS.LEVEL" action="MANAGE">
-          <RowActionDestructive icon={<Trash2 className="h-4 w-4"/>} onClick={onDelete}>
+          <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={onDelete}>
             Delete
           </RowActionDestructive>
         </PermissionGate>

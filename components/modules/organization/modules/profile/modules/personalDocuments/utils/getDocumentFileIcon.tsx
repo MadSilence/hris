@@ -1,15 +1,14 @@
 import * as React from "react";
-import { File, } from "lucide-react";
-import Excel from "@/public/icons/excel.svg";
-import Word from "@/public/icons/word.svg";
-import Pdf from "@/public/icons/pdf.svg";
-import Jpg from "@/public/icons/jpg.svg";
+import { Doc01Icon, File01Icon, Image01Icon, Pdf01Icon, Xls01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+
+/* A file's type, as an icon of the one set (SPEC § 9): neutral, in the text colour. */
 
 export const getDocumentFileIcon = (mimeType: string) => {
   const normalized = mimeType.toLowerCase();
 
   if (normalized.includes("pdf")) {
-    return <Pdf className="h-4 w-4"/>;
+    return <Icon icon={Pdf01Icon} size="sm" />;
   }
 
   if (
@@ -17,7 +16,7 @@ export const getDocumentFileIcon = (mimeType: string) => {
     normalized.includes("document") ||
     normalized.includes("msword")
   ) {
-    return <Word className="h-4 w-4"/>;
+    return <Icon icon={Doc01Icon} size="sm" />;
   }
 
   if (
@@ -26,12 +25,12 @@ export const getDocumentFileIcon = (mimeType: string) => {
     normalized.includes("spreadsheet") ||
     normalized.includes("csv")
   ) {
-    return <Excel className="h-4 w-4"/>;
+    return <Icon icon={Xls01Icon} size="sm" />;
   }
 
   if (normalized.startsWith("image/")) {
-    return <Jpg className="h-4 w-4"/>;
+    return <Icon icon={Image01Icon} size="sm" />;
   }
 
-  return <File className="h-4 w-4"/>;
+  return <Icon icon={File01Icon} size="sm" />;
 };

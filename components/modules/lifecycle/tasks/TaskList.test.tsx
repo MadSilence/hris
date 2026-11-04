@@ -52,12 +52,12 @@ describe("TaskList — done where shown", () => {
     (documentService.uploadPersonalDocument as jest.Mock).mockResolvedValue({ id: "doc1" });
     render(<TaskList tasks={[task({ category: { id: "cat1", name: "Handover" } })]} onCompleteAction={complete} />);
 
-    expect(screen.queryByRole("button", { name: "Mark Done" })).not.toBeInTheDocument();
-    const attach = screen.getByRole("button", { name: "Attach and Mark Done" });
+    expect(screen.queryByRole("button", { name: "Mark done" })).not.toBeInTheDocument();
+    const attach = screen.getByRole("button", { name: "Attach and mark done" });
     expect(attach).toBeDisabled();
 
     const file = new File(["x"], "handover.pdf", { type: "application/pdf" });
-    fireEvent.change(screen.getByLabelText("Choose File"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Choose file"), { target: { files: [file] } });
     expect(screen.getByText("handover.pdf")).toBeInTheDocument();
     fireEvent.click(attach);
 
@@ -65,12 +65,12 @@ describe("TaskList — done where shown", () => {
     expect(documentService.uploadPersonalDocument).toHaveBeenCalledWith({ userId: "p1", file, categoryId: "cat1" });
   });
 
-  it("closes an Upload Document task with no category with the file uploaded through it", async () => {
+  it("closes an Upload document task with no category with the file uploaded through it", async () => {
     const complete = jest.fn();
     (documentService.uploadPersonalDocument as jest.Mock).mockResolvedValue({ id: "doc2" });
     render(<TaskList tasks={[task({ kind: "DOCUMENT" })]} onCompleteAction={complete} />);
     const file = new File(["x"], "contract.pdf", { type: "application/pdf" });
-    fireEvent.change(screen.getByLabelText("Choose File"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Choose file"), { target: { files: [file] } });
     fireEvent.click(screen.getByRole("button", { name: "Upload" }));
     await waitFor(() => expect(complete).toHaveBeenCalledWith(expect.objectContaining({ id: "t1" }), "doc2"));
     expect(documentService.uploadPersonalDocument).toHaveBeenCalledWith({ userId: "p1", file, categoryId: null });
@@ -79,12 +79,12 @@ describe("TaskList — done where shown", () => {
   it("lets only the assignee acknowledge", () => {
     const ack = task({ kind: "ACKNOWLEDGE", materials: [{ type: "LINK", url: "https://example.test/policy", name: "Policy" }] });
     const { rerender } = render(<TaskList tasks={[ack]} onCompleteAction={jest.fn()} isMine={() => false} />);
-    expect(screen.queryByRole("button", { name: "I Have Read It" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "I have read it" })).not.toBeInTheDocument();
     expect(screen.getByText(/Waiting for Ada Lovelace to confirm/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Policy/ })).toHaveAttribute("href", "https://example.test/policy");
 
     rerender(<TaskList tasks={[ack]} onCompleteAction={jest.fn()} isMine={() => true} />);
-    expect(screen.getByRole("button", { name: "I Have Read It" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "I have read it" })).toBeInTheDocument();
   });
 
   it("fills simple fields in the row, through the profile's own write", async () => {
@@ -107,7 +107,7 @@ describe("TaskList — done where shown", () => {
       kind: "FILL_FIELDS",
       fields: [{ id: "a1", name: "Mentor", type: "PERSON", filled: false, isRequired: false, options: [] }],
     })]} />);
-    expect(screen.getByRole("link", { name: "Fill In on the Profile" })).toHaveAttribute("href", "/organization/people/p1/personal");
+    expect(screen.getByRole("link", { name: "Fill in on the profile" })).toHaveAttribute("href", "/organization/people/p1/personal");
   });
 
   it("opens a questionnaire for its assignee and nobody else", () => {
@@ -122,8 +122,8 @@ describe("TaskList — done where shown", () => {
 
   it("offers editing a running process's task only when it is given the means", () => {
     const { rerender } = render(<TaskList tasks={[task()]} />);
-    expect(screen.queryByRole("button", { name: "Task Actions" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Task actions" })).not.toBeInTheDocument();
     rerender(<TaskList tasks={[task()]} onEditAction={jest.fn()} onCancelAction={jest.fn()} />);
-    expect(screen.getByRole("button", { name: "Task Actions" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Task actions" })).toBeInTheDocument();
   });
 });

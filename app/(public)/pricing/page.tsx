@@ -1,5 +1,5 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/components/desact/card";
+import { Button } from "@/components/desact/button";
 
 const tiers = [
   {
@@ -26,8 +26,8 @@ export default function PricingPage() {
   return (
     <div className="flex flex-col gap-10">
       <section className="space-y-4">
-        <h1 className="text-5xl font-medium">Pricing</h1>
-        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+        <h1 className="text-greeting">Pricing</h1>
+        <p className="max-w-2xl text-section-title text-tertiary">
           Simple, transparent pricing that scales with your team.
         </p>
       </section>
@@ -40,9 +40,9 @@ export default function PricingPage() {
             </CardHeader>
 
             <CardContent className="space-y-5">
-              <div className="text-2xl font-semibold">{t.price}</div>
+              <div className="text-page-title">{t.price}</div>
 
-              <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-text-tertiary)]">
+              <ul className="list-disc space-y-2 pl-5 text-body text-tertiary">
                 {t.features.map((f) => (
                   <li key={f}>{f}</li>
                 ))}

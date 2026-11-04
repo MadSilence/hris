@@ -2,8 +2,9 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, Copy, FileText, Pencil, Plus, Trash2 } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -78,8 +79,8 @@ export function ReviewFormsContainer() {
           <PermissionGate resource="REVIEWS.FORM" action="EDIT">
             {/* Blank, or one of the library's self, manager and peer forms (REVIEWS_PLAN.md 9.3) — the dialog asks. */}
             <Button type="button" className="gap-1.5" onClick={() => setAdding(true)}>
-              <Plus className="h-4 w-4" />
-              Add Form
+              <Icon icon={Add01Icon} size="sm" />
+              Add form
             </Button>
           </PermissionGate>
         }
@@ -90,9 +91,9 @@ export function ReviewFormsContainer() {
       ) : isLoading ? (
         <ul className="space-y-2" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <li key={i} className="flex h-[72px] items-center gap-4 rounded-xl border border-brown-100 px-5">
-              <div className="h-4 w-48 animate-pulse rounded bg-muted" />
-              <div className="ml-auto h-3 w-28 animate-pulse rounded bg-muted" />
+            <li key={i} className="flex h-[72px] items-center gap-4 rounded-card border border-divider px-5">
+              <div className="h-4 w-48 shimmer rounded-tag bg-mist" />
+              <div className="ml-auto h-3 w-28 shimmer rounded-tag bg-mist" />
             </li>
           ))}
         </ul>
@@ -100,11 +101,11 @@ export function ReviewFormsContainer() {
         <ListEmptyState
           query={query}
           archivedView={showArchived}
-          icon={<FileText className="h-6 w-6" />}
+          scene="forms"
           title="No review forms yet"
           description="A form is the set of questions a reviewer answers — about themselves, a colleague, a report or their manager."
           onCreate={() => setAdding(true)}
-          createLabel="Add Form"
+          createLabel="Add form"
           createAccess={{ resource: "REVIEWS.FORM", action: "EDIT" }}
         />
       ) : (
@@ -118,34 +119,34 @@ export function ReviewFormsContainer() {
               data-test="review-form-row"
               onClick={() => open(f)}
               onKeyDown={(e) => { if (e.key === "Enter") open(f); }}
-              className="flex cursor-pointer items-center gap-4 rounded-xl border border-brown-100 bg-white px-5 py-4 transition-colors hover:border-brown-200 hover:bg-brown-50/40"
+              className="flex cursor-pointer items-center gap-4 rounded-card border border-divider bg-card px-5 py-4 transition-colors hover:border-divider hover:bg-subtle/40"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-medium text-brown-900">{f.name}</span>
+                  <span className="truncate font-medium text-primary">{f.name}</span>
                   {f.archivedAt && <StatusBadge status="archived" />}
                 </div>
-                <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                <div className="mt-0.5 truncate text-hint text-tertiary">
                   {f.questionCount === 1 ? "1 question" : `${f.questionCount} questions`} · Updated {formatDisplayDate(f.updatedAt)}
                   {f.description && <> · <MentionText text={f.description} /></>}
                 </div>
               </div>
               {(canEdit || canManage) && (
                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                  <RowActionsMenu label="Form Actions">
+                  <RowActionsMenu label="Form actions">
                     {canEdit && !f.archivedAt && (
-                      <RowAction icon={<Pencil className="h-4 w-4 text-muted-foreground" />} onClick={() => open(f)}>
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => open(f)}>
                         Edit
                       </RowAction>
                     )}
                     {canEdit && (
-                      <RowAction icon={<Copy className="h-4 w-4 text-muted-foreground" />} onClick={() => void duplicate(f)}>
+                      <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate(f)}>
                         Duplicate
                       </RowAction>
                     )}
                     {canManage && (f.archivedAt ? (
                       <RowAction
-                        icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />}
+                        icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />}
                         onClick={async () => {
                           const problem = await run(unarchiveReviewFormAction(f.id));
                           if (problem) showActionError({ errorMessage: problem });
@@ -154,12 +155,12 @@ export function ReviewFormsContainer() {
                         Unarchive
                       </RowAction>
                     ) : (
-                      <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => setConfirm({ kind: "archive", form: f })}>
+                      <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setConfirm({ kind: "archive", form: f })}>
                         Archive
                       </RowAction>
                     ))}
                     {canManage && (
-                      <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => setConfirm({ kind: "delete", form: f })}>
+                      <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setConfirm({ kind: "delete", form: f })}>
                         Delete
                       </RowActionDestructive>
                     )}
@@ -184,7 +185,7 @@ export function ReviewFormsContainer() {
 
       <ConfirmDialog
         open={confirm?.kind === "archive"}
-        title="Archive Form"
+        title="Archive form"
         confirmLabel="Archive"
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -201,7 +202,7 @@ export function ReviewFormsContainer() {
 
       <ConfirmDialog
         open={confirm?.kind === "delete"}
-        title="Delete Form"
+        title="Delete form"
         confirmLabel="Delete"
         destructive
         onCancelAction={() => setConfirm(null)}

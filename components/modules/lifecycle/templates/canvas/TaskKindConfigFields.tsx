@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
+import { Checkbox } from "@/components/desact/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
@@ -57,9 +57,9 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
       <div className="space-y-1.5">
         <RequiredLabel required>Fields</RequiredLabel>
         <div className="max-h-48 overflow-y-auto">
-          {attributes.length === 0 && <p className="text-xs text-muted-foreground">There are no fields to ask for.</p>}
+          {attributes.length === 0 && <p className="text-hint text-tertiary">There are no fields to ask for.</p>}
           {attributes.map((a) => (
-            <label key={a.id} className="flex items-center gap-2 py-0.5 text-sm">
+            <label key={a.id} className="flex items-center gap-2 py-0.5 text-body">
               <Checkbox
                 checked={attributeIds.includes(a.id)}
                 disabled={disabled}
@@ -71,7 +71,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
             </label>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">Closes by itself once every field holds a value.</p>
+        <p className="text-hint text-tertiary">Closes by itself once every field holds a value.</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   if (kind === "DOCUMENT") {
     // No category: the person uploads a document — any — and it closes the task (owner, 2026-11-02).
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         The person uploads a file here. It goes into their Documents and closes the task.
       </p>
     );
@@ -89,13 +89,13 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
     const requires = categoryId !== null;
     return (
       <div className="space-y-1.5">
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-body">
           <Checkbox
             checked={requires}
             disabled={disabled}
             onCheckedChange={(on) => onChange({ categoryId: on ? (categories ?? [])[0]?.id ?? "" : null })}
           />
-          Requires a File
+          Requires a file
         </label>
         {requires && (
           <>
@@ -110,11 +110,11 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
             />
             {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). */}
             {categories !== undefined && categories.length === 0 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-hint text-tertiary">
                 No document categories yet — add them in Settings → People → Documents.
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Ticked with the file attached — a signed form, a receipt. It goes into the person&apos;s Documents.
             </p>
           </>
@@ -125,7 +125,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
 
   if (kind === "ACKNOWLEDGE") {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         The person reads what is attached and presses I Have Read It; the moment is recorded. Only they can do it.
       </p>
     );

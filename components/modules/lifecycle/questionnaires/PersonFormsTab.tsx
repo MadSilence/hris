@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ClipboardList } from "lucide-react";
+
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatDisplayDate } from "@/lib/date";
@@ -27,13 +27,13 @@ export function PersonFormsTab({ userId }: { userId: string }) {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>;
+    return <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-28 shimmer rounded-control bg-mist" />)}</div>;
   }
   if (!data || data.length === 0) {
     return (
       <EmptyState
         fill
-        icon={<ClipboardList className="h-6 w-6" />}
+        scene="forms"
         title="No forms yet"
         description="Questionnaires answered in a preboarding, an onboarding or an offboarding appear here."
       />
@@ -43,9 +43,9 @@ export function PersonFormsTab({ userId }: { userId: string }) {
   return (
     <div className="space-y-4" data-test="person-forms">
       {data.map((r) => (
-        <section key={r.id} className="rounded-lg border border-brown-200 p-4" aria-labelledby={`form-${r.id}`}>
-          <h3 id={`form-${r.id}`} className="font-medium text-brown-900">{r.title}</h3>
-          <p className="text-xs text-muted-foreground">
+        <section key={r.id} className="rounded-card border border-divider p-4" aria-labelledby={`form-${r.id}`}>
+          <h3 id={`form-${r.id}`} className="font-medium text-primary">{r.title}</h3>
+          <p className="text-hint text-tertiary">
             {[
               r.processType ? PROCESS_TYPE_LABELS[r.processType] : null,
               `Answered ${formatDisplayDate(r.submittedAt, { style: "medium" })}`,
@@ -55,8 +55,8 @@ export function PersonFormsTab({ userId }: { userId: string }) {
           <dl className="mt-3 space-y-2">
             {r.answers.map((a) => (
               <div key={a.questionId}>
-                <dt className="text-xs text-muted-foreground">{a.label}</dt>
-                <dd className="whitespace-pre-wrap text-sm">{answerText(a)}</dd>
+                <dt className="text-hint text-tertiary">{a.label}</dt>
+                <dd className="whitespace-pre-wrap text-body">{answerText(a)}</dd>
               </div>
             ))}
           </dl>

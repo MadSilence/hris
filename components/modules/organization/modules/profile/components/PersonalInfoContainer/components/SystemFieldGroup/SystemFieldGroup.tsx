@@ -8,9 +8,9 @@ import type { User } from "@/models/user/User";
 import { isReferenceField, type FieldDTO, type ReferenceValueSource } from "@/models/user/fields";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
 import { formatEmploymentType } from "@/models/user/employmentType";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
@@ -196,7 +196,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
 
   return (
     <ProfileSectionCard title={title} actions={actions}>
-      <div className="divide-y divide-brown-100">
+      <div className="divide-y divide-divider">
         {visible.map((field) => {
           const editing = isEdit && draft !== null && canEditSystemField(user, field.id);
           // While the section is being edited, a derived field says where it is changed rather
@@ -208,8 +208,8 @@ export const SystemFieldGroup: React.FC<Props> = ({
               key={field.id}
               className="grid grid-cols-[minmax(14rem,18rem)_1fr] items-center gap-5 py-3.5"
             >
-              <div className="text-sm text-muted-foreground">{field.label}</div>
-              <div className="text-sm text-foreground">
+              <div className="text-body text-tertiary">{field.label}</div>
+              <div className="text-body text-primary">
                 {editing && draft ? editorFor(field.id, draft) : (
                   <>
                     <PendingValue steps={pendingSteps(scheduledChanges, field.id, currentValuesOf(user, field.id))}>
@@ -225,7 +225,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
                   </>
                 )}
                 {source ? (
-                  <p className="m-0 mt-1 text-xs text-muted-foreground">
+                  <p className="m-0 mt-1 text-hint text-tertiary">
                     Follows {source.label}. Change the {source.label.toLowerCase()} to change it.
                   </p>
                 ) : null}
@@ -261,13 +261,13 @@ const ReferenceSelect: React.FC<{
   );
 };
 
-const NotSet = () => <span className="text-muted-foreground italic">Not set</span>;
+const NotSet = () => <span className="text-tertiary">Not set</span>;
 
 const RefChips: React.FC<{ values?: { id: string; name: string }[] }> = ({ values }) =>
   values?.length ? (
     <div className="flex flex-wrap gap-1.5">
       {values.map((v) => (
-        <Badge key={v.id} variant="secondary">{v.name}</Badge>
+        <Badge key={v.id} variant="neutral">{v.name}</Badge>
       ))}
     </div>
   ) : (

@@ -40,7 +40,7 @@ function TemplatesSettings() {
       <div className="space-y-6 px-8 pb-10">
         <div className="space-y-4">
           <SettingsPageHeader title="Templates" backHref="/settings"/>
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would
             create in your company, adjust it, and apply it as a copy you can change afterwards.
           </PageDescription>

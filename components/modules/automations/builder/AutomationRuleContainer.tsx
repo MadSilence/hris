@@ -2,19 +2,12 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  AlertTriangle,
-  Archive,
-  ArchiveRestore,
-  Play,
-  Power,
-  PowerOff,
-  Trash2,
-} from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Delete02Icon, PlayIcon, PowerIcon, PowerOffIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -295,8 +288,8 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
     return (
       <div className="space-y-4 px-8" aria-busy="true">
         <Skeleton className="h-10 w-72" />
-        <Skeleton className="h-40 w-full rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-popover" />
+        <Skeleton className="h-40 w-full rounded-popover" />
       </div>
     );
   }
@@ -307,26 +300,26 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const kebab = ruleId && canManage && rule.data && !systemOwned ? (
     <RowActionsMenu label="Automation actions">
       {status === "DISABLED" && (
-        <RowAction icon={<Power className="h-4 w-4 text-muted-foreground" />} onClick={() => { setActError(null); setEnableOpen(true); }}>
+        <RowAction icon={<Icon icon={PowerIcon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setEnableOpen(true); }}>
           Enable
         </RowAction>
       )}
       {status === "PAUSED" && (
-        <RowAction icon={<Play className="h-4 w-4 text-muted-foreground" />} onClick={() => void resume()}>Resume</RowAction>
+        <RowAction icon={<Icon icon={PlayIcon} size="sm" className="text-tertiary" />} onClick={() => void resume()}>Resume</RowAction>
       )}
       {(status === "ENABLED" || status === "PAUSED") && (
-        <RowAction icon={<PowerOff className="h-4 w-4 text-muted-foreground" />} onClick={() => void disable()}>Disable</RowAction>
+        <RowAction icon={<Icon icon={PowerOffIcon} size="sm" className="text-tertiary" />} onClick={() => void disable()}>Disable</RowAction>
       )}
       {status === "ARCHIVED" ? (
-        <RowAction icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />} onClick={() => void unarchive()}>Unarchive</RowAction>
+        <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>Unarchive</RowAction>
       ) : (
-        <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => { setActError(null); setConfirm("archive"); }}>
+        <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setConfirm("archive"); }}>
           Archive
         </RowAction>
       )}
       {/* A rule that has run for somebody cannot be deleted — archive it (DELETION.md rule 4). */}
       {totalRuns === 0 && (
-        <RowActionDestructive icon={<Trash2 className="h-4 w-4" />} onClick={() => { setActError(null); setConfirm("delete"); }}>
+        <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => { setActError(null); setConfirm("delete"); }}>
           Delete
         </RowActionDestructive>
       )}
@@ -348,7 +341,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
     setDraft((d) => (d ? { ...d, definition: { ...d.definition, ...patch } } : d));
 
   const ruleTab = readOnly ? (
-    <div className="max-w-3xl rounded-xl border border-brown-100 bg-white px-5 py-2">
+    <div className="max-w-3xl rounded-card border border-divider bg-card px-5 py-2">
       <DefinitionView definition={definition} />
     </div>
   ) : (
@@ -404,7 +397,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   return (
     <div className="space-y-6 px-8 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <SettingsPageHeader title={draft.name.trim() || (isNew ? "New Automation" : "Automation")} backHref={LIST_HREF} />
+        <SettingsPageHeader title={draft.name.trim() || (isNew ? "New automation" : "Automation")} backHref={LIST_HREF} />
         <div className="flex items-center gap-3">
           {rule.data && <RuleStatusBadge status={status} />}
           {kebab}
@@ -413,18 +406,18 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       </div>
 
       {systemOwned && rule.data?.binding && (
-        <p className="-mt-3 m-0 text-sm text-muted-foreground" data-test="system-owned">
+        <p className="-mt-3 m-0 text-body text-tertiary" data-test="system-owned">
           This automation is the Holiday Calendar of {bindingSourceLabel(rule.data.binding)}. Change it there.
         </p>
       )}
 
       {!readOnly && gateReason && (isNew || definitionChanged) && (
-        <p className="-mt-3 text-right text-xs text-muted-foreground" data-test="publish-gate">{gateReason}</p>
+        <p className="-mt-3 text-right text-hint text-tertiary" data-test="publish-gate">{gateReason}</p>
       )}
 
       {status === "PAUSED" && rule.data?.pausedReason && (
-        <div className="flex items-start gap-3 rounded-lg bg-warning-50 px-4 py-3 text-sm text-warning-800">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+        <div className="flex items-start gap-3 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
+          <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
           <div>
             <p className="m-0 font-medium">This automation is paused</p>
             <p className="m-0">{rule.data.pausedReason} Fix what it points at, publish, and resume it from the menu.</p>
@@ -434,9 +427,9 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       {ruleId ? (
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-fit bg-brown-50">
+          <TabsList className="w-fit bg-subtle">
             <TabsTrigger value="rule">Rule</TabsTrigger>
-            <TabsTrigger value="runs">Run Log</TabsTrigger>
+            <TabsTrigger value="runs">Run log</TabsTrigger>
             <TabsTrigger value="versions">Versions</TabsTrigger>
           </TabsList>
           <TabsContent value="rule" className="pt-4">{ruleTab}</TabsContent>
@@ -474,7 +467,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmActionModal
         isOpen={confirm === "archive"}
-        title="Archive Automation"
+        title="Archive automation"
         description="It stops running and leaves the list; scheduled runs are cancelled. What already ran stays as it is. You can unarchive it later."
         confirmLabel="Archive"
         isLoading={acting}
@@ -485,7 +478,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmActionModal
         isOpen={confirm === "delete"}
-        title="Delete Automation"
+        title="Delete automation"
         description="It has never run for anybody, so it is removed with all its versions."
         confirmLabel="Delete"
         destructive
@@ -497,7 +490,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave Without Publishing?"
+        title="Leave without publishing?"
         description="The changes to this automation are only in this page. Leaving now discards them."
         cancelText="Stay"
         confirmText="Leave"

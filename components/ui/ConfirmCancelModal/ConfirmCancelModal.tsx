@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 
 type ConfirmCancelModalProps = {
   isOpen: boolean;
@@ -48,7 +48,7 @@ export const ConfirmCancelModal: FC<ConfirmCancelModalProps> = ({
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>
 
           <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            destructive
             onClick={onConfirmAction}
           >
             {confirmText}

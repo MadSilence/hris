@@ -2,7 +2,7 @@
 
 import { FC, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
@@ -57,7 +57,7 @@ export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
       <Dialog open onOpenChange={(open) => !open && onClose()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Time Off</DialogTitle>
+            <DialogTitle>Request time off</DialogTitle>
             <DialogDescription>
               {isError
                 ? `Time off for ${request.name} could not be loaded.`
@@ -66,7 +66,7 @@ export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
           </DialogHeader>
           {isError ? <ErrorState compact error={error} onRetry={() => void refetch()} /> : null}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Close
             </Button>
           </DialogFooter>

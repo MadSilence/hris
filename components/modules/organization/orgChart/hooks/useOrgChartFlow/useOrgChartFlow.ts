@@ -13,7 +13,7 @@ import type { OrgTreeNode } from "@/components/modules/organization/orgChart/uti
 
 const H_SPACING = 40;
 const V_SPACING = 72;
-const EDGE_STROKE = "var(--brown-300)";
+const EDGE_STROKE = "var(--border-strong)";
 
 type LayoutNode = { user: OrgTreeNode["user"] | null; children: OrgTreeNode[] };
 

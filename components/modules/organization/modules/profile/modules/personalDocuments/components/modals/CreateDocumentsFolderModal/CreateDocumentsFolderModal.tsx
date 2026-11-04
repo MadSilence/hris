@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   CreateDocumentsFolderForm,
@@ -56,7 +56,7 @@ export const CreateDocumentsFolderModal: FC<
       >
         <DialogContent hideClose className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Folder</DialogTitle>
+            <DialogTitle>Add folder</DialogTitle>
             <DialogDescription>
               Create a new folder to organize personal documents.
             </DialogDescription>

@@ -4,11 +4,12 @@ import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
 
 import { useState, type FC } from "react";
 import type { Matcher } from "react-day-picker";
-import { CalendarDays, X } from "lucide-react";
+import { Calendar03Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Calendar } from "@/public/desact/src/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Calendar } from "@/components/desact/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { cn } from "@/lib/cn";
 
 export { dateToISO, isoToDate } from "@/lib/date";
 
@@ -79,16 +80,16 @@ export const DatePicker: FC<Props> = ({
           data-invalid={invalid || undefined}
           aria-label={ariaLabel}
           className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-lg border border-brown-300 bg-input-background px-3 text-sm outline-none transition-colors",
-            "hover:border-brown-400 disabled:cursor-not-allowed disabled:opacity-50",
-            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-            "data-[invalid]:border-destructive data-[invalid]:ring-destructive/20",
+            "flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-body outline-none transition-colors",
+            "hover:border-strong disabled:cursor-not-allowed disabled:opacity-50",
+            "focus-visible:border-accent focus-visible:ring-accent-ring/50 focus-visible:ring-[3px]",
+            "data-[invalid]:border-danger data-[invalid]:ring-status-declined-border/20",
             className,
           )}
         >
-          <CalendarDays className="size-4 shrink-0 text-brown-400" aria-hidden />
+          <Icon icon={Calendar03Icon} size="sm" className="shrink-0 text-tertiary" />
 
-          <span className={cn("min-w-0 flex-1 truncate text-left", !selected && "text-muted-foreground")}>
+          <span className={cn("min-w-0 flex-1 truncate text-left", !selected && "text-tertiary")}>
             {selected ? formatDisplayDate(selected, { style: "medium" }) : placeholder}
           </span>
 
@@ -101,9 +102,9 @@ export const DatePicker: FC<Props> = ({
                 event.stopPropagation();
                 onChange("");
               }}
-              className="shrink-0 rounded p-0.5 text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+              className="shrink-0 rounded-control p-0.5 text-tertiary hover:bg-mist hover:text-secondary"
             >
-              <X className="size-3.5" />
+              <Icon icon={Cancel01Icon} size="sm" />
             </span>
           )}
         </button>

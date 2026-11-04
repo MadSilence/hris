@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { ChevronUp, Folder } from "lucide-react";
+import { ArrowUp01Icon, Folder01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import type { DepartmentTreeNode } from "@/models/departments";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 import { useDepartmentCanvas } from "./DepartmentCanvasContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -37,14 +38,14 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
   return (
     <div
       className={cn(
-        "relative flex h-[140px] w-[200px] flex-col rounded-xl border bg-white p-3.5 transition-shadow",
+        "relative flex h-[140px] w-[200px] flex-col rounded-popover border bg-card p-3.5 transition-shadow",
         selected
-          ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
-          : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
+          ? "border-accent bg-card shadow-raised ring-1 ring-accent-ring"
+          : "border-divider shadow-card hover:border-field hover:shadow-raised",
         isArchived && "border-dashed",
-        matched && "border-warning-400 ring-2 ring-warning-300",
+        matched && "bg-search-highlight ring-2 ring-strong",
         dimmed && "opacity-35",
-        isDropTarget && "border-success-400 ring-2 ring-success-300",
+        isDropTarget && "border-dashed border-accent-ring bg-accent-subtle",
       )}
     >
       <Handle type="target" position={Position.Top} className={hiddenHandle} isConnectable={false} />
@@ -53,15 +54,15 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
       <div className="flex flex-none items-center justify-between">
         <div
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg",
-            selected ? "bg-brown-200 text-brown-700" : "bg-brown-100 text-brown-600",
+            "flex h-8 w-8 items-center justify-center rounded-control",
+            selected ? "bg-accent-muted text-accent-text" : "bg-mist text-secondary",
           )}
         >
-          <Folder className="h-4 w-4" />
+          <Icon icon={Folder01Icon} size="sm" />
         </div>
 
         {department.code && (
-          <span className="rounded border border-brown-200 bg-brown-50 px-1 py-0.5 font-mono text-[10px] leading-none text-brown-500">
+          <span className="rounded-tag border border-divider bg-subtle px-1 py-0.5 font-mono text-hint leading-none text-tertiary">
             {department.code}
           </span>
         )}
@@ -69,27 +70,27 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
 
       {/* Name */}
       <div className="mt-2.5 flex-1 overflow-hidden">
-        <p className="line-clamp-2 text-sm font-semibold leading-snug text-brown-900" title={department.name}>
+        <p className="line-clamp-2 text-body font-semibold leading-snug text-primary" title={department.name}>
           {department.name}
         </p>
         {isArchived && (
-          <StatusBadge status="archived" className="mt-1 inline-block px-1 py-0.5 text-[10px] leading-none" />
+          <StatusBadge status="archived" className="mt-1 inline-block px-1 py-0.5 text-hint leading-none" />
         )}
       </div>
 
       {/* Footer: Members + Subs */}
       <div
         className={cn(
-          "flex flex-none items-center gap-4 border-t pt-2 text-[11px] leading-none text-brown-500",
-          selected ? "border-brown-300" : "border-brown-100",
+          "flex flex-none items-center gap-4 border-t pt-2 text-hint leading-none text-tertiary",
+          selected ? "border-accent-ring" : "border-divider",
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{department.memberCount}</span>{" "}
+          <span className="font-semibold text-secondary">{department.memberCount}</span>{" "}
           {department.memberCount === 1 ? "Person" : "People"}
         </span>
         <span>
-          <span className="font-semibold text-brown-700">{childCount}</span>{" "}
+          <span className="font-semibold text-secondary">{childCount}</span>{" "}
           {childCount === 1 ? "Sub" : "Subs"}
         </span>
       </div>
@@ -103,14 +104,14 @@ export function DepartmentNode({ data }: NodeProps<DepartmentFlowNode>) {
             e.stopPropagation();
             onToggleCollapse(department.id);
           }}
-          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-full border border-brown-200 bg-white px-1.5 text-brown-500 shadow-sm transition-colors hover:border-brown-300 hover:text-brown-800"
+          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
           aria-label={collapsed ? `Expand ${childCount} sub-departments` : "Collapse"}
           title={collapsed ? `Expand ${childCount} sub-departments` : "Collapse"}
         >
           {collapsed ? (
-            <span className="text-[11px] font-semibold leading-none">{childCount}</span>
+            <span className="text-hint font-semibold leading-none">{childCount}</span>
           ) : (
-            <ChevronUp className="h-3.5 w-3.5" />
+            <Icon icon={ArrowUp01Icon} size="sm" />
           )}
         </button>
       )}

@@ -63,7 +63,7 @@ export type StarterId = "welcome-email" | "manager-day-one" | "office-calendar" 
 export const STARTERS: { id: StarterId; title: string; hint: string; draft: () => Draft }[] = [
   {
     id: "welcome-email",
-    title: "Welcome Email Before the First Day",
+    title: "Welcome email before the first day",
     hint: "Emails the new person three days before they start.",
     draft: () => ({
       name: "Welcome email",
@@ -85,7 +85,7 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
   },
   {
     id: "manager-day-one",
-    title: "A Task for the Manager on Day One",
+    title: "A task for the manager on day one",
     hint: "Gives the manager a task on the new person's first day.",
     draft: () => ({
       name: "First day with the manager",
@@ -106,7 +106,7 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
   },
   {
     id: "office-calendar",
-    title: "Holiday Calendar by Office",
+    title: "Holiday calendar by office",
     hint: "Everyone in an office gets its holiday calendar, and keeps following it.",
     draft: () => ({
       name: "Holiday calendar by office",
@@ -120,7 +120,7 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
   },
   {
     id: "termination-hr",
-    title: "Tell HR About a Termination",
+    title: "Tell HR about a termination",
     hint: "Notifies a role the day a termination is recorded.",
     draft: () => ({
       name: "Termination recorded",

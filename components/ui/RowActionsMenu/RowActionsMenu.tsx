@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/public/desact/src/components/ui/dropdown-menu";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dropdown-menu";
+import { cn } from "@/lib/cn";
 
 /**
  * The kebab menu. One icon, one size, one set of rules.
@@ -44,14 +45,13 @@ export const RowActionsMenu: React.FC<{
       */}
       <Button type="button"
         variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-brown-500 hover:bg-brown-50 hover:text-brown-700 disabled:opacity-40"
+        size="icon-sm" className="text-tertiary hover:bg-subtle hover:text-secondary disabled:opacity-40"
         aria-label={label}
         disabled={disabled}
         title={title}
         onClick={stopPropagation ? (e) => e.stopPropagation() : undefined}
       >
-        <MoreHorizontal className="h-4 w-4" />
+        <Icon icon={MoreHorizontalIcon} size="sm" />
       </Button>
     </DropdownMenuTrigger>
 
@@ -62,7 +62,7 @@ export const RowActionsMenu: React.FC<{
     */}
     <DropdownMenuContent
       align={align}
-      className={cn("w-40 rounded-lg p-1", className)}
+      className={cn("w-40 rounded-control p-1", className)}
       onClick={stopPropagation ? (e) => e.stopPropagation() : undefined}
     >
       {children}
@@ -70,7 +70,7 @@ export const RowActionsMenu: React.FC<{
   </DropdownMenu>
 );
 
-const ITEM_CLASS = "gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer";
+const ITEM_CLASS = "gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer";
 
 /**
  * An ordinary item. The icon is required, because a menu whose icons stop halfway reads as a
@@ -91,7 +91,7 @@ export const RowAction: React.FC<{
 
 /**
  * The destructive item: a separator above it, and `variant="destructive"` rather than one of the
- * three hand-written `text-danger-600` spellings the product had.
+ * three hand-written `text-danger-text` spellings the product had.
  *
  * **The separator carries as much meaning as the colour.** It is the pause between "things you do to
  * this row" and "the thing you cannot undo" — which is why one menu putting a separator before
@@ -107,7 +107,7 @@ export const RowActionDestructive: React.FC<{
   title?: string;
 }> = ({ icon, children, onClick, disabled, title }) => (
   <>
-    <DropdownMenuSeparator className="my-1 bg-brown-100" />
+    <DropdownMenuSeparator className="my-1 bg-mist" />
     <DropdownMenuItem
       variant="destructive"
       onClick={onClick}

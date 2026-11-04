@@ -74,21 +74,22 @@ describe("toSegments — lanes", () => {
 });
 
 describe("a leave bar", () => {
-  it("says Time off and stays neutral when the type was not sent", () => {
+  it("says Away and stays gray when the type was not sent", () => {
     const style = leaveStyle(leave());
-    expect(leaveTitle(leave())).toContain("Time off");
-    expect(style.backgroundColor).toBe("var(--brown-100)");
+    expect(leaveTitle(leave())).toContain("Away");
+    expect(style.backgroundColor).toBe("var(--tag-gray-bar)");
   });
 
-  it("is tinted with the type's colour only when the type was sent", () => {
-    expect(leaveStyle(leave({ leaveTypeName: "Vacation", leaveTypeColor: "#22aa44" })).backgroundColor).toBe(
-      "#22aa4433",
+  it("wears the type's tag colour only when the type was sent", () => {
+    expect(leaveStyle(leave({ leaveTypeName: "Vacation", leaveTypeColor: "ocean" })).backgroundColor).toBe(
+      "var(--tag-ocean-bar)",
     );
   });
 
-  it("is hatched and says so while it is being decided", () => {
-    const pending = leave({ status: "PENDING", awaitingYou: true });
-    expect(leaveStyle(pending).backgroundImage).toContain("repeating-linear-gradient");
+  it("is dotted over the light tint and says so while it is being decided", () => {
+    const pending = leave({ status: "PENDING", awaitingYou: true, leaveTypeColor: "ocean" });
+    expect(leaveStyle(pending).backgroundColor).toBe("var(--tag-ocean-bg)");
+    expect(leaveStyle(pending).backgroundImage).toContain("radial-gradient");
     expect(leaveTitle(pending)).toContain("Pending your approval");
     expect(leaveTitle(leave({ status: "PENDING" }))).toContain("Pending approval");
   });
@@ -111,7 +112,7 @@ describe("a leave bar", () => {
   it("is not a link without the id", () => {
     render(<CompanyCalendarRow user={user} marks={[]} absences={[leave()]} {...geometry} />);
     expect(screen.queryByRole("link")).toBeNull();
-    expect(screen.getByText("Time off")).toBeInTheDocument();
+    expect(screen.getByText("Away")).toBeInTheDocument();
   });
 
   it("opens a request for the days dragged across, in either direction", () => {

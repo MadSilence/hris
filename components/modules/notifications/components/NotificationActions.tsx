@@ -1,12 +1,13 @@
 "use client";
 
 import { FC, useId, useState } from "react";
-import { Check, X } from "lucide-react";
+import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
 import { useRejectTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useRejectTimeOffRequest";
@@ -18,9 +19,9 @@ import { PublicHolidayDriftActions } from "@/components/modules/notifications/co
 
 type Outcome = { label: string; className: string };
 
-const GREEN = "text-success-700";
-const RED = "text-danger-600";
-const MUTED = "text-brown-500";
+const GREEN = "text-status-approved-text";
+const RED = "text-danger-text";
+const MUTED = "text-tertiary";
 
 /**
  * What a closed question reads as, per question. The same request status means different things to the
@@ -82,7 +83,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
   if (!source.open) {
     const outcome = (isCancellation ? CANCELLATION_OUTCOMES : APPROVAL_OUTCOMES)[source.status ?? ""];
     if (!outcome) return null;
-    return <p className={cn("mt-2 text-xs font-medium", outcome.className)}>{outcome.label}</p>;
+    return <p className={cn("mt-2 text-hint font-medium", outcome.className)}>{outcome.label}</p>;
   }
 
   const busy = approve.isPending || reject.isPending || decideCancellation.isPending;
@@ -116,16 +117,16 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
           disabled={busy}
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "CONFIRM" }))}
         >
-          <Check className="h-4 w-4" />
-          Approve Cancellation
+          <Icon icon={Tick02Icon} size="sm" />
+          Approve cancellation
         </Button>
         <Button type="button"
           size="sm"
-          variant="outline"
+          variant="secondary"
           disabled={busy}
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "DECLINE" }))}
         >
-          <X className="h-4 w-4" />
+          <Icon icon={Cancel01Icon} size="sm" />
           Decline
         </Button>
       </div>
@@ -168,11 +169,11 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
       ) : (
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
-            <Check className="h-4 w-4" />
+            <Icon icon={Tick02Icon} size="sm" />
             Approve
           </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => setRejecting(true)} disabled={busy}>
-            <X className="h-4 w-4" />
+          <Button type="button" size="sm" variant="secondary" onClick={() => setRejecting(true)} disabled={busy}>
+            <Icon icon={Cancel01Icon} size="sm" />
             Reject
           </Button>
         </div>

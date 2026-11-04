@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Mail, PanelRightClose } from "lucide-react";
+import { LinkSquare02Icon, Mail01Icon, SidebarRightIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { cn } from "@/lib/cn";
 import type { OrgChartUser } from "@/models/orgChart/OrgChartUser";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 
 type Props = {
@@ -45,16 +46,16 @@ function PersonRow({ user, onSelect }: { user: OrgChartUser; onSelect: (id: stri
     <button
       type="button"
       onClick={() => onSelect(user.id)}
-      className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left transition-colors hover:bg-brown-50"
+      className="flex w-full items-center gap-2 rounded-control px-1.5 py-1 text-left transition-colors hover:bg-subtle"
     >
       <Avatar className="h-6 w-6 flex-none">
         {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
-        <AvatarFallback className="text-[10px]">{initials(user)}</AvatarFallback>
+        <AvatarFallback className="text-hint">{initials(user)}</AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-brown-900">{fullName(user)}</span>
+        <span className="block truncate text-body font-medium text-primary">{fullName(user)}</span>
         {user.jobName ? (
-          <span className="block truncate text-xs text-brown-500">{user.jobName}</span>
+          <span className="block truncate text-hint text-tertiary">{user.jobName}</span>
         ) : null}
       </span>
     </button>
@@ -63,7 +64,7 @@ function PersonRow({ user, onSelect }: { user: OrgChartUser; onSelect: (id: stri
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-brown-400">{children}</h3>
+    <h3 className="mb-2 text-hint font-semibold text-tertiary">{children}</h3>
   );
 }
 
@@ -89,24 +90,24 @@ export function UserDetailPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
-      <div className="flex flex-none items-start gap-3 border-b border-brown-200 p-5">
+      <div className="flex flex-none items-start gap-3 border-b border-divider p-5">
         <Avatar className="h-12 w-12 flex-none">
           {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={name} /> : null}
-          <AvatarFallback className="text-sm">{initials(user)}</AvatarFallback>
+          <AvatarFallback className="text-body">{initials(user)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-base font-semibold text-brown-900">{name}</h2>
-          <p className="truncate text-sm text-brown-500">{user.jobName}</p>
+          <h2 className="truncate text-body font-semibold text-primary">{name}</h2>
+          <p className="truncate text-body text-tertiary">{user.jobName}</p>
           {/* Status is a field like any other: a caller who may not see it gets none, and "Suspended"
               would be a claim about somebody the API said nothing about. */}
           {user.status ? (
             <span
               className={cn(
-                "mt-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium leading-none",
-                isActive ? "bg-success-50 text-success-700" : "bg-brown-100 text-brown-500",
+                "mt-1.5 inline-flex items-center gap-1 rounded-pill px-1.5 py-0.5 text-hint font-medium leading-none",
+                isActive ? "bg-status-approved-bg text-status-approved-text" : "bg-mist text-tertiary",
               )}
             >
-              <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-success-500" : "bg-brown-400")} />
+              <span className={cn("h-1.5 w-1.5 rounded-pill", isActive ? "bg-status-approved-fill" : "bg-strong")} />
               {isActive ? "Active" : "Suspended"}
             </span>
           ) : null}
@@ -116,9 +117,9 @@ export function UserDetailPanel({
           onClick={onCollapse}
           aria-label="Hide panel"
           title="Hide panel"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md text-brown-400 hover:bg-brown-100 hover:text-brown-700"
+          className="flex h-8 w-8 flex-none items-center justify-center rounded-control text-tertiary hover:bg-mist hover:text-secondary"
         >
-          <PanelRightClose className="h-4 w-4" />
+          <Icon icon={SidebarRightIcon} size="sm" />
         </button>
       </div>
 
@@ -130,17 +131,17 @@ export function UserDetailPanel({
           {user.email ? (
             <a
               href={`mailto:${user.email}`}
-              className="flex items-center gap-2 text-sm text-brown-700 no-underline hover:text-brown-900"
+              className="flex items-center gap-2 text-body text-secondary no-underline hover:text-primary"
             >
-              <Mail className="h-4 w-4 flex-none text-brown-400" />
+              <Icon icon={Mail01Icon} size="sm" className="flex-none text-tertiary" />
               <span className="truncate">{user.email}</span>
             </a>
           ) : null}
           <Link
             href={`/organization/people/${user.id}/personal`}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-brown-200 px-2.5 py-1.5 text-sm text-brown-700 no-underline transition-colors hover:bg-brown-50"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-control border border-divider px-2.5 py-1.5 text-body text-secondary no-underline transition-colors hover:bg-subtle"
           >
-            <ExternalLink className="h-3.5 w-3.5" />
+            <Icon icon={LinkSquare02Icon} size="sm" />
             Open full profile
           </Link>
         </div>
@@ -151,7 +152,7 @@ export function UserDetailPanel({
           {manager ? (
             <PersonRow user={manager} onSelect={onSelect} />
           ) : (
-            <p className="px-1.5 text-sm text-brown-400">Top of the organisation.</p>
+            <p className="px-1.5 text-body text-tertiary">Top of the organisation.</p>
           )}
           {/* The drag is the fast way; this is the way that does not need the other person on screen.
               Both write the profile's own manager field, so the rules (no cycles, not oneself) are the
@@ -170,12 +171,12 @@ export function UserDetailPanel({
               {manager ? (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   disabled={isSavingManager}
                   onClick={() => onChangeManager(null)}
                 >
-                  Remove Manager
+                  Remove manager
                 </Button>
               ) : null}
             </div>
@@ -186,7 +187,7 @@ export function UserDetailPanel({
             <div className="mt-2 space-y-2 px-1.5">
               {insertingAbove ? (
                 <>
-                  <p className="text-xs text-brown-500">
+                  <p className="text-hint text-tertiary">
                     {manager
                       ? `The person you pick will take ${name}'s place under ${fullName(manager)}, and ${name} will report to them.`
                       : `The person you pick will become the top of this branch, and ${name} will report to them.`}
@@ -214,12 +215,12 @@ export function UserDetailPanel({
               ) : (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   disabled={isSavingManager}
                   onClick={() => setInsertingAbove(true)}
                 >
-                  Add Manager Above
+                  Add manager above
                 </Button>
               )}
             </div>
@@ -235,7 +236,7 @@ export function UserDetailPanel({
               ))}
             </div>
           ) : (
-            <p className="px-1.5 text-sm text-brown-400">No direct reports.</p>
+            <p className="px-1.5 text-body text-tertiary">No direct reports.</p>
           )}
         </div>
 
@@ -245,19 +246,19 @@ export function UserDetailPanel({
             <SectionTitle>Organization</SectionTitle>
             <div className="space-y-2">
               {orgRows.map((row) => (
-                <div key={row.label} className="flex items-baseline justify-between gap-3 text-sm">
-                  <span className="text-brown-500">{row.label}</span>
-                  <span className="truncate text-right text-brown-800">{row.value}</span>
+                <div key={row.label} className="flex items-baseline justify-between gap-3 text-body">
+                  <span className="text-tertiary">{row.label}</span>
+                  <span className="truncate text-right text-primary">{row.value}</span>
                 </div>
               ))}
               {user.teams.length > 0 && (
-                <div className="text-sm">
-                  <span className="text-brown-500">Teams</span>
+                <div className="text-body">
+                  <span className="text-tertiary">Teams</span>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {user.teams.map((t) => (
                       <span
                         key={t.id}
-                        className="rounded border border-brown-200 bg-brown-50 px-1.5 py-0.5 text-[11px] leading-none text-brown-600"
+                        className="rounded-tag border border-divider bg-subtle px-1.5 py-0.5 text-hint leading-none text-secondary"
                       >
                         {t.name}
                       </span>

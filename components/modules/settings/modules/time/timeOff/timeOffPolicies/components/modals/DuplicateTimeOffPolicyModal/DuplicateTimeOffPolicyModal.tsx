@@ -2,9 +2,9 @@
 
 import { FC, FormEvent, useEffect, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 
 export interface DuplicateTimeOffPolicyModalProps {
@@ -51,7 +51,7 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
       onOpenChange={(open) => {
         if (!open && !isLoading) onCancelAction();
       }}
-    >
+ >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Duplicate policy</DialogTitle>
@@ -73,14 +73,13 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
           </div>
 
           <DialogFooter className="mt-8">
-            <Button type="button" variant="outline" disabled={isLoading} onClick={onCancelAction}>
+            <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !trimmed}
-              className="bg-brown-600 text-white hover:bg-brown-700"
-            >
+ >
               Duplicate
             </Button>
           </DialogFooter>

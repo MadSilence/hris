@@ -3,7 +3,8 @@
 import React, { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Landmark } from "lucide-react";
+import { BankIcon, Building03Icon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
@@ -11,13 +12,13 @@ import { AccessDenied } from "@/components/auth/AccessDenied";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, ResourceCode } from "@/models/access";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
   id: string;
   label: string;
   href: string;
-  icon: typeof Building2;
+  icon: IconSvgElement;
   resource: ResourceCode;
   title: string;
   description: string;
@@ -26,11 +27,11 @@ type Tab = {
 const tabs: Tab[] = [
   {
     id: "legal-entities",
-    label: "Legal Entities",
+    label: "Legal entities",
     href: "/settings/general/legal-entities",
-    icon: Landmark,
+    icon: BankIcon,
     resource: "ORG.LEGAL_ENTITY",
-    title: "Legal Entities",
+    title: "Legal entities",
     description:
       "Legal Entities define the official registered companies within your organization. Each entity includes important compliance details such as registration number, tax ID, and address.",
   },
@@ -38,7 +39,7 @@ const tabs: Tab[] = [
     id: "offices",
     label: "Offices",
     href: "/settings/general/offices",
-    icon: Building2,
+    icon: Building03Icon,
     resource: "ORG.OFFICE",
     title: "Offices",
     description:
@@ -80,16 +81,16 @@ export default function LegalEntitiesAndOfficesLayout({
         <div className="px-8 space-y-4">
           <SettingsPageHeader title={activeTab.title} backHref="/settings"/>
 
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             {activeTab.description}
           </PageDescription>
         </div>
 
         <div className="px-8">
           <Tabs value={activeTab.id} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+            <TabsList className="grid w-full grid-cols-2 bg-subtle">
               {visibleTabs.map((tab) => {
-                const Icon = tab.icon;
+                const shownIcon = tab.icon;
 
                 return (
                   <TabsTrigger
@@ -99,7 +100,7 @@ export default function LegalEntitiesAndOfficesLayout({
                     className="flex items-center gap-2"
                   >
                     <Link href={tab.href} className="no-underline">
-                      <Icon className="h-4 w-4"/>
+                      <Icon icon={shownIcon} size="sm" />
                       {tab.label}
                     </Link>
                   </TabsTrigger>

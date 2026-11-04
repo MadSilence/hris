@@ -2,18 +2,19 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { CalendarClock } from "lucide-react";
+import { CalendarLock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import type { ScheduledChange } from "@/models/user/ScheduledChange";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { ActionResult } from "@/lib/errors/withActionError";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/public/desact/src/components/ui/sheet";
+} from "@/components/desact/sheet";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -82,31 +83,31 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
       <Button type="button"
         variant="ghost"
         size="sm"
-        className="h-7 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
+        className="h-7 gap-1.5 px-2 text-tertiary hover:text-primary"
         onClick={() => setOpen(true)}
       >
-        <CalendarClock className="h-4 w-4" />
-        Scheduled Changes ({changes.length})
+        <Icon icon={CalendarLock01Icon} size="sm" />
+        Scheduled changes ({changes.length})
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Scheduled Changes</SheetTitle>
+            <SheetTitle>Scheduled changes</SheetTitle>
             <SheetDescription>What is going to change for this person, and when.</SheetDescription>
           </SheetHeader>
 
-          <ul className="m-0 list-none divide-y divide-brown-100 px-4" aria-label="Scheduled changes">
+          <ul className="m-0 list-none divide-y divide-divider px-4" aria-label="Scheduled changes">
             {changes.map((change) => (
               <li key={change.id} className="flex items-start justify-between gap-4 py-3.5">
                 <div className="min-w-0">
-                  <p className="m-0 text-sm font-medium text-foreground">{labelOfChange(change)}</p>
-                  <p className="m-0 mt-0.5 text-sm text-muted-foreground">
+                  <p className="m-0 text-body font-medium text-primary">{labelOfChange(change)}</p>
+                  <p className="m-0 mt-0.5 text-body text-tertiary">
                     {change.kind === "TERMINATION" && change.rescheduleDate
                       ? `Last working day ${medium(change.rescheduleDate)}, takes effect ${medium(change.effectiveAt)}`
                       : `Takes effect ${medium(change.effectiveAt)}`}
                   </p>
-                  <p className="m-0 mt-0.5 text-xs text-muted-foreground">
+                  <p className="m-0 mt-0.5 text-hint text-tertiary">
                     {change.scheduledBy ? `Scheduled by ${change.scheduledBy.name}` : "Scheduled by a process"}
                   </p>
                 </div>
@@ -120,7 +121,7 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
                         setMoving(change);
                       }}
                     >
-                      Change Date
+                      Change date
                     </Button>
                   )}
                   {change.canCancel && (
@@ -137,11 +138,11 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
 
       <ConfirmActionModal
         isOpen={cancelling !== null}
-        title="Cancel Scheduled Change"
+        title="Cancel scheduled change"
         description={
           cancelling ? `${labelOfChange(cancelling)} on ${medium(cancelling.effectiveAt)} will not happen.` : ""
         }
-        confirmLabel="Cancel Change"
+        confirmLabel="Cancel change"
         isLoading={busy}
         errorMessage={error}
         onCancelAction={close}
@@ -152,7 +153,7 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
 
       <ConfirmActionModal
         isOpen={moving !== null}
-        title="Change Date"
+        title="Change date"
         description={moving ? labelOfChange(moving) : ""}
         confirmLabel="Save"
         isLoading={busy}

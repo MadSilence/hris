@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { AccessAction, AccessCheck, AccessScope, ResourceCode } from "@/models/access";
 import { PermissionGate } from "./PermissionGate";
 import { AccessDenied } from "./AccessDenied";
@@ -51,6 +51,6 @@ const PageGateSkeleton: React.FC = () => (
     <span className="sr-only">Checking your access…</span>
     <Skeleton className="h-7 w-56"/>
     <Skeleton className="h-4 w-80"/>
-    <Skeleton className="h-64 w-full rounded-xl"/>
+    <Skeleton className="h-64 w-full rounded-popover"/>
   </div>
 );

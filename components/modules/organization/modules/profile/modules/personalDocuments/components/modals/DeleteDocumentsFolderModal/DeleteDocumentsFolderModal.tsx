@@ -11,8 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { FolderX } from "lucide-react";
+} from "@/components/desact/alert-dialog";
 
 import type {
   DocumentFolderDeleteImpactDTO,
@@ -95,10 +94,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <FolderX className="h-5 w-5"/>
-            Delete folder
-          </AlertDialogTitle>
+          <AlertDialogTitle>Delete folder</AlertDialogTitle>
 
           <AlertDialogDescription>
             <strong>{folderName ?? "Untitled folder"}</strong>{" "}
@@ -112,7 +108,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
 
         {contents && (
           <div className="space-y-2">
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-brown-200 p-3 hover:bg-brown-50">
+            <label className="flex cursor-pointer items-start gap-3 rounded-control border border-divider p-3 hover:bg-subtle">
               <input
                 type="radio"
                 name="folder-delete-strategy"
@@ -121,9 +117,9 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
                 onChange={() => setStrategy("MOVE_TO_PARENT")}
                 disabled={isLoading}
               />
-              <span className="text-sm">
+              <span className="text-body">
                 <span className="font-medium">Keep the contents</span>
-                <span className="block text-muted-foreground">
+                <span className="block text-tertiary">
                   {contents
                     ? `${contents} move one level up and stay where they can be found.`
                     : "Everything inside moves one level up and stays where it can be found."}
@@ -131,7 +127,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-brown-200 p-3 hover:bg-brown-50">
+            <label className="flex cursor-pointer items-start gap-3 rounded-control border border-divider p-3 hover:bg-subtle">
               <input
                 type="radio"
                 name="folder-delete-strategy"
@@ -140,9 +136,9 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
                 onChange={() => setStrategy("TRASH_CONTENTS")}
                 disabled={isLoading}
               />
-              <span className="text-sm">
+              <span className="text-body">
                 <span className="font-medium">Delete the contents too</span>
-                <span className="block text-muted-foreground">
+                <span className="block text-tertiary">
                   {deepContents
                     ? `${deepContents}${goesDeeper ? ", including everything nested inside them," : ""} go to the trash, where they can be restored until the retention period ends.`
                     : "Documents go to the trash, where they can be restored until the retention period ends."}
@@ -164,7 +160,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
               event.preventDefault();
               onConfirmAction(strategy);
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Delete folder
           </AlertDialogAction>

@@ -1,7 +1,10 @@
 "use client";
 
-import { AlertTriangle, RotateCw } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Alert02Icon, Refresh01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Illustration } from "@/components/illustrations/Illustration";
+import type { Scene } from "@/components/illustrations/scenes";
+import { Button } from "@/components/desact/button";
 import { ApiError, ForbiddenError, NotFoundError } from "@/components/clients/exceptions";
 import { FALLBACK_ERROR_MESSAGE, messageForError } from "@/lib/errors/errorMessages";
 
@@ -46,17 +49,21 @@ export const ErrorState: React.FC<{
           : "flex min-h-[40vh] flex-col items-center justify-center gap-4 p-8 text-center"
       }
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-50">
-        <AlertTriangle className="h-6 w-6 text-brown-600" />
-      </div>
+      {compact ? (
+        <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-subtle">
+          <Icon icon={Alert02Icon} className="text-secondary" />
+        </div>
+      ) : (
+        <Illustration scene={sceneFor(error)} size="s" />
+      )}
 
       <div className="flex flex-col gap-1">
-        <p className="font-medium">{heading}</p>
-        <p className="max-w-md text-sm text-[var(--color-text-tertiary)]">{message}</p>
+        <p className="text-card-title text-primary">{heading}</p>
+        <p className="max-w-md text-body text-secondary">{message}</p>
       </div>
 
       {reference && (
-        <p className="font-mono text-xs text-[var(--color-text-tertiary)]" data-testid="error-reference">
+        <p className="font-mono text-hint text-tertiary" data-testid="error-reference">
           {reference}
         </p>
       )}
@@ -64,8 +71,8 @@ export const ErrorState: React.FC<{
       {/* A refusal of rights answers the same however often it is asked; offering a retry promised
           otherwise (the board's request dialog, walk of 2026-10-30). */}
       {!(error instanceof ForbiddenError) && (
-        <Button type="button" variant="outline" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
-          <RotateCw className="mr-2 h-4 w-4" />
+        <Button type="button" variant="secondary" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
+          <Icon icon={Refresh01Icon} size="sm" />
           Try again
         </Button>
       )}
@@ -74,7 +81,13 @@ export const ErrorState: React.FC<{
 };
 
 const defaultHeading = (error: unknown): string => {
-  if (error instanceof ForbiddenError) return "You do not have access to this";
-  if (error instanceof NotFoundError) return "Not found";
-  return "This did not load";
+  if (error instanceof ForbiddenError) return "This is private";
+  if (error instanceof NotFoundError) return "We can't find this";
+  return "This didn't load";
+};
+
+const sceneFor = (error: unknown): Scene => {
+  if (error instanceof ForbiddenError) return "policies";
+  if (error instanceof NotFoundError) return "no-results-s";
+  return "something-broke";
 };

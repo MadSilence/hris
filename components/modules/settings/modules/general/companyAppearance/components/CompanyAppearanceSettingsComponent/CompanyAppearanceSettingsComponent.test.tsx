@@ -9,13 +9,12 @@ jest.mock("@/components/layout/SettingsPageHeader/SettingsPageHeader", () => ({
 }));
 
 const defaults: CompanyAppearance = {
-  brandColor: null,
+  accent: null,
   loginImageUrl: null,
   loginHeadline: null,
   loginSubheadline: null,
   useImageOnLogin: false,
   useImageOnDashboard: false,
-  sidebarContrast: false,
   version: 2,
 };
 
@@ -42,7 +41,7 @@ const renderComponent = (
 
 const saveButton = () => screen.getByRole("button", { name: /save changes/i });
 const querySaveButton = () => screen.queryByRole("button", { name: /save changes/i });
-const hexInput = () => screen.getByLabelText(/custom colour/i);
+const hexInput = () => screen.getByLabelText(/custom color/i);
 
 describe("CompanyAppearanceSettingsComponent", () => {
   it("offers no Save or Cancel until something changes", () => {
@@ -51,27 +50,36 @@ describe("CompanyAppearanceSettingsComponent", () => {
     expect(querySaveButton()).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Denim$/ }));
 
     expect(saveButton()).toBeEnabled();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
-  it("sends the picked preset colour and trims empty copy to null", () => {
+  it("sends the picked preset by its name and trims empty copy to null", () => {
     const { onSave } = renderComponent();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Denim$/ }));
     fireEvent.click(saveButton());
 
     expect(onSave).toHaveBeenCalledWith({
-      brandColor: "#2563eb",
+      accent: "denim",
       loginHeadline: null,
       loginSubheadline: null,
       useImageOnLogin: false,
       useImageOnDashboard: false,
-      sidebarContrast: false,
       version: 2,
     });
+  });
+
+  it("stores Wine, the default, as nothing at all", () => {
+    const { onSave } = renderComponent({ accent: "denim" });
+
+    expect(screen.getByRole("button", { name: /^Denim$/ })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: /^Wine$/ }));
+    fireEvent.click(saveButton());
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ accent: null }));
   });
 
   it("accepts a hex typed without the leading hash", () => {
@@ -81,7 +89,7 @@ describe("CompanyAppearanceSettingsComponent", () => {
     fireEvent.click(saveButton());
 
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ brandColor: "#16a34a" }),
+      expect.objectContaining({ accent: "#16a34a" }),
     );
   });
 
@@ -89,56 +97,49 @@ describe("CompanyAppearanceSettingsComponent", () => {
     renderComponent();
 
     // Something else has to be dirty first, or there would be no Save button to disable.
-    fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Denim$/ }));
     fireEvent.change(hexInput(), { target: { value: "not-a-colour" } });
 
-    expect(screen.getByText(/enter a hex colour/i)).toBeInTheDocument();
+    expect(screen.getByText(/enter a color as #rrggbb/i)).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
   });
 
-  it("clearing the hex resets to the default palette rather than an invalid value", () => {
-    const { onSave } = renderComponent({ brandColor: "#2563eb" });
+  it("says so when a light custom color had to be adjusted for readability", () => {
+    renderComponent();
+
+    fireEvent.change(hexInput(), { target: { value: "#b5e61d" } });
+
+    expect(screen.getByText("We adjusted your color for readability.")).toBeInTheDocument();
+  });
+
+  it("clearing the hex resets to the default rather than an invalid value", () => {
+    const { onSave } = renderComponent({ accent: "#2563eb" });
 
     fireEvent.change(hexInput(), { target: { value: "" } });
     fireEvent.click(saveButton());
 
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ brandColor: null }));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ accent: null }));
   });
 
-  it("keeps the draft colour inside the preview instead of repainting the page", () => {
-    const { container } = render(
-      <CompanyAppearanceSettingsComponent
-        appearance={defaults}
-        onSave={jest.fn()}
-        onUploadLoginImage={jest.fn()}
-        onRemoveLoginImage={jest.fn()}
-        saving={false}
-        uploadingImage={false}
-        removingImage={false}
-        saveError={null}
-        imageError={null}
-      />,
-    );
+  it("keeps the draft color inside the preview instead of repainting the page", () => {
+    renderComponent();
 
-    const sheetOf = () =>
-      container.querySelector("style[data-brand-theme-preview]")?.innerHTML ?? "";
+    const preview = () => screen.getByTestId("appearance-preview");
+    expect(preview()).toHaveAttribute("data-accent", "wine");
 
-    const shipped = sheetOf();
-    expect(shipped).toContain("[data-appearance-preview]{");
-    expect(shipped).not.toContain("html:root");
+    fireEvent.click(screen.getByRole("button", { name: /^Denim$/ }));
+    expect(preview()).toHaveAttribute("data-accent", "denim");
+    expect(document.documentElement).not.toHaveAttribute("data-accent", "denim");
 
-    fireEvent.click(screen.getByRole("button", { name: /^Blue$/ }));
-
-    const drafted = sheetOf();
-    expect(drafted).toContain("[data-appearance-preview]{");
-    expect(drafted).toContain("--brown-600:");
-    expect(drafted).not.toEqual(shipped);
+    fireEvent.change(hexInput(), { target: { value: "#123456" } });
+    expect(preview()).not.toHaveAttribute("data-accent");
+    expect(preview().style.getPropertyValue("--accent-base")).toBe("#123456");
   });
 
   it("cancel returns every field to the saved state", () => {
-    renderComponent({ brandColor: "#2563eb" });
+    renderComponent({ accent: "#2563eb" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^Rose$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Raspberry$/ }));
     expect(saveButton()).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -154,17 +155,16 @@ describe("CompanyAppearanceSettingsComponent", () => {
     expect(screen.getByLabelText(/use as company dashboard background/i)).toBeDisabled();
   });
 
-  it("sends the placement and sidebar switches with the rest of the draft", () => {
+  it("sends the placement switches with the rest of the draft", () => {
     const { onSave } = renderComponent({
       loginImageUrl: "http://api.test/uploads/c/u/splash.png",
     });
 
     fireEvent.click(screen.getByLabelText(/use as company dashboard background/i));
-    fireEvent.click(screen.getByLabelText(/make sidebar contrast/i));
     fireEvent.click(saveButton());
 
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ useImageOnDashboard: true, sidebarContrast: true }),
+      expect.objectContaining({ useImageOnDashboard: true }),
     );
   });
 

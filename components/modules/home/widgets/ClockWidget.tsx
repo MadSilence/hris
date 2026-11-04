@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatDisplayDate } from "@/lib/date";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
@@ -28,21 +28,21 @@ export const ClockWidget: React.FC = () => {
   const today = isoDateInZone(now, companyZone);
 
   return (
-    <HomeCard title="Company Time">
+    <HomeCard title="Company time">
       {settings.isLoading ? (
         <Skeleton className="h-12 w-40" />
       ) : settings.error ? (
         <ErrorState error={settings.error} compact onRetry={() => void settings.refetch()} />
       ) : (
         <div className="flex flex-col gap-1">
-          <p className="text-3xl font-semibold tabular-nums text-brown-900" data-testid="company-clock">
+          <p className="text-page-title tabular-nums text-primary" data-testid="company-clock">
             {timeInZone(now, companyZone)}
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             {weekdayOf(today)}, {formatDisplayDate(today, { style: "medium" })} · {companyZone ?? "UTC"}
           </p>
           {ownZone && ownZone !== companyZone && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Your time: {timeInZone(now, ownZone)} · {ownZone}
             </p>
           )}

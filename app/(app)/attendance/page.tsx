@@ -13,8 +13,8 @@ export default function AttendancePage() {
     <PageGate resource="PEOPLE.ATTENDANCE" action="MANAGE">
       <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6">
         <section className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold">Attendance</h1>
-          <p className="max-w-2xl text-[var(--color-text-tertiary)]">
+          <h1 className="text-page-title">Attendance</h1>
+          <p className="max-w-2xl text-tertiary">
             Time logged against what was expected, per person. Expected days leave out weekends, public holidays
             and approved leave; overtime is time beyond a day&apos;s norm, and every minute on a day without one.
           </p>

@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Role } from "@/models/role/Role";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
 import { formatDisplayDate } from "@/lib/date";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Shield } from "lucide-react";
+import { Badge } from "@/components/desact/badge";
+
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import RolesTableSkeleton from "./RolesTableSkeleton";
@@ -136,12 +136,12 @@ export default function RolesTable({
   return (
     <>
       <Table className="table-fixed" stickyHeader>
-        <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+        <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
           <TableRow>
             <TableHead className="w-1/4">Name</TableHead>
             <TableHead className="w-1/4">Users</TableHead>
             <TableHead className="w-1/4">Status</TableHead>
-            <TableHead className="w-1/4">Last Updated</TableHead>
+            <TableHead className="w-1/4">Last updated</TableHead>
             <TableHead className="w-12"/>
           </TableRow>
         </TableHeader>
@@ -154,7 +154,7 @@ export default function RolesTable({
             roleRows!.map((r) => (
               <TableRow
                 key={r.id}
-                className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                className="group border-divider cursor-pointer hover:bg-subtle [&_td]:py-2"
                 onClick={() => router.push(buildRoleHref(r.id))}
               >
                 <TableCell className="py-3">
@@ -167,19 +167,19 @@ export default function RolesTable({
                   </Link>
 
                   {r.systemOwner && (
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="neutral" className="ml-2">
                       System
                     </Badge>
                   )}
 
                   {r.isDefault && (
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="neutral" className="ml-2">
                       Default
                     </Badge>
                   )}
                 </TableCell>
 
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-tertiary">
                   {r.userCount}
                 </TableCell>
 
@@ -187,7 +187,7 @@ export default function RolesTable({
                   <StatusBadge status={r.archived ? "archived" : "active"}/>
                 </TableCell>
 
-                <TableCell className="text-muted-foreground">{formatDate(r.updatedAt)}</TableCell>
+                <TableCell className="text-tertiary">{formatDate(r.updatedAt)}</TableCell>
 
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end">
@@ -214,7 +214,7 @@ export default function RolesTable({
                 <ListEmptyState
                   query={query}
                   archivedView={showArchived}
-                  icon={<Shield className="h-7 w-7"/>}
+                  scene="policies"
                   title="No roles yet"
                   description="A role is a set of permissions you can hand to people. Add the first one to start granting access."
                   noResultsHint="Try a different role name."

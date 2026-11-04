@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
+import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
@@ -105,7 +105,7 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={(e) => { e.preventDefault(); void repeat(); }}>
           <DialogHeader>
-            <DialogTitle>Repeat Cycle</DialogTitle>
+            <DialogTitle>Repeat cycle</DialogTitle>
             <DialogDescription>
               A new draft with the same people, reviews, forms and settings as {cycle.name}, every date moved later.
             </DialogDescription>
@@ -114,11 +114,11 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
             <Label>Move every date by</Label>
             <RadioGroup value={preset} onValueChange={setPreset} className="flex flex-wrap gap-4">
               {REPEAT_MONTH_PRESETS.map((m) => (
-                <label key={m} className="flex items-center gap-2 text-sm">
+                <label key={m} className="flex items-center gap-2 text-body">
                   <RadioGroupItem value={String(m)} /> {m} months
                 </label>
               ))}
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-body">
                 <RadioGroupItem value="other" /> Other
               </label>
             </RadioGroup>
@@ -126,15 +126,15 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
               <div className="flex items-center gap-2">
                 <Input type="number" min={1} max={MAX_REPEAT_MONTHS} value={custom} aria-label="Months"
                   className="w-24" onChange={(e) => setCustom(e.target.value)} />
-                <span className="text-sm text-muted-foreground">months, 1 to {MAX_REPEAT_MONTHS}</span>
+                <span className="text-body text-tertiary">months, 1 to {MAX_REPEAT_MONTHS}</span>
               </div>
             )}
             {valid && dates.length > 0 && (
-              <ul className="space-y-1 rounded-lg border border-brown-100 p-3 text-sm" aria-label="Moved dates">
+              <ul className="space-y-1 rounded-control border border-divider p-3 text-body" aria-label="Moved dates">
                 {dates.map((d) => (
                   <li key={d.label} className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">{d.label}</span>
-                    <span className="text-brown-900">
+                    <span className="text-tertiary">{d.label}</span>
+                    <span className="text-primary">
                       {formatDisplayDate(d.from, { style: "medium" })} → {formatDisplayDate(d.to, { style: "medium" })}
                     </span>
                   </li>
@@ -142,12 +142,12 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
               </ul>
             )}
             {valid && dates.length === 0 && (
-              <p className="text-sm text-muted-foreground">This cycle has no dates to move; the new draft has none either.</p>
+              <p className="text-body text-tertiary">This cycle has no dates to move; the new draft has none either.</p>
             )}
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy || !valid}>{busy ? "Repeating…" : "Repeat"}</Button>
           </DialogFooter>
         </form>

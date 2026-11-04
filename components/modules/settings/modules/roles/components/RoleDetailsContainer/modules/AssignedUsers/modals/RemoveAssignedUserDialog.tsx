@@ -12,8 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { AlertTriangle } from "lucide-react";
+} from "@/components/desact/alert-dialog";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 export default function RemoveAssignedUserDialog({
   trigger,
@@ -52,8 +53,8 @@ export default function RemoveAssignedUserDialog({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <AlertTriangle className="w-5 h-5"/>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon={Alert02Icon} />
             Remove user from role
           </AlertDialogTitle>
 
@@ -62,12 +63,12 @@ export default function RemoveAssignedUserDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="bg-danger-50 border border-danger-200 rounded-lg p-4">
+        <div className="bg-mist border border-divider rounded-card p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-danger-600 mt-0.5"/>
+            <Icon icon={Alert02Icon} className="text-secondary mt-0.5" />
             <div>
-              <h4 className="font-medium text-danger-800 mb-1">Warning</h4>
-              <p className="text-sm text-danger-700">
+              <h4 className="font-medium text-primary mb-1">Warning</h4>
+              <p className="text-body text-secondary">
                 {removingOwnOwnerRole
                   ? "This is you. You will lose the System Owner role and be signed out at once; another owner can give it back."
                   : "The user will lose the access granted by this role until it is assigned again."}
@@ -79,7 +80,7 @@ export default function RemoveAssignedUserDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-danger-600 hover:bg-danger-700"
+            destructive
             disabled={busy}
             onClick={(event) => {
               event.preventDefault();

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { FileSpreadsheet, Upload } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Upload01Icon, Xls01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -58,7 +59,7 @@ export const UploadStep: React.FC = () => {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div className="space-y-2 text-sm text-brown-700">
+      <div className="space-y-2 text-body text-secondary">
         <p>
           Bring a company in from spreadsheets: its structure first, then its people, then their leave balances.
           Nothing is written until a file has no errors — the check lists every problem in every row, and you can
@@ -67,7 +68,7 @@ export const UploadStep: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-brown-800">What are you importing?</p>
+        <p className="text-body font-medium text-primary">What are you importing?</p>
         <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="What are you importing">
           {offered.map((k) => (
             <button
@@ -77,41 +78,41 @@ export const UploadStep: React.FC = () => {
               aria-checked={kind === k}
               onClick={() => setChosen(k)}
               className={cn(
-                "rounded-lg border p-4 text-left text-sm transition-colors",
-                kind === k ? "border-brown-600 bg-brown-50" : "border-brown-200 hover:bg-brown-50",
+                "rounded-card border p-4 text-left text-body transition-colors",
+                kind === k ? "border-accent bg-subtle" : "border-divider hover:bg-subtle",
               )}
             >
-              <span className="block font-medium text-brown-800">{IMPORT_KINDS[k].title}</span>
-              <span className="mt-1 block text-muted-foreground">{IMPORT_KINDS[k].description}</span>
+              <span className="block font-medium text-primary">{IMPORT_KINDS[k].title}</span>
+              <span className="mt-1 block text-tertiary">{IMPORT_KINDS[k].description}</span>
             </button>
           ))}
         </div>
         {offered.length === 0 && (
-          <p className="text-sm text-muted-foreground">You do not have permission to import anything.</p>
+          <p className="text-body text-tertiary">You do not have permission to import anything.</p>
         )}
       </div>
 
       {kind && (
         <>
-          <div className="rounded-lg border border-brown-200 p-5">
-            <p className="text-sm font-medium text-brown-800">1. Start from the template</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <div className="rounded-card border border-divider p-5">
+            <p className="text-body font-medium text-primary">1. Start from the template</p>
+            <p className="mt-1 text-body text-tertiary">
               One column per field you may fill, with lists to pick from and an Instructions sheet.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => template("xlsx")}>
-                <FileSpreadsheet className="h-4 w-4" />
-                Download XLSX Template
+              <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={() => template("xlsx")}>
+                <Icon icon={Xls01Icon} size="sm" />
+                Download XLSX template
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={() => template("csv")}>
-                CSV Template
+                CSV template
               </Button>
             </div>
           </div>
 
-          <div className="rounded-lg border border-dashed border-brown-300 p-5">
-            <p className="text-sm font-medium text-brown-800">2. Upload the file</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <div className="rounded-card border border-dashed border-field p-5">
+            <p className="text-body font-medium text-primary">2. Upload the file</p>
+            <p className="mt-1 text-body text-tertiary">
               CSV (UTF-8) or XLSX, up to {MAX_MB} MB and 2,000 rows. Only the first sheet is read.
             </p>
             <FormError message={error} />
@@ -127,8 +128,8 @@ export const UploadStep: React.FC = () => {
               }}
             />
             <Button type="button" className="mt-3 gap-1.5" disabled={upload.isPending} onClick={() => input.current?.click()}>
-              <Upload className="h-4 w-4" />
-              {upload.isPending ? "Reading the file…" : "Choose File"}
+              <Icon icon={Upload01Icon} size="sm" />
+              {upload.isPending ? "Reading the file…" : "Choose file"}
             </Button>
           </div>
         </>

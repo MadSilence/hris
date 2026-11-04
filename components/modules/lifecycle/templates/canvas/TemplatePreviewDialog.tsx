@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 import { internalApiClient } from "@/components/clients/apiClient";
@@ -139,12 +139,12 @@ export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }
         </DialogHeader>
 
         {own.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">
+          <p className="py-10 text-center text-body text-tertiary">
             Nothing here is the person&apos;s to do: every task is for somebody else. Add one in their row of the
             timeline.
           </p>
         ) : type === "PREBOARDING" ? (
-          <div className="rounded-xl bg-brown-50/50 px-4" data-test="template-preview">
+          <div className="rounded-popover bg-subtle/50 px-4" data-test="template-preview">
             <PreboardingPageContainer key={JSON.stringify(page)} token="" initialPage={page} preview onOpenFile={(m) => void openFile(m)} />
           </div>
         ) : (

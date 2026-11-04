@@ -61,9 +61,9 @@ describe("TemplateCanvas", () => {
   it("draws the tasks as blocks, the lanes down the side and the days across", () => {
     render_();
     expect(screen.getAllByTestId("task-block")).toHaveLength(2);
-    expect(screen.getByRole("button", { name: /Order a laptop, 7 days before start, Onboarding Manager/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Set up the laptop, 1 day before start, The New Person, waits for 1 task/ })).toBeInTheDocument();
-    expect(screen.getByText("The New Person")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Order a laptop, 7 days before start, Onboarding manager/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Set up the laptop, 1 day before start, The new person, waits for 1 task/ })).toBeInTheDocument();
+    expect(screen.getByText("The new person")).toBeInTheDocument();
     // No zoom buttons on the canvas (owner, 2026-11-02): it opens on the first week; pinch, Ctrl/Cmd + scroll
     // and Alt/Option + 1 zoom.
     expect(screen.queryByRole("group", { name: "Zoom" })).not.toBeInTheDocument();
@@ -84,7 +84,7 @@ describe("TemplateCanvas", () => {
 
   it("adds from a lane's own button — the keyboard's way to a cell", () => {
     const props = render_();
-    fireEvent.click(screen.getByRole("button", { name: "Add Task for Onboarding Manager" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add task for Onboarding manager" }));
     expect(props.onAddInLaneAction).toHaveBeenCalledWith("ONBOARDING_MANAGER", expect.objectContaining({ left: expect.any(Number) }));
   });
 
@@ -97,6 +97,6 @@ describe("TemplateCanvas", () => {
   it("is read-only for an archived template", () => {
     render_({ readOnly: true });
     expect(screen.queryByTestId("cell-TARGET-d0")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Add Task for/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Add task for/ })).not.toBeInTheDocument();
   });
 });

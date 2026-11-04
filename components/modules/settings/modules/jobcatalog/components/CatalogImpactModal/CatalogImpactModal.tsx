@@ -1,7 +1,8 @@
 "use client";
 
 import { FC, ReactNode } from "react";
-import { AlertTriangle, Archive, Trash2 } from "lucide-react";
+import { Alert02Icon, Archive02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
+import { InlineAlert } from "@/components/desact/alert";
 
 export type CatalogImpactAction = "archive" | "delete";
 
@@ -51,7 +53,7 @@ export const CatalogImpactModal: FC<Props> = ({
   onRequestCloseAction,
 }) => {
   const isDelete = action === "delete";
-  const Icon = isDelete ? Trash2 : Archive;
+  const actionIcon = isDelete ? Delete02Icon : Archive02Icon;
 
   const title = `${isDelete ? "Delete" : "Archive"} ${entityLabel}`;
   const confirmLabel = title;
@@ -79,11 +81,11 @@ export const CatalogImpactModal: FC<Props> = ({
         <AlertDialogHeader>
           <div className="flex items-center gap-3 text-left">
             <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                isDelete ? "bg-danger-100 text-danger-600" : "bg-brown-100 text-brown-700"
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-popover ${
+                "bg-mist text-secondary"
               }`}
             >
-              <Icon className="h-5 w-5"/>
+              <Icon icon={actionIcon} />
             </span>
             <div className="space-y-1">
               <AlertDialogTitle className="capitalize">{title}</AlertDialogTitle>
@@ -92,14 +94,14 @@ export const CatalogImpactModal: FC<Props> = ({
           </div>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600"/>
+            <Icon icon={Alert02Icon} className="mt-0.5 shrink-0 text-secondary" />
 
             <div>
-              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">Warning</h4>
 
-              <div className="space-y-1 text-sm text-danger-700">
+              <div className="space-y-1 text-body text-secondary">
                 {affectedJobs !== undefined && affectedJobs > 0 && (
                   <p>
                     <strong>{affectedJobs}</strong> position
@@ -124,12 +126,9 @@ export const CatalogImpactModal: FC<Props> = ({
         </div>
 
         {errorMessage && (
-          <p
-            role="alert"
-            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-          >
+          <InlineAlert tone="declined">
             {errorMessage}
-          </p>
+          </InlineAlert>
         )}
 
         <AlertDialogFooter>
@@ -143,7 +142,7 @@ export const CatalogImpactModal: FC<Props> = ({
               e.preventDefault();
               onConfirmAction();
             }}
-            className={isDelete ? "bg-danger-600 text-white hover:bg-danger-700" : undefined}
+            destructive={isDelete}
           >
             {confirmLabel}
           </AlertDialogAction>

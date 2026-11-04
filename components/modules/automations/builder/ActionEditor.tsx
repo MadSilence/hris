@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Plus, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/public/desact/src/components/ui/select";
+import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
 import { useUser } from "@/components/hooks/useUser/useUser";
@@ -78,9 +79,9 @@ export function OffsetField({
           <SelectTrigger className="w-48" aria-label={label}><SelectValue /></SelectTrigger>
           <SelectContent>
             {allowEmpty && <SelectItem value="NONE">None</SelectItem>}
-            <SelectItem value="BEFORE">Days Before</SelectItem>
-            <SelectItem value="ON">On the Day</SelectItem>
-            <SelectItem value="AFTER">Days After</SelectItem>
+            <SelectItem value="BEFORE">Days before</SelectItem>
+            <SelectItem value="ON">On the day</SelectItem>
+            <SelectItem value="AFTER">Days after</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -138,8 +139,8 @@ function RecipientRow({
         </div>
       )}
       {onRemove && (
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Remove recipient" onClick={onRemove}>
-          <X className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove recipient" onClick={onRemove}>
+          <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       )}
     </div>
@@ -171,11 +172,11 @@ function RecipientsField({
           type="button"
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-muted-foreground"
+          className="gap-1.5 text-tertiary"
           onClick={() => onChange([...recipients, { kind: kinds[0] ?? "PERSON" }])}
         >
-          <Plus className="h-4 w-4" />
-          Add Recipient
+          <Icon icon={Add01Icon} size="sm" />
+          Add recipient
         </Button>
       </div>
     </Field>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
@@ -35,7 +35,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, destructive
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="space-y-2 text-sm text-muted-foreground">{children}</div>
+            <div className="space-y-2 text-body text-tertiary">{children}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <FormError message={error} />
@@ -43,7 +43,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, destructive
           <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={busy || confirmDisabled}
-            className={destructive ? "bg-danger-600 text-white hover:bg-danger-700" : undefined}
+            destructive={destructive}
             onClick={async (e) => {
               e.preventDefault();
               setBusy(true);

@@ -13,7 +13,7 @@ const RolesSettingsPage: React.FC = () => {
         <div className="px-8 space-y-2 shrink-0">
           <SettingsPageHeader title={"Roles and permissions"} backHref="/settings"/>
 
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             Manage access by defining roles and their permissions. Use the table below to review, search and navigate to specific roles.
           </PageDescription>
         </div>

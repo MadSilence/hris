@@ -1,11 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Camera, Check, Loader2 } from "lucide-react";
+import { Camera01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { NodRing } from "@/components/desact/nod";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { uploadAvatarByTokenAction } from "@/components/modules/firstRun/actions";
 import { ActionStatus } from "@/components/models/ActionStatus";
+import { FormError } from "@/components/feedback/FormError";
 
 /**
  * One button, on a phone.
@@ -50,11 +53,11 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
   if (state === "done") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success-50">
-          <Check className="h-7 w-7 text-success-700" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-pill bg-status-approved-bg">
+          <Icon icon={Tick02Icon} size="lg" className="text-status-approved-text" />
         </div>
-        <h1 className="text-xl font-semibold text-foreground">That&apos;s your photo</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-section-title text-primary">That&apos;s your photo</h1>
+        <p className="text-tertiary">
           It is already on your profile. You can close this page and go back to your computer.
         </p>
       </div>
@@ -64,27 +67,27 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">
+        <h1 className="text-section-title text-primary">
           {firstName ? `Hi ${firstName}` : "Add your photo"}
         </h1>
-        <p className="mt-1 text-muted-foreground">Take a photo for your profile.</p>
+        <p className="mt-1 text-tertiary">Take a photo for your profile.</p>
       </div>
 
       <Button type="button"
         size="lg"
-        className="h-14 w-full max-w-xs gap-2 text-base"
+        className="h-14 w-full max-w-xs gap-2 text-body"
         onClick={() => input.current?.click()}
         disabled={state === "uploading"}
       >
         {state === "uploading" ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <NodRing size="md" label="" />
         ) : (
-          <Camera className="h-5 w-5" />
+          <Icon icon={Camera01Icon} />
         )}
-        {state === "uploading" ? "Uploading" : "Take a Photo"}
+        {state === "uploading" ? "Uploading" : "Take a photo"}
       </Button>
 
-      {problem && <p className="max-w-xs text-sm text-destructive">{problem}</p>}
+      {problem && <FormError message={problem} className="max-w-xs" />}
 
       <input
         ref={input}

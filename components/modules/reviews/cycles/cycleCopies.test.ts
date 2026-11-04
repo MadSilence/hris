@@ -46,9 +46,9 @@ describe("repeating a cycle", () => {
   it("previews every date the cycle has and where it moves, and nothing it does not have", () => {
     expect(shiftedCycleDates(cycle(), 6)).toEqual([
       { label: "Hired on or before", from: "2026-01-31", to: "2026-07-31" },
-      { label: "Self Review opens", from: "2026-01-31", to: "2026-07-31" },
-      { label: "Self Review due", from: "2026-02-14", to: "2026-08-14" },
-      { label: "Peer Review due", from: "2026-02-28", to: "2026-08-28" },
+      { label: "Self review opens", from: "2026-01-31", to: "2026-07-31" },
+      { label: "Self review due", from: "2026-02-14", to: "2026-08-14" },
+      { label: "Peer review due", from: "2026-02-28", to: "2026-08-28" },
       { label: "Peers nominated by", from: "2026-02-05", to: "2026-08-05" },
       { label: "Peers approved by", from: "2026-02-10", to: "2026-08-10" },
       { label: "Results released", from: "2026-03-15", to: "2026-09-15" },

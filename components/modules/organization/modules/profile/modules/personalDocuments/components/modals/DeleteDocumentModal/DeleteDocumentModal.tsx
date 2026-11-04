@@ -11,8 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { FileX2 } from "lucide-react";
+} from "@/components/desact/alert-dialog";
 
 export interface DeleteDocumentModalProps {
   isOpen: boolean;
@@ -41,10 +40,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <FileX2 className="h-5 w-5"/>
-            Delete document
-          </AlertDialogTitle>
+          <AlertDialogTitle>Delete document</AlertDialogTitle>
 
           <AlertDialogDescription>
             <strong>{documentName ?? "Untitled document"}</strong> will be moved to the trash, where
@@ -64,7 +60,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Delete document
           </AlertDialogAction>

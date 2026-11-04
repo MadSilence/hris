@@ -1,27 +1,16 @@
 "use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
-import {
-  Archive,
-  ArchiveRestore,
-  Check,
-  ChevronsDownUp,
-  ChevronsUpDown,
-  Copy,
-  Download,
-  Pencil,
-  Plus,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Download01Icon, PencilEdit02Icon, Tick02Icon, UnfoldLessIcon, UnfoldMoreIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/public/desact/src/components/ui/accordion";
+} from "@/components/desact/accordion";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
@@ -30,7 +19,6 @@ import {
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { Job, JobFamily } from "@/models/job";
-import { Briefcase } from "lucide-react";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { JobFamilySkeleton } from "@/components/modules/settings/modules/jobcatalog/components/JobFamilyContainer/components/JobFamily/JobFamilySkeleton";
@@ -161,43 +149,41 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           <>
             <Button type="button"
               variant="ghost"
-              size="sm"
-              className="h-9 gap-1.5 text-brown-600"
+              className="gap-1.5 text-secondary"
               onClick={toggleAll}
               disabled={families.length === 0}
             >
-              {allOpen ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
-              {allOpen ? "Collapse All" : "Expand All"}
+              {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
+              {allOpen ? "Collapse all" : "Expand all"}
             </Button>
 
           <Button type="button"
             size="icon"
-            variant="outline"
-            className="h-9 w-9"
+            variant="secondary"
             onClick={() => {
               setExportError(null);
               setIsExportOpen(true);
             }}
             aria-label="Export job catalog"
           >
-            <Download className="h-4 w-4"/>
+            <Icon icon={Download01Icon} size="sm" />
           </Button>
           </>
         }
         primary={
           <PermissionGate resource="JOBS.FAMILY" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onCreateFamily}>
-              <Plus className="h-4 w-4"/>
-              Add Job Family
+              <Icon icon={Add01Icon} size="sm" />
+              Add job family
             </Button>
           </PermissionGate>
         }
       />
 
       <div className="-mx-1 max-h-[calc(100svh-380px)] overflow-y-auto px-1">
-        <div className={`${GRID} sticky top-0 z-10 bg-white px-3 pb-2 pt-1 text-sm font-medium text-foreground`}>
+        <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
           <div>Name</div>
-          <div>Assigned People</div>
+          <div>Assigned people</div>
           <div>Code</div>
           <div>Status</div>
           <div>Level</div>
@@ -211,13 +197,13 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
             <ListEmptyState
               query={query}
               archivedView={showArchived}
-              icon={<Briefcase className="h-7 w-7"/>}
+              scene="goals-and-growth"
               title="No job families yet"
               description="A job family groups related positions. Add the first one to start building the catalog."
               noResultsHint="Try a different family, position or code."
               archivedDescription="Archived job families will appear here."
               onCreate={onCreateFamily}
-              createLabel="Add Job Family"
+              createLabel="Add job family"
               createAccess={{ resource: "JOBS.FAMILY" }}
             />
           )}
@@ -311,15 +297,15 @@ const FamilySection: FC<FamilySectionProps> = ({
   <AccordionItem value={family.id} data-family-id={family.id} className="border-b-0">
     <div className="relative">
       <AccordionTrigger
-        className={`rounded-md bg-brown-50 px-3 py-2.5 pr-9 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline ${
+        className={`rounded-control bg-subtle px-3 py-2.5 pr-9 text-body font-semibold text-secondary hover:no-underline ${
           ""
         }`}
       >
         <span className="flex items-center gap-2">
           {family.name}
-          <span className="normal-case tracking-normal text-brown-400">({family.jobs.length})</span>
+          <span className="normal-case text-tertiary">({family.jobs.length})</span>
           {family.archived && (
-            <StatusBadge status="archived" className="font-normal normal-case tracking-normal" />
+            <StatusBadge status="archived" className="font-normal normal-case" />
           )}
         </span>
       </AccordionTrigger>
@@ -334,24 +320,24 @@ const FamilySection: FC<FamilySectionProps> = ({
         <div className="absolute right-[54px] top-1/2 flex -translate-y-1/2 items-center">
           {editing ? (
             <>
-              <RowActionsMenu label="Family Actions" stopPropagation>
+              <RowActionsMenu label="Family actions" stopPropagation>
                 <PermissionGate resource="JOBS.FAMILY" action="EDIT">
-                  <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditFamily(family)}>
+                  <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditFamily(family)}>
                     Edit
                   </RowAction>
-                  <RowAction icon={<Copy className="h-4 w-4"/>} onClick={() => onDuplicateFamily(family)}>
+                  <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicateFamily(family)}>
                     Duplicate
                   </RowAction>
                   {family.archived ? (
                     <RowAction
-                      icon={<ArchiveRestore className="h-4 w-4"/>}
+                      icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                       onClick={() => onActivateFamily(family)}
                     >
                       Unarchive
                     </RowAction>
                   ) : (
                     <RowAction
-                      icon={<Archive className="h-4 w-4"/>}
+                      icon={<Icon icon={Archive02Icon} size="sm" />}
                       onClick={() => onArchiveFamily(family)}
                     >
                       Archive
@@ -361,7 +347,7 @@ const FamilySection: FC<FamilySectionProps> = ({
 
                 <PermissionGate resource="JOBS.FAMILY" action="MANAGE">
                   <RowActionDestructive
-                    icon={<Trash2 className="h-4 w-4"/>}
+                    icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteFamily(family)}
                   >
                     Delete
@@ -372,7 +358,7 @@ const FamilySection: FC<FamilySectionProps> = ({
               <Button type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+                className="h-7 w-7 text-secondary hover:bg-mist"
                 aria-label="Done editing family"
                 title="Done"
                 onClick={(e) => {
@@ -380,14 +366,14 @@ const FamilySection: FC<FamilySectionProps> = ({
                   onToggleEditing();
                 }}
               >
-                <Check className="h-4 w-4"/>
+                <Icon icon={Tick02Icon} size="sm" />
               </Button>
             </>
           ) : (
             <Button type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+              className="h-7 w-7 text-secondary hover:bg-mist"
               aria-label="Edit family"
               title="Edit family"
               onClick={(e) => {
@@ -395,7 +381,7 @@ const FamilySection: FC<FamilySectionProps> = ({
                 onToggleEditing();
               }}
             >
-              <Pencil className="h-4 w-4"/>
+              <Icon icon={PencilEdit02Icon} size="sm" />
             </Button>
           )}
         </div>
@@ -405,7 +391,7 @@ const FamilySection: FC<FamilySectionProps> = ({
     <AccordionContent>
       <div className="pb-2">
         {family.jobs.length === 0 && !editing && (
-          <div className="mt-2 flex w-full items-center justify-center rounded-md border border-dashed border-brown-300 bg-brown-50/60 px-3 py-2 text-sm text-brown-600">
+          <div className="mt-2 flex w-full items-center justify-center rounded-control border border-dashed border-field bg-subtle/60 px-3 py-2 text-body text-secondary">
             No positions in this family yet
           </div>
         )}
@@ -430,11 +416,11 @@ const FamilySection: FC<FamilySectionProps> = ({
           <PermissionGate resource="JOBS.TITLE" action="EDIT">
             <button
               type="button"
-              className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50"
+              className="mt-2 flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle"
               onClick={() => onCreateJob(family)}
             >
-              <Plus className="h-4 w-4"/>
-              Add Job
+              <Icon icon={Add01Icon} size="sm" />
+              Add job
             </button>
           </PermissionGate>
         )}
@@ -465,31 +451,31 @@ const JobRow: FC<JobRowProps> = ({
   onAssignJob,
   onDeleteJob,
 }) => (
-  <div className={notLast ? "border-b border-brown-100" : ""}>
+  <div className={notLast ? "border-b border-divider" : ""}>
     {/* Archived positions stay in the list, dimmed — hiding them would make the catalogue lie
         about what used to exist. */}
     {/* Not dimmed: the chip says it, and fading a whole row makes its text harder to read for a
         reason that is already on screen. Rule: ui/STATUS_AND_BADGES.md § 2. */}
     <div className={`${GRID} min-h-11 px-3 py-1.5`}>
       <div className="min-w-0">
-        <span className="truncate text-sm font-medium text-foreground" title={job.description ?? undefined}>
+        <span className="truncate text-body font-medium text-primary" title={job.description ?? undefined}>
           {job.name}
         </span>
       </div>
 
-      <div className="text-sm text-muted-foreground">{job.assignedUsersCount}</div>
+      <div className="text-body text-tertiary">{job.assignedUsersCount}</div>
 
-      <div className="truncate text-sm text-muted-foreground">{job.code}</div>
+      <div className="truncate text-body text-tertiary">{job.code}</div>
 
       <div>
         {job.archived ? (
           <StatusBadge status="archived" className="font-normal" />
         ) : (
-          <span className="text-sm text-muted-foreground">Active</span>
+          <span className="text-body text-tertiary">Active</span>
         )}
       </div>
 
-      <div className="truncate text-sm text-muted-foreground">{job.level?.name}</div>
+      <div className="truncate text-body text-tertiary">{job.level?.name}</div>
 
       <div className="flex items-center justify-end">
         {editing && (
@@ -499,12 +485,12 @@ const JobRow: FC<JobRowProps> = ({
               { resource: "JOBS.TITLE", action: "MANAGE" },
             ]}
           >
-            <RowActionsMenu label="Position Actions">
+            <RowActionsMenu label="Position actions">
               <PermissionGate resource="JOBS.TITLE" action="EDIT">
-                <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onEditJob(job)}>
+                <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditJob(job)}>
                   Edit
                 </RowAction>
-                <RowAction icon={<Copy className="h-4 w-4"/>} onClick={() => onDuplicateJob(job)}>
+                <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicateJob(job)}>
                   Duplicate
                 </RowAction>
 
@@ -518,20 +504,20 @@ const JobRow: FC<JobRowProps> = ({
                   action that is certain to be skipped is the defect this wave exists to remove.
                 */}
                 {!job.archived && (
-                  <RowAction icon={<Users className="h-4 w-4"/>} onClick={() => onAssignJob(job)}>
-                    Assign People
+                  <RowAction icon={<Icon icon={UserGroupIcon} size="sm" />} onClick={() => onAssignJob(job)}>
+                    Assign people
                   </RowAction>
                 )}
 
                 {job.archived ? (
                   <RowAction
-                    icon={<ArchiveRestore className="h-4 w-4"/>}
+                    icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                     onClick={() => onActivateJob(job)}
                   >
                     Unarchive
                   </RowAction>
                 ) : (
-                  <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => onArchiveJob(job)}>
+                  <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => onArchiveJob(job)}>
                     Archive
                   </RowAction>
                 )}
@@ -539,7 +525,7 @@ const JobRow: FC<JobRowProps> = ({
 
               <PermissionGate resource="JOBS.TITLE" action="MANAGE">
                 <RowActionDestructive
-                  icon={<Trash2 className="h-4 w-4"/>}
+                  icon={<Icon icon={Delete02Icon} size="sm" />}
                   onClick={() => onDeleteJob(job)}
                 >
                   Delete

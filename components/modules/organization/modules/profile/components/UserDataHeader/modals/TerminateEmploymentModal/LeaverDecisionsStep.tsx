@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Label } from "@/components/desact/label";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { formatDisplayDate } from "@/lib/date";
 import type { LeaverDecisionsDTO } from "@/api/modules/users/clients/hrisApiUsersClient";
@@ -53,19 +53,19 @@ export const LeaverDecisionsStep: FC<{
   const groups = [
     decisions.requests.length > 0 && {
       key: "requestsTo" as const,
-      title: `Leave Requests Waiting on Them (${decisions.requests.length})`,
+      title: `Leave requests waiting on them (${decisions.requests.length})`,
       items: decisions.requests.map((r) => `${r.requester?.name ?? "A colleague"} · ${span(r.startDate, r.endDate)}`),
       hint: fallbackDefault(decisions.requests.map((r) => r.fallbackRoleName)),
     },
     decisions.tasks.length > 0 && {
       key: "tasksTo" as const,
-      title: `Tasks Assigned to Them (${decisions.tasks.length})`,
+      title: `Tasks assigned to them (${decisions.tasks.length})`,
       items: decisions.tasks.map((t) => (t.subject?.name ? `${t.title} · for ${t.subject.name}` : t.title)),
       hint: "Unchosen, each goes to its onboarding manager.",
     },
     decisions.policies.length > 0 && {
       key: "policiesTo" as const,
-      title: `Leave Policies Naming Them (${decisions.policies.length})`,
+      title: `Leave policies naming them (${decisions.policies.length})`,
       items: decisions.policies.map((p) => `${p.policyName ?? "A policy"} · step ${p.approvalOrder}`),
       hint: fallbackDefault(decisions.policies.map((p) => p.fallbackRoleName)),
     },
@@ -73,7 +73,7 @@ export const LeaverDecisionsStep: FC<{
     // (WALK_QUESTIONS § 18, decided 2026-10-27).
     (decisions.processes?.length ?? 0) > 0 && {
       key: "processesTo" as const,
-      title: `Processes They Manage (${decisions.processes!.length})`,
+      title: `Processes they manage (${decisions.processes!.length})`,
       items: decisions.processes!.map((p) =>
         p.subject?.name ? `${processLabel(p.type)} of ${p.subject.name}` : processLabel(p.type)),
       hint: decisions.processes![0].defaultManager?.name
@@ -83,30 +83,30 @@ export const LeaverDecisionsStep: FC<{
   ].filter((g): g is Exclude<typeof g, false> => !!g);
 
   return (
-    <div className="space-y-4 rounded-lg border border-brown-200 p-3.5">
+    <div className="space-y-4 rounded-control border border-divider p-3.5">
       <div>
-        <p className="text-sm font-medium text-brown-900">Decisions Waiting on {fullName}</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-body font-medium text-primary">Decisions Waiting on {fullName}</p>
+        <p className="text-hint text-tertiary">
           Handed on when the termination takes effect, with anything that arrives before then.
         </p>
       </div>
       {groups.map((g) => (
         <div key={g.key} className="space-y-1.5" data-test={`leaver-group-${g.key}`}>
-          <Label htmlFor={`reassign-${g.key}`} className="text-sm">{g.title}</Label>
-          <ul className="space-y-0.5 text-xs text-brown-700">
+          <Label htmlFor={`reassign-${g.key}`} className="text-body">{g.title}</Label>
+          <ul className="space-y-0.5 text-hint text-secondary">
             {g.items.slice(0, 5).map((item, i) => (
               <li key={i}>{item}</li>
             ))}
-            {g.items.length > 5 && <li className="text-muted-foreground">and {g.items.length - 5} more</li>}
+            {g.items.length > 5 && <li className="text-tertiary">and {g.items.length - 5} more</li>}
           </ul>
           <UserPickerField
             id={`reassign-${g.key}`}
             value={value[g.key]}
             onChange={(u) => onChange({ ...value, [g.key]: u })}
-            placeholder="Reassign To…"
+            placeholder="Reassign to…"
             disabled={disabled}
           />
-          {!value[g.key] && <p className="text-xs text-muted-foreground">{g.hint}</p>}
+          {!value[g.key] && <p className="text-hint text-tertiary">{g.hint}</p>}
         </div>
       ))}
     </div>

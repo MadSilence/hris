@@ -43,26 +43,26 @@ export function AnswersView({ block, scale, mentions, title }: {
   title?: string;
 }) {
   const heading = title ?? (block.kind === "PEER" && !block.author
-    ? "Peer Review"
+    ? "Peer review"
     : `${REVIEW_KIND_LABELS[block.kind]}${block.author ? ` — ${block.author.name}` : ""}`);
   return (
-    <section className="space-y-3 rounded-xl border border-brown-100 bg-white p-5" data-test="review-answers">
+    <section className="space-y-3 rounded-card border border-divider bg-card p-5" data-test="review-answers">
       <div className="flex flex-wrap items-baseline gap-2">
-        <h3 className="text-base font-semibold text-brown-900">{heading}</h3>
-        {block.previous && <span className="text-xs text-muted-foreground">Written by a previous manager</span>}
+        <h3 className="text-body font-semibold text-primary">{heading}</h3>
+        {block.previous && <span className="text-hint text-tertiary">Written by a previous manager</span>}
         {block.submittedAt && (
-          <span className="text-xs text-muted-foreground">Submitted {formatDisplayDate(block.submittedAt, { style: "medium" })}</span>
+          <span className="text-hint text-tertiary">Submitted {formatDisplayDate(block.submittedAt, { style: "medium" })}</span>
         )}
       </div>
       {block.answers.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No answers.</p>
+        <p className="text-body text-tertiary">No answers.</p>
       ) : (
         <dl className="space-y-3">
           {block.answers.map((a) => (
             <div key={a.questionId}>
-              <dt className="text-sm font-medium text-brown-900">{replaceMentions(a.label, mentions)}</dt>
-              <dd className="mt-0.5 whitespace-pre-line text-sm text-brown-800">{answerText(a, scale)}</dd>
-              {a.comment && <dd className="mt-0.5 whitespace-pre-line text-sm text-muted-foreground">{a.comment}</dd>}
+              <dt className="text-body font-medium text-primary">{replaceMentions(a.label, mentions)}</dt>
+              <dd className="mt-0.5 whitespace-pre-line text-body text-primary">{answerText(a, scale)}</dd>
+              {a.comment && <dd className="mt-0.5 whitespace-pre-line text-body text-tertiary">{a.comment}</dd>}
             </div>
           ))}
         </dl>

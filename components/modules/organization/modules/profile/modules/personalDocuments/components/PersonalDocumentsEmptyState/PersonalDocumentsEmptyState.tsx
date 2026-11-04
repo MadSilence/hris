@@ -1,5 +1,6 @@
 import * as React from "react";
-import { FolderOpen } from "lucide-react";
+import { FolderOpenIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 type Props = {
   /** Defaults describe an empty folder; the trash passes its own wording. */
@@ -21,14 +22,14 @@ export const PersonalDocumentsEmptyState: React.FC<Props> = ({
   icon,
 }) => {
   return (
-    <div className="flex h-full min-h-[260px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-brown-200 bg-brown-50/40 p-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-100 text-brown-500">
-        {icon ?? <FolderOpen className="h-6 w-6"/>}
+    <div className="flex h-full min-h-[260px] flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider bg-subtle/40 p-10 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-mist text-tertiary">
+        {icon ?? <Icon icon={FolderOpenIcon} size="lg" />}
       </div>
 
-      <h3 className="text-base font-medium text-foreground">{title}</h3>
+      <h3 className="text-body font-medium text-primary">{title}</h3>
 
-      <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
+      <p className="max-w-sm text-body text-tertiary">{description}</p>
     </div>
   );
 };

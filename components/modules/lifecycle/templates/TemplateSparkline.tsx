@@ -18,10 +18,10 @@ export function TemplateSparkline({ offsets }: Props) {
   const x = (offset: number) => ((Math.min(TO, Math.max(FROM, offset)) - FROM) / (TO - FROM)) * WIDTH;
   return (
     <svg width={WIDTH} height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-hidden className="shrink-0">
-      <line x1={0} x2={WIDTH} y1={HEIGHT / 2} y2={HEIGHT / 2} className="stroke-brown-200" strokeWidth={1} />
-      <line x1={x(0)} x2={x(0)} y1={2} y2={HEIGHT - 2} className="stroke-primary" strokeWidth={1.5} />
+      <line x1={0} x2={WIDTH} y1={HEIGHT / 2} y2={HEIGHT / 2} className="stroke-divider" strokeWidth={1} />
+      <line x1={x(0)} x2={x(0)} y1={2} y2={HEIGHT - 2} className="stroke-accent" strokeWidth={1.5} />
       {offsets.map((o, i) => (
-        <circle key={i} cx={o === null ? x(-0.5) : x(o)} cy={HEIGHT / 2} r={2.5} className="fill-brown-500" />
+        <circle key={i} cx={o === null ? x(-0.5) : x(o)} cy={HEIGHT / 2} r={2.5} className="fill-accent" />
       ))}
     </svg>
   );

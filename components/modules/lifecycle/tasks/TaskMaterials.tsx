@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { ExternalLink, Paperclip } from "lucide-react";
+import { Attachment01Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import type { Material } from "@/models/lifecycle";
 
 /**
@@ -23,18 +24,18 @@ export function TaskMaterials({ materials, onOpenFile }: {
               href={m.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-brown-200 px-2 py-1 text-xs hover:bg-brown-50"
+              className="inline-flex items-center gap-1 rounded-tag border border-divider px-2 py-1 text-hint hover:bg-subtle"
             >
-              <ExternalLink className="h-3 w-3" />
+              <Icon icon={LinkSquare02Icon} size="sm" />
               {m.name ?? m.url}
             </a>
           ) : (
             <button
               type="button"
               onClick={() => onOpenFile(m)}
-              className="inline-flex items-center gap-1 rounded-md border border-brown-200 px-2 py-1 text-xs hover:bg-brown-50"
+              className="inline-flex items-center gap-1 rounded-tag border border-divider px-2 py-1 text-hint hover:bg-subtle"
             >
-              <Paperclip className="h-3 w-3" />
+              <Icon icon={Attachment01Icon} size="sm" />
               {m.name ?? "File"}
             </button>
           )}

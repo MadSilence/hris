@@ -1,7 +1,8 @@
 "use client";
 
 import { FC } from "react";
-import { CalendarClock } from "lucide-react";
+import { CalendarLock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import {
   Dialog,
@@ -9,7 +10,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 
 import { UserTimeOffRequests } from "./UserTimeOffRequests";
 
@@ -29,8 +30,8 @@ export const RequestsPreviewModal: FC<Props> = ({ isOpen, userId, onCloseAction 
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brown-50 text-brown-600">
-              <CalendarClock className="h-5 w-5"/>
+            <span className="flex h-9 w-9 items-center justify-center rounded-control bg-subtle text-secondary">
+              <Icon icon={CalendarLock01Icon} />
             </span>
             <div>
               <DialogTitle>Time off requests</DialogTitle>

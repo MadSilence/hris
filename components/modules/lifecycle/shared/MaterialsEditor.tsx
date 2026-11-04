@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { ExternalLink, Paperclip, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Attachment01Icon, Cancel01Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { uploadLifecycleFileAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
@@ -69,8 +70,8 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium">Material{required ? " *" : ""}</legend>
-      <p className="text-xs text-muted-foreground">
+      <legend className="text-body font-medium">Material{required ? " *" : ""}</legend>
+      <p className="text-hint text-tertiary">
         {required
           ? "What the person confirms they have read: a file or a link."
           : "Files and links for whoever does the task."}
@@ -78,13 +79,13 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
       {materials.length > 0 && (
         <ul className="space-y-1">
           {materials.map((m, i) => (
-            <li key={`${m.fileId ?? m.url}-${i}`} className="flex items-center gap-2 text-sm">
-              {m.type === "LINK" ? <ExternalLink className="h-3.5 w-3.5 shrink-0" /> : <Paperclip className="h-3.5 w-3.5 shrink-0" />}
+            <li key={`${m.fileId ?? m.url}-${i}`} className="flex items-center gap-2 text-body">
+              {m.type === "LINK" ? <Icon icon={LinkSquare02Icon} size="sm" className="shrink-0" /> : <Icon icon={Attachment01Icon} size="sm" className="shrink-0" />}
               <span className="min-w-0 flex-1 truncate">{m.name ?? m.url ?? "File"}</span>
               {!disabled && (
                 <Button type="button" variant="ghost" size="icon" className="h-6 w-6" aria-label={`Remove ${m.name ?? "material"}`}
                   onClick={() => onChange(materials.filter((_, j) => j !== i))}>
-                  <X className="h-3.5 w-3.5" />
+                  <Icon icon={Cancel01Icon} size="sm" />
                 </Button>
               )}
             </li>
@@ -94,14 +95,14 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
       {!disabled && (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor={`${idPrefix}-link`} className="text-xs">Link</Label>
+            <Label htmlFor={`${idPrefix}-link`} className="text-hint">Link</Label>
             <Input id={`${idPrefix}-link`} placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy} />
             <Input aria-label="Link name" placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} disabled={busy} />
-            <Button type="button" size="sm" variant="outline" disabled={busy || !url.trim()} onClick={addLink}>Add Link</Button>
+            <Button type="button" size="sm" variant="secondary" disabled={busy || !url.trim()} onClick={addLink}>Add link</Button>
           </div>
           <div className="space-y-1">
-            <Label htmlFor={`${idPrefix}-file`} className="text-xs">File</Label>
-            <FilePickButton id={`${idPrefix}-file`} label="Attach File" disabled={busy}
+            <Label htmlFor={`${idPrefix}-file`} className="text-hint">File</Label>
+            <FilePickButton id={`${idPrefix}-file`} label="Attach file" disabled={busy}
               onPickAction={(file) => { if (file) void addFile(file); }} />
           </div>
         </div>

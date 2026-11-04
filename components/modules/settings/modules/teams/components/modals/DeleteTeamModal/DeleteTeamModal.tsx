@@ -3,13 +3,14 @@
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { useDeleteTeam } from "@/components/modules/settings/modules/teams/hooks/useDeleteTeam/useDeleteTeam";
 import type { TeamTreeNode } from "@/models/teams";
 import type { TeamChildrenStrategy, TeamMembersStrategy } from "@/models/teams/DeleteTeamPayload";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   open: boolean;
@@ -69,7 +70,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
           <DialogTitle>Delete &ldquo;{team.name}&rdquo;</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 py-2 text-sm text-brown-700">
+        <div className="space-y-5 py-2 text-body text-secondary">
           <p>This action cannot be undone. Choose how to handle existing sub-teams and members.</p>
 
           {hasChildren && (
@@ -144,14 +145,12 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
           )}
 
           {deleteTeam.isError && (
-            <p className="text-danger-500">
-              {(deleteTeam.error as Error)?.message ?? "An error occurred."}
-            </p>
+            <FormError message={(deleteTeam.error as Error)?.message ?? "An error occurred."} />
           )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={deleteTeam.isPending}>
             Cancel
           </Button>
           <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending}>

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { RowAction, RowActionsMenu } from "./RowActionsMenu";
 
 // The dropdown renders its content inline here; what matters is the React tree, which a portal keeps.
-jest.mock("@/public/desact/src/components/ui/dropdown-menu", () => ({
+jest.mock("@/components/desact/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuContent: ({ children, onClick }: { children: React.ReactNode; onClick?: React.MouseEventHandler }) => (

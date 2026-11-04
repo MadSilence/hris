@@ -7,7 +7,7 @@ import {
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useDocumentsFolderDeleteImpact";
 import * as React from "react";
 import { useMemo, useState } from "react";
-import { Card } from "@/public/desact/src/components/ui/card";
+import { Card } from "@/components/desact/card";
 import type { DocumentDTO, DocumentFolderDTO } from "@/api/modules/documents/dto";
 import { PersonalDocumentsBreadcrumbs } from "../PersonalDocumentsBreadcrumbs/PersonalDocumentsBreadcrumbs";
 import { PersonalDocumentsToolbar } from "../PersonalDocumentsToolbar/PersonalDocumentsToolbar";
@@ -52,8 +52,9 @@ import {
 import {
   PersonalDocumentsTrash,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsTrash";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Button } from "@/components/desact/button";
+import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 type PersonalDocumentsContainerProps = {
   userId: string;
@@ -193,8 +194,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         }}
       >
         {isDraggingOver && (
-          <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-brown-400 bg-brown-50/90">
-            <p className="font-medium text-brown-800">
+          <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-control border-2 border-dashed border-strong bg-subtle/90">
+            <p className="font-medium text-primary">
               Drop to upload into this folder
             </p>
           </div>
@@ -218,14 +219,14 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
             <div className="ml-auto flex items-center gap-3">
               {canManage && (
                 <Button type="button"
-                  variant={showTrash ? "secondary" : "outline"}
+                  variant="secondary"
                   size="icon"
                   aria-label="Trash"
                   aria-pressed={showTrash}
                   title="Trash"
                   onClick={() => setShowTrash((v) => !v)}
                 >
-                  <Trash2 className="h-4 w-4"/>
+                  <Icon icon={Delete02Icon} size="sm" />
                 </Button>
               )}
             </div>
@@ -250,7 +251,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
             ) : isLoading ? (
               <PersonalDocumentsSkeleton/>
             ) : error ? (
-              <div className="rounded-lg border bg-white">
+              <div className="rounded-control border bg-card">
                 <ErrorState error={error} compact/>
               </div>
             ) : isEmpty ? (

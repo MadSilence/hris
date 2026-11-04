@@ -5,10 +5,10 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { useUpdateDepartment } from "@/components/modules/settings/modules/departments/hooks/useUpdateDepartment/useUpdateDepartment";
 import {
   UserPickerField,
@@ -17,6 +17,8 @@ import {
 import type { DepartmentTreeNode } from "@/models/departments";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 
 const ROOT_VALUE = "none";
 
@@ -106,7 +108,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
               onBlur={formik.handleBlur}
             />
             {formik.touched.name && formik.errors.name && (
-              <p role="alert" className="text-xs text-danger-500">{formik.errors.name}</p>
+              <FieldError>{formik.errors.name}</FieldError>
             )}
           </div>
 
@@ -131,7 +133,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-dept-parent">Parent Department</Label>
+            <Label htmlFor="edit-dept-parent">Parent department</Label>
             <SearchableSelect
               id="edit-dept-parent"
               options={[{ value: ROOT_VALUE, label: "None" }, ...activeOptions.map((n) => ({ value: n.id, label: n.name }))]}
@@ -142,19 +144,17 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label>Department Lead</Label>
+            <Label>Department lead</Label>
             <UserPickerField value={lead} onChange={setLeadUser} placeholder="Search for a person" />
           </div>
 
           {updateDepartment.isError && (
-            <p className="text-sm text-danger-500">
-              {(updateDepartment.error as Error)?.message ?? "An error occurred."}
-            </p>
+            <FormError message={(updateDepartment.error as Error)?.message ?? "An error occurred."} />
           )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>

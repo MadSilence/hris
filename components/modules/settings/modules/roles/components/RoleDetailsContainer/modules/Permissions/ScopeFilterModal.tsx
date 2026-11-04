@@ -8,8 +8,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import type { Segment } from "@/models/segment/Segment";
@@ -67,21 +67,20 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
         />
 
         {filters.length === 0 && (
-          <p className="text-sm text-warning-700">
+          <p className="text-body text-status-pending-text">
             A custom scope with no conditions is rejected on save — it would claim a reach it never
             defines.
           </p>
         )}
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancelAction}>
+          <Button type="button" variant="secondary" onClick={onCancelAction}>
             Cancel
           </Button>
           <Button type="button"
             disabled={filters.length === 0}
             onClick={() => onConfirmAction({ filters, excludeUserIds: [], includeInactive })}
-            className="bg-brown-600 text-white hover:bg-brown-700"
-          >
+ >
             Save conditions
           </Button>
         </DialogFooter>

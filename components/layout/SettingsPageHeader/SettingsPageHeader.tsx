@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 type SettingsPageHeaderProps = {
   title: string;
@@ -26,7 +26,7 @@ export default function SettingsPageHeader({
       {backHref ? (
         <Link
           href={backHref}
-          className="no-underline grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
+          className="no-underline grid h-10 w-10 place-items-center rounded-pill border bg-card hover:bg-subtle active:translate-y-px"
         >
           <ChevronLeft className="h-4 w-4"/>
         </Link>
@@ -34,7 +34,7 @@ export default function SettingsPageHeader({
         <button
           type="button"
           onClick={() => router.back()}
-          className="grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
+          className="grid h-10 w-10 place-items-center rounded-pill border bg-card hover:bg-subtle active:translate-y-px"
         >
           <ChevronLeft className="h-4 w-4"/>
         </button>
@@ -42,7 +42,7 @@ export default function SettingsPageHeader({
 
       {leading}
 
-      <h1 className="text-3xl font-semibold">{title}</h1>
+      <h1 className="text-page-title">{title}</h1>
     </header>
   );
 }

@@ -103,7 +103,7 @@ describe("a draft and the template it saves as", () => {
     const lanes = deriveLanes(draftFromTemplate(template).items, [
       { id: "USER:u2", assigneeKind: "SPECIFIC_USER", userId: "u2", label: "Grace", problem: null },
     ]);
-    expect(lanes.map((l) => l.label)).toEqual(["The New Person", "Onboarding Manager", "Linus", "Grace"]);
+    expect(lanes.map((l) => l.label)).toEqual(["The new person", "Onboarding manager", "Linus", "Grace"]);
   });
 
   it("says what is missing before a save would be refused", () => {
@@ -153,9 +153,9 @@ describe("what a task carries (DECISIONS.md § \"Lifecycle tasks\")", () => {
   });
 
   it("counts an offboarding from the last working day, and calls its people what they are", () => {
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, "OFFBOARDING")).toBe("Last Day");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, "OFFBOARDING")).toBe("Last day");
     expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, "OFFBOARDING")).toBe("By the last day");
     expect(dayLabel({ dueKind: "OFFSET", offsetDays: -2 }, "OFFBOARDING")).toBe("2 days before the last day");
-    expect(deriveLanes([], [], "OFFBOARDING").map((l) => l.label)).toEqual(["The Leaver", "Offboarding Manager"]);
+    expect(deriveLanes([], [], "OFFBOARDING").map((l) => l.label)).toEqual(["The leaver", "Offboarding manager"]);
   });
 });

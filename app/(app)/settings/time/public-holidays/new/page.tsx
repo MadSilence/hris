@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { PublicHolidayCalendarNewPage } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayCalendarNewPage";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { PageGate } from "@/components/auth/PageGate";
 
 function PageFallback() {

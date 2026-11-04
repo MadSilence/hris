@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
+import { Input } from "@/components/desact/input";
 import { PLACEHOLDER_LABELS } from "@/models/automations";
 import { insertPlaceholder } from "./draft";
 import { Field } from "./SentenceCard";
@@ -52,7 +52,7 @@ export function PlaceholderTextField({
           rows={5}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex min-h-20 w-full resize-y rounded-lg border border-brown-300 bg-input-background px-3 py-3 text-base outline-none transition-[color,box-shadow] hover:border-brown-400 focus:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+          className="flex min-h-20 w-full resize-y rounded-control border border-field bg-card px-3 py-3 text-body outline-none transition-[color,box-shadow] hover:border-strong focus:border-accent focus-visible:ring-[3px] focus-visible:ring-accent-ring/50 md:text-body"
         />
       ) : (
         <Input id={id} ref={ref} value={value} onChange={(e) => onChange(e.target.value)} />
@@ -65,7 +65,7 @@ export function PlaceholderTextField({
             // Keep the focus (and the selection) in the field while the chip is pressed.
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => insert(p)}
-            className="rounded-md border border-brown-100 bg-brown-50/60 px-2 py-0.5 text-xs text-brown-700 hover:border-brown-200 hover:bg-brown-100"
+            className="rounded-tag border border-divider bg-subtle/60 px-2 py-0.5 text-hint text-secondary hover:border-divider hover:bg-mist"
           >
             {PLACEHOLDER_LABELS[p] ?? p}
           </button>

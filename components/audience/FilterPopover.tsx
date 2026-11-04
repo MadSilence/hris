@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Filter as FilterIcon } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
+import { FilterHorizontalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Badge } from "@/components/desact/badge";
+import { Button } from "@/components/desact/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 
@@ -40,11 +41,11 @@ export const FilterPopover: React.FC<Props> = ({ fields, isLoadingFields, value,
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5">
-          <FilterIcon className="h-4 w-4"/>
+        <Button type="button" variant="secondary" className="gap-1.5">
+          <Icon icon={FilterHorizontalIcon} size="sm" />
           Filter
           {value.length > 0 ? (
-            <Badge variant="secondary" className="ml-1 px-1.5">{value.length}</Badge>
+            <Badge variant="neutral" className="ml-1 px-1.5">{value.length}</Badge>
           ) : null}
         </Button>
       </PopoverTrigger>

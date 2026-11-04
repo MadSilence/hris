@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Badge } from "@/components/desact/badge";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { FormError } from "@/components/feedback/FormError";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -126,7 +126,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
       <DialogContent hideClose className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Export Attendance</DialogTitle>
+          <DialogTitle>Export attendance</DialogTitle>
           <DialogDescription>
             The people in the current view, over the current period. Two sheets: a summary, one row a person,
             and every logged entry.
@@ -135,30 +135,30 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
 
         <FormError message={errorMessage}/>
 
-        <dl className="space-y-2 text-sm">
+        <dl className="space-y-2 text-body">
           <div className="flex flex-wrap items-center gap-2">
-            <dt className="w-20 text-muted-foreground">Period</dt>
-            <dd><Badge variant="secondary">{periodLabel(view.period.from, view.period.to)}</Badge></dd>
+            <dt className="w-20 text-tertiary">Period</dt>
+            <dd><Badge variant="neutral">{periodLabel(view.period.from, view.period.to)}</Badge></dd>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <dt className="w-20 text-muted-foreground">Search</dt>
-            <dd>{search ? <Badge variant="secondary">{search}</Badge> : <span className="text-muted-foreground">None</span>}</dd>
+            <dt className="w-20 text-tertiary">Search</dt>
+            <dd>{search ? <Badge variant="neutral">{search}</Badge> : <span className="text-tertiary">None</span>}</dd>
           </div>
           <div className="flex flex-wrap items-start gap-2">
-            <dt className="w-20 pt-0.5 text-muted-foreground">Filters</dt>
+            <dt className="w-20 pt-0.5 text-tertiary">Filters</dt>
             <dd className="flex min-w-0 flex-1 flex-wrap gap-1.5">
               {view.filters.length
                 ? view.filters.map((filter, index) => (
                   <FilterBadge key={index} filter={filter} fields={fields} />
                 ))
-                : <span className="text-muted-foreground">None — everyone in your reach</span>}
+                : <span className="text-tertiary">None — everyone in your reach</span>}
             </dd>
           </div>
         </dl>
 
         {preview.length > 0 && (
-          <div className="overflow-x-auto rounded-lg border border-brown-200">
-            <Table className="text-xs">
+          <div className="overflow-x-auto rounded-control border border-divider">
+            <Table className="text-hint">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -186,7 +186,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
               </TableBody>
             </Table>
             {total !== null && total > preview.length && (
-              <p className="border-t border-brown-100 px-3 py-2 text-xs text-muted-foreground">
+              <p className="border-t border-divider px-3 py-2 text-hint text-tertiary">
                 and {total - preview.length} more
               </p>
             )}

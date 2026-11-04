@@ -1,20 +1,22 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Briefcase, Copy, Pencil } from "lucide-react";
+import { Briefcase01Icon, Copy01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import {
   JobForm,
   JobFormValues,
 } from "@/components/modules/settings/modules/jobcatalog/components/JobForm";
 import { JobFamily, JobLevelGroup } from "@/models/job";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
+import { InlineAlert } from "@/components/desact/alert";
 
 export type JobModalMode = "create" | "edit" | "duplicate";
 
@@ -55,10 +57,10 @@ const COPY: Record<JobModalMode, { title: string; description: string; submit: s
   },
 };
 
-const ICON: Record<JobModalMode, typeof Briefcase> = {
-  create: Briefcase,
-  edit: Pencil,
-  duplicate: Copy,
+const ICON: Record<JobModalMode, IconSvgElement> = {
+  create: Briefcase01Icon,
+  edit: PencilEdit02Icon,
+  duplicate: Copy01Icon,
 };
 
 export const JobModal: FC<Props> = ({
@@ -78,7 +80,7 @@ export const JobModal: FC<Props> = ({
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
   const copy = COPY[mode];
-  const Icon = ICON[mode];
+  const shownIcon = ICON[mode];
 
   const requestClose = () => {
     if (isLoading) return;
@@ -107,8 +109,8 @@ export const JobModal: FC<Props> = ({
         <DialogContent hideClose className="gap-5 sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 text-left">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
-                <Icon className="h-5 w-5"/>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+                <Icon icon={shownIcon} />
               </span>
               <div className="space-y-1">
                 <DialogTitle>{copy.title}</DialogTitle>
@@ -118,12 +120,9 @@ export const JobModal: FC<Props> = ({
           </DialogHeader>
 
           {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
+            <InlineAlert tone="declined">
               {errorMessage}
-            </p>
+            </InlineAlert>
           )}
 
           <JobForm

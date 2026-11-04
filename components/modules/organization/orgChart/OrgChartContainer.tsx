@@ -3,7 +3,8 @@
 import { CanvasMessage } from "@/components/ui/Canvas";
 
 import React, { useCallback, useMemo, useState } from "react";
-import { PanelRightOpen } from "lucide-react";
+import { SidebarRightIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { useOrgChart } from "@/components/modules/organization/orgChart/hooks/useOrgChart/useOrgChart";
 import { useSetManager } from "@/components/modules/organization/orgChart/hooks/useSetManager";
@@ -87,8 +88,8 @@ export default function OrgChartContainer() {
   const reports = selectedUser ? forest.reportsById.get(selectedUser.id) ?? [] : [];
 
   return (
-    <div className="flex h-[76dvh] overflow-hidden rounded-xl border border-brown-200">
-      <div className="relative min-w-0 flex-1 bg-brown-50/40">
+    <div className="flex h-[76dvh] overflow-hidden rounded-popover border border-divider">
+      <div className="relative min-w-0 flex-1 bg-subtle/40">
         {isLoading ? (
           <CanvasMessage>Loading org chart…</CanvasMessage>
         ) : error ? (
@@ -115,21 +116,21 @@ export default function OrgChartContainer() {
             onClick={() => setPanelOpen(true)}
             aria-label="Show panel"
             title="Show panel"
-            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg border border-brown-200 bg-white text-brown-500 shadow-sm transition-colors hover:text-brown-800"
+            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-control border border-divider bg-card text-tertiary shadow-card transition-colors hover:text-primary"
           >
-            <PanelRightOpen className="h-4 w-4" />
+            <Icon icon={SidebarRightIcon} size="sm" />
           </button>
         )}
 
         {canReparent && !isLoading && !error && forest.roots.length > 0 && (
-          <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-lg border border-brown-200 bg-white/90 px-3 py-1.5 text-xs text-brown-500 shadow-sm">
+          <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
             Drag a person onto another to change their manager.
           </div>
         )}
       </div>
 
       {panelOpen && (
-        <div className="w-[360px] flex-none overflow-hidden border-l border-brown-200 bg-white">
+        <div className="w-[360px] flex-none overflow-hidden border-l border-divider bg-card">
           {selectedUser ? (
             <UserDetailPanel
               key={selectedUser.id}
@@ -149,8 +150,8 @@ export default function OrgChartContainer() {
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
-              <p className="text-sm font-medium text-brown-700">No one selected</p>
-              <p className="text-sm text-brown-400">
+              <p className="text-body font-medium text-secondary">No one selected</p>
+              <p className="text-body text-tertiary">
                 Click a person on the chart to see their details.
               </p>
             </div>

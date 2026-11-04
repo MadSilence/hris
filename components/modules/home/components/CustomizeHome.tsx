@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Switch } from "@/public/desact/src/components/ui/switch";
+import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Switch } from "@/components/desact/switch";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
 import type { HomeWidgetPlacement } from "@/models/home";
@@ -47,8 +48,8 @@ export const CustomizeHome: React.FC<{
   };
 
   return (
-    <div className="flex flex-col gap-6" aria-label="Customize Home" role="form">
-      <p className="text-sm text-muted-foreground">
+    <div className="flex flex-col gap-6" aria-label="Customize home" role="form">
+      <p className="text-body text-tertiary">
         Choose what your home shows and in what order. Only you see this arrangement.
       </p>
 
@@ -57,35 +58,33 @@ export const CustomizeHome: React.FC<{
         if (entries.length === 0) return null;
         return (
           <section key={group} className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-brown-400">{HOME_GROUP_LABELS[group]}</h2>
-            <ul className="flex flex-col divide-y divide-brown-100 rounded-lg border border-brown-100 bg-white">
+            <h2 className="text-hint font-semibold text-tertiary">{HOME_GROUP_LABELS[group]}</h2>
+            <ul className="flex flex-col divide-y divide-divider rounded-control border border-divider bg-card">
               {entries.map(({ widget, hidden }, index) => (
                 <li key={widget.id} className="flex items-center gap-3 px-4 py-3" data-testid={`customize-${widget.id}`}>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-brown-900">{widget.title}</p>
-                    <p className="text-xs text-muted-foreground">{widget.description}</p>
+                    <p className="text-body font-medium text-primary">{widget.title}</p>
+                    <p className="text-hint text-tertiary">{widget.description}</p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
+                    size="icon-sm"
                     aria-label={`Move ${widget.title} Up`}
                     disabled={index === 0 || saving}
                     onClick={() => setDraft((current) => moveWidget(current, widget.id, "up"))}
                   >
-                    <ArrowUp className="h-4 w-4" />
+                    <Icon icon={ArrowUp02Icon} size="sm" />
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
+                    size="icon-sm"
                     aria-label={`Move ${widget.title} Down`}
                     disabled={index === entries.length - 1 || saving}
                     onClick={() => setDraft((current) => moveWidget(current, widget.id, "down"))}
                   >
-                    <ArrowDown className="h-4 w-4" />
+                    <Icon icon={ArrowDown02Icon} size="sm" />
                   </Button>
                   <Switch
                     checked={!hidden}
@@ -104,10 +103,10 @@ export const CustomizeHome: React.FC<{
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Button type="button" variant="ghost" disabled={saving} onClick={() => void save([])}>
-          Reset to Default
+          Reset to default
         </Button>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>
+          <Button type="button" variant="secondary" disabled={saving} onClick={onCancel}>
             Cancel
           </Button>
           <Button type="button" disabled={saving} onClick={() => void save(toPlacements(draft, stored))}>

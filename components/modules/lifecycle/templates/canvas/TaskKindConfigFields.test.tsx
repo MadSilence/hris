@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { TaskKindConfigFields } from "./TaskKindConfigFields";
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 
-jest.mock("@/public/desact/src/components/ui/select", () => jest.requireActual("@/test/selectMock"));
+jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
 jest.mock("@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups", () => ({
   useAttributeGroups: () => ({ data: [] }),
 }));
@@ -18,7 +18,7 @@ const render_ = (kind: "DOCUMENT" | "TODO", categoryId: string | null) =>
   );
 
 describe("TaskKindConfigFields", () => {
-  it("asks no category of an Upload Document task: any document closes it", () => {
+  it("asks no category of an Upload document task: any document closes it", () => {
     (useDocumentCategories as jest.Mock).mockReturnValue({ data: [{ id: "passport", name: "Passport" }], isLoading: false });
     render_("DOCUMENT", null);
     expect(screen.queryByLabelText(/Document Category/)).not.toBeInTheDocument();

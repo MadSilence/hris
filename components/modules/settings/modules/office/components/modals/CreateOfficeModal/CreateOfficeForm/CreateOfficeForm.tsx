@@ -4,13 +4,14 @@ import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export type CreateOfficeFormValues = {
   name: string;
@@ -159,8 +160,8 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
         <div className="space-y-5">
           {/* SECTION: DETAILS */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold">Office details</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="text-body font-semibold">Office details</h3>
+            <p className="mt-1 text-body text-tertiary">
               Basic information about this office location.
             </p>
           </div>
@@ -178,9 +179,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 aria-invalid={!!shownErrors.name}
               />
               {shownErrors.name && (
-                <p className="text-sm text-destructive">
-                  {shownErrors.name}
-                </p>
+                <FieldError>{shownErrors.name}</FieldError>
               )}
             </div>
 
@@ -209,9 +208,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   aria-invalid={!!shownErrors.email}
                 />
                 {shownErrors.email && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.email}
-                  </p>
+                  <FieldError>{shownErrors.email}</FieldError>
                 )}
               </div>
 
@@ -231,7 +228,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
             {/* The same field and words as the office page's own Remote checkbox. */}
             <div className="space-y-2">
               <Label htmlFor="office-remote">Remote</Label>
-              <label className="flex items-center gap-2 text-sm text-foreground">
+              <label className="flex items-center gap-2 text-body text-primary">
                 <Checkbox
                   id="office-remote"
                   checked={formik.values.isRemote}
@@ -245,8 +242,8 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
           {/* SECTION: ADDRESS */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold">Address</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="text-body font-semibold">Address</h3>
+            <p className="mt-1 text-body text-tertiary">
               {formik.values.isRemote
                 ? "A remote office needs only its country; the rest of the address is optional."
                 : "Physical location of the office."}
@@ -267,9 +264,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   aria-invalid={!!shownErrors.country}
                 />
                 {shownErrors.country && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.country}
-                  </p>
+                  <FieldError>{shownErrors.country}</FieldError>
                 )}
               </div>
 
@@ -285,9 +280,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   aria-invalid={!!shownErrors.city}
                 />
                 {shownErrors.city && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.city}
-                  </p>
+                  <FieldError>{shownErrors.city}</FieldError>
                 )}
               </div>
             </div>
@@ -306,7 +299,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   aria-invalid={!!shownErrors.street}
                 />
                 {shownErrors.street && (
-                  <p className="text-sm text-destructive">{shownErrors.street}</p>
+                  <FieldError>{shownErrors.street}</FieldError>
                 )}
               </div>
 
@@ -323,13 +316,13 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   aria-invalid={!!shownErrors.building}
                 />
                 {shownErrors.building && (
-                  <p className="text-sm text-destructive">{shownErrors.building}</p>
+                  <FieldError>{shownErrors.building}</FieldError>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="office-post-code" required={!formik.values.isRemote}>Post Code</RequiredLabel>
+              <RequiredLabel htmlFor="office-post-code" required={!formik.values.isRemote}>Post code</RequiredLabel>
               <Input
                 id="office-post-code"
                 value={formik.values.postCode}
@@ -341,7 +334,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                 aria-invalid={!!shownErrors.postCode}
               />
               {shownErrors.postCode && (
-                <p className="text-sm text-destructive">{shownErrors.postCode}</p>
+                <FieldError>{shownErrors.postCode}</FieldError>
               )}
             </div>
           </div>
@@ -350,10 +343,10 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
       <FormError message={errorMessage} className="mx-6 mb-4"/>
 
-      <DialogFooter className="border-t border-brown-100 bg-white px-6 py-4">
+      <DialogFooter className="border-t border-divider bg-card px-6 py-4">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
         >

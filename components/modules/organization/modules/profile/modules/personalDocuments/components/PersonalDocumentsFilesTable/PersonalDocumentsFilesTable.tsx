@@ -1,8 +1,9 @@
 import * as React from "react";
-import { ArrowDown, ArrowUp, Download, Eye, EyeOff, FolderInput, Pencil, Star, StarOff, Trash2 } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
-import { DropdownMenuItem } from "@/public/desact/src/components/ui/dropdown-menu";
+import { ArrowDown02Icon, ArrowUp02Icon, Delete02Icon, Download01Icon, FolderTransferIcon, PencilEdit02Icon, StarIcon, StarOffIcon, ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Badge } from "@/components/desact/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
+import { DropdownMenuItem } from "@/components/desact/dropdown-menu";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 import type {
@@ -39,7 +40,7 @@ const SortableHead: React.FC<{
     <TableHead>
       <button
         type="button"
-        className="inline-flex items-center gap-1 hover:text-foreground"
+        className="inline-flex items-center gap-1 hover:text-primary"
         onClick={() =>
           onSortChange({
             field,
@@ -50,9 +51,9 @@ const SortableHead: React.FC<{
         {label}
         {active &&
           (sort.dir === "asc" ? (
-            <ArrowUp className="h-3 w-3"/>
+            <Icon icon={ArrowUp02Icon} size="sm" />
           ) : (
-            <ArrowDown className="h-3 w-3"/>
+            <Icon icon={ArrowDown02Icon} size="sm" />
           ))}
       </button>
     </TableHead>
@@ -84,7 +85,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
               <SortableHead field="size" label="Size" sort={sort} onSortChange={onSortChange}/>
               <SortableHead
                 field="createdAt"
-                label="Uploaded At"
+                label="Uploaded at"
                 sort={sort}
                 onSortChange={onSortChange}
               />
@@ -98,7 +99,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
               <TableRow key={document.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <span className="shrink-0 text-muted-foreground [&_svg]:h-5 [&_svg]:w-5">
+                    <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
                       {getDocumentFileIcon(document.mimeType)}
                     </span>
                     <span className="font-medium">{document.name}</span>
@@ -107,7 +108,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
 
                 <TableCell>
                   {document.categoryName ? (
-                    <Badge variant="secondary">{document.categoryName}</Badge>
+                    <Badge variant="neutral">{document.categoryName}</Badge>
                   ) : (
                     null
                   )}
@@ -116,11 +117,11 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 <TableCell>
                   {document.visibility === "HR_ONLY" ? (
                     <Badge variant="outline" className="gap-1 font-normal">
-                      <EyeOff className="h-3 w-3"/>
+                      <Icon icon={ViewOffSlashIcon} size="sm" />
                       HR only
                     </Badge>
                   ) : (
-                    <span className="text-muted-foreground">Visible</span>
+                    <span className="text-tertiary">Visible</span>
                   )}
                 </TableCell>
 
@@ -135,22 +136,24 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                     aria-label={document.isStarred ? "Unstar" : "Star"}
                     aria-pressed={document.isStarred}
                     title={document.isStarred ? "Unstar" : "Star"}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-control hover:bg-mist"
                   >
-                    <Star
-                      className={`h-4 w-4 ${
+                    <Icon
+                      icon={StarIcon}
+                      size="sm"
+                      className={`${
                         document.isStarred
-                          ? "fill-current text-warning-500"
-                          : "text-muted-foreground"
+                          ? "fill-current text-status-pending-icon"
+                          : "text-tertiary"
                       }`}
                     />
                   </button>
                 </TableCell>
 
                 <TableCell className="text-center">
-                  <RowActionsMenu label="Document Actions">
+                  <RowActionsMenu label="Document actions">
                     {onPreview && isPreviewable(document.mimeType) ? (
-                      <RowAction icon={<Eye className="h-4 w-4"/>} onClick={() => onPreview(document)}>
+                      <RowAction icon={<Icon icon={ViewIcon} size="sm" />} onClick={() => onPreview(document)}>
                         Preview
                       </RowAction>
                     ) : null}
@@ -159,33 +162,33 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                       The one menu item that is a link rather than a handler: the download is a
                       browser navigation, which carries the session cookie by itself.
                     */}
-                    <DropdownMenuItem asChild className="gap-2.5 rounded-md px-2.5 py-1.5 cursor-pointer">
+                    <DropdownMenuItem asChild className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
                       <a href={getDownloadUrl(document.id)} download>
-                        <Download className="h-4 w-4 text-muted-foreground"/>
+                        <Icon icon={Download01Icon} size="sm" className="text-tertiary" />
                         Download
                       </a>
                     </DropdownMenuItem>
 
                     <RowAction
-                      icon={document.isStarred ? <StarOff className="h-4 w-4"/> : <Star className="h-4 w-4"/>}
+                      icon={document.isStarred ? <Icon icon={StarOffIcon} size="sm" /> : <Icon icon={StarIcon} size="sm" />}
                       onClick={() => onToggleStar(document)}
                     >
-                      {document.isStarred ? "Remove Star" : "Add Star"}
+                      {document.isStarred ? "Remove star" : "Add star"}
                     </RowAction>
 
                     {onRename ? (
-                      <RowAction icon={<Pencil className="h-4 w-4"/>} onClick={() => onRename(document)}>
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onRename(document)}>
                         Rename
                       </RowAction>
                     ) : null}
                     {onMove ? (
-                      <RowAction icon={<FolderInput className="h-4 w-4"/>} onClick={() => onMove(document)}>
+                      <RowAction icon={<Icon icon={FolderTransferIcon} size="sm" />} onClick={() => onMove(document)}>
                         Move
                       </RowAction>
                     ) : null}
                     {onDelete ? (
                       <RowActionDestructive
-                        icon={<Trash2 className="h-4 w-4"/>}
+                        icon={<Icon icon={Delete02Icon} size="sm" />}
                         onClick={() => onDelete(document)}
                       >
                         Delete

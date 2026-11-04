@@ -2,9 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft02Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import {
   personDisplayName,
   personInitials,
@@ -23,9 +24,9 @@ export function DepartmentPersonPanel({ person, departmentName, onBack }: Props)
       <button
         type="button"
         onClick={onBack}
-        className="flex w-fit items-center gap-1.5 text-sm text-brown-500 hover:text-brown-800"
+        className="flex w-fit items-center gap-1.5 text-body text-tertiary hover:text-primary"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <Icon icon={ArrowLeft02Icon} size="sm" />
         Back
       </button>
 
@@ -35,42 +36,42 @@ export function DepartmentPersonPanel({ person, departmentName, onBack }: Props)
           <AvatarFallback>{personInitials(person)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-lg font-semibold text-brown-900">
+          <h2 className="truncate text-section-title text-primary">
             {personDisplayName(person)}
           </h2>
-          {person.jobName && <p className="truncate text-sm text-brown-500">{person.jobName}</p>}
+          {person.jobName && <p className="truncate text-body text-tertiary">{person.jobName}</p>}
         </div>
       </div>
 
       <div className="space-y-4">
         <div>
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+          <h3 className="mb-1 text-hint font-semibold text-tertiary">
             Department
           </h3>
-          <p className="text-sm text-brown-700">{departmentName ?? "No department"}</p>
+          <p className="text-body text-secondary">{departmentName ?? "No department"}</p>
         </div>
 
         <div>
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+          <h3 className="mb-1 text-hint font-semibold text-tertiary">
             Email
           </h3>
-          <p className="truncate text-sm text-brown-700">{person.email}</p>
+          <p className="truncate text-body text-secondary">{person.email}</p>
         </div>
 
         <div>
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+          <h3 className="mb-1 text-hint font-semibold text-tertiary">
             Status
           </h3>
-          <p className="text-sm text-brown-700">{person.status}</p>
+          <p className="text-body text-secondary">{person.status}</p>
         </div>
       </div>
 
       <Link
         href={`/organization/people/${person.id}/personal`}
-        className="flex w-fit items-center gap-1.5 text-sm text-brown-600 underline-offset-2 hover:text-brown-900 hover:underline"
+        className="flex w-fit items-center gap-1.5 text-body text-accent-text underline-offset-4 hover:underline"
       >
         Open profile
-        <ExternalLink className="h-3.5 w-3.5" />
+        <Icon icon={LinkSquare02Icon} size="sm" />
       </Link>
     </div>
   );

@@ -1,12 +1,12 @@
 "use client";
 
 import { useBalanceAsOf } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useBalanceAsOf";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { formatDisplayDate } from "@/lib/date";
 import { FC, useMemo } from "react";
 
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import { useEmployeeTimeOffBalanceTransactions } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalanceTransactions";
 import { TimeOffBalanceTransactionType } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 
@@ -57,41 +57,41 @@ export const BalanceLedger: FC<Props> = ({ balanceId, periodEnd }) => {
   }
 
   const projectionRow = projection && (
-    <div className="flex items-center justify-between rounded-lg border border-dashed border-brown-200 px-3 py-2 text-sm">
-      <span className="text-muted-foreground">
+    <div className="flex items-center justify-between rounded-control border border-dashed border-divider px-3 py-2 text-body">
+      <span className="text-tertiary">
         Projected on {formatDisplayDate(periodEnd, { style: "medium" })}
       </span>
-      <span className="font-medium text-brown-900">
+      <span className="font-medium text-primary">
         {formatDayAmount(projection.balance)}
       </span>
     </div>
   );
 
   if (rows.length === 0) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">No ledger entries yet.</p>;
+    return <p className="py-6 text-center text-body text-tertiary">No ledger entries yet.</p>;
   }
 
   return (
     <div className="space-y-2">
       {projectionRow}
 
-      <div className="divide-y divide-brown-100">
+      <div className="divide-y divide-divider">
       {rows.map(({ t, running }) => (
         <div key={t.id} className="flex items-center justify-between gap-3 py-2">
           <div className="min-w-0">
-            <p className="text-sm text-foreground">
+            <p className="text-body text-primary">
               {TYPE_LABEL[t.type]}
-              {t.reason ? <span className="text-muted-foreground"> · {t.reason}</span> : null}
+              {t.reason ? <span className="text-tertiary"> · {t.reason}</span> : null}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               {formatDisplayDate(t.effectiveDate, { style: "medium" })}
             </p>
           </div>
           <div className="flex items-baseline gap-3 text-right">
-            <span className={cn("text-sm font-medium", t.amount < 0 ? "text-danger-600" : "text-success-700")}>
+            <span className={cn("text-body font-medium", t.amount < 0 ? "text-danger-text" : "text-status-approved-text")}>
               {signed(t.amount)}
             </span>
-            <span className="w-12 text-xs text-muted-foreground">{formatDayAmount(running)}</span>
+            <span className="w-12 text-hint text-tertiary">{formatDayAmount(running)}</span>
           </div>
         </div>
       ))}

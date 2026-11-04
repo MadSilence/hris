@@ -64,7 +64,7 @@ const openReview = async () => {
       lineManager={{ id: "m1", name: "Ada Lovelace" }} onCloseAction={jest.fn()} />,
   );
   fireEvent.click(screen.getByText("Choose Template"));
-  fireEvent.click(screen.getByRole("button", { name: "Review Tasks" }));
+  fireEvent.click(screen.getByRole("button", { name: "Review tasks" }));
   await screen.findByText("Welcome call");
 };
 
@@ -102,12 +102,12 @@ describe("StartProcessModal", () => {
   it("renames a task on request and starts with the new title", async () => {
     await openReview();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Rename Task" })[0]);
-    fireEvent.change(screen.getByLabelText("Task Title"), { target: { value: "Say hi" } });
-    fireEvent.keyDown(screen.getByLabelText("Task Title"), { key: "Enter" });
+    fireEvent.click(screen.getAllByRole("button", { name: "Rename task" })[0]);
+    fireEvent.change(screen.getByLabelText("Task title"), { target: { value: "Say hi" } });
+    fireEvent.keyDown(screen.getByLabelText("Task title"), { key: "Enter" });
     expect(screen.getByText("Say hi")).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove Task" })[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove task" })[1]);
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
 
     await waitFor(() => expect(startProcessAction).toHaveBeenCalled());
@@ -118,7 +118,7 @@ describe("StartProcessModal", () => {
   it("can remove the task instead", async () => {
     await openReview();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove Task" })[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove task" })[1]);
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
 
     await waitFor(() => expect(startProcessAction).toHaveBeenCalled());

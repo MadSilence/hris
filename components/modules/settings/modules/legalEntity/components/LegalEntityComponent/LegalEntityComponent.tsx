@@ -8,9 +8,10 @@ import { LegalEntity } from "@/models/legalEntity";
 import { useCreateLegalEntityAction } from "@/components/modules/settings/modules/legalEntity/hooks/useCreateLegalEntityAction";
 import type { CreateLegalEntityActionInput, } from "@/components/modules/settings/modules/legalEntity/actions/createLegalEntityAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Archive, ArchiveRestore, Building2, Download, Plus } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
+import { Button } from "@/components/desact/button";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -163,19 +164,19 @@ export const LegalEntityComponent: React.FC<Props> = ({
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
               <Button type="button"
                 size="icon"
-                variant="outline"
+                variant="secondary"
                 aria-label="Export legal entities"
                 onClick={() => setIsExportModalOpen(true)}
               >
-                <Download className="h-4 w-4"/>
+                <Icon icon={Download01Icon} size="sm" />
               </Button>
             </PermissionGate>
           }
           primary={
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
               <Button type="button" onClick={openCreate} className="gap-1.5">
-                <Plus className="h-4 w-4"/>
-                Add Legal Entity
+                <Icon icon={Add01Icon} size="sm" />
+                Add legal entity
               </Button>
             </PermissionGate>
           }
@@ -189,24 +190,24 @@ export const LegalEntityComponent: React.FC<Props> = ({
           <ListEmptyState
             query={query}
             archivedView={showArchived}
-            icon={<Building2 className="h-7 w-7"/>}
+            scene="company-hub"
             title="No legal entities yet"
             description="A legal entity is the company people are employed by. Add the first one to start assigning people to it."
             noResultsHint="Try a different name, country or registration number."
             archivedDescription="Archived legal entities will appear here."
             onCreate={openCreate}
-            createLabel="Add Legal Entity"
+            createLabel="Add legal entity"
             createAccess={{ resource: "ORG.LEGAL_ENTITY" }}
           />
         ) : (
           <Table className="table-fixed">
-            <TableHeader className="[&_tr]:border-brown-200 [&_tr]:border-t-0">
+            <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
               <TableRow>
                 <TableHead className="w-[22%]">Name</TableHead>
                 <TableHead className="w-[13%]">Country</TableHead>
-                <TableHead className="w-[13%]">Assigned Users</TableHead>
+                <TableHead className="w-[13%]">Assigned users</TableHead>
                 <TableHead className="w-[27%]">Address</TableHead>
-                <TableHead className="w-[12.5%]">Registration Number</TableHead>
+                <TableHead className="w-[12.5%]">Registration number</TableHead>
                 <TableHead className="w-[12.5%]">Tax ID</TableHead>
                 <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
               </TableRow>
@@ -216,7 +217,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
               {filteredSorted.map((e) => (
                 <TableRow
                   key={e.id}
-                  className={`group cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2 ${
+                  className={`group cursor-pointer border-divider hover:bg-subtle [&_td]:py-2 ${
                     ""
                   }`}
                   onClick={() => handleRowClick(e)}
@@ -228,25 +229,25 @@ export const LegalEntityComponent: React.FC<Props> = ({
                     </span>
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-tertiary">
                     {e.country}
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-tertiary">
                     {e.assignedUsersCount}
                   </TableCell>
 
-                  <TableCell className="truncate text-muted-foreground">
+                  <TableCell className="truncate text-tertiary">
                     {[e.street, e.postCode, e.city, e.country]
                       .filter(Boolean)
                       .join(", ")}
                   </TableCell>
 
-                  <TableCell className="truncate text-muted-foreground">
+                  <TableCell className="truncate text-tertiary">
                     {e.registrationNumber}
                   </TableCell>
 
-                  <TableCell className="truncate text-muted-foreground">
+                  <TableCell className="truncate text-tertiary">
                     {e.taxId}
                   </TableCell>
 
@@ -255,14 +256,14 @@ export const LegalEntityComponent: React.FC<Props> = ({
                       <RowActionsMenu label="Legal entity actions" stopPropagation>
                         {e.archived ? (
                           <RowAction
-                            icon={<ArchiveRestore className="h-4 w-4"/>}
+                            icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                             onClick={() => handleRestore(e)}
                             disabled={restoreAction.isPending}
                           >
                             Unarchive
                           </RowAction>
                         ) : (
-                          <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => setArchiving(e)}>
+                          <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => setArchiving(e)}>
                             Archive
                           </RowAction>
                         )}

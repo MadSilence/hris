@@ -2,14 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { CalendarDays } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import type { AccessCheck } from "@/models/access";
 import { useHolidayCalendarBinding } from "@/components/modules/settings/modules/time/publicHolidays/hooks/useHolidayCalendarBinding";
 import type { HolidayCalendarBindingKind } from "@/models/publicHolidays/binding";
 import { HolidayCalendarBindingDialog } from "./HolidayCalendarBindingDialog";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
   kind: HolidayCalendarBindingKind;
@@ -51,17 +53,17 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
-            <h2 className="text-base font-semibold">Holiday Calendar</h2>
+            <Icon icon={Calendar03Icon} />
+            <h2 className="text-body font-semibold">Holiday calendar</h2>
           </div>
-          <p className="m-0 text-sm text-muted-foreground">
+          <p className="m-0 text-body text-tertiary">
             Which public holidays the people who work here get, unless they have a calendar of their own.
           </p>
         </div>
         {!readOnly && (
           <PermissionGate allOf={writeChecks(kind)}>
-            <Button type="button" variant="outline" onClick={() => setIsOpen(true)} disabled={binding.isLoading}>
-              {current?.calendarId ? "Change" : "Set Calendar"}
+            <Button type="button" variant="secondary" onClick={() => setIsOpen(true)} disabled={binding.isLoading}>
+              {current?.calendarId ? "Change" : "Set calendar"}
             </Button>
           </PermissionGate>
         )}
@@ -70,34 +72,32 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
       {binding.error ? (
         <ErrorState error={binding.error} />
       ) : binding.isLoading ? (
-        <div className="h-5 w-48 animate-pulse rounded bg-brown-100" />
+        <div className="h-5 w-48 shimmer rounded-tag bg-mist" />
       ) : current?.calendarId ? (
         <div className="space-y-1">
-          <p className="m-0 text-sm font-medium text-foreground">{current.calendarName}</p>
-          <p className="m-0 text-xs text-muted-foreground">
+          <p className="m-0 text-body font-medium text-primary">{current.calendarName}</p>
+          <p className="m-0 text-hint text-tertiary">
             {inheriting === 1 ? "1 person inherits it" : `${inheriting} people inherit it`}
             {current.ruleId && (
               <>
                 {" · "}
                 <Link
                   href={`/settings/automation/automations/${current.ruleId}`}
-                  className="text-foreground underline-offset-2 hover:underline"
+                  className="text-accent-text underline-offset-4 hover:underline"
                 >
-                  Run Log
+                  Run log
                 </Link>
               </>
             )}
           </p>
           {current.ruleStatus === "PAUSED" && (
-            <p className="m-0 text-xs text-destructive">
-              Paused: this calendar is no longer available. Choose a calendar again to apply it.
-            </p>
+            <FieldError>Paused: this calendar is no longer available. Choose a calendar again to apply it.</FieldError>
           )}
         </div>
       ) : (
         <div className="space-y-1">
-          <p className="m-0 text-sm text-foreground">None</p>
-          <p className="m-0 text-xs text-muted-foreground">{FALLBACK[kind]}</p>
+          <p className="m-0 text-body text-primary">None</p>
+          <p className="m-0 text-hint text-tertiary">{FALLBACK[kind]}</p>
         </div>
       )}
 

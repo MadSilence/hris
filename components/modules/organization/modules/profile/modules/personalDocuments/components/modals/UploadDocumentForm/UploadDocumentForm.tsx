@@ -1,16 +1,18 @@
 "use client";
 
 import { FC, FormEvent, useRef, useState } from "react";
-import { CloudUpload, FileText, Upload, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Cancel01Icon, CloudUploadIcon, FileTextIcon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Label } from "@/components/desact/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
+import { cn } from "@/lib/cn";
 import { formatBytes } from "../../../utils/formatBytes";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
 
 export type FolderOption = {
   id: string;
@@ -153,13 +155,13 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
               addFiles(e.dataTransfer.files);
             }}
             className={cn(
-              "flex min-h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-all",
+              "flex min-h-[200px] items-center justify-center rounded-card border-2 border-dashed p-6 text-center transition-all",
               isLoading
                 ? "cursor-not-allowed opacity-60"
-                : "cursor-pointer hover:border-brown-300 hover:bg-brown-50/50",
-              isDragging ? "border-brown-400 bg-brown-50" : "border-brown-200",
+                : "cursor-pointer hover:border-field hover:bg-subtle/50",
+              isDragging ? "border-accent-ring bg-accent-subtle" : "border-field",
             )}
-          >
+ >
             <input
               ref={inputRef}
               aria-label="Files"
@@ -176,27 +178,27 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
             <div className="flex w-full max-w-md flex-col items-center">
               {isDragging ? (
                 <>
-                  <CloudUpload className="mb-4 h-12 w-12 text-brown-600"/>
-                  <p className="mb-2 font-medium text-brown-800">Drop files to upload</p>
-                  <p className="text-sm text-brown-600">Release to add them</p>
+                  <Icon icon={CloudUploadIcon} size="lg" className="mb-4 text-secondary" />
+                  <p className="mb-2 font-medium text-primary">Drop files to upload</p>
+                  <p className="text-body text-secondary">Release to add them</p>
                 </>
               ) : (
                 <>
-                  <CloudUpload className="mb-4 h-12 w-12 text-brown-400"/>
-                  <p className="mb-2 font-medium text-stone-900">Drag files here to upload</p>
-                  <p className="mb-4 text-sm text-stone-500">or click to browse</p>
+                  <Icon icon={CloudUploadIcon} size="lg" className="mb-4 text-tertiary" />
+                  <p className="mb-2 font-medium text-primary">Drag files here to upload</p>
+                  <p className="mb-4 text-body text-tertiary">or click to browse</p>
 
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     disabled={isLoading}
                     onClick={(e) => {
                       e.stopPropagation();
                       inputRef.current?.click();
                     }}
-                  >
-                    <Upload className="mr-2 h-4 w-4"/>
+ >
+                    <Icon icon={Upload01Icon} size="sm" />
                     Choose files
                   </Button>
                 </>
@@ -205,17 +207,17 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
           </div>
 
           {files.length > 0 && (
-            <ul className="divide-y divide-brown-100 rounded-lg border border-brown-200">
+            <ul className="divide-y divide-divider rounded-control border border-divider">
               {files.map((file, index) => (
                 <li
                   key={`${file.name}-${file.size}-${file.lastModified}`}
                   className="flex items-center gap-3 px-3 py-2"
-                >
-                  <FileText className="h-4 w-4 shrink-0 text-brown-500"/>
-                  <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>
+ >
+                  <Icon icon={FileTextIcon} size="sm" className="shrink-0 text-tertiary" />
+                  <span className="min-w-0 flex-1 truncate text-body" title={file.name}>
                     {shortenFileName(file.name)}
                   </span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
+                  <span className="shrink-0 text-hint text-tertiary">
                     {formatBytes(file.size)}
                   </span>
                   <Button
@@ -226,15 +228,15 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
                     aria-label={`Remove ${file.name}`}
                     disabled={isLoading}
                     onClick={() => removeFile(index)}
-                  >
-                    <X className="h-3.5 w-3.5"/>
+ >
+                    <Icon icon={Cancel01Icon} size="sm" />
                   </Button>
                 </li>
               ))}
             </ul>
           )}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <FormError message={error} />}
         </div>
 
         <div className="space-y-2">
@@ -255,13 +257,13 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label>Who Can See This</Label>
+          <Label>Who can see this</Label>
 
           <Select
             value={visibility}
             onValueChange={(v) => setVisibility(v as DocumentVisibility)}
             disabled={isLoading}
-          >
+ >
             <SelectTrigger>
               <SelectValue/>
             </SelectTrigger>
@@ -296,15 +298,14 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
       </div>
 
       <DialogFooter className="mt-8">
-        <Button type="button" variant="outline" disabled={isLoading} onClick={onCancelAction}>
+        <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
           Cancel
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading || files.length === 0}
-          className="bg-brown-600 text-white hover:bg-brown-700"
-        >
+ >
           {files.length > 1 ? `Upload ${files.length} files` : "Upload"}
         </Button>
       </DialogFooter>

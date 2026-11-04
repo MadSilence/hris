@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Cancel01Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { cn } from "@/lib/cn";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
 import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve";
 import { emptySegment, type UserRefDTO } from "@/models/segment/Segment";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import { NodRing } from "@/components/desact/nod";
 
 export type PickedUser = {
   id: string;
@@ -106,22 +108,22 @@ export function UserPickerField({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-brown-300 bg-input-background px-3 text-sm outline-none transition-colors hover:border-brown-400 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-9 w-full items-center justify-between gap-2 rounded-control border border-field bg-card px-3 text-body outline-none transition-colors hover:border-strong disabled:cursor-not-allowed disabled:opacity-50",
           )}
         >
           {value ? (
             <span className="flex min-w-0 items-center gap-2">
               <Avatar className="h-5 w-5 shrink-0">
                 {value.avatarUrl ? <AvatarImage src={value.avatarUrl} alt="" /> : null}
-                <AvatarFallback className="text-[9px]">{initials(value)}</AvatarFallback>
+                <AvatarFallback className="text-hint">{initials(value)}</AvatarFallback>
               </Avatar>
-              <span className="truncate text-brown-900">{fullName(value)}</span>
+              <span className="truncate text-primary">{fullName(value)}</span>
             </span>
           ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
+            <span className="text-tertiary">{placeholder}</span>
           )}
 
-          <span className="flex flex-none items-center gap-1 text-brown-400">
+          <span className="flex flex-none items-center gap-1 text-tertiary">
             {value && allowClear && !disabled && (
               <span
                 role="button"
@@ -131,26 +133,26 @@ export function UserPickerField({
                   e.stopPropagation();
                   onChange(null);
                 }}
-                className="rounded p-0.5 hover:bg-brown-100 hover:text-brown-700"
+                className="rounded-control p-0.5 hover:bg-mist hover:text-secondary"
               >
-                <X className="h-3.5 w-3.5" />
+                <Icon icon={Cancel01Icon} size="sm" />
               </span>
             )}
-            <ChevronsUpDown className="h-4 w-4 opacity-60" />
+            <Icon icon={UnfoldMoreIcon} size="sm" className="opacity-60" />
           </span>
         </button>
       </PopoverTrigger>
 
       <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
-        <div className="border-b border-brown-100 p-2">
+        <div className="border-b border-divider p-2">
           <SearchBox value={query} onChange={setQuery}/>
         </div>
 
         <div ref={listRef} onScroll={onScroll} className="max-h-64 overflow-y-auto p-1">
           {isLoading ? (
-            <p className="px-2 py-6 text-center text-sm text-brown-400">Loading…</p>
+            <div className="flex justify-center px-2 py-6"><NodRing size="md" /></div>
           ) : items.length === 0 ? (
-            <p className="px-2 py-6 text-center text-sm text-brown-400">No people found.</p>
+            <p className="px-2 py-6 text-center text-body text-tertiary">No people found.</p>
           ) : (
             items.map((u) => {
               const isSelected = value?.id === u.id;
@@ -160,25 +162,25 @@ export function UserPickerField({
                   type="button"
                   onClick={() => select(u)}
                   className={cn(
-                    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-brown-50",
-                    isSelected && "bg-brown-50",
+                    "flex w-full items-center gap-2 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-subtle",
+                    isSelected && "bg-subtle",
                   )}
                 >
                   <Avatar className="h-6 w-6 shrink-0">
                     {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt="" /> : null}
-                    <AvatarFallback className="text-[10px]">{initials(u)}</AvatarFallback>
+                    <AvatarFallback className="text-hint">{initials(u)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-brown-900">{fullName(u)}</span>
-                    <span className="block truncate text-xs text-brown-500">{u.email}</span>
+                    <span className="block truncate text-body font-medium text-primary">{fullName(u)}</span>
+                    <span className="block truncate text-hint text-tertiary">{u.email}</span>
                   </span>
-                  {isSelected && <Check className="h-4 w-4 flex-none text-brown-600" />}
+                  {isSelected && <Icon icon={Tick02Icon} size="sm" className="flex-none text-secondary" />}
                 </button>
               );
             })
           )}
           {isFetchingNextPage && (
-            <p className="px-2 py-2 text-center text-xs text-brown-400">Loading more…</p>
+            <p className="px-2 py-2 text-center text-hint text-tertiary">Loading more…</p>
           )}
         </div>
       </PopoverContent>

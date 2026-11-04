@@ -59,7 +59,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         // ENTERPRISE_ACCESS_DESIGN.md § 4.5 (A9): who decides who can sign in as whom.
         code: "SETTINGS.IDENTITY",
-        label: "Single Sign-On",
+        label: "Single sign-on",
         description: "Set up the identity provider, its provisioning tokens and the roles its groups grant.",
         supportedActions: ["MANAGE"],
         supportedScopes: COMPANY_ONLY,

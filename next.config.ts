@@ -2,29 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   distDir: ".next-dev",
-  webpack(config) {
-    const fileLoaderRule = config.module.rules.find(
-      (rule: { test?: { test?: (value: string) => boolean } }) => rule.test?.test?.(".svg"),
-    );
-    if (fileLoaderRule) fileLoaderRule.exclude = /\.svg$/i;
-
-    config.module.rules.push({
-      test: /\.svg$/i,
-      issuer: /\.[jt]sx?$/,
-      use: [
-        {
-          loader: "@svgr/webpack",
-          options: {
-            titleProp: true,
-            svgo: true,
-            icon: true,
-          },
-        },
-      ],
-    });
-
-    return config;
-  },
 };
 
 export default nextConfig;

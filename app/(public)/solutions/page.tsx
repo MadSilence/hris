@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, } from "@/public/desact/src/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, } from "@/components/desact/card";
 
 const solutions = [
   {
@@ -9,7 +9,7 @@ const solutions = [
   },
   {
     id: "people-managers",
-    title: "People Managers",
+    title: "People managers",
     body: "Approve requests, view balances, and keep schedules in sync.",
     bullets: ["Approvals in one view", "Team calendars", "Manager insights"],
   },
@@ -25,8 +25,8 @@ export default function SolutionsPage() {
   return (
     <div className="flex flex-col gap-10">
       <section className="space-y-4">
-        <h1 className="text-5xl font-medium">Solutions</h1>
-        <p className="max-w-2xl text-lg text-[var(--color-text-tertiary)]">
+        <h1 className="text-greeting">Solutions</h1>
+        <p className="max-w-2xl text-section-title text-tertiary">
           Role-based value across your organization.
         </p>
       </section>
@@ -41,7 +41,7 @@ export default function SolutionsPage() {
             <CardContent className="space-y-4">
               <p>{s.body}</p>
 
-              <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-text-tertiary)]">
+              <ul className="list-disc space-y-2 pl-5 text-body text-tertiary">
                 {s.bullets.map((b) => (
                   <li key={b}>{b}</li>
                 ))}

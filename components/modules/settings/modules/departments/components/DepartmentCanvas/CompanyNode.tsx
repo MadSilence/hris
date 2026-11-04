@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { Building2, ChevronUp } from "lucide-react";
+import { ArrowUp01Icon, Building03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 import { useDepartmentCanvas } from "./DepartmentCanvasContext";
 
@@ -33,34 +34,34 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
   return (
     <div
       className={cn(
-        "relative flex h-[140px] w-[200px] flex-col rounded-xl border bg-white p-3.5 transition-shadow",
+        "relative flex h-[140px] w-[200px] flex-col rounded-popover border bg-card p-3.5 transition-shadow",
         selected
-          ? "border-brown-300 bg-brown-100 shadow-md ring-1 ring-brown-200"
-          : "border-brown-200 shadow-sm hover:border-brown-300 hover:shadow-md",
+          ? "border-accent bg-card shadow-raised ring-1 ring-accent-ring"
+          : "border-divider shadow-card hover:border-field hover:shadow-raised",
         dimmed && "opacity-35",
-        dropTargetId === COMPANY_NODE_ID && "border-success-400 ring-2 ring-success-300",
+        dropTargetId === COMPANY_NODE_ID && "border-dashed border-accent-ring bg-accent-subtle",
       )}
     >
       {/* Top row: company icon / logo */}
       <div className="flex flex-none items-center">
         <div
           className={cn(
-            "flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg",
-            selected ? "bg-brown-200 text-brown-700" : "bg-brown-100 text-brown-600",
+            "flex h-8 w-8 items-center justify-center overflow-hidden rounded-control",
+            selected ? "bg-accent-muted text-accent-text" : "bg-mist text-secondary",
           )}
         >
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={logo} alt="" className="h-full w-full object-cover" />
           ) : (
-            <Building2 className="h-4 w-4" />
+            <Icon icon={Building03Icon} size="sm" />
           )}
         </div>
       </div>
 
       {/* Name */}
       <div className="mt-2.5 flex-1 overflow-hidden">
-        <p className="line-clamp-2 text-sm font-semibold leading-snug text-brown-900" title={name}>
+        <p className="line-clamp-2 text-body font-semibold leading-snug text-primary" title={name}>
           {name}
         </p>
       </div>
@@ -68,16 +69,16 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
       {/* Footer: People + Subs */}
       <div
         className={cn(
-          "flex flex-none items-center gap-4 border-t pt-2 text-[11px] leading-none text-brown-500",
-          selected ? "border-brown-300" : "border-brown-100",
+          "flex flex-none items-center gap-4 border-t pt-2 text-hint leading-none text-tertiary",
+          selected ? "border-accent-ring" : "border-divider",
         )}
       >
         <span>
-          <span className="font-semibold text-brown-700">{memberCount}</span>{" "}
+          <span className="font-semibold text-secondary">{memberCount}</span>{" "}
           {memberCount === 1 ? "Person" : "People"}
         </span>
         <span>
-          <span className="font-semibold text-brown-700">{departmentCount}</span> Subs
+          <span className="font-semibold text-secondary">{departmentCount}</span> Subs
         </span>
       </div>
 
@@ -90,14 +91,14 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
             e.stopPropagation();
             onToggleCollapse(COMPANY_NODE_ID);
           }}
-          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-full border border-brown-200 bg-white px-1.5 text-brown-500 shadow-sm transition-colors hover:border-brown-300 hover:text-brown-800"
+          className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
           aria-label={collapsed ? `Expand ${departmentCount} departments` : "Collapse"}
           title={collapsed ? `Expand ${departmentCount} departments` : "Collapse"}
         >
           {collapsed ? (
-            <span className="text-[11px] font-semibold leading-none">{departmentCount}</span>
+            <span className="text-hint font-semibold leading-none">{departmentCount}</span>
           ) : (
-            <ChevronUp className="h-3.5 w-3.5" />
+            <Icon icon={ArrowUp01Icon} size="sm" />
           )}
         </button>
       )}

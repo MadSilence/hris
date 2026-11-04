@@ -136,11 +136,11 @@ describe("AssignPeopleModal — everyone who matches", () => {
       segment: expect.objectContaining({ filters: [{ field: "sys:office", op: "eq", value: "berlin" }] }),
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Live Rule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create live rule" }));
     await screen.findByText("Live rule “Assign Germany 2026” created.");
     expect(createLiveRuleAction).toHaveBeenCalled();
     expect(assignmentApplyAction).not.toHaveBeenCalled();
-    expect(screen.getByRole("link", { name: "Open the Rule" })).toHaveAttribute("href", "/settings/automation/automations/rule-9");
+    expect(screen.getByRole("link", { name: "Open the rule" })).toHaveAttribute("href", "/settings/automation/automations/rule-9");
   });
 
   it("asks no date for a dated target, because each person gets it from the day they match", () => {

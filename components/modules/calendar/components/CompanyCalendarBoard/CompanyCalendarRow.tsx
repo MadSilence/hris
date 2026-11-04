@@ -2,17 +2,22 @@
 
 import { CSSProperties, FC, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
+import { toTagColor } from "@/lib/theme/tags";
 
 export const NAME_COL = 200;
 
 export const boardGridTemplate = (dayCount: number): string =>
   `${NAME_COL}px repeat(${dayCount}, minmax(0, 1fr))`;
 
-/** danger-100 — a variable because the half-day fill is a gradient stop, not a utility class. */
-const HOLIDAY_FILL = "var(--danger-100)";
+/**
+ * A holiday is a day off for the row, drawn quiet (SPEC § 13.13: weekends and holidays are a light ground,
+ * the holiday named): Mist, a hairline, secondary text. A variable because the half-day fill is a gradient
+ * stop, not a utility class.
+ */
+const HOLIDAY_FILL = "var(--surface-mist)";
 
 /**
  * One bar on a row: a public holiday or a person's leave, clipped to the visible days and turned into a
@@ -99,7 +104,8 @@ const holidayTitle = (m: CompanyCalendarMark): string => {
   return m.calendarName ? `${parts.join(" ")} · ${m.calendarName}` : parts.join(" ");
 };
 
-const leaveLabel = (a: CompanyCalendarAbsence): string => a.leaveTypeName ?? "Time off";
+/** Leave whose type the reader may not see is "Away", with no type (SPEC § 13.13 "Hidden details"). */
+const leaveLabel = (a: CompanyCalendarAbsence): string => a.leaveTypeName ?? "Away";
 
 /** The tooltip is the explanation — there is no legend (`COMPANY_CALENDAR.md` § 7). */
 export const leaveTitle = (a: CompanyCalendarAbsence): string => {
@@ -113,23 +119,26 @@ export const leaveTitle = (a: CompanyCalendarAbsence): string => {
 };
 
 /**
- * A leave bar's fill: the type's colour, faint, only when the type was sent; otherwise neutral. A masked
- * bar tinted with its type's colour would still name the type to anyone who has learnt the colour.
- * Undecided leave is hatched over the same fill, with a dashed edge so the difference is not colour alone.
+ * A leave bar (SPEC § 13.13), in its type's tag colour — and in gray when the type was not sent: a masked bar
+ * tinted with its type's colour would still name the type to anyone who has learnt the colour.
+ *
+ *   approved   a solid bar in the tag's bar colour
+ *   pending    a 1.5 px edge in the bar colour over the tag's light tint, with a 4 px dot pattern on top
+ *
+ * The difference is never the colour alone: the dots stay in a black-and-white print.
  */
 export const leaveStyle = (a: CompanyCalendarAbsence): CSSProperties => {
-  const hex = a.leaveTypeColor && /^#[0-9a-fA-F]{6}$/.test(a.leaveTypeColor) ? a.leaveTypeColor : null;
-  const undecided = a.status !== "APPROVED";
+  const tag = toTagColor(a.leaveTypeColor);
+  const bar = `var(--tag-${tag}-bar)`;
+  if (a.status === "APPROVED") {
+    return { backgroundColor: bar, borderColor: bar, color: "var(--text-inverse)" };
+  }
   return {
-    backgroundColor: hex ? `${hex}33` : "var(--brown-100)",
-    borderColor: hex ?? "var(--brown-300)",
-    ...(undecided
-      ? {
-          backgroundImage:
-            "repeating-linear-gradient(135deg, transparent 0 4px, rgba(255,255,255,0.75) 4px 8px)",
-          borderStyle: "dashed",
-        }
-      : {}),
+    backgroundColor: `var(--tag-${tag}-bg)`,
+    borderColor: bar,
+    color: `var(--tag-${tag}-text)`,
+    backgroundImage: `radial-gradient(${bar} 0.75px, transparent 1px)`,
+    backgroundSize: "4px 4px",
   };
 };
 
@@ -233,9 +242,9 @@ export const CompanyCalendarRow: FC<RowProps> = ({
   const height = rowHeight(segments);
 
   return (
-    <div className="relative grid w-full text-sm" style={{ gridTemplateColumns }}>
+    <div className="relative grid w-full text-body" style={{ gridTemplateColumns }}>
       <div
-        className="sticky left-0 z-10 border-b border-r border-brown-200 bg-white px-3 py-2"
+        className="sticky left-0 z-10 border-b border-r border-divider bg-card px-3 py-2"
         style={{ minHeight: height }}
       >
         <UserChip
@@ -267,8 +276,15 @@ export const CompanyCalendarRow: FC<RowProps> = ({
             }
             onMouseEnter={onSelectRange && drag ? () => setDrag({ from: drag.from, to: i }) : undefined}
             className={[
-              "border-b border-r border-brown-100",
-              selected(i) ? "bg-brown-100" : today ? "bg-brown-50" : weekend ? "bg-brown-50/50" : "",
+              "border-b border-r border-divider",
+              // Today is a thin accent line down the day (SPEC § 13.13); weekends a light ground.
+              selected(i)
+                ? "bg-accent-subtle"
+                : today
+                  ? "relative before:absolute before:inset-y-0 before:left-1/2 before:w-px before:bg-accent before:content-['']"
+                  : weekend
+                    ? "bg-subtle"
+                    : "",
               onSelectRange ? "cursor-cell" : "",
             ].join(" ")}
           />
@@ -284,8 +300,8 @@ export const CompanyCalendarRow: FC<RowProps> = ({
         >
           {segments.map((seg) => {
             const edges = [
-              seg.continuesLeft ? "rounded-l-none border-l-0" : "ml-1 rounded-l-md",
-              seg.continuesRight ? "rounded-r-none border-r-0" : "mr-1 rounded-r-md",
+              seg.continuesLeft ? "rounded-none border-l-0" : "ml-1 rounded-l-control",
+              seg.continuesRight ? "rounded-none border-r-0" : "mr-1 rounded-r-control",
             ].join(" ");
             const placement = { gridColumn: `${seg.startCol + 2} / ${seg.endCol + 3}`, gridRow: seg.lane + 1 };
             // The name only where it fits. At month density a day column is a fraction of the row, so
@@ -306,14 +322,14 @@ export const CompanyCalendarRow: FC<RowProps> = ({
                       ? { backgroundImage: `linear-gradient(to top, ${HOLIDAY_FILL} 50%, transparent 50%)` }
                       : { backgroundColor: HOLIDAY_FILL }),
                   }}
-                  className={`pointer-events-auto flex items-center overflow-hidden border border-danger-200 text-[11px] leading-none text-danger-800 ${edges}`}
+                  className={`pointer-events-auto flex items-center overflow-hidden border border-divider text-hint leading-none text-secondary ${edges}`}
                 >
                   {showLabel ? (
                     <span className="truncate px-1.5">
                       {mark.name}
                       {/* The bar is painted half; the words say so where there is room for
                           words, so the fill is not the only carrier of the fact. */}
-                      {mark.dayPart === "HALF_DAY" ? " · Half Day" : null}
+                      {mark.dayPart === "HALF_DAY" ? " · Half day" : null}
                     </span>
                   ) : null}
                 </div>
@@ -322,7 +338,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
 
             const absence = seg.bar.absence;
             const className = [
-              "pointer-events-auto flex items-center overflow-hidden border text-[11px] leading-none text-brown-800",
+              "pointer-events-auto flex items-center overflow-hidden border-[1.5px] text-hint font-medium leading-none",
               absence.requestId ? "cursor-pointer hover:brightness-95" : "",
               edges,
             ].join(" ");
@@ -331,7 +347,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
                 {absence.awaitingYou ? (
                   <span
                     aria-label="Waiting for your approval"
-                    className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warning-500"
+                    className="ml-1 h-1.5 w-1.5 shrink-0 rounded-pill bg-status-pending-fill"
                   />
                 ) : null}
                 {showLabel ? <span className="truncate px-1.5">{leaveLabel(absence)}</span> : null}
@@ -373,15 +389,15 @@ export const CompanyCalendarSkeletonRow: FC<{ dayISOs: string[]; gridTemplateCol
   dayISOs,
   gridTemplateColumns,
 }) => (
-  <div className="grid w-full text-sm" style={{ gridTemplateColumns }}>
-    <div className="sticky left-0 z-10 border-b border-r border-brown-200 bg-white px-3 py-2">
+  <div className="grid w-full text-body" style={{ gridTemplateColumns }}>
+    <div className="sticky left-0 z-10 border-b border-r border-divider bg-card px-3 py-2">
       <div className="flex items-center gap-2.5">
-        <Skeleton className="h-7 w-7 rounded-full" />
+        <Skeleton className="h-7 w-7 rounded-pill" />
         <Skeleton className="h-4 w-28" />
       </div>
     </div>
     {dayISOs.map((iso) => (
-      <div key={iso} className="min-h-[44px] border-b border-r border-brown-100" />
+      <div key={iso} className="min-h-[44px] border-b border-r border-divider" />
     ))}
   </div>
 );

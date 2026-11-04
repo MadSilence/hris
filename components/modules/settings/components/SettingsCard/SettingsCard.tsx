@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@/public/desact/src/components/ui/card";
-import { Separator } from "@/public/desact/src/components/ui/separator";
-import { ExternalLink } from "lucide-react";
+import { Card } from "@/components/desact/card";
+import { Separator } from "@/components/desact/separator";
+import { LinkSquare02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import React from "react";
 
 export type SettingsLinkItem = {
@@ -34,14 +35,14 @@ const SettingsCard = ({
       <div className="flex items-center gap-4">
         {icon ? (
           <span
-            className="inline-grid place-items-center w-8 h-8 rounded-md bg-muted text-muted-foreground"
+            className="inline-grid place-items-center w-8 h-8 rounded-control bg-mist text-tertiary"
             aria-hidden
           >
             {icon}
           </span>
         ) : null}
 
-        <h2 id={headingId} className="text-base font-semibold">
+        <h2 id={headingId} className="text-body font-semibold">
           {title}
         </h2>
       </div>
@@ -50,17 +51,14 @@ const SettingsCard = ({
         {items.map((it, idx) => {
           const row = (
             <div
-              className="group flex items-center justify-between px-2.5 py-1.5 rounded-md hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors cursor-pointer"
+              className="group flex items-center justify-between px-2.5 py-1.5 rounded-control hover:bg-mist focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring transition-colors cursor-pointer"
             >
-              <div className="text-sm no-underline">
+              <div className="text-body no-underline">
                 {it.label}
               </div>
 
               {it.external ? (
-                <ExternalLink
-                  className="w-3.5 h-3.5 text-muted-foreground opacity-70 group-hover:opacity-100"
-                  aria-hidden
-                />
+                <Icon icon={LinkSquare02Icon} size="sm" className="text-tertiary opacity-70 group-hover:opacity-100" />
               ) : null}
             </div>
           );
@@ -72,14 +70,14 @@ const SettingsCard = ({
                   href={it.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-md no-underline hover:no-underline"
+                  className="rounded-control no-underline hover:no-underline"
                 >
                   {row}
                 </a>
               ) : (
                 <Link
                   href={it.href}
-                  className="rounded-md no-underline hover:no-underline"
+                  className="rounded-control no-underline hover:no-underline"
                 >
                   {row}
                 </Link>

@@ -1,9 +1,10 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import { Archive, ArchiveRestore, Layers, Pencil, Plus } from "lucide-react";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
@@ -13,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
+} from "@/components/desact/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
 import { LeaveTypesSettingsSkeleton } from "../LeaveTypesSettingsSkeleton";
@@ -21,6 +22,8 @@ import { LeaveTypeCategoryChip } from "../LeaveTypeCategoryChip/LeaveTypeCategor
 import { LeaveTypeCategory, LeaveTypeStatus } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { LeaveType } from "@/models/timeOff";
 import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
+import { cn } from "@/lib/cn";
+import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
 
 type Props = {
   leaveTypes: LeaveType[];
@@ -83,8 +86,8 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
 
   const addButton = (
     <Button type="button" className="gap-1.5" onClick={onCreateAction}>
-      <Plus className="h-4 w-4" />
-      Add Leave Type
+      <Icon icon={Add01Icon} size="sm" />
+      Add leave type
     </Button>
   );
 
@@ -93,7 +96,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
           <SettingsPageHeader title="Time off" backHref="/settings" />
-          <PageDescription className="text-base text-muted-foreground/90">
+          <PageDescription className="text-body text-tertiary/90">
             Leave types are the categories of time off in your organization — Vacation, Sick,
             Parental and more. Each type holds one or more policies with the actual rules.
           </PageDescription>
@@ -101,8 +104,8 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
 
         {/* Info block */}
         <div className="space-y-1 pb-1 pt-5">
-          <h2 className="text-lg font-semibold text-foreground">Leave types</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-section-title text-primary">Leave types</h2>
+          <p className="text-body text-tertiary">
             Open a type to manage its policies (quotas, accrual, carryover and approvals).
           </p>
         </div>
@@ -118,17 +121,17 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
       <div className="flex min-h-0 flex-1 flex-col px-8 pb-6">
         {!isLoading && !hasLeaveTypes ? (
           <ListEmptyState
-            icon={<Layers className="h-7 w-7" />}
+            scene="time-off"
             title="No leave types yet"
             description="A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies."
             onCreate={onCreateAction}
-            createLabel="Add Leave Type"
+            createLabel="Add leave type"
             className="min-h-72 flex-1"
           />
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <table className="w-full caption-bottom text-sm table-fixed">
-              <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+            <table className="w-full caption-bottom text-body table-fixed">
+              <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                 <TableRow>
                   <TableHead className="pl-4">Type</TableHead>
                   <TableHead>Category</TableHead>
@@ -146,13 +149,13 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                       <ListEmptyState
                         query={query}
                         archivedView={showArchived}
-                        icon={<Layers className="h-7 w-7" />}
+                        scene="time-off"
                         title="No leave types yet"
                         description="A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies."
                         noResultsHint="Try a different name or category."
                         archivedDescription="Archived leave types will appear here."
                         onCreate={onCreateAction}
-                        createLabel="Add Leave Type"
+                        createLabel="Add leave type"
                       />
                     </TableCell>
                   </TableRow>
@@ -162,19 +165,19 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                     return (
                       <TableRow
                         key={leaveType.id}
-                        className="group border-brown-200 cursor-pointer hover:bg-brown-50 [&_td]:py-2"
+                        className="group border-divider cursor-pointer hover:bg-subtle [&_td]:py-2"
                         onClick={() => onOpenAction(leaveType)}
                       >
                         <TableCell className="py-3 pl-4">
                           <div className="flex items-center gap-2.5">
                             <span
-                              className="h-2.5 w-2.5 flex-none rounded-full border border-brown-200"
-                              style={{ backgroundColor: leaveType.color ?? "#e7e0d8" }}
+                              aria-hidden
+                              className={cn("size-2.5 flex-none rounded-pill", TAG_CLASSES[toTagColor(leaveType.color)].dot)}
                             />
                             <div className="min-w-0">
                               <span className="font-medium text-primary">{leaveType.name}</span>
                               {leaveType.description && (
-                                <p className="truncate text-xs text-muted-foreground">
+                                <p className="truncate text-hint text-tertiary">
                                   {leaveType.description}
                                 </p>
                               )}
@@ -189,9 +192,9 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
-                            <RowActionsMenu label="Leave Type Actions">
+                            <RowActionsMenu label="Leave type actions">
                               <RowAction
-                                icon={<Pencil className="h-4 w-4" />}
+                                icon={<Icon icon={PencilEdit02Icon} size="sm" />}
                                 onClick={() => onEditAction(leaveType)}
                               >
                                 Edit
@@ -204,14 +207,14 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                               */}
                               {leaveType.status === LeaveTypeStatus.Active ? (
                                 <RowAction
-                                  icon={<Archive className="h-4 w-4" />}
+                                  icon={<Icon icon={Archive02Icon} size="sm" />}
                                   onClick={() => onArchiveAction(leaveType)}
                                 >
                                   Archive
                                 </RowAction>
                               ) : (
                                 <RowAction
-                                  icon={<ArchiveRestore className="h-4 w-4" />}
+                                  icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                                   onClick={() => onRestoreAction(leaveType)}
                                 >
                                   Unarchive
@@ -232,5 +235,4 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
     </div>
   );
 };
-
 

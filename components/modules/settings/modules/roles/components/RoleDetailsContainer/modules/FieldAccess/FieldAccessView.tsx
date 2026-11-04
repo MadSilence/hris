@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Lock } from "lucide-react";
+import { SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/public/desact/src/components/ui/accordion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
 import type { FieldDTO } from "@/models/user/fields";
 import type { AttributeGroup } from "@/models/attribute";
 import {
@@ -22,6 +23,9 @@ import {
   FieldActionLevel,
   FieldScope,
 } from "@/components/modules/settings/modules/roles/utils/fieldAccessDraft";
+import { TagChip } from "@/components/ui/TagChip";
+import type { TagColor } from "@/lib/theme/tags";
+import { Badge } from "@/components/desact/badge";
 
 // Field · Type · Own · Direct reports · Whole company — one template for header + rows.
 // Field column is ~2× the others (2fr : 1fr : 1fr : 1fr : 1fr).
@@ -32,9 +36,9 @@ const SYSTEM_GROUP_ID = "__system__";
 const UNGROUPED_ID = "__ungrouped__";
 
 function dotClass(current: FieldActionLevel, server: FieldActionLevel): string {
-  if (current !== server) return "bg-info-500";
-  if (current === "NONE") return "bg-brown-300";
-  return "bg-success-500";
+  if (current !== server) return "bg-status-info-fill";
+  if (current === "NONE") return "bg-strong";
+  return "bg-status-approved-fill";
 }
 
 // Friendly labels + colored chips per attribute type (like the status/role chips elsewhere).
@@ -51,32 +55,26 @@ const TYPE_LABELS: Record<string, string> = {
   PERSON: "Person",
 };
 
-// A categorical palette — one hue per field type, not a status — so the raw hues are deliberate.
-/* eslint-disable no-restricted-syntax */
-const TYPE_CHIP: Record<string, string> = {
-  TEXT: "border-brown-200 bg-brown-50 text-brown-700",
-  EMAIL: "border-blue-200 bg-blue-50 text-blue-700",
-  URL: "border-blue-200 bg-blue-50 text-blue-700",
-  STATUS: "border-pink-200 bg-pink-50 text-pink-700",
-  NUMBER: "border-amber-200 bg-amber-50 text-amber-700",
-  DATE: "border-purple-200 bg-purple-50 text-purple-700",
-  CHECKBOX: "border-green-200 bg-green-50 text-green-700",
-  SELECT: "border-teal-200 bg-teal-50 text-teal-700",
-  MULTI_SELECT: "border-teal-200 bg-teal-50 text-teal-700",
-  PERSON: "border-indigo-200 bg-indigo-50 text-indigo-700",
+// One tag colour per field type — a category, not a status, so it takes the tag palette (SPEC § 4.7).
+const TYPE_TAG: Record<string, TagColor> = {
+  TEXT: "gray",
+  EMAIL: "ocean",
+  URL: "ocean",
+  STATUS: "berry",
+  NUMBER: "bronze",
+  DATE: "plum",
+  CHECKBOX: "teal",
+  SELECT: "indigo",
+  MULTI_SELECT: "indigo",
+  PERSON: "cocoa",
 };
-/* eslint-enable no-restricted-syntax */
 
 const TypeChip: React.FC<{ type?: string | null }> = ({ type }) => {
   const key = type ?? "";
   return (
-    <span
-      className={`inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-xs font-medium ${
-        TYPE_CHIP[key] ?? "border-brown-200 bg-brown-50 text-brown-700"
-      }`}
-    >
+    <TagChip color={TYPE_TAG[key] ?? "gray"}>
       {TYPE_LABELS[key] ?? key}
-    </span>
+    </TagChip>
   );
 };
 
@@ -130,7 +128,7 @@ const ActionSelect: React.FC<{
     <Select value={value} onValueChange={(v) => onChange(v as FieldActionLevel)} disabled={disabled}>
       <SelectTrigger className="w-full">
         <span className="flex min-w-0 items-center gap-2">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass(value, server)}`} />
+          <span className={`h-2 w-2 shrink-0 rounded-pill ${dotClass(value, server)}`} />
           <SelectValue />
         </span>
       </SelectTrigger>
@@ -153,7 +151,7 @@ const ActionSelect: React.FC<{
           );
         })}
         {floorOrd > 0 && (
-          <p className="mt-1 border-t border-brown-100 px-2 pt-1.5 text-xs text-muted-foreground">
+          <p className="mt-1 border-t border-divider px-2 pt-1.5 text-hint text-tertiary">
             Options below “{FIELD_ACTION_LABELS[floor]}” are set by Whole company access.
           </p>
         )}
@@ -203,7 +201,7 @@ export default function FieldAccessView({
 
   return (
     <div>
-      <div className={`${GRID} sticky top-0 z-10 bg-white px-1 pb-3 pt-1 text-sm font-medium text-foreground`}>
+      <div className={`${GRID} sticky top-0 z-10 bg-card px-1 pb-3 pt-1 text-body font-medium text-primary`}>
         <div>Field</div>
         <div>Type</div>
         {FIELD_SCOPES.map((scope) => (
@@ -212,7 +210,7 @@ export default function FieldAccessView({
       </div>
 
       {readOnlyReason && (
-        <p className="mt-3 rounded-md bg-brown-50 px-4 py-3 text-sm text-muted-foreground">
+        <p className="mt-3 rounded-control bg-subtle px-4 py-3 text-body text-tertiary">
           {readOnlyReason}
         </p>
       )}
@@ -225,7 +223,7 @@ export default function FieldAccessView({
       >
         {visibleGroups.map((group) => (
           <AccordionItem key={group.id} value={group.id} className="border-b-0">
-            <AccordionTrigger className="rounded-md bg-brown-50 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-brown-700 hover:no-underline">
+            <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
               {group.label}
             </AccordionTrigger>
 
@@ -239,17 +237,19 @@ export default function FieldAccessView({
                   return (
                     <div
                       key={field.id}
-                      className={`${ROW} border-b border-brown-100 px-1 py-2 last:border-b-0`}
+                      className={`${ROW} border-b border-divider px-1 py-2 last:border-b-0`}
                     >
-                      <p className="min-w-0 truncate text-sm font-medium">
+                      <p className="min-w-0 truncate text-body font-medium">
                         {field.label ?? field.key}
                         {field.sensitive && (
-                          <span
-                            className="ml-2 rounded border border-warning-300 bg-warning-50 px-1.5 py-0.5 align-middle text-[10px] font-normal uppercase tracking-wide text-warning-700"
+                          <Badge
+                            variant="neutral"
+                            size="sm"
+                            className="ml-2 align-middle"
                             title="Sensitive: access is never granted automatically; without it people see a placeholder"
                           >
                             Sensitive
-                          </span>
+                          </Badge>
                         )}
                       </p>
 
@@ -259,8 +259,8 @@ export default function FieldAccessView({
                         <>
                           <span aria-hidden />
                           <span aria-hidden />
-                          <span className="flex items-center justify-start gap-1.5 text-sm text-muted-foreground opacity-60">
-                            <Lock className="h-3.5 w-3.5" />
+                          <span className="flex items-center justify-start gap-1.5 text-body text-tertiary opacity-60">
+                            <Icon icon={SquareLock02Icon} size="sm" />
                             Always visible
                           </span>
                         </>
@@ -285,7 +285,7 @@ export default function FieldAccessView({
         ))}
 
         {visibleGroups.length === 0 && (
-          <p className="px-1 py-6 text-sm text-muted-foreground">
+          <p className="px-1 py-6 text-body text-tertiary">
             No fields match “{query.trim()}”.
           </p>
         )}

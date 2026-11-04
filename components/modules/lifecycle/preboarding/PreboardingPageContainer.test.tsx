@@ -36,9 +36,9 @@ describe("PreboardingPageContainer", () => {
     const [done, open] = screen.getAllByRole("listitem");
 
     expect(within(done).getByText("Done")).toBeInTheDocument();
-    expect(within(done).queryByRole("button", { name: "Mark Done" })).not.toBeInTheDocument();
+    expect(within(done).queryByRole("button", { name: "Mark done" })).not.toBeInTheDocument();
 
     expect(within(open).queryByText("Done")).not.toBeInTheDocument();
-    expect(within(open).getByRole("button", { name: "Mark Done" })).toBeInTheDocument();
+    expect(within(open).getByRole("button", { name: "Mark done" })).toBeInTheDocument();
   });
 });

@@ -445,7 +445,7 @@ describe("PersonalInfoContainer — system fields in the same save", () => {
     expect(sectionIds).toEqual(["sys-group:Account", "sys-group:Organization", "position-history", "g1"]);
     expect(screen.getByText("Position timeline")).toBeInTheDocument();
     // The sidebar entry.
-    expect(screen.getByText("Position History")).toBeInTheDocument();
+    expect(screen.getByText("Position history")).toBeInTheDocument();
   });
 
   it("leaves the timeline out for a reader who may not see the position", () => {
@@ -457,6 +457,6 @@ describe("PersonalInfoContainer — system fields in the same save", () => {
     render(<PersonalInfoContainer user={user({ fieldAccess: { "sys:first_name": "VIEW", "attr:a1": "VIEW" } })}/>);
 
     expect(screen.queryByText("Position timeline")).not.toBeInTheDocument();
-    expect(screen.queryByText("Position History")).not.toBeInTheDocument();
+    expect(screen.queryByText("Position history")).not.toBeInTheDocument();
   });
 });

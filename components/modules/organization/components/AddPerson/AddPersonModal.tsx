@@ -6,15 +6,16 @@ import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { createUserAction } from "@/components/modules/organization/components/AddPerson/actions/createUserAction";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
   open: boolean;
@@ -86,7 +87,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent onKeyDown={handleKeyDown} className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Person</DialogTitle>
+          <DialogTitle>Add person</DialogTitle>
           <DialogDescription>
             A name is enough. The person is added as a draft and invited when you decide to.
           </DialogDescription>
@@ -95,7 +96,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="person-first-name" required>First Name</RequiredLabel>
+              <RequiredLabel htmlFor="person-first-name" required>First name</RequiredLabel>
               <Input
                 id="person-first-name"
                 name="firstName"
@@ -105,11 +106,11 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
                 disabled={busy}
               />
               {formik.touched.firstName && formik.errors.firstName && (
-                <p role="alert" className="text-xs text-destructive">{formik.errors.firstName}</p>
+                <FieldError>{formik.errors.firstName}</FieldError>
               )}
             </div>
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="person-last-name" required>Last Name</RequiredLabel>
+              <RequiredLabel htmlFor="person-last-name" required>Last name</RequiredLabel>
               <Input
                 id="person-last-name"
                 name="lastName"
@@ -119,7 +120,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
                 disabled={busy}
               />
               {formik.touched.lastName && formik.errors.lastName && (
-                <p role="alert" className="text-xs text-destructive">{formik.errors.lastName}</p>
+                <FieldError>{formik.errors.lastName}</FieldError>
               )}
             </div>
           </div>
@@ -136,18 +137,18 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
               disabled={busy}
             />
             {formik.touched.email && formik.errors.email && (
-              <p role="alert" className="text-xs text-destructive">{formik.errors.email}</p>
+              <FieldError>{formik.errors.email}</FieldError>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="person-hire-date">Hire Date</Label>
+            <Label htmlFor="person-hire-date">Hire date</Label>
             <DatePicker
               id="person-hire-date"
               value={formik.values.hireDate}
               onChange={(v) => formik.setFieldValue("hireDate", v)}
               disabled={busy}
-              ariaLabel="Hire Date"
+              ariaLabel="Hire date"
             />
           </div>
 
@@ -155,7 +156,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
             Cancel
           </Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>

@@ -2,10 +2,11 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, ListChecks, Mail, Plus, UserMinus, Zap } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Add01Icon, Calendar03Icon, CheckListIcon, FlashIcon, Mail01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -18,14 +19,14 @@ import { startsReviews, useAutomationNames } from "@/components/modules/automati
 import { STARTERS, type StarterId } from "@/components/modules/automations/builder/draft";
 import { formatMoment, type AssignableType, type AutomationRuleSummary } from "@/models/automations";
 
-const COLUMNS = ["Automation", "Status", "Last Run", "Runs"] as const;
+const COLUMNS = ["Automation", "Status", "Last run", "Runs"] as const;
 const NEW_HREF = "/settings/automation/automations/new";
 
 const STARTER_ICONS: Record<StarterId, React.ReactNode> = {
-  "welcome-email": <Mail className="h-4 w-4" />,
-  "manager-day-one": <ListChecks className="h-4 w-4" />,
-  "office-calendar": <CalendarDays className="h-4 w-4" />,
-  "termination-hr": <UserMinus className="h-4 w-4" />,
+  "welcome-email": <Icon icon={Mail01Icon} size="sm" />,
+  "manager-day-one": <Icon icon={CheckListIcon} size="sm" />,
+  "office-calendar": <Icon icon={Calendar03Icon} size="sm" />,
+  "termination-hr": <Icon icon={UserRemove01Icon} size="sm" />,
 };
 
 const totalRuns = (r: AutomationRuleSummary) =>
@@ -71,8 +72,8 @@ export function AutomationsListContainer() {
   const newButton = (
     <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
       <Button type="button" className="gap-1.5" onClick={() => router.push(NEW_HREF)}>
-        <Plus className="h-4 w-4" />
-        New Automation
+        <Icon icon={Add01Icon} size="sm" />
+        New automation
       </Button>
     </PermissionGate>
   );
@@ -97,7 +98,7 @@ export function AutomationsListContainer() {
             fill
             query={query}
             archivedView={showArchived}
-            icon={<Zap className="h-6 w-6" />}
+            scene="automations"
             title="No automations yet"
             description="An automation does something on its own when something happens to a person."
             noResultsHint="Try a different name, trigger or action."
@@ -114,7 +115,7 @@ export function AutomationsListContainer() {
                 ? [0, 1, 2].map((i) => (
                   <TableRow key={`skeleton-${i}`}>
                     <TableCell><Skeleton className="h-4 w-48" /><Skeleton className="mt-2 h-3 w-80" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16 rounded-pill" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="ml-auto h-4 w-8" /></TableCell>
                   </TableRow>
@@ -130,18 +131,18 @@ export function AutomationsListContainer() {
                     }}
                   >
                     <TableCell className="max-w-0 py-3">
-                      <div className="truncate font-medium text-foreground">{rule.name}</div>
+                      <div className="truncate font-medium text-primary">{rule.name}</div>
                       {rule.definition ? (
-                        <div className="mt-0.5 truncate text-sm text-muted-foreground" data-test="rule-sentence">
+                        <div className="mt-0.5 truncate text-body text-tertiary" data-test="rule-sentence">
                           {sentence.when} · for {sentence.forWhom} → {sentence.does}
                         </div>
                       ) : null}
                       {rule.status === "PAUSED" && rule.pausedReason ? (
-                        <div className="mt-0.5 truncate text-xs text-warning-700">{rule.pausedReason}</div>
+                        <div className="mt-0.5 truncate text-hint text-status-pending-text">{rule.pausedReason}</div>
                       ) : null}
                     </TableCell>
                     <TableCell className="w-32"><RuleStatusBadge status={rule.status} /></TableCell>
-                    <TableCell className="w-44 text-sm text-muted-foreground">{formatMoment(rule.lastRunAt)}</TableCell>
+                    <TableCell className="w-44 text-body text-tertiary">{formatMoment(rule.lastRunAt)}</TableCell>
                     <TableCell className="w-20 text-right tabular-nums">{totalRuns(rule)}</TableCell>
                   </TableRow>
                 ))}
@@ -160,10 +161,10 @@ export function AutomationsListContainer() {
 function FirstAutomation({ onStart, onBlank }: { onStart: (id: StarterId) => void; onBlank: () => void }) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 py-16 text-center">
-      <div className="rounded-2xl bg-brown-50 p-4 text-brown-600"><Zap className="h-7 w-7" /></div>
+      <div className="rounded-card bg-subtle p-4 text-secondary"><Icon icon={FlashIcon} size="lg" /></div>
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-foreground">Automate the first rule</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-section-title text-primary">Automate the first rule</h3>
+        <p className="text-body text-tertiary">
           An automation does something on its own when something happens to a person — a welcome email
           before their first day, a task for their manager, the right holiday calendar for their office.
         </p>
@@ -175,19 +176,19 @@ function FirstAutomation({ onStart, onBlank }: { onStart: (id: StarterId) => voi
               key={s.id}
               type="button"
               onClick={() => onStart(s.id)}
-              className="flex items-start gap-3 rounded-xl border border-brown-100 bg-white p-4 text-left transition hover:border-brown-200 hover:bg-brown-50"
+              className="flex items-start gap-3 rounded-card border border-divider bg-card p-4 text-left transition hover:border-divider hover:bg-subtle"
             >
-              <span className="mt-0.5 text-brown-500">{STARTER_ICONS[s.id]}</span>
+              <span className="mt-0.5 text-tertiary">{STARTER_ICONS[s.id]}</span>
               <span>
-                <span className="block text-sm font-medium text-foreground">{s.title}</span>
-                <span className="block text-xs text-muted-foreground">{s.hint}</span>
+                <span className="block text-body font-medium text-primary">{s.title}</span>
+                <span className="block text-hint text-tertiary">{s.hint}</span>
               </span>
             </button>
           ))}
         </div>
         <Button type="button" className="gap-1.5" onClick={onBlank}>
-          <Plus className="h-4 w-4" />
-          New Automation
+          <Icon icon={Add01Icon} size="sm" />
+          New automation
         </Button>
       </PermissionGate>
     </div>

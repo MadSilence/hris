@@ -11,7 +11,7 @@ describe("ErrorState", () => {
   // A refusal of rights answers the same however often it is asked (walk of 2026-10-30).
   it("offers no retry for a refusal of rights", () => {
     render(<ErrorState error={new ForbiddenError("nope", { status: 403, code: "E00403" })} onRetry={jest.fn()} />);
-    expect(screen.getByText("You do not have access to this")).toBeInTheDocument();
+    expect(screen.getByText("This is private")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Try again/ })).not.toBeInTheDocument();
   });
 });

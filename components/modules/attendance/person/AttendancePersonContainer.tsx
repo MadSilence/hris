@@ -2,11 +2,12 @@
 
 import React, { Fragment } from "react";
 import Link from "next/link";
-import { ChevronLeft, UserRound } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
+import { ArrowLeft01Icon, UserIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -38,11 +39,11 @@ export const daysShown = (days: AttendanceLogDay[]): AttendanceLogDay[] =>
 type NumericTotal = Exclude<keyof AttendanceTotals, "amounts">;
 
 const TOTALS: { key: NumericTotal; label: string; minutes: boolean }[] = [
-  { key: "expectedDays", label: "Expected Days", minutes: false },
-  { key: "loggedDays", label: "Logged Days", minutes: false },
-  { key: "expectedMinutes", label: "Expected Hours", minutes: true },
-  { key: "loggedMinutes", label: "Logged Hours", minutes: true },
-  { key: "overtimeMinutes", label: "Overtime Hours", minutes: true },
+  { key: "expectedDays", label: "Expected days", minutes: false },
+  { key: "loggedDays", label: "Logged days", minutes: false },
+  { key: "expectedMinutes", label: "Expected hours", minutes: true },
+  { key: "loggedMinutes", label: "Logged hours", minutes: true },
+  { key: "overtimeMinutes", label: "Overtime hours", minutes: true },
 ];
 
 const COLUMNS = 6;
@@ -72,10 +73,10 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
         <div className="flex items-center gap-4">
           <Link
             href={backHref}
-            aria-label="Back to Attendance"
-            className="no-underline grid h-10 w-10 place-items-center rounded-full border bg-white hover:bg-brown-50 active:translate-y-px"
+            aria-label="Back to attendance"
+            className="no-underline grid h-10 w-10 place-items-center rounded-pill border bg-card hover:bg-subtle active:translate-y-px"
           >
-            <ChevronLeft className="h-4 w-4"/>
+            <Icon icon={ArrowLeft01Icon} size="sm" />
           </Link>
           {person ? (
             <>
@@ -83,7 +84,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                 {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt={name}/> : null}
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
-              <h1 className="text-3xl font-semibold">{name}</h1>
+              <h1 className="text-page-title">{name}</h1>
             </>
           ) : (
             <Skeleton className="h-9 w-64"/>
@@ -91,10 +92,10 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
         </div>
         <div className="flex items-center gap-3">
           <PeriodControl month={view.month} range={view.range} onMonthChange={setMonth} onRangeChange={setRange}/>
-          <Button asChild variant="outline">
+          <Button asChild variant="secondary">
             <Link href={`/organization/people/${userId}/attendance`} className="no-underline">
-              <UserRound className="h-4 w-4"/>
-              Open Profile
+              <Icon icon={UserIcon} size="sm" />
+              Open profile
             </Link>
           </Button>
         </div>
@@ -107,8 +108,8 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
           <dl className="flex flex-wrap gap-x-10 gap-y-3" aria-label="Period totals">
             {TOTALS.map((total) => (
               <div key={total.key}>
-                <dt className="text-xs text-muted-foreground">{total.label}</dt>
-                <dd className="mt-0.5 text-lg font-semibold tabular-nums text-brown-900">
+                <dt className="text-hint text-tertiary">{total.label}</dt>
+                <dd className="mt-0.5 text-section-title tabular-nums text-primary">
                   {log.data
                     ? total.minutes ? formatMinutes(log.data.totals[total.key]) : log.data.totals[total.key]
                     : <Skeleton className="h-6 w-12"/>}
@@ -118,13 +119,13 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
             {/* Only when the server sent money: a reader who may not see the rate gets no figure, not a 0. */}
             {amount && (
               <div>
-                <dt className="text-xs text-muted-foreground">Amount</dt>
-                <dd className="mt-0.5 text-lg font-semibold tabular-nums text-brown-900">{amount}</dd>
+                <dt className="text-hint text-tertiary">Amount</dt>
+                <dd className="mt-0.5 text-section-title tabular-nums text-primary">{amount}</dd>
               </div>
             )}
           </dl>
 
-          <div className="rounded-lg border border-brown-200 bg-white">
+          <div className="rounded-control border border-divider bg-card">
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
@@ -148,7 +149,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                   : days.length === 0
                     ? (
                       <TableRow className="hover:bg-transparent">
-                        <TableCell colSpan={COLUMNS} className="py-10 text-center text-sm text-muted-foreground">
+                        <TableCell colSpan={COLUMNS} className="py-10 text-center text-body text-tertiary">
                           Nothing was expected and nothing was logged in this period.
                         </TableCell>
                       </TableRow>
@@ -156,7 +157,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                     : days.map((day) => {
                       const note = dayNote(day);
                       const noteCell = (
-                        <TableCell className={note?.tone === "missing" ? "font-medium text-danger-700" : "text-muted-foreground"}>
+                        <TableCell className={note?.tone === "missing" ? "font-medium text-status-declined-text" : "text-tertiary"}>
                           {note?.text ?? ""}
                         </TableCell>
                       );

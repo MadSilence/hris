@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
   ExportDataForm,
   ExportDataFormValues,

@@ -5,17 +5,19 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/public/desact/src/components/ui/radio-group";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
+import { Label } from "@/components/desact/label";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker, dateToISO } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { inviteUserAction } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
 import type { InviteStateDTO } from "@/api/modules/users/clients/hrisApiUsersClient";
+import { FieldError } from "@/components/desact/field-error";
+import { InlineAlert } from "@/components/desact/alert";
 
 type Props = {
   open: boolean;
@@ -108,7 +110,7 @@ export function InviteUserModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isResend ? "Resend Invitation" : "Invite"}</DialogTitle>
+          <DialogTitle>{isResend ? "Resend invitation" : "Invite"}</DialogTitle>
           <DialogDescription>
             {isResend
               ? `${fullName} gets a new link to set a password. The previous one stops working.`
@@ -130,7 +132,7 @@ export function InviteUserModal({
               aria-invalid={Boolean(formik.errors.email)}
             />
             {formik.touched.email && formik.errors.email && (
-              <p role="alert" className="text-xs text-destructive">{formik.errors.email}</p>
+              <FieldError>{formik.errors.email}</FieldError>
             )}
           </div>
 
@@ -142,13 +144,13 @@ export function InviteUserModal({
                 onValueChange={(v) => formik.setFieldValue("when", v)}
                 className="space-y-1"
               >
-                <label className="flex items-center gap-2 text-sm" htmlFor="invite-now">
+                <label className="flex items-center gap-2 text-body" htmlFor="invite-now">
                   <RadioGroupItem value="now" id="invite-now" />
                   Now
                 </label>
-                <label className="flex items-center gap-2 text-sm" htmlFor="invite-later">
+                <label className="flex items-center gap-2 text-body" htmlFor="invite-later">
                   <RadioGroupItem value="later" id="invite-later" />
-                  On a Date
+                  On a date
                 </label>
               </RadioGroup>
               {later && (
@@ -158,13 +160,13 @@ export function InviteUserModal({
                     onChange={(v) => formik.setFieldValue("sendOn", v)}
                     min={tomorrowISO()}
                     disabled={busy}
-                    ariaLabel="Send On"
+                    ariaLabel="Send on"
                     invalid={Boolean(formik.touched.sendOn && formik.errors.sendOn)}
                   />
                   {formik.touched.sendOn && formik.errors.sendOn && (
-                    <p role="alert" className="text-xs text-destructive">{formik.errors.sendOn}</p>
+                    <FieldError>{formik.errors.sendOn}</FieldError>
                   )}
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-hint text-tertiary">
                     It goes out on that day, in your company&apos;s timezone.
                   </p>
                 </div>
@@ -173,30 +175,29 @@ export function InviteUserModal({
           )}
 
           {askPreboarding && (
-            <div className="space-y-2 rounded-md border border-warning-200 bg-warning-50 p-3" role="alert">
-              <p className="text-sm font-medium text-warning-800">{fullName} has an unfinished preboarding.</p>
+            <InlineAlert tone="pending" title={`${fullName} has an unfinished preboarding.`}>
               <RadioGroup
                 value={formik.values.preboarding}
                 onValueChange={(v) => formik.setFieldValue("preboarding", v)}
                 className="space-y-1"
               >
-                <label className="flex items-center gap-2 text-sm" htmlFor="invite-keep-preboarding">
+                <label className="flex items-center gap-2 text-body" htmlFor="invite-keep-preboarding">
                   <RadioGroupItem value="KEEP" id="invite-keep-preboarding" />
-                  Keep It — the remaining tasks follow them into the app
+                  Keep it — the remaining tasks follow them into the app
                 </label>
-                <label className="flex items-center gap-2 text-sm" htmlFor="invite-end-preboarding">
+                <label className="flex items-center gap-2 text-body" htmlFor="invite-end-preboarding">
                   <RadioGroupItem value="END" id="invite-end-preboarding" />
-                  End It Early — the remaining tasks are cancelled
+                  End it early — the remaining tasks are cancelled
                 </label>
               </RadioGroup>
-            </div>
+            </InlineAlert>
           )}
 
           <FormError message={error} />
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={busy}>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
             Cancel
           </Button>
           <Button type="button"

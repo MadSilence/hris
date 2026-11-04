@@ -1,100 +1,186 @@
 "use client";
 
 import * as React from "react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import {
+  Archive02Icon,
+  Calendar03Icon,
+  CancelCircleIcon,
+  CheckmarkCircle02Icon,
+  HelpCircleIcon,
+  HourglassIcon,
+  Loading03Icon,
+  PencilEdit02Icon,
+  Remove01Icon,
+} from "@hugeicons/core-free-icons";
+
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
+import { cn } from "@/lib/cn";
 import { formatAccountStatus, formatUserStatus, isActiveStatus, isProspectiveStatus } from "@/models/user/status";
 
 /**
- * The one status chip.
+ * The one status chip (SPEC § 4.5, § 13.4): a 24 px pill, a 14 px icon and a 12/16 semibold word on the
+ * status's soft background. **A status is always an icon and a word**; the colour is the third signal, never
+ * the only one. Status colours are never themed: Approved is Pine and an error is red in every workspace.
  *
- * Five files carried a private `statusBadge(status)` returning the same `{ label, className }` for
- * the same four states, and they had already started to drift: the leave-type one has no Draft, the
- * calendar ones call the neutral state Inactive and the policy ones call it Draft, and each list
- * spelled the archived colour out by hand. **A vocabulary held in five places is a vocabulary that
- * will disagree in five places**, and the archive work is what makes that visible — every one of
- * those screens now has to say the same thing about the same state.
+ * Nine statuses, and nothing else may wear their colours:
  *
- * The state names are the product's, not any one entity's schema: an entity maps its own enum onto
- * these four. That mapping is the only thing a caller should have to write.
+ *   approved      approved, signed, completed, submitted, paid — and an active person or record
+ *   pending       waiting on a decision or on information
+ *   in-progress   started, in review
+ *   scheduled     starts later
+ *   declined      declined, overdue, expired, failed
+ *   info          information
+ *   draft         not started; drawn white with a dashed border
+ *   inactive      inactive
+ *   archived      kept for history, cancelled
+ *
+ * There is no "Needs your nod" status: what waits for a person's decision is shown by the Approve button, and
+ * the request itself is Pending.
+ *
+ * An entity maps its own enum onto these and writes nothing else. The four words of the old shared
+ * vocabulary (`active`, `inactive`, `draft`, `archived`) are still accepted; `active` is drawn as approved.
+ * Rule: `technical_documentation/ui/STATUS_AND_BADGES.md`.
  */
+export type StatusTone =
+  | "approved"
+  | "pending"
+  | "in-progress"
+  | "scheduled"
+  | "declined"
+  | "info"
+  | "draft"
+  | "inactive"
+  | "archived";
+
 export type EntityStatus = "active" | "inactive" | "draft" | "archived";
 
-/**
- * Semantic tokens, not raw Tailwind.
- *
- * The design system defines `success-*` / `danger-*` / `warning-*` in `globals.css` and, at the time
- * of the audit, **not one component used them** — all ~300 semantic colours in the app were raw
- * `green-500` / `red-500` / `amber-500`. The values are currently identical, so nothing looks wrong
- * today, **and that is the trap**: under a tenant palette the brown chrome moves and every status
- * colour stays put. Rule: `technical_documentation/ui/STATUS_AND_BADGES.md` § 3.
- */
-const STYLES: Record<EntityStatus, { label: string; className: string }> = {
-  active: { label: "Active", className: "border-success-200 bg-success-50 text-success-700" },
-  /*
-   * Grey, not amber. Archived is **not a warning** — it is a state somebody chose, reversible by
-   * decision — and colouring it amber puts it in the same visual class as "something needs
-   * attention". The product had four colours for this one concept: amber, brown, grey and a plain
-   * outline. Rule: `technical_documentation/ui/STATUS_AND_BADGES.md` § 2.
-   */
-  archived: { label: "Archived", className: "border-brown-200 bg-brown-50 text-brown-600" },
-  inactive: { label: "Inactive", className: "" },
-  draft: { label: "Draft", className: "" },
+type StatusStyle = { label: string; icon: IconSvgElement; className: string; iconClassName: string };
+
+/* Written out in full so Tailwind finds every class in the source. */
+const STYLES: Record<StatusTone, StatusStyle> = {
+  approved: {
+    label: "Approved",
+    icon: CheckmarkCircle02Icon,
+    className: "bg-status-approved-bg text-status-approved-text",
+    iconClassName: "text-status-approved-icon",
+  },
+  pending: {
+    label: "Pending",
+    icon: HourglassIcon,
+    className: "bg-status-pending-bg text-status-pending-text",
+    iconClassName: "text-status-pending-icon",
+  },
+  "in-progress": {
+    label: "In progress",
+    icon: Loading03Icon,
+    className: "bg-status-in-progress-bg text-status-in-progress-text",
+    iconClassName: "text-status-in-progress-icon",
+  },
+  scheduled: {
+    label: "Scheduled",
+    icon: Calendar03Icon,
+    className: "bg-status-scheduled-bg text-status-scheduled-text",
+    iconClassName: "text-status-scheduled-icon",
+  },
+  declined: {
+    label: "Declined",
+    icon: CancelCircleIcon,
+    className: "bg-status-declined-bg text-status-declined-text",
+    iconClassName: "text-status-declined-icon",
+  },
+  info: {
+    label: "Info",
+    icon: HelpCircleIcon,
+    className: "bg-status-info-bg text-status-info-text",
+    iconClassName: "text-status-info-icon",
+  },
+  draft: {
+    label: "Draft",
+    icon: PencilEdit02Icon,
+    className: "border border-dashed border-status-draft-border bg-status-draft-bg text-status-draft-text",
+    iconClassName: "text-status-draft-icon",
+  },
+  inactive: {
+    label: "Inactive",
+    icon: Remove01Icon,
+    className: "bg-status-inactive-bg text-status-inactive-text",
+    iconClassName: "text-status-inactive-icon",
+  },
+  archived: {
+    label: "Archived",
+    icon: Archive02Icon,
+    className: "bg-status-archived-bg text-status-archived-text",
+    iconClassName: "text-status-archived-icon",
+  },
 };
+
+const ENTITY_TONES: Record<EntityStatus, { tone: StatusTone; label: string }> = {
+  active: { tone: "approved", label: "Active" },
+  inactive: { tone: "inactive", label: "Inactive" },
+  draft: { tone: "draft", label: "Draft" },
+  archived: { tone: "archived", label: "Archived" },
+};
+
+const resolve = (status: StatusTone | EntityStatus): { tone: StatusTone; label: string } =>
+  status in ENTITY_TONES
+    ? ENTITY_TONES[status as EntityStatus]
+    : { tone: status as StatusTone, label: STYLES[status as StatusTone].label };
 
 export const StatusBadge: React.FC<{
-  status: EntityStatus;
-  /** Overrides the word only. The colour stays tied to the state. */
+  status: StatusTone | EntityStatus;
+  /** Overrides the word only. The colour and the icon stay tied to the status. */
   label?: string;
+  /** `sm` (20 px) in dense tables; `md` (24 px) everywhere else. */
+  size?: "sm" | "md";
   className?: string;
-}> = ({ status, label, className }) => {
-  const style = STYLES[status];
+}> = ({ status, label, size = "md", className }) => {
+  const resolved = resolve(status);
+  const style = STYLES[resolved.tone];
 
   return (
-    <Badge variant="outline" className={`${style.className} ${className ?? ""}`.trim()}>
-      {label ?? style.label}
-    </Badge>
+    <span
+      data-slot="status-badge"
+      data-status={resolved.tone}
+      className={cn(
+        "inline-flex w-fit shrink-0 items-center gap-1 rounded-pill text-hint font-semibold whitespace-nowrap",
+        size === "sm" ? "h-5 px-1.5" : "h-6 px-2",
+        style.className,
+        className,
+      )}
+    >
+      <Icon icon={style.icon} size="sm" className={cn("size-3.5", style.iconClassName)} />
+      {label ?? resolved.label}
+    </span>
   );
 };
 
 /**
- * A person's status, mapped onto the shared vocabulary.
- *
- * This existed **three times, byte for byte**, in `PeopleTable`, `AssignedUsersTableContent` and
- * `AssignedUsersPanel` — differing only in a local variable name. All three imported
- * `models/user/status`, whose own comment says "use it everywhere instead of hardcoding", and then
- * each re-implemented the badge around it.
- *
- * **`Pending` and `Archived` used to render identically** — both fell through to a grey `secondary`
- * with no colour — which is worse than either choice on its own, since they mean opposite things.
- * `Pending` is gone: somebody who has not started yet is `PROSPECTIVE`, labelled *Not Started*, and
- * drawn as the neutral state rather than the archived one (LIFECYCLE_PROCESSES.md § 2.2).
+ * A person's employment status (SPEC § 4.5 "Lifecycles"): somebody who has not started yet is Scheduled,
+ * an active person is Approved, a person who has left is Inactive.
  */
-export const UserStatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
+export const UserStatusBadge: React.FC<{ status?: string | null; size?: "sm" | "md" }> = ({ status, size }) => {
   if (!status) return null;
 
-  return (
-    <StatusBadge
-      status={isActiveStatus(status) ? "active" : isProspectiveStatus(status) ? "draft" : "archived"}
-      label={formatUserStatus(status)}
-    />
-  );
+  const tone: StatusTone = isActiveStatus(status) ? "approved" : isProspectiveStatus(status) ? "scheduled" : "inactive";
+  return <StatusBadge status={tone} label={formatUserStatus(status)} size={size} />;
 };
 
 /**
  * The access axis, as a chip — and only when it says something.
  *
- * <p>A person carries two statuses, and the directory used to show one. *Not started* meant three
- * different things at once: somebody who starts on Monday, somebody invited who has not accepted,
- * and somebody who is a name in a table and nothing more. This is the second axis, drawn beside the
- * first, and it is silent for the ordinary case — an active account needs no chip, because every
- * account on the screen is one.
+ * <p>A person carries two statuses, and the directory used to show one. *Not started* meant three different
+ * things at once: somebody who starts on Monday, somebody invited who has not accepted, and somebody who is a
+ * name in a table and nothing more. This is the second axis, drawn beside the first, and it is silent for the
+ * ordinary case — an active account needs no chip, because every account on the screen is one.
  *
- * <p>Blocked is included: it is an account state a reader needs to see wherever people are listed,
- * and it is the same word the profile header already uses.
+ * <p>A draft is Draft; an invitation not yet accepted is Pending — it waits on the person; a blocked account
+ * is Declined.
  */
-export const AccountStatusBadge: React.FC<{ accountStatus?: string | null }> = ({ accountStatus }) => {
+export const AccountStatusBadge: React.FC<{ accountStatus?: string | null; size?: "sm" | "md" }> = ({ accountStatus, size }) => {
   const code = (accountStatus ?? "").toUpperCase();
-  if (code !== "DRAFT" && code !== "INVITED" && code !== "BLOCKED") return null;
+  const tone: StatusTone | null =
+    code === "DRAFT" ? "draft" : code === "INVITED" ? "pending" : code === "BLOCKED" ? "declined" : null;
+  if (!tone) return null;
 
-  return <StatusBadge status={code === "DRAFT" ? "draft" : "inactive"} label={formatAccountStatus(code)} />;
+  return <StatusBadge status={tone} label={formatAccountStatus(code)} size={size} />;
 };

@@ -4,7 +4,8 @@ import { useTimeOffAssignmentImpact } from "@/components/modules/settings/module
 import { dateToISO, isoToDate } from "@/lib/date";
 
 import { FC, useMemo, useState } from "react";
-import { CalendarDays, ShieldCheck } from "lucide-react";
+import { Calendar03Icon, ShieldCheckIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { format } from "date-fns";
 
 import {
@@ -13,12 +14,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { Calendar } from "@/public/desact/src/components/ui/calendar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Label } from "@/components/desact/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { Calendar } from "@/components/desact/calendar";
+import { cn } from "@/lib/cn";
 
 import { useCreateTimeOffPolicyAssignment } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useCreateTimeOffPolicyAssignment";
 import { useInvalidateEmployeeTimeOffBalancesQuery } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
@@ -26,6 +27,8 @@ import { TimeOffPolicyStatus, TimeOffPolicyUnit } from "@/api/modules/timeOff/ti
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FormError } from "@/components/feedback/FormError";
+import { InlineAlert } from "@/components/desact/alert";
 
 type Props = {
   isOpen: boolean;
@@ -116,13 +119,13 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !createMutation.isPending) onCloseAction(); }}>
       <DialogContent hideClose className="max-w-lg overflow-hidden p-0">
-        <DialogHeader className="border-b border-brown-100 bg-brown-50/40 px-6 py-5 text-left">
+        <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5 text-left">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brown-200 bg-white text-brown-600">
-              <ShieldCheck className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover border border-divider bg-card text-secondary">
+              <Icon icon={ShieldCheckIcon} />
             </div>
             <div>
-              <DialogTitle className="text-lg">Assign a time-off policy</DialogTitle>
+              <DialogTitle className="text-section-title">Assign a time-off policy</DialogTitle>
               <DialogDescription>
                 The opening balance is granted right away.
               </DialogDescription>
@@ -132,7 +135,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
         <div className="space-y-4 px-6 py-5">
           {available.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-brown-200 px-4 py-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-card border border-dashed border-divider px-4 py-8 text-center text-body text-tertiary">
               {policies.length === 0
                 ? "No time-off policies exist yet."
                 : "This person is already on every active policy."}
@@ -140,7 +143,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
           ) : (
             <>
               <div className="space-y-1.5">
-                <RequiredLabel className="text-xs" required>Policy</RequiredLabel>
+                <RequiredLabel className="text-hint" required>Policy</RequiredLabel>
                 <SearchableSelect
                   options={available.map((p) => ({ value: p.id, label: p.name }))}
                   value={policyId || null}
@@ -152,32 +155,32 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               </div>
 
               {noHireDate && (
-                <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-xs text-danger-700">
+                <InlineAlert tone="declined">
                   This policy renews on the hire anniversary and this person has no hire date, so the
                   balance would never renew. Set a hire date first — the assignment will be refused
                   until then.
-                </p>
+                </InlineAlert>
               )}
 
               {chainWontResolve && !noHireDate && (
-                <p className="rounded-lg border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
+                <InlineAlert tone="pending">
                   This policy&apos;s approval chain has nobody to sign for this person — it asks for a
                   manager, and none is set. The assignment will work; their requests will be refused
                   until somebody can approve them.
-                </p>
+                </InlineAlert>
               )}
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Effective From</Label>
+                <Label className="text-hint">Effective from</Label>
                 <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       disabled={createMutation.isPending}
                       className={cn("w-full justify-start font-normal")}
                     >
-                      <CalendarDays className="h-4 w-4" />
+                      <Icon icon={Calendar03Icon} size="sm" />
                       {prettyISO(effectiveFrom)}
                     </Button>
                   </PopoverTrigger>
@@ -197,18 +200,18 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
                 </Popover>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-brown-200 bg-brown-50/40 px-4 py-3 text-sm">
-                <span className="text-muted-foreground">Yearly entitlement</span>
-                <span className="font-medium text-brown-900">{quotaLabel}</span>
+              <div className="flex items-center justify-between rounded-card border border-divider bg-subtle/40 px-4 py-3 text-body">
+                <span className="text-tertiary">Yearly entitlement</span>
+                <span className="font-medium text-primary">{quotaLabel}</span>
               </div>
             </>
           )}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <FormError message={error} />}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-brown-100 px-6 py-4">
-          <Button type="button" variant="outline" onClick={onCloseAction} disabled={createMutation.isPending}>
+        <div className="flex justify-end gap-2 border-t border-divider px-6 py-4">
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={createMutation.isPending}>
             Cancel
           </Button>
           <Button type="button"

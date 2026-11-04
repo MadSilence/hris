@@ -1,7 +1,8 @@
 "use client";
 
 import { FC, FormEvent, useCallback, useEffect, useState } from "react";
-import { Layers } from "lucide-react";
+import { Layers01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -12,11 +13,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
+import { FieldError } from "@/components/desact/field-error";
+import { InlineAlert } from "@/components/desact/alert";
 
 type Props = {
   isOpen: boolean;
@@ -121,8 +124,8 @@ export const JobLevelNameModal: FC<Props> = ({
         <DialogContent hideClose className="gap-5 sm:max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-3 text-left">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brown-100 text-brown-700">
-                <Layers className="h-5 w-5"/>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-popover bg-mist text-secondary">
+                <Icon icon={Layers01Icon} />
               </span>
               <div className="space-y-1">
                 <DialogTitle>{title}</DialogTitle>
@@ -132,12 +135,9 @@ export const JobLevelNameModal: FC<Props> = ({
           </DialogHeader>
 
           {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
+            <InlineAlert tone="declined">
               {errorMessage}
-            </p>
+            </InlineAlert>
           )}
 
           <form onSubmit={handleSubmit} noValidate>
@@ -156,12 +156,12 @@ export const JobLevelNameModal: FC<Props> = ({
               />
 
               {formik.errors.name && (
-                <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+                <FieldError>{formik.errors.name}</FieldError>
               )}
             </div>
 
-            <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
-              <Button type="button" variant="outline" disabled={isLoading} onClick={requestClose}>
+            <DialogFooter className="mt-6 border-t border-divider pt-4">
+              <Button type="button" variant="secondary" disabled={isLoading} onClick={requestClose}>
                 Cancel
               </Button>
 

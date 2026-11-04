@@ -4,11 +4,12 @@ import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Textarea } from "@/components/desact/textarea";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export interface CreateGroupFormProps {
   isLoading?: boolean;
@@ -96,7 +97,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="group-name" required>Name Your Section</RequiredLabel>
+        <RequiredLabel htmlFor="group-name" required>Name your section</RequiredLabel>
 
         <Input
           id="group-name"
@@ -108,7 +109,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
         />
 
         {formik.errors.name && (
-          <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+          <FieldError>{formik.errors.name}</FieldError>
         )}
       </div>
 
@@ -125,14 +126,14 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
         />
 
         {formik.errors.description && (
-          <p role="alert" className="text-sm text-destructive">{formik.errors.description}</p>
+          <FieldError>{formik.errors.description}</FieldError>
         )}
       </div>
 
-      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
+      <DialogFooter className="mt-6 border-t border-divider pt-4">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
         >

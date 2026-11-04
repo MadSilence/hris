@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/public/desact/src/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
   UpsertRoleNameForm,
   UpsertRoleNameFormValues
@@ -24,13 +24,13 @@ export interface UpsertRoleNameModalProps {
 
 const copyByMode = {
   rename: {
-    title: "Edit Role",
+    title: "Edit role",
     description:
       "Update the role name and description to keep your access model organized.",
     submitText: "Save changes",
   },
   duplicate: {
-    title: "Duplicate Role",
+    title: "Duplicate role",
     description:
       "Create a new role based on this one. You can edit permissions later.",
     submitText: "Create duplicate",

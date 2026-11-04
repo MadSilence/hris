@@ -3,8 +3,8 @@
 import React, { FormEvent, useState } from "react";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -13,6 +13,7 @@ import {
   type PasswordValues,
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { resetPasswordAction } from "@/components/modules/passwordReset/actions/passwordResetActions";
+import { FieldError } from "@/components/desact/field-error";
 
 /** The refusal for a link that was used, expired or never existed. */
 const LINK_NOT_VALID = "AUTH00003";
@@ -69,31 +70,31 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
 
   if (done) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-        <h1 className="text-4xl font-medium">Password Changed</h1>
-        <p className="text-md text-muted-foreground">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-page-title">Password changed</h1>
+        <p className="text-body text-tertiary">
           Your new password is set. Anywhere you were signed in with the old one has been signed out.
         </p>
         <Button asChild>
-          <a href="/login">Sign In</a>
+          <a href="/login">Sign in</a>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-xl items-center justify-center py-12">
+    <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">{firstName ? `Hi ${firstName}` : "Set a New Password"}</h1>
-          <p className="mx-auto max-w-xl text-md text-muted-foreground">
+          <h1 className="text-page-title">{firstName ? `Hi ${firstName}` : "Set a new password"}</h1>
+          <p className="text-body text-secondary">
             Choose a new password for your account.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password" required>New Password</RequiredLabel>
+            <RequiredLabel htmlFor="reset-password" required>New password</RequiredLabel>
             <Input
               id="reset-password"
               name="password"
@@ -105,12 +106,12 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
               aria-invalid={Boolean(formik.errors.password)}
             />
             {formik.errors.password && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.password}</p>
+              <FieldError>{formik.errors.password}</FieldError>
             )}
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password-repeat" required>Confirm Password</RequiredLabel>
+            <RequiredLabel htmlFor="reset-password-repeat" required>Confirm password</RequiredLabel>
             <Input
               id="reset-password-repeat"
               name="confirmPassword"
@@ -122,11 +123,11 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
               aria-invalid={Boolean(formik.errors.confirmPassword)}
             />
             {formik.errors.confirmPassword && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.confirmPassword}</p>
+              <FieldError>{formik.errors.confirmPassword}</FieldError>
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
           </p>
 
@@ -139,9 +140,9 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
                 onChange={(e) => setCode(e.currentTarget.value)}
                 autoComplete="one-time-code"
                 disabled={busy}
-                className="font-mono tracking-widest"
+                className="font-mono"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body text-tertiary">
                 Your account is locked after too many failed sign-ins. Enter the code from your authenticator app, or
                 one of your backup codes, to unlock it.
               </p>
@@ -151,13 +152,13 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
           <FormError message={error} />
 
           {linkExpired && (
-            <p className="text-center text-sm">
-              <Link href="/forgot-password" className="underline underline-offset-4">Request a New Link</Link>
+            <p className="text-center text-body">
+              <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">Request a new link</Link>
             </p>
           )}
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
-            {busy ? "Saving…" : "Set Password"}
+          <Button type="submit" disabled={busy} size="lg" className="w-full">
+            {busy ? "Saving…" : "Set password"}
           </Button>
         </form>
       </div>

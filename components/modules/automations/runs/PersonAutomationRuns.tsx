@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Zap } from "lucide-react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { formatMoment } from "@/models/automations";
@@ -35,7 +36,7 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
     return (
       <EmptyState
         className="my-4"
-        icon={<Zap className="h-6 w-6" />}
+        scene="automations"
         title="No automation runs"
         description="When an automation does something for this person, it is listed here with what each step did."
       />
@@ -43,7 +44,7 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
   }
 
   return (
-    <ul className="m-0 list-none divide-y divide-brown-100 p-0">
+    <ul className="m-0 list-none divide-y divide-divider p-0">
       {rows.map((run) => {
         const isOpen = open === run.id;
         return (
@@ -55,10 +56,10 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
                 onClick={() => setOpen(isOpen ? null : run.id)}
                 aria-expanded={isOpen}
               >
-                {isOpen ? <ChevronDown className="h-4 w-4 flex-none text-muted-foreground" /> : <ChevronRight className="h-4 w-4 flex-none text-muted-foreground" />}
+                {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" className="flex-none text-tertiary" /> : <Icon icon={ArrowRight01Icon} size="sm" className="flex-none text-tertiary" />}
                 <span className="min-w-0">
-                  <span className="block truncate text-sm text-foreground">{run.ruleName ?? "Automation"}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block truncate text-body text-primary">{run.ruleName ?? "Automation"}</span>
+                  <span className="block truncate text-hint text-tertiary">
                     {[runReason(run), formatMoment(run.finishedAt ?? run.createdAt)].filter(Boolean).join(" · ")}
                   </span>
                 </span>
@@ -66,9 +67,9 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
               <RunStatusBadge status={run.status} />
               <Link
                 href={`/settings/automation/automations/${run.ruleId}`}
-                className="text-xs text-muted-foreground no-underline hover:text-foreground hover:underline"
+                className="text-hint text-tertiary no-underline hover:text-primary hover:underline"
               >
-                Open Rule
+                Open rule
               </Link>
             </div>
             {isOpen && <div className="mt-3 pl-6"><RunSteps run={run} /></div>}

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Users } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
@@ -64,8 +65,8 @@ export const AttendanceOverviewContainer: React.FC = () => {
         secondary={
           <>
             <PeriodControl month={view.month} range={view.range} onMonthChange={setMonth} onRangeChange={setRange}/>
-            <Button type="button" size="icon" variant="outline" aria-label="Export attendance" onClick={() => setExporting(true)}>
-              <Download className="h-4 w-4"/>
+            <Button type="button" size="icon" variant="secondary" aria-label="Export attendance" onClick={() => setExporting(true)}>
+              <Icon icon={Download01Icon} size="sm" />
             </Button>
           </>
         }
@@ -85,7 +86,7 @@ export const AttendanceOverviewContainer: React.FC = () => {
             ? <NoResults hint="Try a different search or filter."/>
             : (
               <EmptyState
-                icon={<Users className="h-6 w-6"/>}
+                scene="attendance"
                 title="Nobody in this period"
                 description="Nobody within your reach was employed in this period."
               />

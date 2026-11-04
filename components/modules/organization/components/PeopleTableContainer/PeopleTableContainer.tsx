@@ -414,13 +414,13 @@ const PeopleTableContainer: React.FC = () => {
     <div className="flex min-h-0 flex-1 gap-4">
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         {notice ? (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-brown-200 bg-brown-50 px-3 py-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between gap-3 rounded-tag border border-divider bg-subtle px-3 py-1.5 text-hint text-tertiary">
             <span>{notice}</span>
             <button
               type="button"
               onClick={() => setNotice(null)}
               aria-label="Dismiss"
-              className="shrink-0 text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-tertiary hover:text-primary"
             >
               ×
             </button>
@@ -447,7 +447,7 @@ const PeopleTableContainer: React.FC = () => {
         />
 
         {offerAllMatching ? (
-          <div className="flex items-center gap-2 rounded-md border border-brown-200 bg-brown-50 px-3 py-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-tag border border-divider bg-subtle px-3 py-1.5 text-hint text-tertiary">
             {allMatching ? (
               <>
                 <span>All {matchingCount} {matchingCount === 1 ? "person" : "people"} matching are selected.</span>
@@ -457,9 +457,9 @@ const PeopleTableContainer: React.FC = () => {
                     setAllMatching(false);
                     setSelectedIds(new Set());
                   }}
-                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
                 >
-                  Clear Selection
+                  Clear selection
                 </button>
               </>
             ) : (
@@ -468,7 +468,7 @@ const PeopleTableContainer: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setAllMatching(true)}
-                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
                 >
                   Select All {matchingCount} Matching
                 </button>
@@ -525,7 +525,7 @@ const PeopleTableContainer: React.FC = () => {
 
       <ConfirmActionModal
         isOpen={deletingView !== null}
-        title="Delete View"
+        title="Delete view"
         description={deletingView
           ? `“${deletingView.name}” will be deleted. Anyone it is shared with loses it too.`
           : ""}

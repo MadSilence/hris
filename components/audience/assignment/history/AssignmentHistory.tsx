@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { History } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Clock04Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 import { skipReasonText } from "@/components/audience/assignment/assignmentSkips";
 import { useAssignmentHistory } from "@/components/modules/automations/hooks";
 import { formatMoment, type AssignableType, type AssignmentHistoryItem } from "@/models/automations";
@@ -26,7 +27,7 @@ export const historySource = (item: AssignmentHistoryItem): React.ReactNode => {
     return item.rule ? (
       <>
         by rule{" "}
-        <Link href={`/settings/automation/automations/${item.rule.id}`} className="text-foreground no-underline hover:underline">
+        <Link href={`/settings/automation/automations/${item.rule.id}`} className="text-primary no-underline hover:underline">
           {item.rule.name}
         </Link>
       </>
@@ -50,9 +51,9 @@ export const HistoryToggle: React.FC<{ showing: boolean; onChange: (showing: boo
     size="sm"
     aria-pressed={showing}
     onClick={() => onChange(!showing)}
-    className={cn("flex-none gap-1.5 text-muted-foreground", showing && "bg-brown-50 text-foreground", className)}
+    className={cn("flex-none gap-1.5 text-tertiary", showing && "bg-subtle text-primary", className)}
   >
-    <History className="h-4 w-4" />
+    <Icon icon={Clock04Icon} size="sm" />
     History
   </Button>
 );
@@ -90,7 +91,7 @@ export const AssignmentHistoryList: React.FC<{ assignableType: AssignableType; a
     return (
       <EmptyState
         className={className}
-        icon={<History className="h-6 w-6" />}
+        scene="notes"
         title="No history yet"
         description="Every assignment and removal here is listed, with the rule or the person who made it."
       />
@@ -98,18 +99,18 @@ export const AssignmentHistoryList: React.FC<{ assignableType: AssignableType; a
   }
 
   return (
-    <ul className={cn("m-0 list-none divide-y divide-brown-100 p-0", className)} aria-label="Assignment history">
+    <ul className={cn("m-0 list-none divide-y divide-divider p-0", className)} aria-label="Assignment history">
       {items.map((item) => (
-        <li key={item.recordId} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-1 py-2 text-sm">
+        <li key={item.recordId} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-1 py-2 text-body">
           <span className="min-w-0">
-            <span className="text-foreground">{item.person?.name}</span>
-            <span className="text-muted-foreground">
+            <span className="text-primary">{item.person?.name}</span>
+            <span className="text-tertiary">
               {" · "}
               {VERB[item.status]} {historySource(item)}
               {item.status === "SKIPPED" && item.skipReason ? ` — ${skipReasonText(item.skipReason)}` : ""}
             </span>
           </span>
-          <span className="text-xs tabular-nums text-muted-foreground">{formatMoment(item.at)}</span>
+          <span className="text-hint tabular-nums text-tertiary">{formatMoment(item.at)}</span>
         </li>
       ))}
     </ul>

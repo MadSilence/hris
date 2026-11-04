@@ -3,12 +3,14 @@
 import { FormEvent, useCallback, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Label } from "@/components/desact/label";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { normalizeCompanyAddress } from "@/lib/companyAddress";
+import { FieldError } from "@/components/desact/field-error";
+import { FormError } from "@/components/feedback/FormError";
 
 export type TrialValues = {
   email: string;
@@ -92,42 +94,14 @@ function sanitize(values: TrialValues): TrialValues {
   };
 }
 
-type FieldErrorProps = {
-  message?: string;
-};
-
-function FieldError({ message }: FieldErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p className="text-sm text-destructive" role="alert">
-      {message}
-    </p>
-  );
-}
-
-type ApiErrorProps = {
-  message?: string;
-};
-
-function ApiErrorMessage({ message }: ApiErrorProps) {
-  if (!message) return null;
-
-  return (
-    <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-      {message}
-    </p>
-  );
-}
-
 function TrialHeader() {
   return (
     <div className="space-y-3 text-center">
 
-      <h1 className="text-4xl font-medium">Get started for free</h1>
+      <h1 className="text-greeting">Get started for free</h1>
 
-      <p className="mx-auto max-w-xl text-md text-[var(--color-text-tertiary)]">
-        Try SixSoftware for 14 days for free. No credit card, setup or
+      <p className="mx-auto max-w-xl text-body text-tertiary">
+        Try noddo for 14 days for free. No credit card, setup or
         cancellation required.
       </p>
     </div>
@@ -137,14 +111,14 @@ function TrialHeader() {
 function TrialSuccessBlock() {
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-      <h1 className="text-4xl font-medium">Check your inbox</h1>
+      <h1 className="text-greeting">Check your inbox</h1>
 
-      <p className="text-md text-[var(--color-text-tertiary)]">
+      <p className="text-body text-tertiary">
         We’ve sent a verification link to your email address. Please open the
         email and confirm your account before continuing.
       </p>
 
-      <p className="text-sm text-[var(--color-text-tertiary)]">
+      <p className="text-body text-tertiary">
         Didn’t receive it? Be sure to check your spam or promotions folder.
       </p>
     </div>
@@ -160,7 +134,7 @@ export default function TrialForm({
 }: TrialFormProps) {
   const consentText = useMemo(
     () =>
-      "By submitting this form I confirm that I have read the privacy policy and agree to the processing of my personal data by SixSoftware for the stated purposes. In case of consent, I can revoke my consent at any time. Furthermore, by sending the form I agree to the general terms and conditions.",
+      "By submitting this form I confirm that I have read the privacy policy and agree to the processing of my personal data by noddo for the stated purposes. In case of consent, I can revoke my consent at any time. Furthermore, by sending the form I agree to the general terms and conditions.",
     [],
   );
 
@@ -212,7 +186,7 @@ export default function TrialForm({
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="trial-email" required>Business Email</RequiredLabel>
+            <RequiredLabel htmlFor="trial-email" required>Business email</RequiredLabel>
 
             <Input
               id="trial-email"
@@ -227,12 +201,12 @@ export default function TrialForm({
               aria-invalid={!!formik.errors.email}
             />
 
-            <FieldError message={formik.errors.email}/>
+            <FieldError>{formik.errors.email}</FieldError>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="trial-first-name" required>First Name</RequiredLabel>
+              <RequiredLabel htmlFor="trial-first-name" required>First name</RequiredLabel>
 
               <Input
                 id="trial-first-name"
@@ -246,11 +220,11 @@ export default function TrialForm({
                 aria-invalid={!!formik.errors.firstName}
               />
 
-              <FieldError message={formik.errors.firstName}/>
+              <FieldError>{formik.errors.firstName}</FieldError>
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="trial-last-name" required>Last Name</RequiredLabel>
+              <RequiredLabel htmlFor="trial-last-name" required>Last name</RequiredLabel>
 
               <Input
                 id="trial-last-name"
@@ -264,12 +238,12 @@ export default function TrialForm({
                 aria-invalid={!!formik.errors.lastName}
               />
 
-              <FieldError message={formik.errors.lastName}/>
+              <FieldError>{formik.errors.lastName}</FieldError>
             </div>
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="trial-company-name" required>Company Name</RequiredLabel>
+            <RequiredLabel htmlFor="trial-company-name" required>Company name</RequiredLabel>
 
             <Input
               id="trial-company-name"
@@ -284,18 +258,18 @@ export default function TrialForm({
             />
 
             {companyAddressPreview && normalizeCompanyAddress(formik.values.companyName) ? (
-              <p className="text-sm text-[var(--color-text-tertiary)]" aria-live="polite">
+              <p className="text-body text-tertiary" aria-live="polite">
                 Your company will sign in at{" "}
-                <span className="font-medium text-[var(--color-text-primary)]">
+                <span className="font-medium text-primary">
                   {companyAddressPreview(normalizeCompanyAddress(formik.values.companyName))}
                 </span>
               </p>
             ) : null}
 
-            <FieldError message={formik.errors.companyName}/>
+            <FieldError>{formik.errors.companyName}</FieldError>
           </div>
 
-          <p className="text-sm text-[var(--color-text-tertiary)]">
+          <p className="text-body text-tertiary">
             *For the best experience possible, we ask that you provide all of
             the required contact details above.
           </p>
@@ -314,25 +288,25 @@ export default function TrialForm({
 
               <Label
                 htmlFor="trial-consent"
-                className="cursor-pointer text-sm font-normal leading-relaxed text-[var(--color-text-tertiary)]"
+                className="cursor-pointer text-body font-normal leading-relaxed text-tertiary"
               >
                 {consentText}
               </Label>
             </div>
 
-            <FieldError message={formik.errors.consent}/>
+            <FieldError>{formik.errors.consent}</FieldError>
           </div>
 
-          <ApiErrorMessage message={apiError}/>
+          <FormError message={apiError} />
 
           <div className="flex flex-col gap-4">
             <Button type="submit" disabled={busy} className="w-full">
               {busy ? "Starting your trial…" : "Start your free trial"}
             </Button>
 
-            <p className="text-center text-sm text-[var(--color-text-tertiary)]">
+            <p className="text-center text-body text-tertiary">
               You already have an account?{" "}
-              <a href="/login" className="underline underline-offset-4">
+              <a href="/login" className="text-accent-text underline-offset-4 hover:underline">
                 Login here
               </a>
             </p>

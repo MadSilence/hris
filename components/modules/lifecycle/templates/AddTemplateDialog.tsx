@@ -3,15 +3,16 @@
 import React, { useEffect, useState } from "react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { saveTemplateAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { PROCESS_TYPE_LABELS, type ProcessType, type Template } from "@/models/lifecycle";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
   open: boolean;
@@ -89,11 +90,11 @@ export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: 
                 aria-invalid={nameError ? true : undefined}
                 onChange={(e) => { setName(e.target.value); setNameError(null); }}
               />
-              {nameError && <p role="alert" className="text-xs text-destructive">{nameError}</p>}
+              {nameError && <FieldError>{nameError}</FieldError>}
             </div>
             <FormError message={error} />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={requestClose} disabled={busy}>Cancel</Button>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>Cancel</Button>
               <Button type="submit" disabled={busy}>{busy ? "Adding…" : "Add"}</Button>
             </DialogFooter>
           </form>

@@ -17,16 +17,13 @@ export const ERROR_MESSAGES: Record<string, string> = {
   // Raised on this side only: the request never became an HTTP exchange, so the backend has no
   // code for it. See BACKEND_UNAVAILABLE_CODE in components/clients/exceptions.
   E00503: "We could not reach the server. Check your connection and try again.",
-
   // CommonBusinessError
   E00405: "That action is not available here.",
-
   // TemplateBusinessError — the template catalogue (TEMPLATES_DESIGN.md § 5).
   TPL00001: "That template could not be found. Reload the list of templates.",
   TPL00002: "The company changed since this preview was made. Here is the new preview — check it before applying.",
   TPL00003: "“{0}” is taken too. Skip it, or rename the company’s own first.",
   TPL00004: "This template cannot be applied right now. Tell support which one it was.",
-
   // OfficeBusinessError — added 2026-08-27 when offices stopped answering with the generic
   // validation error (finding S-1 of the first smoke run).
   O00001: "That office could not be found.",
@@ -38,7 +35,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   O00007: "This office is already active.",
   O00008: "An archived office cannot be changed. Restore it first.",
   O00009: "An office that is not remote needs a city, street, building and post code.",
-
   // AssignmentEngineBusinessError
   ASGN002: "That item could not be found in this company.",
   ASGN003: "Assignment rule not found",
@@ -46,7 +42,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   ASGN006: "effectiveTo must be on or after effectiveFrom",
   ASGN007: "This kind of target is not supported yet. Pick people, a department, a team, or the whole company.",
   ASGN009: "An assignment for this target is already running. Wait for it to finish.",
-
   // AttributeBusinessError
   AT00001: "An attribute with this name already exists.",
   AT00002: "Built-in attributes cannot be deleted.",
@@ -83,7 +78,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AUTH00018: "Reset your own two-step sign-in with a backup code instead.",
   AUTH00019: "Two-step sign-in is not available on this server yet. Tell your administrator.",
   AUTH00020: "Only a System Owner can change how people sign in.",
-
   // AvatarBusinessError
   A00001: "Avatar upload request is invalid",
   A00002: "Avatar file is empty",
@@ -95,19 +89,16 @@ export const ERROR_MESSAGES: Record<string, string> = {
   A00008: "Avatar not found",
   A00009: "You do not have access to this photo.",
   A00010: "This upload link has expired or has already been used. Show a new code and scan it again.",
-
   // BulkEditBusinessError
   BE0005: "Provide either userIds or a segment",
-
   // CommonBusinessError
   E00000: "Something went wrong on our side. Please try again.",
   E00001: "Something went wrong on our side. Please try again.",
   E00403: "You do not have permission to do this.",
   E00404: "We could not find that. It may have been deleted.",
   E99999: "Something went wrong on our side. Please try again.",
-
   // CompanyAppearanceBusinessError
-  CA00001: "Invalid brand color (expected #rrggbb)",
+  CA00001: "Choose one of the colors, or enter one as #rrggbb.",
   CA00002: "Login headline is too long (max 120 characters)",
   CA00003: "Login subheadline is too long (max 240 characters)",
   CA00004: "Invalid login image upload request",
@@ -118,13 +109,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CA00009: "Login image not found",
   CA00010: "The image could not be uploaded. Please try again.",
   CA00011: "You do not have access to company appearance settings.",
-
   // CompanyBusinessError
   C00001: "That company could not be found.",
   C00002: "You need to accept the terms to continue.",
   C00003: "A company with this name already exists.",
   C00004: "Company name is required",
-
   // CompanyLogoBusinessError
   CL00001: "Company logo upload request is invalid",
   CL00002: "Company logo file is empty",
@@ -135,7 +124,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CL00007: "The logo could not be deleted. Please try again.",
   CL00008: "Company logo not found",
   CL00009: "You do not have access to the company logo.",
-
   // CompanySettingsBusinessError
   CS00001: "That is not a valid time zone.",
   CS00002: "Pick at least one working day.",
@@ -147,13 +135,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   CS00008: "Choose who must use two-step sign-in.",
   CS00009: "A device can be remembered for 0 to 30 days.",
   CS00010: "A session may go unused for 15 minutes to 30 days.",
-
   // CompanySetupBusinessError
   CST0001: "This company has already been set up.",
   CST0002: "Your company is being set up right now — this page will follow along.",
   CST0003: "Pick what you would like to start with.",
   CST0004: "This company has no setup to complete.",
-
   // DepartmentBusinessError
   DEPT001: "Department not found",
   DEPT002: "Department name is required",
@@ -171,7 +157,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   DEPT014: "People cannot be moved into an archived department.",
   DEPT015: "One of the chosen sub-departments is not an archived part of this department. Reopen the dialog and choose again.",
   DEPT016: "A sub-department can only come back with its parent. Choose its parent too, or leave both archived.",
-
   // DocumentBusinessError
   D00001: "Document not found",
   D00002: "This document is already in the trash.",
@@ -199,7 +184,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   D00025: "You do not have access to this category.",
   D00026: "Built-in categories cannot be deleted.",
   D00027: "This category is still applied to documents. Remove it from them first.",
-
   // EmployeeTimeOffBalanceBusinessError
   ETOBB00001: "Employee time off balance not found",
   ETOBB00002: "Time off policy assignment not found",
@@ -210,12 +194,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   ETOBB00007: "Balance amounts must be non-negative",
   ETOBB00008: "Adjustment amount must be non-zero",
   ETOBB00009: "Adjustment reason is required",
-
   // GroupBusinessError
   G00001: "A group with this name already exists.",
   G00002: "This group cannot be deleted.",
   G00004: "Built-in groups cannot be changed.",
-
   // JobBusinessError
   J00001: "A position with this name and level already exists in this family.",
   J00003: "That code is already used by another position.",
@@ -230,7 +212,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   JG00001: "A track with this name already exists.",
   JL00001: "A level with this name already exists in this track.",
   JL00004: "The levels changed while you were reordering them. Refresh the page and try again.",
-
   // LeaveTypeBusinessError
   LTY00001: "This leave type no longer exists. Refresh the page.",
   LTY00002: "Give the leave type a name.",
@@ -238,11 +219,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LTY00004: "This leave type is already archived.",
   LTY00005: "An archived leave type cannot be changed.",
   LTY00006: "This leave type is not active and cannot be used.",
-
   // LegalEntityBusinessError
   LE00001: "A legal entity with this name already exists.",
   LE00002: "Built-in legal entities cannot be deleted.",
-
   // PublicHolidayBusinessError
   PH00001: "This holiday no longer exists. Refresh the page.",
   PH00002: "Give the holiday a name.",
@@ -257,7 +236,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PH00012: "This calendar comes from where the person works. Give them a calendar of their own instead of removing it.",
   PH00013: "An archived calendar cannot be given to a place. Restore it first.",
   PH00014: "An archived office or legal entity cannot be given a holiday calendar.",
-
   // PublicHolidayCalendarBusinessError
   PHC00001: "This calendar no longer exists. Refresh the page.",
   PHC00002: "Give the calendar a name.",
@@ -274,17 +252,14 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PHC00014: "This year already has holidays. Clear them before filling it again.",
   PHC00015: "These holiday changes no longer exist. Refresh the page.",
   PHC00016: "Somebody has already dealt with these holiday changes, or the source reported something newer.",
-
   // PublicHolidayTemplateBusinessError
   PHT00001: "That holiday template is no longer available.",
   PHT00002: "That holiday source is not supported.",
   PHT00003: "That holiday source has no data for this year.",
   PHT00004: "The holiday template could not be loaded. Please try again.",
   PHT00005: "The holiday template could not be imported. Please try again.",
-
   // RoleAccessBusinessError
   RA00005: "Permissions of a built-in role cannot be changed.",
-
   // RoleBusinessError
   R00001: "A role with this name already exists.",
   R00003: "This role cannot be deleted.",
@@ -294,10 +269,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   R00007: "This role is already archived.",
   R00008: "This role is not archived.",
   R00009: "An archived role cannot be assigned. Restore it first.",
-
   // RoleFieldAccessBusinessError
   RF00005: "Field access of a built-in role cannot be changed.",
-
   // SegmentBusinessError
 
   // StorageBusinessError
@@ -306,7 +279,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   S00003: "The file could not be read. Please try again.",
   S00004: "The file could not be deleted. Please try again.",
   S00005: "File storage is not set up correctly. Contact your administrator.",
-
   // TeamBusinessError
   TEAM001: "Team not found",
   TEAM002: "Team name is required",
@@ -325,12 +297,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TEAM015: "User is not a member of this team",
   TEAM016: "One of the chosen sub-teams is not an archived part of this team. Reopen the dialog and choose again.",
   TEAM017: "A sub-team can only come back with its parent. Choose its parent too, or leave both archived.",
-
   // TimeOffPolicyAccrualBusinessError
   TOPAC001: "Time off policy not found",
   TOPAC002: "Archived time off policy accrual cannot be modified",
   TOPAC003: "Accrual amount and cap must be non-negative",
-
   // TimeOffPolicyApprovalSettingsBusinessError
   TOPAS00001: "At least one approver is required",
   TOPAS00002: "Duplicate approval order values are not allowed",
@@ -340,7 +310,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOPAS00006: "Approval settings cannot be modified on an archived policy",
   TOPAS00007: "approvalOrder is required and must be a positive integer",
   TOPAS00008: "That role no longer exists. Choose another fallback approver.",
-
   // TimeOffPolicyAssignmentBusinessError
   TOPAA00001: "Time off policy assignment not found",
   TOPAA00002: "This person already has an active assignment for this policy.",
@@ -351,7 +320,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOPAA00007: "An archived policy cannot be assigned.",
   TOPAA00008: "This policy renews on the hire anniversary, and this person has no hire date.",
   TOPAA00009: "This person already has an active policy for this leave type.",
-
   // TimeOffPolicyBusinessError
   TOP00001: "Time off policy not found",
   TOP00002: "Time off policy name is missing",
@@ -369,12 +337,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TOP00015: "A policy cannot both allow requests for past dates and require advance notice. Pick one.",
   TOP00016: "A blackout needs a date range and a coverage cap needs a number, and neither takes the other's.",
   TOP00017: "This policy earns leave over time but has no accrual set up, so it would never grant anything.",
-
   // TimeOffPolicyEligibilityBusinessError
   TOPE0001: "Time off policy not found",
   TOPE0002: "Archived time off policy eligibility cannot be modified",
   TOPE0003: "A non-negative delay value is required when eligibility is enabled",
-
   // TimeOffPolicyRequestRulesBusinessError
   TORR0001: "Archived time off policy rules cannot be modified",
   TORR0002: "Certificate duration threshold is required for FROM_DURATION",
@@ -382,13 +348,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TORR0004: "Past limit days are required when past requests are allowed",
   TORR0005: "Request rules contain an invalid value",
   TORR0006: "Minimum duration per request cannot exceed the maximum",
-
   // TimeOffPolicyTenureBusinessError
   TOPT0001: "Time off policy not found",
   TOPT0002: "Archived time off policy tenure rules cannot be modified",
   TOPT0003: "Each tenure rule needs non-negative years of service and bonus days",
   TOPT0004: "Tenure rules must have distinct years-of-service tiers",
-
   // TimeOffRequestBusinessError
   TORQ00001: "Time off request not found",
   TORQ00002: "Time off policy assignment not found",
@@ -428,7 +392,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TORQ00038: "This policy does not allow an absence to be edited once it has started.",
   TORQ00039: "This policy does not allow a request in the past to be edited.",
   TORQ00040: "Only a pending or approved request can be edited.",
-
   // UserBusinessError
   U00001: "Someone with this email already exists.",
   U00002: "User not found",
@@ -438,18 +401,14 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00006: "Unknown user status",
   U00007: "This person is already terminated.",
   U00008: "Unknown termination reason",
-
   // UserDepartmentBusinessError
   UDEPT001: "User not found",
   UDEPT002: "User is not assigned to this department",
-
   // UserTeamBusinessError
   UTEAM001: "User not found",
   UTEAM002: "User is not a member of this team",
-
   // ValidationBusinessError
   V00001: "Some of the details are not valid. Check the highlighted fields.",
-
   // --- Codes whose message carries values -------------------------------------------------------
   // These lived on the backend's own wording until `params` began travelling with the response
   // (2026-09-07). The placeholders are filled by `interpolate` below; the sentences are ours.
@@ -524,7 +483,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   TORQ00043: "Choose somebody else who works here and can sign in.",
   TORQ00044: "Choose a start and an end date, the end on or after the start and not in the past.",
   TORQ00045: "This delegation no longer exists. Refresh the page.",
-
   // --- Codes that had no entry at all -----------------------------------------------------------
 
   // CommonBusinessError — the conflict envelope. E00409 and E00410 arrive from the database rather
@@ -532,11 +490,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   E00409: "Somebody else changed this while you were working on it. Reload and try again.",
   E00410: "This change conflicts with something that already exists.",
   E00411: "A department or team with this name already exists.",
-
   // LeaveTypeBusinessError
   LTY00007: "This leave type is not archived, so there is nothing to restore.",
   LTY00008: "This leave type is used by policies and cannot be deleted. Archive it instead.",
-
   // UserBusinessError
   U00009: "This email address is already used by another employee.",
   U00010: "You cannot block your own account.",
@@ -570,7 +526,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   U00038: "The confirmation link for the new email could not be sent. Try again shortly.",
   U00039: "Only a System Owner can change a System Owner's email.",
   U00040: "This account's email changed less than a day ago. A password reset can be sent after that.",
-
   // LifecycleBusinessError — preboarding, onboarding, their templates and tasks.
   LC00001: "That template could not be found.",
   LC00002: "A template needs a name.",
@@ -607,7 +562,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   LC00040: "A comment needs some text, at most 4000 characters.",
   LC00041: "This task is incomplete: {0}.",
   LC00042: "That file could not be found.",
-
   // AutomationBusinessError — Settings → Automation and the live assignment rules.
   AU00001: "That automation could not be found.",
   AU00002: "An automation needs a name.",
@@ -672,7 +626,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
   ATD00006: "Choose a range that runs forwards and covers at most {0} days.",
   ATD00011: "A schedule already starts on this date. Choose another date.",
   ATD00012: "Scheduled hours must be between 0 and 24 on every day.",
-
   // PeopleImportBusinessError — the file (IMP000xx), the import (IMP001xx), a cell (IMP002xx).
   IMP00001: "The file is empty.",
   IMP00002: "The file is larger than {0} MB. Split it, or save it as XLSX, which is smaller.",

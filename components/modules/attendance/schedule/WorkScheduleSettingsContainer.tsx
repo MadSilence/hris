@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserRoundSearch } from "lucide-react";
-import { Label } from "@/public/desact/src/components/ui/label";
+
+import { Label } from "@/components/desact/label";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
@@ -27,7 +27,7 @@ export const WorkScheduleSettingsContainer: React.FC = () => {
 
       {!person ? (
         <EmptyState
-          icon={<UserRoundSearch className="h-6 w-6"/>}
+          scene="attendance"
           title="Choose a person"
           description="Their work schedules appear here: the hours per weekday, and the date each one starts."
         />
@@ -35,7 +35,7 @@ export const WorkScheduleSettingsContainer: React.FC = () => {
         <ErrorState error={capabilities.error} compact onRetry={() => void capabilities.refetch()}/>
       ) : capabilities.data && !capabilities.data.canViewSchedule ? (
         <EmptyState
-          icon={<UserRoundSearch className="h-6 w-6"/>}
+          scene="attendance"
           title="Not available to you"
           description="Your access does not include this person's employment details."
         />

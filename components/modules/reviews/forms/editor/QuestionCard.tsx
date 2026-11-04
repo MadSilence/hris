@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowDown, ArrowUp, Copy, Heading, Plus, Trash2, X } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Add01Icon, ArrowDown02Icon, ArrowUp02Icon, Cancel01Icon, Copy01Icon, Delete02Icon, Heading01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/public/desact/src/components/ui/select";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/select";
+import { cn } from "@/lib/cn";
 import {
   isChoiceQuestion,
   REVIEW_QUESTION_TYPE_LABELS,
@@ -18,6 +19,7 @@ import {
 } from "@/models/reviews";
 import { retype } from "./draft";
 import { MentionField } from "./MentionField";
+import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
   question: ReviewQuestion;
@@ -49,14 +51,14 @@ export function QuestionCard({
     <li
       data-test="review-question"
       className={cn(
-        "rounded-xl border bg-white p-4",
-        section ? "border-brown-200 bg-brown-50/40" : "border-brown-100",
-        problem && "border-destructive/50",
+        "rounded-card border bg-card p-4",
+        section ? "border-divider bg-subtle/40" : "border-divider",
+        problem && "border-danger/50",
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-2 w-6 shrink-0 text-right text-sm font-medium text-muted-foreground">
-          {section ? <Heading className="ml-auto h-4 w-4" aria-label="Section" /> : `${number}.`}
+        <div className="mt-2 w-6 shrink-0 text-right text-body font-medium text-tertiary">
+          {section ? <Icon icon={Heading01Icon} size="sm" className="ml-auto" label="Section" /> : `${number}.`}
         </div>
 
         <div className="min-w-0 flex-1 space-y-3">
@@ -66,7 +68,7 @@ export function QuestionCard({
                 id={`${idBase}-label`}
                 value={q.label}
                 disabled={readOnly}
-                aria-label={section ? "Section Heading" : `Question ${number}`}
+                aria-label={section ? "Section heading" : `Question ${number}`}
                 aria-invalid={problem ? true : undefined}
                 className={cn(section && "font-medium")}
                 onChange={(label) => onChange({ ...q, label })}
@@ -78,7 +80,7 @@ export function QuestionCard({
                 disabled={readOnly}
                 onValueChange={(v) => onChange(retype(q, v as ReviewQuestionType))}
               >
-                <SelectTrigger id={`${idBase}-type`} aria-label="Answer Type" className="sm:w-48"><SelectValue /></SelectTrigger>
+                <SelectTrigger id={`${idBase}-type`} aria-label="Answer type" className="sm:w-48"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(REVIEW_QUESTION_TYPE_LABELS) as (keyof typeof REVIEW_QUESTION_TYPE_LABELS)[]).map((t) => (
                     <SelectItem key={t} value={t}>{REVIEW_QUESTION_TYPE_LABELS[t]}</SelectItem>
@@ -91,21 +93,21 @@ export function QuestionCard({
           {showGuidance && (
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <Label htmlFor={`${idBase}-guidance`} className="text-xs text-muted-foreground">
-                  {section ? "Text Under the Heading" : "Guidance for the Reviewer"}
+                <Label htmlFor={`${idBase}-guidance`} className="text-hint text-tertiary">
+                  {section ? "Text under the heading" : "Guidance for the reviewer"}
                 </Label>
                 {!readOnly && (
                   <button
                     type="button"
-                    aria-label={section ? "Remove Text" : "Remove Guidance"}
-                    title={section ? "Remove Text" : "Remove Guidance"}
-                    className="rounded p-0.5 text-muted-foreground hover:bg-brown-50 hover:text-brown-900"
+                    aria-label={section ? "Remove text" : "Remove guidance"}
+                    title={section ? "Remove text" : "Remove guidance"}
+                    className="rounded-control p-0.5 text-tertiary hover:bg-subtle hover:text-primary"
                     onClick={() => {
                       setShowGuidance(false);
                       onChange({ ...q, description: null });
                     }}
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <Icon icon={Cancel01Icon} size="sm" />
                   </button>
                 )}
               </div>
@@ -129,16 +131,16 @@ export function QuestionCard({
           )}
 
           {q.type === "RATING" && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-hint text-tertiary">
               Answered on the review cycle&apos;s rating scale, with room for a comment.
             </p>
           )}
 
-          {problem && <p role="alert" className="text-xs text-destructive">{problem}</p>}
+          {problem && <FormError message={problem} />}
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {!section && (
-              <label className="flex items-center gap-1.5 text-sm">
+              <label className="flex items-center gap-1.5 text-body">
                 <Checkbox
                   checked={Boolean(q.required)}
                   disabled={readOnly}
@@ -148,31 +150,31 @@ export function QuestionCard({
               </label>
             )}
             {q.type === "RATING" && (
-              <label className="flex items-center gap-1.5 text-sm" title="The manager form's overall rating becomes the person's rating for the cycle.">
+              <label className="flex items-center gap-1.5 text-body" title="The manager form's overall rating becomes the person's rating for the cycle.">
                 <Checkbox
                   checked={Boolean(q.overall)}
                   disabled={readOnly}
                   onCheckedChange={(c) => onOverallChange(c === true)}
                 />
-                Overall Rating
+                Overall rating
               </label>
             )}
             {!readOnly && !showGuidance && (
               <button
                 type="button"
-                className="text-sm font-medium text-brown-700 hover:text-brown-900"
+                className="text-body font-medium text-secondary hover:text-primary"
                 onClick={() => setShowGuidance(true)}
               >
-                {section ? "Add Text" : "Add Guidance"}
+                {section ? "Add text" : "Add guidance"}
               </button>
             )}
 
             {!readOnly && (
               <div className="ml-auto flex gap-1">
-                <IconButton label="Move Up" disabled={first} onClick={() => onMove(-1)}><ArrowUp className="h-3.5 w-3.5" /></IconButton>
-                <IconButton label="Move Down" disabled={last} onClick={() => onMove(1)}><ArrowDown className="h-3.5 w-3.5" /></IconButton>
-                <IconButton label="Duplicate" onClick={onDuplicate}><Copy className="h-3.5 w-3.5" /></IconButton>
-                <IconButton label="Remove" onClick={onRemove}><Trash2 className="h-3.5 w-3.5" /></IconButton>
+                <IconButton label="Move up" disabled={first} onClick={() => onMove(-1)}><Icon icon={ArrowUp02Icon} size="sm" /></IconButton>
+                <IconButton label="Move down" disabled={last} onClick={() => onMove(1)}><Icon icon={ArrowDown02Icon} size="sm" /></IconButton>
+                <IconButton label="Duplicate" onClick={onDuplicate}><Icon icon={Copy01Icon} size="sm" /></IconButton>
+                <IconButton label="Remove" onClick={onRemove}><Icon icon={Delete02Icon} size="sm" /></IconButton>
               </div>
             )}
           </div>
@@ -211,21 +213,21 @@ function OptionCells({ options, disabled, onChange }: {
             aria-label={`Option ${i + 1}`}
             value={o}
             disabled={disabled}
-            className="h-8 w-40 pr-7 text-sm"
+            className="h-8 w-40 pr-7 text-body"
             onChange={(e) => onChange(shown.map((x, j) => (j === i ? e.target.value : x)))}
           />
           {!disabled && shown.length > 1 && (
-            <button type="button" aria-label={`Remove Option ${i + 1}`}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-brown-900"
+            <button type="button" aria-label={`Remove option ${i + 1}`}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-control p-0.5 text-tertiary hover:text-primary"
               onClick={() => onChange(shown.filter((_, j) => j !== i))}>
-              <X className="h-3.5 w-3.5" />
+              <Icon icon={Cancel01Icon} size="sm" />
             </button>
           )}
         </div>
       ))}
       {!disabled && (
-        <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-brown-700" onClick={() => onChange([...shown, ""])}>
-          <Plus className="h-3.5 w-3.5" />
+        <Button type="button" variant="ghost" size="sm" className="gap-1 text-secondary" onClick={() => onChange([...shown, ""])}>
+          <Icon icon={Add01Icon} size="sm" />
           Option
         </Button>
       )}

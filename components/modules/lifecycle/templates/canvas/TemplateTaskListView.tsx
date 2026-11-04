@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Hourglass, ListChecks, Plus, TriangleAlert } from "lucide-react";
+import { Add01Icon, Alert02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { EmptyState } from "@/components/feedback/EmptyState";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Button } from "@/components/desact/button";
+import { cn } from "@/lib/cn";
 import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
 import {
   dayLabel,
@@ -45,11 +46,11 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
     return (
       <div className="h-full" data-test="template-list-view">
         <EmptyState
-          icon={<ListChecks className="h-6 w-6" />}
+          scene="onboarding"
           title="No tasks yet"
           description="A process started from this template would have nothing to do. Add the first task."
           onCreate={readOnly ? undefined : onAddAction}
-          createLabel="Add Task"
+          createLabel="Add task"
           fill
         />
       </div>
@@ -60,9 +61,9 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
     <div className="space-y-6 px-1" data-test="template-list-view">
       {!readOnly && (
         <div className="flex justify-end">
-          <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={onAddAction}>
-            <Plus className="h-4 w-4" />
-            Add Task
+          <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={onAddAction}>
+            <Icon icon={Add01Icon} size="sm" />
+            Add task
           </Button>
         </div>
       )}
@@ -72,12 +73,12 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
         if (inPhase.length === 0) return null;
         return (
           <section key={phase} aria-labelledby={`phase-${phase}`} className="space-y-2">
-            <h3 id={`phase-${phase}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {phase === "BEFORE_START" && type === "OFFBOARDING" ? "By the Last Day" : PHASE_LABELS[phase]}
+            <h3 id={`phase-${phase}`} className="text-hint font-medium text-tertiary">
+              {phase === "BEFORE_START" && type === "OFFBOARDING" ? "By the last day" : PHASE_LABELS[phase]}
             </h3>
-            <ul className="divide-y divide-brown-100 overflow-hidden rounded-lg border border-brown-100 bg-white">
+            <ul className="divide-y divide-divider overflow-hidden rounded-control border border-divider bg-card">
               {inPhase.map((item) => {
-                const Icon = TASK_KIND_ICON[item.kind];
+                const kindIcon = TASK_KIND_ICON[item.kind];
                 return (
                   <li key={item.key}>
                     <button
@@ -85,25 +86,25 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
                       onClick={() => onSelectAction(item.key)}
                       aria-current={selectedKey === item.key ? "true" : undefined}
                       className={cn(
-                        "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-brown-50",
-                        selectedKey === item.key && "bg-brown-50",
+                        "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-subtle",
+                        selectedKey === item.key && "bg-subtle",
                       )}
                     >
-                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-label={TASK_KIND_LABELS[item.kind]} />
+                      <Icon icon={kindIcon} size="sm" className="mt-0.5 text-tertiary" label={TASK_KIND_LABELS[item.kind]} />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium text-brown-900">{item.title || "Untitled task"}</span>
-                        <span className="block text-xs text-muted-foreground">
+                        <span className="block truncate font-medium text-primary">{item.title || "Untitled task"}</span>
+                        <span className="block text-hint text-tertiary">
                           {dayLabel(item, type)} · {laneLabel(item)}
                         </span>
                         {item.waitsFor.length > 0 && (
-                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                            <Hourglass className="h-3 w-3" />
+                          <span className="mt-0.5 flex items-center gap-1 text-hint text-tertiary">
+                            <Icon icon={HourglassIcon} size="sm" />
                             Waits for {item.waitsFor.map(titleOf).join(", ")}
                           </span>
                         )}
                       </span>
                       {item.assigneeKind === "SPECIFIC_USER" && (item.assigneeProblem || !item.assigneeUserId) && (
-                        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning-700" aria-label="Needs a person who can take it" />
+                        <Icon icon={Alert02Icon} size="sm" className="mt-0.5 shrink-0 text-status-pending-text" label="Needs a person who can take it" />
                       )}
                     </button>
                   </li>

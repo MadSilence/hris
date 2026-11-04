@@ -1,7 +1,8 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
-import { Bell, Eye, Shield, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
+import { Notification01Icon, Shield01Icon, UserGroupIcon, ViewIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import FieldAccessModule
   from "@/components/modules/settings/modules/roles/components/RoleDetailsContainer/modules/FieldAccess/FieldAccessModule";
 import PermissionsModule
@@ -28,24 +29,24 @@ export default function RoleDetailsView({ roleId, roleName, isDefaultRole = fals
     <div className="px-8 space-y-4">
 
       <Tabs defaultValue="assigned" className="w-full">
-        <TabsList className="grid grid-cols-4 w-full bg-brown-50">
+        <TabsList className="grid grid-cols-4 w-full bg-subtle">
           <TabsTrigger value="assigned" className="flex items-center gap-2">
-            <Users className="w-4 h-4"/>
-            Assigned Users
+            <Icon icon={UserGroupIcon} size="sm" />
+            Assigned users
             {assignedCount != null && (
-              <span className="text-brown-400">({assignedCount})</span>
+              <span className="text-tertiary">({assignedCount})</span>
             )}
           </TabsTrigger>
           <TabsTrigger value="permissions" className="flex items-center gap-2">
-            <Shield className="w-4 h-4"/>
+            <Icon icon={Shield01Icon} size="sm" />
             Permissions
           </TabsTrigger>
           <TabsTrigger value="field-access" className="flex items-center gap-2">
-            <Eye className="w-4 h-4"/>
-            Field Access
+            <Icon icon={ViewIcon} size="sm" />
+            Field access
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="w-4 h-4"/>
+            <Icon icon={Notification01Icon} size="sm" />
             Notifications
           </TabsTrigger>
         </TabsList>

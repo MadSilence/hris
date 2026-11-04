@@ -75,12 +75,12 @@ describe("ShareViewDialog", () => {
 
     render(<ShareViewDialog view={view} onClose={jest.fn()} />);
 
-    const list = screen.getByRole("list", { name: "Shared With" });
+    const list = screen.getByRole("list", { name: "Shared with" });
     expect(list).toHaveTextContent("Platform");
     expect(list).toHaveTextContent("Removed Role");
 
     fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
-    expect(screen.getByText("Remove Access")).toBeInTheDocument();
+    expect(screen.getByText("Remove access")).toBeInTheDocument();
     expect(unshareMutate).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Remove" }).at(-1)!);
@@ -100,7 +100,7 @@ describe("ShareViewDialog", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Pick Cid" }));
 
-    expect(screen.getByRole("list", { name: "To Share" })).toHaveTextContent("Cid Clerk");
+    expect(screen.getByRole("list", { name: "To share" })).toHaveTextContent("Cid Clerk");
     expect(previewAsked.at(-1)).toEqual([{ granteeType: "PERSON", granteeId: "u-cid" }]);
     expect(screen.getByText("3 people won't see Salary (Cid Clerk, Dee Doe and 1 more).")).toBeInTheDocument();
     expect(shareMutate).not.toHaveBeenCalled();
@@ -116,9 +116,9 @@ describe("ShareViewDialog", () => {
     render(<ShareViewDialog view={view} onClose={jest.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Pick Cid" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Do Not Share With Cid Clerk" }));
+    fireEvent.click(screen.getByRole("button", { name: "Do not share with Cid Clerk" }));
 
-    expect(screen.queryByRole("list", { name: "To Share" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "To share" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Share" })).toBeDisabled();
   });
 });

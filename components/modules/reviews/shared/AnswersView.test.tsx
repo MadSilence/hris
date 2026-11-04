@@ -21,7 +21,7 @@ describe("AnswersView", () => {
       assignmentId: "a1", kind: "PEER", author: null, submittedAt: null, previous: false,
       answers: [{ questionId: "q1", label: "Strengths", type: "LONG_TEXT", value: "Kind", comment: null }],
     }} />);
-    expect(screen.getByRole("heading", { name: "Peer Review" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Peer review" })).toBeInTheDocument();
     expect(screen.queryByText(/Submitted/)).not.toBeInTheDocument();
     expect(screen.getByText("Kind")).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe("AnswersView", () => {
       assignmentId: "a2", kind: "MANAGER", author: { userId: "u1", name: "Bea Boss" }, submittedAt: "2026-11-02T10:00:00",
       previous: true, answers: [],
     }} />);
-    expect(screen.getByRole("heading", { name: "Manager Review — Bea Boss" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Manager review — Bea Boss" })).toBeInTheDocument();
     expect(screen.getByText("Written by a previous manager")).toBeInTheDocument();
   });
 });

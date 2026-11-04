@@ -1,9 +1,10 @@
 "use client";
 
 import { FC } from "react";
-import { Lock, SlidersHorizontal } from "lucide-react";
+import { PreferenceHorizontalIcon, SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import AttributeGroupsContainer
   from "@/components/modules/settings/modules/attributes/components/AttributeGroupsContainer/AttributeGroupsContainer";
 import {
@@ -21,14 +22,14 @@ import {
  */
 export const PersonFieldsTabs: FC = () => (
   <Tabs defaultValue="custom" className="w-full">
-    <TabsList className="grid w-full grid-cols-2 bg-brown-50">
+    <TabsList className="grid w-full grid-cols-2 bg-subtle">
       <TabsTrigger value="custom" className="flex items-center gap-2">
-        <SlidersHorizontal className="h-4 w-4"/>
-        Custom Fields
+        <Icon icon={PreferenceHorizontalIcon} size="sm" />
+        Custom fields
       </TabsTrigger>
       <TabsTrigger value="system" className="flex items-center gap-2">
-        <Lock className="h-4 w-4"/>
-        System Fields
+        <Icon icon={SquareLock02Icon} size="sm" />
+        System fields
       </TabsTrigger>
     </TabsList>
 

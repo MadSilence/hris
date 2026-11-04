@@ -48,8 +48,9 @@ const renderScreen = () =>
 
 const openCreate = () =>
   // The toolbar button, anchored: with an empty list the empty state is a second, deliberate
-  // "Add Office" affordance, and an unanchored name now matches both.
-  fireEvent.click(screen.getByRole("button", { name: /^add office$/i }));
+  // "Add office" affordance, and an unanchored name now matches both.
+  // The toolbar's button; the empty list offers the same action again under its illustration.
+  fireEvent.click(screen.getAllByRole("button", { name: /^add office$/i })[0]);
 
 /**
  * A server action answers 200 whether it worked or not — the envelope is the only thing that says

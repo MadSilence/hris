@@ -30,21 +30,21 @@ describe("WhosOutWidget", () => {
     fireEvent.click(screen.getByRole("button", { name: "Everyone" }));
     expect(useWhosOut).toHaveBeenLastCalledWith("TODAY", "EVERYONE");
 
-    fireEvent.click(screen.getByRole("button", { name: "This Week" }));
+    fireEvent.click(screen.getByRole("button", { name: "This week" }));
     expect(useWhosOut).toHaveBeenLastCalledWith("WEEK", "EVERYONE");
-    expect(screen.getByRole("button", { name: "This Week" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "This week" })).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("says Time Off where the leave type was not disclosed, and marks a pending request", () => {
+  it("says Away where the leave type was not disclosed, and marks a pending request", () => {
     answer({
       people: [
         person({ userId: "masked" }),
-        person({ userId: "open", firstName: "Bob", status: "PENDING", leaveTypeName: "Vacation", leaveTypeColor: "#0f0", requestId: "r1" }),
+        person({ userId: "open", firstName: "Bob", status: "PENDING", leaveTypeName: "Vacation", leaveTypeColor: "teal", requestId: "r1" }),
       ],
     });
     render(<WhosOutWidget />);
 
-    expect(screen.getByText("Time Off")).toBeInTheDocument();
+    expect(screen.getByText("Away")).toBeInTheDocument();
     expect(screen.getByText("Vacation")).toBeInTheDocument();
     expect(screen.getByText("Pending")).toBeInTheDocument();
     // Only the request the reader may open is a link.
@@ -57,7 +57,7 @@ describe("WhosOutWidget", () => {
     render(<WhosOutWidget />);
 
     expect(screen.getByText("You are not in a team or a department yet.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Show Everyone" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show everyone" }));
     expect(useWhosOut).toHaveBeenLastCalledWith("TODAY", "EVERYONE");
   });
 
@@ -75,6 +75,6 @@ describe("WhosOutWidget", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(refetch).toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Who's Out" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Who's out" })).toBeInTheDocument();
   });
 });

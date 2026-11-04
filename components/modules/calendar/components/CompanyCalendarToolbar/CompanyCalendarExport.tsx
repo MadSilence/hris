@@ -1,15 +1,16 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Download, Printer } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Download01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { FormError } from "@/components/feedback/FormError";
 import { ForbiddenError } from "@/components/clients/exceptions";
@@ -75,26 +76,24 @@ export const CompanyCalendarExport: FC<Props> = ({ from, to, q, filters }) => {
     <>
       <Button
         type="button"
-        variant="outline"
-        size="icon"
-        className="h-9 w-9 print:hidden"
+        variant="secondary"
+        size="icon" className="print:hidden"
         aria-label="Print the calendar"
         title="Print"
         onClick={() => window.print()}
       >
-        <Printer className="h-4 w-4" />
+        <Icon icon={PrinterIcon} size="sm" />
       </Button>
       <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
         <Button
           type="button"
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 print:hidden"
+          variant="secondary"
+          size="icon" className="print:hidden"
           aria-label="Export the calendar"
           title="Export"
           onClick={() => setOpen(true)}
         >
-          <Download className="h-4 w-4" />
+          <Icon icon={Download01Icon} size="sm" />
         </Button>
         <Dialog open={open} onOpenChange={(next) => !next && close()}>
           <DialogContent hideClose className="sm:max-w-xl">

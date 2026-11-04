@@ -2,9 +2,9 @@
 
 import * as React from "react";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
@@ -78,12 +78,12 @@ export const MfaSignInStep: React.FC<{
   if (codesLeft != null) {
     return (
       <div className="w-full space-y-6 text-center">
-        <h1 className="text-3xl font-medium">Signed in with a backup code</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-page-title">Signed in with a backup code</h1>
+        <p className="text-body text-tertiary">
           {codesLeft === 1 ? "1 backup code is left." : `${codesLeft} backup codes are left.`} If you have lost your phone,
           set up a new one in My Preferences → Two-Step Sign-In.
         </p>
-        <Button type="button" className="h-11 w-full" onClick={open}>Continue</Button>
+        <Button type="button" size="lg" className="w-full" onClick={open}>Continue</Button>
       </div>
     );
   }
@@ -92,8 +92,8 @@ export const MfaSignInStep: React.FC<{
     return (
       <div className="w-full space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-medium">Set up two-step sign-in</h1>
-          <p className="text-sm text-muted-foreground">Your company asks for a second step when you sign in.</p>
+          <h1 className="text-page-title">Set up two-step sign-in</h1>
+          <p className="text-body text-tertiary">Your company asks for a second step when you sign in.</p>
         </div>
         {codes ? (
           <BackupCodesSheet codes={codes} onDone={open} doneLabel="Continue" />
@@ -109,8 +109,8 @@ export const MfaSignInStep: React.FC<{
           <>
             <FormError message={error} />
             {error && (
-              <Button type="button" variant="outline" className="w-full" onClick={onRestart}>
-                Sign In Again
+              <Button type="button" variant="secondary" className="w-full" onClick={onRestart}>
+                Sign in again
               </Button>
             )}
           </>
@@ -122,8 +122,8 @@ export const MfaSignInStep: React.FC<{
   return (
     <div className="w-full space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-medium">Two-step sign-in</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-page-title">Two-step sign-in</h1>
+        <p className="text-body text-tertiary">
           {useBackup ? "Enter one of your backup codes." : "Enter the six-digit code from your authenticator app."}
         </p>
       </div>
@@ -134,14 +134,14 @@ export const MfaSignInStep: React.FC<{
           <Label htmlFor="mfa-remember">Remember this device</Label>
         </div>
         <FormError message={error} />
-        <Button type="submit" className="h-11 w-full" disabled={busy || !code.trim()}>
+        <Button type="submit" size="lg" className="w-full" disabled={busy || !code.trim()}>
           {busy ? "Checking…" : "Sign in"}
         </Button>
       </form>
-      <div className="flex justify-between text-sm">
+      <div className="flex justify-between text-body">
         <button
           type="button"
-          className="text-brown-600 underline"
+          className="text-secondary underline"
           onClick={() => {
             setUseBackup((v) => !v);
             setCode("");
@@ -150,7 +150,7 @@ export const MfaSignInStep: React.FC<{
         >
           {useBackup ? "Use the app instead" : "Use a backup code"}
         </button>
-        <button type="button" className="text-brown-600 underline" onClick={onRestart}>
+        <button type="button" className="text-secondary underline" onClick={onRestart}>
           Start over
         </button>
       </div>

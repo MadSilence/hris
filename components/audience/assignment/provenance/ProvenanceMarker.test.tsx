@@ -51,14 +51,14 @@ describe("ProvenanceMarker", () => {
     expect(screen.queryByTestId("provenance-sys:team")).not.toBeInTheDocument();
   });
 
-  it("shows a hand value that holds a rule off, with Return to Rule, to an editor only", () => {
+  it("shows a hand value that holds a rule off, with Return to rule, to an editor only", () => {
     const { unmount } = renderMarker({ fieldId: "sys:office", canEdit: false });
-    expect(screen.queryByRole("button", { name: "Return to Rule" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Return to rule" })).not.toBeInTheDocument();
     unmount();
 
     renderMarker({ fieldId: "sys:office", canEdit: true });
     expect(screen.getByTestId("provenance-sys:office")).toHaveTextContent("Set by hand — the rule “Sales sit in Berlin” would set something else.");
-    expect(screen.getByRole("button", { name: "Return to Rule" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Return to rule" })).toBeInTheDocument();
   });
 
   it("returns the value to the rule and tells the profile to read the person again", async () => {
@@ -66,7 +66,7 @@ describe("ProvenanceMarker", () => {
     const onReturned = jest.fn();
     renderMarker({ fieldId: "sys:office", onReturned });
 
-    fireEvent.click(screen.getByRole("button", { name: "Return to Rule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Return to rule" }));
 
     await waitFor(() => expect(onReturned).toHaveBeenCalled());
     expect(returnToRuleAction).toHaveBeenCalledWith({ userId: "u1", assignableType: "OFFICE", assignableId: null });
@@ -79,7 +79,7 @@ describe("ProvenanceMarker", () => {
       canEdit: false,
       provenance: [{
         ...fromRule,
-        rule: { id: "r3", name: "Holiday Calendar · Office Berlin → Germany 2026" },
+        rule: { id: "r3", name: "Holiday calendar · Office Berlin → Germany 2026" },
         source: { kind: "OFFICE", refId: "berlin", name: "Berlin", calendarId: "cal-de", calendarName: "Germany 2026" },
       }],
     });
@@ -87,7 +87,7 @@ describe("ProvenanceMarker", () => {
     expect(screen.getByTestId("provenance-sys:calendar")).toHaveTextContent("From office: Berlin");
   });
 
-  it("offers Return to Rule for an own calendar that holds off the inherited one, to an editor only", async () => {
+  it("offers Return to rule for an own calendar that holds off the inherited one, to an editor only", async () => {
     (returnToRuleAction as jest.Mock).mockResolvedValue({ status: ActionStatus.SUCCESS, data: [] });
     const own: AssignmentProvenance = {
       assignableType: "PUBLIC_HOLIDAY_CALENDAR",
@@ -96,7 +96,7 @@ describe("ProvenanceMarker", () => {
       origin: "HAND",
       rule: null,
       since: null,
-      overriddenRule: { id: "r3", name: "Holiday Calendar · Office Berlin → Germany 2026" },
+      overriddenRule: { id: "r3", name: "Holiday calendar · Office Berlin → Germany 2026" },
       overriddenSource: { kind: "OFFICE", refId: "berlin", name: "Berlin", calendarId: "cal-de", calendarName: "Germany 2026" },
     };
     const { unmount } = renderMarker({ fieldId: "sys:calendar", canEdit: false, provenance: [own] });
@@ -106,7 +106,7 @@ describe("ProvenanceMarker", () => {
     renderMarker({ fieldId: "sys:calendar", canEdit: true, provenance: [own] });
     expect(screen.getByTestId("provenance-sys:calendar"))
       .toHaveTextContent("Set by hand, in place of Germany 2026 from office: Berlin.");
-    fireEvent.click(screen.getByRole("button", { name: "Return to Rule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Return to rule" }));
 
     await waitFor(() => expect(returnToRuleAction).toHaveBeenCalledWith({
       userId: "u1", assignableType: "PUBLIC_HOLIDAY_CALENDAR", assignableId: null,
@@ -118,7 +118,7 @@ describe("ProvenanceMarker", () => {
     (returnToRuleAction as jest.Mock).mockResolvedValue({ status: ActionStatus.ERROR, errorMessage: "No enabled automation sets this for this person, so there is no rule to return to." });
     renderMarker({ fieldId: "sys:office" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Return to Rule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Return to rule" }));
 
     await waitFor(() => expect(showError).toHaveBeenCalled());
   });

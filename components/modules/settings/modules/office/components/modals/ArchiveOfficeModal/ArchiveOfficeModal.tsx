@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Archive } from "lucide-react";
+import { Archive02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +10,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/dialog";
+import { Button } from "@/components/desact/button";
 import { Office } from "@/models/office";
 import type { AssignedUsersStrategy } from "@/components/modules/settings/modules/office/actions/archiveOfficeAction";
 
@@ -36,7 +37,7 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Archive className="h-5 w-5"/>
+            <Icon icon={Archive02Icon} />
             Archive &quot;{office?.name ?? ""}&quot;?
           </DialogTitle>
           <DialogDescription>
@@ -46,14 +47,14 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
         </DialogHeader>
 
         {count > 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             {count} {count === 1 ? "person is" : "people are"} assigned to this office.
             {" "}Archiving keeps them assigned; unarchiving brings everything back as it was.
           </p>
         )}
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => !isLoading && onRequestCloseAction()} disabled={isLoading}>
+          <Button type="button" variant="secondary" onClick={() => !isLoading && onRequestCloseAction()} disabled={isLoading}>
             Cancel
           </Button>
           <Button type="button" onClick={() => !isLoading && onConfirmAction("KEEP")} disabled={isLoading}>

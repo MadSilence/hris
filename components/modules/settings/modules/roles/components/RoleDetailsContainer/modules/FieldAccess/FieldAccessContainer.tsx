@@ -2,10 +2,11 @@
 
 import React from "react";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { Card, CardContent, CardHeader } from "@/public/desact/src/components/ui/card";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/desact/card";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Button } from "@/components/desact/button";
+import { UnfoldLessIcon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
@@ -25,6 +26,7 @@ import {
 import FieldAccessView, { buildFieldGroups } from "./FieldAccessView";
 import { FieldAccessSummaryModal } from "./FieldAccessSummaryModal";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { FieldError } from "@/components/desact/field-error";
 
 function FieldAccessSkeleton() {
   return (
@@ -115,8 +117,8 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
       <CardHeader className="px-0 py-0">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold">Field access</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-section-title">Field access</h2>
+            <p className="text-body text-tertiary">
               Choose which employee fields this role can see and edit.
             </p>
           </div>
@@ -127,16 +129,16 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
             <Button type="button"
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-brown-600"
+              className="gap-1.5 text-secondary"
               onClick={() => setOpenGroups(allExpanded ? [] : groups.map((group) => group.id))}
             >
-              {allExpanded ? <ChevronsDownUp className="h-4 w-4"/> : <ChevronsUpDown className="h-4 w-4"/>}
+              {allExpanded ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
               {allExpanded ? "Collapse all" : "Expand all"}
             </Button>
 
             {showActions && (
               <>
-                <Button type="button" variant="outline" onClick={() => setDraft(serverDraft)} disabled={saving}>
+                <Button type="button" variant="secondary" onClick={() => setDraft(serverDraft)} disabled={saving}>
                   Reset
                 </Button>
                 <Button type="button" onClick={() => setReviewOpen(true)} disabled={saving}>
@@ -152,7 +154,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
         {isLoading ? (
           <FieldAccessSkeleton/>
         ) : error ? (
-          <p className="text-sm text-danger-600">Failed to load field access.</p>
+          <FieldError>Failed to load field access.</FieldError>
         ) : (
           <FieldAccessView
             groups={groups}

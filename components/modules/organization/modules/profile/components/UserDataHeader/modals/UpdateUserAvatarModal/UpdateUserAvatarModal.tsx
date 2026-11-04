@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
+} from "@/components/desact/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,11 +21,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage, } from "@/public/desact/src/components/ui/avatar";
-import { Separator } from "@/public/desact/src/components/ui/separator";
-import { AlertTriangle, ImagePlus, Trash2, UploadCloud, UserRoundX, X, } from "lucide-react";
+} from "@/components/desact/alert-dialog";
+import { Button } from "@/components/desact/button";
+import { Avatar, AvatarFallback, AvatarImage, } from "@/components/desact/avatar";
+import { Separator } from "@/components/desact/separator";
+import { Alert02Icon, Cancel01Icon, CloudUploadIcon, Delete02Icon, ImageAdd01Icon, UserBlock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 export type UpdateUserAvatarSubmission =
   | {
@@ -160,34 +161,34 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
 
           <div className="space-y-7 px-8 py-7">
             <div className="flex min-h-40 items-center gap-7">
-              <Avatar key={avatarKey} className="size-32 shrink-0 border shadow-sm">
+              <Avatar key={avatarKey} className="size-32 shrink-0 border shadow-card">
                 {displayedAvatarUrl ? (
                   <AvatarImage src={displayedAvatarUrl} alt={fullName}/>
                 ) : null}
-                <AvatarFallback className="text-3xl">
+                <AvatarFallback className="text-page-title">
                   {initialsOf(fullName)}
                 </AvatarFallback>
               </Avatar>
 
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="text-body font-medium">
                     {selectedFile ? "New avatar" : "Current avatar"}
                   </p>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                  <p className="mt-2 max-w-md text-body leading-6 text-tertiary">
                     Recommended: square image, at least 400×400px. PNG, JPG or WEBP works best.
                   </p>
                 </div>
 
                 <div className="min-h-[68px]">
                   {selectedFile ? (
-                    <div className="rounded-xl border bg-muted/30 px-4 py-3">
+                    <div className="rounded-card border bg-mist/30 px-4 py-3">
                       <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
+                          <p className="truncate text-body font-medium">
                             {shortenFileName(selectedFile.name)}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-hint text-tertiary">
                             {formatFileSize(selectedFile.size)}
                           </p>
                         </div>
@@ -200,7 +201,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                           onClick={handleClearSelection}
                           aria-label="Clear selected image"
                         >
-                          <X className="size-4"/>
+                          <Icon icon={Cancel01Icon} size="sm" />
                         </Button>
                       </div>
                     </div>
@@ -216,24 +217,24 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
             <div className="grid gap-4 sm:grid-cols-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 disabled={isLoading}
                 onClick={() => inputRef.current?.click()}
-                className="h-auto items-center justify-start gap-4 rounded-2xl px-5 py-5"
+                className="h-auto items-center justify-start gap-4 rounded-card px-5 py-5"
               >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-muted">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-card bg-mist">
                   {hasCurrentAvatar ? (
-                    <ImagePlus className="size-5"/>
+                    <Icon icon={ImageAdd01Icon} />
                   ) : (
-                    <UploadCloud className="size-5"/>
+                    <Icon icon={CloudUploadIcon} />
                   )}
                 </span>
 
                 <span className="min-w-0 text-left">
-                  <span className="block text-sm font-medium">
+                  <span className="block text-body font-medium">
                     {hasCurrentAvatar ? "Replace photo" : "Upload photo"}
                   </span>
-                  <span className="mt-1 block text-xs text-muted-foreground">
+                  <span className="mt-1 block text-hint text-tertiary">
                     Choose an image from your device.
                   </span>
                 </span>
@@ -241,18 +242,18 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
 
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 disabled={isLoading || !hasCurrentAvatar}
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="h-auto items-center justify-start gap-4 rounded-2xl px-5 py-5 text-danger-600 hover:bg-danger-50 hover:text-danger-700"
+                className="h-auto items-center justify-start gap-4 rounded-card px-5 py-5 text-danger-text hover:bg-status-declined-bg hover:text-status-declined-text"
               >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-danger-50">
-                  <Trash2 className="size-5"/>
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-card bg-status-declined-bg">
+                  <Icon icon={Delete02Icon} />
                 </span>
 
                 <span className="min-w-0 text-left">
-                  <span className="block text-sm font-medium">Remove photo</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">
+                  <span className="block text-body font-medium">Remove photo</span>
+                  <span className="mt-1 block text-hint text-tertiary">
                     Use initials instead of an avatar.
                   </span>
                 </span>
@@ -272,7 +273,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
             <DialogFooter>
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 disabled={isLoading}
                 onClick={requestClose}
               >
@@ -283,7 +284,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                 disabled={isLoading || !canSave}
                 onClick={handleUploadConfirm}
               >
-                {isLoading ? "Saving..." : "Save changes"}
+                {isLoading ? "Saving…" : "Save changes"}
               </Button>
             </DialogFooter>
           </div>
@@ -331,8 +332,8 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <UserRoundX className="h-5 w-5"/>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon={UserBlock01Icon} />
             Remove avatar
           </AlertDialogTitle>
 
@@ -343,12 +344,12 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600"/>
+            <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
-              <p className="text-sm text-danger-700">
+              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <p className="text-body text-secondary">
                 The current avatar will be permanently removed.
               </p>
             </div>
@@ -367,7 +368,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
               event.preventDefault();
               void onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Remove avatar
           </AlertDialogAction>

@@ -18,7 +18,7 @@ jest.mock(
   () => ({ ChoosePublicHolidayTemplateModal: () => null }),
 );
 
-// The company default's Holiday Calendar field reads through react-query; it is tested on its own.
+// The company default's Holiday calendar field reads through react-query; it is tested on its own.
 jest.mock(
   "@/components/modules/settings/modules/time/publicHolidays/components/HolidayCalendarBinding",
   () => ({ HolidayCalendarBindingSection: () => null }),
@@ -96,7 +96,7 @@ const calendar = (overrides: Partial<PublicHolidayCalendar> = {}): PublicHoliday
 const openRowMenu = async (name: string) => {
   const user = userEvent.setup();
   const row = screen.getByRole("link", { name }).closest("tr");
-  await user.click(within(row as HTMLElement).getByRole("button", { name: "Calendar Actions" }));
+  await user.click(within(row as HTMLElement).getByRole("button", { name: "Calendar actions" }));
   return user;
 };
 

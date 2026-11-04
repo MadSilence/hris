@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
+import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { AttributeOption, AttributeType, isOptionsType } from "@/models/attribute";
-import { PRESET_COLORS } from "@/models/colors";
-import {
-  ColorSwatchPicker
-} from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeTypePickers/ColorSwatchPicker";
+import { TagColorPicker } from "@/components/ui/TagColorPicker";
+import { nextTagColor, TAG_COLOR_SEQUENCE } from "@/lib/theme/tags";
 import { sortBySortOrder } from "../../../../hooks/utils/useReorderAction";
 import { AttributeOptionUpsert } from "@/models/attribute/AttributeOptionUpsert";
 
@@ -19,12 +18,8 @@ type OptionsEditorProps = {
   disabled?: boolean;
 };
 
-function pickNextColor(current: AttributeOptionUpsert[]): string {
-  const used = new Set(current.map((o) => o.color).filter(Boolean));
-  const free = PRESET_COLORS.find((c) => !used.has(c));
-
-  return free ?? PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)];
-}
+/** A new option takes the next tag colour nobody uses yet (SPEC § 4.7). */
+const pickNextColor = (current: AttributeOptionUpsert[]): string => nextTagColor(current.map((o) => o.color));
 
 export const OptionsEditor: React.FC<OptionsEditorProps> = ({
   type,
@@ -60,7 +55,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
     if (local.length === 0) {
       const first: AttributeOptionUpsert = {
         value: "",
-        color: PRESET_COLORS[0],
+        color: TAG_COLOR_SEQUENCE[0],
         sortOrder: 1,
       };
 
@@ -102,7 +97,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
 
     commit(
       next.length === 0
-        ? [{ value: "", color: PRESET_COLORS[0], sortOrder: 1 }]
+        ? [{ value: "", color: TAG_COLOR_SEQUENCE[0], sortOrder: 1 }]
         : next,
     );
   };
@@ -126,9 +121,9 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
               disabled={disabled}
             />
 
-            <ColorSwatchPicker
+            <TagColorPicker
               value={option.color}
-              onChange={(hex) => updateOption(index, { color: hex })}
+              onChange={(color) => updateOption(index, { color })}
               ariaLabel={`Color for option ${index + 1}`}
               disabled={disabled}
             />
@@ -136,14 +131,13 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0 text-brown-500 hover:text-destructive"
+              size="icon" className="shrink-0 text-tertiary hover:text-danger-text"
               onClick={() => removeOption(index)}
               aria-label={`Remove option ${index + 1}`}
               title="Remove option"
               disabled={disabled}
             >
-              <Trash2 className="h-4 w-4"/>
+              <Icon icon={Delete02Icon} size="sm" />
             </Button>
           </div>
         ))}
@@ -153,9 +147,9 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
         type="button"
         onClick={addOption}
         disabled={disabled}
-        className="flex w-full items-center gap-1.5 rounded-md border border-dashed border-brown-300 px-3 py-2 text-sm text-brown-600 hover:bg-brown-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Plus className="h-4 w-4"/>
+        <Icon icon={Add01Icon} size="sm" />
         Add option
       </button>
     </div>

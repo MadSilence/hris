@@ -1,8 +1,9 @@
 "use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRight } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Badge } from "@/components/desact/badge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import {
   useCompanyCalendarAbsences,
@@ -225,20 +226,22 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
       {/* Sticks under the day header while its rows scroll past, so the reader always knows whose
           rows they are looking at; the next group's header pushes it out. */}
       <div
-        className="sticky z-[15] border-b border-brown-200 bg-brown-50"
+        className="sticky z-[15] border-b border-divider bg-subtle"
         style={{ top: `var(${CALENDAR_HEADER_HEIGHT_VAR}, 0px)` }}
       >
         <button
           type="button"
           aria-expanded={!collapsed}
           onClick={toggle}
-          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-brown-100"
+          className="flex w-full items-center gap-2 px-3 py-2 text-left text-body hover:bg-mist"
         >
-          <ChevronRight
-            className={`h-4 w-4 shrink-0 text-brown-500 transition-transform ${collapsed ? "" : "rotate-90"}`}
+          <Icon
+            icon={ArrowRight01Icon}
+            size="sm"
+            className={`text-tertiary transition-transform duration-(--duration-menu) ${collapsed ? "" : "rotate-90"}`}
           />
-          <span className="truncate font-medium text-brown-800">{title}</span>
-          <Badge variant="secondary" className="px-1.5" aria-label={`${group.count} people`}>
+          <span className="truncate font-medium text-primary">{title}</span>
+          <Badge variant="neutral" className="px-1.5" aria-label={`${group.count} people`}>
             {group.count}
           </Badge>
         </button>
@@ -292,7 +295,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
             />
           ))}
           {hasNextPage ? (
-            <div ref={sentinelRef} className="flex justify-center py-3 text-xs text-muted-foreground">
+            <div ref={sentinelRef} className="flex justify-center py-3 text-hint text-tertiary">
               {isFetchingNextPage ? "Loading…" : ""}
             </div>
           ) : null}

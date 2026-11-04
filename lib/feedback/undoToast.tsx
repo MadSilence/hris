@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Undo2 } from "lucide-react";
+import { Undo02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { showError } from "@/lib/errors/errorToast";
 
 /**
@@ -66,17 +67,17 @@ const UndoCard: React.FC<{
 }> = ({ message, durationMs, onUndo }) => (
   <div
     role="status"
-    className="relative w-[356px] overflow-hidden rounded-lg border border-brown-200 bg-white shadow-lg"
+    className="relative w-[356px] overflow-hidden rounded-control border border-divider bg-card shadow-popover"
   >
     <div className="flex items-center justify-between gap-3 px-4 py-3">
-      <p className="text-sm text-brown-900">{message}</p>
+      <p className="text-body text-primary">{message}</p>
 
       <button
         type="button"
         onClick={onUndo}
-        className="flex flex-none items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-brown-700 transition hover:bg-brown-50"
+        className="flex flex-none items-center gap-1.5 rounded-control px-2 py-1 text-body font-medium text-secondary transition hover:bg-subtle"
       >
-        <Undo2 className="h-3.5 w-3.5" aria-hidden />
+        <Icon icon={Undo02Icon} size="sm" />
         Undo
       </button>
     </div>
@@ -88,7 +89,7 @@ const UndoCard: React.FC<{
     */}
     <span
       aria-hidden
-      className="absolute bottom-0 left-0 h-0.5 bg-brown-400"
+      className="absolute bottom-0 left-0 h-0.5 bg-strong"
       style={{ animation: `undo-drain ${durationMs}ms linear forwards` }}
     />
 

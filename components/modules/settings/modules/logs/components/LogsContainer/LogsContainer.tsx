@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Download } from "lucide-react";
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { ListToolbar } from "@/components/ui/ListToolbar";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { LogsFilters } from "@/components/modules/settings/modules/logs/components/LogsFilters/LogsFilters";
 import { LogsTable } from "@/components/modules/settings/modules/logs/components/LogsTable/LogsTable";
@@ -50,9 +51,9 @@ export const LogsContainer: React.FC = () => {
           />
         }
         secondary={
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="secondary" size="sm" asChild>
             <a href={`/api/activity-logs/export${exportQuery(filters)}`}>
-              <Download className="mr-1.5 h-4 w-4"/>
+              <Icon icon={Download01Icon} size="sm" />
               Export
             </a>
           </Button>

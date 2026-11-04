@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Paperclip } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Attachment01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
 
 /**
  * Choosing a file, as a button and the chosen name beside it. The browser's own file input draws its
  * "Choose File · No file chosen" in its own font and baseline, which sat crooked in every form it was put in
  * (owner, 2026-11-02); the input stays, hidden, and does the picking.
  */
-export function FilePickButton({ id, label = "Choose File", file, disabled, onPickAction }: {
+export function FilePickButton({ id, label = "Choose file", file, disabled, onPickAction }: {
   id?: string;
   label?: string;
   /** The file picked so far; its name is shown, or "No file chosen". Omit where the pick is acted on at once. */
@@ -32,13 +33,13 @@ export function FilePickButton({ id, label = "Choose File", file, disabled, onPi
           e.target.value = "";
         }}
       />
-      <Button type="button" variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={disabled}
+      <Button type="button" variant="secondary" size="sm" className="shrink-0 gap-1.5" disabled={disabled}
         onClick={() => input.current?.click()}>
-        <Paperclip className="h-3.5 w-3.5" />
+        <Icon icon={Attachment01Icon} size="sm" />
         {label}
       </Button>
       {file !== undefined && (
-        <span className="min-w-0 truncate text-sm text-muted-foreground">{file ? file.name : "No file chosen"}</span>
+        <span className="min-w-0 truncate text-body text-tertiary">{file ? file.name : "No file chosen"}</span>
       )}
     </div>
   );

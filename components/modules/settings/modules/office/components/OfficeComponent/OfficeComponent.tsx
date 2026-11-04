@@ -6,9 +6,10 @@ import { Office } from "@/models/office";
 import { useCreateOfficeAction } from "@/components/modules/settings/modules/office/hooks/useCreateOfficeAction";
 import type { CreateOfficeActionInput } from "@/components/modules/settings/modules/office/actions/createOfficeAction";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Archive, ArchiveRestore, Building2, Download, Plus } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
+import { Button } from "@/components/desact/button";
+import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -162,19 +163,19 @@ export const OfficeComponent: FC<Props> = ({
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
               <Button type="button"
                 size="icon"
-                variant="outline"
+                variant="secondary"
                 aria-label="Export offices"
                 onClick={() => setIsExportOpen(true)}
               >
-                <Download className="h-4 w-4"/>
+                <Icon icon={Download01Icon} size="sm" />
               </Button>
             </PermissionGate>
           }
           primary={
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
               <Button type="button" onClick={openCreate} className="gap-1.5">
-                <Plus className="h-4 w-4"/>
-                Add Office
+                <Icon icon={Add01Icon} size="sm" />
+                Add office
               </Button>
             </PermissionGate>
           }
@@ -187,22 +188,22 @@ export const OfficeComponent: FC<Props> = ({
         <ListEmptyState
           query={query}
           archivedView={showArchived}
-          icon={<Building2 className="h-7 w-7"/>}
+          scene="company-hub"
           title="No offices yet"
           description="An office is a place people work from. Add the first one to start assigning people to it."
           noResultsHint="Try a different name, country or address."
           archivedDescription="Archived offices will appear here."
           onCreate={openCreate}
-          createLabel="Add Office"
+          createLabel="Add office"
           createAccess={{ resource: "ORG.OFFICE" }}
         />
       ) : (
         <Table className="table-fixed">
-          <TableHeader className="[&_tr]:border-brown-200 [&_tr]:border-t-0">
+          <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
             <TableRow>
               <TableHead className="w-[22%]">Name</TableHead>
               <TableHead className="w-[13%]">Country</TableHead>
-              <TableHead className="w-[13%]">Assigned Users</TableHead>
+              <TableHead className="w-[13%]">Assigned users</TableHead>
               <TableHead className="w-[27%]">Address</TableHead>
               <TableHead className="w-[12.5%]">Email</TableHead>
               <TableHead className="w-[12.5%]">Phone</TableHead>
@@ -214,7 +215,7 @@ export const OfficeComponent: FC<Props> = ({
             {filteredSorted.map((o) => (
               <TableRow
                 key={o.id}
-                className={`group cursor-pointer border-brown-200 hover:bg-brown-50 [&_td]:py-2 ${
+                className={`group cursor-pointer border-divider hover:bg-subtle [&_td]:py-2 ${
                   ""
                 }`}
                 onClick={() => handleRowClick(o)}
@@ -226,25 +227,25 @@ export const OfficeComponent: FC<Props> = ({
                   </span>
                 </TableCell>
 
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-tertiary">
                   {o.country}
                 </TableCell>
 
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-tertiary">
                   {o.assignedUsersCount}
                 </TableCell>
 
-                <TableCell className="truncate text-muted-foreground">
+                <TableCell className="truncate text-tertiary">
                   {[o.street, o.building, o.postCode, o.city, o.country]
                     .filter(Boolean)
                     .join(", ")}
                 </TableCell>
 
-                <TableCell className="truncate text-muted-foreground">
+                <TableCell className="truncate text-tertiary">
                   {o.email}
                 </TableCell>
 
-                <TableCell className="truncate text-muted-foreground">
+                <TableCell className="truncate text-tertiary">
                   {o.phone}
                 </TableCell>
 
@@ -253,14 +254,14 @@ export const OfficeComponent: FC<Props> = ({
                     <RowActionsMenu label="Office actions" stopPropagation>
                       {o.archived ? (
                         <RowAction
-                          icon={<ArchiveRestore className="h-4 w-4"/>}
+                          icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                           onClick={() => handleRestore(o)}
                           disabled={restoreAction.isPending}
                         >
                           Unarchive
                         </RowAction>
                       ) : (
-                        <RowAction icon={<Archive className="h-4 w-4"/>} onClick={() => setArchiving(o)}>
+                        <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => setArchiving(o)}>
                           Archive
                         </RowAction>
                       )}

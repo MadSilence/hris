@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import NavbarLink from "../../ui/NavbarLink/NavbarLink";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
+import { NoddoWordmark } from "@/components/brand";
 
 const LINKS = [
   { label: "Products", href: "/products" },
@@ -13,13 +14,10 @@ const LINKS = [
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-brown-200 bg-white/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-divider bg-card/85 backdrop-blur-md">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3">
-        <Link
-          href="/"
-          className="text-xl font-semibold text-[var(--color-text-primary)] no-underline"
-        >
-          Six Software
+        <Link href="/" aria-label="noddo home" className="inline-flex items-center">
+          <NoddoWordmark tone="ink" height={24} />
         </Link>
 
         <nav className="hidden items-center justify-center gap-2 md:flex">
@@ -32,11 +30,11 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost">
-            <Link href="/login" className="no-underline">Login</Link>
+            <Link href="/login">Sign in</Link>
           </Button>
 
           <Button asChild>
-            <Link href="/trial" className="no-underline">Free Trial</Link>
+            <Link href="/trial">Start free trial</Link>
           </Button>
         </div>
       </div>

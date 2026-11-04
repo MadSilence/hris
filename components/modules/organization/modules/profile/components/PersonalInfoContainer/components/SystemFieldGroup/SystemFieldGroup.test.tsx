@@ -58,7 +58,7 @@ describe("SystemFieldGroup — a field that is going to change", () => {
     expect(screen.getByText("London")).toBeInTheDocument();
     const pending = screen.getByTestId("pending-change");
     expect(pending).toHaveTextContent(`→ Paris from ${formatDisplayDate("2026-12-01", { style: "medium" })}`);
-    expect(pending).toHaveClass("text-muted-foreground");
+    expect(pending).toHaveClass("text-tertiary");
   });
 
   it("leaves a field nothing is scheduled on as it is", () => {

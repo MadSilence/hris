@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 export interface PageDescriptionProps {
   children: React.ReactNode;
@@ -8,7 +8,7 @@ export interface PageDescriptionProps {
 
 export const PageDescription: React.FC<PageDescriptionProps> = ({ children, className }) => {
   return (
-    <p className={cn("text-muted-foreground/90 text-base leading-relaxed", className)}>
+    <p className={cn("text-tertiary/90 text-body leading-relaxed", className)}>
       {children}
     </p>
   );

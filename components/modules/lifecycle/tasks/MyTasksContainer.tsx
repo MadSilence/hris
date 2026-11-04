@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { ListChecks } from "lucide-react";
-import { Switch } from "@/public/desact/src/components/ui/switch";
-import { Label } from "@/public/desact/src/components/ui/label";
+
+import { Switch } from "@/components/desact/switch";
+import { Label } from "@/components/desact/label";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { showActionError } from "@/lib/errors/errorToast";
@@ -26,7 +26,7 @@ export function MyTasksContainer() {
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="flex shrink-0 items-center justify-end gap-2">
         <Switch id="tasks-include-done" checked={includeDone} onCheckedChange={setIncludeDone} />
-        <Label htmlFor="tasks-include-done">Show Done</Label>
+        <Label htmlFor="tasks-include-done">Show done</Label>
       </div>
 
       {/* The list scrolls; the empty state fills what is left instead of sitting in the corner. */}
@@ -34,11 +34,11 @@ export function MyTasksContainer() {
       {error ? (
         <ErrorState error={error} />
       ) : isLoading ? (
-        <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-16 animate-pulse rounded-md bg-muted" />)}</div>
+        <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-16 shimmer rounded-control bg-mist" />)}</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState
           fill
-          icon={<ListChecks className="h-6 w-6" />}
+          scene="all-caught-up"
           title="Nothing to do"
           description="Tasks assigned to you by a preboarding, an onboarding or an offboarding appear here."
         />

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/public/desact/src/components/ui/table";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Checkbox } from "@/components/desact/checkbox";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
+import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
 import { formatDisplayDate } from "@/lib/date";
@@ -137,21 +137,21 @@ export default function PeopleTable({
             </div>
           );
         case "created_at":
-          return <span className="text-muted-foreground">{formatDate(row.createdAt)}</span>;
+          return <span className="text-tertiary">{formatDate(row.createdAt)}</span>;
         case "updated_at":
-          return <span className="text-muted-foreground">{formatDate(row.updatedAt)}</span>;
+          return <span className="text-tertiary">{formatDate(row.updatedAt)}</span>;
         case "last_name":
           return <span>{row.lastName}</span>;
         case "first_name":
           return <span>{row.firstName}</span>;
         case "hire_date":
-          return <span className="text-muted-foreground">{formatDate(row.hireDate)}</span>;
+          return <span className="text-tertiary">{formatDate(row.hireDate)}</span>;
         case "employment_type":
           return <span>{row.employmentType}</span>;
         case "probation_end":
-          return <span className="text-muted-foreground">{formatDate(row.probationEnd)}</span>;
+          return <span className="text-tertiary">{formatDate(row.probationEnd)}</span>;
         case "termination_date":
-          return <span className="text-muted-foreground">{formatDate(row.terminationDate)}</span>;
+          return <span className="text-tertiary">{formatDate(row.terminationDate)}</span>;
 
         // ── References to other entities ────────────────────────────────────────────────
         case "job":
@@ -193,7 +193,7 @@ export default function PeopleTable({
     // muted and labelled, rather than as text that looks like somebody typed dots.
     if (isMaskedValue(val) || (meta.type === "SELECT" && isMaskedValue(optionValueLabel(val)))) {
       return (
-        <span className="text-muted-foreground" title="Hidden — you do not have access to this value">
+        <span className="text-tertiary" title="Hidden — you do not have access to this value">
           {typeof val === "string" ? val : optionValueLabel(val)}
         </span>
       );
@@ -224,7 +224,7 @@ export default function PeopleTable({
 
       case "DATE": {
         const s = typeof val === "string" ? val : null;
-        return <span className="text-muted-foreground">{formatDate(s)}</span>;
+        return <span className="text-tertiary">{formatDate(s)}</span>;
       }
 
       case "MULTI_SELECT": {
@@ -233,7 +233,7 @@ export default function PeopleTable({
           : [];
         if (!arr.length) return null;
         return (
-          <span className="text-muted-foreground">{arr.join(", ")}</span>
+          <span className="text-tertiary">{arr.join(", ")}</span>
         );
       }
 
@@ -252,7 +252,7 @@ export default function PeopleTable({
 
   if (isLoading) {
     return (
-      <div className="min-h-0 flex-1 overflow-hidden bg-background">
+      <div className="min-h-0 flex-1 overflow-hidden bg-page">
         <PeopleTableSkeleton columns={visibleColumns} />
       </div>
     );
@@ -261,10 +261,10 @@ export default function PeopleTable({
   return (
     <div
       ref={scrollRef}
-      className="min-h-0 flex-1 overflow-auto bg-background"
+      className="min-h-0 flex-1 overflow-auto bg-page"
     >
-      <table className="w-full caption-bottom text-sm table-fixed">
-        <TableHeader className="sticky top-0 z-10 bg-background [&_tr]:border-brown-200">
+      <table className="w-full caption-bottom text-body table-fixed">
+        <TableHeader className="sticky top-0 z-10 bg-page [&_tr]:border-divider">
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
@@ -289,10 +289,10 @@ export default function PeopleTable({
                   title={isSortable ? column.label : undefined}
                   className={`truncate ${isSortable ? "cursor-pointer select-none" : ""}`}
                 >
-                  <span className="inline-flex max-w-full items-center gap-1 align-middle text-foreground">
+                  <span className="inline-flex max-w-full items-center gap-1 align-middle text-primary">
                     <span className="truncate">{column.label}</span>
                     {isActive ? (
-                      <span className="shrink-0 text-muted-foreground" aria-hidden>
+                      <span className="shrink-0 text-tertiary" aria-hidden>
                         {active.dir === "asc" ? "↑" : "↓"}
                       </span>
                     ) : null}
@@ -318,7 +318,7 @@ export default function PeopleTable({
               <TableRow
                 key={row.id}
                 data-state={checked ? "selected" : undefined}
-                className="border-brown-200 hover:bg-brown-50 [&_td]:py-2"
+                className="border-divider hover:bg-subtle [&_td]:py-2"
               >
                 <TableCell className="w-12">
                   <Checkbox
@@ -342,7 +342,7 @@ export default function PeopleTable({
       {/* Infinite-scroll sentinel + loading indicator */}
       <div ref={sentinelRef} />
       {isLoadingMore ? (
-        <div className="py-3 text-center text-sm text-muted-foreground">Loading more…</div>
+        <div className="py-3 text-center text-body text-tertiary">Loading more…</div>
       ) : null}
     </div>
   );
@@ -352,7 +352,7 @@ export default function PeopleTable({
 const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center gap-2 py-10 text-center">
     <div className="font-medium">No people to show</div>
-    <div className="text-sm text-muted-foreground">
+    <div className="text-body text-tertiary">
       Try changing filters or come back later.
     </div>
   </div>
@@ -376,7 +376,7 @@ const PersonValue: React.FC<{ value?: PersonRefDTO | null; raw?: unknown }> = ({
   }
 
   const fallback = raw == null ? null : valueToString(raw);
-  return <span className={fallback ? "text-muted-foreground" : ""}>{fallback}</span>;
+  return <span className={fallback ? "text-tertiary" : ""}>{fallback}</span>;
 };
 
 /** The resolved shape the backend sends for a PERSON attribute, or null if it is still raw. */
@@ -404,7 +404,7 @@ const RefList: React.FC<{ values?: RefDTO[] }> = ({ values }) => {
   return (
     <div className="flex flex-wrap gap-1">
       {values.map((v) => (
-        <Badge key={v.id} variant="secondary" className="font-normal">
+        <Badge key={v.id} variant="neutral" className="font-normal">
           {v.name}
         </Badge>
       ))}

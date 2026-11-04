@@ -1,11 +1,14 @@
 import { SettingsLinkItem } from "@/components/modules/settings/components/SettingsCard/SettingsCard";
 import { canAccess, type AccessAction, type AccessScope, type EffectiveAccess, type ResourceCode } from "@/models/access";
-import People from "@/public/icons/people.svg";
-import Calendar from "@/public/icons/calendar.svg";
-import Settings from "@/public/icons/settings.svg";
-import Automation from "@/public/icons/automation.svg";
-import Admin from "@/public/icons/admin.svg";
-import Building from "@/public/icons/building.svg";
+import {
+  Building03Icon,
+  Calendar03Icon,
+  Settings01Icon,
+  ShieldUserIcon,
+  UserGroupIcon,
+  WorkflowSquare03Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 /** A right that shows a settings item — for the items a VIEW does not describe. */
 export type SettingsGrant = { resource: ResourceCode; action: AccessAction; scope?: AccessScope };
@@ -38,13 +41,13 @@ export const settingsGroups: SettingsGroup[] = [
   {
     id: "general",
     title: "General",
-    icon: <Building/>,
+    icon: <Icon icon={Building03Icon} />,
     items: [
       { label: "Company", href: "/settings/general/company", resources: ["SETTINGS.GENERAL"] },
       { label: "Appearance", href: "/settings/general/customisation", resources: ["SETTINGS.GENERAL"] },
       { label: "Home", href: "/settings/general/dashboard", resources: ["SETTINGS.GENERAL"] },
       {
-        label: "Legal Entities & Offices",
+        label: "Legal entities & offices",
         href: "/settings/general/legal-entities",
         resources: ["ORG.LEGAL_ENTITY", "ORG.OFFICE"],
       },
@@ -59,12 +62,12 @@ export const settingsGroups: SettingsGroup[] = [
         resources: ["ORG.TEAM"],
       },
       {
-        label: "Job Catalog",
+        label: "Job catalog",
         href: "/settings/general/job-catalog",
         resources: ["JOBS.FAMILY", "JOBS.LEVEL_GROUP", "JOBS.LEVEL", "JOBS.TITLE"],
       },
       {
-        label: "Import & Export",
+        label: "Import & export",
         href: "/settings/general/import",
         // The rights of the three import kinds (I-B6): whoever may run one finds the page.
         grants: [
@@ -84,21 +87,21 @@ export const settingsGroups: SettingsGroup[] = [
   {
     id: "people",
     title: "People",
-    icon: <People/>,
+    icon: <Icon icon={UserGroupIcon} />,
     items: [
-      { label: "Employee Information", href: "/settings/people/attributes", resources: ["PEOPLE.ATTRIBUTES"] },
-      { label: "Employee Roles & Access", href: "/settings/people/roles", resources: ["ROLES.ROLE"] },
+      { label: "Employee information", href: "/settings/people/attributes", resources: ["PEOPLE.ATTRIBUTES"] },
+      { label: "Employee roles & access", href: "/settings/people/roles", resources: ["ROLES.ROLE"] },
       { label: "Documents", href: "/settings/people/documents", resources: ["PEOPLE.DOCUMENT_CATEGORIES"] },
     ],
   },
   {
     id: "time",
-    title: "Time & Time-Off",
-    icon: <Calendar/>,
+    title: "Time & time-off",
+    icon: <Icon icon={Calendar03Icon} />,
     items: [
       { label: "Time off", href: "/settings/time/leave-type", resources: ["PEOPLE.TIME_OFF_POLICIES"] },
       {
-        label: "Public Holidays",
+        label: "Public holidays",
         href: "/settings/time/public-holidays",
         resources: ["ORG.PUBLIC_HOLIDAY_CALENDAR", "ORG.PUBLIC_HOLIDAY_TEMPLATE"],
       },
@@ -108,12 +111,12 @@ export const settingsGroups: SettingsGroup[] = [
   {
     id: "automation",
     title: "Automation",
-    icon: <Automation/>,
+    icon: <Icon icon={WorkflowSquare03Icon} />,
     items: [
       { label: "Automations", href: "/settings/automation/automations", resources: ["SETTINGS.AUTOMATIONS"] },
       { label: "Workflows", href: "/settings/automation/workflows", resources: ["SETTINGS.GENERAL"] },
       {
-        label: "Preboarding, Onboarding & Offboarding",
+        label: "Preboarding, Onboarding & offboarding",
         href: "/settings/automation/preboarding",
         resources: ["PEOPLE.LIFECYCLE_TEMPLATES", "SETTINGS.GENERAL"],
       },
@@ -124,7 +127,7 @@ export const settingsGroups: SettingsGroup[] = [
   }, {
     id: "tech",
     title: "Tech",
-    icon: <Settings/>,
+    icon: <Icon icon={Settings01Icon} />,
     items: [
       { label: "API", href: "/settings/tech/api", resources: ["SETTINGS.GENERAL"] },
       { label: "Login & SSO", href: "/settings/tech/login-and-sso", resources: ["SETTINGS.GENERAL"] },
@@ -132,10 +135,10 @@ export const settingsGroups: SettingsGroup[] = [
   }, {
     id: "admin",
     title: "Admin",
-    icon: <Admin/>,
+    icon: <Icon icon={ShieldUserIcon} />,
     items: [
       { label: "Logs", href: "/settings/admin/logs", resources: ["SETTINGS.AUDIT_LOG"] },
-      { label: "Subscription Management", href: "/settings/admin/subscription", resources: ["SETTINGS.GENERAL"] },
+      { label: "Subscription management", href: "/settings/admin/subscription", resources: ["SETTINGS.GENERAL"] },
       { label: "Support", href: "/settings/admin/support", resources: ["SETTINGS.GENERAL"] },
     ],
   },

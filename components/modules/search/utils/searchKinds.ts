@@ -1,14 +1,14 @@
 import type { SearchItem, SearchKind } from "@/models/search";
 
-/** Group headings, Title Case (`ui/NAMING.md` § 1). */
+/** Group headings, sentence case (`ui/NAMING.md` § 1). */
 export const SEARCH_KIND_LABELS: Record<SearchKind, string> = {
   PEOPLE: "People",
   DEPARTMENT: "Departments",
   TEAM: "Teams",
   OFFICE: "Offices",
-  LEGAL_ENTITY: "Legal Entities",
+  LEGAL_ENTITY: "Legal entities",
   JOB: "Jobs",
-  TIME_OFF_POLICY: "Time Off Policies",
+  TIME_OFF_POLICY: "Time off policies",
   ROLE: "Roles",
 };
 

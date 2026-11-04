@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { UserRoundX } from "lucide-react";
+import { UserBlock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { PersonChip } from "@/components/ui/PersonChip";
 import {
@@ -46,7 +47,7 @@ export function DepartmentUnassignedTab({
     return (
       <div className="space-y-1.5 p-6">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-9 animate-pulse rounded-lg bg-brown-100" />
+          <div key={i} className="h-9 shimmer rounded-control bg-mist" />
         ))}
       </div>
     );
@@ -55,12 +56,12 @@ export function DepartmentUnassignedTab({
   if (people.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brown-100 text-brown-500">
-          <UserRoundX className="h-5 w-5" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-mist text-tertiary">
+          <Icon icon={UserBlock01Icon} />
         </div>
         <div>
-          <p className="text-sm font-medium text-brown-900">Everyone has a department</p>
-          <p className="mt-1 text-sm text-brown-400">
+          <p className="text-body font-medium text-primary">Everyone has a department</p>
+          <p className="mt-1 text-body text-tertiary">
             People without one would show up here.
           </p>
         </div>
@@ -71,10 +72,10 @@ export function DepartmentUnassignedTab({
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-6">
       <div className="flex-none">
-        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-brown-400">
+        <h3 className="mb-1 text-hint font-semibold text-tertiary">
           Unassigned people
         </h3>
-        <p className="mb-3 text-sm text-brown-500">
+        <p className="mb-3 text-body text-tertiary">
           {people.length} {people.length === 1 ? "person is" : "people are"} not in any department.
         </p>
         <SearchBox value={query} onChange={setQuery}/>

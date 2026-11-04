@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Select,
   SelectContent,
@@ -12,7 +13,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/public/desact/src/components/ui/select";
+} from "@/components/desact/select";
 import type { ActivityCatalog, ActivityLogFilters } from "@/models/activityLog";
 
 const ANY = "__any__";
@@ -149,7 +150,7 @@ export const LogsFilters: React.FC<{
             onChange({ search: value.search, targetUserId: value.targetUserId, objectType: undefined })
           }
         >
-          <X className="mr-1 h-3.5 w-3.5"/>
+          <Icon icon={Cancel01Icon} size="sm" />
           Clear
         </Button>
       )}

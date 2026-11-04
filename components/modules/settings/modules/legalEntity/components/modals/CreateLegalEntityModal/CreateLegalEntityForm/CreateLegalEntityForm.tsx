@@ -3,12 +3,13 @@
 import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+import { Button } from "@/components/desact/button";
+import { DialogFooter } from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export type CreateLegalEntityFormValues = {
   name: string;
@@ -171,8 +172,8 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
       <div className="max-h-[65vh] overflow-y-auto px-6 py-5 pr-8">
         <div className="space-y-5">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold">Legal entity details</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="text-body font-semibold">Legal entity details</h3>
+            <p className="mt-1 text-body text-tertiary">
               Basic registration information used in company documents.
             </p>
           </div>
@@ -191,7 +192,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 aria-invalid={!!shownErrors.name}
               />
               {shownErrors.name && (
-                <p className="text-sm text-destructive">{shownErrors.name}</p>
+                <FieldError>{shownErrors.name}</FieldError>
               )}
             </div>
 
@@ -207,16 +208,14 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 aria-invalid={!!shownErrors.description}
               />
               {shownErrors.description && (
-                <p className="text-sm text-destructive">
-                  {shownErrors.description}
-                </p>
+                <FieldError>{shownErrors.description}</FieldError>
               )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <RequiredLabel htmlFor="legal-entity-registration-number" required>
-                  Registration Number
+                  Registration number
                 </RequiredLabel>
                 <Input
                   id="legal-entity-registration-number"
@@ -232,9 +231,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.registrationNumber}
                 />
                 {shownErrors.registrationNumber && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.registrationNumber}
-                  </p>
+                  <FieldError>{shownErrors.registrationNumber}</FieldError>
                 )}
               </div>
 
@@ -251,17 +248,15 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.taxId}
                 />
                 {shownErrors.taxId && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.taxId}
-                  </p>
+                  <FieldError>{shownErrors.taxId}</FieldError>
                 )}
               </div>
             </div>
           </div>
 
           <div className="mb-4">
-            <h3 className="text-sm font-semibold">Address</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="text-body font-semibold">Address</h3>
+            <p className="mt-1 text-body text-tertiary">
               Location details for this legal entity.
             </p>
           </div>
@@ -281,9 +276,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.country}
                 />
                 {shownErrors.country && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.country}
-                  </p>
+                  <FieldError>{shownErrors.country}</FieldError>
                 )}
               </div>
 
@@ -300,9 +293,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.city}
                 />
                 {shownErrors.city && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.city}
-                  </p>
+                  <FieldError>{shownErrors.city}</FieldError>
                 )}
               </div>
             </div>
@@ -321,9 +312,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.street}
                 />
                 {shownErrors.street && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.street}
-                  </p>
+                  <FieldError>{shownErrors.street}</FieldError>
                 )}
               </div>
 
@@ -340,15 +329,13 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                   aria-invalid={!!shownErrors.building}
                 />
                 {shownErrors.building && (
-                  <p className="text-sm text-destructive">
-                    {shownErrors.building}
-                  </p>
+                  <FieldError>{shownErrors.building}</FieldError>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="legal-entity-post-code" required>Post Code</RequiredLabel>
+              <RequiredLabel htmlFor="legal-entity-post-code" required>Post code</RequiredLabel>
               <Input
                 id="legal-entity-post-code"
                 value={formik.values.postCode}
@@ -360,9 +347,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
                 aria-invalid={!!shownErrors.postCode}
               />
               {shownErrors.postCode && (
-                <p className="text-sm text-destructive">
-                  {shownErrors.postCode}
-                </p>
+                <FieldError>{shownErrors.postCode}</FieldError>
               )}
             </div>
           </div>
@@ -371,10 +356,10 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
 
       <FormError message={errorMessage} className="mx-6 mb-4"/>
 
-      <DialogFooter className="border-t border-brown-100 bg-white px-6 py-4">
+      <DialogFooter className="border-t border-divider bg-card px-6 py-4">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
         >

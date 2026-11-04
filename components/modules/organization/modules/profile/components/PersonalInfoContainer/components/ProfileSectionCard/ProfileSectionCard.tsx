@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Pencil } from "lucide-react";
+import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 
 type Props = {
   title: string;
@@ -19,8 +20,8 @@ type Props = {
  */
 export const ProfileSectionCard: React.FC<Props> = ({ title, actions, children }) => (
   <div>
-    <div className="flex min-h-[44px] items-center justify-between gap-3 rounded-md bg-brown-50 px-4 py-2.5">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-brown-700">{title}</h2>
+    <div className="flex min-h-[44px] items-center justify-between gap-3 rounded-control bg-subtle px-4 py-2.5">
+      <h2 className="text-body font-semibold text-secondary">{title}</h2>
 
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
@@ -40,11 +41,11 @@ export const SectionEditButton: React.FC<{ onClick: () => void; label: string }>
   <Button type="button"
     variant="ghost"
     size="icon"
-    className="h-7 w-7 text-brown-600 hover:bg-brown-100"
+    className="h-7 w-7 text-secondary hover:bg-mist"
     onClick={onClick}
     aria-label={label}
     title={label}
   >
-    <Pencil className="h-4 w-4"/>
+    <Icon icon={PencilEdit02Icon} size="sm" />
   </Button>
 );

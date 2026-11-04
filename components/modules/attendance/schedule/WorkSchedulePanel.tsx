@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { CalendarClock, Plus } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -59,16 +60,16 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
     <section className="space-y-3" aria-labelledby="work-schedule-heading">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 id="work-schedule-heading" className="text-lg font-semibold">Work Schedule</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 id="work-schedule-heading" className="text-section-title">Work schedule</h2>
+          <p className="text-body text-tertiary">
             Hours per weekday. Days with no hours are not charged as leave. A schedule is never edited — a
             change is a new schedule from the date it starts.
           </p>
         </div>
         {canEdit && (
-          <Button type="button" onClick={() => setAdding(true)} className="bg-brown-600 text-white hover:bg-brown-700">
-            <Plus className="h-4 w-4"/>
-            Add Work Schedule
+          <Button type="button" onClick={() => setAdding(true)} >
+            <Icon icon={Add01Icon} size="sm" />
+            Add work schedule
           </Button>
         )}
       </div>
@@ -77,20 +78,20 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
         <ErrorState error={error} compact onRetry={() => void refetch()}/>
       ) : !isLoading && (schedules ?? []).length === 0 ? (
         <EmptyState
-          icon={<CalendarClock className="h-6 w-6"/>}
+          scene="attendance"
           title="Works the company week"
           description="No personal schedule. The company's working days apply, each at the company's working-day length."
           onCreate={canEdit ? () => setAdding(true) : undefined}
-          createLabel={canEdit ? "Add Work Schedule" : undefined}
+          createLabel={canEdit ? "Add work schedule" : undefined}
         />
       ) : (
-        <div className="rounded-lg border border-brown-200 bg-white">
+        <div className="rounded-control border border-divider bg-card">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Effective From</TableHead>
+                <TableHead>Effective from</TableHead>
                 {WEEKDAY_FIELDS.map((field) => <TableHead key={field.key}>{field.label}</TableHead>)}
-                <TableHead>Weekly Hours</TableHead>
+                <TableHead>Weekly hours</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -106,7 +107,7 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
                   <TableRow key={schedule.id}>
                     <TableCell className="whitespace-nowrap">
                       {formatDisplayDate(schedule.effectiveFrom, { style: "medium" })}
-                      {current?.id === schedule.id && <StatusBadge status="active" label="In Force" className="ml-2"/>}
+                      {current?.id === schedule.id && <StatusBadge status="active" label="In force" className="ml-2"/>}
                     </TableCell>
                     {WEEKDAY_FIELDS.map((field) => (
                       <TableCell key={field.key} className="tabular-nums">{formatMinutes(Number(schedule[field.key]) * 60)}</TableCell>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";

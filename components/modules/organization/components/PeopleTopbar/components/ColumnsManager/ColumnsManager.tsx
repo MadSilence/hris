@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { GripVertical, Search } from "lucide-react";
+import { DragDropVerticalIcon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Checkbox } from "@/public/desact/src/components/ui/checkbox";
-import { Badge } from "@/public/desact/src/components/ui/badge";
+import { Input } from "@/components/desact/input";
+import { Checkbox } from "@/components/desact/checkbox";
+import { Badge } from "@/components/desact/badge";
 
 import { ReorderableList } from "@/components/utils/ReorderableList/ReorderableList";
 import type { SortableApi } from "@/components/utils/SortableRow";
@@ -60,17 +61,17 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
       <div
         ref={sortable?.setNodeRef}
         style={sortable?.style}
-        className="flex items-center gap-2 rounded-md px-1.5 py-1.5 hover:bg-muted/60"
+        className="flex items-center gap-2 rounded-control px-1.5 py-1.5 hover:bg-mist/60"
       >
         {sortable ? (
           <button
             type="button"
-            className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+            className="cursor-grab text-tertiary/50 hover:text-tertiary active:cursor-grabbing"
             aria-label="Drag to reorder"
             {...sortable.attributes}
             {...sortable.listeners}
           >
-            <GripVertical className="h-4 w-4" />
+            <Icon icon={DragDropVerticalIcon} size="sm" />
           </button>
         ) : (
           <span className="w-4 shrink-0" />
@@ -83,7 +84,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
           aria-label={`Toggle ${item.label}`}
         />
 
-        <span className="flex-1 truncate text-sm text-foreground" title={item.label}>
+        <span className="flex-1 truncate text-body text-primary" title={item.label}>
           {item.label}
         </span>
       </div>
@@ -93,7 +94,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
   return (
     <div className="flex w-[280px] flex-col gap-2">
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Icon icon={Search01Icon} size="sm" className="absolute left-2.5 top-1/2 -translate-y-1/2 text-tertiary" />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -103,9 +104,9 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         />
       </div>
 
-      <div className="flex items-center justify-between px-1 text-xs font-medium text-muted-foreground">
+      <div className="flex items-center justify-between px-1 text-hint font-medium text-tertiary">
         <span>Shown</span>
-        <Badge variant="secondary" className="font-normal">
+        <Badge variant="neutral" className="font-normal">
           {selectedCount}
         </Badge>
       </div>
@@ -132,7 +133,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
 
         {visibleHidden.length ? (
           <>
-            <div className="mt-2 px-1 pb-1 pt-2 text-xs font-medium text-muted-foreground">
+            <div className="mt-2 px-1 pb-1 pt-2 text-hint font-medium text-tertiary">
               Available
             </div>
             {visibleHidden.map((c) => (
@@ -142,7 +143,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         ) : null}
 
         {nothingFound ? (
-          <div className="px-2 py-6 text-center text-sm text-muted-foreground">No columns found</div>
+          <div className="px-2 py-6 text-center text-body text-tertiary">No columns found</div>
         ) : null}
       </div>
     </div>

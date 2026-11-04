@@ -3,7 +3,7 @@
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { cn } from "@/lib/cn";
 
 type Props = {
   id: string;
@@ -22,7 +22,7 @@ export function DroppableBlockZone({ id, depth = 0, disabled, className, childre
     <div
       ref={setNodeRef}
       data-drop-id={id}
-      className={cn("rounded-xl", className, isOver && !disabled && "ring-2 ring-inset ring-success-400")}
+      className={cn("rounded-popover", className, isOver && !disabled && "ring-2 ring-inset ring-status-approved-fill")}
     >
       {children}
     </div>

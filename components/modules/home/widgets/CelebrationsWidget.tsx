@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Cake, PartyPopper, Sparkles } from "lucide-react";
+import { BirthdayCakeIcon, PartyPopperIcon, SparklesIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { formatDisplayDate } from "@/lib/date";
@@ -16,16 +17,16 @@ import {
   HomeToggle,
 } from "@/components/modules/home/components/HomeCard";
 
-const ICONS = { BIRTHDAY: Cake, ANNIVERSARY: PartyPopper, NEW_JOINER: Sparkles } as const;
+const ICONS = { BIRTHDAY: BirthdayCakeIcon, ANNIVERSARY: PartyPopperIcon, NEW_JOINER: SparklesIcon } as const;
 
 const what = (item: Celebration): string => {
   switch (item.kind) {
     case "BIRTHDAY":
       return "Birthday";
     case "ANNIVERSARY":
-      return `${item.years} ${item.years === 1 ? "Year" : "Years"} at the Company`;
+      return `${item.years} ${item.years === 1 ? "Year" : "Years"} at the company`;
     default:
-      return "Joins the Company";
+      return "Joins the company";
   }
 };
 
@@ -43,18 +44,18 @@ const BirthdayNote: React.FC<{ data: Celebrations }> = ({ data }) => {
 
   if (data.birthdays === "OFF" && canChooseField) {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         Birthdays are off: no birthday field is chosen.{" "}
-        <Link href="/settings/general/dashboard" className="font-medium text-brown-600 hover:underline">Choose One</Link>
+        <Link href="/settings/general/dashboard" className="font-medium text-accent-text underline-offset-4 hover:underline">Choose one</Link>
       </p>
     );
   }
   if (data.birthdays === "HIDDEN" && canOpenAccess) {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-hint text-tertiary">
         Birthdays are hidden from you: {data.birthdayFieldName ? `"${data.birthdayFieldName}"` : "the birthday field"} is
         not visible to your role for everyone. Grant it in field access to show birthdays here.{" "}
-        <Link href="/settings/people/roles" className="font-medium text-brown-600 hover:underline">Open Roles</Link>
+        <Link href="/settings/people/roles" className="font-medium text-accent-text underline-offset-4 hover:underline">Open roles</Link>
       </p>
     );
   }
@@ -78,7 +79,7 @@ export const CelebrationsWidget: React.FC = () => {
           label="When"
           value={upcoming ? "upcoming" : "today"}
           onChange={(next) => setUpcoming(next === "upcoming")}
-          options={[{ value: "today", label: "Today" }, { value: "upcoming", label: "Show Upcoming" }]}
+          options={[{ value: "today", label: "Today" }, { value: "upcoming", label: "Show upcoming" }]}
         />
       }
     >
@@ -93,7 +94,7 @@ export const CelebrationsWidget: React.FC = () => {
           ) : (
             <div className="flex flex-col gap-1">
               {query.data.items.map((item) => {
-                const Icon = ICONS[item.kind];
+                const shownIcon = ICONS[item.kind];
                 return (
                   <HomePersonRow
                     key={`${item.kind}-${item.userId}`}
@@ -102,8 +103,8 @@ export const CelebrationsWidget: React.FC = () => {
                     avatarUrl={item.avatarUrl}
                     detail={what(item)}
                     aside={
-                      <span className="flex shrink-0 items-center gap-1.5 text-xs text-brown-700">
-                        <Icon className="h-3.5 w-3.5 text-brown-500" aria-hidden />
+                      <span className="flex shrink-0 items-center gap-1.5 text-hint text-secondary">
+                        <Icon icon={shownIcon} size="sm" className="text-tertiary" />
                         {when(item, query.data.from)}
                       </span>
                     }

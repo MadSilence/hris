@@ -2,9 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Workflow } from "lucide-react";
-import { Badge } from "@/public/desact/src/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/public/desact/src/components/ui/table";
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -12,6 +11,7 @@ import { formatDisplayDate } from "@/lib/date";
 import { useLifecycleProcesses } from "@/components/modules/lifecycle/hooks";
 import { PROCESS_TYPE_LABELS } from "@/models/lifecycle";
 import { ProcessStatusBadge } from "./ProcessStatusBadge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 /**
  * Running processes. An overdue process stays here, open and visible — a date passing completes
@@ -44,13 +44,13 @@ export function ProcessesListContainer() {
       {source.error ? (
         <ErrorState error={source.error} />
       ) : source.isLoading ? (
-        <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-md bg-muted" />)}</div>
+        <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 shimmer rounded-control bg-mist" />)}</div>
       ) : rows.length === 0 ? (
         <ListEmptyState
           fill
           query={query}
           archivedView={showArchived}
-          icon={<Workflow className="h-6 w-6" />}
+          scene="onboarding"
           title="No processes yet"
           description="Start a preboarding or an onboarding from a person's profile."
         />
@@ -61,7 +61,7 @@ export function ProcessesListContainer() {
               <TableHead>Person</TableHead>
               <TableHead>Process</TableHead>
               <TableHead>Starts</TableHead>
-              <TableHead>Onboarding Manager</TableHead>
+              <TableHead>Onboarding manager</TableHead>
               <TableHead>Tasks</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
@@ -72,16 +72,14 @@ export function ProcessesListContainer() {
                 <TableCell className="font-medium">{p.target.name}</TableCell>
                 <TableCell>
                   <div>{PROCESS_TYPE_LABELS[p.type]}</div>
-                  <div className="text-xs text-muted-foreground">{p.templateName}</div>
+                  <div className="text-hint text-tertiary">{p.templateName}</div>
                 </TableCell>
                 <TableCell>{formatDisplayDate(p.anchorDate)}</TableCell>
                 <TableCell>{p.manager?.name}</TableCell>
                 <TableCell>
                   <span>{p.taskCount - p.openTaskCount} / {p.taskCount}</span>
                   {p.overdueTaskCount > 0 && (
-                    <Badge variant="outline" className="ml-2 border-warning-200 bg-warning-50 text-warning-700">
-                      {p.overdueTaskCount} Due
-                    </Badge>
+                    <StatusBadge status="pending" label={`${p.overdueTaskCount} due`} size="sm" className="ml-2" />
                   )}
                 </TableCell>
                 <TableCell><ProcessStatusBadge status={p.status} /></TableCell>

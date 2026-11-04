@@ -2,9 +2,9 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Textarea } from "@/public/desact/src/components/ui/textarea";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Textarea } from "@/components/desact/textarea";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { StickyPageBar } from "@/components/layout/StickyPageBar";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -25,6 +25,8 @@ import { HeldBackNote } from "@/components/modules/reviews/shared/HeldBackNote";
 import { AssignmentStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
 import { REVIEW_KIND_LABELS, replaceMentions, type AnswerInput, type Writing } from "@/models/reviews";
 import { AnswerField, type AnswerState } from "./AnswerField";
+import { FieldError } from "@/components/desact/field-error";
+import { InlineAlert } from "@/components/desact/alert";
 
 const AUTOSAVE_MS = 1500;
 
@@ -92,7 +94,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
   }, [answers, touched]);
 
   if (review.error) return <div className="mx-auto max-w-3xl"><ErrorState error={review.error} /></div>;
-  if (!w) return <Skeleton className="mx-auto h-96 w-full max-w-3xl rounded-xl" aria-busy="true" />;
+  if (!w) return <Skeleton className="mx-auto h-96 w-full max-w-3xl rounded-popover" aria-busy="true" />;
 
   const submit = async () => {
     setError(null);
@@ -124,24 +126,24 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
           <AssignmentStatusBadge status={w.status} />
           <div className="flex flex-wrap items-center gap-2">
             {writable && w.status === "OPEN" && (
-              <span className="text-xs text-muted-foreground" aria-live="polite">
+              <span className="text-hint text-tertiary" aria-live="polite">
                 {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Draft saved" : "Saved as you type"}
               </span>
             )}
             {w.canDecline && <Button type="button" variant="ghost" onClick={() => setDeclining(true)}>Decline</Button>}
-            {w.canAmend && !amending && <Button type="button" variant="outline" onClick={() => setAmending(true)}>Edit</Button>}
+            {w.canAmend && !amending && <Button type="button" variant="secondary" onClick={() => setAmending(true)}>Edit</Button>}
             {writable && (
               <Button type="button" disabled={submitting}
                 onClick={() => {
                   if (missing.length > 0) { setShowMissing(true); return; }
                   setConfirmSubmit(true);
                 }}>
-                {w.canAmend ? "Update and Share Again" : "Submit"}
+                {w.canAmend ? "Update and share again" : "Submit"}
               </Button>
             )}
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body text-tertiary">
           {subjectLine} · {w.cycleName}
           {w.dueOn ? ` · due ${formatDisplayDate(w.dueOn, { style: "medium" })}` : ""}
           {w.anonymous ? " · Your name is not shown with this review, to anybody." : ""}
@@ -154,11 +156,11 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
               aria-valuemin={0}
               aria-valuemax={asks.length}
               aria-valuenow={answered}
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-brown-100"
+              className="h-1.5 flex-1 overflow-hidden rounded-pill bg-mist"
             >
-              <div className="h-full rounded-full bg-brown-600 transition-[width]" style={{ width: `${(answered / asks.length) * 100}%` }} />
+              <div className="h-full rounded-pill bg-accent transition-[width]" style={{ width: `${(answered / asks.length) * 100}%` }} />
             </div>
-            <span className={showMissing && missing.length > 0 ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
+            <span className={showMissing && missing.length > 0 ? "text-hint text-danger-text" : "text-hint text-tertiary"}>
               {showMissing && missing.length > 0
                 ? missing.length === 1 ? "One required question is not answered" : `${missing.length} required questions are not answered`
                 : `${answered} of ${asks.length} answered`}
@@ -168,30 +170,31 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
       </StickyPageBar>
       <FormError message={error} />
       {w.sentBackComment && (
-        <div className="rounded-xl border border-warning-200 bg-warning-50 px-5 py-3 text-sm" data-test="sent-back">
-          <div className="font-medium text-warning-700">Sent back for changes</div>
-          <p className="mt-1 whitespace-pre-line text-brown-800">{w.sentBackComment}</p>
+        <div data-test="sent-back">
+          <InlineAlert tone="pending" title="Sent back for changes">
+            <p className="whitespace-pre-line">{w.sentBackComment}</p>
+          </InlineAlert>
         </div>
       )}
 
       <div className={hasContext ? "grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : ""}>
         <div className="space-y-6">
           {w.form?.description && (
-            <p className="whitespace-pre-line rounded-xl border border-brown-100 bg-brown-50/50 px-5 py-3 text-sm text-brown-800">
+            <p className="whitespace-pre-line rounded-card border border-divider bg-subtle/50 px-5 py-3 text-body text-primary">
               {replaceMentions(w.form.description, w.mentions)}
             </p>
           )}
 
           {writable ? (
-            <ol className="space-y-6 rounded-xl border border-brown-100 bg-white p-5 sm:p-6">
+            <ol className="space-y-6 rounded-card border border-divider bg-card p-5 sm:p-6">
               {(() => {
                 let n = 0;
                 return (w.form?.questions ?? []).map((q) => {
                   if (q.type === "SECTION") {
                     return (
-                      <li key={q.id} className="space-y-1 border-t border-brown-100 pt-5 first:border-t-0 first:pt-0">
-                        <h2 className="text-base font-semibold text-brown-900">{replaceMentions(q.label, w.mentions)}</h2>
-                        {q.description && <p className="whitespace-pre-line text-sm text-muted-foreground">{replaceMentions(q.description, w.mentions)}</p>}
+                      <li key={q.id} className="space-y-1 border-t border-divider pt-5 first:border-t-0 first:pt-0">
+                        <h2 className="text-body font-semibold text-primary">{replaceMentions(q.label, w.mentions)}</h2>
+                        {q.description && <p className="whitespace-pre-line text-body text-tertiary">{replaceMentions(q.description, w.mentions)}</p>}
                       </li>
                     );
                   }
@@ -199,38 +202,38 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
                   const invalid = showMissing && missing.includes(q.id);
                   return (
                     <li key={q.id} className="space-y-2">
-                      <RequiredLabel htmlFor={`answer-${q.id}`} required={Boolean(q.required)} className="text-sm font-medium text-brown-900">
+                      <RequiredLabel htmlFor={`answer-${q.id}`} required={Boolean(q.required)} className="text-body font-medium text-primary">
                         {n}. {replaceMentions(q.label, w.mentions)}
                       </RequiredLabel>
-                      {q.description && <p className="whitespace-pre-line text-xs text-muted-foreground">{replaceMentions(q.description, w.mentions)}</p>}
+                      {q.description && <p className="whitespace-pre-line text-hint text-tertiary">{replaceMentions(q.description, w.mentions)}</p>}
                       <AnswerField question={q} scale={w.scale} value={answers[q.id] ?? { value: null, comment: "" }}
                         disabled={submitting} invalid={invalid}
                         onChange={(next) => { setAnswers((a) => ({ ...a, [q.id]: next })); setTouched(true); }} />
-                      {invalid && <p role="alert" className="text-xs text-destructive">Answer this question.</p>}
+                      {invalid && <FieldError>Answer this question.</FieldError>}
                     </li>
                   );
                 });
               })()}
             </ol>
           ) : (
-            <section className="space-y-3 rounded-xl border border-brown-100 bg-white p-5">
+            <section className="space-y-3 rounded-card border border-divider bg-card p-5">
               {w.status === "SUBMITTED" ? (
                 <>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-body text-tertiary">
                     Submitted {w.submittedAt ? formatDisplayDate(w.submittedAt, { style: "medium" }) : ""}.
                   </p>
                   <dl className="space-y-3">
                     {w.submitted.map((a) => (
                       <div key={a.questionId}>
-                        <dt className="text-sm font-medium text-brown-900">{replaceMentions(a.label, w.mentions)}</dt>
-                        <dd className="whitespace-pre-line text-sm text-brown-800">{answerText(a, w.scale)}</dd>
-                        {a.comment && <dd className="whitespace-pre-line text-sm text-muted-foreground">{a.comment}</dd>}
+                        <dt className="text-body font-medium text-primary">{replaceMentions(a.label, w.mentions)}</dt>
+                        <dd className="whitespace-pre-line text-body text-primary">{answerText(a, w.scale)}</dd>
+                        {a.comment && <dd className="whitespace-pre-line text-body text-tertiary">{a.comment}</dd>}
                       </div>
                     ))}
                   </dl>
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body text-tertiary">
                   {w.cycleStatus !== "ACTIVE" ? "This cycle is closed; the review can no longer be written."
                     : "This review is no longer yours to write."}
                 </p>
@@ -242,7 +245,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
 
         {hasContext && (
           <aside className="space-y-4">
-            <h2 className="text-sm font-medium text-muted-foreground">Already In</h2>
+            <h2 className="text-body font-medium text-tertiary">Already in</h2>
             {w.context.map((b) => <AnswersView key={b.assignmentId} block={b} scale={w.scale} mentions={w.mentions} />)}
             <HeldBackNote count={w.peersHeldBack} threshold={w.anonymityThreshold} />
             <HeldBackNote count={w.upwardHeldBack} threshold={w.upwardThreshold} kind="upward" />
@@ -252,8 +255,8 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
 
       <ConfirmDialog
         open={confirmSubmit}
-        title={w.canAmend ? "Update Review" : "Submit Review"}
-        confirmLabel={w.canAmend ? "Update and Share" : "Submit"}
+        title={w.canAmend ? "Update review" : "Submit review"}
+        confirmLabel={w.canAmend ? "Update and share" : "Submit"}
         onCancelAction={() => setConfirmSubmit(false)}
         onConfirmAction={async () => {
           await submit();
@@ -271,7 +274,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
 
       <ConfirmDialog
         open={declining}
-        title="Decline Peer Review"
+        title="Decline peer review"
         confirmLabel="Decline"
         destructive
         onCancelAction={() => setDeclining(false)}

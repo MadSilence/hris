@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Dialog,
   DialogContent,
@@ -11,15 +11,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/public/desact/src/components/ui/dialog";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
+} from "@/components/desact/dialog";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
 import { FormError } from "@/components/feedback/FormError";
 import { formatMinutes, WEEKDAY_FIELDS, type WeekdayHoursKey, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
 import { parseDuration } from "@/components/modules/attendance/lib";
+import { FieldError } from "@/components/desact/field-error";
 
 /** The schedule is stored in hours; a day may be typed as `7:30` or `7.5`. */
 const hoursOf = (value: string): number | null => {
@@ -105,7 +106,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
       <Dialog open={isOpen} onOpenChange={(open) => { if (!open) requestClose(); }}>
         <DialogContent hideClose className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Add Work Schedule</DialogTitle>
+            <DialogTitle>Add work schedule</DialogTitle>
             <DialogDescription>
               Hours per weekday from a date on. Zero means the person does not work that day, and leave is
               not charged for it. Earlier schedules stay as they were.
@@ -119,11 +120,11 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
               void formik.submitForm();
             }}
             className="space-y-4"
-          >
+ >
             <FormError message={serverError}/>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="work-schedule-from" required>Effective From</RequiredLabel>
+              <RequiredLabel htmlFor="work-schedule-from" required>Effective from</RequiredLabel>
               <DatePicker
                 id="work-schedule-from"
                 value={formik.values.effectiveFrom}
@@ -132,14 +133,14 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
                 invalid={Boolean(formik.errors.effectiveFrom)}
               />
               {formik.errors.effectiveFrom && (
-                <p className="text-sm text-destructive">{formik.errors.effectiveFrom}</p>
+                <FieldError>{formik.errors.effectiveFrom}</FieldError>
               )}
             </div>
 
             <div className="grid grid-cols-7 gap-2">
               {WEEKDAY_FIELDS.map((field) => (
                 <div key={field.key} className="space-y-1">
-                  <Label htmlFor={`work-schedule-${field.key}`} className="text-xs">{field.label}</Label>
+                  <Label htmlFor={`work-schedule-${field.key}`} className="text-hint">{field.label}</Label>
                   <Input
                     id={`work-schedule-${field.key}`}
                     inputMode="decimal"
@@ -152,20 +153,18 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
               ))}
             </div>
             {WEEKDAY_FIELDS.some((field) => formik.errors[field.key]) && (
-              <p className="text-sm text-destructive">
-                {WEEKDAY_FIELDS.map((field) => formik.errors[field.key]).find(Boolean)}
-              </p>
+              <FieldError>{WEEKDAY_FIELDS.map((field) => formik.errors[field.key]).find(Boolean)}</FieldError>
             )}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body text-tertiary">
               {formatMinutes(weeklyTotal)} a week
             </p>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={requestClose} disabled={formik.isSubmitting}>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={formik.isSubmitting}>
                 Cancel
               </Button>
               <Button type="submit" disabled={formik.isSubmitting}
-                      className="bg-brown-600 text-white hover:bg-brown-700">
+ >
                 Add
               </Button>
             </DialogFooter>

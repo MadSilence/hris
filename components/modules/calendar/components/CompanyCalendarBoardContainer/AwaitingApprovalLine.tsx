@@ -4,6 +4,8 @@ import { FC } from "react";
 import Link from "next/link";
 import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/utils/inboxFilters";
 import { useTimeOffRequestsAwaitingMe } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsAwaitingMe";
+import { Banner } from "@/components/desact/alert";
+import { HourglassIcon } from "@hugeicons/core-free-icons";
 
 
 /**
@@ -17,14 +19,19 @@ export const AwaitingApprovalLine: FC = () => {
   if (count === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-brown-800">
-      <span className="h-2 w-2 shrink-0 rounded-full bg-warning-500" aria-hidden />
-      <span className="flex-1">
+    // The state of the page, so a neutral banner (SPEC § 13.7): what waits for a decision is the Approve
+    // button's to show, not an amber box.
+    <Banner
+      icon={HourglassIcon}
+      action={
+        <Link href={NEEDS_ACTION_INBOX_HREF} className="font-medium text-accent-text underline-offset-4 hover:underline">
+          Review
+        </Link>
+      }
+    >
+      <span className="text-primary">
         {count === 1 ? "1 request is" : `${count} requests are`} waiting for your approval
       </span>
-      <Link href={NEEDS_ACTION_INBOX_HREF} className="font-medium text-brown-900 underline-offset-2 hover:underline">
-        Review
-      </Link>
-    </div>
+    </Banner>
   );
 };

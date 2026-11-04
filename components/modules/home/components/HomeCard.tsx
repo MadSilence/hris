@@ -2,13 +2,13 @@
 
 import React, { useId } from "react";
 import Link from "next/link";
-import { Card } from "@/public/desact/src/components/ui/card";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/public/desact/src/components/ui/avatar";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Card } from "@/components/desact/card";
+import { Skeleton } from "@/components/desact/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
+import { cn } from "@/lib/cn";
 
 /**
- * One widget on home: a Title Case heading, at most one action beside it, and the widget's own body
+ * One widget on home: a sentence-case heading, at most one action beside it, and the widget's own body
  * (HOME_AND_SEARCH.md § 1). One level of card — what is inside separates by space, not by boxes.
  */
 export const HomeCard: React.FC<{
@@ -19,9 +19,9 @@ export const HomeCard: React.FC<{
 }> = ({ title, action, children, className }) => {
   const headingId = useId();
   return (
-    <Card className={cn("h-fit gap-4 border-brown-100 p-5", className)} aria-labelledby={headingId} role="region">
+    <Card className={cn("h-fit gap-4 border-divider p-5", className)} aria-labelledby={headingId} role="region">
       <div className="flex items-center justify-between gap-3">
-        <h3 id={headingId} className="text-base font-semibold text-brown-900">{title}</h3>
+        <h3 id={headingId} className="text-body font-semibold text-primary">{title}</h3>
         {action}
       </div>
       {children}
@@ -31,7 +31,7 @@ export const HomeCard: React.FC<{
 
 /** The one header action of a card: a quiet link. */
 export const HomeCardLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
-  <Link href={href} className="shrink-0 text-sm font-medium text-brown-600 underline-offset-2 hover:text-brown-800 hover:underline">
+  <Link href={href} className="shrink-0 text-body font-medium text-accent-text underline-offset-4 hover:underline">
     {children}
   </Link>
 );
@@ -41,7 +41,7 @@ export const HomeRowsSkeleton: React.FC<{ rows?: number; avatar?: boolean }> = (
   <div className="flex flex-col gap-3" aria-hidden data-testid="home-rows-skeleton">
     {Array.from({ length: rows }, (_, i) => (
       <div key={i} className="flex items-center gap-3">
-        {avatar && <Skeleton className="h-8 w-8 shrink-0 rounded-full" />}
+        {avatar && <Skeleton className="h-8 w-8 shrink-0 rounded-pill" />}
         <div className="flex flex-1 flex-col gap-1.5">
           <Skeleton className="h-3.5 w-2/5" />
           <Skeleton className="h-3 w-1/4" />
@@ -53,7 +53,7 @@ export const HomeRowsSkeleton: React.FC<{ rows?: number; avatar?: boolean }> = (
 
 /** One sentence of what the card is for when it has nothing to show. */
 export const HomeEmpty: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-sm text-muted-foreground">{children}</p>
+  <p className="text-body text-tertiary">{children}</p>
 );
 
 const initialsOf = (first?: string | null, last?: string | null) =>
@@ -75,17 +75,17 @@ export const HomePersonRow: React.FC<{
     <>
       <Avatar className="h-8 w-8 shrink-0">
         {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-        <AvatarFallback className="bg-brown-100 text-xs text-brown-700">{initialsOf(firstName, lastName)}</AvatarFallback>
+        <AvatarFallback className="bg-mist text-hint text-secondary">{initialsOf(firstName, lastName)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-brown-900">{fullName(firstName, lastName)}</p>
-        {detail && <div className="truncate text-xs text-muted-foreground">{detail}</div>}
+        <p className="truncate text-body font-medium text-primary">{fullName(firstName, lastName)}</p>
+        {detail && <div className="truncate text-hint text-tertiary">{detail}</div>}
       </div>
       {aside}
     </>
   );
   return href ? (
-    <Link href={href} className="-mx-2 flex items-center gap-3 rounded-md px-2 py-1 hover:bg-brown-50">
+    <Link href={href} className="-mx-2 flex items-center gap-3 rounded-control px-2 py-1 hover:bg-subtle">
       {body}
     </Link>
   ) : (
@@ -113,8 +113,8 @@ export const HomeToggle = <T extends string>({
         aria-pressed={value === option.value}
         onClick={() => onChange(option.value)}
         className={cn(
-          "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-          value === option.value ? "bg-brown-100 text-brown-800" : "text-muted-foreground hover:bg-brown-50",
+          "rounded-tag px-2.5 py-1 text-hint font-medium transition-colors",
+          value === option.value ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
         )}
       >
         {option.label}

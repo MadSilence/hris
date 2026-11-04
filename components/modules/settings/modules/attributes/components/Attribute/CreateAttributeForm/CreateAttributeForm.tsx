@@ -4,10 +4,10 @@ import { FC, FormEvent, useCallback, useEffect } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { DialogFooter } from "@/public/desact/src/components/ui/dialog";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { DialogFooter } from "@/components/desact/dialog";
 
 import {
   ATTRIBUTE_TYPES_CREATABLE,
@@ -28,6 +28,7 @@ import {
 } from "@/components/modules/settings/modules/attributes/components/Attribute/AttributeConfigFields";
 import { ObjectFieldDef } from "@/models/attribute/objectFields";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { FieldError } from "@/components/desact/field-error";
 
 export interface CreateAttributeFormProps {
   isLoading?: boolean;
@@ -217,7 +218,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       {/* Only the fields scroll — the modal keeps one size whatever type is picked. */}
       <div className="-mx-1 min-h-0 flex-1 space-y-6 overflow-y-auto px-1 py-1">
         <div className="space-y-2">
-          <RequiredLabel htmlFor="attribute-name" required>Attribute Name</RequiredLabel>
+          <RequiredLabel htmlFor="attribute-name" required>Attribute name</RequiredLabel>
           <Input
             id="attribute-name"
             value={formik.values.name}
@@ -229,7 +230,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
             aria-invalid={!!formik.errors.name}
           />
           {formik.errors.name && (
-            <p role="alert" className="text-sm text-destructive">{formik.errors.name}</p>
+            <FieldError>{formik.errors.name}</FieldError>
           )}
         </div>
 
@@ -244,9 +245,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
             }}
           />
           {formik.errors.type && (
-            <p className="text-sm text-destructive">
-              {String(formik.errors.type)}
-            </p>
+            <FieldError>{String(formik.errors.type)}</FieldError>
           )}
         </div>
 
@@ -263,7 +262,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {isNumber && (
           <div className="space-y-1.5">
-            <Label htmlFor="attribute-dec-scale">Decimal Scale</Label>
+            <Label htmlFor="attribute-dec-scale">Decimal scale</Label>
             <Input
               id="attribute-dec-scale"
               type="number"
@@ -277,7 +276,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
               aria-invalid={!!formik.errors.decScale}
             />
             {formik.errors.decScale && (
-              <p className="text-sm text-destructive">{String(formik.errors.decScale)}</p>
+              <FieldError>{String(formik.errors.decScale)}</FieldError>
             )}
           </div>
         )}
@@ -328,10 +327,10 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
         />
       </div>
 
-      <DialogFooter className="mt-6 border-t border-brown-100 pt-4">
+      <DialogFooter className="mt-6 border-t border-divider pt-4">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isLoading}
           onClick={onCancelAction}
         >

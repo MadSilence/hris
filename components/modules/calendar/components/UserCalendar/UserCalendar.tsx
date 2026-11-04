@@ -5,9 +5,12 @@ import { expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calend
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 
 import { FC, ReactNode, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { ArrowLeft01Icon, ArrowRight01Icon, Calendar03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
+import type { CSSProperties } from "react";
+import { toTagColor } from "@/lib/theme/tags";
 
 export type CalendarHolidayEvent = {
   id: string;
@@ -22,6 +25,8 @@ export type CalendarTimeOffEvent = {
   startDate: string;
   endDate: string;
   tone: "approved" | "pending";
+  /** The leave type's tag colour (SPEC § 13.13); gray when it is not known. */
+  color?: string | null;
 };
 
 /**
@@ -99,6 +104,7 @@ type TimeOffSegment = {
   id: string;
   label: string;
   tone: CalendarTimeOffEvent["tone"];
+  color?: string | null;
   startCol: number; // 0..6 within the week
   endCol: number; // 0..6 within the week
   continuesLeft: boolean;
@@ -106,9 +112,21 @@ type TimeOffSegment = {
   lane: number;
 };
 
-const timeOffToneClass: Record<CalendarTimeOffEvent["tone"], string> = {
-  approved: "border-success-200 bg-success-100 text-success-800",
-  pending: "border-warning-200 bg-warning-100 text-warning-800",
+/**
+ * A leave bar as the company calendar draws one (SPEC § 13.13): approved is a solid bar in the leave type's tag
+ * colour, pending its light tint under a 1.5 px edge and a 4 px dot pattern — so the two differ in print too.
+ */
+const timeOffStyle = (tone: CalendarTimeOffEvent["tone"], color?: string | null): CSSProperties => {
+  const tag = toTagColor(color);
+  const bar = `var(--tag-${tag}-bar)`;
+  if (tone === "approved") return { backgroundColor: bar, borderColor: bar, color: "var(--text-inverse)" };
+  return {
+    backgroundColor: `var(--tag-${tag}-bg)`,
+    borderColor: bar,
+    color: `var(--tag-${tag}-text)`,
+    backgroundImage: `radial-gradient(${bar} 0.75px, transparent 1px)`,
+    backgroundSize: "4px 4px",
+  };
 };
 
 /**
@@ -131,6 +149,7 @@ function buildWeekSegments(weekCells: DayCell[], timeOff: CalendarTimeOffEvent[]
         id: t.id,
         label: t.label,
         tone: t.tone,
+        color: t.color,
         startCol,
         endCol,
         continuesLeft: t.startDate < weekStart,
@@ -269,7 +288,7 @@ export const UserCalendar: FC<Props> = ({
   const isCurrentMonth = cursor.year === today.getFullYear() && cursor.month === today.getMonth();
 
   const cellMinH = compact ? "min-h-[72px]" : "min-h-[104px]";
-  const monthClass = compact ? "text-base font-semibold text-foreground" : "text-lg font-semibold text-foreground";
+  const monthClass = compact ? "text-body font-semibold text-primary" : "text-section-title text-primary";
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -279,14 +298,14 @@ export const UserCalendar: FC<Props> = ({
       {toolbar === "split" ? (
         <div className="flex-none pb-4">
           <div className="flex items-center justify-between gap-2">
-            <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Previous month" onClick={goPrev}>
-              <ChevronLeft className="h-4 w-4" />
+            <Button type="button" variant="secondary" size="icon-sm" aria-label="Previous month" onClick={goPrev}>
+              <Icon icon={ArrowLeft01Icon} size="sm" />
             </Button>
             <h2 className={monthClass}>
               {MONTHS[cursor.month]} {cursor.year}
             </h2>
-            <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Next month" onClick={goNext}>
-              <ChevronRight className="h-4 w-4" />
+            <Button type="button" variant="secondary" size="icon-sm" aria-label="Next month" onClick={goNext}>
+              <Icon icon={ArrowRight01Icon} size="sm" />
             </Button>
           </div>
           {/* Its own row rather than a third thing in the stepper, which would push the month off
@@ -294,7 +313,7 @@ export const UserCalendar: FC<Props> = ({
           {headerAction || !isCurrentMonth ? (
             <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
               {!isCurrentMonth && (
-                <Button type="button" variant="outline" size="sm" onClick={goToday}>
+                <Button type="button" variant="secondary" size="sm" onClick={goToday}>
                   Today
                 </Button>
               )}
@@ -309,14 +328,14 @@ export const UserCalendar: FC<Props> = ({
               {MONTHS[cursor.month]} {cursor.year}
             </h2>
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={goToday}>
+              <Button type="button" variant="secondary" size="sm" onClick={goToday}>
                 Today
               </Button>
-              <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Previous month" onClick={goPrev}>
-                <ChevronLeft className="h-4 w-4" />
+              <Button type="button" variant="secondary" size="icon-sm" aria-label="Previous month" onClick={goPrev}>
+                <Icon icon={ArrowLeft01Icon} size="sm" />
               </Button>
-              <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Next month" onClick={goNext}>
-                <ChevronRight className="h-4 w-4" />
+              <Button type="button" variant="secondary" size="icon-sm" aria-label="Next month" onClick={goNext}>
+                <Icon icon={ArrowRight01Icon} size="sm" />
               </Button>
             </div>
           </div>
@@ -329,11 +348,11 @@ export const UserCalendar: FC<Props> = ({
       {/* Grid — light dividers, no outer border. */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Weekday header */}
-        <div className={`${gridClass} border-b border-brown-100`}>
+        <div className={`${gridClass} border-b border-divider`}>
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="border-r border-brown-100 px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-brown-400 last:border-r-0"
+              className="border-r border-divider px-2 py-2 text-center text-hint font-medium text-tertiary last:border-r-0"
             >
               {d}
             </div>
@@ -346,7 +365,7 @@ export const UserCalendar: FC<Props> = ({
               {Array.from({ length: 7 }).map((_, i) => (
                 <div
                   key={`cal-skel-${w}-${i}`}
-                  className={`${cellMinH} border-b border-r border-brown-100 p-2 last:border-r-0`}
+                  className={`${cellMinH} border-b border-r border-divider p-2 last:border-r-0`}
                 >
                   <Skeleton className="h-4 w-5" />
                 </div>
@@ -377,27 +396,27 @@ export const UserCalendar: FC<Props> = ({
                         cellMinH,
                         // Not `last:border-r-0`: the time-off overlay below is the row's last child,
                         // so Sunday never matched it and kept an outer border.
-                        "border-b border-brown-100",
+                        "border-b border-divider",
                         dIdx < week.length - 1 ? "border-r" : "",
                         selectable ? "cursor-pointer select-none" : "",
                         inSelection || picked
-                          ? "bg-brown-100"
-                          : !cell.inMonth ? "bg-brown-50/30" : cell.isToday ? "bg-brown-50" : cell.isWeekend ? "bg-brown-50/40" : "",
+                          ? "bg-accent-subtle"
+                          : !cell.inMonth ? "bg-subtle/30" : cell.isToday ? "bg-subtle" : cell.isWeekend ? "bg-subtle/40" : "",
                         // Only the ends are ringed, so a run reads as one run and not as five boxes.
                         picked && (cell.iso === selectedRange?.start || cell.iso === selectedRange?.end)
-                          ? "ring-2 ring-inset ring-brown-400"
+                          ? "ring-2 ring-inset ring-accent-ring"
                           : "",
                       ].join(" ")}
                     >
                       <div className="relative z-10 flex items-center justify-between px-1.5 pt-1">
                         <span
                           className={[
-                            "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs",
+                            "inline-flex h-5 min-w-5 items-center justify-center rounded-pill px-1 text-hint",
                             cell.isToday
-                              ? "bg-brown-100 font-semibold text-brown-800"
+                              ? "bg-accent font-semibold text-on-accent"
                               : cell.inMonth
-                                ? "text-foreground"
-                                : "text-brown-300",
+                                ? "text-primary"
+                                : "text-disabled",
                           ].join(" ")}
                         >
                           {cell.dayNumber}
@@ -405,7 +424,7 @@ export const UserCalendar: FC<Props> = ({
                         {holiday ? (
                           <span
                             title={holidayTitle}
-                            className="h-1.5 w-1.5 rounded-full bg-danger-400"
+                            className="h-1.5 w-1.5 rounded-pill bg-status-declined-fill"
                             aria-label={holiday.name}
                           />
                         ) : null}
@@ -433,12 +452,12 @@ export const UserCalendar: FC<Props> = ({
                       style={{
                         gridColumn: `${seg.startCol + 1} / ${seg.endCol + 2}`,
                         gridRow: seg.lane + 1,
+                        ...timeOffStyle(seg.tone, seg.color),
                       }}
                       className={[
-                        "flex items-center truncate border px-1.5 text-[11px]",
-                        timeOffToneClass[seg.tone],
-                        seg.continuesLeft ? "rounded-l-none border-l-0" : "ml-1.5 rounded-l-md",
-                        seg.continuesRight ? "rounded-r-none border-r-0" : "mr-1.5 rounded-r-md",
+                        "flex items-center truncate border-[1.5px] px-1.5 text-hint font-medium",
+                        seg.continuesLeft ? "rounded-none border-l-0" : "ml-1.5 rounded-l-control",
+                        seg.continuesRight ? "rounded-none border-r-0" : "mr-1.5 rounded-r-control",
                       ].join(" ")}
                     >
                       {seg.continuesLeft ? "" : seg.label}
@@ -455,21 +474,21 @@ export const UserCalendar: FC<Props> = ({
 
       {/* Legend */}
       {!compact && (
-        <div className="flex flex-none flex-wrap items-center gap-4 pt-4 text-xs text-muted-foreground">
+        <div className="flex flex-none flex-wrap items-center gap-4 pt-4 text-hint text-tertiary">
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-danger-400" />
+            <span className="inline-block h-2 w-2 rounded-pill bg-status-declined-fill" />
             Public holiday
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded-sm border border-success-200 bg-success-100" />
+            <span className="inline-block h-3 w-3 rounded-tag border-[1.5px]" style={timeOffStyle("approved")} />
             Time off — approved
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded-sm border border-warning-200 bg-warning-100" />
+            <span className="inline-block h-3 w-3 rounded-tag border-[1.5px]" style={timeOffStyle("pending")} />
             Time off — pending
           </span>
           <span className="ml-auto flex items-center gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5" />
+            <Icon icon={Calendar03Icon} size="sm" />
             {holidays.length} holidays · {timeOff.length} time-off entries
           </span>
         </div>

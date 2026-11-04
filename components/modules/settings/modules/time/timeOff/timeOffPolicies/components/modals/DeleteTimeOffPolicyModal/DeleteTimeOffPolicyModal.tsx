@@ -2,7 +2,8 @@
 
 import { FC } from "react";
 import { FormError } from "@/components/feedback/FormError";
-import { AlertTriangle, Clock } from "lucide-react";
+import { Alert02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
+} from "@/components/desact/alert-dialog";
 import type { TimeOffPolicy } from "@/models/timeOff";
 
 type Props = {
@@ -49,8 +50,8 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-danger-600">
-            <Clock className="h-5 w-5" />
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon={Clock01Icon} />
             Delete time off policy
           </AlertDialogTitle>
 
@@ -61,12 +62,12 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
+        <div className="rounded-card border border-divider bg-mist p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-danger-600" />
+            <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-danger-800">Warning</h4>
-              <p className="text-sm text-danger-700">
+              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <p className="text-body text-secondary">
                 This policy will be permanently removed. This cannot be
                 reversed.
               </p>
@@ -86,7 +87,7 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
               event.preventDefault();
               onConfirmAction();
             }}
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            destructive
           >
             Delete policy
           </AlertDialogAction>

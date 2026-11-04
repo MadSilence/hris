@@ -4,6 +4,7 @@ import * as React from "react";
 import { AccessAction, ResourceCode } from "@/models/access";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
+import type { Scene } from "@/components/illustrations";
 
 /**
  * Picks which of the three empty screens a list is actually in.
@@ -25,7 +26,8 @@ export const ListEmptyState: React.FC<{
   query?: string;
   /** True while the list is showing the archived view. */
   archivedView?: boolean;
-  icon: React.ReactNode;
+  /** The ring illustration of the nothing-yet and the archive screens. */
+  scene: Scene;
   /** The nothing-yet heading: "No legal entities yet". */
   title: string;
   /** The nothing-yet sentence. Say what the thing is for, not that the list is empty. */
@@ -47,7 +49,7 @@ export const ListEmptyState: React.FC<{
    * what three suites reported when the hook was tried there.
    */
   createAccess?: { resource: ResourceCode; action?: AccessAction };
-  /** A control to render in place of the clickable block — see {@link EmptyState}. */
+  /** A control to render in place of the create button — see {@link EmptyState}. */
   action?: React.ReactNode;
   /** Fills the height its parent gives it — see {@link EmptyState}'s `fill`. */
   fill?: boolean;
@@ -55,7 +57,7 @@ export const ListEmptyState: React.FC<{
 }> = ({
   query,
   archivedView,
-  icon,
+  scene,
   title,
   description,
   noResultsHint,
@@ -75,7 +77,7 @@ export const ListEmptyState: React.FC<{
   if (archivedView) {
     return (
       <EmptyState
-        icon={icon}
+        scene={scene}
         title="Nothing archived"
         description={archivedDescription}
         fill={fill}
@@ -84,7 +86,7 @@ export const ListEmptyState: React.FC<{
     );
   }
 
-  const common = { icon, title, description, action, fill, className };
+  const common = { scene, title, description, action, fill, className };
 
   if (createAccess && onCreate) {
     return (

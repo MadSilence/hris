@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle } from "lucide-react";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact/useTimeOffAssignmentImpact";
 
 type Props = {
@@ -37,8 +38,8 @@ export const PolicyAssignmentWarning: React.FC<Props> = ({ policyId, userIds }) 
   if (noApprover.length === 0 && noHireDate.length === 0) return null;
 
   return (
-    <div className="flex items-start gap-2 rounded-md bg-warning-50 px-4 py-3 text-sm text-warning-800">
-      <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+    <div className="flex items-start gap-2 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
+      <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
       <div className="space-y-1">
         {noApprover.length > 0 ? (
           <p className="m-0">

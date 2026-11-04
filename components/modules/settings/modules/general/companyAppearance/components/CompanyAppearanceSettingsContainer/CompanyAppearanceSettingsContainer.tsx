@@ -11,6 +11,7 @@ import {
 } from "@/components/modules/settings/modules/general/companyAppearance/hooks/useCompanyAppearance";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import type { UpdateCompanyAppearanceRequest } from "@/api/modules/company/modules/appearance/dto";
+import { FormError } from "@/components/feedback/FormError";
 
 const errorMessageOf = (error: unknown) => (error instanceof Error ? error.message : null);
 
@@ -25,17 +26,15 @@ export default function CompanyAppearanceSettingsContainer() {
   if (isLoading || (!appearance && !error)) {
     return (
       <div className="grid h-[calc(100svh-6rem)] grid-cols-2 gap-10 px-12">
-        <div className="h-full animate-pulse rounded-xl bg-brown-50"/>
-        <div className="h-full animate-pulse rounded-xl bg-brown-50"/>
+        <div className="h-full shimmer rounded-popover bg-subtle"/>
+        <div className="h-full shimmer rounded-popover bg-subtle"/>
       </div>
     );
   }
 
   if (!appearance) {
     return (
-      <p className="text-sm text-destructive">
-        {errorMessageOf(error) ?? "Failed to load appearance settings."}
-      </p>
+      <FormError message={errorMessageOf(error) ?? "Failed to load appearance settings."} />
     );
   }
 
@@ -53,9 +52,10 @@ export default function CompanyAppearanceSettingsContainer() {
   return (
     <CompanyAppearanceSettingsComponent
       // Remounts the form when the saved state changes, so its draft restarts from the new baseline.
-      key={`${appearance.brandColor ?? "default"}|${appearance.loginImageUrl ?? ""}`}
+      key={`${appearance.accent ?? "default"}|${appearance.loginImageUrl ?? ""}`}
       appearance={appearance}
       companyName={company?.name}
+      logoUrl={company?.companyLogo}
       onSave={handleSave}
       onUploadLoginImage={handleUpload}
       onRemoveLoginImage={handleRemove}

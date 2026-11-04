@@ -28,7 +28,7 @@ export const UpcomingHolidaysWidget: React.FC = () => {
   const today = isoDateInZone(new Date(), settings.data?.companyTimeZone);
 
   return (
-    <HomeCard title="Upcoming Holidays">
+    <HomeCard title="Upcoming holidays">
       {!userId || query.isLoading ? (
         <HomeRowsSkeleton rows={3} avatar={false} />
       ) : query.error || !query.data ? (
@@ -40,15 +40,15 @@ export const UpcomingHolidaysWidget: React.FC = () => {
           {nextHolidays(query.data, today).map((holiday) => (
             <li key={`${holiday.calendarId}-${holiday.id}-${holiday.holidayDate}`} className="flex items-baseline justify-between gap-3">
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-brown-900">{holiday.name}</span>
-                <span className="block truncate text-xs text-muted-foreground">
+                <span className="block truncate text-body font-medium text-primary">{holiday.name}</span>
+                <span className="block truncate text-hint text-tertiary">
                   {holiday.calendarName ?? "Holiday calendar"}
-                  {holiday.dayPart === PublicHolidayDayPart.HalfDay ? " · Half Day" : ""}
+                  {holiday.dayPart === PublicHolidayDayPart.HalfDay ? " · Half day" : ""}
                 </span>
               </span>
-              <span className="shrink-0 text-right text-xs text-brown-700">
+              <span className="shrink-0 text-right text-hint text-secondary">
                 {holiday.holidayDate === today ? "Today" : weekdayOf(holiday.holidayDate)}
-                <span className="block text-muted-foreground">
+                <span className="block text-tertiary">
                   {formatDisplayDate(holiday.holidayDate, { style: "medium" })}
                 </span>
               </span>

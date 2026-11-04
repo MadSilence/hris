@@ -11,7 +11,7 @@ jest.mock("@/components/auth/PermissionGate", () => ({
   PermissionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 // The dropdown renders its content inline here; what matters is the React tree.
-jest.mock("@/public/desact/src/components/ui/dropdown-menu", () => ({
+jest.mock("@/components/desact/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

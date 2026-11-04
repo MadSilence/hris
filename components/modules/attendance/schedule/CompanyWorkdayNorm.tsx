@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Label } from "@/public/desact/src/components/ui/label";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Label } from "@/components/desact/label";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -68,8 +68,8 @@ export const CompanyWorkdayNorm: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="company-workday-heading">
       <div>
-        <h2 id="company-workday-heading" className="text-lg font-semibold">Working Day</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 id="company-workday-heading" className="text-section-title">Working day</h2>
+        <p className="text-body text-tertiary">
           How long a company working day is. Attendance expects it of everybody without a personal schedule;
           anything logged beyond it is overtime.
         </p>
@@ -85,7 +85,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
             event.preventDefault();
             void save();
           }}
-        >
+ >
           <div className="w-32 space-y-1">
             <Label htmlFor="company-workday-length">Length</Label>
             <Input
@@ -100,7 +100,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <Button type="submit" disabled={!dirty || update.isPending} className="bg-brown-600 text-white hover:bg-brown-700">
+            <Button type="submit" disabled={!dirty || update.isPending} >
               Save
             </Button>
           )}

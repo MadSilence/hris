@@ -10,8 +10,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/public/desact/src/components/ui/alert-dialog";
-import { Button } from "@/public/desact/src/components/ui/button";
+} from "@/components/desact/alert-dialog";
+import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { messageForCode } from "@/lib/errors/errorMessages";
@@ -59,7 +59,7 @@ export const DeleteProfileModal: FC<Props> = ({
     <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open && !isBusy) onClose(); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-danger-600">Delete Profile</AlertDialogTitle>
+          <AlertDialogTitle>Delete profile</AlertDialogTitle>
           <AlertDialogDescription>
             This deletes <strong>{fullName}</strong> and their history, and cannot be undone.
             {/* Only while Terminate is on offer: for a person already terminated the advice points at
@@ -71,25 +71,25 @@ export const DeleteProfileModal: FC<Props> = ({
         </AlertDialogHeader>
 
         {isLoading ? (
-          <p className="m-0 text-sm text-muted-foreground">Checking what is attached to this profile…</p>
+          <p className="m-0 text-body text-tertiary">Checking what is attached to this profile…</p>
         ) : isError || !impact ? (
-          <p className="m-0 text-sm text-muted-foreground">What is attached to this profile could not be checked.</p>
+          <p className="m-0 text-body text-tertiary">What is attached to this profile could not be checked.</p>
         ) : (
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-body">
             <p className="m-0 font-medium">Deleted with the profile</p>
-            <ul className="m-0 list-disc space-y-0.5 pl-5 text-muted-foreground">
+            <ul className="m-0 list-disc space-y-0.5 pl-5 text-tertiary">
               <li>{plural(impact.timeOffRequests, "leave request", "leave requests")}, {plural(impact.balances, "balance", "balances")} and their history</li>
               <li>{plural(impact.policyAssignments, "policy assignment", "policy assignments")}, {plural(impact.assignmentRecords, "assignment record", "assignment records")}, {plural(impact.jobHistoryEntries, "job history entry", "job history entries")}</li>
               <li>{plural(impact.processesDeleted, "preboarding or onboarding process", "preboarding and onboarding processes")} run for them</li>
             </ul>
             <p className="m-0 font-medium">Kept</p>
-            <ul className="m-0 list-disc space-y-0.5 pl-5 text-muted-foreground">
+            <ul className="m-0 list-disc space-y-0.5 pl-5 text-tertiary">
               <li>{plural(impact.documentsToTrash, "document goes", "documents go")} to the trash, not straight to erasure</li>
               <li>{plural(impact.approvalsSignedForOthers, "approval they signed", "approvals they signed")} in other people&apos;s requests, with their name</li>
               <li>The journal of what they did</li>
             </ul>
             {impact.directReports > 0 ? (
-              <p className="m-0 text-muted-foreground">
+              <p className="m-0 text-tertiary">
                 {impact.reportsMoveTo
                   ? <>{plural(impact.directReports, "direct report moves", "direct reports move")} to {impact.reportsMoveTo}.</>
                   : <>{plural(impact.directReports, "direct report is", "direct reports are")} left without a manager.</>}
@@ -103,12 +103,12 @@ export const DeleteProfileModal: FC<Props> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isBusy}>Cancel</AlertDialogCancel>
           {onTerminateInstead ? (
-            <Button type="button" variant="outline" disabled={isBusy} onClick={onTerminateInstead}>
-              Terminate Instead
+            <Button type="button" variant="secondary" disabled={isBusy} onClick={onTerminateInstead}>
+              Terminate instead
             </Button>
           ) : null}
           <Button type="button"
-            className="bg-danger-600 text-white hover:bg-danger-700"
+            variant="destructive-confirm"
             disabled={isBusy || isLoading || Boolean(refusal)}
             onClick={onConfirm}
           >

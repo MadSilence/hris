@@ -2,12 +2,14 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Archive, ArchiveRestore, Check, ChevronLeft, Eye, GanttChart, List, Loader2 } from "lucide-react";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
-import { useIsMobile } from "@/public/desact/src/components/ui/use-mobile";
-import { cn } from "@/public/desact/src/components/ui/utils";
+import { Archive02Icon, ArchiveArrowUpIcon, ArrowLeft01Icon, LeftToRightListBulletIcon, Tick02Icon, TimelineIcon, ViewIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { NodRing } from "@/components/desact/nod";
+import { Button } from "@/components/desact/button";
+import { Input } from "@/components/desact/input";
+import { Skeleton } from "@/components/desact/skeleton";
+import { useIsMobile } from "@/components/desact/use-mobile";
+import { cn } from "@/lib/cn";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -307,14 +309,14 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     return (
       <div className="space-y-4 px-8" aria-busy="true">
         <Skeleton className="h-10 w-80" />
-        <Skeleton className="h-[420px] w-full rounded-xl" />
+        <Skeleton className="h-[420px] w-full rounded-popover" />
       </div>
     );
   }
 
   const quickAddLane = quickAdd ? laneById(quickAdd.laneId) : null;
   const addPerson = (u: { id: string; firstName?: string | null; lastName?: string | null; email?: string | null }) => {
-    const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Named Person";
+    const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Named person";
     setExtraLanes((l) => [...l, { id: `USER:${u.id}`, assigneeKind: "SPECIFIC_USER", userId: u.id, label, problem: null }]);
   };
   const quickAddColumn = quickAdd ? axis.columns.find((c) => c.id === quickAdd.columnId) ?? null : null;
@@ -329,19 +331,19 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         <Link
           href={listHref(type)}
           aria-label={`Back to ${PROCESS_TYPE_LABELS[type]} Templates`}
-          className="no-underline grid h-10 w-10 shrink-0 place-items-center rounded-full border bg-white hover:bg-brown-50"
+          className="no-underline grid h-10 w-10 shrink-0 place-items-center rounded-pill border bg-card hover:bg-subtle"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <Icon icon={ArrowLeft01Icon} size="sm" />
         </Link>
         <div className="min-w-0 flex-1">
           <Input
-            aria-label="Template Name"
+            aria-label="Template name"
             value={draft.name}
             disabled={readOnly}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            className="h-10 max-w-xl border-transparent bg-transparent px-2 text-2xl font-semibold text-brown-900 shadow-none hover:border-brown-200 focus-visible:border-brown-300"
+            className="h-10 max-w-xl border-transparent bg-transparent px-2 text-page-title text-primary shadow-none hover:border-divider focus-visible:border-field"
           />
-          <div className="flex items-center gap-2 px-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 px-2 text-hint text-tertiary">
             <span>{PROCESS_TYPE_LABELS[type]} Template</span>
             <span aria-hidden>·</span>
             <span>{items.length === 1 ? "1 task" : `${items.length} tasks`}</span>
@@ -351,7 +353,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         </div>
 
         {!narrow && (
-          <div className="flex rounded-lg border border-brown-100 bg-white p-0.5" role="group" aria-label="View">
+          <div className="flex rounded-control border border-divider bg-card p-0.5" role="group" aria-label="View">
             {(["canvas", "list"] as EditorView[]).map((v) => (
               <button
                 key={v}
@@ -359,11 +361,11 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
                 aria-pressed={view === v}
                 onClick={() => setView(v)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm",
-                  view === v ? "bg-brown-100 font-medium text-brown-900" : "text-brown-600 hover:bg-brown-50",
+                  "flex items-center gap-1.5 rounded-control px-2.5 py-1.5 text-body",
+                  view === v ? "bg-accent-muted font-medium text-accent-text" : "text-secondary hover:bg-subtle",
                 )}
               >
-                {v === "canvas" ? <GanttChart className="h-4 w-4" /> : <List className="h-4 w-4" />}
+                {v === "canvas" ? <Icon icon={TimelineIcon} size="sm" /> : <Icon icon={LeftToRightListBulletIcon} size="sm" />}
                 {v === "canvas" ? "Timeline" : "List"}
               </button>
             ))}
@@ -371,18 +373,18 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         )}
 
         <Button type="button" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
-          <Eye className="h-4 w-4" />
+          <Icon icon={ViewIcon} size="sm" />
           Preview
         </Button>
 
         {canManage && (
-          <RowActionsMenu label="Template Actions">
+          <RowActionsMenu label="Template actions">
             {archived ? (
-              <RowAction icon={<ArchiveRestore className="h-4 w-4 text-muted-foreground" />} onClick={() => void unarchive()}>
+              <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>
                 Unarchive
               </RowAction>
             ) : (
-              <RowAction icon={<Archive className="h-4 w-4 text-muted-foreground" />} onClick={() => { setArchiveError(null); setConfirmArchive(true); }}>
+              <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => { setArchiveError(null); setConfirmArchive(true); }}>
                 Archive
               </RowAction>
             )}
@@ -391,8 +393,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       </header>
 
       <div className="space-y-1 px-8 pb-4">
-        <p className="text-base text-muted-foreground/90">{INTRO[type]}</p>
-        {!readOnly && <p className="text-sm text-muted-foreground">{HOW_TO}</p>}
+        <p className="text-body text-tertiary/90">{INTRO[type]}</p>
+        {!readOnly && <p className="text-body text-tertiary">{HOW_TO}</p>}
       </div>
 
       {((saveState === "failed" && saveError) || notice || refusal || archived) && (
@@ -401,10 +403,10 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
               missing; only a save the server refused is an error. */}
           {saveState === "failed" && <FormError message={saveError} />}
           {archived && (
-            <p className="text-sm text-muted-foreground">An archived template cannot be changed or used. Unarchive it to edit it.</p>
+            <p className="text-body text-tertiary">An archived template cannot be changed or used. Unarchive it to edit it.</p>
           )}
-          {notice && view === "list" && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
-          {refusal && view === "canvas" && <p className="text-sm text-warning-700">{refusal}</p>}
+          {notice && view === "list" && <p role="status" className="text-body text-tertiary">{notice}</p>}
+          {refusal && view === "canvas" && <p className="text-body text-status-pending-text">{refusal}</p>}
         </div>
       )}
 
@@ -445,7 +447,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         </div>
 
         {selected && panelOpen && (
-          <div className={cn(narrow ? "fixed inset-0 z-30 bg-white" : "ml-4 h-full overflow-hidden rounded-xl")}>
+          <div className={cn(narrow ? "fixed inset-0 z-30 bg-card" : "ml-4 h-full overflow-hidden rounded-popover")}>
             <TaskSidePanel
               item={selected}
               items={items}
@@ -461,7 +463,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove Task"
+        title="Remove task"
         confirmLabel="Remove"
         destructive
         description={
@@ -480,7 +482,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <ConfirmActionModal
         isOpen={confirmArchive}
-        title="Archive Template"
+        title="Archive template"
         confirmLabel="Archive"
         errorMessage={archiveError}
         description={
@@ -515,7 +517,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         isOpen={guard.pendingHref !== null}
         title="Leave before it is saved?"
         description={saveError ? `The last changes could not be saved: ${saveError}` : "The last changes are still being saved."}
-        cancelText="Keep Editing"
+        cancelText="Keep editing"
         confirmText="Leave"
         onCancelAction={guard.stay}
         onConfirmAction={() => {
@@ -531,7 +533,7 @@ function SaveStatus({ state }: { state: SaveState }) {
   if (state === "saving") {
     return (
       <span className="flex items-center gap-1" role="status">
-        <Loader2 className="h-3 w-3 animate-spin" />
+        <NodRing size="sm" label="" />
         Saving…
       </span>
     );
@@ -539,11 +541,11 @@ function SaveStatus({ state }: { state: SaveState }) {
   if (state === "saved") {
     return (
       <span className="flex items-center gap-1" role="status">
-        <Check className="h-3 w-3" />
+        <Icon icon={Tick02Icon} size="sm" />
         Saved
       </span>
     );
   }
   if (state === "blocked") return null;
-  return <span className="text-warning-700" role="status">Not saved</span>;
+  return <span className="text-status-pending-text" role="status">Not saved</span>;
 }

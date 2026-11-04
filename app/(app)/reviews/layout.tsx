@@ -3,17 +3,18 @@
 import React, { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, LayoutDashboard, UserCheck } from "lucide-react";
+import { DashboardSquare01Icon, FileTextIcon, UserCheck01Icon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess, ResourceCode } from "@/models/access";
-import { Tabs, TabsList, TabsTrigger } from "@/public/desact/src/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
   id: string;
   label: string;
   href: string;
-  icon: typeof FileText;
+  icon: IconSvgElement;
   /** Undefined: everybody — everybody may have reviews to write or to read. */
   resource?: ResourceCode;
   description: string;
@@ -24,22 +25,22 @@ const tabs: Tab[] = [
     id: "overview",
     label: "Overview",
     href: "/reviews",
-    icon: LayoutDashboard,
+    icon: DashboardSquare01Icon,
     resource: "REVIEWS.CYCLE",
     description: "Every review cycle, and who has written what.",
   },
   {
     id: "me",
-    label: "My Reviews",
+    label: "My reviews",
     href: "/reviews/me",
-    icon: UserCheck,
+    icon: UserCheck01Icon,
     description: "The reviews you are asked to write, the ones shared with you, and your people's.",
   },
   {
     id: "forms",
     label: "Forms",
     href: "/reviews/forms",
-    icon: FileText,
+    icon: FileTextIcon,
     resource: "REVIEWS.FORM",
     description: "The questionnaires a review cycle asks its reviewers to fill in.",
   },
@@ -68,19 +69,19 @@ export default function ReviewsLayout({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-semibold text-brown-900">Reviews</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{activeTab.description}</p>
+        <h1 className="text-page-title text-primary">Reviews</h1>
+        <p className="mt-1 text-body text-tertiary">{activeTab.description}</p>
       </div>
 
       {visibleTabs.length > 1 && (
         <Tabs value={activeTab.id} className="w-full">
-          <TabsList className={`grid w-full max-w-xl ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-brown-50`}>
+          <TabsList className={`grid w-full max-w-xl ${GRID_COLUMNS[visibleTabs.length] ?? "grid-cols-3"} bg-subtle`}>
             {visibleTabs.map((tab) => {
-              const Icon = tab.icon;
+              const shownIcon = tab.icon;
               return (
                 <TabsTrigger key={tab.id} value={tab.id} asChild className="flex items-center gap-2">
                   <Link href={tab.href} className="no-underline">
-                    <Icon className="h-4 w-4" />
+                    <Icon icon={shownIcon} size="sm" />
                     {tab.label}
                   </Link>
                 </TabsTrigger>

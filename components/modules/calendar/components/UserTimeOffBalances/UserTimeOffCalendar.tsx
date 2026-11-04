@@ -1,14 +1,15 @@
 "use client";
 
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarClock, Plus, ShieldCheck, Wallet } from "lucide-react";
+import { Add01Icon, CalendarLock01Icon, ShieldCheckIcon, Wallet01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Card } from "@/public/desact/src/components/ui/card";
+import { Button } from "@/components/desact/button";
+import { Card } from "@/components/desact/card";
 import { RowAction, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
 import { PermissionGate } from "@/components/auth/PermissionGate";
@@ -83,29 +84,29 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           />
         </div>
 
-        <Card className="h-fit gap-4 border-brown-100 p-6 lg:basis-1/3">
+        <Card className="h-fit gap-4 border-divider p-6 lg:basis-1/3">
           <div className="flex items-center gap-2">
             <Button type="button" className="flex-1" onClick={() => open()} disabled={!hasBalances}>
-              <Plus className="h-4 w-4" />
-              Request Time Off
+              <Icon icon={Add01Icon} size="sm" />
+              Request time off
             </Button>
 
             {/* Everything else the tab does, in the kebab beside the one primary action. The menu
                 always has Requests, so it is never empty. */}
-            <RowActionsMenu label="Time Off Actions">
+            <RowActionsMenu label="Time off actions">
               {/* Without an assignment there is no balance and no way to request — so the people who
                   manage policies get the entry point here, on the person, not only in settings. */}
               <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
-                <RowAction icon={<ShieldCheck className="h-4 w-4" />} onClick={() => setAssignOpen(true)}>
-                  Assign Policy
+                <RowAction icon={<Icon icon={ShieldCheckIcon} size="sm" />} onClick={() => setAssignOpen(true)}>
+                  Assign policy
                 </RowAction>
               </PermissionGate>
               {/* Request history + Cancel: the calendar alone cannot undo a booked absence. */}
-              <RowAction icon={<CalendarClock className="h-4 w-4" />} onClick={() => setRequestsOpen(true)}>
+              <RowAction icon={<Icon icon={CalendarLock01Icon} size="sm" />} onClick={() => setRequestsOpen(true)}>
                 Requests
               </RowAction>
               <RowAction
-                icon={<Wallet className="h-4 w-4" />}
+                icon={<Icon icon={Wallet01Icon} size="sm" />}
                 onClick={() => setPreviewOpen(true)}
                 disabled={!hasBalances}
               >
@@ -114,7 +115,7 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
             </RowActionsMenu>
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body text-tertiary">
             {hasBalances
               ? "Click a day on the calendar, or drag across several, to request time off for them."
               : "No time-off policy is assigned yet, so there is nothing to request against."}

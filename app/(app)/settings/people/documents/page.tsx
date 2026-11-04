@@ -12,9 +12,9 @@ const DocumentCategoriesSettingsPage: FC = () => (
     action="MANAGE">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
-        <SettingsPageHeader title="Document Categories" backHref="/settings"/>
+        <SettingsPageHeader title="Document categories" backHref="/settings"/>
 
-        <PageDescription className="text-base text-muted-foreground/90">
+        <PageDescription className="text-body text-tertiary/90">
           Labels for the documents on a person&apos;s profile. Anyone who can see documents can pick
           a category when uploading; managing the list itself stays here.
         </PageDescription>

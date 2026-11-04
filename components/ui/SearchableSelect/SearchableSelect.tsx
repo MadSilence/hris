@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Button } from "@/components/desact/button";
 import {
   Command,
   CommandEmpty,
@@ -11,9 +12,9 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/public/desact/src/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/public/desact/src/components/ui/popover";
-import { cn } from "@/public/desact/src/components/ui/utils";
+} from "@/components/desact/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { cn } from "@/lib/cn";
 
 export type SearchableOption = {
   value: string;
@@ -53,10 +54,10 @@ const groupOptions = (options: SearchableOption[]) => {
  */
 const AUTOHIDE_SCROLLBAR = cn(
   "[&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-track]:bg-transparent",
-  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2",
+  "[&::-webkit-scrollbar-thumb]:rounded-pill [&::-webkit-scrollbar-thumb]:border-2",
   "[&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent",
   "[&::-webkit-scrollbar-thumb]:bg-clip-padding",
-  "[&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-border)_calc(var(--thumb-alpha,0)*100%),transparent)]",
+  "[&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--border-strong)_calc(var(--thumb-alpha,0)*100%),transparent)]",
 );
 
 const SCROLLBAR_LINGER_MS = 600;
@@ -133,7 +134,7 @@ export const SearchableSelect: React.FC<{
         <Button
           id={id}
           type="button"
-          variant="outline"
+          variant="secondary"
           role="combobox"
           aria-expanded={open}
           aria-label={ariaLabel}
@@ -148,10 +149,10 @@ export const SearchableSelect: React.FC<{
                 <span className="truncate">{selected.label}</span>
               </>
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-tertiary">{placeholder}</span>
             )}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <Icon icon={UnfoldMoreIcon} size="sm" className="ml-2 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
 
@@ -180,11 +181,9 @@ export const SearchableSelect: React.FC<{
                     {option.icon}
                     <span className="truncate">{option.label}</span>
                     {option.hint && (
-                      <span className="ml-2 shrink-0 text-xs text-muted-foreground">{option.hint}</span>
+                      <span className="ml-2 shrink-0 text-hint text-tertiary">{option.hint}</span>
                     )}
-                    <Check
-                      className={cn("ml-auto h-4 w-4", option.value === value ? "opacity-100" : "opacity-0")}
-                    />
+                    <Icon icon={Tick02Icon} className={cn("ml-auto h-4 w-4", option.value === value ? "opacity-100" : "opacity-0")} />
                   </CommandItem>
                 ))}
               </CommandGroup>

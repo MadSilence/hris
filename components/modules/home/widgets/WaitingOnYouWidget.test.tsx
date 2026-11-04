@@ -36,7 +36,7 @@ describe("WaitingOnYouWidget", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("lists the newest five, each opening its decision page, and sends See All to the inbox's Needs Action", () => {
+  it("lists the newest five, each opening its decision page, and sends See all to the inbox's Needs action", () => {
     waiting(Array.from({ length: 7 }, (_, i) => request(`r${i}`, `2026-10-2${i}T10:00:00`)));
     render(<WaitingOnYouWidget />);
 
@@ -44,7 +44,7 @@ describe("WaitingOnYouWidget", () => {
     expect(rows.map((link) => link.getAttribute("href"))).toEqual([
       "/time-off/requests/r6", "/time-off/requests/r5", "/time-off/requests/r4", "/time-off/requests/r3", "/time-off/requests/r2",
     ]);
-    expect(screen.getByRole("link", { name: "See All (7)" })).toHaveAttribute("href", "/inbox?filter=needs-action");
+    expect(screen.getByRole("link", { name: "See all (7)" })).toHaveAttribute("href", "/inbox?filter=needs-action");
     expect(screen.getAllByText("Anna Kowalska")).toHaveLength(5);
   });
 });

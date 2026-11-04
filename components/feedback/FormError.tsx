@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { InlineAlert } from "@/components/desact/alert";
 import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
 
 /**
@@ -23,16 +23,10 @@ export const FormError: React.FC<{
   if (!message) return null;
 
   return (
-    <div
-      role="alert"
-      className={`flex items-start gap-2 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 ${className ?? ""}`}
-    >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" />
-      <div className="flex flex-col gap-0.5">
-        <p className="text-sm text-danger-700">{message}</p>
-        {reference && <p className="font-mono text-xs text-danger-600/70">{reference}</p>}
-      </div>
-    </div>
+    <InlineAlert tone="declined" className={className}>
+      <p>{message}</p>
+      {reference && <p className="font-mono text-hint opacity-70">{reference}</p>}
+    </InlineAlert>
   );
 };
 

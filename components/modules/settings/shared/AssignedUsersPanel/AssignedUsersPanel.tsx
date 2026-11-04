@@ -2,16 +2,17 @@
 
 import { useState, type ReactNode } from "react";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
-import { Button } from "@/public/desact/src/components/ui/button";
-import { Skeleton } from "@/public/desact/src/components/ui/skeleton";
+import { Button } from "@/components/desact/button";
+import { Skeleton } from "@/components/desact/skeleton";
 import {
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/public/desact/src/components/ui/table";
-import { Download, Plus, Users, X } from "lucide-react";
+} from "@/components/desact/table";
+import { Add01Icon, Cancel01Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -78,7 +79,7 @@ export interface AssignedUsersPanelProps {
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
 export default function AssignedUsersPanel({
-  title = "Assigned People",
+  title = "Assigned people",
   description,
   manageResource,
   manageAction = "EDIT",
@@ -159,7 +160,7 @@ export default function AssignedUsersPanel({
       disabled={!assign || isArchived}
       title={isArchived ? "This record is archived, so nobody new can be assigned to it." : undefined}
     >
-      <Plus className="h-4 w-4"/>
+      <Icon icon={Add01Icon} size="sm" />
       Assign
     </Button>
   );
@@ -176,13 +177,13 @@ export default function AssignedUsersPanel({
 
   const infoBlock = (
     <div className="flex-none space-y-1 pt-2 pb-1">
-      <h2 className="text-lg font-semibold text-foreground">
+      <h2 className="text-section-title text-primary">
         {title}
-        {error ? null : <span className="font-normal text-brown-400"> ({total ?? rows.length})</span>}
+        {error ? null : <span className="font-normal text-tertiary"> ({total ?? rows.length})</span>}
       </h2>
-      <p className="text-sm text-muted-foreground">{description}</p>
+      <p className="text-body text-tertiary">{description}</p>
       {limited && !error ? (
-        <p className="text-xs text-muted-foreground">Only the people your access covers are listed.</p>
+        <p className="text-hint text-tertiary">Only the people your access covers are listed.</p>
       ) : null}
     </div>
   );
@@ -227,11 +228,11 @@ export default function AssignedUsersPanel({
           {onExport ? (
             <Button type="button"
               size="icon"
-              variant="outline"
+              variant="secondary"
               aria-label="Export"
               onClick={onExport}
             >
-              <Download className="h-4 w-4"/>
+              <Icon icon={Download01Icon} size="sm" />
             </Button>
           ) : null}
         </div>
@@ -245,7 +246,7 @@ export default function AssignedUsersPanel({
         <div style={emptyStyle}>
           <ListEmptyState
             query={searching ? q : ""}
-            icon={<Users className="h-7 w-7"/>}
+            scene="team-and-org"
             title={limited && (total ?? 0) > 0 ? "No one you can see" : "No people assigned yet"}
             description={limited && (total ?? 0) > 0
               ? "People are assigned here, but none of them is someone your access covers."
@@ -254,14 +255,14 @@ export default function AssignedUsersPanel({
             /* An archived record takes no new people, so the block is a panel rather than a
                button — a control that cannot work is not offered. */
             onCreate={assign && !isArchived ? () => setAssignOpen(true) : undefined}
-            createLabel="Assign People"
+            createLabel="Assign people"
             className={emptyClass}
           />
         </div>
       ) : (
         <div className={scrollClass} style={scrollStyle}>
-          <table className="w-full caption-bottom text-sm table-fixed">
-            <TableHeader className="[&_tr]:border-brown-200 sticky top-0 z-10 bg-white">
+          <table className="w-full caption-bottom text-body table-fixed">
+            <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
               <TableRow>
                 <TableHead className="pl-4">User</TableHead>
                 <TableHead>{secondary.header}</TableHead>
@@ -273,18 +274,18 @@ export default function AssignedUsersPanel({
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <TableRow key={`assigned-skel-${i}`} className="border-brown-200 [&_td]:py-2">
+                  <TableRow key={`assigned-skel-${i}`} className="border-divider [&_td]:py-2">
                     <TableCell className="py-2 pl-4">
                       <div className="flex items-center gap-2.5">
-                        <Skeleton className="h-7 w-7 rounded-full"/>
+                        <Skeleton className="h-7 w-7 rounded-pill"/>
                         <Skeleton className="h-4 w-32"/>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-5 w-24 rounded-full"/>
+                      <Skeleton className="h-5 w-24 rounded-pill"/>
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-6 w-16 rounded-full"/>
+                      <Skeleton className="h-6 w-16 rounded-pill"/>
                     </TableCell>
                     {canRemove ? <TableCell className="w-10"/> : null}
                   </TableRow>
@@ -294,7 +295,7 @@ export default function AssignedUsersPanel({
                   const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
 
                   return (
-                    <TableRow key={u.id} className="group border-brown-200 hover:bg-brown-50 [&_td]:py-2">
+                    <TableRow key={u.id} className="group border-divider hover:bg-subtle [&_td]:py-2">
                       <TableCell className="py-2 pl-4">
                         <UserChip
                           id={u.id}
@@ -306,7 +307,7 @@ export default function AssignedUsersPanel({
                         />
                       </TableCell>
 
-                      <TableCell className="text-muted-foreground">{secondary.render(u)}</TableCell>
+                      <TableCell className="text-tertiary">{secondary.render(u)}</TableCell>
 
                       <TableCell>
                         <UserStatusBadge status={u.status}/>
@@ -340,7 +341,7 @@ export default function AssignedUsersPanel({
 
           {hasMore ? (
             <div className="flex justify-center py-3">
-              <Button type="button" variant="outline" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
+              <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
                 {isLoadingMore ? "Loading…" : "Load more"}
               </Button>
             </div>
@@ -363,7 +364,7 @@ export default function AssignedUsersPanel({
 
       <ConfirmActionModal
         isOpen={removeTarget !== null}
-        title="Unassign Person"
+        title="Unassign person"
         description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be assigned here. They keep their account and everything else.`}
         confirmLabel="Unassign"
         destructive
@@ -390,9 +391,9 @@ function RemoveButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={`Unassign ${name}`}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-brown-400 transition hover:bg-brown-100 hover:text-danger-600 disabled:opacity-50"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text disabled:opacity-50"
     >
-      <X className="h-4 w-4"/>
+      <Icon icon={Cancel01Icon} size="sm" />
     </button>
   );
 }

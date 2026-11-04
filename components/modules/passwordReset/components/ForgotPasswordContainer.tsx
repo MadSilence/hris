@@ -4,12 +4,13 @@ import React, { FormEvent, useState } from "react";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
-import { Input } from "@/public/desact/src/components/ui/input";
-import { Button } from "@/public/desact/src/components/ui/button";
+import { Input } from "@/components/desact/input";
+import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { forgotPasswordAction } from "@/components/modules/passwordReset/actions/passwordResetActions";
+import { FieldError } from "@/components/desact/field-error";
 
 type Values = { email: string };
 
@@ -63,29 +64,29 @@ export function ForgotPasswordContainer() {
 
   if (sent) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-        <h1 className="text-4xl font-medium">Check Your Email</h1>
-        <p className="text-md text-muted-foreground" role="status">{FORGOT_PASSWORD_SENT_MESSAGE}</p>
-        <Button asChild variant="outline">
-          <Link href="/login">Back to Sign In</Link>
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-page-title">Check your email</h1>
+        <p className="text-body text-tertiary" role="status">{FORGOT_PASSWORD_SENT_MESSAGE}</p>
+        <Button asChild variant="secondary">
+          <Link href="/login">Back to sign in</Link>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center py-12">
+    <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-4xl font-medium">Forgot Password</h1>
-          <p className="text-md text-muted-foreground">
+          <h1 className="text-page-title">Forgot your password?</h1>
+          <p className="text-body text-tertiary">
             Enter the email address you sign in with, and we will send you a link to set a new password.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="forgot-email" required>Email Address</RequiredLabel>
+            <RequiredLabel htmlFor="forgot-email" required>Email address</RequiredLabel>
             <Input
               id="forgot-email"
               name="email"
@@ -97,18 +98,18 @@ export function ForgotPasswordContainer() {
               aria-invalid={Boolean(formik.errors.email)}
             />
             {formik.errors.email && (
-              <p className="text-sm text-destructive" role="alert">{formik.errors.email}</p>
+              <FieldError>{formik.errors.email}</FieldError>
             )}
           </div>
 
           <FormError message={error} />
 
-          <Button type="submit" disabled={busy} className="h-11 w-full">
-            {busy ? "Sending…" : "Send Link"}
+          <Button type="submit" disabled={busy} size="lg" className="w-full">
+            {busy ? "Sending…" : "Send link"}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/login" className="underline underline-offset-4">Back to Sign In</Link>
+          <p className="text-center text-body text-tertiary">
+            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">Back to sign in</Link>
           </p>
         </form>
       </div>

@@ -18,7 +18,7 @@ import {
 
 const H_SPACING = 40;
 const V_SPACING = 72;
-const EDGE_STROKE = "var(--brown-300)";
+const EDGE_STROKE = "var(--border-strong)";
 
 export type BlockFlowNode = DepartmentBlockFlowNode | CompanyBlockFlowNode;
 

@@ -3,15 +3,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OptionsEditor } from "./OptionsEditor";
 import { AttributeOption, AttributeOptionUpsert, AttributeType } from "@/models/attribute";
-import { PRESET_COLORS } from "@/models/colors";
-
-// The desact Button/Input render fine in jsdom and need no stubs. The SVG one does: the global
-// svgMock isn't flagged `__esModule`, so the default import arrives as a module object and React
-// refuses to render it.
-jest.mock("@/public/icons/trash.svg", () => ({
-  __esModule: true,
-  default: () => <svg data-testid="trash-icon"/>,
-}));
 
 // The editor takes stored options, which carry ids and audit columns the tests never look at. Built
 // here so the suite states only what it is about — value and colour.
@@ -42,16 +33,16 @@ describe("OptionsEditor", () => {
   it("renders existing options with placeholders and values", () => {
     setup(
       [
-        option("Option A", "#111111"),
-        option("Option B", "#222222"),
+        option("Option A", "ocean"),
+        option("Option B", "berry"),
       ],
       AttributeType.SELECT
     );
 
     expect(screen.getByPlaceholderText("Option 1")).toHaveValue("Option A");
     expect(screen.getByPlaceholderText("Option 2")).toHaveValue("Option B");
-    expect(screen.getByLabelText("Color for option 1")).toBeInTheDocument();
-    expect(screen.getByLabelText("Color for option 2")).toBeInTheDocument();
+    expect(screen.getByLabelText("Color for option 1: Ocean")).toBeInTheDocument();
+    expect(screen.getByLabelText("Color for option 2: Berry")).toBeInTheDocument();
   });
 
   it("adds an option on top of the auto-seeded first one", async () => {
@@ -71,7 +62,7 @@ describe("OptionsEditor", () => {
   });
 
   it("updates option value when typing", async () => {
-    const { onChange } = setup([option("", "#4F46E5")]);
+    const { onChange } = setup([option("", "indigo")]);
 
     const input = screen.getByPlaceholderText("Option 1");
     fireEvent.change(input, { target: { value: "Hello" } });
@@ -80,24 +71,24 @@ describe("OptionsEditor", () => {
     expect(last[0].value).toBe("Hello");
   });
 
-  it("updates option color through the swatch picker", async () => {
+  it("updates an option's tag color through the picker", async () => {
     const user = userEvent.setup();
-    const { onChange } = setup([option("Red", PRESET_COLORS[0])]);
+    const { onChange } = setup([option("Red", "ocean")]);
 
-    // The colour input became a swatch popover: open it, then pick a colour from the palette.
-    await user.click(screen.getByLabelText("Color for option 1"));
-    await user.click(screen.getByLabelText(`Choose ${PRESET_COLORS[1]}`));
+    // The dot opens the eight tag colours, each shown by its name.
+    await user.click(screen.getByLabelText("Color for option 1: Ocean"));
+    await user.click(screen.getByRole("radio", { name: "Berry" }));
 
     const last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as AttributeOptionUpsert[];
-    expect(last[0].color).toBe(PRESET_COLORS[1]);
+    expect(last[0].color).toBe("berry");
   });
 
   it("removes an option", async () => {
     const user = userEvent.setup();
     const { onChange } = setup(
       [
-        option("One", "#000000"),
-        option("Two", "#ffffff"),
+        option("One", "gray"),
+        option("Two", "teal"),
       ],
       AttributeType.SELECT
     );
