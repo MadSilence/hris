@@ -31,7 +31,7 @@ const LANGUAGE_CODES =
 
 /**
  * The stored value is the English name — it is what profiles already hold and what filters compare — and only
- * the label is in the reader's language (I18N_DESIGN.md § 9: company data is not translated, the product's
+ * the label is in the reader's language (I18N.md § 9: company data is not translated, the product's
  * own names are).
  */
 function displayName(type: "region" | "language" | "currency", code: string, locale = "en"): string | null {

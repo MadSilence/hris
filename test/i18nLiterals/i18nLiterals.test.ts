@@ -1,5 +1,5 @@
 /**
- * The ratchet (technical_design/I18N_DESIGN.md § 7.1): words written into a component instead of a catalogue
+ * The ratchet (technical_documentation/I18N.md § 7.1): words written into a component instead of a catalogue
  * may only go down.
  *
  * `baseline.json` holds, per file, how many literal texts it had when extraction started. A file may not
@@ -36,7 +36,7 @@ describe("literal texts in components (the i18n ratchet)", () => {
 
     if (grown.length > 0) {
       throw new Error(
-        "Words written into components instead of messages/<locale>/*.json — use t() (I18N_DESIGN.md § 2):\n" +
+        "Words written into components instead of messages/<locale>/*.json — use t() (I18N.md § 2):\n" +
           grown.join("\n"),
       );
     }

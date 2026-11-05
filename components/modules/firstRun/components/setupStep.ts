@@ -3,7 +3,7 @@
  */
 export type SetupStepKey = "starting" | "localization" | "holidays" | "exampleData" | "finishing";
 
-/** The step the setup is on, by its code (`CompanySetupStep`'s name — `stepCode`, I18N_DESIGN.md rule 1). */
+/** The step the setup is on, by its code (`CompanySetupStep`'s name — `stepCode`, I18N.md rule 1). */
 const SETUP_STEP_CODES: Record<string, SetupStepKey> = {
   STARTING: "starting",
   LOCALIZATION: "localization",

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Finds the words still written into components rather than read from a catalogue
- * (technical_design/I18N_DESIGN.md § 7.1). Shared by the ratchet test (`i18nLiterals.test.ts`) and the
+ * (technical_documentation/I18N.md § 7.1). Shared by the ratchet test (`i18nLiterals.test.ts`) and the
  * script that rewrites its baseline (`npm run i18n:baseline`).
  *
  * Read through the TypeScript AST, so a class name, an import path or an enum value is not mistaken for a

@@ -1,5 +1,5 @@
 /**
- * The languages the application speaks — `technical_design/I18N_DESIGN.md`.
+ * The languages the application speaks — `technical_documentation/I18N.md`.
  *
  * One list for the whole frontend: the catalogues under `messages/<locale>/`, the resolution in
  * `resolveLocale`, the company's Language field. The backend's `AppLanguage` enum lists the same codes and

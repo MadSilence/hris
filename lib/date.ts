@@ -42,7 +42,7 @@ type DisplayPreferences = {
   /**
    * The language the application speaks (`i18n/locales`), set by `LocaleBridge`; null until it is, which is
    * the browser's own locale — what every date did before there was a language. It decides the *words* of a
-   * date (a month's name), never its order: the order is `dateFormat`'s (I18N_DESIGN.md § 2, rule 6).
+   * date (a month's name), never its order: the order is `dateFormat`'s (I18N.md § 2, rule 6).
    */
   language: string | null;
 };

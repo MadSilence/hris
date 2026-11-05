@@ -1,5 +1,5 @@
 /**
- * The pseudo-locale's transform (`I18N_DESIGN.md` § 7.4): `Save` → `[Šàvé ~~]`.
+ * The pseudo-locale's transform (`I18N.md` § 7.4): `Save` → `[Šàvé ~~]`.
  *
  * Every letter outside an ICU argument is swapped for an accented twin and the message is padded by about a
  * third, so a string that was never extracted stands out as plain English and a layout that only fits English

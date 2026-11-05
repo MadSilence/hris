@@ -1,5 +1,5 @@
 /**
- * Proves the typed keys still bite (I18N_DESIGN.md § 7.2). Never run — only compiled by `npm run typecheck`.
+ * Proves the typed keys still bite (I18N.md § 7.2). Never run — only compiled by `npm run typecheck`.
  *
  * `useTranslations` and `getTranslations` take their types from `AppConfig` in `global.d.ts`, nowhere else.
  * If that augmentation stopped applying, every key would be accepted and the `@ts-expect-error` lines below

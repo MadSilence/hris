@@ -5,7 +5,7 @@ type Translator = ReturnType<typeof useTranslations<"peopleImport">>;
 
 /**
  * The backend's import catalogue sends an English header for its own fields ("First name"); the words are
- * the frontend's (I18N_DESIGN.md § 2, rule 1), so a known system field is named from the catalogue by its id.
+ * the frontend's (I18N.md § 2, rule 1), so a known system field is named from the catalogue by its id.
  * An attribute is company content and keeps the name the company gave it; only the part of a money or an
  * address attribute ("Salary · Amount") is translated. Anything unknown falls back to the server's header.
  */

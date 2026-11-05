@@ -21,7 +21,7 @@ jest.mock("@/components/modules/firstRun/actions", () => ({
 import { CompanySetupContainer } from "./CompanySetupContainer";
 
 /**
- * The company's language is asked at setup (I18N_PLAN.md 2.5): it starts on the language the screen is
+ * The company's language is asked at setup (technical_documentation/I18N.md § 5): it starts on the language the screen is
  * already in, and travels with the answers, so the first screen after setup speaks it.
  */
 describe("CompanySetupContainer — language", () => {

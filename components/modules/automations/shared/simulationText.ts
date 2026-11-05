@@ -1,6 +1,6 @@
 /**
  * The simulation's sentences (D2) worded from the codes the backend sends beside its English
- * (`AutomationSimulationNotice`, `AutomationViews#summaryCode`; I18N_DESIGN.md rule 1). A code this frontend does
+ * (`AutomationSimulationNotice`, `AutomationViews#summaryCode`; I18N.md rule 1). A code this frontend does
  * not know — or a backend that sends none — gives null, and the screen shows the server's English.
  */
 import type { CodedMessage } from "@/models/misc";

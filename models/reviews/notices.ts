@@ -4,7 +4,7 @@ import { REVIEW_KIND_KEYS, type ReviewKind } from "./index";
 
 /**
  * The sentences reviews compose on the backend — a launch's blockers and warnings, a peer cap passed, a calibration
- * row that is locked — worded here from their codes (`ReviewNotice`, I18N_DESIGN.md rule 1). A code this frontend
+ * row that is locked — worded here from their codes (`ReviewNotice`, I18N.md rule 1). A code this frontend
  * does not know, or one whose params do not fit, gives null: the caller shows the English the backend sent beside it.
  */
 

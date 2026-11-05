@@ -1,5 +1,5 @@
 /**
- * The catalogues' own checks (I18N_DESIGN.md § 7.3). What `tsc` cannot see in JSON:
+ * The catalogues' own checks (I18N.md § 7.3). What `tsc` cannot see in JSON:
  *
  * - every message parses as ICU — a stray `{` or an unclosed plural breaks a page at render, not at build;
  * - a translation names the same arguments as English — a Russian sentence that forgot `{name}` drops the

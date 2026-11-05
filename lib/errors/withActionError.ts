@@ -54,7 +54,7 @@ const translateBoundField = (error: ApiError, locale: AppLocale): Record<string,
 
 /** Turns a caught error into the answer a caller reads. Exported for actions that cannot be wrapped. */
 /**
- * The language of the request this action answers (I18N_DESIGN.md § 6.4). A server action has no reader's
+ * The language of the request this action answers (I18N.md § 6.4). A server action has no reader's
  * browser to ask, so the words are chosen here, from the same resolution the page was rendered with; outside
  * a request — a script, a test — English.
  */

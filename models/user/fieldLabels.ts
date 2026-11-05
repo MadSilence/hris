@@ -15,7 +15,7 @@ type OrganizationT = ReturnType<typeof useTranslations<"organization">>;
  * "Account" / "Employment" / "Organization", the status and employment-type options). Those are the product's
  * words, not the company's, so they are translated here — once, where the list is read — and every screen that
  * renders a field (the People table's columns and filters, the profile, bulk edit, views) gets them. A field the
- * map does not know, and every attribute a company created, keeps the label it came with (I18N_DESIGN.md § 9).
+ * map does not know, and every attribute a company created, keeps the label it came with (I18N.md § 9).
  * Found on the i18n walk of 2026-11-05: the People table's headers were English on a Russian company.
  */
 export const SYSTEM_FIELD_KEYS = {

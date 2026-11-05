@@ -1,5 +1,5 @@
 /**
- * The English catalogue — the source of every key (technical_design/I18N_DESIGN.md § 4.1).
+ * The English catalogue — the source of every key (technical_documentation/I18N.md § 4.1).
  *
  * One file per area; a new file is registered here and in `messages/ru/index.ts`. Its shape is the type of
  * every key in the application (`global.d.ts`), so a key that is not here does not compile.

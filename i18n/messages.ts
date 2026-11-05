@@ -11,7 +11,7 @@ export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartia
 
 /**
  * English underneath, the translation on top: a key the translation lacks is read in English, never shown
- * as its raw name (I18N_DESIGN.md § 2, rule 5). The catalogue test reports what a translation lacks.
+ * as its raw name (I18N.md § 2, rule 5). The catalogue test reports what a translation lacks.
  */
 const overlay = <T>(base: T, top: DeepPartial<T> | undefined): T => {
   if (top === undefined) return base;

@@ -9,7 +9,7 @@ import { setValidationLocale } from "@/lib/validationLocale";
 
 /**
  * Hands the application's language to the formatters that are plain functions, not hooks — `lib/date.ts`
- * today (I18N_DESIGN.md § 11, step 1). The same shape as `UserSettingsProvider`, and for the same reason: a
+ * today (I18N.md § 11, step 1). The same shape as `UserSettingsProvider`, and for the same reason: a
  * date is formatted in table cells and mappers, where no hook can reach. The error texts read on the client
  * (`messageForError`) take the language the same way, and so do yup's default validation messages
  * (`lib/validationLocale.ts`).

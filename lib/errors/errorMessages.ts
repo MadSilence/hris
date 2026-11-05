@@ -10,7 +10,7 @@ import enErrors from "@/messages/en/errors.json";
  *
  * The key is the backend's error code, not its message: `message` is technical English written for
  * a developer and a log ("Document folder name not changed") and is never rendered. The words live in the
- * `errors` catalogue — `messages/<locale>/errors.json` (technical_design/I18N_DESIGN.md § 6.4) — which is the
+ * `errors` catalogue — `messages/<locale>/errors.json` (technical_documentation/I18N.md § 6.4) — which is the
  * only place a user-facing string for an error exists, in every language.
  *
  * The catalogue will always lag behind the backend: someone adds a code in Java and forgets the

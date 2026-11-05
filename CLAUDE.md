@@ -207,7 +207,7 @@ The following areas are incomplete or inconsistent. Do not use them as reference
 # Words on a screen (i18n)
 
 Every user-visible string comes from a catalogue — `messages/<locale>/<area>.json`, English the source,
-Russian beside it (`(claude)/technical_design/I18N_DESIGN.md`):
+Russian beside it (`(claude)/technical_documentation/I18N.md`):
 
 - **No word in a component.** `useTranslations("area")` in a client component, `await getTranslations("area")`
   in a server one; config arrays and schemas hold keys or take `t`. Keys are typed — an unknown key fails `tsc`.

@@ -19,7 +19,7 @@ const cache: <F extends (...args: never[]) => unknown>(fn: F) => F =
   (React as { cache?: <F>(fn: F) => F }).cache ?? ((fn) => fn);
 
 /**
- * Which language this response is written in — `technical_design/I18N_DESIGN.md` § 5.
+ * Which language this response is written in — `technical_documentation/I18N.md` § 5.
  *
  * In order: the person's own choice, the company's language, and — only where nobody is signed in — the
  * company the address belongs to, then the browser's `Accept-Language`; English last. One read per request,
