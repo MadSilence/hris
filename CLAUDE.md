@@ -12,6 +12,9 @@ Tech stack:
 - The noddo design system: `styles/noddo/` (SPEC, tokens — never edited by hand), `styles/globals.css` (the
   only stylesheet), Desact — our Radix kit in `components/desact/` — and Hugeicons. How it fits together:
   `(claude)/technical_documentation/ui/DESIGN_SYSTEM.md`. Read `styles/noddo/SPEC.md` before building UI.
+- Work with the designers goes through `design/` (`design/README.md`, `design/HANDOFF.md`): a screen is built
+  only from `design/screens/<name>/spec.md` with `status: ready`, and when built its "Built" section is filled.
+  `design/rules/` is generated — `node design/sync-rules.mjs`, never a hand edit.
 - Tailwind utility classes — **only the system's**: Tailwind's own palette, sizes, radii and shadows are switched
   off, and `test/designSystemGuard.test.ts` fails on them
 
