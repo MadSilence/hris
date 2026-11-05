@@ -231,7 +231,7 @@ describe("PersonalInfoContainer — saving", () => {
     expect(updateUserAction).not.toHaveBeenCalled();
   });
 
-  it("blocks Save while a required field is being cleared, and not before", () => {
+  it("does not save while a required field is being cleared, and says so beside it", () => {
     // `required` means "cannot be cleared", which is the rule the server enforces. Treating it as
     // "must be filled" made the client stricter than the API: one never-filled required attribute
     // froze every other edit on the page.
@@ -241,8 +241,11 @@ describe("PersonalInfoContainer — saving", () => {
     enterEditMode();
 
     fireEvent.change(screen.getByDisplayValue("Berlin"), { target: { value: "" } });
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(screen.getByText("This field cannot be cleared.")).toBeInTheDocument();
+    const save = screen.getByRole("button", { name: "Save" });
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    expect(updateUserAction).not.toHaveBeenCalled();
   });
 
   it("leaves a required field that was already empty alone", () => {

@@ -153,7 +153,12 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading || !user || !hasChanges) return;
+    if (isLoading || !user) return;
+    // The same roles: nothing to apply, and the form closes as if it had.
+    if (!hasChanges) {
+      onCancelAction();
+      return;
+    }
 
     const errors = await formik.validateForm();
 
@@ -323,7 +328,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
 
         <Button
           type="submit"
-          disabled={isLoading || !hasChanges || !user}
+          disabled={isLoading || !user}
  >
           {tCommon("actions.apply")}
         </Button>

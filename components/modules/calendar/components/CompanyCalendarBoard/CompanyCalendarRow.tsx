@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, FC, useEffect, useMemo, useState } from "react";
+import { createContext, CSSProperties, FC, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -8,6 +8,8 @@ import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
 import { toTagColor } from "@/lib/theme/tags";
 import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
+import { useShortDates } from "@/lib/date";
 
 export const NAME_COL = 200;
 
@@ -107,7 +109,9 @@ const holidayTitle = (t: CalendarTranslator, m: CompanyCalendarMark): string => 
 };
 
 /** Leave whose type the reader may not see is "Away", with no type (SPEC § 13.13 "Hidden details"). */
-const leaveLabel = (t: CalendarTranslator, a: CompanyCalendarAbsence): string => a.leaveTypeName ?? t("board.away");
+/** A bar is named by its policy — the colour is the policy's (D2) — or "Away" when the reader may not know it. */
+const leaveLabel = (t: CalendarTranslator, a: CompanyCalendarAbsence): string =>
+  a.policyName ?? a.leaveTypeName ?? t("board.away");
 
 /** The tooltip is the explanation — there is no legend (`COMPANY_CALENDAR.md` § 7). */
 export const leaveTitle = (t: CalendarTranslator, a: CompanyCalendarAbsence): string => {
@@ -120,6 +124,29 @@ export const leaveTitle = (t: CalendarTranslator, a: CompanyCalendarAbsence): st
   return parts.join(" · ");
 };
 
+/** The tooltip's lines under the policy's name: the dates in the short style, and a status that is not plain approved. */
+const leaveDetail = (
+  t: CalendarTranslator,
+  a: CompanyCalendarAbsence,
+  shortDates: ReturnType<typeof useShortDates>,
+): string => {
+  const parts = [shortDates.range(a.startDate, a.endDate, { weekday: true })];
+  if (a.status === "PENDING") parts.push(a.awaitingYou ? t("board.pendingYourApproval") : t("board.pendingApproval"));
+  if (a.status === "CANCELLATION_PENDING") {
+    parts.push(a.awaitingYou ? t("board.cancellationAwaitingYou") : t("board.cancellationRequested"));
+  }
+  return parts.join(" · ");
+};
+
+/**
+ * The days being picked on the board, shared with its header: a row reports its drag here, and the header marks those
+ * dates — in `accent` 600, the first and last in a soft circle (the designers' answer 1.5). Columns, not dates.
+ */
+export const BoardPickContext = createContext<{
+  picked: { from: number; to: number } | null;
+  setPicked: (picked: { from: number; to: number } | null) => void;
+}>({ picked: null, setPicked: () => {} });
+
 /**
  * A leave bar (SPEC § 13.13), in its type's tag colour — and in gray when the type was not sent: a masked bar
  * tinted with its type's colour would still name the type to anyone who has learnt the colour.
@@ -130,7 +157,7 @@ export const leaveTitle = (t: CalendarTranslator, a: CompanyCalendarAbsence): st
  * The difference is never the colour alone: the dots stay in a black-and-white print.
  */
 export const leaveStyle = (a: CompanyCalendarAbsence): CSSProperties => {
-  const tag = toTagColor(a.leaveTypeColor);
+  const tag = toTagColor(a.policyColor);
   const bar = `var(--tag-${tag}-bar)`;
   if (a.status === "APPROVED") {
     return { backgroundColor: bar, borderColor: bar, color: "var(--text-inverse)" };
@@ -199,7 +226,12 @@ export const CompanyCalendarRow: FC<RowProps> = ({
   // A drag across the row's days: where it started and where the pointer is now. Released anywhere —
   // the pointer may leave the row while dragging — it opens the request for the days covered.
   const t = useTranslations("calendar");
+  const shortDates = useShortDates();
   const [drag, setDrag] = useState<{ from: number; to: number } | null>(null);
+  const { setPicked } = useContext(BoardPickContext);
+  useEffect(() => {
+    setPicked(drag ? { from: Math.min(drag.from, drag.to), to: Math.max(drag.from, drag.to) } : null);
+  }, [drag, setPicked]);
   useEffect(() => {
     if (!drag || !onSelectRange) return;
     const finish = () => {
@@ -211,8 +243,6 @@ export const CompanyCalendarRow: FC<RowProps> = ({
     window.addEventListener("mouseup", finish);
     return () => window.removeEventListener("mouseup", finish);
   }, [drag, onSelectRange, dayISOs]);
-  const selected = (i: number) =>
-    drag !== null && i >= Math.min(drag.from, drag.to) && i <= Math.max(drag.from, drag.to);
 
   const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
   const segments = useMemo(
@@ -281,9 +311,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
             className={[
               "border-b border-r border-divider",
               // Today is a thin accent line down the day (SPEC § 13.13); weekends a light ground.
-              selected(i)
-                ? "bg-accent-subtle"
-                : today
+              today
                   ? "relative before:absolute before:inset-y-0 before:left-1/2 before:w-px before:bg-accent before:content-['']"
                   : weekend
                     ? "bg-subtle"
@@ -293,6 +321,21 @@ export const CompanyCalendarRow: FC<RowProps> = ({
           />
         );
       })}
+
+      {/* The days being picked: one soft band over the cells, not a tint per day (the owner, 2026-11-05). It sits
+          under the bars, and grows with the drag, unanimated. */}
+      {drag !== null ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 inset-y-1 grid"
+          style={{ gridTemplateColumns }}
+        >
+          <div
+            className="mx-1 rounded-control bg-accent-subtle"
+            style={{ gridColumn: `${Math.min(drag.from, drag.to) + 2} / ${Math.max(drag.from, drag.to) + 3}`, gridRow: 1 }}
+          />
+        </div>
+      ) : null}
 
       {/* Bars, laid over the day cells in a grid with the same columns, one grid row per lane. The
           name column is skipped by starting every span at column 2. */}
@@ -357,12 +400,12 @@ export const CompanyCalendarRow: FC<RowProps> = ({
               </>
             );
             const style = { ...placement, ...leaveStyle(absence) };
-            // A bar is a link only for a reader the server gave the request id to.
-            return absence.requestId ? (
+            // A bar is a link only for a reader the server gave the request id to. Its tooltip names the policy on the
+            // first line, then the dates and the status (the designers' answer 1.1).
+            const bar = absence.requestId ? (
               <Link
-                key={seg.bar.key}
                 href={`/time-off/requests/${absence.requestId}`}
-                title={leaveTitle(t, absence)}
+                aria-label={`${leaveLabel(t, absence)} · ${leaveDetail(t, absence, shortDates)}`}
                 data-status={absence.status}
                 style={style}
                 className={className}
@@ -370,15 +413,15 @@ export const CompanyCalendarRow: FC<RowProps> = ({
                 {content}
               </Link>
             ) : (
-              <div
-                key={seg.bar.key}
-                title={leaveTitle(t, absence)}
-                data-status={absence.status}
-                style={style}
-                className={className}
-              >
+              <div aria-label={`${leaveLabel(t, absence)} · ${leaveDetail(t, absence, shortDates)}`} data-status={absence.status} style={style} className={className}>
                 {content}
               </div>
+            );
+            return (
+              <Tooltip key={seg.bar.key}>
+                <TooltipTrigger asChild>{bar}</TooltipTrigger>
+                <TooltipContent title={leaveLabel(t, absence)}>{leaveDetail(t, absence, shortDates)}</TooltipContent>
+              </Tooltip>
             );
           })}
         </div>

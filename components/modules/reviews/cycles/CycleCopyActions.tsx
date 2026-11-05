@@ -11,6 +11,7 @@ import { Input } from "@/components/desact/input";
 import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
 import { useDateFormatter } from "@/lib/date";
@@ -78,8 +79,9 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
   const [custom, setCustom] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
   useEffect(() => {
-    if (open) { setPreset("12"); setCustom(""); setError(null); }
+    if (open) { setPreset("12"); setCustom(""); setError(null); setTried(false); }
   }, [open]);
 
   const months = preset === "other" ? Number(custom) : Number(preset);
@@ -87,6 +89,7 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
   const dates = valid ? shiftedCycleDates(cycle, months, t) : [];
 
   const repeat = async () => {
+    setTried(true);
     if (!valid) return;
     setBusy(true);
     setError(null);
@@ -134,6 +137,7 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
                 <span className="text-body text-tertiary">{t("copies.repeat.range", { max: MAX_REPEAT_MONTHS })}</span>
               </div>
             )}
+            <FieldError>{tried && !valid ? t("copies.repeat.invalidMonths", { max: MAX_REPEAT_MONTHS }) : null}</FieldError>
             {valid && dates.length > 0 && (
               <ul className="space-y-1 rounded-control border border-divider p-3 text-body" aria-label={t("copies.repeat.movedDates")}>
                 {dates.map((d) => (
@@ -156,7 +160,7 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
           <FormError message={error} />
           <DialogFooter className="mt-4">
             <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy || !valid}>{busy ? t("copies.repeat.repeating") : t("copies.repeat.repeat")}</Button>
+            <Button type="submit" disabled={busy}>{busy ? t("copies.repeat.repeating") : t("copies.repeat.repeat")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

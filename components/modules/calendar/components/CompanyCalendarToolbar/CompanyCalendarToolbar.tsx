@@ -7,6 +7,7 @@ import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
+import { FieldError } from "@/components/desact/field-error";
 import { Badge } from "@/components/desact/badge";
 import {
   Popover,
@@ -93,6 +94,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   const [viewsOpen, setViewsOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
+  const [saveTried, setSaveTried] = useState(false);
 
   // Re-seeding the builder on open discards a half-typed row from the previous visit, which is what
   // the people table does for the same reason.
@@ -109,6 +111,13 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   };
 
   const activeView = views.find((v) => v.id === activeViewId) ?? null;
+
+  const submitSave = () => {
+    setSaveTried(true);
+    if (!saveName.trim() || viewsBusy) return;
+    onSaveView(saveName.trim());
+    setSaveOpen(false);
+  };
 
   return (
     <div className="flex flex-none flex-wrap items-center justify-between gap-3">
@@ -243,6 +252,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 disabled={viewsBusy}
                 onClick={() => {
                   setSaveName("");
+                  setSaveTried(false);
                   setSaveOpen(true);
                   setViewsOpen(false);
                 }}
@@ -299,12 +309,11 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             value={saveName}
             onChange={(e) => setSaveName(e.currentTarget.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && saveName.trim()) {
-                onSaveView(saveName.trim());
-                setSaveOpen(false);
-              }
+              // i18n-exempt: a key name, not text
+              if (e.key === "Enter") submitSave();
             }}
           />
+          <FieldError>{saveTried && !saveName.trim() ? tCommon("validation.enterName") : null}</FieldError>
           <p className="text-hint text-tertiary">
             {t("toolbar.saveViewHint")}
           </p>
@@ -313,11 +322,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
               {tCommon("actions.cancel")}
             </Button>
             <Button type="button"
-              disabled={!saveName.trim() || viewsBusy}
-              onClick={() => {
-                onSaveView(saveName.trim());
-                setSaveOpen(false);
-              }}
+              disabled={viewsBusy}
+              onClick={submitSave}
             >
               {tCommon("actions.save")}
             </Button>

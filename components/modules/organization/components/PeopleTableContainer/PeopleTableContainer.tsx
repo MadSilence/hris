@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectionBar } from "@/components/ui/SelectionBar";
+import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -431,55 +433,60 @@ const PeopleTableContainer: React.FC = () => {
           </div>
         ) : null}
 
-        <PeopleTopbar
-          sort={sort}
-          selectedCount={heldCount}
-          onEditSelectedAction={() => setBulkOpen(true)}
-          onAddPersonAction={() => setAddPersonOpen(true)}
-          query={query}
-          onQueryChangeAction={onQueryChange}
-          columns={columns}
-          onColumnsChangeAction={onColumnsChange}
-          filters={filters}
-          onFiltersChangeAction={onFiltersChange}
-          fields={fieldsData ?? []}
-          drafts={{
-            count: draftCount?.count ?? 0,
-            showing: showDrafts,
-            onChange: setShowDrafts,
-          }}
-        />
-
-        {offerAllMatching ? (
-          <div className="flex items-center gap-2 rounded-tag border border-divider bg-subtle px-3 py-1.5 text-hint text-tertiary">
-            {allMatching ? (
-              <>
-                <span>{t("table.selection.allMatching", { count: matchingCount ?? 0 })}</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAllMatching(false);
-                    setSelectedIds(new Set());
-                  }}
-                  className="font-medium text-primary underline-offset-2 hover:underline"
-                >
-                  {t("table.selection.clear")}
-                </button>
-              </>
-            ) : (
-              <>
-                <span>{t("table.selection.allLoaded", { count: selectedIds.size })}</span>
-                <button
-                  type="button"
-                  onClick={() => setAllMatching(true)}
-                  className="font-medium text-primary underline-offset-2 hover:underline"
-                >
-                  {t("table.selection.selectAllMatching", { count: matchingCount ?? 0 })}
-                </button>
-              </>
-            )}
-          </div>
-        ) : null}
+        {/* While people are picked, the Mist bar takes the toolbar's place (the owner, 2026-11-05, D2); "select all
+            matching" rides in it. */}
+        {heldCount > 0 ? (
+          <SelectionBar
+            count={heldCount}
+            onClear={() => {
+              setAllMatching(false);
+              setSelectedIds(new Set());
+            }}
+            // "Select all N matching" only when the header checkbox took the page and the filter holds more; then
+            // "All N selected" and a way back (the designers' answer 1.2).
+            label={allMatching ? t("table.selection.allSelected", { count: matchingCount ?? heldCount }) : undefined}
+            extra={offerAllMatching && !allMatching ? (
+              <button
+                type="button"
+                onClick={() => setAllMatching(true)}
+                className="text-label text-accent-text underline-offset-2 hover:underline"
+              >
+                {t("table.selection.selectAllMatching", { count: matchingCount ?? 0 })}
+              </button>
+            ) : allMatching ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setAllMatching(false);
+                  setSelectedIds(new Set());
+                }}
+                className="text-label text-accent-text underline-offset-2 hover:underline"
+              >
+                {t("table.selection.clearSelection")}
+              </button>
+            ) : null}
+            actions={[{ key: "edit", label: tCommon("actions.edit"), icon: PencilEdit02Icon, onClick: () => setBulkOpen(true) }]}
+          />
+        ) : (
+          <PeopleTopbar
+            sort={sort}
+            selectedCount={heldCount}
+            onEditSelectedAction={() => setBulkOpen(true)}
+            onAddPersonAction={() => setAddPersonOpen(true)}
+            query={query}
+            onQueryChangeAction={onQueryChange}
+            columns={columns}
+            onColumnsChangeAction={onColumnsChange}
+            filters={filters}
+            onFiltersChangeAction={onFiltersChange}
+            fields={fieldsData ?? []}
+            drafts={{
+              count: draftCount?.count ?? 0,
+              showing: showDrafts,
+              onChange: setShowDrafts,
+            }}
+          />
+        )}
 
         <PeopleTable
           data={items}

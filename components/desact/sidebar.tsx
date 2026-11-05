@@ -98,7 +98,7 @@ function SidebarProvider({
 
   return (
     <SidebarContext.Provider value={value}>
-      <TooltipProvider delayDuration={300}>
+      <TooltipProvider>
         <div data-slot="sidebar-wrapper" className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)} {...props}>
           {children}
         </div>
@@ -233,6 +233,9 @@ const menuButton = cn(
   "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sidebar-focus",
   "disabled:pointer-events-none disabled:text-disabled aria-disabled:pointer-events-none",
   "group-data-[state=collapsed]:size-10 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0",
+  // Collapsed, the label goes — its tooltip says it; a badge's dot (aria-hidden) stays. Clipped to the 40 px square it
+  // showed as "Sea", "I", "T" beside the icons (walk of 2026-11-05).
+  "group-data-[state=collapsed]:[&>span:not([aria-hidden])]:hidden",
   "[&>svg]:text-sidebar-icon data-[active=true]:[&>svg]:text-sidebar-item-active-text [&>span:last-child]:truncate",
 );
 

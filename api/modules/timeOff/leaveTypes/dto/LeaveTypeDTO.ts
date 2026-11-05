@@ -7,7 +7,6 @@ export interface LeaveTypeDTO {
 
   name: string;
   description: string | null;
-  color: string | null;
   category: LeaveTypeCategory | null;
 
   status: LeaveTypeStatus;

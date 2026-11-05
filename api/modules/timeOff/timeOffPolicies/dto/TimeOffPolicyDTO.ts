@@ -1,4 +1,5 @@
-﻿import { TimeOffPolicyStatus } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyStatus";
+import type { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
+import { TimeOffPolicyStatus } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyStatus";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyUnit";
 import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import { TimeOffPolicyEntitlementMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyEntitlementMode";
@@ -60,6 +61,8 @@ export interface TimeOffPolicyDTO {
 
   version: number;
 
-  /** The tag colour of the policy's leave type — what a person's own calendar paints their leave in. Only the list carries it. */
-  leaveTypeColor?: string | null;
+  /** The policy's colour — a tag colour but gray: its bar on the calendars and its marker beside the name. */
+  color: string;
+  /** The category of the policy's leave type — a VACATION policy leads a person's balances. Only the list carries it. */
+  leaveTypeCategory?: LeaveTypeCategory | null;
 }

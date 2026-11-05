@@ -1,7 +1,8 @@
-import { hrisApiDocumentsClient } from "@/api/modules/documents/clients/hrisApiDocumentsClient";
+import { hrisApiDocumentsClient, type DocumentBatchOperation } from "@/api/modules/documents/clients/hrisApiDocumentsClient";
 import {
   CreateDocumentFolderRequest,
   DocumentDTO,
+  DocumentVisibility,
   DocumentFolderDeleteImpactDTO,
   DocumentFolderDeleteStrategy,
   DocumentFolderContentDTO,
@@ -83,6 +84,10 @@ export class HrisDocumentsService {
     return hrisApiDocumentsClient.renameDocument(documentId, body);
   }
 
+  public async changeVisibility(documentId: string, visibility: DocumentVisibility): Promise<void> {
+    return hrisApiDocumentsClient.changeVisibility(documentId, visibility);
+  }
+
   public async listTrash(userId: string): Promise<DocumentDTO[]> {
     return hrisApiDocumentsClient.listTrash(userId);
   }
@@ -112,6 +117,17 @@ export class HrisDocumentsService {
 
   public async deleteCategory(id: string): Promise<void> {
     return hrisApiDocumentsClient.deleteCategory(id);
+  }
+
+  public async batch(
+    operation: DocumentBatchOperation,
+    body: { ids: string[]; folderId?: string | null; targetUserId?: string; starred?: boolean },
+  ): Promise<void> {
+    return hrisApiDocumentsClient.batch(operation, body);
+  }
+
+  public async downloadZip(ids: string[]): Promise<Response> {
+    return hrisApiDocumentsClient.downloadZip(ids);
   }
 
   public async downloadDocument(documentId: string): Promise<Response> {

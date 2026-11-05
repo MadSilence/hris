@@ -245,7 +245,8 @@
       "fromTo": "{from} → {to}",
       "noDates": "This cycle has no dates to move; the new draft has none either.",
       "repeating": "Repeating…",
-      "repeat": "Repeat"
+      "repeat": "Repeat",
+      "invalidMonths": "Enter a whole number of months from 1 to {max}."
     }
   },
   "answers": {
@@ -642,7 +643,8 @@
       "description": "Colleagues who review {name}. They have {count} now; this cycle asks for {min}–{max}. Each is asked at once and gets a task.",
       "full": "This person already has the most peers the cycle allows.",
       "asking": "Asking…",
-      "ask": "Ask them"
+      "ask": "Ask them",
+      "pickSomeone": "Pick at least one person."
     },
     "handOnDialog": {
       "done": "Review handed on.",
@@ -691,7 +693,8 @@
       "description": "{name}'s final rating. Their manager gave {hasRating, select, yes {{rating}} other {no rating}}; what the manager wrote stays as it is. The change and its reason are recorded.",
       "selectRating": "Select a rating",
       "reasonPlaceholder": "Why the rating changes",
-      "reasonHint": "Read by the manager, the approver and HR. Never shown to {name}."
+      "reasonHint": "Read by the manager, the approver and HR. Never shown to {name}.",
+      "sameRating": "Pick a rating other than the current one."
     },
     "sessions": {
       "intro": "Line up final ratings across managers, each change with a reason, and set each person's potential for the 9-box. Only people whose review is not shared yet can change.",

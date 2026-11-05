@@ -50,7 +50,26 @@ describe("MoveDocumentForm", () => {
     );
 
     expect(screen.getByText(/destination folder/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^move$/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^move$/i })).toBeEnabled();
+  });
+
+  it("closes without moving when the folder is unchanged", () => {
+    const onCancelAction = jest.fn();
+    const onSubmitAction = jest.fn();
+
+    render(
+      <MoveDocumentForm
+        folders={folders}
+        currentFolderId="folder-1"
+        onCancelAction={onCancelAction}
+        onSubmitAction={onSubmitAction}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^move$/i }));
+
+    expect(onCancelAction).toHaveBeenCalledTimes(1);
+    expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
   it("calls onCancelAction", () => {

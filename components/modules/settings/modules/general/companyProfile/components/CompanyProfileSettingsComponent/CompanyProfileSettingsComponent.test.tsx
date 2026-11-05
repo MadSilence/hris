@@ -129,13 +129,15 @@ describe("CompanyProfileSettingsComponent", () => {
     expect(onSaveProfile).not.toHaveBeenCalled();
   });
 
-  it("blocks saving with an empty name or an empty working week", () => {
-    renderComponent();
+  it("does not save an empty name or an empty working week, and says so under the field", () => {
+    const { onSaveProfile, onSaveSettings } = renderComponent();
 
     fireEvent.change(nameInput(), { target: { value: "  " } });
 
     expect(screen.getByText(/company name is required/i)).toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    expect(saveButton()).toBeEnabled();
+    fireEvent.click(saveButton());
+    expect(onSaveProfile).not.toHaveBeenCalled();
 
     fireEvent.change(nameInput(), { target: { value: "Acme" } });
 
@@ -144,7 +146,8 @@ describe("CompanyProfileSettingsComponent", () => {
     }
 
     expect(screen.getByText(/at least one working day/i)).toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    fireEvent.click(saveButton());
+    expect(onSaveSettings).not.toHaveBeenCalled();
   });
 
   it("cancel returns every field to the saved state", () => {

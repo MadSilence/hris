@@ -44,7 +44,9 @@ export interface CompanyCalendarAbsence {
   endDate: string;
   status: "APPROVED" | "PENDING" | "CANCELLATION_PENDING";
   leaveTypeName?: string;
-  leaveTypeColor?: string;
+  /** The policy, which the bar is named after and coloured by — under the same rule as the type. */
+  policyName?: string;
+  policyColor?: string;
   requestId?: string;
   /** The request's current step can be signed by the reader. */
   awaitingYou?: boolean;

@@ -64,7 +64,9 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
     );
   };
 
-  const onSave = () =>
+  const onSave = () => {
+    // Nothing edited: nothing to send.
+    if (changes === 0) return;
     send(
       Object.entries(drafts).map(([k, value]) => {
         const [rowNumber, column] = k.split(":").map(Number);
@@ -72,6 +74,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
       }),
       [...removed],
     );
+  };
 
   const list = rows.data ?? [];
   const unknownLeads = list.flatMap((row) =>
@@ -202,7 +205,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
 
       <FormError message={error} />
       <div className="flex flex-wrap gap-2">
-        <Button type="button" disabled={changes === 0 || edit.isPending} onClick={onSave}>
+        <Button type="button" disabled={edit.isPending} onClick={onSave}>
           {edit.isPending ? t("preview.checking") : t("preview.saveAndCheck")}
         </Button>
         {changes > 0 && (

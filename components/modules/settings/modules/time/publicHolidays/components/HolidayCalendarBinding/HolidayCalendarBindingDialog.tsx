@@ -80,7 +80,14 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
   const busy = preview.isPending || apply.isPending;
   const error = preview.error ?? apply.error;
 
-  const onReview = () => preview.mutate({ kind, refId, calendarId });
+  const onReview = () => {
+    // The same calendar again: nothing to review, and the dialog closes as if it had been set.
+    if (unchanged) {
+      onRequestCloseAction();
+      return;
+    }
+    preview.mutate({ kind, refId, calendarId });
+  };
   const onApply = async () => {
     try {
       await apply.mutateAsync({ kind, refId, calendarId });
@@ -137,7 +144,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
               <Button type="button" variant="secondary" onClick={onRequestCloseAction} disabled={busy}>
                 {tCommon("actions.cancel")}
               </Button>
-              <Button type="button" onClick={onReview} disabled={busy || unchanged}>
+              <Button type="button" onClick={onReview} disabled={busy}>
                 {preview.isPending ? t("binding.dialog.reviewing") : t("binding.dialog.review")}
               </Button>
             </>

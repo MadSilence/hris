@@ -290,7 +290,22 @@
       "thisUser": "this user",
       "warning": "Warning",
       "warningText": "The current avatar will be permanently removed.",
-      "removeFailed": "The photo could not be removed."
+      "removeFailed": "The photo could not be removed.",
+      "pickFile": "Choose an image to upload."
+    },
+    "waiting": {
+      "timeOff": "{name} asked for {range} off · {policy}, {amount} {count, plural, one {day} other {days}}",
+      "review": "{name}'s {cycle} · due {due}",
+      "reviewNoDue": "{name}'s {cycle}",
+      "notNow": "Not now",
+      "approve": "Approve",
+      "giveInput": "Give input",
+      "approved": "Approved. {name}'s off {range}.",
+      "head": "Waiting on you",
+      "moduleTimeOff": "Time off",
+      "moduleReview": "Review",
+      "showMore": "Show {count} more",
+      "showLess": "Show less"
     }
   },
   "documents": {
@@ -336,7 +351,14 @@
       "star": "Star",
       "unstar": "Unstar",
       "actions": "Document actions",
-      "move": "Move"
+      "move": "Move",
+      "changeVisibility": "Change visibility",
+      "movedToTrash": "{name} moved to the trash",
+      "visibilityFailed": "Could not change who can see it.",
+      "selectAll": "Select all",
+      "select": "Select {name}",
+      "batchFailed": "Could not do that to the selection.",
+      "movedManyToTrash": "{count, plural, one {# document} other {# documents}} moved to the trash"
     },
     "trash": {
       "restoreFailed": "Failed to restore",
@@ -363,10 +385,7 @@
       "description": "Update the folder name. All documents inside will stay in place."
     },
     "deleteDocument": {
-      "title": "Delete document",
-      "description": "<b>{name}</b> will be moved to the trash, where it can be restored until the retention period ends.",
-      "untitled": "Untitled document",
-      "confirm": "Delete document"
+      "untitled": "Untitled document"
     },
     "deleteFolder": {
       "title": "Delete folder",
@@ -392,7 +411,8 @@
       "thisDocument": "this document",
       "destination": "Destination folder",
       "destinationRequired": "Please select destination folder.",
-      "submit": "Move"
+      "submit": "Move",
+      "nDocuments": "{count, plural, one {# document} other {# documents}}"
     },
     "preview": {
       "readOnly": "Read-only preview.",
@@ -480,7 +500,8 @@
       "share": "Share",
       "removeTitle": "Remove access",
       "removeDescription": "{name} will no longer see “{view}”.",
-      "thisGrantee": "This grantee"
+      "thisGrantee": "This grantee",
+      "pickGrantee": "Pick who to share it with."
     }
   },
   "bulkEdit": {
@@ -565,10 +586,9 @@
       "linkCopied": "Link copied. Whoever opens it sees this table under their own access."
     },
     "selection": {
-      "allMatching": "{count, plural, one {All # person matching are selected.} other {All # people matching are selected.}}",
-      "clear": "Clear selection",
-      "allLoaded": "{count, plural, one {All # loaded person is selected.} other {All # loaded people are selected.}}",
-      "selectAllMatching": "Select All {count} Matching"
+      "selectAllMatching": "Select All {count} Matching",
+      "allSelected": "All {count} selected",
+      "clearSelection": "Clear selection"
     },
     "deleteView": {
       "title": "Delete view",

@@ -24,6 +24,7 @@ import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
 import {
   PolicyWizardModal,
   buildAccrualRequest,
+  approvalStepChanged,
   buildApprovalRequest,
   buildRestrictionsRequest,
   buildEditRulesRequest,
@@ -156,7 +157,12 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
       accrual: buildAccrualRequest(values),
       restrictions: buildRestrictionsRequest(values),
       tenureRules: buildTenureRulesRequest(values),
-      approval: buildApprovalRequest(values),
+      // Untouched and never set up: left out, so the backend's "an administrator decides" stands rather than the
+      // wizard's "not required" being written over it.
+      approval:
+        approvalQuery.data?.configured || !editInitialValues || approvalStepChanged(editInitialValues, values)
+          ? buildApprovalRequest(values)
+          : undefined,
       // The version the wizard was filled from. A colleague's save since then is refused (E00409):
       // the wizard stays open with the message, and nothing of theirs is overwritten.
       version: values.version,
@@ -283,6 +289,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
         mode="edit"
         leaveTypeName={leaveType?.name}
         initialValues={editInitialValues}
+        policyId={policy?.id}
         editImpact={editImpactQuery.data}
         // A refusal is thrown to the wizard, which keeps it open and shows it in the form — under Name when
         // the name is taken. A card here slid away before anybody read it (walk of 2026-10-30).

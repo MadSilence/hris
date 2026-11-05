@@ -18,6 +18,8 @@ export type CompanySettingsDTO = {
   weekStartDay: string;
   language: string;
   dailyNormMinutes?: number;
+  /** When a working day starts, in minutes after midnight (540 = 09:00). */
+  workdayStartMinutes?: number;
   attendanceRateAttributeId?: string | null;
   /** The DATE field home reads birthdays from. Null: no birthdays on home. */
   birthdayAttributeId?: string | null;
@@ -41,6 +43,8 @@ export type UpdateCompanySettingsRequest = {
   language?: string | null;
   /** Minutes in a company working day. Left out, the stored value stays — the Company form does not carry it. */
   dailyNormMinutes?: number | null;
+  /** When a working day starts, in minutes after midnight. Left out, the stored value stays. */
+  workdayStartMinutes?: number | null;
   /**
    * The MONEY field Attendance prices logged time from. Left out, the stored choice stays — the Company
    * form does not carry it; `{ attributeId: null }` means no money in Attendance.

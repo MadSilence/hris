@@ -18,5 +18,6 @@ export * from "./EmployeeTimeOffBalance";
 export * from "./TimeOffRequest";
 export * from "./TimeOffRequestDuration";
 export * from "./TimeOffOverlap";
+export * from "./TimeOffApproverPreview";
 export * from "./formatDayAmount";
 export * from "./TimeOffDecisionContext";

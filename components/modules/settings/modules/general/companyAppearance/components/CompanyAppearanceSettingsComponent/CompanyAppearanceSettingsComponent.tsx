@@ -182,6 +182,8 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   };
 
   const handleSave = async () => {
+    // A colour that is not one already says so under the field.
+    if (customHexInvalid) return;
     const saved = await onSave({
       accent,
       loginHeadline: headline.trim() || null,
@@ -418,7 +420,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                 {tCommon("actions.cancel")}
               </Button>
 
-              <Button type="button" onClick={handleSave} disabled={saving || customHexInvalid}>
+              <Button type="button" onClick={handleSave} disabled={saving}>
                 {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
               </Button>
             </div>

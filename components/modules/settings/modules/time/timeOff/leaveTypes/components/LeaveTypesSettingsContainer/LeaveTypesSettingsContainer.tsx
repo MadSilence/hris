@@ -43,7 +43,6 @@ export default function LeaveTypesSettingsContainer() {
   const toPayload = (values: LeaveTypeFormValues) => ({
     name: values.name,
     description: values.description || null,
-    color: values.color || null,
     category: values.category === "" ? null : values.category,
   });
 

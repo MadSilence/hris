@@ -34,6 +34,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 import { DecideAnywayControls } from "@/components/modules/timeOffDecision";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 
 type Props = { userId: string };
 
@@ -119,6 +120,8 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
   const [editStart, setEditStart] = useState("");
   const [editEnd, setEditEnd] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Whether the open inline form (edit, cancel, reject) has been submitted once — its errors show from then on.
+  const [inlineTried, setInlineTried] = useState(false);
 
   const policyName = useMemo(() => {
     const map = new Map((policies ?? []).map((p) => [p.id, p.name]));
@@ -149,6 +152,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
     if (needsCancellationReason(request.status, !canDecide)) {
       setCancellingId(request.id);
       setCancelReason("");
+      setInlineTried(false);
       return;
     }
     void submitCancel(request, null);
@@ -161,9 +165,12 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
     setEditStart(request.startDate);
     setEditEnd(request.endDate);
     setError(null);
+    setInlineTried(false);
   };
 
   const submitEdit = async (request: TimeOffRequest) => {
+    setInlineTried(true);
+    if (!editStart || !editEnd) return;
     setError(null);
     try {
       await editMutation.mutateAsync({
@@ -206,7 +213,8 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
 
   const handleReject = async (request: TimeOffRequest) => {
     // The API takes the reason as a required string — a rejection without one tells the person
-    // nothing, so the button stays disabled until it is filled in.
+    // nothing, so pressing Confirm without one says so under the field.
+    setInlineTried(true);
     const reason = rejectReason.trim();
     if (!reason) return;
 
@@ -351,6 +359,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         onClick={() => {
                           setRejectingId(request.id);
                           setRejectReason("");
+                          setInlineTried(false);
                         }}
                         disabled={isDeciding}
                       >
@@ -430,7 +439,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   <Button type="button"
                     size="sm"
                     onClick={() => submitEdit(request)}
-                    disabled={editMutation.isPending || !editStart || !editEnd}
+                    disabled={editMutation.isPending}
                   >
                     {tCommon("actions.save")}
                   </Button>
@@ -442,6 +451,9 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   >
                     {tCommon("actions.cancel")}
                   </Button>
+                  <FieldError className="w-full">
+                    {inlineTried && (!editStart || !editEnd) ? tCommon("validation.required") : null}
+                  </FieldError>
                 </div>
               )}
 
@@ -458,8 +470,12 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   />
                   <Button type="button"
                     size="sm"
-                    onClick={() => submitCancel(request, cancelReason.trim())}
-                    disabled={cancelMutation.isPending || !cancelReason.trim()}
+                    onClick={() => {
+                      setInlineTried(true);
+                      if (!cancelReason.trim()) return;
+                      void submitCancel(request, cancelReason.trim());
+                    }}
+                    disabled={cancelMutation.isPending}
                   >
                     {t("requests.requestCancellation")}
                   </Button>
@@ -472,13 +488,13 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     {tCommon("actions.back")}
                   </Button>
                   </div>
+                  <FieldError>{inlineTried && !cancelReason.trim() ? tCommon("validation.required") : null}</FieldError>
                 </div>
               )}
 
               {isRejecting && (
                 <div className="mt-3 flex flex-col gap-1.5">
-                  {/* Confirm stays disabled until this is filled: say so, rather than leaving an
-                      unexplained box beside a dead button. */}
+                  {/* Required: Confirm without it says so under the field. */}
                   <RequiredLabel htmlFor={`reject-reason-${request.id}`} required>{t("requests.reason")}</RequiredLabel>
                   <div className="flex items-center gap-2">
                   <Input
@@ -491,7 +507,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                   <Button type="button"
                     size="sm"
                     onClick={() => handleReject(request)}
-                    disabled={isDeciding || !rejectReason.trim()}
+                    disabled={isDeciding}
                   >
                     {tCommon("actions.confirm")}
                   </Button>
@@ -504,6 +520,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     {tCommon("actions.cancel")}
                   </Button>
                   </div>
+                  <FieldError>{inlineTried && !rejectReason.trim() ? tCommon("validation.required") : null}</FieldError>
                 </div>
               )}
             </div>

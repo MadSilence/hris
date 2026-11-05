@@ -77,4 +77,29 @@ describe("showUndoToast", () => {
     expect(bar).toBeTruthy();
     expect(bar!.style.animation).toContain(`${UNDO_WINDOW_MS}ms`);
   });
+
+  describe("an act held back until the toast ends (D1)", () => {
+    it("does it when the toast runs out", async () => {
+      const onExpire = jest.fn();
+      renderToaster();
+      showUndoToast({ message: "Approved", onUndo: jest.fn(), onExpire, durationMs: 50 });
+
+      await screen.findByText("Approved");
+      await waitFor(() => expect(onExpire).toHaveBeenCalledTimes(1));
+    });
+
+    it("never does it after an Undo", async () => {
+      const user = userEvent.setup();
+      const onExpire = jest.fn();
+      const onUndo = jest.fn();
+      renderToaster();
+      showUndoToast({ message: "Approved", onUndo, onExpire, durationMs: 400 });
+
+      await user.click(await screen.findByRole("button", { name: /undo/i }));
+      await new Promise((r) => setTimeout(r, 600));
+
+      expect(onUndo).toHaveBeenCalledTimes(1);
+      expect(onExpire).not.toHaveBeenCalled();
+    });
+  });
 });

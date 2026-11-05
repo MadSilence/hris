@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
+import { FieldError } from "@/components/desact/field-error";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import type { Segment } from "@/models/segment/Segment";
@@ -41,11 +42,13 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const [filters, setFilters] = React.useState<FilterDTO[]>(value?.filters ?? []);
   const [includeInactive, setIncludeInactive] = React.useState(value?.includeInactive ?? false);
+  const [tried, setTried] = React.useState(false);
 
   // Reseed whenever a different cell is opened.
   React.useEffect(() => {
     setFilters(value?.filters ?? []);
     setIncludeInactive(value?.includeInactive ?? false);
+    setTried(false);
   }, [value, isOpen]);
 
   return (
@@ -69,19 +72,24 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
           includeInactiveLabel={t("roles.permissions.customScope.includeInactive")}
         />
 
-        {filters.length === 0 && (
+        {filters.length === 0 && (tried ? (
+          <FieldError>{t("roles.permissions.customScope.empty")}</FieldError>
+        ) : (
           <p className="text-body text-status-pending-text">
             {t("roles.permissions.customScope.empty")}
           </p>
-        )}
+        ))}
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancelAction}>
             {tCommon("actions.cancel")}
           </Button>
           <Button type="button"
-            disabled={filters.length === 0}
-            onClick={() => onConfirmAction({ filters, excludeUserIds: [], includeInactive })}
+            onClick={() => {
+              setTried(true);
+              if (filters.length === 0) return;
+              onConfirmAction({ filters, excludeUserIds: [], includeInactive });
+            }}
  >
             {t("roles.permissions.customScope.save")}
           </Button>

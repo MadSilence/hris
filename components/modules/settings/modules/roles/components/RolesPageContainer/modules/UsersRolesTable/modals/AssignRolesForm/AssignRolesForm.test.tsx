@@ -118,11 +118,9 @@ describe("AssignRolesForm", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /apply/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /apply/i })).toBeEnabled();
 
     fireEvent.click(screen.getByText(/hr/i));
-
-    expect(screen.getByRole("button", { name: /apply/i })).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: /apply/i }));
 
@@ -152,7 +150,7 @@ describe("AssignRolesForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /reset/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /apply/i })).toBeDisabled();
+      expect(screen.queryByRole("button", { name: /reset/i })).not.toBeInTheDocument();
     });
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
@@ -191,6 +189,25 @@ describe("AssignRolesForm", () => {
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /apply/i })).toBeDisabled();
+  });
+
+  it("closes without applying when nothing changed", async () => {
+    const onCancelAction = jest.fn();
+    const onSubmitAction = jest.fn();
+
+    render(
+      <AssignRolesForm
+        user={user}
+        allRoles={allRoles}
+        onCancelAction={onCancelAction}
+        onSubmitAction={onSubmitAction}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /apply/i }));
+
+    await waitFor(() => expect(onCancelAction).toHaveBeenCalledTimes(1));
+    expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
   it("disables apply when user is null", () => {

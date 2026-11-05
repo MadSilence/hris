@@ -14,8 +14,7 @@ import {
   HomeRowsSkeleton,
   HomeToggle,
 } from "@/components/modules/home/components/HomeCard";
-import { cn } from "@/lib/cn";
-import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const PENDING = new Set(["PENDING", "CANCELLATION_PENDING"]);
@@ -84,9 +83,9 @@ export const WhosOutWidget: React.FC = () => {
                   {PENDING.has(person.status) && (
                     <StatusBadge status="pending" size="sm" />
                   )}
-                  <span className="flex items-center gap-1.5 text-hint text-secondary">
-                    <span aria-hidden className={cn("size-2 rounded-pill", TAG_CLASSES[toTagColor(person.leaveTypeColor)].dot)} />
-                    {person.leaveTypeName ?? t("whosOut.away")}
+                  <span className="flex items-center gap-2 text-hint text-secondary">
+                    <PolicyMarker color={person.policyColor} />
+                    {person.policyName ?? person.leaveTypeName ?? t("whosOut.away")}
                   </span>
                 </div>
               }

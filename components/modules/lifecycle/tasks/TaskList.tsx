@@ -10,6 +10,7 @@ import { TASK_KIND_ICON } from "@/components/modules/lifecycle/templates/canvas/
 import { Badge } from "@/components/desact/badge";
 import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -237,6 +238,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   const tCommon = useTranslations("common");
   const [file, setFile] = useState<File | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
+  const [tried, setTried] = useState(false);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answering, setAnswering] = useState(false);
@@ -309,11 +311,16 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
-        <Button type="button" size="sm" variant="secondary" disabled={act || !file}
-          onClick={() => file && run(async () => {
-            const doc = await upload(file);
-            await onCompleteAction(task, doc.id);
-          })}
+        <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
+        <Button type="button" size="sm" variant="secondary" disabled={act}
+          onClick={() => {
+            setTried(true);
+            if (!file) return;
+            void run(async () => {
+              const doc = await upload(file);
+              await onCompleteAction(task, doc.id);
+            });
+          }}
         >
           {t("shared.attachAndMarkDone")}
         </Button>
@@ -342,13 +349,18 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
-        <Button type="button" size="sm" variant="secondary" disabled={act || !file}
-          onClick={() => file && run(async () => {
-            const doc = await upload(file);
-            // With no category the file closes the task itself; with one, its arrival does (the listener).
-            if (!task.category && onCompleteAction) await onCompleteAction(task, doc.id);
-            else await onChangedAction?.();
-          })}
+        <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
+        <Button type="button" size="sm" variant="secondary" disabled={act}
+          onClick={() => {
+            setTried(true);
+            if (!file) return;
+            void run(async () => {
+              const doc = await upload(file);
+              // With no category the file closes the task itself; with one, its arrival does (the listener).
+              if (!task.category && onCompleteAction) await onCompleteAction(task, doc.id);
+              else await onChangedAction?.();
+            });
+          }}
         >
           {tCommon("actions.upload")}
         </Button>
@@ -376,16 +388,22 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
             disabled={disabled}
           />
         ))}
-        <Button type="button" size="sm" variant="secondary" disabled={act || Object.keys(values).length === 0}
-          onClick={() => run(async () => {
-            const res = await updateUserAttributesAction({ userId: task.subject.id, values });
-            if (res.status !== ActionStatus.SUCCESS) {
-              setError(res.errorMessage ?? null);
-              return;
-            }
-            setValues({});
-            await onChangedAction?.();
-          })}
+        <FieldError>{tried && Object.keys(values).length === 0 ? t("shared.fillSomething") : null}</FieldError>
+        <Button type="button" size="sm" variant="secondary" disabled={act}
+          onClick={() => {
+            setTried(true);
+            if (Object.keys(values).length === 0) return;
+            void run(async () => {
+              const res = await updateUserAttributesAction({ userId: task.subject.id, values });
+              if (res.status !== ActionStatus.SUCCESS) {
+                setError(res.errorMessage ?? null);
+                return;
+              }
+              setValues({});
+              setTried(false);
+              await onChangedAction?.();
+            });
+          }}
         >
           {tCommon("actions.save")}
         </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
@@ -183,12 +183,6 @@ export function PublicHolidayCalendarNewPage() {
     return valid;
   }, [draftName, draftHolidays, t]);
 
-  const isFormValid = useMemo(() => {
-    if (!draftName.trim()) return false;
-    if (draftHolidays.length === 0) return false;
-    return draftHolidays.every((h) => h.name.trim() && h.holidayDate);
-  }, [draftName, draftHolidays]);
-
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -266,7 +260,7 @@ export function PublicHolidayCalendarNewPage() {
             title={t("publicHolidays.newCalendar.title")}
             backHref="/settings/time/public-holidays"
           />
-          <Button type="button" onClick={handleSubmit} disabled={!isFormValid || isLoading}>
+          <Button type="button" onClick={handleSubmit} disabled={isLoading}>
             {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
           </Button>
         </div>

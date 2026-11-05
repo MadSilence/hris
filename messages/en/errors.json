@@ -99,6 +99,7 @@
   "CS00008": "Choose who must use two-step sign-in.",
   "CS00009": "A device can be remembered for 0 to 30 days.",
   "CS00010": "A session may go unused for 15 minutes to 30 days.",
+  "CS00012": "Enter a start between 00:00 and 23:59.",
   "CST0001": "This company has already been set up.",
   "CST0002": "Your company is being set up right now — this page will follow along.",
   "CST0003": "Pick what you would like to start with.",

@@ -237,7 +237,8 @@
         "willAssignSkipped": "{count, plural, one {# person} other {# people}} will be assigned, {skipped} skipped.",
         "conflicts": "{count, plural, one {# person already has} other {# people already have}} a {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} from another live rule. That rule keeps it; this one does not overwrite it.",
         "live": "This creates a live rule — everyone who matches now, and anyone who matches later. You can find it, change it or switch it off in Settings → Automation.",
-        "manual": "These people are assigned by hand, once. No rule takes a hand assignment away."
+        "manual": "These people are assigned by hand, once. No rule takes a hand assignment away.",
+        "nobodyToAssign": "Nobody here would be assigned — go back and pick people."
       },
       "liveResult": {
         "created": "Live rule “{name}” created.",
@@ -251,7 +252,8 @@
         "skipped": "{count, plural, one {# person was} other {# people were}} skipped.",
         "failed": "{count, plural, one {# person} other {# people}} could not be added."
       },
-      "titleKind": "Add People to {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}}"
+      "titleKind": "Add People to {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}}",
+      "pickSomeone": "Pick at least one person."
     },
     "skips": {
       "reasons": {

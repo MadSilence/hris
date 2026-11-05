@@ -39,7 +39,7 @@ describe("WhosOutWidget", () => {
     answer({
       people: [
         person({ userId: "masked" }),
-        person({ userId: "open", firstName: "Bob", status: "PENDING", leaveTypeName: "Vacation", leaveTypeColor: "teal", requestId: "r1" }),
+        person({ userId: "open", firstName: "Bob", status: "PENDING", leaveTypeName: "Vacation", policyColor: "teal", requestId: "r1" }),
       ],
     });
     render(<WhosOutWidget />);

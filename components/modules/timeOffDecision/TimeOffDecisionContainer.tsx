@@ -11,6 +11,7 @@ import { Input } from "@/components/desact/input";
 import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -65,6 +66,7 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
   const decideCancellation = useDecideCancellation();
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
+  const [rejectTried, setRejectTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const reasonId = useId();
 
@@ -219,9 +221,14 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
             <div className="flex max-w-md flex-col gap-1.5">
               <RequiredLabel htmlFor={reasonId} required>{t("decision.reason")}</RequiredLabel>
               <Input id={reasonId} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+              <FieldError>{rejectTried && !reason.trim() ? tCommon("validation.required") : null}</FieldError>
               <div className="mt-1 flex gap-2">
-                <Button type="button" variant="destructive" disabled={busy || !reason.trim()}
-                        onClick={() => void run(() => reject.mutateAsync({ requestId, rejectionReason: reason.trim() }))}>
+                <Button type="button" variant="destructive" disabled={busy}
+                        onClick={() => {
+                          setRejectTried(true);
+                          if (!reason.trim()) return;
+                          void run(() => reject.mutateAsync({ requestId, rejectionReason: reason.trim() }));
+                        }}>
                   {t("decision.reject")}
                 </Button>
                 <Button type="button" variant="ghost" disabled={busy} onClick={() => setRejecting(false)}>{tCommon("actions.back")}</Button>
@@ -232,7 +239,7 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
               <Button type="button" variant="approve" disabled={busy} onClick={() => void run(() => approve.mutateAsync({ requestId }))}>
                 {t("decision.approve")}
               </Button>
-              <Button type="button" variant="secondary" disabled={busy} onClick={() => setRejecting(true)}>
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => { setRejectTried(false); setRejecting(true); }}>
                 <Icon icon={Cancel01Icon} size="sm" />
                 {t("decision.reject")}
               </Button>

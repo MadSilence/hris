@@ -456,7 +456,9 @@ export const UserCalendar: FC<Props> = ({
                     aria-hidden="true"
                     data-band-start={weekBand.start}
                     data-band-len={weekBand.len}
-                    className="pointer-events-none absolute bottom-1 top-1 rounded-popover bg-accent-subtle"
+                    // While the pointer is still choosing, the band is a Mist preview; it takes the accent once the
+                    // range is picked (the designers' answer 1.5).
+                    className={`pointer-events-none absolute bottom-1 top-1 rounded-popover ${selRange ? "bg-mist" : "bg-accent-subtle"}`}
                     style={{
                       left: `calc(${weekBand.start} * 100% / 7 + 4px)`,
                       width: `calc(${weekBand.len} * 100% / 7 - 8px)`,

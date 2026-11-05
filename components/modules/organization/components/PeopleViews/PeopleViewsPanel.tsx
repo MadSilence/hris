@@ -7,6 +7,7 @@ import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
+import { FieldError } from "@/components/desact/field-error";
 import { Badge } from "@/components/desact/badge";
 import {
   Dialog,
@@ -74,6 +75,7 @@ export default function PeopleViewsPanel({
   const tCommon = useTranslations("common");
   const [dialog, setDialog] = useState<NameDialogState>(null);
   const [name, setName] = useState("");
+  const [tried, setTried] = useState(false);
   const [sharing, setSharing] = useState<PeopleView | null>(null);
 
   const ownViews = views.filter(isOwn);
@@ -84,14 +86,17 @@ export default function PeopleViewsPanel({
 
   const openSaveAs = () => {
     setName("");
+    setTried(false);
     setDialog({ kind: "saveAs" });
   };
   const openRename = (view: PeopleView) => {
     setName(view.name);
+    setTried(false);
     setDialog({ kind: "rename", view });
   };
   const submitDialog = () => {
     const trimmed = name.trim();
+    setTried(true);
     if (!trimmed || !dialog) return;
     if (dialog.kind === "saveAs") onSaveAs(trimmed);
     else onRename(dialog.view, trimmed);
@@ -220,11 +225,12 @@ export default function PeopleViewsPanel({
             onKeyDown={(e) => e.key === "Enter" && submitDialog()}
             className="h-9"
           />
+          <FieldError>{tried && !name.trim() ? tCommon("validation.enterName") : null}</FieldError>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setDialog(null)}>
               {tCommon("actions.cancel")}
             </Button>
-            <Button type="button" onClick={submitDialog} disabled={!name.trim()}>
+            <Button type="button" onClick={submitDialog}>
               {dialog?.kind === "rename" ? tCommon("actions.rename") : tCommon("actions.save")}
             </Button>
           </DialogFooter>

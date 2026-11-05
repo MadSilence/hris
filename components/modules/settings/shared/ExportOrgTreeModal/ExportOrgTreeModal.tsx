@@ -17,6 +17,7 @@ import {
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 
 /** What the tree is made of. Each kind has its own sentences in the catalogue, in every language. */
 export type ExportOrgTreeKind = "department" | "team";
@@ -57,6 +58,7 @@ export function ExportOrgTreeModal({
   const [includePeople, setIncludePeople] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   const selected = useMemo(
     () => nodes.find((node) => node.id === nodeId) ?? null,
@@ -75,6 +77,7 @@ export function ExportOrgTreeModal({
       setIncludeSubNodes(false);
       setIncludePeople(false);
       setError(null);
+      setTried(false);
     }
     // Re-running on every `nodes` identity change would reset a choice mid-dialog.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,6 +95,7 @@ export function ExportOrgTreeModal({
   }, [includePeople, peopleAvailable]);
 
   const handleExport = async () => {
+    setTried(true);
     if (!selected) return;
 
     setIsLoading(true);
@@ -132,6 +136,7 @@ export function ExportOrgTreeModal({
               disabled={nodes.length === 0}
               clearable={false}
             />
+            <FieldError>{tried && !selected ? tCommon("validation.required") : null}</FieldError>
           </div>
 
           {/* Format */}
@@ -189,7 +194,7 @@ export function ExportOrgTreeModal({
           <Button
             type="button"
             onClick={handleExport}
-            disabled={isLoading || !selected}
+            disabled={isLoading}
  >
             {isLoading ? t("shared.exportOrgTree.exporting") : tCommon("actions.export")}
           </Button>

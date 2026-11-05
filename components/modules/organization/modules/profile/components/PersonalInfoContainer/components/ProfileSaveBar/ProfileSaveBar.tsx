@@ -7,8 +7,6 @@ type Props = {
   /** How many fields differ from what was loaded. The bar is not drawn at zero. */
   changeCount: number;
   isSaving: boolean;
-  /** A client-side problem in a field (reported beside that field) — Save waits for it. */
-  saveBlocked?: boolean;
   /** What the server said when the save was refused. The draft stays, so it can be fixed. */
   error?: string | null;
   onDiscard: () => void;
@@ -26,7 +24,6 @@ type Props = {
 export const ProfileSaveBar: React.FC<Props> = ({
   changeCount,
   isSaving,
-  saveBlocked = false,
   error,
   onDiscard,
   onSave,
@@ -52,7 +49,7 @@ export const ProfileSaveBar: React.FC<Props> = ({
         <Button type="button" variant="secondary" size="sm" onClick={onDiscard} disabled={isSaving}>
           {tCommon("actions.discard")}
         </Button>
-        <Button type="button" size="sm" onClick={onSave} disabled={isSaving || saveBlocked || changeCount === 0}>
+        <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
           {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
         </Button>
       </div>

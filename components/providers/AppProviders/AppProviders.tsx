@@ -6,6 +6,7 @@ import NavigationUtilsProvider from "@/components/providers/NavigationUtilsProvi
 import type { PublicEnvironmentConfig } from "@/config/env.types";
 import QueryClientProviderWrapper from "@/components/providers/QueryClientProviderWrapper/QueryClientProviderWrapper";
 import GlobalErrorProvider from "@/components/error/GlobalErrorProvider/GlobalErrorProvider";
+import { TooltipProvider } from "@/components/desact/tooltip";
 
 type AppProvidersProps = {
   env: PublicEnvironmentConfig;
@@ -17,7 +18,10 @@ const AppProviders: React.FC<AppProvidersProps> = ({ env, children }) => {
     <AppDataProvider env={env}>
       <QueryClientProviderWrapper>
         <GlobalErrorProvider>
-          <NavigationUtilsProvider>{children}</NavigationUtilsProvider>
+          {/* One provider for every tooltip, so moving from one to the next shows it without a second delay. */}
+          <TooltipProvider>
+            <NavigationUtilsProvider>{children}</NavigationUtilsProvider>
+          </TooltipProvider>
         </GlobalErrorProvider>
       </QueryClientProviderWrapper>
     </AppDataProvider>

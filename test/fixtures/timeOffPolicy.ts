@@ -27,6 +27,7 @@ export const timeOffPolicyCreateRequest = (
 
   name: "Vacation",
   description: null,
+  color: "ocean",
 
   status: TimeOffPolicyStatus.Draft,
   unit: TimeOffPolicyUnit.Days,
@@ -85,6 +86,7 @@ export const timeOffPolicyDto = (
   ...timeOffPolicyCreateRequest(),
 
   id: "policy-id",
+  color: "ocean",
   companyId: "company-id",
 
   status: TimeOffPolicyStatus.Active,

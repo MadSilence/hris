@@ -93,15 +93,17 @@ describe("CompanyAppearanceSettingsComponent", () => {
     );
   });
 
-  it("blocks saving while the typed colour is not a valid hex", () => {
-    renderComponent();
+  it("does not save while the typed colour is not a valid hex", () => {
+    const { onSave } = renderComponent();
 
-    // Something else has to be dirty first, or there would be no Save button to disable.
+    // Something else has to be dirty first, or there would be no Save button to press.
     fireEvent.click(screen.getByRole("button", { name: /^Denim$/ }));
     fireEvent.change(hexInput(), { target: { value: "not-a-colour" } });
 
     expect(screen.getByText(/enter a color as #rrggbb/i)).toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    expect(saveButton()).toBeEnabled();
+    fireEvent.click(saveButton());
+    expect(onSave).not.toHaveBeenCalled();
   });
 
   it("says so when a light custom color had to be adjusted for readability", () => {

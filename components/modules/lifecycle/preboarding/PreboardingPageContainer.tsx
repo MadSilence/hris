@@ -10,6 +10,7 @@ import { Button } from "@/components/desact/button";
 import { Label } from "@/components/desact/label";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { showError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useDateFormatter } from "@/lib/date";
@@ -138,6 +139,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
   const [error, setError] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [file, setFile] = useState<File | null>(null);
+  const [tried, setTried] = useState(false);
 
   const finish = (res: { status: ActionStatus; data?: PreboardingPage; errorMessage?: string }) => {
     if (res.status === ActionStatus.SUCCESS && res.data) onPageAction(res.data);
@@ -186,10 +188,12 @@ function TaskBody({ token, task, onPageAction, preview }: {
       <div className="space-y-2 pl-8">
         {task.categoryName && <Label htmlFor={`${task.id}-file`}>{t("preboarding.fileOf", { category: task.categoryName })}</Label>}
         <FilePickButton id={`${task.id}-file`} file={file} disabled={busy} onPickAction={setFile} />
+        <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
         <Button type="button"
           size="sm"
-          disabled={busy || preview || !file}
+          disabled={busy || preview}
           onClick={async () => {
+            setTried(true);
             if (!file) return;
             setBusy(true);
             setError(null);
@@ -213,10 +217,13 @@ function TaskBody({ token, task, onPageAction, preview }: {
       {fields.map((f) => (
         <TaskFieldInput key={f.id} field={f} value={values[f.id]} onChange={(v) => setValues((all) => ({ ...all, [f.id]: v }))} disabled={busy} />
       ))}
+      <FieldError>{tried && Object.keys(values).length === 0 ? t("shared.fillSomething") : null}</FieldError>
       <Button type="button"
         size="sm"
-        disabled={busy || preview || Object.keys(values).length === 0}
+        disabled={busy || preview}
         onClick={async () => {
+          setTried(true);
+          if (Object.keys(values).length === 0) return;
           setBusy(true);
           setError(null);
           try { finish(await preboardingFieldsAction({ token, taskId: task.id, values })); } finally { setBusy(false); }

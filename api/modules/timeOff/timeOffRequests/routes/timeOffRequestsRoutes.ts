@@ -12,6 +12,13 @@ export class TimeOffRequestsRoutes {
     return Response.json(data);
   }
 
+  public async previewApprovers(req: Request) {
+    const url = new URL(req.url);
+    return Response.json(
+      await hrisTimeOffRequestsService.previewApprovers(url.searchParams.get("assignmentId") ?? ""),
+    );
+  }
+
   public async listOverlaps(req: Request) {
     const url = new URL(req.url);
     const data = await hrisTimeOffRequestsService.listOverlaps(

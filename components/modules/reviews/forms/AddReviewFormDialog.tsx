@@ -139,6 +139,8 @@ export function AddReviewFormDialog({ open, onCloseAction, onAddedAction, existi
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // A template that cannot be added already says why, right under the choice.
+    if (template && templateBlocked) return;
     setError(null);
     if (addedBefore) onAddedAction({ id: addedBefore.id });
     else if (template) await createFromTemplate();
@@ -213,7 +215,7 @@ export function AddReviewFormDialog({ open, onCloseAction, onAddedAction, existi
               </Link>
               <div className="flex gap-2">
                 <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
-                <Button type="submit" disabled={busy || (template !== null && (!preview.data || templateBlocked))}>
+                <Button type="submit" disabled={busy || (template !== null && !preview.data)}>
                   {busy ? t("addForm.adding") : addedBefore ? t("addForm.openIt") : tCommon("actions.add")}
                 </Button>
               </div>

@@ -84,14 +84,18 @@ describe("a leave bar", () => {
     expect(style.backgroundColor).toBe("var(--tag-gray-bar)");
   });
 
-  it("wears the type's tag colour only when the type was sent", () => {
-    expect(leaveStyle(leave({ leaveTypeName: "Vacation", leaveTypeColor: "ocean" })).backgroundColor).toBe(
+  it("is named by its policy, which its colour belongs to", () => {
+    expect(leaveTitle(t, leave({ leaveTypeName: "Vacation", policyName: "Annual Leave" }))).toMatch(/^Annual Leave/);
+  });
+
+  it("wears the policy's tag colour only when the policy was sent", () => {
+    expect(leaveStyle(leave({ leaveTypeName: "Vacation", policyColor: "ocean" })).backgroundColor).toBe(
       "var(--tag-ocean-bar)",
     );
   });
 
   it("is dotted over the light tint and says so while it is being decided", () => {
-    const pending = leave({ status: "PENDING", awaitingYou: true, leaveTypeColor: "ocean" });
+    const pending = leave({ status: "PENDING", awaitingYou: true, policyColor: "ocean" });
     expect(leaveStyle(pending).backgroundColor).toBe("var(--tag-ocean-bg)");
     expect(leaveStyle(pending).backgroundImage).toContain("radial-gradient");
     expect(leaveTitle(t, pending)).toContain("Pending your approval");

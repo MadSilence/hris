@@ -89,22 +89,24 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
     onSubmit: handleSubmitAction,
   });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (isLoading) return;
-
-    await formik.submitForm();
-  };
-
   // "Nothing to update" is not worth a round trip: the backend answers R00002 and the user learns
-  // only that their no-op failed. Better to leave the button off until something actually changed.
+  // only that their no-op failed. An unchanged submit closes the form instead of sending it.
   const isUnchanged =
     blockUnchanged
     && formik.values.name.trim() === initialName.trim()
     && (formik.values.description ?? "").trim() === initialDescription.trim();
 
-  const canSubmit = formik.values.name.trim().length >= 2 && !isUnchanged;
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isLoading) return;
+    if (isUnchanged) {
+      onCancelAction();
+      return;
+    }
+
+    await formik.submitForm();
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -152,7 +154,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
 
         <Button
           type="submit"
-          disabled={isLoading || !canSubmit}
+          disabled={isLoading}
  >
           {submitText}
         </Button>

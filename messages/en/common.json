@@ -186,8 +186,15 @@
       "ocean": "Ocean",
       "teal": "Teal",
       "cocoa": "Cocoa",
-      "bronze": "Bronze"
-    }
+      "bronze": "Bronze",
+      "lilac": "Lilac",
+      "orange": "Orange",
+      "mustard": "Mustard",
+      "olive": "Olive"
+    },
+    "inUse": "In use",
+    "usedBy": "Used by {names}",
+    "policyColor": "Color on the calendar"
   },
   "weekdays": {
     "short": {
@@ -254,7 +261,11 @@
       "length": "Must have {length, plural, one {# item} other {# items}}",
       "min": "Must have at least {min, plural, one {# item} other {# items}}",
       "max": "Must have at most {max, plural, one {# item} other {# items}}"
-    }
+    },
+    "enterCode": "Enter the code from your app.",
+    "enterPassword": "Enter your password.",
+    "enterName": "Enter a name.",
+    "chooseOne": "Choose one to go on."
   },
   "toast": {
     "region": "Notifications",
@@ -272,5 +283,9 @@
     "nodeDescriptionKeyboard": "Press Enter or Space to select an item, then move it with the arrow keys. Press Delete to remove it and Escape to cancel.",
     "nodeMoved": "Moved the item {direction}. New position: x {x}, y {y}",
     "edgeDescription": "Press Enter or Space to select a link, then Delete to remove it or Escape to cancel."
+  },
+  "selection": {
+    "selected": "{count} selected",
+    "clear": "Clear selection"
   }
 }

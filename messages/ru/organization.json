@@ -290,7 +290,22 @@
       "thisUser": "этого пользователя",
       "warning": "Внимание",
       "warningText": "Текущий аватар будет удалён безвозвратно.",
-      "removeFailed": "Не удалось удалить фото."
+      "removeFailed": "Не удалось удалить фото.",
+      "pickFile": "Выберите изображение для загрузки."
+    },
+    "waiting": {
+      "timeOff": "{name} просит отпуск {range} · {policy}, {amount} {count, plural, one {день} few {дня} many {дней} other {дня}}",
+      "review": "{name}: {cycle} · до {due}",
+      "reviewNoDue": "{name}: {cycle}",
+      "notNow": "Не сейчас",
+      "approve": "Одобрить",
+      "giveInput": "Заполнить",
+      "approved": "Одобрено. {name} отсутствует {range}.",
+      "head": "Ждёт вас",
+      "moduleTimeOff": "Отпуск",
+      "moduleReview": "Оценка",
+      "showMore": "Показать ещё {count}",
+      "showLess": "Свернуть"
     }
   },
   "documents": {
@@ -336,7 +351,14 @@
       "star": "Отметить звёздочкой",
       "unstar": "Снять звёздочку",
       "actions": "Действия с документом",
-      "move": "Переместить"
+      "move": "Переместить",
+      "changeVisibility": "Изменить доступ",
+      "movedToTrash": "{name} — в корзине",
+      "visibilityFailed": "Не удалось изменить доступ.",
+      "selectAll": "Выбрать все",
+      "select": "Выбрать {name}",
+      "batchFailed": "Не удалось выполнить для выбранных.",
+      "movedManyToTrash": "{count, plural, one {# документ} few {# документа} many {# документов} other {# документа}} в корзине"
     },
     "trash": {
       "restoreFailed": "Не удалось восстановить",
@@ -363,10 +385,7 @@
       "description": "Измените название папки. Документы внутри останутся на месте."
     },
     "deleteDocument": {
-      "title": "Удалить документ",
-      "description": "<b>{name}</b> переместится в корзину, где его можно восстановить до окончания срока хранения.",
-      "untitled": "Документ без названия",
-      "confirm": "Удалить документ"
+      "untitled": "Документ без названия"
     },
     "deleteFolder": {
       "title": "Удалить папку",
@@ -392,7 +411,8 @@
       "thisDocument": "этот документ",
       "destination": "Папка назначения",
       "destinationRequired": "Выберите папку назначения.",
-      "submit": "Переместить"
+      "submit": "Переместить",
+      "nDocuments": "{count, plural, one {# документ} few {# документа} many {# документов} other {# документа}}"
     },
     "preview": {
       "readOnly": "Только просмотр.",
@@ -480,7 +500,8 @@
       "share": "Поделиться",
       "removeTitle": "Закрыть доступ",
       "removeDescription": "{name} больше не увидит «{view}».",
-      "thisGrantee": "Этот получатель"
+      "thisGrantee": "Этот получатель",
+      "pickGrantee": "Выберите, с кем поделиться."
     }
   },
   "bulkEdit": {
@@ -565,10 +586,9 @@
       "linkCopied": "Ссылка скопирована. Каждый, кто её откроет, увидит таблицу в рамках своего доступа."
     },
     "selection": {
-      "allMatching": "{count, plural, one {Выбран # подходящий сотрудник.} few {Выбраны все # подходящих сотрудника.} many {Выбраны все # подходящих сотрудников.} other {Выбраны все # подходящего сотрудника.}}",
-      "clear": "Снять выбор",
-      "allLoaded": "{count, plural, one {Выбран # загруженный сотрудник.} few {Выбраны все # загруженных сотрудника.} many {Выбраны все # загруженных сотрудников.} other {Выбраны все # загруженного сотрудника.}}",
-      "selectAllMatching": "Выбрать всех подходящих: {count}"
+      "selectAllMatching": "Выбрать всех подходящих: {count}",
+      "allSelected": "Выбраны все {count}",
+      "clearSelection": "Снять выбор"
     },
     "deleteView": {
       "title": "Удалить представление",

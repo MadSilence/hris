@@ -245,3 +245,102 @@ const numericPattern = (
       return hideYear ? `${month}-${day}` : `${year}-${month}-${day}`;
   }
 };
+
+/**
+ * The short style (the owner, 2026-11-05, C1): what a person reads in a panel or a dialog — "Wed, 11 Nov",
+ * "Wed–Fri, 11–13 Nov", or "Nov 11–13" for a reader whose order is month first. **No year for the current year**;
+ * the year appears for a date in another year, and on both ends of a range that crosses one. The order of day and
+ * month is the reader's (`dateFormat`; for "the system's", the locale's own), the words are the page's language.
+ */
+export type ShortDateOptions = { weekday?: boolean; language?: string; today?: Date };
+
+/** Day before month, or month before day, as the reader writes dates. */
+const dayFirst = (language?: string): boolean => {
+  const chosen = preferences.dateFormat;
+  if (chosen === "MDY") return false;
+  if (chosen === "DMY" || chosen === "YMD") return true;
+  const locale = systemLocale(language) ?? "en-GB";
+  const parts = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).formatToParts(new Date(2026, 10, 11));
+  return parts.findIndex((p) => p.type === "day") < parts.findIndex((p) => p.type === "month");
+};
+
+/** The locale the month and weekday names are written in. */
+const shortWordsLocale = (language?: string): string => {
+  const chosen = preferences.dateFormat;
+  if (chosen === "SYSTEM") return systemLocale(language) ?? "en-GB";
+  return wordsLocale(chosen, language);
+};
+
+const toCalendarDate = (value: string | Date): Date =>
+  typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? isoToDate(value.trim()) : new Date(value);
+
+const monthName = (date: Date, locale: string) =>
+  new Intl.DateTimeFormat(locale, { month: "short" }).format(date).replace(/\.$/, "");
+const weekdayName = (date: Date, locale: string) =>
+  new Intl.DateTimeFormat(locale, { weekday: "short" }).format(date).replace(/\.$/, "");
+
+/** One date in the short style: "11 Nov", "Wed, 11 Nov", "Nov 11", "11 Nov 2025". */
+export const formatShortDate = (value: string | Date | null | undefined, options?: ShortDateOptions): string => {
+  if (value == null || value === "") return "";
+  const date = toCalendarDate(value);
+  if (Number.isNaN(date.getTime())) return typeof value === "string" ? value : "";
+  const locale = shortWordsLocale(options?.language);
+  const thisYear = (options?.today ?? new Date()).getFullYear();
+  const dm = dayFirst(options?.language)
+    ? `${date.getDate()} ${monthName(date, locale)}`
+    : `${monthName(date, locale)} ${date.getDate()}`;
+  const withYear = date.getFullYear() === thisYear ? dm : `${dm} ${date.getFullYear()}`;
+  return options?.weekday ? `${weekdayName(date, locale)}, ${withYear}` : withYear;
+};
+
+/**
+ * A span of days in the short style. One day reads as one date; a span inside a month shares it ("11–13 Nov",
+ * "Wed–Fri, 11–13 Nov"); a span across months or years writes both ends ("30 Nov – 2 Dec", "28 Dec 2026 – 3 Jan
+ * 2027").
+ */
+export const formatShortRange = (
+  start: string | Date | null | undefined,
+  end: string | Date | null | undefined,
+  options?: ShortDateOptions,
+): string => {
+  if (start == null || start === "") return "";
+  if (end == null || end === "") return formatShortDate(start, options);
+  const a = toCalendarDate(start);
+  const b = toCalendarDate(end);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return formatShortDate(start, options);
+  if (dateToISO(a) === dateToISO(b)) return formatShortDate(a, options);
+
+  const locale = shortWordsLocale(options?.language);
+  const thisYear = (options?.today ?? new Date()).getFullYear();
+  const crossesYear = a.getFullYear() !== b.getFullYear();
+  if (crossesYear || a.getMonth() !== b.getMonth()) {
+    // Both ends in full; a span crossing a year, or away from this one, names the year on both.
+    const forceYear = crossesYear || a.getFullYear() !== thisYear;
+    const one = (d: Date) => {
+      const dm = dayFirst(options?.language) ? `${d.getDate()} ${monthName(d, locale)}` : `${monthName(d, locale)} ${d.getDate()}`;
+      const y = forceYear ? `${dm} ${d.getFullYear()}` : dm;
+      return options?.weekday ? `${weekdayName(d, locale)}, ${y}` : y;
+    };
+    return `${one(a)} – ${one(b)}`;
+  }
+
+  const days = `${a.getDate()}–${b.getDate()}`;
+  const month = monthName(a, locale);
+  const dm = dayFirst(options?.language) ? `${days} ${month}` : `${month} ${days}`;
+  const withYear = a.getFullYear() === thisYear ? dm : `${dm} ${a.getFullYear()}`;
+  return options?.weekday ? `${weekdayName(a, locale)}–${weekdayName(b, locale)}, ${withYear}` : withYear;
+};
+
+/** The short style in the page's language — for render. */
+export const useShortDates = () => {
+  const language = useDisplayLanguage();
+  return {
+    date: (value: string | Date | null | undefined, options?: Omit<ShortDateOptions, "language">) =>
+      formatShortDate(value, { ...options, language }),
+    range: (
+      start: string | Date | null | undefined,
+      end: string | Date | null | undefined,
+      options?: Omit<ShortDateOptions, "language">,
+    ) => formatShortRange(start, end, { ...options, language }),
+  };
+};

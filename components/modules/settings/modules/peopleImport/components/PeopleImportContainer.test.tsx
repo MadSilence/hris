@@ -118,10 +118,13 @@ describe("PeopleImportContainer", () => {
     expect(screen.getByRole("button", { name: "Check file" })).toBeEnabled();
   });
 
-  it("does not let a file be checked until both names are mapped", () => {
+  it("does not check a file until both names are mapped, and says so when Check is pressed", () => {
     show(anImport({ status: "MAPPED", mapping: { "0": "sys:first_name" } }));
     expect(screen.getByText(/still to match: last name/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Check file" })).toBeDisabled();
+    const checkButton = screen.getByRole("button", { name: "Check file" });
+    expect(checkButton).toBeEnabled();
+    fireEvent.click(checkButton);
+    expect(screen.getByRole("alert")).toHaveTextContent(/still to match: last name/i);
   });
 
   it("says what will happen before anything is created", () => {

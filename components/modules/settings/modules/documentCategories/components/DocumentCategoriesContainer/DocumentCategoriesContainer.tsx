@@ -3,6 +3,7 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { Add01Icon, Delete02Icon, PencilEdit02Icon, SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -236,9 +237,11 @@ const CategoryFormModal: FC<{
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    setTried(false);
     setName(category?.name ?? "");
     setDescription(category?.description ?? "");
     setIsActive(category?.isActive ?? true);
@@ -246,7 +249,9 @@ const CategoryFormModal: FC<{
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading || !name.trim()) return;
+    if (isLoading) return;
+    setTried(true);
+    if (!name.trim()) return;
     onSubmitAction({
       name: name.trim(),
       description: description.trim() || null,
@@ -276,6 +281,7 @@ const CategoryFormModal: FC<{
               disabled={isLoading}
               onChange={(e) => setName(e.currentTarget.value)}
             />
+            <FieldError>{tried && !name.trim() ? tCommon("validation.enterName") : null}</FieldError>
           </div>
 
           <div className="space-y-2">
@@ -309,7 +315,7 @@ const CategoryFormModal: FC<{
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !name.trim()}
+              disabled={isLoading}
  >
               {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
             </Button>

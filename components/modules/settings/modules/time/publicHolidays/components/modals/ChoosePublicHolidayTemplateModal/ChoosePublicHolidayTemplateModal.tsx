@@ -33,6 +33,7 @@ import {
   templateDisplayName,
 } from "@/components/modules/settings/modules/time/publicHolidays/components/PublicHolidayTemplatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FieldError } from "@/components/desact/field-error";
 import { TagChip } from "@/components/ui/TagChip";
 
 /** Radix Select cannot hold an empty value, so "no subdivision" needs a sentinel. */
@@ -60,6 +61,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<string>(NATIONAL);
+  const [tried, setTried] = useState(false);
 
   const { data: regions = [], isFetching: isRegionsFetching } =
     usePublicHolidayTemplateRegions({
@@ -77,6 +79,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
     setSelectedTemplateId("");
     setSelectedRegion(NATIONAL);
+    setTried(false);
     onRequestCloseAction();
   };
 
@@ -87,6 +90,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
   };
 
   const handleGoToPreview = () => {
+    setTried(true);
     if (!selectedTemplate) return;
 
     const region = selectedRegion !== NATIONAL
@@ -133,6 +137,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
                 disabled={templates.length === 0}
               />
             )}
+            <FieldError>{tried && !selectedTemplate ? tCommon("validation.required") : null}</FieldError>
 
             {!isLoading && templates.length === 0 ? (
               <p className="text-hint text-tertiary">
@@ -188,7 +193,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
             <Button
               type="button"
-              disabled={isLoading || !selectedTemplate}
+              disabled={isLoading}
               onClick={handleGoToPreview}
             >
               {t("publicHolidays.chooseTemplate.useTemplate")}

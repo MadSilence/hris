@@ -8,6 +8,7 @@ import type {
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
   TimeOffOverlapDTO,
+  TimeOffApproverPreviewDTO,
   TimeOffDecisionContextDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
@@ -36,6 +37,11 @@ export class HrisApiTimeOffRequestsClient {
   ): Promise<TimeOffRequestDurationDTO> {
     const qs = new URLSearchParams({ assignmentId, startDate, endDate }).toString();
     return hrisApiClient.get<TimeOffRequestDurationDTO>(`${this.REQUESTS_PATH}/duration?${qs}`);
+  }
+
+  public async previewApprovers(assignmentId: string): Promise<TimeOffApproverPreviewDTO> {
+    const qs = new URLSearchParams({ assignmentId }).toString();
+    return hrisApiClient.get<TimeOffApproverPreviewDTO>(`${this.REQUESTS_PATH}/approvers?${qs}`);
   }
 
   public async listOverlaps(

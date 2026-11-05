@@ -5,10 +5,19 @@ import { useTranslations } from "next-intl";
 import { ArrowDown02Icon, ArrowUp02Icon, Delete02Icon, Download01Icon, FolderTransferIcon, PencilEdit02Icon, SquareLock02Icon, StarIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
+import { Checkbox } from "@/components/desact/checkbox";
+import { cn } from "@/lib/cn";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
-import { DropdownMenuItem } from "@/components/desact/dropdown-menu";
+import {
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/desact/dropdown-menu";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
-import type { DocumentDTO } from "@/api/modules/documents/dto";
+import type { DocumentDTO, DocumentVisibility } from "@/api/modules/documents/dto";
 import type {
   DocumentSort,
   DocumentSortField,
@@ -28,6 +37,12 @@ type PersonalDocumentsFilesTableProps = {
   onMove?: (document: DocumentDTO) => void;
   onRename?: (document: DocumentDTO) => void;
   onPreview?: (document: DocumentDTO) => void;
+  /** Bulk selection (D2): the ids picked, and how to toggle one or all. Absent, the table has no checkboxes. */
+  selectedIds?: Set<string>;
+  onToggleSelected?: (id: string) => void;
+  onToggleAllSelected?: () => void;
+  /** Only for those who manage documents (D3): HR only, or the person too. */
+  onChangeVisibility?: (document: DocumentDTO, visibility: DocumentVisibility) => void;
   getDownloadUrl: (documentId: string) => string;
 };
 
@@ -72,6 +87,10 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
   onMove,
   onRename,
   onPreview,
+  selectedIds,
+  onToggleSelected,
+  onToggleAllSelected,
+  onChangeVisibility,
   getDownloadUrl,
 }) => {
   const t = useTranslations("organization");
@@ -86,6 +105,21 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
         <Table>
           <TableHeader>
             <TableRow>
+              {selectedIds && (
+                <TableHead className="w-9">
+                  <Checkbox
+                    aria-label={t("documents.table.selectAll")}
+                    checked={
+                      documents.length > 0 && documents.every((d) => selectedIds.has(d.id))
+                        ? true
+                        : documents.some((d) => selectedIds.has(d.id))
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={() => onToggleAllSelected?.()}
+                  />
+                </TableHead>
+              )}
               <SortableHead field="name" label={tCommon("fields.name")} sort={sort} onSortChange={onSortChange}/>
               <TableHead>{t("documents.table.category")}</TableHead>
               <TableHead>{t("documents.table.visibility")}</TableHead>
@@ -107,7 +141,11 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 key={document.id}
                 // Double click, or Enter on the focused row, opens the preview (design fixes of 2026-11-04, fix 8).
                 tabIndex={0}
-                className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
+                data-state={selectedIds?.has(document.id) ? "selected" : undefined}
+                className={cn(
+                  "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
+                  selectedIds?.has(document.id) && "bg-accent-subtle",
+                )}
                 onDoubleClick={() => {
                   if (onPreview && isPreviewable(document.mimeType)) onPreview(document);
                 }}
@@ -117,6 +155,15 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                   }
                 }}
               >
+                {selectedIds && (
+                  <TableCell className="w-9" onDoubleClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      aria-label={t("documents.table.select", { name: document.name })}
+                      checked={selectedIds.has(document.id)}
+                      onCheckedChange={() => onToggleSelected?.(document.id)}
+                    />
+                  </TableCell>
+                )}
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
@@ -173,12 +220,8 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
 
                 <TableCell className="text-center">
                   <RowActionsMenu label={t("documents.table.actions")}>
-                    {onPreview && isPreviewable(document.mimeType) ? (
-                      <RowAction icon={<Icon icon={ViewIcon} size="sm" />} onClick={() => onPreview(document)}>
-                        {tCommon("actions.preview")}
-                      </RowAction>
-                    ) : null}
-
+                    {/* Download, Rename, Move, Change visibility, — Delete (D1, D3). Preview opens on a double
+                        click or Enter on the row, not from here. */}
                     {/*
                       The one menu item that is a link rather than a handler: the download is a
                       browser navigation, which carries the session cookie by itself.
@@ -200,6 +243,23 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                       <RowAction icon={<Icon icon={FolderTransferIcon} size="sm" />} onClick={() => onMove(document)}>
                         {t("documents.table.move")}
                       </RowAction>
+                    ) : null}
+                    {onChangeVisibility ? (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="gap-2.5 rounded-control px-2.5 py-1.5">
+                          <Icon icon={SquareLock02Icon} size="sm" className="text-tertiary" />
+                          {t("documents.table.changeVisibility")}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuRadioGroup
+                            value={document.visibility}
+                            onValueChange={(next) => onChangeVisibility(document, next as DocumentVisibility)}
+                          >
+                            <DropdownMenuRadioItem value="HR_ONLY">{t("documents.table.hrOnly")}</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="VISIBLE_TO_EMPLOYEE">{t("documents.table.employee")}</DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
                     ) : null}
                     {onDelete ? (
                       <RowActionDestructive

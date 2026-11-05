@@ -15,6 +15,7 @@ import {
 } from "@/models/user/status";
 import { useDateFormatter } from "@/lib/date";
 import { useRouter } from "next/navigation";
+import { WaitingOnYou } from "@/components/modules/organization/modules/profile/components/WaitingOnYou";
 import Link from "next/link";
 import { Button } from "@/components/desact/button";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
@@ -486,6 +487,13 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             onChangedAction={() => refreshUser(user.id)}
           />
         </div>
+
+        {/* What the reader has to do about this person (B5). Never on your own profile: nothing waits on you there. */}
+        {!isOwnProfile && (
+          <div className="mt-5">
+            <WaitingOnYou userId={user.id} firstName={user.firstName ?? fullName} />
+          </div>
+        )}
       </header>
 
       <UpdateUserAvatarModal

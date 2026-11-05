@@ -86,8 +86,8 @@ export const RenameAttributeGroupForm: FC<
     onDirtyChangeAction?.(formik.dirty);
   }, [formik.dirty, onDirtyChangeAction]);
 
-  // Submitting an untouched form would only earn "nothing changed" from the backend, so Save stays
-  // off until the name or the description actually moved.
+  // Submitting an untouched form would only earn "nothing changed" from the backend, so an unchanged
+  // Save closes the form instead of sending it.
   const isUnchanged =
     formik.values.name.trim() === initialName.trim()
     && formik.values.description.trim() === startDescription.trim();
@@ -95,7 +95,11 @@ export const RenameAttributeGroupForm: FC<
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading || isUnchanged) return;
+    if (isLoading) return;
+    if (isUnchanged) {
+      onCancelAction();
+      return;
+    }
 
     const errors = await formik.validateForm();
 
@@ -152,7 +156,7 @@ export const RenameAttributeGroupForm: FC<
           {tCommon("actions.cancel")}
         </Button>
 
-        <Button type="submit" disabled={isLoading || isUnchanged}>
+        <Button type="submit" disabled={isLoading}>
           {tCommon("actions.save")}
         </Button>
       </DialogFooter>

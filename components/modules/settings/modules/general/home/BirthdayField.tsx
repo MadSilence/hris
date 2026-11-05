@@ -57,7 +57,8 @@ export const BirthdayField: React.FC = () => {
   const dirty = draft !== null && draft !== stored;
 
   const save = async () => {
-    if (!settings.data) return;
+    // Saving what is already stored is a no-op, not a request.
+    if (!settings.data || !dirty) return;
     setError(null);
     try {
       await update.mutateAsync({
@@ -118,7 +119,7 @@ export const BirthdayField: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <Button type="submit" disabled={!dirty || update.isPending} >
+            <Button type="submit" disabled={update.isPending}>
               {tCommon("actions.save")}
             </Button>
           )}

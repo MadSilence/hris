@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FieldError } from "@/components/desact/field-error";
 import { useTranslations } from "next-intl";
 import { ComputerIcon, Key01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -159,7 +160,9 @@ export const TwoStepSection: React.FC = () => {
 /** Password again (a stolen session alone cannot enrol a phone), then the app, then the codes. */
 const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const t = useTranslations("auth");
+  const tCommonSetup = useTranslations("common");
   const [password, setPassword] = React.useState("");
+  const [triedSetup, setTriedSetup] = React.useState(false);
   const [enrolment, setEnrolment] = React.useState<{ otpauthUri: string; secret: string } | null>(null);
   const [signOutOthers, setSignOutOthers] = React.useState(true);
   const [codes, setCodes] = React.useState<string[] | null>(null);
@@ -178,6 +181,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
 
   const start = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTriedSetup(true);
     if (!password) return;
     setBusy(true);
     setError(null);
@@ -228,9 +232,10 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
                 disabled={busy}
                 autoFocus
               />
+              <FieldError>{triedSetup && !password ? tCommonSetup("validation.enterPassword") : null}</FieldError>
             </div>
             <FormError message={error} />
-            <Button type="submit" className="w-full" disabled={busy || !password}>{busy ? t("mfa.setup.continueBusy") : t("mfa.setup.continue")}</Button>
+            <Button type="submit" className="w-full" disabled={busy}>{busy ? t("mfa.setup.continueBusy") : t("mfa.setup.continue")}</Button>
           </form>
         )}
       </DialogContent>
@@ -245,6 +250,7 @@ const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
   const [value, setValue] = React.useState("");
   const [backup, setBackup] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const [triedOff, setTriedOff] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -257,6 +263,7 @@ const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTriedOff(true);
     if (!value.trim()) return;
     setBusy(true);
     setError(null);
@@ -274,14 +281,17 @@ const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
             <DialogTitle>{t("mfa.disable.title")}</DialogTitle>
             <DialogDescription>{t("mfa.disable.description")}</DialogDescription>
           </DialogHeader>
-          <CodeField id="mfa-disable-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
+          <div>
+            <CodeField id="mfa-disable-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
+            <FieldError>{triedOff && !value.trim() ? tCommon("validation.enterCode") : null}</FieldError>
+          </div>
           <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
             {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
           </button>
           <FormError message={error} />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy || !value.trim()}>{busy ? t("mfa.disable.submitBusy") : t("mfa.disable.submit")}</Button>
+            <Button type="submit" disabled={busy}>{busy ? t("mfa.disable.submitBusy") : t("mfa.disable.submit")}</Button>
           </div>
         </form>
       </DialogContent>

@@ -6,6 +6,7 @@ import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
 import { Skeleton } from "@/components/desact/skeleton";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -20,11 +21,20 @@ import { parseDuration } from "@/components/modules/attendance/lib";
 import { useInvalidateAttendance } from "@/components/modules/attendance/hooks";
 
 const DEFAULT_NORM = 480;
+const DEFAULT_START = 540;
+
+const toClock = (minutes: number) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+const fromClock = (clock: string): number | null => {
+  const m = /^(\d{2}):(\d{2})$/.exec(clock);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+};
 
 /**
- * How long a company working day is — the norm Attendance expects of anybody without a personal
- * schedule. The company's working days say *which* days; this says *how long*. Kept in the company
- * settings, edited here, beside the personal schedules that override it.
+ * When a company working day starts and how long it is — the norm Attendance expects of anybody without a
+ * personal schedule, and the start Log hours' Full day and Half day presets begin at (the owner, 2026-11-05, C3).
+ * The company's working days say *which* days; this says *when* and *how long*. Kept in the company settings,
+ * edited here, beside the personal schedules that override the length.
  */
 export const CompanyWorkdayNorm: React.FC = () => {
   const t = useTranslations("attendance");
@@ -34,6 +44,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
   const invalidateAttendance = useInvalidateAttendance();
   const canEdit = useCanAccess("SETTINGS.GENERAL", "EDIT");
   const [draft, setDraft] = useState<string | null>(null);
+  const [startDraft, setStartDraft] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (settings.error) {
@@ -43,10 +54,14 @@ export const CompanyWorkdayNorm: React.FC = () => {
   const stored = settings.data?.dailyNormMinutes ?? DEFAULT_NORM;
   const value = draft ?? formatMinutes(stored);
   const parsed = parseDuration(value);
-  const dirty = draft !== null && parsed !== stored;
+  const storedStart = settings.data?.workdayStartMinutes ?? DEFAULT_START;
+  const startValue = startDraft ?? toClock(storedStart);
+  const parsedStart = fromClock(startValue);
+  const dirty = (draft !== null && parsed !== stored) || (startDraft !== null && parsedStart !== storedStart);
 
   const save = async () => {
-    if (!settings.data) return;
+    // Saving what is already stored is a no-op, not a request.
+    if (!settings.data || !dirty) return;
     if (parsed === null || parsed < 1 || parsed > 24 * 60) {
       setError(t("workday.invalid"));
       return;
@@ -58,9 +73,11 @@ export const CompanyWorkdayNorm: React.FC = () => {
         workingDays: settings.data.workingDays,
         weekStartDay: settings.data.weekStartDay,
         dailyNormMinutes: parsed,
+        workdayStartMinutes: parsedStart ?? storedStart,
         version: settings.data.version,
       });
       setDraft(null);
+      setStartDraft(null);
       void invalidateAttendance();
       showSuccess(t("workday.saved"));
     } catch (caught) {
@@ -86,6 +103,18 @@ export const CompanyWorkdayNorm: React.FC = () => {
             void save();
           }}
  >
+          <div className="w-36 space-y-1">
+            <Label htmlFor="company-workday-start">{t("workday.startsAt")}</Label>
+            <TimePicker
+              id="company-workday-start"
+              value={startValue}
+              disabled={!canEdit || update.isPending}
+              onChange={(next) => {
+                setStartDraft(next);
+                setError(null);
+              }}
+            />
+          </div>
           <div className="w-32 space-y-1">
             <Label htmlFor="company-workday-length">{t("workday.length")}</Label>
             <Input
@@ -100,7 +129,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
             />
           </div>
           {canEdit && (
-            <Button type="submit" disabled={!dirty || update.isPending} >
+            <Button type="submit" disabled={update.isPending}>
               {tCommon("actions.save")}
             </Button>
           )}

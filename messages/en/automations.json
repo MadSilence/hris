@@ -498,7 +498,8 @@
     "changing": "Changing…",
     "alsoTitle": "Also tell",
     "alsoDescription": "When a run fails, a wait times out or the automation pauses, these people are told too.",
-    "removePerson": "Remove {name}"
+    "removePerson": "Remove {name}",
+    "pickOwner": "Pick the new owner."
   },
   "placeholderField": {
     "listLabel": "Fields for {label}",

@@ -10,6 +10,8 @@ export interface UpdateTimeOffPolicyRequest {
   /** The policy's one name, as typed — unique inside its leave type. Renaming is an ordinary save. */
   name: string;
   description: string | null;
+  /** A tag colour but gray; null leaves it as it is. */
+  color: string | null;
 
   unit: TimeOffPolicyUnit;
 

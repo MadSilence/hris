@@ -419,7 +419,7 @@ function TemplateCanvasInner({
         </ReactFlow>
 
         {dragHint && (
-          <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-tag bg-inverse px-2.5 py-1 text-hint text-on-inverse shadow-card">
+          <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-popover border border-divider bg-overlay px-2.5 py-1.5 text-hint text-secondary shadow-popover">
             {dragHint}
           </div>
         )}

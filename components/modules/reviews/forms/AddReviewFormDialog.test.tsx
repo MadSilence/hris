@@ -134,13 +134,16 @@ describe("AddReviewFormDialog from the library", () => {
     expect(saveMock).not.toHaveBeenCalled();
   });
 
-  it("does not offer Add while the library's name is taken twice", () => {
+  it("does not add while the library's name is taken twice", () => {
     previewMock.mockReturnValue(partialMock<ReturnType<typeof useTemplatePreview>>({
       data: previewOf("Self review (template)", { renameTaken: true }), isLoading: false,
     }));
     renderDialog();
     fireEvent.click(screen.getByRole("radio", { name: /Self review/ }));
-    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
+    const add = screen.getByRole("button", { name: "Add" });
+    expect(add).toBeEnabled();
+    fireEvent.click(add);
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 });
 

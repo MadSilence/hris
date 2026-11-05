@@ -1,4 +1,5 @@
 import type { useTranslations } from "next-intl";
+import { POLICY_COLORS, toPolicyColor, type TagColor } from "@/lib/theme/tags";
 import type {
   CreateTimeOffPolicyRequest,
   UpdateTimeOffPolicyRequest,
@@ -98,6 +99,8 @@ export type PolicyWizardValues = {
   // Basics
   name: string;
   description: string;
+  /** A tag colour but gray (the designers' answer 2.4). */
+  color: TagColor;
   unit: TimeOffPolicyUnit;
   paid: boolean;
   hiddenFromEmployees: boolean;
@@ -205,6 +208,7 @@ export type PolicyWizardValues = {
 export const defaultPolicyWizardValues: PolicyWizardValues = {
   name: "",
   description: "",
+  color: POLICY_COLORS[0],
   unit: TimeOffPolicyUnit.Days,
   paid: true,
   hiddenFromEmployees: false,
@@ -452,6 +456,7 @@ export function buildCreatePolicyRequest(
 
     name: v.name.trim(),
     description: v.description.trim() || null,
+    color: v.color,
 
     status: activate ? TimeOffPolicyStatus.Active : TimeOffPolicyStatus.Draft,
     unit: v.unit,
@@ -622,6 +627,7 @@ export function buildUpdatePolicyRequest(v: PolicyWizardValues): UpdateTimeOffPo
   return {
     name: v.name.trim(),
     description: v.description.trim() || null,
+    color: v.color,
 
     unit: v.unit,
 
@@ -693,6 +699,7 @@ export function policyToWizardValues(
     // Basics
     name: policy.name,
     description: policy.description ?? "",
+    color: toPolicyColor(policy.color),
     unit: policy.unit,
     paid: policy.paid,
     hiddenFromEmployees: policy.hiddenFromEmployees,
@@ -798,4 +805,15 @@ export function policyToWizardValues(
     editAdminCanEditAny: editRules?.adminCanEditAnyRequest ?? d.editAdminCanEditAny,
     editAllowPastEdits: editRules?.allowPastEdits ?? d.editAllowPastEdits,
   };
+}
+
+/**
+ * Whether the approval step was changed from what the wizard opened with — every `appr*` value. A policy nobody set up
+ * approval for is read as "required, an administrator decides" by the backend; the wizard shows it as "not required",
+ * so saving that section untouched switched approvals off for good. An edit of the colour alone made Annual Leave
+ * approve itself (walk of 2026-11-05) — the edit now leaves an untouched, unconfigured approval out of the save.
+ */
+export function approvalStepChanged(opened: PolicyWizardValues, current: PolicyWizardValues): boolean {
+  const keys = (Object.keys(current) as (keyof PolicyWizardValues)[]).filter((k) => k.startsWith("appr"));
+  return keys.some((k) => JSON.stringify(opened[k]) !== JSON.stringify(current[k]));
 }

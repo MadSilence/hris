@@ -57,6 +57,9 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FormError } from "@/components/feedback/FormError";
 import { InlineAlert } from "@/components/desact/alert";
+import { PolicyColorPicker } from "@/components/ui/PolicyColorPicker";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
+import type { TagColor } from "@/lib/theme/tags";
 
 export type WizardSetter = <K extends keyof PolicyWizardValues>(
   key: K,
@@ -131,7 +134,13 @@ function Reveal({ children }: { children: ReactNode }) {
 // ── Step 1: Basics ───────────────────────────────────────────────────
 
 /** `nameError` is a refusal of the name by the server — a name already taken (TOP00004). */
-export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ values, set, nameError }) => {
+export const BasicsStep: FC<StepProps & { nameError?: string | null; usedBy?: Partial<Record<TagColor, string[]>> }> = ({
+  values,
+  set,
+  nameError,
+  usedBy,
+}) => {
+  const tCommon = useTranslations("common");
   const t = useTranslations("timeOff");
   return (
   <div className="space-y-6">
@@ -153,6 +162,16 @@ export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ valu
         onChange={(e) => set("description", e.currentTarget.value)}
       />
     </Field>
+
+    <div className="space-y-2">
+      <Label id="wiz-color-label">{tCommon("tagColor.policyColor")}</Label>
+      <PolicyColorPicker
+        aria-labelledby="wiz-color-label"
+        value={values.color}
+        onChange={(color) => set("color", color)}
+        usedBy={usedBy}
+      />
+    </div>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Field label={t("policyWizard.basics.unit")} htmlFor="wiz-unit">
@@ -1468,7 +1487,10 @@ export const ReviewStep: FC<{
         <p className="mb-1 text-hint font-semibold text-tertiary">
           {leaveTypeName ? t("policyWizard.review.leaveType", { name: leaveTypeName }) : t("policyWizard.review.newPolicy")}
         </p>
-        <p className="text-section-title text-primary">{values.name || t("policyWizard.review.untitled")}</p>
+        <p className="flex items-center gap-2 text-section-title text-primary">
+          <PolicyMarker color={values.color} />
+          {values.name || t("policyWizard.review.untitled")}
+        </p>
         {values.description && (
           <p className="mt-1 text-body text-tertiary">{values.description}</p>
         )}

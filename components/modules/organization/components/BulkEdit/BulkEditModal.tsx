@@ -32,6 +32,7 @@ import { canAccess, type ResourceCode } from "@/models/access";
 import type { BulkEditRequest, BulkEditResult, BulkOperation } from "@/models/bulkEdit";
 import { useAccess } from "@/components/auth/useAccess";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { useAudienceFieldOptions } from "@/components/audience/hooks/useAudienceFieldOptions";
 import {
@@ -85,6 +86,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
   const [bool, setBool] = useState<boolean>(false);
   const [confirming, setConfirming] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
   // Set when the backend refuses to write because some targets fall outside the actor's access.
   const [outOfScope, setOutOfScope] = useState<BulkEditResult | null>(null);
 
@@ -97,6 +99,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
       setFieldKey("");
       setJobId(null);
       setConfirming(false);
+      setTried(false);
     }
   }, [isOpen]);
 
@@ -132,8 +135,6 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
     (field?.kind === "attr" && field.attrType === "CHECKBOX" ? true : false) ||
     single.trim().length > 0;
 
-  const canSubmit = !!field && valueReady && !bulkEdit.isPending && !jobId;
-
   const doSubmit = (confirmPartial = false) => {
     if (!field) return;
     const base: BulkEditRequest =
@@ -166,6 +167,8 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
   };
 
   const onApply = () => {
+    setTried(true);
+    if (!field || !valueReady) return;
     if (isStatus && !confirming) {
       setConfirming(true);
       return;
@@ -235,6 +238,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
                 placeholder={t("bulkEdit.selectField")}
                 clearable={false}
               />
+              <FieldError>{tried && !field ? tCommon("validation.required") : null}</FieldError>
             </div>
 
             {/* Operation (when more than one) */}
@@ -269,6 +273,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
                   bool={bool}
                   setBool={setBool}
                 />
+                <FieldError>{tried && !valueReady ? tCommon("validation.required") : null}</FieldError>
               </div>
             ) : null}
 
@@ -304,7 +309,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
               <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
                 {tCommon("actions.cancel")}
               </Button>
-              <Button type="button" onClick={onApply} disabled={!canSubmit}>
+              <Button type="button" onClick={onApply} disabled={busy}>
                 {bulkEdit.isPending
                   ? t("bulkEdit.applying")
                   : isStatus && confirming

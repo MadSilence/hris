@@ -110,7 +110,9 @@
     "markDone": "Mark done",
     "attachAndMarkDone": "Attach and mark done",
     "answersNotSent": "The answers could not be sent.",
-    "commentsCount": "Comments ({count})"
+    "commentsCount": "Comments ({count})",
+    "pickFile": "Choose a file first.",
+    "fillSomething": "Fill in at least one field."
   },
   "pages": {
     "processesTitle": "Processes",

@@ -12,6 +12,7 @@ import {
 } from "@/components/desact/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { messageForError } from "@/lib/errors/errorMessages";
 import type {
   PeopleImportDateFormat,
@@ -51,6 +52,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
   const [dateFormat, setDateFormat] = useState<PeopleImportDateFormat>(anImport.dateFormat);
   const [decimal, setDecimal] = useState<PeopleImportDecimalSeparator>(anImport.decimalSeparator);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   const update = useUpdatePeopleImport();
   const check = useCheckPeopleImport();
@@ -76,6 +78,9 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
   };
 
   const onCheck = async () => {
+    setTried(true);
+    // What is still to match is named above the button.
+    if (missingRequired.length > 0) return;
     setError(null);
     try {
       await update.mutateAsync({ id: anImport.id, body: { version: anImport.version, mapping, dateFormat, decimalSeparator: decimal } });
@@ -170,14 +175,16 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       )}
 
       <FormError message={error} />
-      {missingRequired.length > 0 && (
+      {missingRequired.length > 0 && (tried ? (
+        <FieldError>{t("map.stillToMatch", { fields: missingRequired.map((f) => fieldLabel(t, f)).join(", ") })}</FieldError>
+      ) : (
         <p className="text-body text-tertiary">
           {t("map.stillToMatch", { fields: missingRequired.map((f) => fieldLabel(t, f)).join(", ") })}
         </p>
-      )}
+      ))}
 
       <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={() => void onCheck()} disabled={busy || missingRequired.length > 0}>
+        <Button type="button" onClick={() => void onCheck()} disabled={busy}>
           {check.isPending ? t("map.checking") : checkedWithErrors ? t("map.checkAgain") : t("map.checkFile")}
         </Button>
         <Button type="button"

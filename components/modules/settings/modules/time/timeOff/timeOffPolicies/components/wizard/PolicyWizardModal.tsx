@@ -1,6 +1,8 @@
 "use client";
 
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
+import { POLICY_COLORS, nextPolicyColor, toPolicyColor, type TagColor } from "@/lib/theme/tags";
 import { useTranslations } from "next-intl";
 import { ArrowLeft01Icon, ArrowRight01Icon, Calendar03Icon, CalendarLock01Icon, CheckmarkCircle02Icon, FileTextIcon, PencilEdit01Icon, Refresh01Icon, Task01Icon, UserCheck01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
@@ -64,6 +66,8 @@ type Props = {
   mode?: "create" | "edit";
   leaveTypeName?: string;
   initialValues?: PolicyWizardValues;
+  /** The policy being edited — its own colour is not "in use". */
+  policyId?: string;
   /**
    * What is already standing under the rules being changed, shown on the Review step.
    *
@@ -86,6 +90,7 @@ export const PolicyWizardModal: FC<Props> = ({
   leaveTypeName,
   editImpact,
   initialValues,
+  policyId,
   onSubmitAction,
   onCancelAction,
 }) => {
@@ -99,9 +104,28 @@ export const PolicyWizardModal: FC<Props> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
+  // The other policies' colours: "In use" in the picker, and a new policy opens on the first free one.
+  const { data: policies } = useTimeOffPolicies();
+  const usedBy = useMemo(() => {
+    const out: Partial<Record<TagColor, string[]>> = {};
+    for (const p of policies ?? []) {
+      if (p.id === policyId) continue;
+      const color = toPolicyColor(p.color);
+      (out[color] ??= []).push(p.name);
+    }
+    return out;
+  }, [policies, policyId]);
+  const freeColor = useRef<TagColor>(POLICY_COLORS[0]);
+  freeColor.current = nextPolicyColor((policies ?? []).filter((p) => p.id !== policyId).map((p) => p.color));
+  // What the wizard opened with — the dirty check compares against it, so the colour picked for a new policy is not
+  // an edit of its own.
+  const [openedWith, setOpenedWith] = useState<PolicyWizardValues>(defaultPolicyWizardValues);
+
   useEffect(() => {
     if (isOpen) {
-      setValues(initialValues ?? defaultPolicyWizardValues);
+      const start = initialValues ?? { ...defaultPolicyWizardValues, color: freeColor.current };
+      setOpenedWith(start);
+      setValues(start);
       setStepIndex(0);
       setMaxReached(mode === "edit" ? STEPS.length - 1 : 0);
       setError(null);
@@ -110,8 +134,8 @@ export const PolicyWizardModal: FC<Props> = ({
   }, [isOpen, initialValues, mode]);
 
   const isDirty = useMemo(
-    () => JSON.stringify(values) !== JSON.stringify(initialValues ?? defaultPolicyWizardValues),
-    [values, initialValues],
+    () => JSON.stringify(values) !== JSON.stringify(openedWith),
+    [values, openedWith],
   );
 
   const set = <K extends keyof PolicyWizardValues>(key: K, value: PolicyWizardValues[K]) => {
@@ -187,7 +211,7 @@ export const PolicyWizardModal: FC<Props> = ({
   const renderStep = () => {
     switch (step.id) {
       case "basics":
-        return <BasicsStep values={values} set={set} nameError={nameError} />;
+        return <BasicsStep values={values} set={set} nameError={nameError} usedBy={usedBy} />;
       case "entitlement":
         return <EntitlementStep values={values} set={set} />;
       case "accrual":

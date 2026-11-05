@@ -12,6 +12,8 @@ export interface CreateTimeOffPolicyRequest {
 
   name: string;
   description: string | null;
+  /** A tag colour but gray; null lets the backend take the first one no other policy uses. */
+  color: string | null;
 
   status: TimeOffPolicyStatus;
   unit: TimeOffPolicyUnit;

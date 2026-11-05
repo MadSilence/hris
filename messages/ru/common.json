@@ -186,8 +186,15 @@
       "ocean": "Океан",
       "teal": "Бирюзовый",
       "cocoa": "Какао",
-      "bronze": "Бронзовый"
-    }
+      "bronze": "Бронзовый",
+      "lilac": "Сиреневый",
+      "orange": "Оранжевый",
+      "mustard": "Горчичный",
+      "olive": "Оливковый"
+    },
+    "inUse": "Занят",
+    "usedBy": "Уже у: {names}",
+    "policyColor": "Цвет в календаре"
   },
   "weekdays": {
     "short": {
@@ -254,7 +261,11 @@
       "length": "Должно быть ровно {length, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}",
       "min": "Не менее {min, plural, one {# элемента} few {# элементов} many {# элементов} other {# элемента}}",
       "max": "Не более {max, plural, one {# элемента} few {# элементов} many {# элементов} other {# элемента}}"
-    }
+    },
+    "enterCode": "Введите код из приложения.",
+    "enterPassword": "Введите пароль.",
+    "enterName": "Введите название.",
+    "chooseOne": "Выберите вариант, чтобы продолжить."
   },
   "toast": {
     "region": "Уведомления",
@@ -272,5 +283,9 @@
     "nodeDescriptionKeyboard": "Нажмите Enter или пробел, чтобы выбрать элемент, и двигайте его стрелками. Delete удаляет его, Escape отменяет.",
     "nodeMoved": "Элемент перемещён ({direction}). Новое положение: x {x}, y {y}",
     "edgeDescription": "Нажмите Enter или пробел, чтобы выбрать связь; Delete удаляет её, Escape отменяет."
+  },
+  "selection": {
+    "selected": "Выбрано: {count}",
+    "clear": "Снять выбор"
   }
 }

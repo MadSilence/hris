@@ -8,6 +8,16 @@ import {
 
 const values = { ...defaultPolicyWizardValues, name: "Annual Leave" };
 
+// The other policies' colours: what the picker marks "In use" and what a new policy skips.
+jest.mock("@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies", () => ({
+  useTimeOffPolicies: () => ({
+    data: [
+      { id: "p1", name: "Annual Leave", color: "berry" },
+      { id: "p2", name: "Sick Leave", color: "plum" },
+    ],
+  }),
+}))
+
 /**
  * A save refused for its name — another policy has it (TOP00004) — is shown under the Name field, with
  * the wizard back on the step that has it. Until the walk of 2026-10-30 the edit page caught the
@@ -51,5 +61,22 @@ describe("PolicyWizardModal — a refused name", () => {
       expect(screen.getByText("Somebody saved this policy since you opened it.")).toBeInTheDocument(),
     );
     expect(screen.getByText(/Step 12 of/)).toBeInTheDocument();
+  });
+});
+
+describe("PolicyWizardModal — the colour", () => {
+  it("opens a new policy on the first colour nobody uses, and marks the used ones", () => {
+    render(<PolicyWizardModal isOpen mode="create" onSubmitAction={jest.fn()} onCancelAction={jest.fn()} />);
+    const picked = screen.getAllByRole("radio").find((r) => r.getAttribute("aria-checked") === "true");
+    expect(picked).toHaveAccessibleName("Indigo");
+    expect(screen.getByRole("radio", { name: /^Berry, Used by Annual Leave/ })).toBeInTheDocument();
+  });
+
+  it("moves the choice with the arrow keys", () => {
+    render(<PolicyWizardModal isOpen mode="edit" initialValues={{ ...values, color: "ocean" }} onSubmitAction={jest.fn()} onCancelAction={jest.fn()} />);
+    fireEvent.keyDown(screen.getByRole("radio", { name: "Ocean" }), { key: "ArrowRight" });
+    expect(screen.getByRole("radio", { name: "Teal" })).toHaveAttribute("aria-checked", "true");
+    fireEvent.keyDown(screen.getByRole("radio", { name: "Teal" }), { key: "ArrowDown" });
+    expect(screen.getByRole("radio", { name: "Olive" })).toHaveAttribute("aria-checked", "true");
   });
 });

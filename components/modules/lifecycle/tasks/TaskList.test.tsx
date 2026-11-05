@@ -54,7 +54,10 @@ describe("TaskList — done where shown", () => {
 
     expect(screen.queryByRole("button", { name: "Mark done" })).not.toBeInTheDocument();
     const attach = screen.getByRole("button", { name: "Attach and mark done" });
-    expect(attach).toBeDisabled();
+    expect(attach).toBeEnabled();
+    fireEvent.click(attach);
+    expect(screen.getByText("Choose a file first.")).toBeInTheDocument();
+    expect(complete).not.toHaveBeenCalled();
 
     const file = new File(["x"], "handover.pdf", { type: "application/pdf" });
     fireEvent.change(screen.getByLabelText("Choose file"), { target: { files: [file] } });

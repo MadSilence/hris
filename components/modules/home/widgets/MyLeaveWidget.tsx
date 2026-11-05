@@ -18,6 +18,7 @@ import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { isoDateInZone } from "@/components/modules/home/utils/zonedTime";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
 import { HomeCard, HomeCardLink, HomeEmpty, HomeRowsSkeleton } from "@/components/modules/home/components/HomeCard";
 
 const UPCOMING_LIMIT = 3;
@@ -96,8 +97,11 @@ export const MyLeaveWidget: React.FC = () => {
           {current.map((balance) => {
             const policy = policyMap.get(balance.policyId);
             return (
-              <li key={balance.id} className="flex items-baseline justify-between gap-3 text-body">
-                <span className="truncate text-primary">{policy?.name ?? t("myTimeOff.policyFallback")}</span>
+              <li key={balance.id} className="flex items-center justify-between gap-3 text-body">
+                <span className="flex min-w-0 items-center gap-2">
+                  <PolicyMarker color={policy?.color} />
+                  <span className="truncate text-primary">{policy?.name ?? t("myTimeOff.policyFallback")}</span>
+                </span>
                 <span className="shrink-0 text-tertiary">
                   {t.rich("myTimeOff.left", {
                     b: (chunks) => <span className="font-semibold text-primary">{chunks}</span>,
@@ -116,8 +120,11 @@ export const MyLeaveWidget: React.FC = () => {
         <div className="flex flex-col gap-1 border-t border-divider pt-3">
           <p className="text-hint font-medium text-tertiary">{t("myTimeOff.comingUp")}</p>
           {upcoming.map((request) => (
-            <p key={request.id} className="flex items-baseline justify-between gap-3 text-body">
-              <span className="truncate text-primary">{dates(request, formatDisplayDate)}</span>
+            <p key={request.id} className="flex items-center justify-between gap-3 text-body">
+              <span className="flex min-w-0 items-center gap-2">
+                <PolicyMarker color={policyMap.get(request.policyId)?.color} />
+                <span className="truncate text-primary">{dates(request, formatDisplayDate)}</span>
+              </span>
               <span className="shrink-0 text-hint text-tertiary">
                 {request.status === "APPROVED" ? policyMap.get(request.policyId)?.name ?? t("myTimeOff.approved") : t("myTimeOff.waiting")}
               </span>

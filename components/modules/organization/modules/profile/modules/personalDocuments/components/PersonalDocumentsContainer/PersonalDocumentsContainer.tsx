@@ -35,9 +35,13 @@ import {
 import {
   UploadDocumentModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentModal";
-import {
-  DeleteDocumentModal,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/DeleteDocumentModal";
+import { showUndoToast } from "@/lib/feedback/undoToast";
+import { showError } from "@/lib/errors/errorToast";
+import { ActionStatus } from "@/components/models/ActionStatus";
+import { useQueryClient } from "@tanstack/react-query";
+import { restoreDocumentAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/trashActions";
+import { changeDocumentVisibilityAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/changeDocumentVisibilityAction";
+import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import {
   MoveDocumentModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/MoveDocumentModal";
@@ -54,7 +58,9 @@ import {
   PersonalDocumentsTrash,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsTrash";
 import { Button } from "@/components/desact/button";
-import { Delete02Icon, FolderAddIcon, Upload04Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, Download01Icon, FolderAddIcon, FolderTransferIcon, StarIcon, Upload04Icon } from "@hugeicons/core-free-icons";
+import { SelectionBar } from "@/components/ui/SelectionBar";
+import { batchDocumentsAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/batchDocumentsAction";
 import { Icon } from "@/components/desact/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
@@ -103,7 +109,6 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     isRenamingFolder,
     isDeletingFolder,
     isUploadingFile,
-    isDeletingDocument,
     isMovingDocument,
     isRenamingDocument,
 
@@ -111,7 +116,6 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     renameFolderError,
     deleteFolderError,
     uploadFileError,
-    deleteDocumentError,
     moveDocumentError,
     renameDocumentError,
 
@@ -119,7 +123,6 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     resetRenameFolder,
     resetDeleteFolder,
     resetUploadFile,
-    resetDeleteDocument,
     resetMoveDocument,
     resetRenameDocument,
   } = usePersonalDocuments({ userId });
@@ -138,6 +141,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   // The drop overlay says whose documents a file lands in.
   const { data: owner } = useUser(userId);
   const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const dropTarget = breadcrumbs.length > 1
     ? t("documents.container.dropToFolder", { folder: breadcrumbs[breadcrumbs.length - 1].name })
     : isOwnSpace
@@ -163,7 +167,83 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   // Counted when the dialog opens, not carried along with the listing: a folder that was empty two
   // minutes ago is not a promise about now.
   const folderImpact = useDocumentsFolderDeleteImpact(userId, deleteFolderState?.id ?? null);
-  const [deleteDocumentState, setDeleteDocumentState] = useState<DocumentDTO | null>(null);
+  const queryClient = useQueryClient();
+  // The list and the trash both change when a document goes or comes back.
+  const refreshAll = () => void queryClient.invalidateQueries();
+
+  /**
+   * Delete moves to the trash, which can be undone — so no dialog asking first, but a toast with Undo (the owner,
+   * 2026-11-05, D1; `lib/feedback/undoToast` says why the two are not the same thing).
+   */
+  const deleteWithUndo = async (document: DocumentDTO) => {
+    try {
+      await deleteDocument(document.id);
+    } catch (error) {
+      showError(error);
+      return;
+    }
+    showUndoToast({
+      message: t("documents.table.movedToTrash", { name: document.name }),
+      onUndo: async () => {
+        const result = await restoreDocumentAction({ userId, documentId: document.id });
+        if (result.status === ActionStatus.ERROR) throw new Error(result.errorMessage);
+        refreshAll();
+      },
+    });
+  };
+
+  // Bulk selection (D2): the rows picked in the open folder; cleared when the folder or the filter changes.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchMoveOpen, setBatchMoveOpen] = useState(false);
+  const visibleIds = useMemo(() => documents.map((d) => d.id), [documents]);
+  const selectedIds = useMemo(() => [...selected].filter((id) => visibleIds.includes(id)), [selected, visibleIds]);
+  const clearSelection = React.useCallback(() => setSelected(new Set()), []);
+  const toggleSelected = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleAllSelected = () =>
+    setSelected((prev) => (visibleIds.every((id) => prev.has(id)) ? new Set() : new Set(visibleIds)));
+
+  const runBatch = async (operation: "delete" | "restore" | "star" | "move", extra?: { folderId?: string | null }) => {
+    const ids = selectedIds;
+    const result = await batchDocumentsAction({ operation, ids, targetUserId: userId, starred: true, ...extra });
+    if (result.status === ActionStatus.ERROR) {
+      showError(new Error(result.errorMessage ?? t("documents.table.batchFailed")));
+      return false;
+    }
+    refreshAll();
+    return ids;
+  };
+
+  const batchDelete = async () => {
+    const ids = await runBatch("delete");
+    if (!ids) return;
+    clearSelection();
+    showUndoToast({
+      message: t("documents.table.movedManyToTrash", { count: ids.length }),
+      onUndo: async () => {
+        const result = await batchDocumentsAction({ operation: "restore", ids });
+        if (result.status === ActionStatus.ERROR) throw new Error(result.errorMessage);
+        refreshAll();
+      },
+    });
+  };
+
+  const zipUrl = `/api/documents/batch/zip?${new URLSearchParams(selectedIds.map((id) => ["ids", id])).toString()}`;
+
+  const changeVisibility = async (document: DocumentDTO, visibility: DocumentVisibility) => {
+    if (visibility === document.visibility) return;
+    const result = await changeDocumentVisibilityAction({ documentId: document.id, visibility });
+    if (result.status === ActionStatus.ERROR) {
+      showError(new Error(result.errorMessage ?? t("documents.table.visibilityFailed")));
+      return;
+    }
+    refreshAll();
+  };
   const [moveDocumentState, setMoveDocumentState] = useState<DocumentDTO | null>(null);
   const [renameDocumentState, setRenameDocumentState] = useState<DocumentDTO | null>(null);
   const [previewState, setPreviewState] = useState<DocumentDTO | null>(null);
@@ -226,7 +306,20 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         )}
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
-          {/* The trash stays reachable while the space is blank: what was deleted is still in it. */}
+          {/* While rows are picked, the bar takes the toolbar's place (D2). */}
+          {selectedIds.length > 0 && !showTrash ? (
+            <SelectionBar
+              count={selectedIds.length}
+              onClear={clearSelection}
+              actions={[
+                { key: "download", label: tCommon("actions.download"), icon: Download01Icon, href: zipUrl },
+                { key: "star", label: t("documents.table.star"), icon: StarIcon, onClick: () => void runBatch("star").then((ok) => ok && clearSelection()) },
+                ...(canEdit ? [{ key: "move", label: t("documents.table.move"), icon: FolderTransferIcon, onClick: () => setBatchMoveOpen(true) }] : []),
+                ...(canManage ? [{ key: "delete", label: tCommon("actions.delete"), icon: Delete02Icon, danger: true, onClick: () => void batchDelete() }] : []),
+              ]}
+            />
+          ) : (
+          /* The trash stays reachable while the space is blank: what was deleted is still in it. */
           <div className="flex flex-none items-center gap-4">
             {!(isBlank && !showTrash) && <PersonalDocumentsToolbar
               search={search}
@@ -260,6 +353,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               )}
             </div>
           </div>
+          )}
 
           {/*
             The trail is the only thing that says which folder is open, so it appears once there is
@@ -322,11 +416,15 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                   sort={sort}
                   onSortChange={setSort}
                   onToggleStar={toggleStar}
-                  onDelete={canManage ? (document) => setDeleteDocumentState(document) : undefined}
+                  onDelete={canManage ? (document) => void deleteWithUndo(document) : undefined}
+                  onChangeVisibility={hasManagePermission ? (document, next) => void changeVisibility(document, next) : undefined}
                   onMove={canEdit ? (document) => setMoveDocumentState(document) : undefined}
                   onRename={canEdit ? (document) => setRenameDocumentState(document) : undefined}
                   onPreview={(document) => setPreviewState(document)}
                   getDownloadUrl={documentService.getPersonalDocumentDownloadUrl}
+                  selectedIds={new Set(selectedIds)}
+                  onToggleSelected={toggleSelected}
+                  onToggleAllSelected={toggleAllSelected}
                 />
               </div>
             )}
@@ -410,21 +508,17 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         }
       />
 
-      <DeleteDocumentModal
-        isOpen={!!deleteDocumentState}
-        isLoading={isDeletingDocument}
-        documentName={deleteDocumentState?.name}
-        errorMessage={messageOf(deleteDocumentError)}
-        onRequestCloseAction={() => {
-          setDeleteDocumentState(null);
-          resetDeleteDocument();
-        }}
-        onConfirmAction={() => {
-          if (!deleteDocumentState) return;
-
-          void runAndClose(deleteDocument(deleteDocumentState.id), () => {
-            setDeleteDocumentState(null);
-            resetDeleteDocument();
+      {/* The same dialog moves a selection: "Move 3 documents to another folder". */}
+      <MoveDocumentModal
+        isOpen={batchMoveOpen}
+        documentName={t("documents.moveDocument.nDocuments", { count: selectedIds.length })}
+        folders={folderOptions}
+        onCancelAction={() => setBatchMoveOpen(false)}
+        onConfirmAction={({ folderId }) => {
+          void runBatch("move", { folderId: folderId ?? null }).then((ok) => {
+            if (!ok) return;
+            setBatchMoveOpen(false);
+            clearSelection();
           });
         }}
       />

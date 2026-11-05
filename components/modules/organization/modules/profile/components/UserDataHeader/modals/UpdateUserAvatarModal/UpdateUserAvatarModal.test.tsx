@@ -70,10 +70,16 @@ describe("UpdateUserAvatarModal", () => {
     expect(screen.getByRole("button", { name: /remove photo/i })).toBeDisabled();
   });
 
-  it("keeps save button disabled before file selection", () => {
-    renderModal();
+  it("asks for an image when Save is pressed before one is chosen", async () => {
+    const onConfirmAction = jest.fn();
+    renderModal({ onConfirmAction });
 
-    expect(screen.getByRole("button", { name: /save changes/i })).toBeDisabled();
+    const save = screen.getByRole("button", { name: /save changes/i });
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+
+    expect(await screen.findByText("Choose an image to upload.")).toBeInTheDocument();
+    expect(onConfirmAction).not.toHaveBeenCalled();
   });
 
   it("selects file, shows file info and enables save", () => {
@@ -122,7 +128,7 @@ describe("UpdateUserAvatarModal", () => {
 
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:avatar-preview");
     expect(screen.queryByText("avatar.png")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /save changes/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
   });
 
   it("calls onConfirmAction with upload submission", async () => {

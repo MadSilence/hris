@@ -203,7 +203,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
     return ids;
   }, [groups, user?.fieldAccess]);
 
-  // Client-side validity per field (reported by rows) — blocks Save while invalid.
+  // Client-side validity per field (reported by rows) — a save waits while one is invalid.
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const setFieldError = useCallback((attrId: string, err: string | null) => {
     setFieldErrors((prev) => {
@@ -373,7 +373,8 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   };
 
   const onSave = async () => {
-    if (!user?.id) return;
+    // Save is never greyed out (C2): a field that is wrong already says so beside itself, and the save waits.
+    if (!user?.id || hasErrors) return;
 
     const attributes: Record<string, unknown> = {};
     for (const attrId of changedAttrIds) {
@@ -545,7 +546,6 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
             <ProfileSaveBar
               changeCount={changeCount}
               isSaving={isSaving}
-              saveBlocked={hasErrors}
               error={saveError}
               onDiscard={onDiscard}
               onSave={onSave}

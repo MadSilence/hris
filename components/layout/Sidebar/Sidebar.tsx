@@ -30,7 +30,6 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/desact/sidebar";
-import { NoddoWordmark } from "@/components/brand";
 import { RowAction } from "@/components/ui/RowActionsMenu";
 import { Company } from "@/models/company";
 
@@ -90,8 +89,8 @@ const useSearchShortcutLabel = () => {
 
 /**
  * The navigation column of SPEC § 13.6, top to bottom: the company's logo slot, search (⌘K), the items, a
- * spacer, Settings, the noddo wordmark — 12 px, gray, the one place noddo appears in the app's chrome — a
- * divider, and the profile block.
+ * spacer, Settings, a divider, and the profile block. SPEC's 12 px noddo wordmark above the divider is left out by
+ * the owner's call (2026-11-05).
  */
 const AppSidebar: FC<SidebarProps> = ({
   collapsed = false,
@@ -201,10 +200,8 @@ const AppSidebar: FC<SidebarProps> = ({
           {collapsed && <SidebarTrigger className="mx-auto" />}
           <SidebarMenu>{bottomItems.map(renderItem)}</SidebarMenu>
 
-          <div className="flex px-2 text-sidebar-wordmark group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0">
-            <NoddoWordmark tone="mono" height={12} />
-          </div>
-
+          {/* No noddo wordmark here (the owner, 2026-11-05) — an exception to SPEC §§ 2 and 13.6, which put one above the
+              divider. Inside the app the company is the brand. */}
           <SidebarSeparator className="-mx-3 w-auto" />
 
           <SidebarMenu>

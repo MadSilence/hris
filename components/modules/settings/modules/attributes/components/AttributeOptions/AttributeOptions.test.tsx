@@ -67,13 +67,17 @@ describe("AttributeOptions", () => {
     expect(savedPatch(onChange).name).toBe("Base salary");
   });
 
-  it("blocks saving with an empty name", async () => {
+  it("does not save an empty name, and says so under the field", async () => {
     const user = userEvent.setup();
-    setup();
+    const { onChange } = setup();
 
     await user.clear(screen.getByLabelText("Name *"));
 
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    const save = screen.getByRole("button", { name: "Save" });
+    expect(save).toBeEnabled();
+    await user.click(save);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("shows the type as read-only — it can't be changed after creation", () => {

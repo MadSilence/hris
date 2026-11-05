@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FieldError } from "@/components/desact/field-error";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
@@ -31,6 +32,8 @@ export const MfaSignInStep: React.FC<{
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [code, setCode] = React.useState("");
+  // The button is always pressable (C2): pressing it empty says so under the field.
+  const [tried, setTried] = React.useState(false);
   const [useBackup, setUseBackup] = React.useState(false);
   const [remember, setRemember] = React.useState(false);
   const [enrolment, setEnrolment] = React.useState<{ otpauthUri: string; secret: string } | null>(null);
@@ -47,7 +50,9 @@ export const MfaSignInStep: React.FC<{
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy || !code.trim()) return;
+    if (busy) return;
+    setTried(true);
+    if (!code.trim()) return;
     setBusy(true);
     setError(null);
     try {
@@ -130,13 +135,16 @@ export const MfaSignInStep: React.FC<{
         </p>
       </div>
       <form className="space-y-5" onSubmit={submit} noValidate>
-        <CodeField id="mfa-code" value={code} onChange={setCode} backup={useBackup} disabled={busy} autoFocus />
+        <div>
+          <CodeField id="mfa-code" value={code} onChange={setCode} backup={useBackup} disabled={busy} autoFocus />
+          <FieldError>{tried && !code.trim() ? tCommon("validation.enterCode") : null}</FieldError>
+        </div>
         <div className="flex items-center gap-2">
           <Checkbox id="mfa-remember" checked={remember} onCheckedChange={(v) => setRemember(Boolean(v))} disabled={busy} />
           <Label htmlFor="mfa-remember">{t("mfaSignIn.challenge.rememberDevice")}</Label>
         </div>
         <FormError message={error} />
-        <Button type="submit" size="lg" className="w-full" disabled={busy || !code.trim()}>
+        <Button type="submit" size="lg" className="w-full" disabled={busy}>
           {busy ? t("mfaSignIn.challenge.checking") : t("login.submit")}
         </Button>
       </form>

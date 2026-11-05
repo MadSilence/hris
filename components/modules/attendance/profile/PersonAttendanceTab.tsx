@@ -15,10 +15,11 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
 import { expandSpanToDays } from "@/components/modules/calendar/lib/dateRange";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
-import { dateToISO, useDateFormatter } from "@/lib/date";
+import { dateToISO, useDateFormatter, useShortDates } from "@/lib/date";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { formatMinutes, type AttendanceEntry, type AttendanceLogDay } from "@/models/attendance";
@@ -111,6 +112,7 @@ export const formatDuration = (minutes: number, t: AttendanceTranslator): string
 
 export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const formatDisplayDate = useDateFormatter();
+  const shortDates = useShortDates();
   const t = useTranslations("attendance");
   const tCommon = useTranslations("common");
   const todayISO = useMemo(() => dateToISO(new Date()), []);
@@ -122,6 +124,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const [editing, setEditing] = useState<AttendanceEntry | null>(null);
   const [removing, setRemoving] = useState<AttendanceEntry | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   const period = useMemo(() => monthPeriod(month, todayISO), [month, todayISO]);
   const log = useAttendanceLog(userId, period);
@@ -148,6 +151,19 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   const minutes = spanMinutes(draft.from, draft.to);
+  // The presets' span: the company's start of day, and the norm of the first picked day that has one (a weekend has
+  // none), else the company's eight hours.
+  const workdayStart = log.data?.workdayStartMinutes ?? 540;
+  const dayNorm = pickedDays.find((day) => day.normMinutes > 0)?.normMinutes ?? 480;
+  const clock = (minutes: number) => {
+    const m = Math.min(Math.max(minutes, 0), 23 * 60 + 59);
+    return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  };
+  const presets = [
+    { key: "fullDay", from: clock(workdayStart), to: clock(workdayStart + dayNorm) },
+    { key: "halfDay", from: clock(workdayStart), to: clock(workdayStart + Math.round(dayNorm / 2)) },
+    { key: "oneHour", from: clock(workdayStart), to: clock(workdayStart + 60) },
+  ] as const;
   // What the button promises: the span on every picked day (one day when amending).
   const totalMinutes = minutes === null ? null : minutes * (editing ? 1 : pickedDates.length);
   const suggestion = !editing && draft.from === "" && draft.to === "" && draft.description === "" ? lastFilled : null;
@@ -162,16 +178,15 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
     setEditing(null);
     setDraft(EMPTY);
     setFormError(null);
+    setTried(false);
   };
 
   const refusal = (caught: unknown) =>
     caught instanceof AttendanceActionError ? caught.result.errorMessage ?? messageForError(caught) : messageForError(caught);
 
   const submit = async () => {
-    if (minutes === null) {
-      setFormError(t("log.invalidSpan"));
-      return;
-    }
+    setTried(true);
+    if (minutes === null) return;
     setFormError(null);
     try {
       if (editing) {
@@ -191,6 +206,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
       }
       setEditing(null);
       setDraft(EMPTY);
+      setTried(false);
     } catch (caught) {
       setFormError(refusal(caught));
     }
@@ -201,11 +217,11 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
     setEditing(entry);
     setDraft({ from: entry.startTime, to: entry.endTime, description: entry.description ?? "" });
     setFormError(null);
+    setTried(false);
   };
 
-  const rangeLabel = !inBrowser ? null : single
-    ? formatDisplayDate(range.start, { style: "medium" })
-    : `${formatDisplayDate(range.start, { style: "medium" })} – ${formatDisplayDate(range.end, { style: "medium" })}`;
+  // The short style (C1): "Wed, 11 Nov", "Wed–Fri, 11–13 Nov" — no year in the current one.
+  const rangeLabel = !inBrowser ? null : shortDates.range(range.start, range.end, { weekday: true });
 
   return (
     <div className="flex flex-col gap-6">
@@ -257,6 +273,26 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 void submit();
               }}
             >
+              {/* Presets (C3): from the company's start of day, for the person's norm, half of it, or an hour. */}
+              {!editing && (
+                <div className="flex flex-wrap gap-1.5">
+                  {presets.map((preset) => (
+                    <Button
+                      key={preset.key}
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setDraft((d) => ({ ...d, from: preset.from, to: preset.to }));
+                        setFormError(null);
+                      }}
+                    >
+                      {t(`log.presets.${preset.key}`)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="attendance-from">{t("person.from")}</Label>
@@ -277,6 +313,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                   />
                 </div>
               </div>
+              <FieldError>{tried && minutes === null ? t("log.invalidSpan") : null}</FieldError>
 
               {minutes !== null && (
                 <p className="text-hint tabular-nums text-tertiary">
@@ -317,11 +354,11 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
               <div className="flex gap-2">
                 {editing && (
-                  <Button type="button" variant="secondary" className="flex-1" onClick={() => { setEditing(null); setDraft(EMPTY); setFormError(null); }}>
+                  <Button type="button" variant="secondary" className="flex-1" onClick={() => { setEditing(null); setDraft(EMPTY); setFormError(null); setTried(false); }}>
                     {tCommon("actions.cancel")}
                   </Button>
                 )}
-                <Button type="submit" className="flex-1" disabled={busy || minutes === null}>
+                <Button type="submit" className="flex-1" disabled={busy}>
                   {editing ? tCommon("actions.saveChanges") : totalMinutes !== null ? t("log.logDuration", { duration: formatDuration(totalMinutes, t) }) : t("log.logTitle")}
                 </Button>
               </div>

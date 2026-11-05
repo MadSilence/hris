@@ -74,15 +74,17 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
     onSubmit: handleFormSubmission,
   });
 
-  const canSubmit = useMemo(
-    () => formik.values.folderId !== normalizedCurrentFolderId,
-    [formik.values.folderId, normalizedCurrentFolderId],
-  );
+  const unchanged = formik.values.folderId === normalizedCurrentFolderId;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading || !canSubmit) return;
+    if (isLoading) return;
+    // Moving it where it already is: nothing to do, and the dialog closes as if it had.
+    if (unchanged) {
+      onCancelAction();
+      return;
+    }
 
     const errors = await formik.validateForm();
 
@@ -129,7 +131,7 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
 
         <Button
           type="submit"
-          disabled={isLoading || !canSubmit}
+          disabled={isLoading}
  >
           {t("documents.moveDocument.submit")}
         </Button>

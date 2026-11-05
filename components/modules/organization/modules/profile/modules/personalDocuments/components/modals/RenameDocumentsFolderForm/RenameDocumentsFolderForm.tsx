@@ -73,23 +73,22 @@ export const RenameDocumentsFolderForm: FC<
     onSubmit: handleFormSubmission,
   });
 
-  const canSubmit = useMemo(
-    () =>
-      formik.values.name.trim().length >= 2 &&
-      formik.values.name.trim() !== normalizedInitialName.trim(),
-    [formik.values.name, normalizedInitialName],
-  );
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading || !canSubmit) return;
+    if (isLoading) return;
 
     const errors = await formik.validateForm();
 
     await formik.setTouched(setNestedObjectValues(errors, true), true);
 
     if (Object.keys(errors).length > 0) return;
+
+    // The same name: nothing to rename, and the dialog closes as if it had.
+    if (formik.values.name.trim() === normalizedInitialName.trim()) {
+      onCancelAction();
+      return;
+    }
 
     await formik.submitForm();
   };
@@ -126,7 +125,7 @@ export const RenameDocumentsFolderForm: FC<
 
         <Button
           type="submit"
-          disabled={isLoading || !canSubmit}
+          disabled={isLoading}
  >
           {tCommon("actions.save")}
         </Button>

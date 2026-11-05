@@ -3,6 +3,7 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { useQuery } from "@tanstack/react-query";
 import { UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -104,9 +105,11 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
   const [rehireEligible, setRehireEligible] = useState(true);
   const [note, setNote] = useState("");
   const [reassign, setReassign] = useState<LeaverReassignmentChoice>(NO_REASSIGNMENT);
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    setTried(false);
     setLastWorkingDay(today());
     setReason("VOLUNTARY");
     setRehireEligible(true);
@@ -125,7 +128,9 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading || !lastWorkingDay) return;
+    if (isLoading) return;
+    setTried(true);
+    if (!lastWorkingDay) return;
 
     onConfirmAction({
       lastWorkingDay,
@@ -170,6 +175,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                 disabled={isLoading}
                 onChange={setLastWorkingDay}
               />
+              <FieldError>{tried && !lastWorkingDay ? tCommon("validation.required") : null}</FieldError>
             </div>
 
             <div className="space-y-2">
@@ -276,7 +282,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !lastWorkingDay}
+              disabled={isLoading}
               variant="destructive-confirm"
             >
               {isLoading ? t("profile.terminate.terminating") : t("profile.terminate.confirm")}

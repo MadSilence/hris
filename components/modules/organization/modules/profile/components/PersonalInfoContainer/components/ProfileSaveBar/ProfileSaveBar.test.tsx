@@ -42,11 +42,11 @@ describe("ProfileSaveBar", () => {
     expect(screen.getByText("1 unsaved change")).toBeInTheDocument();
   });
 
-  it("holds Save while a field is invalid, and both buttons while saving", () => {
+  it("never greys Save out for the draft's content, only both buttons while saving", () => {
     const { rerender } = render(
-      <ProfileSaveBar changeCount={2} isSaving={false} saveBlocked onDiscard={jest.fn()} onSave={jest.fn()}/>
+      <ProfileSaveBar changeCount={2} isSaving={false} onDiscard={jest.fn()} onSave={jest.fn()}/>
     );
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Discard" })).toBeEnabled();
 
     rerender(<ProfileSaveBar changeCount={2} isSaving onDiscard={jest.fn()} onSave={jest.fn()}/>);

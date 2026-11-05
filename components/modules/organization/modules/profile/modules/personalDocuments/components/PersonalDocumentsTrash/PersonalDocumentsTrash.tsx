@@ -1,6 +1,10 @@
 "use client";
 
-import { FC, useState } from "react";
+import { Checkbox } from "@/components/desact/checkbox";
+import { SelectionBar } from "@/components/ui/SelectionBar";
+import { cn } from "@/lib/cn";
+import { batchDocumentsAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/batchDocumentsAction";
+import { FC, useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowTurnBackwardIcon, Delete02Icon } from "@hugeicons/core-free-icons";
@@ -85,6 +89,31 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
   // not in a line above a list the reader has already left.
   const [pendingPurge, setPendingPurge] = useState<DocumentDTO | null>(null);
 
+  // Bulk selection in the trash (D2): restore or erase several at once.
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [purgeMany, setPurgeMany] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
+  const clearPicked = useCallback(() => setPicked(new Set()), []);
+  const togglePicked = (id: string) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const batch = async (operation: "restore" | "purge") => {
+    const ids = [...picked];
+    const result = await batchDocumentsAction({ operation, ids });
+    if (result.status === ActionStatus.ERROR) {
+      setBatchError(result.errorMessage ?? t("documents.table.batchFailed"));
+      return false;
+    }
+    setBatchError(null);
+    clearPicked();
+    refresh();
+    return true;
+  };
+
   const actionError = messageOf(restore.error);
   const isBusy = restore.isPending || purge.isPending;
 
@@ -115,13 +144,31 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     );
   }
 
+  const pickedRows = rows.filter((r) => picked.has(r.id));
+
   return (
     <div className="space-y-2">
+      {pickedRows.length > 0 && (
+        <SelectionBar
+          count={pickedRows.length}
+          onClear={clearPicked}
+          actions={[
+            { key: "restore", label: tCommon("actions.restore"), icon: ArrowTurnBackwardIcon, onClick: () => void batch("restore") },
+            { key: "purge", label: t("documents.trash.deleteForever"), icon: Delete02Icon, danger: true, onClick: () => setPurgeMany(true) },
+          ]}
+        />
+      )}
       {actionError && <FormError message={actionError} />}
+      {batchError && <FormError message={batchError} />}
 
       <div className="divide-y divide-divider rounded-control border border-divider">
         {rows.map((document) => (
-          <div key={document.id} className="flex items-center gap-3 px-4 py-3">
+          <div key={document.id} className={cn("flex items-center gap-3 px-4 py-3", picked.has(document.id) && "bg-accent-subtle")}>
+            <Checkbox
+              aria-label={t("documents.table.select", { name: document.name })}
+              checked={picked.has(document.id)}
+              onCheckedChange={() => togglePicked(document.id)}
+            />
             <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
               {getDocumentFileIcon(document.mimeType)}
             </span>
@@ -159,6 +206,16 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
           </div>
         ))}
       </div>
+
+      {/* Erasing is irreversible: a selection is confirmed like a single file. */}
+      <PurgeDocumentModal
+        isOpen={purgeMany}
+        documentName={t("documents.moveDocument.nDocuments", { count: pickedRows.length })}
+        onRequestCloseAction={() => setPurgeMany(false)}
+        onConfirmAction={() => {
+          void batch("purge").then((ok) => ok && setPurgeMany(false));
+        }}
+      />
 
       <PurgeDocumentModal
         isOpen={pendingPurge !== null}

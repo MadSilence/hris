@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FieldError } from "@/components/desact/field-error";
 import { useTranslations } from "next-intl";
 
 import {
@@ -36,6 +37,7 @@ export const StepUpDialog: React.FC = () => {
   const [backup, setBackup] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [tried, setTried] = React.useState(false);
 
   React.useEffect(() => {
     registerStepUpDialog((resolve) => {
@@ -58,7 +60,9 @@ export const StepUpDialog: React.FC = () => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy || !value.trim()) return;
+    if (busy) return;
+    setTried(true);
+    if (!value.trim()) return;
     setBusy(true);
     setError(null);
     const body = enrolled ? (backup ? { backupCode: value.trim() } : { code: value.trim() }) : { password: value };
@@ -82,7 +86,10 @@ export const StepUpDialog: React.FC = () => {
           </DialogHeader>
           {status.isLoading ? null : enrolled ? (
             <>
-              <CodeField id="step-up-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
+              <div>
+                <CodeField id="step-up-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
+                <FieldError>{tried && !value.trim() ? tCommon("validation.enterCode") : null}</FieldError>
+              </div>
               <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
                 {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
               </button>
@@ -99,12 +106,13 @@ export const StepUpDialog: React.FC = () => {
                 disabled={busy}
                 autoFocus
               />
+              <FieldError>{tried && !value.trim() ? tCommon("validation.enterPassword") : null}</FieldError>
             </div>
           )}
           <FormError message={error} />
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy || !value.trim()}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
+            <Button type="submit" disabled={busy}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

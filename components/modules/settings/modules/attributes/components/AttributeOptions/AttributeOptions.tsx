@@ -173,6 +173,8 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   );
 
   const save = () => {
+    // An empty name already says so under the field.
+    if (!name.trim()) return;
     const patch: AttributePatch = {};
 
     const trimmedName = name.trim();
@@ -342,7 +344,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
         <Button type="button" variant="secondary" onClick={cancel} disabled={isSaving}>
           {tCommon("actions.cancel")}
         </Button>
-        <Button type="button" onClick={save} disabled={isPreset || !name.trim() || isSaving}>
+        <Button type="button" onClick={save} disabled={isPreset || isSaving}>
           {tCommon("actions.save")}
         </Button>
       </div>

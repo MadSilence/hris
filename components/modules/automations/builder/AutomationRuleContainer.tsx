@@ -8,6 +8,7 @@ import { Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Ico
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
+import { FieldError } from "@/components/desact/field-error";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
@@ -178,6 +179,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishTried, setPublishTried] = useState(false);
 
   const nameMissing = !draft?.name.trim();
   const noActions = (definition?.actions.length ?? 0) === 0;
@@ -194,6 +196,10 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
             : null;
   const saveOnly = !isNew && nameChanged && !definitionChanged;
   const canPublish = isNew || definitionChanged ? gateReason === null : saveOnly && !nameMissing;
+  // Publish is never greyed out for what the rule says (C2) — only while it is sending, or while the preview it
+  // publishes against is still being worked out. Pressed early, it says what is missing (the name under its
+  // field, the rest beside the button) and does nothing.
+  const waitingForPreview = (isNew || definitionChanged) && !nameMissing && !noActions && !previewFresh && !previewError;
 
   const publish = async (choices: PublishChoices) => {
     if (!draft) return;
@@ -384,11 +390,24 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   ) : null;
 
   const primary = readOnly ? null : saveOnly ? (
-    <Button type="button" onClick={() => void saveName()} disabled={!canPublish || publishing}>{tCommon("actions.save")}</Button>
+    <Button type="button"
+      onClick={() => {
+        setPublishTried(true);
+        if (canPublish) void saveName();
+      }}
+      disabled={publishing}
+    >
+      {tCommon("actions.save")}
+    </Button>
   ) : (
     <Button type="button"
-      onClick={() => { setPublishError(null); setPublishOpen(true); }}
-      disabled={!canPublish || publishing || (!isNew && !definitionChanged)}
+      onClick={() => {
+        setPublishTried(true);
+        if (!canPublish) return;
+        setPublishError(null);
+        setPublishOpen(true);
+      }}
+      disabled={publishing || waitingForPreview}
     >
       {tCommon("actions.publish")}
     </Button>
@@ -411,6 +430,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
               value={draft.name}
               onChange={(e) => setDraft((d) => (d ? { ...d, name: e.target.value } : d))}
             />
+            <FieldError>{publishTried && nameMissing ? tCommon("validation.enterName") : null}</FieldError>
           </Field>
           <Field label={tCommon("fields.description")} htmlFor="automation-description">
             <Input

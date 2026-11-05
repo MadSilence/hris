@@ -13,7 +13,7 @@ describe("RenameDocumentsFolderForm", () => {
     );
 
     expect(screen.getByLabelText(/folder name/i)).toHaveValue("Contracts");
-    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save/i })).toBeEnabled();
   });
 
   it("submits sanitized changed name", async () => {
@@ -42,23 +42,25 @@ describe("RenameDocumentsFolderForm", () => {
     });
   });
 
-  it("does not submit unchanged name", () => {
+  it("does not submit unchanged name, and closes", async () => {
     const onSubmitAction = jest.fn();
+    const onCancelAction = jest.fn();
 
     render(
       <RenameDocumentsFolderForm
         folderName="Contracts"
-        onCancelAction={jest.fn()}
+        onCancelAction={onCancelAction}
         onSubmitAction={onSubmitAction}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
+    await waitFor(() => expect(onCancelAction).toHaveBeenCalledTimes(1));
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
-  it("does not submit short name", () => {
+  it("does not submit short name, and says why under the field", async () => {
     const onSubmitAction = jest.fn();
 
     render(
@@ -73,7 +75,10 @@ describe("RenameDocumentsFolderForm", () => {
       target: { value: "A" },
     });
 
-    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save/i })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(await screen.findByText("Folder name must be at least 2 characters.")).toBeInTheDocument();
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 

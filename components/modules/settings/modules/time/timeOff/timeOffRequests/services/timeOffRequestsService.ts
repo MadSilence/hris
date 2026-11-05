@@ -1,5 +1,5 @@
 import { internalApiClient } from "@/components/clients/apiClient";
-import type { TimeOffOverlap, TimeOffRequest, TimeOffRequestDuration } from "@/models/timeOff";
+import type { TimeOffApproverPreview, TimeOffOverlap, TimeOffRequest, TimeOffRequestDuration } from "@/models/timeOff";
 
 export class TimeOffRequestsService {
   public async previewDuration(
@@ -9,6 +9,11 @@ export class TimeOffRequestsService {
   ): Promise<TimeOffRequestDuration> {
     const qs = new URLSearchParams({ assignmentId, startDate, endDate }).toString();
     return internalApiClient.get<TimeOffRequestDuration>(`/time-off/requests/duration?${qs}`);
+  }
+
+  public async previewApprovers(assignmentId: string): Promise<TimeOffApproverPreview> {
+    const qs = new URLSearchParams({ assignmentId }).toString();
+    return internalApiClient.get<TimeOffApproverPreview>(`/time-off/requests/approvers?${qs}`);
   }
 
   public async listOverlaps(

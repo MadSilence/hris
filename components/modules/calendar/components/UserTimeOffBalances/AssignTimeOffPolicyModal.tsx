@@ -28,7 +28,9 @@ import { TimeOffPolicyStatus, TimeOffPolicyUnit } from "@/api/modules/timeOff/ti
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { InlineAlert } from "@/components/desact/alert";
 
 type Props = {
@@ -64,6 +66,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
   const [effectiveFrom, setEffectiveFrom] = useState(dateToISO(new Date()));
   const [fromPickerOpen, setFromPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   // A draft or archived policy cannot be assigned, and the backend rejects a second active
   // assignment to the same policy — so both are filtered out here instead of failing on submit.
@@ -104,10 +107,8 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
  : "";
 
   const handleSubmit = async () => {
-    if (!policyId) {
-      setError(t("assign.pickPolicy"));
-      return;
-    }
+    setTried(true);
+    if (!policyId) return;
     setError(null);
     try {
       await createMutation.mutateAsync({
@@ -152,13 +153,14 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               <div className="space-y-1.5">
                 <RequiredLabel className="text-hint" required>{t("assign.policy")}</RequiredLabel>
                 <SearchableSelect
-                  options={available.map((p) => ({ value: p.id, label: p.name }))}
+                  options={available.map((p) => ({ value: p.id, label: p.name, icon: <PolicyMarker color={p.color} /> }))}
                   value={policyId || null}
                   onChange={(v) => setPolicyId(v ?? "")}
                   placeholder={t("assign.selectPolicy")}
                   disabled={createMutation.isPending}
                   clearable={false}
                 />
+                <FieldError>{tried && !policyId ? t("assign.pickPolicy") : null}</FieldError>
               </div>
 
               {noHireDate && (
@@ -219,7 +221,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
           </Button>
           <Button type="button"
             onClick={handleSubmit}
-            disabled={!policyId || createMutation.isPending || available.length === 0}
+            disabled={createMutation.isPending}
           >
             {createMutation.isPending ? t("assign.assigning") : t("assign.submit")}
           </Button>

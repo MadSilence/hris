@@ -117,8 +117,8 @@ describe("HolidayCalendarBindingSection", () => {
     // An archived calendar is not offered; an inactive one is.
     expect(screen.queryByRole("radio", { name: "Old Calendar" })).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "United Kingdom 2026" })).toBeInTheDocument();
-    // Nothing chosen yet: the field already says None.
-    expect(screen.getByRole("button", { name: "Review" })).toBeDisabled();
+    // Nothing chosen yet: the field already says None, and Review stays pressable — it would only close.
+    expect(screen.getByRole("button", { name: "Review" })).toBeEnabled();
 
     fireEvent.click(screen.getByRole("radio", { name: "Germany 2026" }));
     fireEvent.click(screen.getByRole("button", { name: "Review" }));

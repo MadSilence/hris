@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { FC, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -66,9 +67,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [tried, setTried] = useState(false);
 
   const hasCurrentAvatar = Boolean(avatarUrl);
-  const canSave = Boolean(selectedFile);
 
   useEffect(() => {
     return () => {
@@ -94,6 +95,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
     setSelectedFile(null);
     setPreviewUrl(null);
     setIsDeleteConfirmOpen(false);
+    setTried(false);
     resetInput();
   };
 
@@ -125,7 +127,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
   };
 
   const handleUploadConfirm = async () => {
-    if (isLoading || !selectedFile) return;
+    if (isLoading) return;
+    setTried(true);
+    if (!selectedFile) return;
 
     await onConfirmAction({
       action: "upload",
@@ -209,7 +213,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="h-[68px]" aria-hidden="true"/>
+                    <div className="h-[68px]">
+                      <FieldError>{tried ? t("profile.avatar.pickFile") : null}</FieldError>
+                    </div>
                   )}
                 </div>
               </div>
@@ -284,7 +290,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
               </Button>
               <Button
                 type="button"
-                disabled={isLoading || !canSave}
+                disabled={isLoading}
                 onClick={handleUploadConfirm}
               >
                 {isLoading ? tCommon("actions.saving") : tCommon("actions.saveChanges")}

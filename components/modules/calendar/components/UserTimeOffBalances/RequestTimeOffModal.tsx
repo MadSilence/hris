@@ -1,11 +1,11 @@
 "use client";
 
-import { type DateFormatter, dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
+import { dateToISO, isoToDate, useDateFormatter, useShortDates } from "@/lib/date";
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Calendar03Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { DateRange } from "react-day-picker";
 
@@ -25,12 +25,17 @@ import { cn } from "@/lib/cn";
 import { useCreateTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCreateTimeOffRequest";
 import { useTimeOffRequestDuration } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestDuration";
 import { useTimeOffOverlaps } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffOverlaps";
+import { useTimeOffApproverPreview } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffApproverPreview";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
 import { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FormError } from "@/components/feedback/FormError";
-import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
+import { FieldError } from "@/components/desact/field-error";
+import { showSuccess } from "@/lib/errors/errorToast";
+import { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
 
 type Props = {
   isOpen: boolean;
@@ -43,9 +48,6 @@ type Props = {
   forName?: string;
   onCloseAction: () => void;
 };
-
-// The reader's own date format (lib/date), as everywhere else — not a hard-coded "Nov 11, 2026".
-const prettyISO = (iso: string, formatDisplayDate: DateFormatter) => formatDisplayDate(iso, { style: "medium" });
 
 // Inclusive calendar-day count, matching the backend duration (ChronoUnit.DAYS + 1).
 const inclusiveDays = (start: string, end: string): number => {
@@ -68,6 +70,7 @@ export const RequestTimeOffModal: FC<Props> = ({
 }) => {
   const t = useTranslations("calendar");
   const formatDisplayDate = useDateFormatter();
+  const shortDates = useShortDates();
   const tCommon = useTranslations("common");
   const createMutation = useCreateTimeOffRequest();
 
@@ -85,14 +88,20 @@ export const RequestTimeOffModal: FC<Props> = ({
     for (const b of [...open].sort((a, c) => a.periodStart.localeCompare(c.periodStart))) {
       if (!byAssignment.has(b.assignmentId)) byAssignment.set(b.assignmentId, b);
     }
-    return [...byAssignment.values()];
-  }, [balances]);
+    // A VACATION policy first — and so picked by default — as it leads the balances (the owner, 2026-11-05); the
+    // order the periods happened to start in made the dialog open on Sick Leave (walk of 2026-11-05).
+    const isVacation = (b: EmployeeTimeOffBalance) =>
+      policyMap.get(b.policyId)?.leaveTypeCategory === LeaveTypeCategory.Vacation ? 0 : 1;
+    return [...byAssignment.values()].sort((a, c) => isVacation(a) - isVacation(c));
+  }, [balances, policyMap]);
 
   const [assignmentId, setAssignmentId] = useState(selectable[0]?.assignmentId ?? "");
   const [startDate, setStartDate] = useState(initialStartDate ?? "");
   const [endDate, setEndDate] = useState(initialEndDate ?? initialStartDate ?? "");
   const [reason, setReason] = useState("");
+  // A refusal from the server goes under the form; what the reader left out goes under its field (C2).
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ policy?: string; dates?: string }>({});
   /** Set once the request has been filed and the coverage cap wants the person to know. */
   const [coverageWarning, setCoverageWarning] = useState<string[] | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -118,8 +127,11 @@ export const RequestTimeOffModal: FC<Props> = ({
   // Who else from the team/department is already out then. Advisory: the policy's coverage rules are
   // what can actually reject the request — this just stops people booking blind.
   const { data: overlaps } = useTimeOffOverlaps(userId, startDate, endDate);
+  // The server sends them already ordered — the manager first, then by days shared (C8).
   const overlapPeople = useMemo(() => {
-    const byUser = new Map<string, { name: string; start: string; end: string }>();
+    const byUser = new Map<string, {
+      name: string; start: string; end: string; avatarUrl: string | null; manager: boolean; teamName: string | null;
+    }>();
     for (const o of overlaps ?? []) {
       const existing = byUser.get(o.userId);
       // One row per person even when they have several requests in the window.
@@ -127,12 +139,29 @@ export const RequestTimeOffModal: FC<Props> = ({
         name: `${o.firstName} ${o.lastName}`.trim(),
         start: existing && existing.start < o.startDate ? existing.start : o.startDate,
         end: existing && existing.end > o.endDate ? existing.end : o.endDate,
+        avatarUrl: o.avatarUrl,
+        manager: Boolean(o.manager),
+        teamName: o.teamName ?? null,
       });
     }
     return [...byUser.values()];
   }, [overlaps]);
+  const teamSize = overlaps?.[0]?.teamSize ?? 0;
+  const teamAway = overlapPeople.filter((p) => p.teamName).length;
+  const [allOffOpen, setAllOffOpen] = useState(false);
 
-  const canSubmit = Boolean(assignmentId) && days > 0 && !createMutation.isPending;
+  // Who decides first (C7): the approver, then the delegates or the fallback role's holders.
+  const { data: approvers } = useTimeOffApproverPreview(assignmentId || undefined);
+  const firstApprover = approvers?.deciders[0];
+  const moreApprovers = Math.max((approvers?.deciders.length ?? 0) - 1, 0);
+  // The days of theirs that fall inside the request — what "Also off" shows beside each name.
+  const clip = (p: { start: string; end: string }) => ({
+    start: p.start < startDate ? startDate : p.start,
+    end: p.end > endDate ? endDate : p.end,
+  });
+  const ALSO_OFF_SHOWN = 3;
+  const shortfall = insufficient ? -remainingAfter : 0;
+  const isSick = policy?.leaveTypeCategory === LeaveTypeCategory.Sick;
 
   const range: DateRange | undefined = startDate
     ? { from: isoToDate(startDate), to: endDate ? isoToDate(endDate) : isoToDate(startDate) }
@@ -146,28 +175,29 @@ export const RequestTimeOffModal: FC<Props> = ({
     }
     setStartDate(dateToISO(r.from));
     setEndDate(dateToISO(r.to ?? r.from));
+    setFieldErrors((f) => ({ ...f, dates: undefined }));
     if (r.from && r.to) setPickerOpen(false);
   };
 
+  // Both ends in full, as the owner's specification writes it: "Wed, 11 Nov – Fri, 13 Nov".
   const dateLabel = startDate
     ? endDate && endDate !== startDate
-      ? `${prettyISO(startDate, formatDisplayDate)} – ${prettyISO(endDate, formatDisplayDate)}`
-      : prettyISO(startDate, formatDisplayDate)
+      ? `${shortDates.date(startDate, { weekday: true })} – ${shortDates.date(endDate, { weekday: true })}`
+      : shortDates.date(startDate, { weekday: true })
     : t("request.selectDates");
 
+  // The button is always pressable (C2): pressing it with a field missing says so under that field.
   const handleSubmit = async () => {
-    if (!assignmentId) {
-      setError(t("request.errors.pickPolicy"));
-      return;
-    }
-    if (!startDate || !endDate) {
-      setError(t("request.errors.chooseDates"));
-      return;
-    }
-    if (days <= 0) {
-      setError(t("request.errors.endBeforeStart"));
-      return;
-    }
+    const missing = {
+      policy: assignmentId ? undefined : t("request.errors.pickPolicy"),
+      dates: !startDate || !endDate
+        ? t("request.errors.chooseDates")
+        : days <= 0
+          ? t("request.errors.endBeforeStart")
+          : undefined,
+    };
+    setFieldErrors(missing);
+    if (missing.policy || missing.dates) return;
     setError(null);
     try {
       const result = await createMutation.mutateAsync({
@@ -186,6 +216,9 @@ export const RequestTimeOffModal: FC<Props> = ({
         return;
       }
 
+      showSuccess(firstApprover
+        ? t("request.requestedTo", { name: firstApprover.name.split(" ")[0] })
+        : t("request.requested"));
       onCloseAction();
     } catch (e) {
       setError(e instanceof Error ? e.message : t("request.errors.failed"));
@@ -194,18 +227,19 @@ export const RequestTimeOffModal: FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
-      <DialogContent hideClose size="lg" aria-describedby={undefined} className="overflow-hidden p-0">
-        {/* A plain head: the title says what this is (design fixes of 2026-11-04, fix 10). */}
+      {/* The request dialog (the owner's specification, with the designers' values of 2026-11-05): 800 px, white, a plain
+          head with its ×, the form beside a 280 px preview card (radius 16), a footer naming who decides. */}
+      <DialogContent size="lg" aria-describedby={undefined} className="gap-0 overflow-hidden p-0">
         <DialogHeader className="px-6 pt-5 text-left">
           <DialogTitle className="text-section-title">
             {forName ? t("request.titleFor", { name: forName }) : t("request.title")}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid items-start gap-6 px-6 pb-5 md:grid-cols-[minmax(0,1fr)_280px]">
-          {/* Form */}
+        <div className="grid items-start gap-6 px-6 py-5 md:grid-cols-[minmax(0,1fr)_280px]">
+          {/* Form — 16 px between fields, labels 14/500 above them, no asterisks. */}
           <div className="space-y-4">
-            <div className="space-y-1.5">
+            <div>
               <Label>{t("request.policy")}</Label>
               <SearchableSelect
                 options={selectable.map((b) => {
@@ -216,17 +250,26 @@ export const RequestTimeOffModal: FC<Props> = ({
                         amount: formatDayAmount(b.currentBalance),
                         unit: p?.unit === TimeOffPolicyUnit.Hours ? t("units.hoursShort") : t("units.daysShort"),
                       });
-                  return { value: b.assignmentId, label: p?.name ?? t("balances.fallbackName"), hint: left };
+                  return {
+                    value: b.assignmentId,
+                    label: p?.name ?? t("balances.fallbackName"),
+                    hint: left,
+                    icon: <PolicyMarker color={p?.color} />,
+                  };
                 })}
                 value={assignmentId || null}
-                onChange={(v) => setAssignmentId(v ?? "")}
+                onChange={(v) => {
+                  setAssignmentId(v ?? "");
+                  setFieldErrors((f) => ({ ...f, policy: undefined }));
+                }}
                 placeholder={t("assign.selectPolicy")}
                 disabled={createMutation.isPending}
                 clearable={false}
               />
+              <FieldError>{fieldErrors.policy}</FieldError>
             </div>
 
-            <div className="space-y-1.5">
+            <div>
               <Label>{t("request.dates")}</Label>
               <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
                 <PopoverTrigger asChild>
@@ -234,6 +277,7 @@ export const RequestTimeOffModal: FC<Props> = ({
                     type="button"
                     variant="secondary"
                     disabled={createMutation.isPending}
+                    aria-invalid={Boolean(fieldErrors.dates) || undefined}
                     className={cn(
                       "w-full justify-start font-normal",
                       !startDate && "text-tertiary",
@@ -253,9 +297,12 @@ export const RequestTimeOffModal: FC<Props> = ({
                   />
                 </PopoverContent>
               </Popover>
+              <FieldError>{fieldErrors.dates}</FieldError>
             </div>
 
-            <div className="space-y-1.5">
+            {/* Half day goes here, between Dates and Note, when it is built (development_plan/HALF_DAY_PLAN.md). */}
+
+            <div>
               <Label htmlFor="req-reason">
                 {t.rich("request.note", {
                   muted: (chunks) => <span className="font-normal text-tertiary">{chunks}</span>,
@@ -263,89 +310,96 @@ export const RequestTimeOffModal: FC<Props> = ({
               </Label>
               <Textarea
                 id="req-reason"
-                placeholder={t("request.notePlaceholder")}
+                className="min-h-18"
+                placeholder={isSick ? t("request.notePlaceholderSick") : t("request.notePlaceholder")}
                 value={reason}
                 onChange={(e) => setReason(e.currentTarget.value)}
-                rows={3}
+                rows={2}
                 disabled={createMutation.isPending}
               />
             </div>
 
-            {days > 0 && overlapPeople.length > 0 && (
-              <div className="rounded-control border border-divider bg-subtle/40 p-3">
-                <p className="flex items-center gap-1.5 text-hint font-medium text-primary">
-                  <Icon icon={UserGroupIcon} size="sm" />
-                  {t("request.overlap", { count: overlapPeople.length })}
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {overlapPeople.slice(0, 5).map((p) => (
-                    <li key={p.name} className="flex items-center justify-between gap-3 text-hint">
-                      <span className="truncate text-primary">{p.name}</span>
-                      <span className="shrink-0 text-tertiary">
-                        {p.start === p.end ? prettyISO(p.start, formatDisplayDate) : `${prettyISO(p.start, formatDisplayDate)} – ${prettyISO(p.end, formatDisplayDate)}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {overlapPeople.length > 5 && (
-                  <p className="mt-1.5 text-hint text-tertiary">
-                    {t("request.overlapMore", { count: overlapPeople.length - 5 })}
-                  </p>
-                )}
-              </div>
-            )}
-
             {error && <FormError message={error} />}
           </div>
 
-          {/* Summary */}
-          <aside className="flex flex-col gap-3 rounded-popover border border-divider bg-subtle p-4">
-            <div>
-              <p className="text-label font-normal text-tertiary">{t("request.policy")}</p>
-              <p className="mt-1 flex items-center gap-2 truncate text-card-title text-primary">
-                {policy && (
-                  <span aria-hidden className={cn("size-2 shrink-0 rounded-pill", TAG_CLASSES[toTagColor(policy.leaveTypeColor)].dot)} />
-                )}
-                {policy?.name ?? "—"}
+          {/* Preview — updates as the policy and the dates change. */}
+          <div>
+            <aside className="rounded-card border border-divider bg-subtle px-4 pt-3.5 pb-1.5">
+              <p className="flex items-center gap-2 pb-2.5 text-card-title text-primary">
+                {policy ? <PolicyMarker color={policy.color} /> : null}
+                <span className="truncate">{policy?.name ?? "—"}</span>
               </p>
-            </div>
 
-            <div className="flex items-center justify-between text-body">
-              <span className="text-tertiary">{t("request.available")}</span>
-              <span className="font-medium text-primary">
-                {selected
-                  ? unlimited
-                    ? t("request.noLimit")
-                    : t("request.amountUnit", { amount: formatDayAmount(selected.currentBalance), unit })
-                  : "—"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-body">
-              <span className="text-tertiary">
-                {t("request.duration")}
-                {isWorkingDays ? <span className="text-hint"> · {t("request.workingDays")}</span> : null}
-              </span>
-              <span className="font-medium text-primary">
-                {days > 0 ? tCommon("time.days", { count: days }) : "—"}
-              </span>
-            </div>
-
-            {!unlimited && selected && days > 0 && (
-              <div className="flex items-center justify-between border-t border-divider pt-3 text-body">
-                <span className="text-tertiary">{t("request.leftAfter")}</span>
-                <span className={cn("font-medium", insufficient ? "text-danger-text" : "text-primary")}>
-                  {t("request.amountUnit", { amount: formatDayAmount(remainingAfter), unit })}
+              <div className="flex h-8 items-center justify-between border-t border-divider text-body">
+                <span className="text-tertiary">{t("request.available")}</span>
+                <span className="font-medium tabular-nums text-primary">
+                  {selected
+                    ? unlimited
+                      ? t("request.noLimit")
+                      : t("request.amountUnit", { amount: formatDayAmount(selected.currentBalance), unit })
+                    : "—"}
                 </span>
               </div>
-            )}
 
-            {insufficient && (
-              <p className="text-hint text-status-pending-icon">
-                {t("request.insufficient")}
-              </p>
+              <div className="flex h-8 items-center justify-between border-t border-divider text-body">
+                <span className="text-tertiary">{t("request.duration")}</span>
+                <span className="font-medium tabular-nums text-primary">
+                  {days <= 0
+                    ? "—"
+                    : isWorkingDays && !isHours
+                      ? t("request.durationWorkingDays", { amount: formatDayAmount(days), count: days })
+                      : tCommon("time.days", { count: days })}
+                </span>
+              </div>
+
+              {!unlimited && selected && days > 0 && (
+                <div className="flex h-8 items-center justify-between border-t border-divider text-body">
+                  <span className="text-tertiary">{t("request.leftAfter")}</span>
+                  <span className={cn("font-medium tabular-nums", insufficient ? "text-danger-text" : "text-primary")}>
+                    {t("request.amountUnit", { amount: formatDayAmount(remainingAfter), unit })}
+                  </span>
+                </div>
+              )}
+
+              {/* Also off (C8): a block of its own — a hairline right under the balance, then air. */}
+              {days > 0 && overlapPeople.length > 0 && (
+                <div className="border-t border-divider pt-6 pb-2">
+                  <p className="mb-2 text-label font-normal text-tertiary">
+                    {teamSize > 0 && teamAway * 2 >= teamSize
+                      ? t("request.alsoOffOfTeam", { count: teamAway })
+                      : t("request.alsoOff")}
+                  </p>
+                  {overlapPeople.slice(0, ALSO_OFF_SHOWN).map((p) => (
+                    <AlsoOffRow key={p.name} person={p} range={shortDates.range(clip(p).start, clip(p).end)}
+                                relation={p.manager ? t("request.yourManager") : p.teamName} />
+                  ))}
+                  {overlapPeople.length > ALSO_OFF_SHOWN && (
+                    <Popover open={allOffOpen} onOpenChange={setAllOffOpen}>
+                      <PopoverTrigger asChild>
+                        <button type="button" className="flex h-8 items-center text-body text-accent-text hover:underline">
+                          {t("request.alsoOffMore", { count: overlapPeople.length - ALSO_OFF_SHOWN })}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" align="start" className="w-80 p-3">
+                        {/* Everyone, the same rows and order; it scrolls past eight. */}
+                        <div className="max-h-64 overflow-y-auto">
+                          {overlapPeople.map((p) => (
+                            <AlsoOffRow key={p.name} person={p} range={shortDates.range(clip(p).start, clip(p).end)}
+                                        relation={p.manager ? t("request.yourManager") : p.teamName} />
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              )}
+            </aside>
+            {shortfall > 0 && (
+              <FieldError className="mt-2">
+                {t("request.shortfall", { amount: formatDayAmount(shortfall), count: shortfall })}
+              </FieldError>
             )}
-          </aside>
+          </div>
         </div>
 
         {coverageWarning && (
@@ -362,21 +416,35 @@ export const RequestTimeOffModal: FC<Props> = ({
           </div>
         )}
 
-        <div className="flex justify-end gap-2 border-t border-divider px-6 py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-divider px-6 py-4">
+          {/* Who decides (C7): the first and "+N"; no line when nobody resolves. */}
+          {firstApprover && !coverageWarning && (
+            <p className="mr-auto flex min-w-0 items-center gap-2 text-label font-normal text-secondary">
+              <Avatar className="size-[22px]">
+                {firstApprover.avatarUrl ? <AvatarImage src={firstApprover.avatarUrl} alt="" /> : null}
+                <AvatarFallback name={firstApprover.name} className="text-hint">{firstApprover.name.slice(0, 1)}</AvatarFallback>
+              </Avatar>
+              <span className="truncate">
+                {moreApprovers > 0
+                  ? t("request.goesToMore", { name: firstApprover.name, count: moreApprovers })
+                  : t("request.goesTo", { name: firstApprover.name })}
+              </span>
+            </p>
+          )}
           {coverageWarning ? (
             <Button type="button" onClick={onCloseAction}>{t("request.gotIt")}</Button>
           ) : (
             <>
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={createMutation.isPending}>
-            {tCommon("actions.cancel")}
-          </Button>
-          <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
-            {createMutation.isPending
-              ? t("request.requesting")
-              : days > 0 && !isHours
-                ? t("request.submitDays", { amount: formatDayAmount(days), count: days })
-                : t("request.title")}
-          </Button>
+              <Button type="button" variant="secondary" onClick={onCloseAction} disabled={createMutation.isPending}>
+                {tCommon("actions.cancel")}
+              </Button>
+              <Button type="button" onClick={handleSubmit} loading={createMutation.isPending}>
+                {createMutation.isPending
+                  ? t("request.requesting")
+                  : days > 0 && !isHours
+                    ? t("request.submitDays", { amount: formatDayAmount(days), count: days })
+                    : t("request.title")}
+              </Button>
             </>
           )}
         </div>
@@ -384,5 +452,22 @@ export const RequestTimeOffModal: FC<Props> = ({
     </Dialog>
   );
 };
+
+/** A row of "Also off": the person, why they are here (the manager, or the team), and the days they share. */
+const AlsoOffRow: FC<{
+  person: { name: string; avatarUrl: string | null };
+  relation: string | null;
+  range: string;
+}> = ({ person, relation, range }) => (
+  <div className="flex h-8 items-center gap-2 text-body">
+    <Avatar className="size-[22px]">
+      {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt="" /> : null}
+      <AvatarFallback name={person.name} className="text-hint">{person.name.slice(0, 1)}</AvatarFallback>
+    </Avatar>
+    <span className="min-w-0 truncate text-primary">{person.name}</span>
+    {relation && <span className="shrink-0 truncate text-hint text-tertiary">{relation}</span>}
+    <span className="ml-auto shrink-0 text-label font-normal tabular-nums text-tertiary">{range}</span>
+  </div>
+);
 
 export default RequestTimeOffModal;

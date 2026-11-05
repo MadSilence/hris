@@ -114,8 +114,15 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         : null;
 
   const save = async () => {
+    // Nothing changed: nothing to send.
+    if (!dirty || saving) return;
     setSaveError(null);
     setNameError(null);
+    if (!draft.name.trim()) {
+      setNameError(tCommon("validation.enterName"));
+      setTab("questions");
+      return;
+    }
     if (problemCount > 0) {
       setShowProblems(true);
       setTab("questions");
@@ -171,7 +178,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
           {archived && <StatusBadge status="archived" />}
           <div className="flex items-center gap-2">
             {!readOnly && (
-              <Button type="button" onClick={() => void save()} disabled={!dirty || saving || !draft.name.trim()}>
+              <Button type="button" onClick={() => void save()} disabled={saving}>
                 {saving ? tCommon("actions.saving") : tCommon("actions.save")}
               </Button>
             )}

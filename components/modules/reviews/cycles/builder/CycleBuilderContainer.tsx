@@ -114,6 +114,8 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
     setDraft((d) => ({ ...d, kinds: { ...d.kinds, [k]: { ...d.kinds[k], ...p } } }));
 
   const save = async () => {
+    // Nothing changed: nothing to send. A problem with the draft is already named beside Save.
+    if (saving || !dirty || problems.length > 0) return;
     setError(null);
     setNameError(null);
     setSaving(true);
@@ -147,7 +149,7 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
           {!readOnly && (
             <div className="flex items-center gap-2">
               <Button type="button" variant="secondary" onClick={() => void save()}
-                disabled={saving || !dirty || problems.length > 0}>
+                disabled={saving}>
                 {saving ? tCommon("actions.saving") : isTemplate ? t("builder.saveTemplate") : t("builder.saveDraft")}
               </Button>
               {cycle && !isTemplate && (

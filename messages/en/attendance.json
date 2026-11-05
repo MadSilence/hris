@@ -99,7 +99,12 @@
     "entryActions": "Entry actions",
     "deleteTitle": "Delete entry",
     "deleteDescription": "{span}{hasDescription, select, yes { · {description}} other {}} will be removed from {date}.",
-    "deleted": "Entry deleted."
+    "deleted": "Entry deleted.",
+    "presets": {
+      "fullDay": "Full day",
+      "halfDay": "Half day",
+      "oneHour": "1 h"
+    }
   },
   "schedule": {
     "title": "Work schedule",
@@ -135,9 +140,10 @@
   },
   "workday": {
     "title": "Working day",
-    "description": "How long a company working day is. Attendance expects it of everybody without a personal schedule; anything logged beyond it is overtime.",
+    "description": "When a company working day starts, and how long it is. Attendance expects the length of everybody without a personal schedule — anything beyond it is overtime — and Log hours' Full day and Half day start at this time.",
     "length": "Length",
     "invalid": "Enter the length of a working day as 8:00 or 7.5, up to 24:00.",
-    "saved": "Working day saved."
+    "saved": "Working day saved.",
+    "startsAt": "Workday starts at"
   }
 }

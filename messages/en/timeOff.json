@@ -365,8 +365,6 @@
       "description": "Description",
       "category": "Category",
       "categoryHint": "A system grouping used for icons and reporting.",
-      "color": "Color",
-      "colorHint": "Used on the calendar and type list.",
       "preview": "Preview",
       "untitled": "Untitled type",
       "policiesHint": "Policies (quotas, accrual, approvals) live inside this type and are added on its page.",

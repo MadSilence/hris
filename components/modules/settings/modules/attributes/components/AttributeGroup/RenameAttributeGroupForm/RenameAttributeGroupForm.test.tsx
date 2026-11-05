@@ -47,17 +47,18 @@ describe("RenameAttributeGroupForm", () => {
     expect(screen.getByLabelText(/^description$/i)).toHaveValue("Sizes for the kit order");
   });
 
-  it("keeps Save off until something changed", async () => {
+  it("closes without sending when Save is pressed with nothing changed", async () => {
     const user = userEvent.setup();
     const onSubmitAction = jest.fn();
+    const onCancelAction = jest.fn();
 
-    renderForm({ onSubmitAction });
-
-    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
-
-    await user.type(screen.getByLabelText(/^description$/i), ".");
+    renderForm({ onSubmitAction, onCancelAction });
 
     expect(screen.getByRole("button", { name: /save/i })).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(onCancelAction).toHaveBeenCalledTimes(1);
+    expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
   it("shows validation error when name is empty", async () => {

@@ -14,8 +14,6 @@ import { Label } from "@/components/desact/label";
 import { Badge } from "@/components/desact/badge";
 import { cn } from "@/lib/cn";
 import { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
-import { TagColorSwatches } from "@/components/ui/TagColorPicker";
-import { TAG_CLASSES, TAG_COLOR_SEQUENCE, toTagColor } from "@/lib/theme/tags";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FieldError } from "@/components/desact/field-error";
 import { LEAVE_TYPE_CATEGORY_KEYS } from "../../LeaveTypeCategoryChip/LeaveTypeCategoryChip";
@@ -24,10 +22,7 @@ export type LeaveTypeFormValues = {
   name: string;
   description: string;
   category: LeaveTypeCategory | "";
-  color: string;
 };
-
-const DEFAULT_COLOR = TAG_COLOR_SEQUENCE[0];
 
 type CategoryChip = {
   value: LeaveTypeCategory | "";
@@ -67,7 +62,6 @@ const buildSchema = (t: ReturnType<typeof useTranslations<"timeOff">>) => yup.ob
     .max(1000, t("leaveTypes.form.descriptionMax"))
     .optional(),
   category: yup.mixed<LeaveTypeCategory | "">().optional(),
-  color: yup.string().optional(),
 });
 
 export const LeaveTypeForm: FC<Props> = ({
@@ -97,7 +91,6 @@ export const LeaveTypeForm: FC<Props> = ({
       name: initialValues?.name ?? "",
       description: initialValues?.description ?? "",
       category: initialValues?.category ?? "",
-      color: initialValues?.color ?? DEFAULT_COLOR,
     },
     validationSchema: schema,
     enableReinitialize: true,
@@ -184,19 +177,6 @@ export const LeaveTypeForm: FC<Props> = ({
               })}
             </div>
           </div>
-
-          {/* Color */}
-          <div className="space-y-2">
-            <Label>{t("leaveTypes.form.color")}</Label>
-            <p className="text-hint text-tertiary">{t("leaveTypes.form.colorHint")}</p>
-            <div className="pt-1">
-              <TagColorSwatches
-                value={formik.values.color}
-                onChange={(color) => formik.setFieldValue("color", color)}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Live preview */}
@@ -204,7 +184,6 @@ export const LeaveTypeForm: FC<Props> = ({
           <p className="text-hint font-semibold text-tertiary">{t("leaveTypes.form.preview")}</p>
           <div className="rounded-card border border-divider bg-card p-4 shadow-card">
             <div className="flex items-center gap-2.5">
-              <span aria-hidden className={cn("size-3 flex-none rounded-pill", TAG_CLASSES[toTagColor(formik.values.color)].dot)} />
               <span className="truncate text-body font-medium text-primary">
                 {formik.values.name.trim() || t("leaveTypes.form.untitled")}
               </span>

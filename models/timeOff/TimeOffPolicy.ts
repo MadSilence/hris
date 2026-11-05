@@ -1,4 +1,5 @@
-﻿import type {
+import type { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
+import type {
   TimeOffPolicyCarryoverExpiryType,
   TimeOffPolicyCarryoverExpiryUnit,
   TimeOffPolicyCarryoverType,
@@ -62,6 +63,8 @@ export interface TimeOffPolicy {
 
   version: number;
 
-  /** The tag colour of the policy's leave type — what a person's own calendar paints their leave in. Only the list carries it. */
-  leaveTypeColor?: string | null;
+  /** The policy's colour — a tag colour but gray: its bar on the calendars and its marker beside the name. */
+  color: string;
+  /** The category of the policy's leave type — a VACATION policy leads a person's balances. Only the list carries it. */
+  leaveTypeCategory?: LeaveTypeCategory | null;
 }

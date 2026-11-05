@@ -18,6 +18,7 @@ import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsP
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
@@ -251,17 +252,20 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
   useEffect(() => {
     if (row) {
       setRating(row.finalRating != null ? String(row.finalRating) : "");
       setReason("");
       setError(null);
+      setTried(false);
     }
   }, [row]);
   if (!row) return null;
   const changed = rating !== "" && Number(rating) !== row.finalRating;
 
   const save = async () => {
+    setTried(true);
     if (!changed || !reason.trim()) return;
     setBusy(true);
     setError(null);
@@ -301,11 +305,17 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
                   {session.scale.map((p) => <SelectItem key={p.value} value={String(p.value)}>{p.value} · {p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <FieldError>
+                {tried && !changed
+                  ? rating === "" ? tCommon("validation.required") : t("calibration.adjust.sameRating")
+                  : null}
+              </FieldError>
             </div>
             <div className="space-y-1.5">
               <RequiredLabel htmlFor="calibration-reason">{t("write.declineDialog.reason")}</RequiredLabel>
               <Textarea id="calibration-reason" value={reason} maxLength={2000} rows={3}
                 onChange={(e) => setReason(e.target.value)} placeholder={t("calibration.adjust.reasonPlaceholder")} />
+              <FieldError>{tried && !reason.trim() ? tCommon("validation.required") : null}</FieldError>
               <p className="text-hint text-tertiary">
                 {t("calibration.adjust.reasonHint", { name: row.subject.name.split(" ")[0] })}
               </p>
@@ -314,7 +324,7 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
           <FormError message={error} />
           <DialogFooter className="mt-4">
             <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy || !changed || !reason.trim()}>
+            <Button type="submit" disabled={busy}>
               {busy ? tCommon("actions.saving") : tCommon("actions.save")}
             </Button>
           </DialogFooter>

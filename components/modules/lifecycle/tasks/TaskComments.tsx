@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Textarea } from "@/components/desact/textarea";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useDateFormatter } from "@/lib/date";
 import type { TaskComment } from "@/models/lifecycle";
@@ -29,6 +30,7 @@ export function TaskComments({ load, send }: {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -43,6 +45,8 @@ export function TaskComments({ load, send }: {
   }, []);
 
   const submit = async () => {
+    if (busy) return;
+    setTried(true);
     const text = body.trim();
     if (!text) return;
     setBusy(true);
@@ -52,6 +56,7 @@ export function TaskComments({ load, send }: {
       if (res.status === ActionStatus.SUCCESS && res.data) {
         setComments(res.data);
         setBody("");
+        setTried(false);
       } else {
         setError(res.errorMessage ?? null);
       }
@@ -95,7 +100,8 @@ export function TaskComments({ load, send }: {
           disabled={busy}
           rows={2}
         />
-        <Button type="button" size="sm" disabled={busy || !body.trim()} onClick={() => void submit()}>
+        <FieldError>{tried && !body.trim() ? tCommon("validation.required") : null}</FieldError>
+        <Button type="button" size="sm" disabled={busy} onClick={() => void submit()}>
           {tCommon("actions.send")}
         </Button>
         <FormError message={error} />

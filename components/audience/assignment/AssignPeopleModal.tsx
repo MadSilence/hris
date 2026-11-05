@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { Alert02Icon, ArrowLeft02Icon, RepeatIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { QueryKey } from "@tanstack/react-query";
@@ -155,6 +156,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const [step, setStep] = React.useState<"pick" | "preview">("pick");
   const [previewSummary, setPreviewSummary] = React.useState<PreviewSummary | null>(null);
   const [liveResult, setLiveResult] = React.useState<LiveAssignmentCreated | null>(null);
+  const [tried, setTried] = React.useState(false);
+  const [applyTried, setApplyTried] = React.useState(false);
 
   const assignableType = assignableTypeOf(basePath);
   const domain = DOMAIN_CONFIG[basePath];
@@ -193,6 +196,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
     setStep("pick");
     setPreviewSummary(null);
     setLiveResult(null);
+    setTried(false);
+    setApplyTried(false);
     previewManual.reset();
     applyManual.reset();
     previewLive.reset();
@@ -266,6 +271,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   });
 
   const handlePreview = async () => {
+    setTried(true);
     if (willAffect === 0 || overCap || needsDate) return;
     try {
       if (live) {
@@ -278,6 +284,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
         const byReason = p.skippedByReason ?? countSkips(p.toSkip);
         setPreviewSummary({ willAssign: p.summary.created, skipped: p.summary.skipped, skippedByReason: byReason, conflicts: 0 });
       }
+      setApplyTried(false);
       setStep("preview");
     } catch {
       // The error is on the mutation, and the form shows it.
@@ -285,6 +292,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   };
 
   const handleApply = async () => {
+    setApplyTried(true);
+    if (!live && (previewSummary?.willAssign ?? 0) === 0) return;
     try {
       if (live) {
         const created = await createLive.mutateAsync(liveRequest());
@@ -339,7 +348,13 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
           ) : manualResult ? (
             <ResultView result={manualResult} kind={kind} />
           ) : step === "preview" && previewSummary ? (
-            <PreviewView summary={previewSummary} live={live} kind={kind} errorMessage={errorMessage} />
+            <PreviewView
+              summary={previewSummary}
+              live={live}
+              kind={kind}
+              errorMessage={errorMessage}
+              nobodyError={applyTried && !live && previewSummary.willAssign === 0 ? t("audience.assign.preview.nobodyToAssign") : null}
+            />
           ) : (
             <div className="space-y-3">
               {temporal && !live && (
@@ -347,6 +362,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                   <label className="flex flex-col gap-1 text-body">
                     <span className="text-tertiary">{t("audience.assign.effectiveFromRequired")}</span>
                     <DatePicker value={effectiveFrom} onChange={setEffectiveFrom} ariaLabel={t("audience.assign.effectiveFrom")} className="w-44" />
+                    <FieldError>{tried && needsDate ? tCommon("validation.required") : null}</FieldError>
                   </label>
                   <label className="flex flex-col gap-1 text-body">
                     <span className="text-tertiary">{t("audience.assign.effectiveTo")}</span>
@@ -373,6 +389,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 onIncludeInactiveChange={setIncludeInactive}
                 unavailableReason={currentHolderIds && !canExcludeByField ? unavailableReason : undefined}
               />
+              <FieldError>{tried && willAffect === 0 ? t("audience.assign.pickSomeone") : null}</FieldError>
 
               {/*
                 The checkbox widens the *search* in two directions, and the engine treats the two
@@ -413,7 +430,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 <Icon icon={ArrowLeft02Icon} size="sm" />
                 {tCommon("actions.back")}
               </Button>
-              <Button type="button" onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
+              <Button type="button" onClick={handleApply} disabled={busy}>
                 {busy
                   ? t("audience.assign.applying")
                   : live
@@ -426,7 +443,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
               <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
                 {tCommon("actions.cancel")}
               </Button>
-              <Button type="button" onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
+              <Button type="button" onClick={handlePreview} disabled={busy || (live && !assignableType)}>
                 {busy ? t("audience.assign.checking") : t("audience.assign.reviewPeople", { count: willAffect })}
               </Button>
             </>
@@ -454,12 +471,13 @@ const LiveRuleNote: React.FC<{ temporal: boolean }> = ({ temporal }) => {
 };
 
 /** "N will be assigned, M skipped" — and why — before anything is written. */
-const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; kind: AssignTargetKind; errorMessage?: string }> = ({
-  summary,
-  live,
-  kind,
-  errorMessage,
-}) => {
+const PreviewView: React.FC<{
+  summary: PreviewSummary;
+  live: boolean;
+  kind: AssignTargetKind;
+  errorMessage?: string;
+  nobodyError: string | null;
+}> = ({ summary, live, kind, errorMessage, nobodyError }) => {
   const t = useTranslations("access");
   const lines = skipCountLines(summary.skippedByReason, t);
   return (
@@ -469,6 +487,7 @@ const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; kind: Assi
           ? t("audience.assign.preview.willAssignSkipped", { count: summary.willAssign, skipped: summary.skipped })
           : t("audience.assign.preview.willAssign", { count: summary.willAssign })}
       </p>
+      <FieldError>{nobodyError}</FieldError>
       {lines.length > 0 && (
         <ul className="m-0 list-none space-y-1 rounded-control bg-subtle px-4 py-3 text-body text-primary">
           {lines.map((l) => <li key={l.reason}>{l.text}</li>)}

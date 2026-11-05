@@ -24,6 +24,29 @@
 }
 
 /*
+ * Four tag colours beyond the package's eight — Lilac, Orange, Mustard, Olive — for time off policies, which pick from
+ * eleven (the designers' answer 2.1, 2026-11-05; `DECISIONS.md` § "The designers' answers on the fixes"). An owner
+ * exception, so here and not in `noddo/tokens.css`. The light triplets are the designers'; **the dark ones are ours**
+ * (D3): each keeps the package's dark pattern — a deep background, text at 4.5 : 1 on it, a bar at 3 : 1 on a card — and
+ * was nudged (hue by at most 4°) until every pair with a new colour stays 6 apart for normal vision (the package's own
+ * closest pair) and 2.5 under a colour-vision deficiency — re-tuned on the walk of 2026-11-05, when Lilac sat too close
+ * to Indigo. `test/tagPalette.test.ts` holds both to it.
+ */
+:root {
+  --tag-lilac-bg: #EEEAF6; --tag-lilac-text: #463A78; --tag-lilac-bar: #7B68B5;
+  --tag-orange-bg: #FBEBDD; --tag-orange-text: #7A3E0A; --tag-orange-bar: #D9741C;
+  --tag-mustard-bg: #F5EFD8; --tag-mustard-text: #5A4706; --tag-mustard-bar: #A8861A;
+  --tag-olive-bg: #ECEEE0; --tag-olive-text: #3D4511; --tag-olive-bar: #5E6A1D;
+}
+
+[data-theme="dark"] {
+  --tag-lilac-bg: #2A2341; --tag-lilac-text: #9387C1; --tag-lilac-bar: #8F7FC6;
+  --tag-orange-bg: #3E200A; --tag-orange-text: #BB825B; --tag-orange-bar: #9E5B29;
+  --tag-mustard-bg: #372600; --tag-mustard-text: #AC8C42; --tag-mustard-bar: #B48C26;
+  --tag-olive-bg: #292B18; --tag-olive-text: #8E9370; --tag-olive-bar: #686D44;
+}
+
+/*
  * `reference` — the theme names below are the package's own custom properties, so Tailwind must not emit a
  * second definition of them; `inline` — a utility reads the property directly (`bg-accent` →
  * `var(--accent)`), so it follows `data-accent` and `data-theme` wherever they are set.
@@ -47,6 +70,8 @@
   --color-tertiary: var(--text-tertiary);
   --color-disabled: var(--text-disabled);
   --color-on-inverse: var(--text-inverse);
+  /* A tick on a policy colour's circle — white in both themes (the designers' answer 2.4). */
+  --color-on-tag: var(--white);
 
   /* Surfaces */
   --color-page: var(--surface-page);
@@ -153,6 +178,18 @@
   --color-tag-bronze-bg: var(--tag-bronze-bg);
   --color-tag-bronze-text: var(--tag-bronze-text);
   --color-tag-bronze-bar: var(--tag-bronze-bar);
+  --color-tag-lilac-bg: var(--tag-lilac-bg);
+  --color-tag-lilac-text: var(--tag-lilac-text);
+  --color-tag-lilac-bar: var(--tag-lilac-bar);
+  --color-tag-orange-bg: var(--tag-orange-bg);
+  --color-tag-orange-text: var(--tag-orange-text);
+  --color-tag-orange-bar: var(--tag-orange-bar);
+  --color-tag-mustard-bg: var(--tag-mustard-bg);
+  --color-tag-mustard-text: var(--tag-mustard-text);
+  --color-tag-mustard-bar: var(--tag-mustard-bar);
+  --color-tag-olive-bg: var(--tag-olive-bg);
+  --color-tag-olive-text: var(--tag-olive-text);
+  --color-tag-olive-bar: var(--tag-olive-bar);
 
   /* Charts (SPEC § 15) */
   --color-chart-1: var(--chart-1);

@@ -7,6 +7,7 @@ import type {
   RejectTimeOffRequestRequest,
   TimeOffRequestDurationDTO,
   TimeOffOverlapDTO,
+  TimeOffApproverPreviewDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { UpdateResponse } from "@/api/models/misc";
 import type { TimeOffDecisionContext, TimeOffRequest } from "@/models/timeOff";
@@ -24,6 +25,10 @@ export class HrisTimeOffRequestsService {
     endDate: string
   ): Promise<TimeOffRequestDurationDTO> {
     return hrisApiTimeOffRequestsClient.previewDuration(assignmentId, startDate, endDate);
+  }
+
+  public async previewApprovers(assignmentId: string): Promise<TimeOffApproverPreviewDTO> {
+    return hrisApiTimeOffRequestsClient.previewApprovers(assignmentId);
   }
 
   public async listOverlaps(

@@ -68,7 +68,7 @@ export const UserCalendarContainer: FC<Props> = ({
   const fallbackName = t("balances.fallbackName");
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
     const policyName = new Map((policies ?? []).map((p) => [p.id, p.name]));
-    const policyColor = new Map((policies ?? []).map((p) => [p.id, p.leaveTypeColor ?? null]));
+    const policyColor = new Map((policies ?? []).map((p) => [p.id, p.color ?? null]));
     return (requests ?? [])
       .filter((r) => timeOffStatuses.includes(r.status))
       .map((r) => ({

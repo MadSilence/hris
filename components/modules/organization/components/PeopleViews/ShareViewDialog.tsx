@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/desact/select";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
@@ -104,6 +105,7 @@ export function ShareViewDialog({
   const viewId = view?.id ?? null;
   const [type, setType] = useState<ShareGranteeType>("PERSON");
   const [pending, setPending] = useState<PendingGrantee[]>([]);
+  const [tried, setTried] = useState(false);
   const [removing, setRemoving] = useState<PeopleViewShare | null>(null);
 
   const { data: shares = [], isLoading: sharesLoading } = usePeopleViewShares(viewId);
@@ -127,16 +129,23 @@ export function ShareViewDialog({
 
   const close = () => {
     setPending([]);
+    setTried(false);
     setType("PERSON");
     mutations.share.reset();
     onClose();
   };
 
   const submit = () => {
+    setTried(true);
     if (!viewId || !pending.length) return;
     mutations.share.mutate(
       { viewId, grantees: pending.map(({ granteeType, granteeId, permission }) => ({ granteeType, granteeId, permission })) },
-      { onSuccess: () => setPending([]) },
+      {
+        onSuccess: () => {
+          setPending([]);
+          setTried(false);
+        },
+      },
     );
   };
 
@@ -192,6 +201,7 @@ export function ShareViewDialog({
                 )}
               </div>
             </div>
+            <FieldError>{tried && !pending.length ? t("views.share.pickGrantee") : null}</FieldError>
 
             {pending.length ? (
               <ul className="flex flex-col gap-1" aria-label={t("views.share.toShare")}>
@@ -279,7 +289,7 @@ export function ShareViewDialog({
             <Button type="button" variant="ghost" onClick={close}>
               {tCommon("actions.cancel")}
             </Button>
-            <Button type="button" onClick={submit} disabled={!pending.length || mutations.share.isPending}>
+            <Button type="button" onClick={submit} disabled={mutations.share.isPending}>
               {t("views.share.share")}
             </Button>
           </DialogFooter>

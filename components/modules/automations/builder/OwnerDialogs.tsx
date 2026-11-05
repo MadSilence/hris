@@ -7,6 +7,7 @@ import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import type { PersonRef } from "@/models/automations";
 
@@ -30,7 +31,8 @@ export function ChangeOwnerDialog({
   const t = useTranslations("automations");
   const tCommon = useTranslations("common");
   const [picked, setPicked] = useState<PickedUser | null>(null);
-  useEffect(() => { if (isOpen) setPicked(null); }, [isOpen]);
+  const [tried, setTried] = useState(false);
+  useEffect(() => { if (isOpen) { setPicked(null); setTried(false); } }, [isOpen]);
   const userId = picked?.id ?? null;
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isLoading) onCancel(); }}>
@@ -40,10 +42,18 @@ export function ChangeOwnerDialog({
           <DialogDescription>{t("owner.changeDescription")}</DialogDescription>
         </DialogHeader>
         <UserPickerField value={picked} onChange={setPicked} />
+        <FieldError>{tried && !userId ? t("owner.pickOwner") : null}</FieldError>
         <FormError message={errorMessage} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>{tCommon("actions.cancel")}</Button>
-          <Button type="button" onClick={() => userId && onConfirm(userId)} disabled={isLoading || !userId}>
+          <Button
+            type="button"
+            onClick={() => {
+              setTried(true);
+              if (userId) onConfirm(userId);
+            }}
+            disabled={isLoading}
+          >
             {isLoading ? t("owner.changing") : t("rule.menu.changeOwner")}
           </Button>
         </DialogFooter>

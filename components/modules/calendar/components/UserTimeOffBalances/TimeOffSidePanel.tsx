@@ -10,10 +10,11 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { TimeOffPolicyUnit } from "@/api/modules/timeOff/timeOffPolicies/dto";
-import type { EmployeeTimeOffBalance, TimeOffPolicy, TimeOffRequest } from "@/models/timeOff";
+import { LeaveTypeCategory } from "@/api/modules/timeOff/leaveTypes/dto";
+import type { EmployeeTimeOffBalance, TimeOffPolicy } from "@/models/timeOff";
 import { dayAmountArgs, formatDayAmount } from "@/models/timeOff/formatDayAmount";
-import { type DateFormatter, dateToISO, useDateFormatter } from "@/lib/date";
-import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
+import { dateToISO, useShortDates } from "@/lib/date";
+import { PolicyMarker } from "@/components/ui/PolicyMarker";
 import { cn } from "@/lib/cn";
 import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
 
@@ -30,6 +31,8 @@ export type PolicyStanding = {
   unit: TimeOffPolicyUnit;
   left: number;
   used: number;
+  /** A VACATION-category policy leads (the owner, 2026-11-05, C5). */
+  vacation: boolean;
 };
 
 /**
@@ -59,23 +62,30 @@ export const standingsOf = (
     return {
       policyId: b.policyId,
       name: policy?.name ?? fallbackName,
-      color: policy?.leaveTypeColor,
+      color: policy?.color,
       unlimited: policy?.unlimitedQuota ?? false,
       unit: policy?.unit ?? TimeOffPolicyUnit.Days,
       left: b.currentBalance,
       used: b.usedBalance,
+      vacation: policy?.leaveTypeCategory === LeaveTypeCategory.Vacation,
     };
   });
 };
 
 /**
- * Which balances earn a place in the panel: a limited policy always (it has something left to say), an
- * unlimited one only once it has been used. Most used first. A primary policy would lead (Q13 of the plan).
+ * Which balances earn a place in the panel, in what order: a limited policy always (it has something left to say),
+ * an unlimited one only once it has been used. **A vacation policy leads** — there is no company-wide primary
+ * policy, because people in different places have different ones (the owner, 2026-11-05, C5); of several, the one
+ * with more days left. The rest, most used first.
  */
 export const panelOrder = (standings: PolicyStanding[]): PolicyStanding[] =>
   standings
-    .filter((s) => !s.unlimited || s.used > 0)
-    .sort((a, b) => b.used - a.used || a.name.localeCompare(b.name));
+    .filter((s) => s.vacation || !s.unlimited || s.used > 0)
+    .sort((a, b) => {
+      if (a.vacation !== b.vacation) return a.vacation ? -1 : 1;
+      if (a.vacation && b.vacation) return b.left - a.left || a.name.localeCompare(b.name);
+      return b.used - a.used || a.name.localeCompare(b.name);
+    });
 
 const figureOf = (t: CalendarTranslator, s: PolicyStanding) => {
   const unit = s.unit === TimeOffPolicyUnit.Hours ? "hours" : "days";
@@ -84,16 +94,12 @@ const figureOf = (t: CalendarTranslator, s: PolicyStanding) => {
     : { value: formatDayAmount(s.left), caption: t("sidePanel.left", { unit, count: s.left }) };
 };
 
-const Dot: FC<{ color: string | null | undefined }> = ({ color }) => (
-  <span aria-hidden className={cn("size-2 shrink-0 rounded-pill", TAG_CLASSES[toTagColor(color)].dot)} />
-);
-
 const BalanceRow: FC<{ standing: PolicyStanding; compact?: boolean }> = ({ standing, compact = false }) => {
   const t = useTranslations("calendar");
   const figure = figureOf(t, standing);
   return (
-    <div className={cn("flex items-center gap-2.5 border-divider [&+&]:border-t", compact ? "h-11" : "h-15")}>
-      <Dot color={standing.color} />
+    <div className={cn("flex items-center gap-2 border-divider [&+&]:border-t", compact ? "h-11" : "h-15")}>
+      <PolicyMarker color={standing.color} />
       <span className="min-w-0 flex-1 truncate text-body font-medium text-primary" title={standing.name}>
         {standing.name}
       </span>
@@ -155,10 +161,7 @@ const AllPoliciesDialog: FC<{ standings: PolicyStanding[]; onClose: () => void }
   );
 };
 
-const rangeLabel = (r: TimeOffRequest, formatDisplayDate: DateFormatter) =>
-  r.startDate === r.endDate
-    ? formatDisplayDate(r.startDate, { style: "medium" })
-    : `${formatDisplayDate(r.startDate, { style: "medium" })} – ${formatDisplayDate(r.endDate, { style: "medium" })}`;
+
 
 const UPCOMING_STATUSES = new Set<string>([
   TimeOffRequestStatus.Pending,
@@ -176,7 +179,7 @@ export const TimeOffSidePanel: FC<{
   policyMap: Map<string, TimeOffPolicy>;
 }> = ({ userId, balances, policyMap }) => {
   const t = useTranslations("calendar");
-  const formatDisplayDate = useDateFormatter();
+  const shortDates = useShortDates();
   const tTimeOff = useTranslations("timeOff");
   const todayISO = useMemo(() => dateToISO(new Date()), []);
   const [allOpen, setAllOpen] = useState(false);
@@ -227,10 +230,10 @@ export const TimeOffSidePanel: FC<{
                 ? t("sidePanel.amountHours", { amount })
                 : tTimeOff("amount.days", dayAmountArgs(r.requestedAmount));
             return (
-              <div key={r.id} className="flex items-center gap-2.5 border-divider py-2.5 [&+&]:border-t">
-                <Dot color={policy?.leaveTypeColor} />
+              <div key={r.id} className="flex items-center gap-2 border-divider py-2.5 [&+&]:border-t">
+                <PolicyMarker color={policy?.color} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-body text-primary">{rangeLabel(r, formatDisplayDate)}</p>
+                  <p className="truncate text-body text-primary">{shortDates.range(r.startDate, r.endDate, { weekday: true })}</p>
                   <p className="truncate text-hint text-tertiary">
                     {policy?.name ?? fallbackName} · {amountLabel}
                   </p>

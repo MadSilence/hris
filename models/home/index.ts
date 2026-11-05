@@ -17,7 +17,8 @@ export type WhosOutPerson = {
   endDate: string;
   status: "APPROVED" | "PENDING" | "CANCELLATION_PENDING" | string;
   leaveTypeName?: string;
-  leaveTypeColor?: string;
+  policyName?: string;
+  policyColor?: string;
   requestId?: string;
 };
 

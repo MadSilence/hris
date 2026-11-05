@@ -13,7 +13,7 @@ import { formatBytes } from "../../../utils/formatBytes";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
-import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 
 export type FolderOption = {
   id: string;
@@ -81,7 +81,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   const [folderId, setFolderId] = useState(defaultFolderId ?? ROOT_FOLDER_ID);
   const [categoryId, setCategoryId] = useState(NO_CATEGORY_ID);
   const [visibility, setVisibility] = useState<DocumentVisibility>(defaultVisibility);
-  const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming || incoming.length === 0) return;
@@ -101,7 +101,6 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
 
       return next;
     });
-    setError(null);
   };
 
   const removeFile = (index: number) =>
@@ -111,11 +110,8 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     e.preventDefault();
 
     if (isLoading) return;
-
-    if (files.length === 0) {
-      setError(t("documents.upload.chooseAtLeastOne"));
-      return;
-    }
+    setTried(true);
+    if (files.length === 0) return;
 
     void onSubmitAction({
       files,
@@ -239,7 +235,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
             </ul>
           )}
 
-          {error && <FormError message={error} />}
+          <FieldError>{tried && files.length === 0 ? t("documents.upload.chooseAtLeastOne") : null}</FieldError>
         </div>
 
         <div className="space-y-2">
@@ -307,7 +303,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
 
         <Button
           type="submit"
-          disabled={isLoading || files.length === 0}
+          disabled={isLoading}
  >
           {t("documents.upload.submit", { count: files.length })}
         </Button>

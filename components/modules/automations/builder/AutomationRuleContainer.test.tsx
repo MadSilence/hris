@@ -169,29 +169,34 @@ describe("AutomationRuleContainer — composing a rule", () => {
 });
 
 describe("AutomationRuleContainer — the preview gate", () => {
-  it("holds Publish until the rule has a name, and shows the preview's counts", async () => {
+  it("asks for a name under the field when Publish is pressed without one, and shows the preview's counts", async () => {
     search = new URLSearchParams("starter=welcome-email");
     render(<AutomationRuleContainer ruleId={null} />);
 
     fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: "" } });
     await waitFor(() => expect(screen.getByTestId("preview-matching")).toHaveTextContent("12 people"));
-    expect(publishButton()).toBeDisabled();
+    expect(publishButton()).toBeEnabled();
     expect(screen.getByTestId("publish-gate")).toHaveTextContent("Give the automation a name to publish it.");
+    fireEvent.click(publishButton());
+    expect(screen.getByText("Enter a name.")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: "Welcome email" } });
     await waitFor(() => expect(publishButton()).toBeEnabled());
+    expect(screen.queryByText("Enter a name.")).not.toBeInTheDocument();
     expect(screen.getByTestId("preview-past")).toHaveTextContent("3 people are already past the moment");
     expect(screen.getByTestId("for-whom-count")).toHaveTextContent("12 people match now");
   });
 
-  it("keeps Publish off while the preview reports a problem, in the dictionary's words", async () => {
+  it("does not publish while the preview reports a problem, in the dictionary's words", async () => {
     nextPreview = previewOf({ problems: [{ path: "actions[0].body", code: "AU00005", message: "Unknown placeholder: fristName" }] });
     search = new URLSearchParams("starter=welcome-email");
     render(<AutomationRuleContainer ruleId={null} />);
 
     await waitFor(() => expect(screen.getByTestId("preview-problems")).toHaveTextContent("fristName is not a placeholder this text can use"));
-    expect(publishButton()).toBeDisabled();
     expect(screen.getByTestId("publish-gate")).toHaveTextContent("Fix what the preview lists to publish.");
+    fireEvent.click(publishButton());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
 
@@ -246,8 +251,9 @@ describe("AutomationRuleContainer — publishing", () => {
     (useAutomation as jest.Mock).mockReturnValue({ data: existing, error: null, isLoading: false });
     nextPreview = previewOf({ inFlight: { scheduledRuns: 23, inProgressRuns: 2, completedRuns: 140, wouldCancel: 4, wouldAdd: 6, waitingRuns: 0 } });
     render(<AutomationRuleContainer ruleId="rule-1" />);
-    // Nothing changed yet: there is nothing to publish.
-    expect(publishButton()).toBeDisabled();
+    // Nothing changed yet: there is nothing to publish, so pressing Publish opens nothing.
+    fireEvent.click(publishButton());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Trigger"), { target: { value: "TERMINATION_SCHEDULED" } });
     await waitFor(() => expect(publishButton()).toBeEnabled());
     fireEvent.click(publishButton());

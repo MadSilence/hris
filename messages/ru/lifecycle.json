@@ -110,7 +110,9 @@
     "markDone": "Отметить выполненной",
     "attachAndMarkDone": "Приложить и отметить выполненной",
     "answersNotSent": "Не удалось отправить ответы.",
-    "commentsCount": "Комментарии ({count})"
+    "commentsCount": "Комментарии ({count})",
+    "pickFile": "Сначала выберите файл.",
+    "fillSomething": "Заполните хотя бы одно поле."
   },
   "pages": {
     "processesTitle": "Процессы",

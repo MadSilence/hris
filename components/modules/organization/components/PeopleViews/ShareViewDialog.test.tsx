@@ -100,8 +100,11 @@ describe("ShareViewDialog", () => {
     };
 
     render(<ShareViewDialog view={view} onClose={jest.fn()} />);
-    expect(screen.getByRole("button", { name: "Share" })).toBeDisabled();
     expect(screen.getByText("Not shared with anyone yet.")).toBeInTheDocument();
+    // Nobody picked yet: Share stays pressable and says what is missing under the picker.
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+    expect(screen.getByText("Pick who to share it with.")).toBeInTheDocument();
+    expect(shareMutate).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Pick Cid" }));
 
@@ -124,7 +127,8 @@ describe("ShareViewDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Do not share with Cid Clerk" }));
 
     expect(screen.queryByRole("list", { name: "To share" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Share" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+    expect(shareMutate).not.toHaveBeenCalled();
   });
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -13,6 +13,7 @@ import type {
 import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
 import { WEEKDAY_KEYS, toISO } from "@/components/modules/calendar/lib/dateRange";
 import {
+  BoardPickContext,
   CompanyCalendarRow,
   CompanyCalendarSkeletonRow,
   boardGridTemplate,
@@ -93,6 +94,9 @@ export const CompanyCalendarBoard: FC<Props> = ({
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+  // The days a row is picking, for the header to mark (the designers' answer 1.5).
+  const [picked, setPicked] = useState<{ from: number; to: number } | null>(null);
+  const pickContext = useMemo(() => ({ picked, setPicked }), [picked]);
 
   // Group headers stick just under the day header, so they need its height. Measured rather than
   // assumed: the header's two lines of text are whatever the font makes them.
@@ -136,6 +140,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
       <style>{`@keyframes calFade{from{opacity:0}to{opacity:1}}`}</style>
 
       <div ref={scrollRef} data-calendar-scroll="" className="min-h-0 flex-1 overflow-y-auto print:overflow-visible">
+        <BoardPickContext.Provider value={pickContext}>
         <div key={animationKey} style={{ animation: "calFade 220ms ease-out" }}>
           {/* Header */}
           <div ref={headerRef} className="sticky top-0 z-20 grid w-full text-body" style={{ gridTemplateColumns }}>
@@ -146,6 +151,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
               const iso = dayISOs[i];
               const today = iso === todayISO;
               const weekend = isNonWorkingDay(d);
+              const inPick = picked !== null && i >= picked.from && i <= picked.to;
+              const pickEnd = picked !== null && (i === picked.from || i === picked.to);
               return (
                 <div
                   key={`h-${iso}`}
@@ -162,7 +169,13 @@ export const CompanyCalendarBoard: FC<Props> = ({
                   {/* Today: the date in an accent circle (SPEC § 13.13). */}
                   <div
                     className={`mx-auto inline-flex size-6 items-center justify-center rounded-pill text-hint tabular-nums ${
-                      today ? "bg-accent font-semibold text-on-accent" : "text-primary"
+                      today
+                        ? "bg-accent font-semibold text-on-accent"
+                        : pickEnd
+                          ? "bg-accent-muted font-semibold text-accent-text"
+                          : inPick
+                            ? "font-semibold text-accent-text"
+                            : "text-primary"
                     }`}
                   >
                     {d.getDate()}
@@ -210,6 +223,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
             </div>
           ) : null}
         </div>
+        </BoardPickContext.Provider>
       </div>
 
       {showEmpty ? (

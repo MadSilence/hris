@@ -3,6 +3,7 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
@@ -28,17 +29,27 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
   const [name, setName] = useState(documentName ?? "");
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
-    if (isOpen) setName(documentName ?? "");
+    if (isOpen) {
+      setName(documentName ?? "");
+      setTried(false);
+    }
   }, [isOpen, documentName]);
 
   const trimmed = name.trim();
-  const canSubmit = trimmed.length > 0 && trimmed !== documentName;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading || !canSubmit) return;
+    if (isLoading) return;
+    setTried(true);
+    if (!trimmed) return;
+    // The same name: nothing to rename, and the dialog closes as if it had.
+    if (trimmed === documentName) {
+      onCancelAction();
+      return;
+    }
     onConfirmAction(trimmed);
   };
 
@@ -69,6 +80,7 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
               disabled={isLoading}
               onChange={(e) => setName(e.currentTarget.value)}
             />
+            <FieldError>{tried && !trimmed ? tCommon("validation.enterName") : null}</FieldError>
           </div>
 
           <DialogFooter className="mt-8">
@@ -77,7 +89,7 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !canSubmit}
+              disabled={isLoading}
  >
               {tCommon("actions.rename")}
             </Button>

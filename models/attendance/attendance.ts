@@ -71,6 +71,8 @@ export type AttendanceLog = {
   today: string;
   totals: AttendanceTotals;
   days: AttendanceLogDay[];
+  /** When the company's working day starts, in minutes after midnight — the presets on Log hours start here. */
+  workdayStartMinutes?: number;
 };
 
 /** What the caller may do on one person's attendance — the server's answer, not a guess. */

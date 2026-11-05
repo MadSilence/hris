@@ -11,6 +11,7 @@ import { Button } from "@/components/desact/button";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { showSuccess } from "@/lib/errors/errorToast";
@@ -35,11 +36,14 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
   const [picked, setPicked] = useState<PickedUser[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { if (open) { setPicked([]); setError(null); } }, [open]);
+  const [tried, setTried] = useState(false);
+  useEffect(() => { if (open) { setPicked([]); setError(null); setTried(false); } }, [open]);
   if (!person) return null;
   const room = (person.peerMax ?? 0) - person.peers;
 
   const save = async () => {
+    setTried(true);
+    if (picked.length === 0) return;
     setBusy(true);
     setError(null);
     try {
@@ -85,11 +89,12 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
               onChange={(u) => u && !picked.some((x) => x.id === u.id) && u.id !== person.subject.userId && setPicked([...picked, u])} />
           )}
           {room <= 0 && <p className="text-body text-tertiary">{t("run.peers.full")}</p>}
+          <FieldError>{tried && picked.length === 0 ? t("run.peers.pickSomeone") : null}</FieldError>
         </div>
         <FormError message={error} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy || picked.length === 0}>
+          <Button type="button" onClick={() => void save()} disabled={busy}>
             {busy ? t("run.peers.asking") : t("run.peers.ask")}
           </Button>
         </DialogFooter>
@@ -110,10 +115,12 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
   const [picked, setPicked] = useState<PickedUser | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { if (open) { setPicked(target?.suggestion ?? null); setError(null); } }, [open, target]);
+  const [tried, setTried] = useState(false);
+  useEffect(() => { if (open) { setPicked(target?.suggestion ?? null); setError(null); setTried(false); } }, [open, target]);
   if (!target) return null;
 
   const save = async () => {
+    setTried(true);
     if (!picked) return;
     setBusy(true);
     setError(null);
@@ -146,11 +153,12 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
         <div className="space-y-1.5">
           <RequiredLabel required>{t("run.handOnDialog.newReviewer")}</RequiredLabel>
           <UserPickerField value={picked} onChange={setPicked} />
+          <FieldError>{tried && !picked ? tCommon("validation.required") : null}</FieldError>
         </div>
         <FormError message={error} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy || !picked}>{busy ? t("run.handOnDialog.handingOn") : t("run.handOnDialog.handOn")}</Button>
+          <Button type="button" onClick={() => void save()} disabled={busy}>{busy ? t("run.handOnDialog.handingOn") : t("run.handOnDialog.handOn")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

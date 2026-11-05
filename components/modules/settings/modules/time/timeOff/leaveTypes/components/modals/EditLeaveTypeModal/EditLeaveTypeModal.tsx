@@ -12,7 +12,6 @@ import {
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { LeaveTypeForm, type LeaveTypeFormValues } from "../LeaveTypeForm";
 import type { LeaveType } from "@/models/timeOff";
-import { toTagColor } from "@/lib/theme/tags";
 
 type Props = {
   isOpen: boolean;
@@ -70,7 +69,6 @@ export const EditLeaveTypeModal: FC<Props> = ({
                 name: leaveType.name,
                 description: leaveType.description ?? "",
                 category: leaveType.category ?? "",
-                color: toTagColor(leaveType.color),
               }}
               onCancelAction={requestClose}
               onDirtyChangeAction={setIsDirty}

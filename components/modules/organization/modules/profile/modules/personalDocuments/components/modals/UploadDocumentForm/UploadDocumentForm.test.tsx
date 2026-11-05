@@ -117,7 +117,21 @@ describe("UploadDocumentForm", () => {
     expect(screen.getByText(/drag files here to upload/i)).toBeInTheDocument();
     expect(getInnerButton(/^choose files$/i)).toBeInTheDocument();
     expect(folderSelect()).toHaveValue("folder-1");
-    expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^upload$/i })).toBeEnabled();
+  });
+
+  it("asks for a file under the field when Upload is pressed with none", () => {
+    const onSubmitAction = jest.fn();
+    renderForm({ onSubmitAction });
+
+    expect(screen.queryByText("Please choose at least one file.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
+
+    expect(screen.getByText("Please choose at least one file.")).toBeInTheDocument();
+    expect(onSubmitAction).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
+    expect(screen.queryByText("Please choose at least one file.")).not.toBeInTheDocument();
   });
 
   it("hides the category picker when the company has none", () => {
@@ -191,7 +205,7 @@ describe("UploadDocumentForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /remove contract\.pdf/i }));
 
     expect(screen.queryByText("contract.pdf")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^upload$/i })).toBeEnabled();
   });
 
   it("shows active drag state", () => {

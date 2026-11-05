@@ -319,6 +319,8 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
    * and the form still shows one coherent error.
    */
   const handleSave = async () => {
+    // A missing name or no working day already says so under its field.
+    if (nameMissing || noWorkingDays) return;
     // After a save, the half holds the version that save produced. Following the read is not enough:
     // a name saved as "  Acme " comes back trimmed, the field still differs, the half stays dirty, and
     // the next save would be refused for a version this person moved themselves.
@@ -512,7 +514,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           <Button
             type="button"
             onClick={handleSave}
-            disabled={saving || nameMissing || noWorkingDays}
+            disabled={saving}
           >
             {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
           </Button>

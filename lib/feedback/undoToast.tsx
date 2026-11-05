@@ -23,18 +23,31 @@ import { showError } from "@/lib/errors/errorToast";
  * The bar is the honest part. A toast that offers an undo without showing how long it has left asks
  * the reader to gamble on the timing, and the answer they choose is "read it faster", which is the
  * opposite of what the pause is for.
+ *
+ * **Held back, not taken back** — `onExpire`: for an act that cannot be reversed once sent (an approval tells the
+ * requester at once), the caller does not do it yet; it does it in `onExpire`, when the toast ends without an Undo —
+ * timed out or swiped away. Undo then simply never sends it (the owner, 2026-11-05, D1). Exactly one of the two runs.
  */
 export const showUndoToast = ({
   message,
   onUndo,
+  onExpire,
   durationMs = UNDO_WINDOW_MS,
 }: {
   /** What just happened, in the past tense: "Annual Leave archived". */
   message: string;
   /** Puts it back. Its failure is surfaced as an ordinary error card. */
   onUndo: () => void | Promise<unknown>;
+  /** The toast ended without an Undo: do what was held back. */
+  onExpire?: () => void;
   durationMs?: number;
 }) => {
+  let settled = false;
+  const expire = () => {
+    if (settled) return;
+    settled = true;
+    onExpire?.();
+  };
   const id = toast.custom(
     (toastId) => (
       <UndoCard
@@ -42,7 +55,10 @@ export const showUndoToast = ({
         durationMs={durationMs}
         onUndo={async () => {
           // Dismiss first: the undo is what the reader asked for, and leaving the card up while it
-          // runs invites a second press against a window that is already closing.
+          // runs invites a second press against a window that is already closing. Settled first, so the
+          // dismissal is not read as the toast running out.
+          if (settled) return;
+          settled = true;
           toast.dismiss(toastId);
           try {
             await onUndo();
@@ -52,7 +68,7 @@ export const showUndoToast = ({
         }}
       />
     ),
-    { duration: durationMs },
+    { duration: durationMs, onAutoClose: expire, onDismiss: expire },
   );
 
   return id;

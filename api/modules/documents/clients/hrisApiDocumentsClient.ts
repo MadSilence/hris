@@ -1,7 +1,10 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
+
+export type DocumentBatchOperation = "delete" | "restore" | "purge" | "star" | "move";
 import {
   CreateDocumentFolderRequest,
   DocumentDTO,
+  DocumentVisibility,
   DocumentFolderDeleteImpactDTO,
   DocumentFolderDeleteStrategy,
   DocumentFolderContentDTO,
@@ -103,6 +106,11 @@ export class HrisApiDocumentsClient {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/rename`, body);
   }
 
+  /** HR only, or the person too — after upload (D3). */
+  public async changeVisibility(documentId: string, visibility: DocumentVisibility): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${documentId}/visibility`, { visibility });
+  }
+
   public async listTrash(userId: string): Promise<DocumentDTO[]> {
     return hrisApiClient.get<DocumentDTO[]>(`${this.BASE_PATH}/users/${userId}/trash`);
   }
@@ -135,6 +143,21 @@ export class HrisApiDocumentsClient {
 
   public async deleteCategory(id: string): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/categories/${id}/delete`);
+  }
+
+  /** Several documents at once (D2): each checked and journalled as one, all or none. */
+  public async batch(
+    operation: DocumentBatchOperation,
+    body: { ids: string[]; folderId?: string | null; targetUserId?: string; starred?: boolean },
+  ): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/batch/${operation}`, body);
+  }
+
+  /** The selection as one zip — raw, so the route can stream it on. */
+  public async downloadZip(ids: string[]): Promise<Response> {
+    const qs = new URLSearchParams();
+    for (const id of ids) qs.append("ids", id);
+    return hrisApiClient.fetch(`${this.BASE_PATH}/batch/zip?${qs.toString()}`);
   }
 
   public async downloadDocument(documentId: string): Promise<Response> {

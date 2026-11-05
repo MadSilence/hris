@@ -4,6 +4,7 @@ import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePubl
 import { usePublicHolidayCalendarDeleteImpact } from "../../hooks/usePublicHolidayCalendarDeleteImpact";
 import { FC, type ReactNode, useMemo, useRef, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 // Five of these dialogs printed a sentence they wrote themselves — "Failed to archive the calendar."
 // — over a refusal that already said why (in use, already archived, last of its kind). The rule is
 // the dictionary by `code`; the module does not get its own vocabulary.
@@ -118,6 +119,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
 
   const [duplicateTarget, setDuplicateTarget] = useState<PublicHolidayCalendar | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
+  const [duplicateTried, setDuplicateTried] = useState(false);
   const [archiveTarget, setArchiveTarget] = useState<PublicHolidayCalendar | null>(null);
   const [restoreTarget, setRestoreTarget] = useState<PublicHolidayCalendar | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<PublicHolidayCalendar | null>(null);
@@ -183,11 +185,13 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
 
   const openDuplicate = (c: PublicHolidayCalendar) => {
     setDuplicateName(t("publicHolidays.list.copyName", { name: c.name }));
+    setDuplicateTried(false);
     setDuplicateTarget(c);
   };
 
   const confirmDuplicate = async () => {
-    if (!duplicateTarget) return;
+    setDuplicateTried(true);
+    if (!duplicateTarget || !duplicateName.trim()) return;
     try {
       await duplicate.mutateAsync({ id: duplicateTarget.id, name: duplicateName.trim() });
       setDuplicateTarget(null);
@@ -472,6 +476,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               onChange={(e) => setDuplicateName(e.currentTarget.value)}
               autoFocus
             />
+            <FieldError>{duplicateTried && !duplicateName.trim() ? tCommon("validation.enterName") : null}</FieldError>
             <p className="text-hint text-tertiary">
               {t("publicHolidays.list.duplicate.hint", { name: duplicateTarget?.name ?? "" })}
             </p>
@@ -483,7 +488,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
             <Button type="button" variant="secondary" onClick={() => setDuplicateTarget(null)} disabled={duplicate.isPending}>
               {tCommon("actions.cancel")}
             </Button>
-            <Button type="button" onClick={confirmDuplicate} disabled={duplicate.isPending || !duplicateName.trim()}>
+            <Button type="button" onClick={confirmDuplicate} disabled={duplicate.isPending}>
               {duplicate.isPending ? t("publicHolidays.list.duplicate.pending") : tCommon("actions.duplicate")}
             </Button>
           </DialogFooter>

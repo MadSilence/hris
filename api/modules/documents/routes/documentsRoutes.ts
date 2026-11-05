@@ -60,6 +60,19 @@ export class DocumentsRoutes {
     return Response.json(data);
   }
 
+  /** The selection as one zip (D2); the ids ride the query, as a browser navigation sends them. */
+  public async downloadZip(req: Request) {
+    const ids = new URL(req.url).searchParams.getAll("ids");
+    const backendResponse = await hrisDocumentsService.downloadZip(ids);
+    return new Response(backendResponse.body, {
+      status: backendResponse.status,
+      headers: {
+        "Content-Type": backendResponse.headers.get("content-type") ?? "application/zip",
+        "Content-Disposition": backendResponse.headers.get("content-disposition") ?? 'attachment; filename="documents.zip"',
+      },
+    });
+  }
+
   public async downloadDocument(_req: Request, documentId: string) {
     const backendResponse = await hrisDocumentsService.downloadDocument(documentId);
 

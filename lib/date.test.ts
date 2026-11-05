@@ -4,6 +4,8 @@ import {
   dateToISO,
   displayLocale,
   formatDisplayDate,
+  formatShortDate,
+  formatShortRange,
   isoToDate,
   resetDisplayPreferences,
   setDisplayPreferences,
@@ -156,5 +158,35 @@ describe("useDateFormatter", () => {
     const { result } = renderHook(() => useDateFormatter());
 
     expect(result.current("2026-11-12", { style: "medium", language: "ru" })).toMatch(/нояб/);
+  });
+});
+
+describe("the short style (C1)", () => {
+  const today = new Date(2026, 10, 5);
+  afterEach(() => resetDisplayPreferences());
+
+  it("drops the year of the current year and keeps it otherwise", () => {
+    setDisplayPreferences({ dateFormat: "DMY" });
+    expect(formatShortDate("2026-11-11", { today, language: "en" })).toBe("11 Nov");
+    expect(formatShortDate("2025-11-11", { today, language: "en" })).toBe("11 Nov 2025");
+    expect(formatShortDate("2026-11-11", { today, language: "en", weekday: true })).toBe("Wed, 11 Nov");
+  });
+
+  it("writes a span inside a month once, in the reader's order", () => {
+    setDisplayPreferences({ dateFormat: "DMY" });
+    expect(formatShortRange("2026-11-11", "2026-11-13", { today, language: "en", weekday: true })).toBe("Wed–Fri, 11–13 Nov");
+    setDisplayPreferences({ dateFormat: "MDY" });
+    expect(formatShortRange("2026-11-11", "2026-11-13", { today, language: "en", weekday: true })).toBe("Wed–Fri, Nov 11–13");
+  });
+
+  it("writes both ends across months, and the year on both across years", () => {
+    setDisplayPreferences({ dateFormat: "DMY" });
+    expect(formatShortRange("2026-11-30", "2026-12-02", { today, language: "en" })).toBe("30 Nov – 2 Dec");
+    expect(formatShortRange("2026-12-28", "2027-01-03", { today, language: "en" })).toBe("28 Dec 2026 – 3 Jan 2027");
+  });
+
+  it("reads a single day as one date", () => {
+    setDisplayPreferences({ dateFormat: "DMY" });
+    expect(formatShortRange("2026-11-11", "2026-11-11", { today, language: "en" })).toBe("11 Nov");
   });
 });

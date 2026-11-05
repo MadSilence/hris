@@ -7,6 +7,8 @@ export type CompanySettings = {
   language: string;
   /** Minutes in a company working day — Attendance's norm for anybody without a personal schedule. */
   dailyNormMinutes?: number;
+  /** When a company working day starts, in minutes after midnight — Log hours' presets start here. */
+  workdayStartMinutes?: number;
   /** The MONEY field Attendance prices logged time from. Null: no money in Attendance. */
   attendanceRateAttributeId?: string | null;
   /** The DATE field home reads birthdays from. Null: no birthdays on home. */

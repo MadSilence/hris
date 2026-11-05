@@ -73,13 +73,14 @@ describe("UpsertRoleNameForm", () => {
     expect(onCancelAction).toHaveBeenCalled();
   });
 
-  it("disables submit for short value", () => {
+  it("keeps submit enabled for a short value and says why under the field", async () => {
+    const onSubmitAction = jest.fn();
     render(
       <UpsertRoleNameForm
         initialName=""
         submitText="Save"
         onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
+        onSubmitAction={onSubmitAction}
       />,
     );
 
@@ -90,10 +91,11 @@ describe("UpsertRoleNameForm", () => {
       },
     );
 
-    expect(
-      screen.getByRole("button", {
-        name: /save/i,
-      }),
-    ).toBeDisabled();
+    const save = screen.getByRole("button", { name: /save/i });
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+
+    expect(await screen.findByText("Role name must be at least 2 characters.")).toBeInTheDocument();
+    expect(onSubmitAction).not.toHaveBeenCalled();
   });
 });

@@ -362,12 +362,6 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     }
   };
 
-  const isEditFormValid = useMemo(() => {
-    if (!editedName.trim()) return false;
-    if (editedHolidays.length === 0) return false;
-    return editedHolidays.every((h) => h.name.trim() && h.holidayDate);
-  }, [editedName, editedHolidays]);
-
   const visibleHolidays = useMemo(() => {
     const sorted = [...holidays].sort((a, b) => a.holidayDate.localeCompare(b.holidayDate));
     const q = holidaySearch.trim().toLowerCase();
@@ -450,7 +444,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     <Icon icon={Cancel01Icon} size="sm" />
                     {tCommon("actions.cancel")}
                   </Button>
-                  <Button type="button" disabled={!isEditFormValid || isSaving} onClick={handleSave}>
+                  <Button type="button" disabled={isSaving} onClick={handleSave}>
                     {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
                   </Button>
                 </div>

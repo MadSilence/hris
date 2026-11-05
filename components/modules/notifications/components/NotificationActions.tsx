@@ -7,6 +7,7 @@ import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
+import { FieldError } from "@/components/desact/field-error";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
@@ -76,6 +77,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
 
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
+  const [rejectTried, setRejectTried] = useState(false);
   const reasonId = useId();
 
   // A holiday drift asks a different question of a different domain; it has its own controls.
@@ -145,6 +147,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
   }
 
   const handleReject = async () => {
+    setRejectTried(true);
     if (!reason.trim()) return;
     const ok = await run(() => reject.mutateAsync({ requestId: source.id, rejectionReason: reason.trim() }));
     if (ok) {
@@ -157,8 +160,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
       {rejecting ? (
         <div className="flex flex-col gap-1.5">
-          {/* The button is disabled until this is filled, so the field has to say it is required —
-              without a label it was an unexplained empty box beside a dead button. */}
+          {/* Required: Reject without it says so under the field. */}
           <RequiredLabel htmlFor={reasonId} required>{t("actions.reason")}</RequiredLabel>
           <div className="flex items-center gap-2">
             <Input
@@ -169,20 +171,21 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
               className="h-8 flex-1"
               disabled={busy}
             />
-            <Button type="button" size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
+            <Button type="button" size="sm" variant="destructive" onClick={handleReject} disabled={busy}>
               {t("actions.reject")}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
               {tCommon("actions.cancel")}
             </Button>
           </div>
+          <FieldError>{rejectTried && !reason.trim() ? tCommon("validation.required") : null}</FieldError>
         </div>
       ) : (
         <div className="flex items-center gap-2">
           <Button type="button" variant="approve" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
             {t("actions.approve")}
           </Button>
-          <Button type="button" size="sm" variant="secondary" onClick={() => setRejecting(true)} disabled={busy}>
+          <Button type="button" size="sm" variant="secondary" onClick={() => { setRejectTried(false); setRejecting(true); }} disabled={busy}>
             <Icon icon={Cancel01Icon} size="sm" />
             {t("actions.reject")}
           </Button>

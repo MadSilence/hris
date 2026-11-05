@@ -14,6 +14,7 @@ import { Input } from "@/components/desact/input";
 import { Skeleton } from "@/components/desact/skeleton";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -88,8 +89,10 @@ function AddSessionDialog({ cycleId, open, onCloseAction }: { cycleId: string; o
   const [filters, setFilters] = useState<FilterDTO[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
   useEffect(() => {
     if (open) {
+      setTried(false);
       setName("");
       setFilters([]);
       setError(null);
@@ -97,6 +100,7 @@ function AddSessionDialog({ cycleId, open, onCloseAction }: { cycleId: string; o
   }, [open]);
 
   const save = async () => {
+    setTried(true);
     if (!name.trim()) return;
     setBusy(true);
     setError(null);
@@ -129,13 +133,14 @@ function AddSessionDialog({ cycleId, open, onCloseAction }: { cycleId: string; o
               <RequiredLabel htmlFor="calibration-name">{tCommon("fields.name")}</RequiredLabel>
               <Input id="calibration-name" value={name} maxLength={200} onChange={(e) => setName(e.target.value)}
                 placeholder={t("calibration.sessions.namePlaceholder")} />
+              <FieldError>{tried && !name.trim() ? tCommon("validation.enterName") : null}</FieldError>
             </div>
             <AudienceBuilder fields={fields} isLoadingFields={fieldsLoading} value={filters} onChange={setFilters} />
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
             <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy || !name.trim()}>{busy ? t("addForm.adding") : tCommon("actions.add")}</Button>
+            <Button type="submit" disabled={busy}>{busy ? t("addForm.adding") : tCommon("actions.add")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

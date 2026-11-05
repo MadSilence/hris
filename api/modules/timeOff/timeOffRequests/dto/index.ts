@@ -5,6 +5,7 @@ export * from "./CancelTimeOffRequestRequest";
 export * from "./RejectTimeOffRequestRequest";
 export * from "./TimeOffRequestDurationDTO";
 export * from "./TimeOffOverlapDTO";
+export * from "./TimeOffApproverPreviewDTO";
 
 export * from "./EditTimeOffRequestRequest";
 

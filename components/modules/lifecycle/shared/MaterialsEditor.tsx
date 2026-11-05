@@ -8,6 +8,7 @@ import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { uploadLifecycleFileAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import type { Material } from "@/models/lifecycle";
@@ -40,13 +41,15 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   const addLink = () => {
     const address = url.trim();
     if (!isWebAddress(address)) {
-      setError(t("materials.linkInvalid"));
+      setLinkError(t("materials.linkInvalid"));
       return;
     }
+    setLinkError(null);
     onChange([...materials, { type: "LINK", url: address, name: name.trim() || null }]);
     setUrl("");
     setName("");
@@ -96,9 +99,10 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
         <div className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor={`${idPrefix}-link`} className="text-hint">{t("materials.link")}</Label>
-            <Input id={`${idPrefix}-link`} placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy} />
+            <Input id={`${idPrefix}-link`} placeholder="https://" value={url} onChange={(e) => { setUrl(e.target.value); setLinkError(null); }} disabled={busy} />
+            <FieldError>{linkError}</FieldError>
             <Input aria-label={t("materials.linkName")} placeholder={t("materials.namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} disabled={busy} />
-            <Button type="button" size="sm" variant="secondary" disabled={busy || !url.trim()} onClick={addLink}>{t("materials.addLink")}</Button>
+            <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={addLink}>{t("materials.addLink")}</Button>
           </div>
           <div className="space-y-1">
             <Label htmlFor={`${idPrefix}-file`} className="text-hint">{t("shared.file")}</Label>

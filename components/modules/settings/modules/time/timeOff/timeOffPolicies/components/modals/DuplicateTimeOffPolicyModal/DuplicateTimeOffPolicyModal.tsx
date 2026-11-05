@@ -3,6 +3,7 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
+import { FieldError } from "@/components/desact/field-error";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
@@ -35,16 +36,22 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
   const tCommon = useTranslations("common");
   const initial = sourceName ? t("policies.duplicate.copyName", { name: sourceName }) : "";
   const [name, setName] = useState(initial);
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
-    if (isOpen) setName(initial);
+    if (isOpen) {
+      setName(initial);
+      setTried(false);
+    }
   }, [isOpen, initial]);
 
   const trimmed = name.trim();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading || !trimmed) return;
+    if (isLoading) return;
+    setTried(true);
+    if (!trimmed) return;
     onConfirmAction(trimmed);
   };
 
@@ -73,6 +80,7 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
               disabled={isLoading}
               onChange={(e) => setName(e.currentTarget.value)}
             />
+            <FieldError>{tried && !trimmed ? tCommon("validation.enterName") : null}</FieldError>
           </div>
 
           <DialogFooter className="mt-8">
@@ -81,7 +89,7 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !trimmed}
+              disabled={isLoading}
  >
               {tCommon("actions.duplicate")}
             </Button>

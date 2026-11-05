@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FieldError } from "@/components/desact/field-error";
 import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { Copy01Icon, Download01Icon } from "@hugeicons/core-free-icons";
@@ -61,6 +62,8 @@ export const TotpEnrolment: React.FC<{
   const [qr, setQr] = React.useState<string | null>(null);
   const [showKey, setShowKey] = React.useState(false);
   const [code, setCode] = React.useState("");
+  const [tried, setTried] = React.useState(false);
+  const tCommon = useTranslations("common");
 
   React.useEffect(() => {
     let alive = true;
@@ -77,7 +80,8 @@ export const TotpEnrolment: React.FC<{
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (code.trim()) void onConfirm(code.trim());
+        setTried(true);
+        if (code.trim().length >= 6) void onConfirm(code.trim());
       }}
     >
       <p className="text-body text-tertiary">
@@ -103,9 +107,12 @@ export const TotpEnrolment: React.FC<{
           {t("mfa.enrolment.cantScan")}
         </button>
       )}
-      <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} />
+      <div>
+        <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} />
+        <FieldError>{tried && code.trim().length < 6 ? tCommon("validation.enterCode") : null}</FieldError>
+      </div>
       <FormError message={error} />
-      <Button size="lg" type="submit" className="w-full" disabled={busy || code.trim().length < 6}>
+      <Button size="lg" type="submit" className="w-full" disabled={busy}>
         {busy ? `${confirmLabel}…` : confirmLabel}
       </Button>
     </form>
@@ -124,6 +131,7 @@ export const BackupCodesSheet: React.FC<{
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const [saved, setSaved] = React.useState(false);
+  const [tried, setTried] = React.useState(false);
   const text = codes.join("\n");
 
   const download = () => {
@@ -160,7 +168,16 @@ export const BackupCodesSheet: React.FC<{
         <Checkbox id="mfa-codes-saved" checked={saved} onCheckedChange={(v) => setSaved(Boolean(v))} />
         <Label htmlFor="mfa-codes-saved">{t("mfa.backupCodes.saved")}</Label>
       </div>
-      <Button size="lg" type="button" className="w-full" disabled={!saved} onClick={onDone}>
+      <FieldError>{tried && !saved ? t("mfa.backupCodes.confirmSaved") : null}</FieldError>
+      <Button
+        size="lg"
+        type="button"
+        className="w-full"
+        onClick={() => {
+          setTried(true);
+          if (saved) onDone();
+        }}
+      >
         {doneLabel ?? tCommon("actions.done")}
       </Button>
     </div>

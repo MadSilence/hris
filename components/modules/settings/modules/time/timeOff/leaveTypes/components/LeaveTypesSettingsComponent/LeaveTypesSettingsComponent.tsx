@@ -23,8 +23,6 @@ import { LEAVE_TYPE_CATEGORY_KEYS, LeaveTypeCategoryChip } from "../LeaveTypeCat
 import { LeaveTypeStatus } from "@/api/modules/timeOff/leaveTypes/dto";
 import type { LeaveType } from "@/models/timeOff";
 import { StatusBadge, type EntityStatus } from "@/components/ui/StatusBadge";
-import { cn } from "@/lib/cn";
-import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
 
 type Props = {
   leaveTypes: LeaveType[];
@@ -164,10 +162,6 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                       >
                         <TableCell className="py-3 pl-4">
                           <div className="flex items-center gap-2.5">
-                            <span
-                              aria-hidden
-                              className={cn("size-2.5 flex-none rounded-pill", TAG_CLASSES[toTagColor(leaveType.color)].dot)}
-                            />
                             <div className="min-w-0">
                               <span className="font-medium text-primary">{leaveType.name}</span>
                               {leaveType.description && (
