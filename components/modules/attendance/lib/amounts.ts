@@ -1,4 +1,5 @@
 import type { AttendanceAmount } from "@/models/attendance";
+import { displayLocale } from "@/lib/date";
 
 /**
  * The amount owed, as the screens print it: each currency in its own format, several joined with
@@ -16,7 +17,7 @@ export const formatAmounts = (
 
 const formatAmount = ({ amount, currency }: AttendanceAmount, locale?: string): string => {
   try {
-    return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amount);
+    return new Intl.NumberFormat(locale ?? displayLocale(), { style: "currency", currency }).format(amount);
   } catch {
     // A code Intl does not know still prints, rather than taking the whole cell down.
     return `${amount.toFixed(2)} ${currency}`;

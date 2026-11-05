@@ -1,6 +1,10 @@
 import { SquareLock02Icon } from "@hugeicons/core-free-icons";
-import { presentNotification } from "./notificationPresenter";
+import { translatorFor } from "@/test/nextIntl";
+import { presentNotification as present, type NotificationsTranslator } from "./notificationPresenter";
 import type { Notification } from "@/models/notifications";
+
+const t = translatorFor("notifications") as unknown as NotificationsTranslator;
+const presentNotification = (n: Notification) => present(n, t);
 
 const notification = (over: Partial<Notification>): Notification => ({
   id: "n1",

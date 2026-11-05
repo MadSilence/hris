@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { Copy01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -23,9 +24,11 @@ export const CodeField: React.FC<{
   backup?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
-}> = ({ id, value, onChange, backup = false, disabled, autoFocus }) => (
+}> = ({ id, value, onChange, backup = false, disabled, autoFocus }) => {
+  const t = useTranslations("auth");
+  return (
   <div className="space-y-2">
-    <RequiredLabel htmlFor={id} required>{backup ? "Backup code" : "Code"}</RequiredLabel>
+    <RequiredLabel htmlFor={id} required>{backup ? t("mfa.backupCode") : t("passwordReset.reset.codeLabel")}</RequiredLabel>
     <Input
       id={id}
       value={value}
@@ -38,7 +41,8 @@ export const CodeField: React.FC<{
       className="h-11 font-mono"
     />
   </div>
-);
+  );
+};
 
 /**
  * Setting up an authenticator app: the QR code drawn in the browser from the `otpauth://` address (the
@@ -51,7 +55,9 @@ export const TotpEnrolment: React.FC<{
   error?: string | null;
   onConfirm: (code: string) => void | Promise<void>;
   confirmLabel?: string;
-}> = ({ otpauthUri, secret, busy, error, onConfirm, confirmLabel = "Turn on" }) => {
+}> = ({ otpauthUri, secret, busy, error, onConfirm, confirmLabel: confirmLabelProp }) => {
+  const t = useTranslations("auth");
+  const confirmLabel = confirmLabelProp ?? t("mfa.enrolment.turnOn");
   const [qr, setQr] = React.useState<string | null>(null);
   const [showKey, setShowKey] = React.useState(false);
   const [code, setCode] = React.useState("");
@@ -75,27 +81,26 @@ export const TotpEnrolment: React.FC<{
       }}
     >
       <p className="text-body text-tertiary">
-        Scan this with an authenticator app — Google Authenticator, Microsoft Authenticator, 1Password or any other —
-        then type the six-digit code it shows.
+        {t("mfa.enrolment.scan")}
       </p>
       <div className="flex justify-center">
         {qr ? (
           // eslint-disable-next-line @next/next/no-img-element -- a data URL drawn here, nothing to optimise
-          <img src={qr} alt="QR code for your authenticator app" width={200} height={200} className="rounded-control border border-divider" />
+          <img src={qr} alt={t("mfa.enrolment.qrAlt")} width={200} height={200} className="rounded-control border border-divider" />
         ) : (
           <div className="h-[200px] w-[200px] rounded-control border border-dashed border-divider" />
         )}
       </div>
       {showKey ? (
         <div className="space-y-1 text-center">
-          <p className="text-hint text-tertiary">Enter this key in the app instead:</p>
+          <p className="text-hint text-tertiary">{t("mfa.enrolment.keyPrompt")}</p>
           <code className="block break-all rounded-control bg-subtle px-2 py-1.5 font-mono text-body">
             {secret.replace(/(.{4})/g, "$1 ").trim()}
           </code>
         </div>
       ) : (
         <button type="button" className="mx-auto block text-body text-secondary underline" onClick={() => setShowKey(true)}>
-          Can&apos;t scan? Enter a key instead
+          {t("mfa.enrolment.cantScan")}
         </button>
       )}
       <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} />
@@ -115,12 +120,14 @@ export const BackupCodesSheet: React.FC<{
   codes: string[];
   onDone: () => void;
   doneLabel?: string;
-}> = ({ codes, onDone, doneLabel = "Done" }) => {
+}> = ({ codes, onDone, doneLabel }) => {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [saved, setSaved] = React.useState(false);
   const text = codes.join("\n");
 
   const download = () => {
-    const blob = new Blob([`Backup codes — each works once.\n\n${text}\n`], { type: "text/plain" });
+    const blob = new Blob([`${t("mfa.backupCodes.fileHeading")}\n\n${text}\n`], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -132,7 +139,7 @@ export const BackupCodesSheet: React.FC<{
   return (
     <div className="space-y-4">
       <p className="text-body text-tertiary">
-        Keep these somewhere safe. If you lose your phone, each one signs you in once. They are not shown again.
+        {t("mfa.backupCodes.keepSafe")}
       </p>
       <ul className="grid grid-cols-2 gap-2 rounded-control border border-divider bg-subtle p-3 font-mono text-body">
         {codes.map((c) => (
@@ -142,19 +149,19 @@ export const BackupCodesSheet: React.FC<{
       <div className="flex gap-2">
         <Button type="button" variant="secondary" className="gap-1.5" onClick={() => void navigator.clipboard?.writeText(text)}>
           <Icon icon={Copy01Icon} size="sm" />
-          Copy
+          {tCommon("actions.copy")}
         </Button>
         <Button type="button" variant="secondary" className="gap-1.5" onClick={download}>
           <Icon icon={Download01Icon} size="sm" />
-          Download
+          {tCommon("actions.download")}
         </Button>
       </div>
       <div className="flex items-center gap-2">
         <Checkbox id="mfa-codes-saved" checked={saved} onCheckedChange={(v) => setSaved(Boolean(v))} />
-        <Label htmlFor="mfa-codes-saved">I have saved these codes</Label>
+        <Label htmlFor="mfa-codes-saved">{t("mfa.backupCodes.saved")}</Label>
       </div>
       <Button size="lg" type="button" className="w-full" disabled={!saved} onClick={onDone}>
-        {doneLabel}
+        {doneLabel ?? tCommon("actions.done")}
       </Button>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { showError } from "@/lib/errors/errorToast";
 import * as React from "react";
 import {
@@ -31,6 +32,8 @@ export default function RemoveAssignedUserDialog({
   removingOwnOwnerRole?: boolean;
   onConfirm: () => Promise<unknown> | void;
 }) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
 
@@ -55,11 +58,11 @@ export default function RemoveAssignedUserDialog({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={Alert02Icon} />
-            Remove user from role
+            {t("roles.removeUser.title")}
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            This will remove <strong>{userLabel}</strong> from this role.
+            {t.rich("roles.removeUser.body", { name: userLabel, b: (c) => <strong>{c}</strong> })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -67,18 +70,18 @@ export default function RemoveAssignedUserDialog({
           <div className="flex items-start gap-3">
             <Icon icon={Alert02Icon} className="text-secondary mt-0.5" />
             <div>
-              <h4 className="font-medium text-primary mb-1">Warning</h4>
+              <h4 className="font-medium text-primary mb-1">{t("roles.removeUser.warning")}</h4>
               <p className="text-body text-secondary">
                 {removingOwnOwnerRole
-                  ? "This is you. You will lose the System Owner role and be signed out at once; another owner can give it back."
-                  : "The user will lose the access granted by this role until it is assigned again."}
+                  ? t("roles.removeUser.ownOwner")
+                  : t("roles.removeUser.other")}
               </p>
             </div>
           </div>
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={busy}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             destructive
             disabled={busy}
@@ -87,7 +90,7 @@ export default function RemoveAssignedUserDialog({
               void confirm();
             }}
           >
-            Remove
+            {tCommon("actions.remove")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

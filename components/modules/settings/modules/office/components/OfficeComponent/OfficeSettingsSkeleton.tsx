@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Skeleton } from "@/components/desact/skeleton";
 import {
@@ -19,16 +20,20 @@ import {
  *
  * A skeleton is a promise about what is coming; this one keeps it.
  */
-export const OfficeSettingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 6 }) => (
+export const OfficeSettingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 6 }) => {
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
+  return (
   <Table className="table-fixed">
     <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
       <TableRow>
-        <TableHead className="w-[22%]">Name</TableHead>
-        <TableHead className="w-[13%]">Country</TableHead>
-        <TableHead className="w-[13%]">Assigned users</TableHead>
-        <TableHead className="w-[27%]">Address</TableHead>
-        <TableHead className="w-[12.5%]">Email</TableHead>
-        <TableHead className="w-[12.5%]">Phone</TableHead>
+        <TableHead className="w-[22%]">{tCommon("fields.name")}</TableHead>
+        <TableHead className="w-[13%]">{tPlaces("country")}</TableHead>
+        <TableHead className="w-[13%]">{tPlaces("assignedUsers")}</TableHead>
+        <TableHead className="w-[27%]">{tPlaces("address")}</TableHead>
+        <TableHead className="w-[12.5%]">{tCommon("fields.email")}</TableHead>
+        <TableHead className="w-[12.5%]">{t("phone")}</TableHead>
       </TableRow>
     </TableHeader>
 
@@ -45,4 +50,5 @@ export const OfficeSettingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 6 }
       ))}
     </TableBody>
   </Table>
-);
+  );
+};

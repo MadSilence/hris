@@ -2,6 +2,7 @@ import { isReferenceField, type FieldDTO, type FilterDTO, type ReferenceValueSou
 import type { ResourceCode } from "@/models/access";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import { isManagedCatalogType } from "@/models/attribute/managedCatalogs";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
 
 export type AudienceOperator = FilterDTO["op"];
 
@@ -95,27 +96,13 @@ export function operatorsForField(field: FieldDTO): AudienceOperator[] {
   }
 }
 
-// Human-facing operator labels. Deliberately distinct wording for `in` vs `has_any`:
+// Human-facing operator labels live in the `access` catalogue, `audience.operators.<op>`. Deliberately
+// distinct wording for `in` vs `has_any`:
 //   in       — the field's (single) value is one of the chosen options
 //   has_any  — the user has at least one of the chosen options (multi-valued fields)
-// so the two never read as the same thing in the UI.
-export const OPERATOR_LABELS: Record<AudienceOperator, string> = {
-  eq: "Is",
-  neq: "Is not",
-  contains: "Contains",
-  starts_with: "Starts with",
-  in: "Is any of",
-  not_in: "Is none of",
-  has_any: "Has any of",
-  not_has_any: "Has none of",
-  before: "Before",
-  after: "After",
-  between: "Between",
-  gt: "Greater than",
-  gte: "≥",
-  lt: "Less than",
-  lte: "≤",
-};
+// so the two never read as the same thing in the UI. A sentence built outside a component (automations,
+// attendance) reads them through this, with the caller's own `access` translator.
+export const operatorLabel = (t: AccessTranslator, op: AudienceOperator): string => t(`audience.operators.${op}`);
 
 // Custom CHECKBOX/PERSON attributes have no meaningful segment predicate yet, so they are
 // dropped from the builder rather than offered as a filter that returns nothing.

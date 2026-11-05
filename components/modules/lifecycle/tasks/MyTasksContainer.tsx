@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Switch } from "@/components/desact/switch";
 import { Label } from "@/components/desact/label";
@@ -17,6 +18,7 @@ import { TaskList } from "./TaskList";
  * where a preboarding's open tasks land once the person registers.
  */
 export function MyTasksContainer() {
+  const t = useTranslations("lifecycle");
   const [includeDone, setIncludeDone] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const { data, isLoading, error } = useMyTasks(includeDone);
@@ -26,7 +28,7 @@ export function MyTasksContainer() {
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="flex shrink-0 items-center justify-end gap-2">
         <Switch id="tasks-include-done" checked={includeDone} onCheckedChange={setIncludeDone} />
-        <Label htmlFor="tasks-include-done">Show done</Label>
+        <Label htmlFor="tasks-include-done">{t("myTasks.showDone")}</Label>
       </div>
 
       {/* The list scrolls; the empty state fills what is left instead of sitting in the corner. */}
@@ -39,8 +41,8 @@ export function MyTasksContainer() {
         <EmptyState
           fill
           scene="all-caught-up"
-          title="Nothing to do"
-          description="Tasks assigned to you by a preboarding, an onboarding or an offboarding appear here."
+          title={t("myTasks.emptyTitle")}
+          description={t("myTasks.emptyDescription")}
         />
       ) : (
         <TaskList

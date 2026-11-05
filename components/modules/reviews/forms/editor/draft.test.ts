@@ -1,5 +1,8 @@
-import type { ReviewQuestion } from "@/models/reviews";
+import type { ReviewQuestion, ReviewsT } from "@/models/reviews";
 import { copyOf, markOverall, move, newQuestion, problemsOf, retype, sameDraft, toWrite, type Draft } from "./draft";
+import { translatorFor } from "@/test/nextIntl";
+
+const t = translatorFor("reviews") as unknown as ReviewsT;
 
 const q = (p: Partial<ReviewQuestion>): ReviewQuestion => ({ id: crypto.randomUUID(), type: "LONG_TEXT", label: "Why?", ...p });
 
@@ -38,7 +41,7 @@ describe("review form draft", () => {
     const section = q({ type: "SECTION", label: "" });
     const oneOption = q({ type: "SINGLE_CHOICE", options: ["Yes", " Yes ", ""] });
     const fine = q({});
-    expect(problemsOf([blank, section, oneOption, fine])).toEqual({
+    expect(problemsOf([blank, section, oneOption, fine], t)).toEqual({
       [blank.id]: "Write the question.",
       [section.id]: "Give the section a heading.",
       [oneOption.id]: "Give at least two different options.",

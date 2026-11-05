@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
-import { PROCESS_STATUS_LABELS, type ProcessStatus } from "@/models/lifecycle";
+import type { ProcessStatus } from "@/models/lifecycle";
 
 /**
  * A process's state on the status chip — onboarding's lifecycle of SPEC § 4.5: Scheduled → In progress → Done.
@@ -17,5 +18,6 @@ const TONE: Record<ProcessStatus, StatusTone> = {
 };
 
 export function ProcessStatusBadge({ status }: { status: ProcessStatus }) {
-  return <StatusBadge status={TONE[status]} label={PROCESS_STATUS_LABELS[status]} />;
+  const t = useTranslations("lifecycle");
+  return <StatusBadge status={TONE[status]} label={t(`processStatus.${status}`)} />;
 }

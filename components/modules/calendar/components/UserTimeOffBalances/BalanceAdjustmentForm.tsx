@@ -2,6 +2,7 @@
 
 import { FC, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 
 import { Button } from "@/components/desact/button";
@@ -17,7 +18,7 @@ import {
 type Props = {
   userId: string;
   balanceId: string;
-  /** "d" or "h" — shown next to the amount so the number is unambiguous. */
+  /** The unit's short label ("d" or "h") — shown next to the amount so the number is unambiguous. */
   unit: string;
 };
 
@@ -26,6 +27,8 @@ type Props = {
  * the balance detail dialog use the same form instead of two copies drifting apart.
  */
 export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const adjustMutation = useAdjustEmployeeTimeOffBalance();
 
@@ -37,12 +40,12 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
     const value = Number(amount);
 
     if (!amount.trim() || !Number.isFinite(value) || value === 0) {
-      setError("Enter a non-zero amount (use a minus for a deduction).");
+      setError(t("adjustment.amountRequired"));
       return;
     }
 
     if (!reason.trim()) {
-      setError("Please add a reason.");
+      setError(t("adjustment.reasonRequired"));
       return;
     }
 
@@ -63,18 +66,18 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
       setAmount("");
       setReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to adjust the balance.");
+      setError(e instanceof Error ? e.message : t("adjustment.failed"));
     }
   };
 
   return (
     <div className="space-y-3 rounded-control border border-divider p-3.5">
-      <p className="text-body font-medium text-primary">Manual adjustment</p>
+      <p className="text-body font-medium text-primary">{t("adjustment.title")}</p>
 
       <div className="flex items-end gap-2">
         <div className="w-28 space-y-1.5">
           <Label htmlFor={`adj-amount-${balanceId}`} className="text-hint">
-            Amount ({unit})
+            {t("adjustment.amount", { unit })}
           </Label>
           <Input
             id={`adj-amount-${balanceId}`}
@@ -86,7 +89,7 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
         </div>
 
         <div className="flex-1 space-y-1.5">
-          <Label htmlFor={`adj-reason-${balanceId}`} className="text-hint">Reason</Label>
+          <Label htmlFor={`adj-reason-${balanceId}`} className="text-hint">{t("adjustment.reason")}</Label>
           <Input
             id={`adj-reason-${balanceId}`}
             value={reason}
@@ -96,14 +99,14 @@ export const BalanceAdjustmentForm: FC<Props> = ({ userId, balanceId, unit }) =>
         </div>
 
         <Button type="button" onClick={handleAdjust} disabled={adjustMutation.isPending}>
-          Apply
+          {tCommon("actions.apply")}
         </Button>
       </div>
 
       <FormError message={error}/>
 
       <p className="text-hint text-tertiary">
-        Use a negative amount to deduct. This adds an entry to the ledger.
+        {t("adjustment.hint")}
       </p>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Building03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -12,6 +13,8 @@ type Props = {
 };
 
 export function CompanyDetailsPanel({ name, logo, topLevelCount, totalCount }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
       <div className="flex items-start gap-4">
@@ -24,25 +27,24 @@ export function CompanyDetailsPanel({ name, logo, topLevelCount, totalCount }: P
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-hint font-medium text-tertiary">Company</p>
+          <p className="text-hint font-medium text-tertiary">{tShared("company")}</p>
           <h2 className="truncate text-section-title text-primary">{name}</h2>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-control border border-divider p-3.5">
-          <p className="mb-1 text-hint text-tertiary">Top-level departments</p>
+          <p className="mb-1 text-hint text-tertiary">{t("companyPanel.topLevel")}</p>
           <p className="text-page-title leading-none text-primary">{topLevelCount}</p>
         </div>
         <div className="rounded-control border border-divider p-3.5">
-          <p className="mb-1 text-hint text-tertiary">All departments</p>
+          <p className="mb-1 text-hint text-tertiary">{t("companyPanel.all")}</p>
           <p className="text-page-title leading-none text-primary">{totalCount}</p>
         </div>
       </div>
 
       <p className="text-body leading-relaxed text-tertiary">
-        Select a department on the chart to view and edit its details. Use the expand controls on each
-        card to reveal sub-departments.
+        {t("companyPanel.hint")}
       </p>
     </div>
   );

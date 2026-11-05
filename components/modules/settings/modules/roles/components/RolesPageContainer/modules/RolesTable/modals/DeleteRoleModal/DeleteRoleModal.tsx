@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -42,6 +43,9 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const b = (c: React.ReactNode) => <strong>{c}</strong>;
   return (
     <AlertDialog
       open={isOpen}
@@ -53,17 +57,13 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={Alert02Icon} />
-            Delete role
+            {t("roles.delete.title")}
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete{" "}
-            {roleName ? (
-              <strong>{roleName}</strong>
-            ) : (
-              <strong>the selected role</strong>
-            )}{" "}
-            and remove all associated data from our servers.
+            {roleName
+              ? t.rich("roles.delete.body", { name: roleName, b })
+              : t.rich("roles.delete.bodyUnnamed", { b })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -71,10 +71,10 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
           <div className="flex items-start gap-3">
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div className="min-w-0 flex-1">
-              <h4 className="mb-1 font-medium text-primary">What this affects</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("roles.delete.affects")}</h4>
 
               {isImpactLoading && (
-                <p className="text-body text-secondary">Checking what depends on this role…</p>
+                <p className="text-body text-secondary">{t("roles.delete.checking")}</p>
               )}
 
               {/*
@@ -85,34 +85,24 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
               */}
               {!isImpactLoading && !impact && !!impactError && (
                 <p className="text-body text-secondary">
-                  {messageForError(impactError)} Until then, how many people this affects is unknown.
+                  {t("roles.delete.impactUnknown", { error: messageForError(impactError) })}
                 </p>
               )}
 
               {!isImpactLoading && !impact && !impactError && (
                 <p className="text-body text-secondary">
-                  Users assigned to this role may lose access to systems and workflows.
+                  {t("roles.delete.generic")}
                 </p>
               )}
 
               {!isImpactLoading && impact && (
                 <ul className="space-y-1 text-body text-secondary">
-                  <li>
-                    <strong>{impact.peopleCount}</strong>{" "}
-                    {impact.peopleCount === 1 ? "person holds" : "people hold"} this role.
-                  </li>
+                  <li>{t.rich("roles.delete.holders", { count: impact.peopleCount, b })}</li>
                   {/* The number that actually matters: these people cannot work tomorrow. */}
-                  <li>
-                    <strong>{impact.peopleLosingLastRole}</strong> of them would be left with the
-                    default role only.
-                  </li>
+                  <li>{t.rich("roles.delete.lastRole", { count: impact.peopleLosingLastRole, b })}</li>
                   {/* History, not pending work: these applications already happened. */}
                   {impact.bulkAssignmentCount > 0 && (
-                    <li>
-                      It was handed out by <strong>{impact.bulkAssignmentCount}</strong> bulk{" "}
-                      {impact.bulkAssignmentCount === 1 ? "assignment" : "assignments"}, which will
-                      be left pointing at a deleted role.
-                    </li>
+                    <li>{t.rich("roles.delete.bulk", { count: impact.bulkAssignmentCount, b })}</li>
                   )}
                 </ul>
               )}
@@ -121,8 +111,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         </div>
 
         <p className="text-body text-tertiary">
-          To take the role out of use without losing its permissions, archive it instead — it can be
-          restored, though the people who held it lose it either way.
+          {t("roles.delete.archiveInstead")}
         </p>
 
         {errorMessage && (
@@ -130,7 +119,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
         )}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
 
           {/*
             Disabled only while the impact question is still open. Once we know \u2014 or know we cannot
@@ -147,7 +136,7 @@ export const DeleteRoleModal: FC<DeleteRoleModalProps> = ({
             destructive
           >
             <Icon icon={Delete02Icon} size="sm" />
-            Delete role
+            {t("roles.delete.title")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

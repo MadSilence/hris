@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { NotificationOff01Icon, SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -11,9 +12,9 @@ import {
   useSetNotificationPreference,
 } from "@/components/modules/notifications/hooks/useNotificationPreferences";
 
-const rowHint = (pref: NotificationPreference): string | null => {
-  if (pref.mandatory) return "Always on — required notifications can't be turned off.";
-  if (!pref.canManage) return "Managed by your organization — you can't opt out of this category.";
+const rowHint = (pref: NotificationPreference) => {
+  if (pref.mandatory) return "preferences.mandatory" as const;
+  if (!pref.canManage) return "preferences.managed" as const;
   return null;
 };
 
@@ -22,6 +23,7 @@ const PreferenceRow: FC<{
   onToggle: (category: string, enabled: boolean) => void;
   pending: boolean;
 }> = ({ pref, onToggle, pending }) => {
+  const t = useTranslations("notifications");
   const locked = pref.mandatory || !pref.canManage;
   const hint = rowHint(pref);
 
@@ -32,20 +34,21 @@ const PreferenceRow: FC<{
           <p className="font-medium text-primary">{pref.label}</p>
           {locked && <Icon icon={SquareLock02Icon} size="sm" className="text-tertiary" />}
         </div>
-        {hint && <p className="mt-0.5 text-body text-tertiary">{hint}</p>}
+        {hint && <p className="mt-0.5 text-body text-tertiary">{t(hint)}</p>}
       </div>
       <Switch
         className="mt-0.5"
         checked={pref.enabled}
         disabled={locked || pending}
         onCheckedChange={(v) => onToggle(pref.category, v)}
-        aria-label={`Toggle ${pref.label}`}
+        aria-label={t("preferences.toggle", { label: pref.label })}
       />
     </div>
   );
 };
 
 export const NotificationPreferences: FC = () => {
+  const t = useTranslations("notifications");
   const { data: preferences, isLoading } = useNotificationPreferences();
   const setPreference = useSetNotificationPreference();
 
@@ -68,7 +71,7 @@ export const NotificationPreferences: FC = () => {
       ) : !preferences || preferences.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
           <Icon icon={NotificationOff01Icon} size="lg" className="text-disabled" />
-          <p className="text-body text-tertiary">No configurable categories yet.</p>
+          <p className="text-body text-tertiary">{t("preferences.empty")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">

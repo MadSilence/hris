@@ -1,6 +1,7 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import { Input } from "@/components/desact/input";
@@ -9,7 +10,7 @@ import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import {
-  passwordSchema,
+  buildPasswordSchema,
   type PasswordValues,
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { resetPasswordAction } from "@/components/modules/passwordReset/actions/passwordResetActions";
@@ -34,6 +35,9 @@ type Props = {
  * signup one, imported rather than copied — the same as the invitation screen.
  */
 export function ResetPasswordContainer({ token, firstName, codeRequired = false }: Props) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const passwordSchema = useMemo(() => buildPasswordSchema(t), [t]);
   const [code, setCode] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,12 +75,12 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
   if (done) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">Password changed</h1>
+        <h1 className="text-page-title">{t("passwordReset.reset.doneTitle")}</h1>
         <p className="text-body text-tertiary">
-          Your new password is set. Anywhere you were signed in with the old one has been signed out.
+          {t("passwordReset.reset.doneBody")}
         </p>
         <Button asChild>
-          <a href="/login">Sign in</a>
+          <a href="/login">{t("login.submit")}</a>
         </Button>
       </div>
     );
@@ -86,15 +90,15 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
     <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-page-title">{firstName ? `Hi ${firstName}` : "Set a new password"}</h1>
+          <h1 className="text-page-title">{firstName ? t("passwordReset.reset.greeting", { name: firstName }) : t("passwordReset.reset.title")}</h1>
           <p className="text-body text-secondary">
-            Choose a new password for your account.
+            {t("passwordReset.reset.description")}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        <form method="post" onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password" required>New password</RequiredLabel>
+            <RequiredLabel htmlFor="reset-password" required>{t("changePassword.newPassword")}</RequiredLabel>
             <Input
               id="reset-password"
               name="password"
@@ -111,7 +115,7 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password-repeat" required>Confirm password</RequiredLabel>
+            <RequiredLabel htmlFor="reset-password-repeat" required>{t("password.confirmLabel")}</RequiredLabel>
             <Input
               id="reset-password-repeat"
               name="confirmPassword"
@@ -128,12 +132,12 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
           </div>
 
           <p className="text-body text-tertiary">
-            Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
+            {t("password.rule")}
           </p>
 
           {codeRequired && (
             <div className="space-y-2">
-              <RequiredLabel htmlFor="reset-password-code" required>Code</RequiredLabel>
+              <RequiredLabel htmlFor="reset-password-code" required>{t("passwordReset.reset.codeLabel")}</RequiredLabel>
               <Input
                 id="reset-password-code"
                 value={code}
@@ -143,8 +147,7 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
                 className="font-mono"
               />
               <p className="text-body text-tertiary">
-                Your account is locked after too many failed sign-ins. Enter the code from your authenticator app, or
-                one of your backup codes, to unlock it.
+                {t("passwordReset.reset.codeHint")}
               </p>
             </div>
           )}
@@ -153,12 +156,12 @@ export function ResetPasswordContainer({ token, firstName, codeRequired = false 
 
           {linkExpired && (
             <p className="text-center text-body">
-              <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">Request a new link</Link>
+              <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">{t("passwordReset.reset.requestNewLink")}</Link>
             </p>
           )}
 
           <Button type="submit" disabled={busy} size="lg" className="w-full">
-            {busy ? "Saving…" : "Set password"}
+            {busy ? tCommon("actions.saving") : t("password.submit")}
           </Button>
         </form>
       </div>

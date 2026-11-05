@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Alert02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -39,6 +40,8 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   if (!policy) return null;
 
   return (
@@ -52,13 +55,14 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={Clock01Icon} />
-            Delete time off policy
+            {t("policies.delete.title")}
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            This action cannot be undone. Policy{" "}
-            <strong>{policy.name}</strong> will be permanently deleted.
-            Only draft policies with no active assignments can be deleted.
+            {t.rich("policies.delete.description", {
+              name: policy.name,
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -66,10 +70,9 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
           <div className="flex items-start gap-3">
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("policies.delete.warning")}</h4>
               <p className="text-body text-secondary">
-                This policy will be permanently removed. This cannot be
-                reversed.
+                {t("policies.delete.warningBody")}
               </p>
             </div>
           </div>
@@ -80,7 +83,7 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
         )}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
             onClick={(event) => {
@@ -89,7 +92,7 @@ export const DeleteTimeOffPolicyModal: FC<Props> = ({
             }}
             destructive
           >
-            Delete policy
+            {t("policies.delete.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

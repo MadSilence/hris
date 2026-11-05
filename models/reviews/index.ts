@@ -5,10 +5,14 @@
  */
 import type { FilterDTO } from "@/models/user/fields";
 import type { MentionValues } from "./mentions";
+import type { ReviewsT } from "./i18n";
+import type { CodedMessage } from "@/models/misc";
 
 export * from "./mentions";
 export * from "./steps";
 export * from "./calibration";
+export * from "./notices";
+export * from "./i18n";
 
 // ── forms ─────────────────────────────────────────────────────────────────────────────────
 
@@ -70,16 +74,16 @@ export type ReviewFormWrite = {
 };
 
 /** What a reviewer answers with, in the order the editor offers them. A section is offered apart. */
-export const REVIEW_QUESTION_TYPE_LABELS: Record<Exclude<ReviewQuestionType, "SECTION">, string> = {
-  RATING: "Rating",
-  LONG_TEXT: "Long text",
-  SHORT_TEXT: "Short text",
-  SINGLE_CHOICE: "One choice",
-  MULTIPLE_CHOICE: "Several choices",
-  YES_NO: "Yes or no",
-  NUMBER: "Number",
-  DATE: "Date",
-};
+export const REVIEW_QUESTION_TYPE_KEYS = {
+  RATING: "questionType.rating",
+  LONG_TEXT: "questionType.longText",
+  SHORT_TEXT: "questionType.shortText",
+  SINGLE_CHOICE: "questionType.singleChoice",
+  MULTIPLE_CHOICE: "questionType.multipleChoice",
+  YES_NO: "questionType.yesNo",
+  NUMBER: "questionType.number",
+  DATE: "questionType.date",
+} as const satisfies Record<Exclude<ReviewQuestionType, "SECTION">, string>;
 
 export const isChoiceQuestion = (type: ReviewQuestionType) => type === "SINGLE_CHOICE" || type === "MULTIPLE_CHOICE";
 
@@ -87,13 +91,17 @@ export const isChoiceQuestion = (type: ReviewQuestionType) => type === "SINGLE_C
  * The scale a rating is shown on in the form editor's preview, and the one a new cycle starts with — each cycle
  * may change its own (design § 4.2, REVIEWS_PLAN.md A1).
  */
-export const PREVIEW_RATING_SCALE = [
-  "Well below expectations",
-  "Below expectations",
-  "Meets expectations",
-  "Above expectations",
-  "Exceptional",
-];
+export const PREVIEW_RATING_SCALE_KEYS = [
+  "scale.wellBelow",
+  "scale.below",
+  "scale.meets",
+  "scale.above",
+  "scale.exceptional",
+] as const;
+
+/** The default scale in the reader's language: what a new cycle is seeded with, after which it is the cycle's data. */
+export const defaultScale = (t: ReviewsT): ScalePoint[] =>
+  PREVIEW_RATING_SCALE_KEYS.map((key, i) => ({ value: i + 1, label: t(key) }));
 
 // ── cycles ────────────────────────────────────────────────────────────────────────────────
 
@@ -113,68 +121,66 @@ export type ReviewNominationStatus = "NOMINATING" | "AWAITING_APPROVAL" | "APPRO
 
 export const REVIEW_KINDS: ReviewKind[] = ["SELF", "MANAGER", "PEER", "UPWARD"];
 
-export const REVIEW_KIND_LABELS: Record<ReviewKind, string> = {
-  SELF: "Self review",
-  MANAGER: "Manager review",
-  PEER: "Peer review",
-  UPWARD: "Upward review",
-};
+export const REVIEW_KIND_KEYS = {
+  SELF: "kind.self.label",
+  MANAGER: "kind.manager.label",
+  PEER: "kind.peer.label",
+  UPWARD: "kind.upward.label",
+} as const satisfies Record<ReviewKind, string>;
 
-export const REVIEW_KIND_DESCRIPTIONS: Record<ReviewKind, string> = {
-  SELF: "Each person reviews themselves.",
-  MANAGER: "Each person's manager reviews them. This review carries the rating.",
-  PEER: "Colleagues review the person — chosen after launch, or nominated by the person.",
-  UPWARD: "Each person who manages people is reviewed by their direct reports. Always anonymous.",
-};
+export const REVIEW_KIND_DESCRIPTION_KEYS = {
+  SELF: "kind.self.description",
+  MANAGER: "kind.manager.description",
+  PEER: "kind.peer.description",
+  UPWARD: "kind.upward.description",
+} as const satisfies Record<ReviewKind, string>;
 
-export const REVIEW_PEER_MODE_LABELS: Record<ReviewPeerMode, string> = {
-  ADMIN_SELECTS: "Whoever runs the cycle chooses",
-  SUBJECT_NOMINATES: "The person nominates, their manager approves",
-};
+export const REVIEW_PEER_MODE_KEYS = {
+  ADMIN_SELECTS: "peerMode.adminSelects",
+  SUBJECT_NOMINATES: "peerMode.subjectNominates",
+} as const satisfies Record<ReviewPeerMode, string>;
 
-export const REVIEW_APPROVAL_MODE_LABELS: Record<ReviewApprovalMode, string> = {
-  NONE: "No approval",
-  SKIP_LEVEL: "The manager's manager",
-  PERSON: "A named person",
-};
+export const REVIEW_APPROVAL_MODE_KEYS = {
+  NONE: "approvalMode.none",
+  SKIP_LEVEL: "approvalMode.skipLevel",
+  PERSON: "approvalMode.person",
+} as const satisfies Record<ReviewApprovalMode, string>;
 
-export const REVIEW_NOMINATION_STATUS_LABELS: Record<ReviewNominationStatus, string> = {
-  NOMINATING: "Nominating",
-  AWAITING_APPROVAL: "Awaiting approval",
-  APPROVED: "Approved",
-};
+export const REVIEW_NOMINATION_STATUS_KEYS = {
+  NOMINATING: "status.nomination.nominating",
+  AWAITING_APPROVAL: "status.nomination.awaitingApproval",
+  APPROVED: "status.nomination.approved",
+} as const satisfies Record<ReviewNominationStatus, string>;
 
-export const REVIEW_CYCLE_STATUS_LABELS: Record<ReviewCycleStatus, string> = {
-  DRAFT: "Draft",
-  ACTIVE: "Active",
-  CLOSED: "Closed",
-};
+export const REVIEW_CYCLE_STATUS_KEYS = {
+  DRAFT: "status.cycle.draft",
+  ACTIVE: "status.cycle.active",
+  CLOSED: "status.cycle.closed",
+} as const satisfies Record<ReviewCycleStatus, string>;
 
-export const REVIEW_ASSIGNMENT_STATUS_LABELS: Record<ReviewAssignmentStatus, string> = {
-  NOMINATED: "Nominated",
-  OPEN: "Not submitted",
-  SUBMITTED: "Submitted",
-  DECLINED: "Declined",
-  REASSIGNED: "Handed on",
-  CANCELLED: "Withdrawn",
-};
+export const REVIEW_ASSIGNMENT_STATUS_KEYS = {
+  NOMINATED: "status.assignment.nominated",
+  OPEN: "status.assignment.open",
+  SUBMITTED: "status.assignment.submitted",
+  DECLINED: "status.assignment.declined",
+  REASSIGNED: "status.assignment.reassigned",
+  CANCELLED: "status.assignment.cancelled",
+} as const satisfies Record<ReviewAssignmentStatus, string>;
 
-export const REVIEW_PARTICIPANT_STATUS_LABELS: Record<ReviewParticipantStatus, string> = {
-  COLLECTING: "Collecting",
-  AWAITING_APPROVAL: "Awaiting approval",
-  SHARED: "Shared",
-  ACKNOWLEDGED: "Acknowledged",
-  REMOVED: "Removed",
-};
+export const REVIEW_PARTICIPANT_STATUS_KEYS = {
+  COLLECTING: "status.participant.collecting",
+  AWAITING_APPROVAL: "status.participant.awaitingApproval",
+  SHARED: "status.participant.shared",
+  ACKNOWLEDGED: "status.participant.acknowledged",
+  REMOVED: "status.participant.removed",
+} as const satisfies Record<ReviewParticipantStatus, string>;
 
-export const REVIEW_SHARING_LABEL: Record<ReviewSharingMode, string> = {
-  MANAGER_SHARES: "The manager shares",
-  RELEASED_ON_DATE: "Released on a date",
-};
+export const REVIEW_SHARING_KEYS = {
+  MANAGER_SHARES: "sharing.managerShares",
+  RELEASED_ON_DATE: "sharing.releasedOnDate",
+} as const satisfies Record<ReviewSharingMode, string>;
 
 export type ScalePoint = { value: number; label: string; description?: string | null };
-
-export const DEFAULT_SCALE: ScalePoint[] = PREVIEW_RATING_SCALE.map((label, i) => ({ value: i + 1, label }));
 
 export type PersonRef = { userId: string; name: string };
 
@@ -304,6 +310,10 @@ export type LaunchPreview = {
   fewReports: PersonRef[];
   /** People asked to nominate their peers (10.2). */
   nominations: number;
+  /** `blockers` as codes (`ReviewNotice`), one each, in the same order; absent from a backend that predates them. */
+  blockerCodes?: CodedMessage[];
+  /** `warnings` as codes, likewise. */
+  warningCodes?: CodedMessage[];
 };
 
 // ── running a cycle ──────────────────────────────────────────────────────────────────────
@@ -365,7 +375,12 @@ export type CycleOverview = {
   canReadResults: boolean;
 };
 
-export type PeersResult = { added: AssignmentRow[]; warnings: string[] };
+export type PeersResult = {
+  added: AssignmentRow[];
+  warnings: string[];
+  /** `warnings` as codes (`REVIEWER_CAP_EXCEEDED`), one each, in the same order. */
+  warningCodes?: CodedMessage[];
+};
 
 // ── writing and reading ──────────────────────────────────────────────────────────────────
 
@@ -558,17 +573,17 @@ export type PacketCalibration = {
 
 export type ReviewPotential = "LOW" | "MEDIUM" | "HIGH";
 export const REVIEW_POTENTIALS: ReviewPotential[] = ["LOW", "MEDIUM", "HIGH"];
-export const REVIEW_POTENTIAL_LABELS: Record<ReviewPotential, string> = {
-  LOW: "Low",
-  MEDIUM: "Medium",
-  HIGH: "High",
-};
+export const REVIEW_POTENTIAL_KEYS = {
+  LOW: "potential.low",
+  MEDIUM: "potential.medium",
+  HIGH: "potential.high",
+} as const satisfies Record<ReviewPotential, string>;
 
 export type ReviewCalibrationStatus = "OPEN" | "CLOSED";
-export const REVIEW_CALIBRATION_STATUS_LABELS: Record<ReviewCalibrationStatus, string> = {
-  OPEN: "Open",
-  CLOSED: "Closed",
-};
+export const REVIEW_CALIBRATION_STATUS_KEYS = {
+  OPEN: "status.calibration.open",
+  CLOSED: "status.calibration.closed",
+} as const satisfies Record<ReviewCalibrationStatus, string>;
 
 export type CalibrationSummary = {
   id: string;
@@ -602,6 +617,8 @@ export type CalibrationRow = {
   editable: boolean;
   /** Why not, while the session is open. */
   lockedReason: string | null;
+  /** `lockedReason` as a code (`LOCKED_REMOVED`, `LOCKED_SHARED`); null exactly when it is. */
+  lockedCode?: CodedMessage | null;
 };
 
 export type CalibrationSession = {

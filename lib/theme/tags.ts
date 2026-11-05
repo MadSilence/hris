@@ -12,16 +12,17 @@ export type TagColor = (typeof TAG_COLORS)[number];
 
 export const DEFAULT_TAG_COLOR: TagColor = "gray";
 
-export const TAG_COLOR_LABELS: Record<TagColor, string> = {
-  gray: "Gray",
-  berry: "Berry",
-  plum: "Plum",
-  indigo: "Indigo",
-  ocean: "Ocean",
-  teal: "Teal",
-  cocoa: "Cocoa",
-  bronze: "Bronze",
-};
+/** The name shown beside each colour — a `common` catalogue key, translated where it renders. */
+export const TAG_COLOR_LABELS = {
+  gray: "tagColor.names.gray",
+  berry: "tagColor.names.berry",
+  plum: "tagColor.names.plum",
+  indigo: "tagColor.names.indigo",
+  ocean: "tagColor.names.ocean",
+  teal: "tagColor.names.teal",
+  cocoa: "tagColor.names.cocoa",
+  bronze: "tagColor.names.bronze",
+} as const satisfies Record<TagColor, string>;
 
 export const isTagColor = (value: unknown): value is TagColor =>
   typeof value === "string" && (TAG_COLORS as readonly string[]).includes(value);

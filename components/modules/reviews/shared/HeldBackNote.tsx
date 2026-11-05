@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -12,14 +13,14 @@ export function HeldBackNote({ count, threshold, kind = "peer" }: {
   threshold: number | null;
   kind?: "peer" | "upward";
 }) {
+  const t = useTranslations("reviews");
   if (count <= 0) return null;
-  const reviews = count === 1 ? `1 anonymous ${kind} review is in` : `${count} anonymous ${kind} reviews are in`;
   return (
     <p className="flex items-start gap-2 rounded-card border border-dashed border-divider px-4 py-3 text-body text-tertiary"
       data-test="peers-held-back">
       <Icon icon={ViewOffSlashIcon} size="sm" className="mt-0.5 shrink-0" />
       <span>
-        {reviews} and held back to keep its writers anonymous — shown once there are {threshold ?? 3}.
+        {t("heldBack.note", { count, kind, threshold: threshold ?? 3 })}
       </span>
     </p>
   );

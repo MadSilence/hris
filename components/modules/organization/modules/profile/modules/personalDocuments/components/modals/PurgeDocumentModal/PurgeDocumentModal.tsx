@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -40,6 +41,9 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
   onRequestCloseAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+
   return (
     <AlertDialog
       open={isOpen}
@@ -51,12 +55,14 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={Delete02Icon} />
-            Delete forever
+            {t("documents.purge.title")}
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            <strong>{documentName ?? "Untitled document"}</strong> and the stored file will be
-            erased. This cannot be undone.
+            {t.rich("documents.purge.description", {
+              name: documentName ?? t("documents.deleteDocument.untitled"),
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -64,10 +70,9 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
           <div className="flex items-start gap-3">
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-primary">There is no trash after this</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("documents.purge.noTrashTitle")}</h4>
               <p className="text-body text-secondary">
-                Leaving the document where it is deletes it automatically once the retention period
-                ends.
+                {t("documents.purge.noTrashBody")}
               </p>
             </div>
           </div>
@@ -76,7 +81,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
         <FormError message={errorMessage} />
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
             // AlertDialogAction closes its dialog on click by default, which throws the failure
@@ -87,7 +92,7 @@ export const PurgeDocumentModal: FC<PurgeDocumentModalProps> = ({
             }}
             destructive
           >
-            Delete forever
+            {t("documents.purge.title")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

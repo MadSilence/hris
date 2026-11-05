@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CalendarLock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { ScheduledChange } from "@/models/user/ScheduledChange";
@@ -18,7 +19,7 @@ import {
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import {
   cancelScheduledChangeAction,
   rescheduleScheduledChangeAction,
@@ -33,7 +34,7 @@ type Props = {
   onChangedAction: () => void | Promise<unknown>;
 };
 
-const medium = (iso: string | null | undefined) => formatDisplayDate(iso, { style: "medium" });
+const medium = (iso: string | null | undefined, formatDisplayDate: DateFormatter) => formatDisplayDate(iso, { style: "medium" });
 
 /**
  * The person's scheduled changes: a quiet entry in the profile header and a side panel listing what
@@ -44,6 +45,9 @@ const medium = (iso: string | null | undefined) => formatDisplayDate(iso, { styl
  * that has applied is no longer listed, so there is nothing left to cancel.
  */
 export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChangedAction }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [cancelling, setCancelling] = useState<ScheduledChange | null>(null);
   const [moving, setMoving] = useState<ScheduledChange | null>(null);
@@ -87,28 +91,30 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
         onClick={() => setOpen(true)}
       >
         <Icon icon={CalendarLock01Icon} size="sm" />
-        Scheduled changes ({changes.length})
+        {t("profile.scheduled.entry", { count: changes.length })}
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Scheduled changes</SheetTitle>
-            <SheetDescription>What is going to change for this person, and when.</SheetDescription>
+            <SheetTitle>{t("profile.scheduled.title")}</SheetTitle>
+            <SheetDescription>{t("profile.scheduled.description")}</SheetDescription>
           </SheetHeader>
 
-          <ul className="m-0 list-none divide-y divide-divider px-4" aria-label="Scheduled changes">
+          <ul className="m-0 list-none divide-y divide-divider px-4" aria-label={t("profile.scheduled.title")}>
             {changes.map((change) => (
               <li key={change.id} className="flex items-start justify-between gap-4 py-3.5">
                 <div className="min-w-0">
-                  <p className="m-0 text-body font-medium text-primary">{labelOfChange(change)}</p>
+                  <p className="m-0 text-body font-medium text-primary">{labelOfChange(t, tCommon, change)}</p>
                   <p className="m-0 mt-0.5 text-body text-tertiary">
                     {change.kind === "TERMINATION" && change.rescheduleDate
-                      ? `Last working day ${medium(change.rescheduleDate)}, takes effect ${medium(change.effectiveAt)}`
-                      : `Takes effect ${medium(change.effectiveAt)}`}
+                      ? t("profile.scheduled.lastDayAndEffect", { lastDay: medium(change.rescheduleDate, formatDisplayDate), date: medium(change.effectiveAt, formatDisplayDate) })
+                      : t("profile.scheduled.takesEffect", { date: medium(change.effectiveAt, formatDisplayDate) })}
                   </p>
                   <p className="m-0 mt-0.5 text-hint text-tertiary">
-                    {change.scheduledBy ? `Scheduled by ${change.scheduledBy.name}` : "Scheduled by a process"}
+                    {change.scheduledBy
+                      ? t("profile.scheduled.scheduledBy", { name: change.scheduledBy.name })
+                      : t("profile.scheduled.scheduledByProcess")}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
@@ -121,12 +127,12 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
                         setMoving(change);
                       }}
                     >
-                      Change date
+                      {t("profile.scheduled.changeDate")}
                     </Button>
                   )}
                   {change.canCancel && (
                     <Button type="button" variant="ghost" size="sm" onClick={() => setCancelling(change)}>
-                      Cancel
+                      {tCommon("actions.cancel")}
                     </Button>
                   )}
                 </div>
@@ -138,11 +144,13 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
 
       <ConfirmActionModal
         isOpen={cancelling !== null}
-        title="Cancel scheduled change"
+        title={t("profile.scheduled.cancelTitle")}
         description={
-          cancelling ? `${labelOfChange(cancelling)} on ${medium(cancelling.effectiveAt)} will not happen.` : ""
+          cancelling
+            ? t("profile.scheduled.cancelDescription", { change: labelOfChange(t, tCommon, cancelling), date: medium(cancelling.effectiveAt, formatDisplayDate) })
+            : ""
         }
-        confirmLabel="Cancel change"
+        confirmLabel={t("profile.scheduled.cancelConfirm")}
         isLoading={busy}
         errorMessage={error}
         onCancelAction={close}
@@ -153,9 +161,9 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
 
       <ConfirmActionModal
         isOpen={moving !== null}
-        title="Change date"
-        description={moving ? labelOfChange(moving) : ""}
-        confirmLabel="Save"
+        title={t("profile.scheduled.changeDate")}
+        description={moving ? labelOfChange(t, tCommon, moving) : ""}
+        confirmLabel={tCommon("actions.save")}
         isLoading={busy}
         errorMessage={error}
         onCancelAction={close}
@@ -168,12 +176,12 @@ export const ScheduledChangesPanel: React.FC<Props> = ({ userId, changes, onChan
         {moving && (
           <div className="grid gap-1.5">
             {/* Pre-filled and cannot be emptied, so no asterisk (FORMS_AND_FIELDS.md § 1). */}
-            <RequiredLabel htmlFor="scheduled-change-date">{rescheduleDateLabelOf(moving)}</RequiredLabel>
+            <RequiredLabel htmlFor="scheduled-change-date">{rescheduleDateLabelOf(t, moving)}</RequiredLabel>
             <DatePicker
               id="scheduled-change-date"
               value={date}
               clearable={false}
-              ariaLabel={rescheduleDateLabelOf(moving)}
+              ariaLabel={rescheduleDateLabelOf(t, moving)}
               onChange={setDate}
             />
           </div>

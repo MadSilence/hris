@@ -31,18 +31,19 @@ export type AccentPreset = keyof typeof ACCENT_PRESETS;
 
 export const DEFAULT_ACCENT: AccentPreset = "wine";
 
-export const ACCENT_PRESET_LABELS: Record<AccentPreset, string> = {
-  wine: "Wine",
-  brick: "Brick",
-  terracotta: "Terracotta",
-  sun: "Sun",
-  forest: "Forest",
-  teal: "Teal",
-  denim: "Denim",
-  iris: "Iris",
-  raspberry: "Raspberry",
-  graphite: "Graphite",
-};
+/** The name shown for each preset — a `common` catalogue key, translated where it renders. */
+export const ACCENT_PRESET_LABEL_KEYS = {
+  wine: "accent.names.wine",
+  brick: "accent.names.brick",
+  terracotta: "accent.names.terracotta",
+  sun: "accent.names.sun",
+  forest: "accent.names.forest",
+  teal: "accent.names.teal",
+  denim: "accent.names.denim",
+  iris: "accent.names.iris",
+  raspberry: "accent.names.raspberry",
+  graphite: "accent.names.graphite",
+} as const satisfies Record<AccentPreset, string>;
 
 export const isAccentPreset = (value: unknown): value is AccentPreset =>
   typeof value === "string" && Object.prototype.hasOwnProperty.call(ACCENT_PRESETS, value);

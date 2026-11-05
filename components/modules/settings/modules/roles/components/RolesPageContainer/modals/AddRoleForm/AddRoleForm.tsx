@@ -3,6 +3,7 @@
 import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
 import { DialogFooter } from "@/components/desact/dialog";
@@ -38,7 +39,7 @@ export interface AddRoleFormProps {
   onSubmitAction: (values: AddRoleFormValues) => void | Promise<void>;
 }
 
-const buildSchema = (existingNames: string[]) => {
+const buildSchema = (existingNames: string[], t: ReturnType<typeof useTranslations<"settings">>) => {
   const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
 
   return yup.object({
@@ -48,25 +49,25 @@ const buildSchema = (existingNames: string[]) => {
     then: (s) =>
       s
         .trim()
-        .required("Please enter a role name.")
-        .min(2, "Role name must be at least 2 characters.")
-        .max(120, "Role name must be at most 120 characters.")
+        .required(t("roles.form.nameRequired"))
+        .min(2, t("roles.form.nameMin"))
+        .max(120, t("roles.form.nameMax"))
         .test(
           "unique",
-          "A role with this name already exists.",
+          t("roles.form.nameTaken"),
           (value) => !value || !taken.has(value.trim().toLowerCase()),
         ),
     otherwise: (s) => s.strip(),
   }),
-  description: yup.string().max(500, "Description must be at most 500 characters."),
+  description: yup.string().max(500, t("roles.form.descriptionMax")),
   templateId: yup.string().when("useTemplate", {
     is: true,
-    then: (s) => s.required("Please select a template."),
+    then: (s) => s.required(t("roles.form.templateRequired")),
     otherwise: (s) => s.strip(),
   }),
   templateName: yup.string().when("useTemplate", {
     is: true,
-    then: (s) => s.trim().max(120, "Role name must be at most 120 characters."),
+    then: (s) => s.trim().max(120, t("roles.form.nameMax")),
     otherwise: (s) => s.strip(),
   }),
   });
@@ -105,7 +106,9 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
     [onSubmitAction],
   );
 
-  const schema = useMemo(() => buildSchema(existingNames), [existingNames]);
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(existingNames, t), [existingNames, t]);
 
   const formik = useFormik<AddRoleFormValues>({
     initialValues: {
@@ -168,9 +171,9 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 rounded-control bg-subtle px-4 py-3">
           <div className="min-w-0">
-            <div className="text-body font-medium">Choose from a template</div>
+            <div className="text-body font-medium">{t("roles.form.useTemplate")}</div>
             <div className="text-hint text-tertiary">
-              Pick a ready configuration and customize it in the future.
+              {t("roles.form.useTemplateHint")}
             </div>
           </div>
 
@@ -185,7 +188,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
 
         {!formik.values.useTemplate && (
           <div className="space-y-2">
-            <RequiredLabel htmlFor="role-name" required>Role name</RequiredLabel>
+            <RequiredLabel htmlFor="role-name" required>{t("roles.form.roleName")}</RequiredLabel>
             <Input
               id="role-name"
               value={formik.values.name}
@@ -204,7 +207,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
 
         {!formik.values.useTemplate && (
           <div className="space-y-2">
-            <Label htmlFor="role-description">Description</Label>
+            <Label htmlFor="role-description">{tCommon("fields.description")}</Label>
             <Textarea
               id="role-description"
               value={formik.values.description}
@@ -224,7 +227,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
         {formik.values.useTemplate && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <RequiredLabel required>Template</RequiredLabel>
+              <RequiredLabel required>{t("roles.form.template")}</RequiredLabel>
 
               <Select
                 value={formik.values.templateId}
@@ -234,7 +237,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
                 disabled={isLoading || templates.length === 0}
               >
                 <SelectTrigger aria-invalid={!!formik.errors.templateId}>
-                  <SelectValue placeholder="Select template"/>
+                  <SelectValue placeholder={t("roles.form.selectTemplate")}/>
                 </SelectTrigger>
 
                 <SelectContent>
@@ -256,8 +259,7 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
             </div>
 
             <p className="text-body text-tertiary">
-              The next step previews exactly what the template creates in your company — and lets you
-              rename it if a role of that name exists — before anything is applied.
+              {t("roles.form.templateNote")}
             </p>
           </div>
         )}
@@ -270,11 +272,11 @@ export const AddRoleForm: FC<AddRoleFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          {formik.values.useTemplate ? "Preview" : "Create"}
+          {formik.values.useTemplate ? tCommon("actions.preview") : tCommon("actions.create")}
         </Button>
       </DialogFooter>
     </form>

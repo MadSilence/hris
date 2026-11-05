@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/desact/button";
@@ -91,13 +92,16 @@ export const NoResults: React.FC<{
   /** See {@link EmptyState}'s `fill`. */
   fill?: boolean;
   className?: string;
-}> = ({ hint = "Try a different search.", title = "No results", action, fill, className }) => (
+}> = ({ hint, title, action, fill, className }) => {
+  const t = useTranslations("common");
+  return (
   <div className={cn("flex w-full flex-col items-center justify-center gap-3 px-6 py-8 text-center", fill && "h-full", className)}>
     <Illustration scene="no-results-s" size="s" />
     <div className="flex flex-col gap-1">
-      <p className="text-body font-medium text-primary">{title}</p>
-      <p className="mx-auto max-w-sm text-body text-tertiary">{hint}</p>
+      <p className="text-body font-medium text-primary">{title ?? t("states.noResults")}</p>
+      <p className="mx-auto max-w-sm text-body text-tertiary">{hint ?? t("emptyState.noResultsHint")}</p>
     </div>
     {action}
   </div>
-);
+  );
+};

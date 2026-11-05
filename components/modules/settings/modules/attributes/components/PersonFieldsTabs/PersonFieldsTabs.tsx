@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { PreferenceHorizontalIcon, SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -20,16 +21,18 @@ import {
  * <p>The tabs are their own row above the content — `ui/ACTIONS_AND_MENUS.md`: tabs choose *which*
  * list, so they never live inside a toolbar.
  */
-export const PersonFieldsTabs: FC = () => (
+export const PersonFieldsTabs: FC = () => {
+  const t = useTranslations("settings.pages.attributes");
+  return (
   <Tabs defaultValue="custom" className="w-full">
     <TabsList>
       <TabsTrigger value="custom" className="flex items-center gap-2">
         <Icon icon={PreferenceHorizontalIcon} size="sm" />
-        Custom fields
+        {t("customTab")}
       </TabsTrigger>
       <TabsTrigger value="system" className="flex items-center gap-2">
         <Icon icon={SquareLock02Icon} size="sm" />
-        System fields
+        {t("systemTab")}
       </TabsTrigger>
     </TabsList>
 
@@ -41,6 +44,7 @@ export const PersonFieldsTabs: FC = () => (
       <SystemFieldsSection/>
     </TabsContent>
   </Tabs>
-);
+  );
+};
 
 export default PersonFieldsTabs;

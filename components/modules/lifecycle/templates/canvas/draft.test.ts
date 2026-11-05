@@ -12,6 +12,11 @@ import {
   type DraftItem,
 } from "./draft";
 import type { Template } from "@/models/lifecycle";
+import { translatorFor } from "@/test/nextIntl";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
+
+// The English catalogue, through the real ICU formatter.
+const t = translatorFor("lifecycle") as unknown as LifecycleT;
 
 const item = (key: string, over: Partial<DraftItem> = {}): DraftItem => ({
   key,
@@ -100,7 +105,7 @@ describe("a draft and the template it saves as", () => {
   });
 
   it("gives one lane per named person, after the new person and the onboarding manager", () => {
-    const lanes = deriveLanes(draftFromTemplate(template).items, [
+    const lanes = deriveLanes(draftFromTemplate(template).items, t, [
       { id: "USER:u2", assigneeKind: "SPECIFIC_USER", userId: "u2", label: "Grace", problem: null },
     ]);
     expect(lanes.map((l) => l.label)).toEqual(["The new person", "Onboarding manager", "Linus", "Grace"]);
@@ -108,8 +113,8 @@ describe("a draft and the template it saves as", () => {
 
   it("says what is missing before a save would be refused", () => {
     const draft = draftFromTemplate(template);
-    expect(draftProblems(draft)).toEqual([]);
-    expect(draftProblems({ ...draft, name: " ", items: [item("x", { title: "" })] }))
+    expect(draftProblems(draft, t)).toEqual([]);
+    expect(draftProblems({ ...draft, name: " ", items: [item("x", { title: "" })] }, t))
       .toEqual(["Give the template a name.", "A task has no title."]);
   });
 });
@@ -122,10 +127,10 @@ describe("words", () => {
     expect(phaseOf({ dueKind: "OFFSET", offsetDays: 6 })).toBe("WEEK_1");
     expect(phaseOf({ dueKind: "OFFSET", offsetDays: 7 })).toBe("MONTH_1");
     expect(phaseOf({ dueKind: "OFFSET", offsetDays: 30 })).toBe("LATER");
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 })).toBe("Day 1");
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 3 })).toBe("3 days after start");
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: -1 })).toBe("1 day before start");
-    expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null })).toBe("By the start day");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, t)).toBe("Day 1");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 3 }, t)).toBe("3 days after start");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: -1 }, t)).toBe("1 day before start");
+    expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, t)).toBe("By the start day");
   });
 });
 
@@ -146,16 +151,16 @@ describe("what a task carries (DECISIONS.md § \"Lifecycle tasks\")", () => {
   });
 
   it("will not save an acknowledgement with nothing to read, or a questionnaire with no question", () => {
-    expect(draftProblems(draft([item("ack", { kind: "ACKNOWLEDGE", title: "Read" })])))
+    expect(draftProblems(draft([item("ack", { kind: "ACKNOWLEDGE", title: "Read" })]), t))
       .toContain("Read: attach a file or a link to acknowledge.");
-    expect(draftProblems(draft([item("q", { kind: "QUESTIONNAIRE", title: "Ask" })])))
+    expect(draftProblems(draft([item("q", { kind: "QUESTIONNAIRE", title: "Ask" })]), t))
       .toContain("Ask: add a question.");
   });
 
   it("counts an offboarding from the last working day, and calls its people what they are", () => {
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, "OFFBOARDING")).toBe("Last day");
-    expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, "OFFBOARDING")).toBe("By the last day");
-    expect(dayLabel({ dueKind: "OFFSET", offsetDays: -2 }, "OFFBOARDING")).toBe("2 days before the last day");
-    expect(deriveLanes([], [], "OFFBOARDING").map((l) => l.label)).toEqual(["The leaver", "Offboarding manager"]);
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, t, "OFFBOARDING")).toBe("Last day");
+    expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, t, "OFFBOARDING")).toBe("By the last day");
+    expect(dayLabel({ dueKind: "OFFSET", offsetDays: -2 }, t, "OFFBOARDING")).toBe("2 days before the last day");
+    expect(deriveLanes([], t, [], "OFFBOARDING").map((l) => l.label)).toEqual(["The leaver", "Offboarding manager"]);
   });
 });

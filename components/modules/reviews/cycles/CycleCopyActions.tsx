@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/desact/dialog";
@@ -12,7 +13,7 @@ import { Label } from "@/components/desact/label";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import {
   duplicateCycleAction,
   saveCycleAsTemplateAction,
@@ -29,6 +30,7 @@ const draftHref = (id: string) => `/reviews/cycles/${id}`;
  * template. Each opens the new draft; a refusal slides in as a card, since nothing here has a form to hold it.
  */
 export function useCycleCopies() {
+  const t = useTranslations("reviews");
   const router = useRouter();
   const invalidate = useInvalidateReviews();
   const [busy, setBusy] = useState(false);
@@ -52,9 +54,9 @@ export function useCycleCopies() {
 
   return {
     busy,
-    duplicate: (id: string) => run(duplicateCycleAction({ id, shiftMonths: null }), "Cycle duplicated."),
-    saveAsTemplate: (id: string) => run(saveCycleAsTemplateAction(id), "Saved as a template.", false),
-    startFromTemplate: (templateId: string) => run(startCycleFromTemplateAction(templateId), "Cycle added from the template."),
+    duplicate: (id: string) => run(duplicateCycleAction({ id, shiftMonths: null }), t("copies.duplicated")),
+    saveAsTemplate: (id: string) => run(saveCycleAsTemplateAction(id), t("copies.savedAsTemplate"), false),
+    startFromTemplate: (templateId: string) => run(startCycleFromTemplateAction(templateId), t("copies.fromTemplate")),
   };
 }
 
@@ -67,6 +69,9 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
   open: boolean;
   onCloseAction: () => void;
 }) {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const invalidate = useInvalidateReviews();
   const [preset, setPreset] = useState<string>("12");
@@ -79,7 +84,7 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
 
   const months = preset === "other" ? Number(custom) : Number(preset);
   const valid = validRepeatMonths(months);
-  const dates = valid ? shiftedCycleDates(cycle, months) : [];
+  const dates = valid ? shiftedCycleDates(cycle, months, t) : [];
 
   const repeat = async () => {
     if (!valid) return;
@@ -88,11 +93,11 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
     try {
       const res = await duplicateCycleAction({ id: cycle.id, shiftMonths: months });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
       await invalidate();
-      showSuccess(`${res.data.name} added as a draft.`);
+      showSuccess(t("copies.repeat.done", { name: res.data.name }));
       onCloseAction();
       router.push(draftHref(res.data.id));
     } finally {
@@ -105,50 +110,53 @@ export function RepeatCycleDialog({ cycle, open, onCloseAction }: {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={(e) => { e.preventDefault(); void repeat(); }}>
           <DialogHeader>
-            <DialogTitle>Repeat cycle</DialogTitle>
+            <DialogTitle>{t("copies.repeat.title")}</DialogTitle>
             <DialogDescription>
-              A new draft with the same people, reviews, forms and settings as {cycle.name}, every date moved later.
+              {t("copies.repeat.description", { name: cycle.name })}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-3">
-            <Label>Move every date by</Label>
+            <Label>{t("copies.repeat.moveBy")}</Label>
             <RadioGroup value={preset} onValueChange={setPreset} className="flex flex-wrap gap-4">
               {REPEAT_MONTH_PRESETS.map((m) => (
                 <label key={m} className="flex items-center gap-2 text-body">
-                  <RadioGroupItem value={String(m)} /> {m} months
+                  <RadioGroupItem value={String(m)} /> {t("copies.repeat.months", { count: m })}
                 </label>
               ))}
               <label className="flex items-center gap-2 text-body">
-                <RadioGroupItem value="other" /> Other
+                <RadioGroupItem value="other" /> {t("copies.repeat.other")}
               </label>
             </RadioGroup>
             {preset === "other" && (
               <div className="flex items-center gap-2">
-                <Input type="number" min={1} max={MAX_REPEAT_MONTHS} value={custom} aria-label="Months"
+                <Input type="number" min={1} max={MAX_REPEAT_MONTHS} value={custom} aria-label={t("copies.repeat.monthsLabel")}
                   className="w-24" onChange={(e) => setCustom(e.target.value)} />
-                <span className="text-body text-tertiary">months, 1 to {MAX_REPEAT_MONTHS}</span>
+                <span className="text-body text-tertiary">{t("copies.repeat.range", { max: MAX_REPEAT_MONTHS })}</span>
               </div>
             )}
             {valid && dates.length > 0 && (
-              <ul className="space-y-1 rounded-control border border-divider p-3 text-body" aria-label="Moved dates">
+              <ul className="space-y-1 rounded-control border border-divider p-3 text-body" aria-label={t("copies.repeat.movedDates")}>
                 {dates.map((d) => (
                   <li key={d.label} className="flex justify-between gap-3">
                     <span className="text-tertiary">{d.label}</span>
                     <span className="text-primary">
-                      {formatDisplayDate(d.from, { style: "medium" })} → {formatDisplayDate(d.to, { style: "medium" })}
+                      {t("copies.repeat.fromTo", {
+                        from: formatDisplayDate(d.from, { style: "medium" }),
+                        to: formatDisplayDate(d.to, { style: "medium" }),
+                      })}
                     </span>
                   </li>
                 ))}
               </ul>
             )}
             {valid && dates.length === 0 && (
-              <p className="text-body text-tertiary">This cycle has no dates to move; the new draft has none either.</p>
+              <p className="text-body text-tertiary">{t("copies.repeat.noDates")}</p>
             )}
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
-            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
-            <Button type="submit" disabled={busy || !valid}>{busy ? "Repeating…" : "Repeat"}</Button>
+            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
+            <Button type="submit" disabled={busy || !valid}>{busy ? t("copies.repeat.repeating") : t("copies.repeat.repeat")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
-import { FC } from "react";
+import { FC, ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -18,8 +19,8 @@ import { InlineAlert } from "@/components/desact/alert";
 type Props = {
   isOpen: boolean;
   isLoading: boolean;
-  /** "level" or "group" — used in the sentences. */
-  entityLabel: string;
+  /** What is being deleted — it picks the sentences. */
+  entityLabel: "level" | "group";
   entityName: string;
   /** Positions that lose their grade. For a track, summed over its grades. */
   affectedJobs: number;
@@ -31,8 +32,6 @@ type Props = {
   onConfirmAction: () => void;
   onRequestCloseAction: () => void;
 };
-
-const positions = (count: number) => `${count} ${count === 1 ? "position" : "positions"}`;
 
 /**
  * Removing a grade does not remove anyone's job — it takes the grade off the positions that used
@@ -50,7 +49,12 @@ export const JobLevelDeleteModal: FC<Props> = ({
   errorMessage,
   onConfirmAction,
   onRequestCloseAction,
-}) => (
+}) => {
+  const t = useTranslations("structure.jobLevels");
+  const tCommon = useTranslations("common");
+  const strong = (chunks: ReactNode) => <strong>{chunks}</strong>;
+
+  return (
   <AlertDialog
     open={isOpen}
     onOpenChange={(open) => {
@@ -64,10 +68,9 @@ export const JobLevelDeleteModal: FC<Props> = ({
             <Icon icon={Delete02Icon} />
           </span>
           <div className="space-y-1">
-            <AlertDialogTitle className="capitalize">Delete {entityLabel}</AlertDialogTitle>
+            <AlertDialogTitle className="capitalize">{t(`delete.${entityLabel}.title`)}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. {entityLabel} <strong>{entityName}</strong> will be
-              permanently deleted.
+              {t.rich(`delete.${entityLabel}.lead`, { name: entityName, b: strong })}
             </AlertDialogDescription>
           </div>
         </div>
@@ -78,36 +81,24 @@ export const JobLevelDeleteModal: FC<Props> = ({
           <Icon icon={Alert02Icon} className="mt-0.5 shrink-0 text-secondary" />
 
           <div>
-            <h4 className="mb-1 font-medium text-primary">Warning</h4>
+            <h4 className="mb-1 font-medium text-primary">{t("delete.warning")}</h4>
 
             <div className="space-y-1 text-body text-secondary">
               {affectedLevels !== undefined && affectedLevels > 0 && (
-                <p>
-                  <strong>{affectedLevels}</strong> level{affectedLevels === 1 ? "" : "s"} in this
-                  group will be deleted too.
-                </p>
+                <p>{t.rich("delete.levelsToo", { count: affectedLevels, b: strong })}</p>
               )}
 
               {affectedJobs > 0 ? (
                 <p>
-                  <strong>{positions(affectedJobs)}</strong> will lose their level and keep
-                  everything else.{" "}
-                  {affectedPeople > 0 && (
-                    <>
-                      <strong>{affectedPeople}</strong>{" "}
-                      {affectedPeople === 1 ? "person holds" : "people hold"} one of them — nobody
-                      loses their job.
-                    </>
-                  )}
+                  {affectedPeople > 0
+                    ? t.rich("delete.jobsLoseWithPeople", { jobs: affectedJobs, people: affectedPeople, b: strong })
+                    : t.rich("delete.jobsLose", { jobs: affectedJobs, b: strong })}
                 </p>
               ) : (
-                <p>No positions use this level.</p>
+                <p>{t("delete.noPositions")}</p>
               )}
 
-              <p>
-                Two positions that differ only by level cannot both survive losing it — the delete
-                is refused if that would happen.
-              </p>
+              <p>{t("delete.refusalNote")}</p>
             </div>
           </div>
         </div>
@@ -120,7 +111,7 @@ export const JobLevelDeleteModal: FC<Props> = ({
       )}
 
       <AlertDialogFooter>
-        <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+        <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
 
         <AlertDialogAction
           disabled={isLoading}
@@ -131,9 +122,10 @@ export const JobLevelDeleteModal: FC<Props> = ({
           }}
           destructive
         >
-          Delete {entityLabel}
+          {t(`delete.${entityLabel}.title`)}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
-);
+  );
+};

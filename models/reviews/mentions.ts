@@ -4,26 +4,27 @@
  * text keeps the tokens. `{subjectFirstName}`, the brace form forms were first written with, still reads as `@subject`.
  * An `@word` that is not a token is left as it is.
  */
+import type { ReviewsT } from "./i18n";
 
 export type MentionToken = "subject" | "subjectFullName" | "manager" | "cycle";
 
 /** The tokens in the order the editor offers them, each with what it stands for. */
-export const MENTION_TOKENS: { token: MentionToken; label: string }[] = [
-  { token: "subject", label: "First name of the person reviewed" },
-  { token: "subjectFullName", label: "Full name of the person reviewed" },
-  { token: "manager", label: "First name of their manager in the cycle" },
-  { token: "cycle", label: "Name of the review cycle" },
-];
+export const MENTION_TOKENS = [
+  { token: "subject", labelKey: "mentions.token.subject" },
+  { token: "subjectFullName", labelKey: "mentions.token.subjectFullName" },
+  { token: "manager", labelKey: "mentions.token.manager" },
+  { token: "cycle", labelKey: "mentions.token.cycle" },
+] as const satisfies readonly { token: MentionToken; labelKey: string }[];
 
 /** What each token stands for here — the backend's `mentions`; a missing one reads as a description. */
 export type MentionValues = Partial<Record<MentionToken, string | null>>;
 
-const FALLBACK: Record<MentionToken, string> = {
-  subject: "the person reviewed",
-  subjectFullName: "the person reviewed",
-  manager: "their manager",
-  cycle: "this cycle",
-};
+const FALLBACK = {
+  subject: "mentions.fallback.subject",
+  subjectFullName: "mentions.fallback.subject",
+  manager: "mentions.fallback.manager",
+  cycle: "mentions.fallback.cycle",
+} as const satisfies Record<MentionToken, string>;
 
 const LEGACY = "{subjectFirstName}";
 
@@ -47,10 +48,10 @@ export function splitMentions(text: string): MentionSegment[] {
   return out;
 }
 
-/** Every token replaced by what it stands for. */
-export function replaceMentions(text: string, values: MentionValues): string {
+/** Every token replaced by what it stands for; one with no value reads as a description, in the reader's language. */
+export function replaceMentions(text: string, values: MentionValues, t: ReviewsT): string {
   return splitMentions(text)
-    .map((s) => (s.token ? (values[s.token]?.trim() || FALLBACK[s.token]) : s.text))
+    .map((s) => (s.token ? (values[s.token]?.trim() || t(FALLBACK[s.token])) : s.text))
     .join("");
 }
 

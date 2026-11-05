@@ -6,7 +6,6 @@
  * So the list view, the side panel and the canvas all edit this one shape.
  */
 import {
-  assigneeKindLabel,
   type AccessProblem,
   type AssigneeProblem,
   type Material,
@@ -19,6 +18,7 @@ import {
   type TemplateItemWrite,
   type TemplateWrite,
 } from "@/models/lifecycle";
+import { assigneeKindText, canvasDayText, type LifecycleT } from "@/components/modules/lifecycle/i18n";
 
 export type DraftItem = {
   /** The item's id when it exists, `new-N` when it was added here. What an arrow names. */
@@ -144,12 +144,12 @@ export const laneIdOf = (i: Pick<DraftItem, "assigneeKind" | "assigneeUserId">):
  * in the order they first appear, then the ones added here that hold no task yet. There is no line
  * manager lane: a template's manager is the process's onboarding manager.
  */
-export const deriveLanes = (items: DraftItem[], extra: Lane[] = [], type?: ProcessType): Lane[] => {
+export const deriveLanes = (items: DraftItem[], t: LifecycleT, extra: Lane[] = [], type?: ProcessType): Lane[] => {
   const lanes: Lane[] = [
-    { id: "TARGET", assigneeKind: "TARGET", userId: null, label: assigneeKindLabel("TARGET", type), problem: null },
+    { id: "TARGET", assigneeKind: "TARGET", userId: null, label: assigneeKindText(t, "TARGET", type), problem: null },
     {
       id: "ONBOARDING_MANAGER", assigneeKind: "ONBOARDING_MANAGER", userId: null,
-      label: assigneeKindLabel("ONBOARDING_MANAGER", type), problem: null,
+      label: assigneeKindText(t, "ONBOARDING_MANAGER", type), problem: null,
     },
   ];
   const seen = new Set(lanes.map((l) => l.id));
@@ -161,7 +161,7 @@ export const deriveLanes = (items: DraftItem[], extra: Lane[] = [], type?: Proce
       id,
       assigneeKind: "SPECIFIC_USER",
       userId: i.assigneeUserId,
-      label: i.assigneeUserId ? i.assigneeName || "Named person" : "Nobody chosen",
+      label: i.assigneeUserId ? i.assigneeName || t("canvas.namedPerson") : t("canvas.nobodyChosen"),
       problem: i.assigneeUserId ? i.assigneeProblem : "MISSING",
     });
   }
@@ -226,33 +226,20 @@ const MINUS = "−";
 /**
  * "By the start day", "Day 1", "3 days after start", "3 days before start" — as people say them, and
  * agreeing with the ruler's "+3". Offsets count calendar days (decision 12). An offboarding counts from the
- * last working day instead: "By the last day", "Last Day", "2 days after the last day".
+ * last working day instead: "By the last day", "Last day", "2 days after the last day".
  */
-export const dayLabel = (i: Pick<DraftItem, "dueKind" | "offsetDays">, type?: ProcessType): string => {
-  const leaving = type === "OFFBOARDING";
-  if (i.dueKind === "BEFORE_START") return leaving ? "By the last day" : "By the start day";
-  const n = i.offsetDays ?? 0;
-  if (n === 0) return leaving ? "Last day" : "Day 1";
-  const days = Math.abs(n) === 1 ? "1 day" : `${Math.abs(n)} days`;
-  if (leaving) return n > 0 ? `${days} after the last day` : `${days} before the last day`;
-  return n > 0 ? `${days} after start` : `${days} before start`;
-};
+export const dayLabel = (i: Pick<DraftItem, "dueKind" | "offsetDays">, t: LifecycleT, type?: ProcessType): string =>
+  canvasDayText(t, i.dueKind, i.offsetDays, type);
 
-/** The anchor's own day on the ruler: Day 1, or an offboarding's Last Day. */
-export const anchorDayLabel = (type?: ProcessType) => (type === "OFFBOARDING" ? "Last day" : "Day 1");
+/** The anchor's own day on the ruler: Day 1, or an offboarding's Last day. */
+export const anchorDayLabel = (t: LifecycleT, type?: ProcessType) => (type === "OFFBOARDING" ? t("due.lastDay") : t("due.dayOne"));
 
 /** A compact day for the ruler: "−3", "Day 1", "+5". */
-export const shortDay = (offset: number, type?: ProcessType): string =>
-  offset === 0 ? anchorDayLabel(type) : offset < 0 ? `${MINUS}${Math.abs(offset)}` : `+${offset}`;
+export const shortDay = (offset: number, t: LifecycleT, type?: ProcessType): string =>
+  offset === 0 ? anchorDayLabel(t, type) : offset < 0 ? `${MINUS}${Math.abs(offset)}` : `+${offset}`;
 
+/** The list view's groups; each is said by `phase.<PHASE>` in the catalogue. */
 export type Phase = "BEFORE_START" | "WEEK_1" | "MONTH_1" | "LATER";
-
-export const PHASE_LABELS: Record<Phase, string> = {
-  BEFORE_START: "Before start",
-  WEEK_1: "Week 1",
-  MONTH_1: "Month 1",
-  LATER: "Later",
-};
 
 /** The list view's groups. Day 1 starts week 1; a month is the first thirty days. */
 export const phaseOf = (i: Pick<DraftItem, "dueKind" | "offsetDays">): Phase => {
@@ -265,17 +252,18 @@ export const phaseOf = (i: Pick<DraftItem, "dueKind" | "offsetDays">): Phase => 
 };
 
 /** Nothing a save would refuse at once: every task has a title, every named task names somebody. */
-export const draftProblems = (draft: TemplateDraft): string[] => {
+export const draftProblems = (draft: TemplateDraft, t: LifecycleT): string[] => {
   const problems: string[] = [];
-  if (!draft.name.trim()) problems.push("Give the template a name.");
+  if (!draft.name.trim()) problems.push(t("draftProblems.noName"));
   draft.items.forEach((i) => {
-    if (!i.title.trim()) problems.push("A task has no title.");
-    else if (i.assigneeKind === "SPECIFIC_USER" && !i.assigneeUserId) problems.push(`${i.title.trim()}: choose who does it.`);
-    else if (i.kind === "FILL_FIELDS" && i.attributeIds.length === 0) problems.push(`${i.title.trim()}: choose the fields to fill in.`);
-    else if (i.kind === "TODO" && i.categoryId === "") problems.push(`${i.title.trim()}: choose the category of the file it requires.`);
-    else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(`${i.title.trim()}: attach a file or a link to acknowledge.`);
-    else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(`${i.title.trim()}: add a question.`);
-    else if (i.kind === "QUESTIONNAIRE" && i.questions.some((q) => !q.label.trim())) problems.push(`${i.title.trim()}: a question has no text.`);
+    const title = i.title.trim();
+    if (!title) problems.push(t("draftProblems.noTitle"));
+    else if (i.assigneeKind === "SPECIFIC_USER" && !i.assigneeUserId) problems.push(t("draftProblems.chooseAssignee", { title }));
+    else if (i.kind === "FILL_FIELDS" && i.attributeIds.length === 0) problems.push(t("draftProblems.chooseFields", { title }));
+    else if (i.kind === "TODO" && i.categoryId === "") problems.push(t("draftProblems.chooseCategory", { title }));
+    else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(t("draftProblems.attachMaterial", { title }));
+    else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(t("draftProblems.addQuestion", { title }));
+    else if (i.kind === "QUESTIONNAIRE" && i.questions.some((q) => !q.label.trim())) problems.push(t("draftProblems.emptyQuestion", { title }));
   });
   return problems;
 };

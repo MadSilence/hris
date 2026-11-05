@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -48,6 +49,8 @@ const calendarNameFromTemplate = (templateName: string) =>
   templateName.replace(/\s+holidays$/i, "").trim() || templateName;
 
 export function PublicHolidayCalendarNewPage() {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateId = searchParams.get("templateId") ?? "";
@@ -55,7 +58,7 @@ export function PublicHolidayCalendarNewPage() {
   const templateRegion = searchParams.get("region") ?? "";
 
   const [draftName, setDraftName] = useState(
-    templateId ? "" : "New public holiday calendar",
+    templateId ? "" : t("publicHolidays.newCalendar.defaultName"),
   );
   const [draftYear, setDraftYear] = useState(CURRENT_YEAR);
   const [draftCountry, setDraftCountry] = useState("");
@@ -136,38 +139,38 @@ export function PublicHolidayCalendarNewPage() {
     let valid = true;
 
     if (!draftName.trim()) {
-      setNameError("Name is required.");
+      setNameError(t("publicHolidays.days.nameRequired"));
       valid = false;
     } else {
       setNameError("");
     }
 
     if (draftHolidays.length === 0) {
-      setGeneralError("Please add at least one holiday day.");
+      setGeneralError(t("publicHolidays.newCalendar.atLeastOne"));
       valid = false;
     } else {
       setGeneralError("");
     }
 
     const rowErrors: DraftHolidayErrors = {};
-    const overlaps = findDraftOverlaps(draftHolidays);
+    const overlaps = findDraftOverlaps(draftHolidays, t);
 
     for (const h of draftHolidays) {
       const rowErr: { name?: string; holidayDate?: string; endDate?: string } = {};
 
       if (!h.name.trim()) {
-        rowErr.name = "Name is required.";
+        rowErr.name = t("publicHolidays.days.nameRequired");
         valid = false;
       }
       if (!h.holidayDate) {
-        rowErr.holidayDate = "Date is required.";
+        rowErr.holidayDate = t("publicHolidays.days.dateRequired");
         valid = false;
       } else if (overlaps[h.localId]) {
         rowErr.holidayDate = overlaps[h.localId];
         valid = false;
       }
       if (h.endDate && h.holidayDate && h.endDate < h.holidayDate) {
-        rowErr.endDate = "End must be on or after the start.";
+        rowErr.endDate = t("publicHolidays.days.endBeforeStart");
         valid = false;
       }
 
@@ -178,7 +181,7 @@ export function PublicHolidayCalendarNewPage() {
 
     setHolidayErrors(rowErrors);
     return valid;
-  }, [draftName, draftHolidays]);
+  }, [draftName, draftHolidays, t]);
 
   const isFormValid = useMemo(() => {
     if (!draftName.trim()) return false;
@@ -223,7 +226,7 @@ export function PublicHolidayCalendarNewPage() {
       router.push(`/settings/time/public-holidays/${calendarId}`);
     } catch {
       setGeneralError(
-        "Something went wrong while creating the calendar. Please try again.",
+        t("publicHolidays.newCalendar.createFailed"),
       );
     } finally {
       setIsSubmitting(false);
@@ -242,7 +245,7 @@ export function PublicHolidayCalendarNewPage() {
       <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
         <div className="shrink-0 px-8 pt-2">
           <SettingsPageHeader
-            title="New public holiday calendar"
+            title={t("publicHolidays.newCalendar.title")}
             backHref="/settings/time/public-holidays"
           />
           <div className="space-y-4 pt-5">
@@ -260,11 +263,11 @@ export function PublicHolidayCalendarNewPage() {
       <div className="shrink-0 px-8 pt-2">
         <div className="flex items-center justify-between gap-4">
           <SettingsPageHeader
-            title="New public holiday calendar"
+            title={t("publicHolidays.newCalendar.title")}
             backHref="/settings/time/public-holidays"
           />
           <Button type="button" onClick={handleSubmit} disabled={!isFormValid || isLoading}>
-            {isLoading ? "Saving…" : "Save"}
+            {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
           </Button>
         </div>
 
@@ -290,17 +293,16 @@ export function PublicHolidayCalendarNewPage() {
         <div className="flex items-end justify-between gap-4 pb-4 pt-6">
           <div>
             <h2 className="mb-1 text-body font-semibold text-primary">
-              Holiday days
+              {t("publicHolidays.newCalendar.holidayDays")}
             </h2>
             <p className="text-body text-tertiary">
-              Add all public holiday days for this calendar.
+              {t("publicHolidays.newCalendar.holidayDaysHint")}
               {templateId && isPreviewFetching ? (
-                <span className="ml-2">Loading {draftYear}…</span>
+                <span className="ml-2">{t("publicHolidays.newCalendar.loadingYear", { year: String(draftYear) })}</span>
               ) : previewFailed ? null : (
                 draftHolidays.length > 0 && (
                   <span className="ml-2 font-medium text-primary">
-                    {totalDraftDays(draftHolidays)}{" "}
-                    {totalDraftDays(draftHolidays) === 1 ? "day" : "days"} added
+                    {t("publicHolidays.newCalendar.daysAdded", { count: totalDraftDays(draftHolidays) })}
                   </span>
                 )
               )}
@@ -326,7 +328,7 @@ export function PublicHolidayCalendarNewPage() {
           */
           <ErrorState
             error={previewError}
-            title={`${draftYear} holidays could not be loaded`}
+            title={t("publicHolidays.newCalendar.yearFailed", { year: String(draftYear) })}
             onRetry={() => void refetchPreview()}
             compact
           />
@@ -336,10 +338,10 @@ export function PublicHolidayCalendarNewPage() {
               <Icon icon={Calendar03Icon} size="lg" className="text-tertiary" />
             </div>
             <p className="text-body font-medium text-primary">
-              No holidays yet
+              {t("publicHolidays.newCalendar.noHolidays")}
             </p>
             <p className="mt-1 text-body text-tertiary">
-              Add your first holiday day below.
+              {t("publicHolidays.newCalendar.addFirst")}
             </p>
             <div className="mt-4">
               <PublicHolidayDaysEditor

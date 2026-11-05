@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUp01Icon, Folder01Icon } from "@hugeicons/core-free-icons";
@@ -61,6 +62,9 @@ const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
   const { team, people, childCount, expanded, selected, matched, dimmed, height } = data;
   const ctx = useTeamBlocks();
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
 
   const isArchived = team.status === "ARCHIVED";
   const visible = expanded ? people : people.slice(0, VISIBLE_CHIPS);
@@ -102,14 +106,15 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
         </button>
 
         <span className="flex-none whitespace-nowrap text-hint text-tertiary">
-          {team.memberCount} here
-          {team.totalPeople !== team.memberCount && ` · ${team.totalPeople} total`}
+          {team.totalPeople !== team.memberCount
+            ? tShared("headCountWithTotal", { here: team.memberCount, total: team.totalPeople })
+            : tShared("headCount", { here: team.memberCount })}
         </span>
       </header>
 
       <div className="min-h-0 flex-1 px-3 pb-3">
         {people.length === 0 ? (
-          <p className="text-hint text-tertiary">No people here yet.</p>
+          <p className="text-hint text-tertiary">{tShared("noPeopleHere")}</p>
         ) : (
           <div
             className="grid"
@@ -134,7 +139,7 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
                   selected={ctx.selectedPersonId === person.id}
                   matched={ctx.matchedPersonIds.has(person.id)}
                   archived={person.status !== "ACTIVE"}
-                  badge={team.leadId === person.id ? "Lead" : undefined}
+                  badge={team.leadId === person.id ? tShared("lead") : undefined}
                   onClick={() => ctx.onSelectPerson(person)}
                   className="nodrag"
                   style={{ height: CARD_H }}
@@ -154,7 +159,7 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
             style={{ height: MORE_ROW_H }}
             className="nodrag flex items-center text-hint text-tertiary underline-offset-2 hover:text-primary hover:underline"
           >
-            {expanded ? "Show less" : `+${hidden} more`}
+            {expanded ? tCommon("actions.showLess") : tShared("more", { count: hidden })}
           </button>
         )}
       </div>
@@ -169,8 +174,8 @@ export function TeamBlockNode({ data }: NodeProps<TeamBlockFlowNode>) {
             ctx.onToggleCollapse(team.id);
           }}
           className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
-          aria-label={branchCollapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
-          title={branchCollapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
+          aria-label={branchCollapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
+          title={branchCollapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
         >
           {branchCollapsed ? (
             <span className="text-hint font-semibold leading-none">{childCount}</span>

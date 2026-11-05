@@ -11,8 +11,8 @@
  */
 export const NONE_VALUE = "none";
 
-/** The label, so nobody writes "No category" again. */
-export const NONE_LABEL = "None";
+/** The label's key in `common`, so nobody writes "No category" again. */
+export const NONE_LABEL_KEY = "values.none" as const;
 
 /** `undefined` for the sentinel, the value otherwise — for reading a Select back into a request. */
 export const valueOrNone = <T extends string>(value: string): T | null =>

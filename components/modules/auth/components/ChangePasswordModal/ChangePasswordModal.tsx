@@ -3,6 +3,7 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
+import { useTranslations } from "next-intl";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/desact/dialog";
@@ -14,7 +15,8 @@ import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCa
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
 import {
-  passwordSchema,
+  type AuthTranslator,
+  buildPasswordSchema,
   type PasswordValues,
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { changePasswordAction } from "@/components/modules/auth/actions/changePasswordAction";
@@ -29,8 +31,8 @@ const EMPTY: ChangePasswordValues = { currentPassword: "", password: "", confirm
 const CURRENT_PASSWORD_WRONG = "AUTH00004";
 
 /** The new password follows the signup rule; the current one only has to be there. */
-export const changePasswordSchema = passwordSchema.shape({
-  currentPassword: yup.string().required("Please enter your current password.").nonNullable(),
+export const buildChangePasswordSchema = (t: AuthTranslator) => buildPasswordSchema(t).shape({
+  currentPassword: yup.string().required(t("changePassword.validation.currentRequired")).nonNullable(),
 });
 
 /** Wrapped so tests can observe the redirect: jsdom's location is read-only. */
@@ -54,6 +56,9 @@ type Props = {
  * navigation, not a router push, for the same reason signing in uses one: identity changed.
  */
 export function ChangePasswordModal({ open, onCloseAction }: Props) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const changePasswordSchema = React.useMemo(() => buildChangePasswordSchema(t), [t]);
   const [error, setError] = useState<string | null>(null);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const logout = useLogoutAction();
@@ -147,21 +152,21 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
     <>
       <Dialog open={open} onOpenChange={(v) => { if (!v) requestClose(); }}>
         <DialogContent className="sm:max-w-md">
-          <form onSubmit={handleSubmit} noValidate>
+          <form method="post" onSubmit={handleSubmit} noValidate>
             <DialogHeader>
-              <DialogTitle>Change password</DialogTitle>
+              <DialogTitle>{t("changePassword.title")}</DialogTitle>
               <DialogDescription>
-                You will be signed out everywhere, here included, and sign in again with the new password.
+                {t("changePassword.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {field("currentPassword", "change-password-current", "Current password", "current-password")}
-              {field("password", "change-password-new", "New password", "new-password")}
-              {field("confirmPassword", "change-password-confirm", "Confirm password", "new-password")}
+              {field("currentPassword", "change-password-current", t("changePassword.currentPassword"), "current-password")}
+              {field("password", "change-password-new", t("changePassword.newPassword"), "new-password")}
+              {field("confirmPassword", "change-password-confirm", t("password.confirmLabel"), "new-password")}
 
               <p className="text-hint text-tertiary">
-                Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
+                {t("password.rule")}
               </p>
 
               <FormError message={error} />
@@ -169,10 +174,10 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
 
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? "Changing…" : "Change password"}
+                {busy ? t("changePassword.submitting") : t("changePassword.submit")}
               </Button>
             </DialogFooter>
           </form>

@@ -2,11 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { usePersonReviews } from "@/components/modules/reviews/hooks";
 import { PacketStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
 
@@ -15,14 +16,16 @@ import { PacketStatusBadge } from "@/components/modules/reviews/shared/ReviewBad
  * them, their manager in a cycle sees that cycle's, a reader with the result right sees all — the backend decides.
  */
 export function PersonReviewsTab({ userId }: { userId: string }) {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
   const reviews = usePersonReviews(userId);
   if (reviews.error) return <div className="px-8"><ErrorState error={reviews.error} /></div>;
   if (!reviews.data) return <div className="px-8"><Skeleton className="h-40 w-full rounded-popover" aria-busy="true" /></div>;
   if (reviews.data.length === 0) {
     return (
       <div className="px-8">
-        <EmptyState scene="reviews-and-one-on-ones" title="No reviews"
-          description="Reviews from performance review cycles appear here once there is one you can read." />
+        <EmptyState scene="reviews-and-one-on-ones" title={t("personTab.empty.title")}
+          description={t("personTab.empty.description")} />
       </div>
     );
   }
@@ -35,10 +38,14 @@ export function PersonReviewsTab({ userId }: { userId: string }) {
             <span className="font-medium text-primary">{p.cycleName}</span>
             <PacketStatusBadge status={p.status} />
             {p.finalRating != null && (
-              <span className="text-body text-tertiary">Rating {p.finalRating}{p.finalRatingLabel ? ` · ${p.finalRatingLabel}` : ""}</span>
+              <span className="text-body text-tertiary">
+                {p.finalRatingLabel
+                  ? t("packetLine.ratingWithLabel", { rating: p.finalRating, label: p.finalRatingLabel })
+                  : t("packetLine.rating", { rating: p.finalRating })}
+              </span>
             )}
             <span className="ml-auto text-hint text-tertiary">
-              {p.sharedAt ? `Shared ${formatDisplayDate(p.sharedAt, { style: "medium" })}` : "Not shared yet"}
+              {p.sharedAt ? t("packetLine.shared", { date: formatDisplayDate(p.sharedAt, { style: "medium" }) }) : t("packetLine.notShared")}
             </span>
           </Link>
         </li>

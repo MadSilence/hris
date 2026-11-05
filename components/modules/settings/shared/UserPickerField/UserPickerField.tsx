@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -65,12 +66,13 @@ function usePathSearch(path: string | undefined, open: boolean, q: string) {
 export function UserPickerField({
   value,
   onChange,
-  placeholder = "Select a person",
+  placeholder,
   allowClear = true,
   disabled,
   id,
   searchPath,
 }: Props) {
+  const t = useTranslations("settings");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query, 300);
@@ -120,7 +122,7 @@ export function UserPickerField({
               <span className="truncate text-primary">{fullName(value)}</span>
             </span>
           ) : (
-            <span className="text-tertiary">{placeholder}</span>
+            <span className="text-tertiary">{placeholder ?? t("shared.userPicker.placeholder")}</span>
           )}
 
           <span className="flex flex-none items-center gap-1 text-tertiary">
@@ -128,7 +130,7 @@ export function UserPickerField({
               <span
                 role="button"
                 tabIndex={-1}
-                aria-label="Clear"
+                aria-label={t("shared.userPicker.clear")}
                 onClick={(e) => {
                   e.stopPropagation();
                   onChange(null);
@@ -152,7 +154,7 @@ export function UserPickerField({
           {isLoading ? (
             <div className="flex justify-center px-2 py-6"><NodRing size="md" /></div>
           ) : items.length === 0 ? (
-            <p className="px-2 py-6 text-center text-body text-tertiary">No people found.</p>
+            <p className="px-2 py-6 text-center text-body text-tertiary">{t("shared.userPicker.empty")}</p>
           ) : (
             items.map((u) => {
               const isSelected = value?.id === u.id;
@@ -180,7 +182,7 @@ export function UserPickerField({
             })
           )}
           {isFetchingNextPage && (
-            <p className="px-2 py-2 text-center text-hint text-tertiary">Loading more…</p>
+            <p className="px-2 py-2 text-center text-hint text-tertiary">{t("shared.userPicker.loadingMore")}</p>
           )}
         </div>
       </PopoverContent>

@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { fieldGroupLabel } from "@/models/user/fieldLabels";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { AttributeType, bareOptionId, hasDefaultValueSupport, optionValueId } from "@/models/attribute";
 import { PersonalInfoSidebar } from "./components/PersonalInfoSidebar";
@@ -42,6 +44,8 @@ const AUTOMATION_RUNS_SECTION_ID = "automation-runs";
 const POSITION_HISTORY_SECTION_ID = "position-history";
 /** The system group the timeline follows — it is the history of a field in that group. */
 const POSITION_HISTORY_AFTER_GROUP = "Organization";
+/** The catalogue's key for a field without a group; its displayed name comes from the catalogue. */
+const OTHER_GROUP = "Other";
 
 type PersonalInfoContainerProps = { user?: User };
 
@@ -81,6 +85,9 @@ const sameValue = (a: unknown, b: unknown): boolean => {
 };
 
 export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ user }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const tAccess = useTranslations("access");
   const [groups, setGroups] = useState<AttributeGroup[]>([]);
   const { data: fetchedGroups, isLoading, error } = useAttributeGroups();
   const { data: catalogue, isLoading: isCatalogueLoading } = useUserFields();
@@ -242,16 +249,16 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
 
     const byGroup = new Map<string, typeof systemFields>();
     for (const field of systemFields) {
-      const key = field.group ?? "Other";
+      const key = field.group ?? OTHER_GROUP;
       byGroup.set(key, [...(byGroup.get(key) ?? []), field]);
     }
 
     return [...byGroup.entries()].map(([name, fields]) => ({
       id: `${SYSTEM_GROUP_PREFIX}${name}`,
-      name,
+      name: name === OTHER_GROUP ? t("profile.sections.other") : fieldGroupLabel(tAccess, name),
       fields,
     }));
-  }, [catalogue, user?.fieldAccess]);
+  }, [catalogue, user?.fieldAccess, t, tAccess]);
 
   // The panel draws nothing for a reader who may not see the position, so it takes no place in the
   // sidebar either.
@@ -267,12 +274,12 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       const after = ids.findIndex((g) => g.name === POSITION_HISTORY_AFTER_GROUP);
       ids.splice(after === -1 ? ids.length : after + 1, 0, {
         id: POSITION_HISTORY_SECTION_ID,
-        name: "Position history",
+        name: t("profile.positionHistory.title"),
       });
     }
-    if (canSeeAutomationRuns) ids.push({ id: AUTOMATION_RUNS_SECTION_ID, name: "Automation runs" });
+    if (canSeeAutomationRuns) ids.push({ id: AUTOMATION_RUNS_SECTION_ID, name: t("profile.sections.automationRuns") });
     return ids;
-  }, [systemGroups, showPositionHistory, canSeeAutomationRuns]);
+  }, [systemGroups, showPositionHistory, canSeeAutomationRuns, t]);
 
   const sections = useMemo(
     () => [...leadingIds, ...visibleGroups.map((g) => ({ id: g.id, name: g.name }))],
@@ -396,7 +403,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
         await mutate(`/api/users/${user.id}`);
       } else {
         // The draft stays exactly as it was typed, so a refusal can be corrected rather than retyped.
-        setSaveError(res.errorMessage ?? "Failed to save changes.");
+        setSaveError(res.errorMessage ?? t("profile.saveBar.failed"));
       }
     } finally {
       setIsSaving(false);
@@ -417,12 +424,12 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   ): React.ReactNode => {
     if (!canEdit) return null;
     if (!openGroupIds.has(groupId)) {
-      return <SectionEditButton label={`Edit ${name}`} onClick={onEdit}/>;
+      return <SectionEditButton label={t("profile.sections.edit", { name })} onClick={onEdit}/>;
     }
     if (isChanged) return null;
     return (
       <Button type="button" variant="secondary" size="sm" onClick={() => closeGroup(groupId)} disabled={isSaving}>
-        Cancel
+        {tCommon("actions.cancel")}
       </Button>
     );
   };
@@ -441,7 +448,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   if (error) {
     return (
       <Card className="p-6">
-        <div className="text-body text-danger-text">Failed to load</div>
+        <div className="text-body text-danger-text">{t("profile.loadFailed")}</div>
       </Card>
     );
   }
@@ -457,9 +464,9 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
   // Three different silences that used to look identical: nothing configured yet, configured but
   // not visible to this reader, and everything fine.
   const attributesNotice = !groups.length
-    ? "No custom fields have been set up for this company yet."
+    ? t("profile.fields.noneConfigured")
     : !visibleGroups.length
-      ? "You don't have access to any of this person's custom fields."
+      ? t("profile.fields.noneVisible")
       : null;
 
   return (
@@ -481,7 +488,7 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
               return [{
                 id,
                 content: (
-                  <ProfileSectionCard title="Automation runs">
+                  <ProfileSectionCard title={t("profile.sections.automationRuns")}>
                     <PersonAutomationRuns personId={user.id}/>
                   </ProfileSectionCard>
                 ),

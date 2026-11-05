@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback } from "react";
+import { FC, FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { FileTextIcon, Xls01Icon } from "@hugeicons/core-free-icons";
@@ -25,11 +26,11 @@ export interface ExportAssignedUsersFormProps {
   ) => void | Promise<void>;
 }
 
-const schema = yup.object({
+const buildSchema = (t: ReturnType<typeof useTranslations<"settings">>) => yup.object({
   format: yup
     .mixed<ExportAssignedUsersFormat>()
     .oneOf(["csv", "xlsx"])
-    .required("Select export format."),
+    .required(t("shared.exportFormat.required")),
 });
 
 export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
@@ -37,6 +38,10 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
   onCancelAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
+
   const handleFormSubmission = useCallback(
     (values: ExportAssignedUsersFormValues) => onSubmitAction(values),
     [onSubmitAction],
@@ -69,7 +74,7 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
-        <div className="text-body font-medium">Format</div>
+        <div className="text-body font-medium">{t("shared.exportFormat.format")}</div>
 
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -87,12 +92,12 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
               <Icon icon={FileTextIcon} size="sm" className="text-secondary" />
               <div className="font-medium">CSV</div>
               <Badge variant="neutral" className="ml-auto">
-                Lightweight
+                {t("shared.exportFormat.csvBadge")}
               </Badge>
             </div>
 
             <div className="mt-2 text-hint text-tertiary">
-              Best for simple imports and quick viewing.
+              {t("shared.exportFormat.csvHint")}
             </div>
           </button>
 
@@ -111,12 +116,12 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
               <Icon icon={Xls01Icon} size="sm" className="text-secondary" />
               <div className="font-medium">XLSX</div>
               <Badge variant="neutral" className="ml-auto">
-                Recommended
+                {t("shared.exportFormat.xlsxBadge")}
               </Badge>
             </div>
 
             <div className="mt-2 text-hint text-tertiary">
-              Better for structured data and multiple sheets.
+              {t("shared.exportFormat.xlsxHint")}
             </div>
           </button>
         </div>
@@ -126,7 +131,7 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
         )}
 
         <div className="rounded-tag bg-subtle px-4 py-3 text-hint text-tertiary">
-          Included: user name, email, position.
+          {t("roles.exportAssigned.included")}
         </div>
       </div>
 
@@ -137,14 +142,14 @@ export const ExportAssignedUsersForm: FC<ExportAssignedUsersFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
  >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading}
  >
-          Export
+          {tCommon("actions.export")}
         </Button>
       </DialogFooter>
     </form>

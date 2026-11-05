@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Role } from "@/models/role/Role";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import { Badge } from "@/components/desact/badge";
 
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -61,6 +62,9 @@ export default function RolesTable({
 }: RolesTableProps) {
   const router = useRouter();
 
+  const t = useTranslations("settings");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [nameModalMode, setNameModalMode] = useState<RoleActionMode>("rename");
   const [nameModalRole, setNameModalRole] =
@@ -129,19 +133,19 @@ export default function RolesTable({
 
   const initialNameForModal = useMemo(() => {
     if (!nameModalRole?.name) return "";
-    if (nameModalMode === "duplicate") return `${nameModalRole.name} (copy)`;
+    if (nameModalMode === "duplicate") return t("roles.table.copyName", { name: nameModalRole.name });
     return nameModalRole.name;
-  }, [nameModalMode, nameModalRole?.name]);
+  }, [nameModalMode, nameModalRole?.name, t]);
 
   return (
     <>
       <Table className="table-fixed" stickyHeader>
         <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
           <TableRow>
-            <TableHead className="w-1/4">Name</TableHead>
-            <TableHead className="w-1/4">Users</TableHead>
-            <TableHead className="w-1/4">Status</TableHead>
-            <TableHead className="w-1/4">Last updated</TableHead>
+            <TableHead className="w-1/4">{t("roles.table.columnName")}</TableHead>
+            <TableHead className="w-1/4">{t("roles.table.columnUsers")}</TableHead>
+            <TableHead className="w-1/4">{tCommon("fields.status")}</TableHead>
+            <TableHead className="w-1/4">{t("roles.table.columnUpdated")}</TableHead>
             <TableHead className="w-12"/>
           </TableRow>
         </TableHeader>
@@ -168,13 +172,13 @@ export default function RolesTable({
 
                   {r.systemOwner && (
                     <Badge variant="neutral" className="ml-2">
-                      System
+                      {t("roles.table.system")}
                     </Badge>
                   )}
 
                   {r.isDefault && (
                     <Badge variant="neutral" className="ml-2">
-                      Default
+                      {t("roles.table.default")}
                     </Badge>
                   )}
                 </TableCell>
@@ -187,7 +191,7 @@ export default function RolesTable({
                   <StatusBadge status={r.archived ? "archived" : "active"}/>
                 </TableCell>
 
-                <TableCell className="text-tertiary">{formatDate(r.updatedAt)}</TableCell>
+                <TableCell className="text-tertiary">{formatDate(r.updatedAt, formatDisplayDate)}</TableCell>
 
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end">
@@ -215,10 +219,10 @@ export default function RolesTable({
                   query={query}
                   archivedView={showArchived}
                   scene="policies"
-                  title="No roles yet"
-                  description="A role is a set of permissions you can hand to people. Add the first one to start granting access."
-                  noResultsHint="Try a different role name."
-                  archivedDescription="Archived roles will appear here."
+                  title={t("roles.table.emptyTitle")}
+                  description={t("roles.table.emptyDescription")}
+                  noResultsHint={t("roles.table.noResultsHint")}
+                  archivedDescription={t("roles.table.archivedDescription")}
                 />
               </TableCell>
             </TableRow>
@@ -278,13 +282,13 @@ export default function RolesTable({
 
       <ConfirmActionModal
         isOpen={archiveTarget !== null}
-        title={`Archive ${archiveTarget?.name ?? "role"}?`}
+        title={archiveTarget?.name ? t("roles.table.archiveTitle", { name: archiveTarget.name }) : t("roles.table.archiveTitleUnnamed")}
         description={
           archiveTarget && archiveTarget.userCount > 0
-            ? `It will be taken from ${archiveTarget.userCount} ${archiveTarget.userCount === 1 ? "person" : "people"}, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.`
-            : "Nobody holds it. Scheduled assignments of it are cancelled, and it can be unarchived later."
+            ? t("roles.table.archiveHeld", { count: archiveTarget.userCount })
+            : t("roles.table.archiveNobody")
         }
-        confirmLabel="Archive"
+        confirmLabel={tCommon("actions.archive")}
         isLoading={archivePending}
         errorMessage={archiveError}
         onConfirmAction={confirmArchive}
@@ -294,6 +298,6 @@ export default function RolesTable({
   );
 }
 
-function formatDate(iso?: string | null) {
+function formatDate(iso: string | null | undefined, formatDisplayDate: DateFormatter) {
   return iso ? formatDisplayDate(iso, { style: "medium" }) : "";
 }

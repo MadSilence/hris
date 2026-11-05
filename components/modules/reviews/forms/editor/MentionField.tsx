@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { cn } from "@/lib/cn";
 import {
@@ -41,6 +42,7 @@ type Props = {
 export function MentionField({
   id, value, onChange, multiline, rows = 2, disabled, className, "aria-label": ariaLabel, "aria-invalid": ariaInvalid,
 }: Props) {
+  const t = useTranslations("reviews");
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -157,7 +159,7 @@ export function MentionField({
         <ul
           id={listId}
           role="listbox"
-          aria-label="Mentions"
+          aria-label={t("mentions.listLabel")}
           className="absolute left-0 top-full z-20 mt-1 w-72 rounded-control border border-divider bg-card py-1 text-body shadow-raised"
         >
           {options.map((o, i) => (
@@ -172,7 +174,7 @@ export function MentionField({
               onMouseEnter={() => setActive(i)}
             >
               <span className="font-medium text-primary">@{o.token}</span>
-              <span className="ml-2 text-hint text-tertiary">{o.label}</span>
+              <span className="ml-2 text-hint text-tertiary">{t(o.labelKey)}</span>
             </li>
           ))}
         </ul>

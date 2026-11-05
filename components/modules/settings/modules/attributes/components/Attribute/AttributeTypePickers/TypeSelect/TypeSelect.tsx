@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ATTRIBUTE_TYPES_CREATABLE, AttributeType } from "@/models/attribute";
-import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
+import { attributeTypeLabelKey } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
 
 type TypeSelectProps = {
@@ -10,15 +11,16 @@ type TypeSelectProps = {
   onChange: (type: AttributeType) => void;
 };
 
-const options = ATTRIBUTE_TYPES_CREATABLE.map((type) => ({
-  value: type,
-  label: getAttributeTypeLabel(type),
-}));
-
 export const TypeSelect: React.FC<TypeSelectProps> = ({ value, onChange }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const options = ATTRIBUTE_TYPES_CREATABLE.map((type) => ({
+    value: type,
+    label: t(attributeTypeLabelKey(type)),
+  }));
   return (
     <label>
-      Type
+      {tCommon("fields.type")}
       <Select value={value} onValueChange={(v) => onChange(v as AttributeType)}>
         <SelectTrigger>
           <SelectValue/>

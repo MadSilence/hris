@@ -1,0 +1,381 @@
+{
+  "inbox": {
+    "title": "Входящие",
+    "unread": "Непрочитанных: {count}",
+    "caughtUp": "Всё прочитано",
+    "markAllRead": "Отметить все как прочитанные",
+    "preferences": "Настройки уведомлений",
+    "allCategories": "Все категории",
+    "star": "Отметить звёздочкой",
+    "unstar": "Снять звёздочку",
+    "filters": {
+      "all": "Все",
+      "unread": "Непрочитанные",
+      "starred": "Со звёздочкой",
+      "needsAction": "Требует действий"
+    },
+    "empty": {
+      "search": "Нет уведомлений по вашему запросу.",
+      "unread": "Нет непрочитанных уведомлений.",
+      "starred": "Нет уведомлений со звёздочкой.",
+      "needsAction": "Ничего не требует ваших действий.",
+      "category": "В этой категории ничего нет.",
+      "none": "Уведомлений пока нет."
+    },
+    "dateGroup": {
+      "today": "Сегодня",
+      "yesterday": "Вчера",
+      "week": "На этой неделе",
+      "earlier": "Ранее"
+    },
+    "timeAgo": {
+      "justNow": "только что",
+      "minutes": "{count} мин назад",
+      "hours": "{count} ч назад",
+      "days": "{count} дн. назад"
+    }
+  },
+  "categories": {
+    "APPROVALS": "Согласования",
+    "ORG_CHANGES": "Оргизменения",
+    "DOCUMENTS": "Документы",
+    "TASKS": "Задачи",
+    "POLICIES": "Политики",
+    "SYSTEM": "Система"
+  },
+  "preferences": {
+    "mandatory": "Всегда включено — обязательные уведомления отключить нельзя.",
+    "managed": "Управляется вашей организацией — от этой категории нельзя отказаться.",
+    "toggle": "Переключить: {label}",
+    "empty": "Настраиваемых категорий пока нет."
+  },
+  "actions": {
+    "approve": "Согласовать",
+    "reject": "Отклонить",
+    "reason": "Причина",
+    "approveCancellation": "Согласовать отмену",
+    "decline": "Отказать",
+    "outcomes": {
+      "approved": "Согласовано",
+      "approvedByYou": "Вы согласовали · ждём остальных согласующих",
+      "rejected": "Отклонено",
+      "cancelled": "Отменено",
+      "cancellationApproved": "Отмена согласована",
+      "cancellationDeclined": "В отмене отказано"
+    }
+  },
+  "drift": {
+    "outcomes": {
+      "applied": "Применено",
+      "dismissed": "Отклонено",
+      "superseded": "Заменено более новой проверкой источника",
+      "conflictApplied": "Принята версия источника",
+      "conflictDismissed": "Ваша версия сохранена"
+    },
+    "requestStatus": {
+      "PENDING": "ожидает",
+      "APPROVED": "согласована",
+      "CANCELLATION_PENDING": "запрошена отмена"
+    },
+    "change": {
+      "added": "Новый: {name}, {span}",
+      "removed": "Больше не праздник: {name}, {span}",
+      "moved": "Перенесён: {name}, {from} → {to}",
+      "renamed": "Переименован: {previous} → {name}",
+      "changed": "Изменён: {name}, {from} → {to}"
+    },
+    "conflict": {
+      "line": "В источнике теперь: {theirs}; у вас: {ours}.",
+      "day": "{name}, {span}",
+      "noHoliday": "нет праздника",
+      "removedByYou": "нет праздника (вы его удалили)",
+      "staysInForce": "Ваша версия действует, пока кто-нибудь не примет версию источника."
+    },
+    "result": {
+      "applied": "Применено изменений: {count}",
+      "recalculated": "пересчитано заявок на отпуск: {count}",
+      "skipped": "пропущено изменений: {count} — день был отредактирован или занят",
+      "leftUnchanged": "{count, plural, one {# заявка теперь целиком приходится} few {# заявки теперь целиком приходятся} many {# заявок теперь целиком приходятся} other {# заявки теперь целиком приходятся}} на праздники и оставлены вам на проверку",
+      "sentence": "{parts}."
+    },
+    "noLeave": "Изменённые дни не затрагивают ни одного отпуска.",
+    "leaveConflict": "{count, plural, one {# заявка на отпуск затрагивает} few {# заявки на отпуск затрагивают} many {# заявок на отпуск затрагивают} other {# заявки на отпуск затрагивают}} эти дни и будут пересчитаны, если вы примете версию источника:",
+    "leaveOrdinary": "{count, plural, one {# заявка на отпуск затрагивает} few {# заявки на отпуск затрагивают} many {# заявок на отпуск затрагивают} other {# заявки на отпуск затрагивают}} изменённые дни и будут пересчитаны:",
+    "moreChanges": "и ещё {count, plural, one {# изменение} few {# изменения} many {# изменений} other {# изменения}}",
+    "observers": "Этот календарь применяется к {count, plural, one {# сотруднику} few {# сотрудникам} many {# сотрудникам} other {# сотрудника}}. {leaveLine}",
+    "someone": "Кто-то",
+    "hiddenRequests": "и {count, plural, one {# заявка} few {# заявки} many {# заявок} other {# заявки}} сотрудников, чьи отпуска вам не видны",
+    "keepOurs": "Оставить нашу",
+    "takeTheirs": "Принять из источника",
+    "applyChanges": "Применить изменения",
+    "dismiss": "Отклонить"
+  },
+  "fallback": {
+    "anEmployee": "Сотрудник",
+    "aColleague": "Коллега",
+    "somebody": "Кто-то",
+    "aPerson": "сотрудник",
+    "APerson": "Сотрудник",
+    "aRole": "без названия",
+    "ARole": "без названия",
+    "aDocument": "документ",
+    "ATask": "Задача",
+    "aTask": "задача",
+    "aLeavePolicy": "политика отпуска",
+    "ALeavePolicy": "Политика отпуска",
+    "aHolidayCalendar": "без названия",
+    "AHolidayCalendar": "без названия",
+    "automation": "Автоматизация",
+    "anAutomation": "Автоматизация",
+    "automationMessage": "Автоматизация отправила вам сообщение.",
+    "aSystemOwner": "владельца системы",
+    "aReviewCycle": "без названия",
+    "AReviewCycle": "без названия",
+    "yourCycle": "без названия",
+    "aReviewer": "Оценивающий",
+    "oneOfYourPeople": "Ваш подчинённый"
+  },
+  "presenter": {
+    "withReason": "{message} Причина: {reason}",
+    "anAmount": "некоторое количество",
+    "signedDays": "{sign}{count, plural, one {{amount} день} few {{amount} дня} many {{amount} дней} other {{amount} дня}}",
+    "driftCount": {
+      "added": "добавлено: {count}",
+      "changed": "изменено: {count}",
+      "removed": "удалено: {count}"
+    },
+    "approvalRequested": {
+      "title": "Запрошено согласование отсутствия",
+      "message": "{requester} запрашивает {count, plural, one {{amount} день} few {{amount} дня} many {{amount} дней} other {{amount} дня}} · {dates}{forSomeone, select, yes { · вы замещаете: {onBehalfOf}} other {}}"
+    },
+    "cancellationRequested": {
+      "title": "Запрошена отмена",
+      "message": "{requester} просит отменить согласованное отсутствие · {dates}{forSomeone, select, yes { · вы замещаете: {onBehalfOf}} other {}}."
+    },
+    "requestCancelled": {
+      "title": "Отсутствие отменено",
+      "message": "{requester}: отсутствие {dates} отменено."
+    },
+    "requestApproved": {
+      "title": "Отсутствие согласовано",
+      "message": "Ваша {hasPolicy, select, yes {заявка «{policy}»} other {заявка на отсутствие}} {dates} согласована{hasActor, select, yes { — согласовал(а) {actor}} other {}}."
+    },
+    "requestRejected": {
+      "title": "Отсутствие отклонено",
+      "message": "Ваша {hasPolicy, select, yes {заявка «{policy}»} other {заявка на отсутствие}} {dates} отклонена{hasActor, select, yes { — отклонил(а) {actor}} other {}}."
+    },
+    "cancellationApproved": {
+      "title": "Отмена согласована",
+      "message": "Ваша просьба отменить {hasPolicy, select, yes {заявку «{policy}»} other {отсутствие}} {dates} согласована{hasActor, select, yes { — согласовал(а) {actor}} other {}}{hasRestored, select, yes {; на баланс вернулось {restoredCount, plural, one {{restored} день} few {{restored} дня} many {{restored} дней} other {{restored} дня}}} other {}}."
+    },
+    "cancellationDeclined": {
+      "title": "В отмене отказано",
+      "message": "В вашей просьбе отменить {hasPolicy, select, yes {заявку «{policy}»} other {отсутствие}} {dates} отказано{hasActor, select, yes { — отказал(а) {actor}} other {}}. Отсутствие остаётся в силе."
+    },
+    "leaveCancelled": {
+      "title": "Отсутствие отменено",
+      "message": "Ваша {hasPolicy, select, yes {заявка «{policy}»} other {заявка на отсутствие}} {dates} отменена{hasActor, select, yes { — отменил(а) {actor}} other {}}{hasRestored, select, yes {; на баланс вернулось {restoredCount, plural, one {{restored} день} few {{restored} дня} many {{restored} дней} other {{restored} дня}}} other {}}."
+    },
+    "policyAssigned": {
+      "title": "Назначена политика отпуска",
+      "withActor": "{actor} назначил(а) вам {hasPolicy, select, yes {политику «{policy}»} other {политику отпуска}}{hasFrom, select, yes { с {from}} other {}}.",
+      "withoutActor": "{hasPolicy, select, yes {Политика «{policy}»} other {Политика отпуска}} теперь применяется к вам{hasFrom, select, yes { с {from}} other {}}."
+    },
+    "policyEnded": {
+      "title": "Политика отпуска завершена",
+      "withActor": "{actor} завершил(а) для вас {hasPolicy, select, yes {политику «{policy}»} other {политику отпуска}}{hasUntil, select, yes { после {until}} other {}}.",
+      "withoutActor": "{hasPolicy, select, yes {Политика «{policy}»} other {Политика отпуска}} больше не применяется к вам{hasUntil, select, yes { после {until}} other {}}."
+    },
+    "approvalsDelegated": {
+      "title": "Вам переданы согласования",
+      "message": "{delegator} передаёт вам согласование отпусков{hasDates, select, yes { · {dates}} other {}}{onLeave, select, yes {, пока находится в отпуске} other {}}. Запросы приходят вам обоим; решает тот, кто ответит первым."
+    },
+    "balanceAdjusted": {
+      "title": "Баланс скорректирован",
+      "withActor": "{actor} изменил(а) ваш баланс {hasPolicy, select, yes {«{policy}»} other {отпуска}} на {amount}.",
+      "withoutActor": "Ваш баланс {hasPolicy, select, yes {«{policy}»} other {отпуска}} изменён на {amount}."
+    },
+    "requestRepriced": {
+      "title": "Стоимость отсутствия пересчитана",
+      "message": "Праздники в период вашей {hasPolicy, select, yes {заявки «{policy}»} other {заявки на отсутствие}} {dates} изменились, теперь она стоит {count, plural, one {{amount} день} few {{amount} дня} many {{amount} дней} other {{amount} дня}}{hasPrevious, select, yes { вместо {previousCount, plural, one {{previous} дня} few {{previous} дней} many {{previous} дней} other {{previous} дня}}} other {}}."
+    },
+    "holidayConflict": {
+      "title": "Ваши правки праздников расходятся с источником",
+      "message": "В источнике календаря «{calendar}»{hasYear, select, yes { ({year})} other {}} изменились {hasCounts, select, yes {дни, которые вы редактировали: {counts}} other {дни, которые вы редактировали}}. {outcome}",
+      "applied": "Принята версия источника.",
+      "dismissed": "Ваша версия сохранена.",
+      "superseded": "Её заменила более новая проверка.",
+      "open": "Ваша версия действует, пока кто-нибудь не примет версию источника."
+    },
+    "holidayDrift": {
+      "title": "Праздники изменились в источнике",
+      "message": "Календарь «{calendar}»{hasYear, select, yes { ({year})} other {}} расходится с источником{hasCounts, select, yes {: {counts}} other {}}. {outcome}",
+      "applied": "Изменения применены.",
+      "dismissed": "Изменения отклонены; ничего не поменялось.",
+      "superseded": "Их заменила более новая проверка.",
+      "open": "Ничего не изменится, пока кто-нибудь их не применит."
+    },
+    "roleAssigned": {
+      "title": "Назначена роль",
+      "message": "Вам назначена {hasRole, select, yes {роль «{role}»} other {роль}}{hasActor, select, yes { — назначил(а) {actor}} other {}}."
+    },
+    "roleRemoved": {
+      "title": "Роль снята",
+      "message": "С вас снята {hasRole, select, yes {роль «{role}»} other {роль}}{hasActor, select, yes { — снял(а) {actor}} other {}}."
+    },
+    "roleHoldersChanged": {
+      "title": "Изменились обладатели роли",
+      "added": "{who} назначил(а) роль «{role}»: {hasPerson, select, yes {{person}} other {{count, plural, one {# сотрудник} few {# сотрудника} many {# сотрудников} other {# сотрудника}}}}.",
+      "removed": "{who} снял(а) роль «{role}»: {hasPerson, select, yes {{person}} other {{count, plural, one {# сотрудник} few {# сотрудника} many {# сотрудников} other {# сотрудника}}}}."
+    },
+    "managerChanged": {
+      "title": "Сменился руководитель",
+      "setWithActor": "{actor} назначил(а) вашим руководителем: {manager}.",
+      "setWithoutActor": "Ваш руководитель теперь — {manager}.",
+      "removedWithActor": "{actor} убрал(а) вашего руководителя.",
+      "removedWithoutActor": "У вас больше нет руководителя."
+    },
+    "orgUnit": {
+      "assignedTitle": "Добавлены в {kind, select, team {команду} other {отдел}}",
+      "unassignedTitle": "Убраны из {kind, select, team {команды} other {отдела}}",
+      "assignedWithActor": "{actor} добавил(а) вас в {kind, select, team {команду} other {отдел}}{hasUnit, select, yes { «{unit}»} other {}}.",
+      "assignedWithoutActor": "Теперь вы в {kind, select, team {команде} other {отделе}}{hasUnit, select, yes { «{unit}»} other {}}.",
+      "unassignedWithActor": "{actor} убрал(а) вас из {kind, select, team {команды} other {отдела}}{hasUnit, select, yes { «{unit}»} other {}}.",
+      "unassignedWithoutActor": "Вас убрали из {kind, select, team {команды} other {отдела}}{hasUnit, select, yes { «{unit}»} other {}}."
+    },
+    "positionChanged": {
+      "title": "Изменилась позиция",
+      "clearedWithActor": "{actor} очистил(а) вашу позицию.",
+      "clearedWithoutActor": "Ваша позиция очищена.",
+      "setWithActor": "{actor} изменил(а) вашу позицию: {job}.",
+      "setWithoutActor": "Ваша позиция теперь — {job}."
+    },
+    "documentAdded": {
+      "title": "Добавлен документ",
+      "message": "{who} добавил(а) в ваше дело: {file}."
+    },
+    "taskDue": {
+      "title": "Срок задачи — сегодня",
+      "message": "«{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target}) — срок сегодня."
+    },
+    "taskOverdue": {
+      "title": "Задача просрочена",
+      "message": "«{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target}) — срок был {hasDue, select, yes {{due}} other {три дня назад}}.{hasAssignee, select, yes { {assignee} ещё не выполнил(а) её.} other {}}"
+    },
+    "taskCommented": {
+      "title": "Новый комментарий",
+      "message": "{author} прокомментировал(а) «{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target})."
+    },
+    "tasksAssigned": {
+      "oneTitle": "Задача для вас",
+      "title": "{count, plural, one {Задача для вас} few {Задачи для вас} many {Задачи для вас} other {Задачи для вас}}",
+      "assigned": "«{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target}) теперь ваша.{hasDue, select, yes { Срок — {due}.} other {}}",
+      "opened": "«{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target}) готова к работе: то, чего она ждала, выполнено.{hasDue, select, yes { Срок — {due}.} other {}}",
+      "started": "{kind, select, onboarding {Онбординг} offboarding {Оффбординг} other {Пребординг}} ({target}) начался, и {count, plural, one {# задача ваша} few {# задачи ваши} many {# задач ваши} other {# задачи ваши}}.{hasDue, select, yes { Первый срок — {due}.} other {}}"
+    },
+    "stepFailed": {
+      "title": "Шаг процесса «{kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}» не выполнен",
+      "message": "{kind, select, onboarding {Онбординг} offboarding {Оффбординг} other {Пребординг}} ({target}) остановлен: запланированный шаг не удалось выполнить, и следующие за ним не начаты."
+    },
+    "automationTask": {
+      "title": "Задача для вас",
+      "message": "{task}{hasPerson, select, yes { — для: {person}} other {}} — поставлена автоматизацией {hasRule, select, yes {«{rule}»} other {вашей компании}}.{hasDue, select, yes { Срок — {due}.} other {}}"
+    },
+    "automationRunFailed": {
+      "title": "Сбой автоматизации",
+      "message": "{rule} не удалось завершить для: {person}{hasError, select, yes {: {error}.} other {.}} Откройте журнал запусков, чтобы повторить."
+    },
+    "automationPaused": {
+      "title": "Автоматизация приостановлена",
+      "message": "{rule} приостановлена: то, что она использует, удалено.{hasReason, select, yes { {reason}} other {}} Исправьте это и возобновите правило."
+    },
+    "invitationFailed": {
+      "title": "Приглашение не отправлено",
+      "message": "Запланированное приглашение для: {target} — не удалось отправить. Откройте профиль, чтобы пригласить снова."
+    },
+    "roleAccessChanged": {
+      "title": "Изменился доступ роли",
+      "withActor": "{actor} изменил(а) {what, select, fieldAccess {доступ к полям} other {права}} роли «{role}».",
+      "withoutActor": "{what, select, fieldAccess {Доступ к полям} other {Права}} роли «{role}» изменились."
+    },
+    "accountLocked": {
+      "title": "Учётная запись заблокирована",
+      "message": "Учётная запись ({name}) заблокирована после слишком многих неудачных попыток входа. Отправьте ссылку для сброса пароля, чтобы разблокировать её."
+    },
+    "securityChanged": {
+      "title": "Изменилась безопасность входа",
+      "scimBlockRefused": "Провайдер удостоверений пытался заблокировать: {whom}. Владельца системы так заблокировать нельзя.",
+      "mfaReset": "{who} сбросил(а) двухэтапный вход: {whom}.",
+      "mfaPolicyChanged": "{who} изменил(а), кто обязан использовать двухэтапный вход.",
+      "identityConnectionUpdated": "{who} изменил(а) единый вход (SSO).",
+      "scimTokenIssued": "{who} выпустил(а) токен синхронизации.",
+      "idpGroupRolesChanged": "{who} изменил(а) роли, которые даёт группа провайдера удостоверений.",
+      "other": "{who} изменил(а) безопасность входа."
+    },
+    "reviewCycleLaunched": {
+      "title": "Нужно написать оценки",
+      "message": "Цикл «{cycle}» начался, и вас просят написать оценки.{hasDue, select, yes { Первый срок — {due}.} other {}}"
+    },
+    "reviewAssigned": {
+      "title": "Оценка для вас",
+      "message": "Вас просят написать {kind, select, SELF {самооценку} MANAGER {оценку руководителя} PEER {оценку коллеги} UPWARD {оценку руководителя снизу} other {оценку}}{hasSubject, select, yes { ({subject})} other {}} в цикле «{cycle}»."
+    },
+    "reviewDueSoon": {
+      "title": "Скоро срок оценки",
+      "message": "Срок вашей {kind, select, SELF {самооценки} MANAGER {оценки руководителя} PEER {оценки коллеги} UPWARD {оценки руководителя снизу} other {оценки}}{hasSubject, select, yes { ({subject})} other {}} в цикле «{cycle}» — {hasDue, select, yes {{due}} other {через два дня}}."
+    },
+    "reviewDue": {
+      "title": "Срок оценки — сегодня",
+      "message": "Срок вашей {kind, select, SELF {самооценки} MANAGER {оценки руководителя} PEER {оценки коллеги} UPWARD {оценки руководителя снизу} other {оценки}}{hasSubject, select, yes { ({subject})} other {}} в цикле «{cycle}» — сегодня."
+    },
+    "reviewReminder": {
+      "title": "Ваша оценка ждёт",
+      "message": "Напоминаем: напишите {kind, select, SELF {самооценку} MANAGER {оценку руководителя} PEER {оценку коллеги} UPWARD {оценку руководителя снизу} other {оценку}} в цикле «{cycle}»."
+    },
+    "reviewOverdue": {
+      "title": "Оценка просрочена",
+      "message": "{reviewer} не написал(а) {kind, select, SELF {самооценку} MANAGER {оценку руководителя} PEER {оценку коллеги} UPWARD {оценку руководителя снизу} other {оценку}} ({subject}) в цикле «{cycle}», срок — {due}."
+    },
+    "reviewDeclined": {
+      "title": "Коллега отказался от оценки",
+      "message": "{reviewer} отказался(-ась) оценивать: {subject} в цикле «{cycle}». Можно попросить кого-то другого."
+    },
+    "reviewSelfSubmitted": {
+      "title": "Самооценка готова",
+      "message": "{subject} отправил(а) самооценку в цикле «{cycle}»."
+    },
+    "reviewShared": {
+      "title": "Ваша оценка готова",
+      "message": "С вами поделились оценкой в цикле «{cycle}»."
+    },
+    "reviewAmended": {
+      "title": "Ваша оценка обновлена",
+      "message": "Руководитель обновил вашу оценку в цикле «{cycle}». Прочитайте новую версию и подтвердите её ещё раз."
+    },
+    "reviewAcknowledged": {
+      "title": "Оценка подтверждена",
+      "message": "{subject} прочитал(а) свою оценку в цикле «{cycle}»{commented, select, yes { и оставил(а) комментарий} other {}}."
+    },
+    "reviewPeersToApprove": {
+      "title": "Коллеги на согласование",
+      "message": "{subject} выбрал(а) коллег для оценки в цикле «{cycle}». Согласуйте их или сначала измените список."
+    },
+    "reviewPeersApproved": {
+      "title": "Ваши коллеги согласованы",
+      "auto": "До даты согласования никто не изменил ваш выбор в цикле «{cycle}», поэтому коллеги утверждены и получили запрос.",
+      "manual": "Ваши коллеги в цикле «{cycle}» согласованы и получили запрос на оценку."
+    },
+    "reviewToApprove": {
+      "title": "Оценка на согласование",
+      "message": "Оценка руководителя ({subject}) в цикле «{cycle}» ждёт вашего согласования."
+    },
+    "reviewApproved": {
+      "title": "Ваша оценка согласована",
+      "message": "Ваша оценка ({subject}) в цикле «{cycle}» согласована."
+    },
+    "reviewSentBack": {
+      "title": "Ваша оценка возвращена",
+      "message": "Ваша оценка ({subject}) в цикле «{cycle}» возвращена с комментарием. Исправьте её и отправьте снова."
+    }
+  }
+}

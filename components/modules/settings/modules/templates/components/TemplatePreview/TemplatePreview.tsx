@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowDown01Icon, ArrowRight01Icon, ShieldAlertIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
@@ -33,16 +34,20 @@ import {
 } from "@/components/modules/settings/modules/templates/hooks";
 import { FieldError } from "@/components/desact/field-error";
 import { InlineAlert } from "@/components/desact/alert";
+import { AttributeType } from "@/models/attribute/AttributeType";
+import { attributeTypeLabelKey } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils/attributeTypeUtils";
+
+type Translator = ReturnType<typeof useTranslations<"settings">>;
 
 const BACK = "/settings/general/templates";
 
 /** The preview's outcomes on the shared chip (STATUS_AND_BADGES.md § 1): the mapping is all a caller writes. */
-const OUTCOME: Record<TemplateOutcome, { status: StatusTone; label: string }> = {
-  NEW: { status: "scheduled", label: "New" },
-  EXISTING: { status: "inactive", label: "Already there" },
-  CLASH: { status: "pending", label: "Name taken" },
-  DROPPED: { status: "archived", label: "Dropped" },
-};
+const OUTCOME = {
+  NEW: { status: "scheduled", label: "templates.outcome.new" },
+  EXISTING: { status: "inactive", label: "templates.outcome.existing" },
+  CLASH: { status: "pending", label: "templates.outcome.clash" },
+  DROPPED: { status: "archived", label: "templates.outcome.dropped" },
+} as const satisfies Record<TemplateOutcome, { status: StatusTone; label: string }>;
 
 type Choices = { excludedTemplates: string[]; items: Record<string, TemplateItemChoice> };
 
@@ -58,6 +63,8 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
   const [appliedId, setAppliedId] = React.useState<string | null>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [applyError, setApplyError] = React.useState<string | null>(null);
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
 
   const request: TemplateChoicesRequest = React.useMemo(
     () => ({ excludedTemplates: choices.excludedTemplates, items: Object.values(choices.items) }),
@@ -106,11 +113,10 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
   return (
     <div className="space-y-6 px-8 pb-10">
       <div className="space-y-4">
-        <SettingsPageHeader title={data?.title ?? "Template"} backHref={BACK}/>
+        <SettingsPageHeader title={data?.title ?? t("templates.preview.fallbackTitle")} backHref={BACK}/>
         {data && (
           <PageDescription className="text-body text-tertiary/90">
-            {data.summary} Version {data.version}. Applying copies it into the company: what it creates is
-            yours to change afterwards, and nothing links it back to the template.
+            {t("templates.preview.description", { summary: data.summary, version: data.version })}
           </PageDescription>
         )}
       </div>
@@ -140,17 +146,19 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
 
           <div className="flex items-center justify-end gap-3 border-t border-divider pt-4">
             <span className="text-body text-tertiary">
-              {summaryLine(data.counts)}
+              {summaryLine(t, data.counts)}
             </span>
             <Button asChild variant="secondary">
-              <Link href={BACK} className="no-underline">Cancel</Link>
+              <Link href={BACK} className="no-underline">{tCommon("actions.cancel")}</Link>
             </Button>
             <Button
               type="button"
               onClick={() => void onApply()}
               disabled={apply.isPending || preview.isFetching || data.counts.create === 0}
             >
-              {data.counts.create === 0 ? "Nothing to create" : `Apply · ${data.counts.create} to create`}
+              {data.counts.create === 0
+                ? t("templates.preview.nothingToCreate")
+                : t("templates.preview.apply", { count: data.counts.create })}
             </Button>
           </div>
         </>
@@ -159,18 +167,20 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
   );
 };
 
-const summaryLine = (c: { create: number; existing: number; skip: number; dropped: number }) =>
+const summaryLine = (t: Translator, c: { create: number; existing: number; skip: number; dropped: number }) =>
   [
-    c.existing > 0 ? `${c.existing} already there` : null,
-    c.skip > 0 ? `${c.skip} skipped` : null,
-    c.dropped > 0 ? `${c.dropped} dropped` : null,
+    c.existing > 0 ? t("templates.preview.summary.existing", { count: c.existing }) : null,
+    c.skip > 0 ? t("templates.preview.summary.skipped", { count: c.skip }) : null,
+    c.dropped > 0 ? t("templates.preview.summary.dropped", { count: c.dropped }) : null,
   ].filter(Boolean).join(" · ");
 
 const PartSection: React.FC<{
   part: TemplatePartDTO;
   onToggle: (included: boolean) => void;
   onChoose: (ref: string, patch: Partial<TemplateItemChoice>) => void;
-}> = ({ part, onToggle, onChoose }) => (
+}> = ({ part, onToggle, onChoose }) => {
+  const t = useTranslations("settings");
+  return (
   <section className="space-y-2" aria-label={part.title}>
     {part.root ? null : (
       <div className="flex items-start gap-3 rounded-control bg-subtle px-4 py-3">
@@ -178,14 +188,12 @@ const PartSection: React.FC<{
           id={`include-${part.key}`}
           checked={part.included}
           onCheckedChange={(v) => onToggle(Boolean(v))}
-          aria-label={`Include ${part.title}`}
+          aria-label={t("templates.preview.include", { title: part.title })}
         />
         <label htmlFor={`include-${part.key}`} className="min-w-0 text-body">
-          <span className="font-medium">Include {part.title}</span>
+          <span className="font-medium">{t("templates.preview.include", { title: part.title })}</span>
           <span className="block text-tertiary">
-            {part.appliedBefore
-              ? "Applied before — its fields are already in the company, so it is not needed again."
-              : "This template uses fields from it. Left out, what points at those fields is dropped."}
+            {part.appliedBefore ? t("templates.preview.appliedBefore") : t("templates.preview.usesFields")}
           </span>
         </label>
       </div>
@@ -196,7 +204,8 @@ const PartSection: React.FC<{
       ))}
     </ul>
   </section>
-);
+  );
+};
 
 const ItemRow: React.FC<{
   item: TemplateItemDTO;
@@ -204,6 +213,7 @@ const ItemRow: React.FC<{
   onChoose: (patch: Partial<TemplateItemChoice>) => void;
 }> = ({ item, disabled, onChoose }) => {
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations("settings");
   const outcome = OUTCOME[item.outcome];
   const canInclude = item.type !== "SECTION" && item.outcome !== "DROPPED" && item.outcome !== "EXISTING";
   const questions = item.questions ?? [];
@@ -217,24 +227,24 @@ const ItemRow: React.FC<{
             checked={item.include}
             disabled={disabled}
             onCheckedChange={(v) => onChoose({ include: Boolean(v) })}
-            aria-label={`Apply ${item.name}`}
+            aria-label={t("templates.preview.applyItem", { name: item.name })}
             className="mt-0.5"
           />
         ) : <span className="w-4"/>}
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.finalName}</span>
-            <span className="text-hint text-tertiary">{typeLabel(item)}</span>
-            <StatusBadge status={outcome.status} label={outcome.label}/>
-            {item.sensitive && <Badge variant="outline">Sensitive</Badge>}
+            <span className="text-hint text-tertiary">{typeLabel(t, item)}</span>
+            <StatusBadge status={outcome.status} label={t(outcome.label)}/>
+            {item.sensitive && <Badge variant="outline">{t("templates.sensitive")}</Badge>}
           </div>
           {item.reason && <p className="text-body text-tertiary">{item.reason}</p>}
           {item.type === "FIELD" && item.sensitive && item.outcome !== "EXISTING" && item.include && (
             <p className="flex items-center gap-1 text-body text-tertiary">
               <Icon icon={ShieldAlertIcon} size="sm" />
               {item.readers.length === 0
-                ? "Only the System Owner will see it until a role is given access."
-                : `Seen by ${item.readers.join(", ")} and the System Owner.`}
+                ? t("templates.preview.onlyOwner")
+                : t("templates.preview.seenBy", { readers: item.readers.join(", ") })}
             </p>
           )}
           {item.outcome === "CLASH" && item.include && (
@@ -244,15 +254,15 @@ const ItemRow: React.FC<{
                 onValueChange={(v) => onChoose({ clash: v as TemplateClashChoice })}
                 disabled={disabled}
               >
-                <SelectTrigger aria-label={`What to do with ${item.name}`}><SelectValue/></SelectTrigger>
+                <SelectTrigger aria-label={t("templates.preview.clashChoice", { name: item.name })}><SelectValue/></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SKIP">Skip — keep the company&apos;s own</SelectItem>
-                  <SelectItem value="RENAME">Create as “{item.name} (template)”</SelectItem>
+                  <SelectItem value="SKIP">{t("templates.preview.clashSkip")}</SelectItem>
+                  <SelectItem value="RENAME">{t("templates.preview.clashRename", { name: item.name })}</SelectItem>
                 </SelectContent>
               </Select>
               {item.renameTaken && (
                 <FieldError>
-                  “{item.finalName}” is taken too. Skip it, or rename the company&apos;s own first.
+                  {t("templates.preview.renameTaken", { name: item.finalName })}
                 </FieldError>
               )}
             </div>
@@ -262,8 +272,10 @@ const ItemRow: React.FC<{
           <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             {open ? <Icon icon={ArrowDown01Icon} size="sm" /> : <Icon icon={ArrowRight01Icon} size="sm" />}
             {item.grants.length > 0
-              ? `${item.grants.filter((g) => g.selected).length} of ${item.grants.length} Grants`
-              : questions.length > 0 ? `${questions.length} Entries` : `${item.tasks.length} Tasks`}
+              ? t("templates.preview.grantsCount", { selected: item.grants.filter((g) => g.selected).length, count: item.grants.length })
+              : questions.length > 0
+                ? t("templates.preview.entriesCount", { count: questions.length })
+                : t("templates.preview.tasksCount", { count: item.tasks.length })}
           </Button>
         )}
       </div>
@@ -282,12 +294,12 @@ const ItemRow: React.FC<{
       )}
       {open && item.tasks.length > 0 && (
         <ul className="ml-7 space-y-1 text-body">
-          {item.tasks.map((t) => (
-            <li key={t.key} className={t.dropped ? "text-tertiary line-through" : ""}>
-              <span>{dueLabel(t.dueKind, t.offsetDays)} · {t.title}</span>
-              <span className="text-tertiary"> — {assigneeLabel(t.assignee)}</span>
-              {t.dropped && t.reason && <span className="block no-underline">{t.reason}</span>}
-              {t.droppedFields.map((f) => <span key={f} className="block text-tertiary">{f}</span>)}
+          {item.tasks.map((task) => (
+            <li key={task.key} className={task.dropped ? "text-tertiary line-through" : ""}>
+              <span>{dueLabel(t, task.dueKind, task.offsetDays)} · {task.title}</span>
+              <span className="text-tertiary"> — {assigneeLabel(t, task.assignee)}</span>
+              {task.dropped && task.reason && <span className="block no-underline">{task.reason}</span>}
+              {task.droppedFields.map((f) => <span key={f} className="block text-tertiary">{f}</span>)}
             </li>
           ))}
         </ul>
@@ -305,6 +317,7 @@ const GrantList: React.FC<{
   disabled: boolean;
   onChange: (selectedKeys: string[]) => void;
 }> = ({ grants, disabled, onChange }) => {
+  const t = useTranslations("settings");
   const selected = new Set(grants.filter((g) => g.selected).map((g) => g.key));
   const toggle = (key: string, on: boolean) => {
     const next = new Set(selected);
@@ -325,14 +338,14 @@ const GrantList: React.FC<{
       />
       <div className="min-w-0">
         <span className={g.dropped ? "text-tertiary line-through" : ""}>
-          {g.label} · {g.action} · {g.scopes.map(scopeLabel).join(", ")}
+          {g.label} · {g.action} · {g.scopes.map((s) => scopeLabel(t, s)).join(", ")}
         </span>
         {g.existingField && (
           <span className="ml-2 text-hint text-tertiary">
-            Existing field · {g.valueCount ?? 0} {g.valueCount === 1 ? "value" : "values"}
+            {t("templates.preview.existingField", { count: g.valueCount ?? 0 })}
           </span>
         )}
-        {g.sensitive && <Badge variant="outline" className="ml-2">Sensitive</Badge>}
+        {g.sensitive && <Badge variant="outline" className="ml-2">{t("templates.sensitive")}</Badge>}
         {g.dropped && g.reason && <span className="block text-hint text-tertiary">{g.reason}</span>}
       </div>
     </li>
@@ -342,13 +355,13 @@ const GrantList: React.FC<{
     <div className="ml-7 grid gap-4 text-body md:grid-cols-2">
       {permissions.length > 0 && (
         <div className="space-y-1">
-          <p className="font-medium">Permissions</p>
+          <p className="font-medium">{t("templates.preview.permissions")}</p>
           <ul className="space-y-1">{permissions.map(row)}</ul>
         </div>
       )}
       {fields.length > 0 && (
         <div className="space-y-1">
-          <p className="font-medium">Field access</p>
+          <p className="font-medium">{t("templates.preview.fieldAccess")}</p>
           <ul className="space-y-1">{fields.map(row)}</ul>
         </div>
       )}
@@ -359,12 +372,13 @@ const GrantList: React.FC<{
 /** After the apply: what was created, as links; what was skipped or dropped, with why. */
 const TemplateResult: React.FC<{ applicationId: string }> = ({ applicationId }) => {
   const { data, error, refetch } = useTemplateApplication(applicationId);
+  const t = useTranslations("settings");
   return (
     <div className="space-y-6 px-8 pb-10">
       <div className="space-y-4">
-        <SettingsPageHeader title={data ? `${data.templateTitle} Applied` : "Template applied"} backHref={BACK}/>
+        <SettingsPageHeader title={data ? t("templates.result.title", { title: data.templateTitle }) : t("templates.result.fallbackTitle")} backHref={BACK}/>
         <PageDescription className="text-body text-tertiary/90">
-          Everything below is an ordinary part of the company now. Change it on its own page.
+          {t("templates.result.description")}
         </PageDescription>
       </div>
       {error ? (
@@ -377,27 +391,28 @@ const TemplateResult: React.FC<{ applicationId: string }> = ({ applicationId }) 
         </ul>
       )}
       <Button asChild variant="secondary">
-        <Link href={BACK} className="no-underline">Back to templates</Link>
+        <Link href={BACK} className="no-underline">{t("templates.result.back")}</Link>
       </Button>
     </div>
   );
 };
 
-const RESULT: Record<TemplateRecordedItem["outcome"], { status: StatusTone; label: string }> = {
-  CREATED: { status: "approved", label: "Created" },
-  EXISTING: { status: "inactive", label: "Already there" },
-  SKIPPED: { status: "inactive", label: "Skipped" },
-  DROPPED: { status: "archived", label: "Dropped" },
-};
+const RESULT = {
+  CREATED: { status: "approved", label: "templates.result.outcome.created" },
+  EXISTING: { status: "inactive", label: "templates.outcome.existing" },
+  SKIPPED: { status: "inactive", label: "templates.result.outcome.skipped" },
+  DROPPED: { status: "archived", label: "templates.outcome.dropped" },
+} as const satisfies Record<TemplateRecordedItem["outcome"], { status: StatusTone; label: string }>;
 
 const ResultRow: React.FC<{ item: TemplateRecordedItem }> = ({ item }) => {
+  const t = useTranslations("settings");
   const href = item.outcome === "CREATED" || item.outcome === "EXISTING" ? linkTo(item) : null;
   return (
     <li className="space-y-1 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         {href ? <Link href={href} className="font-medium">{item.objectName}</Link> : <span className="font-medium">{item.objectName}</span>}
-        <span className="text-hint text-tertiary">{RECORD_TYPE[item.type]}</span>
-        <StatusBadge status={RESULT[item.outcome].status} label={RESULT[item.outcome].label}/>
+        <span className="text-hint text-tertiary">{t(RECORD_TYPE[item.type])}</span>
+        <StatusBadge status={RESULT[item.outcome].status} label={t(RESULT[item.outcome].label)}/>
       </div>
       {item.reason && <p className="text-body text-tertiary">{item.reason}</p>}
       {(item.notes ?? []).map((n) => <p key={n} className="text-body text-tertiary">{n}</p>)}
@@ -405,13 +420,13 @@ const ResultRow: React.FC<{ item: TemplateRecordedItem }> = ({ item }) => {
   );
 };
 
-const RECORD_TYPE: Record<TemplateRecordedItem["type"], string> = {
-  SECTION: "Section",
-  FIELD: "Field",
-  ROLE: "Role",
-  PROCESS: "Checklist",
-  FORM: "Review form",
-};
+const RECORD_TYPE = {
+  SECTION: "templates.type.section",
+  FIELD: "templates.type.field",
+  ROLE: "templates.type.role",
+  PROCESS: "templates.type.checklist",
+  FORM: "templates.type.reviewForm",
+} as const satisfies Record<TemplateRecordedItem["type"], string>;
 
 const linkTo = (item: TemplateRecordedItem): string | null => {
   if (!item.objectId) return null;
@@ -430,43 +445,50 @@ const linkTo = (item: TemplateRecordedItem): string | null => {
   }
 };
 
-const typeLabel = (item: TemplateItemDTO): string => {
+const typeLabel = (t: Translator, item: TemplateItemDTO): string => {
   switch (item.type) {
     case "SECTION":
-      return "Section";
+      return t("templates.type.section");
     case "FIELD":
-      return item.fieldType ? `Field · ${fieldTypeLabel(item.fieldType)}` : "Field";
+      return item.fieldType ? t("templates.type.fieldOf", { type: fieldTypeLabel(t, item.fieldType) }) : t("templates.type.field");
     case "ROLE":
-      return "Role";
+      return t("templates.type.role");
     case "PROCESS":
-      return "Checklist";
+      return t("templates.type.checklist");
     case "FORM":
-      return "Review form";
+      return t("templates.type.reviewForm");
   }
 };
 
-const fieldTypeLabel = (t: string) => t.charAt(0) + t.slice(1).toLowerCase().replace(/_/g, " ");
+/** A code the catalogue has no word for, made readable ("SOME_CODE" → "Some code"). */
+const humanise = (code: string) => code.charAt(0) + code.slice(1).toLowerCase().replace(/_/g, " ");
 
-const scopeLabel = (s: string) => {
+const isAttributeType = (code: string): code is AttributeType =>
+  (Object.values(AttributeType) as string[]).includes(code);
+
+const fieldTypeLabel = (t: Translator, code: string) =>
+  isAttributeType(code) ? t(attributeTypeLabelKey(code)) : humanise(code);
+
+const scopeLabel = (t: Translator, s: string) => {
   switch (s) {
     case "COMPANY":
-      return "Company";
+      return t("templates.scope.company");
     case "DIRECT_REPORTS":
-      return "Direct reports";
+      return t("templates.scope.directReports");
     case "SELF":
-      return "Own";
+      return t("templates.scope.self");
     default:
-      return fieldTypeLabel(s);
+      return humanise(s);
   }
 };
 
-const dueLabel = (dueKind: string, offsetDays: number | null) => {
-  if (dueKind !== "OFFSET" || offsetDays == null) return "Before the start";
-  if (offsetDays === 0) return "Day 1";
-  return offsetDays < 0 ? `${-offsetDays} days before` : `Day ${offsetDays + 1}`;
+const dueLabel = (t: Translator, dueKind: string, offsetDays: number | null) => {
+  if (dueKind !== "OFFSET" || offsetDays == null) return t("templates.due.beforeStart");
+  return offsetDays < 0 ? t("templates.due.daysBefore", { count: -offsetDays }) : t("templates.due.day", { day: offsetDays + 1 });
 };
 
-const assigneeLabel = (a: string) => (a === "TARGET" ? "the new joiner" : a === "ONBOARDING_MANAGER" ? "the onboarding manager" : a);
+const assigneeLabel = (t: Translator, a: string) =>
+  a === "TARGET" ? t("templates.assignee.target") : a === "ONBOARDING_MANAGER" ? t("templates.assignee.onboardingManager") : a;
 
 const PreviewSkeleton: React.FC = () => (
   <ul className="divide-y divide-divider rounded-control border border-divider" aria-busy="true">

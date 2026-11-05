@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -29,8 +30,6 @@ type Props = {
   onClose: () => void;
 };
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
 /**
  * Delete is not Terminate, and the dialog is where that is said.
  *
@@ -42,6 +41,8 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 export const DeleteProfileModal: FC<Props> = ({
   isOpen, userId, fullName, isBusy, error, onTerminateInstead, onConfirm, onClose,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { internalApiClient } = useAppDataContext();
   const { data: impact, isLoading, isError } = useQuery<PersonDeleteImpactDTO>({
     queryKey: ["PERSON_DELETE_IMPACT", userId],
@@ -59,40 +60,46 @@ export const DeleteProfileModal: FC<Props> = ({
     <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open && !isBusy) onClose(); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete profile</AlertDialogTitle>
+          <AlertDialogTitle>{t("profile.header.deleteProfile")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This deletes <strong>{fullName}</strong> and their history, and cannot be undone.
+            {t.rich("profile.delete.description", { name: fullName, b: (chunks) => <strong>{chunks}</strong> })}
             {/* Only while Terminate is on offer: for a person already terminated the advice points at
                 a button that is not there (WALK_QUESTIONS § 17). */}
             {onTerminateInstead
-              ? " If they are leaving, terminate the employment instead: that keeps the record and ends their access."
+              ? <>{" "}{t("profile.delete.terminateHint")}</>
               : null}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {isLoading ? (
-          <p className="m-0 text-body text-tertiary">Checking what is attached to this profile…</p>
+          <p className="m-0 text-body text-tertiary">{t("profile.delete.checking")}</p>
         ) : isError || !impact ? (
-          <p className="m-0 text-body text-tertiary">What is attached to this profile could not be checked.</p>
+          <p className="m-0 text-body text-tertiary">{t("profile.delete.checkFailed")}</p>
         ) : (
           <div className="space-y-2 text-body">
-            <p className="m-0 font-medium">Deleted with the profile</p>
+            <p className="m-0 font-medium">{t("profile.delete.deletedTitle")}</p>
             <ul className="m-0 list-disc space-y-0.5 pl-5 text-tertiary">
-              <li>{plural(impact.timeOffRequests, "leave request", "leave requests")}, {plural(impact.balances, "balance", "balances")} and their history</li>
-              <li>{plural(impact.policyAssignments, "policy assignment", "policy assignments")}, {plural(impact.assignmentRecords, "assignment record", "assignment records")}, {plural(impact.jobHistoryEntries, "job history entry", "job history entries")}</li>
-              <li>{plural(impact.processesDeleted, "preboarding or onboarding process", "preboarding and onboarding processes")} run for them</li>
+              <li>{t("profile.delete.requestsAndBalances", { requests: impact.timeOffRequests, balances: impact.balances })}</li>
+              <li>
+                {t("profile.delete.assignments", {
+                  policyAssignments: impact.policyAssignments,
+                  assignmentRecords: impact.assignmentRecords,
+                  jobHistory: impact.jobHistoryEntries,
+                })}
+              </li>
+              <li>{t("profile.delete.processes", { count: impact.processesDeleted })}</li>
             </ul>
-            <p className="m-0 font-medium">Kept</p>
+            <p className="m-0 font-medium">{t("profile.delete.keptTitle")}</p>
             <ul className="m-0 list-disc space-y-0.5 pl-5 text-tertiary">
-              <li>{plural(impact.documentsToTrash, "document goes", "documents go")} to the trash, not straight to erasure</li>
-              <li>{plural(impact.approvalsSignedForOthers, "approval they signed", "approvals they signed")} in other people&apos;s requests, with their name</li>
-              <li>The journal of what they did</li>
+              <li>{t("profile.delete.documents", { count: impact.documentsToTrash })}</li>
+              <li>{t("profile.delete.approvals", { count: impact.approvalsSignedForOthers })}</li>
+              <li>{t("profile.delete.journal")}</li>
             </ul>
             {impact.directReports > 0 ? (
               <p className="m-0 text-tertiary">
                 {impact.reportsMoveTo
-                  ? <>{plural(impact.directReports, "direct report moves", "direct reports move")} to {impact.reportsMoveTo}.</>
-                  : <>{plural(impact.directReports, "direct report is", "direct reports are")} left without a manager.</>}
+                  ? t("profile.delete.reportsMove", { count: impact.directReports, manager: impact.reportsMoveTo })
+                  : t("profile.delete.reportsLeft", { count: impact.directReports })}
               </p>
             ) : null}
           </div>
@@ -101,10 +108,10 @@ export const DeleteProfileModal: FC<Props> = ({
         <FormError message={refusal ?? error} />
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isBusy}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isBusy}>{tCommon("actions.cancel")}</AlertDialogCancel>
           {onTerminateInstead ? (
             <Button type="button" variant="secondary" disabled={isBusy} onClick={onTerminateInstead}>
-              Terminate instead
+              {t("profile.delete.terminateInstead")}
             </Button>
           ) : null}
           <Button type="button"
@@ -112,7 +119,7 @@ export const DeleteProfileModal: FC<Props> = ({
             disabled={isBusy || isLoading || Boolean(refusal)}
             onClick={onConfirm}
           >
-            {isBusy ? "Deleting…" : "Delete"}
+            {isBusy ? tCommon("actions.deleting") : tCommon("actions.delete")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

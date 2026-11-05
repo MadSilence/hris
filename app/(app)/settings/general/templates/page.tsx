@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import { PageGate } from "@/components/auth/PageGate";
@@ -27,6 +28,7 @@ export default function TemplatesSettingsPage() {
 function TemplatesSettings() {
   const kindParam = useSearchParams().get("kind");
   const kind = KINDS.find((k) => k === kindParam);
+  const t = useTranslations("settings");
 
   return (
     <PageGate
@@ -39,10 +41,9 @@ function TemplatesSettings() {
     >
       <div className="space-y-6 px-8 pb-10">
         <div className="space-y-4">
-          <SettingsPageHeader title="Templates" backHref="/settings"/>
+          <SettingsPageHeader title={t("menu.items.templates")} backHref="/settings"/>
           <PageDescription className="text-body text-tertiary/90">
-            Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would
-            create in your company, adjust it, and apply it as a copy you can change afterwards.
+            {t("templates.description")}
           </PageDescription>
         </div>
         <TemplatesCatalogue kind={kind}/>

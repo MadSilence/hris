@@ -2,22 +2,24 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { Button } from "@/components/desact/button";
+import { getTranslations } from "next-intl/server";
 
 type SettingsImportExportLayoutProps = {
   children: ReactNode;
 };
 
-export default function SettingsImportExportLayout({
+export default async function SettingsImportExportLayout({
   children,
 }: SettingsImportExportLayoutProps) {
+  const t = await getTranslations("settings");
   const tabs = [
-    { id: "import", label: "Import", href: "import" },
-    { id: "export", label: "Export", href: "export" },
+    { id: "import", label: t("importExport.tabs.import"), href: "import" },
+    { id: "export", label: t("importExport.tabs.export"), href: "export" },
   ];
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <SettingsPageHeader title="Import & export" backHref="/settings"/>
+      <SettingsPageHeader title={t("menu.items.importExport")} backHref="/settings"/>
 
       <nav className="pb-5">
         <div className="flex gap-1 border-b border-divider">

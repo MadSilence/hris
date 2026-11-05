@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { Input } from "@/components/desact/input";
 import { cn } from "@/lib/cn";
@@ -27,7 +28,9 @@ export const SearchBox: React.FC<{
   /** Only for a box that is not in a toolbar and has to fit its container. */
   fullWidth?: boolean;
   "aria-label"?: string;
-}> = ({ value, onChange, className, fullWidth = false, "aria-label": ariaLabel = "Search" }) => (
+}> = ({ value, onChange, className, fullWidth = false, "aria-label": ariaLabel }) => {
+  const t = useTranslations("common");
+  return (
   <div className={cn("relative", fullWidth ? "w-full" : "w-[260px]", className)}>
     <Icon icon={Search01Icon} size="sm" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary" />
     <Input
@@ -40,9 +43,10 @@ export const SearchBox: React.FC<{
         }
       }}
       className={cn("h-9 pl-10", fullWidth ? "w-full" : "w-[260px]")}
-      placeholder="Search"
-      aria-label={ariaLabel}
+      placeholder={t("actions.search")}
+      aria-label={ariaLabel ?? t("actions.search")}
       inputMode="search"
     />
   </div>
-);
+  );
+};

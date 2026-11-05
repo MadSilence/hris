@@ -1,5 +1,8 @@
 import { approvalStepLine } from "./TimeOffDecisionContainer";
 import type { TimeOffApprovalStepDTO } from "@/api/modules/timeOff/timeOffRequests/dto";
+import { translatorFor } from "@/test/nextIntl";
+
+const t = translatorFor("timeOff") as unknown as Parameters<typeof approvalStepLine>[1];
 
 const step = (over: Partial<TimeOffApprovalStepDTO>): TimeOffApprovalStepDTO => ({
   approvalOrder: 1,
@@ -23,12 +26,12 @@ const step = (over: Partial<TimeOffApprovalStepDTO>): TimeOffApprovalStepDTO => 
 describe("approvalStepLine", () => {
   it("Asked: Anna · Answered by Maria on behalf of Anna", () => {
     expect(
-      approvalStepLine(step({ signed: true, decidedByName: "Maria Delegate", via: "DELEGATE", onBehalfOfName: "Anna Approver" })),
+      approvalStepLine(step({ signed: true, decidedByName: "Maria Delegate", via: "DELEGATE", onBehalfOfName: "Anna Approver" }), t),
     ).toEqual({ asked: "Anna Approver", answered: "Maria Delegate on behalf of Anna Approver" });
   });
 
   it("keeps who was originally asked when the step was reassigned", () => {
-    expect(approvalStepLine(step({ reassignedToName: "Erin Successor" })).asked).toBe(
+    expect(approvalStepLine(step({ reassignedToName: "Erin Successor" }), t).asked).toBe(
       "Anna Approver, reassigned to Erin Successor",
     );
   });
@@ -44,16 +47,17 @@ describe("approvalStepLine", () => {
         decidedByName: "Helen Hr",
         via: "FALLBACK",
       }),
+      t,
     );
     expect(line).toEqual({ asked: "the HR Admin role", answered: "Helen Hr, as the fallback" });
   });
 
   it("a step closed by Approve anyway names the administrator who decided over it", () => {
-    const line = approvalStepLine(step({ signed: true, decidedByName: "Ada Admin", via: "OVERRIDE" }));
+    const line = approvalStepLine(step({ signed: true, decidedByName: "Ada Admin", via: "OVERRIDE" }), t);
     expect(line.answered).toBe("Ada Admin, approving anyway");
   });
 
   it("an open step has no answer yet", () => {
-    expect(approvalStepLine(step({})).answered).toBeNull();
+    expect(approvalStepLine(step({}), t).answered).toBeNull();
   });
 });

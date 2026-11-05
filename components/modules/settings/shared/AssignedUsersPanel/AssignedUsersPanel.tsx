@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { Button } from "@/components/desact/button";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -20,7 +21,7 @@ import { ForbiddenError } from "@/components/clients/exceptions";
 import type { AccessAction, ResourceCode } from "@/models/access";
 import type { AssignedUser } from "@/models/assignedUser";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
-import { AssignPeopleModal } from "@/components/audience/assignment/AssignPeopleModal";
+import { AssignPeopleModal, type AssignTargetKind } from "@/components/audience/assignment/AssignPeopleModal";
 import { assignedUsersQueryKey } from "@/components/audience/assignment/hooks/useAssignedUsers";
 import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -70,7 +71,7 @@ export interface AssignedUsersPanelProps {
     basePath: string;
     assignableId: string;
     assignableName?: string;
-    noun: string;
+    kind: AssignTargetKind;
     semantics?: "add" | "replace";
     invalidateKeys?: QueryKey[];
   };
@@ -79,7 +80,7 @@ export interface AssignedUsersPanelProps {
 const SCROLL_OFFSET = "calc(100svh - 390px)";
 
 export default function AssignedUsersPanel({
-  title = "Assigned people",
+  title,
   description,
   manageResource,
   manageAction = "EDIT",
@@ -99,8 +100,10 @@ export default function AssignedUsersPanel({
   fillParent = false,
   isArchived = false,
 }: AssignedUsersPanelProps) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const secondary = secondaryColumn ?? {
-    header: "Position",
+    header: t("shared.assignedPanel.position"),
     render: (u: AssignedUser) => u.jobName,
   };
   const queryClient = useQueryClient();
@@ -158,10 +161,10 @@ export default function AssignedUsersPanel({
       className="gap-1.5"
       onClick={() => setAssignOpen(true)}
       disabled={!assign || isArchived}
-      title={isArchived ? "This record is archived, so nobody new can be assigned to it." : undefined}
+      title={isArchived ? t("shared.assignedPanel.archived") : undefined}
     >
       <Icon icon={Add01Icon} size="sm" />
-      Assign
+      {t("shared.assignedPanel.assign")}
     </Button>
   );
 
@@ -178,12 +181,12 @@ export default function AssignedUsersPanel({
   const infoBlock = (
     <div className="flex-none space-y-1 pt-2 pb-1">
       <h2 className="text-section-title text-primary">
-        {title}
+        {title ?? t("shared.assignedPanel.title")}
         {error ? null : <span className="font-normal text-tertiary"> ({total ?? rows.length})</span>}
       </h2>
       <p className="text-body text-tertiary">{description}</p>
       {limited && !error ? (
-        <p className="text-hint text-tertiary">Only the people your access covers are listed.</p>
+        <p className="text-hint text-tertiary">{t("shared.assignedPanel.limited")}</p>
       ) : null}
     </div>
   );
@@ -229,7 +232,7 @@ export default function AssignedUsersPanel({
             <Button type="button"
               size="icon"
               variant="secondary"
-              aria-label="Export"
+              aria-label={tCommon("actions.export")}
               onClick={onExport}
             >
               <Icon icon={Download01Icon} size="sm" />
@@ -247,15 +250,15 @@ export default function AssignedUsersPanel({
           <ListEmptyState
             query={searching ? q : ""}
             scene="team-and-org"
-            title={limited && (total ?? 0) > 0 ? "No one you can see" : "No people assigned yet"}
+            title={limited && (total ?? 0) > 0 ? t("shared.assignedPanel.emptyHiddenTitle") : t("shared.assignedPanel.emptyTitle")}
             description={limited && (total ?? 0) > 0
-              ? "People are assigned here, but none of them is someone your access covers."
-              : "Assign people to this record to see them here."}
-            noResultsHint="Try a different name or position."
+              ? t("shared.assignedPanel.emptyHiddenDescription")
+              : t("shared.assignedPanel.emptyDescription")}
+            noResultsHint={t("shared.assignedPanel.noResultsHint")}
             /* An archived record takes no new people, so the block is a panel rather than a
                button — a control that cannot work is not offered. */
             onCreate={assign && !isArchived ? () => setAssignOpen(true) : undefined}
-            createLabel="Assign people"
+            createLabel={t("shared.assignedPanel.assignPeople")}
             className={emptyClass}
           />
         </div>
@@ -264,9 +267,9 @@ export default function AssignedUsersPanel({
           <table className="w-full caption-bottom text-body table-fixed">
             <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
               <TableRow>
-                <TableHead className="pl-4">User</TableHead>
+                <TableHead className="pl-4">{t("shared.assignedPanel.user")}</TableHead>
                 <TableHead>{secondary.header}</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{tCommon("fields.status")}</TableHead>
                 {canRemove ? <TableHead className="w-10"/> : null}
               </TableRow>
             </TableHeader>
@@ -342,7 +345,7 @@ export default function AssignedUsersPanel({
           {hasMore ? (
             <div className="flex justify-center py-3">
               <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
-                {isLoadingMore ? "Loading…" : "Load more"}
+                {isLoadingMore ? tCommon("states.loading") : t("shared.assignedPanel.loadMore")}
               </Button>
             </div>
           ) : null}
@@ -356,7 +359,7 @@ export default function AssignedUsersPanel({
           basePath={assign.basePath}
           assignableId={assign.assignableId}
           assignableName={assign.assignableName}
-          noun={assign.noun}
+          kind={assign.kind}
           semantics={assign.semantics ?? "replace"}
           invalidateKeys={assign.invalidateKeys}
         />
@@ -364,9 +367,13 @@ export default function AssignedUsersPanel({
 
       <ConfirmActionModal
         isOpen={removeTarget !== null}
-        title="Unassign person"
-        description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be assigned here. They keep their account and everything else.`}
-        confirmLabel="Unassign"
+        title={t("shared.assignedPanel.unassignTitle")}
+        description={removeTarget
+          ? t("shared.assignedPanel.unassignBody", {
+              name: `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email,
+            })
+          : t("shared.assignedPanel.unassignBodyUnnamed")}
+        confirmLabel={t("shared.assignedPanel.unassign")}
         destructive
         isLoading={removingId === removeTarget?.id}
         onConfirmAction={confirmRemove}
@@ -385,12 +392,13 @@ function RemoveButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations("settings");
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={`Unassign ${name}`}
+      aria-label={t("shared.assignedPanel.unassignNamed", { name })}
       className="inline-flex h-7 w-7 items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text disabled:opacity-50"
     >
       <Icon icon={Cancel01Icon} size="sm" />

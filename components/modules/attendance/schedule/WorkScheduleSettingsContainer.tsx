@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Label } from "@/components/desact/label";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -15,29 +16,30 @@ import { WorkSchedulePanel } from "./WorkSchedulePanel";
  * than timesheets.
  */
 export const WorkScheduleSettingsContainer: React.FC = () => {
+  const t = useTranslations("attendance");
   const [person, setPerson] = useState<PickedUser | null>(null);
   const capabilities = useAttendanceCapabilities(person?.id ?? null);
 
   return (
     <div className="space-y-6">
       <div className="w-80 space-y-1">
-        <Label htmlFor="work-schedule-person">Person</Label>
+        <Label htmlFor="work-schedule-person">{t("schedule.settings.person")}</Label>
         <UserPickerField id="work-schedule-person" value={person} onChange={setPerson}/>
       </div>
 
       {!person ? (
         <EmptyState
           scene="attendance"
-          title="Choose a person"
-          description="Their work schedules appear here: the hours per weekday, and the date each one starts."
+          title={t("schedule.settings.chooseTitle")}
+          description={t("schedule.settings.chooseDescription")}
         />
       ) : capabilities.error ? (
         <ErrorState error={capabilities.error} compact onRetry={() => void capabilities.refetch()}/>
       ) : capabilities.data && !capabilities.data.canViewSchedule ? (
         <EmptyState
           scene="attendance"
-          title="Not available to you"
-          description="Your access does not include this person's employment details."
+          title={t("schedule.settings.unavailableTitle")}
+          description={t("schedule.settings.unavailableDescription")}
         />
       ) : capabilities.data ? (
         <WorkSchedulePanel userId={person.id} canEdit={capabilities.data.canEditSchedule}/>

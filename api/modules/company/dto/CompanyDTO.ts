@@ -16,6 +16,7 @@ export type CompanySettingsDTO = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  language: string;
   dailyNormMinutes?: number;
   attendanceRateAttributeId?: string | null;
   /** The DATE field home reads birthdays from. Null: no birthdays on home. */
@@ -36,6 +37,8 @@ export type UpdateCompanySettingsRequest = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  /** A `Language` code. Left out, the stored language stays — the attendance forms do not carry it. */
+  language?: string | null;
   /** Minutes in a company working day. Left out, the stored value stays — the Company form does not carry it. */
   dailyNormMinutes?: number | null;
   /**

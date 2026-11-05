@@ -2,6 +2,7 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Copy01Icon, Delete02Icon, Download01Icon, DragDropVerticalIcon, PencilEdit02Icon, SquareLock02Icon, Tick02Icon, UnfoldLessIcon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -36,7 +37,7 @@ import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute";
 import { sortBySortOrder } from "@/components/modules/settings/modules/attributes/hooks/utils/useReorderAction";
-import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
+import { attributeTypeLabelKey } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import { AttributeTypeChip } from "@/components/modules/settings/modules/attributes/components/AttributeTypeChip/AttributeTypeChip";
 import { ExportDataModal } from "@/components/modules/settings/shared/ExportDataModal/ExportDataModal";
 import { SearchBox } from "@/components/ui/SearchBox";
@@ -69,7 +70,9 @@ const GRID =
 const DROP_PREFIX = "dropzone:";
 
 /** Compact summary of the most important type-specific settings, shown in the Details column. */
-function attributeDetails(a: Attribute): string {
+type DetailsTranslator = ReturnType<typeof useTranslations<"settings.attributes.details">>;
+
+function attributeDetails(a: Attribute, t: DetailsTranslator): string {
   const x = a as unknown as Record<string, unknown>;
   const parts: string[] = [];
 
@@ -92,40 +95,40 @@ function attributeDetails(a: Attribute): string {
     case AttributeType.NUMBER: {
       const r = range(x.minValue, x.maxValue, asIs);
       if (r) parts.push(r);
-      if (x.onlyPositive) parts.push("positive");
-      if (x.decScale === 0) parts.push("integer");
-      else if (typeof x.decScale === "number" && x.decScale > 0) parts.push(`${x.decScale} dp`);
+      if (x.onlyPositive) parts.push(t("positive"));
+      if (x.decScale === 0) parts.push(t("integer"));
+      else if (typeof x.decScale === "number" && x.decScale > 0) parts.push(t("decimalPlaces", { count: x.decScale }));
       break;
     }
     case AttributeType.TEXT:
     case AttributeType.EMAIL:
     case AttributeType.URL: {
-      if (x.isUnique) parts.push("Unique");
+      if (x.isUnique) parts.push(t("unique"));
       const r = range(x.minLength, x.maxLength, asIs);
-      if (r) parts.push(`${r} chars`);
-      if (x.regex) parts.push("pattern");
+      if (r) parts.push(t("chars", { range: r }));
+      if (x.regex) parts.push(t("pattern"));
       break;
     }
     case AttributeType.LONG_TEXT: {
       const r = range(x.minLength, x.maxLength, asIs);
-      if (r) parts.push(`${r} chars`);
+      if (r) parts.push(t("chars", { range: r }));
       break;
     }
     case AttributeType.PHONE: {
-      if (x.isUnique) parts.push("Unique");
+      if (x.isUnique) parts.push(t("unique"));
       break;
     }
     case AttributeType.COUNTRY:
-      parts.push("Country list");
+      parts.push(t("countryList"));
       break;
     case AttributeType.LANGUAGE:
-      parts.push("Language list");
+      parts.push(t("languageList"));
       break;
     case AttributeType.TIMEZONE:
-      parts.push("Timezone list");
+      parts.push(t("timezoneList"));
       break;
     case AttributeType.CURRENCY:
-      parts.push("Currency list");
+      parts.push(t("currencyList"));
       break;
     case AttributeType.OBJECT: {
       let count = 0;
@@ -135,31 +138,31 @@ function attributeDetails(a: Attribute): string {
       } catch {
         count = 0;
       }
-      parts.push(`${count} field${count === 1 ? "" : "s"}`);
+      parts.push(t("fields", { count }));
       break;
     }
     case AttributeType.ADDRESS:
-      parts.push("Address");
+      parts.push(t("address"));
       break;
     case AttributeType.MONEY:
-      parts.push("Amount + currency");
+      parts.push(t("amountCurrency"));
       break;
     case AttributeType.DATE: {
       const r = range(x.minDate, x.maxDate, asYear);
       if (r) parts.push(r);
-      if (x.dateHideYear) parts.push("hide year");
+      if (x.dateHideYear) parts.push(t("hideYear"));
       break;
     }
     case AttributeType.SELECT: {
       const n = optionCount();
-      parts.push(`${n} option${n === 1 ? "" : "s"}`);
+      parts.push(t("options", { count: n }));
       break;
     }
     case AttributeType.MULTI_SELECT: {
       const n = optionCount();
-      parts.push(`${n} option${n === 1 ? "" : "s"}`);
+      parts.push(t("options", { count: n }));
       const sel = range(x.minSelect, x.maxSelect, asIs);
-      if (sel) parts.push(`${sel} selected`);
+      if (sel) parts.push(t("selected", { range: sel }));
       break;
     }
     default:
@@ -192,6 +195,9 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
   onReorderAttributes,
   onMoveAttribute,
 }) => {
+  const t = useTranslations("settings.attributes.list");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const propGroups = groups ?? [];
 
   const [query, setQuery] = useState("");
@@ -208,7 +214,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
       setExportError(null);
       setIsExportOpen(false);
     } catch (error) {
-      setExportError(error instanceof Error ? error.message : "Export failed");
+      setExportError(error instanceof Error ? error.message : t("exportFailed"));
     }
   };
 
@@ -260,7 +266,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
           : (group.attributes ?? []).filter(
               (attr) =>
                 attr.name.toLowerCase().includes(needle) ||
-                getAttributeTypeLabel(attr.type).toLowerCase().includes(needle),
+                tSettings(attributeTypeLabelKey(attr.type)).toLowerCase().includes(needle),
             );
 
         return { ...group, attributes };
@@ -270,7 +276,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
           group.name.toLowerCase().includes(needle) ||
           (group.attributes?.length ?? 0) > 0,
       );
-  }, [localGroups, needle]);
+  }, [localGroups, needle, tSettings]);
 
   const allOpen = display.length > 0 && openIds.length >= display.length;
   const toggleAll = () => setOpenIds(allOpen ? [] : display.map((g) => g.id));
@@ -424,14 +430,14 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
             disabled={display.length === 0}
           >
             {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-            {allOpen ? "Collapse all" : "Expand all"}
+            {allOpen ? t("collapseAll") : t("expandAll")}
           </Button>
 
           {/* A section with its fields, ready-made (TEMPLATES_DESIGN.md § 4.3): the field sets of the catalogue. */}
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
             <Button asChild variant="secondary">
               <Link href="/settings/general/templates?kind=FIELD_SET" className="no-underline">
-                Add from library
+                {t("addFromLibrary")}
               </Link>
             </Button>
           </PermissionGate>
@@ -439,7 +445,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onCreateGroup}>
               <Icon icon={Add01Icon} size="sm" />
-              Add section
+              {t("addSection")}
             </Button>
           </PermissionGate>
 
@@ -447,7 +453,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
             size="icon"
             variant="secondary"
             onClick={() => setIsExportOpen(true)}
-            aria-label="Export attributes"
+            aria-label={t("export")}
           >
             <Icon icon={Download01Icon} size="sm" />
           </Button>
@@ -459,9 +465,9 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
         {/* Column header lives inside the scroll box (same width context as the rows → aligned)
             and sticks to the top so it stays visible while the list scrolls. */}
         <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
-          <div>Name</div>
-          <div>Type</div>
-          <div>Details</div>
+          <div>{tCommon("fields.name")}</div>
+          <div>{tCommon("fields.type")}</div>
+          <div>{t("details")}</div>
           <div/>
         </div>
 
@@ -528,9 +534,9 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title="Export attributes"
-        description="Export all sections and their attributes."
-        includedText="Includes every section with its attributes, types, validation settings, and option sets."
+        title={t("export")}
+        description={t("exportDescription")}
+        includedText={t("exportIncluded")}
         errorMessage={exportError}
         onCancelAction={() => {
           setExportError(null);
@@ -571,6 +577,8 @@ const SortableGroup: FC<SortableGroupProps> = ({
   onDeleteAttribute,
   isSavingAttribute,
 }) => {
+  const t = useTranslations("settings.attributes.list");
+  const tCommon = useTranslations("common");
   const attributes = group.attributes ?? [];
   const description = group.description?.trim();
 
@@ -605,7 +613,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
               {...(dndEnabled ? listeners : {})}
               onClick={(e) => e.stopPropagation()}
               className={`inline-flex ${dndEnabled ? "cursor-grab" : "cursor-default"}`}
-              aria-label="Drag to reorder section"
+              aria-label={t("dragSection")}
             >
               <Icon icon={DragDropVerticalIcon} size="sm" className="shrink-0 text-disabled" />
             </span>
@@ -615,7 +623,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
             </span>
             {group.isSystem ? (
               <Badge variant="neutral" className="font-normal normal-case">
-                System
+                {t("system")}
               </Badge>
             ) : null}
           </span>
@@ -634,9 +642,9 @@ const SortableGroup: FC<SortableGroupProps> = ({
               {/* Section rename/delete live behind the edit affordance now. Preset sections ship with
                   the product, so the menu is disabled rather than failing on save. */}
               <RowActionsMenu
-                label="Section actions"
+                label={t("sectionActions")}
                 disabled={group.isSystem}
-                title={group.isSystem ? "System sections can't be edited or deleted" : undefined}
+                title={group.isSystem ? t("systemSectionLocked") : undefined}
                 stopPropagation
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
@@ -645,7 +653,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                     icon={<Icon icon={PencilEdit02Icon} size="sm" />}
                     onClick={() => onRenameGroup(group)}
                   >
-                    Edit
+                    {tCommon("actions.edit")}
                   </RowAction>
                 </PermissionGate>
 
@@ -654,7 +662,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                     icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteGroup(group)}
                   >
-                    Delete
+                    {tCommon("actions.delete")}
                   </RowActionDestructive>
                 </PermissionGate>
               </RowActionsMenu>
@@ -663,8 +671,8 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-secondary hover:bg-mist"
-                aria-label="Done editing section"
-                title="Done"
+                aria-label={t("doneEditingSection")}
+                title={tCommon("actions.done")}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleEditing();
@@ -678,8 +686,8 @@ const SortableGroup: FC<SortableGroupProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-secondary hover:bg-mist"
-                aria-label="Edit section"
-                title="Edit section"
+                aria-label={t("editSection")}
+                title={t("editSection")}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleEditing();
@@ -729,7 +737,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                   onClick={handleCreateAttribute}
                 >
                   <Icon icon={Add01Icon} size="sm" />
-                  Add attribute
+                  {t("addAttribute")}
                 </button>
               </PermissionGate>
 
@@ -764,8 +772,11 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
   onDeleteAttribute,
   isSavingAttribute,
 }) => {
+  const t = useTranslations("settings.attributes.list");
+  const tDetails = useTranslations("settings.attributes.details");
+  const tCommon = useTranslations("common");
   const isPreset = !!attribute.isSystem;
-  const details = attributeDetails(attribute);
+  const details = attributeDetails(attribute, tDetails);
 
   const { setNodeRef, attributes: dragAttrs, listeners, transform, transition, isDragging } =
     useSortable({ id: attribute.id, disabled: !dndEnabled });
@@ -784,7 +795,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             {...(dndEnabled ? dragAttrs : {})}
             {...(dndEnabled ? listeners : {})}
             className={`inline-flex ${dndEnabled ? "cursor-grab" : "cursor-default"}`}
-            aria-label="Drag to reorder attribute"
+            aria-label={t("dragAttribute")}
           >
             <Icon icon={DragDropVerticalIcon} size="sm" className="shrink-0 text-disabled" />
           </span>
@@ -792,23 +803,23 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             {attribute.name}
           </span>
           {attribute.required && (
-            <span className="shrink-0 text-danger-text" title="Required" aria-label="Required">
+            <span className="shrink-0 text-danger-text" title={tCommon("fields.required")} aria-label={tCommon("fields.required")}>
               *
             </span>
           )}
           {isPreset && (
             <Badge variant="neutral" className="shrink-0 font-normal">
-              System
+              {t("system")}
             </Badge>
           )}
           {attribute.sensitive && (
             <Badge
               variant="neutral"
               className="shrink-0"
-              title="Access isn't granted automatically; people without it see a placeholder"
+              title={t("sensitiveTitle")}
             >
               <Icon icon={SquareLock02Icon} size="sm" />
-              Sensitive
+              {t("sensitive")}
             </Badge>
           )}
         </div>
@@ -830,23 +841,23 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
               ]}
             >
               <RowActionsMenu
-                label="Attribute actions"
+                label={t("attributeActions")}
                 disabled={isPreset || isSavingAttribute}
-                title={isPreset ? "System attributes can't be edited" : undefined}
+                title={isPreset ? t("systemAttributeLocked") : undefined}
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
                   <RowAction
                     icon={<Icon icon={PencilEdit02Icon} size="sm" />}
                     onClick={() => onEditAttribute(attribute)}
                   >
-                    Edit
+                    {tCommon("actions.edit")}
                   </RowAction>
 
                   <RowAction
                     icon={<Icon icon={Copy01Icon} size="sm" />}
                     onClick={() => onDuplicateAttribute(attribute)}
                   >
-                    Duplicate
+                    {tCommon("actions.duplicate")}
                   </RowAction>
                 </PermissionGate>
 
@@ -855,7 +866,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
                     icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteAttribute(attribute)}
                   >
-                    Delete
+                    {tCommon("actions.delete")}
                   </RowActionDestructive>
                 </PermissionGate>
               </RowActionsMenu>

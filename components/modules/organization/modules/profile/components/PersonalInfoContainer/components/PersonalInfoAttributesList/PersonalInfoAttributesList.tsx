@@ -1,5 +1,6 @@
 import * as React from "react";
 import { forwardRef } from "react";
+import { useTranslations } from "next-intl";
 import { AttributeGroup } from "@/models/attribute/AttributeGroup";
 import {
   isEmptyValue,
@@ -57,6 +58,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
+    const t = useTranslations("organization");
     return (
       <section ref={ref} className="relative h-full min-h-0 overflow-y-auto pr-1">
         {/*
@@ -109,7 +111,7 @@ export const PersonalInfoAttributesList = forwardRef<HTMLDivElement, Props>(
                     ))}
                 </div>
               ) : (
-                <div className="py-4 text-body text-tertiary">No attributes</div>
+                <div className="py-4 text-body text-tertiary">{t("profile.fields.noAttributes")}</div>
               )}
             </ProfileSectionCard>
           </div>

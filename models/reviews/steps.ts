@@ -3,6 +3,7 @@
  * approving a manager review. Where each one's page is, and the check a nomination passes before it is sent.
  */
 import type { Nomination, ReviewStepKind } from "./index";
+import type { ReviewsT } from "./i18n";
 
 /** Where a step's page is: its Tasks row and My Reviews both lead there. */
 export function stepHref(kind: ReviewStepKind, participantId: string): string {
@@ -16,23 +17,27 @@ export function stepHref(kind: ReviewStepKind, participantId: string): string {
   }
 }
 
-export const REVIEW_STEP_LABELS: Record<ReviewStepKind, string> = {
-  NOMINATE_PEERS: "Nominate peers",
-  APPROVE_PEERS: "Approve peers",
-  APPROVE_REVIEW: "Approve review",
-};
+export const REVIEW_STEP_KEYS = {
+  NOMINATE_PEERS: "steps.nominatePeers",
+  APPROVE_PEERS: "steps.approvePeers",
+  APPROVE_REVIEW: "steps.approveReview",
+} as const satisfies Record<ReviewStepKind, string>;
 
 /**
  * Whether a nomination of these peers can be sent: within the least and the most, never the person or their manager.
  * Returns the reason it cannot, or null. The server checks the same.
  */
-export function nominationProblem(picked: string[], nomination: Pick<Nomination, "peerMin" | "peerMax" | "excluded">): string | null {
+export function nominationProblem(
+  picked: string[],
+  nomination: Pick<Nomination, "peerMin" | "peerMax" | "excluded">,
+  t: ReviewsT,
+): string | null {
   const unique = Array.from(new Set(picked));
-  if (unique.some((id) => nomination.excluded.includes(id))) return "Neither the person nor their manager can be chosen.";
+  if (unique.some((id) => nomination.excluded.includes(id))) return t("nomination.problem.excluded");
   if (unique.length < nomination.peerMin || unique.length > nomination.peerMax) {
     return nomination.peerMin === nomination.peerMax
-      ? `Choose ${nomination.peerMin} ${nomination.peerMin === 1 ? "peer" : "peers"}.`
-      : `Choose between ${nomination.peerMin} and ${nomination.peerMax} peers.`;
+      ? t("nomination.problem.exactly", { count: nomination.peerMin })
+      : t("nomination.problem.between", { min: nomination.peerMin, max: nomination.peerMax });
   }
   return null;
 }

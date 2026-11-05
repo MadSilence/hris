@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   Dialog,
@@ -45,6 +46,7 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
   onCreateBlankAction,
   onCreateFromTemplateAction,
 }) => {
+  const t = useTranslations("settings");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -92,10 +94,9 @@ export const AddRoleModal: FC<AddRoleModalProps> = ({
       >
         <DialogContent hideClose className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add new role</DialogTitle>
+            <DialogTitle>{t("roles.add.title")}</DialogTitle>
             <DialogDescription>
-              Create a new role from scratch or start from a template and adjust
-              it later.
+              {t("roles.add.description")}
             </DialogDescription>
           </DialogHeader>
 

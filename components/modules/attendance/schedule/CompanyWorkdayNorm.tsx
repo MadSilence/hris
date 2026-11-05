@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
@@ -26,6 +27,8 @@ const DEFAULT_NORM = 480;
  * settings, edited here, beside the personal schedules that override it.
  */
 export const CompanyWorkdayNorm: React.FC = () => {
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const settings = useCompanySettings();
   const update = useUpdateCompanySettings();
   const invalidateAttendance = useInvalidateAttendance();
@@ -45,7 +48,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
   const save = async () => {
     if (!settings.data) return;
     if (parsed === null || parsed < 1 || parsed > 24 * 60) {
-      setError("Enter the length of a working day as 8:00 or 7.5, up to 24:00.");
+      setError(t("workday.invalid"));
       return;
     }
     setError(null);
@@ -59,7 +62,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
       });
       setDraft(null);
       void invalidateAttendance();
-      showSuccess("Working day saved.");
+      showSuccess(t("workday.saved"));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : messageForError(caught));
     }
@@ -68,11 +71,8 @@ export const CompanyWorkdayNorm: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="company-workday-heading">
       <div>
-        <h2 id="company-workday-heading" className="text-section-title">Working day</h2>
-        <p className="text-body text-tertiary">
-          How long a company working day is. Attendance expects it of everybody without a personal schedule;
-          anything logged beyond it is overtime.
-        </p>
+        <h2 id="company-workday-heading" className="text-section-title">{t("workday.title")}</h2>
+        <p className="text-body text-tertiary">{t("workday.description")}</p>
       </div>
 
       {settings.isLoading ? (
@@ -87,7 +87,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
           }}
  >
           <div className="w-32 space-y-1">
-            <Label htmlFor="company-workday-length">Length</Label>
+            <Label htmlFor="company-workday-length">{t("workday.length")}</Label>
             <Input
               id="company-workday-length"
               className="tabular-nums"
@@ -101,7 +101,7 @@ export const CompanyWorkdayNorm: React.FC = () => {
           </div>
           {canEdit && (
             <Button type="submit" disabled={!dirty || update.isPending} >
-              Save
+              {tCommon("actions.save")}
             </Button>
           )}
         </form>

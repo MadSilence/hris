@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { NodRing } from "@/components/desact/nod";
 
@@ -62,14 +63,9 @@ type Props = {
   onApplied: () => void;
 };
 
-const OP_LABELS: Record<BulkOperation, string> = {
-  SET: "Set",
-  CLEAR: "Clear",
-  ADD: "Add",
-  REMOVE: "Remove",
-};
-
 export default function BulkEditModal({ isOpen, onClose, target, count, fields, onApplied }: Props) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { access } = useAccess();
   const editableFields = useMemo(
     () =>
@@ -77,8 +73,9 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
         fields,
         (r: ResourceCode) => canAccess({ access, resource: r, action: "EDIT" }),
         (r: ResourceCode) => canAccess({ access, resource: r, action: "MANAGE" }),
+        t,
       ),
-    [fields, access],
+    [fields, access, t],
   );
 
   const [fieldKey, setFieldKey] = useState<string>("");
@@ -179,23 +176,21 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
   const fullName = (b: { firstName?: string | null; lastName?: string | null; email: string }) =>
     `${b.firstName ?? ""} ${b.lastName ?? ""}`.trim() || b.email;
 
-  const targetLabel = count == null ? "all people matching the current filters" : `${count} ${count === 1 ? "person" : "people"}`;
+  const targetLabel = count == null ? t("bulkEdit.targetAll") : tCommon("people.count", { count });
   const busy = bulkEdit.isPending || !!jobId;
 
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit people</DialogTitle>
-          <DialogDescription>Apply a change to {targetLabel}.</DialogDescription>
+          <DialogTitle>{t("bulkEdit.title")}</DialogTitle>
+          <DialogDescription>{t("bulkEdit.description", { target: targetLabel })}</DialogDescription>
         </DialogHeader>
 
         {outOfScope ? (
           <div className="flex flex-col gap-3 py-1">
             <p className="text-body">
-              {outOfScope.blocked?.length}{" "}
-              {outOfScope.blocked?.length === 1 ? "person is" : "people are"} outside your access
-              scope and will not be changed.
+              {t("bulkEdit.outOfScope", { count: outOfScope.blocked?.length ?? 0 })}
             </p>
 
             <div className="max-h-56 overflow-y-auto rounded-control border border-divider">
@@ -208,7 +203,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
                         <div className="text-hint text-tertiary">{b.email}</div>
                       </td>
                       <td className="px-3 py-2 text-right text-hint text-tertiary">
-                        Outside your access
+                        {t("bulkEdit.outsideAccess")}
                       </td>
                     </tr>
                   ))}
@@ -219,20 +214,25 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
         ) : jobId ? (
           <div className="flex items-center gap-3 py-6 text-body text-tertiary">
             <NodRing size="sm" label="" />
-            Applying… {job.data ? `(${job.data.summary?.created ?? 0}/${job.data.summary?.total ?? "?"})` : ""}
+            {job.data
+              ? t("bulkEdit.applyingProgress", {
+                  done: job.data.summary?.created ?? 0,
+                  total: job.data.summary?.total ?? "?",
+                })
+              : t("bulkEdit.applying")}
           </div>
         ) : (
           <div className="flex flex-col gap-3 py-1">
             {/* Field */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-hint font-medium text-tertiary">Field</span>
+              <span className="text-hint font-medium text-tertiary">{t("bulkEdit.field")}</span>
               <SearchableSelect
                 className="h-9"
-                aria-label="Field"
+                aria-label={t("bulkEdit.field")}
                 options={editableFields.map((f) => ({ value: f.key, label: f.label }))}
                 value={fieldKey || null}
                 onChange={(v) => setFieldKey(v ?? "")}
-                placeholder="Select a field"
+                placeholder={t("bulkEdit.selectField")}
                 clearable={false}
               />
             </div>
@@ -240,7 +240,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             {/* Operation (when more than one) */}
             {field && field.operations.length > 1 ? (
               <div className="flex flex-col gap-1.5">
-                <span className="text-hint font-medium text-tertiary">Action</span>
+                <span className="text-hint font-medium text-tertiary">{t("bulkEdit.action")}</span>
                 <Select value={operation} onValueChange={(v) => setOperation(v as BulkOperation)}>
                   <SelectTrigger className="h-9">
                     <SelectValue />
@@ -248,7 +248,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
                   <SelectContent>
                     {field.operations.map((op) => (
                       <SelectItem key={op} value={op}>
-                        {OP_LABELS[op]}
+                        {t(`bulkEdit.operation.${op}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -259,7 +259,7 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             {/* Value */}
             {field && !isClear ? (
               <div className="flex flex-col gap-1.5">
-                <span className="text-hint font-medium text-tertiary">Value</span>
+                <span className="text-hint font-medium text-tertiary">{t("bulkEdit.value")}</span>
                 <ValueEditor
                   field={field}
                   single={single}
@@ -274,8 +274,11 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
 
             {isStatus && confirming ? (
               <InlineAlert tone="pending" icon={Alert02Icon}>
-                This changes the status of {targetLabel} to{" "}
-                <b>{formatUserStatus(single)}</b>. Click Confirm to proceed.
+                {t.rich("bulkEdit.confirmStatus", {
+                  target: targetLabel,
+                  status: formatUserStatus(tCommon, single),
+                  b: (chunks) => <b>{chunks}</b>,
+                })}
               </InlineAlert>
             ) : null}
 
@@ -288,21 +291,25 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
             <>
               {/* Back to the selection, rather than a dead end. */}
               <Button type="button" variant="ghost" onClick={() => setOutOfScope(null)} disabled={bulkEdit.isPending}>
-                Back to selection
+                {t("bulkEdit.backToSelection")}
               </Button>
               <Button type="button" onClick={() => doSubmit(true)} disabled={bulkEdit.isPending || !outOfScope.allowedCount}>
                 {bulkEdit.isPending
-                  ? "Applying…"
-                  : `Apply to ${outOfScope.allowedCount} allowed`}
+                  ? t("bulkEdit.applying")
+                  : t("bulkEdit.applyAllowed", { count: outOfScope.allowedCount ?? 0 })}
               </Button>
             </>
           ) : (
             <>
               <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button type="button" onClick={onApply} disabled={!canSubmit}>
-                {bulkEdit.isPending ? "Applying…" : isStatus && confirming ? "Confirm" : "Apply"}
+                {bulkEdit.isPending
+                  ? t("bulkEdit.applying")
+                  : isStatus && confirming
+                    ? tCommon("actions.confirm")
+                    : tCommon("actions.apply")}
               </Button>
             </>
           )}
@@ -329,13 +336,15 @@ function ValueEditor({
   bool: boolean;
   setBool: (v: boolean) => void;
 }) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   if (field.kind === "status") {
     return (
       <SelectOne
         value={single}
         onChange={setSingle}
-        options={USER_STATUSES.map((s) => ({ id: s, label: formatUserStatus(s) }))}
-        placeholder="Select status"
+        options={USER_STATUSES.map((s) => ({ id: s, label: formatUserStatus(tCommon, s) }))}
+        placeholder={t("bulkEdit.selectStatus")}
       />
     );
   }
@@ -352,7 +361,7 @@ function ValueEditor({
 
   const type = field.attrType;
   if (type === "SELECT") {
-    return <SelectOne value={single} onChange={setSingle} options={field.options ?? []} placeholder="Select value" searchable />;
+    return <SelectOne value={single} onChange={setSingle} options={field.options ?? []} placeholder={t("bulkEdit.selectValue")} searchable />;
   }
   if (type === "MULTI_SELECT") {
     return (
@@ -378,7 +387,7 @@ function ValueEditor({
     return (
       <label className="flex items-center gap-2 text-body">
         <Checkbox checked={bool} onCheckedChange={(v) => setBool(v === true)} />
-        {bool ? "Checked" : "Unchecked"}
+        {bool ? t("bulkEdit.checked") : t("bulkEdit.unchecked")}
       </label>
     );
   }
@@ -407,11 +416,12 @@ function SelectOne({
   /** Data — the company's records or a company-defined option list — is searched; a vocabulary is not. */
   searchable?: boolean;
 }) {
+  const t = useTranslations("organization");
   if (searchable) {
     return (
       <SearchableSelect
         className="h-9"
-        aria-label="Value"
+        aria-label={t("bulkEdit.value")}
         options={options.map((o) => ({ value: o.id, label: o.label }))}
         value={value || null}
         onChange={(v) => onChange(v ?? "")}
@@ -445,13 +455,17 @@ function RemoteSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { options, isLoading } = useAudienceFieldOptions(source);
   return (
-    <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select value"} searchable />
+    <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? tCommon("states.loading") : t("bulkEdit.selectValue")} searchable />
   );
 }
 
 function RoleSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { internalApiClient } = useAppDataContext();
   const { data, isLoading } = useQuery<{ id: string; name: string }[]>({
     queryKey: ["BULK_EDIT_ROLES"],
@@ -459,5 +473,5 @@ function RoleSelect({ value, onChange }: { value: string; onChange: (v: string) 
     staleTime: 5 * 60 * 1000,
   });
   const options = (data ?? []).map((r) => ({ id: r.id, label: r.name }));
-  return <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? "Loading…" : "Select role"} searchable />;
+  return <SelectOne value={value} onChange={onChange} options={options} placeholder={isLoading ? tCommon("states.loading") : t("bulkEdit.selectRole")} searchable />;
 }

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { HolidayCalendarBindingSection } from "./HolidayCalendarBindingSection";
 import { previewLines } from "./bindingCopy";
+import { translatorFor } from "@/test/nextIntl";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   previewHolidayCalendarBindingAction,
@@ -159,11 +160,12 @@ describe("HolidayCalendarBindingSection", () => {
 });
 
 describe("previewLines", () => {
+  const t = translatorFor("timeOff") as unknown as Parameters<typeof previewLines>[2];
   it("names those a more specific binding reaches, and says what clearing does", () => {
-    expect(previewLines({ ...preview, kind: "LEGAL_ENTITY", willInherit: 1, alreadyByHand: 0, keepOwn: 0, outranked: 4 }, null))
+    expect(previewLines({ ...preview, kind: "LEGAL_ENTITY", willInherit: 1, alreadyByHand: 0, keepOwn: 0, outranked: 4 }, null, t))
       .toEqual(["1 person will get Germany 2026.", "4 people keep their office's calendar, which comes first."]);
-    expect(previewLines({ ...preview, calendarId: null, calendarName: null, losing: 5 }, "Germany 2026"))
+    expect(previewLines({ ...preview, calendarId: null, calendarName: null, losing: 5 }, "Germany 2026", t))
       .toEqual(["5 people will stop inheriting Germany 2026 from today and fall back to the next binding down, if there is one."]);
-    expect(previewLines({ ...preview, members: 0 }, null)).toEqual(["Nobody works here yet. Whoever joins will get Germany 2026."]);
+    expect(previewLines({ ...preview, members: 0 }, null, t)).toEqual(["Nobody works here yet. Whoever joins will get Germany 2026."]);
   });
 });

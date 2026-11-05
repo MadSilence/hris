@@ -48,7 +48,7 @@ const renderModal = (props: Partial<React.ComponentProps<typeof AssignPeopleModa
         basePath="/public-holiday-calendars"
         assignableId="cal-de"
         assignableName="Germany 2026"
-        noun="calendar"
+        kind="calendar"
         semantics="add"
         {...props}
       />
@@ -144,7 +144,7 @@ describe("AssignPeopleModal — everyone who matches", () => {
   });
 
   it("asks no date for a dated target, because each person gets it from the day they match", () => {
-    renderModal({ basePath: "/time-off/policies", assignableId: "pol-1", noun: "policy", temporal: true });
+    renderModal({ basePath: "/time-off/policies", assignableId: "pol-1", kind: "policy", temporal: true });
 
     expect(screen.getByLabelText("Effective from")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Everyone Who Matches" }));

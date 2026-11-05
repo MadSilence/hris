@@ -4,6 +4,7 @@ import type { AudienceValueSource } from "@/components/audience/fieldCatalog";
 import type { OptionDTO, ReferenceValueSource } from "@/models/user/fields";
 import type { AttributeType } from "@/models/attribute/AttributeType";
 import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
+import { useDisplayLanguage } from "@/lib/date";
 import {
   REFERENCE_ENDPOINTS,
   useReferenceOptions,
@@ -28,6 +29,7 @@ export function useAudienceFieldOptions(
   attributeOptions?: OptionDTO[] | null,
   attributeType?: AttributeType | null,
 ) {
+  const language = useDisplayLanguage();
   const referenceSource = isReferenceSource(source) ? source : undefined;
   const { options: referenceOptions, isLoading, hasEndpoint } =
     useReferenceOptions(referenceSource);
@@ -46,7 +48,7 @@ export function useAudienceFieldOptions(
     // The stored text is the id: a country is kept by its name, a currency by its code, and the
     // filter compares the stored text.
     const options = attributeType
-      ? getCatalogOptions(attributeType).map((o) => ({ id: o.value, label: o.label }))
+      ? getCatalogOptions(attributeType, language).map((o) => ({ id: o.value, label: o.label }))
       : [];
     return { options, isLoading: false, hasOptions: true };
   }

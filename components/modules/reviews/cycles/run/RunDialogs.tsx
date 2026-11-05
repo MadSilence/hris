@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -18,9 +19,9 @@ import {
   reassignReviewAction,
   updateCycleDatesAction,
 } from "@/components/modules/reviews/actions/reviewCycleActions";
-import { REVIEW_KIND_LABELS, type Cycle, type PersonRow, type ReviewKind } from "@/models/reviews";
+import { REVIEW_KIND_KEYS, reviewNoticeLines, type Cycle, type PersonRow, type ReviewKind } from "@/models/reviews";
 
-const nameOf = (u: PickedUser) => [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "Somebody";
+const nameOf = (u: PickedUser, fallback: string) => [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || fallback;
 
 /** Peers for one person, chosen by whoever runs the cycle (R2), within the cycle's fewest and most. */
 export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }: {
@@ -29,6 +30,8 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
   onCloseAction: () => void;
   onDoneAction: () => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const [picked, setPicked] = useState<PickedUser[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,10 +45,11 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
     try {
       const res = await addPeersAction({ participantId: person.participantId, reviewerUserIds: picked.map((p) => p.id) });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
-      showSuccess(res.data.warnings.length ? res.data.warnings.join(". ") + "." : "Peers asked.");
+      const warnings = reviewNoticeLines(t, res.data.warnings, res.data.warningCodes);
+      showSuccess(warnings.length ? warnings.join(" ") : t("run.peers.asked"));
       onDoneAction();
     } finally {
       setBusy(false);
@@ -56,33 +60,37 @@ export function ChoosePeersDialog({ person, open, onCloseAction, onDoneAction }:
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose peers</DialogTitle>
+          <DialogTitle>{t("run.choosePeers")}</DialogTitle>
           <DialogDescription>
-            Colleagues who review {person.subject.name}. They have {person.peers} now; this cycle asks for
-            {person.peerMin != null ? ` ${person.peerMin}` : ""}–{person.peerMax ?? ""}. Each is asked at once and gets a task.
+            {t("run.peers.description", {
+              name: person.subject.name,
+              count: person.peers,
+              min: person.peerMin ?? "",
+              max: person.peerMax ?? "",
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
           {picked.map((p) => (
             <div key={p.id} className="flex items-center justify-between rounded-control border border-divider px-3 py-1.5 text-body">
-              {nameOf(p)}
-              <button type="button" aria-label={`Remove ${nameOf(p)}`} className="text-tertiary hover:text-primary"
+              {nameOf(p, t("nomination.somebody"))}
+              <button type="button" aria-label={t("nomination.remove", { name: nameOf(p, t("nomination.somebody")) })} className="text-tertiary hover:text-primary"
                 onClick={() => setPicked(picked.filter((x) => x.id !== p.id))}>
                 <Icon icon={Cancel01Icon} size="sm" />
               </button>
             </div>
           ))}
           {picked.length < room && (
-            <UserPickerField value={null} placeholder="Add a person"
+            <UserPickerField value={null} placeholder={t("nomination.addPerson")}
               onChange={(u) => u && !picked.some((x) => x.id === u.id) && u.id !== person.subject.userId && setPicked([...picked, u])} />
           )}
-          {room <= 0 && <p className="text-body text-tertiary">This person already has the most peers the cycle allows.</p>}
+          {room <= 0 && <p className="text-body text-tertiary">{t("run.peers.full")}</p>}
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
           <Button type="button" onClick={() => void save()} disabled={busy || picked.length === 0}>
-            {busy ? "Asking…" : "Ask them"}
+            {busy ? t("run.peers.asking") : t("run.peers.ask")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -97,6 +105,8 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
   onCloseAction: () => void;
   onDoneAction: () => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const [picked, setPicked] = useState<PickedUser | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,10 +120,10 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
     try {
       const res = await reassignReviewAction({ assignmentId: target.assignmentId, reviewerUserId: picked.id });
       if (res.status !== ActionStatus.SUCCESS) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
-      showSuccess("Review handed on.");
+      showSuccess(t("run.handOnDialog.done"));
       onDoneAction();
     } finally {
       setBusy(false);
@@ -124,21 +134,23 @@ export function ReassignDialog({ target, open, onCloseAction, onDoneAction }: {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Hand to someone else</DialogTitle>
+          <DialogTitle>{t("run.handOn")}</DialogTitle>
           <DialogDescription>
-            The {REVIEW_KIND_LABELS[target.kind].toLowerCase()} of {target.subjectName}, now with {target.reviewerName}. Anything
-            already typed goes with it.
-            {target.kind === "MANAGER" && " The new reviewer becomes the manager who shares this review."}
+            {t(target.kind === "MANAGER" ? "run.handOnDialog.descriptionManager" : "run.handOnDialog.description", {
+              kind: target.kind,
+              subject: target.subjectName,
+              reviewer: target.reviewerName,
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-1.5">
-          <RequiredLabel required>New reviewer</RequiredLabel>
+          <RequiredLabel required>{t("run.handOnDialog.newReviewer")}</RequiredLabel>
           <UserPickerField value={picked} onChange={setPicked} />
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy || !picked}>{busy ? "Handing on…" : "Hand on"}</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
+          <Button type="button" onClick={() => void save()} disabled={busy || !picked}>{busy ? t("run.handOnDialog.handingOn") : t("run.handOnDialog.handOn")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -152,6 +164,8 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
   onCloseAction: () => void;
   onDoneAction: () => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const [dates, setDates] = useState<Record<string, { opensOn: string; dueOn: string }>>({});
   const [release, setRelease] = useState("");
   const [busy, setBusy] = useState(false);
@@ -176,10 +190,10 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
         releaseDate: releases ? release || null : null,
       });
       if (res.status !== ActionStatus.SUCCESS) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
-      showSuccess("Dates saved.");
+      showSuccess(t("run.datesDialog.done"));
       onDoneAction();
     } finally {
       setBusy(false);
@@ -190,36 +204,40 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit dates</DialogTitle>
-          <DialogDescription>Open reviews take the new due date, and their reminders move with it.</DialogDescription>
+          <DialogTitle>{t("run.editDates")}</DialogTitle>
+          <DialogDescription>{t("run.datesDialog.description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          {cycle.kinds.map((k) => (
+          {cycle.kinds.map((k) => {
+            const opensId = `dates-${k.kind}-opens`;
+            const dueId = `dates-${k.kind}-due`;
+            return (
             <div key={k.kind} className="grid grid-cols-[1fr_1fr_1fr] items-end gap-2">
-              <span className="pb-2 text-body font-medium text-primary">{REVIEW_KIND_LABELS[k.kind]}</span>
+              <span className="pb-2 text-body font-medium text-primary">{t(REVIEW_KIND_KEYS[k.kind])}</span>
               <div className="space-y-1">
-                <RequiredLabel htmlFor={`dates-${k.kind}-opens`}>Opens on</RequiredLabel>
-                <DatePicker id={`dates-${k.kind}-opens`} value={dates[k.kind]?.opensOn ?? ""} clearable
+                <RequiredLabel htmlFor={opensId}>{t("builder.kind.opensOn")}</RequiredLabel>
+                <DatePicker id={opensId} value={dates[k.kind]?.opensOn ?? ""} clearable
                   onChange={(v) => setDates({ ...dates, [k.kind]: { ...dates[k.kind], opensOn: v } })} />
               </div>
               <div className="space-y-1">
-                <RequiredLabel htmlFor={`dates-${k.kind}-due`} required>Due on</RequiredLabel>
-                <DatePicker id={`dates-${k.kind}-due`} value={dates[k.kind]?.dueOn ?? ""}
+                <RequiredLabel htmlFor={dueId} required>{t("builder.kind.dueOn")}</RequiredLabel>
+                <DatePicker id={dueId} value={dates[k.kind]?.dueOn ?? ""}
                   onChange={(v) => setDates({ ...dates, [k.kind]: { ...dates[k.kind], dueOn: v } })} />
               </div>
             </div>
-          ))}
+            );
+          })}
           {releases && (
             <div className="max-w-xs space-y-1">
-              <RequiredLabel htmlFor="dates-release" required>Release date</RequiredLabel>
+              <RequiredLabel htmlFor="dates-release" required>{t("builder.results.releaseDate")}</RequiredLabel>
               <DatePicker id="dates-release" value={release} onChange={setRelease} />
             </div>
           )}
         </div>
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
+          <Button type="button" onClick={() => void save()} disabled={busy}>{busy ? tCommon("actions.saving") : tCommon("actions.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

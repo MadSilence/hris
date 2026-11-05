@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Textarea } from "@/components/desact/textarea";
 import { Label } from "@/components/desact/label";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -40,6 +41,7 @@ type Props = {
 export function AccountAccessModal({
   kind, userId, fullName, accountLocked = false, onCloseAction, onChangedAction,
 }: Props) {
+  const t = useTranslations("organization");
   const [reason, setReason] = useState("");
   // Email is the channel an attacker most likely holds: the actor says they checked another way (§ 3.7).
   const [verified, setVerified] = useState(false);
@@ -65,8 +67,8 @@ export function AccountAccessModal({
         onCloseAction();
         if (res.status === ActionStatus.SUCCESS) {
           showSuccess(accountLocked
-            ? `Password reset sent to ${fullName}. Setting a new password unlocks the account.`
-            : `Password reset sent to ${fullName}.`);
+            ? t("profile.access.resetSentUnlock", { name: fullName })
+            : t("profile.access.resetSent", { name: fullName }));
         } else {
           showActionError(res);
         }
@@ -77,7 +79,7 @@ export function AccountAccessModal({
         const res = await withStepUpAction(() => resetUserMfaAction(userId, verified));
         if (res.status === ActionStatus.SUCCESS) {
           onCloseAction();
-          showSuccess(`${fullName}'s two-step sign-in was reset. They were signed out everywhere.`);
+          showSuccess(t("profile.access.mfaReset", { name: fullName }));
         } else {
           setError(res.errorMessage ?? null);
         }
@@ -91,8 +93,8 @@ export function AccountAccessModal({
         if (res.status === ActionStatus.SUCCESS) {
           const n = res.data?.ended ?? 0;
           showSuccess(n === 0
-            ? `${fullName} was not signed in anywhere.`
-            : `${fullName} was signed out of ${n} ${n === 1 ? "session" : "sessions"}.`);
+            ? t("profile.access.noSessions", { name: fullName })
+            : t("profile.access.sessionsEnded", { name: fullName, count: n }));
         } else {
           showActionError(res);
         }
@@ -113,7 +115,7 @@ export function AccountAccessModal({
     }
   };
 
-  const copy = kind ? COPY[kind](fullName, accountLocked) : null;
+  const copy = kind ? COPY[kind](t, fullName, accountLocked) : null;
 
   return (
     <ConfirmActionModal
@@ -132,13 +134,13 @@ export function AccountAccessModal({
         <div className="flex items-start gap-2">
           <Checkbox id="account-access-verified" checked={verified} onCheckedChange={(v) => setVerified(Boolean(v))} disabled={busy} />
           <Label htmlFor="account-access-verified" className="font-normal leading-snug">
-            I confirmed this request with {fullName} by a call or in person, not by email.
+            {t("profile.access.verified", { name: fullName })}
           </Label>
         </div>
       )}
       {(kind === "BLOCK" || kind === "UNBLOCK") && (
         <div className="space-y-1.5">
-          <Label htmlFor="account-access-reason">Reason</Label>
+          <Label htmlFor="account-access-reason">{t("profile.access.reason")}</Label>
           <Textarea
             id="account-access-reason"
             value={reason}
@@ -152,36 +154,38 @@ export function AccountAccessModal({
   );
 }
 
-const COPY: Record<AccountAccessKind, (name: string, locked: boolean) => {
+type OrgTranslator = ReturnType<typeof useTranslations<"organization">>;
+
+const COPY: Record<AccountAccessKind, (t: OrgTranslator, name: string, locked: boolean) => {
   title: string;
   description: string;
   confirmLabel: string;
 }> = {
-  BLOCK: (name) => ({
-    title: "Block account",
-    description: `${name} will be signed out everywhere and will not be able to sign in until the account is unblocked.`,
-    confirmLabel: "Block",
+  BLOCK: (t, name) => ({
+    title: t("profile.header.block"),
+    description: t("profile.access.blockDescription", { name }),
+    confirmLabel: t("profile.access.blockConfirm"),
   }),
-  UNBLOCK: (name) => ({
-    title: "Unblock account",
-    description: `${name} will be able to sign in again.`,
-    confirmLabel: "Unblock",
+  UNBLOCK: (t, name) => ({
+    title: t("profile.header.unblock"),
+    description: t("profile.access.unblockDescription", { name }),
+    confirmLabel: t("profile.access.unblockConfirm"),
   }),
-  RESET: (name, locked) => ({
-    title: locked ? "Send password reset to unlock" : "Send password reset",
+  RESET: (t, name, locked) => ({
+    title: locked ? t("profile.header.sendResetToUnlock") : t("profile.header.sendReset"),
     description: locked
-      ? `${name}'s account is locked after too many failed sign-ins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.`
-      : `${name} will get an email with a link to set a new password. The link works for one hour.`,
-    confirmLabel: "Send",
+      ? t("profile.access.resetLockedDescription", { name })
+      : t("profile.access.resetDescription", { name }),
+    confirmLabel: t("profile.access.resetConfirm"),
   }),
-  RESET_MFA: (name) => ({
-    title: "Reset two-step sign-in",
-    description: `${name}'s authenticator app, backup codes and remembered devices stop working, and they are signed out everywhere. If your company requires two-step sign-in, they set it up again at their next sign-in.`,
-    confirmLabel: "Reset",
+  RESET_MFA: (t, name) => ({
+    title: t("profile.header.resetMfa"),
+    description: t("profile.access.mfaDescription", { name }),
+    confirmLabel: t("profile.access.mfaConfirm"),
   }),
-  END_SESSIONS: (name) => ({
-    title: "End all sessions",
-    description: `${name} will be signed out of every browser at once. They can sign in again straight away — to keep them out, block the account instead.`,
-    confirmLabel: "End sessions",
+  END_SESSIONS: (t, name) => ({
+    title: t("profile.header.endSessions"),
+    description: t("profile.access.endSessionsDescription", { name }),
+    confirmLabel: t("profile.access.endSessionsConfirm"),
   }),
 };

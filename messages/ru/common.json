@@ -1,0 +1,276 @@
+{
+  "actions": {
+    "save": "Сохранить",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение…",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "deleting": "Удаление…",
+    "edit": "Изменить",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "continue": "Продолжить",
+    "add": "Добавить",
+    "remove": "Убрать",
+    "create": "Создать",
+    "done": "Готово",
+    "apply": "Применить",
+    "search": "Поиск",
+    "retry": "Попробовать снова",
+    "confirm": "Подтвердить",
+    "archive": "В архив",
+    "restore": "Восстановить",
+    "discard": "Не сохранять",
+    "keepEditing": "Продолжить редактирование",
+    "clear": "Очистить",
+    "reset": "Сбросить",
+    "submit": "Отправить",
+    "copy": "Копировать",
+    "upload": "Загрузить",
+    "download": "Скачать",
+    "export": "Выгрузить",
+    "import": "Импортировать",
+    "view": "Посмотреть",
+    "open": "Открыть",
+    "select": "Выбрать",
+    "preview": "Предпросмотр",
+    "publish": "Опубликовать",
+    "send": "Отправить",
+    "duplicate": "Дублировать",
+    "rename": "Переименовать",
+    "manage": "Управлять",
+    "showMore": "Показать больше",
+    "showLess": "Показать меньше",
+    "learnMore": "Подробнее",
+    "undo": "Отменить",
+    "moreActions": "Другие действия",
+    "goBack": "Назад",
+    "goHome": "На главную"
+  },
+  "fields": {
+    "name": "Название",
+    "description": "Описание",
+    "status": "Статус",
+    "actions": "Действия",
+    "type": "Тип",
+    "email": "Эл. почта",
+    "date": "Дата",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания",
+    "notes": "Заметки",
+    "optional": "Необязательно",
+    "required": "Обязательно",
+    "personName": "Имя"
+  },
+  "values": {
+    "yes": "Да",
+    "no": "Нет",
+    "none": "Нет",
+    "all": "Все",
+    "today": "Сегодня",
+    "unknown": "Неизвестно",
+    "notSet": "Не указано",
+    "entries": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
+  },
+  "states": {
+    "loading": "Загрузка…",
+    "empty": "Здесь пока ничего нет",
+    "noResults": "Ничего не найдено",
+    "copied": "Скопировано",
+    "loadingShort": "Загрузка"
+  },
+  "people": {
+    "count": "{count, plural, one {# человек} few {# человека} many {# человек} other {# человека}}"
+  },
+  "time": {
+    "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+    "hours": "{count, plural, one {# час} few {# часа} many {# часов} other {# часа}}",
+    "minutes": "{count, plural, one {# минута} few {# минуты} many {# минут} other {# минуты}}"
+  },
+  "language": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "status": {
+    "approved": "Согласовано",
+    "pending": "Ожидает",
+    "inProgress": "В работе",
+    "scheduled": "Запланировано",
+    "declined": "Отклонено",
+    "info": "Информация",
+    "draft": "Черновик",
+    "inactive": "Неактивен",
+    "archived": "В архиве",
+    "active": "Активен"
+  },
+  "userStatus": {
+    "prospective": "Не приступил",
+    "active": "Активен",
+    "archived": "В архиве"
+  },
+  "accountStatus": {
+    "draft": "Черновик",
+    "invited": "Приглашён",
+    "active": "Зарегистрирован",
+    "blocked": "Заблокирован"
+  },
+  "access": {
+    "private": "Нет доступа",
+    "pagePrivate": "Нет доступа к странице",
+    "askAdmin": "Попросите доступ у администратора.",
+    "checking": "Проверяем доступ…",
+    "permissionsDidNotLoad": "Не удалось загрузить права"
+  },
+  "errorState": {
+    "notFound": "Ничего не нашлось",
+    "didNotLoad": "Не удалось загрузить",
+    "errorId": "Код ошибки {reference}"
+  },
+  "emptyState": {
+    "nothingArchived": "В архиве пусто",
+    "archivedDescription": "Здесь появятся записи из архива.",
+    "noResultsHint": "Попробуйте другой запрос."
+  },
+  "toggles": {
+    "archived": "В архиве ({count})",
+    "drafts": "Черновики ({count})"
+  },
+  "brand": {
+    "poweredBy": "работает на"
+  },
+  "sidebar": {
+    "title": "Навигация",
+    "description": "Разделы приложения",
+    "collapse": "Свернуть меню",
+    "expand": "Развернуть меню",
+    "toggle": "Показать или скрыть меню"
+  },
+  "stepper": {
+    "progress": "Прогресс",
+    "stepDone": "{label}, готово",
+    "stepOf": "Шаг {current} из {total} · {label}"
+  },
+  "datePicker": {
+    "pickDate": "Выберите дату",
+    "pickRange": "Выберите период",
+    "clearDate": "Очистить дату",
+    "clearRange": "Очистить период"
+  },
+  "timePicker": {
+    "hour": "Час",
+    "minute": "Минута"
+  },
+  "searchableSelect": {
+    "empty": "Ничего не найдено."
+  },
+  "searchField": {
+    "placeholder": "Поиск…",
+    "searchIn": "Где искать",
+    "noResults": "0 результатов",
+    "matchOf": "{current} из {total}",
+    "previousMatch": "Предыдущее совпадение",
+    "nextMatch": "Следующее совпадение",
+    "clear": "Очистить поиск"
+  },
+  "tagColor": {
+    "color": "Цвет",
+    "optionColor": "{option}: {color}",
+    "pick": "Выберите цвет",
+    "pickDescription": "Цвет метки этого варианта.",
+    "names": {
+      "gray": "Серый",
+      "berry": "Ягодный",
+      "plum": "Сливовый",
+      "indigo": "Индиго",
+      "ocean": "Океан",
+      "teal": "Бирюзовый",
+      "cocoa": "Какао",
+      "bronze": "Бронзовый"
+    }
+  },
+  "weekdays": {
+    "short": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    }
+  },
+  "accent": {
+    "names": {
+      "wine": "Вино",
+      "brick": "Кирпич",
+      "terracotta": "Терракота",
+      "sun": "Солнце",
+      "forest": "Лес",
+      "teal": "Бирюза",
+      "denim": "Деним",
+      "iris": "Ирис",
+      "raspberry": "Малина",
+      "graphite": "Графит"
+    }
+  },
+  "confirmCancel": {
+    "title": "Отменить изменения?",
+    "description": "У вас есть несохранённые изменения. Закрыть окно?"
+  },
+  "commandDialog": {
+    "description": "Поиск сотрудников, страниц и действий"
+  },
+  "validation": {
+    "invalid": "Недопустимое значение",
+    "required": "Обязательное поле",
+    "oneOf": "Допустимые значения: {values}",
+    "notOneOf": "Недопустимые значения: {values}",
+    "notNumber": "Введите число",
+    "notDate": "Введите корректную дату",
+    "string": {
+      "length": "Должно быть ровно {length, plural, one {# символ} few {# символа} many {# символов} other {# символа}}",
+      "min": "Не менее {min, plural, one {# символа} few {# символов} many {# символов} other {# символа}}",
+      "max": "Не более {max, plural, one {# символа} few {# символов} many {# символов} other {# символа}}",
+      "matches": "Неверный формат",
+      "email": "Введите корректный адрес электронной почты",
+      "url": "Введите корректный URL",
+      "uuid": "Введите корректный UUID"
+    },
+    "number": {
+      "min": "Должно быть не меньше {min}",
+      "max": "Должно быть не больше {max}",
+      "lessThan": "Должно быть меньше {less}",
+      "moreThan": "Должно быть больше {more}",
+      "positive": "Должно быть положительным числом",
+      "negative": "Должно быть отрицательным числом",
+      "integer": "Должно быть целым числом"
+    },
+    "date": {
+      "min": "Должна быть позже {min}",
+      "max": "Должна быть раньше {max}"
+    },
+    "array": {
+      "length": "Должно быть ровно {length, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}",
+      "min": "Не менее {min, plural, one {# элемента} few {# элементов} many {# элементов} other {# элемента}}",
+      "max": "Не более {max, plural, one {# элемента} few {# элементов} many {# элементов} other {# элемента}}"
+    }
+  },
+  "toast": {
+    "region": "Уведомления",
+    "close": "Закрыть"
+  },
+  "flow": {
+    "controls": "Управление холстом",
+    "zoomIn": "Приблизить",
+    "zoomOut": "Отдалить",
+    "fitView": "Вписать в экран",
+    "interactive": "Заблокировать или разблокировать холст",
+    "minimap": "Мини-карта",
+    "handle": "Точка соединения",
+    "nodeDescription": "Нажмите Enter или пробел, чтобы выбрать элемент. Delete удаляет его, Escape отменяет.",
+    "nodeDescriptionKeyboard": "Нажмите Enter или пробел, чтобы выбрать элемент, и двигайте его стрелками. Delete удаляет его, Escape отменяет.",
+    "nodeMoved": "Элемент перемещён ({direction}). Новое положение: x {x}, y {y}",
+    "edgeDescription": "Нажмите Enter или пробел, чтобы выбрать связь; Delete удаляет её, Escape отменяет."
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 import { PageGate } from "@/components/auth/PageGate";
 import { AttendanceOverviewContainer } from "@/components/modules/attendance/overview";
 
@@ -9,15 +10,13 @@ import { AttendanceOverviewContainer } from "@/components/modules/attendance/ove
  * attendance — an employee logs their own time on their profile and never sees this page.
  */
 export default function AttendancePage() {
+  const t = useTranslations("attendance");
   return (
     <PageGate resource="PEOPLE.ATTENDANCE" action="MANAGE">
       <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6">
         <section className="flex flex-col gap-2">
-          <h1 className="text-page-title">Attendance</h1>
-          <p className="max-w-2xl text-tertiary">
-            Time logged against what was expected, per person. Expected days leave out weekends, public holidays
-            and approved leave; overtime is time beyond a day&apos;s norm, and every minute on a day without one.
-          </p>
+          <h1 className="text-page-title">{t("page.title")}</h1>
+          <p className="max-w-2xl text-tertiary">{t("page.description")}</p>
         </section>
 
         <Suspense fallback={null}>

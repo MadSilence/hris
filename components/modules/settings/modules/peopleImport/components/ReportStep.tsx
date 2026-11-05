@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
@@ -15,29 +16,28 @@ type Props = {
   onStartAnother: () => void;
 };
 
-const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
-
 /**
  * Step 6 (design § 3): what was created, what failed and why, the invitations. A row fails here only
  * when something changed after the check — and when one did, the invitations were held back, so the
  * report offers them instead (design § 9).
  */
 export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
+  const t = useTranslations("peopleImport");
   const invite = useInvitePeopleImport();
   const [error, setError] = useState<string | null>(null);
 
   if (anImport.status === "FAILED") {
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        <p className="text-body font-medium text-primary">The import of {anImport.fileName} stopped.</p>
+        <p className="text-body font-medium text-primary">{t("report.stopped", { fileName: anImport.fileName })}</p>
         {anImport.errorDetail && <p className="text-body text-tertiary">{anImport.errorDetail}</p>}
         {anImport.kind !== "PEOPLE_CREATE" && <CheckErrors anImport={anImport} />}
         <p className="text-body text-tertiary">
           {anImport.kind === "PEOPLE_CREATE"
-            ? `${people(anImport.createdCount)} had been created before it stopped. They are in the People table as drafts.`
-            : "Nothing was written: this file is applied whole or not at all. Fix what changed and import it again."}
+            ? t("report.stoppedPeople", { count: anImport.createdCount })
+            : t("report.stoppedWhole")}
         </p>
-        <div><Button type="button" onClick={onStartAnother}>Import another file</Button></div>
+        <div><Button type="button" onClick={onStartAnother}>{t("report.importAnother")}</Button></div>
       </div>
     );
   }
@@ -48,28 +48,31 @@ export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
     <div className="flex max-w-4xl flex-col gap-6">
       <div className="rounded-card border border-divider p-5">
         <p className="text-body font-medium text-primary">
-          {IMPORT_KINDS[anImport.kind].noun(anImport.createdCount)} imported from {anImport.fileName}.
+          {t("report.imported", {
+            noun: t(IMPORT_KINDS[anImport.kind].nounKey, { count: anImport.createdCount }),
+            fileName: anImport.fileName,
+          })}
         </p>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-secondary">
           {anImport.failedCount > 0 && (
-            <li>{anImport.failedCount} {anImport.failedCount === 1 ? "row was" : "rows were"} not created — something changed after the check.</li>
+            <li>{t("report.failed", { count: anImport.failedCount })}</li>
           )}
           {anImport.unchangedCount > 0 && (
-            <li>{anImport.unchangedCount} {anImport.unchangedCount === 1 ? "balance was" : "balances were"} already at the target.</li>
+            <li>{t("report.unchanged", { count: anImport.unchangedCount })}</li>
           )}
-          {anImport.invitedCount > 0 && <li>{people(anImport.invitedCount)} invited.</li>}
+          {anImport.invitedCount > 0 && <li>{t("report.invited", { count: anImport.invitedCount })}</li>}
           {anImport.inviteAfter && anImport.invitedCount === 0 && anImport.failedCount > 0 && (
-            <li>No invitations were sent, because a row failed.</li>
+            <li>{t("report.noInvitations")}</li>
           )}
         </ul>
         <div className="mt-4 flex flex-wrap gap-2">
           {anImport.kind === "PEOPLE_CREATE" && (
             <Button asChild variant="secondary" size="sm">
-              <Link href="/organization/people">Open people</Link>
+              <Link href="/organization/people">{t("report.openPeople")}</Link>
             </Button>
           )}
           <Button asChild variant="ghost" size="sm">
-            <Link href="/settings/admin/logs">See it in the logs</Link>
+            <Link href="/settings/admin/logs">{t("report.seeLogs")}</Link>
           </Button>
         </div>
       </div>
@@ -87,15 +90,15 @@ export const ReportStep: React.FC<Props> = ({ anImport, onStartAnother }) => {
             }}
           >
             {invite.isPending
-              ? "Sending…"
-              : `Invite the ${anImport.createdCount} ${anImport.createdCount === 1 ? "Person" : "People"} Created`}
+              ? t("report.sending")
+              : t("report.inviteCreated", { count: anImport.createdCount })}
           </Button>
         </div>
       )}
 
       {anImport.status === "COMPLETED_WITH_FAILURES" && <CheckErrors anImport={anImport} />}
 
-      <div><Button type="button" onClick={onStartAnother}>Import another file</Button></div>
+      <div><Button type="button" onClick={onStartAnother}>{t("report.importAnother")}</Button></div>
     </div>
   );
 };

@@ -1,0 +1,270 @@
+{
+  "weekdays": {
+    "short": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "narrow": {
+      "sun": "S",
+      "mon": "M",
+      "tue": "T",
+      "wed": "W",
+      "thu": "T",
+      "fri": "F",
+      "sat": "S"
+    }
+  },
+  "months": {
+    "long": {
+      "jan": "January",
+      "feb": "February",
+      "mar": "March",
+      "apr": "April",
+      "may": "May",
+      "jun": "June",
+      "jul": "July",
+      "aug": "August",
+      "sep": "September",
+      "oct": "October",
+      "nov": "November",
+      "dec": "December"
+    },
+    "short": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
+  },
+  "period": {
+    "month": "{month} {year}",
+    "week": "{fromMonth} {fromDay} – {toMonth} {toDay}, {year}"
+  },
+  "grouping": {
+    "department": "Department",
+    "team": "Team",
+    "office": "Office",
+    "noDepartment": "No department",
+    "noTeam": "No team",
+    "noOffice": "No office",
+    "untitled": "Untitled"
+  },
+  "capacity": {
+    "atLimit": "At its limit — new requests from {who, select, team {this team} department {this department} other {anyone in the company}} will be {behavior, select, block {refused} other {warned}}",
+    "awayOfCap": "{away} of {cap} away",
+    "formDecides": "The request form decides for each person"
+  },
+  "board": {
+    "halfDayCountsWhole": "(half day — leave still counts it as a whole day)",
+    "away": "Away",
+    "pendingYourApproval": "Pending your approval",
+    "pendingApproval": "Pending approval",
+    "cancellationAwaitingYou": "Cancellation waiting for your approval",
+    "cancellationRequested": "Cancellation requested",
+    "halfDay": "Half day",
+    "waitingForYourApproval": "Waiting for your approval",
+    "people": "People",
+    "emptyTitle": "No people to show",
+    "emptyDescription": "Nobody matches the current view."
+  },
+  "toolbar": {
+    "filter": "Filter",
+    "group": "Group",
+    "groupBy": "Group: {grouping}",
+    "views": "Views",
+    "allPeople": "All people",
+    "deleteView": "Delete {name}",
+    "saveCurrentAsView": "Save current filters as a view",
+    "density": {
+      "week": "week",
+      "month": "month"
+    },
+    "previous": "Previous",
+    "saveViewTitle": "Save view",
+    "saveViewHint": "A view remembers the filters, the grouping and the week/month choice — not the period. Opened in June it shows June."
+  },
+  "export": {
+    "printAria": "Print the calendar",
+    "print": "Print",
+    "exportAria": "Export the calendar",
+    "title": "Export calendar",
+    "description": "The people in the current view, one column per day of the period shown. Leave appears as you see it on the board.",
+    "included": "Included: {from} – {to}, with public holidays and time off."
+  },
+  "page": {
+    "title": "Calendar",
+    "description": "See who is away, and which days are public holidays."
+  },
+  "awaiting": {
+    "review": "Review",
+    "line": "{count, plural, one {# request is} other {# requests are}} waiting for your approval"
+  },
+  "request": {
+    "title": "Request time off",
+    "titleFor": "Request time off for {name}",
+    "selectDates": "Select dates",
+    "errors": {
+      "pickPolicy": "Pick a policy to request against.",
+      "chooseDates": "Choose your time-off dates.",
+      "endBeforeStart": "The end date must be on or after the start date.",
+      "failed": "Failed to submit the request."
+    },
+    "policy": "Policy",
+    "leftHint": "{amount} {unit} left",
+    "dates": "Dates",
+    "note": "Note <muted>(optional)</muted>",
+    "notePlaceholder": "Anything your manager should know",
+    "overlap": "{count, plural, one {# colleague is} other {# colleagues are}} already away then",
+    "overlapMore": "and {count} more",
+    "available": "Available",
+    "noLimit": "No limit",
+    "amountUnit": "{amount} {unit}",
+    "duration": "Duration",
+    "workingDays": "working days",
+    "leftAfter": "Left after",
+    "insufficient": "That is more than is left — it may be rejected, depending on the policy.",
+    "coverage": {
+      "submitted": "Your request was submitted.",
+      "warning": "This policy warns when too many people are away at once, and {count, plural, one {one of your days is} other {# of your days are}} already at that limit: {days}. Nothing is blocked — your approver can see the same thing."
+    },
+    "gotIt": "Got it",
+    "requesting": "Requesting…",
+    "submitDays": "Request {amount} {count, plural, one {day} other {days}}"
+  },
+  "boardRequest": {
+    "loadFailed": "Time off for {name} could not be loaded.",
+    "noPolicy": "{name} has no time-off policy assigned, so there is nothing to request against."
+  },
+  "userCalendar": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "legend": {
+      "holiday": "Public holiday",
+      "approved": "Time off — approved",
+      "pending": "Time off — pending",
+      "counts": "{holidays, plural, one {# holiday} other {# holidays}} · {entries, plural, one {# time-off entry} other {# time-off entries}}"
+    }
+  },
+  "units": {
+    "hoursShort": "h",
+    "daysShort": "d"
+  },
+  "adjustment": {
+    "amountRequired": "Enter a non-zero amount (use a minus for a deduction).",
+    "reasonRequired": "Please add a reason.",
+    "failed": "Failed to adjust the balance.",
+    "title": "Manual adjustment",
+    "amount": "Amount ({unit})",
+    "reason": "Reason",
+    "hint": "Use a negative amount to deduct. This adds an entry to the ledger."
+  },
+  "ledger": {
+    "type": {
+      "accrual": "Accrual",
+      "usage": "Time off",
+      "adjustment": "Adjustment",
+      "carryover": "Carryover",
+      "expiry": "Expiry",
+      "reversal": "Reversal"
+    },
+    "projectedOn": "Projected on {date}",
+    "empty": "No ledger entries yet."
+  },
+  "balances": {
+    "fallbackName": "Time off",
+    "unlimited": "Unlimited",
+    "left": "<b>{amount}</b> {unit} left",
+    "awaitingDecision": "{amount} awaiting a decision",
+    "carriedOver": "{amount} carried over",
+    "title": "Time off balances",
+    "description": "Balances by policy and their accrual history.",
+    "usedInYear": "{amount} {unit} used · {year}",
+    "leftOfInYear": "{amount} {unit} left of {granted} · {year}",
+    "history": "History",
+    "empty": "No balances to show."
+  },
+  "assign": {
+    "quotaPerYear": "{amount} {unit} / year",
+    "pickPolicy": "Pick a policy to assign.",
+    "failed": "Failed to assign the policy.",
+    "title": "Assign a time-off policy",
+    "description": "The opening balance is granted right away.",
+    "noPolicies": "No time-off policies exist yet.",
+    "allAssigned": "This person is already on every active policy.",
+    "policy": "Policy",
+    "selectPolicy": "Select a policy",
+    "noHireDate": "This policy renews on the hire anniversary and this person has no hire date, so the balance would never renew. Set a hire date first — the assignment will be refused until then.",
+    "noApprover": "This policy's approval chain has nobody to sign for this person — it asks for a manager, and none is set. The assignment will work; their requests will be refused until somebody can approve them.",
+    "effectiveFrom": "Effective from",
+    "yearlyEntitlement": "Yearly entitlement",
+    "assigning": "Assigning…",
+    "submit": "Assign policy"
+  },
+  "requestsPreview": {
+    "title": "Time off requests",
+    "description": "Every request, newest first. Pending and approved ones can still be cancelled."
+  },
+  "sidePanel": {
+    "taken": "{count, plural, one {{unit, select, hours {hour} other {day}}} other {{unit, select, hours {hours} other {days}}}} taken",
+    "left": "{count, plural, one {{unit, select, hours {hour} other {day}}} other {{unit, select, hours {hours} other {days}}}} left",
+    "onRequest": "On request",
+    "withBalance": "With a balance",
+    "allPoliciesTitle": "All policies",
+    "searchPolicies": "Search policies",
+    "noMatch": "No policy matches “{query}”.",
+    "balances": "Balances",
+    "allPolicies": "All {count} policies",
+    "upcoming": "Upcoming",
+    "amountHours": "{amount} h"
+  },
+  "timeOffTab": {
+    "noPolicy": "No time off policy is assigned yet.",
+    "allRequests": "All requests",
+    "balanceHistory": "Balance history"
+  },
+  "requests": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "cancellationPending": "Cancellation requested",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "requestCancellation": "Request cancellation",
+    "cancel": "Cancel",
+    "errors": {
+      "cancel": "Failed to cancel the request.",
+      "edit": "Failed to edit the request.",
+      "answerCancellation": "Failed to answer the cancellation request.",
+      "approve": "Failed to approve the request.",
+      "reject": "Failed to reject the request."
+    },
+    "anyYear": "Any year",
+    "anyStatus": "Any status",
+    "emptyFiltered": "No requests match these filters.",
+    "empty": "No time off requests yet.",
+    "line": "{start} → {end} · {amount} {unit}",
+    "rejectionReason": "<b>Reason:</b> {reason}",
+    "awaitingCancellation": "Waiting for the approver to confirm the cancellation",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmCancellation": "Confirm cancellation",
+    "keepAbsence": "Keep the absence",
+    "editDates": "Edit dates",
+    "to": "to",
+    "reason": "Reason"
+  }
+}

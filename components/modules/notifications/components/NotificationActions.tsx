@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useId, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -17,7 +18,15 @@ import { useMarkNotificationRead } from "@/components/modules/notifications/hook
 import { showError } from "@/lib/errors/errorToast";
 import { PublicHolidayDriftActions } from "@/components/modules/notifications/components/PublicHolidayDriftActions";
 
-type Outcome = { label: string; className: string };
+type OutcomeKey =
+  | "actions.outcomes.approved"
+  | "actions.outcomes.approvedByYou"
+  | "actions.outcomes.rejected"
+  | "actions.outcomes.cancelled"
+  | "actions.outcomes.cancellationApproved"
+  | "actions.outcomes.cancellationDeclined";
+
+type Outcome = { labelKey: OutcomeKey; className: string };
 
 const GREEN = "text-status-approved-text";
 const RED = "text-danger-text";
@@ -29,18 +38,18 @@ const MUTED = "text-tertiary";
  * "declined".
  */
 const APPROVAL_OUTCOMES: Record<string, Outcome> = {
-  APPROVED: { label: "Approved", className: GREEN },
+  APPROVED: { labelKey: "actions.outcomes.approved", className: GREEN },
   // This approver has signed; the request still waits for the rest of its chain. The backend answers
   // it per recipient, so the next approver's copy of the same request still offers the buttons.
-  APPROVED_BY_YOU: { label: "You approved · waiting for the rest of the chain", className: GREEN },
-  CANCELLATION_PENDING: { label: "Approved", className: GREEN },
-  REJECTED: { label: "Rejected", className: RED },
-  CANCELLED: { label: "Cancelled", className: MUTED },
+  APPROVED_BY_YOU: { labelKey: "actions.outcomes.approvedByYou", className: GREEN },
+  CANCELLATION_PENDING: { labelKey: "actions.outcomes.approved", className: GREEN },
+  REJECTED: { labelKey: "actions.outcomes.rejected", className: RED },
+  CANCELLED: { labelKey: "actions.outcomes.cancelled", className: MUTED },
 };
 
 const CANCELLATION_OUTCOMES: Record<string, Outcome> = {
-  CANCELLED: { label: "Cancellation approved", className: GREEN },
-  APPROVED: { label: "Cancellation declined", className: RED },
+  CANCELLED: { labelKey: "actions.outcomes.cancellationApproved", className: GREEN },
+  APPROVED: { labelKey: "actions.outcomes.cancellationDeclined", className: RED },
 };
 
 const ACTIONABLE_TYPES = new Set(["TIMEOFF_APPROVAL_REQUESTED", "TIMEOFF_CANCELLATION_REQUESTED"]);
@@ -57,6 +66,8 @@ const PUBLIC_HOLIDAY_DRIFT_TYPE = "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT";
  * leaving it bold made the inbox claim there was still something to do.
  */
 export const NotificationActions: FC<{ notification: Notification }> = ({ notification }) => {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const invalidateNotifications = useInvalidateNotifications();
   const markRead = useMarkNotificationRead();
   const approve = useApproveTimeOffRequest();
@@ -83,7 +94,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
   if (!source.open) {
     const outcome = (isCancellation ? CANCELLATION_OUTCOMES : APPROVAL_OUTCOMES)[source.status ?? ""];
     if (!outcome) return null;
-    return <p className={cn("mt-2 text-hint font-medium", outcome.className)}>{outcome.label}</p>;
+    return <p className={cn("mt-2 text-hint font-medium", outcome.className)}>{t(outcome.labelKey)}</p>;
   }
 
   const busy = approve.isPending || reject.isPending || decideCancellation.isPending;
@@ -118,7 +129,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
           disabled={busy}
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "CONFIRM" }))}
         >
-          Approve cancellation
+          {t("actions.approveCancellation")}
         </Button>
         <Button type="button"
           size="sm"
@@ -127,7 +138,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
           onClick={() => run(() => decideCancellation.mutateAsync({ requestId: source.id, userId, decision: "DECLINE" }))}
         >
           <Icon icon={Cancel01Icon} size="sm" />
-          Decline
+          {t("actions.decline")}
         </Button>
       </div>
     );
@@ -148,7 +159,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
         <div className="flex flex-col gap-1.5">
           {/* The button is disabled until this is filled, so the field has to say it is required —
               without a label it was an unexplained empty box beside a dead button. */}
-          <RequiredLabel htmlFor={reasonId} required>Reason</RequiredLabel>
+          <RequiredLabel htmlFor={reasonId} required>{t("actions.reason")}</RequiredLabel>
           <div className="flex items-center gap-2">
             <Input
               id={reasonId}
@@ -159,21 +170,21 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
               disabled={busy}
             />
             <Button type="button" size="sm" variant="destructive" onClick={handleReject} disabled={busy || !reason.trim()}>
-              Reject
+              {t("actions.reject")}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
           </div>
         </div>
       ) : (
         <div className="flex items-center gap-2">
           <Button type="button" variant="approve" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
-            Approve
+            {t("actions.approve")}
           </Button>
           <Button type="button" size="sm" variant="secondary" onClick={() => setRejecting(true)} disabled={busy}>
             <Icon icon={Cancel01Icon} size="sm" />
-            Reject
+            {t("actions.reject")}
           </Button>
         </div>
       )}

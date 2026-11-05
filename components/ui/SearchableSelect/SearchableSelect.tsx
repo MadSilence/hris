@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -113,8 +114,8 @@ export const SearchableSelect: React.FC<{
   options,
   value,
   onChange,
-  placeholder = "Select",
-  emptyLabel = "Nothing matches that.",
+  placeholder,
+  emptyLabel,
   clearable = true,
   id,
   disabled,
@@ -122,6 +123,7 @@ export const SearchableSelect: React.FC<{
   "aria-label": ariaLabel,
   "aria-invalid": ariaInvalid,
 }) => {
+  const t = useTranslations("common");
   const [open, setOpen] = React.useState(false);
   const selected = options.find((o) => o.value === value) ?? null;
 
@@ -149,7 +151,7 @@ export const SearchableSelect: React.FC<{
                 <span className="truncate">{selected.label}</span>
               </>
             ) : (
-              <span className="text-tertiary">{placeholder}</span>
+              <span className="text-tertiary">{placeholder ?? t("actions.select")}</span>
             )}
           </span>
           <Icon icon={UnfoldMoreIcon} size="sm" className="ml-2 shrink-0 opacity-50" />
@@ -160,9 +162,9 @@ export const SearchableSelect: React.FC<{
           as it cut "Standard Sick Leave" short (walk of 2026-11-01). */}
       <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] min-w-64 p-0">
         <Command>
-          <CommandInput placeholder="Search" />
+          <CommandInput placeholder={t("actions.search")} />
           <CommandList onScroll={showScrollbarWhileScrolling} className={AUTOHIDE_SCROLLBAR}>
-            <CommandEmpty>{emptyLabel}</CommandEmpty>
+            <CommandEmpty>{emptyLabel ?? t("searchableSelect.empty")}</CommandEmpty>
             {groupOptions(options).map(([group, items]) => (
               <CommandGroup key={group} heading={group || undefined}>
                 {items.map((option) => (

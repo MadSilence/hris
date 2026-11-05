@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ArrowDown01Icon, ArrowUp01Icon, Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 
 import { Input } from "@/components/desact/input";
@@ -42,7 +43,7 @@ type Props = {
 export function SearchField({
   value,
   onChange,
-  placeholder = "Search…",
+  placeholder,
   className,
   modes,
   mode,
@@ -52,6 +53,7 @@ export function SearchField({
   onPrev,
   onNext,
 }: Props) {
+  const t = useTranslations("common");
   const hasQuery = value.length > 0;
   const showCounter = matchCount !== undefined && hasQuery;
 
@@ -65,7 +67,7 @@ export function SearchField({
       {modes && modes.length > 1 && (
         <Select value={mode} onValueChange={onModeChange}>
           <SelectTrigger
-            aria-label="Search in"
+            aria-label={t("searchField.searchIn")}
             className="h-7 w-[124px] flex-none border-0 bg-transparent pl-2.5 text-body shadow-none focus:ring-0"
           >
             <SelectValue />
@@ -85,7 +87,7 @@ export function SearchField({
         <Input
           value={value}
           onChange={(e) => onChange(e.currentTarget.value)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("searchField.placeholder")}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -103,7 +105,7 @@ export function SearchField({
 
       {showCounter && (
         <span className="flex-none whitespace-nowrap px-1 text-hint tabular-nums text-tertiary">
-          {matchCount === 0 ? "0 results" : `${activeMatch ?? 1} of ${matchCount}`}
+          {matchCount === 0 ? t("searchField.noResults") : t("searchField.matchOf", { current: activeMatch ?? 1, total: matchCount })}
         </span>
       )}
 
@@ -112,7 +114,7 @@ export function SearchField({
           <button
             type="button"
             onClick={onPrev}
-            aria-label="Previous match"
+            aria-label={t("searchField.previousMatch")}
             className="flex h-6 w-6 items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
           >
             <Icon icon={ArrowUp01Icon} size="sm" />
@@ -120,7 +122,7 @@ export function SearchField({
           <button
             type="button"
             onClick={onNext}
-            aria-label="Next match"
+            aria-label={t("searchField.nextMatch")}
             className="flex h-6 w-6 items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
           >
             <Icon icon={ArrowDown01Icon} size="sm" />
@@ -132,7 +134,7 @@ export function SearchField({
         <button
           type="button"
           onClick={() => onChange("")}
-          aria-label="Clear search"
+          aria-label={t("searchField.clear")}
           className="flex h-6 w-6 flex-none items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
         >
           <Icon icon={Cancel01Icon} size="sm" />

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import type { FieldDTO } from "@/models/user/fields";
 import type { AutomationDefinition } from "@/models/automations";
@@ -26,16 +27,17 @@ export function ForWhomCard({
   matchingCount: number | null;
   onChange: (patch: Partial<AutomationDefinition>) => void;
 }) {
+  const t = useTranslations("automations");
   const segment = definition.conditions;
   return (
     <SentenceCard
-      word="For whom"
+      word={t("clause.forWhom")}
       summary={
         <>
           {summary}
           {matchingCount != null && (
             <span className="ml-2 text-primary" data-test="for-whom-count">
-              · {matchingCount} {matchingCount === 1 ? "person matches" : "people match"} now
+              · {t("forWhom.matching", { count: matchingCount })}
             </span>
           )}
         </>
@@ -47,10 +49,7 @@ export function ForWhomCard({
         value={segment.filters}
         onChange={(filters) => onChange({ conditions: { ...segment, filters } })}
       />
-      <p className="m-0 text-hint text-tertiary">
-        With no conditions the rule is for everyone. The conditions are checked when a run is planned
-        and again just before each step.
-      </p>
+      <p className="m-0 text-hint text-tertiary">{t("forWhom.hint")}</p>
     </SentenceCard>
   );
 }

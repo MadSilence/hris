@@ -14,6 +14,8 @@ export type CompanySetupDTO = {
   seededPeople: number;
   /** What is being built right now; null unless RUNNING. */
   step: string | null;
+  /** The same as a code — a `CompanySetupStep` name; absent from a backend that predates it. */
+  stepCode?: string | null;
   /** Why it stopped; null unless FAILED. */
   errorDetail: string | null;
   completedAt: string | null;
@@ -24,6 +26,8 @@ export type CompanySetupSubmitRequest = {
   sizeBand: CompanySizeBand | null;
   countryCode: string | null;
   dataset: CompanySetupDataset;
+  /** A `Language` code; the application speaks it to the company from the first screen after setup. */
+  language: string | null;
 };
 
 /** A country the setup can offer, with what choosing it would set. */

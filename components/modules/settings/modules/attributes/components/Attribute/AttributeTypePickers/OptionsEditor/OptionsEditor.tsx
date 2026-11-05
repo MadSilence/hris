@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { Button } from "@/components/desact/button";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
@@ -27,6 +28,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
   onChange,
   disabled = false,
 }) => {
+  const t = useTranslations("settings.attributes.options");
   const needsOptions = isOptionsType(type);
 
   const [local, setLocal] = React.useState<AttributeOptionUpsert[]>(
@@ -110,21 +112,21 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
         {local.map((option, index) => (
           <div key={option.id ?? `new-${index}`} className="flex items-center gap-2">
             <Input
-              placeholder={`Option ${index + 1}`}
+              placeholder={t("option", { number: index + 1 })}
               value={option.value}
               onChange={(e) =>
                 updateOption(index, {
                   value: e.currentTarget.value,
                 })
               }
-              aria-label={`Option ${index + 1}`}
+              aria-label={t("option", { number: index + 1 })}
               disabled={disabled}
             />
 
             <TagColorPicker
               value={option.color}
               onChange={(color) => updateOption(index, { color })}
-              ariaLabel={`Color for option ${index + 1}`}
+              ariaLabel={t("optionColor", { number: index + 1 })}
               disabled={disabled}
             />
 
@@ -133,8 +135,8 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
               variant="ghost"
               size="icon" className="shrink-0 text-tertiary hover:text-danger-text"
               onClick={() => removeOption(index)}
-              aria-label={`Remove option ${index + 1}`}
-              title="Remove option"
+              aria-label={t("removeOptionNumbered", { number: index + 1 })}
+              title={t("removeOption")}
               disabled={disabled}
             >
               <Icon icon={Delete02Icon} size="sm" />
@@ -150,7 +152,7 @@ export const OptionsEditor: React.FC<OptionsEditorProps> = ({
         className="flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Icon icon={Add01Icon} size="sm" />
-        Add option
+        {t("addOption")}
       </button>
     </div>
   );

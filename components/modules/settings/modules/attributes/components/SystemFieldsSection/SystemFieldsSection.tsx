@@ -1,6 +1,8 @@
 "use client";
 
 import { FC, useMemo } from "react";
+import { fieldGroupLabel } from "@/models/user/fieldLabels";
+import { useTranslations } from "next-intl";
 import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -21,30 +23,35 @@ const GRID =
 /** Display order of the registry's groups; anything unexpected sorts to the end. */
 const GROUP_ORDER = ["Account", "Employment", "Organization"];
 
-const SOURCE_LABELS: Record<string, string> = {
-  offices: "Offices",
-  legalEntities: "Legal entities",
-  jobs: "Job catalog",
-  departments: "Departments",
-  teams: "Teams",
-  calendars: "Holiday calendars",
-  roles: "Roles",
-  policies: "Time off policies",
-  people: "People",
-};
+const SOURCE_LABELS = {
+  offices: "sources.offices",
+  legalEntities: "sources.legalEntities",
+  jobs: "sources.jobs",
+  departments: "sources.departments",
+  teams: "sources.teams",
+  calendars: "sources.calendars",
+  roles: "sources.roles",
+  policies: "sources.policies",
+  people: "sources.people",
+} as const;
+
+type SourceLabelKey = (typeof SOURCE_LABELS)[keyof typeof SOURCE_LABELS];
+
+type SystemFieldsTranslator = ReturnType<typeof useTranslations<"settings.attributes.systemFields">>;
 
 /** One line of context per field — the same column the custom attributes use for their config. */
-function fieldDetails(field: FieldDTO): string {
+function fieldDetails(field: FieldDTO, t: SystemFieldsTranslator): string {
   if (isReferenceField(field)) {
-    const source = SOURCE_LABELS[field.valueSource ?? ""] ?? field.valueSource ?? "";
-    return field.cardinality === "MANY" ? `Many from ${source}` : `One from ${source}`;
+    const key: SourceLabelKey | undefined = SOURCE_LABELS[(field.valueSource ?? "") as keyof typeof SOURCE_LABELS];
+    const source = key ? t(key) : field.valueSource ?? "";
+    return field.cardinality === "MANY" ? t("manyFrom", { source }) : t("oneFrom", { source });
   }
 
   if (field.options?.length) {
-    return `${field.options.length} fixed values`;
+    return t("fixedValues", { count: field.options.length });
   }
 
-  return "Built-in";
+  return t("builtIn");
 }
 
 /**
@@ -54,6 +61,9 @@ function fieldDetails(field: FieldDTO): string {
  * visibility, and that lives in Roles → Field access.
  */
 export const SystemFieldsSection: FC = () => {
+  const t = useTranslations("settings.attributes.systemFields");
+  const tList = useTranslations("settings.attributes.list");
+  const tAccess = useTranslations("access");
   const { data: fields, isLoading } = useUserFields();
 
   const groups = useMemo(() => {
@@ -85,12 +95,12 @@ export const SystemFieldsSection: FC = () => {
           <AccordionItem key={name} value={name} className="border-b-0">
             <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
               <span className="flex items-center gap-2">
-                {name}
+                {fieldGroupLabel(tAccess, name)}
                 <span className="normal-case text-tertiary">
                   ({groupFields.length})
                 </span>
                 <Badge variant="neutral" className="font-normal normal-case">
-                  System
+                  {tList("system")}
                 </Badge>
               </span>
             </AccordionTrigger>
@@ -104,11 +114,11 @@ export const SystemFieldsSection: FC = () => {
                       <AttributeTypeChip type={field.type} />
                     </span>
                     <span className="truncate text-body text-tertiary">
-                      {fieldDetails(field)}
+                      {fieldDetails(field, t)}
                     </span>
                     <span
                       className="flex justify-end text-disabled"
-                      title="System fields can't be edited or deleted"
+                      title={t("locked")}
                     >
                       <Icon icon={SquareLock02Icon} size="sm" />
                     </span>

@@ -1,36 +1,41 @@
-import type { HolidayCalendarBindingKind, HolidayCalendarBindingPreview } from "@/models/publicHolidays/binding";
+import type { useTranslations } from "next-intl";
+import type { HolidayCalendarBindingPreview } from "@/models/publicHolidays/binding";
 
-const people = (n: number) => (n === 1 ? "1 person" : `${n} people`);
-
-/** Whom a more specific binding reaches instead, worded for the binding being set. */
-const moreSpecific = (kind: HolidayCalendarBindingKind) =>
-  kind === "LEGAL_ENTITY" ? "their office's calendar" : "their office's or legal entity's calendar";
+type TimeOffT = ReturnType<typeof useTranslations<"timeOff">>;
 
 /**
  * The preview as sentences — "12 people will get Germany 2026. 3 people already have it by hand and will
  * now inherit it. 2 people keep their own calendar as an override." A line with nothing to say is left out.
  */
-export const previewLines = (preview: HolidayCalendarBindingPreview, currentCalendarName: string | null): string[] => {
+export const previewLines = (
+  preview: HolidayCalendarBindingPreview,
+  currentCalendarName: string | null,
+  t: TimeOffT,
+): string[] => {
   if (!preview.calendarId) {
-    if (preview.losing === 0) return ["Nobody inherits a calendar from here now, so nothing changes for anyone."];
+    if (preview.losing === 0) return [t("binding.preview.nothingChanges")];
     return [
-      `${people(preview.losing)} will stop inheriting ${currentCalendarName ?? "this calendar"} from today and fall back to the next binding down, if there is one.`,
+      t("binding.preview.losing", {
+        count: preview.losing,
+        name: currentCalendarName ?? t("binding.preview.thisCalendar"),
+      }),
     ];
   }
-  const name = preview.calendarName ?? "this calendar";
-  if (preview.members === 0) return [`Nobody works here yet. Whoever joins will get ${name}.`];
+  const name = preview.calendarName ?? t("binding.preview.thisCalendar");
+  if (preview.members === 0) return [t("binding.preview.nobodyYet", { name })];
   const lines: string[] = [];
   if (preview.willInherit > 0) {
-    lines.push(`${people(preview.willInherit)} will get ${name}.`);
+    lines.push(t("binding.preview.willGet", { count: preview.willInherit, name }));
   }
   if (preview.alreadyByHand > 0) {
-    lines.push(`${people(preview.alreadyByHand)} already ${preview.alreadyByHand === 1 ? "has" : "have"} it by hand and will now inherit it.`);
+    lines.push(t("binding.preview.alreadyByHand", { count: preview.alreadyByHand }));
   }
   if (preview.keepOwn > 0) {
-    lines.push(`${people(preview.keepOwn)} ${preview.keepOwn === 1 ? "keeps" : "keep"} their own calendar as an override.`);
+    lines.push(t("binding.preview.keepOwn", { count: preview.keepOwn }));
   }
   if (preview.outranked > 0) {
-    lines.push(`${people(preview.outranked)} ${preview.outranked === 1 ? "keeps" : "keep"} ${moreSpecific(preview.kind)}, which comes first.`);
+    // Whom a more specific binding reaches instead, worded for the binding being set.
+    lines.push(t("binding.preview.outranked", { count: preview.outranked, kind: preview.kind }));
   }
   return lines;
 };

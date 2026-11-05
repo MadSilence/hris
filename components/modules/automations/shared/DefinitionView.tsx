@@ -2,12 +2,9 @@
 
 import React from "react";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
-import {
-  actionSentence,
-  offsetText,
-  triggerSentence,
-  type AutomationDefinition,
-} from "@/models/automations";
+import { useTranslations } from "next-intl";
+import type { AutomationDefinition } from "@/models/automations";
+import { actionSentence, offsetText, triggerSentence } from "./vocabulary";
 import { conditionsSentence, typesInDefinition } from "./sentence";
 import { startsReviews, useAutomationNames } from "./useAutomationNames";
 
@@ -25,22 +22,24 @@ function Clause({ word, children }: { word: string; children: React.ReactNode })
  * rule but not change it. The same three clauses the builder edits.
  */
 export function DefinitionView({ definition }: { definition: AutomationDefinition }) {
+  const t = useTranslations("automations");
+  const tAccess = useTranslations("access");
   const { data: fields } = useUserFields();
   const names = useAutomationNames(typesInDefinition(definition, fields), true, startsReviews(definition));
 
   return (
     <div className="divide-y divide-divider">
-      <Clause word="When">
-        {triggerSentence(definition.trigger)}
-        {definition.latePolicy === "SKIP" && <span className="text-tertiary"> · skipped if the date is already past</span>}
+      <Clause word={t("clause.when")}>
+        {triggerSentence(t, definition.trigger)}
+        {definition.latePolicy === "SKIP" && <span className="text-tertiary"> · {t("definition.skippedIfPast")}</span>}
       </Clause>
-      <Clause word="For whom">{conditionsSentence(definition.conditions, fields, names.targets)}</Clause>
-      <Clause word="Do">
+      <Clause word={t("clause.forWhom")}>{conditionsSentence(t, tAccess, definition.conditions, fields, names.targets)}</Clause>
+      <Clause word={t("clause.do")}>
         <ol className="m-0 list-decimal space-y-2 pl-5">
           {definition.actions.map((a, i) => (
             <li key={i}>
-              <span>{actionSentence(a, { targets: names.targets, roles: names.roles })}</span>
-              <span className="text-tertiary"> · {offsetText(a.offsetDays)}</span>
+              <span>{actionSentence(t, a, { targets: names.targets, roles: names.roles })}</span>
+              <span className="text-tertiary"> · {offsetText(t, a.offsetDays)}</span>
               {a.type === "SEND_EMAIL" && a.body && (
                 <p className="m-0 mt-1 whitespace-pre-line text-hint text-tertiary">{a.body}</p>
               )}

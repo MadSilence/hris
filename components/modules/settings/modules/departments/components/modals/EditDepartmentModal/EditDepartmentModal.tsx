@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useEffect, useMemo, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -22,6 +23,8 @@ import { FieldError } from "@/components/desact/field-error";
 
 const ROOT_VALUE = "none";
 
+type SharedTranslator = ReturnType<typeof useTranslations<"structure.shared">>;
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -29,14 +32,18 @@ type Props = {
   parentOptions: DepartmentTreeNode[];
 };
 
-const validationSchema = Yup.object({
-  name: Yup.string().trim().required("Name is required"),
+const buildValidationSchema = (tShared: SharedTranslator) => Yup.object({
+  name: Yup.string().trim().required(tShared("nameRequired")),
   code: Yup.string().trim().nullable(),
   description: Yup.string().trim().nullable(),
   parentId: Yup.string().nullable(),
 });
 
 export function EditDepartmentModal({ open, onClose, department, parentOptions }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
+  const validationSchema = useMemo(() => buildValidationSchema(tShared), [tShared]);
   const updateDepartment = useUpdateDepartment();
 
   const [lead, setLeadUser] = useState<PickedUser | null>(
@@ -94,12 +101,12 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent onKeyDown={handleKeyDown} className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit {department.name}</DialogTitle>
+          <DialogTitle>{t("edit.title", { name: department.name })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <RequiredLabel htmlFor="edit-dept-name" required>Name</RequiredLabel>
+            <RequiredLabel htmlFor="edit-dept-name" required>{tCommon("fields.name")}</RequiredLabel>
             <Input
               id="edit-dept-name"
               name="name"
@@ -113,7 +120,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-dept-code">Code</Label>
+            <Label htmlFor="edit-dept-code">{tShared("code")}</Label>
             <Input
               id="edit-dept-code"
               name="code"
@@ -123,7 +130,7 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-dept-description">Description</Label>
+            <Label htmlFor="edit-dept-description">{tCommon("fields.description")}</Label>
             <Input
               id="edit-dept-description"
               name="description"
@@ -133,10 +140,10 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-dept-parent">Parent department</Label>
+            <Label htmlFor="edit-dept-parent">{t("labels.parent")}</Label>
             <SearchableSelect
               id="edit-dept-parent"
-              options={[{ value: ROOT_VALUE, label: "None" }, ...activeOptions.map((n) => ({ value: n.id, label: n.name }))]}
+              options={[{ value: ROOT_VALUE, label: tCommon("values.none") }, ...activeOptions.map((n) => ({ value: n.id, label: n.name }))]}
               value={formik.values.parentId || ROOT_VALUE}
               onChange={(v) => formik.setFieldValue("parentId", !v || v === ROOT_VALUE ? "" : v)}
               clearable={false}
@@ -144,21 +151,21 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           </div>
 
           <div className="space-y-1.5">
-            <Label>Department lead</Label>
-            <UserPickerField value={lead} onChange={setLeadUser} placeholder="Search for a person" />
+            <Label>{t("labels.lead")}</Label>
+            <UserPickerField value={lead} onChange={setLeadUser} placeholder={tShared("searchPerson")} />
           </div>
 
           {updateDepartment.isError && (
-            <FormError message={(updateDepartment.error as Error)?.message ?? "An error occurred."} />
+            <FormError message={(updateDepartment.error as Error)?.message ?? tShared("errorOccurred")} />
           )}
         </div>
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
-            {busy ? "Saving…" : "Save"}
+            {busy ? tCommon("actions.saving") : tCommon("actions.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon, UserAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -37,7 +38,8 @@ function AssignmentRow({
 }) {
   // The person arrives with the assignment. Fetching them per row meant one request per assignee
   // and the word "Loading…" where a name belongs — on a policy with fifty people, fifty requests.
-  const name = assignment.person?.name ?? "Unnamed";
+  const t = useTranslations("timeOff");
+  const name = assignment.person?.name ?? t("policies.assignments.unnamed");
 
   return (
     <div className="group flex items-center justify-between gap-2 rounded-control py-1 pl-3 pr-1 hover:bg-subtle">
@@ -48,8 +50,9 @@ function AssignmentRow({
           avatarUrl={assignment.person?.avatarUrl}
         />
         <span className="hidden text-hint text-tertiary sm:inline">
-          from {assignment.effectiveFrom}
-          {assignment.effectiveTo ? ` to ${assignment.effectiveTo}` : ""}
+          {assignment.effectiveTo
+            ? t("policies.assignments.fromTo", { from: assignment.effectiveFrom, to: assignment.effectiveTo })
+            : t("policies.assignments.from", { from: assignment.effectiveFrom })}
         </span>
       </div>
 
@@ -61,8 +64,8 @@ function AssignmentRow({
         <button
           type="button"
           onClick={() => onEnd(assignment)}
-          aria-label="End assignment"
-          title="End assignment"
+          aria-label={t("policies.assignments.end")}
+          title={t("policies.assignments.end")}
           className="flex h-7 w-7 flex-none items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text"
         >
           <Icon icon={Cancel01Icon} size="sm" />
@@ -73,6 +76,7 @@ function AssignmentRow({
 }
 
 export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchived }) => {
+  const t = useTranslations("timeOff");
   const [assignOpen, setAssignOpen] = useState(false);
   /** The assignment whose ending is being confirmed. */
   const [ending, setEnding] = useState<TimeOffPolicyAssignment | null>(null);
@@ -116,14 +120,12 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   const endModal = (
     <ConfirmActionModal
       isOpen={ending !== null}
-      title="End this assignment?"
-      description={
-        <>
-          {ending?.person?.name ?? "This person"} comes off {policyName} now. The assignment stays on
-          this tab among the ended ones.
-        </>
-      }
-      confirmLabel="End assignment"
+      title={t("policies.assignments.endTitle")}
+      description={t("policies.assignments.endDescription", {
+        name: ending?.person?.name ?? t("policies.assignments.thisPerson"),
+        policy: policyName,
+      })}
+      confirmLabel={t("policies.assignments.end")}
       isLoading={endMutation.isPending}
       errorMessage={endError}
       onConfirmAction={handleEnd}
@@ -138,7 +140,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
       basePath="/time-off/policies"
       assignableId={policyId}
       assignableName={policyName}
-      noun="policy"
+      kind="policy"
       semantics="add"
       temporal
       invalidateKeys={[getTimeOffPolicyAssignmentsQueryKey(policyId)]}
@@ -150,7 +152,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
   const assignButton = !isArchived && (
     <Button type="button" size="sm" className="gap-1.5" onClick={() => setAssignOpen(true)}>
       <Icon icon={UserAdd01Icon} size="sm" />
-      Assign people
+      {t("policies.assignments.assign")}
     </Button>
   );
 
@@ -180,9 +182,9 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           <div className="mb-4 rounded-card bg-subtle p-4">
             <Icon icon={UserGroupIcon} size="lg" className="text-secondary" />
           </div>
-          <h3 className="text-body font-semibold text-primary">No one is assigned yet</h3>
+          <h3 className="text-body font-semibold text-primary">{t("policies.assignments.emptyTitle")}</h3>
           <p className="mt-2 max-w-md text-body text-tertiary">
-            Assign this policy to people — individually or by segment — to give them this time off.
+            {t("policies.assignments.emptyHint")}
           </p>
           {assignButton && <div className="mt-5">{assignButton}</div>}
           <HistoryToggle showing={showHistory} onChange={setShowHistory} className="mt-3" />
@@ -201,7 +203,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             <Skeleton className="h-4 w-28" />
           ) : error ? null : (
             <p className="text-body text-tertiary">
-              {active.length} {active.length === 1 ? "person" : "people"} assigned
+              {t("policies.assignments.assignedCount", { count: active.length })}
             </p>
           )}
           {ended.length > 0 && (
@@ -211,7 +213,9 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
               className="text-hint text-tertiary"
               onClick={() => setShowEnded((v) => !v)}
             >
-              {showEnded ? "Hide" : "Show"} {ended.length} ended
+              {showEnded
+                ? t("policies.assignments.hideEnded", { count: ended.length })
+                : t("policies.assignments.showEnded", { count: ended.length })}
             </Button>
           )}
         </div>
@@ -232,7 +236,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
             ))}
           </div>
         ) : error ? (
-          <FieldError className="py-6 text-center">Failed to load assignments.</FieldError>
+          <FieldError className="py-6 text-center">{t("policies.assignments.loadFailed")}</FieldError>
         ) : (
           <div className="flex flex-col">
             {shown.map((assignment) => (

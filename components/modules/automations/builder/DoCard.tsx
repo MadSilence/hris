@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, ArrowDown01Icon, ArrowDown02Icon, ArrowRight01Icon, ArrowUp02Icon, CalendarCheckIn01Icon, CheckListIcon, Delete02Icon, Mail01Icon, Notification01Icon, TaskDone01Icon, Clock01Icon, CheckmarkBadge01Icon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -12,15 +13,8 @@ import {
 } from "@/components/desact/dropdown-menu";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
-import {
-  ACTION_LABELS,
-  actionSentence,
-  offsetText,
-  type ActionSpec,
-  type AutomationActionType,
-  type AutomationCatalog,
-  type AutomationDefinition,
-} from "@/models/automations";
+import type { ActionSpec, AutomationActionType, AutomationCatalog, AutomationDefinition } from "@/models/automations";
+import { actionSentence, offsetText } from "@/components/modules/automations/shared/vocabulary";
 import { ActionEditor } from "./ActionEditor";
 import type { FieldDTO } from "@/models/user/fields";
 import { newAction } from "./draft";
@@ -58,6 +52,8 @@ export function DoCard({
   isLoadingFields?: boolean;
   onChange: (patch: Partial<AutomationDefinition>) => void;
 }) {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const actions = definition.actions;
   const [open, setOpen] = useState<number | null>(actions.length === 1 ? 0 : null);
   const [removing, setRemoving] = useState<number | null>(null);
@@ -82,9 +78,9 @@ export function DoCard({
   };
 
   return (
-    <SentenceCard word="Do" summary={actions.length ? `${actions.length} ${actions.length === 1 ? "action" : "actions"}, in this order` : "Nothing yet"} last>
+    <SentenceCard word={t("clause.do")} summary={actions.length ? t("do.summary", { count: actions.length }) : t("do.nothingYet")} last>
       {actions.length === 0 ? (
-        <p className="m-0 text-body text-tertiary">Add what should happen — an email, a task, an assignment.</p>
+        <p className="m-0 text-body text-tertiary">{t("do.empty")}</p>
       ) : (
         <ol className="m-0 list-none space-y-2 p-0">
           {actions.map((action, i) => {
@@ -103,20 +99,20 @@ export function DoCard({
                     <Icon icon={actionIcon} size="sm" className="flex-none text-tertiary" />
                     <span className="min-w-0">
                       <span className="block truncate text-body text-primary">
-                        {actionSentence(action, { targets: names.targets, roles: names.roles })}
+                        {actionSentence(t, action, { targets: names.targets, roles: names.roles })}
                       </span>
-                      <span className="block text-hint text-tertiary">{offsetText(action.offsetDays)}</span>
+                      <span className="block text-hint text-tertiary">{offsetText(t, action.offsetDays)}</span>
                     </span>
                   </button>
-                  <RowActionsMenu label={`Actions for step ${i + 1}`}>
+                  <RowActionsMenu label={t("do.stepMenu", { step: i + 1 })}>
                     <RowAction icon={<Icon icon={ArrowUp02Icon} size="sm" className="text-tertiary" />} onClick={() => move(i, -1)} disabled={i === 0}>
-                      Move up
+                      {t("do.moveUp")}
                     </RowAction>
                     <RowAction icon={<Icon icon={ArrowDown02Icon} size="sm" className="text-tertiary" />} onClick={() => move(i, 1)} disabled={i === actions.length - 1}>
-                      Move down
+                      {t("do.moveDown")}
                     </RowAction>
                     <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setRemoving(i)}>
-                      Remove
+                      {tCommon("actions.remove")}
                     </RowActionDestructive>
                   </RowActionsMenu>
                 </div>
@@ -144,7 +140,7 @@ export function DoCard({
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="secondary" size="sm" className="gap-1.5">
             <Icon icon={Add01Icon} size="sm" />
-            Add action
+            {t("do.add")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 rounded-control p-1">
@@ -153,7 +149,7 @@ export function DoCard({
             return (
               <DropdownMenuItem key={type} onClick={() => add(type)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
                 <Icon icon={actionIcon} size="sm" className="text-tertiary" />
-                {ACTION_LABELS[type]}
+                {t(`action.label.${type}`)}
               </DropdownMenuItem>
             );
           })}
@@ -162,9 +158,9 @@ export function DoCard({
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove action"
-        description="This action is taken out of the draft. Nothing changes until you publish."
-        confirmLabel="Remove"
+        title={t("do.removeTitle")}
+        description={t("do.removeDescription")}
+        confirmLabel={tCommon("actions.remove")}
         destructive
         onConfirmAction={() => { if (removing !== null) remove(removing); }}
         onCancelAction={() => setRemoving(null)}

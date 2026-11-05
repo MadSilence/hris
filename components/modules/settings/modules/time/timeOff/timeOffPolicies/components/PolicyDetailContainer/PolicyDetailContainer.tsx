@@ -5,6 +5,7 @@ import { showError } from "@/lib/errors/errorToast";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Archive02Icon, Delete02Icon, PencilEdit02Icon, PlayIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -71,6 +72,8 @@ const policyStatus = (status: TimeOffPolicyStatus): EntityStatus => {
 };
 
 export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const listHref = `/settings/time/leave-type/${leaveTypeId}/policies`;
 
@@ -172,7 +175,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
     } catch (error) {
       // Deleting an active policy is refused by the backend; the dialog stays open and now has
       // somewhere to print the reason, which is what made TIME_OFF_POLICY_IN_USE invisible.
-      setDeleteError(error instanceof Error ? error.message : "The policy could not be deleted.");
+      setDeleteError(error instanceof Error ? error.message : t("policies.detail.deleteFailed"));
     }
   };
 
@@ -185,7 +188,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   if (isLoading || !policy) {
     return (
       <div className="px-8 pt-2">
-        <SettingsPageHeader title="Policy" backHref={listHref} />
+        <SettingsPageHeader title={t("policies.detail.fallbackTitle")} backHref={listHref} />
         <Skeleton className="mt-6 h-40 w-full rounded-control" />
       </div>
     );
@@ -204,7 +207,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
           <div className="flex items-center gap-2.5">
             <StatusBadge status={status}/>
             {leaveType && (
-              <span className="text-body text-tertiary">in {leaveType.name}</span>
+              <span className="text-body text-tertiary">{t("policies.detail.inLeaveType", { name: leaveType.name })}</span>
             )}
           </div>
 
@@ -217,7 +220,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
                 onClick={() => activateMutation.mutate({ id: policy.id })}
               >
                 <Icon icon={PlayIcon} size="sm" />
-                Activate
+                {t("policies.detail.activate")}
               </Button>
             )}
             {policy.status === TimeOffPolicyStatus.Active && (
@@ -228,7 +231,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
                 onClick={() => archiveMutation.mutateAsync({ id: policy.id }).catch(showError)}
               >
                 <Icon icon={Archive02Icon} size="sm" />
-                Archive
+                {tCommon("actions.archive")}
               </Button>
             )}
             {isDraft && (
@@ -239,13 +242,13 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
                 onClick={() => setIsDeleteOpen(true)}
               >
                 <Icon icon={Delete02Icon} size="sm" />
-                Delete
+                {tCommon("actions.delete")}
               </Button>
             )}
             {!isArchived && (
               <Button type="button" size="sm" className="gap-1.5" onClick={() => setIsEditOpen(true)}>
                 <Icon icon={PencilEdit02Icon} size="sm" />
-                Edit
+                {tCommon("actions.edit")}
               </Button>
             )}
           </div>
@@ -254,10 +257,10 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
 
       <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col px-8 pt-5">
         <TabsList className="flex-none">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="overview">{t("policies.detail.tabOverview")}</TabsTrigger>
           <TabsTrigger value="assignments" className="gap-1.5">
             <Icon icon={UserGroupIcon} size="sm" />
-            Assignments
+            {t("policies.detail.tabAssignments")}
           </TabsTrigger>
         </TabsList>
 

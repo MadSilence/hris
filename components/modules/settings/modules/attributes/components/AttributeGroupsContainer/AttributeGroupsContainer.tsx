@@ -3,8 +3,9 @@
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 
 import { showError } from "@/lib/errors/errorToast";
-import { FALLBACK_ERROR_MESSAGE, messageForError } from "@/lib/errors/errorMessages";
+import { fallbackErrorMessage, messageForError } from "@/lib/errors/errorMessages";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CreateGroupModal } from "../AttributeGroup/CreateGroupModal";
 import { useCreateAttributeGroupAction } from "../../hooks/AttributeGroup/useCreateAttributeGroupAction";
@@ -33,6 +34,8 @@ import { AttributeGroupsComponent } from "@/components/modules/settings/modules/
 import { Loader } from "@/components/ui/Loader";
 
 export default function AttributeGroupsContainer() {
+  const t = useTranslations("settings.attributes.duplicate");
+  const tCommon = useTranslations("common");
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
   const [isCreateAttributeModalOpen, setIsCreateAttributeModalOpen] = useState(false);
 
@@ -148,7 +151,7 @@ export default function AttributeGroupsContainer() {
           version: editVersionRef.current,
         });
         if (updated.status === ActionStatus.ERROR) {
-          setEditAttributeError(updated.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+          setEditAttributeError(updated.errorMessage ?? fallbackErrorMessage());
           return false;
         }
         editVersionRef.current = updated.data?.version;
@@ -163,7 +166,7 @@ export default function AttributeGroupsContainer() {
             version: editVersionRef.current,
           });
           if (saved.status === ActionStatus.ERROR) {
-            setEditAttributeError(saved.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+            setEditAttributeError(saved.errorMessage ?? fallbackErrorMessage());
             return false;
           }
           invalidateGroups();
@@ -273,9 +276,9 @@ export default function AttributeGroupsContainer() {
 
       <ConfirmActionModal
         isOpen={!!attributeToDuplicate}
-        title={`Duplicate "${attributeToDuplicate?.name ?? ""}"?`}
-        description="A copy of this field's definition and options is added at the end of the same section. Nobody's values are copied."
-        confirmLabel="Duplicate"
+        title={t("title", { name: attributeToDuplicate?.name ?? "" })}
+        description={t("description")}
+        confirmLabel={tCommon("actions.duplicate")}
         isLoading={duplicateAttributeAction.isPending}
         errorMessage={duplicateError}
         onConfirmAction={confirmDuplicateAttribute}

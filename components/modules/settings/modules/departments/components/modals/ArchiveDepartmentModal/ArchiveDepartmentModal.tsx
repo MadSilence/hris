@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -34,6 +35,9 @@ function sumDescendantMembers(node: DepartmentTreeNode): number {
 export function ArchiveDepartmentModal({
   open, onClose, department, allDepartments, onArchived,
 }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const archiveDepartment = useArchiveDepartment();
 
   const [childrenStrategy, setChildrenStrategy] =
@@ -77,18 +81,15 @@ export function ArchiveDepartmentModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Archive &ldquo;{department.name}&rdquo;</DialogTitle>
+          <DialogTitle>{t("archive.title", { name: department.name })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2 text-body text-secondary">
-          <p>
-            Archiving hides this department from active views. Choose how to handle its
-            sub-departments and members.
-          </p>
+          <p>{t("archive.intro")}</p>
 
           {hasChildren && (
             <div className="space-y-2">
-              <Label>Sub-departments</Label>
+              <Label>{t("labels.subUnits")}</Label>
               <RadioGroup
                 value={childrenStrategy}
                 onValueChange={(v) => setChildrenStrategy(v as DepartmentArchiveChildrenStrategy)}
@@ -96,13 +97,13 @@ export function ArchiveDepartmentModal({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="ARCHIVE_CASCADE" id="acs-cascade" />
                   <Label htmlFor="acs-cascade" className="mb-0 cursor-pointer font-normal">
-                    Archive all sub-departments
+                    {t("archive.archiveAllSub")}
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="PROMOTE" id="acs-promote" />
                   <Label htmlFor="acs-promote" className="mb-0 cursor-pointer font-normal">
-                    Promote all sub-departments to parent level
+                    {t("archive.promoteAllSub")}
                   </Label>
                 </div>
               </RadioGroup>
@@ -111,7 +112,7 @@ export function ArchiveDepartmentModal({
 
           {hasMembers && (
             <div className="space-y-2">
-              <Label>Members</Label>
+              <Label>{tShared("members")}</Label>
               <RadioGroup
                 value={effectiveMembersStrategy}
                 onValueChange={(v) => setMembersStrategy(v as DepartmentArchiveMembersStrategy)}
@@ -119,14 +120,14 @@ export function ArchiveDepartmentModal({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="UNASSIGN" id="ams-unassign" />
                   <Label htmlFor="ams-unassign" className="mb-0 cursor-pointer font-normal">
-                    Unassign users from this department
+                    {t("archive.unassignMembers")}
                   </Label>
                 </div>
                 {parent && (
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="ams-move" />
                     <Label htmlFor="ams-move" className="mb-0 cursor-pointer font-normal">
-                      Promote to parent level ({parent.name})
+                      {tShared("promoteToParentNamed", { parent: parent.name })}
                     </Label>
                   </div>
                 )}
@@ -136,7 +137,7 @@ export function ArchiveDepartmentModal({
 
           {cascading && subMembersCount > 0 && (
             <div className="space-y-2">
-              <Label>Members of Sub-departments</Label>
+              <Label>{t("labels.subMembers")}</Label>
               <RadioGroup
                 value={effectiveSubMembersStrategy}
                 onValueChange={(v) => setSubMembersStrategy(v as DepartmentArchiveMembersStrategy)}
@@ -144,14 +145,14 @@ export function ArchiveDepartmentModal({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="UNASSIGN" id="asms-unassign" />
                   <Label htmlFor="asms-unassign" className="mb-0 cursor-pointer font-normal">
-                    Unassign users from all sub-departments
+                    {t("archive.unassignSubMembers")}
                   </Label>
                 </div>
                 {parent && (
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="asms-move" />
                     <Label htmlFor="asms-move" className="mb-0 cursor-pointer font-normal">
-                      Promote all sub-department users to parent level ({parent.name})
+                      {t("labels.promoteSubMembers", { parent: parent.name })}
                     </Label>
                   </div>
                 )}
@@ -160,16 +161,16 @@ export function ArchiveDepartmentModal({
           )}
 
           {archiveDepartment.isError && (
-            <FormError message={(archiveDepartment.error as Error)?.message ?? "An error occurred."} />
+            <FormError message={(archiveDepartment.error as Error)?.message ?? tShared("errorOccurred")} />
           )}
         </div>
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={archiveDepartment.isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={handleArchive} disabled={archiveDepartment.isPending}>
-            {archiveDepartment.isPending ? "Archiving…" : "Archive"}
+            {archiveDepartment.isPending ? tShared("archiving") : tCommon("actions.archive")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { CalendarLock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -25,6 +26,7 @@ type Props = {
  * Sits next to the Balances preview so both read-and-act surfaces open the same way.
  */
 export const RequestsPreviewModal: FC<Props> = ({ isOpen, userId, onCloseAction }) => {
+  const t = useTranslations("calendar");
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
       <DialogContent size="lg">
@@ -34,9 +36,9 @@ export const RequestsPreviewModal: FC<Props> = ({ isOpen, userId, onCloseAction 
               <Icon icon={CalendarLock01Icon} />
             </span>
             <div>
-              <DialogTitle>Time off requests</DialogTitle>
+              <DialogTitle>{t("requestsPreview.title")}</DialogTitle>
               <DialogDescription>
-                Every request, newest first. Pending and approved ones can still be cancelled.
+                {t("requestsPreview.description")}
               </DialogDescription>
             </div>
           </div>

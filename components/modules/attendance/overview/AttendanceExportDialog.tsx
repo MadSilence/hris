@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/desact/badge";
 import {
   Dialog,
@@ -13,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FormError } from "@/components/feedback/FormError";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import {
   ExportDataForm,
   type ExportDataFormValues,
@@ -22,19 +23,20 @@ import { triggerExportPostDownload } from "@/components/modules/settings/shared/
 import type { AttendanceExportRequest, AttendanceReportRow } from "@/models/attendance";
 import type { FieldDTO } from "@/models/user/fields";
 import type { AttendanceView } from "./useAttendanceView";
-import { ATTENDANCE_COLUMNS, personName } from "./AttendanceTable";
+import { ATTENDANCE_COLUMNS, personName, type AttendanceColumnLabelKey } from "./AttendanceTable";
 import { FilterBadge } from "./FilterBadge";
 
 const PREVIEW_ROWS = 5;
 
-type FileColumn = { key: string; label: string; value: (r: AttendanceReportRow) => string; numeric?: boolean };
+type FileColumn = { key: string; labelKey: AttendanceColumnLabelKey; value: (r: AttendanceReportRow) => string; numeric?: boolean };
+type AttendanceTranslator = ReturnType<typeof useTranslations<"attendance">>;
 
 /** The file's word for a status — `AttendanceExportService.statusLabel`, which is not the directory's. */
-const fileStatus = (status: string | null) => {
+const fileStatus = (status: string | null, t: AttendanceTranslator) => {
   switch (status) {
-    case "ACTIVE": return "Active";
-    case "ARCHIVED": return "Archived";
-    case "PROSPECTIVE": return "Prospective";
+    case "ACTIVE": return t("export.fileStatus.ACTIVE");
+    case "ARCHIVED": return t("export.fileStatus.ARCHIVED");
+    case "PROSPECTIVE": return t("export.fileStatus.PROSPECTIVE");
     default: return status ?? "";
   }
 };
@@ -44,21 +46,21 @@ const fileStatus = (status: string | null) => {
  * table's columns are not these: the file adds Email and Status, and splits the amount from its
  * currency so a spreadsheet can sum it. The preview promises the file, so it prints the file.
  */
-const fileColumns = (money: boolean): FileColumn[] => [
-  { key: "email", label: "Email", value: (r) => r.person.email ?? "" },
-  { key: "status", label: "Status", value: (r) => fileStatus(r.person.status) },
+const fileColumns = (money: boolean, t: AttendanceTranslator): FileColumn[] => [
+  { key: "email", labelKey: "columns.email", value: (r) => r.person.email ?? "" },
+  { key: "status", labelKey: "columns.status", value: (r) => fileStatus(r.person.status, t) },
   ...ATTENDANCE_COLUMNS.map((column) => ({ ...column, numeric: true })),
   ...(money
     ? [
       {
         key: "amount",
-        label: "Amount",
+        labelKey: "columns.amount" as const,
         value: (r: AttendanceReportRow) => (r.totals.amounts ?? []).map((a) => String(a.amount)).join(" + "),
         numeric: true,
       },
       {
         key: "currency",
-        label: "Currency",
+        labelKey: "columns.currency" as const,
         value: (r: AttendanceReportRow) => (r.totals.amounts ?? []).map((a) => a.currency).join(" + "),
       },
     ]
@@ -76,7 +78,7 @@ type Props = {
   rows: AttendanceReportRow[];
 };
 
-const periodLabel = (from: string, to: string) =>
+const periodLabel = (from: string, to: string, formatDisplayDate: DateFormatter) =>
   `${formatDisplayDate(from, { style: "medium" })} – ${formatDisplayDate(to, { style: "medium" })}`;
 
 /**
@@ -86,6 +88,9 @@ const periodLabel = (from: string, to: string) =>
  * an unfiltered one look identical from inside an ordinary export dialog; this one does not.
  */
 export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, fields, total, rows }) => {
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
+  const formatDisplayDate = useDateFormatter();
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -120,38 +125,35 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
   // The server sends money only to a reader who may see the rate, and only when time is priced — the
   // same condition that puts Amount and Currency into the file.
   const money = rows.some((row) => row.totals.amounts != null);
-  const columns = fileColumns(money);
+  const columns = fileColumns(money, t);
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
       <DialogContent hideClose className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Export attendance</DialogTitle>
-          <DialogDescription>
-            The people in the current view, over the current period. Two sheets: a summary, one row a person,
-            and every logged entry.
-          </DialogDescription>
+          <DialogTitle>{t("export.title")}</DialogTitle>
+          <DialogDescription>{t("export.description")}</DialogDescription>
         </DialogHeader>
 
         <FormError message={errorMessage}/>
 
         <dl className="space-y-2 text-body">
           <div className="flex flex-wrap items-center gap-2">
-            <dt className="w-20 text-tertiary">Period</dt>
-            <dd><Badge variant="neutral">{periodLabel(view.period.from, view.period.to)}</Badge></dd>
+            <dt className="w-20 text-tertiary">{t("export.period")}</dt>
+            <dd><Badge variant="neutral">{periodLabel(view.period.from, view.period.to, formatDisplayDate)}</Badge></dd>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <dt className="w-20 text-tertiary">Search</dt>
-            <dd>{search ? <Badge variant="neutral">{search}</Badge> : <span className="text-tertiary">None</span>}</dd>
+            <dt className="w-20 text-tertiary">{t("export.search")}</dt>
+            <dd>{search ? <Badge variant="neutral">{search}</Badge> : <span className="text-tertiary">{tCommon("values.none")}</span>}</dd>
           </div>
           <div className="flex flex-wrap items-start gap-2">
-            <dt className="w-20 pt-0.5 text-tertiary">Filters</dt>
+            <dt className="w-20 pt-0.5 text-tertiary">{t("export.filters")}</dt>
             <dd className="flex min-w-0 flex-1 flex-wrap gap-1.5">
               {view.filters.length
                 ? view.filters.map((filter, index) => (
                   <FilterBadge key={index} filter={filter} fields={fields} />
                 ))
-                : <span className="text-tertiary">None — everyone in your reach</span>}
+                : <span className="text-tertiary">{t("export.noFilters")}</span>}
             </dd>
           </div>
         </dl>
@@ -161,10 +163,10 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
             <Table className="text-hint">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>{t("columns.name")}</TableHead>
                   {columns.map((column) => (
                     <TableHead key={column.key} className={column.numeric ? "text-right" : undefined}>
-                      {column.label}
+                      {t(column.labelKey)}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -187,7 +189,7 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
             </Table>
             {total !== null && total > preview.length && (
               <p className="border-t border-divider px-3 py-2 text-hint text-tertiary">
-                and {total - preview.length} more
+                {t("export.more", { count: total - preview.length })}
               </p>
             )}
           </div>
@@ -195,11 +197,8 @@ export const AttendanceExportDialog: React.FC<Props> = ({ open, onClose, view, f
 
         <ExportDataForm
           isLoading={busy}
-          includedText={money
-            ? "Included: the summary — name, email, status, the five numbers and the amount owed with its currency — and every logged entry with its date, times, hours, description, a note on days without a norm, and the rate it was logged at."
-            : "Included: the summary — name, email, status and the five numbers — and every logged entry with its date, times, hours, description and a note on days without a norm."}
-          rowCount={total ?? undefined}
-          rowNoun={total === 1 ? "person" : "people"}
+          includedText={money ? t("export.includedWithMoney") : t("export.included")}          rowCount={total ?? undefined}
+          rowKind="people"
           onCancelAction={close}
           onSubmitAction={onConfirm}
         />

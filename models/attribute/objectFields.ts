@@ -9,9 +9,23 @@ export const OBJECT_SUBFIELD_TYPES: ObjectSubfieldType[] = [
   AttributeType.DATE,
 ];
 
+/** Catalogue key (namespace `organization`) naming a preset sub-field; user-defined sub-fields have none. */
+export type ObjectPresetLabelKey =
+  | "objectFields.line1"
+  | "objectFields.line2"
+  | "objectFields.city"
+  | "objectFields.region"
+  | "objectFields.postalCode"
+  | "objectFields.country"
+  | "objectFields.amount"
+  | "objectFields.currency";
+
 export type ObjectFieldDef = {
   key: string;
+  /** What the company typed for a user-defined sub-field; for a preset it is only the key — show `labelKey`. */
   label: string;
+  /** Set on the ADDRESS/MONEY presets: their label is product text, translated where it renders. */
+  labelKey?: ObjectPresetLabelKey;
   /** Sub-field render type. User-defined OBJECT sub-fields are limited to OBJECT_SUBFIELD_TYPES;
    *  the ADDRESS/MONEY presets also use COUNTRY/CURRENCY (managed pickers). */
   type: AttributeType;
@@ -24,17 +38,17 @@ export type ObjectRecord = Record<string, unknown>;
 // ── Presets (fixed single-record composites on top of the object storage) ──────────
 
 export const ADDRESS_FIELDS: ObjectFieldDef[] = [
-  { key: "line1", label: "Address line 1", type: AttributeType.TEXT, sortOrder: 0 },
-  { key: "line2", label: "Address line 2", type: AttributeType.TEXT, sortOrder: 1 },
-  { key: "city", label: "City", type: AttributeType.TEXT, sortOrder: 2 },
-  { key: "region", label: "State / Region", type: AttributeType.TEXT, sortOrder: 3 },
-  { key: "postalCode", label: "Postal code", type: AttributeType.TEXT, sortOrder: 4 },
-  { key: "country", label: "Country", type: AttributeType.COUNTRY, sortOrder: 5 },
+  { key: "line1", label: "line1", labelKey: "objectFields.line1", type: AttributeType.TEXT, sortOrder: 0 },
+  { key: "line2", label: "line2", labelKey: "objectFields.line2", type: AttributeType.TEXT, sortOrder: 1 },
+  { key: "city", label: "city", labelKey: "objectFields.city", type: AttributeType.TEXT, sortOrder: 2 },
+  { key: "region", label: "region", labelKey: "objectFields.region", type: AttributeType.TEXT, sortOrder: 3 },
+  { key: "postalCode", label: "postalCode", labelKey: "objectFields.postalCode", type: AttributeType.TEXT, sortOrder: 4 },
+  { key: "country", label: "country", labelKey: "objectFields.country", type: AttributeType.COUNTRY, sortOrder: 5 },
 ];
 
 export const MONEY_FIELDS: ObjectFieldDef[] = [
-  { key: "amount", label: "Amount", type: AttributeType.NUMBER, sortOrder: 0 },
-  { key: "currency", label: "Currency", type: AttributeType.CURRENCY, sortOrder: 1 },
+  { key: "amount", label: "amount", labelKey: "objectFields.amount", type: AttributeType.NUMBER, sortOrder: 0 },
+  { key: "currency", label: "currency", labelKey: "objectFields.currency", type: AttributeType.CURRENCY, sortOrder: 1 },
 ];
 
 /** OBJECT + its single-record presets all use the object-row storage (value = array of records). */

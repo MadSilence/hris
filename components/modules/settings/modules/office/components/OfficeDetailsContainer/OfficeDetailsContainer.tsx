@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { showError } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -94,6 +95,9 @@ const mapOffice = (office: Office): FormValues => ({
 
 export default function OfficeDetailsContainer({ officeId }: Props) {
   const router = useRouter();
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
 
   const { data, isLoading, error } = useOffice();
   const updateAction = useUpdateOfficeAction();
@@ -145,7 +149,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
   if (!office) {
     return (
       <div className="px-8 py-6 text-body text-tertiary">
-        Office not found
+        {t("details.notFound")}
       </div>
     );
   }
@@ -229,11 +233,11 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
         <TabsList>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Icon icon={Building03Icon} size="sm" />
-            General information
+            {tPlaces("generalInformation")}
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
-            Assigned users
+            {tPlaces("assignedUsers")}
           </TabsTrigger>
         </TabsList>
 
@@ -242,18 +246,18 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-section-title text-primary">General information</h2>
+                  <h2 className="text-section-title text-primary">{tPlaces("generalInformation")}</h2>
                   {isArchived && (
                     <StatusBadge status="archived" className="font-normal" />
                   )}
                   {office.isRemote && (
                     <Badge variant="neutral" className="font-normal">
-                      Remote
+                      {t("remote")}
                     </Badge>
                   )}
                 </div>
                 <p className="text-body text-tertiary">
-                  Contact and address details for this office.
+                  {t("details.intro")}
                 </p>
               </div>
 
@@ -266,7 +270,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
                       >
-                        Archive
+                        {tCommon("actions.archive")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
@@ -275,7 +279,7 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
-                        Delete
+                        {tCommon("actions.delete")}
                       </Button>
                     </PermissionGate>
                     <Button type="button"
@@ -283,17 +287,17 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
-                      Cancel
+                      {tCommon("actions.cancel")}
                     </Button>
                     <Button type="button" onClick={handleSave} disabled={updateAction.isPending}>
-                      Save changes
+                      {tCommon("actions.saveChanges")}
                     </Button>
                   </>
                 ) : isArchived ? (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button" onClick={handleRestore} disabled={restoreAction.isPending}>
-                        Unarchive
+                        {tPlaces("unarchive")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="MANAGE">
@@ -302,14 +306,14 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
-                        Delete
+                        {tCommon("actions.delete")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button"
                         size="icon"
                         variant="secondary"
-                        aria-label="Export office"
+                        aria-label={t("details.export")}
                         onClick={() => setIsExportOpen(true)}
                       >
                         <Icon icon={Download01Icon} size="sm" />
@@ -319,13 +323,13 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                 ) : (
                   <>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                      <Button type="button" onClick={handleEdit}>Edit</Button>
+                      <Button type="button" onClick={handleEdit}>{tCommon("actions.edit")}</Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.OFFICE" action="EDIT">
                       <Button type="button"
                         size="icon"
                         variant="secondary"
-                        aria-label="Export office"
+                        aria-label={t("details.export")}
                         onClick={() => setIsExportOpen(true)}
                       >
                         <Icon icon={Download01Icon} size="sm" />
@@ -340,18 +344,18 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 
             <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
-        <SectionTitle icon={<Icon icon={Building03Icon} />} title="General"/>
+        <SectionTitle icon={<Icon icon={Building03Icon} />} title={tPlaces("general")}/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
-            label="Name"
+            label={tCommon("fields.name")}
             value={current.name}
             isEditing={isEditing}
             onChange={(value) => updateField("name", value)}
           />
 
           <div className="space-y-2">
-            <Label htmlFor="office-remote">Remote</Label>
+            <Label htmlFor="office-remote">{t("remote")}</Label>
             {isEditing ? (
               <label className="flex items-center gap-2 text-body text-primary">
                 <Checkbox
@@ -359,15 +363,15 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
                   checked={current.isRemote}
                   onCheckedChange={(c) => updateRemote(c === true)}
                 />
-                People here work from anywhere in the office&apos;s country
+                {t("remoteHint")}
               </label>
             ) : (
-              <p className="text-body text-primary">{current.isRemote ? "Yes" : "No"}</p>
+              <p className="text-body text-primary">{current.isRemote ? tCommon("values.yes") : tCommon("values.no")}</p>
             )}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label>Description</Label>
+            <Label>{tCommon("fields.description")}</Label>
             {isEditing ? (
               <Textarea
                 value={current.description}
@@ -388,39 +392,39 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<Icon icon={Location01Icon} />} title="Address"/>
+        <SectionTitle icon={<Icon icon={Location01Icon} />} title={tPlaces("address")}/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
-            label="Country"
+            label={tPlaces("country")}
             value={current.country}
             isEditing={isEditing}
             onChange={(value) => updateField("country", value)}
           />
 
           <Field
-            label="City"
+            label={tPlaces("city")}
             value={current.city}
             isEditing={isEditing}
             onChange={(value) => updateField("city", value)}
           />
 
           <Field
-            label="Street"
+            label={tPlaces("street")}
             value={current.street}
             isEditing={isEditing}
             onChange={(value) => updateField("street", value)}
           />
 
           <Field
-            label="Building"
+            label={tPlaces("building")}
             value={current.building}
             isEditing={isEditing}
             onChange={(value) => updateField("building", value)}
           />
 
           <Field
-            label="Post code"
+            label={tPlaces("postCode")}
             value={current.postCode}
             isEditing={isEditing}
             onChange={(value) => updateField("postCode", value)}
@@ -431,18 +435,18 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<Icon icon={Mail01Icon} />} title="Contact"/>
+        <SectionTitle icon={<Icon icon={Mail01Icon} />} title={t("details.contact")}/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
-            label="Email"
+            label={tCommon("fields.email")}
             value={current.email}
             isEditing={isEditing}
             onChange={(value) => updateField("email", value)}
           />
 
           <Field
-            label="Phone"
+            label={t("phone")}
             value={current.phone}
             isEditing={isEditing}
             onChange={(value) => updateField("phone", value)}
@@ -495,9 +499,9 @@ export default function OfficeDetailsContainer({ officeId }: Props) {
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title={`Export ${office.name}`}
-        description="Export this office's details and its assigned users."
-        includedText="Two sheets — General Information (name, description, email, phone, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+        title={tPlaces("exportNamed", { name: office.name })}
+        description={t("details.exportDescription")}
+        includedText={t("details.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -33,7 +34,9 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
   onRequestCloseAction,
   attribute,
 }) => {
-  const attributeName = attribute?.name ?? "Untitled attribute";
+  const t = useTranslations("settings.attributes.deleteModal");
+  const tCommon = useTranslations("common");
+  const attributeName = attribute?.name ?? t("untitled");
 
   const {
     data: impact,
@@ -59,10 +62,9 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
               <Icon icon={Delete02Icon} />
             </span>
             <div className="space-y-1">
-              <AlertDialogTitle>Delete attribute</AlertDialogTitle>
+              <AlertDialogTitle>{t("title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. Attribute{" "}
-                <strong>{attributeName}</strong> will be permanently deleted.
+                {t.rich("description", { name: attributeName, b: (chunks) => <strong>{chunks}</strong> })}
               </AlertDialogDescription>
             </div>
           </div>
@@ -73,14 +75,11 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
 
             <div>
-              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("warning")}</h4>
 
               <div className="space-y-1 text-body text-secondary">
                 {hasOptions && (
-                  <p>
-                    All options associated with this attribute will also be
-                    deleted.
-                  </p>
+                  <p>{t("optionsDeleted")}</p>
                 )}
 
                 {/*
@@ -90,45 +89,41 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
                   the one thing the reader is trying to find out before pressing Delete. The pattern
                   is `DeleteRoleModal`, one folder away.
                 */}
-                {isImpactLoading && <p>Checking how many people have a value for this\u2026</p>}
+                {isImpactLoading && <p>{t("impactLoading")}</p>}
 
                 {!isImpactLoading && !impact && !!impactError && (
                   <p>
-                    {messageForError(impactError)} Until then, how many values this deletes is
-                    unknown.
+                    {t("impactFailed", { error: messageForError(impactError) })}
                   </p>
                 )}
 
                 {!isImpactLoading && impact && impact.valueCount > 0 && (
                   <p>
-                    This will permanently delete{" "}
-                    <strong>{impact.valueCount}</strong> value
-                    {impact.valueCount === 1 ? "" : "s"} from{" "}
-                    <strong>{impact.peopleCount}</strong>{" "}
-                    {impact.peopleCount === 1 ? "person" : "people"}.
+                    {t.rich("impact", {
+                      valueCount: impact.valueCount,
+                      peopleCount: impact.peopleCount,
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })}
                   </p>
                 )}
 
                 {!isImpactLoading && impact && impact.valueCount === 0 && (
-                  <p>Nobody has a value for this attribute.</p>
+                  <p>{t("noValues")}</p>
                 )}
 
                 {/* Nothing asked yet, and nothing to report. */}
                 {!isImpactLoading && !impact && !impactError && (
-                  <p>Any values people have for it will be deleted with it.</p>
+                  <p>{t("valuesDeleted")}</p>
                 )}
 
-                <p>
-                  Any saved views or filters referencing this attribute will be
-                  updated. Deleted attributes cannot be restored.
-                </p>
+                <p>{t("viewsUpdated")}</p>
               </div>
             </div>
           </div>
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
 
           {/*
             Disabled *only* while the question is still open. Once the answer is in \u2014 or once we
@@ -143,7 +138,7 @@ export const DeleteAttributeModal: FC<DeleteAttributeModalProps> = ({
             }}
             destructive
           >
-            Delete attribute
+            {t("title")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,7 +1,8 @@
 "use client";
 
 import { partsToISO as toISO } from "@/lib/date";
-import { expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
+import { MONTH_KEYS, expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
+import { useTranslations } from "next-intl";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 
 import { FC, ReactNode, useEffect, useMemo, useState } from "react";
@@ -79,11 +80,8 @@ type Props = {
   footer?: (visibleDays: CalendarDayInfo[]) => ReactNode;
 };
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+/** Monday first; the labels are the catalogue's `weekdays.short.*`. */
+const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 const weekdayOffset = (jsDay: number) => (jsDay + 6) % 7;
 
@@ -198,6 +196,8 @@ export const UserCalendar: FC<Props> = ({
   onMonthChange,
   footer,
 }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const compact = variant === "compact";
   const selectable = Boolean(onSelectRange);
   const gridClass = "grid grid-cols-7";
@@ -299,6 +299,11 @@ export const UserCalendar: FC<Props> = ({
   const goToday = () => setCursor({ year: today.getFullYear(), month: today.getMonth() });
   const isCurrentMonth = cursor.year === today.getFullYear() && cursor.month === today.getMonth();
 
+  const monthTitle = t("period.month", {
+    month: t(`months.long.${MONTH_KEYS[cursor.month]}`),
+    year: String(cursor.year),
+  });
+
   const cellMinH = compact ? "min-h-[72px]" : "min-h-[104px]";
   const monthClass = compact ? "text-body font-semibold text-primary" : "text-section-title text-primary";
 
@@ -310,13 +315,13 @@ export const UserCalendar: FC<Props> = ({
       {toolbar === "split" ? (
         <div className="flex-none pb-4">
           <div className="flex items-center justify-between gap-2">
-            <Button type="button" variant="secondary" size="icon-sm" aria-label="Previous month" onClick={goPrev}>
+            <Button type="button" variant="secondary" size="icon-sm" aria-label={t("userCalendar.previousMonth")} onClick={goPrev}>
               <Icon icon={ArrowLeft01Icon} size="sm" />
             </Button>
             <h2 className={monthClass}>
-              {MONTHS[cursor.month]} {cursor.year}
+              {monthTitle}
             </h2>
-            <Button type="button" variant="secondary" size="icon-sm" aria-label="Next month" onClick={goNext}>
+            <Button type="button" variant="secondary" size="icon-sm" aria-label={t("userCalendar.nextMonth")} onClick={goNext}>
               <Icon icon={ArrowRight01Icon} size="sm" />
             </Button>
           </div>
@@ -326,7 +331,7 @@ export const UserCalendar: FC<Props> = ({
             <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
               {!isCurrentMonth && (
                 <Button type="button" variant="secondary" size="sm" onClick={goToday}>
-                  Today
+                  {tCommon("values.today")}
                 </Button>
               )}
               {headerAction}
@@ -337,16 +342,16 @@ export const UserCalendar: FC<Props> = ({
         <div className="flex flex-none flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-4">
           <div className="flex items-center gap-3">
             <h2 className={monthClass}>
-              {MONTHS[cursor.month]} {cursor.year}
+              {monthTitle}
             </h2>
             <div className="flex items-center gap-2">
               <Button type="button" variant="secondary" size="sm" onClick={goToday}>
-                Today
+                {tCommon("values.today")}
               </Button>
-              <Button type="button" variant="secondary" size="icon-sm" aria-label="Previous month" onClick={goPrev}>
+              <Button type="button" variant="secondary" size="icon-sm" aria-label={t("userCalendar.previousMonth")} onClick={goPrev}>
                 <Icon icon={ArrowLeft01Icon} size="sm" />
               </Button>
-              <Button type="button" variant="secondary" size="icon-sm" aria-label="Next month" onClick={goNext}>
+              <Button type="button" variant="secondary" size="icon-sm" aria-label={t("userCalendar.nextMonth")} onClick={goNext}>
                 <Icon icon={ArrowRight01Icon} size="sm" />
               </Button>
             </div>
@@ -366,7 +371,7 @@ export const UserCalendar: FC<Props> = ({
               key={d}
               className="border-r border-divider px-2 py-2 text-center text-hint font-medium text-tertiary last:border-r-0"
             >
-              {d}
+              {t(`weekdays.short.${d}`)}
             </div>
           ))}
         </div>
@@ -376,7 +381,7 @@ export const UserCalendar: FC<Props> = ({
             <div key={`cal-skel-${w}`} className={gridClass}>
               {Array.from({ length: 7 }).map((_, i) => (
                 <div
-                  key={`cal-skel-${w}-${i}`}
+                  key={i}
                   className={`${cellMinH} border-b border-r border-divider p-2 last:border-r-0`}
                 >
                   <Skeleton className="h-4 w-5" />
@@ -499,19 +504,19 @@ export const UserCalendar: FC<Props> = ({
         <div className="flex flex-none flex-wrap items-center gap-4 pt-4 text-hint text-tertiary">
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-pill bg-status-declined-fill" />
-            Public holiday
+            {t("userCalendar.legend.holiday")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded-tag border-[1.5px]" style={timeOffStyle("approved")} />
-            Time off — approved
+            {t("userCalendar.legend.approved")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded-tag border-[1.5px]" style={timeOffStyle("pending")} />
-            Time off — pending
+            {t("userCalendar.legend.pending")}
           </span>
           <span className="ml-auto flex items-center gap-1.5">
             <Icon icon={Calendar03Icon} size="sm" />
-            {holidays.length} holidays · {timeOff.length} time-off entries
+            {t("userCalendar.legend.counts", { holidays: holidays.length, entries: timeOff.length })}
           </span>
         </div>
       )}

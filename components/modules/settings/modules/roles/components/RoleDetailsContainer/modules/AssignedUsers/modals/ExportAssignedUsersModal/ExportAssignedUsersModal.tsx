@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
@@ -22,6 +23,7 @@ export const ExportAssignedUsersModal: FC<ExportAssignedUsersModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("settings");
   const requestClose = () => {
     if (isLoading) return;
 
@@ -37,9 +39,9 @@ export const ExportAssignedUsersModal: FC<ExportAssignedUsersModalProps> = ({
     >
       <DialogContent hideClose className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Export assigned users</DialogTitle>
+          <DialogTitle>{t("roles.exportAssigned.title")}</DialogTitle>
           <DialogDescription>
-            Export users assigned to <strong>{roleName}</strong>.
+            {t.rich("roles.exportAssigned.description", { role: roleName, b: (c) => <strong>{c}</strong> })}
           </DialogDescription>
         </DialogHeader>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Cancel01Icon, Delete02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -12,13 +13,10 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/desact/select";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
+import { assigneeKindText } from "@/components/modules/lifecycle/i18n";
 import {
-  ACCESS_PROBLEM_LABELS,
-  ASSIGNEE_KIND_LABELS,
-  ASSIGNEE_PROBLEM_LABELS,
+  ASSIGNEE_KINDS,
   EDITABLE_TASK_KINDS,
-  TASK_KIND_LABELS,
-  assigneeKindLabel,
   type ProcessType,
   type TaskKind,
   type TemplateAssigneeKind,
@@ -63,6 +61,7 @@ type Props = {
  * are what moving a block changes. Edits apply as they are made; the template's Save keeps them.
  */
 export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove, onClose }: Props) {
+  const t = useTranslations("lifecycle");
   const id = `task-${item.key}`;
   const mode = dueModeOf(item);
   const [daysText, setDaysText] = useState(String(Math.abs(item.offsetDays ?? 0) || 1));
@@ -72,10 +71,12 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
 
   const others = items.filter((i) => i.key !== item.key);
   const leaving = type === "OFFBOARDING";
+  const untitled = t("shared.untitledTask");
+  const named = (text: string) => (item.assigneeName ? t("shared.namedProblem", { name: item.assigneeName, problem: text }) : text);
 
   return (
     <aside
-      aria-label="Task details"
+      aria-label={t("sidePanel.label")}
       className="flex h-full w-full flex-col bg-subtle/40 md:w-[400px]"
     >
       {/* The task's own title heads the panel and is edited where it stands, like the template's name: no
@@ -83,11 +84,11 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
       <div className="flex items-start gap-1 px-3 pb-1 pt-3">
         <Textarea
           id={`${id}-title`}
-          aria-label="Task title"
+          aria-label={t("shared.taskTitle")}
           rows={1}
           value={item.title}
           disabled={readOnly}
-          placeholder="Untitled task"
+          placeholder={untitled}
           // A task added from the list arrives untitled; the title is where to start.
           autoFocus={!item.title}
           // A title is one line: a pasted line break becomes a space, and Enter adds none.
@@ -95,7 +96,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
           className={`${INLINE} min-h-0 resize-none text-section-title leading-6 text-primary [field-sizing:content]`}
         />
-        <Button type="button" variant="ghost" size="icon-sm" className="mt-0.5 shrink-0" aria-label="Close panel" onClick={onClose}>
+        <Button type="button" variant="ghost" size="icon-sm" className="mt-0.5 shrink-0" aria-label={t("sidePanel.closePanel")} onClick={onClose}>
           <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       </div>
@@ -105,23 +106,23 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-5 pb-5 pt-1">
         <Textarea
           id={`${id}-description`}
-          aria-label="Task description"
+          aria-label={t("sidePanel.description")}
           value={item.description}
           disabled={readOnly}
-          placeholder={readOnly ? "" : "Add a description"}
+          placeholder={readOnly ? "" : t("sidePanel.addDescription")}
           onChange={(e) => onChange({ description: e.target.value })}
           className={`${INLINE} -mx-2 min-h-0 resize-none text-body text-secondary [field-sizing:content]`}
         />
 
         <div className="space-y-1.5">
-          <Label htmlFor={`${id}-kind`}>Kind</Label>
+          <Label htmlFor={`${id}-kind`}>{t("shared.kind")}</Label>
           {/* A document's category does not make a to-do require a file by accident: it is chosen again. */}
           <Select value={item.kind} disabled={readOnly}
             onValueChange={(v) => onChange({ kind: v as TaskKind, categoryId: v === "DOCUMENT" && item.kind === "DOCUMENT" ? item.categoryId : null })}>
             <SelectTrigger id={`${id}-kind`}><SelectValue /></SelectTrigger>
             <SelectContent>
               {EDITABLE_TASK_KINDS.map((k) => (
-                <SelectItem key={k} value={k}>{TASK_KIND_LABELS[k]}</SelectItem>
+                <SelectItem key={k} value={k}>{t(`taskKind.${k}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -140,11 +141,11 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
         />
 
         <div className="space-y-1.5">
-          <Label htmlFor={`${id}-due`}>When</Label>
+          <Label htmlFor={`${id}-due`}>{t("sidePanel.when")}</Label>
           <div className="flex gap-2">
             {(mode === "BEFORE" || mode === "AFTER") && (
               <Input
-                aria-label="Days"
+                aria-label={t("sidePanel.days")}
                 type="number"
                 min={1}
                 className="w-20"
@@ -164,20 +165,18 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
             >
               <SelectTrigger id={`${id}-due`} className="flex-1"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="BEFORE">{leaving ? "Days before the last day" : "Days before start"}</SelectItem>
-                <SelectItem value="ON">{leaving ? "On the last day" : "On the start day"}</SelectItem>
-                <SelectItem value="AFTER">{leaving ? "Days after the last day" : "Days after start"}</SelectItem>
-                <SelectItem value="BEFORE_START">{leaving ? "By the last day" : "By the start day"}</SelectItem>
+                <SelectItem value="BEFORE">{leaving ? t("sidePanel.daysBeforeLastDay") : t("sidePanel.daysBeforeStart")}</SelectItem>
+                <SelectItem value="ON">{leaving ? t("due.onLastDay") : t("due.onStartDay")}</SelectItem>
+                <SelectItem value="AFTER">{leaving ? t("sidePanel.daysAfterLastDay") : t("sidePanel.daysAfterStart")}</SelectItem>
+                <SelectItem value="BEFORE_START">{leaving ? t("due.byLastDay") : t("due.byStartDay")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <p className="text-hint text-tertiary">
-            {dayLabel(item, type)}. Calendar days; a date on a weekend stays where it falls.
-          </p>
+          <p className="text-hint text-tertiary">{t("sidePanel.whenHint", { day: dayLabel(item, t, type) })}</p>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor={`${id}-assignee`}>Done by</Label>
+          <Label htmlFor={`${id}-assignee`}>{t("shared.doneBy")}</Label>
           <Select
             value={item.assigneeKind}
             disabled={readOnly}
@@ -190,8 +189,8 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           >
             <SelectTrigger id={`${id}-assignee`}><SelectValue /></SelectTrigger>
             <SelectContent>
-              {(Object.keys(ASSIGNEE_KIND_LABELS) as TemplateAssigneeKind[]).map((k) => (
-                <SelectItem key={k} value={k}>{assigneeKindLabel(k, type)}</SelectItem>
+              {ASSIGNEE_KINDS.map((k) => (
+                <SelectItem key={k} value={k}>{assigneeKindText(t, k, type)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -209,28 +208,24 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           {item.assigneeKind === "SPECIFIC_USER" && item.assigneeProblem && (
             <p role="alert" className="flex items-center gap-1.5 text-hint text-status-pending-text">
               <Icon icon={Alert02Icon} size="sm" />
-              {item.assigneeName ? `${item.assigneeName}: ` : ""}
-              {ASSIGNEE_PROBLEM_LABELS[item.assigneeProblem]}. Choose somebody else.
+              {named(t("sidePanel.assigneeProblem", { problem: t(`assigneeProblem.${item.assigneeProblem}`) }))}
             </p>
           )}
           {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && item.accessProblem && (
             <p role="status" className="flex items-center gap-1.5 text-hint text-status-pending-text">
               <Icon icon={Alert02Icon} size="sm" />
-              {item.assigneeName ? `${item.assigneeName}: ` : ""}
-              {ACCESS_PROBLEM_LABELS[item.accessProblem]} for anybody. Grant it, or give the task to somebody who can.
+              {named(t("sidePanel.accessProblem", { problem: t(`accessProblem.${item.accessProblem}`) }))}
             </p>
           )}
           {item.assigneeKind === "SPECIFIC_USER" && !item.assigneeProblem && (
-            <p className="text-hint text-tertiary">
-              A named person makes the template depend on them; the start of a process asks again if they have left.
-            </p>
+            <p className="text-hint text-tertiary">{t("sidePanel.namedHint")}</p>
           )}
         </div>
 
         <fieldset className="space-y-1.5">
-          <legend className="text-body font-medium">Waits for</legend>
+          <legend className="text-body font-medium">{t("sidePanel.waitsFor")}</legend>
           {others.length === 0 ? (
-            <p className="text-hint text-tertiary">There are no other tasks to wait for.</p>
+            <p className="text-hint text-tertiary">{t("sidePanel.noOthers")}</p>
           ) : (
             <div className="max-h-48 space-y-1 overflow-y-auto">
               {others.map((other) => {
@@ -242,15 +237,15 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
                       className="mt-0.5"
                       checked={checked}
                       disabled={readOnly || circle}
-                      aria-label={`Waits for ${other.title || "Untitled task"}`}
+                      aria-label={t("sidePanel.waitsForTask", { title: other.title || untitled })}
                       onCheckedChange={(on) => onChange({
                         waitsFor: on ? [...item.waitsFor, other.key] : item.waitsFor.filter((k) => k !== other.key),
                       })}
                     />
                     <span className="min-w-0">
-                      <span className="block truncate">{other.title || "Untitled task"}</span>
+                      <span className="block truncate">{other.title || untitled}</span>
                       <span className="block text-hint text-tertiary">
-                        {circle ? "Waits for this task already, so it would make a circle" : dayLabel(other, type)}
+                        {circle ? t("sidePanel.circle") : dayLabel(other, t, type)}
                       </span>
                     </span>
                   </label>
@@ -260,7 +255,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           )}
           <p className="flex items-start gap-1.5 text-hint text-tertiary">
             <Icon icon={HourglassIcon} size="sm" className="mt-0.5 shrink-0" />
-            Until those are done, this task shows as waiting and its assignee is not told.
+            {t("sidePanel.waitsHint")}
           </p>
         </fieldset>
       </div>
@@ -269,7 +264,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
         <div className="border-t border-divider px-5 py-3">
           <Button type="button" variant="ghost" className="gap-1.5 text-danger-text hover:text-status-declined-text" onClick={onRemove}>
             <Icon icon={Delete02Icon} size="sm" />
-            Remove task
+            {t("shared.removeTask")}
           </Button>
         </div>
       )}

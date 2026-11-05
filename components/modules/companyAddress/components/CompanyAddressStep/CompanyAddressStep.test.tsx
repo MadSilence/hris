@@ -1,9 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import CompanyAddressStep, {
-  CompanyAddressStepMessages,
-} from "@/components/modules/companyAddress/components/CompanyAddressStep";
+import CompanyAddressStep from "@/components/modules/companyAddress/components/CompanyAddressStep";
 
 const web = { scheme: "http", rootDomain: "localhost:3000" };
 
@@ -31,7 +29,7 @@ describe("CompanyAddressStep", () => {
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(navigate).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent(CompanyAddressStepMessages.Required);
+    expect(screen.getByRole("alert")).toHaveTextContent("Please enter your company address.");
   });
 
   it("offers the remembered company and never follows it on its own", async () => {

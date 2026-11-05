@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, type FC } from "react";
 import { Clock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -38,6 +39,7 @@ export const TimePicker: FC<Props> = ({
   ariaLabel,
   className,
 }) => {
+  const t = useTranslations("common");
   const [open, setOpen] = useState(false);
 
   const [hour, minute] = /^\d{2}:\d{2}$/.test(value) ? value.split(":") : ["", ""];
@@ -80,7 +82,7 @@ export const TimePicker: FC<Props> = ({
 
       <PopoverContent className="w-auto p-2" align="start">
         <div className="flex gap-2">
-          <div className="flex max-h-56 w-16 flex-col gap-0.5 overflow-y-auto" role="listbox" aria-label="Hour">
+          <div className="flex max-h-56 w-16 flex-col gap-0.5 overflow-y-auto" role="listbox" aria-label={t("timePicker.hour")}>
             {HOURS.map((option) => (
               <button
                 key={option}
@@ -95,7 +97,7 @@ export const TimePicker: FC<Props> = ({
             ))}
           </div>
           <div className="w-px bg-mist" aria-hidden />
-          <div className="flex max-h-56 w-16 flex-col gap-0.5 overflow-y-auto" role="listbox" aria-label="Minute">
+          <div className="flex max-h-56 w-16 flex-col gap-0.5 overflow-y-auto" role="listbox" aria-label={t("timePicker.minute")}>
             {MINUTES.map((option) => (
               <button
                 key={option}

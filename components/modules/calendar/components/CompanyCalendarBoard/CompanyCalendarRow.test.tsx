@@ -8,6 +8,10 @@ import {
   type CompanyCalendarBar,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
 import type { CompanyCalendarAbsence, CompanyCalendarMark } from "@/models/calendar";
+import { translatorFor } from "@/test/nextIntl";
+import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
+
+const t = translatorFor("calendar") as unknown as CalendarTranslator;
 
 jest.mock("@/components/modules/settings/shared/UserChip/UserChip", () => ({
   __esModule: true,
@@ -76,7 +80,7 @@ describe("toSegments — lanes", () => {
 describe("a leave bar", () => {
   it("says Away and stays gray when the type was not sent", () => {
     const style = leaveStyle(leave());
-    expect(leaveTitle(leave())).toContain("Away");
+    expect(leaveTitle(t, leave())).toContain("Away");
     expect(style.backgroundColor).toBe("var(--tag-gray-bar)");
   });
 
@@ -90,8 +94,8 @@ describe("a leave bar", () => {
     const pending = leave({ status: "PENDING", awaitingYou: true, leaveTypeColor: "ocean" });
     expect(leaveStyle(pending).backgroundColor).toBe("var(--tag-ocean-bg)");
     expect(leaveStyle(pending).backgroundImage).toContain("radial-gradient");
-    expect(leaveTitle(pending)).toContain("Pending your approval");
-    expect(leaveTitle(leave({ status: "PENDING" }))).toContain("Pending approval");
+    expect(leaveTitle(t, pending)).toContain("Pending your approval");
+    expect(leaveTitle(t, leave({ status: "PENDING" }))).toContain("Pending approval");
   });
 
   const geometry = {

@@ -10,6 +10,7 @@ import {
   isSupportedPermission,
   RESOURCE_GROUPS,
   ResourceCode,
+  type ResourceMessageKey,
 } from "@/models/access";
 
 // Editor state: which scopes are granted for every resource/action pair.
@@ -159,20 +160,30 @@ export const SCOPE_CHOICES = [
 
 export type ScopeChoice = (typeof SCOPE_CHOICES)[number];
 
-export const SCOPE_CHOICE_LABELS: Record<ScopeChoice, string> = {
-  NONE: "No access",
-  SELF: "Own record",
-  DIRECT_REPORTS: "Direct reports",
-  SELF_AND_REPORTS: "Own record + direct reports",
-  MY_TEAM: "My team",
-  MY_TEAM_SUBTREE: "My team and sub-teams",
-  MY_DEPARTMENT: "My department",
-  MY_DEPARTMENT_SUBTREE: "My department and sub-departments",
-  MY_OFFICE: "My office",
-  MY_LEGAL_ENTITY: "My legal entity",
-  COMPANY: "Whole company",
-  CUSTOM: "Custom filter…",
-};
+/** Catalogue keys (`settings` namespace) of the choices. */
+export const SCOPE_CHOICE_LABEL_KEYS = {
+  NONE: "roles.permissions.scope.none",
+  SELF: "roles.permissions.scope.self",
+  DIRECT_REPORTS: "roles.permissions.scope.directReports",
+  SELF_AND_REPORTS: "roles.permissions.scope.selfAndReports",
+  MY_TEAM: "roles.permissions.scope.myTeam",
+  MY_TEAM_SUBTREE: "roles.permissions.scope.myTeamSubtree",
+  MY_DEPARTMENT: "roles.permissions.scope.myDepartment",
+  MY_DEPARTMENT_SUBTREE: "roles.permissions.scope.myDepartmentSubtree",
+  MY_OFFICE: "roles.permissions.scope.myOffice",
+  MY_LEGAL_ENTITY: "roles.permissions.scope.myLegalEntity",
+  COMPANY: "roles.permissions.scope.company",
+  CUSTOM: "roles.permissions.scope.custom",
+} as const satisfies Record<ScopeChoice, string>;
+
+/** Catalogue keys (`settings` namespace) of the four actions, as column titles and in a grant's name. */
+export const ACCESS_ACTION_LABEL_KEYS = {
+  VIEW: "roles.permissions.action.view",
+  EDIT: "roles.permissions.action.edit",
+  MANAGE: "roles.permissions.action.manage",
+  // Offered by People → Profiles only; every other row shows the cell as unsupported.
+  BLOCK: "roles.permissions.action.block",
+} as const satisfies Record<AccessAction, string>;
 
 /** The one-to-one choices; SELF/DIRECT_REPORTS are the only pair the matrix combines. */
 const DIRECT_CHOICES: ScopeChoice[] = [
@@ -232,7 +243,7 @@ export function availableScopeChoices(resourceCode: ResourceCode, action: Access
 
 export type RolePermissionChange = {
   resourceCode: ResourceCode;
-  resourceLabel: string;
+  resourceMessageKey: ResourceMessageKey;
   action: AccessAction;
   from: ScopeChoice;
   to: ScopeChoice;
@@ -255,7 +266,7 @@ export function diffRolePermissions(
         if (from !== to) {
           changes.push({
             resourceCode: resource.code,
-            resourceLabel: resource.label,
+            resourceMessageKey: resource.messageKey,
             action,
             from,
             to,

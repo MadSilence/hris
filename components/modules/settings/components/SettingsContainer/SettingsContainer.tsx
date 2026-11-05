@@ -4,14 +4,18 @@ import SettingsCard from "@/components/modules/settings/components/SettingsCard/
 import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
 import { useAccess } from "@/components/auth/useAccess";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 const SettingsContainer: React.FC = () => {
   const { access } = useAccess();
+  const t = useTranslations("settings");
 
   const visibleGroups = settingsGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => canSeeSettingsItem(access, item)),
+      items: group.items
+        .filter((item) => canSeeSettingsItem(access, item))
+        .map(({ labelKey, href, external }) => ({ label: t(labelKey), href, external })),
     }))
     .filter((group) => group.items.length > 0);
 
@@ -22,8 +26,8 @@ const SettingsContainer: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className="min-w-0">
-                <h1 className="text-greeting leading-tight">Settings</h1>
-                <p className="text-label text-tertiary mt-1">Configure your organization and people settings</p>
+                <h1 className="text-greeting leading-tight">{t("hub.title")}</h1>
+                <p className="text-label text-tertiary mt-1">{t("hub.subtitle")}</p>
               </div>
             </div>
           </div>
@@ -35,7 +39,7 @@ const SettingsContainer: React.FC = () => {
           {visibleGroups.map((group) => (
             <SettingsCard
               key={group.id}
-              title={group.title}
+              title={t(group.titleKey)}
               icon={group.icon}
               items={group.items}
             />

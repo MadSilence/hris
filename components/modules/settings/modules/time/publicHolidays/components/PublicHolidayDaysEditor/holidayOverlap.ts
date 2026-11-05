@@ -1,3 +1,4 @@
+import type { useTranslations } from "next-intl";
 import type { DraftHoliday } from "./PublicHolidayDaysEditor";
 
 /**
@@ -15,14 +16,17 @@ import type { DraftHoliday } from "./PublicHolidayDaysEditor";
  * Year span belongs to the year it starts in and reaches into the next one. That collision is caught
  * by the backend, which answers with the row it hit.
  */
-export function findDraftOverlaps(holidays: DraftHoliday[]): Record<string, string> {
+export function findDraftOverlaps(
+  holidays: DraftHoliday[],
+  t: ReturnType<typeof useTranslations<"timeOff">>,
+): Record<string, string> {
   const errors: Record<string, string> = {};
 
   const spans = holidays
     .filter((h) => h.holidayDate)
     .map((h) => ({
       localId: h.localId,
-      name: h.name.trim() || "another day",
+      name: h.name.trim() || t("publicHolidays.days.anotherDay"),
       start: h.holidayDate,
       // An empty end means "same day" — comparing "" against a date would quietly always be true.
       end: h.endDate && h.endDate >= h.holidayDate ? h.endDate : h.holidayDate,
@@ -35,7 +39,7 @@ export function findDraftOverlaps(holidays: DraftHoliday[]): Record<string, stri
 
   for (const span of spans.slice(1)) {
     if (span.start <= holder.end) {
-      errors[span.localId] = `Overlaps “${holder.name}” (${formatRange(holder.start, holder.end)}).`;
+      errors[span.localId] = t("publicHolidays.days.overlaps", { name: holder.name, range: formatRange(holder.start, holder.end) });
     }
     // Keep whichever span reaches furthest: a long one can collide with several that follow it.
     if (span.end > holder.end) holder = span;

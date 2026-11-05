@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import Link from "next/link";
 import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -18,6 +20,8 @@ import { RunSteps, runReason } from "./RunLog";
  * the right the run log is behind (design § 9.11).
  */
 export function PersonAutomationRuns({ personId }: { personId: string }) {
+  const t = useTranslations("automations");
+  const language = useDisplayLanguage();
   const runs = usePersonAutomationRuns(personId);
   const [open, setOpen] = useState<string | null>(null);
   const rows = runs.data?.content ?? [];
@@ -37,8 +41,8 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
       <EmptyState
         className="my-4"
         scene="automations"
-        title="No automation runs"
-        description="When an automation does something for this person, it is listed here with what each step did."
+        title={t("runs.personEmptyTitle")}
+        description={t("runs.personEmptyDescription")}
       />
     );
   }
@@ -58,9 +62,9 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
               >
                 {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" className="flex-none text-tertiary" /> : <Icon icon={ArrowRight01Icon} size="sm" className="flex-none text-tertiary" />}
                 <span className="min-w-0">
-                  <span className="block truncate text-body text-primary">{run.ruleName ?? "Automation"}</span>
+                  <span className="block truncate text-body text-primary">{run.ruleName ?? t("rule.title.existing")}</span>
                   <span className="block truncate text-hint text-tertiary">
-                    {[runReason(run), formatMoment(run.finishedAt ?? run.createdAt)].filter(Boolean).join(" · ")}
+                    {[runReason(t, run, language), formatMoment(run.finishedAt ?? run.createdAt, language)].filter(Boolean).join(" · ")}
                   </span>
                 </span>
               </button>
@@ -69,7 +73,7 @@ export function PersonAutomationRuns({ personId }: { personId: string }) {
                 href={`/settings/automation/automations/${run.ruleId}`}
                 className="text-hint text-tertiary no-underline hover:text-primary hover:underline"
               >
-                Open rule
+                {t("runs.openRule")}
               </Link>
             </div>
             {isOpen && <div className="mt-3 pl-6"><RunSteps run={run} /></div>}

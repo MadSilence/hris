@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { JobLevel as JobLevelModel, JobLevelGroup } from "@/models/job";
@@ -28,6 +29,8 @@ type DeleteDialog =
   | { kind: "level"; group: JobLevelGroup; level: JobLevelModel };
 
 export default function JobLevelContainer() {
+  const t = useTranslations("structure.jobLevels");
+  const tCommon = useTranslations("common");
   const { data, isLoading, error } = useJobLevelGroups();
 
   const [managingGroupId, setManagingGroupId] = useState<string | null>(null);
@@ -75,7 +78,7 @@ export default function JobLevelContainer() {
       closeDialogs();
       return;
     }
-    setErrorMessage(result.errorMessage ?? "Something went wrong. Please try again.");
+    setErrorMessage(result.errorMessage ?? t("errors.generic"));
   };
 
   const submitName = async (name: string) => {
@@ -139,12 +142,12 @@ export default function JobLevelContainer() {
       levelIds: next.map((l) => l.id),
     });
     if (result.status === ActionStatus.ERROR) {
-      setErrorMessage(result.errorMessage ?? "Could not reorder levels.");
+      setErrorMessage(result.errorMessage ?? t("errors.reorder"));
     }
   };
 
   if (error) {
-    return <div className="py-10 text-body text-tertiary">Failed to load job levels</div>;
+    return <div className="py-10 text-body text-tertiary">{t("errors.loadFailed")}</div>;
   }
 
   const isSavingName =
@@ -177,7 +180,7 @@ export default function JobLevelContainer() {
           errorMessage={errorMessage}
           onConfirmAction={submitName}
           onRequestCloseAction={closeDialogs}
-          {...nameModalCopy(nameDialog, groups)}
+          {...nameModalCopy(nameDialog, groups, t, tCommon)}
         />
       )}
 
@@ -195,7 +198,15 @@ export default function JobLevelContainer() {
   );
 }
 
-const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
+type JobLevelsTranslator = ReturnType<typeof useTranslations<"structure.jobLevels">>;
+type CommonTranslator = ReturnType<typeof useTranslations<"common">>;
+
+const nameModalCopy = (
+  dialog: NameDialog,
+  groups: JobLevelGroup[],
+  t: JobLevelsTranslator,
+  tCommon: CommonTranslator,
+) => {
   if (dialog.kind === "group") {
     const names = groups
       .filter((g) => dialog.mode === "create" || g.id !== dialog.group.id)
@@ -203,19 +214,19 @@ const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
 
     return dialog.mode === "create"
       ? {
-          title: "Add job group",
-          description: "A career track employees progress through.",
-          submitLabel: "Add",
-          fieldLabel: "Name",
-          placeholder: "e.g., Individual Contributor",
+          title: t("nameModal.addGroup.title"),
+          description: t("nameModal.addGroup.description"),
+          submitLabel: tCommon("actions.add"),
+          fieldLabel: tCommon("fields.name"),
+          placeholder: t("nameModal.groupPlaceholder"),
           existingNames: names,
         }
       : {
-          title: "Rename job group",
-          description: "The track keeps its levels and their order.",
-          submitLabel: "Save",
-          fieldLabel: "Name",
-          placeholder: "e.g., Individual Contributor",
+          title: t("nameModal.renameGroup.title"),
+          description: t("nameModal.renameGroup.description"),
+          submitLabel: tCommon("actions.save"),
+          fieldLabel: tCommon("fields.name"),
+          placeholder: t("nameModal.groupPlaceholder"),
           initialName: dialog.group.name,
           existingNames: names,
         };
@@ -226,19 +237,19 @@ const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
 
   return dialog.mode === "create"
     ? {
-        title: "Add level",
-        description: `A new rung at the bottom of ${dialog.group.name}.`,
-        submitLabel: "Add",
-        fieldLabel: "Name",
-        placeholder: "e.g., L3 - Senior",
+        title: t("addLevel"),
+        description: t("nameModal.addLevel.description", { group: dialog.group.name }),
+        submitLabel: tCommon("actions.add"),
+        fieldLabel: tCommon("fields.name"),
+        placeholder: t("nameModal.levelPlaceholder"),
         existingNames: names,
       }
     : {
-        title: "Rename level",
-        description: "Positions using this level follow the new name.",
-        submitLabel: "Save",
-        fieldLabel: "Name",
-        placeholder: "e.g., L3 - Senior",
+        title: t("nameModal.renameLevel.title"),
+        description: t("nameModal.renameLevel.description"),
+        submitLabel: tCommon("actions.save"),
+        fieldLabel: tCommon("fields.name"),
+        placeholder: t("nameModal.levelPlaceholder"),
         initialName: dialog.level.name,
         existingNames: names,
       };
@@ -247,7 +258,7 @@ const nameModalCopy = (dialog: NameDialog, groups: JobLevelGroup[]) => {
 const deleteModalProps = (dialog: DeleteDialog) => {
   if (dialog.kind === "group") {
     return {
-      entityLabel: "group",
+      entityLabel: "group" as const,
       entityName: dialog.group.name,
       affectedJobs: dialog.group.assignedJobsCount,
       affectedPeople: dialog.group.assignedUsersCount,
@@ -255,7 +266,7 @@ const deleteModalProps = (dialog: DeleteDialog) => {
     };
   }
   return {
-    entityLabel: "level",
+    entityLabel: "level" as const,
     entityName: dialog.level.name,
     affectedJobs: dialog.level.assignedJobsCount ?? 0,
     affectedPeople: dialog.level.assignedUsersCount ?? 0,

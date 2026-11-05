@@ -2,13 +2,11 @@
 
 import React from "react";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
-import {
-  RULE_STATUS_LABELS,
-  RUN_STATUS_LABELS,
-  STEP_STATUS_LABELS,
-  type AutomationRuleStatus,
-  type AutomationRunStatus,
-  type AutomationStepStatus,
+import { useTranslations } from "next-intl";
+import type {
+  AutomationRuleStatus,
+  AutomationRunStatus,
+  AutomationStepStatus,
 } from "@/models/automations";
 
 /**
@@ -42,13 +40,16 @@ const STEP: Record<AutomationStepStatus, StatusTone> = {
 };
 
 export function RuleStatusBadge({ status }: { status: AutomationRuleStatus }) {
-  return <StatusBadge status={RULE[status]} label={RULE_STATUS_LABELS[status]} />;
+  const t = useTranslations("automations");
+  return <StatusBadge status={RULE[status]} label={t(`ruleStatus.${status}`)} />;
 }
 
 export function RunStatusBadge({ status }: { status: AutomationRunStatus }) {
-  return <StatusBadge status={RUN[status]} label={RUN_STATUS_LABELS[status]} />;
+  const t = useTranslations("automations");
+  return <StatusBadge status={RUN[status]} label={t(`runStatus.${status}`)} />;
 }
 
 export function StepStatusBadge({ status }: { status: AutomationStepStatus }) {
-  return <StatusBadge status={STEP[status]} label={STEP_STATUS_LABELS[status]} />;
+  const t = useTranslations("automations");
+  return <StatusBadge status={STEP[status]} label={t(`stepStatus.${status}`)} />;
 }

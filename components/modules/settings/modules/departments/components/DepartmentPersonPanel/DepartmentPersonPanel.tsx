@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft02Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
@@ -11,6 +12,7 @@ import {
   personInitials,
 } from "@/components/modules/settings/modules/departments/utils/personDisplay";
 import type { DepartmentPerson } from "@/models/departments";
+import { formatUserStatus } from "@/models/user/status";
 
 type Props = {
   person: DepartmentPerson;
@@ -19,6 +21,9 @@ type Props = {
 };
 
 export function DepartmentPersonPanel({ person, departmentName, onBack }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 p-6">
       <button
@@ -27,7 +32,7 @@ export function DepartmentPersonPanel({ person, departmentName, onBack }: Props)
         className="flex w-fit items-center gap-1.5 text-body text-tertiary hover:text-primary"
       >
         <Icon icon={ArrowLeft02Icon} size="sm" />
-        Back
+        {tCommon("actions.back")}
       </button>
 
       <div className="flex items-start gap-4">
@@ -46,23 +51,23 @@ export function DepartmentPersonPanel({ person, departmentName, onBack }: Props)
       <div className="space-y-4">
         <div>
           <h3 className="mb-1 text-hint font-semibold text-tertiary">
-            Department
+            {t("person.units")}
           </h3>
-          <p className="text-body text-secondary">{departmentName ?? "No department"}</p>
+          <p className="text-body text-secondary">{departmentName ?? t("person.none")}</p>
         </div>
 
         <div>
           <h3 className="mb-1 text-hint font-semibold text-tertiary">
-            Email
+            {tCommon("fields.email")}
           </h3>
           <p className="truncate text-body text-secondary">{person.email}</p>
         </div>
 
         <div>
           <h3 className="mb-1 text-hint font-semibold text-tertiary">
-            Status
+            {tCommon("fields.status")}
           </h3>
-          <p className="text-body text-secondary">{person.status}</p>
+          <p className="text-body text-secondary">{formatUserStatus(tCommon, person.status)}</p>
         </div>
       </div>
 
@@ -70,7 +75,7 @@ export function DepartmentPersonPanel({ person, departmentName, onBack }: Props)
         href={`/organization/people/${person.id}/personal`}
         className="flex w-fit items-center gap-1.5 text-body text-accent-text underline-offset-4 hover:underline"
       >
-        Open profile
+        {tShared("openProfile")}
         <Icon icon={LinkSquare02Icon} size="sm" />
       </Link>
     </div>

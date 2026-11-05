@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Delete02Icon, Folder01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
@@ -17,6 +20,9 @@ export const PersonalDocumentsFolderCard: React.FC<PersonalDocumentsFolderCardPr
   onRename,
   onDelete,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+
   return (
     <div className="flex items-center justify-between rounded-card border p-4 transition-colors hover:bg-mist/40">
       <button
@@ -33,15 +39,15 @@ export const PersonalDocumentsFolderCard: React.FC<PersonalDocumentsFolderCardPr
         </div>
       </button>
 
-      <RowActionsMenu label="Folder actions">
+      <RowActionsMenu label={t("documents.folderCard.actions")}>
         {onRename ? (
           <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onRename(folder)}>
-            Rename
+            {tCommon("actions.rename")}
           </RowAction>
         ) : null}
         {onDelete ? (
           <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => onDelete(folder)}>
-            Delete
+            {tCommon("actions.delete")}
           </RowActionDestructive>
         ) : null}
       </RowActionsMenu>

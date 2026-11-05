@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   TimeOffPolicyCarryoverExpiryType,
@@ -34,68 +35,70 @@ function Row({ label, value }: { label: string; value: string | null | undefined
 }
 
 export const PolicyOverview: FC<{ policy: TimeOffPolicy }> = ({ policy }) => {
-  const unitLabel = policy.unit === TimeOffPolicyUnit.Hours ? "hours" : "days";
+  const t = useTranslations("timeOff");
 
   const quota = policy.unlimitedQuota
-    ? "Unlimited"
-    : `${policy.yearlyQuota ?? 0} ${unitLabel}/year`;
+    ? t("policies.overview.unlimited")
+    : t("policies.overview.quotaValue", { quota: String(policy.yearlyQuota ?? 0), unit: policy.unit ?? TimeOffPolicyUnit.Days });
 
   const renewal =
     policy.renewalType === TimeOffPolicyRenewalType.Manual
-      ? "Manual"
-      : `${policy.renewalFixedDay}/${policy.renewalFixedMonth} yearly`;
+      ? t("policies.overview.manual")
+      : policy.renewalType === TimeOffPolicyRenewalType.Anniversary
+        ? t("policies.overview.anniversary")
+        : t("policies.overview.yearly", { day: String(policy.renewalFixedDay), month: String(policy.renewalFixedMonth) });
 
   const carryover =
     policy.carryoverType === TimeOffPolicyCarryoverType.None
-      ? "None"
+      ? t("policies.overview.none")
       : policy.carryoverType === TimeOffPolicyCarryoverType.Unlimited
-        ? "Unlimited"
-        : `Limited to ${policy.carryoverLimit ?? 0}`;
+        ? t("policies.overview.unlimited")
+        : t("policies.overview.limitedTo", { limit: String(policy.carryoverLimit ?? 0) });
 
   const carryoverExpiry =
     policy.carryoverExpiryType === TimeOffPolicyCarryoverExpiryType.AfterPeriod
-      ? `After ${policy.carryoverExpiryValue ?? 0} ${(policy.carryoverExpiryUnit ?? "").toLowerCase()}`
-      : "Never";
+      ? t("policies.overview.expiryAfter", { count: policy.carryoverExpiryValue ?? 0, unit: policy.carryoverExpiryUnit ?? "" })
+      : t("policies.overview.never");
 
   const negativeBalance = policy.allowNegativeBalance
     ? policy.maxNegativeBalance != null
-      ? `Allowed (max ${policy.maxNegativeBalance})`
-      : "Allowed"
-    : "Not allowed";
+      ? t("policies.overview.allowedMax", { max: String(policy.maxNegativeBalance) })
+      : t("policies.overview.allowed")
+    : t("policies.overview.notAllowed");
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <Section title="Basics">
-        <Row label="Unit" value={policy.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
-        <Row label="Pay type" value={policy.paid ? "Paid" : "Unpaid"} />
-        <Row label="Visibility" value={policy.hiddenFromEmployees ? "Private — colleagues see “Time off”" : "Leave type visible to colleagues"} />
-        <Row label="Effective date" value={policy.effectiveDate} />
+      <Section title={t("policies.overview.basics")}>
+        <Row label={t("policies.overview.unit")} value={policy.unit === TimeOffPolicyUnit.Hours ? t("policies.overview.hours") : t("policies.overview.days")} />
+        <Row label={t("policies.overview.payType")} value={policy.paid ? t("policies.overview.paid") : t("policies.overview.unpaid")} />
+        <Row label={t("policies.overview.visibility")} value={policy.hiddenFromEmployees ? t("policies.overview.private") : t("policies.overview.visible")} />
+        <Row label={t("policies.overview.effectiveDate")} value={policy.effectiveDate} />
       </Section>
 
-      <Section title="Entitlement & renewal">
-        <Row label="Quota" value={quota} />
+      <Section title={t("policies.overview.entitlement")}>
+        <Row label={t("policies.overview.quota")} value={quota} />
         <Row
-          label="Granting mode"
-          value={policy.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued ? "Accrued" : "Upfront"}
+          label={t("policies.overview.grantingMode")}
+          value={policy.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued ? t("policies.overview.accrued") : t("policies.overview.upfront")}
         />
-        <Row label="Renewal" value={renewal} />
+        <Row label={t("policies.overview.renewal")} value={renewal} />
       </Section>
 
-      <Section title="Carryover & balance">
-        <Row label="Carryover" value={carryover} />
-        <Row label="Carried-over expiry" value={carryoverExpiry} />
-        <Row label="Negative carryover" value={policy.allowNegativeCarryover ? "Allowed" : "Not allowed"} />
-        <Row label="Negative balance" value={negativeBalance} />
+      <Section title={t("policies.overview.carryoverSection")}>
+        <Row label={t("policies.overview.carryover")} value={carryover} />
+        <Row label={t("policies.overview.carriedExpiry")} value={carryoverExpiry} />
+        <Row label={t("policies.overview.negativeCarryover")} value={policy.allowNegativeCarryover ? t("policies.overview.allowed") : t("policies.overview.notAllowed")} />
+        <Row label={t("policies.overview.negativeBalance")} value={negativeBalance} />
       </Section>
 
-      <Section title="Counting">
+      <Section title={t("policies.overview.counting")}>
         <Row
-          label="Counting mode"
-          value={policy.countingMode === TimeOffPolicyCountingMode.WorkingDays ? "Working days" : "Calendar days"}
+          label={t("policies.overview.countingMode")}
+          value={policy.countingMode === TimeOffPolicyCountingMode.WorkingDays ? t("policies.overview.workingDays") : t("policies.overview.calendarDays")}
         />
         <Row
-          label="Public holidays"
-          value={policy.includePublicHolidays ? "Consume balance" : "Excluded"}
+          label={t("policies.overview.publicHolidays")}
+          value={policy.includePublicHolidays ? t("policies.overview.consume") : t("policies.overview.excluded")}
         />
       </Section>
     </div>

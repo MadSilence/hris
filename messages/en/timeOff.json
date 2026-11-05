@@ -1,0 +1,812 @@
+{
+  "amount": {
+    "days": "{count, plural, one {{amount} day} other {{amount} days}}",
+    "hours": "{count, plural, one {{amount} hour} other {{amount} hours}}"
+  },
+  "requestStatus": {
+    "pending": "Waiting for approval",
+    "approved": "Approved",
+    "cancellationPending": "Cancellation requested",
+    "rejected": "Rejected",
+    "cancelled": "Cancelled"
+  },
+  "decision": {
+    "anEmployee": "An employee",
+    "answeringForDelegator": "You are answering for {name}, who delegated their approvals to you.",
+    "reachedAsFallback": "This reached you because nobody in the approval chain can answer it.",
+    "decidedAnyway": "Decided over the approval chain by an administrator.",
+    "balance": {
+      "title": "Balance on this policy",
+      "available": "Available",
+      "reserved": "Reserved by requests awaiting an answer",
+      "period": "Period",
+      "periodRange": "{start} – {end}",
+      "periodOpen": "{start} onwards",
+      "none": "No balance for the period this request falls in."
+    },
+    "otherLeave": {
+      "title": "Their other leave around these dates",
+      "none": "None within a month either side."
+    },
+    "peersAway": {
+      "title": "Also away over these dates",
+      "none": "Nobody they work with.",
+      "notYetApproved": "not yet approved"
+    },
+    "approveCancellation": "Approve cancellation",
+    "decline": "Decline",
+    "reason": "Reason",
+    "reject": "Reject",
+    "approve": "Approve",
+    "orDecideOverChain": "Or decide over the chain:",
+    "mayDecideOverChain": "You may decide over the approval chain.",
+    "steps": {
+      "title": "Approval",
+      "asked": "Asked:",
+      "answeredBy": "Answered by",
+      "notAnswered": "Not answered yet",
+      "fallbackRole": "the {role} role",
+      "fallbackRoleFor": "the {role} role (for {name})",
+      "noFallback": "nobody — no fallback is set",
+      "managerSeatEmpty": "the manager — nobody in that seat",
+      "nobody": "nobody",
+      "reassigned": "{asked}, reassigned to {name}",
+      "deletedPerson": "somebody since deleted",
+      "onBehalfOf": "{by} on behalf of {name}",
+      "asFallback": "{by}, as the fallback",
+      "approvingAnyway": "{by}, approving anyway"
+    },
+    "anyway": {
+      "thisPerson": "this person",
+      "reasonRequired": "Say why it is rejected.",
+      "failed": "The request could not be decided.",
+      "approve": "Approve anyway",
+      "reject": "Reject anyway",
+      "approveTitle": "Approve anyway?",
+      "rejectTitle": "Reject anyway?",
+      "approveDescription": "The request of {who} is approved now, whatever approval steps are still open. It is recorded as an override.",
+      "rejectDescription": "The request of {who} is rejected now, over the approvers who have not answered yet. It is recorded as an override."
+    }
+  },
+  "delegations": {
+    "onLeave": {
+      "label": "Delegate My Approvals While I'm on Leave",
+      "hint": "When your own leave is approved, the requests waiting on you also go to your manager for those days."
+    },
+    "given": {
+      "title": "Your delegations",
+      "none": "You have not delegated your approvals.",
+      "to": "To <b>{name}</b> · {range}"
+    },
+    "received": {
+      "title": "Delegated to you",
+      "from": "From <b>{name}</b> · {range}"
+    },
+    "aColleague": "a colleague",
+    "inForce": "In force now",
+    "forYourLeave": "For your leave",
+    "form": {
+      "dates": "Dates",
+      "datesAria": "Delegation dates",
+      "delegate": "Delegate",
+      "delegatePlaceholder": "Select a person",
+      "delegateHint": "They are asked beside you; whoever answers first decides, on your behalf.",
+      "adding": "Adding…",
+      "add": "Add delegation",
+      "datesRequired": "Choose the days the delegation covers.",
+      "delegateRequired": "Choose who decides for you.",
+      "saveFailed": "The delegation could not be saved."
+    },
+    "remove": {
+      "title": "Remove delegation?",
+      "description": "{name} stops being asked for you from now on.",
+      "yourDelegate": "Your delegate",
+      "failed": "The delegation could not be removed."
+    }
+  },
+  "settingsPages": {
+    "attendance": {
+      "title": "Attendance",
+      "description": "What Attendance expects of people. Everybody works the company week at the company's working-day length, unless they have a personal schedule: hours per weekday, from a date on. Leave is not charged for a day with no hours, and time logged beyond a day's hours is overtime."
+    },
+    "policiesFallbackTitle": "Policies"
+  },
+  "binding": {
+    "theCompany": "the company",
+    "section": {
+      "title": "Holiday calendar",
+      "description": "Which public holidays the people who work here get, unless they have a calendar of their own.",
+      "change": "Change",
+      "set": "Set calendar",
+      "inherits": "{count, plural, one {# person inherits it} other {# people inherit it}}",
+      "runLog": "Run log",
+      "paused": "Paused: this calendar is no longer available. Choose a calendar again to apply it.",
+      "fallback": {
+        "office": "People here get their legal entity's calendar, or the company default.",
+        "legalEntity": "People here get their office's calendar, or the company default.",
+        "companyDefault": "People get only their office's or legal entity's calendar, or one of their own."
+      }
+    },
+    "dialog": {
+      "set": "Holiday calendar set.",
+      "removed": "Holiday calendar removed.",
+      "title": "Holiday Calendar for {place}",
+      "description": "Everybody who works here gets this calendar, unless they have one of their own or a more specific place gives them another: the office comes before the legal entity, the legal entity before the company default. A change applies from today, and leave before today keeps its price.",
+      "choiceAria": "Holiday calendar",
+      "keepingOwn": "Keeping their own: {names}",
+      "keepingOwnMore": "Keeping their own: {names}, …",
+      "unnamed": "Unnamed",
+      "review": "Review",
+      "reviewing": "Reviewing…",
+      "applying": "Applying…"
+    },
+    "preview": {
+      "nothingChanges": "Nobody inherits a calendar from here now, so nothing changes for anyone.",
+      "losing": "{count, plural, one {# person} other {# people}} will stop inheriting {name} from today and fall back to the next binding down, if there is one.",
+      "thisCalendar": "this calendar",
+      "nobodyYet": "Nobody works here yet. Whoever joins will get {name}.",
+      "willGet": "{count, plural, one {# person} other {# people}} will get {name}.",
+      "alreadyByHand": "{count, plural, one {# person already has} other {# people already have}} it by hand and will now inherit it.",
+      "keepOwn": "{count, plural, one {# person keeps} other {# people keep}} their own calendar as an override.",
+      "outranked": "{count, plural, one {# person keeps} other {# people keep}} {kind, select, LEGAL_ENTITY {their office's calendar} other {their office's or legal entity's calendar}}, which comes first."
+    }
+  },
+  "publicHolidays": {
+    "chooseTemplate": {
+      "title": "Choose public holiday template",
+      "description": "Select a template to preview holidays before creating a company calendar.",
+      "template": "Template",
+      "noTemplates": "No public holiday templates are available yet.",
+      "region": "Region",
+      "nationalOnly": "National holidays only",
+      "regionHint": "A region adds the days that apply only there on top of the national ones.",
+      "useTemplate": "Use this template",
+      "selectTemplate": "Select a template",
+      "detailsHere": "Template details will appear here.",
+      "regional": "Regional",
+      "national": "National",
+      "country": "Country",
+      "language": "Language",
+      "supportedYears": "Supported years",
+      "yearsRange": "{from} - {to}",
+      "yearsFrom": "From {from}",
+      "yearsUntil": "Until {to}",
+      "anyYear": "Any supported year"
+    },
+    "subscribe": {
+      "createFailed": "Could not create the subscription link.",
+      "copyFailed": "Could not copy. Select the link and copy it by hand.",
+      "resetFailed": "Could not reset the link.",
+      "title": "Subscribe to “{name}”",
+      "description": "Add this link in Outlook, Google Calendar or Apple Calendar and the holidays appear alongside your meetings. Changes made here follow automatically.",
+      "link": "Subscription link",
+      "copyLink": "Copy link",
+      "hint": "Anyone with this link can read the calendar. Reset it if it ends up somewhere it should not be — existing subscriptions stop working immediately.",
+      "reset": "Reset link"
+    },
+    "days": {
+      "date": "Date",
+      "endDate": "End date",
+      "name": "Name",
+      "length": "Length",
+      "actions": "Actions",
+      "pickDate": "Pick a date",
+      "holidayName": "Holiday name",
+      "fullDay": "Full day",
+      "halfDay": "Half day",
+      "remove": "Remove holiday",
+      "add": "Add holiday day",
+      "overlaps": "Overlaps “{name}” ({range}).",
+      "anotherDay": "another day",
+      "nameRequired": "Name is required.",
+      "dateRequired": "Date is required.",
+      "endBeforeStart": "End must be on or after the start."
+    },
+    "overrides": {
+      "providerHas": "The provider has {name} on {span}.",
+      "thisDay": "this day",
+      "providerDropped": "The provider no longer lists this day.",
+      "editedTitle": "Edited by your company. {provider}",
+      "edited": "Edited",
+      "rowActions": "Holiday actions",
+      "revert": "Revert to provider",
+      "removedTitle": "Removed provider days",
+      "removedHint": "The provider lists these days; your company removed them from this calendar."
+    },
+    "picker": {
+      "placeholder": "Choose from a template",
+      "search": "Search templates",
+      "closeList": "Close template list",
+      "openList": "Open template list",
+      "none": "No templates found"
+    },
+    "fields": {
+      "name": "Name",
+      "country": "Country",
+      "region": "Region",
+      "substitution": "Holiday on a Non-working Day",
+      "substitutionOptions": {
+        "none": "No substitution — the day is lost",
+        "next": "Move to the next working day",
+        "previous": "Move to the previous working day",
+        "nearest": "Move to the nearest working day",
+        "manual": "Owe a day, choose the date by hand"
+      }
+    },
+    "assigned": {
+      "title": "Assigned people",
+      "description": "People who have this holiday calendar assigned to them.",
+      "column": "Holiday calendars"
+    },
+    "loadFailed": "This calendar could not be loaded",
+    "newCalendar": {
+      "title": "New public holiday calendar",
+      "defaultName": "New public holiday calendar",
+      "atLeastOne": "Please add at least one holiday day.",
+      "createFailed": "Something went wrong while creating the calendar. Please try again.",
+      "holidayDays": "Holiday days",
+      "holidayDaysHint": "Add all public holiday days for this calendar.",
+      "loadingYear": "Loading {year}…",
+      "daysAdded": "{count, plural, one {# day added} other {# days added}}",
+      "yearFailed": "{year} holidays could not be loaded",
+      "noHolidays": "No holidays yet",
+      "addFirst": "Add your first holiday day below."
+    },
+    "details": {
+      "theDay": "The day",
+      "reverted": "{name} is the provider's version again.",
+      "revertedRepriced": "{name} is the provider's version again. {count, plural, one {# leave request was} other {# leave requests were}} recalculated.",
+      "loaded": "{count, plural, one {Loaded # day for {year}.} other {Loaded # days for {year}.}}",
+      "alreadyHasDays": "{year} already has days — nothing was changed.",
+      "loadFailed": "Could not load that year. Please try again.",
+      "saveFailed": "Something went wrong while saving. Please try again.",
+      "subscribe": "Subscribe in your calendar app",
+      "export": "Export calendar",
+      "intro": "This is the holiday-days section for this calendar — review and edit the days below, and manage who this calendar is assigned to.",
+      "tabHolidays": "Holidays",
+      "tabAssigned": "Assigned people",
+      "editTitle": "Edit calendar",
+      "count": "<muted>{count}</muted> Holidays",
+      "countHint": "Public holiday days included in this calendar.",
+      "loadYear": "Load {year}",
+      "loadingYear": "Loading {year}…",
+      "observed": "observed {date}",
+      "spanDays": "{count, plural, one {# day} other {# days}}",
+      "halfDay": "Half day",
+      "noMatch": "No holidays match your search",
+      "noMatchHint": "Try a different name or date.",
+      "noneForYear": "No holidays for {year}",
+      "startEditing": "Click to start editing",
+      "addOrLoad": "Add holiday days for {year}, or load them from the source above.",
+      "addForYear": "Add holiday days for {year} to this calendar.",
+      "exportTitle": "Export {name}",
+      "exportDescription": "Export this calendar's details, its holiday days, and its assigned users.",
+      "exportIncluded": "Three sheets — General Information (name, country, region, days, status, created by, created at), Holidays (name, dates, year) and Assigned Users (first name, last name, email, position)."
+    },
+    "list": {
+      "copyName": "{name} (copy)",
+      "addCalendar": "Add calendar",
+      "fromTemplate": "From template",
+      "manually": "Manually",
+      "title": "Public holidays",
+      "description": "Manage public holiday calendars and assign them to employees, locations or groups.",
+      "exportAria": "Export calendars",
+      "emptyTitle": "No public holiday calendars yet",
+      "emptyDescription": "Add a manual calendar or choose a template to start using public holidays in time off calculations.",
+      "noResultsHint": "Try a different calendar, country or region.",
+      "archivedDescription": "Archived calendars will appear here.",
+      "colCalendar": "Calendar",
+      "colCountryRegion": "Country / Region",
+      "colDays": "Days",
+      "colYears": "Years",
+      "colStatus": "Status",
+      "rowActions": "Calendar actions",
+      "unarchive": "Unarchive",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "exportTitle": "Export holiday calendars",
+      "exportDescription": "Export all holiday calendars with their day counts and creation details.",
+      "exportIncluded": "Included: name, country, region, days, year, status, created by, created at.",
+      "duplicate": {
+        "title": "Duplicate calendar",
+        "name": "New calendar name",
+        "hint": "Creates an inactive copy with all holiday days from “{name}”.",
+        "pending": "Duplicating…"
+      },
+      "archive": {
+        "title": "Archive “{name}”",
+        "body": "An archived calendar <b>stops applying to everyone assigned to it</b> — its days no longer count as holidays for them — and it cannot be assigned to anybody new. The assignments themselves are kept, so restoring brings the calendar back with the same people still on it.",
+        "pending": "Archiving…"
+      },
+      "restore": {
+        "title": "Unarchive “{name}”",
+        "body": "This brings the calendar back <b>as inactive</b>, which is deliberate rather than a half-finished restore: nothing starts applying to anybody until you activate it. Its holiday days and the people assigned to it are both kept.",
+        "pending": "Unarchiving…"
+      },
+      "deactivateDialog": {
+        "title": "Deactivate “{name}”",
+        "body": "An inactive calendar stops applying: the people assigned to it keep the assignment, but its days no longer count as holidays, so new leave requests over those dates will be one day longer. Assignments and holiday days are kept — activate it again at any time.",
+        "pending": "Deactivating…"
+      },
+      "delete": {
+        "title": "Delete “{name}”",
+        "body": "This permanently deletes the calendar. It cannot be undone — to take it out of use and keep everything, archive it instead.",
+        "checking": "Checking what depends on this calendar…",
+        "checkFailed": "What depends on this calendar could not be checked.",
+        "people": "{count, plural, one {# person loses} other {# people lose}} this calendar. Leave already approved is not recalculated.",
+        "days": "{count, plural, one {# holiday day is} other {# holiday days are}} deleted with it.",
+        "links": "{count, plural, one {# subscription link stops} other {# subscription links stop}} working."
+      }
+    }
+  },
+  "leaveTypeCategory": {
+    "vacation": "Vacation",
+    "sick": "Sick",
+    "parental": "Parental",
+    "unpaid": "Unpaid",
+    "other": "Other"
+  },
+  "leaveTypes": {
+    "archive": {
+      "title": "Archive \"{name}\"",
+      "description": "An archived leave type cannot be used for new requests. Existing requests keep it, and you can unarchive it at any time."
+    },
+    "create": {
+      "title": "Create leave type",
+      "description": "Add a new category of time off. You'll define its policies next.",
+      "submit": "Create type"
+    },
+    "edit": {
+      "title": "Edit leave type",
+      "description": "Update this leave type's details."
+    },
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "category": "Category",
+      "categoryHint": "A system grouping used for icons and reporting.",
+      "color": "Color",
+      "colorHint": "Used on the calendar and type list.",
+      "preview": "Preview",
+      "untitled": "Untitled type",
+      "policiesHint": "Policies (quotas, accrual, approvals) live inside this type and are added on its page.",
+      "nameRequired": "Please enter a type name.",
+      "nameMin": "Type name must be at least 2 characters.",
+      "nameMax": "Type name must be at most 200 characters.",
+      "descriptionMax": "Description must be at most 1000 characters."
+    },
+    "list": {
+      "add": "Add leave type",
+      "title": "Time off",
+      "description": "Leave types are the categories of time off in your organization — Vacation, Sick, Parental and more. Each type holds one or more policies with the actual rules.",
+      "heading": "Leave types",
+      "headingHint": "Open a type to manage its policies (quotas, accrual, carryover and approvals).",
+      "emptyTitle": "No leave types yet",
+      "emptyDescription": "A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies.",
+      "noResultsHint": "Try a different name or category.",
+      "archivedDescription": "Archived leave types will appear here.",
+      "colType": "Type",
+      "colCategory": "Category",
+      "colStatus": "Status",
+      "rowActions": "Leave type actions",
+      "unarchive": "Unarchive"
+    }
+  },
+  "policies": {
+    "delete": {
+      "title": "Delete time off policy",
+      "description": "This action cannot be undone. Policy <b>{name}</b> will be permanently deleted. Only draft policies with no active assignments can be deleted.",
+      "warning": "Warning",
+      "warningBody": "This policy will be permanently removed. This cannot be reversed.",
+      "confirm": "Delete policy"
+    },
+    "duplicate": {
+      "title": "Duplicate policy",
+      "description": "The copy starts as a draft with every setting of the original.",
+      "name": "Name",
+      "copyName": "{name} (copy)"
+    },
+    "assignmentWarning": {
+      "namesMore": "{names} and {rest} more",
+      "noApprover": "{count} of {selected} selected {selected, plural, one {person has} other {people have}} nobody the approval chain can reach — usually no manager — so their requests could not be approved: {names}.",
+      "noHireDate": "{count} of {selected} selected {selected, plural, one {person has} other {people have}} no hire date, and this policy renews on the hire anniversary, so they will not be assigned: {names}."
+    },
+    "detail": {
+      "fallbackTitle": "Policy",
+      "inLeaveType": "in {name}",
+      "activate": "Activate",
+      "tabOverview": "Overview",
+      "tabAssignments": "Assignments",
+      "deleteFailed": "The policy could not be deleted."
+    },
+    "archive": {
+      "title": "Archive \"{name}\"",
+      "description": "An archived policy stops being offered and can be unarchived at any time — it comes back as a draft, so switching it on again is a separate step."
+    },
+    "overview": {
+      "basics": "Basics",
+      "unit": "Unit",
+      "hours": "Hours",
+      "days": "Days",
+      "payType": "Pay type",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "visibility": "Visibility",
+      "private": "Private — colleagues see “Time off”",
+      "visible": "Leave type visible to colleagues",
+      "effectiveDate": "Effective date",
+      "entitlement": "Entitlement & renewal",
+      "quota": "Quota",
+      "unlimited": "Unlimited",
+      "quotaValue": "{quota} {unit, select, HOURS {hours} other {days}}/year",
+      "grantingMode": "Granting mode",
+      "accrued": "Accrued",
+      "upfront": "Upfront",
+      "renewal": "Renewal",
+      "manual": "Manual",
+      "yearly": "{day}/{month} yearly",
+      "anniversary": "On the hire anniversary",
+      "carryoverSection": "Carryover & balance",
+      "carryover": "Carryover",
+      "none": "None",
+      "limitedTo": "Limited to {limit}",
+      "carriedExpiry": "Carried-over expiry",
+      "never": "Never",
+      "expiryAfter": "{unit, select, DAYS {After {count, plural, one {# day} other {# days}}} MONTHS {After {count, plural, one {# month} other {# months}}} YEARS {After {count, plural, one {# year} other {# years}}} other {After {count}}}",
+      "negativeCarryover": "Negative carryover",
+      "allowed": "Allowed",
+      "allowedMax": "Allowed (max {max})",
+      "notAllowed": "Not allowed",
+      "negativeBalance": "Negative balance",
+      "counting": "Counting",
+      "countingMode": "Counting mode",
+      "workingDays": "Working days",
+      "calendarDays": "Calendar days",
+      "publicHolidays": "Public holidays",
+      "consume": "Consume balance",
+      "excluded": "Excluded"
+    },
+    "assignments": {
+      "unnamed": "Unnamed",
+      "from": "from {from}",
+      "fromTo": "from {from} to {to}",
+      "end": "End assignment",
+      "endTitle": "End this assignment?",
+      "endDescription": "{name} comes off {policy} now. The assignment stays on this tab among the ended ones.",
+      "thisPerson": "This person",
+      "assign": "Assign people",
+      "emptyTitle": "No one is assigned yet",
+      "emptyHint": "Assign this policy to people — individually or by segment — to give them this time off.",
+      "assignedCount": "{count, plural, one {# person assigned} other {# people assigned}}",
+      "showEnded": "Show {count} ended",
+      "hideEnded": "Hide {count} ended",
+      "loadFailed": "Failed to load assignments."
+    },
+    "list": {
+      "add": "Add policy",
+      "title": "Time off",
+      "description": "Define leave types and quota rules for your organization. Use the table below to review, search and navigate to specific policies.",
+      "heading": "Leave policies",
+      "headingHint": "Every leave policy in your company. Archived ones are behind the toggle.",
+      "exportAria": "Export policies",
+      "emptyTitle": "No time off policies yet",
+      "emptyDescription": "A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off.",
+      "noResultsHint": "Try a different policy name or unit.",
+      "archivedDescription": "Archived policies will appear here.",
+      "colPolicy": "Policy",
+      "colUnit": "Unit",
+      "colPayType": "Pay type",
+      "colStatus": "Status",
+      "rowActions": "Policy actions",
+      "unarchive": "Unarchive",
+      "exportTitle": "Export time-off policies",
+      "exportDescription": "Export the policy catalogue, archived policies included.",
+      "exportIncluded": "Includes leave type, name, status, unit, pay type, quota, granting mode, renewal, carryover and how many people hold each one.",
+      "exportFailed": "Export failed."
+    }
+  },
+  "policyWizard": {
+    "steps": {
+      "basics": {
+        "title": "Basics",
+        "subtitle": "Name, unit, visibility"
+      },
+      "entitlement": {
+        "title": "Entitlement",
+        "subtitle": "Quota & renewal"
+      },
+      "accrual": {
+        "title": "Accrual",
+        "subtitle": "Earning over time"
+      },
+      "carryover": {
+        "title": "Carryover & balance",
+        "subtitle": "Rollover & negatives"
+      },
+      "counting": {
+        "title": "Counting",
+        "subtitle": "How days are counted"
+      },
+      "requests": {
+        "title": "Requests",
+        "subtitle": "How employees request"
+      },
+      "approvals": {
+        "title": "Approvals",
+        "subtitle": "Who signs off"
+      },
+      "tenure": {
+        "title": "Tenure rewards",
+        "subtitle": "Extra days by service"
+      },
+      "eligibility": {
+        "title": "Eligibility",
+        "subtitle": "Waiting period"
+      },
+      "restrictions": {
+        "title": "Restrictions",
+        "subtitle": "When leave is blocked"
+      },
+      "editing": {
+        "title": "Editing",
+        "subtitle": "Who can edit requests"
+      },
+      "review": {
+        "title": "Review",
+        "subtitle": "Confirm"
+      }
+    },
+    "editTitle": "Edit policy",
+    "createTitle": "Create policy",
+    "inLeaveType": "in {name}",
+    "stepOf": "Step {current} of {total}",
+    "saveFailed": "Something went wrong. Please try again.",
+    "saveDraft": "Save as draft",
+    "saveActivate": "Save & activate",
+    "impact": {
+      "title": "{count, plural, one {# absence was} other {# absences were}} counted under the current rules",
+      "inProgress": "{count, plural, one {# of them is} other {# of them are}} already under way. ",
+      "body": "They belong to {people, plural, one {# person} other {# people}} and are <b>not recalculated</b> — what was decided stays decided. The new rules apply to what is requested from now on."
+    },
+    "validation": {
+      "name": "Please enter a policy name (at least 2 characters).",
+      "quota": "Please enter a valid yearly quota (0 or more).",
+      "renewalDay": "Renewal day must be between 1 and 31.",
+      "renewalMonth": "Renewal month must be between 1 and 12.",
+      "carryoverLimit": "Please enter a carryover limit (0 or more).",
+      "carryoverExpiry": "Carryover expiry period must be greater than 0.",
+      "certificateDuration": "Please enter the duration from which a certificate is required.",
+      "noticeDays": "Please enter the default notice days.",
+      "pastLimit": "Please enter how many days back past requests are allowed.",
+      "approvalStep": "Add at least one approval step.",
+      "specificUser": "Pick a person for each specific-user approval step.",
+      "requiredCount": "Enter how many approvals are needed.",
+      "tooFewApprovers": "Only {listed, plural, one {# approver is} other {# approvers are}} listed, so {needed} approvals can never be collected.",
+      "waitingPeriod": "Please enter a non-negative waiting-period value.",
+      "accrualAmount": "Accrual amount must be non-negative.",
+      "accrualCap": "Accrual cap must be non-negative.",
+      "blackoutDates": "Each blackout needs a start and an end date.",
+      "blackoutOrder": "A blackout's end date must be on or after its start date.",
+      "coverageCap": "Each coverage cap needs a non-negative number of people.",
+      "tenureValues": "Each tenure tier needs non-negative years and bonus days.",
+      "tenureDistinct": "Tenure tiers must have distinct years of service."
+    },
+    "basics": {
+      "intro": "Give the policy a name and the essentials. You can fine-tune the rules in the next steps.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionHint": "Shown to admins.",
+      "unit": "Unit",
+      "days": "Days",
+      "hours": "Hours",
+      "effectiveDate": "Effective date",
+      "effectiveHint": "When it takes effect.",
+      "paid": "Paid leave",
+      "paidHint": "Whether time off under this policy is paid.",
+      "private": "Private — colleagues see only “Time off”",
+      "privateHint": "On the company calendar and home, colleagues see that the person is away but not this leave type. The person, their manager and HR still see it. Employees also do not see the policy in the policy list."
+    },
+    "entitlement": {
+      "intro": "How much time off employees get each year, and when the balance resets.",
+      "unlimited": "Unlimited quota",
+      "unlimitedHint": "No yearly balance limit (e.g. unlimited sick days).",
+      "quota": "Yearly quota",
+      "quotaHint": "{unit, select, HOURS {Amount granted per year, in hours.} other {Amount granted per year, in days.}}",
+      "grantingMode": "Granting mode",
+      "grantingHint": "Upfront grants the full amount; accrued earns it over time (configure in the Accrual step).",
+      "upfront": "Upfront (full amount)",
+      "accrued": "Accrued (earned over time)",
+      "renewal": "Renewal",
+      "renewalHint": "When the balance resets each year.",
+      "yearStart": "Year start (1 Jan)",
+      "customDate": "Yearly on a custom date",
+      "hireDate": "On the employee's hire date",
+      "never": "Never — the balance is kept by hand",
+      "renewalDay": "Renewal day",
+      "renewalMonth": "Renewal month",
+      "anniversaryHint": "The balance renews on each employee's work anniversary (their hire date).",
+      "summaryManual": "Never — adjusted by hand",
+      "summaryHire": "On hire date",
+      "summaryYearly": "{day}/{month} yearly"
+    },
+    "carryover": {
+      "intro": "What happens to unused balance at renewal, and whether balances may go negative.",
+      "carryover": "Carryover",
+      "carryoverHint": "Unused balance at the end of a period.",
+      "none": "None (use it or lose it)",
+      "unlimited": "Unlimited",
+      "limited": "Limited",
+      "limit": "Carryover limit",
+      "limitHint": "Maximum amount carried into the next period.",
+      "expires": "Carried-over balance expires",
+      "never": "Never",
+      "afterPeriod": "After a period",
+      "expiresAfter": "Expires after",
+      "unit": "Unit",
+      "days": "Days",
+      "months": "Months",
+      "allowNegative": "Allow negative balance",
+      "allowNegativeHint": "Let employees request more than their current balance.",
+      "maxNegative": "Max negative balance",
+      "maxNegativeHint": "How far into the negative is allowed.",
+      "capByQuota": "Cap negative balance by quota",
+      "capByQuotaHint": "Limit the negative balance to the yearly quota.",
+      "allowNegativeCarryover": "Allow negative carryover",
+      "allowNegativeCarryoverHint": "Let a negative balance carry into the next period.",
+      "negativeCarryoverLimit": "Negative carryover limit"
+    },
+    "counting": {
+      "intro": "How a request's duration is turned into an amount of balance used.",
+      "mode": "Counting mode",
+      "modeHint": "Calendar days count every day; working days skip non-working days.",
+      "calendarDays": "Calendar days",
+      "workingDays": "Working days",
+      "holidays": "Public holidays consume balance",
+      "holidaysHint": "If off, public holidays inside a request are not counted."
+    },
+    "requests": {
+      "intro": "Rules for how employees may request time off under this policy.",
+      "minDuration": "Min duration per request",
+      "minDurationHint": "Optional (e.g. minimum a week).",
+      "overlapping": "Allow overlapping requests",
+      "overlappingHint": "Let an employee have two requests on the same dates.",
+      "maxDuration": "Max duration per request",
+      "minGap": "Min gap between requests (days)",
+      "maxPerYear": "Max request days per year",
+      "maxPerYearHint": "Optional cap across the year.",
+      "allowPast": "Allow requests in the past",
+      "daysBack": "How many days back",
+      "notice": "Require advance notice",
+      "noticeDisabledHint": "Not available while requests in the past are allowed — a past date can never meet a notice period.",
+      "noticeDays": "Default notice days"
+    },
+    "approvals": {
+      "selectApprover": "Select approver",
+      "chosenRole": "The chosen role",
+      "fallback": "Fallback approver",
+      "fallbackDefault": "HR Admin, or System Owner without it (the default)",
+      "noFallback": "No fallback",
+      "fallbackHint": "A role whose holders decide any step nobody can: an approver who has left, a manager step for somebody with no manager, an approver away with nobody standing in.",
+      "noFallbackWarning": "Without a fallback, a request whose approver has left or is away with nobody standing in waits for an administrator to approve it anyway.",
+      "intro": "Who signs off on requests. Turn off to auto-approve everything.",
+      "require": "Require approval",
+      "requireHint": "Requests need sign-off before they're approved.",
+      "chain": "Approval chain",
+      "manager": "Manager",
+      "specificUser": "Specific user",
+      "employeesManager": "The employee's manager",
+      "removeStep": "Remove step",
+      "addStep": "Add approval step",
+      "chainHint": "Manager steps route to each employee's manager; specific-user steps always go to the chosen person.",
+      "howDecide": "How do they decide?",
+      "sequential": "In order — each one signs in turn",
+      "all": "All of them, in any order",
+      "nOfM": "Any number of them",
+      "any": "Any",
+      "countAria": "How many approvals are required, out of the {count} listed",
+      "ofListed": "of the {count} listed"
+    },
+    "eligibility": {
+      "intro": "When a newly-eligible employee can start using this policy.",
+      "require": "Require a waiting period",
+      "requireHint": "Employees can't take this leave until a delay after their reference date.",
+      "waitingPeriod": "Waiting period",
+      "days": "Days",
+      "months": "Months",
+      "years": "Years",
+      "countedFrom": "Counted from",
+      "hireDate": "Hire date",
+      "probationEnd": "Probation end (not enforced yet)",
+      "probationHint": "Probation-end isn't enforced yet (no probation date on employees) — requests against it are allowed until that exists."
+    },
+    "accrual": {
+      "intro": "How entitlement is earned over time.",
+      "upfrontNotice": "This policy grants its entitlement upfront, so there's nothing to accrue. Switch the granting mode to <b>Accrued</b> in the Entitlement step to configure how it's earned.",
+      "unlimitedNotice": "This policy has an <b>unlimited</b> quota, so there is no yearly total to earn a share of and nothing here would be read. Set a yearly quota in the Entitlement step to accrue against it.",
+      "introAccrued": "How the yearly entitlement is earned over the year.",
+      "frequency": "Accrual frequency",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "annually": "Annually",
+      "amount": "Amount per period",
+      "amountHint": "Leave blank to spread the yearly quota evenly.",
+      "cap": "Accrual cap",
+      "capHint": "Max earned per year. Blank = the yearly quota.",
+      "timing": "When days land",
+      "timingHint": "At the start of each period, or once it has been worked through.",
+      "start": "At the start of the period",
+      "end": "At the end of the period",
+      "duringWaiting": "Earn during the waiting period",
+      "duringWaitingHint": "Days accumulate while the employee still cannot take this leave."
+    },
+    "tenure": {
+      "intro": "Extra days once an employee reaches a length-of-service tier (highest tier wins).",
+      "empty": "No tenure rewards. Everyone gets the base entitlement.",
+      "after": "After",
+      "years": "Years of service",
+      "grant": "grant",
+      "bonus": "Bonus days",
+      "remove": "Remove tenure tier",
+      "add": "Add tenure tier"
+    },
+    "restrictions": {
+      "blackout": "Nobody away on these dates",
+      "coverageCap": "No more than N people away at once",
+      "intro": "When leave cannot be taken — fixed dates, or too many people away at once.",
+      "empty": "No restrictions. Requests are allowed all year, however many people are away.",
+      "remove": "Remove restriction",
+      "name": "Name",
+      "blackoutPlaceholder": "Year-end freeze",
+      "coveragePlaceholder": "Keep the desk covered",
+      "from": "From",
+      "to": "To",
+      "blackoutStart": "Blackout start",
+      "blackoutEnd": "Blackout end",
+      "maxAway": "Max people away",
+      "appliesTo": "Applies to",
+      "team": "The same team",
+      "department": "The same department",
+      "company": "The whole company",
+      "whenApplies": "When it applies",
+      "block": "Refuse those days",
+      "warn": "Allow, and say which days",
+      "repeats": "Repeats",
+      "once": "Once, on these dates",
+      "yearly": "Every year",
+      "addBlackout": "Add a blackout",
+      "addCoverage": "Add a coverage cap"
+    },
+    "editing": {
+      "intro": "Who can edit time off requests, and when.",
+      "own": "Employees can edit their own requests",
+      "approved": "Allow editing approved requests",
+      "duringLeave": "Allow editing during active leave",
+      "reapproval": "Edits require re-approval",
+      "reapprovalHint": "An edited request goes back through approval.",
+      "managers": "Managers can edit their team's requests",
+      "admins": "Admins can edit any request",
+      "past": "Allow editing past requests"
+    },
+    "review": {
+      "autoApprove": "Auto-approve on submission",
+      "sequential": "{count, plural, one {# approver} other {# approvers}}, in order",
+      "nOfM": "any {required} of {count}",
+      "all": "{count, plural, one {# approver} other {# approvers}}, all must sign",
+      "introEdit": "Review the changes before saving them. You can go back to any step to adjust.",
+      "introCreate": "Review the policy before creating it. You can go back to any step to adjust.",
+      "leaveType": "Leave type: {name}",
+      "newPolicy": "New policy",
+      "untitled": "Untitled policy",
+      "unit": "Unit",
+      "payType": "Pay type",
+      "quota": "Quota",
+      "renewal": "Renewal",
+      "carryover": "Carryover",
+      "counting": "Counting",
+      "negativeBalance": "Negative balance",
+      "approval": "Approval",
+      "footerEdit": "Every section above is saved together — if anything is refused, nothing changes.",
+      "footerCreate": "Anything here can be changed later, including the steps you skipped."
+    }
+  }
+}

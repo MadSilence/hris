@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { Layers01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -55,6 +56,8 @@ export const JobLevelNameModal: FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("structure.jobLevels");
+  const tCommon = useTranslations("common");
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
   const taken = new Set(
@@ -74,11 +77,11 @@ export const JobLevelNameModal: FC<Props> = ({
       name: yup
         .string()
         .trim()
-        .required("Please enter a name.")
-        .max(255, "Name must be 255 characters or fewer.")
+        .required(t("validation.nameRequired"))
+        .max(255, t("validation.nameMax"))
         .test(
           "unique",
-          "This name is already taken.",
+          t("validation.nameTaken"),
           (value) => !value || !taken.has(value.trim().toLowerCase()),
         ),
     }),
@@ -162,7 +165,7 @@ export const JobLevelNameModal: FC<Props> = ({
 
             <DialogFooter className="mt-6 border-t border-divider pt-4">
               <Button type="button" variant="secondary" disabled={isLoading} onClick={requestClose}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
 
               <Button type="submit" disabled={isLoading}>

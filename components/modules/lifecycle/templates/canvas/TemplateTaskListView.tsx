@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Alert02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/components/desact/button";
 import { cn } from "@/lib/cn";
-import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
+import type { ProcessType } from "@/models/lifecycle";
 import {
   dayLabel,
   laneIdOf,
-  PHASE_LABELS,
   phaseOf,
   timelineOrder,
   type DraftItem,
@@ -37,8 +37,10 @@ const PHASES: Phase[] = ["BEFORE_START", "WEEK_1", "MONTH_1", "LATER"];
  * on a small screen (research § B.5).
  */
 export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly, onSelectAction, onAddAction }: Props) {
+  const t = useTranslations("lifecycle");
+  const untitled = t("shared.untitledTask");
   const laneLabel = (i: DraftItem) => lanes.find((l) => l.id === laneIdOf(i))?.label ?? "";
-  const titleOf = (key: string) => items.find((i) => i.key === key)?.title || "Untitled task";
+  const titleOf = (key: string) => items.find((i) => i.key === key)?.title || untitled;
 
   // Nothing yet: the whole place is the invitation, as every empty list in the product is — and the only way
   // to add, so there is no Add Task button above it.
@@ -47,10 +49,10 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
       <div className="h-full" data-test="template-list-view">
         <EmptyState
           scene="onboarding"
-          title="No tasks yet"
-          description="A process started from this template would have nothing to do. Add the first task."
+          title={t("listView.emptyTitle")}
+          description={t("listView.emptyDescription")}
           onCreate={readOnly ? undefined : onAddAction}
-          createLabel="Add task"
+          createLabel={t("shared.addTask")}
           fill
         />
       </div>
@@ -63,7 +65,7 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
         <div className="flex justify-end">
           <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={onAddAction}>
             <Icon icon={Add01Icon} size="sm" />
-            Add task
+            {t("shared.addTask")}
           </Button>
         </div>
       )}
@@ -74,7 +76,7 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
         return (
           <section key={phase} aria-labelledby={`phase-${phase}`} className="space-y-2">
             <h3 id={`phase-${phase}`} className="text-hint font-medium text-tertiary">
-              {phase === "BEFORE_START" && type === "OFFBOARDING" ? "By the last day" : PHASE_LABELS[phase]}
+              {phase === "BEFORE_START" && type === "OFFBOARDING" ? t("due.byLastDay") : t(`phase.${phase}`)}
             </h3>
             <ul className="divide-y divide-divider overflow-hidden rounded-control border border-divider bg-card">
               {inPhase.map((item) => {
@@ -90,21 +92,21 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
                         selectedKey === item.key && "bg-subtle",
                       )}
                     >
-                      <Icon icon={kindIcon} size="sm" className="mt-0.5 text-tertiary" label={TASK_KIND_LABELS[item.kind]} />
+                      <Icon icon={kindIcon} size="sm" className="mt-0.5 text-tertiary" label={t(`taskKind.${item.kind}`)} />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium text-primary">{item.title || "Untitled task"}</span>
+                        <span className="block truncate font-medium text-primary">{item.title || untitled}</span>
                         <span className="block text-hint text-tertiary">
-                          {dayLabel(item, type)} · {laneLabel(item)}
+                          {t("canvas.dayLane", { day: dayLabel(item, t, type), lane: laneLabel(item) })}
                         </span>
                         {item.waitsFor.length > 0 && (
                           <span className="mt-0.5 flex items-center gap-1 text-hint text-tertiary">
                             <Icon icon={HourglassIcon} size="sm" />
-                            Waits for {item.waitsFor.map(titleOf).join(", ")}
+                            {t("shared.waitsFor", { names: item.waitsFor.map(titleOf).join(", ") })}
                           </span>
                         )}
                       </span>
                       {item.assigneeKind === "SPECIFIC_USER" && (item.assigneeProblem || !item.assigneeUserId) && (
-                        <Icon icon={Alert02Icon} size="sm" className="mt-0.5 shrink-0 text-status-pending-text" label="Needs a person who can take it" />
+                        <Icon icon={Alert02Icon} size="sm" className="mt-0.5 shrink-0 text-status-pending-text" label={t("shared.needsPerson")} />
                       )}
                     </button>
                   </li>

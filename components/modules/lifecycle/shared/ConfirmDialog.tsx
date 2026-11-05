@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -26,6 +27,7 @@ type Props = {
 
 /** A confirmation that stays open on refusal and says why. */
 export function ConfirmDialog({ open, title, children, confirmLabel, destructive, confirmDisabled, onCancelAction, onConfirmAction }: Props) {
+  const tCommon = useTranslations("common");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +42,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, destructive
         </AlertDialogHeader>
         <FormError message={error} />
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={busy}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={busy || confirmDisabled}
             destructive={destructive}

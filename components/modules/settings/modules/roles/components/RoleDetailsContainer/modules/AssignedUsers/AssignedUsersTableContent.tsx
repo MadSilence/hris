@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { Button } from "@/components/desact/button";
 import type { UsersSearchItemDTO } from "@/models/user/fields";
 import AssignedUsersTableSkeleton from "./AssignedUsersTableSkeleton";
 import RemoveAssignedUserDialog from "./modals/RemoveAssignedUserDialog";
 import { PermissionGate } from "@/components/auth/PermissionGate";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { UserStatusBadge } from "@/components/ui/StatusBadge";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -25,7 +26,7 @@ export interface AssignedUsersTableContentProps {
 }
 
 
-function formatDate(iso?: string | null) {
+function formatDate(iso: string | null | undefined, formatDisplayDate: DateFormatter) {
   return iso ? formatDisplayDate(iso, { style: "medium" }) : "";
 }
 
@@ -38,8 +39,11 @@ export default function AssignedUsersTableContent({
   onRemoveUser,
   disableRemove = false,
   isSystemOwnerRole = false,
-  emptyText = "No users yet",
+  emptyText,
 }: AssignedUsersTableContentProps) {
+  const t = useTranslations("settings");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const { userId: currentUserId } = useCurrentUser();
   const hasData = rows.length > 0;
 
@@ -48,11 +52,11 @@ export default function AssignedUsersTableContent({
       <table className="w-full caption-bottom text-body">
         <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
           <TableRow>
-            <TableHead className="pl-4">User</TableHead>
-            <TableHead>Position</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Added on</TableHead>
-            <TableHead>Added by</TableHead>
+            <TableHead className="pl-4">{t("roles.assigned.columns.user")}</TableHead>
+            <TableHead>{t("roles.assigned.columns.position")}</TableHead>
+            <TableHead>{tCommon("fields.status")}</TableHead>
+            <TableHead>{t("roles.assigned.columns.addedOn")}</TableHead>
+            <TableHead>{t("roles.assigned.columns.addedBy")}</TableHead>
             <TableHead className="w-10"/>
           </TableRow>
         </TableHeader>
@@ -64,7 +68,7 @@ export default function AssignedUsersTableContent({
             hasData &&
             rows.map((u) => {
               const fullName =
-                `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Unnamed";
+                `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || t("roles.assigned.unnamed");
 
               return (
                 <TableRow key={u.id} className="group border-divider hover:bg-subtle [&_td]:py-2">
@@ -85,13 +89,15 @@ export default function AssignedUsersTableContent({
                     <UserStatusBadge status={u.status}/>
                   </TableCell>
 
-                  <TableCell className="text-tertiary">{formatDate(u.assignedAt)}</TableCell>
+                  <TableCell className="text-tertiary">{formatDate(u.assignedAt, formatDisplayDate)}</TableCell>
 
                   <TableCell className="text-tertiary">
+                    {/* i18n-exempt: the backend's marker for an assignment nobody made by hand */}
+                    {/* i18n-exempt: the backend's marker for an assignment nobody made by hand */}
                     {u.assignedByName && u.assignedByName !== "System" ? (
                       <UserChip name={u.assignedByName}/>
                     ) : (
-                      "System"
+                      t("roles.assigned.system")
                     )}
                   </TableCell>
 
@@ -103,9 +109,9 @@ export default function AssignedUsersTableContent({
                           variant="ghost"
                           size="icon"
                           className="text-danger-text"
-                          aria-label="Remove user"
+                          aria-label={t("roles.assigned.removeUser")}
                           disabled
-                          title="The default role can't be removed"
+                          title={t("roles.assigned.defaultCannotRemove")}
                           onClick={(e) => e.stopPropagation()}
                         >
                           ✕
@@ -119,7 +125,7 @@ export default function AssignedUsersTableContent({
                               variant="ghost"
                               size="icon"
                               className="text-danger-text hover:text-status-declined-text"
-                              aria-label="Remove user"
+                              aria-label={t("roles.assigned.removeUser")}
                               onClick={(e) => e.stopPropagation()}
                             >
                               ✕
@@ -137,7 +143,7 @@ export default function AssignedUsersTableContent({
           {!isLoading && !hasData && (
             <TableRow>
               <TableCell colSpan={6}>
-                <div className="py-6 text-center text-body text-tertiary">{emptyText}</div>
+                <div className="py-6 text-center text-body text-tertiary">{emptyText ?? t("roles.assigned.emptyDefault")}</div>
               </TableCell>
             </TableRow>
           )}
@@ -147,7 +153,7 @@ export default function AssignedUsersTableContent({
       {hasMore && (
         <div className="flex justify-center py-3">
           <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
-            {isLoadingMore ? "Loading…" : "Load more"}
+            {isLoadingMore ? tCommon("states.loading") : t("roles.assigned.loadMore")}
           </Button>
         </div>
       )}

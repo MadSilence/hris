@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
@@ -31,6 +32,8 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+
   const requestClose = () => {
     if (isLoading) return;
 
@@ -46,10 +49,12 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
     >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Move document</DialogTitle>
+          <DialogTitle>{t("documents.moveDocument.title")}</DialogTitle>
           <DialogDescription>
-            Move <strong>{documentName ?? "this document"}</strong> to another
-            folder.
+            {t.rich("documents.moveDocument.description", {
+              name: documentName ?? t("documents.moveDocument.thisDocument"),
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </DialogDescription>
         </DialogHeader>
 

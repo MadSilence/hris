@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { Card, CardContent, CardHeader } from "@/components/desact/card";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -39,6 +40,8 @@ function FieldAccessSkeleton() {
 }
 
 export default function FieldAccessContainer({ roleId }: { roleId: string }) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const { data: fields, isLoading: fieldsLoading, error: fieldsError } = useUserFields();
   const { data: attributeGroups, isLoading: groupsLoading } = useAttributeGroups();
   const { data, isLoading: accessLoading, error: accessError, save, saving, saveError } =
@@ -117,9 +120,9 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
       <CardHeader className="px-0 py-0">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-section-title">Field access</h2>
+            <h2 className="text-section-title">{t("roles.fieldAccess.title")}</h2>
             <p className="text-body text-tertiary">
-              Choose which employee fields this role can see and edit.
+              {t("roles.fieldAccess.subtitle")}
             </p>
           </div>
 
@@ -133,16 +136,16 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
               onClick={() => setOpenGroups(allExpanded ? [] : groups.map((group) => group.id))}
             >
               {allExpanded ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-              {allExpanded ? "Collapse all" : "Expand all"}
+              {allExpanded ? t("roles.review.collapseAll") : t("roles.review.expandAll")}
             </Button>
 
             {showActions && (
               <>
                 <Button type="button" variant="secondary" onClick={() => setDraft(serverDraft)} disabled={saving}>
-                  Reset
+                  {tCommon("actions.reset")}
                 </Button>
                 <Button type="button" onClick={() => setReviewOpen(true)} disabled={saving}>
-                  Review &amp; Save
+                  {t("roles.review.reviewAndSave")}
                 </Button>
               </>
             )}
@@ -154,7 +157,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
         {isLoading ? (
           <FieldAccessSkeleton/>
         ) : error ? (
-          <FieldError>Failed to load field access.</FieldError>
+          <FieldError>{t("roles.fieldAccess.loadFailed")}</FieldError>
         ) : (
           <FieldAccessView
             groups={groups}
@@ -163,9 +166,9 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
             readOnly={readOnly}
             readOnlyReason={
               isSystemRole
-                ? "This is a system role. It always has full access, and its field access cannot be changed."
+                ? t("roles.fieldAccess.systemRole")
                 : !canEdit
-                  ? "You do not have permission to change field access."
+                  ? t("roles.fieldAccess.noPermission")
                   : undefined
             }
             query={query}

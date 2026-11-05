@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Baby01Icon, BeachIcon, Stethoscope02Icon, Tag01Icon, UnavailableIcon } from "@hugeicons/core-free-icons";
@@ -17,6 +18,7 @@ import { TagColorSwatches } from "@/components/ui/TagColorPicker";
 import { TAG_CLASSES, TAG_COLOR_SEQUENCE, toTagColor } from "@/lib/theme/tags";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FieldError } from "@/components/desact/field-error";
+import { LEAVE_TYPE_CATEGORY_KEYS } from "../../LeaveTypeCategoryChip/LeaveTypeCategoryChip";
 
 export type LeaveTypeFormValues = {
   name: string;
@@ -29,17 +31,18 @@ const DEFAULT_COLOR = TAG_COLOR_SEQUENCE[0];
 
 type CategoryChip = {
   value: LeaveTypeCategory | "";
-  label: string;
+  /** `null` is "None", from `common`. */
+  labelKey: (typeof LEAVE_TYPE_CATEGORY_KEYS)[LeaveTypeCategory] | null;
   icon: IconSvgElement;
 };
 
 const CATEGORY_CHIPS: CategoryChip[] = [
-  { value: "", label: "None", icon: Tag01Icon },
-  { value: LeaveTypeCategory.Vacation, label: "Vacation", icon: BeachIcon },
-  { value: LeaveTypeCategory.Sick, label: "Sick", icon: Stethoscope02Icon },
-  { value: LeaveTypeCategory.Parental, label: "Parental", icon: Baby01Icon },
-  { value: LeaveTypeCategory.Unpaid, label: "Unpaid", icon: UnavailableIcon },
-  { value: LeaveTypeCategory.Other, label: "Other", icon: Tag01Icon },
+  { value: "", labelKey: null, icon: Tag01Icon },
+  { value: LeaveTypeCategory.Vacation, labelKey: LEAVE_TYPE_CATEGORY_KEYS[LeaveTypeCategory.Vacation], icon: BeachIcon },
+  { value: LeaveTypeCategory.Sick, labelKey: LEAVE_TYPE_CATEGORY_KEYS[LeaveTypeCategory.Sick], icon: Stethoscope02Icon },
+  { value: LeaveTypeCategory.Parental, labelKey: LEAVE_TYPE_CATEGORY_KEYS[LeaveTypeCategory.Parental], icon: Baby01Icon },
+  { value: LeaveTypeCategory.Unpaid, labelKey: LEAVE_TYPE_CATEGORY_KEYS[LeaveTypeCategory.Unpaid], icon: UnavailableIcon },
+  { value: LeaveTypeCategory.Other, labelKey: LEAVE_TYPE_CATEGORY_KEYS[LeaveTypeCategory.Other], icon: Tag01Icon },
 ];
 
 type Props = {
@@ -51,17 +54,17 @@ type Props = {
   onSubmitAction: (values: LeaveTypeFormValues) => void | Promise<void>;
 };
 
-const schema = yup.object({
+const buildSchema = (t: ReturnType<typeof useTranslations<"timeOff">>) => yup.object({
   name: yup
     .string()
     .trim()
-    .required("Please enter a type name.")
-    .min(2, "Type name must be at least 2 characters.")
-    .max(200, "Type name must be at most 200 characters."),
+    .required(t("leaveTypes.form.nameRequired"))
+    .min(2, t("leaveTypes.form.nameMin"))
+    .max(200, t("leaveTypes.form.nameMax")),
   description: yup
     .string()
     .trim()
-    .max(1000, "Description must be at most 1000 characters.")
+    .max(1000, t("leaveTypes.form.descriptionMax"))
     .optional(),
   category: yup.mixed<LeaveTypeCategory | "">().optional(),
   color: yup.string().optional(),
@@ -75,6 +78,10 @@ export const LeaveTypeForm: FC<Props> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
+  const chipLabel = (chip: CategoryChip) => (chip.labelKey ? t(chip.labelKey) : tCommon("values.none"));
   const handleFormSubmission = useCallback(
     (values: LeaveTypeFormValues) =>
       onSubmitAction({
@@ -122,7 +129,7 @@ export const LeaveTypeForm: FC<Props> = ({
         {/* Form fields */}
         <div className="space-y-5">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="leave-type-name" required>Name</RequiredLabel>
+            <RequiredLabel htmlFor="leave-type-name" required>{t("leaveTypes.form.name")}</RequiredLabel>
             <Input
               id="leave-type-name"
               value={formik.values.name}
@@ -135,7 +142,7 @@ export const LeaveTypeForm: FC<Props> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="leave-type-description">Description</Label>
+            <Label htmlFor="leave-type-description">{t("leaveTypes.form.description")}</Label>
             <Input
               id="leave-type-description"
               value={formik.values.description}
@@ -150,16 +157,16 @@ export const LeaveTypeForm: FC<Props> = ({
 
           {/* Category chips */}
           <div className="space-y-2">
-            <Label>Category</Label>
+            <Label>{t("leaveTypes.form.category")}</Label>
             <p className="text-hint text-tertiary">
-              A system grouping used for icons and reporting.
+              {t("leaveTypes.form.categoryHint")}
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               {CATEGORY_CHIPS.map((chip) => {
                 const selected = formik.values.category === chip.value;
                 return (
                   <button
-                    key={chip.label}
+                    key={chip.value || "none"}
                     type="button"
                     disabled={isLoading}
                     onClick={() => formik.setFieldValue("category", chip.value)}
@@ -171,7 +178,7 @@ export const LeaveTypeForm: FC<Props> = ({
                     )}
                   >
                     <Icon icon={chip.icon} size="sm" className="size-3.5" />
-                    {chip.label}
+                    {chipLabel(chip)}
                   </button>
                 );
               })}
@@ -180,8 +187,8 @@ export const LeaveTypeForm: FC<Props> = ({
 
           {/* Color */}
           <div className="space-y-2">
-            <Label>Color</Label>
-            <p className="text-hint text-tertiary">Used on the calendar and type list.</p>
+            <Label>{t("leaveTypes.form.color")}</Label>
+            <p className="text-hint text-tertiary">{t("leaveTypes.form.colorHint")}</p>
             <div className="pt-1">
               <TagColorSwatches
                 value={formik.values.color}
@@ -194,12 +201,12 @@ export const LeaveTypeForm: FC<Props> = ({
 
         {/* Live preview */}
         <aside className="space-y-3">
-          <p className="text-hint font-semibold text-tertiary">Preview</p>
+          <p className="text-hint font-semibold text-tertiary">{t("leaveTypes.form.preview")}</p>
           <div className="rounded-card border border-divider bg-card p-4 shadow-card">
             <div className="flex items-center gap-2.5">
               <span aria-hidden className={cn("size-3 flex-none rounded-pill", TAG_CLASSES[toTagColor(formik.values.color)].dot)} />
               <span className="truncate text-body font-medium text-primary">
-                {formik.values.name.trim() || "Untitled type"}
+                {formik.values.name.trim() || t("leaveTypes.form.untitled")}
               </span>
             </div>
             {formik.values.description.trim() && (
@@ -211,22 +218,22 @@ export const LeaveTypeForm: FC<Props> = ({
               {selectedChip && selectedChip.value !== "" ? (
                 <Badge variant="outline" className="gap-1 border-divider bg-subtle text-secondary">
                   <Icon icon={selectedChip.icon} size="sm" className="size-3.5" />
-                  {selectedChip.label}
+                  {chipLabel(selectedChip)}
                 </Badge>
               ) : (
-                <span className="text-hint text-tertiary">None</span>
+                <span className="text-hint text-tertiary">{tCommon("values.none")}</span>
               )}
             </div>
           </div>
           <p className="text-hint leading-relaxed text-tertiary">
-            Policies (quotas, accrual, approvals) live inside this type and are added on its page.
+            {t("leaveTypes.form.policiesHint")}
           </p>
         </aside>
       </div>
 
       <DialogFooter className="border-t border-divider bg-card px-6 py-4">
         <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
           {submitLabel}

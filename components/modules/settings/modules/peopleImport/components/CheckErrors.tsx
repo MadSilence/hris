@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -12,6 +13,8 @@ type Props = { anImport: PeopleImportDTO };
 
 /** The report's failures: every row Apply could not write, and why. The Check step's list is {@link PreviewEditor}. */
 export const CheckErrors: React.FC<Props> = ({ anImport }) => {
+  const t = useTranslations("peopleImport");
+  const tCommon = useTranslations("common");
   const rows = usePeopleImportRows(anImport.id, true);
 
   if (rows.isLoading) {
@@ -30,7 +33,7 @@ export const CheckErrors: React.FC<Props> = ({ anImport }) => {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-body font-medium text-primary">
-          {`${list.length} ${list.length === 1 ? "row needs" : "rows need"} attention.`}
+          {t("checkErrors.attention", { count: list.length })}
         </p>
       </div>
 
@@ -38,9 +41,9 @@ export const CheckErrors: React.FC<Props> = ({ anImport }) => {
         <Table className="text-body">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16">Row</TableHead>
-              <TableHead className="w-48">Name</TableHead>
-              <TableHead>What Is wrong</TableHead>
+              <TableHead className="w-16">{t("checkErrors.row")}</TableHead>
+              <TableHead className="w-48">{tCommon("fields.personName")}</TableHead>
+              <TableHead>{t("checkErrors.whatIsWrong")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -52,7 +55,7 @@ export const CheckErrors: React.FC<Props> = ({ anImport }) => {
                   <ul className="space-y-1">
                     {row.errors.map((error, index) => (
                       <li key={index}>
-                        {error.columnHeader && <span className="font-medium text-primary">{error.columnHeader}: </span>}
+                        {error.columnHeader && <span className="font-medium text-primary">{t("checkErrors.columnPrefix", { header: error.columnHeader })}</span>}
                         {messageForCode(error.code, undefined, error.params)}
                       </li>
                     ))}

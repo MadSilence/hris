@@ -114,6 +114,13 @@ describe("LoginForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
+  it("never lets the browser send the password in the address — the form is a POST", () => {
+    const { container } = renderForm();
+
+    // Clicked before hydration, a form submits natively; the default GET put the password into the URL.
+    expect(container.querySelector("form")).toHaveAttribute("method", "post");
+  });
+
   it("offers a way to a new password", () => {
     renderForm();
 

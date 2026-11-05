@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
@@ -13,7 +14,7 @@ import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
 
 type TabDef = {
   id: string;
-  label: string;
+  labelKey: "publicProfile" | "personal" | "documents" | "timeOff" | "salary" | "attendance" | "forms" | "reviews" | "tasks" | "notes";
   /** Undefined = always visible. Otherwise the tab is hidden without VIEW on this resource. */
   resource?: ResourceCode;
   /** Shown also to the person and to their line manager, whatever their rights. */
@@ -27,18 +28,18 @@ type TabDef = {
  * backend gives the processes right all of them and the person what they answered themself.
  */
 const TABS: TabDef[] = [
-  { id: "public-profile", label: "Public profile" },
-  { id: "personal", label: "Personal info" },
-  { id: "documents", label: "Documents", resource: "PEOPLE.DOCUMENTS" },
-  { id: "time-off", label: "Time off", resource: "PEOPLE.TIME_OFF" },
-  { id: "salary", label: "Salary" },
-  { id: "attendance", label: "Attendance", resource: "PEOPLE.ATTENDANCE" },
-  { id: "forms", label: "Forms" },
+  { id: "public-profile", labelKey: "publicProfile" },
+  { id: "personal", labelKey: "personal" },
+  { id: "documents", labelKey: "documents", resource: "PEOPLE.DOCUMENTS" },
+  { id: "time-off", labelKey: "timeOff", resource: "PEOPLE.TIME_OFF" },
+  { id: "salary", labelKey: "salary" },
+  { id: "attendance", labelKey: "attendance", resource: "PEOPLE.ATTENDANCE" },
+  { id: "forms", labelKey: "forms" },
   // The person, their line manager and REVIEWS.RESULT holders (DECISIONS.md § "Performance reviews — the second
   // sitting", Q6); each sees a different part, and the backend answers which (REVIEWS_DESIGN.md § 12.6).
-  { id: "reviews", label: "Reviews", resource: "REVIEWS.RESULT", personAndManager: true },
-  { id: "tasks", label: "Tasks" },
-  { id: "notes", label: "Notes" },
+  { id: "reviews", labelKey: "reviews", resource: "REVIEWS.RESULT", personAndManager: true },
+  { id: "tasks", labelKey: "tasks" },
+  { id: "notes", labelKey: "notes" },
 ];
 
 type Props = {
@@ -54,6 +55,8 @@ type Props = {
 };
 
 export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { user: viewer } = useCurrentUser();
   const pathname = usePathname();
   const router = useRouter();
@@ -96,7 +99,7 @@ export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
                     }
                   }}
                 >
-                  {tab.label}
+                  {t(`profile.tabs.${tab.labelKey}`)}
                 </Link>
               </TabsTrigger>
             );
@@ -107,10 +110,10 @@ export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
       <ConfirmCancelModal
         isOpen={!!pendingHref}
         // The owner's wording (person-profile plan 9.3): the question is about leaving, not discarding.
-        title="Leave without saving?"
-        description="You have unsaved changes on this tab. Leaving now discards them."
-        cancelText="Keep editing"
-        confirmText="Leave without saving"
+        title={t("profile.leaveGuard.title")}
+        description={t("profile.leaveGuard.description")}
+        cancelText={tCommon("actions.keepEditing")}
+        confirmText={t("profile.leaveGuard.confirm")}
         onCancelAction={() => setPendingHref(null)}
         onConfirmAction={() => {
           const href = pendingHref;

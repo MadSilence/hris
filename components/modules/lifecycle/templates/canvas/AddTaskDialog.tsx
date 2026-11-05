@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import {
@@ -8,7 +9,7 @@ import {
 } from "@/components/desact/dialog";
 import { cn } from "@/lib/cn";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
-import { EDITABLE_TASK_KINDS, TASK_KIND_DESCRIPTIONS, TASK_KIND_LABELS, type TaskKind } from "@/models/lifecycle";
+import { EDITABLE_TASK_KINDS, type TaskKind } from "@/models/lifecycle";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
 import { Icon } from "@/components/desact/icon";
 import { FormError } from "@/components/feedback/FormError";
@@ -30,6 +31,8 @@ const KINDS: TaskKind[] = EDITABLE_TASK_KINDS;
  * or Cancel closes it; nothing has been written yet, so nothing is asked.
  */
 export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Props) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<TaskKind>("TODO");
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +47,7 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError("Enter a title.");
+      setError(t("addTask.enterTitle"));
       return;
     }
     onAddAction({ title: title.trim(), kind });
@@ -55,17 +58,17 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
       <DialogContent className="sm:max-w-2xl">
         <form onSubmit={submit} className="space-y-5">
           <DialogHeader>
-            <DialogTitle>Add task</DialogTitle>
+            <DialogTitle>{t("shared.addTask")}</DialogTitle>
             <DialogDescription>{where}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-1.5">
-            <RequiredLabel htmlFor="add-task-title" required>Title</RequiredLabel>
+            <RequiredLabel htmlFor="add-task-title" required>{t("shared.title")}</RequiredLabel>
             <Input
               id="add-task-title"
               autoFocus
               value={title}
-              placeholder="Order a laptop"
+              placeholder={t("addTask.titlePlaceholder")}
               aria-invalid={error ? true : undefined}
               onChange={(e) => {
                 setTitle(e.target.value);
@@ -76,8 +79,8 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
           </div>
 
           <fieldset className="space-y-2">
-            <legend className="mb-2 text-body font-medium">Kind of task</legend>
-            <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Kind">
+            <legend className="mb-2 text-body font-medium">{t("addTask.kindLegend")}</legend>
+            <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={t("shared.kind")}>
               {KINDS.map((k) => {
                 const shownIcon = TASK_KIND_ICON[k];
                 const checked = kind === k;
@@ -100,8 +103,8 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
                       <Icon icon={shownIcon} size="sm" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-body font-medium text-primary">{TASK_KIND_LABELS[k]}</span>
-                      <span className="block text-hint text-tertiary">{TASK_KIND_DESCRIPTIONS[k]}</span>
+                      <span className="block text-body font-medium text-primary">{t(`taskKind.${k}`)}</span>
+                      <span className="block text-hint text-tertiary">{t(`taskKindDescription.${k}`)}</span>
                     </span>
                   </button>
                 );
@@ -110,8 +113,8 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
           </fieldset>
 
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={onCancelAction}>Cancel</Button>
-            <Button type="submit">Add task</Button>
+            <Button type="button" variant="secondary" onClick={onCancelAction}>{tCommon("actions.cancel")}</Button>
+            <Button type="submit">{t("shared.addTask")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -27,12 +28,13 @@ type Props = {
  * fails, so a refusal is read where it was asked (`ACTIONS_AND_MENUS.md` § 7).
  */
 export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName, onDecided, size = "sm" }) => {
+  const t = useTranslations("timeOff");
   const decide = useDecideAnyway();
   const [open, setOpen] = useState<DecideAnywayDecision | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const reasonId = useId();
-  const who = requesterName?.trim() || "this person";
+  const who = requesterName?.trim() || t("decision.anyway.thisPerson");
 
   const close = () => {
     setOpen(null);
@@ -43,7 +45,7 @@ export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName
   const confirm = async () => {
     if (!open) return;
     if (open === "REJECT" && !reason.trim()) {
-      setError("Say why it is rejected.");
+      setError(t("decision.anyway.reasonRequired"));
       return;
     }
     setError(null);
@@ -56,14 +58,14 @@ export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName
       close();
       await onDecided?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The request could not be decided.");
+      setError(e instanceof Error ? e.message : t("decision.anyway.failed"));
     }
   };
 
   return (
     <>
       <Button type="button" variant="secondary" size={size} onClick={() => setOpen("APPROVE")} disabled={decide.isPending}>
-        Approve anyway
+        {t("decision.anyway.approve")}
       </Button>
       <Button
         type="button"
@@ -73,18 +75,18 @@ export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName
         onClick={() => setOpen("REJECT")}
         disabled={decide.isPending}
       >
-        Reject anyway
+        {t("decision.anyway.reject")}
       </Button>
 
       <ConfirmActionModal
         isOpen={open !== null}
-        title={open === "REJECT" ? "Reject anyway?" : "Approve anyway?"}
+        title={open === "REJECT" ? t("decision.anyway.rejectTitle") : t("decision.anyway.approveTitle")}
         description={
           open === "REJECT"
-            ? `The request of ${who} is rejected now, over the approvers who have not answered yet. It is recorded as an override.`
-            : `The request of ${who} is approved now, whatever approval steps are still open. It is recorded as an override.`
+            ? t("decision.anyway.rejectDescription", { who })
+            : t("decision.anyway.approveDescription", { who })
         }
-        confirmLabel={open === "REJECT" ? "Reject anyway" : "Approve anyway"}
+        confirmLabel={open === "REJECT" ? t("decision.anyway.reject") : t("decision.anyway.approve")}
         destructive={open === "REJECT"}
         isLoading={decide.isPending}
         errorMessage={error}
@@ -93,7 +95,7 @@ export const DecideAnywayControls: React.FC<Props> = ({ requestId, requesterName
       >
         {open === "REJECT" && (
           <div className="flex flex-col gap-1.5">
-            <RequiredLabel htmlFor={reasonId} required>Reason</RequiredLabel>
+            <RequiredLabel htmlFor={reasonId} required>{t("decision.reason")}</RequiredLabel>
             <Input id={reasonId} value={reason} onChange={(e) => setReason(e.currentTarget.value)} autoFocus />
           </div>
         )}

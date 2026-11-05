@@ -1,7 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Notification } from "@/models/notifications";
-import { PublicHolidayDriftActions, describeConflict, describeDriftChange } from "./PublicHolidayDriftActions";
+import { translatorFor } from "@/test/nextIntl";
+import type { NotificationsTranslator } from "./notificationPresenter";
+import {
+  PublicHolidayDriftActions,
+  describeConflict as conflictLine,
+  describeDriftChange as changeLine,
+} from "./PublicHolidayDriftActions";
+
+const t = translatorFor("notifications") as unknown as NotificationsTranslator;
+const describeDriftChange = (change: Parameters<typeof changeLine>[0]) => changeLine(change, t);
+const describeConflict = (change: Parameters<typeof conflictLine>[0]) => conflictLine(change, t);
 
 const applyMutateAsync = jest.fn();
 const dismissMutateAsync = jest.fn();

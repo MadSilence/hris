@@ -1,6 +1,16 @@
 import type { ActionSpec } from "@/models/automations";
-import type { Cycle } from "@/models/reviews";
-import { defaultReviewWindows, startReviewProblems, withWindow } from "./startReview";
+import { REVIEW_KIND_KEYS, type Cycle } from "@/models/reviews";
+import type { useTranslations } from "next-intl";
+import { translatorFor } from "@/test/nextIntl";
+import type { AutomationsT } from "@/components/modules/automations/shared/vocabulary";
+import { defaultReviewWindows, startReviewProblems as problemsOf, withWindow, type StartReviewWords } from "./startReview";
+
+const tReviews = translatorFor("reviews") as unknown as ReturnType<typeof useTranslations<"reviews">>;
+const words: StartReviewWords = {
+  t: translatorFor("automations") as unknown as AutomationsT,
+  kindLabel: (kind) => tReviews(REVIEW_KIND_KEYS[kind]),
+};
+const startReviewProblems = (action: ActionSpec, template?: Cycle | null) => problemsOf(action, template, words);
 
 const template = (patch: Partial<Cycle> = {}): Cycle => ({
   id: "t1",

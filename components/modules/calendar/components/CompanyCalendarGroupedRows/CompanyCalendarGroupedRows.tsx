@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
@@ -127,6 +128,8 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   capacity,
   requestFor,
 }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [nearScreen, setNearScreen] = useState(false);
 
@@ -217,7 +220,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
     onToggle();
   };
 
-  const title = groupTitle(grouping, group);
+  const title = groupTitle(t, grouping, group);
   const failed = peopleFailed || marksFailed || absencesFailed;
   const waiting = !collapsed && (!nearScreen || (isLoading && users.length === 0));
 
@@ -241,7 +244,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
             className={`text-tertiary transition-transform duration-(--duration-menu) ${collapsed ? "" : "rotate-90"}`}
           />
           <span className="truncate font-medium text-primary">{title}</span>
-          <Badge variant="neutral" className="px-1.5" aria-label={`${group.count} people`}>
+          <Badge variant="neutral" className="px-1.5" aria-label={tCommon("people.count", { count: group.count })}>
             {group.count}
           </Badge>
         </button>
@@ -260,7 +263,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
                   className="pointer-events-auto flex justify-center"
                   style={{ gridColumn: col + 2, gridRow: 1 }}
                 >
-                  <CapacityDot mark={mark} who={`this ${grouping === "TEAM" ? "team" : "department"}`} />
+                  <CapacityDot mark={mark} who={grouping === "TEAM" ? "team" : "department"} />
                 </span>
               );
             })}
@@ -296,7 +299,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
           ))}
           {hasNextPage ? (
             <div ref={sentinelRef} className="flex justify-center py-3 text-hint text-tertiary">
-              {isFetchingNextPage ? "Loading…" : ""}
+              {isFetchingNextPage ? tCommon("states.loading") : ""}
             </div>
           ) : null}
         </>

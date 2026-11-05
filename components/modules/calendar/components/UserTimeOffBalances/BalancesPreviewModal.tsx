@@ -2,6 +2,7 @@
 
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { FC, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Wallet01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -39,8 +40,9 @@ const BalanceItem: FC<{
   selected: boolean;
   onSelect: () => void;
 }> = ({ balance, policy, selected, onSelect }) => {
-  const name = policy?.name ?? "Time off";
-  const unit = policy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
+  const t = useTranslations("calendar");
+  const name = policy?.name ?? t("balances.fallbackName");
+  const unit = policy?.unit === TimeOffPolicyUnit.Hours ? t("units.hoursShort") : t("units.daysShort");
   const unlimited = policy?.unlimitedQuota ?? false;
   const granted = grantedOf(balance);
   const pct = granted > 0 ? Math.min(Math.round((balance.usedBalance / granted) * 100), 100) : 0;
@@ -62,12 +64,15 @@ const BalanceItem: FC<{
       </div>
       <div className="mt-1.5 text-body">
         {unlimited ? (
-          <span className="font-semibold text-primary">Unlimited</span>
+          <span className="font-semibold text-primary">{t("balances.unlimited")}</span>
         ) : (
-          <>
-            <span className="font-semibold text-primary">{formatDayAmount(balance.currentBalance)}</span>
-            <span className="text-tertiary"> {unit} left</span>
-          </>
+          <span className="text-tertiary">
+            {t.rich("balances.left", {
+              amount: formatDayAmount(balance.currentBalance),
+              unit,
+              b: (chunks) => <span className="font-semibold text-primary">{chunks}</span>,
+            })}
+          </span>
         )}
       </div>
 
@@ -76,13 +81,11 @@ const BalanceItem: FC<{
       {!unlimited && (balance.pendingBalance > 0 || balance.remainingCarryover > 0) && (
         <p className="mt-1 text-hint text-tertiary">
           {balance.pendingBalance > 0 && (
-            <>
-              {formatDayAmount(balance.pendingBalance)} awaiting a decision
-            </>
+            <>{t("balances.awaitingDecision", { amount: formatDayAmount(balance.pendingBalance) })}</>
           )}
           {balance.pendingBalance > 0 && balance.remainingCarryover > 0 && " · "}
           {balance.remainingCarryover > 0 && (
-            <>{formatDayAmount(balance.remainingCarryover)} carried over</>
+            <>{t("balances.carriedOver", { amount: formatDayAmount(balance.remainingCarryover) })}</>
           )}
         </p>
       )}
@@ -107,6 +110,8 @@ export const BalancesPreviewModal: FC<Props> = ({
   policyMap,
   onCloseAction,
 }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const [selectedId, setSelectedId] = useState(balances[0]?.id ?? "");
   // Crediting or deducting days by hand is a MANAGE action — same gate the endpoint applies.
   const canAdjust = useCanAccess("PEOPLE.TIME_OFF", "MANAGE");
@@ -116,7 +121,7 @@ export const BalancesPreviewModal: FC<Props> = ({
     [balances, selectedId],
   );
   const selectedPolicy = selected ? policyMap.get(selected.policyId) : undefined;
-  const unit = selectedPolicy?.unit === TimeOffPolicyUnit.Hours ? "h" : "d";
+  const unit = selectedPolicy?.unit === TimeOffPolicyUnit.Hours ? t("units.hoursShort") : t("units.daysShort");
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
@@ -127,8 +132,8 @@ export const BalancesPreviewModal: FC<Props> = ({
               <Icon icon={Wallet01Icon} />
             </div>
             <div>
-              <DialogTitle className="text-section-title">Time off balances</DialogTitle>
-              <DialogDescription>Balances by policy and their accrual history.</DialogDescription>
+              <DialogTitle className="text-section-title">{t("balances.title")}</DialogTitle>
+              <DialogDescription>{t("balances.description")}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -153,12 +158,21 @@ export const BalancesPreviewModal: FC<Props> = ({
               <>
                 <div className="mb-3">
                   <p className="text-body font-medium text-primary">
-                    {selectedPolicy?.name ?? "Time off"}
+                    {selectedPolicy?.name ?? t("balances.fallbackName")}
                   </p>
                   <p className="text-hint text-tertiary">
                     {selectedPolicy?.unlimitedQuota
-                      ? `${formatDayAmount(selected.usedBalance)} ${unit} used · ${selected.year}`
-                      : `${formatDayAmount(selected.currentBalance)} ${unit} left of ${formatDayAmount(grantedOf(selected))} · ${selected.year}`}
+                      ? t("balances.usedInYear", {
+                          amount: formatDayAmount(selected.usedBalance),
+                          unit,
+                          year: String(selected.year),
+                        })
+                      : t("balances.leftOfInYear", {
+                          amount: formatDayAmount(selected.currentBalance),
+                          unit,
+                          granted: formatDayAmount(grantedOf(selected)),
+                          year: String(selected.year),
+                        })}
                   </p>
                 </div>
                 {canAdjust && (
@@ -171,17 +185,17 @@ export const BalancesPreviewModal: FC<Props> = ({
                   </div>
                 )}
 
-                <p className="mb-2 text-hint font-semibold text-tertiary">History</p>
+                <p className="mb-2 text-hint font-semibold text-tertiary">{t("balances.history")}</p>
                 <BalanceLedger balanceId={selected.id} periodEnd={selected.periodEnd} />
               </>
             ) : (
-              <p className="py-6 text-center text-body text-tertiary">No balances to show.</p>
+              <p className="py-6 text-center text-body text-tertiary">{t("balances.empty")}</p>
             )}
           </div>
         </div>
 
         <div className="flex justify-end border-t border-divider px-6 py-4">
-          <Button type="button" variant="secondary" onClick={onCloseAction}>Close</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction}>{tCommon("actions.close")}</Button>
         </div>
       </DialogContent>
     </Dialog>

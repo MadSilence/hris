@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import { usePeopleSearchInfinite } from "@/components/modules/organization/hooks/usePeopleSearch";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
@@ -36,6 +37,7 @@ const errorMessageOf = (error: unknown) =>
   error instanceof Error ? error.message : undefined;
 
 const RolesPageContainer: React.FC = () => {
+  const t = useTranslations("settings");
   const [view, setView] = React.useState<RolesTableView>("roles");
   const [query, setQuery] = React.useState("");
   const [showArchived, setShowArchived] = React.useState(false);
@@ -100,7 +102,7 @@ const RolesPageContainer: React.FC = () => {
   // message, so a 403 on the people list and a dead backend produced the same generic sentence.
   const failure = rolesError ?? peopleError;
   if (failure instanceof ForbiddenError) return <AccessDenied/>;
-  if (failure) return <ErrorState error={failure} title="Roles could not be loaded"/>;
+  if (failure) return <ErrorState error={failure} title={t("roles.page.loadFailed")}/>;
 
   return (
     <RolesPageView

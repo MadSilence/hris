@@ -1,6 +1,7 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import { Input } from "@/components/desact/input";
 import { Button } from "@/components/desact/button";
@@ -8,7 +9,7 @@ import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import {
-  passwordSchema,
+  buildPasswordSchema,
   type PasswordValues,
 } from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
 import { acceptInviteAction } from "@/components/modules/invitation/actions/acceptInviteAction";
@@ -29,6 +30,9 @@ type Props = {
  * than copied.
  */
 export function InviteAcceptContainer({ token, firstName, email, companyName }: Props) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const passwordSchema = useMemo(() => buildPasswordSchema(t), [t]);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,12 +63,12 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
   if (done) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">You&apos;re in</h1>
+        <h1 className="text-page-title">{t("invitation.done.title")}</h1>
         <p className="text-body text-tertiary">
-          Your password is set. Sign in with {email ?? "your email address"} to continue.
+          {email ? t("invitation.done.bodyWithEmail", { email }) : t("invitation.done.body")}
         </p>
         <Button asChild>
-          <a href="/login">Go to sign in</a>
+          <a href="/login">{t("invitation.done.goToSignIn")}</a>
         </Button>
       </div>
     );
@@ -74,16 +78,20 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
     <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-page-title">{firstName ? `Welcome, ${firstName}` : "Welcome"}</h1>
+          <h1 className="text-page-title">{firstName ? t("invitation.welcomeName", { name: firstName }) : t("invitation.welcome")}</h1>
           <p className="text-body text-secondary">
-            {companyName ? `You have been invited to join ${companyName}. ` : "You have been invited. "}
-            Set a password to sign in{email ? ` as ${email}` : ""}.
+            {t("invitation.intro", {
+              hasCompany: companyName ? "yes" : "no",
+              company: companyName ?? "",
+              hasEmail: email ? "yes" : "no",
+              email: email ?? "",
+            })}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        <form method="post" onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="invite-password" required>Password</RequiredLabel>
+            <RequiredLabel htmlFor="invite-password" required>{t("login.passwordLabel")}</RequiredLabel>
             <Input
               id="invite-password"
               name="password"
@@ -100,7 +108,7 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="invite-password-repeat" required>Confirm password</RequiredLabel>
+            <RequiredLabel htmlFor="invite-password-repeat" required>{t("password.confirmLabel")}</RequiredLabel>
             <Input
               id="invite-password-repeat"
               name="confirmPassword"
@@ -117,13 +125,13 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
           </div>
 
           <p className="text-body text-tertiary">
-            Use at least 8 characters with upper &amp; lower case letters, a number, and a symbol.
+            {t("password.rule")}
           </p>
 
           <FormError message={error} />
 
           <Button type="submit" disabled={busy} size="lg" className="w-full">
-            {busy ? "Saving…" : "Set password"}
+            {busy ? tCommon("actions.saving") : t("password.submit")}
           </Button>
         </form>
       </div>

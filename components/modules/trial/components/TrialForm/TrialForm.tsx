@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/components/desact/input";
@@ -33,51 +34,43 @@ export interface TrialFormProps {
   companyAddressPreview?: (subdomain: string) => string;
 }
 
-export enum TrialMessages {
-  EmailRequired = "Please enter your business email.",
-  InvalidEmail = "Enter a valid email address.",
-  FirstRequired = "Please enter your first name.",
-  LastRequired = "Please enter your last name.",
-  CompanyRequired = "Please enter your company name.",
-  CompanyInvalid = "Use letters, numbers, spaces and hyphens only.",
-  ConsentRequired = "Please accept the privacy terms to continue.",
-}
+type AuthTranslator = ReturnType<typeof useTranslations<"auth">>;
 
-const schema = yup.object({
+const buildSchema = (t: AuthTranslator) => yup.object({
   email: yup
     .string()
     .trim()
-    .required(TrialMessages.EmailRequired)
-    .email(TrialMessages.InvalidEmail)
+    .required(t("trial.validation.emailRequired"))
+    .email(t("login.validation.emailInvalid"))
     .nonNullable(),
 
   firstName: yup
     .string()
     .trim()
-    .required(TrialMessages.FirstRequired)
+    .required(t("trial.validation.firstNameRequired"))
     .nonNullable(),
 
   lastName: yup
     .string()
     .trim()
-    .required(TrialMessages.LastRequired)
+    .required(t("trial.validation.lastNameRequired"))
     .nonNullable(),
 
   companyName: yup
     .string()
     .trim()
-    .required(TrialMessages.CompanyRequired)
+    .required(t("trial.validation.companyRequired"))
     .test(
       "valid-company-name",
-      TrialMessages.CompanyInvalid,
+      t("trial.validation.companyInvalid"),
       (value) => !!value && isValidCompanyName(value),
     )
     .nonNullable(),
 
   consent: yup
     .boolean()
-    .oneOf([true], TrialMessages.ConsentRequired)
-    .required(TrialMessages.ConsentRequired),
+    .oneOf([true], t("trial.validation.consentRequired"))
+    .required(t("trial.validation.consentRequired")),
 });
 
 function isValidCompanyName(value: string) {
@@ -95,31 +88,31 @@ function sanitize(values: TrialValues): TrialValues {
 }
 
 function TrialHeader() {
+  const t = useTranslations("auth");
   return (
     <div className="space-y-3 text-center">
 
-      <h1 className="text-greeting">Get started for free</h1>
+      <h1 className="text-greeting">{t("trial.start.title")}</h1>
 
       <p className="mx-auto max-w-xl text-body text-tertiary">
-        Try noddo for 14 days for free. No credit card, setup or
-        cancellation required.
+        {t("trial.start.description")}
       </p>
     </div>
   );
 }
 
 function TrialSuccessBlock() {
+  const t = useTranslations("auth");
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-      <h1 className="text-greeting">Check your inbox</h1>
+      <h1 className="text-greeting">{t("trial.start.successTitle")}</h1>
 
       <p className="text-body text-tertiary">
-        We’ve sent a verification link to your email address. Please open the
-        email and confirm your account before continuing.
+        {t("trial.start.successBody")}
       </p>
 
       <p className="text-body text-tertiary">
-        Didn’t receive it? Be sure to check your spam or promotions folder.
+        {t("trial.start.successHint")}
       </p>
     </div>
   );
@@ -132,11 +125,9 @@ export default function TrialForm({
   isSuccess,
   companyAddressPreview,
 }: TrialFormProps) {
-  const consentText = useMemo(
-    () =>
-      "By submitting this form I confirm that I have read the privacy policy and agree to the processing of my personal data by noddo for the stated purposes. In case of consent, I can revoke my consent at any time. Furthermore, by sending the form I agree to the general terms and conditions.",
-    [],
-  );
+  const t = useTranslations("auth");
+  const schema = useMemo(() => buildSchema(t), [t]);
+  const consentText = t("trial.start.consent");
 
   const handleFormSubmission = useCallback(
     async (values: TrialValues) => {
@@ -186,7 +177,7 @@ export default function TrialForm({
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="trial-email" required>Business email</RequiredLabel>
+            <RequiredLabel htmlFor="trial-email" required>{t("trial.start.businessEmail")}</RequiredLabel>
 
             <Input
               id="trial-email"
@@ -206,7 +197,7 @@ export default function TrialForm({
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="trial-first-name" required>First name</RequiredLabel>
+              <RequiredLabel htmlFor="trial-first-name" required>{t("trial.start.firstName")}</RequiredLabel>
 
               <Input
                 id="trial-first-name"
@@ -224,7 +215,7 @@ export default function TrialForm({
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="trial-last-name" required>Last name</RequiredLabel>
+              <RequiredLabel htmlFor="trial-last-name" required>{t("trial.start.lastName")}</RequiredLabel>
 
               <Input
                 id="trial-last-name"
@@ -243,7 +234,7 @@ export default function TrialForm({
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="trial-company-name" required>Company name</RequiredLabel>
+            <RequiredLabel htmlFor="trial-company-name" required>{t("trial.start.companyName")}</RequiredLabel>
 
             <Input
               id="trial-company-name"
@@ -259,10 +250,10 @@ export default function TrialForm({
 
             {companyAddressPreview && normalizeCompanyAddress(formik.values.companyName) ? (
               <p className="text-body text-tertiary" aria-live="polite">
-                Your company will sign in at{" "}
-                <span className="font-medium text-primary">
-                  {companyAddressPreview(normalizeCompanyAddress(formik.values.companyName))}
-                </span>
+                {t.rich("trial.start.addressPreview", {
+                  address: companyAddressPreview(normalizeCompanyAddress(formik.values.companyName)),
+                  b: (chunks) => <span className="font-medium text-primary">{chunks}</span>,
+                })}
               </p>
             ) : null}
 
@@ -270,8 +261,7 @@ export default function TrialForm({
           </div>
 
           <p className="text-body text-tertiary">
-            *For the best experience possible, we ask that you provide all of
-            the required contact details above.
+            {t("trial.start.requiredNote")}
           </p>
 
           <div className="space-y-2">
@@ -301,14 +291,17 @@ export default function TrialForm({
 
           <div className="flex flex-col gap-4">
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? "Starting your trial…" : "Start your free trial"}
+              {busy ? t("trial.start.submitting") : t("trial.start.submit")}
             </Button>
 
             <p className="text-center text-body text-tertiary">
-              You already have an account?{" "}
-              <a href="/login" className="text-accent-text underline-offset-4 hover:underline">
-                Login here
-              </a>
+              {t.rich("trial.start.haveAccount", {
+                link: (chunks) => (
+                  <a href="/login" className="text-accent-text underline-offset-4 hover:underline">
+                    {chunks}
+                  </a>
+                ),
+              })}
             </p>
           </div>
         </form>

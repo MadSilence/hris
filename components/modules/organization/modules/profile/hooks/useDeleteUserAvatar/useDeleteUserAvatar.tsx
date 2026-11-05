@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import {
   deleteUserAvatarAction,
@@ -6,6 +7,7 @@ import {
 } from "@/components/modules/organization/modules/profile/actions/deleteUserAvatarAction";
 
 export const useDeleteUserAvatar = () => {
+  const t = useTranslations("organization");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -19,7 +21,7 @@ export const useDeleteUserAvatar = () => {
     mutationFn: async (payload: DeleteUserAvatarActionInput) => {
       const result = await deleteUserAvatarAction(payload);
       if (result.status !== ActionStatus.SUCCESS) {
-        throw new Error(result.errorMessage ?? "The photo could not be removed.");
+        throw new Error(result.errorMessage ?? t("profile.avatar.removeFailed"));
       }
       return result;
     },

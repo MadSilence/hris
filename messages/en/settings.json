@@ -1,0 +1,1016 @@
+{
+  "company": {
+    "language": {
+      "label": "Language",
+      "hint": "The language noddo speaks to everybody in the company: screens, emails and exports."
+    },
+    "title": "Company",
+    "description": "Who your company is inside the workspace and how it keeps time. The name and description travel with every profile, document and export; the working week drives calendars, time-off balances and every date the app calculates for you.",
+    "signInAddress": "Sign-in address",
+    "logo": {
+      "title": "Logo",
+      "shown": "Shown in the sidebar and at the top of the org chart.",
+      "initials": "Until one is uploaded, the initials stand in for it.",
+      "working": "Working…",
+      "replace": "Replace",
+      "upload": "Upload logo"
+    },
+    "identity": {
+      "title": "Company identity",
+      "description": "How the company is named and introduced across the workspace.",
+      "name": "Company name",
+      "nameRequired": "A company name is required.",
+      "website": "Website"
+    },
+    "time": {
+      "title": "Localization & time",
+      "description": "The clock and the working week every calculated date is measured against.",
+      "timezone": "Timezone",
+      "timezonePlaceholder": "Select a timezone",
+      "weekStart": "Week starts on",
+      "workingDays": "Working days",
+      "noWorkingDays": "Select at least one working day."
+    },
+    "days": {
+      "monday": {
+        "short": "Mon",
+        "long": "Monday"
+      },
+      "tuesday": {
+        "short": "Tue",
+        "long": "Tuesday"
+      },
+      "wednesday": {
+        "short": "Wed",
+        "long": "Wednesday"
+      },
+      "thursday": {
+        "short": "Thu",
+        "long": "Thursday"
+      },
+      "friday": {
+        "short": "Fri",
+        "long": "Friday"
+      },
+      "saturday": {
+        "short": "Sat",
+        "long": "Saturday"
+      },
+      "sunday": {
+        "short": "Sun",
+        "long": "Sunday"
+      }
+    }
+  },
+  "pages": {
+    "roles": {
+      "title": "Roles and permissions",
+      "description": "Manage access by defining roles and their permissions. Use the table below to review, search and navigate to specific roles."
+    },
+    "roleDetail": {
+      "fallbackName": "Role",
+      "notFoundTitle": "Role not found",
+      "notFoundMessage": "This role no longer exists. It may have been deleted."
+    },
+    "logs": {
+      "title": "Logs",
+      "description": "Everything that has happened in this company — who did it, when, and what changed. The list is read-only; open a row to see the details behind it."
+    },
+    "attributes": {
+      "title": "Person information",
+      "description": "Every field a person has. <b>Custom fields</b> are the ones your company defines — grouped into sections, with their own types, validation and sensitivity. <b>System fields</b> are built in and read-only: their values come from their own modules, and who may see them is set in Roles → Field access.",
+      "customTab": "Custom fields",
+      "systemTab": "System fields"
+    },
+    "documents": {
+      "title": "Document categories",
+      "description": "Labels for the documents on a person's profile. Anyone who can see documents can pick a category when uploading; managing the list itself stays here."
+    }
+  },
+  "roles": {
+    "page": {
+      "tabRoles": "Roles",
+      "tabUsers": "Users",
+      "addRole": "Add role",
+      "exportRoles": "Export roles",
+      "loadFailed": "Roles could not be loaded"
+    },
+    "detail": {
+      "tabs": {
+        "assigned": "Assigned users",
+        "permissions": "Permissions",
+        "fieldAccess": "Field access",
+        "notifications": "Notifications"
+      }
+    },
+    "assigned": {
+      "archivedTitle": "This role is archived",
+      "archivedBody": "Archiving took it from everyone who held it, and it cannot be assigned. Unarchive it to start using it again.",
+      "archivedCannotAssign": "An archived role cannot be assigned",
+      "emptyArchived": "Nobody holds this archived role.",
+      "empty": "No users yet — use Assign to give this role to someone.",
+      "emptyDefault": "No users yet",
+      "columns": {
+        "user": "User",
+        "position": "Position",
+        "addedOn": "Added on",
+        "addedBy": "Added by"
+      },
+      "system": "System",
+      "unnamed": "Unnamed",
+      "removeUser": "Remove user",
+      "defaultCannotRemove": "The default role can't be removed",
+      "loadMore": "Load more",
+      "assign": "Assign"
+    },
+    "removeUser": {
+      "title": "Remove user from role",
+      "body": "This will remove <b>{name}</b> from this role.",
+      "warning": "Warning",
+      "ownOwner": "This is you. You will lose the System Owner role and be signed out at once; another owner can give it back.",
+      "other": "The user will lose the access granted by this role until it is assigned again."
+    },
+    "exportAssigned": {
+      "title": "Export assigned users",
+      "description": "Export users assigned to <b>{role}</b>.",
+      "included": "Included: user name, email, position."
+    },
+    "exportRoles": {
+      "title": "Export roles",
+      "description": "Export all roles with permissions and assigned users.",
+      "included": "Included: role name, status, system flag, permissions, assigned users."
+    },
+    "review": {
+      "changes": "{count, plural, one {# change will be applied to this role.} other {# changes will be applied to this role.}}",
+      "reviewAndSave": "Review & Save",
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all"
+    },
+    "fieldAccess": {
+      "title": "Field access",
+      "subtitle": "Choose which employee fields this role can see and edit.",
+      "loadFailed": "Failed to load field access.",
+      "systemRole": "This is a system role. It always has full access, and its field access cannot be changed.",
+      "noPermission": "You do not have permission to change field access.",
+      "reviewTitle": "Review field access changes",
+      "columnField": "Field",
+      "columnType": "Type",
+      "floorBlocked": "Whole company is set to \"{level}\". Lower it there to allow less access here.",
+      "floorNote": "Options below “{level}” are set by Whole company access.",
+      "sensitiveTitle": "Sensitive: access is never granted automatically; without it people see a placeholder",
+      "sensitive": "Sensitive",
+      "alwaysVisible": "Always visible",
+      "noMatch": "No fields match “{query}”.",
+      "systemFields": "System fields",
+      "baseAttributes": "Base attributes",
+      "scope": {
+        "self": "Own",
+        "directReports": "Direct reports",
+        "company": "Whole company"
+      },
+      "level": {
+        "none": "No access",
+        "view": "View",
+        "edit": "Edit",
+        "manage": "Manage"
+      },
+      "type": {
+        "text": "Text",
+        "email": "Email",
+        "url": "URL",
+        "status": "Status",
+        "number": "Number",
+        "date": "Date",
+        "checkbox": "Checkbox",
+        "select": "Select",
+        "multiSelect": "Multi select",
+        "person": "Person"
+      }
+    },
+    "permissions": {
+      "title": "Permissions",
+      "subtitle": "Set the access level for each resource.",
+      "loadFailed": "Permissions did not load",
+      "systemRole": "This is a system role. It always has full access, and its permissions cannot be changed.",
+      "noPermission": "You do not have permission to change role permissions.",
+      "reviewTitle": "Review permission changes",
+      "columnResource": "Resource",
+      "missingView": "Without view access this role cannot open the related pages.",
+      "setConditions": "Set conditions",
+      "conditions": "{count, plural, one {# condition} other {# conditions}}",
+      "noMatch": "No permissions match “{query}”.",
+      "grantLabel": "{resource} · {action}",
+      "action": {
+        "view": "View",
+        "edit": "Edit",
+        "manage": "Manage",
+        "block": "Block"
+      },
+      "scope": {
+        "none": "No access",
+        "self": "Own record",
+        "directReports": "Direct reports",
+        "selfAndReports": "Own record + direct reports",
+        "myTeam": "My team",
+        "myTeamSubtree": "My team and sub-teams",
+        "myDepartment": "My department",
+        "myDepartmentSubtree": "My department and sub-departments",
+        "myOffice": "My office",
+        "myLegalEntity": "My legal entity",
+        "company": "Whole company",
+        "custom": "Custom filter…",
+        "customShort": "Custom"
+      },
+      "customScope": {
+        "title": "Custom access scope",
+        "description": "{grant} — this grant will reach everyone matching all of the conditions below.",
+        "includeInactive": "Also reach people who are not active",
+        "empty": "A custom scope with no conditions is rejected on save — it would claim a reach it never defines.",
+        "save": "Save conditions"
+      }
+    },
+    "form": {
+      "useTemplate": "Choose from a template",
+      "useTemplateHint": "Pick a ready configuration and customize it in the future.",
+      "roleName": "Role name",
+      "template": "Template",
+      "selectTemplate": "Select template",
+      "templateNote": "The next step previews exactly what the template creates in your company — and lets you rename it if a role of that name exists — before anything is applied.",
+      "nameRequired": "Please enter a role name.",
+      "nameRequiredShort": "Role name is required.",
+      "nameMin": "Role name must be at least 2 characters.",
+      "nameMax": "Role name must be at most 120 characters.",
+      "nameTooLong": "Role name is too long.",
+      "nameTaken": "A role with this name already exists.",
+      "descriptionMax": "Description must be at most 500 characters.",
+      "templateRequired": "Please select a template."
+    },
+    "add": {
+      "title": "Add new role",
+      "description": "Create a new role from scratch or start from a template and adjust it later."
+    },
+    "upsert": {
+      "renameTitle": "Edit role",
+      "renameDescription": "Update the role name and description to keep your access model organized.",
+      "duplicateTitle": "Duplicate role",
+      "duplicateDescription": "Create a new role based on this one. You can edit permissions later.",
+      "duplicateSubmit": "Create duplicate"
+    },
+    "delete": {
+      "title": "Delete role",
+      "body": "This action cannot be undone. This will permanently delete <b>{name}</b> and remove all associated data from our servers.",
+      "bodyUnnamed": "This action cannot be undone. This will permanently delete <b>the selected role</b> and remove all associated data from our servers.",
+      "affects": "What this affects",
+      "checking": "Checking what depends on this role…",
+      "impactUnknown": "{error} Until then, how many people this affects is unknown.",
+      "generic": "Users assigned to this role may lose access to systems and workflows.",
+      "holders": "{count, plural, one {<b>#</b> person holds this role.} other {<b>#</b> people hold this role.}}",
+      "lastRole": "<b>{count}</b> of them would be left with the default role only.",
+      "bulk": "{count, plural, one {It was handed out by <b>#</b> bulk assignment, which will be left pointing at a deleted role.} other {It was handed out by <b>#</b> bulk assignments, which will be left pointing at a deleted role.}}",
+      "archiveInstead": "To take the role out of use without losing its permissions, archive it instead — it can be restored, though the people who held it lose it either way."
+    },
+    "table": {
+      "columnName": "Name",
+      "columnUsers": "Users",
+      "columnUpdated": "Last updated",
+      "system": "System",
+      "default": "Default",
+      "emptyTitle": "No roles yet",
+      "emptyDescription": "A role is a set of permissions you can hand to people. Add the first one to start granting access.",
+      "noResultsHint": "Try a different role name.",
+      "archivedDescription": "Archived roles will appear here.",
+      "copyName": "{name} (copy)",
+      "archiveTitle": "Archive {name}?",
+      "archiveTitleUnnamed": "Archive role?",
+      "archiveHeld": "{count, plural, one {It will be taken from # person, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.} other {It will be taken from # people, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.}}",
+      "archiveNobody": "Nobody holds it. Scheduled assignments of it are cancelled, and it can be unarchived later.",
+      "rowActions": "Role actions",
+      "unarchive": "Unarchive"
+    },
+    "assign": {
+      "title": "Manage assigned roles",
+      "description": "Select which roles should be assigned to this user.",
+      "tabRoles": "Assigned roles",
+      "tabPermissions": "Resolved permissions",
+      "tabFields": "Resolved field visibility",
+      "noModuleAccess": "These roles grant no module access.",
+      "noFieldAccess": "These roles grant no access to employee fields.",
+      "noRoles": "No roles available",
+      "fallbackUser": "User",
+      "lockDefault": "Default role — always assigned and can’t be removed",
+      "lockOwner": "Only a System Owner can grant or remove this role",
+      "lockArchived": "This role is archived — it grants nothing and cannot be assigned again",
+      "resolving": "Resolving access…",
+      "fullAccess": "Full access",
+      "fullAccessBody": "This selection includes the System Owner role, which grants everything and bypasses field-level restrictions. Listing individual rights here would understate it.",
+      "customField": "Custom"
+    },
+    "users": {
+      "columnRoles": "Assigned roles",
+      "emptyTitle": "No people yet",
+      "emptyDescription": "People appear here once they are added to the organization.",
+      "noResultsHint": "Try a different name or email."
+    }
+  },
+  "shared": {
+    "exportFormat": {
+      "format": "Format",
+      "csvBadge": "Lightweight",
+      "csvHint": "Best for simple imports and quick viewing.",
+      "xlsxBadge": "Recommended",
+      "xlsxHint": "Better for structured data and multiple sheets.",
+      "required": "Select export format."
+    },
+    "exportData": {
+      "button": {
+        "rows": "Export {count, plural, one {# row} other {# rows}}",
+        "people": "Export {count, plural, one {# person} other {# people}}",
+        "offices": "Export {count, plural, one {# office} other {# offices}}",
+        "legalEntities": "Export {count, plural, one {# legal entity} other {# legal entities}}",
+        "calendars": "Export {count, plural, one {# calendar} other {# calendars}}"
+      }
+    },
+    "assignedPanel": {
+      "title": "Assigned people",
+      "position": "Position",
+      "archived": "This record is archived, so nobody new can be assigned to it.",
+      "assign": "Assign",
+      "limited": "Only the people your access covers are listed.",
+      "emptyHiddenTitle": "No one you can see",
+      "emptyTitle": "No people assigned yet",
+      "emptyHiddenDescription": "People are assigned here, but none of them is someone your access covers.",
+      "emptyDescription": "Assign people to this record to see them here.",
+      "noResultsHint": "Try a different name or position.",
+      "assignPeople": "Assign people",
+      "user": "User",
+      "loadMore": "Load more",
+      "unassignTitle": "Unassign person",
+      "unassignBody": "{name} will no longer be assigned here. They keep their account and everything else.",
+      "unassignBodyUnnamed": "This person will no longer be assigned here. They keep their account and everything else.",
+      "unassign": "Unassign",
+      "unassignNamed": "Unassign {name}"
+    },
+    "detachedPeople": {
+      "unnamed": "Unnamed person",
+      "names": "{names}.",
+      "namesMore": "{names} and {count} more.",
+      "office": {
+        "checking": "Checking who is assigned to this office…",
+        "unchecked": "Who is assigned to this office could not be checked. Anyone assigned to it will lose it.",
+        "nobody": "Nobody is assigned to this office.",
+        "loses": "{count, plural, one {# person loses this office and will have none until somebody assigns another:} other {# people lose this office and will have none until somebody assigns another:}}"
+      },
+      "legalEntity": {
+        "checking": "Checking who is assigned to this legal entity…",
+        "unchecked": "Who is assigned to this legal entity could not be checked. Anyone assigned to it will lose it.",
+        "nobody": "Nobody is assigned to this legal entity.",
+        "loses": "{count, plural, one {# person loses this legal entity and will have none until somebody assigns another:} other {# people lose this legal entity and will have none until somebody assigns another:}}"
+      }
+    },
+    "exportOrgTree": {
+      "failed": "Export failed. Please try again.",
+      "includePeople": "Include assigned people",
+      "includePeopleHint": "Adds a People sheet with everyone assigned in scope.",
+      "noPeople": "No people assigned in the selected scope.",
+      "exporting": "Exporting…",
+      "department": {
+        "title": "Export department",
+        "description": "Pick a department and download it as a spreadsheet.",
+        "label": "Department",
+        "placeholder": "Select a department",
+        "includeSub": "Include all sub-departments",
+        "includeSubHint": "Adds every department below this one to the Structure sheet.",
+        "noSub": "This department has no sub-departments."
+      },
+      "team": {
+        "title": "Export team",
+        "description": "Pick a team and download it as a spreadsheet.",
+        "label": "Team",
+        "placeholder": "Select a team",
+        "includeSub": "Include all sub-teams",
+        "includeSubHint": "Adds every team below this one to the Structure sheet.",
+        "noSub": "This team has no sub-teams."
+      }
+    },
+    "restore": {
+      "unarchive": "Unarchive",
+      "busy": "{label}…",
+      "archivedOn": "Archived separately on {date}",
+      "archived": "Archived separately",
+      "peopleNote": "People the archive removed are not put back; assign them again where they belong.",
+      "description": {
+        "positions": "Choose which archived positions come back with {name}.",
+        "subDepartments": "Choose which archived sub-departments come back with {name}.",
+        "subTeams": "Choose which archived sub-teams come back with {name}."
+      }
+    },
+    "userPicker": {
+      "placeholder": "Select a person",
+      "clear": "Clear",
+      "empty": "No people found.",
+      "loadingMore": "Loading more…"
+    }
+  },
+  "attributes": {
+    "types": {
+      "text": "Text",
+      "longText": "Long text",
+      "select": "Select",
+      "person": "Person",
+      "checkbox": "Checkbox",
+      "number": "Number",
+      "multiSelect": "Multi select",
+      "date": "Date",
+      "email": "Email",
+      "url": "URL",
+      "phone": "Phone",
+      "country": "Country",
+      "language": "Language",
+      "timezone": "Timezone",
+      "currency": "Currency",
+      "object": "Object",
+      "address": "Address",
+      "money": "Money",
+      "reference": "Reference"
+    },
+    "config": {
+      "validationTitle": "Validation & rules",
+      "cannotBeCleared": "Cannot be cleared",
+      "cannotBeClearedHint": "Once this field has a value, it cannot be emptied again. It does not have to be filled in.",
+      "defaultValue": "Default value",
+      "min": "Min",
+      "max": "Max",
+      "onlyPositive": "Only positive numbers",
+      "minLength": "Min length",
+      "maxLength": "Max length",
+      "pattern": "Pattern (Regex)",
+      "phoneHint": "Phone numbers are always checked for 7–15 digits. A pattern adds a stricter format on top.",
+      "earliest": "Earliest",
+      "latest": "Latest",
+      "minSelected": "Min selected",
+      "maxSelected": "Max selected"
+    },
+    "options": {
+      "option": "Option {number}",
+      "optionColor": "Color for option {number}",
+      "removeOption": "Remove option",
+      "removeOptionNumbered": "Remove option {number}",
+      "addOption": "Add option"
+    },
+    "form": {
+      "name": "Attribute name",
+      "nameRequired": "Please enter an attribute name.",
+      "nameTaken": "An attribute with this name already exists in this section.",
+      "typeRequired": "Select attribute type.",
+      "decScaleNumber": "Decimal scale must be a number",
+      "options": "Options",
+      "decScale": "Decimal scale",
+      "hideYear": "Hide the year",
+      "hideYearHint": "Show only day and month (e.g. for birthdays).",
+      "unique": "Unique value",
+      "uniqueHint": "No two people can have the same value.",
+      "sensitive": "Sensitive",
+      "sensitiveCreateHint": "Nobody gets access automatically, and people without it see a placeholder instead of the value.",
+      "sensitiveHint": "People without access to this field see a placeholder instead of the value."
+    },
+    "createModal": {
+      "title": "Create attribute",
+      "description": "A field people fill in on their profile."
+    },
+    "editModal": {
+      "title": "Edit attribute",
+      "description": "Update this attribute's settings and validation."
+    },
+    "deleteModal": {
+      "title": "Delete attribute",
+      "untitled": "Untitled attribute",
+      "description": "This action cannot be undone. Attribute <b>{name}</b> will be permanently deleted.",
+      "warning": "Warning",
+      "optionsDeleted": "All options associated with this attribute will also be deleted.",
+      "impactLoading": "Checking how many people have a value for this…",
+      "impactFailed": "{error} Until then, how many values this deletes is unknown.",
+      "impact": "This will permanently delete <b>{valueCount}</b> {valueCount, plural, one {value} other {values}} from <b>{peopleCount}</b> {peopleCount, plural, one {person} other {people}}.",
+      "noValues": "Nobody has a value for this attribute.",
+      "valuesDeleted": "Any values people have for it will be deleted with it.",
+      "viewsUpdated": "Any saved views or filters referencing this attribute will be updated. Deleted attributes cannot be restored."
+    },
+    "subFields": {
+      "title": "Sub-fields",
+      "hint": "The fields of each record (e.g. Institution, Degree, Year).",
+      "empty": "No sub-fields yet. Add at least one.",
+      "label": "Label",
+      "labelAria": "Sub-field {number} label",
+      "typeAria": "Sub-field {number} type",
+      "removeAria": "Remove sub-field {number}",
+      "add": "Add sub-field"
+    },
+    "sectionForm": {
+      "name": "Name your section",
+      "nameRequired": "Please enter a section name.",
+      "nameMin": "Name must be at least {min} characters long.",
+      "nameMax": "Name must be {max} characters or fewer.",
+      "descriptionMax": "Description must be {max} characters or fewer.",
+      "nameTaken": "A section with this name already exists."
+    },
+    "createSection": {
+      "title": "Create section",
+      "description": "Group related attributes into a section on the profile."
+    },
+    "editSection": {
+      "title": "Edit section",
+      "description": "Update the section name and the description shown under it."
+    },
+    "deleteSection": {
+      "title": "Delete section",
+      "untitled": "Untitled section",
+      "description": "This action cannot be undone. Section <b>{name}</b> will be permanently deleted.",
+      "warning": "Warning",
+      "impactLoading": "Checking what this section contains…",
+      "impactFailed": "{error} Until then, what this section contains is unknown.",
+      "impact": "<b>{attributeCount}</b> {attributeCount, plural, one {attribute} other {attributes}} in this section will also be deleted.",
+      "impactWithValues": "<b>{attributeCount}</b> {attributeCount, plural, one {attribute} other {attributes}} in this section will also be deleted, removing <b>{valueCount}</b> {valueCount, plural, one {value} other {values}} from <b>{peopleCount}</b> {peopleCount, plural, one {person} other {people}}.",
+      "empty": "This section is empty — no attributes will be deleted with it.",
+      "attributesDeleted": "All attributes assigned to this section will also be deleted.",
+      "viewsUpdated": "Saved views or filters referencing them will be updated. This cannot be undone."
+    },
+    "list": {
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all",
+      "addFromLibrary": "Add from library",
+      "addSection": "Add section",
+      "export": "Export attributes",
+      "exportDescription": "Export all sections and their attributes.",
+      "exportIncluded": "Includes every section with its attributes, types, validation settings, and option sets.",
+      "exportFailed": "Export failed",
+      "details": "Details",
+      "dragSection": "Drag to reorder section",
+      "system": "System",
+      "sectionActions": "Section actions",
+      "systemSectionLocked": "System sections can't be edited or deleted",
+      "doneEditingSection": "Done editing section",
+      "editSection": "Edit section",
+      "addAttribute": "Add attribute",
+      "dragAttribute": "Drag to reorder attribute",
+      "sensitiveTitle": "Access isn't granted automatically; people without it see a placeholder",
+      "sensitive": "Sensitive",
+      "attributeActions": "Attribute actions",
+      "systemAttributeLocked": "System attributes can't be edited"
+    },
+    "details": {
+      "positive": "positive",
+      "integer": "integer",
+      "decimalPlaces": "{count} dp",
+      "unique": "Unique",
+      "chars": "{range} chars",
+      "pattern": "pattern",
+      "countryList": "Country list",
+      "languageList": "Language list",
+      "timezoneList": "Timezone list",
+      "currencyList": "Currency list",
+      "fields": "{count, plural, one {# field} other {# fields}}",
+      "address": "Address",
+      "amountCurrency": "Amount + currency",
+      "hideYear": "hide year",
+      "options": "{count, plural, one {# option} other {# options}}",
+      "selected": "{range} selected"
+    },
+    "duplicate": {
+      "title": "Duplicate \"{name}\"?",
+      "description": "A copy of this field's definition and options is added at the end of the same section. Nobody's values are copied."
+    },
+    "editForm": {
+      "nameRequired": "A name is required.",
+      "typeLocked": "Can't be changed after the attribute is created.",
+      "group": "Group",
+      "moveHint": "Moving the attribute places it at the end of the target group.",
+      "decScaleHint": "Chooses how new values are stored (decimal vs whole numbers). Values saved earlier keep their current form."
+    },
+    "systemFields": {
+      "sources": {
+        "offices": "Offices",
+        "legalEntities": "Legal entities",
+        "jobs": "Job catalog",
+        "departments": "Departments",
+        "teams": "Teams",
+        "calendars": "Holiday calendars",
+        "roles": "Roles",
+        "policies": "Time off policies",
+        "people": "People"
+      },
+      "manyFrom": "Many from {source}",
+      "oneFrom": "One from {source}",
+      "fixedValues": "{count} fixed values",
+      "builtIn": "Built-in",
+      "locked": "System fields can't be edited or deleted"
+    }
+  },
+  "documentCategories": {
+    "add": "Add category",
+    "emptyTitle": "No categories yet",
+    "emptyDescription": "Until a category exists documents cannot be labelled, and the category picker stays hidden on upload.",
+    "noResultsHint": "Try a different category name.",
+    "system": "System",
+    "inactive": "Inactive",
+    "systemLocked": "System categories can't be edited or deleted",
+    "editAria": "Edit {name}",
+    "deleteAria": "Delete {name}",
+    "deleteTitle": "Delete category",
+    "deleteDescription": "<b>{name}</b> will be removed. Documents already labelled with it keep the file but lose the label.",
+    "editTitle": "Edit category",
+    "newTitle": "New category",
+    "formDescription": "Categories label a person's documents — contracts, certificates, payslips.",
+    "active": "Active",
+    "activeHint": "Inactive categories stay on existing documents but are not offered on upload."
+  },
+  "logs": {
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "module": "Module",
+      "allModules": "All modules",
+      "action": "Action",
+      "allActions": "All actions",
+      "kind": "Kind",
+      "anyKind": "Anything done",
+      "doneBy": "Done by",
+      "anyone": "Anyone",
+      "actorUser": "A person",
+      "actorSystem": "The system",
+      "actorIntegration": "An integration"
+    },
+    "table": {
+      "when": "When",
+      "who": "Who",
+      "what": "What",
+      "onWhat": "On what",
+      "aboutWhom": "About whom",
+      "deletedPerson": "Deleted person",
+      "emptyTitle": "Nothing recorded yet",
+      "emptyDescription": "Everything people do in this company shows up here.",
+      "noResultsHint": "Try a different name, period or module.",
+      "system": "System",
+      "appliedBy": "applied by {source}",
+      "impersonated": "while acting as somebody else"
+    },
+    "detail": {
+      "action": "Action",
+      "actorRole": "Actor role",
+      "actorType": "Actor type",
+      "objectType": "Object type",
+      "ipAddress": "IP address",
+      "reference": "Reference",
+      "objectId": "Object id",
+      "device": "Device",
+      "deletedSince": "deleted since",
+      "rest": "Everything else the row carries",
+      "mentions": {
+        "policyId": "Policy",
+        "categoryId": "Document category",
+        "folderId": "Folder",
+        "oldFolderId": "Folder (before)",
+        "newFolderId": "Folder (after)",
+        "levelId": "Level",
+        "familyId": "Job family",
+        "groupId": "Level group",
+        "calendarId": "Holiday calendar",
+        "leadId": "Lead",
+        "managerIdFrom": "Manager (before)",
+        "managerIdTo": "Manager (after)",
+        "newManagerId": "New manager",
+        "parentId": "Parent",
+        "oldParentId": "Parent (before)",
+        "assignableId": "Assigned to",
+        "granteeUserId": "Shared with",
+        "teamId": "Team",
+        "departmentId": "Department",
+        "roleId": "Role"
+      }
+    }
+  },
+  "menu": {
+    "groups": {
+      "general": "General",
+      "people": "People",
+      "time": "Time & time-off",
+      "automation": "Automation",
+      "tech": "Tech",
+      "admin": "Admin"
+    },
+    "items": {
+      "company": "Company",
+      "appearance": "Appearance",
+      "home": "Home",
+      "legalEntitiesOffices": "Legal entities & offices",
+      "departments": "Departments",
+      "teams": "Teams",
+      "jobCatalog": "Job catalog",
+      "importExport": "Import & export",
+      "templates": "Templates",
+      "employeeInformation": "Employee information",
+      "rolesAccess": "Employee roles & access",
+      "documents": "Documents",
+      "timeOff": "Time off",
+      "publicHolidays": "Public holidays",
+      "attendance": "Attendance",
+      "automations": "Automations",
+      "workflows": "Workflows",
+      "lifecycle": "Preboarding, Onboarding & offboarding",
+      "approvals": "Approvals",
+      "notifications": "Notifications",
+      "integrations": "Integrations",
+      "api": "API",
+      "loginSso": "Login & SSO",
+      "logs": "Logs",
+      "subscription": "Subscription management",
+      "support": "Support"
+    }
+  },
+  "hub": {
+    "title": "Settings",
+    "subtitle": "Configure your organization and people settings"
+  },
+  "comingSoon": {
+    "title": "{title} is not available yet",
+    "description": "This part of settings is planned and has not been built. Nothing here changes how the product works today."
+  },
+  "home": {
+    "description": "What everybody's home can show. Each person chooses and arranges their own widgets; the company decides where the data behind them comes from.",
+    "birthday": {
+      "title": "Birthday field",
+      "saved": "Birthday field saved.",
+      "description": "The date field home's Celebrations reads birthdays from, shown as day and month only. A birthday is listed only to people whose role may see this field for everyone — set that in <link>Employee Roles & Access</link>, under field access. By default nobody but the person sees their own.",
+      "hidden": "A field you cannot see"
+    }
+  },
+  "templates": {
+    "description": "Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would create in your company, adjust it, and apply it as a copy you can change afterwards.",
+    "suggested": "Suggested",
+    "sensitive": "Sensitive",
+    "kind": {
+      "fieldSet": {
+        "label": "Field sets",
+        "description": "A section of the profile and the fields in it."
+      },
+      "role": {
+        "label": "Roles",
+        "description": "A role with its permissions and field access."
+      },
+      "process": {
+        "label": "Onboarding checklists",
+        "description": "A checklist for a new joiner's first days, ready for the canvas."
+      },
+      "reviewForm": {
+        "label": "Review forms",
+        "description": "A performance review form, ready for a review cycle."
+      }
+    },
+    "catalogue": {
+      "emptyTitle": "No templates to apply",
+      "emptyDescription": "Templates appear here for what you may set up: roles, profile fields or onboarding checklists.",
+      "noResultsHint": "Try a different name.",
+      "applied": "Applied v{version}",
+      "appliedAt": "Applied v{version} · {date}",
+      "available": "v{version} Available",
+      "items": "{count, plural, one {# item} other {# items}}"
+    },
+    "outcome": {
+      "new": "New",
+      "existing": "Already there",
+      "clash": "Name taken",
+      "dropped": "Dropped"
+    },
+    "type": {
+      "section": "Section",
+      "field": "Field",
+      "fieldOf": "Field · {type}",
+      "role": "Role",
+      "checklist": "Checklist",
+      "reviewForm": "Review form"
+    },
+    "scope": {
+      "company": "Company",
+      "directReports": "Direct reports",
+      "self": "Own"
+    },
+    "due": {
+      "beforeStart": "Before the start",
+      "day": "Day {day}",
+      "daysBefore": "{count, plural, one {# day before} other {# days before}}"
+    },
+    "assignee": {
+      "target": "the new joiner",
+      "onboardingManager": "the onboarding manager"
+    },
+    "preview": {
+      "fallbackTitle": "Template",
+      "description": "{summary} Version {version}. Applying copies it into the company: what it creates is yours to change afterwards, and nothing links it back to the template.",
+      "nothingToCreate": "Nothing to create",
+      "apply": "Apply · {count} to create",
+      "summary": {
+        "existing": "{count} already there",
+        "skipped": "{count} skipped",
+        "dropped": "{count} dropped"
+      },
+      "include": "Include {title}",
+      "appliedBefore": "Applied before — its fields are already in the company, so it is not needed again.",
+      "usesFields": "This template uses fields from it. Left out, what points at those fields is dropped.",
+      "applyItem": "Apply {name}",
+      "onlyOwner": "Only the System Owner will see it until a role is given access.",
+      "seenBy": "Seen by {readers} and the System Owner.",
+      "clashChoice": "What to do with {name}",
+      "clashSkip": "Skip — keep the company's own",
+      "clashRename": "Create as “{name} (template)”",
+      "renameTaken": "“{name}” is taken too. Skip it, or rename the company's own first.",
+      "grantsCount": "{selected} of {count} Grants",
+      "entriesCount": "{count, plural, one {# Entry} other {# Entries}}",
+      "tasksCount": "{count, plural, one {# Task} other {# Tasks}}",
+      "existingField": "{count, plural, one {Existing field · # value} other {Existing field · # values}}",
+      "permissions": "Permissions",
+      "fieldAccess": "Field access"
+    },
+    "result": {
+      "title": "{title} Applied",
+      "fallbackTitle": "Template applied",
+      "description": "Everything below is an ordinary part of the company now. Change it on its own page.",
+      "back": "Back to templates",
+      "outcome": {
+        "created": "Created",
+        "skipped": "Skipped"
+      }
+    }
+  },
+  "loginSso": {
+    "description": "How people sign in to the company, and how long a sign-in lasts.",
+    "signInSecurity": "Sign-in security"
+  },
+  "identity": {
+    "copy": "Copy {label}",
+    "connect": {
+      "connected": "Your account is connected to {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}}.",
+      "hint": "Sign in with {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}} as well as your password. A System Owner connects here, never by email.",
+      "connecting": "Connecting…",
+      "button": "Connect {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}}"
+    },
+    "mode": {
+      "off": "Off",
+      "optional": "Optional — password or single sign-on",
+      "required": "Required — single sign-on only (System Owners keep the password)",
+      "badge": {
+        "off": "Off",
+        "optional": "Optional",
+        "required": "Required"
+      }
+    },
+    "sso": {
+      "saved": "Single sign-on saved.",
+      "title": "Single sign-on",
+      "provider": "Identity provider",
+      "providerOther": "Other",
+      "protocol": "Protocol",
+      "redirectUri": "Redirect URI — paste into the identity provider",
+      "issuer": "Issuer",
+      "issuerHintEntra": "Your tenant's own issuer, https://login.microsoftonline.com/'<tenant id>'/v2.0 — never “common”.",
+      "issuerHintOkta": "For Okta, https://'<your org>'.okta.com or an authorization server's address.",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "secretSet": "Set. Type a new one to replace it.",
+      "secretNotSet": "Not set.",
+      "entityId": "Entity ID — paste into the identity provider",
+      "acsUrl": "Assertion consumer service URL",
+      "metadataUrl": "Identity provider metadata URL",
+      "metadataHint": "Read on save for the entity ID, sign-in address and signing certificates.",
+      "idpEntityId": "IdP entity ID",
+      "idpSsoUrl": "IdP sign-in URL",
+      "certificates": "Signing certificates",
+      "certificatesSet": "Set. Paste new PEM certificates to replace them — two during a rotation.",
+      "certificatesHint": "PEM, one or two.",
+      "requiredWarning": "Saving signs out everyone who signed in with a password, except the System Owners. Every System Owner needs two-step sign-in first.",
+      "sessionLasts": "A single sign-on session lasts",
+      "test": "Test connection"
+    },
+    "scim": {
+      "title": "Provisioning (SCIM)",
+      "enable": "Let the identity provider link people and push groups",
+      "description": "The identity provider links people already here by email and can block or unblock them; it never adds or deletes a person, or changes their name or email.",
+      "baseUrl": "SCIM base URL",
+      "noTokens": "No tokens yet.",
+      "revoked": "Revoked",
+      "live": "Live",
+      "issued": "Issued {date}",
+      "expires": "expires {date}",
+      "noExpiry": "no expiry",
+      "lastUsed": "last used {date}",
+      "neverUsed": "never used",
+      "failedCalls": "{count, plural, one {# failed call} other {# failed calls}}",
+      "revoke": "Revoke",
+      "twoLive": "Two tokens are live: revoke one first",
+      "issueToken": "Issue token",
+      "copyNow": "Copy the token now",
+      "issueTitle": "Issue a provisioning token",
+      "shownOnce": "It is shown this once and never again. Paste it into the identity provider, test the connection, then revoke the old token.",
+      "twoAtOnce": "Two tokens can be live at once, so the old one keeps working while you replace it.",
+      "token": "Token",
+      "expiry": "Expires",
+      "inMonths": "{count, plural, one {In # month} other {In # months}}",
+      "never": "Never",
+      "issue": "Issue"
+    },
+    "groups": {
+      "title": "Groups",
+      "description": "Groups the identity provider pushed, and the roles their members hold. A role given here is the identity provider's: it goes when the person leaves the group, unless it was also given by hand.",
+      "empty": "No groups pushed yet.",
+      "members": "{count, plural, one {# member} other {# members}}",
+      "noRoles": "no roles",
+      "grantsAdministration": "gives IT the right to appoint administrators",
+      "roles": "Roles",
+      "dialogTitle": "Roles for {name}",
+      "dialogDescription": "Every member is updated at once, and signed out on their next request if their access changes — you too, if you are in this group.",
+      "neverGiven": "The System Owner and default roles are never given by a group."
+    }
+  },
+  "appearance": {
+    "title": "Appearance",
+    "description": "How the workspace looks to everyone in your company: your color marks what to act on — buttons, links, the active page — and one uploaded image can back the sign-in screen, the dashboard, or both. The preview on the right shows the result before anyone else sees it.",
+    "loadFailed": "Failed to load appearance settings.",
+    "color": {
+      "title": "Workspace color",
+      "description": "Your color marks the one thing to act on. Text, surfaces and status colors stay noddo's, whichever you pick.",
+      "presets": "Workspace colors",
+      "custom": "Custom color",
+      "leaveEmpty": "Leave empty to use a preset.",
+      "invalid": "Enter a color as #rrggbb, like #2f63c4.",
+      "adjusted": "We adjusted your color for readability."
+    },
+    "signIn": {
+      "title": "Sign in experience",
+      "description": "The artwork and the words people meet before they are signed in.",
+      "chooseImage": "Choose a background image",
+      "imageAlt": "Login background",
+      "clickToChoose": "Click to choose an image",
+      "loginScreen": "Login screen",
+      "fileHint": "PNG, JPEG or WebP, up to 10 MB. The image is stored as soon as it is uploaded.",
+      "uploading": "Uploading…",
+      "replaceImage": "Replace image",
+      "uploadImage": "Upload image",
+      "removing": "Removing…",
+      "useOnLogin": "Use as login background",
+      "useOnDashboard": "Use as company dashboard background",
+      "headline": "Headline",
+      "subheadline": "Sub-heading"
+    },
+    "preview": {
+      "dashboardRegion": "Dashboard preview",
+      "loginRegion": "Sign-in screen preview",
+      "yourCompany": "Your company",
+      "nav": {
+        "home": "Home",
+        "inbox": "Inbox",
+        "search": "Search",
+        "organization": "Organization",
+        "calendar": "Calendar"
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Track hiring activity, team growth and open roles in one place.",
+        "action": "Manage users",
+        "trends": "Recruitment trends",
+        "pipeline": "Candidate pipeline"
+      },
+      "stats": {
+        "openPositions": {
+          "label": "Open positions",
+          "value": "18",
+          "delta": "+3 this month"
+        },
+        "timeToHire": {
+          "label": "Time to hire",
+          "value": "24d",
+          "delta": "-2d vs. last quarter"
+        },
+        "offerAcceptance": {
+          "label": "Offer acceptance",
+          "value": "87%",
+          "delta": "+5% vs. last quarter"
+        }
+      },
+      "pipeline": {
+        "applied": "Applied",
+        "screening": "Screening",
+        "interview": "Interview",
+        "offer": "Offer"
+      },
+      "login": {
+        "email": "Email address",
+        "password": "Password",
+        "signIn": "Sign in",
+        "forgot": "Forgot password?"
+      }
+    }
+  },
+  "importExport": {
+    "tabs": {
+      "import": "Import",
+      "export": "Export"
+    }
+  }
+}

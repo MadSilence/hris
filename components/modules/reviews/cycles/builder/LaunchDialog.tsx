@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, UnavailableIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -13,7 +14,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { launchCycleAction } from "@/components/modules/reviews/actions/reviewCycleActions";
 import { useLaunchPreview } from "@/components/modules/reviews/hooks";
-import type { Cycle } from "@/models/reviews";
+import { reviewNoticeLines, type Cycle } from "@/models/reviews";
 import { InlineAlert } from "@/components/desact/alert";
 
 /**
@@ -26,11 +27,15 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
   onCloseAction: () => void;
   onLaunchedAction: (cycle: Cycle) => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const preview = useLaunchPreview(cycleId, open);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const p = preview.data;
   const blocked = !p || p.blockers.length > 0;
+  const blockers = p ? reviewNoticeLines(t, p.blockers, p.blockerCodes) : [];
+  const warnings = p ? reviewNoticeLines(t, p.warnings, p.warningCodes) : [];
 
   const launch = async () => {
     setBusy(true);
@@ -38,7 +43,7 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
     try {
       const res = await launchCycleAction(cycleId);
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
       onLaunchedAction(res.data);
@@ -51,10 +56,9 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) { setError(null); onCloseAction(); } }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Launch cycle</DialogTitle>
+          <DialogTitle>{t("launch.title")}</DialogTitle>
           <DialogDescription>
-            Launching asks everybody below for their reviews and puts them in their Tasks. After launch the forms, the
-            kinds of review, the scale and anonymity can no longer change; dates still can.
+            {t("launch.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -68,35 +72,36 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
         ) : (
           <div className="space-y-4 text-body">
             <div className="grid grid-cols-3 gap-2">
-              <Fact label="People" value={p.participants} />
-              <Fact label="Self reviews" value={p.selfReviews} />
-              <Fact label="Manager reviews" value={p.managerReviews} />
-              {p.upwardReviews > 0 && <Fact label="Upward reviews" value={p.upwardReviews} />}
-              {p.nominations > 0 && <Fact label="Nominating peers" value={p.nominations} />}
+              <Fact label={t("launch.fact.people")} value={p.participants} />
+              <Fact label={t("launch.fact.self")} value={p.selfReviews} />
+              <Fact label={t("launch.fact.manager")} value={p.managerReviews} />
+              {p.upwardReviews > 0 && <Fact label={t("launch.fact.upward")} value={p.upwardReviews} />}
+              {p.nominations > 0 && <Fact label={t("launch.fact.nominating")} value={p.nominations} />}
             </div>
             {p.fewReports.length > 0 && (
               <p className="text-tertiary" data-test="few-reports">
-                Upward reviews held back for: {p.fewReports.slice(0, 12).map((n) => n.name).join(", ")}
-                {p.fewReports.length > 12 ? "…" : ""}.
+                {t("launch.fewReports", {
+                  names: p.fewReports.slice(0, 12).map((n) => n.name).join(", ") + (p.fewReports.length > 12 ? "…" : ""),
+                })}
               </p>
             )}
             {p.sample.length > 0 && (
               <p className="text-tertiary">
-                {p.sample.map((s) => s.name).join(", ")}
-                {p.participants > p.sample.length ? ` and ${p.participants - p.sample.length} more` : ""}.
+                {p.participants > p.sample.length
+                  ? t("launch.sampleMore", { names: p.sample.map((s) => s.name).join(", "), count: p.participants - p.sample.length })
+                  : t("launch.sample", { names: p.sample.map((s) => s.name).join(", ") })}
               </p>
             )}
             {p.excludedByHireDate > 0 && (
               <p className="text-tertiary">
-                {p.excludedByHireDate === 1 ? "1 person was" : `${p.excludedByHireDate} people were`} hired after the
-                eligibility date and are not included.
+                {t("launch.excludedByHireDate", { count: p.excludedByHireDate })}
               </p>
             )}
-            {p.blockers.length > 0 && (
+            {blockers.length > 0 && (
               <InlineAlert tone="declined">
-                <p className="flex items-center gap-1.5 font-medium"><Icon icon={UnavailableIcon} size="sm" /> Fix these to launch</p>
+                <p className="flex items-center gap-1.5 font-medium"><Icon icon={UnavailableIcon} size="sm" /> {t("launch.blockers")}</p>
                 <ul className="mt-1 list-disc pl-5">
-                  {p.blockers.map((b) => <li key={b}>{b.charAt(0).toUpperCase() + b.slice(1)}.</li>)}
+                  {blockers.map((b, i) => <li key={`${i}-${b}`}>{b}</li>)}
                 </ul>
               </InlineAlert>
             )}
@@ -104,34 +109,31 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
               <InlineAlert tone="pending">
                 <p className="flex items-center gap-1.5 font-medium">
                   <Icon icon={Alert02Icon} size="sm" />
-                  {p.noManager.length === 1 ? "1 person has" : `${p.noManager.length} people have`} no manager and get no
-                  manager review
+                  {t("launch.noManager", { count: p.noManager.length })}
                 </p>
                 <p className="mt-1">{p.noManager.slice(0, 12).map((n) => n.name).join(", ")}{p.noManager.length > 12 ? "…" : ""}</p>
               </InlineAlert>
             )}
-            {(p.warnings ?? []).length > 0 && (
+            {warnings.length > 0 && (
               <div data-test="launch-warnings">
-                <InlineAlert tone="pending" icon={Alert02Icon} title="Before you launch">
+                <InlineAlert tone="pending" icon={Alert02Icon} title={t("launch.warnings")}>
                   <ul className="mt-1 list-disc pl-5">
-                    {p.warnings.map((w) => <li key={w}>{w.charAt(0).toUpperCase() + w.slice(1)}.</li>)}
+                    {warnings.map((w, i) => <li key={`${i}-${w}`}>{w}</li>)}
                   </ul>
                 </InlineAlert>
               </div>
             )}
             <p className="text-hint text-tertiary">
-              {p.nominations > 0
-                ? "Each person gets a task to nominate their peers; their manager approves them."
-                : "Peers are chosen after launch, on the cycle\u2019s page."} Anonymity and its threshold are fixed at launch.
+              {p.nominations > 0 ? t("launch.footNominate") : t("launch.footAdmin")}
             </p>
           </div>
         )}
 
         <FormError message={error} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
           <Button type="button" onClick={() => void launch()} disabled={busy || blocked}>
-            {busy ? "Launching…" : "Launch"}
+            {busy ? t("launch.launching") : t("launch.launch")}
           </Button>
         </DialogFooter>
       </DialogContent>

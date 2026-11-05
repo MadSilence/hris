@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { getTranslations } from "next-intl/server";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import { PageGate } from "@/components/auth/PageGate";
@@ -9,15 +9,16 @@ import { BirthdayField } from "@/components/modules/settings/modules/general/hom
  * field birthdays come from (sitting 2, H7); how each person arranges their own home is theirs, on home itself.
  * The route keeps its old name — it was the "Dashboard" placeholder, and home itself still lives at `/dashboard`.
  */
-const HomeSettingsPage: FC = () => (
+const HomeSettingsPage = async () => {
+  const t = await getTranslations("settings");
+  return (
   <PageGate resource="SETTINGS.GENERAL" action="VIEW">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
-        <SettingsPageHeader title="Home" backHref="/settings"/>
+        <SettingsPageHeader title={t("menu.items.home")} backHref="/settings"/>
 
         <PageDescription className="text-body text-tertiary/90">
-          What everybody&apos;s home can show. Each person chooses and arranges their own widgets; the company
-          decides where the data behind them comes from.
+          {t("home.description")}
         </PageDescription>
       </div>
 
@@ -26,6 +27,7 @@ const HomeSettingsPage: FC = () => (
       </div>
     </div>
   </PageGate>
-);
+  );
+};
 
 export default HomeSettingsPage;

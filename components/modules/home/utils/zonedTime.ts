@@ -1,4 +1,4 @@
-import { partsToISO } from "@/lib/date";
+import { displayLocale, partsToISO } from "@/lib/date";
 
 /**
  * The calendar date in a zone, as `yyyy-MM-dd`. Home's "today" is the company's (HOME_AND_SEARCH.md
@@ -26,20 +26,21 @@ export const hourInZone = (now: Date, zone: string | null | undefined): number =
   return Number(hour ?? 0);
 };
 
-/** A clock reading in a zone, in the reader's own locale. */
-export const timeInZone = (now: Date, zone: string | null | undefined): string =>
-  new Intl.DateTimeFormat(undefined, {
+/** A clock reading in a zone, in the reader's own locale — the page's `useDisplayLocale()` during render. */
+export const timeInZone = (now: Date, zone: string | null | undefined, locale?: string): string =>
+  new Intl.DateTimeFormat(locale ?? displayLocale(), {
     hour: "2-digit",
     minute: "2-digit",
     ...(zone ? { timeZone: safeZone(zone) } : {}),
   }).format(now);
 
 /** The weekday of a calendar date, in the reader's own locale. A calendar date is never moved by a zone. */
-export const weekdayOf = (iso: string): string =>
-  new Intl.DateTimeFormat(undefined, { weekday: "long", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
+export const weekdayOf = (iso: string, locale?: string): string =>
+  new Intl.DateTimeFormat(locale ?? displayLocale(), { weekday: "long", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
 
-export const greetingFor = (hour: number): string =>
-  hour < 5 ? "Good evening" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+/** The part of the day a greeting names — the `part` of `home.greeting.line`. */
+export const greetingFor = (hour: number): "morning" | "afternoon" | "evening" =>
+  hour < 5 ? "evening" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
 /** A stored zone that has left the tz database must not break the page. */
 const safeZone = (zone: string): string | undefined => {

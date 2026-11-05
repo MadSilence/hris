@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Attachment01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -10,7 +11,7 @@ import { Button } from "@/components/desact/button";
  * "Choose File · No file chosen" in its own font and baseline, which sat crooked in every form it was put in
  * (owner, 2026-11-02); the input stays, hidden, and does the picking.
  */
-export function FilePickButton({ id, label = "Choose file", file, disabled, onPickAction }: {
+export function FilePickButton({ id, label: labelProp, file, disabled, onPickAction }: {
   id?: string;
   label?: string;
   /** The file picked so far; its name is shown, or "No file chosen". Omit where the pick is acted on at once. */
@@ -18,6 +19,8 @@ export function FilePickButton({ id, label = "Choose file", file, disabled, onPi
   disabled?: boolean;
   onPickAction: (file: File | null) => void;
 }) {
+  const t = useTranslations("lifecycle");
+  const label = labelProp ?? t("filePick.chooseFile");
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="flex min-w-0 items-center gap-3">
@@ -39,7 +42,7 @@ export function FilePickButton({ id, label = "Choose file", file, disabled, onPi
         {label}
       </Button>
       {file !== undefined && (
-        <span className="min-w-0 truncate text-body text-tertiary">{file ? file.name : "No file chosen"}</span>
+        <span className="min-w-0 truncate text-body text-tertiary">{file ? file.name : t("filePick.noFile")}</span>
       )}
     </div>
   );

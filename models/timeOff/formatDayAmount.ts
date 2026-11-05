@@ -7,3 +7,13 @@
  */
 export const formatDayAmount = (value: number): string =>
   Number.isInteger(value) ? String(value) : value.toFixed(1);
+
+/**
+ * The arguments of the plural messages `timeOff.amount.days` and `timeOff.amount.hours`: the plural is chosen by
+ * `count`, the number is written by `formatDayAmount` — `t("amount.days", dayAmountArgs(7.5))` → "7.5 days",
+ * `dayAmountArgs(1)` → "1 day". A caller in another namespace reads the message from a `timeOff` translator.
+ */
+export const dayAmountArgs = (value: number): { count: number; amount: string } => ({
+  count: value,
+  amount: formatDayAmount(value),
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Label } from "@/components/desact/label";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -9,7 +10,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { NONE_LABEL, NONE_VALUE, noneOrValue, valueOrNone } from "@/models/select";
+import { NONE_VALUE, noneOrValue, valueOrNone } from "@/models/select";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import {
   useCompanySettings,
@@ -19,8 +20,6 @@ import { useAttributeGroups } from "@/components/modules/settings/modules/attrib
 import { useInvalidateAttendance } from "@/components/modules/attendance/hooks";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
-/** The stored choice is a field this reader's access does not list — it still shows, by what it is. */
-const HIDDEN_LABEL = "A field you cannot see";
 
 /**
  * Which money field Attendance prices logged time from. Its value on the person is copied into each
@@ -28,6 +27,8 @@ const HIDDEN_LABEL = "A field you cannot see";
  * already logged. None: no money in Attendance at all.
  */
 export const AttendanceRateField: React.FC = () => {
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const settings = useCompanySettings();
   const groups = useAttributeGroups();
   const update = useUpdateCompanySettings();
@@ -68,7 +69,7 @@ export const AttendanceRateField: React.FC = () => {
       });
       setDraft(null);
       void invalidateAttendance();
-      showSuccess("Hourly rate field saved.");
+      showSuccess(t("rate.saved"));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : messageForError(caught));
     }
@@ -77,12 +78,8 @@ export const AttendanceRateField: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="attendance-rate-heading">
       <div>
-        <h2 id="attendance-rate-heading" className="text-section-title">Hourly rate</h2>
-        <p className="text-body text-tertiary">
-          The money field Attendance prices logged time from. A person&apos;s rate is copied into each entry when
-          the time is logged, so a later change never re-prices a day already logged. Amounts are shown only to
-          people who may see this field.
-        </p>
+        <h2 id="attendance-rate-heading" className="text-section-title">{t("rate.title")}</h2>
+        <p className="text-body text-tertiary">{t("rate.description")}</p>
       </div>
 
       {settings.isLoading || groups.isLoading ? (
@@ -97,12 +94,12 @@ export const AttendanceRateField: React.FC = () => {
           }}
  >
           <div className="w-64 space-y-1">
-            <Label htmlFor="attendance-rate-field">Hourly rate field</Label>
+            <Label htmlFor="attendance-rate-field">{t("rate.field")}</Label>
             <SearchableSelect
               id="attendance-rate-field"
               options={[
-                { value: NONE_VALUE, label: NONE_LABEL },
-                ...(storedIsHidden ? [{ value: stored, label: HIDDEN_LABEL }] : []),
+                { value: NONE_VALUE, label: tCommon("values.none") },
+                ...(storedIsHidden ? [{ value: stored, label: t("rate.hidden") }] : []),
                 ...moneyFields.map((attribute) => ({ value: attribute.id, label: attribute.name })),
               ]}
               value={value || null}
@@ -116,7 +113,7 @@ export const AttendanceRateField: React.FC = () => {
           </div>
           {canEdit && (
             <Button type="submit" disabled={!dirty || update.isPending} >
-              Save
+              {tCommon("actions.save")}
             </Button>
           )}
         </form>

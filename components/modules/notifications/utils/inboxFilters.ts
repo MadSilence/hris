@@ -4,12 +4,13 @@ import type { Notification } from "@/models/notifications";
 export const INBOX_FILTERS = ["all", "unread", "starred", "needs-action"] as const;
 export type InboxFilter = (typeof INBOX_FILTERS)[number];
 
-export const INBOX_FILTER_LABELS: Record<InboxFilter, string> = {
-  all: "All",
-  unread: "Unread",
-  starred: "Starred",
-  "needs-action": "Needs action",
-};
+/** The label of each filter, a key of the `notifications` catalogue. */
+export const INBOX_FILTER_LABEL_KEYS = {
+  all: "inbox.filters.all",
+  unread: "inbox.filters.unread",
+  starred: "inbox.filters.starred",
+  "needs-action": "inbox.filters.needsAction",
+} as const satisfies Record<InboxFilter, string>;
 
 /** Where home's *Waiting on You* "See All" leads (sitting 2, H5). */
 export const NEEDS_ACTION_INBOX_HREF = "/inbox?filter=needs-action";

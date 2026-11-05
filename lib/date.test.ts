@@ -1,10 +1,15 @@
+import { renderHook } from "@testing-library/react";
+
 import {
   dateToISO,
+  displayLocale,
   formatDisplayDate,
   isoToDate,
   resetDisplayPreferences,
   setDisplayPreferences,
+  useDateFormatter,
 } from "@/lib/date";
+import { withTestLocale } from "@/test/nextIntl";
 
 /**
  * The one place a date becomes text.
@@ -83,5 +88,73 @@ describe("formatDisplayDate", () => {
     // Never through toISOString(): that converts to UTC and loses a day west of Greenwich.
     expect(dateToISO(new Date(2026, 2, 12))).toBe("2026-03-12");
     expect(isoToDate("2026-03-12").getDate()).toBe(12);
+  });
+});
+
+/**
+ * The server's position: no `LocaleBridge` has run and no `<html lang>` says anything — on the server neither
+ * exists, and the module variable is never set there because it is shared by every request. A date rendered
+ * there learns its language only from the caller (the walk's "Выходит на работу Nov 12, 2026" on a Russian page).
+ */
+describe("formatDisplayDate with an explicit language", () => {
+  beforeEach(() => {
+    resetDisplayPreferences();
+    document.documentElement.lang = "";
+  });
+
+  it("writes a Russian month with nothing else to go on", () => {
+    expect(formatDisplayDate("2026-11-12", { language: "ru", style: "medium" })).toMatch(/нояб/);
+  });
+
+  it("writes a Russian month in a chosen format too — the order is the reader's, the words the page's", () => {
+    setDisplayPreferences({ dateFormat: "DMY" });
+
+    expect(formatDisplayDate("2026-11-12", { language: "ru", style: "medium" })).toMatch(/нояб/);
+  });
+
+  it("beats what the module was told", () => {
+    setDisplayPreferences({ language: "en" });
+
+    expect(formatDisplayDate("2026-11-12", { language: "ru", style: "medium" })).toMatch(/нояб/);
+  });
+
+  it("hands numbers the same language", () => {
+    expect(new Intl.NumberFormat(displayLocale("ru")).format(1234.5)).toBe(new Intl.NumberFormat("ru").format(1234.5));
+  });
+});
+
+/**
+ * The hook every component formats with during render: bound to the page's language from `next-intl`, which the
+ * server knows per request — so the server's HTML and the browser's first frame say the same month.
+ */
+describe("useDateFormatter", () => {
+  afterEach(() => resetDisplayPreferences());
+
+  it("formats in the page's language, not the module's", () => {
+    // The module variable says English; the page is Russian. The page wins.
+    setDisplayPreferences({ language: "en" });
+    const { result } = withTestLocale("ru", () => renderHook(() => useDateFormatter()));
+
+    expect(result.current("2026-11-12", { style: "medium" })).toMatch(/нояб/);
+  });
+
+  it("writes English by default, as every other test reads", () => {
+    const { result } = renderHook(() => useDateFormatter());
+
+    expect(result.current("2026-11-12", { style: "medium" })).toMatch(/Nov/);
+  });
+
+  it("hands back the same function on every render, so it is safe in a dependency list", () => {
+    const { result, rerender } = renderHook(() => useDateFormatter());
+    const first = result.current;
+    rerender();
+
+    expect(result.current).toBe(first);
+  });
+
+  it("still lets the caller name another language", () => {
+    const { result } = renderHook(() => useDateFormatter());
+
+    expect(result.current("2026-11-12", { style: "medium", language: "ru" })).toMatch(/нояб/);
   });
 });

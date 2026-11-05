@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -42,6 +43,7 @@ export const JobLevel: React.FC<JobLevelProps> = ({
   isReordering,
   isLoading = false,
 }) => {
+  const t = useTranslations("structure.jobLevels");
   const [query, setQuery] = useState("");
 
   /* A track matches on its own name or on any level inside it — looking for "Senior" should find
@@ -60,7 +62,7 @@ export const JobLevel: React.FC<JobLevelProps> = ({
     <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
       <Button type="button" className="shrink-0 gap-1.5" onClick={onCreateGroup}>
         <Icon icon={Add01Icon} size="sm" />
-        Add track
+        {t("addTrack")}
       </Button>
     </PermissionGate>
   );
@@ -70,11 +72,13 @@ export const JobLevel: React.FC<JobLevelProps> = ({
     <div className="space-y-4 pt-2 pb-1">
       <div className="space-y-1">
         <h2 className="text-section-title text-primary">
-          Job Level Groups <span className="font-normal text-tertiary">({groups.length})</span>
+          {t.rich("heading", {
+            count: groups.length,
+            muted: (chunks) => <span className="font-normal text-tertiary">{chunks}</span>,
+          })}
         </h2>
         <p className="text-body text-tertiary">
-          Group job levels into career tracks and define the progression employees move through
-          within each.
+          {t("intro")}
         </p>
       </div>
 
@@ -89,11 +93,11 @@ export const JobLevel: React.FC<JobLevelProps> = ({
         <ListEmptyState
           query={query}
           scene="goals-and-growth"
-          title="No career tracks yet"
-          description="A track groups job levels into the progression somebody moves through. Add the first one to start placing jobs on it."
-          noResultsHint="Try a different track or level name."
+          title={t("empty.title")}
+          description={t("empty.description")}
+          noResultsHint={t("empty.noResultsHint")}
           onCreate={onCreateGroup}
-          createLabel="Add track"
+          createLabel={t("addTrack")}
           createAccess={{ resource: "JOBS.LEVEL_GROUP" }}
         />
       ) : (

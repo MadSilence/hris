@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,29 +42,35 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
   impactLoading,
   impactError,
 }) => {
+  const t = useTranslations("structure.legalEntities");
+  const tCommon = useTranslations("common");
   const asked = impact !== undefined || impactLoading || impactError;
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestCloseAction()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Permanently delete &quot;{entity?.name ?? ""}&quot; legal entity?
+            {t("delete.title", { name: entity?.name ?? "" })}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This legal entity will be permanently removed from the system. This action cannot be undone.
             {asked
-              ? null
+              ? t("delete.body")
               : entity?.assignedUsersCount
-                ? ` ${entity.assignedUsersCount} ${entity.assignedUsersCount === 1 ? "person" : "people"} currently assigned to it will lose that assignment.`
-                : " Anyone currently assigned to it will lose that assignment."}
+                ? t("delete.bodyWithCount", { count: entity.assignedUsersCount })
+                : t("delete.bodyAnyone")}
           </AlertDialogDescription>
           {asked ? (
-            <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} noun="legal entity" />
+            <DetachedPeopleNotice
+              impact={impact}
+              isLoading={impactLoading}
+              isError={impactError}
+              kind="legalEntity"
+            />
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>
           {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires onOpenChange. */}
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading || impactLoading}
             destructive
@@ -72,7 +79,7 @@ export const DeleteLegalEntityModal: FC<DeleteLegalEntityModalProps> = ({
               onConfirmAction();
             }}
           >
-            Delete
+            {tCommon("actions.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

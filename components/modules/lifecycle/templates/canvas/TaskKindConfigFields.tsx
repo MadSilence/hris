@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/desact/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
@@ -45,6 +46,7 @@ export function TaskKindConfigFields(props: Props) {
 }
 
 function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, onChange }: Props) {
+  const t = useTranslations("lifecycle");
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
   const { data: groups } = useAttributeGroups();
@@ -55,9 +57,9 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   if (kind === "FILL_FIELDS") {
     return (
       <div className="space-y-1.5">
-        <RequiredLabel required>Fields</RequiredLabel>
+        <RequiredLabel required>{t("kindConfig.fields")}</RequiredLabel>
         <div className="max-h-48 overflow-y-auto">
-          {attributes.length === 0 && <p className="text-hint text-tertiary">There are no fields to ask for.</p>}
+          {attributes.length === 0 && <p className="text-hint text-tertiary">{t("kindConfig.noFields")}</p>}
           {attributes.map((a) => (
             <label key={a.id} className="flex items-center gap-2 py-0.5 text-body">
               <Checkbox
@@ -71,7 +73,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
             </label>
           ))}
         </div>
-        <p className="text-hint text-tertiary">Closes by itself once every field holds a value.</p>
+        <p className="text-hint text-tertiary">{t("kindConfig.fieldsHint")}</p>
       </div>
     );
   }
@@ -79,9 +81,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   if (kind === "DOCUMENT") {
     // No category: the person uploads a document — any — and it closes the task (owner, 2026-11-02).
     return (
-      <p className="text-hint text-tertiary">
-        The person uploads a file here. It goes into their Documents and closes the task.
-      </p>
+      <p className="text-hint text-tertiary">{t("kindConfig.documentHint")}</p>
     );
   }
 
@@ -95,28 +95,24 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
             disabled={disabled}
             onCheckedChange={(on) => onChange({ categoryId: on ? (categories ?? [])[0]?.id ?? "" : null })}
           />
-          Requires a file
+          {t("kindConfig.requiresFile")}
         </label>
         {requires && (
           <>
             <SearchableSelect
               id={`${idPrefix}-category`}
-              aria-label="Category of the file"
+              aria-label={t("kindConfig.category")}
               options={(categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
               value={categoryId || null}
               onChange={(v) => onChange({ categoryId: v ?? "" })}
-              placeholder="Select a category…"
+              placeholder={t("kindConfig.categoryPlaceholder")}
               disabled={disabled}
             />
             {/* An empty select with nothing to say why left the author stuck (walk, SWEEP S11). */}
             {categories !== undefined && categories.length === 0 && (
-              <p className="text-hint text-tertiary">
-                No document categories yet — add them in Settings → People → Documents.
-              </p>
+              <p className="text-hint text-tertiary">{t("kindConfig.noCategories")}</p>
             )}
-            <p className="text-hint text-tertiary">
-              Ticked with the file attached — a signed form, a receipt. It goes into the person&apos;s Documents.
-            </p>
+            <p className="text-hint text-tertiary">{t("kindConfig.fileHint")}</p>
           </>
         )}
       </div>
@@ -125,9 +121,7 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
 
   if (kind === "ACKNOWLEDGE") {
     return (
-      <p className="text-hint text-tertiary">
-        The person reads what is attached and presses I Have Read It; the moment is recorded. Only they can do it.
-      </p>
+      <p className="text-hint text-tertiary">{t("kindConfig.acknowledgeHint")}</p>
     );
   }
 

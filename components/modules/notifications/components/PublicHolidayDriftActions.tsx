@@ -2,6 +2,7 @@
 
 import { FC, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon, PencilEdit02Icon, Shield01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -15,8 +16,9 @@ import {
 } from "@/components/modules/settings/modules/time/publicHolidays/hooks/usePublicHolidayDrift";
 import { useInvalidateNotifications } from "@/components/modules/notifications/hooks/useNotifications";
 import { useMarkNotificationRead } from "@/components/modules/notifications/hooks/useNotificationMutations";
-import { formatDisplayDate } from "@/lib/date";
+import { formatDisplayDate, useDisplayLanguage } from "@/lib/date";
 import { showError } from "@/lib/errors/errorToast";
+import type { NotificationsTranslator } from "@/components/modules/notifications/components/notificationPresenter";
 
 /**
  * One change, as the backend projects it (`PublicHolidayDriftImpactService`). On a conflict the
@@ -52,26 +54,34 @@ type DriftDetails = {
   affectedRequestCount: number;
 };
 
-type Outcome = { label: string; className: string };
+type Outcome = {
+  labelKey:
+    | "drift.outcomes.applied"
+    | "drift.outcomes.dismissed"
+    | "drift.outcomes.superseded"
+    | "drift.outcomes.conflictApplied"
+    | "drift.outcomes.conflictDismissed";
+  className: string;
+};
 
 const OUTCOMES: Record<string, Outcome> = {
-  APPLIED: { label: "Applied", className: "text-status-approved-text" },
-  DISMISSED: { label: "Dismissed", className: "text-tertiary" },
-  SUPERSEDED: { label: "Replaced by a newer check of the source", className: "text-tertiary" },
+  APPLIED: { labelKey: "drift.outcomes.applied", className: "text-status-approved-text" },
+  DISMISSED: { labelKey: "drift.outcomes.dismissed", className: "text-tertiary" },
+  SUPERSEDED: { labelKey: "drift.outcomes.superseded", className: "text-tertiary" },
 };
 
 /** The same statuses, read as the answers to a conflict. */
 const CONFLICT_OUTCOMES: Record<string, Outcome> = {
-  APPLIED: { label: "The source's version was taken", className: "text-status-approved-text" },
-  DISMISSED: { label: "Your version was kept", className: "text-tertiary" },
+  APPLIED: { labelKey: "drift.outcomes.conflictApplied", className: "text-status-approved-text" },
+  DISMISSED: { labelKey: "drift.outcomes.conflictDismissed", className: "text-tertiary" },
   SUPERSEDED: OUTCOMES.SUPERSEDED,
 };
 
-const REQUEST_STATUS: Record<string, string> = {
-  PENDING: "pending",
-  APPROVED: "approved",
-  CANCELLATION_PENDING: "cancellation asked",
-};
+const REQUEST_STATUS = {
+  PENDING: "drift.requestStatus.PENDING",
+  APPROVED: "drift.requestStatus.APPROVED",
+  CANCELLATION_PENDING: "drift.requestStatus.CANCELLATION_PENDING",
+} as const;
 
 const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
 const asNumber = (value: unknown): number => (typeof value === "number" ? value : 0);
@@ -92,25 +102,36 @@ export const isConflictDrift = (notification: Notification): boolean =>
   notification.params?.conflict === "true" ||
   notification.source?.details?.kind === "CONFLICT";
 
-const day = (iso: string | null) => formatDisplayDate(iso, { style: "medium", hideYear: true });
+const day = (iso: string | null, language?: string) => formatDisplayDate(iso, { style: "medium", hideYear: true, language });
 
-const span = (start: string | null, end: string | null) =>
-  !end || end === start ? day(start) : `${day(start)} – ${day(end)}`;
+const span = (start: string | null, end: string | null, language?: string) =>
+  !end || end === start ? day(start, language) : `${day(start, language)} – ${day(end, language)}`;
 
 /** One line per change, in words a calendar manager would use. */
-export const describeDriftChange = (change: DriftChange): string => {
+export const describeDriftChange = (change: DriftChange, t: NotificationsTranslator, language?: string): string => {
   switch (change.kind) {
     case "ADDED":
-      return `New: ${change.name ?? ""}, ${span(change.start, change.end)}`;
+      return t("drift.change.added", { name: change.name ?? "", span: span(change.start, change.end, language) });
     case "REMOVED":
-      return `No longer a holiday: ${change.name ?? change.previousName ?? ""}, ${span(change.previousStart, change.previousEnd)}`;
+      return t("drift.change.removed", {
+        name: change.name ?? change.previousName ?? "",
+        span: span(change.previousStart, change.previousEnd, language),
+      });
     case "MOVED":
-      return `Moved: ${change.name ?? ""}, ${span(change.previousStart, change.previousEnd)} → ${span(change.start, change.end)}`;
+      return t("drift.change.moved", {
+        name: change.name ?? "",
+        from: span(change.previousStart, change.previousEnd, language),
+        to: span(change.start, change.end, language),
+      });
     case "CHANGED": {
       const renamed = change.previousName && change.name && change.previousName !== change.name;
       const redated = change.previousStart !== change.start || change.previousEnd !== change.end;
-      if (renamed && !redated) return `Renamed: ${change.previousName} → ${change.name}`;
-      return `Changed: ${change.name ?? ""}, ${span(change.previousStart, change.previousEnd)} → ${span(change.start, change.end)}`;
+      if (renamed && !redated) return t("drift.change.renamed", { previous: change.previousName ?? "", name: change.name ?? "" });
+      return t("drift.change.changed", {
+        name: change.name ?? "",
+        from: span(change.previousStart, change.previousEnd, language),
+        to: span(change.start, change.end, language),
+      });
     }
     default:
       return change.name ?? "";
@@ -118,30 +139,29 @@ export const describeDriftChange = (change: DriftChange): string => {
 };
 
 /** "The source now says X; yours says Y" — a conflict, one line per day. */
-export const describeConflict = (change: DriftChange): string => {
-  const theirs = change.start ? `${change.name ?? ""}, ${span(change.start, change.end)}` : "no holiday";
+export const describeConflict = (change: DriftChange, t: NotificationsTranslator, language?: string): string => {
+  const theirs = change.start
+    ? t("drift.conflict.day", { name: change.name ?? "", span: span(change.start, change.end, language) })
+    : t("drift.conflict.noHoliday");
   const ours = change.previousStart
-    ? `${change.previousName ?? ""}, ${span(change.previousStart, change.previousEnd)}`
-    : "no holiday (you removed it)";
-  return `The source now says ${theirs}; yours says ${ours}.`;
+    ? t("drift.conflict.day", { name: change.previousName ?? "", span: span(change.previousStart, change.previousEnd, language) })
+    : t("drift.conflict.removedByYou");
+  return t("drift.conflict.line", { theirs, ours });
 };
 
-const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
-
-const resultSummary = (result: PublicHolidayDriftApplyResult): string => {
-  const parts = [`${plural(result.applied, "change", "changes")} applied`];
+/** What applying did, one clause per kind of outcome (a list, so the clauses are joined with commas). */
+const resultSummary = (result: PublicHolidayDriftApplyResult, t: NotificationsTranslator): string => {
+  const parts = [t("drift.result.applied", { count: result.applied })];
   if (result.recalculatedRequests > 0) {
-    parts.push(`${plural(result.recalculatedRequests, "leave request", "leave requests")} recalculated`);
+    parts.push(t("drift.result.recalculated", { count: result.recalculatedRequests }));
   }
   if (result.skipped.length > 0) {
-    parts.push(`${plural(result.skipped.length, "change", "changes")} skipped because the day was edited or is taken`);
+    parts.push(t("drift.result.skipped", { count: result.skipped.length }));
   }
   if (result.requestsLeftUnchanged > 0) {
-    parts.push(
-      `${plural(result.requestsLeftUnchanged, "request", "requests")} now fall entirely on holidays and were left for you to review`
-    );
+    parts.push(t("drift.result.leftUnchanged", { count: result.requestsLeftUnchanged }));
   }
-  return `${parts.join(", ")}.`;
+  return t("drift.result.sentence", { parts: parts.join(", ") });
 };
 
 /**
@@ -155,6 +175,9 @@ const resultSummary = (result: PublicHolidayDriftApplyResult): string => {
  * them — the next read of anybody's inbox shows the outcome instead of the buttons.
  */
 export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ notification }) => {
+  const t = useTranslations("notifications");
+  const language = useDisplayLanguage();
+  const tCommon = useTranslations("common");
   const invalidateNotifications = useInvalidateNotifications();
   const markRead = useMarkNotificationRead();
   const apply = useApplyPublicHolidayDrift();
@@ -170,8 +193,8 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
     const outcome = (conflict ? CONFLICT_OUTCOMES : OUTCOMES)[source.status ?? ""];
     return (
       <div className="mt-2 flex flex-col gap-1">
-        {outcome && <p className={cn("text-hint font-medium", outcome.className)}>{outcome.label}</p>}
-        {applied && <p className="text-hint text-tertiary">{resultSummary(applied)}</p>}
+        {outcome && <p className={cn("text-hint font-medium", outcome.className)}>{t(outcome.labelKey)}</p>}
+        {applied && <p className="text-hint text-tertiary">{resultSummary(applied, t)}</p>}
       </div>
     );
   }
@@ -208,10 +231,10 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
 
   const leaveLine =
     details.affectedRequestCount === 0
-      ? "No leave touches the changed days."
+      ? t("drift.noLeave")
       : conflict
-        ? `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} these days and would be recalculated if you take the source's version:`
-        : `${plural(details.affectedRequestCount, "leave request touches", "leave requests touch")} the changed days and will be recalculated:`;
+        ? t("drift.leaveConflict", { count: details.affectedRequestCount })
+        : t("drift.leaveOrdinary", { count: details.affectedRequestCount });
 
   return (
     <div className="mt-3 flex flex-col gap-2 text-hint text-secondary" onClick={(e) => e.stopPropagation()}>
@@ -219,34 +242,34 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         <ul className="flex flex-col gap-0.5">
           {details.changes.map((change, index) => (
             <li key={`${change.kind}-${change.name ?? change.previousName}-${index}`}>
-              {conflict ? describeConflict(change) : describeDriftChange(change)}
+              {conflict ? describeConflict(change, t, language) : describeDriftChange(change, t, language)}
             </li>
           ))}
-          {moreChanges > 0 && <li className="text-tertiary">and {plural(moreChanges, "more change", "more changes")}</li>}
+          {moreChanges > 0 && <li className="text-tertiary">{t("drift.moreChanges", { count: moreChanges })}</li>}
         </ul>
       )}
 
       {conflict && (
-        <p className="text-tertiary">Your version stays in force until someone takes the source&apos;s.</p>
+        <p className="text-tertiary">{t("drift.conflict.staysInForce")}</p>
       )}
 
-      <p>
-        {plural(details.peopleOnCalendar, "person observes", "people observe")} this calendar. {leaveLine}
-      </p>
+      <p>{t("drift.observers", { count: details.peopleOnCalendar, leaveLine })}</p>
 
       {details.affectedRequests.length > 0 && (
         <ul className="flex flex-col gap-0.5">
           {details.affectedRequests.map((request) => (
             <li key={request.requestId}>
-              {request.personName || "Someone"} · {span(request.startDate, request.endDate)} ·{" "}
-              {REQUEST_STATUS[request.status] ?? request.status.toLowerCase()}
+              {request.personName || t("drift.someone")} · {span(request.startDate, request.endDate, language)} ·{" "}
+              {request.status in REQUEST_STATUS
+                ? t(REQUEST_STATUS[request.status as keyof typeof REQUEST_STATUS])
+                : request.status.toLowerCase()}
             </li>
           ))}
         </ul>
       )}
       {hiddenRequests > 0 && (
         <p className="text-tertiary">
-          and {plural(hiddenRequests, "request", "requests")} by people whose leave you cannot see
+          {t("drift.hiddenRequests", { count: hiddenRequests })}
         </p>
       )}
 
@@ -254,17 +277,17 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" disabled={busy} onClick={dismissDrift}>
             <Icon icon={Shield01Icon} size="sm" />
-            Keep ours
+            {t("drift.keepOurs")}
           </Button>
           <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={applyDrift}>
             <Icon icon={Tick02Icon} size="sm" />
-            Take theirs
+            {t("drift.takeTheirs")}
           </Button>
           {calendarHref && (
             <Button size="sm" variant="ghost" asChild>
               <Link href={calendarHref}>
                 <Icon icon={PencilEdit02Icon} size="sm" />
-                Edit
+                {tCommon("actions.edit")}
               </Link>
             </Button>
           )}
@@ -273,11 +296,11 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" disabled={busy} onClick={applyDrift}>
             <Icon icon={Tick02Icon} size="sm" />
-            Apply changes
+            {t("drift.applyChanges")}
           </Button>
           <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={dismissDrift}>
             <Icon icon={Cancel01Icon} size="sm" />
-            Dismiss
+            {t("drift.dismiss")}
           </Button>
         </div>
       )}

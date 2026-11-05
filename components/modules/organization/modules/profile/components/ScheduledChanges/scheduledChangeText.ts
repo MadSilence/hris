@@ -1,43 +1,56 @@
 import type { ScheduledChange } from "@/models/user/ScheduledChange";
 import { formatUserStatus } from "@/models/user/status";
-import { NONE_LABEL } from "@/models/select";
+import { NONE_LABEL_KEY } from "@/models/select";
+import type { useTranslations } from "next-intl";
 
-/** What a dated assignment touches, as a label names it. */
-const ASSIGNABLE_LABELS: Record<string, string> = {
-  OFFICE: "Office",
-  LEGAL_ENTITY: "Legal entity",
-  DEPARTMENT: "Department",
-  TEAM: "Team",
-  JOB: "Job",
-  ROLE: "Role",
-  PUBLIC_HOLIDAY_CALENDAR: "Holiday calendar",
-};
+type OrgTranslator = ReturnType<typeof useTranslations<"organization">>;
+type CommonTranslator = ReturnType<typeof useTranslations<"common">>;
+
+/** What a dated assignment touches, as a label names it — a key under `profile.scheduled.things`. */
+const ASSIGNABLE_LABELS = {
+  OFFICE: "profile.scheduled.things.office",
+  LEGAL_ENTITY: "profile.scheduled.things.legalEntity",
+  DEPARTMENT: "profile.scheduled.things.department",
+  TEAM: "profile.scheduled.things.team",
+  JOB: "profile.scheduled.things.job",
+  ROLE: "profile.scheduled.things.role",
+  PUBLIC_HOLIDAY_CALENDAR: "profile.scheduled.things.holidayCalendar",
+} as const;
 
 /** The value a change carries, as a reader reads it: a status by its word, a reference by its name. */
-export const valueLabelOf = (change: ScheduledChange): string => {
+export const valueLabelOf = (tCommon: CommonTranslator, change: ScheduledChange): string => {
   if (!change.value) return "";
-  if (change.fieldId === "sys:status") return formatUserStatus(change.value.id);
+  if (change.fieldId === "sys:status") return formatUserStatus(tCommon, change.value.id);
   return change.value.name ?? "";
 };
 
 /** One line naming the change — a label, so sentence case (`NAMING.md`). */
-export const labelOfChange = (change: ScheduledChange): string => {
+export const labelOfChange = (t: OrgTranslator, tCommon: CommonTranslator, change: ScheduledChange): string => {
   switch (change.kind) {
     case "TERMINATION":
-      return "Employment ends";
+      return t("profile.scheduled.kind.termination");
     case "EMPLOYMENT_START":
-      return "Employment starts";
+      return t("profile.scheduled.kind.employmentStart");
     case "INVITATION":
-      return "Invitation goes out";
+      return t("profile.scheduled.kind.invitation");
     case "TASK_DUE":
-      return change.subject ? `Task due: ${change.subject}` : "Task due";
+      return change.subject
+        ? t("profile.scheduled.kind.taskDueSubject", { subject: change.subject })
+        : t("profile.scheduled.kind.taskDue");
     case "ASSIGNMENT_START":
     case "ASSIGNMENT_END": {
       const type = change.labelKey.split(".")[1] ?? "";
-      const thing = ASSIGNABLE_LABELS[type] ?? "Assignment";
-      const verb = change.kind === "ASSIGNMENT_START" ? "Starts" : "Ends";
-      const name = valueLabelOf(change);
-      return name ? `${thing} ${verb}: ${name}` : `${thing} ${verb}`;
+      const thingKey = ASSIGNABLE_LABELS[type as keyof typeof ASSIGNABLE_LABELS];
+      const thing = thingKey ? t(thingKey) : t("profile.scheduled.things.assignment");
+      const name = valueLabelOf(tCommon, change);
+      if (change.kind === "ASSIGNMENT_START") {
+        return name
+          ? t("profile.scheduled.assignment.startsNamed", { thing, name })
+          : t("profile.scheduled.assignment.starts", { thing });
+      }
+      return name
+        ? t("profile.scheduled.assignment.endsNamed", { thing, name })
+        : t("profile.scheduled.assignment.ends", { thing });
     }
     default:
       return change.labelKey;
@@ -45,8 +58,8 @@ export const labelOfChange = (change: ScheduledChange): string => {
 };
 
 /** What Change Date edits, by kind — the day a person reads it as, not the engine's effective day. */
-export const rescheduleDateLabelOf = (change: ScheduledChange): string =>
-  change.kind === "TERMINATION" ? "Last working day" : "Send on";
+export const rescheduleDateLabelOf = (t: OrgTranslator, change: ScheduledChange): string =>
+  change.kind === "TERMINATION" ? t("profile.scheduled.lastWorkingDay") : t("profile.scheduled.sendOn");
 
 /** The fields that hold several values; every other field holds one. */
 const MULTI_VALUED = new Set(["sys:role", "sys:team", "sys:calendar"]);
@@ -64,6 +77,7 @@ export type PendingStep = { date: string; label: string };
  * nothing: a removal of a value the field does not hold is not a change anybody would see.
  */
 export const pendingSteps = (
+  tCommon: CommonTranslator,
   changes: ScheduledChange[] | undefined,
   fieldId: string,
   current: FieldValue[],
@@ -75,7 +89,7 @@ export const pendingSteps = (
 
   const multi = MULTI_VALUED.has(fieldId);
   const nameOf = (values: FieldValue[]) =>
-    values.length === 0 ? NONE_LABEL : values.map((v) => v.name).join(", ");
+    values.length === 0 ? tCommon(NONE_LABEL_KEY) : values.map((v) => v.name).join(", ");
 
   let values = [...current];
   let lastLabel = nameOf(values);
@@ -85,7 +99,7 @@ export const pendingSteps = (
   for (const date of dates) {
     for (const change of forField.filter((c) => c.effectiveAt === date)) {
       if (!change.value) continue;
-      const value: FieldValue = { id: change.value.id, name: valueLabelOf(change) };
+      const value: FieldValue = { id: change.value.id, name: valueLabelOf(tCommon, change) };
       if (change.operation === "SET" || (change.operation === "ADD" && !multi)) {
         values = [value];
       } else if (change.operation === "ADD") {

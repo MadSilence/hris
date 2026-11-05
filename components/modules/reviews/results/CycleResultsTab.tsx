@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Download01Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -13,7 +14,7 @@ import {
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { useCycleResults } from "@/components/modules/reviews/hooks";
 import {
-  REVIEW_KIND_LABELS,
+  REVIEW_KIND_KEYS,
   formatAverage,
   shares,
   type RatingDistribution,
@@ -26,6 +27,8 @@ import {
  * whose results the reader may read (A25). The export (12.4) is for whoever runs cycles.
  */
 export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: string; cycleName: string; canExport: boolean }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const results = useCycleResults(cycleId);
   const [exporting, setExporting] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -52,26 +55,26 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
       {canExport && (
         <div className="flex justify-end">
           <Button type="button" variant="secondary" onClick={() => setExporting(true)}>
-            <Icon icon={Download01Icon} size="sm" />Export {readable} {readable === 1 ? "person" : "people"}
+            <Icon icon={Download01Icon} size="sm" />{t("results.exportPeople", { people: tCommon("people.count", { count: readable }) })}
           </Button>
         </div>
       )}
 
-      <Section title="Completion by kind">
+      <Section title={t("results.byKind")}>
         <table className="w-full text-body">
           <thead className="text-left text-hint text-tertiary">
             <tr className="border-b border-divider">
-              <th className="px-4 py-2 font-medium">Review</th>
-              <th className="px-4 py-2 font-medium">Submitted</th>
-              <th className="px-4 py-2 font-medium">Overdue</th>
+              <th className="px-4 py-2 font-medium">{t("results.col.review")}</th>
+              <th className="px-4 py-2 font-medium">{t("run.fact.submitted")}</th>
+              <th className="px-4 py-2 font-medium">{t("status.assignment.overdue")}</th>
               <th className="w-1/3 px-4 py-2" />
             </tr>
           </thead>
           <tbody>
             {r.byKind.map((k) => (
               <tr key={k.kind} className="border-b border-divider last:border-0">
-                <td className="px-4 py-2 text-primary">{REVIEW_KIND_LABELS[k.kind]}</td>
-                <td className="px-4 py-2">{k.submitted} of {k.total}</td>
+                <td className="px-4 py-2 text-primary">{t(REVIEW_KIND_KEYS[k.kind])}</td>
+                <td className="px-4 py-2">{t("run.ofTotal", { count: k.submitted, total: k.total })}</td>
                 <td className={`px-4 py-2 ${k.overdue > 0 ? "text-status-pending-text" : ""}`}>{k.overdue}</td>
                 <td className="px-4 py-2"><Bar value={k.submitted} of={k.total} /></td>
               </tr>
@@ -80,14 +83,14 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
         </table>
       </Section>
 
-      <Section title="Completion by department" hint="Every review about the people of a department, together.">
+      <Section title={t("results.byDepartment")} hint={t("results.byDepartmentHint")}>
         <table className="w-full text-body">
           <thead className="text-left text-hint text-tertiary">
             <tr className="border-b border-divider">
-              <th className="px-4 py-2 font-medium">Department</th>
-              <th className="px-4 py-2 font-medium">People</th>
-              <th className="px-4 py-2 font-medium">Reviews submitted</th>
-              <th className="px-4 py-2 font-medium">Shared</th>
+              <th className="px-4 py-2 font-medium">{t("calibration.col.department")}</th>
+              <th className="px-4 py-2 font-medium">{t("launch.fact.people")}</th>
+              <th className="px-4 py-2 font-medium">{t("results.col.reviewsSubmitted")}</th>
+              <th className="px-4 py-2 font-medium">{t("status.participant.shared")}</th>
               <th className="w-1/3 px-4 py-2" />
             </tr>
           </thead>
@@ -96,7 +99,7 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
               <tr key={d.department} className="border-b border-divider last:border-0">
                 <td className="px-4 py-2 text-primary">{d.department}</td>
                 <td className="px-4 py-2">{d.people}</td>
-                <td className="px-4 py-2">{d.submitted} of {d.total}</td>
+                <td className="px-4 py-2">{t("run.ofTotal", { count: d.submitted, total: d.total })}</td>
                 <td className="px-4 py-2">{d.shared}</td>
                 <td className="px-4 py-2"><Bar value={d.submitted} of={d.total} /></td>
               </tr>
@@ -109,14 +112,14 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
         <p className="flex items-center gap-2 text-body text-tertiary" data-test="ratings-hidden">
           <Icon icon={ViewOffSlashIcon} size="sm" />
           {readable === 0
-            ? "Ratings are shown only for people whose results you can read."
-            : `${r.ratingsHidden} ${r.ratingsHidden === 1 ? "person is" : "people are"} outside the results you can read and left out of the ratings below.`}
+            ? t("results.ratingsOnlyReadable")
+            : t("results.ratingsHidden", { count: r.ratingsHidden })}
         </p>
       )}
 
       {readable > 0 && (
         <>
-          <Section title="Rating distribution" hint="Final ratings — calibrated where a session changed them.">
+          <Section title={t("results.distribution")} hint={t("results.distributionHint")}>
             <div className="space-y-4 p-4">
               <DistributionRows distribution={r.overall} scale={r.scale} />
               {r.ratingsByDepartment.length > 0 && (
@@ -132,18 +135,18 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
             </div>
           </Section>
 
-          <Section title="Ratings by manager" hint="What each manager gave, and what their people were finally given.">
+          <Section title={t("results.byManager")} hint={t("results.byManagerHint")}>
             {r.byManager.length === 0 ? (
-              <p className="py-4 text-body text-tertiary">No manager has rated anybody in this cycle yet.</p>
+              <p className="py-4 text-body text-tertiary">{t("results.noManagerRatings")}</p>
             ) : (
             <table className="w-full text-body">
               <thead className="text-left text-hint text-tertiary">
                 <tr className="border-b border-divider">
-                  <th className="px-4 py-2 font-medium">Manager</th>
-                  <th className="px-4 py-2 font-medium">People</th>
-                  <th className="px-4 py-2 font-medium">Rated</th>
-                  <th className="px-4 py-2 font-medium">Average manager rating</th>
-                  <th className="px-4 py-2 font-medium">Average final rating</th>
+                  <th className="px-4 py-2 font-medium">{t("calibration.col.manager")}</th>
+                  <th className="px-4 py-2 font-medium">{t("launch.fact.people")}</th>
+                  <th className="px-4 py-2 font-medium">{t("results.col.rated")}</th>
+                  <th className="px-4 py-2 font-medium">{t("results.col.averageManager")}</th>
+                  <th className="px-4 py-2 font-medium">{t("results.col.averageFinal")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,11 +169,11 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
       <ExportDataModal
         isOpen={exporting}
         isLoading={busy}
-        title="Export results"
+        title={t("results.export.title")}
         rowCount={readable}
-        rowNoun="people"
-        description={`The results of ${cycleName}: one row a person whose results you can read. No answers are exported.`}
-        includedText="Included: person, email, department, manager, status, manager rating, final rating and its label, potential, calibrated, shared on, acknowledged on."
+        rowKind="people"
+        description={t("results.export.description", { name: cycleName })}
+        includedText={t("results.export.included")}
         onCancelAction={() => setExporting(false)}
         onConfirmAction={(values) => void doExport(values)}
       />
@@ -200,6 +203,7 @@ function Bar({ value, of }: { value: number; of: number }) {
 }
 
 function DistributionRows({ distribution, scale }: { distribution: RatingDistribution; scale: ScalePoint[] }) {
+  const t = useTranslations("reviews");
   const pct = shares(distribution.counts);
   return (
     <div className="space-y-1">
@@ -213,7 +217,7 @@ function DistributionRows({ distribution, scale }: { distribution: RatingDistrib
         </div>
       ))}
       <p className="text-hint text-tertiary">
-        {distribution.rated} rated · average {formatAverage(distribution.average)}
+        {t("results.ratedAverage", { rated: distribution.rated, average: formatAverage(distribution.average) })}
       </p>
     </div>
   );

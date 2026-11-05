@@ -1,5 +1,5 @@
 import { ProfileComingSoonTab } from "@/components/modules/organization/modules/profile/components/ProfileComingSoonTab";
 
 export default function PublicProfileTabPage() {
-  return <ProfileComingSoonTab title="Public profile"/>;
+  return <ProfileComingSoonTab tab="publicProfile"/>;
 }

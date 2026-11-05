@@ -1,15 +1,17 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import type { AnswersBlock, ScalePoint } from "@/models/reviews";
+import { translatorFor } from "@/test/nextIntl";
+import type { AnswersBlock, CommonT, ScalePoint } from "@/models/reviews";
 import { AnswersView, answerText } from "./AnswersView";
 
 const scale: ScalePoint[] = [{ value: 1, label: "Low" }, { value: 2, label: "High" }];
+const tCommon = translatorFor("common") as unknown as CommonT;
 const mentions = { subject: "Ann", subjectFullName: "Ann Lee", manager: "Bea", cycle: "H2 Review" };
 
 describe("AnswersView", () => {
   it("writes each answer type as text", () => {
     const a = (type: AnswersBlock["answers"][number]["type"], value: AnswersBlock["answers"][number]["value"]) =>
-      answerText({ questionId: "q", label: "Q", type, value, comment: null }, scale);
+      answerText({ questionId: "q", label: "Q", type, value, comment: null }, scale, tCommon);
     expect(a("RATING", 2)).toBe("2 · High");
     expect(a("YES_NO", false)).toBe("No");
     expect(a("MULTIPLE_CHOICE", ["A", "B"])).toBe("A, B");

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { showError } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -89,6 +90,9 @@ export default function LegalEntityDetailsContainer({
   legalEntityId,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("structure.legalEntities");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
 
   const { data, isLoading, error } = useLegalEntity();
   const updateAction = useUpdateLegalEntityAction();
@@ -142,7 +146,7 @@ export default function LegalEntityDetailsContainer({
   }
 
   if (!entity) {
-    return <div className="px-8 py-6 text-body text-tertiary">Not found</div>;
+    return <div className="px-8 py-6 text-body text-tertiary">{tPlaces("notFound")}</div>;
   }
 
   const current = values ?? mapEntity(entity);
@@ -217,11 +221,11 @@ export default function LegalEntityDetailsContainer({
         <TabsList>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Icon icon={Building03Icon} size="sm" />
-            General information
+            {tPlaces("generalInformation")}
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
-            Assigned users
+            {tPlaces("assignedUsers")}
           </TabsTrigger>
         </TabsList>
 
@@ -230,13 +234,13 @@ export default function LegalEntityDetailsContainer({
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-section-title text-primary">General information</h2>
+                  <h2 className="text-section-title text-primary">{tPlaces("generalInformation")}</h2>
                   {isArchived && (
                     <StatusBadge status="archived" className="font-normal" />
                   )}
                 </div>
                 <p className="text-body text-tertiary">
-                  Registration, tax, and address details for this legal entity.
+                  {t("details.intro")}
                 </p>
               </div>
 
@@ -249,7 +253,7 @@ export default function LegalEntityDetailsContainer({
                         onClick={() => setIsArchiveOpen(true)}
                         disabled={updateAction.isPending || archiveAction.isPending}
                       >
-                        Archive
+                        {tCommon("actions.archive")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
@@ -258,7 +262,7 @@ export default function LegalEntityDetailsContainer({
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
-                        Delete
+                        {tCommon("actions.delete")}
                       </Button>
                     </PermissionGate>
                     <Button type="button"
@@ -266,17 +270,17 @@ export default function LegalEntityDetailsContainer({
                       onClick={handleCancel}
                       disabled={updateAction.isPending}
                     >
-                      Cancel
+                      {tCommon("actions.cancel")}
                     </Button>
                     <Button type="button" onClick={handleSave} disabled={updateAction.isPending}>
-                      Save changes
+                      {tCommon("actions.saveChanges")}
                     </Button>
                   </>
                 ) : isArchived ? (
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button" onClick={handleRestore} disabled={restoreAction.isPending}>
-                        Unarchive
+                        {tPlaces("unarchive")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="MANAGE">
@@ -285,14 +289,14 @@ export default function LegalEntityDetailsContainer({
                         onClick={() => setIsDeleteOpen(true)}
                         disabled={deleteAction.isPending}
                       >
-                        Delete
+                        {tCommon("actions.delete")}
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button"
                         size="icon"
                         variant="secondary"
-                        aria-label="Export legal entity"
+                        aria-label={t("details.export")}
                         onClick={() => setIsExportOpen(true)}
                       >
                         <Icon icon={Download01Icon} size="sm" />
@@ -302,13 +306,13 @@ export default function LegalEntityDetailsContainer({
                 ) : (
                   <>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <Button type="button" onClick={handleEdit}>Edit</Button>
+                      <Button type="button" onClick={handleEdit}>{tCommon("actions.edit")}</Button>
                     </PermissionGate>
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
                       <Button type="button"
                         size="icon"
                         variant="secondary"
-                        aria-label="Export legal entity"
+                        aria-label={t("details.export")}
                         onClick={() => setIsExportOpen(true)}
                       >
                         <Icon icon={Download01Icon} size="sm" />
@@ -323,32 +327,32 @@ export default function LegalEntityDetailsContainer({
 
             <div className="space-y-8 overflow-y-auto px-1" style={{ maxHeight: SCROLL_OFFSET }}>
               <div className="space-y-5">
-        <SectionTitle icon={<Icon icon={Building03Icon} />} title="General"/>
+        <SectionTitle icon={<Icon icon={Building03Icon} />} title={tPlaces("general")}/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
-            label="Name"
+            label={tCommon("fields.name")}
             value={current.name}
             isEditing={isEditing}
             onChange={(value) => updateField("name", value)}
           />
 
           <Field
-            label="Registration number"
+            label={t("registrationNumber")}
             value={current.registrationNumber}
             isEditing={isEditing}
             onChange={(value) => updateField("registrationNumber", value)}
           />
 
           <Field
-            label="Tax ID"
+            label={t("taxId")}
             value={current.taxId}
             isEditing={isEditing}
             onChange={(value) => updateField("taxId", value)}
           />
 
           <div className="space-y-2 md:col-span-2">
-            <Label>Description</Label>
+            <Label>{tCommon("fields.description")}</Label>
             {isEditing ? (
               <Textarea
                 value={current.description}
@@ -369,39 +373,39 @@ export default function LegalEntityDetailsContainer({
       <Separator/>
 
       <div className="space-y-5">
-        <SectionTitle icon={<Icon icon={Location01Icon} />} title="Address"/>
+        <SectionTitle icon={<Icon icon={Location01Icon} />} title={tPlaces("address")}/>
 
         <div className="grid gap-5 md:grid-cols-2">
           <Field
-            label="Country"
+            label={tPlaces("country")}
             value={current.country}
             isEditing={isEditing}
             onChange={(value) => updateField("country", value)}
           />
 
           <Field
-            label="City"
+            label={tPlaces("city")}
             value={current.city}
             isEditing={isEditing}
             onChange={(value) => updateField("city", value)}
           />
 
           <Field
-            label="Street"
+            label={tPlaces("street")}
             value={current.street}
             isEditing={isEditing}
             onChange={(value) => updateField("street", value)}
           />
 
           <Field
-            label="Building"
+            label={tPlaces("building")}
             value={current.building}
             isEditing={isEditing}
             onChange={(value) => updateField("building", value)}
           />
 
           <Field
-            label="Post code"
+            label={tPlaces("postCode")}
             value={current.postCode}
             isEditing={isEditing}
             onChange={(value) => updateField("postCode", value)}
@@ -454,9 +458,9 @@ export default function LegalEntityDetailsContainer({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title={`Export ${entity.name}`}
-        description="Export this legal entity's details and its assigned users."
-        includedText="Two sheets — General Information (name, description, registration number, tax ID, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+        title={tPlaces("exportNamed", { name: entity.name })}
+        description={t("details.exportDescription")}
+        includedText={t("details.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

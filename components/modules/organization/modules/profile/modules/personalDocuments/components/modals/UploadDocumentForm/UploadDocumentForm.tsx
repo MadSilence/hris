@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon, CloudUploadIcon, FileTextIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -72,6 +73,8 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   onCancelAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -110,7 +113,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     if (isLoading) return;
 
     if (files.length === 0) {
-      setError("Please choose at least one file.");
+      setError(t("documents.upload.chooseAtLeastOne"));
       return;
     }
 
@@ -126,7 +129,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-5">
         <div className="space-y-2">
-          <RequiredLabel required>Files</RequiredLabel>
+          <RequiredLabel required>{t("documents.upload.files")}</RequiredLabel>
 
           <div
             role="button"
@@ -164,7 +167,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
  >
             <input
               ref={inputRef}
-              aria-label="Files"
+              aria-label={t("documents.upload.files")}
               type="file"
               multiple
               className="hidden"
@@ -179,14 +182,14 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
               {isDragging ? (
                 <>
                   <Icon icon={CloudUploadIcon} size="lg" className="mb-4 text-secondary" />
-                  <p className="mb-2 font-medium text-primary">Drop files to upload</p>
-                  <p className="text-body text-secondary">Release to add them</p>
+                  <p className="mb-2 font-medium text-primary">{t("documents.upload.dropTitle")}</p>
+                  <p className="text-body text-secondary">{t("documents.upload.dropHint")}</p>
                 </>
               ) : (
                 <>
                   <Icon icon={CloudUploadIcon} size="lg" className="mb-4 text-tertiary" />
-                  <p className="mb-2 font-medium text-primary">Drag files here to upload</p>
-                  <p className="mb-4 text-body text-tertiary">or click to browse</p>
+                  <p className="mb-2 font-medium text-primary">{t("documents.upload.dragTitle")}</p>
+                  <p className="mb-4 text-body text-tertiary">{t("documents.upload.dragHint")}</p>
 
                   <Button
                     type="button"
@@ -199,7 +202,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
                     }}
  >
                     <Icon icon={Upload01Icon} size="sm" />
-                    Choose files
+                    {t("documents.upload.chooseFiles")}
                   </Button>
                 </>
               )}
@@ -225,7 +228,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 shrink-0"
-                    aria-label={`Remove ${file.name}`}
+                    aria-label={t("documents.upload.removeFile", { name: file.name })}
                     disabled={isLoading}
                     onClick={() => removeFile(index)}
  >
@@ -240,24 +243,24 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label>Folder</Label>
+          <Label>{t("documents.upload.folder")}</Label>
 
           <SearchableSelect
-            aria-label="Folder"
+            aria-label={t("documents.upload.folder")}
             options={[
-              { value: ROOT_FOLDER_ID, label: "None" },
+              { value: ROOT_FOLDER_ID, label: tCommon("values.none") },
               ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
             ]}
             value={folderId || null}
             onChange={(v) => setFolderId(v ?? ROOT_FOLDER_ID)}
-            placeholder="Select folder"
+            placeholder={t("documents.selectFolder")}
             disabled={isLoading}
             clearable={false}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Who can see this</Label>
+          <Label>{t("documents.upload.visibility")}</Label>
 
           <Select
             value={visibility}
@@ -269,9 +272,9 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="HR_ONLY">HR only — hidden from the employee</SelectItem>
+              <SelectItem value="HR_ONLY">{t("documents.upload.visibilityHrOnly")}</SelectItem>
               <SelectItem value="VISIBLE_TO_EMPLOYEE">
-                Visible to the employee — read-only for them
+                {t("documents.upload.visibilityEmployee")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -279,17 +282,17 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
 
         {categories.length > 0 && (
           <div className="space-y-2">
-            <Label>Category</Label>
+            <Label>{t("documents.upload.category")}</Label>
 
             <SearchableSelect
-              aria-label="Category"
+              aria-label={t("documents.upload.category")}
               options={[
-                { value: NO_CATEGORY_ID, label: "None" },
+                { value: NO_CATEGORY_ID, label: tCommon("values.none") },
                 ...categories.map((category) => ({ value: category.id, label: category.name })),
               ]}
               value={categoryId || null}
               onChange={(v) => setCategoryId(v ?? NO_CATEGORY_ID)}
-              placeholder="Select category"
+              placeholder={t("documents.upload.selectCategory")}
               disabled={isLoading}
               clearable={false}
             />
@@ -299,14 +302,14 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
 
       <DialogFooter className="mt-8">
         <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading || files.length === 0}
  >
-          {files.length > 1 ? `Upload ${files.length} files` : "Upload"}
+          {t("documents.upload.submit", { count: files.length })}
         </Button>
       </DialogFooter>
     </form>

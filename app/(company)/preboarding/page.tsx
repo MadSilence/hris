@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { hrisApiLifecycleService } from "@/api/modules/lifecycle/services";
 import type { PreboardingPage } from "@/models/lifecycle";
 import { PreboardingPageContainer } from "@/components/modules/lifecycle/preboarding/PreboardingPageContainer";
@@ -20,11 +21,12 @@ type Props = {
 export const dynamic = "force-dynamic";
 export default async function PreboardingRoutePage({ searchParams }: Props) {
   const { token } = await searchParams;
+  const t = await getTranslations("lifecycle");
 
   let page: PreboardingPage | null = null;
   let problem: string | null = null;
   if (!token) {
-    problem = "This link is incomplete. Open it from your email again.";
+    problem = t("preboarding.linkIncomplete");
   } else {
     try {
       page = await hrisApiLifecycleService.preboardingView(token);
@@ -50,11 +52,9 @@ export default async function PreboardingRoutePage({ searchParams }: Props) {
         {!token || !page ? (
           <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
             <Illustration scene="policies" />
-            <h1 className="text-page-title">This link doesn&apos;t work</h1>
+            <h1 className="text-page-title">{t("preboarding.linkBroken")}</h1>
             <p className="text-body text-secondary">{problem}</p>
-            <p className="text-body text-secondary">
-              If you have already set a password, sign in — your remaining tasks are in the app.
-            </p>
+            <p className="text-body text-secondary">{t("preboarding.signInHint")}</p>
           </div>
         ) : (
           <PreboardingPageContainer token={token} initialPage={page} />

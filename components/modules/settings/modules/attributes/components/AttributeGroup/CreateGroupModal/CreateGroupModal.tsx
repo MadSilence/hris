@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Layers01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
@@ -30,6 +31,7 @@ export const CreateGroupModal: FC<CreateGroupModalProps> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("settings.attributes.createSection");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -67,9 +69,9 @@ export const CreateGroupModal: FC<CreateGroupModalProps> = ({
                 <Icon icon={Layers01Icon} />
               </span>
               <div className="space-y-1">
-                <DialogTitle>Create section</DialogTitle>
+                <DialogTitle>{t("title")}</DialogTitle>
                 <DialogDescription>
-                  Group related attributes into a section on the profile.
+                  {t("description")}
                 </DialogDescription>
               </div>
             </div>

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { GitBranchIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -13,21 +14,22 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 const tabs = [
   {
     id: "people",
-    label: "People",
+    labelKey: "layout.people.title",
     href: "/organization/people",
     icon: UserGroupIcon,
-    description: "Browse everyone in the company and find the person you need.",
+    descriptionKey: "layout.people.description",
   },
   {
     id: "chart",
-    label: "Org chart",
+    labelKey: "layout.chart.title",
     href: "/organization/chart",
     icon: GitBranchIcon,
-    description: "See how the company reporting structure fits together.",
+    descriptionKey: "layout.chart.description",
   },
-];
+] as const;
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("organization");
   const pathname = usePathname();
   const activeTab = tabs.find((tab) => pathname === tab.href) ?? null;
 
@@ -37,8 +39,8 @@ export default function OrganizationLayout({ children }: { children: React.React
     <div className="flex h-[calc(100dvh-96px)] min-h-0 flex-col gap-10">
       <section className="flex flex-none flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-greeting">{activeTab.label}</h1>
-          <p className="max-w-2xl text-body text-tertiary">{activeTab.description}</p>
+          <h1 className="text-greeting">{t(activeTab.labelKey)}</h1>
+          <p className="max-w-2xl text-body text-tertiary">{t(activeTab.descriptionKey)}</p>
         </div>
 
         <Tabs value={activeTab.id} className="w-full">
@@ -55,7 +57,7 @@ export default function OrganizationLayout({ children }: { children: React.React
                 >
                   <Link href={tab.href} className="no-underline">
                     <Icon icon={shownIcon} size="sm" />
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </Link>
                 </TabsTrigger>
               );

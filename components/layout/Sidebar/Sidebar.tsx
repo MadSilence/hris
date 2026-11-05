@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, type FC } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -104,6 +105,7 @@ const AppSidebar: FC<SidebarProps> = ({
   onChangePassword,
   showFinishProfile = false,
 }) => {
+  const t = useTranslations("navigation");
   const pathname = usePathname();
   const router = useRouter();
   const searchShortcut = useSearchShortcutLabel();
@@ -153,7 +155,7 @@ const AppSidebar: FC<SidebarProps> = ({
             <Link
               href="/dashboard"
               className="flex min-w-0 flex-1 items-center gap-2 rounded-control group-data-[state=collapsed]:flex-none"
-              aria-label={companyName ? `${companyName} home` : "Home"}
+              aria-label={companyName ? t("menu.companyHome", { company: companyName }) : t("menu.home")}
             >
               {company?.companyLogo ? (
                 // The company's logo is primary (SPEC § 2): up to 160 × 32 expanded, a 32 px mark collapsed.
@@ -180,9 +182,9 @@ const AppSidebar: FC<SidebarProps> = ({
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Search" onClick={onSearch} className="font-normal text-tertiary">
+              <SidebarMenuButton tooltip={t("menu.search")} onClick={onSearch} className="font-normal text-tertiary">
                 <Icon icon={Search01Icon} />
-                <span>Search</span>
+                <span>{t("menu.search")}</span>
                 <kbd className="ml-auto font-sans text-hint text-tertiary group-data-[state=collapsed]:hidden">
                   {searchShortcut}
                 </kbd>
@@ -216,7 +218,7 @@ const AppSidebar: FC<SidebarProps> = ({
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     tooltip={profile.name}
-                    aria-label="Your account"
+                    aria-label={t("menu.account")}
                     className="h-12 gap-2 data-[state=open]:bg-sidebar-item-hover group-data-[state=collapsed]:size-10"
                   >
                     {profile.name ? (
@@ -239,27 +241,27 @@ const AppSidebar: FC<SidebarProps> = ({
 
                 <DropdownMenuContent side="top" align="start" className="w-56">
                   <RowAction icon={<Icon icon={UserIcon} size="sm" />} onClick={() => router.push(profileHref)}>
-                    My profile
+                    {t("menu.myProfile")}
                   </RowAction>
 
                   {showFinishProfile && (
                     <RowAction icon={<Icon icon={SparklesIcon} size="sm" />} onClick={() => router.push("/welcome?again=1")}>
-                      Finish your profile
+                      {t("menu.finishProfile")}
                     </RowAction>
                   )}
 
                   <RowAction icon={<Icon icon={PreferenceHorizontalIcon} size="sm" />} onClick={() => router.push("/preferences")}>
-                    My preferences
+                    {t("menu.myPreferences")}
                   </RowAction>
 
                   {onChangePassword && (
                     <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={onChangePassword}>
-                      Change password
+                      {t("menu.changePassword")}
                     </RowAction>
                   )}
 
                   <RowAction icon={<Icon icon={Logout01Icon} size="sm" />} onClick={onSignOut}>
-                    Sign out
+                    {t("menu.signOut")}
                   </RowAction>
                 </DropdownMenuContent>
               </DropdownMenu>

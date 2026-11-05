@@ -1,0 +1,139 @@
+{
+  "setup": {
+    "metaTitle": "Set up your company",
+    "steps": {
+      "company": "Your company",
+      "dataset": "What to start with"
+    },
+    "welcomeTo": "Welcome to {company}",
+    "welcome": "Welcome",
+    "datasetTitle": "What should we start you with?",
+    "companyLead": "Three questions, so the product arrives set up rather than blank. You can change any of it later.",
+    "datasetLead": "Whichever you pick, every feature is switched on. This is only about what is in it on day one.",
+    "failed": "The last attempt stopped: {detail}. Your answers are still here — try again.",
+    "industry": {
+      "label": "What does the company do?",
+      "placeholder": "Select an industry",
+      "options": {
+        "software": "Software & IT",
+        "professionalServices": "Professional services",
+        "finance": "Finance & insurance",
+        "healthcare": "Healthcare",
+        "manufacturing": "Manufacturing",
+        "retail": "Retail & e-commerce",
+        "education": "Education",
+        "hospitality": "Hospitality",
+        "construction": "Construction",
+        "transport": "Transport & logistics",
+        "publicSector": "Public sector",
+        "nonProfit": "Non-profit",
+        "other": "Other"
+      }
+    },
+    "size": {
+      "label": "How many people will use it?",
+      "placeholder": "Select a size",
+      "options": {
+        "under10": "Fewer than 10",
+        "tenTo50": "10 to 50",
+        "fiftyTo200": "50 to 200",
+        "over200": "More than 200"
+      }
+    },
+    "country": {
+      "label": "Where is the company based?",
+      "hintFor": "Sets your time zone to {timezone}, starts the week on {weekday, select, MONDAY {Monday} TUESDAY {Tuesday} WEDNESDAY {Wednesday} THURSDAY {Thursday} FRIDAY {Friday} SATURDAY {Saturday} SUNDAY {Sunday} other {the first working day}}, and builds that country's public holiday calendar.",
+      "hint": "Sets your time zone and working week, and builds that country's public holiday calendar."
+    },
+    "datasets": {
+      "sample": {
+        "title": "Example company",
+        "body": "Offices, departments, job titles, leave policies and a set of people sized to your answer — enough to see how every screen looks before you put anything real in."
+      },
+      "empty": {
+        "title": "Start empty",
+        "body": "Nothing but your own account. Everything is here — the fields, the roles, the leave types — and none of it is filled in with anybody imaginary."
+      },
+      "full": {
+        "title": "Full demo",
+        "body": "The complete demo company: fifty people whatever your size, with every feature exercised. The most to look at, and the most to clear out afterwards."
+      }
+    },
+    "submitting": "Setting up…",
+    "submit": "Set up my company",
+    "building": {
+      "title": "Setting up your company",
+      "lead": "This takes a few moments. You can leave this page — it will pick up where it left off.",
+      "steps": {
+        "starting": "Getting started",
+        "localization": "Setting your time zone and working week",
+        "holidays": "Building your public holiday calendar",
+        "exampleData": "Creating your example company",
+        "finishing": "Almost there"
+      }
+    },
+    "language": {
+      "label": "Language",
+      "hint": "Everybody in the company sees noddo in it — screens, emails and exports. You can change it later in Settings."
+    }
+  },
+  "countryPicker": {
+    "placeholder": "Select a country",
+    "empty": "No country matches that."
+  },
+  "avatar": {
+    "qrAlt": "Scan to upload a photo from your phone",
+    "qrHint": "Scan it with your phone's camera. The code works once, for the next few minutes.",
+    "hideCode": "Hide code",
+    "usePhone": "Use my phone",
+    "uploadFromComputer": "Upload from this computer"
+  },
+  "mobileAvatar": {
+    "title": "Add your photo",
+    "greeting": "Hi {name}",
+    "lead": "Take a photo for your profile.",
+    "uploading": "Uploading",
+    "takePhoto": "Take a photo",
+    "failed": "That did not work. Ask for a new code and try again.",
+    "done": {
+      "title": "That's your photo",
+      "body": "It is already on your profile. You can close this page and go back to your computer."
+    },
+    "expired": {
+      "title": "This code has expired",
+      "body": "Codes last a few minutes and work once. Show a new one on your computer and scan it again."
+    }
+  },
+  "preferences": {
+    "timeZone": {
+      "label": "Time zone",
+      "followCompany": "Same as the company",
+      "followCompanyWithOffset": "Same as the company (UTC{offset})",
+      "thisDevice": "this device",
+      "hint": "When something happened is shown in this zone. Dates in the calendar sense — a hire date, a day of leave — are the same day for everybody and do not move."
+    },
+    "dateFormat": {
+      "label": "Date format",
+      "system": "Same as this device",
+      "dayFirst": "{sample} — day first",
+      "monthFirst": "{sample} — month first",
+      "yearFirst": "{sample} — year first"
+    }
+  },
+  "welcome": {
+    "metaTitle": "Welcome",
+    "steps": {
+      "aboutYou": "About you",
+      "preferences": "Your preferences"
+    },
+    "greeting": "Welcome, {name}",
+    "preferencesTitle": "How would you like things shown?",
+    "leadWithFields": "A photo so colleagues can put a face to your name, and anything of yours that is still blank.",
+    "leadPhotoOnly": "A photo, so colleagues can put a face to your name.",
+    "preferencesLead": "Two settings, and you can change them whenever you like.",
+    "you": "You",
+    "nothingToFill": "Everything else about you lives on your profile, where you can change it any time.",
+    "skip": "Skip",
+    "finish": "Finish"
+  }
+}

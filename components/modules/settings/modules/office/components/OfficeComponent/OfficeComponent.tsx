@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { FC, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Office } from "@/models/office";
@@ -40,6 +41,9 @@ export const OfficeComponent: FC<Props> = ({
   initialOffices,
   isLoading,
 }) => {
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -164,7 +168,7 @@ export const OfficeComponent: FC<Props> = ({
               <Button type="button"
                 size="icon"
                 variant="secondary"
-                aria-label="Export offices"
+                aria-label={t("list.export")}
                 onClick={() => setIsExportOpen(true)}
               >
                 <Icon icon={Download01Icon} size="sm" />
@@ -175,7 +179,7 @@ export const OfficeComponent: FC<Props> = ({
             <PermissionGate resource="ORG.OFFICE" action="EDIT">
               <Button type="button" onClick={openCreate} className="gap-1.5">
                 <Icon icon={Add01Icon} size="sm" />
-                Add office
+                {t("list.add")}
               </Button>
             </PermissionGate>
           }
@@ -189,25 +193,25 @@ export const OfficeComponent: FC<Props> = ({
           query={query}
           archivedView={showArchived}
           scene="company-hub"
-          title="No offices yet"
-          description="An office is a place people work from. Add the first one to start assigning people to it."
-          noResultsHint="Try a different name, country or address."
-          archivedDescription="Archived offices will appear here."
+          title={t("list.emptyTitle")}
+          description={t("list.emptyDescription")}
+          noResultsHint={t("list.noResultsHint")}
+          archivedDescription={t("list.archivedDescription")}
           onCreate={openCreate}
-          createLabel="Add office"
+          createLabel={t("list.add")}
           createAccess={{ resource: "ORG.OFFICE" }}
         />
       ) : (
         <Table className="table-fixed">
           <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
             <TableRow>
-              <TableHead className="w-[22%]">Name</TableHead>
-              <TableHead className="w-[13%]">Country</TableHead>
-              <TableHead className="w-[13%]">Assigned users</TableHead>
-              <TableHead className="w-[27%]">Address</TableHead>
-              <TableHead className="w-[12.5%]">Email</TableHead>
-              <TableHead className="w-[12.5%]">Phone</TableHead>
-              <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
+              <TableHead className="w-[22%]">{tCommon("fields.name")}</TableHead>
+              <TableHead className="w-[13%]">{tPlaces("country")}</TableHead>
+              <TableHead className="w-[13%]">{tPlaces("assignedUsers")}</TableHead>
+              <TableHead className="w-[27%]">{tPlaces("address")}</TableHead>
+              <TableHead className="w-[12.5%]">{tCommon("fields.email")}</TableHead>
+              <TableHead className="w-[12.5%]">{t("phone")}</TableHead>
+              <TableHead className="w-12"><span className="sr-only">{tCommon("fields.actions")}</span></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -251,18 +255,18 @@ export const OfficeComponent: FC<Props> = ({
 
                 <TableCell className="text-right">
                   <PermissionGate resource="ORG.OFFICE" action="EDIT">
-                    <RowActionsMenu label="Office actions" stopPropagation>
+                    <RowActionsMenu label={t("list.rowActions")} stopPropagation>
                       {o.archived ? (
                         <RowAction
                           icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                           onClick={() => handleRestore(o)}
                           disabled={restoreAction.isPending}
                         >
-                          Unarchive
+                          {tPlaces("unarchive")}
                         </RowAction>
                       ) : (
                         <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => setArchiving(o)}>
-                          Archive
+                          {tCommon("actions.archive")}
                         </RowAction>
                       )}
                     </RowActionsMenu>
@@ -306,11 +310,11 @@ export const OfficeComponent: FC<Props> = ({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title="Export offices"
+        title={t("list.export")}
         rowCount={initialOffices.length}
-        rowNoun="offices"
-        description="Export all offices with their address, assigned people, and creation details."
-        includedText="Included: name, description, email, phone, address, assigned people, created by, created at."
+        rowKind="offices"
+        description={t("list.exportDescription")}
+        includedText={t("list.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

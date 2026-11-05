@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -55,6 +56,8 @@ export function DepartmentSearchBar({
   departmentNameById,
   canSearchPeople,
 }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
   const isPeople = mode === "people";
   const showResults = isPeople && query.trim().length > 0;
 
@@ -63,12 +66,12 @@ export function DepartmentSearchBar({
       <SearchField
         value={query}
         onChange={onQueryChange}
-        placeholder={isPeople ? "Search people…" : "Search departments…"}
+        placeholder={isPeople ? tShared("searchPeople") : t("search.placeholder")}
         modes={
           canSearchPeople
             ? [
-                { value: "units", label: "Departments" },
-                { value: "people", label: "People" },
+                { value: "units", label: t("search.unitsMode") },
+                { value: "people", label: tShared("people") },
               ]
             : undefined
         }
@@ -83,17 +86,17 @@ export function DepartmentSearchBar({
       {showResults && (
         <div className="absolute left-0 right-0 top-11 z-20 max-h-80 overflow-y-auto rounded-control border border-divider bg-card py-1 shadow-popover">
           {peopleLoading ? (
-            <p className="px-3 py-3 text-body text-tertiary">Searching…</p>
+            <p className="px-3 py-3 text-body text-tertiary">{tShared("searching")}</p>
           ) : peopleResults.length === 0 ? (
             <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
               <Icon icon={UserGroupIcon} className="text-disabled" />
-              <p className="text-body text-tertiary">No people match “{query}”</p>
+              <p className="text-body text-tertiary">{tShared("noPeopleMatch", { query })}</p>
             </div>
           ) : (
             peopleResults.map((person) => {
               const departmentName = person.departmentId
-                ? departmentNameById.get(person.departmentId) ?? "Unknown department"
-                : "No department";
+                ? departmentNameById.get(person.departmentId) ?? t("search.unknown")
+                : t("person.none");
               return (
                 <button
                   key={person.id}

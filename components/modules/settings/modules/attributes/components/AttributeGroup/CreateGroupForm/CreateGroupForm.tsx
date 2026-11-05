@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -26,26 +27,28 @@ export type CreateGroupFormValues = {
   description: string;
 };
 
-const buildValidationSchema = (existingNames: string[]) => {
+type SectionFormTranslator = ReturnType<typeof useTranslations<"settings.attributes.sectionForm">>;
+
+const buildValidationSchema = (existingNames: string[], t: SectionFormTranslator) => {
   const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
 
   return yup.object({
     name: yup
       .string()
       .trim()
-      .required("Please enter a section name.")
-      .min(3, "Name must be at least 3 characters long.")
-      .max(120, "Name must be 120 characters or fewer.")
-      .nonNullable("Please enter a section name.")
+      .required(t("nameRequired"))
+      .min(3, t("nameMin", { min: 3 }))
+      .max(120, t("nameMax", { max: 120 }))
+      .nonNullable(t("nameRequired"))
       .test(
         "unique",
-        "A section with this name already exists.",
+        t("nameTaken"),
         (value) => !value || !taken.has(value.trim().toLowerCase()),
       ),
     description: yup
       .string()
       .trim()
-      .max(1000, "Description must be 1000 characters or fewer."),
+      .max(1000, t("descriptionMax", { max: 1000 })),
   });
 };
 
@@ -56,6 +59,9 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings.attributes.sectionForm");
+  const tCommon = useTranslations("common");
+  const validationSchema = useMemo(() => buildValidationSchema(existingNames, t), [existingNames, t]);
   const handleFormSubmission = useCallback(
     (values: CreateGroupFormValues) =>
       onSubmitAction({
@@ -70,7 +76,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
       name: "",
       description: "",
     },
-    validationSchema: buildValidationSchema(existingNames),
+    validationSchema,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -97,7 +103,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="group-name" required>Name your section</RequiredLabel>
+        <RequiredLabel htmlFor="group-name" required>{t("name")}</RequiredLabel>
 
         <Input
           id="group-name"
@@ -114,7 +120,7 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
       </div>
 
       <div className="mt-4 space-y-2">
-        <RequiredLabel htmlFor="group-description">Description</RequiredLabel>
+        <RequiredLabel htmlFor="group-description">{tCommon("fields.description")}</RequiredLabel>
 
         <Textarea
           id="group-description"
@@ -137,11 +143,11 @@ export const CreateGroupForm: FC<CreateGroupFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Add
+          {tCommon("actions.add")}
         </Button>
       </DialogFooter>
     </form>

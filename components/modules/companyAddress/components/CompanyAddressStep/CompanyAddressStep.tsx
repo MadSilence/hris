@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { Button } from "@/components/desact/button";
 import { Label } from "@/components/desact/label";
@@ -15,9 +16,6 @@ import {
 } from "@/lib/companyAddress";
 import { FormError } from "@/components/feedback/FormError";
 
-export enum CompanyAddressStepMessages {
-  Required = "Please enter your company address.",
-}
 
 type Props = {
   web: WebAddressConfig;
@@ -43,6 +41,8 @@ const REMEMBER_TYPED_FOR_SECONDS = 365 * 24 * 60 * 60;
  * trapped in the first one by a redirect.
  */
 export default function CompanyAddressStep({ web, rememberedSubdomain, navigate = defaultNavigate }: Props) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [chooseAnother, setChooseAnother] = useState(rememberedSubdomain === null);
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +60,7 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!address) {
-      setError(CompanyAddressStepMessages.Required);
+      setError(t("companyAddress.step.required"));
       return;
     }
     goTo(address);
@@ -72,27 +72,27 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
     <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-greeting">Sign in to your company</h1>
+          <h1 className="text-greeting">{t("companyAddress.step.title")}</h1>
           <p className="text-body text-tertiary">
             {offered
-              ? "Continue to the company you signed in to last time, or choose another."
-              : <>Enter your company&apos;s address — the one you sign in at.</>}
+              ? t("companyAddress.step.rememberedPrompt")
+              : t("companyAddress.step.prompt")}
           </p>
         </div>
 
         {offered ? (
           <div className="space-y-3">
             <Button size="lg" type="button" className="w-full" onClick={() => goTo(offered)}>
-              Continue to {companyHost(offered, web)}
+              {t("companyAddress.step.continueTo", { address: companyHost(offered, web) })}
             </Button>
             <Button size="lg" type="button" variant="secondary" className="w-full" onClick={() => setChooseAnother(true)}>
-              Use another company
+              {t("companyAddress.step.useAnother")}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="company-address">Company address</Label>
+              <Label htmlFor="company-address">{t("companyAddress.step.label")}</Label>
 
               <div className="flex items-center gap-2">
                 <Input
@@ -101,7 +101,7 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
                   autoComplete="organization"
                   autoCapitalize="none"
                   spellCheck={false}
-                  placeholder="your-company"
+                  placeholder={t("companyAddress.step.placeholder")}
                   value={typed}
                   onChange={(e) => {
                     setTyped(e.currentTarget.value);
@@ -119,13 +119,13 @@ export default function CompanyAddressStep({ web, rememberedSubdomain, navigate 
               )}
             </div>
 
-            <Button size="lg" type="submit" className="w-full">Continue</Button>
+            <Button size="lg" type="submit" className="w-full">{tCommon("actions.continue")}</Button>
           </form>
         )}
 
         <p className="text-center text-body text-tertiary">
           <Link href="/find-company" className="text-accent-text underline-offset-4 hover:underline">
-            Forgot company address?
+            {t("companyAddress.step.forgot")}
           </Link>
         </p>
       </div>

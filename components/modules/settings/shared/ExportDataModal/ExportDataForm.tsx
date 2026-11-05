@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback } from "react";
+import { FC, FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { FileTextIcon, Xls01Icon } from "@hugeicons/core-free-icons";
@@ -30,27 +31,37 @@ export interface ExportDataFormProps {
    * and inventing one would be worse than the plain verb.
    */
   rowCount?: number;
-  /** What is being counted, for the label: "128 roles". Ignored without `rowCount`. */
-  rowNoun?: string;
+  /**
+   * What is being counted, for the label: "Export 128 offices". Each kind has its own whole message, since
+   * the counted noun declines with the verb; without one the count is of rows. Ignored without `rowCount`.
+   */
+  rowKind?: ExportRowKind;
   onCancelAction: () => void;
   onSubmitAction: (values: ExportDataFormValues) => void | Promise<void>;
 }
 
-const schema = yup.object({
+/** The things an export button can count. A new kind is a new `shared.exportData.button.*` message. */
+export type ExportRowKind = "people" | "offices" | "legalEntities" | "calendars";
+
+const buildSchema = (t: ReturnType<typeof useTranslations<"settings">>) => yup.object({
   format: yup
     .mixed<ExportDataFormat>()
     .oneOf(["csv", "xlsx"])
-    .required("Select export format."),
+    .required(t("shared.exportFormat.required")),
 });
 
 export const ExportDataForm: FC<ExportDataFormProps> = ({
   isLoading = false,
   includedText,
   rowCount,
-  rowNoun,
+  rowKind,
   onCancelAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
+
   const handleFormSubmission = useCallback(
     (values: ExportDataFormValues) => onSubmitAction(values),
     [onSubmitAction],
@@ -83,7 +94,7 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
-        <div className="text-body font-medium">Format</div>
+        <div className="text-body font-medium">{t("shared.exportFormat.format")}</div>
 
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -101,12 +112,12 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
               <Icon icon={FileTextIcon} size="sm" className="text-secondary" />
               <div className="font-medium">CSV</div>
               <Badge variant="neutral" className="ml-auto">
-                Lightweight
+                {t("shared.exportFormat.csvBadge")}
               </Badge>
             </div>
 
             <div className="mt-2 text-hint text-tertiary">
-              Best for simple imports and quick viewing.
+              {t("shared.exportFormat.csvHint")}
             </div>
           </button>
 
@@ -125,12 +136,12 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
               <Icon icon={Xls01Icon} size="sm" className="text-secondary" />
               <div className="font-medium">XLSX</div>
               <Badge variant="neutral" className="ml-auto">
-                Recommended
+                {t("shared.exportFormat.xlsxBadge")}
               </Badge>
             </div>
 
             <div className="mt-2 text-hint text-tertiary">
-              Better for structured data and multiple sheets.
+              {t("shared.exportFormat.xlsxHint")}
             </div>
           </button>
         </div>
@@ -151,14 +162,16 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
  >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading}
  >
-          {exportLabel(rowCount, rowNoun)}
+          {rowCount === undefined
+            ? tCommon("actions.export")
+            : t(`shared.exportData.button.${rowKind ?? "rows"}`, { count: rowCount })}
         </Button>
       </DialogFooter>
     </form>
@@ -166,13 +179,8 @@ export const ExportDataForm: FC<ExportDataFormProps> = ({
 };
 
 /**
- * "Export 128 roles", or just "Export" when there is nothing honest to count.
+ * The button says "Export 128 roles", or just "Export" when there is nothing honest to count.
  *
  * Zero is stated rather than hidden: a button offering to export nothing is the clearest possible
  * warning that the filter above it is wrong.
  */
-const exportLabel = (rowCount?: number, rowNoun?: string): string => {
-  if (rowCount === undefined) return "Export";
-  const noun = rowNoun ? ` ${rowNoun}` : " rows";
-  return `Export ${rowCount}${rowCount === 1 && rowNoun ? noun.replace(/s$/, "") : noun}`;
-};

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { getTranslations } from "next-intl/server";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import { PageGate } from "@/components/auth/PageGate";
@@ -13,16 +13,16 @@ import {
  * personal schedules that override the working day.
  * Logged time itself lives on the Attendance page and the person profile; this is the norm behind it.
  */
-const AttendanceSettingsPage: FC = () => (
+const AttendanceSettingsPage = async () => {
+  const t = await getTranslations("timeOff");
+  return (
   <PageGate resource="PEOPLE.PROFILE" action="VIEW">
     <div className="space-y-6">
       <div className="px-8 space-y-4">
-        <SettingsPageHeader title="Attendance" backHref="/settings"/>
+        <SettingsPageHeader title={t("settingsPages.attendance.title")} backHref="/settings"/>
 
         <PageDescription className="text-body text-tertiary/90">
-          What Attendance expects of people. Everybody works the company week at the company&apos;s working-day
-          length, unless they have a personal schedule: hours per weekday, from a date on. Leave is not charged
-          for a day with no hours, and time logged beyond a day&apos;s hours is overtime.
+          {t("settingsPages.attendance.description")}
         </PageDescription>
       </div>
 
@@ -33,6 +33,7 @@ const AttendanceSettingsPage: FC = () => (
       </div>
     </div>
   </PageGate>
-);
+  );
+};
 
 export default AttendanceSettingsPage;

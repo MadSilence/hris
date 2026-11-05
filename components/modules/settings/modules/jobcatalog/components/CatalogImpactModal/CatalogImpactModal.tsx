@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Archive02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -17,12 +18,16 @@ import { InlineAlert } from "@/components/desact/alert";
 
 export type CatalogImpactAction = "archive" | "delete";
 
+/** What is being archived or deleted — it picks the sentences. */
+export type CatalogImpactEntity = "job" | "job family";
+
+const ENTITY = { job: "job", "job family": "family" } as const;
+
 type Props = {
   isOpen: boolean;
   isLoading: boolean;
   action: CatalogImpactAction;
-  /** "job" / "job family" — used in the sentences. */
-  entityLabel: string;
+  entityLabel: CatalogImpactEntity;
   entityName: string;
   /** How many people currently hold this position (or any position in this family). */
   affectedPeople: number;
@@ -32,8 +37,6 @@ type Props = {
   onConfirmAction: () => void;
   onRequestCloseAction: () => void;
 };
-
-const people = (count: number) => `${count} ${count === 1 ? "person" : "people"}`;
 
 /**
  * Archiving and deleting are different in permanence but identical in blast radius: both take the
@@ -52,23 +55,20 @@ export const CatalogImpactModal: FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tCommon = useTranslations("common");
   const isDelete = action === "delete";
   const actionIcon = isDelete ? Delete02Icon : Archive02Icon;
+  const entity = ENTITY[entityLabel];
+  const strong = (chunks: ReactNode) => <strong>{chunks}</strong>;
 
-  const title = `${isDelete ? "Delete" : "Archive"} ${entityLabel}`;
+  const title = t(`impact.${entity}.${isDelete ? "deleteTitle" : "archiveTitle"}`);
   const confirmLabel = title;
 
-  const lead: ReactNode = isDelete ? (
-    <>
-      This action cannot be undone. {entityLabel} <strong>{entityName}</strong> will be permanently
-      deleted.
-    </>
-  ) : (
-    <>
-      {entityLabel} <strong>{entityName}</strong> will be moved to archive. It stays in the
-      catalogue, marked archived, and can no longer be assigned.
-    </>
-  );
+  const lead: ReactNode = t.rich(`impact.${entity}.${isDelete ? "deleteLead" : "archiveLead"}`, {
+    name: entityName,
+    b: strong,
+  });
 
   return (
     <AlertDialog
@@ -99,27 +99,25 @@ export const CatalogImpactModal: FC<Props> = ({
             <Icon icon={Alert02Icon} className="mt-0.5 shrink-0 text-secondary" />
 
             <div>
-              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("impact.warning")}</h4>
 
               <div className="space-y-1 text-body text-secondary">
                 {affectedJobs !== undefined && affectedJobs > 0 && (
                   <p>
-                    <strong>{affectedJobs}</strong> position
-                    {affectedJobs === 1 ? "" : "s"} in this family will be{" "}
-                    {isDelete ? "deleted" : "archived"} too.
+                    {t.rich(isDelete ? "impact.jobsDeleted" : "impact.jobsArchived", {
+                      count: affectedJobs,
+                      b: strong,
+                    })}
                   </p>
                 )}
 
                 {affectedPeople > 0 ? (
-                  <p>
-                    <strong>{people(affectedPeople)}</strong> will lose their position. Their profile
-                    will show no job until you assign a new one.
-                  </p>
+                  <p>{t.rich("impact.peopleLose", { count: affectedPeople, b: strong })}</p>
                 ) : (
-                  <p>Nobody currently holds this position.</p>
+                  <p>{t("impact.nobody")}</p>
                 )}
 
-                <p>The change is recorded in each person&apos;s job history.</p>
+                <p>{t("impact.history")}</p>
               </div>
             </div>
           </div>
@@ -132,7 +130,7 @@ export const CatalogImpactModal: FC<Props> = ({
         )}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
 
           <AlertDialogAction
             disabled={isLoading}

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -21,13 +22,16 @@ type Props = {
  * shared page, not a copy per entry, so the wording cannot drift and the day a page is built there is
  * one line to remove.
  */
-export const ComingSoonSettingsPage: React.FC<Props> = ({ title, withHeader = true }) => (
+export const ComingSoonSettingsPage: React.FC<Props> = ({ title, withHeader = true }) => {
+  const t = useTranslations("settings");
+  return (
   <div className="flex flex-col gap-6 px-8">
     {withHeader ? <SettingsPageHeader title={title} backHref="/settings" /> : null}
     <EmptyState
       scene="company-hub"
-      title={`${title} is not available yet`}
-      description="This part of settings is planned and has not been built. Nothing here changes how the product works today."
+      title={t("comingSoon.title", { title })}
+      description={t("comingSoon.description")}
     />
   </div>
-);
+  );
+};

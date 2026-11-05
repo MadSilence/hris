@@ -58,11 +58,13 @@ export const nonWorkingDayTest = (workingDays?: string[]) => {
   return (d: Date) => !working.has(DAY_NAMES[d.getDay()]);
 };
 
-export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+/** Weekday keys in `Date.getDay()` order; the labels are the `calendar` catalogue's `weekdays.*`. */
+export const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+/** Month keys in `Date.getMonth()` order; the labels are the `calendar` catalogue's `months.*`. */
+export const MONTH_KEYS = [
+  "jan", "feb", "mar", "apr", "may", "jun",
+  "jul", "aug", "sep", "oct", "nov", "dec",
+] as const;
 
 /**
  * Every day an inclusive `[start, end]` span covers, as ISO strings.

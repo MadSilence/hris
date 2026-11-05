@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Card, CardContent, CardHeader } from "@/components/desact/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
@@ -88,6 +89,7 @@ export default function RolesPageView({
   assignRolesErrorMessage,
   onClearErrors,
 }: RolesPageViewProps) {
+  const t = useTranslations("settings");
   return (
     <Card className="flex h-full min-h-0 flex-col border-0 gap-3 px-8 pt-2">
       <CardHeader className="px-0 py-0 shrink-0">
@@ -96,12 +98,12 @@ export default function RolesPageView({
             <TabsList className="w-fit">
               <TabsTrigger value="roles" className="flex items-center gap-2">
                 <Icon icon={Shield01Icon} size="sm" />
-                Roles
+                {t("roles.page.tabRoles")}
               </TabsTrigger>
 
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Icon icon={UserGroupIcon} size="sm" />
-                Users
+                {t("roles.page.tabUsers")}
               </TabsTrigger>
             </TabsList>
           </Tabs>

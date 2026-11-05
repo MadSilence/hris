@@ -152,14 +152,15 @@ export type WorkSchedule = {
 
 export type WorkScheduleWriteRequest = Omit<WorkSchedule, "id" | "userId">;
 
+/** `labelKey` is a `common` catalogue key (`t(field.labelKey)` with `useTranslations("common")`). */
 export const WEEKDAY_FIELDS = [
-  { key: "mondayHours", label: "Mon" },
-  { key: "tuesdayHours", label: "Tue" },
-  { key: "wednesdayHours", label: "Wed" },
-  { key: "thursdayHours", label: "Thu" },
-  { key: "fridayHours", label: "Fri" },
-  { key: "saturdayHours", label: "Sat" },
-  { key: "sundayHours", label: "Sun" },
+  { key: "mondayHours", labelKey: "weekdays.short.mon" },
+  { key: "tuesdayHours", labelKey: "weekdays.short.tue" },
+  { key: "wednesdayHours", labelKey: "weekdays.short.wed" },
+  { key: "thursdayHours", labelKey: "weekdays.short.thu" },
+  { key: "fridayHours", labelKey: "weekdays.short.fri" },
+  { key: "saturdayHours", labelKey: "weekdays.short.sat" },
+  { key: "sundayHours", labelKey: "weekdays.short.sun" },
 ] as const;
 
 export type WeekdayHoursKey = (typeof WEEKDAY_FIELDS)[number]["key"];

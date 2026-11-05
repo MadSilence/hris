@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 
 import { Icon } from "@/components/desact/icon";
@@ -30,17 +31,17 @@ export function StepRing({ state, number, className }: { state: StepState; numbe
 }
 
 export function Stepper({ steps, current, className }: { steps: readonly string[]; current: number; className?: string }) {
+  const t = useTranslations("common");
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <ol className="flex items-center gap-2" aria-label="Progress">
+      <ol className="flex items-center gap-2" aria-label={t("stepper.progress")}>
         {steps.map((label, index) => {
           const state: StepState = index < current ? "done" : index === current ? "current" : "ahead";
           return (
             <li key={label} className="flex items-center gap-2" aria-current={state === "current" ? "step" : undefined}>
               <StepRing state={state} />
               <span className="sr-only">
-                {label}
-                {state === "done" ? ", done" : ""}
+                {state === "done" ? t("stepper.stepDone", { label }) : label}
               </span>
               {index < steps.length - 1 && (
                 <span aria-hidden className={cn("h-0.5 w-6 rounded-pill", index < current ? "bg-accent" : "bg-divider")} />
@@ -50,7 +51,7 @@ export function Stepper({ steps, current, className }: { steps: readonly string[
         })}
       </ol>
       <p className="text-hint text-tertiary">
-        Step {current + 1} of {steps.length} · {steps[current]}
+        {t("stepper.stepOf", { current: current + 1, total: steps.length, label: steps[current] })}
       </p>
     </div>
   );

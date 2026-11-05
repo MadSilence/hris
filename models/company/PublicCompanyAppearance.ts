@@ -11,6 +11,8 @@ export type PublicCompanyAppearance = {
   loginImageUrl: string | null;
   /** The company's logo, which heads its sign-in card (SPEC § 2). Absolute; null when none was uploaded. */
   logoUrl: string | null;
+  /** The company's language, so its sign-in page speaks it; null on an address no company holds. */
+  language: string | null;
 };
 
 export const DEFAULT_PUBLIC_COMPANY_APPEARANCE: PublicCompanyAppearance = {
@@ -19,4 +21,5 @@ export const DEFAULT_PUBLIC_COMPANY_APPEARANCE: PublicCompanyAppearance = {
   loginSubheadline: null,
   loginImageUrl: null,
   logoUrl: null,
+  language: null,
 };

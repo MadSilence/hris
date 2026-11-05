@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Label } from "@/components/desact/label";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -10,7 +11,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { NONE_LABEL, NONE_VALUE, noneOrValue, valueOrNone } from "@/models/select";
+import { NONE_VALUE, noneOrValue, valueOrNone } from "@/models/select";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import {
   useCompanySettings,
@@ -18,9 +19,6 @@ import {
 } from "@/components/modules/settings/modules/general/companyProfile/hooks/useCompanySettings";
 import { useAttributeGroups } from "@/components/modules/settings/modules/attributes/hooks/AttributeGroup/useAttributeGroups";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
-
-/** The stored choice is a field this reader's access does not list — it still shows, by what it is. */
-const HIDDEN_LABEL = "A field you cannot see";
 
 /**
  * Which date field home reads birthdays from (sitting 2, H7) — the same shape as Attendance's hourly rate
@@ -36,6 +34,8 @@ export const BirthdayField: React.FC = () => {
   const canEdit = useCanAccess("SETTINGS.GENERAL", "EDIT");
   const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("settings.home.birthday");
+  const tCommon = useTranslations("common");
 
   if (settings.error || groups.error) {
     return (
@@ -68,7 +68,7 @@ export const BirthdayField: React.FC = () => {
         version: settings.data.version,
       });
       setDraft(null);
-      showSuccess("Birthday field saved.");
+      showSuccess(t("saved"));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : messageForError(caught));
     }
@@ -77,12 +77,13 @@ export const BirthdayField: React.FC = () => {
   return (
     <section className="space-y-3" aria-labelledby="birthday-field-heading">
       <div>
-        <h2 id="birthday-field-heading" className="text-section-title">Birthday field</h2>
+        <h2 id="birthday-field-heading" className="text-section-title">{t("title")}</h2>
         <p className="text-body text-tertiary">
-          The date field home&apos;s Celebrations reads birthdays from, shown as day and month only. A birthday is
-          listed only to people whose role may see this field for everyone — set that in{" "}
-          <Link href="/settings/people/roles" className="font-medium text-accent-text underline-offset-4 hover:underline">Employee Roles &amp; Access</Link>,
-          under field access. By default nobody but the person sees their own.
+          {t.rich("description", {
+            link: (chunks) => (
+              <Link href="/settings/people/roles" className="font-medium text-accent-text underline-offset-4 hover:underline">{chunks}</Link>
+            ),
+          })}
         </p>
       </div>
 
@@ -98,12 +99,13 @@ export const BirthdayField: React.FC = () => {
           }}
  >
           <div className="w-64 space-y-1">
-            <Label htmlFor="birthday-field">Birthday field</Label>
+            <Label htmlFor="birthday-field">{t("title")}</Label>
             <SearchableSelect
               id="birthday-field"
               options={[
-                { value: NONE_VALUE, label: NONE_LABEL },
-                ...(storedIsHidden ? [{ value: stored, label: HIDDEN_LABEL }] : []),
+                { value: NONE_VALUE, label: tCommon("values.none") },
+                // The stored choice is a field this reader's access does not list — it still shows, by what it is.
+                ...(storedIsHidden ? [{ value: stored, label: t("hidden") }] : []),
                 ...dateFields.map((attribute) => ({ value: attribute.id, label: attribute.name })),
               ]}
               value={value || null}
@@ -117,7 +119,7 @@ export const BirthdayField: React.FC = () => {
           </div>
           {canEdit && (
             <Button type="submit" disabled={!dirty || update.isPending} >
-              Save
+              {tCommon("actions.save")}
             </Button>
           )}
         </form>

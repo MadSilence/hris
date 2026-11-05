@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CanvasLoading, CanvasMessage } from "@/components/ui/Canvas";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -123,6 +124,9 @@ function collectParentIds(nodes: TeamTreeNode[]): Set<string> {
 }
 
 export default function TeamsContainer() {
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const { company } = useCompanyData();
   const { params, setParams } = useUrlState();
   const { access } = useAccess();
@@ -465,7 +469,7 @@ export default function TeamsContainer() {
               height={CARD_H}
               selected={selectedPerson?.id === person.id}
               matched={matchedPersonIds.has(person.id)}
-              badge={node.leadId === person.id ? "Lead" : undefined}
+              badge={node.leadId === person.id ? tShared("lead") : undefined}
               onClick={() => handleSelectPerson(person)}
             />
           )
@@ -487,6 +491,7 @@ export default function TeamsContainer() {
       toggleExpandedBlock,
       collapsed,
       dndEnabled,
+      tShared,
     ],
   );
 
@@ -507,22 +512,22 @@ export default function TeamsContainer() {
     totalPeople: node.totalPeople,
   }));
 
-  const companyName = company?.name ?? "Company";
+  const companyName = company?.name ?? tShared("company");
   const companyLogo = company?.companyLogo ?? null;
   const searchActive = searchMode === "units" && debouncedQuery.trim().length > 0;
   const noUnitMatches = searchActive && unitSearch.matchIds.length === 0;
 
   const renderCanvasArea = () => {
-    if (isLoading) return <CanvasLoading label="Loading teams…" />;
-    if (error) return <CanvasMessage tone="error">Failed to load teams.</CanvasMessage>;
+    if (isLoading) return <CanvasLoading label={t("container.loading")} />;
+    if (error) return <CanvasMessage tone="error">{t("container.loadFailed")}</CanvasMessage>;
     if (tree.length === 0) {
       return (
         <CanvasMessage>
-          <span>No teams yet.</span>
+          <span>{t("container.empty")}</span>
           <PermissionGate resource="ORG.TEAM" action="EDIT">
             <Button type="button" size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">
               <Icon icon={Add01Icon} size="sm" />
-              Create your first team
+              {t("container.createFirst")}
             </Button>
           </PermissionGate>
         </CanvasMessage>
@@ -544,8 +549,7 @@ export default function TeamsContainer() {
           banner={
             dndEnabled ? (
               <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
-                Drag a person onto another team to move them. Drop them on the Unassigned tab
-                to take them out.
+                {t("container.blocksHint")}
               </div>
             ) : null
           }
@@ -572,14 +576,13 @@ export default function TeamsContainer() {
 
         {editMode && canEdit && (
           <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
-            Drag a team onto another to move it. Drop it on the company card to make it
-            top-level.
+            {t("container.chartHint")}
           </div>
         )}
 
         {noUnitMatches && (
           <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-control border border-divider bg-card px-3 py-1.5 text-body text-tertiary shadow-card">
-            No teams match “{debouncedQuery}”
+            {t("container.noMatch", { query: debouncedQuery })}
           </div>
         )}
       </>
@@ -656,11 +659,11 @@ export default function TeamsContainer() {
             <TabsList className="w-fit">
               <TabsTrigger value="chart" className="flex items-center gap-2">
                 <Icon icon={HierarchyIcon} size="sm" />
-                Chart
+                {tShared("chart")}
               </TabsTrigger>
               <TabsTrigger value="blocks" className="flex items-center gap-2">
                 <Icon icon={GridViewIcon} size="sm" />
-                Blocks
+                {tShared("blocks")}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -687,7 +690,7 @@ export default function TeamsContainer() {
           className="flex-none"
           onClick={() => setIncludeArchived((current) => !current)}
         >
-          Show archived
+          {tShared("showArchived")}
         </FilterChip>
 
         <div className="ml-auto flex flex-none items-center gap-3">
@@ -697,7 +700,7 @@ export default function TeamsContainer() {
               onClick={() => setCreateParentId(defaultNewParentId)}
             >
               <Icon icon={Add01Icon} size="sm" />
-              Add
+              {tCommon("actions.add")}
             </Button>
           </PermissionGate>
 
@@ -714,7 +717,7 @@ export default function TeamsContainer() {
               ].join(" ")}
             >
               <Icon icon={PencilEdit02Icon} size="sm" />
-              {editMode ? "Done" : "Edit"}
+              {editMode ? tCommon("actions.done") : tCommon("actions.edit")}
             </Button>
           )}
 
@@ -722,8 +725,8 @@ export default function TeamsContainer() {
             type="button"
             size="icon"
             variant="secondary"
-            aria-label="Export a team"
-            title="Export a team"
+            aria-label={t("container.export")}
+            title={t("container.export")}
             disabled={allFlat.length === 0}
             onClick={() => setIsExportOpen(true)}
           >
@@ -748,9 +751,9 @@ export default function TeamsContainer() {
           <button
             type="button"
             onClick={() => setIsPanelCollapsed((current) => !current)}
-            aria-label={isPanelCollapsed ? "Expand the panel" : "Collapse the panel"}
+            aria-label={isPanelCollapsed ? tShared("expandPanel") : tShared("collapsePanel")}
             aria-expanded={!isPanelCollapsed}
-            title={isPanelCollapsed ? "Expand the panel" : "Collapse the panel"}
+            title={isPanelCollapsed ? tShared("expandPanel") : tShared("collapsePanel")}
             className={[
               "absolute top-1/2 z-10 flex h-14 w-5 -translate-y-1/2 items-center justify-center",
               "rounded-l-control border border-r-0 border-divider bg-card text-tertiary shadow-card",
@@ -776,9 +779,9 @@ export default function TeamsContainer() {
               <div className="flex-none border-b border-divider px-4 py-2.5">
                 <Tabs value={panelMode} onValueChange={(next) => setPanelMode(next as PanelMode)}>
                   <TabsList>
-                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="details">{tShared("details")}</TabsTrigger>
                     <TabsTrigger value="unassigned" className="flex items-center gap-1.5">
-                      Unassigned
+                      {tShared("unassigned")}
                       <span className="rounded-tag bg-divider/60 px-1 text-hint leading-4 tabular-nums text-secondary">
                         {membership.unassigned.length}
                       </span>
@@ -804,7 +807,7 @@ export default function TeamsContainer() {
       <ExportOrgTreeModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
-        noun="team"
+        kind="team"
         nodes={exportNodes}
         defaultNodeId={selectedTeam?.id ?? null}
         buildExportUrl={(id) => `/api/teams/${id}/export`}
@@ -911,9 +914,9 @@ export default function TeamsContainer() {
         <RestoreWithChildrenModal
           key={restoreTarget.id}
           isOpen
-          title="Unarchive team"
+          title={t("container.unarchiveTitle")}
           name={restoreTarget.name}
-          childNoun="sub-teams"
+          childKind="subTeams"
           items={restoreFlow.items}
           isLoading={restoreFlow.isPending}
           errorMessage={restoreFlow.errorMessage}

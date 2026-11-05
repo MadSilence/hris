@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { DragDropVerticalIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -28,6 +29,8 @@ type ColumnsManagerProps = {
  * change that does not happen.
  */
 export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChange, pinnedId }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [q, setQ] = useState("");
 
   const toggle = (id: string, checked: boolean) =>
@@ -67,7 +70,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
           <button
             type="button"
             className="cursor-grab text-tertiary/50 hover:text-tertiary active:cursor-grabbing"
-            aria-label="Drag to reorder"
+            aria-label={t("columns.dragToReorder")}
             {...sortable.attributes}
             {...sortable.listeners}
           >
@@ -81,7 +84,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
           checked={item.checked}
           disabled={isPinned}
           onCheckedChange={(v) => toggle(item.id, v === true)}
-          aria-label={`Toggle ${item.label}`}
+          aria-label={t("columns.toggle", { name: item.label })}
         />
 
         <span className="flex-1 truncate text-body text-primary" title={item.label}>
@@ -98,14 +101,14 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search"
+          placeholder={tCommon("actions.search")}
           className="h-9 pl-8"
-          aria-label="Search columns"
+          aria-label={t("columns.search")}
         />
       </div>
 
       <div className="flex items-center justify-between px-1 text-hint font-medium text-tertiary">
-        <span>Shown</span>
+        <span>{t("columns.shown")}</span>
         <Badge variant="neutral" className="font-normal">
           {selectedCount}
         </Badge>
@@ -134,7 +137,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         {visibleHidden.length ? (
           <>
             <div className="mt-2 px-1 pb-1 pt-2 text-hint font-medium text-tertiary">
-              Available
+              {t("columns.available")}
             </div>
             {visibleHidden.map((c) => (
               <React.Fragment key={c.id}>{renderRow(c)}</React.Fragment>
@@ -143,7 +146,7 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         ) : null}
 
         {nothingFound ? (
-          <div className="px-2 py-6 text-center text-body text-tertiary">No columns found</div>
+          <div className="px-2 py-6 text-center text-body text-tertiary">{t("columns.noneFound")}</div>
         ) : null}
       </div>
     </div>

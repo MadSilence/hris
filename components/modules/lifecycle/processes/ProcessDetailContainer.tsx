@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Archive02Icon, ArchiveArrowUpIcon, CalendarLock01Icon, CancelCircleIcon, Delete02Icon, Link01Icon, TickDouble02Icon, Unlink01Icon, UserSettings01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -13,7 +14,7 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import {
   archiveProcessAction,
   changeProcessManagerAction,
@@ -32,7 +33,8 @@ import {
 } from "@/components/modules/lifecycle/hooks";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import { TaskList } from "@/components/modules/lifecycle/tasks/TaskList";
-import { PROCESS_TYPE_LABELS, assigneeKindLabel, type Task } from "@/models/lifecycle";
+import type { Task } from "@/models/lifecycle";
+import { assigneeKindText } from "@/components/modules/lifecycle/i18n";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { cancelProcessTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
@@ -44,6 +46,9 @@ type Dialog = "complete" | "cancel" | "archive" | "delete" | "manager" | "revoke
 
 /** One process: its tasks, who runs it, the hire date it was planned against, and what can be done to it. */
 export function ProcessDetailContainer({ processId }: { processId: string }) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const { data: process, isLoading, error } = useLifecycleProcess(processId);
   const invalidate = useInvalidateLifecycle();
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -63,10 +68,11 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
   const open = !process.closedAt;
   const leaving = process.type === "OFFBOARDING";
   // The same role either way; an offboarding calls it by its own name (Q4 of 2026-11-02).
-  const managerLabel = assigneeKindLabel("ONBOARDING_MANAGER", process.type);
+  const managerLabel = assigneeKindText(t, "ONBOARDING_MANAGER", process.type);
+  const leavingArg = leaving ? "yes" : "no";
   const act = async (result: Promise<{ status: ActionStatus; errorMessage?: string }>, success?: string) => {
     const res = await result;
-    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
+    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("shared.somethingWentWrong");
     await invalidate();
     if (success) showSuccess(success);
     return null;
@@ -78,10 +84,15 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <h1 className="text-page-title text-primary">
-              {PROCESS_TYPE_LABELS[process.type]} for{" "}
-              <Link className="text-accent-text underline-offset-4 hover:underline" href={`/organization/people/${process.target.id}/personal`}>
-                {process.target.name}
-              </Link>
+              {t.rich("processDetail.title", {
+                type: t(`processType.${process.type}`),
+                name: process.target.name ?? "",
+                link: (chunks) => (
+                  <Link className="text-accent-text underline-offset-4 hover:underline" href={`/organization/people/${process.target.id}/personal`}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </h1>
             <ProcessStatusBadge status={process.status} />
             {/* Said in the text line only, an archived process looked like any other (walk, SWEEP S11). */}
@@ -89,10 +100,10 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           </div>
           <p className="text-body text-tertiary">
             {[
-              `From ${process.templateName}`,
-              `${leaving ? "Last day" : "Starts"} ${formatDisplayDate(process.anchorDate, { style: "medium" })}`,
-              `${leaving ? "Offboarding" : "Onboarding"} manager: ${process.manager?.name ?? "nobody"}`,
-              process.type === "PREBOARDING" ? (process.linkActive ? "Preboarding link active" : "No active preboarding link") : null,
+              t("processDetail.fromTemplate", { template: process.templateName }),
+              t(leaving ? "processDetail.lastDay" : "processDetail.starts", { date: formatDisplayDate(process.anchorDate, { style: "medium" }) }),
+              t("processDetail.managerLine", { leaving: leavingArg, name: process.manager?.name ?? t("shared.nobody") }),
+              process.type === "PREBOARDING" ? (process.linkActive ? t("processDetail.linkActive") : t("processDetail.noLink")) : null,
             ].filter(Boolean).join(" · ")}
           </p>
         </div>
@@ -102,34 +113,34 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
             {open && (
               <Button type="button" variant="secondary" className="gap-1.5" onClick={() => setDialog("complete")}>
                 <Icon icon={TickDouble02Icon} size="sm" />
-                Mark as complete
+                {t("processDetail.markComplete")}
               </Button>
             )}
-            <RowActionsMenu label="Process actions" className="w-56">
+            <RowActionsMenu label={t("processDetail.actions")} className="w-56">
               {open && (
                 <RowAction icon={<Icon icon={UserSettings01Icon} size="sm" className="text-tertiary" />} onClick={() => { setManager(null); setDialog("manager"); }}>
-                  Change {managerLabel}
+                  {t("processDetail.changeManager", { leaving: leavingArg })}
                 </RowAction>
               )}
               {open && process.type === "PREBOARDING" && (
                 <RowAction
                   icon={<Icon icon={Link01Icon} size="sm" className="text-tertiary" />}
                   onClick={async () => {
-                    const problem = await act(reissuePreboardingLinkAction(process.id), "A new preboarding link was sent.");
+                    const problem = await act(reissuePreboardingLinkAction(process.id), t("processDetail.newLinkSent"));
                     if (problem) showActionError({ errorMessage: problem });
                   }}
                 >
-                  Send a new link
+                  {t("processDetail.sendNewLink")}
                 </RowAction>
               )}
               {open && process.type === "PREBOARDING" && process.linkActive && (
                 <RowAction icon={<Icon icon={Unlink01Icon} size="sm" className="text-tertiary" />} onClick={() => setDialog("revoke")}>
-                  Revoke link
+                  {t("processDetail.revokeLink")}
                 </RowAction>
               )}
               {open && (
                 <RowAction icon={<Icon icon={CancelCircleIcon} size="sm" className="text-tertiary" />} onClick={() => setDialog("cancel")}>
-                  Cancel process
+                  {t("processDetail.cancelProcess")}
                 </RowAction>
               )}
               <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="MANAGE">
@@ -141,15 +152,15 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
                       if (problem) showActionError({ errorMessage: problem });
                     }}
                   >
-                    Unarchive
+                    {t("shared.unarchive")}
                   </RowAction>
                 ) : (
                   <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setDialog("archive")}>
-                    Archive
+                    {tCommon("actions.archive")}
                   </RowAction>
                 )}
                 <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setDialog("delete")}>
-                  Delete
+                  {tCommon("actions.delete")}
                 </RowActionDestructive>
               </PermissionGate>
             </RowActionsMenu>
@@ -162,46 +173,52 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           tone="pending"
           icon={CalendarLock01Icon}
           title={
-            <>
-              {leaving ? "The last working day" : "The hire date"} moved from {formatDisplayDate(process.anchorDrift.from, { style: "medium" })} to{" "}
-              {formatDisplayDate(process.anchorDrift.to, { style: "medium" })}.
-            </>
+            t("processDetail.drift", {
+              leaving: leavingArg,
+              from: formatDisplayDate(process.anchorDrift.from, { style: "medium" }),
+              to: formatDisplayDate(process.anchorDrift.to, { style: "medium" }),
+            })
           }
           action={
             <PermissionGate resource="PEOPLE.LIFECYCLE_PROCESSES" action="EDIT">
               <Button type="button"
                 size="sm"
                 onClick={async () => {
-                  const problem = await act(rebaseProcessAction(process.id), "Dates recalculated.");
+                  const problem = await act(rebaseProcessAction(process.id), t("processDetail.datesRecalculated"));
                   if (problem) showActionError({ errorMessage: problem });
                 }}
               >
-                Recalculate dates
+                {t("processDetail.recalculate")}
               </Button>
             </PermissionGate>
           }
         >
               <p>
                 {process.anchorDrift.changes.length === 0
-                  ? "No open task changes date."
-                  : `${process.anchorDrift.changes.length} open task(s) would move: `
-                    + process.anchorDrift.changes.map((c) =>
-                      `${c.title} (${formatDisplayDate(c.from ?? "")} → ${formatDisplayDate(c.to ?? "")})`).join(", ")}
+                  ? t("processDetail.driftNone")
+                  : t("processDetail.driftChanges", {
+                    count: process.anchorDrift.changes.length,
+                    list: process.anchorDrift.changes.map((c) => t("processDetail.driftChange", {
+                      title: c.title,
+                      from: formatDisplayDate(c.from ?? ""),
+                      to: formatDisplayDate(c.to ?? ""),
+                    })).join(", "),
+                  })}
               </p>
         </InlineAlert>
       )}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-section-title">Tasks</h2>
+          <h2 className="text-section-title">{t("processDetail.tasks")}</h2>
           {open && canEdit && (
             <Button type="button" variant="secondary" size="sm" onClick={() => { setTaskOf(null); setDialog("task"); }}>
-              Add task
+              {t("shared.addTask")}
             </Button>
           )}
         </div>
         {process.tasks.length === 0 ? (
-          <p className="text-body text-tertiary">This process has no tasks.</p>
+          <p className="text-body text-tertiary">{t("processDetail.noTasks")}</p>
         ) : (
           <TaskList
             tasks={process.tasks}
@@ -227,8 +244,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "complete"}
-        title="Mark as complete"
-        confirmLabel="Mark as complete"
+        title={t("processDetail.markComplete")}
+        confirmLabel={t("processDetail.markComplete")}
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(closeProcessAction({ id: process.id, outcome: "COMPLETED" }));
@@ -236,13 +253,13 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           return problem;
         }}
       >
-        <p>Tasks still open are cancelled, and nothing more is scheduled.{process.type === "PREBOARDING" ? " The preboarding link stops working." : ""}</p>
+        <p>{process.type === "PREBOARDING" ? t("processDetail.completeBodyPreboarding") : t("processDetail.completeBody")}</p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "cancel"}
-        title="Cancel process"
-        confirmLabel="Cancel process"
+        title={t("processDetail.cancelProcess")}
+        confirmLabel={t("processDetail.cancelProcess")}
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(closeProcessAction({ id: process.id, outcome: "CANCELLED" }));
@@ -250,13 +267,13 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           return problem;
         }}
       >
-        <p>The process ends without being completed. Tasks still open are cancelled; what was done stays done.</p>
+        <p>{t("processDetail.cancelBody")}</p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "archive"}
-        title="Archive process"
-        confirmLabel="Archive"
+        title={t("processDetail.archiveTitle")}
+        confirmLabel={tCommon("actions.archive")}
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(archiveProcessAction(process.id));
@@ -264,13 +281,13 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           return problem;
         }}
       >
-        <p>It leaves the list of processes and keeps everything as it is. Unarchiving puts it back exactly as it was.</p>
+        <p>{t("processDetail.archiveBody")}</p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "revoke"}
-        title="Revoke link"
-        confirmLabel="Revoke"
+        title={t("processDetail.revokeLink")}
+        confirmLabel={t("processDetail.revoke")}
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
           const problem = await act(revokePreboardingLinkAction(process.id));
@@ -278,13 +295,13 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           return problem;
         }}
       >
-        <p>The link that was sent stops working at once. Send a new link to give access again.</p>
+        <p>{t("processDetail.revokeBody")}</p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "delete"}
-        title="Delete process"
-        confirmLabel="Delete"
+        title={t("processDetail.deleteTitle")}
+        confirmLabel={tCommon("actions.delete")}
         destructive
         // Seen live: Delete was pressable while the dialog still said "Working out what this removes…".
         confirmDisabled={impact.isLoading}
@@ -300,17 +317,17 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
       >
         {impact.data ? (
           <>
-            <p>{impact.data.tasksDeleted} task(s) will be deleted.</p>
-            <p>{impact.data.documentsKept} document(s) stay in {process.target.name}&apos;s file.</p>
+            <p>{t("processDetail.tasksDeleted", { count: impact.data.tasksDeleted })}</p>
+            <p>{t("processDetail.documentsKept", { count: impact.data.documentsKept, name: process.target.name ?? "" })}</p>
             {impact.data.answersKept > 0 && (
-              <p>{impact.data.answersKept} answered questionnaire(s) stay on {process.target.name}&apos;s Forms tab.</p>
+              <p>{t("processDetail.answersKept", { count: impact.data.answersKept, name: process.target.name ?? "" })}</p>
             )}
-            <p>The history of what happened is kept.</p>
+            <p>{t("processDetail.historyKept")}</p>
           </>
         ) : impact.isError ? (
-          <p>We could not work out what this removes. The history of what happened is kept either way.</p>
+          <p>{t("processDetail.impactFailed")}</p>
         ) : (
-          <p>Working out what this removes…</p>
+          <p>{t("processDetail.impactLoading")}</p>
         )}
       </ConfirmDialog>
 
@@ -324,8 +341,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
 
       <ConfirmDialog
         open={dialog === "cancelTask"}
-        title="Cancel task"
-        confirmLabel="Cancel task"
+        title={t("shared.cancelTask")}
+        confirmLabel={t("shared.cancelTask")}
         destructive
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
@@ -335,16 +352,16 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
           return problem;
         }}
       >
-        <p>&ldquo;{taskOf?.title}&rdquo; will not be done. A task waiting for it opens now, as if it were done.</p>
+        <p>{t("processDetail.cancelTaskBody", { title: taskOf?.title ?? "" })}</p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "manager"}
-        title={`Change ${managerLabel}`}
-        confirmLabel="Change"
+        title={t("processDetail.changeManager", { leaving: leavingArg })}
+        confirmLabel={t("processDetail.change")}
         onCancelAction={() => setDialog(null)}
         onConfirmAction={async () => {
-          if (!manager) return "Choose somebody.";
+          if (!manager) return t("processDetail.chooseSomebody");
           const problem = await act(changeProcessManagerAction({ id: process.id, managerUserId: manager.id }));
           if (!problem) setDialog(null);
           return problem;
@@ -353,7 +370,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         <div className="space-y-1.5">
           <Label>{managerLabel}</Label>
           <UserPickerField value={manager} onChange={setManager} />
-          <p className="text-hint">Their open tasks as {managerLabel.toLowerCase()} move to the new one.</p>
+          <p className="text-hint">{t("processDetail.managerHint", { leaving: leavingArg })}</p>
         </div>
       </ConfirmDialog>
     </div>

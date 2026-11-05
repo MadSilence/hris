@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
@@ -22,20 +23,18 @@ export interface UpsertRoleNameModalProps {
   onConfirmAction: (values: UpsertRoleNameFormValues) => void | Promise<void>;
 }
 
-const copyByMode = {
+const copyByMode = (t: ReturnType<typeof useTranslations<"settings">>, tCommon: ReturnType<typeof useTranslations<"common">>) => ({
   rename: {
-    title: "Edit role",
-    description:
-      "Update the role name and description to keep your access model organized.",
-    submitText: "Save changes",
+    title: t("roles.upsert.renameTitle"),
+    description: t("roles.upsert.renameDescription"),
+    submitText: tCommon("actions.saveChanges"),
   },
   duplicate: {
-    title: "Duplicate role",
-    description:
-      "Create a new role based on this one. You can edit permissions later.",
-    submitText: "Create duplicate",
+    title: t("roles.upsert.duplicateTitle"),
+    description: t("roles.upsert.duplicateDescription"),
+    submitText: t("roles.upsert.duplicateSubmit"),
   },
-};
+});
 
 export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
   isOpen,
@@ -48,7 +47,9 @@ export const UpsertRoleNameModal: FC<UpsertRoleNameModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
-  const content = copyByMode[mode];
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const content = copyByMode(t, tCommon)[mode];
 
   const requestClose = () => {
     if (isLoading) return;

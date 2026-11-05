@@ -23,6 +23,7 @@ const settings: CompanySettings = {
   timezone: "Europe/Warsaw",
   workingDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
   weekStartDay: "MONDAY",
+  language: "en",
   version: 9,
 };
 
@@ -113,6 +114,7 @@ describe("CompanyProfileSettingsComponent", () => {
     expect(onSaveSettings).toHaveBeenCalledWith({
       timezone: "Europe/Warsaw",
       weekStartDay: "MONDAY",
+      language: "en",
       workingDays: [
         "MONDAY",
         "TUESDAY",
@@ -156,6 +158,13 @@ describe("CompanyProfileSettingsComponent", () => {
     expect(querySaveButton()).not.toBeInTheDocument();
     expect(nameInput()).toHaveValue("Acme");
     expect(screen.getByRole("button", { name: "Sun" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("offers the company's language, named in its own language", () => {
+    renderComponent();
+
+    expect(screen.getByLabelText("Language")).toHaveTextContent("English");
+    expect(screen.getByText(/the language noddo speaks/i)).toBeInTheDocument();
   });
 
   it("shows initials while no logo is uploaded", () => {

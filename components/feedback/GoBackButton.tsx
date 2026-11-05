@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 
 /**
@@ -7,13 +8,14 @@ import { Button } from "@/components/desact/button";
  * Plain `history`, not the router: an error page can render where no app router is mounted (the root 404).
  */
 export function GoBackButton({ fallback = "/dashboard" }: { fallback?: string }) {
+  const t = useTranslations("common");
   return (
     <Button
       type="button"
       variant="secondary"
       onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign(fallback))}
     >
-      Go back
+      {t("actions.goBack")}
     </Button>
   );
 }

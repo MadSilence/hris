@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -47,6 +48,7 @@ export const EditAttributeModal: FC<EditAttributeModalProps> = ({
   errorMessage,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("settings.attributes.editModal");
   const draftRef = useRef<AttributePatch>({});
 
   const requestClose = () => {
@@ -72,9 +74,9 @@ export const EditAttributeModal: FC<EditAttributeModalProps> = ({
               <Icon icon={PencilEdit02Icon} />
             </span>
             <div className="space-y-1">
-              <DialogTitle>Edit attribute</DialogTitle>
+              <DialogTitle>{t("title")}</DialogTitle>
               <DialogDescription>
-                {attribute ? attribute.name : "Update this attribute's settings and validation."}
+                {attribute ? attribute.name : t("description")}
               </DialogDescription>
             </div>
           </div>

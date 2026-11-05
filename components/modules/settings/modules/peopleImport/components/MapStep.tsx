@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import {
   Select,
@@ -24,14 +25,16 @@ import {
 } from "@/components/modules/settings/modules/peopleImport/hooks";
 import { PreviewEditor } from "./PreviewEditor";
 import { IMPORT_KINDS } from "./importKinds";
+import { fieldLabel } from "./fieldLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 /** Radix refuses an empty value, so "not imported" has a name of its own. */
 const SKIP = "__skip__";
 
-const DECIMALS: { value: PeopleImportDecimalSeparator; label: string }[] = [
-  { value: "DOT", label: "1,234.5" },
-  { value: "COMMA", label: "1.234,5" },
+/** Each separator shown by an example number — a format, not a word. */
+const DECIMALS: { value: PeopleImportDecimalSeparator; example: string }[] = [
+  { value: "DOT", example: "1,234.5" },
+  { value: "COMMA", example: "1.234,5" },
 ];
 
 type Props = { anImport: PeopleImportDTO };
@@ -43,6 +46,7 @@ type Props = { anImport: PeopleImportDTO };
  * format) or in the file.
  */
 export const MapStep: React.FC<Props> = ({ anImport }) => {
+  const t = useTranslations("peopleImport");
   const [mapping, setMapping] = useState<Record<string, string>>(anImport.mapping);
   const [dateFormat, setDateFormat] = useState<PeopleImportDateFormat>(anImport.dateFormat);
   const [decimal, setDecimal] = useState<PeopleImportDecimalSeparator>(anImport.decimalSeparator);
@@ -86,9 +90,9 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <p className="text-body font-medium text-primary">{anImport.fileName}</p>
-          <p className="text-hint text-tertiary">{IMPORT_KINDS[anImport.kind].title}</p>
+          <p className="text-hint text-tertiary">{t(IMPORT_KINDS[anImport.kind].titleKey)}</p>
           <p className="text-body text-tertiary">
-            {anImport.rowCount} {anImport.rowCount === 1 ? "row" : "rows"} · Match each column to a field, or leave it out.
+            {t("map.rowsHint", { count: anImport.rowCount })}
           </p>
         </div>
       </div>
@@ -97,8 +101,8 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
         <Table className="text-body">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-1/2">Column in the file</TableHead>
-              <TableHead>Imported as</TableHead>
+              <TableHead className="w-1/2">{t("map.columnInFile")}</TableHead>
+              <TableHead>{t("map.importedAs")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,12 +114,12 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
                   <TableCell>
                     <SearchableSelect
                       className="h-8 max-w-xs"
-                      aria-label={`Field for ${header}`}
+                      aria-label={t("map.fieldFor", { header })}
                       options={[
-                        { value: SKIP, label: "Not imported" },
+                        { value: SKIP, label: t("map.notImported") },
                         ...anImport.fields.map((field) => ({
                           value: field.id,
-                          label: `${field.header}${field.required ? " *" : ""}`,
+                          label: field.required ? t("map.requiredMark", { label: fieldLabel(t, field) }) : fieldLabel(t, field),
                         })),
                       ]}
                       value={current}
@@ -124,7 +128,7 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
                       clearable={false}
                     />
                     {current !== SKIP && !fieldsById.has(current) && (
-                      <p className="mt-1 text-hint text-status-declined-text">You may not import this field.</p>
+                      <p className="mt-1 text-hint text-status-declined-text">{t("map.notAllowed")}</p>
                     )}
                   </TableCell>
                 </TableRow>
@@ -138,9 +142,9 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       {anImport.kind !== "ORG_STRUCTURE" && (
       <div className="flex flex-wrap gap-6">
         <label className="flex flex-col gap-1 text-body">
-          <span className="text-secondary">Dates written as text</span>
+          <span className="text-secondary">{t("map.datesLabel")}</span>
           <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as PeopleImportDateFormat)} disabled={busy}>
-            <SelectTrigger className="h-8 w-48" aria-label="Date format">
+            <SelectTrigger className="h-8 w-48" aria-label={t("map.dateFormatAria")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -149,16 +153,16 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
               ))}
             </SelectContent>
           </Select>
-          <span className="text-hint text-tertiary">2026-03-04 is always read. Real date cells in XLSX need no answer.</span>
+          <span className="text-hint text-tertiary">{t("map.datesHint")}</span>
         </label>
         <label className="flex flex-col gap-1 text-body">
-          <span className="text-secondary">Numbers written as</span>
+          <span className="text-secondary">{t("map.numbersLabel")}</span>
           <Select value={decimal} onValueChange={(v) => setDecimal(v as PeopleImportDecimalSeparator)} disabled={busy}>
-            <SelectTrigger className="h-8 w-48" aria-label="Decimal separator">
+            <SelectTrigger className="h-8 w-48" aria-label={t("map.decimalAria")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {DECIMALS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+              {DECIMALS.map((d) => <SelectItem key={d.value} value={d.value}>{d.example}</SelectItem>)}
             </SelectContent>
           </Select>
         </label>
@@ -168,20 +172,20 @@ export const MapStep: React.FC<Props> = ({ anImport }) => {
       <FormError message={error} />
       {missingRequired.length > 0 && (
         <p className="text-body text-tertiary">
-          Still to match: {missingRequired.map((f) => f.header).join(", ")}.
+          {t("map.stillToMatch", { fields: missingRequired.map((f) => fieldLabel(t, f)).join(", ") })}
         </p>
       )}
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={() => void onCheck()} disabled={busy || missingRequired.length > 0}>
-          {check.isPending ? "Checking every row…" : checkedWithErrors ? "Check again" : "Check file"}
+          {check.isPending ? t("map.checking") : checkedWithErrors ? t("map.checkAgain") : t("map.checkFile")}
         </Button>
         <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}
         >
-          Discard import
+          {t("map.discard")}
         </Button>
       </div>
 

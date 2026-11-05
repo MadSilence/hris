@@ -2,10 +2,12 @@
 
 import { CSSProperties, FC, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/desact/skeleton";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
 import { toTagColor } from "@/lib/theme/tags";
+import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
 
 export const NAME_COL = 200;
 
@@ -93,27 +95,27 @@ export const rowHeight = (segments: Segment[]): number => {
   return Math.max(MIN_ROW_PX, lanes * LANE_PX + ROW_PAD_PX);
 };
 
-const holidayTitle = (m: CompanyCalendarMark): string => {
+const holidayTitle = (t: CalendarTranslator, m: CompanyCalendarMark): string => {
   const parts = [m.name];
   // The board draws half a day and leave counting charges a whole one. Both are deliberate — exact
   // half-day arithmetic arrives with hourly absence, which does not exist — but the two screens were
   // disagreeing in silence, and the person reading them is the one who loses the day.
-  if (m.dayPart === "HALF_DAY") parts.push("(half day — leave still counts it as a whole day)");
+  if (m.dayPart === "HALF_DAY") parts.push(t("board.halfDayCountsWhole"));
   // A substituted holiday is drawn exactly like any other and says nothing about where it moved from:
   // decided, with the nominal date dropping out of the product (`nominalDate` stays on the DTO, unused).
   return m.calendarName ? `${parts.join(" ")} · ${m.calendarName}` : parts.join(" ");
 };
 
 /** Leave whose type the reader may not see is "Away", with no type (SPEC § 13.13 "Hidden details"). */
-const leaveLabel = (a: CompanyCalendarAbsence): string => a.leaveTypeName ?? "Away";
+const leaveLabel = (t: CalendarTranslator, a: CompanyCalendarAbsence): string => a.leaveTypeName ?? t("board.away");
 
 /** The tooltip is the explanation — there is no legend (`COMPANY_CALENDAR.md` § 7). */
-export const leaveTitle = (a: CompanyCalendarAbsence): string => {
+export const leaveTitle = (t: CalendarTranslator, a: CompanyCalendarAbsence): string => {
   const dates = a.startDate === a.endDate ? a.startDate : `${a.startDate} – ${a.endDate}`;
-  const parts = [leaveLabel(a), dates];
-  if (a.status === "PENDING") parts.push(a.awaitingYou ? "Pending your approval" : "Pending approval");
+  const parts = [leaveLabel(t, a), dates];
+  if (a.status === "PENDING") parts.push(a.awaitingYou ? t("board.pendingYourApproval") : t("board.pendingApproval"));
   if (a.status === "CANCELLATION_PENDING") {
-    parts.push(a.awaitingYou ? "Cancellation waiting for your approval" : "Cancellation requested");
+    parts.push(a.awaitingYou ? t("board.cancellationAwaitingYou") : t("board.cancellationRequested"));
   }
   return parts.join(" · ");
 };
@@ -196,6 +198,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
 }) => {
   // A drag across the row's days: where it started and where the pointer is now. Released anywhere —
   // the pointer may leave the row while dragging — it opens the request for the days covered.
+  const t = useTranslations("calendar");
   const [drag, setDrag] = useState<{ from: number; to: number } | null>(null);
   useEffect(() => {
     if (!drag || !onSelectRange) return;
@@ -313,7 +316,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
               return (
                 <div
                   key={seg.bar.key}
-                  title={holidayTitle(mark)}
+                  title={holidayTitle(t, mark)}
                   style={{
                     ...placement,
                     // A half day is painted half — the fill stops halfway up the bar, so
@@ -329,7 +332,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
                       {mark.name}
                       {/* The bar is painted half; the words say so where there is room for
                           words, so the fill is not the only carrier of the fact. */}
-                      {mark.dayPart === "HALF_DAY" ? " · Half day" : null}
+                      {mark.dayPart === "HALF_DAY" ? ` · ${t("board.halfDay")}` : null}
                     </span>
                   ) : null}
                 </div>
@@ -346,11 +349,11 @@ export const CompanyCalendarRow: FC<RowProps> = ({
               <>
                 {absence.awaitingYou ? (
                   <span
-                    aria-label="Waiting for your approval"
+                    aria-label={t("board.waitingForYourApproval")}
                     className="ml-1 h-1.5 w-1.5 shrink-0 rounded-pill bg-status-pending-fill"
                   />
                 ) : null}
-                {showLabel ? <span className="truncate px-1.5">{leaveLabel(absence)}</span> : null}
+                {showLabel ? <span className="truncate px-1.5">{leaveLabel(t, absence)}</span> : null}
               </>
             );
             const style = { ...placement, ...leaveStyle(absence) };
@@ -359,7 +362,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
               <Link
                 key={seg.bar.key}
                 href={`/time-off/requests/${absence.requestId}`}
-                title={leaveTitle(absence)}
+                title={leaveTitle(t, absence)}
                 data-status={absence.status}
                 style={style}
                 className={className}
@@ -369,7 +372,7 @@ export const CompanyCalendarRow: FC<RowProps> = ({
             ) : (
               <div
                 key={seg.bar.key}
-                title={leaveTitle(absence)}
+                title={leaveTitle(t, absence)}
                 data-status={absence.status}
                 style={style}
                 className={className}

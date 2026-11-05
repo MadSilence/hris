@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
@@ -45,7 +46,8 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
   },
   ref,
 ) {
-  const title = [name, jobName, archived ? "Archived" : null].filter(Boolean).join(" · ");
+  const t = useTranslations("common");
+  const title = [name, jobName, archived ? t("status.archived") : null].filter(Boolean).join(" · ");
 
   // A node on a canvas (SPEC § 13.8): a card with the level-1 shadow; selected wears the accent's tint, a
   // search match the accent ring, an archived person a dashed edge.
@@ -69,7 +71,7 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
         <span className="w-full text-center">
           <span className="line-clamp-2 text-hint font-medium text-primary">{name}</span>
           {jobName && !archived && <span className="mt-0.5 block truncate text-hint text-tertiary">{jobName}</span>}
-          {archived && <span className="mt-0.5 block truncate text-hint text-tertiary">Archived</span>}
+          {archived && <span className="mt-0.5 block truncate text-hint text-tertiary">{t("status.archived")}</span>}
         </span>
         {badge && <Badge size="sm">{badge}</Badge>}
       </div>
@@ -84,7 +86,7 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
       </Avatar>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-hint font-medium text-primary">{name}</span>
-        {(jobName || archived) && <span className="block truncate text-hint text-tertiary">{archived ? "Archived" : jobName}</span>}
+        {(jobName || archived) && <span className="block truncate text-hint text-tertiary">{archived ? t("status.archived") : jobName}</span>}
       </span>
       {badge && <Badge size="sm" className="flex-none">{badge}</Badge>}
     </div>

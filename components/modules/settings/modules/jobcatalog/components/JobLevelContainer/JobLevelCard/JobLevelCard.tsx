@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, ReactNode, useState } from "react";
 import { Add01Icon, ArrowDown01Icon, ArrowRight02Icon, ArrowUp01Icon, Briefcase01Icon, Delete02Icon, PencilEdit02Icon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -38,6 +39,8 @@ export const JobLevelCard: FC<Props> = ({
   onMoveLevel,
   isReordering = false,
 }) => {
+  const t = useTranslations("structure.jobLevels");
+  const tCommon = useTranslations("common");
   const [expanded, setExpanded] = useState(false);
 
   const sortedLevels = [...group.levels].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
@@ -59,10 +62,10 @@ export const JobLevelCard: FC<Props> = ({
           ]}
         >
           {managing && (
-            <RowActionsMenu label="Track actions">
+            <RowActionsMenu label={t("card.trackActions")}>
               <PermissionGate resource="JOBS.LEVEL_GROUP" action="EDIT">
                 <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditGroup(group)}>
-                  Rename
+                  {tCommon("actions.rename")}
                 </RowAction>
               </PermissionGate>
 
@@ -71,7 +74,7 @@ export const JobLevelCard: FC<Props> = ({
                   icon={<Icon icon={Delete02Icon} size="sm" />}
                   onClick={() => onDeleteGroup(group)}
                 >
-                  Delete
+                  {tCommon("actions.delete")}
                 </RowActionDestructive>
               </PermissionGate>
             </RowActionsMenu>
@@ -84,13 +87,13 @@ export const JobLevelCard: FC<Props> = ({
         <Stat
           icon={<Icon icon={UserGroupIcon} size="lg" />}
           value={String(group.assignedUsersCount)}
-          label={group.assignedUsersCount === 1 ? "Employee" : "Employees"}
+          label={t("card.employees", { count: group.assignedUsersCount })}
         />
         <div className="mx-4 w-px bg-divider"/>
         <Stat
           icon={<Icon icon={Briefcase01Icon} size="lg" />}
           value={String(group.assignedJobsCount)}
-          label={group.assignedJobsCount === 1 ? "Position" : "Positions"}
+          label={t("card.positions", { count: group.assignedJobsCount })}
         />
       </div>
 
@@ -100,7 +103,7 @@ export const JobLevelCard: FC<Props> = ({
       <div className="flex-1">
         {sortedLevels.length === 0 && !managing ? (
           <div className="flex w-full items-center justify-center rounded-control border border-dashed border-field bg-subtle/60 px-3 py-2 text-body text-secondary">
-            No levels yet
+            {t("card.noLevels")}
           </div>
         ) : (
           <ol>
@@ -148,7 +151,7 @@ export const JobLevelCard: FC<Props> = ({
                   onClick={() => setExpanded(true)}
                   className="rounded-control bg-subtle px-2 py-1 text-body font-medium text-secondary transition-colors hover:bg-mist"
                 >
-                  +{hiddenCount} more levels
+                  {t("card.moreLevels", { count: hiddenCount })}
                 </button>
               </li>
             )}
@@ -161,7 +164,7 @@ export const JobLevelCard: FC<Props> = ({
             onClick={() => setExpanded(false)}
             className="mt-3 text-body font-medium text-secondary transition-colors hover:text-secondary"
           >
-            Show less
+            {tCommon("actions.showLess")}
           </button>
         )}
 
@@ -173,7 +176,7 @@ export const JobLevelCard: FC<Props> = ({
               onClick={() => onCreateLevel(group)}
             >
               <Icon icon={Add01Icon} size="sm" />
-              Add level
+              {t("addLevel")}
             </button>
           </PermissionGate>
         )}
@@ -192,7 +195,7 @@ export const JobLevelCard: FC<Props> = ({
           className="group mt-1 w-full justify-between px-2 text-secondary hover:bg-subtle hover:text-secondary"
           onClick={onToggleManaging}
         >
-          <span className="text-body font-medium">{managing ? "Done" : "Manage group"}</span>
+          <span className="text-body font-medium">{managing ? tCommon("actions.done") : t("card.manage")}</span>
           {managing ? (
             <Icon icon={Tick02Icon} size="sm" />
           ) : (
@@ -236,13 +239,16 @@ const LevelActions: FC<LevelActionsProps> = ({
   onDown,
   onEdit,
   onDelete,
-}) => (
+}) => {
+  const t = useTranslations("structure.jobLevels");
+  const tCommon = useTranslations("common");
+  return (
   <div className="flex shrink-0 items-center">
     <Button type="button"
       variant="ghost"
       size="icon"
       className="h-7 w-7 text-tertiary hover:bg-mist"
-      aria-label="Move level up"
+      aria-label={t("card.moveUp")}
       disabled={first || disabled}
       onClick={onUp}
     >
@@ -253,25 +259,26 @@ const LevelActions: FC<LevelActionsProps> = ({
       variant="ghost"
       size="icon"
       className="h-7 w-7 text-tertiary hover:bg-mist"
-      aria-label="Move level down"
+      aria-label={t("card.moveDown")}
       disabled={last || disabled}
       onClick={onDown}
     >
       <Icon icon={ArrowDown01Icon} size="sm" />
     </Button>
 
-    <RowActionsMenu label="Level actions">
+    <RowActionsMenu label={t("card.levelActions")}>
         <PermissionGate resource="JOBS.LEVEL" action="EDIT">
           <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onEdit}>
-            Rename
+            {tCommon("actions.rename")}
           </RowAction>
         </PermissionGate>
 
         <PermissionGate resource="JOBS.LEVEL" action="MANAGE">
           <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={onDelete}>
-            Delete
+            {tCommon("actions.delete")}
           </RowActionDestructive>
         </PermissionGate>
     </RowActionsMenu>
   </div>
-);
+  );
+};

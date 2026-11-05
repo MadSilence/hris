@@ -1,0 +1,648 @@
+{
+  "profile": {
+    "tabs": {
+      "publicProfile": "Public profile",
+      "personal": "Personal info",
+      "documents": "Documents",
+      "timeOff": "Time off",
+      "salary": "Salary",
+      "attendance": "Attendance",
+      "forms": "Forms",
+      "reviews": "Reviews",
+      "tasks": "Tasks",
+      "notes": "Notes"
+    },
+    "comingSoon": {
+      "title": "{tab} is not available yet",
+      "description": "This part of the profile is planned and has not been built. Nothing here changes how the product works today."
+    },
+    "leaveGuard": {
+      "title": "Leave without saving?",
+      "description": "You have unsaved changes on this tab. Leaving now discards them.",
+      "confirm": "Leave without saving"
+    },
+    "loadFailed": "Failed to load",
+    "fields": {
+      "selectPlaceholder": "Select…",
+      "maskedValue": "You don't have access to this field's value",
+      "noAttributes": "No attributes",
+      "noneConfigured": "No custom fields have been set up for this company yet.",
+      "noneVisible": "You don't have access to any of this person's custom fields."
+    },
+    "validation": {
+      "cannotClear": "This field cannot be cleared.",
+      "number": "Must be a number.",
+      "positive": "Must be a positive number.",
+      "min": "Must be ≥ {min}.",
+      "max": "Must be ≤ {max}.",
+      "minLength": "Must be at least {count} characters.",
+      "maxLength": "Must be at most {count} characters.",
+      "email": "Enter a valid email address.",
+      "url": "Enter a valid URL (starting with http:// or https://).",
+      "format": "Doesn't match the required format.",
+      "phone": "Enter a valid phone number.",
+      "minDate": "Must be on or after {date}.",
+      "maxDate": "Must be on or before {date}.",
+      "minSelect": "Select at least {count}.",
+      "maxSelect": "Select at most {count}."
+    },
+    "saveBar": {
+      "region": "Unsaved changes",
+      "count": "{count, plural, one {# unsaved change} other {# unsaved changes}}",
+      "failed": "Failed to save changes."
+    },
+    "system": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "hireDate": "Hire date",
+      "probationEnd": "Probation end",
+      "derivedFrom": "Follows {field}. Change the {fieldLower} to change it."
+    },
+    "sections": {
+      "other": "Other",
+      "automationRuns": "Automation runs",
+      "edit": "Edit {name}"
+    },
+    "positionHistory": {
+      "title": "Position history",
+      "emptyTitle": "No position changes yet",
+      "emptyDescription": "When this person is given a position, or it changes, the date and the position appear here.",
+      "datesNote": "Each date is the day the change was recorded.",
+      "columns": {
+        "from": "From",
+        "position": "Position",
+        "previous": "Previous position",
+        "reason": "Reason"
+      },
+      "reason": {
+        "assigned": "Set on the profile",
+        "unassigned": "Cleared on the profile",
+        "bulk": "Bulk edit",
+        "imported": "Imported from a file",
+        "jobArchived": "Position archived",
+        "jobDeleted": "Position deleted",
+        "familyArchived": "Job family archived",
+        "familyDeleted": "Job family deleted"
+      }
+    },
+    "scheduled": {
+      "entry": "Scheduled changes ({count})",
+      "title": "Scheduled changes",
+      "description": "What is going to change for this person, and when.",
+      "lastDayAndEffect": "Last working day {lastDay}, takes effect {date}",
+      "takesEffect": "Takes effect {date}",
+      "scheduledBy": "Scheduled by {name}",
+      "scheduledByProcess": "Scheduled by a process",
+      "changeDate": "Change date",
+      "cancelTitle": "Cancel scheduled change",
+      "cancelDescription": "{change} on {date} will not happen.",
+      "cancelConfirm": "Cancel change",
+      "pendingStep": "→ {value} from {date}",
+      "lastWorkingDay": "Last working day",
+      "sendOn": "Send on",
+      "kind": {
+        "termination": "Employment ends",
+        "employmentStart": "Employment starts",
+        "invitation": "Invitation goes out",
+        "taskDue": "Task due",
+        "taskDueSubject": "Task due: {subject}"
+      },
+      "things": {
+        "office": "Office",
+        "legalEntity": "Legal entity",
+        "department": "Department",
+        "team": "Team",
+        "job": "Job",
+        "role": "Role",
+        "holidayCalendar": "Holiday calendar",
+        "assignment": "Assignment"
+      },
+      "assignment": {
+        "starts": "{thing} Starts",
+        "startsNamed": "{thing} Starts: {name}",
+        "ends": "{thing} Ends",
+        "endsNamed": "{thing} Ends: {name}"
+      }
+    },
+    "header": {
+      "unnamed": "Unnamed",
+      "teams": "{count, plural, one {Team} other {Teams}}",
+      "department": "Department",
+      "changePhoto": "Change photo",
+      "locked": "Locked",
+      "manager": "Manager",
+      "withUs": "With us",
+      "loginAs": "Login as user",
+      "resendInvitation": "Resend invitation",
+      "invite": "Invite",
+      "personActions": "Person actions",
+      "viewInOrgChart": "View in org chart",
+      "changePassword": "Change password",
+      "cancelScheduledInvitation": "Cancel scheduled invitation",
+      "startPreboarding": "Start preboarding",
+      "startOnboarding": "Start onboarding",
+      "startOffboarding": "Start offboarding",
+      "sendResetToUnlock": "Send password reset to unlock",
+      "sendReset": "Send password reset",
+      "exportPersonalData": "Export personal data",
+      "resetMfa": "Reset two-step sign-in",
+      "endSessions": "End all sessions",
+      "block": "Block account",
+      "unblock": "Unblock account",
+      "alreadyTerminated": "Already terminated",
+      "leaving": "Leaving {date}",
+      "terminate": "Terminate employment",
+      "deleteProfile": "Delete profile",
+      "terminateFailed": "Failed to terminate employment.",
+      "deleteFailed": "Failed to delete the profile."
+    },
+    "lifecycleNote": {
+      "starts": "Starts {date}",
+      "noStartDate": "No start date yet",
+      "invitationGoesOut": "Invitation goes out {date}",
+      "invited": "Invited {date}, not registered yet",
+      "notInvited": "Not invited",
+      "locked": "Locked after too many failed sign-ins — send a password reset to unlock",
+      "pendingEmail": "New email {email} waits for confirmation — the link was sent to it"
+    },
+    "tenure": {
+      "weeks": "{count, plural, one {# week} other {# weeks}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "years": "{count, plural, one {# year} other {# years}}",
+      "yearsMonths": "{years} y {months} m"
+    },
+    "access": {
+      "resetSentUnlock": "Password reset sent to {name}. Setting a new password unlocks the account.",
+      "resetSent": "Password reset sent to {name}.",
+      "mfaReset": "{name}'s two-step sign-in was reset. They were signed out everywhere.",
+      "noSessions": "{name} was not signed in anywhere.",
+      "sessionsEnded": "{name} was signed out of {count, plural, one {# session} other {# sessions}}.",
+      "verified": "I confirmed this request with {name} by a call or in person, not by email.",
+      "reason": "Reason",
+      "blockDescription": "{name} will be signed out everywhere and will not be able to sign in until the account is unblocked.",
+      "blockConfirm": "Block",
+      "unblockDescription": "{name} will be able to sign in again.",
+      "unblockConfirm": "Unblock",
+      "resetLockedDescription": "{name}'s account is locked after too many failed sign-ins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.",
+      "resetDescription": "{name} will get an email with a link to set a new password. The link works for one hour.",
+      "resetConfirm": "Send",
+      "mfaDescription": "{name}'s authenticator app, backup codes and remembered devices stop working, and they are signed out everywhere. If your company requires two-step sign-in, they set it up again at their next sign-in.",
+      "mfaConfirm": "Reset",
+      "endSessionsDescription": "{name} will be signed out of every browser at once. They can sign in again straight away — to keep them out, block the account instead.",
+      "endSessionsConfirm": "End sessions"
+    },
+    "delete": {
+      "description": "This deletes <b>{name}</b> and their history, and cannot be undone.",
+      "terminateHint": "If they are leaving, terminate the employment instead: that keeps the record and ends their access.",
+      "checking": "Checking what is attached to this profile…",
+      "checkFailed": "What is attached to this profile could not be checked.",
+      "deletedTitle": "Deleted with the profile",
+      "requestsAndBalances": "{requests, plural, one {# leave request} other {# leave requests}}, {balances, plural, one {# balance} other {# balances}} and their history",
+      "assignments": "{policyAssignments, plural, one {# policy assignment} other {# policy assignments}}, {assignmentRecords, plural, one {# assignment record} other {# assignment records}}, {jobHistory, plural, one {# job history entry} other {# job history entries}}",
+      "processes": "{count, plural, one {# preboarding or onboarding process} other {# preboarding and onboarding processes}} run for them",
+      "keptTitle": "Kept",
+      "documents": "{count, plural, one {# document goes} other {# documents go}} to the trash, not straight to erasure",
+      "approvals": "{count, plural, one {# approval they signed} other {# approvals they signed}} in other people's requests, with their name",
+      "journal": "The journal of what they did",
+      "reportsMove": "{count, plural, one {# direct report moves} other {# direct reports move}} to {manager}.",
+      "reportsLeft": "{count, plural, one {# direct report is} other {# direct reports are}} left without a manager.",
+      "terminateInstead": "Terminate instead"
+    },
+    "invite": {
+      "emailRequired": "Enter an email address to send the invitation to.",
+      "dateRequired": "Pick the day to send it.",
+      "resendDescription": "{name} gets a new link to set a password. The previous one stops working.",
+      "description": "{name} gets a link to set a password and sign in. Nothing is granted until they accept.",
+      "when": "Send",
+      "now": "Now",
+      "onDate": "On a date",
+      "timezoneNote": "It goes out on that day, in your company's timezone.",
+      "preboardingTitle": "{name} has an unfinished preboarding.",
+      "preboardingKeep": "Keep it — the remaining tasks follow them into the app",
+      "preboardingEnd": "End it early — the remaining tasks are cancelled",
+      "sending": "Sending…",
+      "schedule": "Schedule"
+    },
+    "leaver": {
+      "offboarding": "Offboarding",
+      "onboarding": "Onboarding",
+      "process": "Process",
+      "fallbackRole": "Unchosen, they go to the {role} role, the policy's fallback.",
+      "fallbackNone": "Unchosen, they wait for an administrator: the policy has no fallback role.",
+      "fallbackEach": "Unchosen, each goes to its policy's fallback role.",
+      "requestsTitle": "Leave requests waiting on them ({count})",
+      "requestItem": "{name} · {dates}",
+      "aColleague": "A colleague",
+      "tasksTitle": "Tasks assigned to them ({count})",
+      "taskItem": "{title} · for {name}",
+      "tasksHint": "Unchosen, each goes to its onboarding manager.",
+      "policiesTitle": "Leave policies naming them ({count})",
+      "policyItem": "{policy} · step {step}",
+      "aPolicy": "A policy",
+      "processesTitle": "Processes they manage ({count})",
+      "processItem": "{process} of {name}",
+      "processesHint": "Unchosen, they go to {name}, their manager, with the tasks that come with them.",
+      "processesHintNone": "Unchosen, they stay without an onboarding manager until somebody sets one: this person has no manager.",
+      "title": "Decisions Waiting on {name}",
+      "description": "Handed on when the termination takes effect, with anything that arrives before then.",
+      "more": "and {count} more",
+      "reassignTo": "Reassign to…"
+    },
+    "terminate": {
+      "description": "{name} will be archived and lose access.",
+      "reasons": {
+        "voluntary": "Voluntary — the person resigned",
+        "involuntary": "Involuntary — let go by the company",
+        "endOfContract": "End of contract"
+      },
+      "rehire": "Eligible for rehire",
+      "rehireHint": "The first thing anyone asks when this person applies again.",
+      "note": "Note",
+      "impactTitle": "What this will do",
+      "checking": "Checking…",
+      "impact": {
+        "until": "Nothing changes until the end of <b>{date}</b>. Then the status becomes Archived and the person loses access.",
+        "now": "Status becomes Archived and the person loses access.",
+        "roles": "{count, plural, one {# role} other {# roles}} revoked.",
+        "policies": "{count, plural, one {# time-off policy assignment} other {# time-off policy assignments}} ended. Remaining balances are kept for the final settlement, not cleared.",
+        "reports": "{count, plural, one {# direct report moves} other {# direct reports move}} to <b>{manager}</b>.",
+        "reportsNoManager": "{count, plural, one {# direct report moves} other {# direct reports move}} to <b>no manager</b>.",
+        "requests": "{count, plural, one {# request is} other {# requests are}} waiting for this person to decide. They are handed on as chosen above, or to their policy's fallback role.",
+        "absences": "{count, plural, one {# approved absence runs} other {# approved absences run}} past the last working day. They are cancelled, or cut at that day, and the days go back to the balance."
+      },
+      "terminating": "Terminating…",
+      "confirm": "Terminate"
+    },
+    "avatar": {
+      "title": "Profile picture",
+      "description": "Upload a new avatar or remove the current profile picture.",
+      "new": "New avatar",
+      "current": "Current avatar",
+      "recommendation": "Recommended: square image, at least 400×400px. PNG, JPG or WEBP works best.",
+      "clearSelection": "Clear selected image",
+      "replace": "Replace photo",
+      "upload": "Upload photo",
+      "uploadHint": "Choose an image from your device.",
+      "remove": "Remove photo",
+      "removeHint": "Use initials instead of an avatar.",
+      "removeTitle": "Remove avatar",
+      "removeDescription": "This action will remove the profile picture for <b>{name}</b>. The profile will use initials instead.",
+      "thisUser": "this user",
+      "warning": "Warning",
+      "warningText": "The current avatar will be permanently removed.",
+      "removeFailed": "The photo could not be removed."
+    }
+  },
+  "documents": {
+    "root": "Documents",
+    "selectFolder": "Select folder",
+    "container": {
+      "dropTitle": "Drop to upload",
+      "dropToFolder": "Goes to {folder}",
+      "dropToOwn": "Goes to your documents",
+      "dropToPerson": "Goes to {name}’s documents",
+      "dropToThese": "Goes to these documents",
+      "trash": "Trash",
+      "blankTitle": "No documents yet",
+      "blankDescription": "Contracts, IDs and certificates live here.",
+      "blankDescriptionEditable": "Contracts, IDs and certificates live here.\nDrop files here or upload them below.",
+      "uploadFile": "Upload file",
+      "newFolder": "New folder",
+      "noMatchTitle": "No documents match",
+      "noMatchHint": "Try a different search or filter.",
+      "emptyFolderTitle": "This folder is empty",
+      "emptyFolderDescription": "Drop files here or use Add."
+    },
+    "emptyState": {
+      "title": "No folders or files",
+      "description": "This location is empty. Create a folder or upload a file to get started."
+    },
+    "folderCard": {
+      "actions": "Folder actions"
+    },
+    "toolbar": {
+      "starredOnly": "Show starred only",
+      "hrOnly": "Show HR-only documents",
+      "addFolder": "Add folder",
+      "uploadDocuments": "Upload documents"
+    },
+    "table": {
+      "category": "Category",
+      "visibility": "Visibility",
+      "size": "Size",
+      "uploaded": "Uploaded",
+      "hrOnly": "HR only",
+      "employee": "Employee",
+      "star": "Star",
+      "unstar": "Unstar",
+      "actions": "Document actions",
+      "move": "Move"
+    },
+    "trash": {
+      "restoreFailed": "Failed to restore",
+      "purgeFailed": "Failed to delete permanently",
+      "unavailable": "Trash unavailable",
+      "emptyTitle": "Nothing in the trash",
+      "emptyDescription": "Deleted documents wait here until they are restored or permanently removed.",
+      "meta": "{size} · uploaded {date}",
+      "deleteForever": "Delete forever"
+    },
+    "folderForm": {
+      "label": "Folder name",
+      "hint": "Minimum 2 characters.",
+      "required": "Please enter a folder name.",
+      "min": "Folder name must be at least 2 characters.",
+      "max": "Folder name must be at most 120 characters."
+    },
+    "createFolder": {
+      "title": "Add folder",
+      "description": "Create a new folder to organize personal documents."
+    },
+    "renameFolder": {
+      "title": "Rename folder",
+      "description": "Update the folder name. All documents inside will stay in place."
+    },
+    "deleteDocument": {
+      "title": "Delete document",
+      "description": "<b>{name}</b> will be moved to the trash, where it can be restored until the retention period ends.",
+      "untitled": "Untitled document",
+      "confirm": "Delete document"
+    },
+    "deleteFolder": {
+      "title": "Delete folder",
+      "untitled": "Untitled folder",
+      "checking": "<b>{name}</b> — checking what is inside…",
+      "holds": "<b>{name}</b> holds {contents}.",
+      "empty": "<b>{name}</b> is empty.",
+      "countDocuments": "{count, plural, one {# document} other {# documents}}",
+      "countFolders": "{count, plural, one {# folder} other {# folders}}",
+      "countBoth": "{documents, plural, one {# document} other {# documents}} and {folders, plural, one {# folder} other {# folders}}",
+      "keepTitle": "Keep the contents",
+      "keepWithCount": "{contents} move one level up and stay where they can be found.",
+      "keepFallback": "Everything inside moves one level up and stays where it can be found.",
+      "trashTitle": "Delete the contents too",
+      "trashWithCount": "{contents} go to the trash, where they can be restored until the retention period ends.",
+      "trashWithCountNested": "{contents}, including everything nested inside them, go to the trash, where they can be restored until the retention period ends.",
+      "trashFallback": "Documents go to the trash, where they can be restored until the retention period ends.",
+      "confirm": "Delete folder"
+    },
+    "moveDocument": {
+      "title": "Move document",
+      "description": "Move <b>{name}</b> to another folder.",
+      "thisDocument": "this document",
+      "destination": "Destination folder",
+      "destinationRequired": "Please select destination folder.",
+      "submit": "Move"
+    },
+    "preview": {
+      "readOnly": "Read-only preview.",
+      "readOnlyWithCategory": "{category} · Read-only preview.",
+      "downloadInstead": "Download instead"
+    },
+    "purge": {
+      "title": "Delete forever",
+      "description": "<b>{name}</b> and the stored file will be erased. This cannot be undone.",
+      "noTrashTitle": "There is no trash after this",
+      "noTrashBody": "Leaving the document where it is deletes it automatically once the retention period ends."
+    },
+    "renameDocument": {
+      "title": "Rename document",
+      "description": "Changes the display name only — the file itself is untouched."
+    },
+    "upload": {
+      "title": "Add document",
+      "description": "Upload a document and place it into a folder.",
+      "files": "Files",
+      "chooseAtLeastOne": "Please choose at least one file.",
+      "dropTitle": "Drop files to upload",
+      "dropHint": "Release to add them",
+      "dragTitle": "Drag files here to upload",
+      "dragHint": "or click to browse",
+      "chooseFiles": "Choose files",
+      "removeFile": "Remove {name}",
+      "folder": "Folder",
+      "visibility": "Who can see this",
+      "visibilityHrOnly": "HR only — hidden from the employee",
+      "visibilityEmployee": "Visible to the employee — read-only for them",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "submit": "{count, plural, =0 {Upload} =1 {Upload} other {Upload # files}}"
+    }
+  },
+  "views": {
+    "panel": {
+      "expand": "Expand views panel",
+      "collapse": "Collapse views panel",
+      "title": "Saved views",
+      "myViews": "My views",
+      "default": "Default",
+      "rowActions": "{name} Actions",
+      "share": "Share",
+      "sharedWithMe": "Shared with me",
+      "someone": "Someone",
+      "sharedDetail": "{owner} · {access, select, EDIT {Can edit} other {Can view}}",
+      "saveCopy": "Save a copy",
+      "saveAsNew": "Save as new view",
+      "copyLink": "Copy link",
+      "renameTitle": "Rename view",
+      "saveTitle": "Save view",
+      "edited": "edited"
+    },
+    "share": {
+      "granteeType": {
+        "PERSON": "Person",
+        "TEAM": "Team",
+        "DEPARTMENT": "Department",
+        "ROLE": "Role"
+      },
+      "permission": {
+        "VIEW": "Can view",
+        "EDIT": "Can edit"
+      },
+      "title": "Share “{name}”",
+      "description": "Everyone sees this view under their own access. A column somebody may not see is hidden for them.",
+      "shareWith": "Share with",
+      "selectPerson": "Select a person",
+      "selectGrantee": "{type, select, TEAM {Select a team} DEPARTMENT {Select a department} ROLE {Select a role} other {Select a person}}",
+      "toShare": "To share",
+      "permissionLabel": "{name} Permission",
+      "doNotShare": "Do not share with {name}",
+      "checking": "Checking who will see what…",
+      "nobody": "Nobody is in this group yet.",
+      "everyColumn": "{count, plural, one {# person} other {# people}} will see every column of this view.",
+      "noPeopleAccess": "{count, plural, one {# person} other {# people}} can't open the People table and won't see this view at all.",
+      "hiddenField": "{count, plural, one {# person} other {# people}} won't see {field}.",
+      "hiddenFieldNamed": "{count, plural, one {# person} other {# people}} won't see {field} ({names}).",
+      "namesAndMore": "{names} and {others} more",
+      "sharedWith": "Shared with",
+      "notShared": "Not shared with anyone yet.",
+      "removedGrantee": "{type, select, PERSON {Removed Person} TEAM {Removed Team} DEPARTMENT {Removed Department} other {Removed Role}}",
+      "share": "Share",
+      "removeTitle": "Remove access",
+      "removeDescription": "{name} will no longer see “{view}”.",
+      "thisGrantee": "This grantee"
+    }
+  },
+  "bulkEdit": {
+    "title": "Edit people",
+    "description": "Apply a change to {target}.",
+    "targetAll": "all people matching the current filters",
+    "outOfScope": "{count, plural, one {# person is} other {# people are}} outside your access scope and will not be changed.",
+    "outsideAccess": "Outside your access",
+    "applying": "Applying…",
+    "applyingProgress": "Applying… ({done}/{total})",
+    "field": "Field",
+    "selectField": "Select a field",
+    "action": "Action",
+    "value": "Value",
+    "confirmStatus": "This changes the status of {target} to <b>{status}</b>. Click Confirm to proceed.",
+    "backToSelection": "Back to selection",
+    "applyAllowed": "Apply to {count} allowed",
+    "selectStatus": "Select status",
+    "selectValue": "Select value",
+    "selectRole": "Select role",
+    "checked": "Checked",
+    "unchecked": "Unchecked",
+    "operation": {
+      "SET": "Set",
+      "CLEAR": "Clear",
+      "ADD": "Add",
+      "REMOVE": "Remove"
+    },
+    "fields": {
+      "status": "Status",
+      "hireDate": "Hire date",
+      "probationEnd": "Probation end",
+      "terminationDate": "Termination date",
+      "employmentType": "Employment type",
+      "role": "Role",
+      "timeOffPolicies": "Time off policies"
+    }
+  },
+  "employmentType": {
+    "fullTime": "Full-time",
+    "partTime": "Part-time",
+    "contractor": "Contractor",
+    "intern": "Intern",
+    "temporary": "Temporary"
+  },
+  "objectFields": {
+    "line1": "Address line 1",
+    "line2": "Address line 2",
+    "city": "City",
+    "region": "State / Region",
+    "postalCode": "Postal code",
+    "country": "Country",
+    "amount": "Amount",
+    "currency": "Currency"
+  },
+  "addPerson": {
+    "title": "Add person",
+    "description": "A name is enough. The person is added as a draft and invited when you decide to.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "hireDate": "Hire date",
+    "adding": "Adding…",
+    "validation": {
+      "firstName": "Enter a first name.",
+      "lastName": "Enter a last name.",
+      "email": "Enter a valid email address."
+    }
+  },
+  "table": {
+    "maskedValue": "Hidden — you do not have access to this value",
+    "selectAll": "select all",
+    "selectRow": "select row",
+    "loadingMore": "Loading more…",
+    "empty": {
+      "title": "No people to show",
+      "description": "Try changing filters or come back later."
+    },
+    "dismiss": "Dismiss",
+    "notice": {
+      "fieldsHidden": "Some fields in this view aren't available to you and were hidden.",
+      "savedCopy": "Saved “{name}” to My Views.",
+      "linkCopied": "Link copied. Whoever opens it sees this table under their own access."
+    },
+    "selection": {
+      "allMatching": "{count, plural, one {All # person matching are selected.} other {All # people matching are selected.}}",
+      "clear": "Clear selection",
+      "allLoaded": "{count, plural, one {All # loaded person is selected.} other {All # loaded people are selected.}}",
+      "selectAllMatching": "Select All {count} Matching"
+    },
+    "deleteView": {
+      "title": "Delete view",
+      "description": "“{name}” will be deleted. Anyone it is shared with loses it too."
+    }
+  },
+  "columns": {
+    "dragToReorder": "Drag to reorder",
+    "toggle": "Toggle {name}",
+    "search": "Search columns",
+    "shown": "Shown",
+    "available": "Available",
+    "noneFound": "No columns found"
+  },
+  "export": {
+    "title": "Export people",
+    "description": "The people in the current view — the same search, filters, segment and order as the table.",
+    "allColumns": "Export all columns",
+    "allColumnsHint": "Every column you are allowed to see, not only the ones shown.",
+    "includedAll": "Included: every column you are allowed to see, including the ones hidden in the table.",
+    "includedShown": "Included: {list}. Status is added when the view leaves it out, so a former employee is never mistaken for a current one."
+  },
+  "topbar": {
+    "columns": "Columns",
+    "filter": "Filter"
+  },
+  "layout": {
+    "people": {
+      "title": "People",
+      "description": "Browse everyone in the company and find the person you need."
+    },
+    "chart": {
+      "title": "Org chart",
+      "description": "See how the company reporting structure fits together."
+    }
+  },
+  "orgChart": {
+    "loading": "Loading org chart…",
+    "loadFailed": "Failed to load the org chart.",
+    "empty": "No people to display yet.",
+    "showPanel": "Show panel",
+    "dragHint": "Drag a person onto another to change their manager.",
+    "noSelection": {
+      "title": "No one selected",
+      "description": "Click a person on the chart to see their details."
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "node": {
+      "reports": "{count, plural, one {<b>#</b> report} other {<b>#</b> reports}}",
+      "expand": "{count, plural, one {Expand # report} other {Expand # reports}}",
+      "collapse": "Collapse"
+    },
+    "panel": {
+      "department": "Department",
+      "office": "Office",
+      "legalEntity": "Legal entity",
+      "hide": "Hide panel",
+      "contacts": "Contacts",
+      "openProfile": "Open full profile",
+      "manager": "Manager",
+      "topOfOrganisation": "Top of the organisation.",
+      "changeManager": "Change manager…",
+      "setManager": "Set a manager…",
+      "removeManager": "Remove manager",
+      "insertAboveUnder": "The person you pick will take {name}'s place under {manager}, and {name} will report to them.",
+      "insertAboveTop": "The person you pick will become the top of this branch, and {name} will report to them.",
+      "addManagerAbove": "Add manager above",
+      "directReports": "Direct reports ({count})",
+      "noDirectReports": "No direct reports.",
+      "organization": "Organization",
+      "teams": "Teams"
+    }
+  }
+}

@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { CompanySetupContainer } from "@/components/modules/firstRun/components/CompanySetupContainer";
 import { hrisFirstRunService } from "@/api/modules/firstRun/services";
 import { hrisApiCompanyService } from "@/api/modules/company/services/hrisCompanyService";
 
-export const metadata = { title: "Set up your company" };
+export async function generateMetadata() {
+  const t = await getTranslations("firstRun");
+  return { title: t("setup.metaTitle") };
+}
 
 /**
  * The owner's first screen.

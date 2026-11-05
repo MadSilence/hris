@@ -11,7 +11,10 @@ export type UserSettingsDTO = {
   companyTimeZone: string;
   dateFormat: UserDateFormat;
   timeFormat: UserTimeFormat;
+  /** The person's own language; null means "follow the company" (I18N_DESIGN.md § 5). */
   language: string | null;
+  /** The company's language, beside it so one read resolves the locale. */
+  companyLanguage: string;
   welcomeCompletedAt: string | null;
   /** "Delegate my approvals while I'm on leave" — on unless switched off. */
   delegateApprovalsOnLeave: boolean;

@@ -1,10 +1,14 @@
+import type { useTranslations } from "next-intl";
 import { formatDisplayDate } from "@/lib/date";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { Alert02Icon, Briefcase01Icon, CalendarLock01Icon, CancelCircleIcon, CheckListIcon, CheckmarkCircle02Icon, FileTextIcon, FlashIcon, Notification01Icon, ShieldCheckIcon, SquareLock02Icon, TaskDone01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/models/notifications";
 import type { IconSvgElement } from "@/components/desact/icon";
 
-/** "preboarding", "onboarding" or "offboarding" — the process a lifecycle notification is about. */
+/** The `notifications` translator, handed to the pure helpers that build a notification's sentence. */
+export type NotificationsTranslator = ReturnType<typeof useTranslations<"notifications">>;
+
+/** "preboarding", "onboarding" or "offboarding" — the process a lifecycle notification is about (a `select` in the messages). */
 const processKind = (p: Record<string, unknown>): string => {
   const type = typeof p.processType === "string" ? p.processType : "";
   return type === "ONBOARDING" ? "onboarding" : type === "OFFBOARDING" ? "offboarding" : "preboarding";
@@ -19,45 +23,46 @@ export type NotificationPresentation = {
 
 const str = (v: unknown): string => (v == null ? "" : String(v));
 
-const dayCount = (amount: string): string => {
+/** A select argument: whether an optional part of the sentence is there. */
+const has = (v: unknown): "yes" | "no" => (str(v).trim() ? "yes" : "no");
+const yesNo = (b: boolean): "yes" | "no" => (b ? "yes" : "no");
+
+/** The arguments of an inline `{count, plural, … {{amount} days}}`: the plural by the number, the number as people write it. */
+const dayArgs = (amount: string): { count: number; amount: string } => {
   const n = Number(amount);
-  if (!Number.isFinite(n)) return amount;
-  return `${formatDayAmount(n)} ${n === 1 ? "day" : "days"}`;
+  if (!Number.isFinite(n)) return { count: 0, amount };
+  return { count: n, amount: formatDayAmount(n) };
 };
 
 type Params = Record<string, unknown>;
 
-const signedDays = (amount: string): string => {
+const signedDays = (t: NotificationsTranslator, amount: string): string => {
   const n = Number(amount);
-  if (!Number.isFinite(n) || amount === "") return "an amount";
-  return `${n > 0 ? "+" : ""}${dayCount(amount)}`;
+  if (!Number.isFinite(n) || amount === "") return t("presenter.anAmount");
+  return t("presenter.signedDays", { sign: n > 0 ? "+" : "", ...dayArgs(amount) });
 };
 
-const dates = (p: Params): string => {
-  const start = formatDisplayDate(str(p.startDate));
-  const end = formatDisplayDate(str(p.endDate));
+const dates = (p: Params, language?: string): string => {
+  const start = formatDisplayDate(str(p.startDate), { language });
+  const end = formatDisplayDate(str(p.endDate), { language });
   if (!start) return "";
   return !end || end === start ? start : `${start} → ${end}`;
 };
 
-const leave = (p: Params): string => (str(p.policyName) ? `${str(p.policyName)} request` : "time off");
+/** The policy of a leave notification: `{hasPolicy, select, yes {{policy} request} other {time off}}`. */
+const leave = (p: Params) => ({ hasPolicy: has(p.policyName), policy: str(p.policyName) });
 
-/** " by Ada Lovelace", or nothing when the change had no named actor (a scheduler, a settlement). */
-const by = (p: Params): string => (str(p.actorName) ? ` by ${str(p.actorName)}` : "");
+/** The person who did it: `{hasActor, select, yes { by {actor}} other {}}`. */
+const by = (p: Params) => ({ hasActor: has(p.actorName), actor: str(p.actorName) });
 
-/** The sentence with the person who did it as its subject, or the passive one when nobody is named. */
-const actorFirst = (p: Params, withActor: (actor: string) => string, withoutActor: string): string =>
-  str(p.actorName) ? withActor(str(p.actorName)) : withoutActor;
+/** The days a cancellation gave back. */
+const returned = (p: Params) => {
+  const restored = dayArgs(str(p.restoredAmount));
+  return { hasRestored: yesNo(Number(p.restoredAmount) > 0), restoredCount: restored.count, restored: restored.amount };
+};
 
-const from = (p: Params): string => (str(p.effectiveFrom) ? ` from ${formatDisplayDate(str(p.effectiveFrom))}` : "");
-
-const until = (p: Params): string => (str(p.effectiveTo) ? ` after ${formatDisplayDate(str(p.effectiveTo))}` : "");
-
-const returned = (p: Params): string =>
-  Number(p.restoredAmount) > 0 ? `, and ${dayCount(str(p.restoredAmount))} went back to your balance` : "";
-
-const withReason = (message: string, reason: unknown): string =>
-  str(reason).trim() ? `${message} Reason: ${str(reason).trim()}` : message;
+const withReason = (t: NotificationsTranslator, message: string, reason: unknown): string =>
+  str(reason).trim() ? t("presenter.withReason", { message, reason: str(reason).trim() }) : message;
 
 const ownTimeOff = (userId: unknown): string | null =>
   str(userId) ? `/organization/people/${str(userId)}/time-off` : null;
@@ -65,17 +70,23 @@ const ownTimeOff = (userId: unknown): string | null =>
 const ownProfile = (userId: unknown): string | null =>
   str(userId) ? `/organization/people/${str(userId)}/personal` : null;
 
-const capitalise = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
+/** The `{kind, select, …}` argument of a review message. */
+const reviewKind = (kind: unknown): string =>
+  kind === "SELF" || kind === "MANAGER" || kind === "PEER" || kind === "UPWARD" ? kind : "other";
 
-const roleLabel = (p: Params): string => (str(p.roleName) ? `the ${str(p.roleName)} role` : "a role");
+/** A formatted due date, with its select. */
+const dueOn = (value: unknown, language?: string) => ({ hasDue: has(value), due: str(value) ? formatDisplayDate(str(value), { language }) : "" });
 
 /**
  * Turns a stored notification (type + params) into display text + a deep-link, rendered at read time
  * (templates, not snapshot strings). Deep-links are built here from target/params via a shared
  * resolver; a type with no destination yet returns href=null (renders as a non-navigating item).
+ * Every type is one message of the `notifications` catalogue with named arguments.
  */
-export const presentNotification = (n: Notification): NotificationPresentation => {
+export const presentNotification = (n: Notification, t: NotificationsTranslator, language?: string): NotificationPresentation => {
   const p = n.params ?? {};
+  const person = str(p.targetName) || t("fallback.aPerson");
+  const cycle = str(p.cycleName) || t("fallback.aReviewCycle");
 
   switch (n.type) {
     case "TIMEOFF_APPROVAL_REQUESTED": {
@@ -84,11 +95,15 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       // the person's time-off tab refused an approver without a role over them.
       const requestId = n.targetType === "TIME_OFF_REQUEST" ? str(n.targetId) : "";
       return {
-        title: "Time off approval requested",
+        title: t("presenter.approvalRequested.title"),
         // A delegate's copy says whom they are answering for ("for Anna").
-        message: `${str(p.requesterName) || "An employee"} requested ${dayCount(str(p.amount))} · ${dates(p)}${
-          str(p.onBehalfOfName) ? ` · for ${str(p.onBehalfOfName)}` : ""
-        }`,
+        message: t("presenter.approvalRequested.message", {
+          requester: str(p.requesterName) || t("fallback.anEmployee"),
+          ...dayArgs(str(p.amount)),
+          dates: dates(p, language),
+          forSomeone: has(p.onBehalfOfName),
+          onBehalfOf: str(p.onBehalfOfName),
+        }),
         icon: CalendarLock01Icon,
         href: requestId
           ? `/time-off/requests/${requestId}`
@@ -97,12 +112,16 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     }
     case "TIMEOFF_CANCELLATION_REQUESTED":
       return {
-        title: "Cancellation requested",
+        title: t("presenter.cancellationRequested.title"),
         message: withReason(
+          t,
           // A delegate is asked too, and is told whom they answer for — as with the request itself.
-          `${str(p.requesterName) || "An employee"} asks to cancel approved time off · ${dates(p)}${
-            str(p.onBehalfOfName) ? ` · for ${str(p.onBehalfOfName)}` : ""
-          }.`,
+          t("presenter.cancellationRequested.message", {
+            requester: str(p.requesterName) || t("fallback.anEmployee"),
+            dates: dates(p, language),
+            forSomeone: has(p.onBehalfOfName),
+            onBehalfOf: str(p.onBehalfOfName),
+          }),
           p.reason,
         ),
         icon: CalendarLock01Icon,
@@ -110,124 +129,159 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       };
     case "TIMEOFF_REQUEST_CANCELLED":
       return {
-        title: "Time off cancelled",
-        message: withReason(`${str(p.requesterName) || "An employee"}'s time off ${dates(p)} is cancelled.`, p.reason),
+        title: t("presenter.requestCancelled.title"),
+        message: withReason(
+          t,
+          t("presenter.requestCancelled.message", { requester: str(p.requesterName) || t("fallback.anEmployee"), dates: dates(p, language) }),
+          p.reason,
+        ),
         icon: CancelCircleIcon,
         href: ownTimeOff(p.requesterId),
       };
     case "TIMEOFF_REQUEST_APPROVED":
       return {
-        title: "Time off approved",
-        message: `Your ${leave(p)} ${dates(p)} was approved${by(p)}.`,
+        title: t("presenter.requestApproved.title"),
+        message: t("presenter.requestApproved.message", { ...leave(p), dates: dates(p, language), ...by(p) }),
         icon: CheckmarkCircle02Icon,
         href: ownTimeOff(p.requesterId),
       };
     case "TIMEOFF_REQUEST_REJECTED":
       return {
-        title: "Time off rejected",
-        message: withReason(`Your ${leave(p)} ${dates(p)} was rejected${by(p)}.`, p.reason),
+        title: t("presenter.requestRejected.title"),
+        message: withReason(t, t("presenter.requestRejected.message", { ...leave(p), dates: dates(p, language), ...by(p) }), p.reason),
         icon: CancelCircleIcon,
         href: ownTimeOff(p.requesterId),
       };
     case "TIMEOFF_CANCELLATION_APPROVED":
       return {
-        title: "Cancellation approved",
-        message: `Your request to cancel ${leave(p)} ${dates(p)} was approved${by(p)}${returned(p)}.`,
+        title: t("presenter.cancellationApproved.title"),
+        message: t("presenter.cancellationApproved.message", { ...leave(p), dates: dates(p, language), ...by(p), ...returned(p) }),
         icon: CheckmarkCircle02Icon,
         href: ownTimeOff(p.requesterId),
       };
     case "TIMEOFF_CANCELLATION_DECLINED":
       return {
-        title: "Cancellation declined",
-        message: `Your request to cancel ${leave(p)} ${dates(p)} was declined${by(p)}. The time off stands.`,
+        title: t("presenter.cancellationDeclined.title"),
+        message: t("presenter.cancellationDeclined.message", { ...leave(p), dates: dates(p, language), ...by(p) }),
         icon: CancelCircleIcon,
         href: ownTimeOff(p.requesterId),
       };
     case "TIMEOFF_LEAVE_CANCELLED":
       return {
-        title: "Time off cancelled",
-        message: withReason(`Your ${leave(p)} ${dates(p)} was cancelled${by(p)}${returned(p)}.`, p.reason),
+        title: t("presenter.leaveCancelled.title"),
+        message: withReason(
+          t,
+          t("presenter.leaveCancelled.message", { ...leave(p), dates: dates(p, language), ...by(p), ...returned(p) }),
+          p.reason,
+        ),
         icon: CancelCircleIcon,
         href: ownTimeOff(p.requesterId),
       };
-    case "TIMEOFF_POLICY_ASSIGNED":
+    case "TIMEOFF_POLICY_ASSIGNED": {
+      const args = {
+        ...leave(p),
+        hasFrom: has(p.effectiveFrom),
+        from: str(p.effectiveFrom) ? formatDisplayDate(str(p.effectiveFrom), { language }) : "",
+      };
       return {
-        title: "Leave policy assigned",
-        message: actorFirst(
-          p,
-          (actor) => `${actor} assigned you ${str(p.policyName) || "a leave policy"}${from(p)}.`,
-          `${str(p.policyName) || "A leave policy"} now applies to you${from(p)}.`,
-        ),
+        title: t("presenter.policyAssigned.title"),
+        message: str(p.actorName)
+          ? t("presenter.policyAssigned.withActor", { ...args, actor: str(p.actorName) })
+          : t("presenter.policyAssigned.withoutActor", args),
         icon: CalendarLock01Icon,
         href: ownTimeOff(p.userId),
       };
-    case "TIMEOFF_POLICY_ENDED":
+    }
+    case "TIMEOFF_POLICY_ENDED": {
+      const args = {
+        ...leave(p),
+        hasUntil: has(p.effectiveTo),
+        until: str(p.effectiveTo) ? formatDisplayDate(str(p.effectiveTo), { language }) : "",
+      };
       return {
-        title: "Leave policy ended",
-        message: actorFirst(
-          p,
-          (actor) => `${actor} ended ${str(p.policyName) || "a leave policy"} for you${until(p)}.`,
-          `${str(p.policyName) || "A leave policy"} no longer applies to you${until(p)}.`,
-        ),
+        title: t("presenter.policyEnded.title"),
+        message: str(p.actorName)
+          ? t("presenter.policyEnded.withActor", { ...args, actor: str(p.actorName) })
+          : t("presenter.policyEnded.withoutActor", args),
         icon: CalendarLock01Icon,
         href: ownTimeOff(p.userId),
       };
+    }
     case "TIMEOFF_APPROVALS_DELEGATED":
       return {
-        title: "Approvals delegated to you",
-        message: `${str(p.delegatorName) || "A colleague"} delegated their leave approvals to you${
-          dates(p) ? ` · ${dates(p)}` : ""
-        }${str(p.delegationSource) === "LEAVE" ? ", while they are on leave" : ""}. You are asked beside them; whoever answers first decides.`,
+        title: t("presenter.approvalsDelegated.title"),
+        message: t("presenter.approvalsDelegated.message", {
+          delegator: str(p.delegatorName) || t("fallback.aColleague"),
+          hasDates: has(dates(p, language)),
+          dates: dates(p, language),
+          onLeave: yesNo(str(p.delegationSource) === "LEAVE"),
+        }),
         icon: UserGroupIcon,
         href: "/preferences",
       };
-    case "TIMEOFF_BALANCE_ADJUSTED":
+    case "TIMEOFF_BALANCE_ADJUSTED": {
+      const args = { ...leave(p), amount: signedDays(t, str(p.amount)) };
       return {
-        title: "Balance adjusted",
+        title: t("presenter.balanceAdjusted.title"),
         message: withReason(
-          actorFirst(
-            p,
-            (actor) => `${actor} changed your ${str(p.policyName) || "leave"} balance by ${signedDays(str(p.amount))}.`,
-            `Your ${str(p.policyName) || "leave"} balance changed by ${signedDays(str(p.amount))}.`,
-          ),
+          t,
+          str(p.actorName)
+            ? t("presenter.balanceAdjusted.withActor", { ...args, actor: str(p.actorName) })
+            : t("presenter.balanceAdjusted.withoutActor", args),
           p.reason,
         ),
         icon: CalendarLock01Icon,
         href: ownTimeOff(p.userId),
       };
-    case "TIMEOFF_REQUEST_REPRICED":
+    }
+    case "TIMEOFF_REQUEST_REPRICED": {
+      const previous = dayArgs(str(p.previousAmount));
       return {
-        title: "Time off re-priced",
-        message: `The holidays under your ${leave(p)} ${dates(p)} changed, so it now costs ${dayCount(str(p.amount))}${
-          str(p.previousAmount) ? ` instead of ${dayCount(str(p.previousAmount))}` : ""
-        }.`,
+        title: t("presenter.requestRepriced.title"),
+        message: t("presenter.requestRepriced.message", {
+          ...leave(p),
+          dates: dates(p, language),
+          ...dayArgs(str(p.amount)),
+          hasPrevious: has(p.previousAmount),
+          previousCount: previous.count,
+          previous: previous.amount,
+        }),
         icon: CalendarLock01Icon,
         href: ownTimeOff(p.userId),
       };
+    }
     case "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT": {
       const calendarId = str(p.calendarId);
-      const counts = [
-        [p.added, "added"],
-        [p.changed, "changed"],
-        [p.removed, "removed"],
-      ]
+      const counts = (
+        [
+          [p.added, "added"],
+          [p.changed, "changed"],
+          [p.removed, "removed"],
+        ] as const
+      )
         .filter(([count]) => Number(count) > 0)
-        .map(([count, what]) => `${count} ${what}`)
+        .map(([count, what]) => t(`presenter.driftCount.${what}`, { count: str(count) }))
         .join(", ");
+      const year = { hasYear: has(p.year), year: str(p.year), hasCounts: has(counts), counts };
+      const status = n.source?.status;
       // A conflict: the provider changed days the company overrode. It blocks nothing — the company's
       // version stays in force until somebody takes the source's.
       if (p.conflict === true || p.conflict === "true") {
         const conflictOutcome =
-          n.source?.status === "APPLIED"
-            ? "The source's version was taken."
-            : n.source?.status === "DISMISSED"
-              ? "Your version was kept."
-              : n.source?.status === "SUPERSEDED"
-                ? "A newer check replaced it."
-                : "Your version stays in force until someone takes the source's.";
+          status === "APPLIED"
+            ? t("presenter.holidayConflict.applied")
+            : status === "DISMISSED"
+              ? t("presenter.holidayConflict.dismissed")
+              : status === "SUPERSEDED"
+                ? t("presenter.holidayConflict.superseded")
+                : t("presenter.holidayConflict.open");
         return {
-          title: "Your holiday edits differ from the source",
-          message: `The source of ${str(p.calendarName) || "a holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} changed ${counts ? `days you edited: ${counts}` : "days you edited"}. ${conflictOutcome}`,
+          title: t("presenter.holidayConflict.title"),
+          message: t("presenter.holidayConflict.message", {
+            calendar: str(p.calendarName) || t("fallback.aHolidayCalendar"),
+            ...year,
+            outcome: conflictOutcome,
+          }),
           icon: Alert02Icon,
           href: calendarId ? `/settings/time/public-holidays/${calendarId}` : null,
         };
@@ -235,113 +289,148 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       // The last sentence follows the drift as it is now, not as it was when the card was sent: every
       // calendar manager holds a copy and one person's Apply closes them all (WALK_QUESTIONS § 17).
       const outcome =
-        n.source?.status === "APPLIED"
-          ? "It has been applied."
-          : n.source?.status === "DISMISSED"
-            ? "It was dismissed; nothing changed."
-            : n.source?.status === "SUPERSEDED"
-              ? "A newer check replaced it."
-              : "Nothing changes until someone applies it.";
+        status === "APPLIED"
+          ? t("presenter.holidayDrift.applied")
+          : status === "DISMISSED"
+            ? t("presenter.holidayDrift.dismissed")
+            : status === "SUPERSEDED"
+              ? t("presenter.holidayDrift.superseded")
+              : t("presenter.holidayDrift.open");
       return {
-        title: "Holidays changed at the source",
-        message: `${str(p.calendarName) || "A holiday calendar"}${p.year ? ` (${str(p.year)})` : ""} differs from its source${counts ? `: ${counts}` : ""}. ${outcome}`,
+        title: t("presenter.holidayDrift.title"),
+        message: t("presenter.holidayDrift.message", {
+          calendar: str(p.calendarName) || t("fallback.AHolidayCalendar"),
+          ...year,
+          outcome,
+        }),
         icon: Alert02Icon,
         href: calendarId ? `/settings/time/public-holidays/${calendarId}` : null,
       };
     }
     case "ROLE_ASSIGNMENT_CREATED":
       return {
-        title: "Role assigned",
-        message: `You were given ${roleLabel(p)}${by(p)}.`,
+        title: t("presenter.roleAssigned.title"),
+        message: t("presenter.roleAssigned.message", { hasRole: has(p.roleName), role: str(p.roleName), ...by(p) }),
         icon: ShieldCheckIcon,
         href: ownProfile(p.userId),
       };
     case "ROLE_ASSIGNMENT_REMOVED":
       return {
-        title: "Role removed",
-        message: `${capitalise(roleLabel(p))} was taken from you${by(p)}.`,
+        title: t("presenter.roleRemoved.title"),
+        message: t("presenter.roleRemoved.message", { hasRole: has(p.roleName), role: str(p.roleName), ...by(p) }),
         icon: ShieldCheckIcon,
         href: ownProfile(p.userId),
       };
     case "ROLE_HOLDERS_CHANGED": {
       const roleId = str(p.roleId);
-      const role = str(p.roleName) || "a role";
-      const who = str(p.actorName) || "Somebody";
-      const count = Number(p.count) || 0;
-      const people = str(p.personName) || (count === 1 ? "1 person" : `${count} people`);
+      const args = {
+        who: str(p.actorName) || t("fallback.somebody"),
+        role: str(p.roleName) || t("fallback.aRole"),
+        hasPerson: has(p.personName),
+        person: str(p.personName),
+        count: Number(p.count) || 0,
+      };
       return {
-        title: "Role holders changed",
+        title: t("presenter.roleHoldersChanged.title"),
         message: p.added === true || p.added === "true"
-          ? `${who} gave ${role} to ${people}.`
-          : `${who} took ${role} from ${people}.`,
+          ? t("presenter.roleHoldersChanged.added", args)
+          : t("presenter.roleHoldersChanged.removed", args),
         icon: Alert02Icon,
         href: roleId ? `/settings/people/roles/${roleId}` : null,
       };
     }
-    case "MANAGER_CHANGED":
+    case "MANAGER_CHANGED": {
+      const actor = str(p.actorName);
+      const manager = str(p.managerName);
       return {
-        title: "Manager changed",
-        message: str(p.managerName)
-          ? actorFirst(
-              p,
-              (actor) => `${actor} made ${str(p.managerName)} your manager.`,
-              `Your manager is now ${str(p.managerName)}.`,
-            )
-          : actorFirst(p, (actor) => `${actor} removed your manager.`, "You no longer have a manager."),
-        icon: UserGroupIcon,
-        href: ownProfile(p.userId),
-      };
-    case "ORG_UNIT_ASSIGNED":
-    case "ORG_UNIT_UNASSIGNED": {
-      const kind = str(p.unitKind) === "TEAM" ? "team" : "department";
-      const unit = str(p.unitName) ? `the ${str(p.unitName)} ${kind}` : `a ${kind}`;
-      const joined = n.type === "ORG_UNIT_ASSIGNED";
-      return {
-        title: joined ? `Added to a ${capitalise(kind)}` : `Removed from a ${capitalise(kind)}`,
-        message: joined
-          ? actorFirst(p, (actor) => `${actor} added you to ${unit}.`, `You are now in ${unit}.`)
-          : actorFirst(p, (actor) => `${actor} removed you from ${unit}.`, `You were removed from ${unit}.`),
+        title: t("presenter.managerChanged.title"),
+        message: manager
+          ? actor
+            ? t("presenter.managerChanged.setWithActor", { actor, manager })
+            : t("presenter.managerChanged.setWithoutActor", { manager })
+          : actor
+            ? t("presenter.managerChanged.removedWithActor", { actor })
+            : t("presenter.managerChanged.removedWithoutActor"),
         icon: UserGroupIcon,
         href: ownProfile(p.userId),
       };
     }
-    case "POSITION_CHANGED":
+    case "ORG_UNIT_ASSIGNED":
+    case "ORG_UNIT_UNASSIGNED": {
+      const unit = {
+        kind: str(p.unitKind) === "TEAM" ? "team" : "department",
+        hasUnit: has(p.unitName),
+        unit: str(p.unitName),
+      };
+      const actor = str(p.actorName);
+      const joined = n.type === "ORG_UNIT_ASSIGNED";
       return {
-        title: "Position changed",
-        message: p.cleared === true || !str(p.jobName)
-          ? actorFirst(p, (actor) => `${actor} cleared your position.`, "Your position was cleared.")
-          : actorFirst(
-              p,
-              (actor) => `${actor} changed your position to ${str(p.jobName)}.`,
-              `Your position is now ${str(p.jobName)}.`,
-            ),
+        title: joined
+          ? t("presenter.orgUnit.assignedTitle", { kind: unit.kind })
+          : t("presenter.orgUnit.unassignedTitle", { kind: unit.kind }),
+        message: joined
+          ? actor
+            ? t("presenter.orgUnit.assignedWithActor", { ...unit, actor })
+            : t("presenter.orgUnit.assignedWithoutActor", unit)
+          : actor
+            ? t("presenter.orgUnit.unassignedWithActor", { ...unit, actor })
+            : t("presenter.orgUnit.unassignedWithoutActor", unit),
+        icon: UserGroupIcon,
+        href: ownProfile(p.userId),
+      };
+    }
+    case "POSITION_CHANGED": {
+      const actor = str(p.actorName);
+      const job = str(p.jobName);
+      return {
+        title: t("presenter.positionChanged.title"),
+        message: p.cleared === true || !job
+          ? actor
+            ? t("presenter.positionChanged.clearedWithActor", { actor })
+            : t("presenter.positionChanged.clearedWithoutActor")
+          : actor
+            ? t("presenter.positionChanged.setWithActor", { actor, job })
+            : t("presenter.positionChanged.setWithoutActor", { job }),
         icon: Briefcase01Icon,
         href: ownProfile(p.userId),
       };
+    }
     case "DOCUMENT_ADDED_TO_FILE": {
       const userId = str(p.userId);
       return {
-        title: "Document added",
-        message: `${str(p.actorName) || "Somebody"} added ${str(p.fileName) || "a document"} to your file.`,
+        title: t("presenter.documentAdded.title"),
+        message: t("presenter.documentAdded.message", {
+          who: str(p.actorName) || t("fallback.somebody"),
+          file: str(p.fileName) || t("fallback.aDocument"),
+        }),
         icon: FileTextIcon,
         href: userId ? `/organization/people/${userId}/documents` : null,
       };
     }
     case "LIFECYCLE_TASK_DUE": {
       return {
-        title: "A task Is due",
-        message: `"${str(p.taskTitle) || "A task"}" in ${str(p.targetName) || "a person"}'s ${processKind(p)} is due today.`,
+        title: t("presenter.taskDue.title"),
+        message: t("presenter.taskDue.message", {
+          task: str(p.taskTitle) || t("fallback.ATask"),
+          target: person,
+          kind: processKind(p),
+        }),
         icon: CheckListIcon,
         href: "/tasks",
       };
     }
     case "LIFECYCLE_TASK_OVERDUE": {
       const processId = str(p.processId);
-      const who = str(p.assigneeName) ? ` ${str(p.assigneeName)} has not done it yet.` : "";
       return {
-        title: "A task Is overdue",
-        message: `"${str(p.taskTitle) || "A task"}" in ${str(p.targetName) || "a person"}'s ${processKind(p)} was due ${
-          str(p.dueDate) ? formatDisplayDate(str(p.dueDate)) : "three days ago"}.${who}`,
+        title: t("presenter.taskOverdue.title"),
+        message: t("presenter.taskOverdue.message", {
+          task: str(p.taskTitle) || t("fallback.ATask"),
+          target: person,
+          kind: processKind(p),
+          ...dueOn(p.dueDate, language),
+          hasAssignee: has(p.assigneeName),
+          assignee: str(p.assigneeName),
+        }),
         icon: Alert02Icon,
         href: processId ? `/processes/${processId}` : "/tasks",
       };
@@ -349,9 +438,13 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     case "LIFECYCLE_TASK_COMMENTED": {
       const processId = str(p.processId);
       return {
-        title: "A new comment",
-        message: `${str(p.authorName) || "Somebody"} commented on "${str(p.taskTitle) || "a task"}" in ${
-          str(p.targetName) || "a person"}'s ${processKind(p)}.`,
+        title: t("presenter.taskCommented.title"),
+        message: t("presenter.taskCommented.message", {
+          author: str(p.authorName) || t("fallback.somebody"),
+          task: str(p.taskTitle) || t("fallback.aTask"),
+          target: person,
+          kind: processKind(p),
+        }),
         icon: CheckListIcon,
         href: p.forAssignee === true || !processId ? "/tasks" : `/processes/${processId}`,
       };
@@ -359,30 +452,33 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     case "LIFECYCLE_TASKS_ASSIGNED": {
       const count = Number(p.taskCount) || 0;
       const kind = processKind(p);
+      const due = dueOn(p.firstDueDate, language);
       // A task added to a running process, or given to somebody else (C2): one task, named.
       if (str(p.assignedTaskTitle)) {
-        const dueOn = str(p.firstDueDate) ? ` It is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
         return {
-          title: "A task for you",
-          message: `"${str(p.assignedTaskTitle)}" in ${str(p.targetName) || "a person"}'s ${kind} is yours now.${dueOn}`,
+          title: t("presenter.tasksAssigned.oneTitle"),
+          message: t("presenter.tasksAssigned.assigned", { task: str(p.assignedTaskTitle), target: person, kind, ...due }),
           icon: CheckListIcon,
           href: "/tasks",
         };
       }
-      const due = str(p.firstDueDate) ? ` The first is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
       // A task that waited for another and has just opened (decision 10): one task, named.
       if (str(p.openedTaskTitle)) {
-        const dueOn = str(p.firstDueDate) ? ` It is due ${formatDisplayDate(str(p.firstDueDate))}.` : "";
         return {
-          title: "A task for you",
-          message: `"${str(p.openedTaskTitle)}" in ${str(p.targetName) || "a person"}'s ${kind} is ready: what it waited for is done.${dueOn}`,
+          title: t("presenter.tasksAssigned.oneTitle"),
+          message: t("presenter.tasksAssigned.opened", { task: str(p.openedTaskTitle), target: person, kind, ...due }),
           icon: CheckListIcon,
           href: "/tasks",
         };
       }
       return {
-        title: count === 1 ? "A task for you" : "Tasks for you",
-        message: `${str(p.targetName) || "A person"}'s ${kind} started, and ${count === 1 ? "1 task is" : `${count} tasks are`} yours.${due}`,
+        title: t("presenter.tasksAssigned.title", { count }),
+        message: t("presenter.tasksAssigned.started", {
+          target: str(p.targetName) || t("fallback.APerson"),
+          kind,
+          count,
+          ...due,
+        }),
         icon: CheckListIcon,
         href: "/tasks",
       };
@@ -391,8 +487,8 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       const processId = str(p.processId);
       const kind = processKind(p);
       return {
-        title: `A ${kind} step failed`,
-        message: `${str(p.targetName) || "A person"}'s ${kind} stopped: a scheduled step could not be done, and what came after it was not started.`,
+        title: t("presenter.stepFailed.title", { kind }),
+        message: t("presenter.stepFailed.message", { target: str(p.targetName) || t("fallback.APerson"), kind }),
         icon: Alert02Icon,
         href: processId ? `/processes/${processId}` : null,
       };
@@ -401,18 +497,23 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     // for this person by the engine; the other three are about the rule, and are told to its author.
     case "AUTOMATION_MESSAGE": {
       return {
-        title: str(p.ruleName) || "Automation",
-        message: str(p.text) || "An automation sent you a message.",
+        title: str(p.ruleName) || t("fallback.automation"),
+        message: str(p.text) || t("fallback.automationMessage"),
         icon: FlashIcon,
         href: ownProfile(p.personId),
       };
     }
     case "AUTOMATION_TASK_ASSIGNED": {
-      const due = str(p.dueDate) ? ` Due ${formatDisplayDate(str(p.dueDate))}.` : "";
-      const forWhom = str(p.personName) ? ` for ${str(p.personName)}` : "";
       return {
-        title: "A task for you",
-        message: `${str(p.taskTitle) || "A task"}${forWhom} — set by the automation ${str(p.ruleName) || "of your company"}.${due}`,
+        title: t("presenter.automationTask.title"),
+        message: t("presenter.automationTask.message", {
+          task: str(p.taskTitle) || t("fallback.ATask"),
+          hasPerson: has(p.personName),
+          person: str(p.personName),
+          hasRule: has(p.ruleName),
+          rule: str(p.ruleName),
+          ...dueOn(p.dueDate, language),
+        }),
         icon: CheckListIcon,
         href: "/tasks",
       };
@@ -421,8 +522,13 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       const ruleId = str(p.automationRuleId);
       const error = str(p.error).trim();
       return {
-        title: "Automation failed",
-        message: `${str(p.ruleName) || "An automation"} could not finish for ${str(p.personName) || "a person"}${error ? `: ${error.replace(/\.$/, "")}.` : "."} Open its run log to retry.`,
+        title: t("presenter.automationRunFailed.title"),
+        message: t("presenter.automationRunFailed.message", {
+          rule: str(p.ruleName) || t("fallback.anAutomation"),
+          person: str(p.personName) || t("fallback.aPerson"),
+          hasError: has(error),
+          error: error.replace(/\.$/, ""),
+        }),
         icon: Alert02Icon,
         href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
       };
@@ -431,8 +537,12 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       const ruleId = str(p.automationRuleId);
       const reason = str(p.reason).trim();
       return {
-        title: "Automation paused",
-        message: `${str(p.ruleName) || "An automation"} was paused: something it uses is gone.${reason ? ` ${reason}` : ""} Fix it and resume the rule.`,
+        title: t("presenter.automationPaused.title"),
+        message: t("presenter.automationPaused.message", {
+          rule: str(p.ruleName) || t("fallback.anAutomation"),
+          hasReason: has(reason),
+          reason,
+        }),
         icon: Alert02Icon,
         href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
       };
@@ -441,20 +551,24 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       // A scheduled invitation outside any process that could not go out — told to whoever scheduled it.
       const userId = str(p.userId);
       return {
-        title: "Invitation not sent",
-        message: `The invitation scheduled for ${str(p.targetName) || "a person"} could not be sent. Open their profile to invite them again.`,
+        title: t("presenter.invitationFailed.title"),
+        message: t("presenter.invitationFailed.message", { target: person }),
         icon: Alert02Icon,
         href: userId ? `/organization/people/${userId}` : null,
       };
     }
     case "ROLE_ACCESS_CHANGED": {
       const roleId = str(p.roleId);
-      const what = str(p.what) === "FIELD_ACCESS" ? "field access" : "permissions";
-      const role = str(p.roleName) || "A role";
+      const args = {
+        what: str(p.what) === "FIELD_ACCESS" ? "fieldAccess" : "permissions",
+        role: str(p.roleName) || t("fallback.ARole"),
+      };
       const who = str(p.actorName);
       return {
-        title: "Role access changed",
-        message: who ? `${who} changed the ${what} of ${role}.` : `The ${what} of ${role} changed.`,
+        title: t("presenter.roleAccessChanged.title"),
+        message: who
+          ? t("presenter.roleAccessChanged.withActor", { ...args, actor: who })
+          : t("presenter.roleAccessChanged.withoutActor", args),
         icon: Alert02Icon,
         href: roleId ? `/settings/people/roles/${roleId}` : null,
       };
@@ -464,30 +578,34 @@ export const presentNotification = (n: Notification): NotificationPresentation =
       // the password reset that lifts the lock, which lives in the profile's Person Actions.
       const userId = str(p.userId);
       return {
-        title: "Account locked",
-        message: `${str(p.name) || "Somebody"}'s account was locked after too many failed sign-in attempts. Send them a password reset to unlock it.`,
+        title: t("presenter.accountLocked.title"),
+        message: t("presenter.accountLocked.message", { name: str(p.name) || t("fallback.somebody") }),
         icon: SquareLock02Icon,
         href: userId ? `/organization/people/${userId}/personal` : null,
       };
     }
     case "SECURITY_CHANGED": {
       // Every System Owner is told when somebody changes how people sign in (R2.4, MFA_DESIGN.md § 7).
-      const who = str(p.actorName) || "Somebody";
+      const who = str(p.actorName) || t("fallback.somebody");
       const whom = str(p.name);
-      const what: Record<string, string> = {
-        MFA_RESET: `reset ${whom || "a person"}'s two-step sign-in`,
-        MFA_POLICY_CHANGED: "changed who must use two-step sign-in",
-        IDENTITY_CONNECTION_UPDATED: "changed single sign-on",
-        SCIM_TOKEN_ISSUED: "issued a provisioning token",
-        IDP_GROUP_ROLES_CHANGED: "changed the roles an identity provider group grants",
-      };
       const event = str(p.event);
-      const message = event === "SCIM_BLOCK_REFUSED"
-        ? `The identity provider tried to block ${whom || "a System Owner"}. A System Owner is never blocked that way.`
-        : `${who} ${what[event] ?? "changed sign-in security"}.`;
+      const message =
+        event === "SCIM_BLOCK_REFUSED"
+          ? t("presenter.securityChanged.scimBlockRefused", { whom: whom || t("fallback.aSystemOwner") })
+          : event === "MFA_RESET"
+            ? t("presenter.securityChanged.mfaReset", { who, whom: whom || t("fallback.aPerson") })
+            : event === "MFA_POLICY_CHANGED"
+              ? t("presenter.securityChanged.mfaPolicyChanged", { who })
+              : event === "IDENTITY_CONNECTION_UPDATED"
+                ? t("presenter.securityChanged.identityConnectionUpdated", { who })
+                : event === "SCIM_TOKEN_ISSUED"
+                  ? t("presenter.securityChanged.scimTokenIssued", { who })
+                  : event === "IDP_GROUP_ROLES_CHANGED"
+                    ? t("presenter.securityChanged.idpGroupRolesChanged", { who })
+                    : t("presenter.securityChanged.other", { who });
       const securityUserId = str(p.userId);
       return {
-        title: "Sign-in security changed",
+        title: t("presenter.securityChanged.title"),
         message,
         icon: SquareLock02Icon,
         href: securityUserId ? `/organization/people/${securityUserId}/personal` : "/settings/tech/login-and-sso",
@@ -495,142 +613,177 @@ export const presentNotification = (n: Notification): NotificationPresentation =
     }
     // Performance reviews (REVIEWS_DESIGN.md § 8.3). A review's own page is the reviewer's; a cycle's is its runner's.
     case "REVIEW_CYCLE_LAUNCHED": {
-      const due = str(p.firstDueOn) ? ` The first is due ${formatDisplayDate(str(p.firstDueOn))}.` : "";
       return {
-        title: "Reviews to write",
-        message: `${str(p.cycleName) || "A review cycle"} has started and asks you for reviews.${due}`,
+        title: t("presenter.reviewCycleLaunched.title"),
+        message: t("presenter.reviewCycleLaunched.message", {
+          cycle: str(p.cycleName) || t("fallback.AReviewCycle"),
+          ...dueOn(p.firstDueOn, language),
+        }),
         icon: TaskDone01Icon,
         href: "/reviews/me",
       };
     }
     case "REVIEW_ASSIGNED": {
-      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
       return {
-        title: "A review for you",
-        message: `You are asked to write a ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"}.`,
+        title: t("presenter.reviewAssigned.title"),
+        message: t("presenter.reviewAssigned.message", {
+          kind: reviewKind(p.kind),
+          hasSubject: has(p.subjectName),
+          subject: str(p.subjectName),
+          cycle,
+        }),
         icon: TaskDone01Icon,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_DUE_SOON": {
-      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
-      const due = str(p.dueDate) ? ` on ${formatDisplayDate(str(p.dueDate))}` : " in two days";
       return {
-        title: "Review due soon",
-        message: `Your ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"} is due${due}.`,
+        title: t("presenter.reviewDueSoon.title"),
+        message: t("presenter.reviewDueSoon.message", {
+          kind: reviewKind(p.kind),
+          hasSubject: has(p.subjectName),
+          subject: str(p.subjectName),
+          cycle,
+          ...dueOn(p.dueDate, language),
+        }),
         icon: CalendarLock01Icon,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_DUE": {
-      const about = str(p.subjectName) ? ` of ${str(p.subjectName)}` : "";
       return {
-        title: "Review due today",
-        message: `Your ${reviewKind(p.kind)}${about} in ${str(p.cycleName) || "a review cycle"} is due today.`,
+        title: t("presenter.reviewDue.title"),
+        message: t("presenter.reviewDue.message", {
+          kind: reviewKind(p.kind),
+          hasSubject: has(p.subjectName),
+          subject: str(p.subjectName),
+          cycle,
+        }),
         icon: CalendarLock01Icon,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_REMINDER": {
       return {
-        title: "Your review Is waiting",
-        message: `You are reminded to write your ${reviewKind(p.kind)} in ${str(p.cycleName) || "a review cycle"}.`,
+        title: t("presenter.reviewReminder.title"),
+        message: t("presenter.reviewReminder.message", { kind: reviewKind(p.kind), cycle }),
         icon: Notification01Icon,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_OVERDUE": {
       return {
-        title: "Review overdue",
-        message: `${str(p.reviewerName) || "A reviewer"} has not written the ${reviewKind(p.kind)} of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "your cycle"}, due ${formatDisplayDate(str(p.dueDate))}.`,
+        title: t("presenter.reviewOverdue.title"),
+        message: t("presenter.reviewOverdue.message", {
+          reviewer: str(p.reviewerName) || t("fallback.aReviewer"),
+          kind: reviewKind(p.kind),
+          subject: str(p.subjectName) || t("fallback.aPerson"),
+          cycle: str(p.cycleName) || t("fallback.yourCycle"),
+          due: formatDisplayDate(str(p.dueDate), { language }),
+        }),
         icon: Alert02Icon,
         href: str(p.cycleId) ? `/reviews/cycles/${str(p.cycleId)}` : "/reviews",
       };
     }
     case "REVIEW_DECLINED": {
       return {
-        title: "Peer review declined",
-        message: `${str(p.reviewerName) || "A colleague"} declined to review ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "your cycle"}. You may ask somebody else.`,
+        title: t("presenter.reviewDeclined.title"),
+        message: t("presenter.reviewDeclined.message", {
+          reviewer: str(p.reviewerName) || t("fallback.aColleague"),
+          subject: str(p.subjectName) || t("fallback.aPerson"),
+          cycle: str(p.cycleName) || t("fallback.yourCycle"),
+        }),
         icon: CancelCircleIcon,
         href: str(p.cycleId) ? `/reviews/cycles/${str(p.cycleId)}` : "/reviews",
       };
     }
     case "REVIEW_SELF_SUBMITTED": {
       return {
-        title: "Self review in",
-        message: `${str(p.subjectName) || "One of your people"} submitted their self review in ${str(p.cycleName) || "a review cycle"}.`,
+        title: t("presenter.reviewSelfSubmitted.title"),
+        message: t("presenter.reviewSelfSubmitted.message", {
+          subject: str(p.subjectName) || t("fallback.oneOfYourPeople"),
+          cycle,
+        }),
         icon: CheckmarkCircle02Icon,
         href: "/reviews/me",
       };
     }
     case "REVIEW_SHARED": {
       return {
-        title: "Your review Is ready",
-        message: `Your review in ${str(p.cycleName) || "a review cycle"} has been shared with you.`,
+        title: t("presenter.reviewShared.title"),
+        message: t("presenter.reviewShared.message", { cycle }),
         icon: TaskDone01Icon,
         href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_AMENDED": {
       return {
-        title: "Your review was updated",
-        message: `Your manager updated your review in ${str(p.cycleName) || "a review cycle"}. Read the new version and acknowledge it again.`,
+        title: t("presenter.reviewAmended.title"),
+        message: t("presenter.reviewAmended.message", { cycle }),
         icon: TaskDone01Icon,
         href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_ACKNOWLEDGED": {
       return {
-        title: "Review acknowledged",
-        message: `${str(p.subjectName) || "One of your people"} read their review in ${str(p.cycleName) || "a review cycle"}${p.commented === true ? " and left a comment" : ""}.`,
+        title: t("presenter.reviewAcknowledged.title"),
+        message: t("presenter.reviewAcknowledged.message", {
+          subject: str(p.subjectName) || t("fallback.oneOfYourPeople"),
+          cycle,
+          commented: yesNo(p.commented === true),
+        }),
         icon: CheckmarkCircle02Icon,
         href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_PEERS_TO_APPROVE": {
       return {
-        title: "Peers to approve",
-        message: `${str(p.subjectName) || "One of your people"} nominated their peers in ${str(p.cycleName) || "a review cycle"}. Approve them, or change the list first.`,
+        title: t("presenter.reviewPeersToApprove.title"),
+        message: t("presenter.reviewPeersToApprove.message", {
+          subject: str(p.subjectName) || t("fallback.oneOfYourPeople"),
+          cycle,
+        }),
         icon: TaskDone01Icon,
         href: n.targetId ? `/reviews/nominations/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_PEERS_APPROVED": {
       return {
-        title: "Your peers were approved",
+        title: t("presenter.reviewPeersApproved.title"),
         message: p.autoApproved === true
-          ? `Nobody changed your nomination in ${str(p.cycleName) || "a review cycle"} by the approval date, so your peers stood and were asked.`
-          : `Your peers in ${str(p.cycleName) || "a review cycle"} were approved and asked for their reviews.`,
+          ? t("presenter.reviewPeersApproved.auto", { cycle })
+          : t("presenter.reviewPeersApproved.manual", { cycle }),
         icon: CheckmarkCircle02Icon,
         href: n.targetId ? `/reviews/nominations/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_TO_APPROVE": {
       return {
-        title: "A review to approve",
-        message: `The manager review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} waits for your approval.`,
+        title: t("presenter.reviewToApprove.title"),
+        message: t("presenter.reviewToApprove.message", { subject: str(p.subjectName) || t("fallback.aPerson"), cycle }),
         icon: TaskDone01Icon,
         href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_APPROVED": {
       return {
-        title: "Your review was approved",
-        message: `Your review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} was approved.`,
+        title: t("presenter.reviewApproved.title"),
+        message: t("presenter.reviewApproved.message", { subject: str(p.subjectName) || t("fallback.aPerson"), cycle }),
         icon: CheckmarkCircle02Icon,
         href: n.targetId ? `/reviews/packets/${str(n.targetId)}` : "/reviews/me",
       };
     }
     case "REVIEW_SENT_BACK": {
       return {
-        title: "Your review was sent back",
-        message: `Your review of ${str(p.subjectName) || "a person"} in ${str(p.cycleName) || "a review cycle"} was sent back with a comment. Change it and submit it again.`,
+        title: t("presenter.reviewSentBack.title"),
+        message: t("presenter.reviewSentBack.message", { subject: str(p.subjectName) || t("fallback.aPerson"), cycle }),
         icon: Alert02Icon,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
     default:
       return {
+        // An unknown type shows its own code, humanised — there is no text for it to translate.
         title: n.type.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
         message: "",
         icon: Notification01Icon,
@@ -639,56 +792,54 @@ export const presentNotification = (n: Notification): NotificationPresentation =
   }
 };
 
-function reviewKind(kind: unknown): string {
-  return kind === "SELF" ? "self review" : kind === "MANAGER" ? "manager review" : kind === "PEER" ? "peer review"
-    : kind === "UPWARD" ? "upward review" : "review";
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  APPROVALS: "Approvals",
-  ORG_CHANGES: "Org changes",
-  DOCUMENTS: "Documents",
-  TASKS: "Tasks",
-  POLICIES: "Policies",
-  SYSTEM: "System",
-};
+const CATEGORY_KEYS = {
+  APPROVALS: "categories.APPROVALS",
+  ORG_CHANGES: "categories.ORG_CHANGES",
+  DOCUMENTS: "categories.DOCUMENTS",
+  TASKS: "categories.TASKS",
+  POLICIES: "categories.POLICIES",
+  SYSTEM: "categories.SYSTEM",
+} as const;
 
 /** Friendly label for a notification category (falls back to a humanized key for unknown ones). */
-export const categoryLabel = (category: string): string =>
-  CATEGORY_LABELS[category] ?? category.replaceAll("_", " ").toLowerCase();
+export const categoryLabel = (category: string, t: NotificationsTranslator): string =>
+  category in CATEGORY_KEYS
+    ? t(CATEGORY_KEYS[category as keyof typeof CATEGORY_KEYS])
+    : category.replaceAll("_", " ").toLowerCase();
 
-export type DateGroup = { key: string; label: string; order: number };
+export type DateGroupKey = "today" | "yesterday" | "week" | "earlier";
+export type DateGroup = { key: DateGroupKey; order: number };
 
 /**
  * Buckets a notification's timestamp into a coarse date section for grouped rendering
- * (Today / Yesterday / This week / Earlier). `order` gives a stable sort, newest bucket first.
+ * (Today / Yesterday / This week / Earlier — `inbox.dateGroup.<key>`). `order` gives a stable sort, newest bucket first.
  */
 export const dateGroup = (iso: string): DateGroup => {
   const then = new Date(iso);
-  if (Number.isNaN(then.getTime())) return { key: "earlier", label: "Earlier", order: 3 };
+  if (Number.isNaN(then.getTime())) return { key: "earlier", order: 3 };
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const dayMs = 24 * 60 * 60 * 1000;
   const diffDays = Math.floor((startOfToday.getTime() - then.getTime()) / dayMs);
 
-  if (then.getTime() >= startOfToday.getTime()) return { key: "today", label: "Today", order: 0 };
-  if (diffDays < 1) return { key: "yesterday", label: "Yesterday", order: 1 };
-  if (diffDays < 7) return { key: "week", label: "This week", order: 2 };
-  return { key: "earlier", label: "Earlier", order: 3 };
+  if (then.getTime() >= startOfToday.getTime()) return { key: "today", order: 0 };
+  if (diffDays < 1) return { key: "yesterday", order: 1 };
+  if (diffDays < 7) return { key: "week", order: 2 };
+  return { key: "earlier", order: 3 };
 };
 
-export const timeAgo = (iso: string): string => {
+export const timeAgo = (iso: string, t: NotificationsTranslator, language?: string): string => {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const secs = Math.max(0, Math.floor((Date.now() - then) / 1000));
-  if (secs < 60) return "just now";
+  if (secs < 60) return t("inbox.timeAgo.justNow");
   const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins} min ago`;
+  if (mins < 60) return t("inbox.timeAgo.minutes", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("inbox.timeAgo.hours", { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t("inbox.timeAgo.days", { count: days });
   // Older than a week: an actual date, through the one formatter.
-  return formatDisplayDate(iso);
+  return formatDisplayDate(iso, { language });
 };

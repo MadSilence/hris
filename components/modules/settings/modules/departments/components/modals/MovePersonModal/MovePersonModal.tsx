@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { FormError } from "@/components/feedback/FormError";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
@@ -37,6 +38,8 @@ export function MovePersonModal({
   errorMessage,
   onConfirm,
 }: Props) {
+  const t = useTranslations("structure.departments");
+  const tCommon = useTranslations("common");
   const isRemoval = targetName === null;
 
   return (
@@ -44,27 +47,29 @@ export function MovePersonModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isRemoval ? `Remove ${personName} from the department?` : `Move ${personName}?`}
+            {isRemoval
+              ? t("movePerson.removeTitle", { person: personName })
+              : t("movePerson.moveTitle", { person: personName })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="flex items-center gap-3 rounded-control border border-divider bg-subtle p-3">
             <span className="min-w-0 flex-1 truncate text-body text-secondary">
-              {sourceName ?? "No department"}
+              {sourceName ?? t("person.none")}
             </span>
             <Icon icon={ArrowRight02Icon} size="sm" className="flex-none text-tertiary" />
             <span className="min-w-0 flex-1 truncate text-right text-body font-medium text-primary">
-              {targetName ?? "No department"}
+              {targetName ?? t("person.none")}
             </span>
           </div>
 
           <p className="text-body text-secondary">
             {isRemoval
-              ? `${personName} will no longer belong to any department.`
+              ? t("movePerson.removeBody", { person: personName })
               : sourceName
-                ? `A person can belong to one department only, so ${personName} will be removed from ${sourceName}.`
-                : `${personName} will be assigned to ${targetName}.`}
+                ? t("movePerson.moveBody", { person: personName, source: sourceName })
+                : t("movePerson.assignBody", { person: personName, target: targetName ?? "" })}
           </p>
 
           <FormError message={errorMessage} />
@@ -72,10 +77,10 @@ export function MovePersonModal({
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={onConfirm} disabled={isPending}>
-            {isPending ? "Saving…" : isRemoval ? "Remove" : "Move here"}
+            {isPending ? tCommon("actions.saving") : isRemoval ? tCommon("actions.remove") : t("movePerson.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

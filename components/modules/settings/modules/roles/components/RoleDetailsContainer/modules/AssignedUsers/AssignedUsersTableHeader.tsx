@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Add01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -28,6 +29,8 @@ export default function AssignedUsersTableHeader({
   showHistory = false,
   onShowHistoryChange,
 }: AssignedUsersTableHeaderProps) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   return (
     <div className="flex items-center justify-between gap-4">
       {showHistory ? <span/> : <SearchBox value={query} onChange={onQueryChange}/>}
@@ -43,11 +46,11 @@ export default function AssignedUsersTableHeader({
             className="gap-1.5"
           >
             <Icon icon={Add01Icon} size="sm" />
-            Assign
+            {t("roles.assigned.assign")}
           </Button>
         </PermissionGate>
 
-        <Button type="button" size="icon" variant="secondary" onClick={onExportClick} aria-label="Export">
+        <Button type="button" size="icon" variant="secondary" onClick={onExportClick} aria-label={tCommon("actions.export")}>
           <Icon icon={Download01Icon} size="sm" />
         </Button>
       </div>

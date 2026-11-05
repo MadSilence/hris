@@ -1,4 +1,8 @@
-import { describeUserAgent } from "./describeUserAgent";
+import { translatorFor } from "@/test/nextIntl";
+import { describeUserAgent as describe_ } from "./describeUserAgent";
+
+const t = translatorFor("auth") as unknown as Parameters<typeof describe_>[1];
+const describeUserAgent = (ua: string | null) => describe_(ua, t);
 
 describe("describeUserAgent", () => {
   it("names the browser before the engine it borrows", () => {

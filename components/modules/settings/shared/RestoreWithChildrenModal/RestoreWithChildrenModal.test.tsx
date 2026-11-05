@@ -21,7 +21,7 @@ const renderModal = (items: RestoreChild[] = tree, overrides: Partial<React.Comp
       isOpen
       title="Unarchive department"
       name="Sales"
-      childNoun="sub-departments"
+      childKind="subDepartments"
       items={items}
       onConfirmAction={onConfirmAction}
       onCancelAction={onCancelAction}
@@ -107,7 +107,7 @@ describe("RestoreWithChildrenModal", () => {
         { id: "j1", name: "Engineer", detail: "ENG-1", parentId: null, depth: 1, archivedAt: "2026-10-01T10:00:00", archivedWithParent: true },
         { id: "j2", name: "Designer", detail: null, parentId: null, depth: 1, archivedAt: "2026-02-01T10:00:00", archivedWithParent: false },
       ],
-      { title: "Unarchive job family", childNoun: "positions" },
+      { title: "Unarchive job family", childKind: "positions" },
     );
 
     expect(screen.getByText("ENG-1")).toBeInTheDocument();

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import {
@@ -17,6 +18,8 @@ import type { LegalEntity } from "@/models/legalEntity";
 const BASE_PATH = "/legal-entities";
 
 export default function LegalEntityAssignedUsersTab({ entity }: { entity: LegalEntity }) {
+  const t = useTranslations("structure.legalEntities");
+  const tPlaces = useTranslations("structure.places");
   const [query, setQuery] = useState("");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const debounced = useDebouncedValue(query.trim(), 300);
@@ -37,7 +40,7 @@ export default function LegalEntityAssignedUsersTab({ entity }: { entity: LegalE
   return (
     <>
       <AssignedUsersPanel
-        description="Everyone assigned to this legal entity, managed in one place."
+        description={t("assigned.description")}
         manageResource="ORG.LEGAL_ENTITY"
         query={query}
         onQueryChange={setQuery}
@@ -55,16 +58,16 @@ export default function LegalEntityAssignedUsersTab({ entity }: { entity: LegalE
           basePath: BASE_PATH,
           assignableId: entity.id,
           assignableName: entity.name,
-          noun: "legal entity",
+          kind: "legalEntity",
           invalidateKeys: [assignedUsersQueryKey(BASE_PATH, entity.id)],
         }}
       />
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title={`Export ${entity.name}`}
-        description="Export this legal entity's details and its assigned users."
-        includedText="Two sheets — General Information (name, description, registration number, tax ID, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+        title={tPlaces("exportNamed", { name: entity.name })}
+        description={t("details.exportDescription")}
+        includedText={t("details.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

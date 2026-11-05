@@ -1,8 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
+import { translatorFor } from "@/test/nextIntl";
+
 import { ShareViewDialog, previewSentences } from "./ShareViewDialog";
 import type { PeopleView, PeopleViewShare, SharePreview } from "@/models/peopleView";
 import type { PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
+
+// The real English catalogue, as the component reads it.
+const t = translatorFor("organization") as unknown as Parameters<typeof previewSentences>[1];
 
 const shareMutate = jest.fn();
 const unshareMutate = jest.fn();
@@ -130,7 +135,7 @@ describe("previewSentences", () => {
         recipientCount: 5,
         noPeopleAccessCount: 1,
         hiddenFields: [{ fieldId: "sys:email", label: "Email", peopleCount: 1, sampleNames: ["Ann Admin"] }],
-      }),
+      }, t),
     ).toEqual([
       "1 person can't open the People table and won't see this view at all.",
       "1 person won't see Email (Ann Admin).",

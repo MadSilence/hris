@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -85,6 +86,8 @@ export const buildPeopleExportRequest = (
  * refused is not offered (EXPORT.md). The gate is UX; the refusal is the server's.
  */
 export const PeopleExport: FC<PeopleExportProps> = (props) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [allColumns, setAllColumns] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -92,12 +95,12 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
 
   const includedText = useMemo(() => {
     if (allColumns) {
-      return "Included: every column you are allowed to see, including the ones hidden in the table.";
+      return t("export.includedAll");
     }
     const shown = props.columns.filter((c) => c.checked).map((c) => c.label);
-    const list = shown.length ? shown.join(", ") : "Name";
-    return `Included: ${list}. Status is added when the view leaves it out, so a former employee is never mistaken for a current one.`;
-  }, [allColumns, props.columns]);
+    const list = shown.length ? shown.join(", ") : tCommon("fields.personName");
+    return t("export.includedShown", { list });
+  }, [allColumns, props.columns, t, tCommon]);
 
   const close = () => {
     if (busy) return;
@@ -133,7 +136,7 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
       <Button type="button"
         size="icon"
         variant="secondary"
-        aria-label="Export people"
+        aria-label={t("export.title")}
         onClick={() => setOpen(true)}
       >
         <Icon icon={Download01Icon} size="sm" />
@@ -147,9 +150,9 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
       >
         <DialogContent hideClose className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Export people</DialogTitle>
+            <DialogTitle>{t("export.title")}</DialogTitle>
             <DialogDescription>
-              The people in the current view — the same search, filters, segment and order as the table.
+              {t("export.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -157,9 +160,9 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
 
           <label className="flex items-start justify-between gap-4 rounded-control border border-divider px-4 py-3">
             <span>
-              <span className="block text-body font-medium">Export all columns</span>
+              <span className="block text-body font-medium">{t("export.allColumns")}</span>
               <span className="mt-0.5 block text-hint text-tertiary">
-                Every column you are allowed to see, not only the ones shown.
+                {t("export.allColumnsHint")}
               </span>
             </span>
             <Switch
@@ -167,7 +170,7 @@ export const PeopleExport: FC<PeopleExportProps> = (props) => {
               checked={allColumns}
               disabled={busy}
               onCheckedChange={setAllColumns}
-              aria-label="Export all columns"
+              aria-label={t("export.allColumns")}
             />
           </label>
 

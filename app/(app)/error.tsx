@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { ErrorPage } from "@/components/feedback/ErrorPage";
 
@@ -28,6 +29,8 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("navigation");
+  const tCommon = useTranslations("common");
   React.useEffect(() => {
     console.error("Unhandled error in the app shell:", error, error.digest ?? "");
   }, [error]);
@@ -35,16 +38,16 @@ export default function AppError({
   return (
     <ErrorPage
       scene="something-broke"
-      title="Something broke on our side"
-      line="Try again in a moment."
+      title={t("errorPages.serverTitle")}
+      line={t("errorPages.serverLine")}
       reference={error.digest}
       actions={
         <>
           <Button type="button" onClick={reset}>
-            Try again
+            {tCommon("actions.retry")}
           </Button>
           <Button asChild variant="secondary">
-            <Link href="/dashboard">Go to home</Link>
+            <Link href="/dashboard">{tCommon("actions.goHome")}</Link>
           </Button>
         </>
       }

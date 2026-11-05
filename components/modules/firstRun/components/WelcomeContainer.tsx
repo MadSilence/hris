@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { NodRing } from "@/components/desact/nod";
 
 import { Button } from "@/components/desact/button";
@@ -21,8 +22,6 @@ import { WELCOME_QK, useWelcome } from "@/components/modules/firstRun/hooks";
 import type { Attribute } from "@/models/attribute/Attribute";
 import { Stepper } from "@/components/ui/Stepper";
 import { Illustration } from "@/components/illustrations/Illustration";
-
-const WELCOME_STEPS = ["About you", "Your preferences"] as const;
 
 const ATTR_PREFIX = "attr:";
 
@@ -44,6 +43,9 @@ const ATTR_PREFIX = "attr:";
  */
 export const WelcomeContainer: React.FC = () => {
   const queryClient = useQueryClient();
+  const t = useTranslations("firstRun");
+  const tCommon = useTranslations("common");
+  const welcomeSteps = React.useMemo(() => [t("welcome.steps.aboutYou"), t("welcome.steps.preferences")], [t]);
   const { userId } = useCurrentUser();
   const welcome = useWelcome();
   const groups = useAttributeGroups();
@@ -128,20 +130,20 @@ export const WelcomeContainer: React.FC = () => {
     <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-8 px-4 py-16">
       <header className="flex flex-col gap-4">
         {step === 0 && <Illustration scene="onboarding" size="m" className="self-start" />}
-        <Stepper steps={WELCOME_STEPS} current={step} />
+        <Stepper steps={welcomeSteps} current={step} />
         <h1 className="text-greeting text-primary">
           {step === 0
             ? firstName
-              ? `Welcome, ${firstName}`
-              : "Welcome"
-            : "How would you like things shown?"}
+              ? t("welcome.greeting", { name: firstName })
+              : t("welcome.metaTitle")
+            : t("welcome.preferencesTitle")}
         </h1>
         <p className="text-body text-secondary">
           {step === 0
             ? editable.length
-              ? "A photo so colleagues can put a face to your name, and anything of yours that is still blank."
-              : "A photo, so colleagues can put a face to your name."
-            : "Two settings, and you can change them whenever you like."}
+              ? t("welcome.leadWithFields")
+              : t("welcome.leadPhotoOnly")
+            : t("welcome.preferencesLead")}
         </p>
       </header>
 
@@ -149,7 +151,7 @@ export const WelcomeContainer: React.FC = () => {
         <div className="grid gap-10 md:grid-cols-[14rem_1fr]">
           <AvatarWithQr
             userId={userId ?? ""}
-            fullName={fullName || firstName || "You"}
+            fullName={fullName || firstName || t("welcome.you")}
             avatarUrl={welcome.data?.avatarUrl ?? null}
             onUploadedAction={refreshWelcome}
           />
@@ -160,7 +162,7 @@ export const WelcomeContainer: React.FC = () => {
               // person owns about themselves to fill in, so the step is the photo. The sentence is
               // true for everybody — the owner of the company is not "your HR team".
               <p className="text-body text-tertiary">
-                Everything else about you lives on your profile, where you can change it any time.
+                {t("welcome.nothingToFill")}
               </p>
             ) : (
               <div className="divide-y divide-divider">
@@ -201,16 +203,16 @@ export const WelcomeContainer: React.FC = () => {
       */}
       <div className="flex items-center justify-between gap-3">
         <Button type="button" variant="ghost" onClick={leave} disabled={busy}>
-          Skip
+          {t("welcome.skip")}
         </Button>
 
         {step === 0 ? (
           <Button key="next" type="button" onClick={saveStepOne} loading={busy}>
-            {busy ? "Saving…" : "Continue"}
+            {busy ? tCommon("actions.saving") : tCommon("actions.continue")}
           </Button>
         ) : (
           <Button key="finish" type="submit" form="welcome-preferences">
-            Finish
+            {t("welcome.finish")}
           </Button>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -63,6 +64,8 @@ export type WizardSetter = <K extends keyof PolicyWizardValues>(
 ) => void;
 
 type StepProps = { values: PolicyWizardValues; set: WizardSetter };
+
+type TimeOffT = ReturnType<typeof useTranslations<"timeOff">>;
 
 // ── Shared helpers ───────────────────────────────────────────────────
 
@@ -128,11 +131,13 @@ function Reveal({ children }: { children: ReactNode }) {
 // ── Step 1: Basics ───────────────────────────────────────────────────
 
 /** `nameError` is a refusal of the name by the server — a name already taken (TOP00004). */
-export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ values, set, nameError }) => (
+export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ values, set, nameError }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>Give the policy a name and the essentials. You can fine-tune the rules in the next steps.</StepIntro>
+    <StepIntro>{t("policyWizard.basics.intro")}</StepIntro>
 
-    <Field label="Name" htmlFor="wiz-name" error={nameError}>
+    <Field label={t("policyWizard.basics.name")} htmlFor="wiz-name" error={nameError}>
       <Input
         id="wiz-name"
         aria-invalid={nameError ? true : undefined}
@@ -141,7 +146,7 @@ export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ valu
       />
     </Field>
 
-    <Field label="Description" htmlFor="wiz-desc" hint="Shown to admins.">
+    <Field label={t("policyWizard.basics.description")} htmlFor="wiz-desc" hint={t("policyWizard.basics.descriptionHint")}>
       <Input
         id="wiz-desc"
         value={values.description}
@@ -150,19 +155,19 @@ export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ valu
     </Field>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Field label="Unit" htmlFor="wiz-unit">
+      <Field label={t("policyWizard.basics.unit")} htmlFor="wiz-unit">
         <Select value={values.unit} onValueChange={(v) => set("unit", v as TimeOffPolicyUnit)}>
           <SelectTrigger id="wiz-unit">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={TimeOffPolicyUnit.Days}>Days</SelectItem>
-            <SelectItem value={TimeOffPolicyUnit.Hours}>Hours</SelectItem>
+            <SelectItem value={TimeOffPolicyUnit.Days}>{t("policyWizard.basics.days")}</SelectItem>
+            <SelectItem value={TimeOffPolicyUnit.Hours}>{t("policyWizard.basics.hours")}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
 
-      <Field label="Effective date" htmlFor="wiz-eff" hint="When it takes effect.">
+      <Field label={t("policyWizard.basics.effectiveDate")} htmlFor="wiz-eff" hint={t("policyWizard.basics.effectiveHint")}>
         <DatePicker
           id="wiz-eff"
           value={values.effectiveDate}
@@ -173,20 +178,21 @@ export const BasicsStep: FC<StepProps & { nameError?: string | null }> = ({ valu
 
     <div className="space-y-1 pt-1">
       <ToggleField
-        label="Paid leave"
-        hint="Whether time off under this policy is paid."
+        label={t("policyWizard.basics.paid")}
+        hint={t("policyWizard.basics.paidHint")}
         checked={values.paid}
         onCheckedChange={(v) => set("paid", v)}
       />
       <ToggleField
-        label="Private — colleagues see only “Time off”"
-        hint="On the company calendar and home, colleagues see that the person is away but not this leave type. The person, their manager and HR still see it. Employees also do not see the policy in the policy list."
+        label={t("policyWizard.basics.private")}
+        hint={t("policyWizard.basics.privateHint")}
         checked={values.hiddenFromEmployees}
         onCheckedChange={(v) => set("hiddenFromEmployees", v)}
       />
     </div>
   </div>
-);
+  );
+};
 
 // ── Step 2: Entitlement & renewal ────────────────────────────────────
 
@@ -225,28 +231,30 @@ function setRenewalMode(set: WizardSetter, mode: string) {
   }
 }
 
-function renewalSummary(v: PolicyWizardValues): string {
+function renewalSummary(v: PolicyWizardValues, t: TimeOffT): string {
   switch (v.renewalType) {
     case TimeOffPolicyRenewalType.Manual:
       // "Manual" implied an action somebody performs. There is none: the balance simply never
       // renews, and an administrator adjusts it when they mean to.
-      return "Never — adjusted by hand";
+      return t("policyWizard.entitlement.summaryManual");
     case TimeOffPolicyRenewalType.Anniversary:
-      return "On hire date";
+      return t("policyWizard.entitlement.summaryHire");
     default:
       return isYearStart(v)
-        ? "Year start (1 Jan)"
-        : `${v.renewalFixedDay}/${v.renewalFixedMonth} yearly`;
+        ? t("policyWizard.entitlement.yearStart")
+        : t("policyWizard.entitlement.summaryYearly", { day: v.renewalFixedDay, month: v.renewalFixedMonth });
   }
 }
 
-export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
+export const EntitlementStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>How much time off employees get each year, and when the balance resets.</StepIntro>
+    <StepIntro>{t("policyWizard.entitlement.intro")}</StepIntro>
 
     <ToggleField
-      label="Unlimited quota"
-      hint="No yearly balance limit (e.g. unlimited sick days)."
+      label={t("policyWizard.entitlement.unlimited")}
+      hint={t("policyWizard.entitlement.unlimitedHint")}
       checked={values.unlimitedQuota}
       onCheckedChange={(v) => set("unlimitedQuota", v)}
     />
@@ -254,9 +262,9 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
     {!values.unlimitedQuota && (
       <Reveal>
         <Field
-          label="Yearly quota"
+          label={t("policyWizard.entitlement.quota")}
           htmlFor="wiz-quota"
-          hint={`Amount granted per year, in ${values.unit === TimeOffPolicyUnit.Hours ? "hours" : "days"}.`}
+          hint={t("policyWizard.entitlement.quotaHint", { unit: values.unit })}
         >
           <Input
             id="wiz-quota"
@@ -269,7 +277,7 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
       </Reveal>
     )}
 
-    <Field label="Granting mode" htmlFor="wiz-grant" hint="Upfront grants the full amount; accrued earns it over time (configure in the Accrual step).">
+    <Field label={t("policyWizard.entitlement.grantingMode")} htmlFor="wiz-grant" hint={t("policyWizard.entitlement.grantingHint")}>
       <Select
         value={values.entitlementGrantingMode}
         onValueChange={(v) => set("entitlementGrantingMode", v as TimeOffPolicyEntitlementMode)}
@@ -278,27 +286,27 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={TimeOffPolicyEntitlementMode.Upfront}>Upfront (full amount)</SelectItem>
+          <SelectItem value={TimeOffPolicyEntitlementMode.Upfront}>{t("policyWizard.entitlement.upfront")}</SelectItem>
           <SelectItem value={TimeOffPolicyEntitlementMode.Accrued}>
-            Accrued (earned over time)
+            {t("policyWizard.entitlement.accrued")}
           </SelectItem>
         </SelectContent>
       </Select>
     </Field>
 
-    <Field label="Renewal" htmlFor="wiz-renewal" hint="When the balance resets each year.">
+    <Field label={t("policyWizard.entitlement.renewal")} htmlFor="wiz-renewal" hint={t("policyWizard.entitlement.renewalHint")}>
       <Select value={renewalSelectValue(values)} onValueChange={(v) => setRenewalMode(set, v)}>
         <SelectTrigger id="wiz-renewal">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={RENEWAL_YEAR_START}>Year start (1 Jan)</SelectItem>
-          <SelectItem value={RENEWAL_FIXED_DATE}>Yearly on a custom date</SelectItem>
+          <SelectItem value={RENEWAL_YEAR_START}>{t("policyWizard.entitlement.yearStart")}</SelectItem>
+          <SelectItem value={RENEWAL_FIXED_DATE}>{t("policyWizard.entitlement.customDate")}</SelectItem>
           <SelectItem value={TimeOffPolicyRenewalType.Anniversary}>
-            On the employee&apos;s hire date
+            {t("policyWizard.entitlement.hireDate")}
           </SelectItem>
           <SelectItem value={TimeOffPolicyRenewalType.Manual}>
-            Never — the balance is kept by hand
+            {t("policyWizard.entitlement.never")}
           </SelectItem>
         </SelectContent>
       </Select>
@@ -307,7 +315,7 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
     {renewalSelectValue(values) === RENEWAL_FIXED_DATE && (
       <Reveal>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Renewal day" htmlFor="wiz-rday">
+          <Field label={t("policyWizard.entitlement.renewalDay")} htmlFor="wiz-rday">
             <Input
               id="wiz-rday"
               type="number"
@@ -317,7 +325,7 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
               onChange={(e) => set("renewalFixedDay", e.currentTarget.value)}
             />
           </Field>
-          <Field label="Renewal month" htmlFor="wiz-rmonth">
+          <Field label={t("policyWizard.entitlement.renewalMonth")} htmlFor="wiz-rmonth">
             <Input
               id="wiz-rmonth"
               type="number"
@@ -333,19 +341,22 @@ export const EntitlementStep: FC<StepProps> = ({ values, set }) => (
 
     {values.renewalType === TimeOffPolicyRenewalType.Anniversary && (
       <p className="text-hint text-tertiary">
-        The balance renews on each employee&apos;s work anniversary (their hire date).
+        {t("policyWizard.entitlement.anniversaryHint")}
       </p>
     )}
   </div>
-);
+  );
+};
 
 // ── Step 3: Carryover & balance ──────────────────────────────────────
 
-export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
+export const CarryoverStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>What happens to unused balance at renewal, and whether balances may go negative.</StepIntro>
+    <StepIntro>{t("policyWizard.carryover.intro")}</StepIntro>
 
-    <Field label="Carryover" htmlFor="wiz-co" hint="Unused balance at the end of a period.">
+    <Field label={t("policyWizard.carryover.carryover")} htmlFor="wiz-co" hint={t("policyWizard.carryover.carryoverHint")}>
       <Select
         value={values.carryoverType}
         onValueChange={(v) => set("carryoverType", v as TimeOffPolicyCarryoverType)}
@@ -354,9 +365,9 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={TimeOffPolicyCarryoverType.None}>None (use it or lose it)</SelectItem>
-          <SelectItem value={TimeOffPolicyCarryoverType.Unlimited}>Unlimited</SelectItem>
-          <SelectItem value={TimeOffPolicyCarryoverType.Limited}>Limited</SelectItem>
+          <SelectItem value={TimeOffPolicyCarryoverType.None}>{t("policyWizard.carryover.none")}</SelectItem>
+          <SelectItem value={TimeOffPolicyCarryoverType.Unlimited}>{t("policyWizard.carryover.unlimited")}</SelectItem>
+          <SelectItem value={TimeOffPolicyCarryoverType.Limited}>{t("policyWizard.carryover.limited")}</SelectItem>
         </SelectContent>
       </Select>
     </Field>
@@ -364,7 +375,7 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
     {values.carryoverType !== TimeOffPolicyCarryoverType.None && (
       <Reveal>
         {values.carryoverType === TimeOffPolicyCarryoverType.Limited && (
-          <Field label="Carryover limit" htmlFor="wiz-colimit" hint="Maximum amount carried into the next period.">
+          <Field label={t("policyWizard.carryover.limit")} htmlFor="wiz-colimit" hint={t("policyWizard.carryover.limitHint")}>
             <Input
               id="wiz-colimit"
               type="number"
@@ -375,7 +386,7 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
           </Field>
         )}
 
-        <Field label="Carried-over balance expires" htmlFor="wiz-coexp">
+        <Field label={t("policyWizard.carryover.expires")} htmlFor="wiz-coexp">
           <Select
             value={values.carryoverExpiryType}
             onValueChange={(v) => set("carryoverExpiryType", v as TimeOffPolicyCarryoverExpiryType)}
@@ -384,15 +395,15 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={TimeOffPolicyCarryoverExpiryType.Never}>Never</SelectItem>
-              <SelectItem value={TimeOffPolicyCarryoverExpiryType.AfterPeriod}>After a period</SelectItem>
+              <SelectItem value={TimeOffPolicyCarryoverExpiryType.Never}>{t("policyWizard.carryover.never")}</SelectItem>
+              <SelectItem value={TimeOffPolicyCarryoverExpiryType.AfterPeriod}>{t("policyWizard.carryover.afterPeriod")}</SelectItem>
             </SelectContent>
           </Select>
         </Field>
 
         {values.carryoverExpiryType === TimeOffPolicyCarryoverExpiryType.AfterPeriod && (
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Expires after" htmlFor="wiz-coexpval">
+            <Field label={t("policyWizard.carryover.expiresAfter")} htmlFor="wiz-coexpval">
               <Input
                 id="wiz-coexpval"
                 type="number"
@@ -401,7 +412,7 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
                 onChange={(e) => set("carryoverExpiryValue", e.currentTarget.value)}
               />
             </Field>
-            <Field label="Unit" htmlFor="wiz-coexpunit">
+            <Field label={t("policyWizard.carryover.unit")} htmlFor="wiz-coexpunit">
               <Select
                 value={values.carryoverExpiryUnit}
                 onValueChange={(v) => set("carryoverExpiryUnit", v as TimeOffPolicyCarryoverExpiryUnit)}
@@ -410,8 +421,8 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={TimeOffPolicyCarryoverExpiryUnit.Days}>Days</SelectItem>
-                  <SelectItem value={TimeOffPolicyCarryoverExpiryUnit.Months}>Months</SelectItem>
+                  <SelectItem value={TimeOffPolicyCarryoverExpiryUnit.Days}>{t("policyWizard.carryover.days")}</SelectItem>
+                  <SelectItem value={TimeOffPolicyCarryoverExpiryUnit.Months}>{t("policyWizard.carryover.months")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -422,14 +433,14 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
 
     <div className="border-t border-divider pt-5">
       <ToggleField
-        label="Allow negative balance"
-        hint="Let employees request more than their current balance."
+        label={t("policyWizard.carryover.allowNegative")}
+        hint={t("policyWizard.carryover.allowNegativeHint")}
         checked={values.allowNegativeBalance}
         onCheckedChange={(v) => set("allowNegativeBalance", v)}
       />
       {values.allowNegativeBalance && (
         <Reveal>
-          <Field label="Max negative balance" htmlFor="wiz-negbal" hint="How far into the negative is allowed.">
+          <Field label={t("policyWizard.carryover.maxNegative")} htmlFor="wiz-negbal" hint={t("policyWizard.carryover.maxNegativeHint")}>
             <Input
               id="wiz-negbal"
               type="number"
@@ -438,8 +449,8 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
             />
           </Field>
           <ToggleField
-            label="Cap negative balance by quota"
-            hint="Limit the negative balance to the yearly quota."
+            label={t("policyWizard.carryover.capByQuota")}
+            hint={t("policyWizard.carryover.capByQuotaHint")}
             checked={values.negativeBalanceCappedByQuota}
             onCheckedChange={(v) => set("negativeBalanceCappedByQuota", v)}
           />
@@ -448,14 +459,14 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
 
       <div className="pt-1">
         <ToggleField
-          label="Allow negative carryover"
-          hint="Let a negative balance carry into the next period."
+          label={t("policyWizard.carryover.allowNegativeCarryover")}
+          hint={t("policyWizard.carryover.allowNegativeCarryoverHint")}
           checked={values.allowNegativeCarryover}
           onCheckedChange={(v) => set("allowNegativeCarryover", v)}
         />
         {values.allowNegativeCarryover && (
           <Reveal>
-            <Field label="Negative carryover limit" htmlFor="wiz-negco">
+            <Field label={t("policyWizard.carryover.negativeCarryoverLimit")} htmlFor="wiz-negco">
               <Input
                 id="wiz-negco"
                 type="number"
@@ -468,15 +479,18 @@ export const CarryoverStep: FC<StepProps> = ({ values, set }) => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // ── Step 4: Counting ─────────────────────────────────────────────────
 
-export const CountingStep: FC<StepProps> = ({ values, set }) => (
+export const CountingStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>How a request&apos;s duration is turned into an amount of balance used.</StepIntro>
+    <StepIntro>{t("policyWizard.counting.intro")}</StepIntro>
 
-    <Field label="Counting mode" htmlFor="wiz-count" hint="Calendar days count every day; working days skip non-working days.">
+    <Field label={t("policyWizard.counting.mode")} htmlFor="wiz-count" hint={t("policyWizard.counting.modeHint")}>
       <Select
         value={values.countingMode}
         onValueChange={(v) => set("countingMode", v as TimeOffPolicyCountingMode)}
@@ -485,8 +499,8 @@ export const CountingStep: FC<StepProps> = ({ values, set }) => (
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={TimeOffPolicyCountingMode.CalendarDays}>Calendar days</SelectItem>
-          <SelectItem value={TimeOffPolicyCountingMode.WorkingDays}>Working days</SelectItem>
+          <SelectItem value={TimeOffPolicyCountingMode.CalendarDays}>{t("policyWizard.counting.calendarDays")}</SelectItem>
+          <SelectItem value={TimeOffPolicyCountingMode.WorkingDays}>{t("policyWizard.counting.workingDays")}</SelectItem>
         </SelectContent>
       </Select>
     </Field>
@@ -497,26 +511,29 @@ export const CountingStep: FC<StepProps> = ({ values, set }) => (
         charges from a policy that looked correctly configured. */}
 
     <ToggleField
-      label="Public holidays consume balance"
-      hint="If off, public holidays inside a request are not counted."
+      label={t("policyWizard.counting.holidays")}
+      hint={t("policyWizard.counting.holidaysHint")}
       checked={values.includePublicHolidays}
       onCheckedChange={(v) => set("includePublicHolidays", v)}
     />
   </div>
-);
+  );
+};
 
 // ── Step 5: Requests ─────────────────────────────────────────────────
 
-export const RequestsStep: FC<StepProps> = ({ values, set }) => (
+export const RequestsStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>Rules for how employees may request time off under this policy.</StepIntro>
+    <StepIntro>{t("policyWizard.requests.intro")}</StepIntro>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {/* "Minimum request unit" and "Certificate / attachment" are not offered: both were stored and
           nothing enforced them — every request is whole days, and leave has no attachments. They come
           back with hourly leave and attachments (decided 2026-10-27, NEED_TO_DISCUSS § 17); the stored
           values still round-trip untouched. */}
-      <Field label="Min duration per request" htmlFor="wiz-mindur" hint="Optional (e.g. minimum a week).">
+      <Field label={t("policyWizard.requests.minDuration")} htmlFor="wiz-mindur" hint={t("policyWizard.requests.minDurationHint")}>
         <Input
           id="wiz-mindur"
           type="number"
@@ -529,15 +546,15 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
 
     <div className="space-y-1">
       <ToggleField
-        label="Allow overlapping requests"
-        hint="Let an employee have two requests on the same dates."
+        label={t("policyWizard.requests.overlapping")}
+        hint={t("policyWizard.requests.overlappingHint")}
         checked={values.reqAllowOverlapping}
         onCheckedChange={(v) => set("reqAllowOverlapping", v)}
       />
     </div>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Field label="Max duration per request" htmlFor="wiz-maxdur">
+      <Field label={t("policyWizard.requests.maxDuration")} htmlFor="wiz-maxdur">
         <Input
           id="wiz-maxdur"
           type="number"
@@ -546,7 +563,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
           onChange={(e) => set("reqMaxDurationPerRequest", e.currentTarget.value)}
         />
       </Field>
-      <Field label="Min gap between requests (days)" htmlFor="wiz-mingap">
+      <Field label={t("policyWizard.requests.minGap")} htmlFor="wiz-mingap">
         <Input
           id="wiz-mingap"
           type="number"
@@ -555,7 +572,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
           onChange={(e) => set("reqMinGapBetweenRequests", e.currentTarget.value)}
         />
       </Field>
-      <Field label="Max request days per year" htmlFor="wiz-maxyear" hint="Optional cap across the year.">
+      <Field label={t("policyWizard.requests.maxPerYear")} htmlFor="wiz-maxyear" hint={t("policyWizard.requests.maxPerYearHint")}>
         <Input
           id="wiz-maxyear"
           type="number"
@@ -568,7 +585,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
 
     <div className="border-t border-divider pt-5">
       <ToggleField
-        label="Allow requests in the past"
+        label={t("policyWizard.requests.allowPast")}
         checked={values.reqAllowPastRequests}
         onCheckedChange={(v) => {
           set("reqAllowPastRequests", v);
@@ -579,7 +596,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
       />
       {values.reqAllowPastRequests && (
         <Reveal>
-          <Field label="How many days back" htmlFor="wiz-pastlimit">
+          <Field label={t("policyWizard.requests.daysBack")} htmlFor="wiz-pastlimit">
             <Input
               id="wiz-pastlimit"
               type="number"
@@ -596,10 +613,10 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
             falls before today + N, so notice would refuse everything "allow in the past" allows.
             Greyed rather than hidden: a disappearing switch reads as a bug. */}
         <ToggleField
-          label="Require advance notice"
+          label={t("policyWizard.requests.notice")}
           hint={
             values.reqAllowPastRequests
-              ? "Not available while requests in the past are allowed — a past date can never meet a notice period."
+              ? t("policyWizard.requests.noticeDisabledHint")
               : undefined
           }
           disabled={values.reqAllowPastRequests}
@@ -608,7 +625,7 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
         />
         {values.reqNoticeRequiredEnabled && (
           <Reveal>
-            <Field label="Default notice days" htmlFor="wiz-notice">
+            <Field label={t("policyWizard.requests.noticeDays")} htmlFor="wiz-notice">
               <Input
                 id="wiz-notice"
                 type="number"
@@ -623,7 +640,8 @@ export const RequestsStep: FC<StepProps> = ({ values, set }) => (
     </div>
 
   </div>
-);
+  );
+};
 
 // ── Step 6: Approvals ────────────────────────────────────────────────
 
@@ -636,6 +654,7 @@ const ResolvingApproverField: FC<{
   user: WizardApproverUser;
   onChange: (u: PickedUser | null) => void;
 }> = ({ user, onChange }) => {
+  const t = useTranslations("timeOff");
   const { data } = useUser(user.id);
   const value: PickedUser = data
     ? {
@@ -646,18 +665,20 @@ const ResolvingApproverField: FC<{
         avatarUrl: data.avatarUrl,
       }
     : user;
-  return <UserPickerField value={value} onChange={onChange} placeholder="Select approver" allowClear={false} />;
+  return <UserPickerField value={value} onChange={onChange} placeholder={t("policyWizard.approvals.selectApprover")} allowClear={false} />;
 };
 
 const ApproverUserField: FC<{
   user: WizardApproverUser | null;
   onChange: (u: PickedUser | null) => void;
-}> = ({ user, onChange }) =>
-  user && !hasApproverName(user) ? (
+}> = ({ user, onChange }) => {
+  const t = useTranslations("timeOff");
+  return user && !hasApproverName(user) ? (
     <ResolvingApproverField user={user} onChange={onChange} />
   ) : (
-    <UserPickerField value={user} onChange={onChange} placeholder="Select approver" allowClear={false} />
+    <UserPickerField value={user} onChange={onChange} placeholder={t("policyWizard.approvals.selectApprover")} allowClear={false} />
   );
+};
 
 const FALLBACK_DEFAULT = "__default__";
 const FALLBACK_NONE = "__none__";
@@ -671,10 +692,11 @@ const FALLBACK_NONE = "__none__";
  * The roles list needs ROLES.ROLE VIEW; without it the field still shows the role already chosen.
  */
 export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
   const { data: roles } = useRoles();
   const live = (roles ?? []).filter((r) => !r.archived && !r.systemOwner);
   const known = values.apprFallbackRoleId && !live.some((r) => r.id === values.apprFallbackRoleId)
-    ? [{ id: values.apprFallbackRoleId, name: values.apprFallbackRoleName ?? "The chosen role" }]
+    ? [{ id: values.apprFallbackRoleId, name: values.apprFallbackRoleName ?? t("policyWizard.approvals.chosenRole") }]
     : [];
   const current = values.apprFallbackDefault
     ? FALLBACK_DEFAULT
@@ -700,28 +722,26 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
 
   return (
     <div className="space-y-2 border-t border-divider pt-4">
-      <Label htmlFor="appr-fallback-role">Fallback approver</Label>
+      <Label htmlFor="appr-fallback-role">{t("policyWizard.approvals.fallback")}</Label>
       <SearchableSelect
         id="appr-fallback-role"
         options={[
           ...(values.apprFallbackDefault
-            ? [{ value: FALLBACK_DEFAULT, label: "HR Admin, or System Owner without it (the default)" }]
+            ? [{ value: FALLBACK_DEFAULT, label: t("policyWizard.approvals.fallbackDefault") }]
             : []),
           ...[...known, ...live].map((r) => ({ value: r.id, label: r.name })),
-          { value: FALLBACK_NONE, label: "No fallback" },
+          { value: FALLBACK_NONE, label: t("policyWizard.approvals.noFallback") },
         ]}
         value={current || null}
         onChange={(v) => v && choose(v)}
         clearable={false}
       />
       <p className="text-hint text-tertiary">
-        A role whose holders decide any step nobody can: an approver who has left, a manager step for
-        somebody with no manager, an approver away with nobody standing in.
+        {t("policyWizard.approvals.fallbackHint")}
       </p>
       {none && (
         <InlineAlert tone="pending">
-          Without a fallback, a request whose approver has left or is away with nobody standing in waits
-          for an administrator to approve it anyway.
+          {t("policyWizard.approvals.noFallbackWarning")}
         </InlineAlert>
       )}
     </div>
@@ -729,6 +749,7 @@ export const FallbackRoleField: FC<StepProps> = ({ values, set }) => {
 };
 
 export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
   const patchApprover = (index: number, patch: Partial<WizardApprover>) =>
     set(
       "apprApprovers",
@@ -747,11 +768,11 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
 
   return (
     <div className="space-y-6">
-      <StepIntro>Who signs off on requests. Turn off to auto-approve everything.</StepIntro>
+      <StepIntro>{t("policyWizard.approvals.intro")}</StepIntro>
 
       <ToggleField
-        label="Require approval"
-        hint="Requests need sign-off before they're approved."
+        label={t("policyWizard.approvals.require")}
+        hint={t("policyWizard.approvals.requireHint")}
         checked={values.apprRequiresApproval}
         onCheckedChange={(v) => set("apprRequiresApproval", v)}
       />
@@ -759,7 +780,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
       {values.apprRequiresApproval && (
         <Reveal>
           <div className="space-y-2">
-            <Label>Approval chain</Label>
+            <Label>{t("policyWizard.approvals.chain")}</Label>
             <div className="space-y-2">
               {values.apprApprovers.map((approver, index) => (
                 <div
@@ -785,9 +806,9 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={TimeOffPolicyApproverType.Manager}>Manager</SelectItem>
+                        <SelectItem value={TimeOffPolicyApproverType.Manager}>{t("policyWizard.approvals.manager")}</SelectItem>
                         <SelectItem value={TimeOffPolicyApproverType.SpecificUser}>
-                          Specific user
+                          {t("policyWizard.approvals.specificUser")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -801,7 +822,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                       </div>
                     ) : (
                       <span className="text-hint text-tertiary">
-                        The employee&apos;s manager
+                        {t("policyWizard.approvals.employeesManager")}
                       </span>
                     )}
                   </div>
@@ -811,7 +832,7 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                     onClick={() => removeApprover(index)}
                     disabled={values.apprApprovers.length <= 1}
                     className="flex-none text-tertiary hover:text-danger-text disabled:opacity-40"
-                    aria-label="Remove step"
+                    aria-label={t("policyWizard.approvals.removeStep")}
                   >
                     <Icon icon={Delete02Icon} size="sm" />
                   </button>
@@ -820,18 +841,17 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
             </div>
             <Button type="button" variant="secondary" size="sm" className="mt-1 gap-1.5" onClick={addApprover}>
               <Icon icon={Add01Icon} size="sm" />
-              Add approval step
+              {t("policyWizard.approvals.addStep")}
             </Button>
             <p className="text-hint text-tertiary">
-              Manager steps route to each employee&apos;s manager; specific-user steps always go to the
-              chosen person.
+              {t("policyWizard.approvals.chainHint")}
             </p>
           </div>
 
           {/* One question with three answers, replacing two switches that described the same
               mechanism twice and could not express "any two of these three" between them. */}
           <div className="space-y-2 border-t border-divider pt-4">
-            <Label>How do they decide?</Label>
+            <Label>{t("policyWizard.approvals.howDecide")}</Label>
             <Select
               value={values.apprMode}
               onValueChange={(v) => set("apprMode", v as PolicyWizardValues["apprMode"])}
@@ -840,15 +860,15 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SEQUENTIAL">In order — each one signs in turn</SelectItem>
-                <SelectItem value="ALL">All of them, in any order</SelectItem>
-                <SelectItem value="N_OF_M">Any number of them</SelectItem>
+                <SelectItem value="SEQUENTIAL">{t("policyWizard.approvals.sequential")}</SelectItem>
+                <SelectItem value="ALL">{t("policyWizard.approvals.all")}</SelectItem>
+                <SelectItem value="N_OF_M">{t("policyWizard.approvals.nOfM")}</SelectItem>
               </SelectContent>
             </Select>
 
             {values.apprMode === "N_OF_M" && (
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-body text-tertiary">Any</span>
+                <span className="text-body text-tertiary">{t("policyWizard.approvals.any")}</span>
                 {/* The sentence "Any [N] of the 3 listed" reads well on screen and reaches a screen
                     reader as an unnamed spinbutton, so the field carries its own name. */}
                 <Input
@@ -858,10 +878,10 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                   value={values.apprRequiredCount}
                   onChange={(e) => set("apprRequiredCount", e.currentTarget.value)}
                   className="h-9 w-20"
-                  aria-label={`How many approvals are required, out of the ${values.apprApprovers.length} listed`}
+                  aria-label={t("policyWizard.approvals.countAria", { count: values.apprApprovers.length })}
                 />
                 <span className="text-body text-tertiary">
-                  of the {values.apprApprovers.length} listed
+                  {t("policyWizard.approvals.ofListed", { count: values.apprApprovers.length })}
                 </span>
               </div>
             )}
@@ -876,13 +896,15 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
 
 // ── Step: Eligibility ────────────────────────────────────────────────
 
-export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
+export const EligibilityStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>When a newly-eligible employee can start using this policy.</StepIntro>
+    <StepIntro>{t("policyWizard.eligibility.intro")}</StepIntro>
 
     <ToggleField
-      label="Require a waiting period"
-      hint="Employees can't take this leave until a delay after their reference date."
+      label={t("policyWizard.eligibility.require")}
+      hint={t("policyWizard.eligibility.requireHint")}
       checked={values.eligEnabled}
       onCheckedChange={(v) => set("eligEnabled", v)}
     />
@@ -891,7 +913,7 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
       <Reveal>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label>Waiting period</Label>
+            <Label>{t("policyWizard.eligibility.waitingPeriod")}</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -909,16 +931,16 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={TimeOffEligibilityDelayUnit.Days}>Days</SelectItem>
-                  <SelectItem value={TimeOffEligibilityDelayUnit.Months}>Months</SelectItem>
-                  <SelectItem value={TimeOffEligibilityDelayUnit.Years}>Years</SelectItem>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Days}>{t("policyWizard.eligibility.days")}</SelectItem>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Months}>{t("policyWizard.eligibility.months")}</SelectItem>
+                  <SelectItem value={TimeOffEligibilityDelayUnit.Years}>{t("policyWizard.eligibility.years")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-1">
-            <Label>Counted from</Label>
+            <Label>{t("policyWizard.eligibility.countedFrom")}</Label>
             <Select
               value={values.eligReference}
               onValueChange={(v) => set("eligReference", v as TimeOffEligibilityReference)}
@@ -927,37 +949,37 @@ export const EligibilityStep: FC<StepProps> = ({ values, set }) => (
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={TimeOffEligibilityReference.HireDate}>Hire date</SelectItem>
+                <SelectItem value={TimeOffEligibilityReference.HireDate}>{t("policyWizard.eligibility.hireDate")}</SelectItem>
                 <SelectItem value={TimeOffEligibilityReference.ProbationEnd}>
-                  Probation end (not enforced yet)
+                  {t("policyWizard.eligibility.probationEnd")}
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         <p className="text-hint text-tertiary">
-          Probation-end isn&apos;t enforced yet (no probation date on employees) — requests against it
-          are allowed until that exists.
+          {t("policyWizard.eligibility.probationHint")}
         </p>
       </Reveal>
     )}
   </div>
-);
+  );
+};
 
 // ── Step: Accrual ────────────────────────────────────────────────────
 
 export const AccrualStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  const strong = (chunks: ReactNode) => <span className="font-medium text-primary">{chunks}</span>;
   const isAccrued =
     values.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued;
 
   if (!isAccrued) {
     return (
       <div className="space-y-6">
-        <StepIntro>How entitlement is earned over time.</StepIntro>
+        <StepIntro>{t("policyWizard.accrual.intro")}</StepIntro>
         <p className="rounded-card border border-divider bg-subtle px-4 py-3 text-body text-tertiary">
-          This policy grants its entitlement upfront, so there&apos;s nothing to accrue. Switch the
-          granting mode to <span className="font-medium text-primary">Accrued</span> in the
-          Entitlement step to configure how it&apos;s earned.
+          {t.rich("policyWizard.accrual.upfrontNotice", { b: strong })}
         </p>
       </div>
     );
@@ -969,11 +991,9 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
   if (values.unlimitedQuota) {
     return (
       <div className="space-y-6">
-        <StepIntro>How entitlement is earned over time.</StepIntro>
+        <StepIntro>{t("policyWizard.accrual.intro")}</StepIntro>
         <p className="rounded-card border border-divider bg-subtle px-4 py-3 text-body text-tertiary">
-          This policy has an <span className="font-medium text-primary">unlimited</span> quota,
-          so there is no yearly total to earn a share of and nothing here would be read. Set a yearly
-          quota in the Entitlement step to accrue against it.
+          {t.rich("policyWizard.accrual.unlimitedNotice", { b: strong })}
         </p>
       </div>
     );
@@ -981,9 +1001,9 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
 
   return (
     <div className="space-y-6">
-      <StepIntro>How the yearly entitlement is earned over the year.</StepIntro>
+      <StepIntro>{t("policyWizard.accrual.introAccrued")}</StepIntro>
 
-      <Field label="Accrual frequency" htmlFor="wiz-accrual-freq">
+      <Field label={t("policyWizard.accrual.frequency")} htmlFor="wiz-accrual-freq">
         <Select
           value={values.accrualFrequency}
           onValueChange={(v) => set("accrualFrequency", v as TimeOffAccrualFrequency)}
@@ -992,15 +1012,15 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={TimeOffAccrualFrequency.Weekly}>Weekly</SelectItem>
-            <SelectItem value={TimeOffAccrualFrequency.Monthly}>Monthly</SelectItem>
-            <SelectItem value={TimeOffAccrualFrequency.Annually}>Annually</SelectItem>
+            <SelectItem value={TimeOffAccrualFrequency.Weekly}>{t("policyWizard.accrual.weekly")}</SelectItem>
+            <SelectItem value={TimeOffAccrualFrequency.Monthly}>{t("policyWizard.accrual.monthly")}</SelectItem>
+            <SelectItem value={TimeOffAccrualFrequency.Annually}>{t("policyWizard.accrual.annually")}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Amount per period" htmlFor="wiz-accrual-amount" hint="Leave blank to spread the yearly quota evenly.">
+        <Field label={t("policyWizard.accrual.amount")} htmlFor="wiz-accrual-amount" hint={t("policyWizard.accrual.amountHint")}>
           <Input
             id="wiz-accrual-amount"
             type="number"
@@ -1012,7 +1032,7 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
           />
         </Field>
 
-        <Field label="Accrual cap" htmlFor="wiz-accrual-cap" hint="Max earned per year. Blank = the yearly quota.">
+        <Field label={t("policyWizard.accrual.cap")} htmlFor="wiz-accrual-cap" hint={t("policyWizard.accrual.capHint")}>
           <Input
             id="wiz-accrual-cap"
             type="number"
@@ -1026,9 +1046,9 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
       </div>
 
       <Field
-        label="When days land"
+        label={t("policyWizard.accrual.timing")}
         htmlFor="wiz-accrual-timing"
-        hint="At the start of each period, or once it has been worked through."
+        hint={t("policyWizard.accrual.timingHint")}
       >
         <Select
           value={values.accrualTiming}
@@ -1039,18 +1059,18 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={TimeOffAccrualTiming.StartOfPeriod}>
-              At the start of the period
+              {t("policyWizard.accrual.start")}
             </SelectItem>
             <SelectItem value={TimeOffAccrualTiming.EndOfPeriod}>
-              At the end of the period
+              {t("policyWizard.accrual.end")}
             </SelectItem>
           </SelectContent>
         </Select>
       </Field>
 
       <ToggleField
-        label="Earn during the waiting period"
-        hint="Days accumulate while the employee still cannot take this leave."
+        label={t("policyWizard.accrual.duringWaiting")}
+        hint={t("policyWizard.accrual.duringWaitingHint")}
         checked={values.accrueDuringWaiting}
         onCheckedChange={(v) => set("accrueDuringWaiting", v)}
       />
@@ -1061,10 +1081,11 @@ export const AccrualStep: FC<StepProps> = ({ values, set }) => {
 // ── Step: Tenure ─────────────────────────────────────────────────────
 
 export const TenureStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
   const patchRow = (index: number, patch: Partial<WizardTenureRule>) =>
     set(
       "tenureRules",
-      values.tenureRules.map((t, i) => (i === index ? { ...t, ...patch } : t)),
+      values.tenureRules.map((tier, i) => (i === index ? { ...tier, ...patch } : tier)),
     );
   const addRow = () =>
     set("tenureRules", [...values.tenureRules, { yearsOfService: "", bonusDays: "" }]);
@@ -1073,20 +1094,20 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
 
   return (
     <div className="space-y-6">
-      <StepIntro>Extra days once an employee reaches a length-of-service tier (highest tier wins).</StepIntro>
+      <StepIntro>{t("policyWizard.tenure.intro")}</StepIntro>
 
       <div className="space-y-2">
         {values.tenureRules.length === 0 && (
           <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
-            No tenure rewards. Everyone gets the base entitlement.
+            {t("policyWizard.tenure.empty")}
           </p>
         )}
 
         {values.tenureRules.map((row, index) => (
           <div key={index} className="flex items-end gap-2.5">
-            <span className="pb-2 text-body text-tertiary">After</span>
+            <span className="pb-2 text-body text-tertiary">{t("policyWizard.tenure.after")}</span>
             <div className="space-y-1">
-              <Label className="text-hint">Years of service</Label>
+              <Label className="text-hint">{t("policyWizard.tenure.years")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -1096,9 +1117,9 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
                 onChange={(e) => patchRow(index, { yearsOfService: e.target.value })}
               />
             </div>
-            <span className="pb-2 text-body text-tertiary">grant</span>
+            <span className="pb-2 text-body text-tertiary">{t("policyWizard.tenure.grant")}</span>
             <div className="space-y-1">
-              <Label className="text-hint">Bonus days</Label>
+              <Label className="text-hint">{t("policyWizard.tenure.bonus")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -1113,7 +1134,7 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
               type="button"
               onClick={() => removeRow(index)}
               className="pb-2 flex-none text-tertiary hover:text-danger-text"
-              aria-label="Remove tenure tier"
+              aria-label={t("policyWizard.tenure.remove")}
             >
               <Icon icon={Delete02Icon} size="sm" />
             </button>
@@ -1123,7 +1144,7 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
 
       <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={addRow}>
         <Icon icon={Add01Icon} size="sm" />
-        Add tenure tier
+        {t("policyWizard.tenure.add")}
       </Button>
     </div>
   );
@@ -1131,10 +1152,10 @@ export const TenureStep: FC<StepProps> = ({ values, set }) => {
 
 // ── Step: Restrictions ───────────────────────────────────────────────
 
-const RESTRICTION_LABEL: Record<TimeOffRestrictionType, string> = {
-  [TimeOffRestrictionType.Blackout]: "Nobody away on these dates",
-  [TimeOffRestrictionType.CoverageCap]: "No more than N people away at once",
-};
+const RESTRICTION_LABEL = {
+  [TimeOffRestrictionType.Blackout]: "policyWizard.restrictions.blackout",
+  [TimeOffRestrictionType.CoverageCap]: "policyWizard.restrictions.coverageCap",
+} as const satisfies Record<TimeOffRestrictionType, string>;
 
 /**
  * Blackouts and coverage caps, in one step.
@@ -1144,6 +1165,7 @@ const RESTRICTION_LABEL: Record<TimeOffRestrictionType, string> = {
  * a company shutdown had to be retyped on every policy) and only one of them could warn.
  */
 export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
   const patchRow = (index: number, patch: Partial<WizardRestriction>) =>
     set(
       "restrictions",
@@ -1169,13 +1191,13 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
   return (
     <div className="space-y-6">
       <StepIntro>
-        When leave cannot be taken — fixed dates, or too many people away at once.
+        {t("policyWizard.restrictions.intro")}
       </StepIntro>
 
       <div className="space-y-2">
         {values.restrictions.length === 0 && (
           <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
-            No restrictions. Requests are allowed all year, however many people are away.
+            {t("policyWizard.restrictions.empty")}
           </p>
         )}
 
@@ -1185,13 +1207,13 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
             <div key={index} className="space-y-2 rounded-control border border-divider px-3 py-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-body font-medium text-primary">
-                  {RESTRICTION_LABEL[row.type]}
+                  {t(RESTRICTION_LABEL[row.type])}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeRow(index)}
                   className="flex-none text-tertiary hover:text-danger-text"
-                  aria-label="Remove restriction"
+                  aria-label={t("policyWizard.restrictions.remove")}
                 >
                   <Icon icon={Delete02Icon} size="sm" />
                 </button>
@@ -1199,9 +1221,9 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="flex-1 space-y-1">
-                  <Label className="text-hint">Name</Label>
+                  <Label className="text-hint">{t("policyWizard.restrictions.name")}</Label>
                   <Input
-                    placeholder={blackout ? "Year-end freeze" : "Keep the desk covered"}
+                    placeholder={blackout ? t("policyWizard.restrictions.blackoutPlaceholder") : t("policyWizard.restrictions.coveragePlaceholder")}
                     value={row.name}
                     onChange={(e) => patchRow(index, { name: e.target.value })}
                   />
@@ -1210,19 +1232,19 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                 {blackout ? (
                   <>
                     <div className="space-y-1">
-                      <Label className="text-hint">From</Label>
+                      <Label className="text-hint">{t("policyWizard.restrictions.from")}</Label>
                       <DatePicker
                         value={row.startDate}
-                        ariaLabel="Blackout start"
+                        ariaLabel={t("policyWizard.restrictions.blackoutStart")}
                         className="w-40"
                         onChange={(next) => patchRow(index, { startDate: next })}
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-hint">To</Label>
+                      <Label className="text-hint">{t("policyWizard.restrictions.to")}</Label>
                       <DatePicker
                         value={row.endDate}
-                        ariaLabel="Blackout end"
+                        ariaLabel={t("policyWizard.restrictions.blackoutEnd")}
                         className="w-40"
                         onChange={(next) => patchRow(index, { endDate: next })}
                       />
@@ -1230,7 +1252,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                   </>
                 ) : (
                   <div className="space-y-1">
-                    <Label className="text-hint">Max people away</Label>
+                    <Label className="text-hint">{t("policyWizard.restrictions.maxAway")}</Label>
                     <Input
                       type="number"
                       min={0}
@@ -1245,7 +1267,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="space-y-1">
-                  <Label className="text-hint">Applies to</Label>
+                  <Label className="text-hint">{t("policyWizard.restrictions.appliesTo")}</Label>
                   <Select
                     value={row.scope}
                     onValueChange={(v) => patchRow(index, { scope: v as TimeOffRestrictionScope })}
@@ -1254,19 +1276,19 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={TimeOffRestrictionScope.Team}>The same team</SelectItem>
+                      <SelectItem value={TimeOffRestrictionScope.Team}>{t("policyWizard.restrictions.team")}</SelectItem>
                       <SelectItem value={TimeOffRestrictionScope.Department}>
-                        The same department
+                        {t("policyWizard.restrictions.department")}
                       </SelectItem>
                       <SelectItem value={TimeOffRestrictionScope.Company}>
-                        The whole company
+                        {t("policyWizard.restrictions.company")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-hint">When it applies</Label>
+                  <Label className="text-hint">{t("policyWizard.restrictions.whenApplies")}</Label>
                   <Select
                     value={row.behavior}
                     onValueChange={(v) =>
@@ -1278,10 +1300,10 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={TimeOffRestrictionBehavior.Block}>
-                        Refuse those days
+                        {t("policyWizard.restrictions.block")}
                       </SelectItem>
                       <SelectItem value={TimeOffRestrictionBehavior.Warn}>
-                        Allow, and say which days
+                        {t("policyWizard.restrictions.warn")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -1289,7 +1311,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
                 {blackout && (
                   <div className="space-y-1">
-                    <Label className="text-hint">Repeats</Label>
+                    <Label className="text-hint">{t("policyWizard.restrictions.repeats")}</Label>
                     <Select
                       value={row.recurrence}
                       onValueChange={(v) =>
@@ -1301,10 +1323,10 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={TimeOffRestrictionRecurrence.None}>
-                          Once, on these dates
+                          {t("policyWizard.restrictions.once")}
                         </SelectItem>
                         <SelectItem value={TimeOffRestrictionRecurrence.Yearly}>
-                          Every year
+                          {t("policyWizard.restrictions.yearly")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -1325,7 +1347,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
           onClick={() => addRow(TimeOffRestrictionType.Blackout)}
         >
           <Icon icon={Add01Icon} size="sm" />
-          Add a blackout
+          {t("policyWizard.restrictions.addBlackout")}
         </Button>
         <Button
           type="button"
@@ -1335,7 +1357,7 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
           onClick={() => addRow(TimeOffRestrictionType.CoverageCap)}
         >
           <Icon icon={Add01Icon} size="sm" />
-          Add a coverage cap
+          {t("policyWizard.restrictions.addCoverage")}
         </Button>
       </div>
     </div>
@@ -1344,50 +1366,53 @@ export const RestrictionsStep: FC<StepProps> = ({ values, set }) => {
 
 // ── Step 7: Editing ──────────────────────────────────────────────────
 
-export const EditingStep: FC<StepProps> = ({ values, set }) => (
+export const EditingStep: FC<StepProps> = ({ values, set }) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="space-y-6">
-    <StepIntro>Who can edit time off requests, and when.</StepIntro>
+    <StepIntro>{t("policyWizard.editing.intro")}</StepIntro>
 
     <div className="space-y-1">
       <ToggleField
-        label="Employees can edit their own requests"
+        label={t("policyWizard.editing.own")}
         checked={values.editEmployeeCanEditOwn}
         onCheckedChange={(v) => set("editEmployeeCanEditOwn", v)}
       />
       <ToggleField
-        label="Allow editing approved requests"
+        label={t("policyWizard.editing.approved")}
         checked={values.editAllowEditApproved}
         onCheckedChange={(v) => set("editAllowEditApproved", v)}
       />
       <ToggleField
-        label="Allow editing during active leave"
+        label={t("policyWizard.editing.duringLeave")}
         checked={values.editAllowEditDuringActiveLeave}
         onCheckedChange={(v) => set("editAllowEditDuringActiveLeave", v)}
       />
       <ToggleField
-        label="Edits require re-approval"
-        hint="An edited request goes back through approval."
+        label={t("policyWizard.editing.reapproval")}
+        hint={t("policyWizard.editing.reapprovalHint")}
         checked={values.editRequiresReapproval}
         onCheckedChange={(v) => set("editRequiresReapproval", v)}
       />
       <ToggleField
-        label="Managers can edit their team's requests"
+        label={t("policyWizard.editing.managers")}
         checked={values.editManagerCanEditTeam}
         onCheckedChange={(v) => set("editManagerCanEditTeam", v)}
       />
       <ToggleField
-        label="Admins can edit any request"
+        label={t("policyWizard.editing.admins")}
         checked={values.editAdminCanEditAny}
         onCheckedChange={(v) => set("editAdminCanEditAny", v)}
       />
       <ToggleField
-        label="Allow editing past requests"
+        label={t("policyWizard.editing.past")}
         checked={values.editAllowPastEdits}
         onCheckedChange={(v) => set("editAllowPastEdits", v)}
       />
     </div>
   </div>
-);
+  );
+};
 
 // ── Step 8: Review ───────────────────────────────────────────────────
 
@@ -1400,18 +1425,17 @@ function Summary({ label, value }: { label: string; value: string }) {
   );
 }
 
-function approvalSummary(v: PolicyWizardValues): string {
-  if (!v.apprRequiresApproval) return "Auto-approve on submission";
+function approvalSummary(v: PolicyWizardValues, t: TimeOffT): string {
+  if (!v.apprRequiresApproval) return t("policyWizard.review.autoApprove");
 
   const count = v.apprApprovers.length;
-  const steps = `${count} approver${count === 1 ? "" : "s"}`;
   switch (v.apprMode) {
     case "SEQUENTIAL":
-      return `${steps}, in order`;
+      return t("policyWizard.review.sequential", { count });
     case "N_OF_M":
-      return `any ${v.apprRequiredCount || "1"} of ${count}`;
+      return t("policyWizard.review.nOfM", { required: v.apprRequiredCount || "1", count });
     default:
-      return `${steps}, all must sign`;
+      return t("policyWizard.review.all", { count });
   }
 }
 
@@ -1421,54 +1445,56 @@ export const ReviewStep: FC<{
   /** The wizard edits an existing policy as often as it creates one, and the copy has to say which. */
   mode?: "create" | "edit";
 }> = ({ values, leaveTypeName, mode = "create" }) => {
-  const unitLabel = values.unit === TimeOffPolicyUnit.Hours ? "hours" : "days";
-  const quota = values.unlimitedQuota ? "Unlimited" : `${values.yearlyQuota || "0"} ${unitLabel}/year`;
+  const t = useTranslations("timeOff");
+  const quota = values.unlimitedQuota
+    ? t("policies.overview.unlimited")
+    : t("policies.overview.quotaValue", { quota: values.yearlyQuota || "0", unit: values.unit });
   const carryover =
     values.carryoverType === TimeOffPolicyCarryoverType.None
-      ? "None"
+      ? t("policies.overview.none")
       : values.carryoverType === TimeOffPolicyCarryoverType.Unlimited
-        ? "Unlimited"
-        : `Limited to ${values.carryoverLimit || "0"}`;
+        ? t("policies.overview.unlimited")
+        : t("policies.overview.limitedTo", { limit: values.carryoverLimit || "0" });
 
   return (
     <div className="space-y-5">
       <StepIntro>
         {mode === "edit"
-          ? "Review the changes before saving them. You can go back to any step to adjust."
-          : "Review the policy before creating it. You can go back to any step to adjust."}
+          ? t("policyWizard.review.introEdit")
+          : t("policyWizard.review.introCreate")}
       </StepIntro>
 
       <div className="rounded-card border border-divider p-4">
         <p className="mb-1 text-hint font-semibold text-tertiary">
-          {leaveTypeName ? `Leave type: ${leaveTypeName}` : "New policy"}
+          {leaveTypeName ? t("policyWizard.review.leaveType", { name: leaveTypeName }) : t("policyWizard.review.newPolicy")}
         </p>
-        <p className="text-section-title text-primary">{values.name || "Untitled policy"}</p>
+        <p className="text-section-title text-primary">{values.name || t("policyWizard.review.untitled")}</p>
         {values.description && (
           <p className="mt-1 text-body text-tertiary">{values.description}</p>
         )}
       </div>
 
       <div className="divide-y divide-divider rounded-card border border-divider px-4 py-1.5">
-        <Summary label="Unit" value={values.unit === TimeOffPolicyUnit.Hours ? "Hours" : "Days"} />
-        <Summary label="Pay type" value={values.paid ? "Paid" : "Unpaid"} />
-        <Summary label="Quota" value={quota} />
-        <Summary label="Renewal" value={renewalSummary(values)} />
-        <Summary label="Carryover" value={carryover} />
+        <Summary label={t("policyWizard.review.unit")} value={values.unit === TimeOffPolicyUnit.Hours ? t("policies.overview.hours") : t("policies.overview.days")} />
+        <Summary label={t("policyWizard.review.payType")} value={values.paid ? t("policies.overview.paid") : t("policies.overview.unpaid")} />
+        <Summary label={t("policyWizard.review.quota")} value={quota} />
+        <Summary label={t("policyWizard.review.renewal")} value={renewalSummary(values, t)} />
+        <Summary label={t("policyWizard.review.carryover")} value={carryover} />
         <Summary
-          label="Counting"
-          value={values.countingMode === TimeOffPolicyCountingMode.WorkingDays ? "Working days" : "Calendar days"}
+          label={t("policyWizard.review.counting")}
+          value={values.countingMode === TimeOffPolicyCountingMode.WorkingDays ? t("policies.overview.workingDays") : t("policies.overview.calendarDays")}
         />
-        <Summary label="Negative balance" value={values.allowNegativeBalance ? "Allowed" : "Not allowed"} />
+        <Summary label={t("policyWizard.review.negativeBalance")} value={values.allowNegativeBalance ? t("policies.overview.allowed") : t("policies.overview.notAllowed")} />
         {/* Says how the chain decides, not just how long it is. "Auto-approve" is now the truth
             rather than a wizard default: with approvalRequired off the request is approved on
             submission instead of waiting in PENDING for an administrator. */}
-        <Summary label="Approval" value={approvalSummary(values)} />
+        <Summary label={t("policyWizard.review.approval")} value={approvalSummary(values, t)} />
       </div>
 
       <p className="text-hint text-tertiary">
         {mode === "edit"
-          ? "Every section above is saved together — if anything is refused, nothing changes."
-          : "Anything here can be changed later, including the steps you skipped."}
+          ? t("policyWizard.review.footerEdit")
+          : t("policyWizard.review.footerCreate")}
       </p>
     </div>
   );

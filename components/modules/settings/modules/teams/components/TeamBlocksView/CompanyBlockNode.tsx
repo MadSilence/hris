@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import Image from "next/image";
 import { Building03Icon } from "@hugeicons/core-free-icons";
@@ -28,6 +29,7 @@ const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 /** The root of the block tree: the same anchor the chart view has, so the structure reads whole. */
 export function CompanyBlockNode({ data }: NodeProps<CompanyBlockFlowNode>) {
   const { name, logo, peopleAssigned, teamCount, dimmed } = data;
+  const t = useTranslations("structure.teams");
 
   return (
     <div
@@ -48,10 +50,11 @@ export function CompanyBlockNode({ data }: NodeProps<CompanyBlockFlowNode>) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-body font-semibold text-primary">{name}</p>
         <p className="mt-0.5 text-hint text-tertiary">
-          <span className="font-semibold text-secondary">{peopleAssigned}</span>{" "}
-          {peopleAssigned === 1 ? "person" : "people"} ·{" "}
-          <span className="font-semibold text-secondary">{teamCount}</span>{" "}
-          {teamCount === 1 ? "team" : "teams"}
+          {t.rich("companyBlock.summary", {
+            people: peopleAssigned,
+            units: teamCount,
+            b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span>,
+          })}
         </p>
       </div>
 

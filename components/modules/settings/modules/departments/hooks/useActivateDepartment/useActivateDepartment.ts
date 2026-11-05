@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useInvalidateDepartmentsQuery } from "@/components/modules/settings/modules/departments/hooks/useInvalidateDepartmentsQuery/useInvalidateDepartmentsQuery";
@@ -7,6 +8,7 @@ import { activateDepartmentAction } from "@/components/modules/settings/modules/
 export type ActivateDepartmentInput = string | { id: string; restoreUnitIds?: string[] };
 
 export const useActivateDepartment = () => {
+  const t = useTranslations("structure.departments");
   const invalidate = useInvalidateDepartmentsQuery();
 
   return useMutation({
@@ -14,7 +16,7 @@ export const useActivateDepartment = () => {
       const { id, restoreUnitIds } = typeof input === "string" ? { id: input, restoreUnitIds: undefined } : input;
       const result = await activateDepartmentAction(id, restoreUnitIds);
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage ?? "Failed to activate department");
+        throw new Error(result.errorMessage ?? t("errors.activate"));
       }
       return result;
     },

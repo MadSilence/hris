@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/components/desact/button";
@@ -22,14 +23,17 @@ export interface RenameDocumentsFolderFormProps {
   ) => void | Promise<void>;
 }
 
-const schema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Please enter a folder name.")
-    .min(2, "Folder name must be at least 2 characters.")
-    .max(120, "Folder name must be at most 120 characters."),
-});
+type Translator = ReturnType<typeof useTranslations<"organization">>;
+
+const buildSchema = (t: Translator) =>
+  yup.object({
+    name: yup
+      .string()
+      .trim()
+      .required(t("documents.folderForm.required"))
+      .min(2, t("documents.folderForm.min"))
+      .max(120, t("documents.folderForm.max")),
+  });
 
 function sanitize(
   values: RenameDocumentsFolderFormValues,
@@ -47,6 +51,9 @@ export const RenameDocumentsFolderForm: FC<
   onCancelAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const normalizedInitialName = folderName ?? "";
 
   const handleFormSubmission = useCallback(
@@ -90,7 +97,7 @@ export const RenameDocumentsFolderForm: FC<
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="folder-name" required>Folder name</RequiredLabel>
+        <RequiredLabel htmlFor="folder-name" required>{t("documents.folderForm.label")}</RequiredLabel>
 
         <Input
           id="folder-name"
@@ -114,14 +121,14 @@ export const RenameDocumentsFolderForm: FC<
           disabled={isLoading}
           onClick={onCancelAction}
  >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading || !canSubmit}
  >
-          Save
+          {tCommon("actions.save")}
         </Button>
       </DialogFooter>
     </form>

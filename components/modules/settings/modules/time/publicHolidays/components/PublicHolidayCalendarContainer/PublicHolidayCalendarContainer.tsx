@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { PublicHolidayCalendarDetailsComponent } from "../PublicHolidayCalendarDetailsComponent";
 import { PublicHolidayCalendarDetailsSkeleton } from "../PublicHolidayCalendarDetailsSkeleton";
 import { usePublicHolidayCalendar } from "../../hooks/usePublicHolidayCalendar";
@@ -13,6 +14,7 @@ import { ForbiddenError } from "@/components/clients/exceptions";
 const CURRENT_YEAR = new Date().getFullYear();
 
 export default function PublicHolidayCalendarContainer() {
+  const t = useTranslations("timeOff");
   const params = useParams();
   const calendarId = params.id as string;
 
@@ -50,7 +52,7 @@ export default function PublicHolidayCalendarContainer() {
   // failure in the region that failed is the rule the rest of the app already follows.
   const failure = calendarError ?? holidaysError;
   if (failure instanceof ForbiddenError) return <AccessDenied compact/>;
-  if (failure) return <ErrorState error={failure} title="This calendar could not be loaded"/>;
+  if (failure) return <ErrorState error={failure} title={t("publicHolidays.loadFailed")}/>;
 
   if (isCalendarLoading || !calendar) {
     return <PublicHolidayCalendarDetailsSkeleton />;

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
@@ -9,7 +10,7 @@ import {
   parseCheckboxValue,
   parsePersonValue,
 } from "@/models/attribute/attributeValue";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter, useDisplayLanguage } from "@/lib/date";
 import {
   UserPickerField,
   type PickedUser,
@@ -56,7 +57,9 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
   onChange,
   onValidityChange,
 }) => {
-  const error = isEdit ? fieldError(attribute, rawValue, wasFilled) : null;
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const error = isEdit ? fieldError(t, attribute, rawValue, wasFilled) : null;
 
   // Report this field's validity up so the container can block Save.
   const onValidityChangeRef = React.useRef(onValidityChange);
@@ -71,7 +74,7 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
       <div className="text-body text-tertiary">
         <span>{attribute.name}</span>
         {attribute.required && (
-          <span className="ml-0.5 text-danger-text" title="Required">*</span>
+          <span className="ml-0.5 text-danger-text" title={tCommon("fields.required")}>*</span>
         )}
         {attribute.description && (
           <p className="mt-0.5 text-hint text-tertiary/80">
@@ -85,7 +88,7 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
           // type-specific renderers would turn "••••" into "Not set" for options and dates.
           <span
             className="text-tertiary"
-            title="You don't have access to this field's value"
+            title={t("profile.fields.maskedValue")}
           >
             {rawValue == null ? "" : String(rawValue)}
           </span>
@@ -105,6 +108,8 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
 /* ---------- View ---------- */
 
 function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: unknown }) {
+  const tCommon = useTranslations("common");
+  const formatDisplayDate = useDateFormatter();
   const t = attribute.type;
 
   if (
@@ -112,7 +117,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     rawValue === undefined ||
     (typeof rawValue === "string" && rawValue.trim() === "")
   ) {
-    return <span className="text-tertiary">Not set</span>;
+    return <span className="text-tertiary">{tCommon("values.notSet")}</span>;
   }
 
   switch (t) {
@@ -144,7 +149,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
     }
 
     case AttributeType.DATE: {
-      const s = formatDate(rawValue, !!attribute.dateHideYear);
+      const s = formatDate(rawValue, !!attribute.dateHideYear, formatDisplayDate);
       return <span>{s}</span>;
     }
 
@@ -152,7 +157,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       const { label, color } = resolveSingleOption(attribute, rawValue);
 
       if (!label) {
-        return <span className="text-tertiary">Not set</span>;
+        return <span className="text-tertiary">{tCommon("values.notSet")}</span>;
       }
 
       return <OptionBadge label={label} color={color}/>;
@@ -162,7 +167,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
       const parts = resolveMultiOptions(attribute, rawValue);
 
       if (!parts.length) {
-        return <span className="text-tertiary">Not set</span>;
+        return <span className="text-tertiary">{tCommon("values.notSet")}</span>;
       }
 
       return (
@@ -198,7 +203,7 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
 
     case AttributeType.CHECKBOX:
       // Values arrive as strings, so a stored `false` is the truthy string "false".
-      return <span>{parseCheckboxValue(rawValue) ? "Yes" : "No"}</span>;
+      return <span>{parseCheckboxValue(rawValue) ? tCommon("values.yes") : tCommon("values.no")}</span>;
 
     case AttributeType.OBJECT:
       return (
@@ -234,6 +239,8 @@ function EditValue({
   rawValue: unknown;
   onChange: (v: unknown) => void;
 }) {
+  const tOrg = useTranslations("organization");
+  const language = useDisplayLanguage();
   const t = attribute.type;
 
   switch (t) {
@@ -282,7 +289,7 @@ function EditValue({
     case AttributeType.LANGUAGE:
     case AttributeType.TIMEZONE:
     case AttributeType.CURRENCY: {
-      const options = getCatalogOptions(t);
+      const options = getCatalogOptions(t, language);
       const cur = rawValue == null || rawValue === "" ? undefined : String(rawValue);
 
       return (
@@ -290,7 +297,7 @@ function EditValue({
           options={options}
           value={cur || null}
           onChange={(v) => v && onChange(v)}
-          placeholder="Select…"
+          placeholder={tOrg("profile.fields.selectPlaceholder")}
           clearable={false}
         />
       );
@@ -337,7 +344,7 @@ function EditValue({
           options={options.map((o) => ({ value: o.id, label: o.value }))}
           value={cur ?? null}
           onChange={(v) => v && onChange(v)}
-          placeholder="Select…"
+          placeholder={tOrg("profile.fields.selectPlaceholder")}
           clearable={false}
         />
       );
@@ -465,17 +472,19 @@ function PersonEditor({
   );
 }
 
-function fieldError(attribute: Attribute, raw: unknown, wasFilled: boolean): string | null {
-  if (attribute.required && wasFilled && isEmptyValue(raw)) return "This field cannot be cleared.";
+type OrgTranslator = ReturnType<typeof useTranslations<"organization">>;
+
+function fieldError(t: OrgTranslator, attribute: Attribute, raw: unknown, wasFilled: boolean): string | null {
+  if (attribute.required && wasFilled && isEmptyValue(raw)) return t("profile.validation.cannotClear");
   if (isEmptyValue(raw)) return null;
 
   switch (attribute.type) {
     case AttributeType.NUMBER: {
       const n = Number(raw);
-      if (!Number.isFinite(n)) return "Must be a number.";
-      if (attribute.onlyPositive && n < 0) return "Must be a positive number.";
-      if (attribute.minValue != null && n < attribute.minValue) return `Must be ≥ ${attribute.minValue}.`;
-      if (attribute.maxValue != null && n > attribute.maxValue) return `Must be ≤ ${attribute.maxValue}.`;
+      if (!Number.isFinite(n)) return t("profile.validation.number");
+      if (attribute.onlyPositive && n < 0) return t("profile.validation.positive");
+      if (attribute.minValue != null && n < attribute.minValue) return t("profile.validation.min", { min: String(attribute.minValue) });
+      if (attribute.maxValue != null && n > attribute.maxValue) return t("profile.validation.max", { max: String(attribute.maxValue) });
       return null;
     }
     case AttributeType.TEXT:
@@ -483,15 +492,15 @@ function fieldError(attribute: Attribute, raw: unknown, wasFilled: boolean): str
     case AttributeType.URL: {
       const s = String(raw);
       if (attribute.minLength != null && s.length < attribute.minLength)
-        return `Must be at least ${attribute.minLength} characters.`;
+        return t("profile.validation.minLength", { count: attribute.minLength });
       if (attribute.maxLength != null && s.length > attribute.maxLength)
-        return `Must be at most ${attribute.maxLength} characters.`;
-      if (attribute.type === AttributeType.EMAIL && !EMAIL_RE.test(s)) return "Enter a valid email address.";
+        return t("profile.validation.maxLength", { count: attribute.maxLength });
+      if (attribute.type === AttributeType.EMAIL && !EMAIL_RE.test(s)) return t("profile.validation.email");
       if (attribute.type === AttributeType.URL && !URL_RE.test(s))
-        return "Enter a valid URL (starting with http:// or https://).";
+        return t("profile.validation.url");
       if (attribute.regex) {
         try {
-          if (!new RegExp(attribute.regex).test(s)) return "Doesn't match the required format.";
+          if (!new RegExp(attribute.regex).test(s)) return t("profile.validation.format");
         } catch {
           /* invalid pattern configured — let the server decide */
         }
@@ -501,22 +510,22 @@ function fieldError(attribute: Attribute, raw: unknown, wasFilled: boolean): str
     case AttributeType.LONG_TEXT: {
       const s = String(raw);
       if (attribute.minLength != null && s.length < attribute.minLength)
-        return `Must be at least ${attribute.minLength} characters.`;
+        return t("profile.validation.minLength", { count: attribute.minLength });
       if (attribute.maxLength != null && s.length > attribute.maxLength)
-        return `Must be at most ${attribute.maxLength} characters.`;
+        return t("profile.validation.maxLength", { count: attribute.maxLength });
       return null;
     }
     case AttributeType.PHONE: {
       const s = String(raw);
       const digits = s.replace(/[^0-9]/g, "");
-      if (digits.length < 7 || digits.length > 15) return "Enter a valid phone number.";
+      if (digits.length < 7 || digits.length > 15) return t("profile.validation.phone");
       if (attribute.minLength != null && s.length < attribute.minLength)
-        return `Must be at least ${attribute.minLength} characters.`;
+        return t("profile.validation.minLength", { count: attribute.minLength });
       if (attribute.maxLength != null && s.length > attribute.maxLength)
-        return `Must be at most ${attribute.maxLength} characters.`;
+        return t("profile.validation.maxLength", { count: attribute.maxLength });
       if (attribute.regex) {
         try {
-          if (!new RegExp(attribute.regex).test(s)) return "Doesn't match the required format.";
+          if (!new RegExp(attribute.regex).test(s)) return t("profile.validation.format");
         } catch {
           /* invalid pattern configured — let the server decide */
         }
@@ -525,16 +534,16 @@ function fieldError(attribute: Attribute, raw: unknown, wasFilled: boolean): str
     }
     case AttributeType.DATE: {
       const s = String(raw);
-      if (attribute.minDate && s < attribute.minDate) return `Must be on or after ${attribute.minDate}.`;
-      if (attribute.maxDate && s > attribute.maxDate) return `Must be on or before ${attribute.maxDate}.`;
+      if (attribute.minDate && s < attribute.minDate) return t("profile.validation.minDate", { date: attribute.minDate });
+      if (attribute.maxDate && s > attribute.maxDate) return t("profile.validation.maxDate", { date: attribute.maxDate });
       return null;
     }
     case AttributeType.MULTI_SELECT: {
       const arr = Array.isArray(raw) ? raw : [raw];
       if (attribute.minSelect != null && arr.length < attribute.minSelect)
-        return `Select at least ${attribute.minSelect}.`;
+        return t("profile.validation.minSelect", { count: attribute.minSelect });
       if (attribute.maxSelect != null && arr.length > attribute.maxSelect)
-        return `Select at most ${attribute.maxSelect}.`;
+        return t("profile.validation.maxSelect", { count: attribute.maxSelect });
       return null;
     }
     default:
@@ -568,7 +577,7 @@ function parseDate(raw: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-function formatDate(raw: unknown, hideYear: boolean): string {
+function formatDate(raw: unknown, hideYear: boolean, formatDisplayDate: DateFormatter): string {
   const d = parseDate(raw);
   if (!d) return String(raw ?? "");
   return formatDisplayDate(d, { hideYear });

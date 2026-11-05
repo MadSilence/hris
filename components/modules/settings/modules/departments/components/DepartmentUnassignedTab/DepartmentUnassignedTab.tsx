@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { UserBlock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -33,6 +34,8 @@ export function DepartmentUnassignedTab({
   onSelectPerson,
   renderPersonChip,
 }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -60,10 +63,8 @@ export function DepartmentUnassignedTab({
           <Icon icon={UserBlock01Icon} />
         </div>
         <div>
-          <p className="text-body font-medium text-primary">Everyone has a department</p>
-          <p className="mt-1 text-body text-tertiary">
-            People without one would show up here.
-          </p>
+          <p className="text-body font-medium text-primary">{t("unassigned.allPlaced")}</p>
+          <p className="mt-1 text-body text-tertiary">{t("unassigned.allPlacedHint")}</p>
         </div>
       </div>
     );
@@ -72,18 +73,16 @@ export function DepartmentUnassignedTab({
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-6">
       <div className="flex-none">
-        <h3 className="mb-1 text-hint font-semibold text-tertiary">
-          Unassigned people
-        </h3>
+        <h3 className="mb-1 text-hint font-semibold text-tertiary">{tShared("unassignedPeople")}</h3>
         <p className="mb-3 text-body text-tertiary">
-          {people.length} {people.length === 1 ? "person is" : "people are"} not in any department.
+          {t("unassigned.count", { count: people.length })}
         </p>
         <SearchBox value={query} onChange={setQuery}/>
       </div>
 
       <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
         {filtered.length === 0 ? (
-          <NoResults hint="Try a different name or email."/>
+          <NoResults hint={tShared("tryDifferent")}/>
         ) : (
           filtered.map((person) =>
             renderPersonChip ? (

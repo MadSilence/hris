@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { LinkSquare02Icon, Mail01Icon, SidebarRightIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -79,13 +80,15 @@ export function UserDetailPanel({
   onChangeManager,
   onInsertManagerAbove,
 }: Props) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [insertingAbove, setInsertingAbove] = useState(false);
   const isActive = user.status === "ACTIVE";
   const name = fullName(user);
   const orgRows: { label: string; value: string }[] = [];
-  if (user.department) orgRows.push({ label: "Department", value: user.department.name });
-  if (user.office) orgRows.push({ label: "Office", value: user.office.name });
-  if (user.legalEntity) orgRows.push({ label: "Legal entity", value: user.legalEntity.name });
+  if (user.department) orgRows.push({ label: t("orgChart.panel.department"), value: user.department.name });
+  if (user.office) orgRows.push({ label: t("orgChart.panel.office"), value: user.office.name });
+  if (user.legalEntity) orgRows.push({ label: t("orgChart.panel.legalEntity"), value: user.legalEntity.name });
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -108,15 +111,15 @@ export function UserDetailPanel({
               )}
             >
               <span className={cn("h-1.5 w-1.5 rounded-pill", isActive ? "bg-status-approved-fill" : "bg-strong")} />
-              {isActive ? "Active" : "Suspended"}
+              {isActive ? t("orgChart.status.active") : t("orgChart.status.suspended")}
             </span>
           ) : null}
         </div>
         <button
           type="button"
           onClick={onCollapse}
-          aria-label="Hide panel"
-          title="Hide panel"
+          aria-label={t("orgChart.panel.hide")}
+          title={t("orgChart.panel.hide")}
           className="flex h-8 w-8 flex-none items-center justify-center rounded-control text-tertiary hover:bg-mist hover:text-secondary"
         >
           <Icon icon={SidebarRightIcon} size="sm" />
@@ -127,7 +130,7 @@ export function UserDetailPanel({
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         {/* Contacts */}
         <div>
-          <SectionTitle>Contacts</SectionTitle>
+          <SectionTitle>{t("orgChart.panel.contacts")}</SectionTitle>
           {user.email ? (
             <a
               href={`mailto:${user.email}`}
@@ -142,17 +145,17 @@ export function UserDetailPanel({
             className="mt-2 inline-flex items-center gap-1.5 rounded-control border border-divider px-2.5 py-1.5 text-body text-secondary no-underline transition-colors hover:bg-subtle"
           >
             <Icon icon={LinkSquare02Icon} size="sm" />
-            Open full profile
+            {t("orgChart.panel.openProfile")}
           </Link>
         </div>
 
         {/* Reporting */}
         <div>
-          <SectionTitle>Manager</SectionTitle>
+          <SectionTitle>{t("orgChart.panel.manager")}</SectionTitle>
           {manager ? (
             <PersonRow user={manager} onSelect={onSelect} />
           ) : (
-            <p className="px-1.5 text-body text-tertiary">Top of the organisation.</p>
+            <p className="px-1.5 text-body text-tertiary">{t("orgChart.panel.topOfOrganisation")}</p>
           )}
           {/* The drag is the fast way; this is the way that does not need the other person on screen.
               Both write the profile's own manager field, so the rules (no cycles, not oneself) are the
@@ -164,7 +167,7 @@ export function UserDetailPanel({
                 onChange={(picked) => {
                   if (picked && picked.id !== user.id) onChangeManager(picked.id);
                 }}
-                placeholder={manager ? "Change manager…" : "Set a manager…"}
+                placeholder={manager ? t("orgChart.panel.changeManager") : t("orgChart.panel.setManager")}
                 allowClear={false}
                 disabled={isSavingManager}
               />
@@ -176,7 +179,7 @@ export function UserDetailPanel({
                   disabled={isSavingManager}
                   onClick={() => onChangeManager(null)}
                 >
-                  Remove manager
+                  {t("orgChart.panel.removeManager")}
                 </Button>
               ) : null}
             </div>
@@ -189,8 +192,8 @@ export function UserDetailPanel({
                 <>
                   <p className="text-hint text-tertiary">
                     {manager
-                      ? `The person you pick will take ${name}'s place under ${fullName(manager)}, and ${name} will report to them.`
-                      : `The person you pick will become the top of this branch, and ${name} will report to them.`}
+                      ? t("orgChart.panel.insertAboveUnder", { name, manager: fullName(manager) })
+                      : t("orgChart.panel.insertAboveTop", { name })}
                   </p>
                   <UserPickerField
                     value={null}
@@ -209,7 +212,7 @@ export function UserDetailPanel({
                     disabled={isSavingManager}
                     onClick={() => setInsertingAbove(false)}
                   >
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </Button>
                 </>
               ) : (
@@ -220,7 +223,7 @@ export function UserDetailPanel({
                   disabled={isSavingManager}
                   onClick={() => setInsertingAbove(true)}
                 >
-                  Add manager above
+                  {t("orgChart.panel.addManagerAbove")}
                 </Button>
               )}
             </div>
@@ -228,7 +231,7 @@ export function UserDetailPanel({
         </div>
 
         <div>
-          <SectionTitle>Direct reports ({reports.length})</SectionTitle>
+          <SectionTitle>{t("orgChart.panel.directReports", { count: reports.length })}</SectionTitle>
           {reports.length > 0 ? (
             <div className="flex flex-col">
               {reports.map((r) => (
@@ -236,14 +239,14 @@ export function UserDetailPanel({
               ))}
             </div>
           ) : (
-            <p className="px-1.5 text-body text-tertiary">No direct reports.</p>
+            <p className="px-1.5 text-body text-tertiary">{t("orgChart.panel.noDirectReports")}</p>
           )}
         </div>
 
         {/* Organization */}
         {(orgRows.length > 0 || user.teams.length > 0) && (
           <div>
-            <SectionTitle>Organization</SectionTitle>
+            <SectionTitle>{t("orgChart.panel.organization")}</SectionTitle>
             <div className="space-y-2">
               {orgRows.map((row) => (
                 <div key={row.label} className="flex items-baseline justify-between gap-3 text-body">
@@ -253,14 +256,14 @@ export function UserDetailPanel({
               ))}
               {user.teams.length > 0 && (
                 <div className="text-body">
-                  <span className="text-tertiary">Teams</span>
+                  <span className="text-tertiary">{t("orgChart.panel.teams")}</span>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {user.teams.map((t) => (
+                    {user.teams.map((team) => (
                       <span
-                        key={t.id}
+                        key={team.id}
                         className="rounded-tag border border-divider bg-subtle px-1.5 py-0.5 text-hint leading-none text-secondary"
                       >
-                        {t.name}
+                        {team.name}
                       </span>
                     ))}
                   </div>

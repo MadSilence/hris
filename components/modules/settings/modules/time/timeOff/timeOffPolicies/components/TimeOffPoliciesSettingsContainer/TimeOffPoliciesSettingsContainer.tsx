@@ -4,6 +4,7 @@ import { showError } from "@/lib/errors/errorToast";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { TimeOffPoliciesSettingsComponent } from "../TimeOffPoliciesSettingsComponent";
 import { DeleteTimeOffPolicyModal } from "../modals/DeleteTimeOffPolicyModal";
@@ -49,6 +50,8 @@ export default function TimeOffPoliciesSettingsContainer({
   title,
   backHref,
 }: Props = {}) {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { data: policies, isLoading, error } = useTimeOffPolicies();
 
@@ -201,9 +204,9 @@ export default function TimeOffPoliciesSettingsContainer({
       />
       <ConfirmActionModal
         isOpen={archiveTarget !== null}
-        title={`Archive "${archiveTarget?.name ?? ""}"`}
-        description="An archived policy stops being offered and can be unarchived at any time \u2014 it comes back as a draft, so switching it on again is a separate step."
-        confirmLabel="Archive"
+        title={t("policies.archive.title", { name: archiveTarget?.name ?? "" })}
+        description={t("policies.archive.description")}
+        confirmLabel={tCommon("actions.archive")}
         isLoading={archiveMutation.isPending}
         onConfirmAction={confirmArchive}
         onCancelAction={() => setArchiveTarget(null)}

@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import { MobileAvatarUpload } from "@/components/modules/firstRun/components/MobileAvatarUpload";
 import { hrisFirstRunService } from "@/api/modules/firstRun/services";
 
-export const metadata = { title: "Add your photo" };
+export async function generateMetadata() {
+  const t = await getTranslations("firstRun");
+  return { title: t("mobileAvatar.title") };
+}
 
 type Props = { searchParams: Promise<{ token?: string }> };
 
@@ -12,6 +16,7 @@ type Props = { searchParams: Promise<{ token?: string }> };
  * rendering a camera button that will fail after the photo is taken.
  */
 export default async function MobileAvatarPage({ searchParams }: Props) {
+  const t = await getTranslations("firstRun");
   const { token } = await searchParams;
 
   let firstName: string | null = null;
@@ -30,9 +35,9 @@ export default async function MobileAvatarPage({ searchParams }: Props) {
   if (!usable || !token) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
-        <h1 className="text-section-title text-primary">This code has expired</h1>
+        <h1 className="text-section-title text-primary">{t("mobileAvatar.expired.title")}</h1>
         <p className="max-w-xs text-tertiary">
-          Codes last a few minutes and work once. Show a new one on your computer and scan it again.
+          {t("mobileAvatar.expired.body")}
         </p>
       </div>
     );

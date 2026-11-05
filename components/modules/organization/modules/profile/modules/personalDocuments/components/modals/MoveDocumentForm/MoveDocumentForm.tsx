@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/components/desact/button";
@@ -32,9 +33,12 @@ export interface MoveDocumentFormProps {
 
 const ROOT_FOLDER_ID = "root";
 
-const schema = yup.object({
-  folderId: yup.string().required("Please select destination folder."),
-});
+type Translator = ReturnType<typeof useTranslations<"organization">>;
+
+const buildSchema = (t: Translator) =>
+  yup.object({
+    folderId: yup.string().required(t("documents.moveDocument.destinationRequired")),
+  });
 
 function sanitize(values: MoveDocumentInternalFormValues): MoveDocumentFormValues {
   return {
@@ -49,6 +53,9 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
   onCancelAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const normalizedCurrentFolderId = currentFolderId ?? ROOT_FOLDER_ID;
 
   const handleFormSubmission = useCallback(
@@ -89,17 +96,17 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel required>Destination folder</RequiredLabel>
+        <RequiredLabel required>{t("documents.moveDocument.destination")}</RequiredLabel>
 
         <SearchableSelect
-          aria-label="Destination folder"
+          aria-label={t("documents.moveDocument.destination")}
           options={[
-            { value: ROOT_FOLDER_ID, label: "None" },
+            { value: ROOT_FOLDER_ID, label: tCommon("values.none") },
             ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
           ]}
           value={formik.values.folderId || null}
           onChange={(value) => formik.setFieldValue("folderId", value ?? ROOT_FOLDER_ID)}
-          placeholder="Select folder"
+          placeholder={t("documents.selectFolder")}
           disabled={isLoading}
           aria-invalid={!!formik.errors.folderId}
           clearable={false}
@@ -117,14 +124,14 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
  >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button
           type="submit"
           disabled={isLoading || !canSubmit}
  >
-          Move
+          {t("documents.moveDocument.submit")}
         </Button>
       </DialogFooter>
     </form>

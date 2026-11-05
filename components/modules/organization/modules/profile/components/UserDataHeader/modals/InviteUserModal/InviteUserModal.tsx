@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
+import { useTranslations } from "next-intl";
 import * as Yup from "yup";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -53,6 +54,8 @@ const tomorrowISO = () => {
 export function InviteUserModal({
   open, userId, fullName, email, isResend = false, onCloseAction, onInvitedAction,
 }: Props) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [error, setError] = useState<string | null>(null);
   const [askPreboarding, setAskPreboarding] = useState(false);
   const hasEmail = Boolean(email);
@@ -61,13 +64,13 @@ export function InviteUserModal({
     initialValues: { email: email ?? "", when: "now", sendOn: "", preboarding: "" },
     validationSchema: Yup.object({
       email: hasEmail
-        ? Yup.string().trim().email("Enter a valid email address.")
-        : Yup.string().trim().required("Enter an email address to send the invitation to.")
-            .email("Enter a valid email address."),
+        ? Yup.string().trim().email(t("profile.validation.email"))
+        : Yup.string().trim().required(t("profile.invite.emailRequired"))
+            .email(t("profile.validation.email")),
       when: Yup.string().oneOf(["now", "later"]),
       sendOn: Yup.string().when("when", {
         is: "later",
-        then: (s) => s.required("Pick the day to send it."),
+        then: (s) => s.required(t("profile.invite.dateRequired")),
       }),
     }),
     onSubmit: async (values, helpers) => {
@@ -110,17 +113,17 @@ export function InviteUserModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isResend ? "Resend invitation" : "Invite"}</DialogTitle>
+          <DialogTitle>{isResend ? t("profile.header.resendInvitation") : t("profile.header.invite")}</DialogTitle>
           <DialogDescription>
             {isResend
-              ? `${fullName} gets a new link to set a password. The previous one stops working.`
-              : `${fullName} gets a link to set a password and sign in. Nothing is granted until they accept.`}
+              ? t("profile.invite.resendDescription", { name: fullName })
+              : t("profile.invite.description", { name: fullName })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <RequiredLabel htmlFor="invite-email" required={!hasEmail}>Email</RequiredLabel>
+            <RequiredLabel htmlFor="invite-email" required={!hasEmail}>{tCommon("fields.email")}</RequiredLabel>
             <Input
               id="invite-email"
               name="email"
@@ -138,7 +141,7 @@ export function InviteUserModal({
 
           {!isResend && (
             <div className="space-y-2">
-              <Label>Send</Label>
+              <Label>{t("profile.invite.when")}</Label>
               <RadioGroup
                 value={formik.values.when}
                 onValueChange={(v) => formik.setFieldValue("when", v)}
@@ -146,11 +149,11 @@ export function InviteUserModal({
               >
                 <label className="flex items-center gap-2 text-body" htmlFor="invite-now">
                   <RadioGroupItem value="now" id="invite-now" />
-                  Now
+                  {t("profile.invite.now")}
                 </label>
                 <label className="flex items-center gap-2 text-body" htmlFor="invite-later">
                   <RadioGroupItem value="later" id="invite-later" />
-                  On a date
+                  {t("profile.invite.onDate")}
                 </label>
               </RadioGroup>
               {later && (
@@ -160,14 +163,14 @@ export function InviteUserModal({
                     onChange={(v) => formik.setFieldValue("sendOn", v)}
                     min={tomorrowISO()}
                     disabled={busy}
-                    ariaLabel="Send on"
+                    ariaLabel={t("profile.scheduled.sendOn")}
                     invalid={Boolean(formik.touched.sendOn && formik.errors.sendOn)}
                   />
                   {formik.touched.sendOn && formik.errors.sendOn && (
                     <FieldError>{formik.errors.sendOn}</FieldError>
                   )}
                   <p className="text-hint text-tertiary">
-                    It goes out on that day, in your company&apos;s timezone.
+                    {t("profile.invite.timezoneNote")}
                   </p>
                 </div>
               )}
@@ -175,7 +178,7 @@ export function InviteUserModal({
           )}
 
           {askPreboarding && (
-            <InlineAlert tone="pending" title={`${fullName} has an unfinished preboarding.`}>
+            <InlineAlert tone="pending" title={t("profile.invite.preboardingTitle", { name: fullName })}>
               <RadioGroup
                 value={formik.values.preboarding}
                 onValueChange={(v) => formik.setFieldValue("preboarding", v)}
@@ -183,11 +186,11 @@ export function InviteUserModal({
               >
                 <label className="flex items-center gap-2 text-body" htmlFor="invite-keep-preboarding">
                   <RadioGroupItem value="KEEP" id="invite-keep-preboarding" />
-                  Keep it — the remaining tasks follow them into the app
+                  {t("profile.invite.preboardingKeep")}
                 </label>
                 <label className="flex items-center gap-2 text-body" htmlFor="invite-end-preboarding">
                   <RadioGroupItem value="END" id="invite-end-preboarding" />
-                  End it early — the remaining tasks are cancelled
+                  {t("profile.invite.preboardingEnd")}
                 </label>
               </RadioGroup>
             </InlineAlert>
@@ -198,7 +201,7 @@ export function InviteUserModal({
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button"
             onClick={async () => {
@@ -207,7 +210,7 @@ export function InviteUserModal({
             }}
             disabled={busy}
           >
-            {busy ? "Sending…" : later ? "Schedule" : "Send"}
+            {busy ? t("profile.invite.sending") : later ? t("profile.invite.schedule") : tCommon("actions.send")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ArrowDown01Icon, FileTextIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -65,11 +66,21 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
   const [pagesExpanded, setPagesExpanded] = useState(false);
   const router = useRouter();
   const { access } = useAccess();
+  const t = useTranslations("search");
+  const tCommon = useTranslations("common");
+  const tSettings = useTranslations("settings");
 
   const debounced = useDebouncedValue(term, DEBOUNCE_MS);
   const search = useGlobalSearch(debounced, expanded);
 
-  const allPages = useMemo(() => buildSearchPages(appPages, access), [appPages, access]);
+  const allPages = useMemo(
+    () =>
+      buildSearchPages(appPages, access, {
+        label: (key) => tSettings(key),
+        section: (group) => t("pages.settingsSection", { group }),
+      }),
+    [appPages, access, t, tSettings],
+  );
   const pages = useMemo(() => matchSearchPages(allPages, term), [allPages, term]);
 
   const reset = () => {
@@ -104,7 +115,7 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
     const canShowMore = !expanded.includes(group.kind) && group.items.length < group.total;
 
     return (
-      <CommandGroup key={group.kind} heading={SEARCH_KIND_LABELS[group.kind]}>
+      <CommandGroup key={group.kind} heading={t(SEARCH_KIND_LABELS[group.kind])}>
         {group.items.map((item) => {
           const href = searchItemHref(group.kind, item);
           return (
@@ -126,7 +137,7 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
             className="text-tertiary"
           >
             <Icon icon={ArrowDown01Icon} aria-hidden />
-            <span>Show more</span>
+            <span>{tCommon("actions.showMore")}</span>
             <span className="ml-auto text-hint">
               {group.truncated ? `${group.total}+` : group.total}
             </span>
@@ -155,7 +166,7 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
         {searching && !pagesExpanded && pages.length > visiblePages.length ? (
           <CommandItem value="more:pages" onSelect={() => setPagesExpanded(true)} className="text-tertiary">
             <Icon icon={ArrowDown01Icon} aria-hidden />
-            <span>Show more</span>
+            <span>{tCommon("actions.showMore")}</span>
             <span className="ml-auto text-hint">{pages.length}</span>
           </CommandItem>
         ) : null}
@@ -163,20 +174,20 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
     ) : null;
 
   const renderResults = () => {
-    if (!searching) return renderPages("Go to");
+    if (!searching) return renderPages(t("pages.goTo"));
     if (search.error) {
       return <ErrorState error={search.error} compact onRetry={() => void search.refetch()}/>;
     }
     if (search.isLoading) {
-      return <div role="status" className="px-4 py-6 text-center text-body text-tertiary">Searching…</div>;
+      return <div role="status" className="px-4 py-6 text-center text-body text-tertiary">{t("dialog.searching")}</div>;
     }
     if (!hasServerHits && visiblePages.length === 0) {
-      return <NoResults hint="Try a different name."/>;
+      return <NoResults hint={t("dialog.noResultsHint")}/>;
     }
     return (
       <>
         {search.groups.map(renderGroup)}
-        {renderPages("Pages")}
+        {renderPages(t("pages.heading"))}
       </>
     );
   };
@@ -184,16 +195,16 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent hideClose className="overflow-hidden p-0 sm:max-w-xl">
-        <DialogTitle className="sr-only">Search</DialogTitle>
+        <DialogTitle className="sr-only">{t("dialog.title")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Search people, teams, offices, jobs, policies and pages.
+          {t("dialog.description")}
         </DialogDescription>
         <Command
           shouldFilter={false}
           loop
           className="[&_[cmdk-group-heading]]:text-tertiary **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2"
         >
-          <CommandInput value={term} onValueChange={handleTermChange} placeholder="Search" inputMode="search"/>
+          <CommandInput value={term} onValueChange={handleTermChange} placeholder={t("dialog.title")} inputMode="search"/>
           <CommandList className="max-h-[min(420px,60vh)]">
             {renderResults()}
           </CommandList>

@@ -3,6 +3,7 @@
 import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -28,6 +29,7 @@ type ModalState = { open: boolean; start?: string; end?: string };
  * click/drag on the calendar (which presets the request's start/end to the picked day-range).
  */
 export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
+  const t = useTranslations("calendar");
   const { data: balances, isLoading: balancesLoading } =
     useEmployeeTimeOffBalancesByUser({ userId });
   const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
@@ -88,13 +90,13 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           <div className="flex items-center gap-2">
             <Button type="button" onClick={() => open()} disabled={!hasBalances}>
               <Icon icon={Add01Icon} size="sm" />
-              Request time off
+              {t("request.title")}
             </Button>
             {/* Without an assignment there is no balance and no way to request — so the people who
                 manage policies get the entry point here, on the person, not only in settings. */}
             <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
               <Button type="button" variant="secondary" onClick={() => setAssignOpen(true)}>
-                Assign policy
+                {t("assign.submit")}
               </Button>
             </PermissionGate>
 
@@ -103,18 +105,18 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           {hasBalances && balances ? (
             <TimeOffSidePanel userId={userId} balances={balances} policyMap={policyMap} />
           ) : (
-            <p className="text-body text-tertiary">No time off policy is assigned yet.</p>
+            <p className="text-body text-tertiary">{t("timeOffTab.noPolicy")}</p>
           )}
 
           {/* The history and the ledger, as links under the panel: a kebab beside the two buttons did not fit
               the 340 px panel and pushed the page sideways (walk of 2026-11-04). Requests carry Cancel too. */}
           <div className="flex items-center gap-4 border-t border-divider pt-3">
             <Button type="button" variant="link" size="sm" onClick={() => setRequestsOpen(true)}>
-              All requests
+              {t("timeOffTab.allRequests")}
             </Button>
             {hasBalances && (
               <Button type="button" variant="link" size="sm" onClick={() => setPreviewOpen(true)}>
-                Balance history
+                {t("timeOffTab.balanceHistory")}
               </Button>
             )}
           </div>

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useInvalidateDepartmentsQuery } from "@/components/modules/settings/modules/departments/hooks/useInvalidateDepartmentsQuery/useInvalidateDepartmentsQuery";
@@ -7,6 +8,7 @@ import {
 } from "@/components/modules/settings/modules/departments/actions/archiveDepartmentAction/archiveDepartmentAction";
 
 export const useArchiveDepartment = () => {
+  const t = useTranslations("structure.departments");
   const invalidate = useInvalidateDepartmentsQuery();
 
   return useMutation({
@@ -17,7 +19,7 @@ export const useArchiveDepartment = () => {
         hasPayload ? (payload as ArchiveDepartmentActionInput) : undefined,
       );
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage ?? "Failed to archive department");
+        throw new Error(result.errorMessage ?? t("errors.archive"));
       }
       return result;
     },

@@ -28,6 +28,7 @@ export const GET = apiRequestWrapper(async () => {
   const accessToken = cookieStore.get(ACCESS_COOKIE)?.value;
 
   if (!accessToken) {
+    // i18n-exempt: an API body for the client code, never shown
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 

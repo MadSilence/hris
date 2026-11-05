@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import type { User } from "@/models/user/User";
 import type { PositionChangeReason } from "@/models/user/PositionHistoryEntry";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -22,18 +23,23 @@ import {
 import { useUserJobHistory } from "@/components/modules/organization/modules/profile/hooks/useUserJobHistory";
 
 /** What moved the position. Short, because it sits in a column beside the names it explains. */
-export const POSITION_CHANGE_REASON_LABELS: Record<PositionChangeReason, string> = {
-  ASSIGNED: "Set on the profile",
-  UNASSIGNED: "Cleared on the profile",
-  BULK: "Bulk edit",
-  IMPORTED: "Imported from a file",
-  JOB_ARCHIVED: "Position archived",
-  JOB_DELETED: "Position deleted",
-  FAMILY_ARCHIVED: "Job family archived",
-  FAMILY_DELETED: "Job family deleted",
-};
+export const POSITION_CHANGE_REASON_LABELS = {
+  ASSIGNED: "profile.positionHistory.reason.assigned",
+  UNASSIGNED: "profile.positionHistory.reason.unassigned",
+  BULK: "profile.positionHistory.reason.bulk",
+  IMPORTED: "profile.positionHistory.reason.imported",
+  JOB_ARCHIVED: "profile.positionHistory.reason.jobArchived",
+  JOB_DELETED: "profile.positionHistory.reason.jobDeleted",
+  FAMILY_ARCHIVED: "profile.positionHistory.reason.familyArchived",
+  FAMILY_DELETED: "profile.positionHistory.reason.familyDeleted",
+} as const satisfies Record<PositionChangeReason, string>;
 
-const COLUMNS = ["From", "Position", "Previous position", "Reason"] as const;
+const COLUMNS = [
+  "profile.positionHistory.columns.from",
+  "profile.positionHistory.columns.position",
+  "profile.positionHistory.columns.previous",
+  "profile.positionHistory.columns.reason",
+] as const;
 const SKELETON_ROWS = 3;
 
 type Props = {
@@ -56,6 +62,8 @@ type Props = {
  * history" to them would be the interface claiming more than it knows.
  */
 export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
   const canSeePosition = Boolean(user?.fieldAccess?.["sys:job"]);
 
   const { data, isLoading, error, refetch } = useUserJobHistory(userId, {
@@ -76,8 +84,8 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
         <EmptyState
           className="my-4"
           scene="notes"
-          title="No position changes yet"
-          description="When this person is given a position, or it changes, the date and the position appear here."
+          title={t("profile.positionHistory.emptyTitle")}
+          description={t("profile.positionHistory.emptyDescription")}
         />
       );
     }
@@ -87,7 +95,7 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
         <TableHeader>
           <TableRow>
             {COLUMNS.map((column) => (
-              <TableHead key={column}>{column}</TableHead>
+              <TableHead key={column}>{t(column)}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -111,7 +119,7 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
                 <TableCell>{entry.jobName ?? ""}</TableCell>
                 <TableCell className="text-tertiary">{entry.previousJobName ?? ""}</TableCell>
                 <TableCell className="text-tertiary">
-                  {POSITION_CHANGE_REASON_LABELS[entry.reason] ?? entry.reason}
+                  {entry.reason in POSITION_CHANGE_REASON_LABELS ? t(POSITION_CHANGE_REASON_LABELS[entry.reason]) : entry.reason}
                 </TableCell>
               </TableRow>
             ))}
@@ -121,14 +129,14 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
   };
 
   return (
-    <section aria-label="Position history" className={className}>
-      <ProfileSectionCard title="Position history">
+    <section aria-label={t("profile.positionHistory.title")} className={className}>
+      <ProfileSectionCard title={t("profile.positionHistory.title")}>
         {/*
           Honest about the dates: until changes can be dated in advance, the day a position took
           effect is the day somebody recorded it.
         */}
         <p className="pt-3 text-body text-tertiary">
-          Each date is the day the change was recorded.
+          {t("profile.positionHistory.datesNote")}
         </p>
         {renderBody()}
       </ProfileSectionCard>

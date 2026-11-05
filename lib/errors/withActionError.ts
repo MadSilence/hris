@@ -1,6 +1,9 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { ApiError, BackendUnavailableError } from "@/components/clients/exceptions";
-import { FALLBACK_ERROR_MESSAGE, messageForCode } from "@/lib/errors/errorMessages";
+import { getLocale } from "next-intl/server";
+
+import { type AppLocale, DEFAULT_LOCALE } from "@/i18n/locales";
+import { fallbackErrorMessage, hasMessageForCode, messageForCode } from "@/lib/errors/errorMessages";
 
 /**
  * What every server action answers with.
@@ -34,7 +37,7 @@ export type ActionResult<T = unknown> = {
  * and is passed through untouched, as is anything bean validation produced, which has no code to
  * look up.
  */
-const translateBoundField = (error: ApiError): Record<string, string> | undefined => {
+const translateBoundField = (error: ApiError, locale: AppLocale): Record<string, string> | undefined => {
   const fieldErrors = error.fieldErrors;
   if (!fieldErrors || !error.code) return fieldErrors;
 
@@ -44,12 +47,27 @@ const translateBoundField = (error: ApiError): Record<string, string> | undefine
   const [field, text] = entries[0];
   if (text !== error.message) return fieldErrors;
 
-  const translated = messageForCode(error.code, error.message, error.params);
-  return translated === FALLBACK_ERROR_MESSAGE ? fieldErrors : { [field]: translated };
+  return hasMessageForCode(error.code)
+    ? { [field]: messageForCode(error.code, error.message, error.params, locale) }
+    : fieldErrors;
 };
 
 /** Turns a caught error into the answer a caller reads. Exported for actions that cannot be wrapped. */
-export const toActionError = (error: unknown, context?: string): ActionResult<never> => {
+/**
+ * The language of the request this action answers (I18N_DESIGN.md § 6.4). A server action has no reader's
+ * browser to ask, so the words are chosen here, from the same resolution the page was rendered with; outside
+ * a request — a script, a test — English.
+ */
+const requestLocale = async (): Promise<AppLocale> => {
+  try {
+    return await getLocale();
+  } catch {
+    return DEFAULT_LOCALE;
+  }
+};
+
+export const toActionError = async (error: unknown, context?: string): Promise<ActionResult<never>> => {
+  const locale = await requestLocale();
   if (error instanceof ApiError) {
     // The log line is the technical half — the backend's own wording plus the request id, which is
     // the same id printed on the backend side through %X{traceId}. The user gets the dictionary.
@@ -62,9 +80,9 @@ export const toActionError = (error: unknown, context?: string): ActionResult<ne
 
     return {
       status: ActionStatus.ERROR,
-      errorMessage: messageForCode(error.code, error.message, error.params),
+      errorMessage: messageForCode(error.code, error.message, error.params, locale),
       code: error.code,
-      fieldErrors: translateBoundField(error),
+      fieldErrors: translateBoundField(error, locale),
       // Only worth showing for a failure nobody expected; a refused business rule has nothing to
       // look up. BackendUnavailableError never has one — nothing on the far side issued it.
       requestId: error instanceof BackendUnavailableError ? undefined : error.requestId,
@@ -74,7 +92,7 @@ export const toActionError = (error: unknown, context?: string): ActionResult<ne
   // Not an ApiError at all: a bug in our own code, a bad JSON parse, a thrown string. There is no
   // code to look up and nothing useful to tell the user beyond the generic sentence.
   console.error(`${context ?? "action"} failed with a non-API error:`, error);
-  return { status: ActionStatus.ERROR, errorMessage: FALLBACK_ERROR_MESSAGE };
+  return { status: ActionStatus.ERROR, errorMessage: fallbackErrorMessage(locale) };
 };
 
 /**

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowLeft01Icon, ArrowRight01Icon, Calendar03Icon, CalendarLock01Icon, CheckmarkCircle02Icon, FileTextIcon, PencilEdit01Icon, Refresh01Icon, Task01Icon, UserCheck01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
@@ -38,24 +39,23 @@ import { PolicyActionError } from "@/components/modules/settings/modules/time/ti
 import { FormError } from "@/components/feedback/FormError";
 import { InlineAlert } from "@/components/desact/alert";
 
+/** Each step's title and subtitle are `timeOff.policyWizard.steps.<id>.title|subtitle`. */
 const STEPS: {
   id: WizardStepId;
-  title: string;
-  subtitle: string;
   icon: IconSvgElement;
 }[] = [
-  { id: "basics", title: "Basics", subtitle: "Name, unit, visibility", icon: FileTextIcon },
-  { id: "entitlement", title: "Entitlement", subtitle: "Quota & renewal", icon: CalendarLock01Icon },
-  { id: "accrual", title: "Accrual", subtitle: "Earning over time", icon: Refresh01Icon },
-  { id: "carryover", title: "Carryover & balance", subtitle: "Rollover & negatives", icon: Refresh01Icon },
-  { id: "counting", title: "Counting", subtitle: "How days are counted", icon: Calendar03Icon },
-  { id: "requests", title: "Requests", subtitle: "How employees request", icon: Task01Icon },
-  { id: "approvals", title: "Approvals", subtitle: "Who signs off", icon: UserCheck01Icon },
-  { id: "tenure", title: "Tenure rewards", subtitle: "Extra days by service", icon: CalendarLock01Icon },
-  { id: "eligibility", title: "Eligibility", subtitle: "Waiting period", icon: CalendarLock01Icon },
-  { id: "restrictions", title: "Restrictions", subtitle: "When leave is blocked", icon: UserGroupIcon },
-  { id: "editing", title: "Editing", subtitle: "Who can edit requests", icon: PencilEdit01Icon },
-  { id: "review", title: "Review", subtitle: "Confirm", icon: CheckmarkCircle02Icon },
+  { id: "basics", icon: FileTextIcon },
+  { id: "entitlement", icon: CalendarLock01Icon },
+  { id: "accrual", icon: Refresh01Icon },
+  { id: "carryover", icon: Refresh01Icon },
+  { id: "counting", icon: Calendar03Icon },
+  { id: "requests", icon: Task01Icon },
+  { id: "approvals", icon: UserCheck01Icon },
+  { id: "tenure", icon: CalendarLock01Icon },
+  { id: "eligibility", icon: CalendarLock01Icon },
+  { id: "restrictions", icon: UserGroupIcon },
+  { id: "editing", icon: PencilEdit01Icon },
+  { id: "review", icon: CheckmarkCircle02Icon },
 ];
 
 type Props = {
@@ -89,6 +89,8 @@ export const PolicyWizardModal: FC<Props> = ({
   onSubmitAction,
   onCancelAction,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const [values, setValues] = useState<PolicyWizardValues>(defaultPolicyWizardValues);
   const [stepIndex, setStepIndex] = useState(0);
   const [maxReached, setMaxReached] = useState(0);
@@ -130,7 +132,7 @@ export const PolicyWizardModal: FC<Props> = ({
   };
 
   const handleNext = () => {
-    const validationError = validatePolicyStep(step.id, values);
+    const validationError = validatePolicyStep(step.id, values, t);
     if (validationError) {
       setError(validationError);
       return;
@@ -149,7 +151,7 @@ export const PolicyWizardModal: FC<Props> = ({
   const handleSave = async (activate: boolean) => {
     // Validate every step before saving.
     for (const s of STEPS) {
-      const err = validatePolicyStep(s.id, values);
+      const err = validatePolicyStep(s.id, values, t);
       if (err) {
         setError(err);
         return;
@@ -167,7 +169,7 @@ export const PolicyWizardModal: FC<Props> = ({
         setStepIndex(0);
         return;
       }
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setError(e instanceof Error ? e.message : t("policyWizard.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -213,18 +215,16 @@ export const PolicyWizardModal: FC<Props> = ({
             {mode === "edit" && editImpact && editImpact.affectedRequests > 0 && (
               <InlineAlert tone="pending" className="mt-4">
                 <p className="font-medium">
-                  {editImpact.affectedRequests} absence
-                  {editImpact.affectedRequests === 1 ? " was" : "s were"} counted under the current
-                  rules
+                  {t("policyWizard.impact.title", { count: editImpact.affectedRequests })}
                 </p>
                 <p className="mt-1 text-hint">
                   {editImpact.inProgressRequests > 0
-                    ? `${editImpact.inProgressRequests} of them ${editImpact.inProgressRequests === 1 ? "is" : "are"} already under way. `
+                    ? t("policyWizard.impact.inProgress", { count: editImpact.inProgressRequests })
                     : ""}
-                  They belong to {editImpact.affectedPeople}{" "}
-                  {editImpact.affectedPeople === 1 ? "person" : "people"} and are{" "}
-                  <span className="font-medium">not recalculated</span> — what was decided stays
-                  decided. The new rules apply to what is requested from now on.
+                  {t.rich("policyWizard.impact.body", {
+                    people: editImpact.affectedPeople,
+                    b: (chunks) => <span className="font-medium">{chunks}</span>,
+                  })}
                 </p>
               </InlineAlert>
             )}
@@ -247,10 +247,10 @@ export const PolicyWizardModal: FC<Props> = ({
             <aside className="hidden w-64 shrink-0 flex-col border-r border-divider bg-subtle/40 p-5 sm:flex">
               <DialogHeader className="mb-5 space-y-1 text-left">
                 <DialogTitle className="text-body">
-                  {mode === "edit" ? "Edit policy" : "Create policy"}
+                  {mode === "edit" ? t("policyWizard.editTitle") : t("policyWizard.createTitle")}
                 </DialogTitle>
                 {leaveTypeName && (
-                  <p className="text-hint text-tertiary">in {leaveTypeName}</p>
+                  <p className="text-hint text-tertiary">{t("policyWizard.inLeaveType", { name: leaveTypeName })}</p>
                 )}
               </DialogHeader>
 
@@ -279,10 +279,10 @@ export const PolicyWizardModal: FC<Props> = ({
                             isActive ? "text-primary" : "text-secondary",
                           )}
                         >
-                          {s.title}
+                          {t(`policyWizard.steps.${s.id}.title`)}
                         </span>
                         <span className="block truncate text-hint text-tertiary">
-                          {s.subtitle}
+                          {t(`policyWizard.steps.${s.id}.subtitle`)}
                         </span>
                       </span>
                     </button>
@@ -299,12 +299,12 @@ export const PolicyWizardModal: FC<Props> = ({
                     <Icon icon={step.icon} />
                   </span>
                   <div>
-                    <h2 className="text-section-title leading-tight text-primary">{step.title}</h2>
-                    <p className="text-body text-tertiary">{step.subtitle}</p>
+                    <h2 className="text-section-title leading-tight text-primary">{t(`policyWizard.steps.${step.id}.title`)}</h2>
+                    <p className="text-body text-tertiary">{t(`policyWizard.steps.${step.id}.subtitle`)}</p>
                   </div>
                 </div>
                 <span className="shrink-0 text-hint font-medium text-tertiary">
-                  Step {stepIndex + 1} of {STEPS.length}
+                  {t("policyWizard.stepOf", { current: stepIndex + 1, total: STEPS.length })}
                 </span>
               </div>
 
@@ -323,17 +323,17 @@ export const PolicyWizardModal: FC<Props> = ({
                     className="gap-1"
                   >
                     <Icon icon={ArrowLeft01Icon} size="sm" />
-                    Back
+                    {tCommon("actions.back")}
                   </Button>
 
                   <div className="flex items-center gap-2">
                     <Button type="button" variant="ghost" onClick={requestClose} disabled={busy}>
-                      Cancel
+                      {tCommon("actions.cancel")}
                     </Button>
                     {isLast ? (
                       mode === "edit" ? (
                         <Button type="button" onClick={() => handleSave(false)} disabled={busy}>
-                          Save changes
+                          {tCommon("actions.saveChanges")}
                         </Button>
                       ) : (
                         <>
@@ -343,16 +343,16 @@ export const PolicyWizardModal: FC<Props> = ({
                             onClick={() => handleSave(false)}
                             disabled={busy}
                           >
-                            Save as draft
+                            {t("policyWizard.saveDraft")}
                           </Button>
                           <Button type="button" onClick={() => handleSave(true)} disabled={busy}>
-                            Save &amp; activate
+                            {t("policyWizard.saveActivate")}
                           </Button>
                         </>
                       )
                     ) : (
                       <Button type="button" onClick={handleNext} disabled={busy} className="gap-1">
-                        Next
+                        {tCommon("actions.next")}
                         <Icon icon={ArrowRight01Icon} size="sm" />
                       </Button>
                     )}

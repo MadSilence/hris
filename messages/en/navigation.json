@@ -1,0 +1,244 @@
+{
+  "menu": {
+    "home": "Home",
+    "inbox": "Inbox",
+    "tasks": "Tasks",
+    "organization": "Organization",
+    "calendar": "Calendar",
+    "attendance": "Attendance",
+    "processes": "Processes",
+    "reviews": "Reviews",
+    "settings": "Settings",
+    "search": "Search",
+    "companyHome": "{company} home",
+    "account": "Your account",
+    "myProfile": "My profile",
+    "finishProfile": "Finish your profile",
+    "myPreferences": "My preferences",
+    "changePassword": "Change password",
+    "signOut": "Sign out"
+  },
+  "public": {
+    "nav": {
+      "products": "Products",
+      "solutions": "Solutions",
+      "pricing": "Pricing",
+      "about": "About",
+      "home": "noddo home",
+      "signIn": "Sign in",
+      "startTrial": "Start free trial"
+    },
+    "footer": {
+      "rights": "© {year} noddo. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact"
+    },
+    "home": {
+      "hero": {
+        "title": "HRIS your team will actually enjoy",
+        "lead": "Centralize employee records, documents, time off and working hours—beautifully simple, tenant-ready, and fast.",
+        "seeProducts": "See products"
+      },
+      "requestDemo": "Request demo",
+      "trustedBy": "Trusted by teams like",
+      "learnMoreArrow": "Learn more →",
+      "exploreArrow": "Explore →",
+      "features": {
+        "records": {
+          "title": "Employee records",
+          "body": "Single source of truth for profiles, docs, and lifecycle events—secure and searchable."
+        },
+        "timeOff": {
+          "title": "Time off",
+          "body": "Policies, approvals, accruals and carry-over, automated and audit-ready."
+        },
+        "workingHours": {
+          "title": "Working hours",
+          "body": "Lightweight timesheets and attendance with review and exports."
+        }
+      },
+      "solutions": {
+        "hr": {
+          "title": "For HR",
+          "body": "Cut admin by 40% with automation, templates, and clean workflows."
+        },
+        "managers": {
+          "title": "For people managers",
+          "body": "Approvals, schedules, and team insights in one place."
+        }
+      },
+      "metrics": {
+        "admin": {
+          "value": "40%",
+          "label": "less HR admin in month one"
+        },
+        "uptime": {
+          "value": "99.9%",
+          "label": "uptime, audited"
+        },
+        "goLive": {
+          "value": "7 days",
+          "label": "to go live on average"
+        }
+      },
+      "steps": {
+        "numbered": "{step}. {title}",
+        "connect": {
+          "title": "Connect",
+          "body": "Import employees and documents securely."
+        },
+        "configure": {
+          "title": "Configure",
+          "body": "Set policies, roles, and approvals per tenant."
+        },
+        "automate": {
+          "title": "Automate",
+          "body": "Use templates and reminders to reduce manual work."
+        }
+      },
+      "testimonial": {
+        "quote": "“noddo is the first HR system our managers actually like using.”",
+        "author": "— Marta Kowalska, People Ops, Nimbus"
+      },
+      "faq": {
+        "title": "FAQ",
+        "tenant": {
+          "question": "Can we customize per tenant?",
+          "answer": "Yes—branding, fields, and policies can be tenant-specific."
+        },
+        "sso": {
+          "question": "Do you support SSO?",
+          "answer": "SAML/OIDC are available on Enterprise."
+        },
+        "hosting": {
+          "question": "Where is data hosted?",
+          "answer": "EU or US regions—your choice. Backups and encryption by default."
+        }
+      },
+      "cta": {
+        "title": "Ready to simplify HR?",
+        "body": "Get a guided demo or start a trial with sample data.",
+        "emailPlaceholder": "Work email",
+        "subscribe": "Subscribe"
+      }
+    },
+    "about": {
+      "title": "About noddo",
+      "lead": "We build HR software that feels clear, secure, and human.",
+      "story": {
+        "title": "Our story",
+        "body": "We’re a product team from Warsaw building HR software that feels human. noddo helps HR teams streamline operations without sacrificing employee experience."
+      },
+      "values": {
+        "title": "Our values",
+        "clarity": "Clarity over complexity",
+        "time": "Respect for people’s time",
+        "privacy": "Security and privacy by default"
+      }
+    },
+    "pricing": {
+      "title": "Pricing",
+      "lead": "Simple, transparent pricing that scales with your team.",
+      "tiers": {
+        "starter": {
+          "name": "Starter",
+          "price": "€3 / employee / mo",
+          "cta": "Get started"
+        },
+        "growth": {
+          "name": "Growth",
+          "price": "€5 / employee / mo",
+          "cta": "Start trial"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "price": "Custom",
+          "cta": "Talk to sales"
+        }
+      },
+      "features": {
+        "records": "Employee records",
+        "timeOff": "Time off",
+        "basicReports": "Basic reports",
+        "everythingInStarter": "Everything in Starter",
+        "workingHours": "Working hours",
+        "advancedReports": "Advanced reports",
+        "customWorkflows": "Custom workflows",
+        "slaSso": "SLA & SSO",
+        "dedicatedSupport": "Dedicated support"
+      }
+    },
+    "products": {
+      "title": "Products",
+      "lead": "Modular building blocks designed to work beautifully together.",
+      "learnMore": "Learn more",
+      "items": {
+        "records": {
+          "title": "Employee records",
+          "body": "Profiles, docs, contracts and lifecycle changes in one place. Role-based access and full history."
+        },
+        "timeOff": {
+          "title": "Time off",
+          "body": "Policies, balances, approvals and accruals with regional holidays and carry-over rules."
+        },
+        "workingHours": {
+          "title": "Working hours",
+          "body": "Timesheets, attendance and review flows with CSV/Excel exports."
+        }
+      }
+    },
+    "solutions": {
+      "title": "Solutions",
+      "lead": "Role-based value across your organization.",
+      "items": {
+        "hr": {
+          "title": "HR Teams",
+          "body": "Automate admin and standardize processes without losing flexibility.",
+          "bullets": {
+            "first": "Templates & reminders",
+            "second": "Document workflows",
+            "third": "Reports & exports"
+          }
+        },
+        "managers": {
+          "title": "People managers",
+          "body": "Approve requests, view balances, and keep schedules in sync.",
+          "bullets": {
+            "first": "Approvals in one view",
+            "second": "Team calendars",
+            "third": "Manager insights"
+          }
+        },
+        "finance": {
+          "title": "Finance",
+          "body": "Reliable time data and leave balances ready for payroll.",
+          "bullets": {
+            "first": "Timesheet exports",
+            "second": "Accrual rules",
+            "third": "Audit log"
+          }
+        }
+      }
+    }
+  },
+  "errorPages": {
+    "serverTitle": "Something broke on our side",
+    "serverLine": "Try again in a moment.",
+    "notFoundTitle": "We can't find this page",
+    "notFoundLine": "The link may be broken."
+  },
+  "preferences": {
+    "title": "My preferences",
+    "description": "How the product reads to you, who decides for you while you are away, what it tells you about, and where you are signed in.",
+    "dates": "Dates and time",
+    "delegate": "Delegate approvals",
+    "notifications": "Notifications",
+    "twoStep": "Two-step sign-in",
+    "sso": "Single sign-on",
+    "sessions": "Signed-in sessions"
+  },
+  "meta": {
+    "description": "HR on templates — for teams of every size."
+  }
+}

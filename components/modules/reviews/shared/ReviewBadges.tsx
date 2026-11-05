@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
 import {
-  REVIEW_ASSIGNMENT_STATUS_LABELS,
-  REVIEW_CALIBRATION_STATUS_LABELS,
-  REVIEW_CYCLE_STATUS_LABELS,
-  REVIEW_PARTICIPANT_STATUS_LABELS,
+  REVIEW_ASSIGNMENT_STATUS_KEYS,
+  REVIEW_CALIBRATION_STATUS_KEYS,
+  REVIEW_CYCLE_STATUS_KEYS,
+  REVIEW_PARTICIPANT_STATUS_KEYS,
   type ReviewAssignmentStatus,
   type ReviewCalibrationStatus,
   type ReviewCycleStatus,
@@ -21,7 +22,8 @@ import {
 const CYCLE: Record<ReviewCycleStatus, StatusTone> = { DRAFT: "draft", ACTIVE: "in-progress", CLOSED: "archived" };
 
 export function CycleStatusBadge({ status }: { status: ReviewCycleStatus }) {
-  return <StatusBadge status={CYCLE[status]} label={REVIEW_CYCLE_STATUS_LABELS[status]} />;
+  const t = useTranslations("reviews");
+  return <StatusBadge status={CYCLE[status]} label={t(REVIEW_CYCLE_STATUS_KEYS[status])} />;
 }
 
 /** A review to write: open until submitted, Overdue once late — the one state that asks for attention. */
@@ -35,10 +37,11 @@ const ASSIGNMENT: Record<ReviewAssignmentStatus, StatusTone> = {
 };
 
 export function AssignmentStatusBadge({ status, overdue }: { status: ReviewAssignmentStatus; overdue?: boolean }) {
+  const t = useTranslations("reviews");
   if (status === "OPEN" && overdue) {
-    return <StatusBadge status="declined" label="Overdue" />;
+    return <StatusBadge status="declined" label={t("status.assignment.overdue")} />;
   }
-  return <StatusBadge status={ASSIGNMENT[status]} label={REVIEW_ASSIGNMENT_STATUS_LABELS[status]} />;
+  return <StatusBadge status={ASSIGNMENT[status]} label={t(REVIEW_ASSIGNMENT_STATUS_KEYS[status])} />;
 }
 
 /** A person's review packet: collecting, then waiting for its approver, then shared and acknowledged. */
@@ -51,12 +54,14 @@ const PACKET: Record<ReviewParticipantStatus, StatusTone> = {
 };
 
 export function PacketStatusBadge({ status }: { status: ReviewParticipantStatus }) {
-  return <StatusBadge status={PACKET[status]} label={REVIEW_PARTICIPANT_STATUS_LABELS[status]} />;
+  const t = useTranslations("reviews");
+  return <StatusBadge status={PACKET[status]} label={t(REVIEW_PARTICIPANT_STATUS_KEYS[status])} />;
 }
 
 /** A calibration session: open is in review, closed is frozen and kept for history. */
 export function CalibrationStatusBadge({ status }: { status: ReviewCalibrationStatus }) {
+  const t = useTranslations("reviews");
   return (
-    <StatusBadge status={status === "OPEN" ? "in-progress" : "archived"} label={REVIEW_CALIBRATION_STATUS_LABELS[status]} />
+    <StatusBadge status={status === "OPEN" ? "in-progress" : "archived"} label={t(REVIEW_CALIBRATION_STATUS_KEYS[status])} />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUp01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -39,6 +40,7 @@ function initials(u: OrgChartUser): string {
 
 export function UserNode({ data }: NodeProps<UserFlowNode>) {
   const { user, childCount, collapsed, selected } = data;
+  const t = useTranslations("organization");
   const { onToggleCollapse, dropTargetId } = useOrgChartCanvas();
 
   const hasChildren = childCount > 0;
@@ -99,7 +101,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
             )}
           >
             <span className={cn("h-1.5 w-1.5 rounded-pill", isActive ? "bg-status-approved-fill" : "bg-strong")} />
-            {isActive ? "Active" : "Suspended"}
+            {isActive ? t("orgChart.status.active") : t("orgChart.status.suspended")}
           </span>
         ) : (
           <span />
@@ -107,7 +109,10 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
 
         {hasChildren ? (
           <span className="text-tertiary">
-            <span className="font-semibold text-secondary">{childCount}</span> reports
+            {t.rich("orgChart.node.reports", {
+              count: childCount,
+              b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span>,
+            })}
           </span>
         ) : null}
       </div>
@@ -122,8 +127,8 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
             onToggleCollapse(user.id);
           }}
           className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
-          aria-label={collapsed ? `Expand ${childCount} reports` : "Collapse"}
-          title={collapsed ? `Expand ${childCount} reports` : "Collapse"}
+          aria-label={collapsed ? t("orgChart.node.expand", { count: childCount }) : t("orgChart.node.collapse")}
+          title={collapsed ? t("orgChart.node.expand", { count: childCount }) : t("orgChart.node.collapse")}
         >
           {collapsed ? (
             <span className="text-hint font-semibold leading-none">{childCount}</span>

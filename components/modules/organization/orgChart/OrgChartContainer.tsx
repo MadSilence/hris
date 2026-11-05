@@ -4,6 +4,7 @@ import { CanvasMessage } from "@/components/ui/Canvas";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SidebarRightIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -17,6 +18,7 @@ import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
 
 export default function OrgChartContainer() {
+  const t = useTranslations("organization");
   const { data: users = [], isLoading, error } = useOrgChart();
   const setManager = useSetManager();
   const insertManagerAbove = useInsertManagerAbove();
@@ -103,11 +105,11 @@ export default function OrgChartContainer() {
     <div className="flex h-[76dvh] overflow-hidden rounded-popover border border-divider">
       <div className="relative min-w-0 flex-1 bg-subtle/40">
         {isLoading ? (
-          <CanvasMessage>Loading org chart…</CanvasMessage>
+          <CanvasMessage>{t("orgChart.loading")}</CanvasMessage>
         ) : error ? (
-          <CanvasMessage tone="error">Failed to load the org chart.</CanvasMessage>
+          <CanvasMessage tone="error">{t("orgChart.loadFailed")}</CanvasMessage>
         ) : forest.roots.length === 0 ? (
-          <CanvasMessage>No people to display yet.</CanvasMessage>
+          <CanvasMessage>{t("orgChart.empty")}</CanvasMessage>
         ) : (
           <OrgChartCanvas
             roots={forest.roots}
@@ -126,8 +128,8 @@ export default function OrgChartContainer() {
           <button
             type="button"
             onClick={() => setPanelOpen(true)}
-            aria-label="Show panel"
-            title="Show panel"
+            aria-label={t("orgChart.showPanel")}
+            title={t("orgChart.showPanel")}
             className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-control border border-divider bg-card text-tertiary shadow-card transition-colors hover:text-primary"
           >
             <Icon icon={SidebarRightIcon} size="sm" />
@@ -136,7 +138,7 @@ export default function OrgChartContainer() {
 
         {canReparent && !isLoading && !error && forest.roots.length > 0 && (
           <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-control border border-divider bg-card/90 px-3 py-1.5 text-hint text-tertiary shadow-card">
-            Drag a person onto another to change their manager.
+            {t("orgChart.dragHint")}
           </div>
         )}
       </div>
@@ -162,9 +164,9 @@ export default function OrgChartContainer() {
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
-              <p className="text-body font-medium text-secondary">No one selected</p>
+              <p className="text-body font-medium text-secondary">{t("orgChart.noSelection.title")}</p>
               <p className="text-body text-tertiary">
-                Click a person on the chart to see their details.
+                {t("orgChart.noSelection.description")}
               </p>
             </div>
           )}

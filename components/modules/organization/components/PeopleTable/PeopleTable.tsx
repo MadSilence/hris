@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/cn";
 import { Checkbox } from "@/components/desact/checkbox";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
 import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter, useDisplayLocale } from "@/lib/date";
 import { optionValueLabel, parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { isMaskedValue, objectValueSummary } from "@/models/attribute/objectValueSummary";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
@@ -46,7 +48,7 @@ type PeopleTableProps = {
 
 // Was `toISOString().slice(0,10)`, which converts to UTC and therefore showed Created/Updated as a
 // different day to different readers.
-const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : "");
+const formatDate = (iso: string | null | undefined, formatDisplayDate: DateFormatter) => (iso ? formatDisplayDate(iso) : "");
 
 export default function PeopleTable({
   data = [],
@@ -64,6 +66,10 @@ export default function PeopleTable({
 }: PeopleTableProps) {
   const active = sort;
 
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const locale = useDisplayLocale();
+  const tCommon = useTranslations("common");
   const metaById = useMemo(() => {
     const map = new Map<string, FieldMeta>();
     for (const f of fieldsMeta ?? []) map.set(f.id, f);
@@ -137,21 +143,21 @@ export default function PeopleTable({
             </div>
           );
         case "created_at":
-          return <span className="text-tertiary">{formatDate(row.createdAt)}</span>;
+          return <span className="text-tertiary">{formatDate(row.createdAt, formatDisplayDate)}</span>;
         case "updated_at":
-          return <span className="text-tertiary">{formatDate(row.updatedAt)}</span>;
+          return <span className="text-tertiary">{formatDate(row.updatedAt, formatDisplayDate)}</span>;
         case "last_name":
           return <span>{row.lastName}</span>;
         case "first_name":
           return <span>{row.firstName}</span>;
         case "hire_date":
-          return <span className="text-tertiary">{formatDate(row.hireDate)}</span>;
+          return <span className="text-tertiary">{formatDate(row.hireDate, formatDisplayDate)}</span>;
         case "employment_type":
           return <span>{row.employmentType}</span>;
         case "probation_end":
-          return <span className="text-tertiary">{formatDate(row.probationEnd)}</span>;
+          return <span className="text-tertiary">{formatDate(row.probationEnd, formatDisplayDate)}</span>;
         case "termination_date":
-          return <span className="text-tertiary">{formatDate(row.terminationDate)}</span>;
+          return <span className="text-tertiary">{formatDate(row.terminationDate, formatDisplayDate)}</span>;
 
         // ── References to other entities ────────────────────────────────────────────────
         case "job":
@@ -193,7 +199,7 @@ export default function PeopleTable({
     // muted and labelled, rather than as text that looks like somebody typed dots.
     if (isMaskedValue(val) || (meta.type === "SELECT" && isMaskedValue(optionValueLabel(val)))) {
       return (
-        <span className="text-tertiary" title="Hidden — you do not have access to this value">
+        <span className="text-tertiary" title={t("table.maskedValue")}>
           {typeof val === "string" ? val : optionValueLabel(val)}
         </span>
       );
@@ -219,12 +225,12 @@ export default function PeopleTable({
 
       case "NUMBER": {
         const n = typeof val === "number" ? val : Number(val);
-        return Number.isNaN(n) ? null : <span>{Intl.NumberFormat().format(n)}</span>;
+        return Number.isNaN(n) ? null : <span>{Intl.NumberFormat(locale).format(n)}</span>;
       }
 
       case "DATE": {
         const s = typeof val === "string" ? val : null;
-        return <span className="text-tertiary">{formatDate(s)}</span>;
+        return <span className="text-tertiary">{formatDate(s, formatDisplayDate)}</span>;
       }
 
       case "MULTI_SELECT": {
@@ -241,7 +247,7 @@ export default function PeopleTable({
       case "MONEY":
       case "ADDRESS":
       case "OBJECT": {
-        const summary = objectValueSummary(meta.type, val);
+        const summary = objectValueSummary(tCommon, meta.type, val, undefined, locale);
         return summary ? <span title={summary}>{summary}</span> : null;
       }
 
@@ -270,7 +276,7 @@ export default function PeopleTable({
               <Checkbox
                 checked={allChecked ? true : someChecked ? "indeterminate" : false}
                 onCheckedChange={(checked) => onToggleAllOnPage?.(pageIds, checked === true)}
-                aria-label="select all"
+                aria-label={t("table.selectAll")}
                 disabled={pageIds.length === 0}
               />
             </TableHead>
@@ -287,7 +293,7 @@ export default function PeopleTable({
                   key={column.id}
                   onClick={() => sortKey && toggleSort(sortKey)}
                   title={isSortable ? column.label : undefined}
-                  className={`truncate ${isSortable ? "cursor-pointer select-none" : ""}`}
+                  className={cn("truncate", isSortable && "cursor-pointer select-none")}
                 >
                   <span className="inline-flex max-w-full items-center gap-1 align-middle text-primary">
                     <span className="truncate">{column.label}</span>
@@ -324,7 +330,7 @@ export default function PeopleTable({
                   <Checkbox
                     checked={checked}
                     onCheckedChange={(v) => onToggleOne?.(row.id, v === true)}
-                    aria-label="select row"
+                    aria-label={t("table.selectRow")}
                   />
                 </TableCell>
 
@@ -342,21 +348,22 @@ export default function PeopleTable({
       {/* Infinite-scroll sentinel + loading indicator */}
       <div ref={sentinelRef} />
       {isLoadingMore ? (
-        <div className="py-3 text-center text-body text-tertiary">Loading more…</div>
+        <div className="py-3 text-center text-body text-tertiary">{t("table.loadingMore")}</div>
       ) : null}
     </div>
   );
 }
 
 
-const EmptyState: React.FC = () => (
-  <div className="flex flex-col items-center gap-2 py-10 text-center">
-    <div className="font-medium">No people to show</div>
-    <div className="text-body text-tertiary">
-      Try changing filters or come back later.
+const EmptyState: React.FC = () => {
+  const t = useTranslations("organization");
+  return (
+    <div className="flex flex-col items-center gap-2 py-10 text-center">
+      <div className="font-medium">{t("table.empty.title")}</div>
+      <div className="text-body text-tertiary">{t("table.empty.description")}</div>
     </div>
-  </div>
-);
+  );
+};
 
 function sysKeyFromId(id: string): string | null {
   if (!id.startsWith("sys:")) return null;

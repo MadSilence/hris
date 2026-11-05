@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
  * skeleton shaped like the content after that. Never a spinner or three dots, and never the whole screen for
  * a single save — only the content area loads, the sidebar stays.
  */
-export function Loader({ label = "Loading", className }: { label?: string; className?: string }) {
+export function Loader({ label, className }: { label?: string; className?: string }) {
   return (
     <div className={cn("flex flex-1 items-center justify-center py-12", className)}>
       <NodRing size="lg" label={label} />

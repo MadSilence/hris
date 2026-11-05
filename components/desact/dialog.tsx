@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { Icon } from "./icon";
 
@@ -75,7 +76,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
             className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-control text-tertiary transition-colors duration-(--duration-hover) hover:bg-mist hover:text-primary disabled:pointer-events-none"
           >
             <Icon icon={Cancel01Icon} />
-            <span className="sr-only">Close</span>
+            <CloseLabel />
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -83,6 +84,11 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
   ),
 );
 DialogContent.displayName = DialogPrimitive.Content.displayName;
+
+function CloseLabel() {
+  const t = useTranslations("common");
+  return <span className="sr-only">{t("actions.close")}</span>;
+}
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 pr-8 text-left", className)} {...props} />;

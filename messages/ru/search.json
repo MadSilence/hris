@@ -1,0 +1,23 @@
+{
+  "kinds": {
+    "people": "Сотрудники",
+    "departments": "Отделы",
+    "teams": "Команды",
+    "offices": "Офисы",
+    "legalEntities": "Юрлица",
+    "jobs": "Должности",
+    "timeOffPolicies": "Политики отсутствий",
+    "roles": "Роли"
+  },
+  "pages": {
+    "goTo": "Перейти",
+    "heading": "Страницы",
+    "settingsSection": "Настройки · {group}"
+  },
+  "dialog": {
+    "title": "Поиск",
+    "description": "Поиск сотрудников, команд, офисов, должностей, политик и страниц.",
+    "searching": "Ищем…",
+    "noResultsHint": "Попробуйте другое имя."
+  }
+}

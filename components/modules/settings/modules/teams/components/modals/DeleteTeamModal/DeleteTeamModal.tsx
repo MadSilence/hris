@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -29,6 +30,9 @@ function sumDescendantMembers(node: TeamTreeNode): number {
 }
 
 export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Props) {
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const deleteTeam = useDeleteTeam();
   const [childrenStrategy, setChildrenStrategy] = useState<TeamChildrenStrategy>("PROMOTE");
   const [membersStrategy, setMembersStrategy] = useState<TeamMembersStrategy>("UNASSIGN");
@@ -67,15 +71,15 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Delete &ldquo;{team.name}&rdquo;</DialogTitle>
+          <DialogTitle>{t("delete.title", { name: team.name })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2 text-body text-secondary">
-          <p>This action cannot be undone. Choose how to handle existing sub-teams and members.</p>
+          <p>{t("delete.intro")}</p>
 
           {hasChildren && (
             <div className="space-y-2">
-              <Label>Sub-teams</Label>
+              <Label>{t("labels.subUnits")}</Label>
               <RadioGroup
                 value={childrenStrategy}
                 onValueChange={(v) => setChildrenStrategy(v as TeamChildrenStrategy)}
@@ -83,13 +87,13 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="PROMOTE" id="tcs-promote" />
                   <Label htmlFor="tcs-promote" className="mb-0 cursor-pointer font-normal">
-                    Promote to parent level
+                    {tShared("promoteToParent")}
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="DELETE_CASCADE" id="tcs-cascade" />
                   <Label htmlFor="tcs-cascade" className="mb-0 cursor-pointer font-normal">
-                    Delete all sub-teams
+                    {t("delete.deleteAllSub")}
                   </Label>
                 </div>
               </RadioGroup>
@@ -97,7 +101,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
           )}
 
           <div className="space-y-2">
-            <Label>Members</Label>
+            <Label>{tShared("members")}</Label>
             <RadioGroup
               value={effectiveMembersStrategy}
               onValueChange={(v) => setMembersStrategy(v as TeamMembersStrategy)}
@@ -105,14 +109,14 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="UNASSIGN" id="tms-unassign" />
                 <Label htmlFor="tms-unassign" className="mb-0 cursor-pointer font-normal">
-                  Unassign (remove from team)
+                  {t("delete.unassign")}
                 </Label>
               </div>
               {parent && (
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="MOVE_TO" id="tms-move" />
                   <Label htmlFor="tms-move" className="mb-0 cursor-pointer font-normal">
-                    Promote to parent level ({parent.name})
+                    {tShared("promoteToParentNamed", { parent: parent.name })}
                   </Label>
                 </div>
               )}
@@ -121,7 +125,7 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
 
           {cascading && subMembersCount > 0 && (
             <div className="space-y-2">
-              <Label>Members of Sub-teams</Label>
+              <Label>{t("labels.subMembers")}</Label>
               <RadioGroup
                 value={effectiveSubMembersStrategy}
                 onValueChange={(v) => setSubMembersStrategy(v as TeamMembersStrategy)}
@@ -129,14 +133,14 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="UNASSIGN" id="tsms-unassign" />
                   <Label htmlFor="tsms-unassign" className="mb-0 cursor-pointer font-normal">
-                    Unassign from all sub-teams
+                    {t("delete.unassignSub")}
                   </Label>
                 </div>
                 {parent && (
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="tsms-move" />
                     <Label htmlFor="tsms-move" className="mb-0 cursor-pointer font-normal">
-                      Promote all sub-team users to parent level ({parent.name})
+                      {t("labels.promoteSubMembers", { parent: parent.name })}
                     </Label>
                   </div>
                 )}
@@ -145,16 +149,16 @@ export function DeleteTeamModal({ open, onClose, team, allTeams, onDeleted }: Pr
           )}
 
           {deleteTeam.isError && (
-            <FormError message={(deleteTeam.error as Error)?.message ?? "An error occurred."} />
+            <FormError message={(deleteTeam.error as Error)?.message ?? tShared("errorOccurred")} />
           )}
         </div>
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={deleteTeam.isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteTeam.isPending}>
-            {deleteTeam.isPending ? "Deleting…" : "Delete"}
+            {deleteTeam.isPending ? tCommon("actions.deleting") : tCommon("actions.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { useParams } from "next/navigation";
 import { PageGate } from "@/components/auth/PageGate";
@@ -10,11 +11,12 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { NotFoundError } from "@/components/clients/exceptions";
 
 export default function RolePage() {
+  const t = useTranslations("settings");
   const params = useParams<{ id: string }>();
   const roleId = params?.id as string;
   const { data: roles } = useRoles();
   const role = (roles ?? []).find((r) => r.id === roleId);
-  const roleName = role?.name ?? "Role";
+  const roleName = role?.name ?? t("pages.roleDetail.fallbackName");
 
   /* The name came from the list and the body was drawn regardless, so a role that no longer exists —
      a deep link from a notification about a role since deleted — rendered an empty page titled
@@ -23,9 +25,9 @@ export default function RolePage() {
     return (
       <PageGate resource="ROLES.ROLE" action="VIEW">
         <ErrorState
-          error={new NotFoundError("Role not found", { status: 404 })}
-          title="Role not found"
-          message="This role no longer exists. It may have been deleted."
+          error={new NotFoundError(t("pages.roleDetail.notFoundTitle"), { status: 404 })}
+          title={t("pages.roleDetail.notFoundTitle")}
+          message={t("pages.roleDetail.notFoundMessage")}
         />
       </PageGate>
     );

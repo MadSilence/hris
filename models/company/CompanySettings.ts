@@ -3,6 +3,8 @@ export type CompanySettings = {
   timezone: string;
   workingDays: string[];
   weekStartDay: string;
+  /** The language the application speaks to people who did not choose their own — a `Language` code. */
+  language: string;
   /** Minutes in a company working day — Attendance's norm for anybody without a personal schedule. */
   dailyNormMinutes?: number;
   /** The MONEY field Attendance prices logged time from. Null: no money in Attendance. */

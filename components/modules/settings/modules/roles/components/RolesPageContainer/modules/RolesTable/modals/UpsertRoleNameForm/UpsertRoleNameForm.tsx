@@ -3,6 +3,7 @@
 import { FC, FormEvent, useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { DialogFooter } from "@/components/desact/dialog";
 import { Input } from "@/components/desact/input";
@@ -34,19 +35,19 @@ export interface UpsertRoleNameFormProps {
   onSubmitAction: (values: UpsertRoleNameFormValues) => void | Promise<void>;
 }
 
-const buildSchema = (takenNames: string[]) => {
+const buildSchema = (takenNames: string[], t: ReturnType<typeof useTranslations<"settings">>) => {
   const taken = new Set(takenNames.map((n) => n.trim().toLowerCase()));
 
   return yup.object({
     name: yup
       .string()
       .trim()
-      .required("Role name is required.")
-      .min(2, "Role name must be at least 2 characters.")
-      .max(100, "Role name is too long.")
+      .required(t("roles.form.nameRequiredShort"))
+      .min(2, t("roles.form.nameMin"))
+      .max(100, t("roles.form.nameTooLong"))
       .test(
         "unique",
-        "A role with this name already exists.",
+        t("roles.form.nameTaken"),
         (value) => !value || !taken.has(value.trim().toLowerCase()),
       ),
   });
@@ -63,7 +64,9 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
   onCancelAction,
   onSubmitAction,
 }) => {
-  const schema = useMemo(() => buildSchema(takenNames), [takenNames]);
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(takenNames, t), [takenNames, t]);
   const handleSubmitAction = useCallback(
     (values: UpsertRoleNameFormValues) => {
       return onSubmitAction({
@@ -106,7 +109,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="role-name" required>Role name</RequiredLabel>
+        <RequiredLabel htmlFor="role-name" required>{t("roles.form.roleName")}</RequiredLabel>
 
         <Input
           id="role-name"
@@ -125,7 +128,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
 
       {showDescription && (
         <div className="mt-4 space-y-2">
-          <Label htmlFor="role-description">Description</Label>
+          <Label htmlFor="role-description">{tCommon("fields.description")}</Label>
 
           <Textarea
             id="role-description"
@@ -144,7 +147,7 @@ export const UpsertRoleNameForm: FC<UpsertRoleNameFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
  >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button

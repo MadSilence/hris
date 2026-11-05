@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ export const CreateLeaveTypeModal: FC<Props> = ({
   onConfirmAction,
   onCancelAction,
 }) => {
+  const t = useTranslations("timeOff");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -51,14 +53,14 @@ export const CreateLeaveTypeModal: FC<Props> = ({
       >
         <DialogContent hideClose className="overflow-hidden p-0">
           <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
-            <DialogTitle>Create leave type</DialogTitle>
+            <DialogTitle>{t("leaveTypes.create.title")}</DialogTitle>
             <DialogDescription>
-              Add a new category of time off. You&apos;ll define its policies next.
+              {t("leaveTypes.create.description")}
             </DialogDescription>
           </DialogHeader>
 
           <LeaveTypeForm
-            submitLabel="Create type"
+            submitLabel={t("leaveTypes.create.submit")}
             isLoading={isLoading}
             onCancelAction={requestClose}
             onDirtyChangeAction={setIsDirty}

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
@@ -29,6 +30,8 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
   fetchDocument,
   onCloseAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,10 +73,11 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle className="truncate">{document?.name ?? "Preview"}</DialogTitle>
+          <DialogTitle className="truncate">{document?.name ?? tCommon("actions.preview")}</DialogTitle>
           <DialogDescription>
-            {document?.categoryName ? `${document.categoryName} · ` : ""}
-            Read-only preview.
+            {document?.categoryName
+              ? t("documents.preview.readOnlyWithCategory", { category: document.categoryName })
+              : t("documents.preview.readOnly")}
           </DialogDescription>
         </DialogHeader>
 
@@ -85,7 +89,7 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
               <FormError message={error} />
               {document && (
                 <Button variant="secondary" size="sm" asChild>
-                  <a href={getDownloadUrl(document.id)} download>Download instead</a>
+                  <a href={getDownloadUrl(document.id)} download>{t("documents.preview.downloadInstead")}</a>
                 </Button>
               )}
             </div>

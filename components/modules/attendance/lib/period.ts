@@ -1,4 +1,4 @@
-import { isoToDate } from "@/lib/date";
+import { displayLocale, isoToDate } from "@/lib/date";
 import type { AttendancePeriod } from "@/models/attendance";
 
 /**
@@ -37,15 +37,15 @@ export const monthPeriod = (month: string, today: string): AttendancePeriod => {
 };
 
 /** "September 2026". */
-export const formatMonthLabel = (month: string): string => {
+export const formatMonthLabel = (month: string, locale?: string): string => {
   const date = isoToDate(`${month}-01`);
-  return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(locale ?? displayLocale(), { month: "long", year: "numeric" }).format(date);
 };
 
 /** "Tue 1" — the weekday and the day of the month. */
-export const formatDayLabel = (iso: string): string => {
+export const formatDayLabel = (iso: string, locale?: string): string => {
   const date = isoToDate(iso);
-  const weekday = new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
+  const weekday = new Intl.DateTimeFormat(locale ?? displayLocale(), { weekday: "short" }).format(date);
   return `${weekday} ${date.getDate()}`;
 };
 

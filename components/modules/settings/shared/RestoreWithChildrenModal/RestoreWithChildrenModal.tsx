@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
 } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
 import { Checkbox } from "@/components/desact/checkbox";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import {
   initialSelection,
   toggleSelection,
@@ -25,8 +26,8 @@ type Props = {
   title: string;
   /** The name of the record being restored. */
   name: string;
-  /** Plural, lower case: "positions", "sub-departments", "sub-teams". */
-  childNoun: string;
+  /** What comes back with it — each kind has its own sentence in the catalogue. */
+  childKind: RestoreChildKind;
   items: RestoreChild[];
   /** The verb on the button; matches the row action that opened the dialog. */
   confirmLabel?: string;
@@ -35,6 +36,8 @@ type Props = {
   onConfirmAction: (restoreIds: string[]) => void;
   onCancelAction: () => void;
 };
+
+export type RestoreChildKind = "positions" | "subDepartments" | "subTeams";
 
 /** Indentation per tree depth; past the last step everything sits at the deepest one. */
 const INDENT = ["", "pl-6", "pl-12", "pl-[4.5rem]", "pl-24"];
@@ -55,14 +58,18 @@ export function RestoreWithChildrenModal({
   isOpen,
   title,
   name,
-  childNoun,
+  childKind,
   items,
-  confirmLabel = "Unarchive",
+  confirmLabel: confirmLabelProp,
   isLoading = false,
   errorMessage,
   onConfirmAction,
   onCancelAction,
 }: Props) {
+  const t = useTranslations("settings");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
+  const confirmLabel = confirmLabelProp ?? t("shared.restore.unarchive");
   const [selected, setSelected] = useState<Set<string>>(() => initialSelection(items));
 
   const submit = () => {
@@ -85,7 +92,7 @@ export function RestoreWithChildrenModal({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Choose which archived {childNoun} come back with {name}.
+            {t(`shared.restore.description.${childKind}`, { name })}
           </DialogDescription>
         </DialogHeader>
 
@@ -113,8 +120,8 @@ export function RestoreWithChildrenModal({
                     {!item.archivedWithParent && (
                       <span className="block text-hint text-tertiary">
                         {item.archivedAt
-                          ? `Archived separately on ${formatDisplayDate(item.archivedAt, { style: "medium" })}`
-                          : "Archived separately"}
+                          ? t("shared.restore.archivedOn", { date: formatDisplayDate(item.archivedAt, { style: "medium" }) })
+                          : t("shared.restore.archived")}
                       </span>
                     )}
                   </span>
@@ -125,17 +132,17 @@ export function RestoreWithChildrenModal({
         </ul>
 
         <p className="m-0 text-body text-tertiary">
-          People the archive removed are not put back; assign them again where they belong.
+          {t("shared.restore.peopleNote")}
         </p>
 
         <FormError message={errorMessage} />
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancelAction} disabled={isLoading}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={submit} disabled={isLoading}>
-            {isLoading ? `${confirmLabel}…` : confirmLabel}
+            {isLoading ? t("shared.restore.busy", { label: confirmLabel }) : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

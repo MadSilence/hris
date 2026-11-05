@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ComputerIcon, Key01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -21,7 +22,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { showActionError } from "@/lib/errors/errorToast";
 import { describeUserAgent } from "@/components/modules/sessions/components/describeUserAgent";
 import { useMfaStatus, useInvalidateMfaStatus } from "@/components/modules/mfa/hooks";
@@ -43,6 +44,8 @@ type Dialogs = "setup" | "disable" | "codes" | null;
  * backup codes, switching it off, and the devices that skip the code.
  */
 export const TwoStepSection: React.FC = () => {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("auth");
   const status = useMfaStatus();
   const invalidate = useInvalidateMfaStatus();
   const [dialog, setDialog] = React.useState<Dialogs>(null);
@@ -76,61 +79,64 @@ export const TwoStepSection: React.FC = () => {
           <Icon icon={Key01Icon} className="flex-none text-tertiary" />
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-body font-medium text-primary">Authenticator app</span>
-              <StatusBadge status={s.enrolled ? "active" : "inactive"} label={s.enrolled ? "On" : "Off"} />
+              <span className="text-body font-medium text-primary">{t("mfa.section.app")}</span>
+              <StatusBadge status={s.enrolled ? "active" : "inactive"} label={s.enrolled ? t("mfa.section.on") : t("mfa.section.off")} />
             </div>
             <p className="text-hint text-tertiary">
               {s.enrolled
-                ? `${s.backupCodesLeft} backup ${s.backupCodesLeft === 1 ? "code" : "codes"} left.`
+                ? t("mfa.section.codesLeft", { count: s.backupCodesLeft })
                 : s.required
-                  ? "Your company requires it: you will set it up at your next sign-in if you do not now."
-                  : "A code from your phone after your password, so a stolen password alone does not sign anybody in."}
+                  ? t("mfa.section.requiredHint")
+                  : t("mfa.section.offHint")}
             </p>
           </div>
         </div>
         <div className="flex flex-none gap-2">
           {s.enrolled ? (
             <>
-              <Button type="button" variant="secondary" size="sm" onClick={regenerate}>New backup codes</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={regenerate}>{t("mfa.section.newCodes")}</Button>
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={s.required}
-                title={s.required ? "Your company requires two-step sign-in" : undefined}
+                title={s.required ? t("mfa.section.requiredTitle") : undefined}
                 onClick={() => setDialog("disable")}
               >
-                Switch off
+                {t("mfa.disable.submit")}
               </Button>
             </>
           ) : (
-            <Button type="button" size="sm" onClick={() => setDialog("setup")}>Set up</Button>
+            <Button type="button" size="sm" onClick={() => setDialog("setup")}>{t("mfa.section.setUp")}</Button>
           )}
         </div>
       </div>
 
       {s.trustedDevices.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-body font-medium text-primary">Remembered devices</h3>
+          <h3 className="text-body font-medium text-primary">{t("mfa.devices.title")}</h3>
           <ul className="divide-y divide-divider rounded-control border border-divider">
             {s.trustedDevices.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                 <div className="flex min-w-0 items-center gap-3">
                   <Icon icon={ComputerIcon} size="sm" className="flex-none text-tertiary" />
                   <p className="truncate text-body">
-                    {describeUserAgent(d.label)}
+                    {describeUserAgent(d.label, t)}
                     <span className="text-hint text-tertiary">
-                      {" "}· remembered {formatDisplayDate(d.createdAt, { style: "medium" })} · until{" "}
-                      {formatDisplayDate(d.expiresAt, { style: "medium" })}
+                      {" "}
+                      {t("mfa.devices.remembered", {
+                        from: formatDisplayDate(d.createdAt, { style: "medium" }),
+                        until: formatDisplayDate(d.expiresAt, { style: "medium" }),
+                      })}
                     </span>
                   </p>
                 </div>
-                <Button type="button" variant="secondary" size="sm" onClick={() => void forget(d.id)}>Forget</Button>
+                <Button type="button" variant="secondary" size="sm" onClick={() => void forget(d.id)}>{t("mfa.devices.forget")}</Button>
               </li>
             ))}
           </ul>
           {s.trustedDevices.length > 1 && (
-            <Button type="button" variant="secondary" size="sm" onClick={() => void forget()}>Forget all</Button>
+            <Button type="button" variant="secondary" size="sm" onClick={() => void forget()}>{t("mfa.devices.forgetAll")}</Button>
           )}
         </div>
       )}
@@ -140,8 +146,8 @@ export const TwoStepSection: React.FC = () => {
       <Dialog open={dialog === "codes"} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>New backup codes</DialogTitle>
-            <DialogDescription>The old codes no longer work.</DialogDescription>
+            <DialogTitle>{t("mfa.section.newCodes")}</DialogTitle>
+            <DialogDescription>{t("mfa.section.oldCodesVoid")}</DialogDescription>
           </DialogHeader>
           {codes && <BackupCodesSheet codes={codes} onDone={() => setDialog(null)} />}
         </DialogContent>
@@ -152,6 +158,7 @@ export const TwoStepSection: React.FC = () => {
 
 /** Password again (a stolen session alone cannot enrol a phone), then the app, then the codes. */
 const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const t = useTranslations("auth");
   const [password, setPassword] = React.useState("");
   const [enrolment, setEnrolment] = React.useState<{ otpauthUri: string; secret: string } | null>(null);
   const [signOutOthers, setSignOutOthers] = React.useState(true);
@@ -193,9 +200,9 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
     <Dialog open={open} onOpenChange={(o) => !o && !busy && !codes && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Set up two-step sign-in</DialogTitle>
+          <DialogTitle>{t("mfaSignIn.enrol.title")}</DialogTitle>
           <DialogDescription>
-            {codes ? "Two-step sign-in is on." : enrolment ? "Add your account to an authenticator app." : "Enter your password to begin."}
+            {codes ? t("mfa.setup.on") : enrolment ? t("mfa.setup.addAccount") : t("mfa.setup.enterPassword")}
           </DialogDescription>
         </DialogHeader>
         {codes ? (
@@ -205,13 +212,13 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
             <TotpEnrolment otpauthUri={enrolment.otpauthUri} secret={enrolment.secret} busy={busy} error={error} onConfirm={confirm} />
             <div className="flex items-center gap-2">
               <Checkbox id="mfa-sign-out-others" checked={signOutOthers} onCheckedChange={(v) => setSignOutOthers(Boolean(v))} />
-              <Label htmlFor="mfa-sign-out-others">Sign out my other sessions</Label>
+              <Label htmlFor="mfa-sign-out-others">{t("mfa.setup.signOutOthers")}</Label>
             </div>
           </div>
         ) : (
-          <form className="space-y-4" onSubmit={start}>
+          <form method="post" className="space-y-4" onSubmit={start}>
             <div className="space-y-2">
-              <RequiredLabel htmlFor="mfa-setup-password" required>Password</RequiredLabel>
+              <RequiredLabel htmlFor="mfa-setup-password" required>{t("login.passwordLabel")}</RequiredLabel>
               <Input
                 id="mfa-setup-password"
                 type="password"
@@ -223,7 +230,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
               />
             </div>
             <FormError message={error} />
-            <Button type="submit" className="w-full" disabled={busy || !password}>{busy ? "Continue…" : "Continue"}</Button>
+            <Button type="submit" className="w-full" disabled={busy || !password}>{busy ? t("mfa.setup.continueBusy") : t("mfa.setup.continue")}</Button>
           </form>
         )}
       </DialogContent>
@@ -233,6 +240,8 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
 
 /** A current code or a backup code — never the password alone (§ 3.6). */
 const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [value, setValue] = React.useState("");
   const [backup, setBackup] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -260,19 +269,19 @@ const DisableDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
   return (
     <Dialog open={open} onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="sm:max-w-md">
-        <form className="space-y-4" onSubmit={submit}>
+        <form method="post" className="space-y-4" onSubmit={submit}>
           <DialogHeader>
-            <DialogTitle>Switch off two-step sign-in?</DialogTitle>
-            <DialogDescription>Your password alone will sign you in again, and remembered devices are forgotten.</DialogDescription>
+            <DialogTitle>{t("mfa.disable.title")}</DialogTitle>
+            <DialogDescription>{t("mfa.disable.description")}</DialogDescription>
           </DialogHeader>
           <CodeField id="mfa-disable-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
           <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
-            {backup ? "Use the app instead" : "Use a backup code"}
+            {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
           </button>
           <FormError message={error} />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>Cancel</Button>
-            <Button type="submit" disabled={busy || !value.trim()}>{busy ? "Switch off…" : "Switch off"}</Button>
+            <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
+            <Button type="submit" disabled={busy || !value.trim()}>{busy ? t("mfa.disable.submitBusy") : t("mfa.disable.submit")}</Button>
           </div>
         </form>
       </DialogContent>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Alert02Icon, ArrowLeft02Icon, RepeatIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -41,6 +42,17 @@ import type { LiveAssignmentCreated } from "@/models/automations";
 
 const MANUAL_CAP = 300;
 
+/** The kinds of target people are assigned to here; each has its own phrasing in `audience.assign.*`. */
+export type AssignTargetKind =
+  | "policy"
+  | "calendar"
+  | "team"
+  | "department"
+  | "position"
+  | "role"
+  | "legalEntity"
+  | "office";
+
 type ResultSummary = { total: number; created: number; skipped: number; failed: number };
 type ResultLike = {
   summary: ResultSummary;
@@ -63,7 +75,8 @@ export type AssignPeopleModalProps = {
   basePath: string;
   assignableId: string;
   assignableName?: string;
-  noun: string;
+  /** What people are added to — chooses the wording, which in Russian also chooses the case. */
+  kind: AssignTargetKind;
   semantics: "add" | "replace";
   temporal?: boolean;
   invalidateKeys?: QueryKey[];
@@ -102,8 +115,6 @@ const DOMAIN_CONFIG: Record<string, { column?: PeopleColumn; excludeField: strin
   "/time-off/policies": { excludeField: "sys:policy" },
 };
 
-const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
-
 /**
  * Assign people to one target — eight surfaces, one modal (DECISIONS.md, 2026-10-16, decision 7).
  *
@@ -121,13 +132,15 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   basePath,
   assignableId,
   assignableName,
-  noun,
+  kind,
   semantics,
   temporal = false,
   invalidateKeys = [],
   renderSelectionWarning,
   currentHolderIds,
 }) => {
+  const t = useTranslations("access");
+  const tCommon = useTranslations("common");
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const queryClient = useQueryClient();
 
@@ -160,8 +173,8 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const holders = React.useMemo(() => new Set(currentHolderIds ?? []), [currentHolderIds]);
   const unavailableReason = React.useCallback(
-    (user: UserRefDTO) => (holders.has(user.id) ? "Already assigned" : null),
-    [holders],
+    (user: UserRefDTO) => (holders.has(user.id) ? t("audience.assign.alreadyAssigned") : null),
+    [holders, t],
   );
 
   const previewManual = useAssignmentPreview(basePath, assignableId);
@@ -307,35 +320,37 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const description =
     semantics === "add"
-      ? `This only adds the ${noun} — nobody is removed.`
-      : `A person can belong to one ${noun} only, so anyone who already has one leaves it — this is a move, not an addition.`;
+      ? t("audience.assign.descriptionAdd", { kind })
+      : t("audience.assign.descriptionReplace", { kind });
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeGuarded(); }}>
       <DialogContent className="sm:max-w-3xl max-h-[88vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add People to {assignableName ?? noun}</DialogTitle>
+          <DialogTitle>{assignableName
+            ? t("audience.assign.title", { name: assignableName })
+            : t("audience.assign.titleKind", { kind })}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {liveResult ? (
-            <LiveResultView result={liveResult} noun={noun} />
+            <LiveResultView result={liveResult} kind={kind} />
           ) : manualResult ? (
-            <ResultView result={manualResult} noun={noun} />
+            <ResultView result={manualResult} kind={kind} />
           ) : step === "preview" && previewSummary ? (
-            <PreviewView summary={previewSummary} live={live} noun={noun} errorMessage={errorMessage} />
+            <PreviewView summary={previewSummary} live={live} kind={kind} errorMessage={errorMessage} />
           ) : (
             <div className="space-y-3">
               {temporal && !live && (
                 <div className="flex flex-wrap gap-4 rounded-control border border-divider px-4 py-3">
                   <label className="flex flex-col gap-1 text-body">
-                    <span className="text-tertiary">Effective from *</span>
-                    <DatePicker value={effectiveFrom} onChange={setEffectiveFrom} ariaLabel="Effective from" className="w-44" />
+                    <span className="text-tertiary">{t("audience.assign.effectiveFromRequired")}</span>
+                    <DatePicker value={effectiveFrom} onChange={setEffectiveFrom} ariaLabel={t("audience.assign.effectiveFrom")} className="w-44" />
                   </label>
                   <label className="flex flex-col gap-1 text-body">
-                    <span className="text-tertiary">Effective to</span>
-                    <DatePicker value={effectiveTo} onChange={setEffectiveTo} ariaLabel="Effective to" className="w-44" />
+                    <span className="text-tertiary">{t("audience.assign.effectiveTo")}</span>
+                    <DatePicker value={effectiveTo} onChange={setEffectiveTo} ariaLabel={t("audience.assign.effectiveTo")} className="w-44" />
                   </label>
                 </div>
               )}
@@ -369,8 +384,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
               {includeInactive && (
                 <p className="flex items-start gap-2 rounded-control bg-subtle px-4 py-3 text-body text-primary">
                   <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
-                  People who have left can be found this way but not assigned — they will be listed as
-                  skipped. People who have not started yet, drafts included, are assigned normally.
+                  {t("audience.assign.inactiveNote")}
                 </p>
               )}
 
@@ -381,8 +395,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
               {overCap && (
                 <p className="flex items-start gap-2 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
                   <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
-                  You’ve selected {manual.size}. Add up to {MANUAL_CAP} manually, or use “select
-                  everyone who matches” for larger groups.
+                  {t("audience.assign.overCap", { count: manual.size, cap: MANUAL_CAP })}
                 </p>
               )}
 
@@ -393,24 +406,28 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
         <DialogFooter>
           {done ? (
-            <Button type="button" onClick={onCloseAction}>Done</Button>
+            <Button type="button" onClick={onCloseAction}>{tCommon("actions.done")}</Button>
           ) : step === "preview" ? (
             <>
               <Button type="button" variant="secondary" className="gap-1.5" onClick={() => setStep("pick")} disabled={busy}>
                 <Icon icon={ArrowLeft02Icon} size="sm" />
-                Back
+                {tCommon("actions.back")}
               </Button>
               <Button type="button" onClick={handleApply} disabled={busy || (!live && (previewSummary?.willAssign ?? 0) === 0)}>
-                {busy ? "Applying…" : live ? "Create live rule" : `Add ${people(previewSummary?.willAssign ?? 0)}`}
+                {busy
+                  ? t("audience.assign.applying")
+                  : live
+                    ? t("audience.assign.createLiveRule")
+                    : t("audience.assign.addPeople", { count: previewSummary?.willAssign ?? 0 })}
               </Button>
             </>
           ) : (
             <>
               <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button type="button" onClick={handlePreview} disabled={busy || willAffect === 0 || overCap || needsDate || (live && !assignableType)}>
-                {busy ? "Checking…" : `Review ${people(willAffect)}`}
+                {busy ? t("audience.assign.checking") : t("audience.assign.reviewPeople", { count: willAffect })}
               </Button>
             </>
           )}
@@ -421,32 +438,36 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 };
 
 /** Said plainly, where the reader chooses it: a filter here is a promise about the future too. */
-const LiveRuleNote: React.FC<{ temporal: boolean }> = ({ temporal }) => (
+const LiveRuleNote: React.FC<{ temporal: boolean }> = ({ temporal }) => {
+  const t = useTranslations("access");
+  return (
   <div className="flex items-start gap-3 rounded-control bg-status-info-bg px-4 py-3 text-body text-status-info-text" data-test="live-rule-note">
     <Icon icon={RepeatIcon} size="sm" className="mt-0.5 flex-none" />
     <div>
-      <p className="m-0 font-medium">Everyone who matches now, and anyone who matches later.</p>
+      <p className="m-0 font-medium">{t("audience.assign.liveNote.title")}</p>
       <p className="m-0">
-        Assigning by filter creates a live rule: people who start matching are assigned, and people who
-        stop matching lose only what the rule gave them. A value somebody set by hand is left alone.
-        {temporal ? " Each person gets it from the day they start matching — today for everyone who matches now." : ""}
+        {temporal ? t("audience.assign.liveNote.bodyTemporal") : t("audience.assign.liveNote.body")}
       </p>
     </div>
   </div>
-);
+  );
+};
 
 /** "N will be assigned, M skipped" — and why — before anything is written. */
-const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; noun: string; errorMessage?: string }> = ({
+const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; kind: AssignTargetKind; errorMessage?: string }> = ({
   summary,
   live,
-  noun,
+  kind,
   errorMessage,
 }) => {
-  const lines = skipCountLines(summary.skippedByReason);
+  const t = useTranslations("access");
+  const lines = skipCountLines(summary.skippedByReason, t);
   return (
     <div className="space-y-4 px-1 py-6" data-test="assignment-preview">
       <p className="m-0 text-body font-medium text-primary">
-        {people(summary.willAssign)} will be assigned{summary.skipped > 0 ? `, ${summary.skipped} skipped` : ""}.
+        {summary.skipped > 0
+          ? t("audience.assign.preview.willAssignSkipped", { count: summary.willAssign, skipped: summary.skipped })
+          : t("audience.assign.preview.willAssign", { count: summary.willAssign })}
       </p>
       {lines.length > 0 && (
         <ul className="m-0 list-none space-y-1 rounded-control bg-subtle px-4 py-3 text-body text-primary">
@@ -455,18 +476,16 @@ const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; noun: stri
       )}
       {summary.conflicts > 0 && (
         <p className="m-0 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
-          {people(summary.conflicts)} already {summary.conflicts === 1 ? "has" : "have"} a {noun} from another live
-          rule. That rule keeps it; this one does not overwrite it.
+          {t("audience.assign.preview.conflicts", { count: summary.conflicts, kind })}
         </p>
       )}
       {live ? (
         <p className="m-0 text-body text-tertiary">
-          This creates a live rule — everyone who matches now, and anyone who matches later. You can find
-          it, change it or switch it off in Settings → Automation.
+          {t("audience.assign.preview.live")}
         </p>
       ) : (
         <p className="m-0 text-body text-tertiary">
-          These people are assigned by hand, once. No rule takes a hand assignment away.
+          {t("audience.assign.preview.manual")}
         </p>
       )}
       <FormError message={errorMessage} />
@@ -474,20 +493,25 @@ const PreviewView: React.FC<{ summary: PreviewSummary; live: boolean; noun: stri
   );
 };
 
-const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> = ({ result, noun }) => {
-  const lines = skipCountLines(result.skippedByReason);
+const LiveResultView: React.FC<{ result: LiveAssignmentCreated; kind: AssignTargetKind }> = ({ result, kind }) => {
+  const t = useTranslations("access");
+  const lines = skipCountLines(result.skippedByReason, t);
   return (
     <div className="space-y-4 px-1 py-6">
       <div className="flex items-start gap-3">
         <Icon icon={Tick02Icon} className="mt-0.5 flex-none text-status-approved-icon" />
         <div>
           <p className="m-0 font-medium text-primary">
-            Live rule “{result.ruleName}” created.
+            {t("audience.assign.liveResult.created", { name: result.ruleName })}
           </p>
           <p className="m-0 mt-1 text-body text-tertiary">
-            {people(result.appliedNow)} added to the {noun} now
-            {result.willAssign > result.appliedNow ? `, ${result.willAssign - result.appliedNow} more on their own date` : ""}.
-            Anyone who matches later is added too.
+            {result.willAssign > result.appliedNow
+              ? t("audience.assign.liveResult.addedWithLater", {
+                  count: result.appliedNow,
+                  kind,
+                  later: result.willAssign - result.appliedNow,
+                })
+              : t("audience.assign.liveResult.added", { count: result.appliedNow, kind })}
           </p>
         </div>
       </div>
@@ -498,7 +522,7 @@ const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> 
       )}
       <PermissionGate resource="SETTINGS.AUTOMATIONS" action="VIEW">
         <Link href={`/settings/automation/automations/${result.ruleId}`} className="text-body">
-          Open the rule
+          {t("audience.assign.liveResult.openRule")}
         </Link>
       </PermissionGate>
     </div>
@@ -512,9 +536,10 @@ const LiveResultView: React.FC<{ result: LiveAssignmentCreated; noun: string }> 
  * and they are not shown alike.** "Already there" and "archived" are the engine doing its job; a
  * `failed` row is the engine unable to write, which is the only line here anybody has to act on.
  */
-const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, noun }) => {
+const ResultView: React.FC<{ result: ResultLike; kind: AssignTargetKind }> = ({ result, kind }) => {
+  const t = useTranslations("access");
   const { total, created, skipped, failed } = result.summary;
-  const skippedDetail = result.skipped ? describeSkips(result.skipped) : null;
+  const skippedDetail = result.skipped ? describeSkips(result.skipped, t) : null;
 
   return (
     <div className="space-y-4 px-1 py-6">
@@ -526,24 +551,24 @@ const ResultView: React.FC<{ result: ResultLike; noun: string }> = ({ result, no
         )}
         <div>
           <p className="font-medium text-primary">
-            {created} of {total} {total === 1 ? "person" : "people"} added to the {noun}.
+            {t("audience.assign.result.added", { created, total, kind })}
           </p>
           {created === 0 && (
-            <p className="mt-1 text-body text-tertiary">Nothing changed.</p>
+            <p className="mt-1 text-body text-tertiary">{t("audience.assign.result.nothingChanged")}</p>
           )}
         </div>
       </div>
 
       {skipped > 0 && (
         <div className="rounded-control bg-subtle px-4 py-3 text-body text-primary">
-          {skippedDetail ?? `${skipped} ${skipped === 1 ? "person was" : "people were"} skipped.`}
+          {skippedDetail ?? t("audience.assign.result.skipped", { count: skipped })}
         </div>
       )}
 
       {failed > 0 && (
         <div className="space-y-2 rounded-control bg-status-declined-bg px-4 py-3 text-body text-status-declined-text">
           <p className="font-medium">
-            {failed} {failed === 1 ? "person" : "people"} could not be added.
+            {t("audience.assign.result.failed", { count: failed })}
           </p>
           <ul className="space-y-1">
             {(result.failed ?? []).map((f) => (

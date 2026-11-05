@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FC } from "react";
 import { Copy01Icon, Refresh01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 
 import {
@@ -44,6 +45,8 @@ export const SubscribeCalendarModal: FC<Props> = ({
   calendarId,
   calendarName,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -64,7 +67,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
       .then((result) => {
         if (cancelled) return;
         if (result.status === ActionStatus.ERROR || !result.data) {
-          setError(result.errorMessage ?? "Could not create the subscription link.");
+          setError(result.errorMessage ?? t("publicHolidays.subscribe.createFailed"));
           return;
         }
         setUrl(toAbsolute(result.data.path));
@@ -76,6 +79,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` is stable for the life of the page
   }, [isOpen, calendarId]);
 
   const handleCopy = async () => {
@@ -83,7 +87,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
       await navigator.clipboard.writeText(url);
       setCopied(true);
     } catch {
-      setError("Could not copy. Select the link and copy it by hand.");
+      setError(t("publicHolidays.subscribe.copyFailed"));
     }
   };
 
@@ -98,7 +102,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
     });
 
     if (result.status === ActionStatus.ERROR || !result.data) {
-      setError(result.errorMessage ?? "Could not reset the link.");
+      setError(result.errorMessage ?? t("publicHolidays.subscribe.resetFailed"));
     } else {
       setUrl(toAbsolute(result.data.path));
     }
@@ -110,22 +114,21 @@ export const SubscribeCalendarModal: FC<Props> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Subscribe to &ldquo;{calendarName}&rdquo;</DialogTitle>
+          <DialogTitle>{t("publicHolidays.subscribe.title", { name: calendarName })}</DialogTitle>
           <DialogDescription>
-            Add this link in Outlook, Google Calendar or Apple Calendar and the holidays appear
-            alongside your meetings. Changes made here follow automatically.
+            {t("publicHolidays.subscribe.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 py-2">
-          <Label htmlFor="feed-url">Subscription link</Label>
+          <Label htmlFor="feed-url">{t("publicHolidays.subscribe.link")}</Label>
           <div className="flex items-center gap-2">
-            <Input id="feed-url" readOnly value={isLoading ? "Loading…" : url} />
+            <Input id="feed-url" readOnly value={isLoading ? tCommon("states.loading") : url} />
             <Button
               type="button"
               variant="secondary"
               size="icon"
-              aria-label="Copy link"
+              aria-label={t("publicHolidays.subscribe.copyLink")}
               disabled={isLoading || !url}
               onClick={handleCopy}
             >
@@ -134,8 +137,7 @@ export const SubscribeCalendarModal: FC<Props> = ({
           </div>
 
           <p className="text-hint text-tertiary">
-            Anyone with this link can read the calendar. Reset it if it ends up somewhere it should
-            not be — existing subscriptions stop working immediately.
+            {t("publicHolidays.subscribe.hint")}
           </p>
 
           {error && <FormError message={error} />}
@@ -144,10 +146,10 @@ export const SubscribeCalendarModal: FC<Props> = ({
         <DialogFooter>
           <Button type="button" variant="secondary" disabled={isLoading} onClick={handleRotate}>
             <Icon icon={Refresh01Icon} size="sm" />
-            Reset link
+            {t("publicHolidays.subscribe.reset")}
           </Button>
           <Button type="button" onClick={onCloseAction}>
-            Done
+            {tCommon("actions.done")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -39,11 +40,14 @@ export interface CreateOfficeFormProps {
   onSubmitAction: (values: CreateOfficeFormValues) => void | Promise<void>;
 };
 
-const createOfficeSchema = yup.object({
+type OfficesTranslator = ReturnType<typeof useTranslations<"structure.offices">>;
+type PlacesTranslator = ReturnType<typeof useTranslations<"structure.places">>;
+
+const buildCreateOfficeSchema = (t: OfficesTranslator, tPlaces: PlacesTranslator) => yup.object({
   name: yup
     .string()
     .trim()
-    .required("Please enter an office name.")
+    .required(t("create.nameRequired"))
     .min(2)
     .max(200),
   description: yup.string().trim().max(1000).optional(),
@@ -51,14 +55,14 @@ const createOfficeSchema = yup.object({
   phone: yup.string().trim().max(120).optional(),
   isRemote: yup.boolean(),
   // The country always: a remote office is "anywhere in" it, and it is bound to that country's calendar.
-  country: yup.string().trim().required("Please enter a country.").max(120),
+  country: yup.string().trim().required(tPlaces("validation.countryRequired")).max(120),
   // The postal address is required exactly when the backend requires it — of an office that is not
   // remote (`OfficeAddress`, O00009). It was once optional here while the API required it, so a submit
   // without a building number came back as "check the highlighted fields" with nothing highlighted.
-  city: addressPart("Please enter a city.", 120),
-  street: addressPart("Please enter a street.", 200),
-  building: addressPart("Please enter a building number.", 50),
-  postCode: addressPart("Please enter a post code.", 50),
+  city: addressPart(tPlaces("validation.cityRequired"), 120),
+  street: addressPart(tPlaces("validation.streetRequired"), 200),
+  building: addressPart(tPlaces("validation.buildingRequired"), 50),
+  postCode: addressPart(tPlaces("validation.postCodeRequired"), 50),
 });
 
 function addressPart(message: string, max: number) {
@@ -112,6 +116,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
+  const createOfficeSchema = useMemo(() => buildCreateOfficeSchema(t, tPlaces), [t, tPlaces]);
+
   const handleFormSubmission = useCallback(
     (values: CreateOfficeFormValues) => onSubmitAction(sanitize(values)),
     [onSubmitAction],
@@ -160,15 +169,15 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
         <div className="space-y-5">
           {/* SECTION: DETAILS */}
           <div className="mb-4">
-            <h3 className="text-body font-semibold">Office details</h3>
+            <h3 className="text-body font-semibold">{t("create.detailsTitle")}</h3>
             <p className="mt-1 text-body text-tertiary">
-              Basic information about this office location.
+              {t("create.detailsHint")}
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="office-name" required>Name</RequiredLabel>
+              <RequiredLabel htmlFor="office-name" required>{tCommon("fields.name")}</RequiredLabel>
               <Input
                 id="office-name"
                 value={formik.values.name}
@@ -184,7 +193,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="office-description">Description</Label>
+              <Label htmlFor="office-description">{tCommon("fields.description")}</Label>
               <Input
                 id="office-description"
                 value={formik.values.description}
@@ -197,7 +206,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="office-email">Email</Label>
+                <Label htmlFor="office-email">{tCommon("fields.email")}</Label>
                 <Input
                   id="office-email"
                   value={formik.values.email}
@@ -213,7 +222,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="office-phone">Phone</Label>
+                <Label htmlFor="office-phone">{t("phone")}</Label>
                 <Input
                   id="office-phone"
                   value={formik.values.phone}
@@ -227,7 +236,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
             {/* The same field and words as the office page's own Remote checkbox. */}
             <div className="space-y-2">
-              <Label htmlFor="office-remote">Remote</Label>
+              <Label htmlFor="office-remote">{t("remote")}</Label>
               <label className="flex items-center gap-2 text-body text-primary">
                 <Checkbox
                   id="office-remote"
@@ -235,25 +244,25 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
                   onCheckedChange={(c) => formik.setFieldValue("isRemote", c === true)}
                   disabled={isLoading}
                 />
-                People here work from anywhere in the office&apos;s country
+                {t("remoteHint")}
               </label>
             </div>
           </div>
 
           {/* SECTION: ADDRESS */}
           <div className="mb-4">
-            <h3 className="text-body font-semibold">Address</h3>
+            <h3 className="text-body font-semibold">{tPlaces("address")}</h3>
             <p className="mt-1 text-body text-tertiary">
               {formik.values.isRemote
-                ? "A remote office needs only its country; the rest of the address is optional."
-                : "Physical location of the office."}
+                ? t("create.addressHintRemote")
+                : t("create.addressHint")}
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-country" required>Country</RequiredLabel>
+                <RequiredLabel htmlFor="office-country" required>{tPlaces("country")}</RequiredLabel>
                 <Input
                   id="office-country"
                   value={formik.values.country}
@@ -269,7 +278,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-city" required={!formik.values.isRemote}>City</RequiredLabel>
+                <RequiredLabel htmlFor="office-city" required={!formik.values.isRemote}>{tPlaces("city")}</RequiredLabel>
                 <Input
                   id="office-city"
                   value={formik.values.city}
@@ -287,7 +296,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-street" required={!formik.values.isRemote}>Street</RequiredLabel>
+                <RequiredLabel htmlFor="office-street" required={!formik.values.isRemote}>{tPlaces("street")}</RequiredLabel>
                 <Input
                   id="office-street"
                   value={formik.values.street}
@@ -304,7 +313,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="office-building" required={!formik.values.isRemote}>Building</RequiredLabel>
+                <RequiredLabel htmlFor="office-building" required={!formik.values.isRemote}>{tPlaces("building")}</RequiredLabel>
                 <Input
                   id="office-building"
                   value={formik.values.building}
@@ -322,7 +331,7 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="office-post-code" required={!formik.values.isRemote}>Post code</RequiredLabel>
+              <RequiredLabel htmlFor="office-post-code" required={!formik.values.isRemote}>{tPlaces("postCode")}</RequiredLabel>
               <Input
                 id="office-post-code"
                 value={formik.values.postCode}
@@ -350,11 +359,11 @@ export const CreateOfficeForm: FC<CreateOfficeFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Create
+          {tCommon("actions.create")}
         </Button>
       </DialogFooter>
     </form>

@@ -3,6 +3,7 @@
 import { FC, Fragment, FormEvent, useEffect, useMemo, useState } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { Badge } from "@/components/desact/badge";
@@ -87,6 +88,8 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const { access } = useAccess();
   const iAmOwner = isSystemOwner(access);
   const [tab, setTab] = useState<AssignRolesTab>("roles");
@@ -164,7 +167,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
   const fullName =
     `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() ||
     user?.email ||
-    "User";
+    t("roles.assign.fallbackUser");
 
   const initials = getInitials(user?.firstName, user?.lastName, user?.email);
 
@@ -199,9 +202,9 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
           roles actually add up to. The preview follows the *selection*, not what is saved. */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as AssignRolesTab)}>
         <TabsList>
-          <TabsTrigger value="roles">Assigned roles</TabsTrigger>
-          <TabsTrigger value="permissions">Resolved permissions</TabsTrigger>
-          <TabsTrigger value="fields">Resolved field visibility</TabsTrigger>
+          <TabsTrigger value="roles">{t("roles.assign.tabRoles")}</TabsTrigger>
+          <TabsTrigger value="permissions">{t("roles.assign.tabPermissions")}</TabsTrigger>
+          <TabsTrigger value="fields">{t("roles.assign.tabFields")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="permissions" className="mt-4 max-h-[320px] overflow-y-auto">
@@ -209,7 +212,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
             isLoading={preview.isLoading}
             systemOwner={preview.data?.systemOwner ?? false}
             rows={preview.data?.permissions}
-            emptyText="These roles grant no module access."
+            emptyText={t("roles.assign.noModuleAccess")}
           />
         </TabsContent>
 
@@ -218,7 +221,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
             isLoading={preview.isLoading}
             systemOwner={preview.data?.systemOwner ?? false}
             rows={preview.data?.fields}
-            emptyText="These roles grant no access to employee fields."
+            emptyText={t("roles.assign.noFieldAccess")}
           />
         </TabsContent>
 
@@ -226,7 +229,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       <TooltipProvider delayDuration={200}>
         <div className="space-y-2">
           {visibleRoles.length === 0 ? (
-            <div className="text-body text-tertiary">No roles available</div>
+            <div className="text-body text-tertiary">{t("roles.assign.noRoles")}</div>
           ) : (
             visibleRoles.map((role) => {
               const checked = formik.values.roleIds.includes(role.id);
@@ -238,18 +241,19 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
                 || (role.systemOwner && !iAmOwner)
                 || (role.archived && !checked);
               const lockMsg = role.isDefault
-                ? "Default role — always assigned and can’t be removed"
+                ? t("roles.assign.lockDefault")
                 : role.systemOwner && !iAmOwner
-                  ? "Only a System Owner can grant or remove this role"
+                  ? t("roles.assign.lockOwner")
                   : role.archived
-                    ? "This role is archived — it grants nothing and cannot be assigned again"
+                    ? t("roles.assign.lockArchived")
                     : null;
 
+              const rowClass = `flex items-center gap-3 rounded-control px-2 py-2 ${
+                locked ? "cursor-default" : "cursor-pointer hover:bg-subtle"
+              }`;
               const row = (
                 <label
-                  className={`flex items-center gap-3 rounded-control px-2 py-2 ${
-                    locked ? "cursor-default" : "cursor-pointer hover:bg-subtle"
-                  }`}
+                  className={rowClass}
  >
                   <Checkbox
                     checked={role.isDefault ? true : checked}
@@ -263,11 +267,11 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
                     <div className="truncate text-body font-medium">{role.name}</div>
 
                     {role.systemOwner && (
-                      <Badge variant="neutral" className="shrink-0">System</Badge>
+                      <Badge variant="neutral" className="shrink-0">{t("roles.table.system")}</Badge>
                     )}
 
                     {role.isDefault && (
-                      <Badge variant="neutral" className="shrink-0">Default</Badge>
+                      <Badge variant="neutral" className="shrink-0">{t("roles.table.default")}</Badge>
                     )}
 
                     {role.archived && (
@@ -304,7 +308,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
             disabled={isLoading}
             onClick={handleReset}
  >
-            Reset
+            {tCommon("actions.reset")}
           </Button>
         ) : (
           <Button
@@ -313,7 +317,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
             disabled={isLoading}
             onClick={onCancelAction}
  >
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
         )}
 
@@ -321,7 +325,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
           type="submit"
           disabled={isLoading || !hasChanges || !user}
  >
-          Apply
+          {tCommon("actions.apply")}
         </Button>
       </DialogFooter>
     </form>

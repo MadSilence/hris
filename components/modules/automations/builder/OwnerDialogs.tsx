@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -26,6 +27,8 @@ export function ChangeOwnerDialog({
   onConfirm: (userId: string) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const [picked, setPicked] = useState<PickedUser | null>(null);
   useEffect(() => { if (isOpen) setPicked(null); }, [isOpen]);
   const userId = picked?.id ?? null;
@@ -33,17 +36,15 @@ export function ChangeOwnerDialog({
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isLoading) onCancel(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Change owner</DialogTitle>
-          <DialogDescription>
-            The automation runs in the new owner&apos;s name from now on, and they are told when it fails or pauses.
-          </DialogDescription>
+          <DialogTitle>{t("rule.menu.changeOwner")}</DialogTitle>
+          <DialogDescription>{t("owner.changeDescription")}</DialogDescription>
         </DialogHeader>
         <UserPickerField value={picked} onChange={setPicked} />
         <FormError message={errorMessage} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>{tCommon("actions.cancel")}</Button>
           <Button type="button" onClick={() => userId && onConfirm(userId)} disabled={isLoading || !userId}>
-            {isLoading ? "Changing…" : "Change owner"}
+            {isLoading ? t("owner.changing") : t("rule.menu.changeOwner")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -67,20 +68,22 @@ export function AlsoTellDialog({
   onConfirm: (userIds: string[]) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const [people, setPeople] = useState<PersonRef[]>(current);
   useEffect(() => { if (isOpen) setPeople(current); }, [isOpen, current]);
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isLoading) onCancel(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Also tell</DialogTitle>
-          <DialogDescription>When a run fails, a wait times out or the automation pauses, these people are told too.</DialogDescription>
+          <DialogTitle>{t("owner.alsoTitle")}</DialogTitle>
+          <DialogDescription>{t("owner.alsoDescription")}</DialogDescription>
         </DialogHeader>
         <ul className="m-0 list-none space-y-1 p-0">
           {people.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-2 text-body text-primary">
               {p.name ?? p.id}
-              <Button type="button" variant="ghost" size="icon-sm" aria-label={`Remove ${p.name ?? ""}`}
+              <Button type="button" variant="ghost" size="icon-sm" aria-label={t("owner.removePerson", { name: p.name ?? "" })}
                 onClick={() => setPeople(people.filter((x) => x.id !== p.id))}>
                 <Icon icon={Cancel01Icon} size="sm" />
               </Button>
@@ -98,9 +101,9 @@ export function AlsoTellDialog({
         />
         <FormError message={errorMessage} />
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>{tCommon("actions.cancel")}</Button>
           <Button type="button" onClick={() => onConfirm(people.map((p) => p.id))} disabled={isLoading}>
-            {isLoading ? "Saving…" : "Save"}
+            {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

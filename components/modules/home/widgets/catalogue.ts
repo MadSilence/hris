@@ -1,4 +1,5 @@
 import type React from "react";
+import type { Messages } from "@/i18n/messages";
 import { canAccess, type EffectiveAccess } from "@/models/access";
 import type { HomeGroup } from "@/components/modules/home/layout";
 import { WaitingOnYouWidget } from "./WaitingOnYouWidget";
@@ -12,12 +13,16 @@ import { AutomationsWidget } from "./AutomationsWidget";
 import { QuickActionsWidget } from "./QuickActionsWidget";
 import { ClockWidget } from "./ClockWidget";
 
+type HomeWidgetName = keyof Messages["home"]["widgets"];
+export type HomeWidgetTextKey = `widgets.${HomeWidgetName}.${"title" | "description"}`;
+
 export type HomeWidgetDefinition = {
   /** Stored in the person's arrangement — renaming one resets that widget to its default place. */
   id: string;
-  title: string;
-  /** What the widget is, in Customize. */
-  description: string;
+  /** Its title, a key of the `home` catalogue. */
+  titleKey: HomeWidgetTextKey;
+  /** What the widget is, in Customize — a key of the `home` catalogue. */
+  descriptionKey: HomeWidgetTextKey;
   group: HomeGroup;
   /**
    * Whether this reader may see it — the same grant the widget's own endpoint checks. UX only: the endpoint
@@ -38,72 +43,72 @@ const can = (resource: Parameters<typeof canAccess>[0]["resource"], action: Para
 export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   {
     id: "waiting-on-you",
-    title: "Waiting on you",
-    description: "Leave requests waiting for your decision. Shown only while something waits.",
+    titleKey: "widgets.waitingOnYou.title",
+    descriptionKey: "widgets.waitingOnYou.description",
     group: "PERSONAL",
     isAvailable: can("PEOPLE.TIME_OFF", "VIEW"),
     Component: WaitingOnYouWidget,
   },
   {
     id: "my-tasks",
-    title: "My tasks",
-    description: "Open tasks assigned to you.",
+    titleKey: "widgets.myTasks.title",
+    descriptionKey: "widgets.myTasks.description",
     group: "PERSONAL",
     isAvailable: everyone,
     Component: MyTasksWidget,
   },
   {
     id: "my-time-off",
-    title: "My time off",
-    description: "What is left on your policies, and your next leave.",
+    titleKey: "widgets.myTimeOff.title",
+    descriptionKey: "widgets.myTimeOff.description",
     group: "PERSONAL",
     isAvailable: can("PEOPLE.TIME_OFF", "VIEW"),
     Component: MyLeaveWidget,
   },
   {
     id: "whos-out",
-    title: "Who's out",
-    description: "Who is away today or this week, in your team or the whole company.",
+    titleKey: "widgets.whosOut.title",
+    descriptionKey: "widgets.whosOut.description",
     group: "COMPANY",
     isAvailable: can("PEOPLE.CALENDAR", "VIEW"),
     Component: WhosOutWidget,
   },
   {
     id: "celebrations",
-    title: "Celebrations",
-    description: "Birthdays, work anniversaries and new joiners.",
+    titleKey: "widgets.celebrations.title",
+    descriptionKey: "widgets.celebrations.description",
     group: "COMPANY",
     isAvailable: can("PEOPLE.PROFILE", "VIEW"),
     Component: CelebrationsWidget,
   },
   {
     id: "upcoming-holidays",
-    title: "Upcoming holidays",
-    description: "Your next public holidays.",
+    titleKey: "widgets.upcomingHolidays.title",
+    descriptionKey: "widgets.upcomingHolidays.description",
     group: "COMPANY",
     isAvailable: everyone,
     Component: UpcomingHolidaysWidget,
   },
   {
     id: "processes",
-    title: "Processes in progress",
-    description: "Onboarding and preboarding in flight.",
+    titleKey: "widgets.processes.title",
+    descriptionKey: "widgets.processes.description",
     group: "HR",
     isAvailable: can("PEOPLE.LIFECYCLE_PROCESSES", "VIEW"),
     Component: ProcessesWidget,
   },
   {
     id: "automations",
-    title: "Automations",
-    description: "How the company's automations are running, and which need a look.",
+    titleKey: "widgets.automations.title",
+    descriptionKey: "widgets.automations.description",
     group: "HR",
     isAvailable: can("SETTINGS.AUTOMATIONS", "VIEW"),
     Component: AutomationsWidget,
   },
   {
     id: "quick-actions",
-    title: "Quick actions",
-    description: "Request time off or log time in one click.",
+    titleKey: "widgets.quickActions.title",
+    descriptionKey: "widgets.quickActions.description",
     group: "UTILITIES",
     isAvailable: (access) =>
       canAccess({ access, resource: "PEOPLE.TIME_OFF", action: "EDIT" })
@@ -112,8 +117,8 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   },
   {
     id: "company-time",
-    title: "Company time",
-    description: "The company's local time.",
+    titleKey: "widgets.companyTime.title",
+    descriptionKey: "widgets.companyTime.description",
     group: "UTILITIES",
     isAvailable: everyone,
     Component: ClockWidget,

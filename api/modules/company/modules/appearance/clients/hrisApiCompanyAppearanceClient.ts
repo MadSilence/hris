@@ -47,6 +47,7 @@ export class HrisApiCompanyAppearanceClient {
       loginSubheadline: dto?.loginSubheadline ?? null,
       loginImageUrl: companyMapper.resolveBackendAssetUrl(dto?.loginImageUrl),
       logoUrl: companyMapper.resolveBackendAssetUrl(dto?.logoUrl),
+      language: dto?.language ?? null,
     };
   }
 

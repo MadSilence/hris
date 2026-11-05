@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { Role } from "@/models/role/Role";
@@ -30,6 +31,7 @@ export const AssignRolesModal: FC<AssignRolesModalProps> = ({
   onCancelAction,
   onApplyAction,
 }) => {
+  const t = useTranslations("settings");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -68,9 +70,9 @@ export const AssignRolesModal: FC<AssignRolesModalProps> = ({
           hideClose
         >
           <DialogHeader>
-            <DialogTitle>Manage assigned roles</DialogTitle>
+            <DialogTitle>{t("roles.assign.title")}</DialogTitle>
             <DialogDescription>
-              Select which roles should be assigned to this user.
+              {t("roles.assign.description")}
             </DialogDescription>
           </DialogHeader>
 

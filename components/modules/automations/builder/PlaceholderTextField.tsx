@@ -1,23 +1,12 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
-import { PLACEHOLDER_LABELS } from "@/models/automations";
+import { placeholderLabel } from "@/components/modules/automations/shared/vocabulary";
 import { insertPlaceholder, mentionAt } from "./draft";
 import { Field } from "./SentenceCard";
 
-/** The words of an event's placeholders, beside the person's. */
-const EVENT_PLACEHOLDER_LABELS: Record<string, string> = {
-  leaveType: "Leave type",
-  leaveStart: "Leave starts",
-  leaveEnd: "Leave ends",
-  leaveDays: "Leave days",
-  processName: "Process name",
-  processType: "Process type",
-  reviewKind: "Review kind",
-  cycleName: "Review cycle",
-};
-const labelOf = (p: string) => PLACEHOLDER_LABELS[p] ?? EVENT_PLACEHOLDER_LABELS[p] ?? p;
 
 /**
  * A text an automation fills per person — a subject, a body, a task title. Placeholders are inserted
@@ -41,6 +30,8 @@ export function PlaceholderTextField({
   multiline?: boolean;
   required?: boolean;
 }) {
+  const t = useTranslations("automations");
+  const labelOf = (p: string) => placeholderLabel(t, p);
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   // "@" opens the list of fields at the caret (A3); what is stored is still {name}.
   const [mention, setMention] = useState<{ start: number; query: string } | null>(null);
@@ -95,7 +86,7 @@ export function PlaceholderTextField({
         <Input id={id} ref={ref} value={value} onChange={(e) => type(e.target.value, e.target.selectionStart)} onKeyDown={onKeyDown} />
       )}
       {mention && matches.length > 0 && (
-        <ul role="listbox" aria-label={`Fields for ${label}`} className="m-0 max-h-56 list-none overflow-auto rounded-control border border-divider bg-card p-1 shadow-popover">
+        <ul role="listbox" aria-label={t("placeholderField.listLabel", { label })} className="m-0 max-h-56 list-none overflow-auto rounded-control border border-divider bg-card p-1 shadow-popover">
           {matches.map((p, i) => (
             <li key={p} role="option" aria-selected={i === active}>
               <button
@@ -110,7 +101,7 @@ export function PlaceholderTextField({
           ))}
         </ul>
       )}
-      <p className="m-0 text-hint text-tertiary">Type @ to insert a field — the first name, a date, the leave.</p>
+      <p className="m-0 text-hint text-tertiary">{t("placeholderField.hint")}</p>
     </Field>
   );
 }

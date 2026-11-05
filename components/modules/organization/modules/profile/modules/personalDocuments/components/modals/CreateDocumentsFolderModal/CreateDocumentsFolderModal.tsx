@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -27,6 +28,7 @@ export const CreateDocumentsFolderModal: FC<
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -56,9 +58,9 @@ export const CreateDocumentsFolderModal: FC<
       >
         <DialogContent hideClose className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add folder</DialogTitle>
+            <DialogTitle>{t("documents.createFolder.title")}</DialogTitle>
             <DialogDescription>
-              Create a new folder to organize personal documents.
+              {t("documents.createFolder.description")}
             </DialogDescription>
           </DialogHeader>
 

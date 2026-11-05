@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Archive02Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { FilterChip } from "@/components/ui/FilterChip";
 
@@ -29,6 +30,7 @@ export const ArchivedToggle: React.FC<{
   // Unarchiving the last archived record while the archived view is on would leave the list empty
   // with the only way back gone (seen live on holiday calendars: "No public holiday calendars yet"
   // while three existed). The view falls back to everything else when there is nothing left to show.
+  const t = useTranslations("common");
   React.useEffect(() => {
     if (count === 0 && showingArchived) onChange(false);
   }, [count, showingArchived, onChange]);
@@ -38,7 +40,7 @@ export const ArchivedToggle: React.FC<{
   return (
     <FilterChip selected={showingArchived} onClick={() => onChange(!showingArchived)}>
       {!showingArchived && <Icon icon={Archive02Icon} size="sm" />}
-      Archived ({count})
+      {t("toggles.archived", { count })}
     </FilterChip>
   );
 };

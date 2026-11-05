@@ -6,6 +6,7 @@ import {
   useDocumentsFolderDeleteImpact,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/documentsFolder/useDocumentsFolderDeleteImpact";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Card } from "@/components/desact/card";
 import type { DocumentDTO, DocumentFolderDTO } from "@/api/modules/documents/dto";
@@ -136,7 +137,14 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
   // The drop overlay says whose documents a file lands in.
   const { data: owner } = useUser(userId);
-  const ownerLabel = isOwnSpace ? "your" : owner?.firstName ? `${owner.firstName}’s` : "these";
+  const t = useTranslations("organization");
+  const dropTarget = breadcrumbs.length > 1
+    ? t("documents.container.dropToFolder", { folder: breadcrumbs[breadcrumbs.length - 1].name })
+    : isOwnSpace
+      ? t("documents.container.dropToOwn")
+      : owner?.firstName
+        ? t("documents.container.dropToPerson", { name: owner.firstName })
+        : t("documents.container.dropToThese");
 
   /*
    * Nothing at all in this person's space — not a folder that happens to be empty, not a search that missed.
@@ -212,10 +220,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         {isDraggingOver && (
           <div className="pointer-events-none absolute inset-x-8 top-4 bottom-4 z-10 flex flex-col items-center justify-center gap-2 rounded-card border-[1.5px] border-accent bg-accent-subtle text-accent-text">
             <Icon icon={Upload04Icon} />
-            <p className="text-body font-semibold">Drop to upload</p>
-            <p className="text-hint text-secondary">
-              Goes to {breadcrumbs.length > 1 ? breadcrumbs[breadcrumbs.length - 1].name : `${ownerLabel} documents`}
-            </p>
+            <p className="text-body font-semibold">{t("documents.container.dropTitle")}</p>
+            <p className="text-hint text-secondary">{dropTarget}</p>
           </div>
         )}
 
@@ -242,14 +248,14 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                     <Button type="button"
                       variant="secondary"
                       size="icon"
-                      aria-label="Trash"
+                      aria-label={t("documents.container.trash")}
                       aria-pressed={showTrash}
                       onClick={() => setShowTrash((v) => !v)}
                     >
                       <Icon icon={Delete02Icon} size="sm" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Trash</TooltipContent>
+                  <TooltipContent>{t("documents.container.trash")}</TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -281,27 +287,27 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               <EmptyState
                 scene="documents"
                 className="pt-8"
-                title="No documents yet"
+                title={t("documents.container.blankTitle")}
                 description={canEdit
-                  ? "Contracts, IDs and certificates live here.\nDrop files here or upload them below."
-                  : "Contracts, IDs and certificates live here."}
+                  ? t("documents.container.blankDescriptionEditable")
+                  : t("documents.container.blankDescription")}
                 action={canEdit ? (
                   <div className="flex gap-2">
                     <Button type="button" onClick={() => setAddDocumentOpen(true)}>
                       <Icon icon={Upload04Icon} size="sm" />
-                      Upload file
+                      {t("documents.container.uploadFile")}
                     </Button>
                     <Button type="button" variant="secondary" onClick={() => setCreateFolderOpen(true)}>
                       <Icon icon={FolderAddIcon} size="sm" />
-                      New folder
+                      {t("documents.container.newFolder")}
                     </Button>
                   </div>
                 ) : undefined}
               />
             ) : isEmpty && isFiltered ? (
-              <NoResults title="No documents match" hint="Try a different search or filter." />
+              <NoResults title={t("documents.container.noMatchTitle")} hint={t("documents.container.noMatchHint")} />
             ) : isEmpty ? (
-              <PersonalDocumentsEmptyState title="This folder is empty" description="Drop files here or use Add." />
+              <PersonalDocumentsEmptyState title={t("documents.container.emptyFolderTitle")} description={t("documents.container.emptyFolderDescription")} />
             ) : (
               <div className="space-y-8">
                 <PersonalDocumentsFoldersSection

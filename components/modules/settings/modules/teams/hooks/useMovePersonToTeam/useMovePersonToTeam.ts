@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -27,6 +28,8 @@ export type MovePersonInput = {
  * person was dragged from; "add" leaves every existing membership alone.
  */
 export const useMovePersonToTeam = () => {
+  const t = useTranslations("structure.teams");
+  const tAccess = useTranslations("access");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -35,7 +38,7 @@ export const useMovePersonToTeam = () => {
         if (!sourceTeamId) return;
         const removed = await unassignUserAction(BASE_PATH, sourceTeamId, userId);
         if (removed.status === ActionStatus.ERROR) {
-          throw new Error(removed.errorMessage ?? "Failed to remove the person");
+          throw new Error(removed.errorMessage ?? t("errors.removePerson"));
         }
         return;
       }
@@ -45,21 +48,19 @@ export const useMovePersonToTeam = () => {
         targetPayload: { userIds: [userId] },
       });
       if (added.status === ActionStatus.ERROR) {
-        throw new Error(added.errorMessage ?? "Failed to add the person to the team");
+        throw new Error(added.errorMessage ?? t("errors.addPerson"));
       }
 
       // A 200 that assigned nobody is still a failure from where the person is standing; the engine
       // says why in `skipped`, and saying nothing left them staring at an unchanged board.
-      const skipped = assignmentSkippedEverything(added.data);
+      const skipped = assignmentSkippedEverything(added.data, tAccess);
       if (skipped) throw new Error(skipped);
 
       if (mode === "move" && sourceTeamId && sourceTeamId !== targetTeamId) {
         const removed = await unassignUserAction(BASE_PATH, sourceTeamId, userId);
         if (removed.status === ActionStatus.ERROR) {
           // The add already landed; say so plainly instead of pretending the move failed whole.
-          throw new Error(
-            "Added to the new team, but removing them from the old one failed. Check both teams.",
-          );
+          throw new Error(t("errors.movePartly"));
         }
       }
     },

@@ -9,6 +9,10 @@ import {
 } from "@/components/modules/calendar/lib/grouping";
 import type { FieldDTO } from "@/models/user/fields";
 import { partialMock } from "@/test/types";
+import { translatorFor } from "@/test/nextIntl";
+import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
+
+const t = translatorFor("calendar") as unknown as CalendarTranslator;
 
 const field = (id: string, viewScopes: string[] | null): FieldDTO =>
   partialMock<FieldDTO>({ id, key: id, label: id, isSystem: true, level: "READ", viewScopes });
@@ -60,13 +64,13 @@ describe("availableGroupings", () => {
 
 describe("groupTitle", () => {
   it("names the no-value group after the dimension", () => {
-    expect(groupTitle("TEAM", { id: null, name: null, count: 3 })).toBe("No team");
-    expect(groupTitle("DEPARTMENT", { id: null, name: null, count: 3 })).toBe("No department");
-    expect(groupTitle("OFFICE", { id: null, name: null, count: 3 })).toBe("No office");
+    expect(groupTitle(t, "TEAM", { id: null, name: null, count: 3 })).toBe("No team");
+    expect(groupTitle(t, "DEPARTMENT", { id: null, name: null, count: 3 })).toBe("No department");
+    expect(groupTitle(t, "OFFICE", { id: null, name: null, count: 3 })).toBe("No office");
   });
 
   it("uses the unit's name otherwise", () => {
-    expect(groupTitle("OFFICE", { id: "o1", name: "Berlin", count: 2 })).toBe("Berlin");
+    expect(groupTitle(t, "OFFICE", { id: "o1", name: "Berlin", count: 2 })).toBe("Berlin");
   });
 });
 
@@ -87,6 +91,6 @@ describe("placeholderRowCount", () => {
 
 describe("groupingLabel", () => {
   it("labels each dimension", () => {
-    expect(CALENDAR_GROUPINGS.map(groupingLabel)).toEqual(["Department", "Team", "Office"]);
+    expect(CALENDAR_GROUPINGS.map((g) => groupingLabel(t, g))).toEqual(["Department", "Team", "Office"]);
   });
 });

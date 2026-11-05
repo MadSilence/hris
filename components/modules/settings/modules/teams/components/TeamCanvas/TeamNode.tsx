@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUp01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
@@ -30,6 +31,8 @@ const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
   const { team, childCount, collapsed, selected, matched, dimmed } = data;
   const { onToggleCollapse, dropTargetId } = useTeamCanvas();
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
 
   const isArchived = team.status === "ARCHIVED";
   const hasChildren = childCount > 0;
@@ -85,14 +88,8 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
           selected ? "border-accent-ring" : "border-divider",
         )}
       >
-        <span>
-          <span className="font-semibold text-secondary">{team.memberCount}</span>{" "}
-          {team.memberCount === 1 ? "Person" : "People"}
-        </span>
-        <span>
-          <span className="font-semibold text-secondary">{childCount}</span>{" "}
-          {childCount === 1 ? "Sub" : "Subs"}
-        </span>
+        <span>{tShared.rich("nodePeople", { count: team.memberCount, b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span> })}</span>
+        <span>{tShared.rich("nodeSubs", { count: childCount, b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span> })}</span>
       </div>
 
       <Handle type="source" position={Position.Bottom} className={hiddenHandle} isConnectable={false} />
@@ -105,8 +102,8 @@ export function TeamNode({ data }: NodeProps<TeamFlowNode>) {
             onToggleCollapse(team.id);
           }}
           className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
-          aria-label={collapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
-          title={collapsed ? `Expand ${childCount} sub-teams` : "Collapse"}
+          aria-label={collapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
+          title={collapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
         >
           {collapsed ? (
             <span className="text-hint font-semibold leading-none">{childCount}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type {
@@ -10,7 +11,7 @@ import type {
   CompanyCalendarUser,
 } from "@/models/calendar";
 import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
-import { WEEKDAY_SHORT, toISO } from "@/components/modules/calendar/lib/dateRange";
+import { WEEKDAY_KEYS, toISO } from "@/components/modules/calendar/lib/dateRange";
 import {
   CompanyCalendarRow,
   CompanyCalendarSkeletonRow,
@@ -60,8 +61,6 @@ type Props = {
   scrollResetKey?: string;
 };
 
-const WEEKDAY_NARROW = ["S", "M", "T", "W", "T", "F", "S"];
-
 export const CompanyCalendarBoard: FC<Props> = ({
   days,
   users,
@@ -81,6 +80,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
   isEmpty,
   scrollResetKey,
 }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const dayISOs = useMemo(() => days.map(toISO), [days]);
   const marksByUser = useMarksByUser(marks);
   const absencesByUser = useAbsencesByUser(absences);
@@ -139,7 +140,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
           {/* Header */}
           <div ref={headerRef} className="sticky top-0 z-20 grid w-full text-body" style={{ gridTemplateColumns }}>
             <div className="sticky left-0 z-30 flex items-center border-b border-r border-divider bg-card px-3 py-2 text-hint font-medium text-secondary">
-              People
+              {t("board.people")}
             </div>
             {days.map((d, i) => {
               const iso = dayISOs[i];
@@ -154,7 +155,9 @@ export const CompanyCalendarBoard: FC<Props> = ({
                   ].join(" ")}
                 >
                   <div className={`text-hint ${today ? "font-medium text-accent-text" : "text-tertiary"}`}>
-                    {density === "week" ? WEEKDAY_SHORT[d.getDay()] : WEEKDAY_NARROW[d.getDay()]}
+                    {density === "week"
+                      ? t(`weekdays.short.${WEEKDAY_KEYS[d.getDay()]}`)
+                      : t(`weekdays.narrow.${WEEKDAY_KEYS[d.getDay()]}`)}
                   </div>
                   {/* Today: the date in an accent circle (SPEC § 13.13). */}
                   <div
@@ -166,7 +169,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
                   </div>
                   {capacityByDay.has(iso) ? (
                     <div className="flex h-2 justify-center">
-                      <CapacityDot mark={capacityByDay.get(iso)!} who="anyone in the company" />
+                      <CapacityDot mark={capacityByDay.get(iso)!} who="company" />
                     </div>
                   ) : null}
                 </div>
@@ -203,7 +206,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
 
           {!isGrouped && hasMore ? (
             <div ref={sentinelRef} className="flex justify-center py-3 text-hint text-tertiary">
-              {isLoadingMore ? "Loading…" : ""}
+              {isLoadingMore ? tCommon("states.loading") : ""}
             </div>
           ) : null}
         </div>
@@ -214,8 +217,8 @@ export const CompanyCalendarBoard: FC<Props> = ({
           <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
             <Icon icon={UserGroupIcon} size="lg" />
           </div>
-          <p className="text-body font-medium text-primary">No people to show</p>
-          <p className="max-w-sm text-body text-tertiary">Nobody matches the current view.</p>
+          <p className="text-body font-medium text-primary">{t("board.emptyTitle")}</p>
+          <p className="max-w-sm text-body text-tertiary">{t("board.emptyDescription")}</p>
         </div>
       ) : null}
     </div>

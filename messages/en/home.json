@@ -1,0 +1,147 @@
+{
+  "groups": {
+    "PERSONAL": "For you",
+    "COMPANY": "Company",
+    "HR": "HR",
+    "UTILITIES": "Utilities"
+  },
+  "widgets": {
+    "waitingOnYou": {
+      "title": "Waiting on you",
+      "description": "Leave requests waiting for your decision. Shown only while something waits."
+    },
+    "myTasks": {
+      "title": "My tasks",
+      "description": "Open tasks assigned to you."
+    },
+    "myTimeOff": {
+      "title": "My time off",
+      "description": "What is left on your policies, and your next leave."
+    },
+    "whosOut": {
+      "title": "Who's out",
+      "description": "Who is away today or this week, in your team or the whole company."
+    },
+    "celebrations": {
+      "title": "Celebrations",
+      "description": "Birthdays, work anniversaries and new joiners."
+    },
+    "upcomingHolidays": {
+      "title": "Upcoming holidays",
+      "description": "Your next public holidays."
+    },
+    "processes": {
+      "title": "Processes in progress",
+      "description": "Onboarding and preboarding in flight."
+    },
+    "automations": {
+      "title": "Automations",
+      "description": "How the company's automations are running, and which need a look."
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "description": "Request time off or log time in one click."
+    },
+    "companyTime": {
+      "title": "Company time",
+      "description": "The company's local time."
+    }
+  },
+  "greeting": {
+    "line": "{part, select, morning {Good morning} afternoon {Good afternoon} evening {Good evening} other {Welcome}}{hasName, select, yes {, {name}} other {}}",
+    "unread": "Unread: {count}",
+    "customize": "Customize"
+  },
+  "customize": {
+    "title": "Customize home",
+    "intro": "Choose what your home shows and in what order. Only you see this arrangement.",
+    "moveUp": "Move {title} Up",
+    "moveDown": "Move {title} Down",
+    "show": "Show {title}",
+    "reset": "Reset to default",
+    "allHidden": "Every widget is hidden."
+  },
+  "card": {
+    "seeAll": "See all",
+    "seeAllCount": "See all ({count})",
+    "unnamed": "Unnamed",
+    "today": "Today",
+    "when": "When"
+  },
+  "automations": {
+    "empty": "No automations yet.",
+    "enabled": "Enabled",
+    "scheduledRuns": "Scheduled runs",
+    "failedRuns": "Failed runs",
+    "allGood": "Nothing needs a look.",
+    "paused": "Paused",
+    "failed": "{count} failed"
+  },
+  "celebrations": {
+    "birthday": "Birthday",
+    "anniversary": "{count, plural, one {# Year at the company} other {# Years at the company}}",
+    "joins": "Joins the company",
+    "showUpcoming": "Show upcoming",
+    "emptyWeek": "Nothing to celebrate this week.",
+    "emptyToday": "Nothing to celebrate today.",
+    "birthdaysOff": "Birthdays are off: no birthday field is chosen.",
+    "chooseOne": "Choose one",
+    "birthdaysHidden": "Birthdays are hidden from you: {hasField, select, yes {\"{field}\"} other {the birthday field}} is not visible to your role for everyone. Grant it in field access to show birthdays here.",
+    "openRoles": "Open roles"
+  },
+  "clock": {
+    "yourTime": "Your time: {time} · {zone}"
+  },
+  "myTimeOff": {
+    "requestTimeOff": "Request time off",
+    "empty": "No time-off policy applies to you yet.",
+    "policyFallback": "Time off",
+    "left": "<b>{amount}</b> {unit, select, hours {{count, plural, one {hour} other {hours}}} other {{count, plural, one {day} other {days}}}} left",
+    "comingUp": "Coming up",
+    "approved": "Approved",
+    "waiting": "Waiting for approval"
+  },
+  "myTasks": {
+    "empty": "Nothing assigned to you.",
+    "forSubject": "For {name}",
+    "waiting": "Waiting · {date}"
+  },
+  "processes": {
+    "empty": "No onboarding or preboarding in progress.",
+    "types": {
+      "PREBOARDING": "Preboarding",
+      "ONBOARDING": "Onboarding",
+      "OFFBOARDING": "Offboarding"
+    },
+    "progress": "{done}/{total} done",
+    "overdue": "{count} overdue"
+  },
+  "quickActions": {
+    "requestTimeOff": "Request time off",
+    "logTime": "Log time"
+  },
+  "holidays": {
+    "empty": "No public holidays ahead.",
+    "calendarFallback": "Holiday calendar",
+    "halfDay": "Half day"
+  },
+  "waitingOnYou": {
+    "aRequest": "A request",
+    "requests": "<name></name><rest> requests time off</rest>",
+    "asksToCancel": "<name></name><rest> asks to cancel time off</rest>",
+    "detail": "{dates} · {days}{forSomeone, select, yes { · for {name}} other {}}"
+  },
+  "whosOut": {
+    "openCalendar": "Open calendar",
+    "whose": "Whose absences",
+    "myTeam": "My team",
+    "everyone": "Everyone",
+    "thisWeek": "This week",
+    "noTeam": "You are not in a team or a department yet.",
+    "showEveryone": "Show everyone",
+    "emptyToday": "Everyone's in today.",
+    "emptyWeek": "Everyone's in for the rest of the week.",
+    "away": "Away",
+    "more": "And {count} more on the calendar."
+  }
+}

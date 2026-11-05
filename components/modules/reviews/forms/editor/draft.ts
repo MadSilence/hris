@@ -1,4 +1,4 @@
-import { isChoiceQuestion, type ReviewForm, type ReviewFormWrite, type ReviewQuestion, type ReviewQuestionType } from "@/models/reviews";
+import { isChoiceQuestion, type ReviewForm, type ReviewsT, type ReviewFormWrite, type ReviewQuestion, type ReviewQuestionType } from "@/models/reviews";
 
 /** What the editor holds between saves. */
 export type Draft = {
@@ -63,13 +63,13 @@ export const markOverall = (questions: ReviewQuestion[], id: string, on: boolean
  * What would stop a save, per entry, in the words shown under it. The backend checks the same and has the
  * last word; this only saves a round trip and points at the entry.
  */
-export function problemsOf(questions: ReviewQuestion[]): Record<string, string> {
+export function problemsOf(questions: ReviewQuestion[], t: ReviewsT): Record<string, string> {
   const problems: Record<string, string> = {};
   for (const q of questions) {
     if (!q.label.trim()) {
-      problems[q.id] = q.type === "SECTION" ? "Give the section a heading." : "Write the question.";
+      problems[q.id] = q.type === "SECTION" ? t("editor.problem.sectionHeading") : t("editor.problem.question");
     } else if (isChoiceQuestion(q.type) && new Set((q.options ?? []).map((o) => o.trim()).filter(Boolean)).size < 2) {
-      problems[q.id] = "Give at least two different options.";
+      problems[q.id] = t("editor.problem.options");
     }
   }
   return problems;

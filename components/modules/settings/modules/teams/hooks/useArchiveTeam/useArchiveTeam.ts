@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useInvalidateTeamsQuery } from "@/components/modules/settings/modules/teams/hooks/useInvalidateTeamsQuery/useInvalidateTeamsQuery";
@@ -7,6 +8,7 @@ import {
 } from "@/components/modules/settings/modules/teams/actions/archiveTeamAction/archiveTeamAction";
 
 export const useArchiveTeam = () => {
+  const t = useTranslations("structure.teams");
   const invalidate = useInvalidateTeamsQuery();
 
   return useMutation({
@@ -17,7 +19,7 @@ export const useArchiveTeam = () => {
         hasPayload ? (payload as ArchiveTeamActionInput) : undefined,
       );
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage ?? "Failed to archive team");
+        throw new Error(result.errorMessage ?? t("errors.archive"));
       }
       return result;
     },

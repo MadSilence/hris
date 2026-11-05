@@ -7,21 +7,23 @@ import type { FieldDTO } from "@/models/user/fields";
 // Columns of the editor: on whose records the access applies.
 export const FIELD_SCOPES = ["SELF", "DIRECT_REPORTS", "COMPANY"] as const;
 export type FieldScope = (typeof FIELD_SCOPES)[number];
-export const FIELD_SCOPE_LABELS: Record<FieldScope, string> = {
-  SELF: "Own",
-  DIRECT_REPORTS: "Direct reports",
-  COMPANY: "Whole company",
-};
+/** Catalogue keys (`settings` namespace) of the column titles. */
+export const FIELD_SCOPE_LABEL_KEYS = {
+  SELF: "roles.fieldAccess.scope.self",
+  DIRECT_REPORTS: "roles.fieldAccess.scope.directReports",
+  COMPANY: "roles.fieldAccess.scope.company",
+} as const satisfies Record<FieldScope, string>;
 
 // Dropdown options in each scope column.
 export const FIELD_ACTIONS = ["NONE", "VIEW", "EDIT", "MANAGE"] as const;
 export type FieldActionLevel = (typeof FIELD_ACTIONS)[number];
-export const FIELD_ACTION_LABELS: Record<FieldActionLevel, string> = {
-  NONE: "No access",
-  VIEW: "View",
-  EDIT: "Edit",
-  MANAGE: "Manage",
-};
+/** Catalogue keys (`settings` namespace) of the levels. */
+export const FIELD_ACTION_LABEL_KEYS = {
+  NONE: "roles.fieldAccess.level.none",
+  VIEW: "roles.fieldAccess.level.view",
+  EDIT: "roles.fieldAccess.level.edit",
+  MANAGE: "roles.fieldAccess.level.manage",
+} as const satisfies Record<FieldActionLevel, string>;
 
 // Per field: the action level chosen at each scope.
 export type FieldAccessCell = Record<FieldScope, FieldActionLevel>;

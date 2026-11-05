@@ -1,0 +1,769 @@
+{
+  "kind": {
+    "self": {
+      "label": "Self review",
+      "description": "Each person reviews themselves."
+    },
+    "manager": {
+      "label": "Manager review",
+      "description": "Each person's manager reviews them. This review carries the rating."
+    },
+    "peer": {
+      "label": "Peer review",
+      "description": "Colleagues review the person — chosen after launch, or nominated by the person."
+    },
+    "upward": {
+      "label": "Upward review",
+      "description": "Each person who manages people is reviewed by their direct reports. Always anonymous."
+    }
+  },
+  "questionType": {
+    "rating": "Rating",
+    "longText": "Long text",
+    "shortText": "Short text",
+    "singleChoice": "One choice",
+    "multipleChoice": "Several choices",
+    "yesNo": "Yes or no",
+    "number": "Number",
+    "date": "Date"
+  },
+  "scale": {
+    "wellBelow": "Well below expectations",
+    "below": "Below expectations",
+    "meets": "Meets expectations",
+    "above": "Above expectations",
+    "exceptional": "Exceptional"
+  },
+  "peerMode": {
+    "adminSelects": "Whoever runs the cycle chooses",
+    "subjectNominates": "The person nominates, their manager approves"
+  },
+  "approvalMode": {
+    "none": "No approval",
+    "skipLevel": "The manager's manager",
+    "person": "A named person"
+  },
+  "sharing": {
+    "managerShares": "The manager shares",
+    "releasedOnDate": "Released on a date"
+  },
+  "potential": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "band": {
+    "high": "High performance",
+    "mid": "Mid performance",
+    "low": "Low performance"
+  },
+  "status": {
+    "cycle": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "assignment": {
+      "nominated": "Nominated",
+      "open": "Not submitted",
+      "submitted": "Submitted",
+      "declined": "Declined",
+      "reassigned": "Handed on",
+      "cancelled": "Withdrawn",
+      "overdue": "Overdue"
+    },
+    "participant": {
+      "collecting": "Collecting",
+      "awaitingApproval": "Awaiting approval",
+      "shared": "Shared",
+      "acknowledged": "Acknowledged",
+      "removed": "Removed"
+    },
+    "nomination": {
+      "nominating": "Nominating",
+      "awaitingApproval": "Awaiting approval",
+      "approved": "Approved"
+    },
+    "calibration": {
+      "open": "Open",
+      "closed": "Closed"
+    }
+  },
+  "steps": {
+    "nominatePeers": "Nominate peers",
+    "approvePeers": "Approve peers",
+    "approveReview": "Approve review"
+  },
+  "mentions": {
+    "token": {
+      "subject": "First name of the person reviewed",
+      "subjectFullName": "Full name of the person reviewed",
+      "manager": "First name of their manager in the cycle",
+      "cycle": "Name of the review cycle"
+    },
+    "fallback": {
+      "subject": "the person reviewed",
+      "manager": "their manager",
+      "cycle": "this cycle"
+    },
+    "listLabel": "Mentions"
+  },
+  "nomination": {
+    "problem": {
+      "excluded": "Neither the person nor their manager can be chosen.",
+      "exactly": "{count, plural, one {Choose # peer.} other {Choose # peers.}}",
+      "between": "Choose between {min} and {max} peers."
+    },
+    "title": {
+      "approve": "Approve peers — {name}",
+      "view": "Peers — {name}"
+    },
+    "approvedBy": "approved by {name}",
+    "approvedToast": "Peers approved and asked.",
+    "sentToast": "Nomination sent for approval.",
+    "somebody": "Somebody",
+    "nominateIntro": "Choose {same, select, yes {{min}} other {{min} to {max}}} colleagues who know your work. Your manager writes their own review, so they cannot be one of them. {hasApprover, select, yes {{approver}} other {Your manager}} approves the list{hasDate, select, yes { by {date}} other {}}; if nobody does by then, it stands as you sent it.",
+    "approveIntro": "{name} nominated these colleagues. Remove or add before approving — between {min} and {max}. Each approved peer is asked at once.{hasDate, select, yes { If nobody approves by {date}, the nomination stands as sent.} other {}}",
+    "autoApproved": "Nobody approved by the approval date, so the nomination stood as sent. {count, plural, one {# peer was asked.} other {# peers were asked.}}",
+    "peersAsked": "{count, plural, one {# peer was asked.} other {# peers were asked.}}",
+    "waitingFor": "Waiting for {name} to approve.",
+    "waitingForManager": "Waiting for the manager to approve.",
+    "empty": {
+      "title": "Nobody chosen yet",
+      "nominate": "Pick the colleagues who worked with you closely enough to review you.",
+      "approve": "Add the colleagues who should review this person.",
+      "view": "No peers were named."
+    },
+    "remove": "Remove {name}",
+    "addPerson": "Add a person",
+    "send": "Send nomination",
+    "count": "{count} of {min}–{max}"
+  },
+  "builder": {
+    "problem": {
+      "name": "Give the cycle a name.",
+      "dueBeforeOpens": "A review is due before it opens.",
+      "scaleLabel": "Every point of the rating scale needs a label.",
+      "peerRange": "Peers per person: at least one, and the least no more than the most.",
+      "threshold": "The anonymity threshold runs from {min} to {max}.",
+      "approvedBeforeNominated": "Peers are approved before they are nominated.",
+      "dueBeforeApproved": "The peer review is due before its peers are approved.",
+      "approvalNeedsManager": "An approval of the manager review needs a manager review."
+    },
+    "saved": "Cycle saved.",
+    "newCycle": "New review cycle",
+    "saveTemplate": "Save template",
+    "saveDraft": "Save draft",
+    "actions": "Cycle actions",
+    "saveTemplateFirst": "Save the template first.",
+    "addCycleFromIt": "Add cycle from it",
+    "saveDraftFirst": "Save the draft first.",
+    "repeat": "Repeat…",
+    "saveAsTemplate": "Save as template",
+    "saveToLaunch": "Save the draft to launch it.",
+    "templateNote": "A template is never launched. Add a cycle from it, or let an automation start one for a person.",
+    "basics": "Basics",
+    "who": {
+      "title": "Who takes part",
+      "hint": "With no conditions, everybody who works here now takes part. The list is read once, at launch.",
+      "hiredHint": "Somebody hired later has not been here long enough to be reviewed."
+    },
+    "reviews": {
+      "title": "Reviews",
+      "hint": "Each review has its own form and its own window. Peers are chosen by you after launch, or nominated by each person.",
+      "archivedForm": "{name} (Archived)",
+      "noForms": "Every review needs a form, and there are none yet. <link>Add one under Forms</link> — blank, or from the library — and come back."
+    },
+    "scale": {
+      "title": "Rating scale",
+      "hint": "Every rating question of this cycle is answered on this scale, from the lowest point to the highest.",
+      "point": "Point {number}",
+      "removePoint": "Remove point {number}",
+      "addPoint": "Add point"
+    },
+    "results": {
+      "title": "Results",
+      "hint": "The person reviewed reads their self review and their manager's. They never see peer reviews.",
+      "managerShares": "<b>The manager shares</b> — each manager shares a review once theirs is in, when they are ready.",
+      "releasedOnDate": "<b>Released on a date</b> — every review whose manager review is in is shared on one day.",
+      "releaseDate": "Release date",
+      "approval": "Approval of the manager review",
+      "approver": "Approver",
+      "selectPerson": "Select a person",
+      "approvalHint": "A submitted manager review waits for approval before it can be shared or released. The approver may send it back with a comment.",
+      "approvalHintSkipLevel": "A submitted manager review waits for approval before it can be shared or released. The approver may send it back with a comment. A manager with no manager of their own has their reviews approved by the cycle's owner."
+    },
+    "launched": "Cycle launched.",
+    "deleteDialog": {
+      "templateTitle": "Delete template",
+      "cycleTitle": "Delete cycle",
+      "templateBody": "<b>{name}</b> is removed. Cycles already started from it stay; an automation that starts reviews from it is paused.",
+      "cycleBody": "<b>{name}</b> is removed. It has not been launched, so nobody has been asked for anything."
+    },
+    "leaveDescription": "The changes to this cycle are only on this page. Leaving now discards them.",
+    "kind": {
+      "form": "Form",
+      "selectForm": "Select a form",
+      "opensOn": "Opens on",
+      "dueOn": "Due on",
+      "threshold": "Anonymity threshold",
+      "upwardHint": "Every direct report at launch reviews their manager, without their name. Until this many upward reviews of a manager are in, nobody reads them; the manager reads them in their shared review. Fixed once the cycle is launched.",
+      "peerMode": "Who chooses peers",
+      "nominatedBy": "Nominated by",
+      "approvedBy": "Approved by",
+      "nominateHint": "Each person nominates their peers by the first date; their manager approves, removes or adds by the second. Nominations nobody approves by then stand as sent.",
+      "peerMin": "Fewest peers",
+      "peerMax": "Most peers",
+      "reviewerCap": "Peer reviews per reviewer",
+      "anonymous": "Anonymous — nobody sees who wrote a peer review, HR included",
+      "peerHint": "Until this many peer reviews of a person are in, nobody reads them — the manager sees only how many are waiting. Fixed once the cycle is launched.",
+      "peerHintBelow": "Until this many peer reviews of a person are in, nobody reads them — the manager sees only how many are waiting. Fixed once the cycle is launched. The most peers per person is below it, so their reviews would never be shown."
+    }
+  },
+  "copies": {
+    "date": {
+      "hiredBefore": "Hired on or before",
+      "opens": "{name} opens",
+      "due": "{name} due",
+      "nominatedBy": "Peers nominated by",
+      "approvedBy": "Peers approved by",
+      "released": "Results released"
+    },
+    "duplicated": "Cycle duplicated.",
+    "savedAsTemplate": "Saved as a template.",
+    "fromTemplate": "Cycle added from the template.",
+    "repeat": {
+      "done": "{name} added as a draft.",
+      "title": "Repeat cycle",
+      "description": "A new draft with the same people, reviews, forms and settings as {name}, every date moved later.",
+      "moveBy": "Move every date by",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "other": "Other",
+      "monthsLabel": "Months",
+      "range": "months, 1 to {max}",
+      "movedDates": "Moved dates",
+      "fromTo": "{from} → {to}",
+      "noDates": "This cycle has no dates to move; the new draft has none either.",
+      "repeating": "Repeating…",
+      "repeat": "Repeat"
+    }
+  },
+  "answers": {
+    "headingWithAuthor": "{kind} — {author}",
+    "previousManager": "Written by a previous manager",
+    "submitted": "Submitted {date}",
+    "none": "No answers."
+  },
+  "heldBack": {
+    "note": "{count, plural, one {# anonymous {kind, select, upward {upward} other {peer}} review is in} other {# anonymous {kind, select, upward {upward} other {peer}} reviews are in}} and held back to keep its writers anonymous — shown once there are {threshold}."
+  },
+  "write": {
+    "commentOn": "Comment on {question}",
+    "updatedToast": "Review updated and shared again.",
+    "submittedToast": "Review submitted.",
+    "due": "due {date}",
+    "anonymous": "Your name is not shown with this review, to anybody.",
+    "draftSaved": "Draft saved",
+    "savedAsYouType": "Saved as you type",
+    "decline": "Decline",
+    "updateAndShareAgain": "Update and share again",
+    "answeredLabel": "Answered",
+    "missing": "{count, plural, one {One required question is not answered} other {# required questions are not answered}}",
+    "answered": "{answered} of {total} answered",
+    "sentBack": "Sent back for changes",
+    "answerThis": "Answer this question.",
+    "submittedOn": "Submitted {date}.",
+    "submittedNoDate": "Submitted.",
+    "cycleClosed": "This cycle is closed; the review can no longer be written.",
+    "notYours": "This review is no longer yours to write.",
+    "alreadyIn": "Already in",
+    "confirm": {
+      "updateTitle": "Update review",
+      "submitTitle": "Submit review",
+      "updateAndShare": "Update and share",
+      "amend": "{name} has already read this review; they see the new version, marked as updated, and are asked to acknowledge it again.",
+      "manager": "Once submitted, the review changes only after it is shared, as an update {name} sees.",
+      "final": "Once submitted, the review can no longer be changed."
+    },
+    "declineDialog": {
+      "title": "Decline peer review",
+      "body": "Whoever runs the cycle is told, and may ask somebody else.",
+      "reason": "Reason"
+    }
+  },
+  "personTab": {
+    "empty": {
+      "title": "No reviews",
+      "description": "Reviews from performance review cycles appear here once there is one you can read."
+    }
+  },
+  "packetLine": {
+    "rating": "Rating {rating}",
+    "ratingWithLabel": "Rating {rating} · {label}",
+    "shared": "Shared {date}",
+    "notShared": "Not shared yet"
+  },
+  "mine": {
+    "empty": {
+      "title": "No reviews for you yet",
+      "description": "When a review cycle asks you to write a review, it appears here and in your Tasks. Reviews shared with you appear here too."
+    },
+    "toDo": "To do",
+    "toWrite": {
+      "title": "To write",
+      "emptyTitle": "All caught up",
+      "emptyDescription": "Nothing to write right now. A new review appears here and in your Tasks."
+    },
+    "team": "My team",
+    "aboutMe": {
+      "title": "About me",
+      "emptyTitle": "Nothing shared with you yet",
+      "emptyDescription": "Once your review is shared with you, you read it and acknowledge it here.",
+      "acknowledged": "Acknowledged {date}",
+      "sharedWaiting": "Shared {date} — waiting for you to acknowledge"
+    },
+    "written": "Written",
+    "step": {
+      "forYou": "For your review",
+      "forPerson": "For {name}"
+    },
+    "cycleDue": "{cycle} · due {date}",
+    "cycleSubmitted": "{cycle} · submitted {date}",
+    "about": {
+      "yourself": "About yourself",
+      "yourManager": "Your manager, {name}",
+      "person": "About {name}"
+    },
+    "progress": {
+      "self": "Self",
+      "peers": "Peers {submitted}/{total}",
+      "yours": "Yours",
+      "in": "{label}: in",
+      "notYet": "{label}: not yet"
+    },
+    "writeYourReview": "Write your review",
+    "reviewAndShare": "Review and share"
+  },
+  "overview": {
+    "empty": {
+      "title": "No review cycles yet",
+      "description": "A cycle asks a group of people to review themselves and each other, and their managers to review them, on dates you set.",
+      "archived": "No closed review cycles."
+    },
+    "addCycle": "Add cycle",
+    "blankCycle": "Blank cycle",
+    "fromTemplate": "From a template",
+    "templates": {
+      "title": "Templates",
+      "description": "Never launched themselves: a cycle is added from one, or an automation starts one for a person."
+    },
+    "row": {
+      "noKinds": "No reviews chosen",
+      "nextDue": "Next due {date}",
+      "closed": "Closed {date}",
+      "runBy": "Run by {name}",
+      "template": "Template",
+      "submitted": "{submitted} of {total} submitted",
+      "overdue": "{count} overdue"
+    }
+  },
+  "error": {
+    "generic": "Something went wrong."
+  },
+  "layout": {
+    "title": "Reviews",
+    "tabs": {
+      "overview": {
+        "label": "Overview",
+        "description": "Every review cycle, and who has written what."
+      },
+      "me": {
+        "label": "My reviews",
+        "description": "The reviews you are asked to write, the ones shared with you, and your people's."
+      },
+      "forms": {
+        "label": "Forms",
+        "description": "The questionnaires a review cycle asks its reviewers to fill in."
+      }
+    }
+  },
+  "packet": {
+    "meta": {
+      "manager": "manager {name}",
+      "shared": "shared {date}",
+      "notShared": "not shared yet",
+      "updated": "updated {date}",
+      "releasedOn": "released on {date}",
+      "waitingApproval": "waiting for approval by {name}",
+      "approvedBy": "approved by {name} {date}"
+    },
+    "yourReview": "Your review",
+    "shareOnBehalf": "Share on the manager's behalf",
+    "shareWith": "Share with {name}",
+    "acknowledge": "Acknowledge",
+    "sendBack": "Send back",
+    "approve": "Approve",
+    "overallRating": "Overall rating",
+    "calibrated": "Calibrated{hasFrom, select, yes { from {from}} other {}}{hasBy, select, yes { by {by}} other {}}{hasAt, select, yes { on {at}} other {}}{hasReason, select, yes {: {reason}} other {}}",
+    "potential": "Potential: {potential}",
+    "acknowledgedByYou": "You acknowledged this review on {date}.",
+    "acknowledgedBy": "{name} acknowledged this review on {date}.",
+    "managerNotIn": "The manager review is not in yet.",
+    "yourSelfReview": "Your self review",
+    "peerHeading": "Peer reviews",
+    "peerHeadingHidden": "Peer reviews — {name} never sees these",
+    "upwardHeading": "Upward reviews — from direct reports, anonymous",
+    "approveDialog": {
+      "title": "Approve review",
+      "done": "Review approved.",
+      "released": "{hasManager, select, yes {{manager}'s} other {The manager's}} review of {subject} is released with the others on the date.",
+      "share": "{hasManager, select, yes {{manager}} other {The manager}} can then share the review with {subject}."
+    },
+    "sendBackDialog": {
+      "required": "Say what should change.",
+      "done": "Review sent back.",
+      "body": "{hasManager, select, yes {{manager}} other {The manager}} reads your comment on the review, which opens again with its answers.",
+      "comment": "What should change"
+    },
+    "shareDialog": {
+      "title": "Share review",
+      "confirm": "Share",
+      "done": "Review shared.",
+      "onBehalf": "{subject} will read {hasManager, select, yes {{manager}'s} other {the manager's}} review, their self review and the rating, and is told as if the manager had shared it. The journal records that you shared it on the manager's behalf. A shared review cannot be unshared.",
+      "own": "{subject} will read your review, their self review and the rating. Peer reviews stay with you. A shared review cannot be unshared; you can still update yours."
+    },
+    "acknowledgeDialog": {
+      "title": "Acknowledge review",
+      "done": "Review acknowledged.",
+      "body": "Acknowledging says you have read it — not that you agree. Your manager sees any comment you add.",
+      "comment": "Comment"
+    }
+  },
+  "forms": {
+    "addForm": "Add form",
+    "empty": {
+      "title": "No review forms yet",
+      "description": "A form is the set of questions a reviewer answers — about themselves, a colleague, a report or their manager."
+    },
+    "row": {
+      "facts": "{count, plural, one {# question} other {# questions}} · Updated {date}",
+      "actions": "Form actions",
+      "unarchive": "Unarchive"
+    },
+    "archiveDialog": {
+      "title": "Archive form",
+      "body": "<b>{name}</b> can no longer be chosen for a review cycle. You can unarchive it later."
+    },
+    "deleteDialog": {
+      "title": "Delete form",
+      "body": "<b>{name}</b> and its questions are removed. This cannot be undone."
+    }
+  },
+  "addForm": {
+    "notAdded": "The library form was not added. Open the library to see why.",
+    "nameRequired": "Enter a name.",
+    "description": "Start blank or from one of the library's forms. Either way the editor opens next, and everything in it can be changed.",
+    "startFrom": "Start from",
+    "blank": {
+      "title": "Blank form",
+      "summary": "No questions yet — write your own."
+    },
+    "addedBefore": "Added here before",
+    "namePlaceholder": "Self review, manager review…",
+    "browseLibrary": "Browse the library",
+    "adding": "Adding…",
+    "openIt": "Open it",
+    "note": {
+      "addedBefore": "Added here before as <b>{name}</b>, and kept as it has been changed since. Open it — and duplicate it there for a variant — or start blank.",
+      "taken": "“{name}” is taken here too. Rename the company’s own form first, or start blank.",
+      "adds": "Adds <b>{name}</b>.",
+      "addsRenamed": "Adds <b>{name}</b> — the library’s name is already taken here."
+    }
+  },
+  "preview": {
+    "sampleCycle": "Annual review",
+    "untitledForm": "Untitled form",
+    "shownAs": "Shown as a reviewer writing about {subject}, managed by {manager}, in {cycle} would see it.",
+    "noQuestions": "This form has no questions yet.",
+    "untitledSection": "Untitled section",
+    "untitledQuestion": "Untitled question",
+    "numbered": "{number}. {label}",
+    "answerTo": "Answer to {question}",
+    "answerToQuestion": "Answer to the question",
+    "commentOnRating": "Comment on the rating",
+    "noOptions": "No options yet."
+  },
+  "editor": {
+    "question": {
+      "section": "Section",
+      "sectionHeading": "Section heading",
+      "question": "Question {number}",
+      "answerType": "Answer type",
+      "textUnderHeading": "Text under the heading",
+      "guidance": "Guidance for the reviewer",
+      "removeText": "Remove text",
+      "removeGuidance": "Remove guidance",
+      "ratingHint": "Answered on the review cycle's rating scale, with room for a comment.",
+      "overallHint": "The manager form's overall rating becomes the person's rating for the cycle.",
+      "addText": "Add text",
+      "addGuidance": "Add guidance",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "options": "Options",
+      "option": "Option {number}",
+      "removeOption": "Remove option {number}",
+      "addOption": "Option"
+    },
+    "problem": {
+      "sectionHeading": "Give the section a heading.",
+      "question": "Write the question.",
+      "options": "Give at least two different options."
+    },
+    "gate": {
+      "name": "Give the form a name to save it.",
+      "unfinished": "{count, plural, one {One question is not finished yet.} other {# questions are not finished yet.}}"
+    },
+    "saved": "Form saved.",
+    "tabs": {
+      "questions": "Questions"
+    },
+    "unsaved": "You have unsaved changes.",
+    "archived": "This form is archived and cannot be changed or chosen for a review cycle.",
+    "archivedManage": "This form is archived and cannot be changed or chosen for a review cycle. Unarchive it to edit it.",
+    "introduction": "Introduction",
+    "introductionHint": "Shown to the reviewer above the questions. Here and in every question, type @ to name the person reviewed (@subject, @subjectFullName), their manager (@manager) or the cycle (@cycle).",
+    "empty": {
+      "title": "No questions yet",
+      "readOnly": "Nobody has added a question to this form.",
+      "description": "Add the questions a reviewer answers. Group them under sections, and type @ where a name belongs: @subject for the person reviewed, @manager for their manager, @cycle for the cycle."
+    },
+    "addQuestion": "Add question",
+    "addSection": "Add section",
+    "archiveBodyDirty": "<b>{name}</b> can no longer be chosen for a review cycle. Unsaved changes on this page are discarded. You can unarchive it later.",
+    "leave": {
+      "title": "Leave without saving?",
+      "description": "The changes to this form are only on this page. Leaving now discards them.",
+      "stay": "Stay",
+      "leave": "Leave"
+    }
+  },
+  "launch": {
+    "title": "Launch cycle",
+    "description": "Launching asks everybody below for their reviews and puts them in their Tasks. After launch the forms, the kinds of review, the scale and anonymity can no longer change; dates still can.",
+    "fact": {
+      "people": "People",
+      "self": "Self reviews",
+      "manager": "Manager reviews",
+      "upward": "Upward reviews",
+      "nominating": "Nominating peers"
+    },
+    "fewReports": "Upward reviews held back for: {names}.",
+    "sample": "{names}.",
+    "sampleMore": "{names} and {count} more.",
+    "excludedByHireDate": "{count, plural, one {# person was} other {# people were}} hired after the eligibility date and are not included.",
+    "blockers": "Fix these to launch",
+    "noManager": "{count, plural, one {# person has} other {# people have}} no manager and get no manager review",
+    "warnings": "Before you launch",
+    "footNominate": "Each person gets a task to nominate their peers; their manager approves them. Anonymity and its threshold are fixed at launch.",
+    "footAdmin": "Peers are chosen after launch, on the cycle’s page. Anonymity and its threshold are fixed at launch.",
+    "launching": "Launching…",
+    "launch": "Launch"
+  },
+  "run": {
+    "editDates": "Edit dates",
+    "closeCycle": "Close cycle",
+    "fact": {
+      "submitted": "Submitted"
+    },
+    "ofTotal": "{count} of {total}",
+    "tabs": {
+      "people": "By person",
+      "reviewers": "By reviewer",
+      "calibration": "Calibration",
+      "settings": "Settings"
+    },
+    "people": {
+      "emptyTitle": "Nobody takes part",
+      "emptyDescription": "Everybody who took part has been removed from this cycle."
+    },
+    "reminderSent": "Reminder sent.",
+    "withdrawn": "Review withdrawn.",
+    "reviewers": {
+      "emptyTitle": "Nobody has a review to write",
+      "emptyDescription": "A reviewer appears here once the cycle asks them to write — peers once they are chosen.",
+      "reviewer": "Reviewer",
+      "peerReviews": "Peer reviews",
+      "nextDue": "Next due",
+      "left": "Left",
+      "actions": "Reviewer actions"
+    },
+    "sendReminder": "Send a reminder",
+    "closeBody": "Reviews not yet submitted ({count}) are withdrawn and their tasks cancelled. What was written stays, and shared reviews stay readable. A closed cycle cannot be reopened.",
+    "shareBody": "{subject} will read the manager review{hasManager, select, yes { by {manager}} other {}}, their self review and the rating, and is told as if the manager had shared it. The journal records that you shared it on the manager's behalf. A shared review cannot be unshared.",
+    "removeFromCycle": "Remove from cycle",
+    "removeBody": "{name} is no longer reviewed in this cycle. Reviews about them that are not in yet are withdrawn; what was written stays.",
+    "person": {
+      "leftCompany": "Left the company",
+      "manager": "Manager in this cycle: {name}",
+      "noManager": "No manager review",
+      "managerChanged": "Manager changed since launch",
+      "managerChangedTo": "Manager changed since launch — now {name}",
+      "belowThreshold": "Fewer peers than the anonymity threshold of {threshold} — their reviews stay hidden",
+      "rating": "Rating: {rating}",
+      "calibrated": "calibrated",
+      "approvedBy": "Approved by {name}",
+      "waitingApproval": "Waiting for approval by {name}",
+      "nomination": "Peers: {status}",
+      "nominationWithCount": "Peers: {status} ({count} nominated)",
+      "upward": "Upward {count}",
+      "peers": "Peers {count}/{min}–{max}",
+      "actions": "Person actions",
+      "reviewActions": "Review actions"
+    },
+    "choosePeers": "Choose peers",
+    "handOn": "Hand to someone else",
+    "withdraw": "Withdraw",
+    "settings": {
+      "launched": "Launched",
+      "runBy": "Run by",
+      "anybody": "Anybody",
+      "sharingOn": "{mode} — {date}",
+      "approvedBy": "Manager reviews are approved by {mode, select, PERSON {{hasName, select, yes {{name}} other {a named person}}} SKIP_LEVEL {the manager's manager} other {no approval}} before they are shared.",
+      "noForm": "No form",
+      "questions": "{count, plural, one {# question} other {# questions}}",
+      "opens": "opens {date}",
+      "peerRange": "{min}–{max} peers",
+      "anonymousShown": "anonymous, shown once {threshold} are in",
+      "nominated": "nominated by the person{hasNomination, select, yes { by {nomination}} other {}}{hasApproval, select, yes {, approved by {approval}} other {}}",
+      "lockedNote": "A launched cycle keeps its forms, kinds, scale and anonymity; only the dates change, from Edit Dates."
+    },
+    "peers": {
+      "asked": "Peers asked.",
+      "description": "Colleagues who review {name}. They have {count} now; this cycle asks for {min}–{max}. Each is asked at once and gets a task.",
+      "full": "This person already has the most peers the cycle allows.",
+      "asking": "Asking…",
+      "ask": "Ask them"
+    },
+    "handOnDialog": {
+      "done": "Review handed on.",
+      "description": "The {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} other {upward review}} of {subject}, now with {reviewer}. Anything already typed goes with it.",
+      "descriptionManager": "The {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} other {upward review}} of {subject}, now with {reviewer}. Anything already typed goes with it. The new reviewer becomes the manager who shares this review.",
+      "newReviewer": "New reviewer",
+      "handingOn": "Handing on…",
+      "handOn": "Hand on"
+    },
+    "datesDialog": {
+      "done": "Dates saved.",
+      "description": "Open reviews take the new due date, and their reminders move with it."
+    }
+  },
+  "calibration": {
+    "sessionActions": "Session actions",
+    "closeSession": "Close session",
+    "intro": "{cycle} · {count, plural, one {# person} other {# people}}{hasClosed, select, yes { · closed {closed}} other {}}. A changed rating becomes the person's final rating; the manager review stays as written. Calibrating does not share or approve anything.",
+    "hidden": "{count, plural, one {# person in this session is} other {# people in this session are}} outside the results you can read, and not shown.",
+    "tabs": {
+      "table": "Table",
+      "nineBox": "9-Box"
+    },
+    "closed": "Session closed.",
+    "closeBody": "Ratings and potentials in this session are frozen. The ratings stand as calibrated; a closed session cannot be reopened.",
+    "empty": {
+      "title": "Nobody to calibrate here",
+      "description": "The people of this session are outside the results you may read."
+    },
+    "col": {
+      "person": "Person",
+      "department": "Department",
+      "manager": "Manager",
+      "status": "Status",
+      "managerRating": "Manager rating",
+      "finalRating": "Final rating",
+      "potential": "Potential"
+    },
+    "notInYet": "Not in yet",
+    "readOnly": "Read-only: {reason}.",
+    "potentialOf": "Potential of {name}",
+    "noPotential": "No potential",
+    "changeRating": "Change rating",
+    "adjust": {
+      "done": "Rating calibrated.",
+      "description": "{name}'s final rating. Their manager gave {hasRating, select, yes {{rating}} other {no rating}}; what the manager wrote stays as it is. The change and its reason are recorded.",
+      "selectRating": "Select a rating",
+      "reasonPlaceholder": "Why the rating changes",
+      "reasonHint": "Read by the manager, the approver and HR. Never shown to {name}."
+    },
+    "sessions": {
+      "intro": "Line up final ratings across managers, each change with a reason, and set each person's potential for the 9-box. Only people whose review is not shared yet can change.",
+      "add": "Add session",
+      "empty": "No calibration sessions yet.",
+      "facts": "{count, plural, one {# person} other {# people}} · {calibrated} calibrated · {date}",
+      "factsBy": "{count, plural, one {# person} other {# people}} · {calibrated} calibrated · added by {name} · {date}",
+      "dialogDescription": "With no conditions, everybody in the cycle is in the session. Who is in it is read now, once.",
+      "namePlaceholder": "Engineering calibration"
+    }
+  },
+  "nineBox": {
+    "potential": "{potential} Potential",
+    "unplaced": {
+      "title": "Unplaced",
+      "description": "People with no potential yet, or no rating to place them by. Set a potential on a card, or drag it into a box of its own performance row.",
+      "none": "Everybody is placed."
+    },
+    "notRated": "Not rated yet",
+    "noRating": "No rating",
+    "readOnly": "Read-only: {reason}"
+  },
+  "results": {
+    "exportPeople": "Export {people}",
+    "byKind": "Completion by kind",
+    "col": {
+      "review": "Review",
+      "reviewsSubmitted": "Reviews submitted",
+      "rated": "Rated",
+      "averageManager": "Average manager rating",
+      "averageFinal": "Average final rating"
+    },
+    "byDepartment": "Completion by department",
+    "byDepartmentHint": "Every review about the people of a department, together.",
+    "ratingsOnlyReadable": "Ratings are shown only for people whose results you can read.",
+    "ratingsHidden": "{count, plural, one {# person is} other {# people are}} outside the results you can read and left out of the ratings below.",
+    "distribution": "Rating distribution",
+    "distributionHint": "Final ratings — calibrated where a session changed them.",
+    "byManager": "Ratings by manager",
+    "byManagerHint": "What each manager gave, and what their people were finally given.",
+    "noManagerRatings": "No manager has rated anybody in this cycle yet.",
+    "export": {
+      "title": "Export results",
+      "description": "The results of {name}: one row a person whose results you can read. No answers are exported.",
+      "included": "Included: person, email, department, manager, status, manager rating, final rating and its label, potential, calibrated, shared on, acknowledged on."
+    },
+    "ratedAverage": "{rated} rated · average {average}"
+  },
+  "notice": {
+    "blocker": {
+      "noKinds": "Choose at least one kind of review.",
+      "kindNoForm": "{kind}: there is no form.",
+      "kindFormArchived": "{kind}: the form is archived.",
+      "kindFormNoQuestion": "{kind}: the form has no question.",
+      "kindNoDueDate": "{kind}: there is no due date.",
+      "nominationDatesMissing": "Peers nominated by the person reviewed need a nomination date and an approval date.",
+      "approvalNeedsManagerReview": "An approval of the manager review needs a manager review.",
+      "approverMissing": "Choose who approves the manager reviews.",
+      "releaseDateMissing": "Choose the date the results are released.",
+      "personNotEmployed": "{name} does not work here now.",
+      "nobodyMatches": "Nobody matches who takes part."
+    },
+    "warning": {
+      "peerMaxBelowAnonymity": "At most {peerMax, plural, one {# peer reviews} other {# peers review}} one person, fewer than the anonymity threshold of {threshold}: nobody will read their anonymous peer reviews.",
+      "fewReportsForUpward": "{count, plural, one {# person manages} other {# people manage}} fewer direct reports than the upward anonymity threshold of {threshold}: their upward reviews will be held back."
+    },
+    "peer": {
+      "reviewerCapExceeded": "{name} now writes {count, plural, one {# peer review} other {# peer reviews}} in this cycle."
+    },
+    "locked": {
+      "removed": "Read-only: they were taken out of the cycle.",
+      "shared": "Read-only: their review was already shared, and its rating changes only by the manager’s amendment."
+    }
+  }
+}

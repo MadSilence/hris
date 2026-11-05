@@ -1,5 +1,6 @@
 import type { CompanyCalendarGroup, CompanyCalendarGrouping } from "@/models/calendar";
 import type { FieldDTO } from "@/models/user/fields";
+import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
 
 /**
  * Row grouping on the company calendar — the pure half, so it can be tested without a board.
@@ -17,13 +18,19 @@ const FIELD_ID: Record<CompanyCalendarGrouping, string> = {
   OFFICE: "sys:office",
 };
 
-const LABEL: Record<CompanyCalendarGrouping, string> = {
-  DEPARTMENT: "Department",
-  TEAM: "Team",
-  OFFICE: "Office",
-};
+const LABEL = {
+  DEPARTMENT: "grouping.department",
+  TEAM: "grouping.team",
+  OFFICE: "grouping.office",
+} as const satisfies Record<CompanyCalendarGrouping, string>;
 
-export const groupingLabel = (grouping: CompanyCalendarGrouping): string => LABEL[grouping];
+const NO_VALUE = {
+  DEPARTMENT: "grouping.noDepartment",
+  TEAM: "grouping.noTeam",
+  OFFICE: "grouping.noOffice",
+} as const satisfies Record<CompanyCalendarGrouping, string>;
+
+export const groupingLabel = (t: CalendarTranslator, grouping: CompanyCalendarGrouping): string => t(LABEL[grouping]);
 
 /**
  * A saved view's `grouping`, read defensively. The payload is stored JSON that nothing on the server
@@ -48,8 +55,11 @@ export const availableGroupings = (fields: FieldDTO[] | undefined): CompanyCalen
 };
 
 /** The header text. The "no value" group is named after the dimension: "No team", never "None". */
-export const groupTitle = (grouping: CompanyCalendarGrouping, group: CompanyCalendarGroup): string =>
-  group.id === null ? `No ${LABEL[grouping].toLowerCase()}` : group.name?.trim() || "Untitled";
+export const groupTitle = (
+  t: CalendarTranslator,
+  grouping: CompanyCalendarGrouping,
+  group: CompanyCalendarGroup,
+): string => (group.id === null ? t(NO_VALUE[grouping]) : group.name?.trim() || t("grouping.untitled"));
 
 /** A stable key per group — the "no value" group has no id of its own. */
 export const groupKey = (group: Pick<CompanyCalendarGroup, "id">): string => group.id ?? "__none__";

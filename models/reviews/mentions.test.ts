@@ -1,24 +1,27 @@
+import { translatorFor } from "@/test/nextIntl";
+import type { ReviewsT } from "./i18n";
 import { insertMention, mentionOptions, mentionQueryAt, replaceMentions, splitMentions } from "./mentions";
 
+const t = translatorFor("reviews") as unknown as ReviewsT;
 const values = { subject: "Ann", subjectFullName: "Ann Lee", manager: "Bea", cycle: "H2 Review" };
 
 describe("mentions", () => {
   it("replaces every token, the longest name first", () => {
-    expect(replaceMentions("Did @subjectFullName (@subject) help @manager in @cycle?", values))
+    expect(replaceMentions("Did @subjectFullName (@subject) help @manager in @cycle?", values, t))
       .toBe("Did Ann Lee (Ann) help Bea in H2 Review?");
   });
 
   it("reads the old brace form as @subject", () => {
-    expect(replaceMentions("How did {subjectFirstName} do?", values)).toBe("How did Ann do?");
+    expect(replaceMentions("How did {subjectFirstName} do?", values, t)).toBe("How did Ann do?");
   });
 
   it("leaves an unknown @word, an e-mail address and a token glued to more letters alone", () => {
-    expect(replaceMentions("Ask @team or hr@subject.com about @subjects", values))
+    expect(replaceMentions("Ask @team or hr@subject.com about @subjects", values, t))
       .toBe("Ask @team or hr@subject.com about @subjects");
   });
 
   it("says who is meant when a name is missing", () => {
-    expect(replaceMentions("Talk to @manager", { subject: "Ann" })).toBe("Talk to their manager");
+    expect(replaceMentions("Talk to @manager", { subject: "Ann" }, t)).toBe("Talk to their manager");
   });
 
   it("cuts the text into runs and tokens for highlighting", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   Dialog,
@@ -35,6 +36,8 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const { data: fields, isLoading: fieldsLoading } = useUserFields();
   const [filters, setFilters] = React.useState<FilterDTO[]>(value?.filters ?? []);
   const [includeInactive, setIncludeInactive] = React.useState(value?.includeInactive ?? false);
@@ -49,9 +52,9 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancelAction()}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Custom access scope</DialogTitle>
+          <DialogTitle>{t("roles.permissions.customScope.title")}</DialogTitle>
           <DialogDescription>
-            {grantLabel} — this grant will reach everyone matching all of the conditions below.
+            {t("roles.permissions.customScope.description", { grant: grantLabel })}
           </DialogDescription>
         </DialogHeader>
 
@@ -63,25 +66,24 @@ export const ScopeFilterModal: React.FC<ScopeFilterModalProps> = ({
           onChange={setFilters}
           includeInactive={includeInactive}
           onIncludeInactiveChange={setIncludeInactive}
-          includeInactiveLabel="Also reach people who are not active"
+          includeInactiveLabel={t("roles.permissions.customScope.includeInactive")}
         />
 
         {filters.length === 0 && (
           <p className="text-body text-status-pending-text">
-            A custom scope with no conditions is rejected on save — it would claim a reach it never
-            defines.
+            {t("roles.permissions.customScope.empty")}
           </p>
         )}
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCancelAction}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button"
             disabled={filters.length === 0}
             onClick={() => onConfirmAction({ filters, excludeUserIds: [], includeInactive })}
  >
-            Save conditions
+            {t("roles.permissions.customScope.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

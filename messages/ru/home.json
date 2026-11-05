@@ -1,0 +1,147 @@
+{
+  "groups": {
+    "PERSONAL": "Для вас",
+    "COMPANY": "Компания",
+    "HR": "HR",
+    "UTILITIES": "Инструменты"
+  },
+  "widgets": {
+    "waitingOnYou": {
+      "title": "Ждут вашего решения",
+      "description": "Заявки на отпуск, которые ждут вашего решения. Виджет виден, только пока что-то ждёт."
+    },
+    "myTasks": {
+      "title": "Мои задачи",
+      "description": "Открытые задачи, назначенные вам."
+    },
+    "myTimeOff": {
+      "title": "Мои отсутствия",
+      "description": "Остатки по вашим политикам и ближайший отпуск."
+    },
+    "whosOut": {
+      "title": "Кто отсутствует",
+      "description": "Кто отсутствует сегодня или на этой неделе — в вашей команде или во всей компании."
+    },
+    "celebrations": {
+      "title": "Праздники коллег",
+      "description": "Дни рождения, годовщины работы и новые сотрудники."
+    },
+    "upcomingHolidays": {
+      "title": "Ближайшие праздники",
+      "description": "Ваши ближайшие праздничные дни."
+    },
+    "processes": {
+      "title": "Текущие процессы",
+      "description": "Онбординг и пребординг в работе."
+    },
+    "automations": {
+      "title": "Автоматизации",
+      "description": "Как работают автоматизации компании и какие требуют внимания."
+    },
+    "quickActions": {
+      "title": "Быстрые действия",
+      "description": "Подать заявку на отсутствие или учесть время в один клик."
+    },
+    "companyTime": {
+      "title": "Время компании",
+      "description": "Местное время компании."
+    }
+  },
+  "greeting": {
+    "line": "{part, select, morning {Доброе утро} afternoon {Добрый день} evening {Добрый вечер} other {Добро пожаловать}}{hasName, select, yes {, {name}} other {}}",
+    "unread": "Непрочитанных: {count}",
+    "customize": "Настроить"
+  },
+  "customize": {
+    "title": "Настройка главной",
+    "intro": "Выберите, что показывать на главной и в каком порядке. Эту раскладку видите только вы.",
+    "moveUp": "Переместить «{title}» выше",
+    "moveDown": "Переместить «{title}» ниже",
+    "show": "Показывать «{title}»",
+    "reset": "Сбросить по умолчанию",
+    "allHidden": "Все виджеты скрыты."
+  },
+  "card": {
+    "seeAll": "Все",
+    "seeAllCount": "Все ({count})",
+    "unnamed": "Без имени",
+    "today": "Сегодня",
+    "when": "Когда"
+  },
+  "automations": {
+    "empty": "Автоматизаций пока нет.",
+    "enabled": "Включены",
+    "scheduledRuns": "Запланировано запусков",
+    "failedRuns": "Неудачных запусков",
+    "allGood": "Ничто не требует внимания.",
+    "paused": "Приостановлена",
+    "failed": "Сбоев: {count}"
+  },
+  "celebrations": {
+    "birthday": "День рождения",
+    "anniversary": "{count, plural, one {# год в компании} few {# года в компании} many {# лет в компании} other {# года в компании}}",
+    "joins": "Выходит на работу",
+    "showUpcoming": "Ближайшие",
+    "emptyWeek": "На этой неделе праздников нет.",
+    "emptyToday": "Сегодня праздников нет.",
+    "birthdaysOff": "Дни рождения выключены: поле дня рождения не выбрано.",
+    "chooseOne": "Выбрать",
+    "birthdaysHidden": "Дни рождения от вас скрыты: {hasField, select, yes {поле «{field}»} other {поле дня рождения}} не видно вашей роли для всех сотрудников. Откройте его в доступе к полям, чтобы дни рождения появились здесь.",
+    "openRoles": "Открыть роли"
+  },
+  "clock": {
+    "yourTime": "Ваше время: {time} · {zone}"
+  },
+  "myTimeOff": {
+    "requestTimeOff": "Подать заявку на отсутствие",
+    "empty": "К вам пока не применяется ни одна политика отсутствий.",
+    "policyFallback": "Отсутствие",
+    "left": "Осталось <b>{amount}</b> {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
+    "comingUp": "Скоро",
+    "approved": "Согласовано",
+    "waiting": "Ждёт согласования"
+  },
+  "myTasks": {
+    "empty": "Вам ничего не назначено.",
+    "forSubject": "Для: {name}",
+    "waiting": "Ожидает · {date}"
+  },
+  "processes": {
+    "empty": "Нет онбординга или пребординга в работе.",
+    "types": {
+      "PREBOARDING": "Пребординг",
+      "ONBOARDING": "Онбординг",
+      "OFFBOARDING": "Оффбординг"
+    },
+    "progress": "Выполнено {done}/{total}",
+    "overdue": "Просрочено: {count}"
+  },
+  "quickActions": {
+    "requestTimeOff": "Подать заявку на отсутствие",
+    "logTime": "Учесть время"
+  },
+  "holidays": {
+    "empty": "Праздничных дней впереди нет.",
+    "calendarFallback": "Календарь праздников",
+    "halfDay": "Полдня"
+  },
+  "waitingOnYou": {
+    "aRequest": "Заявка",
+    "requests": "<name></name><rest> запрашивает отсутствие</rest>",
+    "asksToCancel": "<name></name><rest> просит отменить отсутствие</rest>",
+    "detail": "{dates} · {days}{forSomeone, select, yes { · вы замещаете: {name}} other {}}"
+  },
+  "whosOut": {
+    "openCalendar": "Открыть календарь",
+    "whose": "Чьи отсутствия",
+    "myTeam": "Моя команда",
+    "everyone": "Все",
+    "thisWeek": "Эта неделя",
+    "noTeam": "Вы пока не состоите ни в команде, ни в отделе.",
+    "showEveryone": "Показать всех",
+    "emptyToday": "Сегодня все на месте.",
+    "emptyWeek": "До конца недели все на месте.",
+    "away": "Отсутствует",
+    "more": "И ещё {count} в календаре."
+  }
+}

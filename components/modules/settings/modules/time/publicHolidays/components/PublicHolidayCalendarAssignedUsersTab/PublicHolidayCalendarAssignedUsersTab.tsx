@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import {
   useAssignedUsers,
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName, isArchived }: Props) {
+  const t = useTranslations("timeOff");
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
@@ -28,8 +30,8 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
 
   return (
     <AssignedUsersPanel
-      title="Assigned people"
-      description="People who have this holiday calendar assigned to them."
+      title={t("publicHolidays.assigned.title")}
+      description={t("publicHolidays.assigned.description")}
       manageResource="ORG.PUBLIC_HOLIDAY_CALENDAR"
       // The resource has VIEW and MANAGE and no EDIT, so the panel's default EDIT gate hid Assign and
       // Unassign from everybody, including the people the backend lets do both.
@@ -47,7 +49,7 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
       isLoadingMore={isFetchingNextPage}
       onLoadMore={() => void fetchNextPage()}
       secondaryColumn={{
-        header: "Holiday calendars",
+        header: t("publicHolidays.assigned.column"),
         render: (u) =>
           u.calendars && u.calendars.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
@@ -65,7 +67,7 @@ export function PublicHolidayCalendarAssignedUsersTab({ calendarId, calendarName
         basePath: BASE_PATH,
         assignableId: calendarId,
         assignableName: calendarName,
-        noun: "calendar",
+        kind: "calendar",
         semantics: "add",
         invalidateKeys: [assignedUsersQueryKey(BASE_PATH, calendarId)],
       }}

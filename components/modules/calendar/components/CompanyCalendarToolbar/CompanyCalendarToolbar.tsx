@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useEffect, useState, ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowLeft01Icon, ArrowRight01Icon, Bookmark01Icon, Delete02Icon, FilterHorizontalIcon, LayoutTable01Icon, Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -82,6 +83,8 @@ export const CompanyCalendarToolbar: FC<Props> = ({
   onToday,
   actions,
 }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
   const [seed, setSeed] = useState(0);
@@ -116,7 +119,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             value={query}
             onChange={(e) => onQueryChange(e.currentTarget.value)}
             className="h-9 w-[240px] pl-9"
-            placeholder="Search"
+            placeholder={tCommon("actions.search")}
             inputMode="search"
           />
         </div>
@@ -129,7 +132,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
           <PopoverTrigger asChild>
             <Button type="button" variant="secondary" className="gap-1.5">
               <Icon icon={FilterHorizontalIcon} size="sm" />
-              Filter
+              {t("toolbar.filter")}
               {filters.length > 0 ? (
                 <Badge variant="neutral" className="ml-1 px-1.5">
                   {filters.length}
@@ -141,10 +144,10 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
             <div className="mt-3 flex items-center justify-end gap-2">
               <Button type="button" variant="ghost" size="sm" onClick={() => setDraft([])}>
-                Reset
+                {tCommon("actions.reset")}
               </Button>
               <Button type="button" size="sm" onClick={applyFilters}>
-                Apply
+                {tCommon("actions.apply")}
               </Button>
             </div>
           </PopoverContent>
@@ -157,7 +160,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             <PopoverTrigger asChild>
               <Button type="button" variant="secondary" className="gap-1.5">
                 <Icon icon={LayoutTable01Icon} size="sm" />
-                {grouping ? `Group: ${groupingLabel(grouping)}` : "Group"}
+                {grouping ? t("toolbar.groupBy", { grouping: groupingLabel(t, grouping) }) : t("toolbar.group")}
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-[200px] p-2">
@@ -174,7 +177,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                     option === grouping ? "font-medium text-primary" : "text-secondary",
                   ].join(" ")}
                 >
-                  {option ? groupingLabel(option) : "None"}
+                  {option ? groupingLabel(t, option) : tCommon("values.none")}
                   {option === grouping ? <Icon icon={Tick02Icon} size="sm" /> : null}
                 </button>
               ))}
@@ -186,7 +189,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
           <PopoverTrigger asChild>
             <Button type="button" variant="secondary" className="gap-1.5">
               <Icon icon={Bookmark01Icon} size="sm" />
-              {activeView ? activeView.name : "Views"}
+              {activeView ? activeView.name : t("toolbar.views")}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[280px] p-2">
@@ -201,7 +204,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 activeViewId === null ? "font-medium text-primary" : "text-secondary",
               ].join(" ")}
             >
-              All people
+              {t("toolbar.allPeople")}
             </button>
 
             {views.map((v) => (
@@ -223,7 +226,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-label={`Delete ${v.name}`}
+                  aria-label={t("toolbar.deleteView", { name: v.name })}
                   disabled={viewsBusy}
                   onClick={() => onDeleteView(v)}
                 >
@@ -244,7 +247,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                   setViewsOpen(false);
                 }}
               >
-                Save current filters as a view
+                {t("toolbar.saveCurrentAsView")}
               </Button>
             </div>
           </PopoverContent>
@@ -263,19 +266,19 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 density === d ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
               ].join(" ")}
             >
-              {d}
+              {t(`toolbar.density.${d}`)}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-1">
-          <Button type="button" variant="secondary" size="icon" aria-label="Previous" onClick={onPrev}>
+          <Button type="button" variant="secondary" size="icon" aria-label={t("toolbar.previous")} onClick={onPrev}>
             <Icon icon={ArrowLeft01Icon} size="sm" />
           </Button>
           <Button type="button" variant="secondary" onClick={onToday}>
-            Today
+            {tCommon("values.today")}
           </Button>
-          <Button type="button" variant="secondary" size="icon" aria-label="Next" onClick={onNext}>
+          <Button type="button" variant="secondary" size="icon" aria-label={tCommon("actions.next")} onClick={onNext}>
             <Icon icon={ArrowRight01Icon} size="sm" />
           </Button>
         </div>
@@ -289,7 +292,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle>Save view</DialogTitle>
+            <DialogTitle>{t("toolbar.saveViewTitle")}</DialogTitle>
           </DialogHeader>
           <Input
             autoFocus
@@ -303,12 +306,11 @@ export const CompanyCalendarToolbar: FC<Props> = ({
             }}
           />
           <p className="text-hint text-tertiary">
-            A view remembers the filters, the grouping and the week/month choice — not the period.
-            Opened in June it shows June.
+            {t("toolbar.saveViewHint")}
           </p>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setSaveOpen(false)}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button"
               disabled={!saveName.trim() || viewsBusy}
@@ -317,7 +319,7 @@ export const CompanyCalendarToolbar: FC<Props> = ({
                 setSaveOpen(false);
               }}
             >
-              Save
+              {tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,6 +2,11 @@ import * as React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { TemplateTaskListView } from "./TemplateTaskListView";
 import { deriveLanes, type DraftItem } from "./draft";
+import { translatorFor } from "@/test/nextIntl";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
+
+// The English catalogue, through the real ICU formatter.
+const t = translatorFor("lifecycle") as unknown as LifecycleT;
 
 const item = (key: string, title: string, over: Partial<DraftItem> = {}): DraftItem => ({
   key,
@@ -32,7 +37,7 @@ describe("TemplateTaskListView", () => {
   ];
 
   it("groups the tasks by phase, in timeline order, saying the day and who does it", () => {
-    render(<TemplateTaskListView items={items} lanes={deriveLanes(items)} selectedKey={null} onSelectAction={jest.fn()} onAddAction={jest.fn()} />);
+    render(<TemplateTaskListView items={items} lanes={deriveLanes(items, t)} selectedKey={null} onSelectAction={jest.fn()} onAddAction={jest.fn()} />);
 
     const before = within(screen.getByRole("region", { name: "Before start" }));
     expect(before.getAllByRole("button").map((b) => b.textContent)).toEqual([
@@ -49,7 +54,7 @@ describe("TemplateTaskListView", () => {
   it("opens the same side panel as the canvas, and adds a task", () => {
     const onSelect = jest.fn();
     const onAdd = jest.fn();
-    render(<TemplateTaskListView items={items} lanes={deriveLanes(items)} selectedKey="pass" onSelectAction={onSelect} onAddAction={onAdd} />);
+    render(<TemplateTaskListView items={items} lanes={deriveLanes(items, t)} selectedKey="pass" onSelectAction={onSelect} onAddAction={onAdd} />);
     expect(screen.getByRole("button", { name: /Passport/ })).toHaveAttribute("aria-current", "true");
     fireEvent.click(screen.getByRole("button", { name: /Set up the laptop/ }));
     expect(onSelect).toHaveBeenCalledWith("setup");

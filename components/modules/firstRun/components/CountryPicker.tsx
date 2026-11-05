@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { CountryFlag } from "@/components/ui/CountryFlag";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -19,6 +20,7 @@ export const CountryPicker: React.FC<{
   id?: string;
   disabled?: boolean;
 }> = ({ countries, value, onChange, id, disabled }) => {
+  const t = useTranslations("firstRun");
   const options = React.useMemo(
     () =>
       countries.map((country) => ({
@@ -36,8 +38,8 @@ export const CountryPicker: React.FC<{
       options={options}
       value={value}
       onChange={onChange}
-      placeholder="Select a country"
-      emptyLabel="No country matches that."
+      placeholder={t("countryPicker.placeholder")}
+      emptyLabel={t("countryPicker.empty")}
       disabled={disabled}
     />
   );

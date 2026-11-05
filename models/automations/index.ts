@@ -6,6 +6,7 @@
 import type { ReviewKind } from "@/models/reviews";
 import type { Segment } from "@/models/segment/Segment";
 import type { HolidayCalendarBindingRef } from "@/models/publicHolidays/binding";
+import type { CodedMessage } from "@/models/misc";
 
 // ── vocabulary ────────────────────────────────────────────────────────────────────────────────
 
@@ -517,6 +518,10 @@ export type SimulatedStep = {
   late: boolean;
   conditionMet: boolean | null;
   note: string | null;
+  /** `summary` as a code: the action type, its parts as params (`AutomationViews#summaryCode`). */
+  summaryCode?: CodedMessage | null;
+  /** `note` as a code (`AutomationSimulationNotice` STEP_*), null when there is no note. */
+  noteCode?: CodedMessage | null;
 };
 export type AutomationSimulation = {
   person: PersonRef;
@@ -524,6 +529,8 @@ export type AutomationSimulation = {
   moment: string | null;
   steps: SimulatedStep[];
   notes: string[];
+  /** `notes` as codes (`AutomationSimulationNotice`), one each, in the same order. */
+  noteCodes?: CodedMessage[];
 };
 
 export type AutomationTemplate = {
@@ -592,4 +599,4 @@ export type ReturnToRuleRequest = {
   assignableId?: string | null;
 };
 
-export * from "./labels";
+export * from "./moment";

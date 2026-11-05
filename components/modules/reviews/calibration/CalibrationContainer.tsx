@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PencilEdit02Icon, SquareLock02Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -22,7 +23,7 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import {
   calibrateRatingAction,
   closeCalibrationAction,
@@ -31,7 +32,8 @@ import {
 import { useCalibration, useInvalidateReviews } from "@/components/modules/reviews/hooks";
 import { CalibrationStatusBadge, PacketStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
 import {
-  REVIEW_POTENTIAL_LABELS,
+  lockedText,
+  REVIEW_POTENTIAL_KEYS,
   REVIEW_POTENTIALS,
   type CalibrationRow,
   type CalibrationSession,
@@ -47,6 +49,8 @@ const NONE = "NONE";
  * session is read-only throughout.
  */
 export function CalibrationContainer({ sessionId }: { sessionId: string }) {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
   const session = useCalibration(sessionId);
   const invalidate = useInvalidateReviews();
   const [adjusting, setAdjusting] = useState<CalibrationRow | null>(null);
@@ -78,31 +82,32 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
         <SettingsPageHeader title={s.name} backHref={`/reviews/cycles/${s.cycleId}`} className="min-w-0 flex-1" />
         <CalibrationStatusBadge status={s.status} />
         {s.canEdit && (
-          <RowActionsMenu label="Session actions">
+          <RowActionsMenu label={t("calibration.sessionActions")}>
             <RowActionDestructive icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setClosing(true)}>
-              Close session
+              {t("calibration.closeSession")}
             </RowActionDestructive>
           </RowActionsMenu>
         )}
       </div>
       <p className="-mt-4 text-body text-tertiary">
-        {s.cycleName} · {s.rows.length + s.hidden} people
-        {s.closedAt ? ` · closed ${formatDisplayDate(s.closedAt, { style: "medium" })}` : ""}.
-        {" "}A changed rating becomes the person&apos;s final rating; the manager review stays as written. Calibrating
-        does not share or approve anything.
+        {t("calibration.intro", {
+          cycle: s.cycleName,
+          count: s.rows.length + s.hidden,
+          hasClosed: s.closedAt ? "yes" : "no",
+          closed: s.closedAt ? formatDisplayDate(s.closedAt, { style: "medium" }) : "",
+        })}
       </p>
       {s.hidden > 0 && (
         <p className="flex items-center gap-2 text-body text-tertiary">
           <Icon icon={ViewOffSlashIcon} size="sm" />
-          {s.hidden} {s.hidden === 1 ? "person" : "people"} in this session {s.hidden === 1 ? "is" : "are"} outside the
-          results you can read, and not shown.
+          {t("calibration.hidden", { count: s.hidden })}
         </p>
       )}
 
       <Tabs defaultValue="table" className="w-full">
         <TabsList>
-          <TabsTrigger value="table">Table</TabsTrigger>
-          <TabsTrigger value="nine-box">9-Box</TabsTrigger>
+          <TabsTrigger value="table">{t("calibration.tabs.table")}</TabsTrigger>
+          <TabsTrigger value="nine-box">{t("calibration.tabs.nineBox")}</TabsTrigger>
         </TabsList>
         <TabsContent value="table" className="mt-4">
           <CalibrationTable session={s} onAdjust={setAdjusting} onPotential={(r, p) => void setPotential(r, p)} />
@@ -118,22 +123,21 @@ export function CalibrationContainer({ sessionId }: { sessionId: string }) {
 
       <ConfirmDialog
         open={closing}
-        title="Close session"
-        confirmLabel="Close session"
+        title={t("calibration.closeSession")}
+        confirmLabel={t("calibration.closeSession")}
         destructive
         onCancelAction={() => setClosing(false)}
         onConfirmAction={async () => {
           const res = await closeCalibrationAction(s.id);
-          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
+          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("error.generic");
           setClosing(false);
-          showSuccess("Session closed.");
+          showSuccess(t("calibration.closed"));
           await invalidate();
           return null;
         }}
       >
         <p>
-          Ratings and potentials in this session are frozen. The ratings stand as calibrated; a closed session cannot be
-          reopened.
+          {t("calibration.closeBody")}
         </p>
       </ConfirmDialog>
     </div>
@@ -145,6 +149,7 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
   onAdjust: (row: CalibrationRow) => void;
   onPotential: (row: CalibrationRow, potential: ReviewPotential | null) => void;
 }) {
+  const t = useTranslations("reviews");
   const label = (rating: number | null) => {
     if (rating == null) return "—";
     const point = s.scale.find((p) => p.value === rating);
@@ -152,8 +157,8 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
   };
   if (s.rows.length === 0) {
     return (
-      <EmptyState compact scene="reviews-and-one-on-ones" title="Nobody to calibrate here"
-        description="The people of this session are outside the results you may read." />
+      <EmptyState compact scene="reviews-and-one-on-ones" title={t("calibration.empty.title")}
+        description={t("calibration.empty.description")} />
     );
   }
   return (
@@ -161,13 +166,13 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
       <table className="w-full text-body">
         <thead className="text-left text-hint text-tertiary">
           <tr className="border-b border-divider">
-            <th className="px-4 py-2 font-medium">Person</th>
-            <th className="px-4 py-2 font-medium">Department</th>
-            <th className="px-4 py-2 font-medium">Manager</th>
-            <th className="px-4 py-2 font-medium">Status</th>
-            <th className="px-4 py-2 font-medium">Manager rating</th>
-            <th className="px-4 py-2 font-medium">Final rating</th>
-            <th className="px-4 py-2 font-medium">Potential</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.person")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.department")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.manager")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.status")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.managerRating")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.finalRating")}</th>
+            <th className="px-4 py-2 font-medium">{t("calibration.col.potential")}</th>
             <th className="px-4 py-2" />
           </tr>
         </thead>
@@ -180,18 +185,26 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
                 <td className="px-4 py-2">{r.department ?? "—"}</td>
                 <td className="px-4 py-2">{r.manager?.name ?? "—"}</td>
                 <td className="px-4 py-2"><PacketStatusBadge status={r.status} /></td>
-                <td className="px-4 py-2">{r.managerReviewIn ? label(r.managerRating) : "Not in yet"}</td>
+                <td className="px-4 py-2">{r.managerReviewIn ? label(r.managerRating) : t("calibration.notInYet")}</td>
                 <td className="px-4 py-2">
                   <div className="text-primary">{label(r.finalRating)}</div>
                   {r.calibrated && (
                     <div className="max-w-xs text-hint text-tertiary">
-                      Calibrated{r.calibratedBy ? ` by ${r.calibratedBy.name}` : ""}
-                      {r.calibrationReason ? `: ${r.calibrationReason}` : ""}
+                      {t("packet.calibrated", {
+                        hasFrom: "no",
+                        from: "",
+                        hasBy: r.calibratedBy ? "yes" : "no",
+                        by: r.calibratedBy?.name ?? "",
+                        hasAt: "no",
+                        at: "",
+                        hasReason: r.calibrationReason ? "yes" : "no",
+                        reason: r.calibrationReason ?? "",
+                      })}
                     </div>
                   )}
-                  {!editable && r.lockedReason && (
+                  {!editable && lockedText(t, r) && (
                     <div className="max-w-xs text-hint text-tertiary" data-test="locked-hint">
-                      Read-only: {r.lockedReason}.
+                      {lockedText(t, r)}
                     </div>
                   )}
                 </td>
@@ -199,19 +212,19 @@ function CalibrationTable({ session: s, onAdjust, onPotential }: {
                   {editable ? (
                     <Select value={r.potential ?? NONE}
                       onValueChange={(v) => onPotential(r, v === NONE ? null : (v as ReviewPotential))}>
-                      <SelectTrigger className="h-8 w-32" aria-label={`Potential of ${r.subject.name}`}><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-32" aria-label={t("calibration.potentialOf", { name: r.subject.name })}><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={NONE}>No potential</SelectItem>
-                        {REVIEW_POTENTIALS.map((p) => <SelectItem key={p} value={p}>{REVIEW_POTENTIAL_LABELS[p]}</SelectItem>)}
+                        <SelectItem value={NONE}>{t("calibration.noPotential")}</SelectItem>
+                        {REVIEW_POTENTIALS.map((p) => <SelectItem key={p} value={p}>{t(REVIEW_POTENTIAL_KEYS[p])}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                  ) : (r.potential ? REVIEW_POTENTIAL_LABELS[r.potential] : "—")}
+                  ) : (r.potential ? t(REVIEW_POTENTIAL_KEYS[r.potential]) : "—")}
                 </td>
                 <td className="px-4 py-2 text-right">
                   {editable && r.managerReviewIn && (
-                    <RowActionsMenu label="Person actions">
+                    <RowActionsMenu label={t("run.person.actions")}>
                       <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => onAdjust(r)}>
-                        Change rating
+                        {t("calibration.changeRating")}
                       </RowAction>
                     </RowActionsMenu>
                   )}
@@ -232,6 +245,8 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
   onCloseAction: () => void;
   onDoneAction: () => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const [rating, setRating] = useState<string>("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -253,10 +268,10 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
     try {
       const res = await calibrateRatingAction({ id: session.id, participantId: row.participantId, rating: Number(rating), reason: reason.trim() });
       if (res.status !== ActionStatus.SUCCESS) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
-      showSuccess("Rating calibrated.");
+      showSuccess(t("calibration.adjust.done"));
       onDoneAction();
     } finally {
       setBusy(false);
@@ -268,36 +283,39 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
           <DialogHeader>
-            <DialogTitle>Change rating</DialogTitle>
+            <DialogTitle>{t("calibration.changeRating")}</DialogTitle>
             <DialogDescription>
-              {row.subject.name}&apos;s final rating. Their manager gave {row.managerRating ?? "no rating"}; what the
-              manager wrote stays as it is. The change and its reason are recorded.
+              {t("calibration.adjust.description", {
+                name: row.subject.name,
+                hasRating: row.managerRating != null ? "yes" : "no",
+                rating: row.managerRating ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-4">
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="calibration-rating">Final rating</RequiredLabel>
+              <RequiredLabel htmlFor="calibration-rating">{t("calibration.col.finalRating")}</RequiredLabel>
               <Select value={rating} onValueChange={setRating}>
-                <SelectTrigger id="calibration-rating"><SelectValue placeholder="Select a rating" /></SelectTrigger>
+                <SelectTrigger id="calibration-rating"><SelectValue placeholder={t("calibration.adjust.selectRating")} /></SelectTrigger>
                 <SelectContent>
                   {session.scale.map((p) => <SelectItem key={p.value} value={String(p.value)}>{p.value} · {p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="calibration-reason">Reason</RequiredLabel>
+              <RequiredLabel htmlFor="calibration-reason">{t("write.declineDialog.reason")}</RequiredLabel>
               <Textarea id="calibration-reason" value={reason} maxLength={2000} rows={3}
-                onChange={(e) => setReason(e.target.value)} placeholder="Why the rating changes" />
+                onChange={(e) => setReason(e.target.value)} placeholder={t("calibration.adjust.reasonPlaceholder")} />
               <p className="text-hint text-tertiary">
-                Read by the manager, the approver and HR. Never shown to {row.subject.name.split(" ")[0]}.
+                {t("calibration.adjust.reasonHint", { name: row.subject.name.split(" ")[0] })}
               </p>
             </div>
           </div>
           <FormError message={error} />
           <DialogFooter className="mt-4">
-            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
             <Button type="submit" disabled={busy || !changed || !reason.trim()}>
-              {busy ? "Saving…" : "Save"}
+              {busy ? tCommon("actions.saving") : tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </form>

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { Clock04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -10,30 +12,26 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { cn } from "@/lib/cn";
 import { skipReasonText } from "@/components/audience/assignment/assignmentSkips";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
 import { useAssignmentHistory } from "@/components/modules/automations/hooks";
 import { formatMoment, type AssignableType, type AssignmentHistoryItem } from "@/models/automations";
 
-const VERB: Record<AssignmentHistoryItem["status"], string> = {
-  CREATED: "Assigned",
-  SCHEDULED: "Scheduled",
-  SKIPPED: "Skipped",
-  FAILED: "Failed",
-  REMOVED: "Removed",
-};
-
 /** "by rule Berlin office", "by hand · Anna Schmidt". */
-export const historySource = (item: AssignmentHistoryItem): React.ReactNode => {
+export const historySource = (item: AssignmentHistoryItem, t: AccessTranslator): React.ReactNode => {
   if (item.origin === "RULE") {
-    return item.rule ? (
-      <>
-        by rule{" "}
-        <Link href={`/settings/automation/automations/${item.rule.id}`} className="text-primary no-underline hover:underline">
-          {item.rule.name}
-        </Link>
-      </>
-    ) : "by a rule";
+    const rule = item.rule;
+    return rule
+      ? t.rich("audience.history.byRule", {
+          rule: rule.name ?? "",
+          link: (chunks) => (
+            <Link href={`/settings/automation/automations/${rule.id}`} className="text-primary no-underline hover:underline">
+              {chunks}
+            </Link>
+          ),
+        })
+      : t("audience.history.byARule");
   }
-  return item.by?.name ? `by hand · ${item.by.name}` : "by hand";
+  return item.by?.name ? t("audience.history.byHandName", { name: item.by.name }) : t("audience.history.byHand");
 };
 
 /**
@@ -44,7 +42,9 @@ export const HistoryToggle: React.FC<{ showing: boolean; onChange: (showing: boo
   showing,
   onChange,
   className,
-}) => (
+}) => {
+  const t = useTranslations("access");
+  return (
   <Button
     type="button"
     variant="ghost"
@@ -54,9 +54,10 @@ export const HistoryToggle: React.FC<{ showing: boolean; onChange: (showing: boo
     className={cn("flex-none gap-1.5 text-tertiary", showing && "bg-subtle text-primary", className)}
   >
     <Icon icon={Clock04Icon} size="sm" />
-    History
+    {t("audience.history.toggle")}
   </Button>
-);
+  );
+};
 
 /**
  * Who was assigned to one target, by which rule or by hand, and when — removals included (design
@@ -67,6 +68,8 @@ export const AssignmentHistoryList: React.FC<{ assignableType: AssignableType; a
   assignableId,
   className,
 }) => {
+  const t = useTranslations("access");
+  const language = useDisplayLanguage();
   const history = useAssignmentHistory(assignableType, assignableId);
   const items = history.data?.content ?? [];
 
@@ -92,25 +95,25 @@ export const AssignmentHistoryList: React.FC<{ assignableType: AssignableType; a
       <EmptyState
         className={className}
         scene="notes"
-        title="No history yet"
-        description="Every assignment and removal here is listed, with the rule or the person who made it."
+        title={t("audience.history.emptyTitle")}
+        description={t("audience.history.emptyDescription")}
       />
     );
   }
 
   return (
-    <ul className={cn("m-0 list-none divide-y divide-divider p-0", className)} aria-label="Assignment history">
+    <ul className={cn("m-0 list-none divide-y divide-divider p-0", className)} aria-label={t("audience.history.listLabel")}>
       {items.map((item) => (
         <li key={item.recordId} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-1 py-2 text-body">
           <span className="min-w-0">
             <span className="text-primary">{item.person?.name}</span>
             <span className="text-tertiary">
               {" · "}
-              {VERB[item.status]} {historySource(item)}
-              {item.status === "SKIPPED" && item.skipReason ? ` — ${skipReasonText(item.skipReason)}` : ""}
+              {t(`audience.history.verbs.${item.status}`)} {historySource(item, t)}
+              {item.status === "SKIPPED" && item.skipReason ? ` — ${skipReasonText(item.skipReason, t)}` : ""}
             </span>
           </span>
-          <span className="text-hint tabular-nums text-tertiary">{formatMoment(item.at)}</span>
+          <span className="text-hint tabular-nums text-tertiary">{formatMoment(item.at, language)}</span>
         </li>
       ))}
     </ul>

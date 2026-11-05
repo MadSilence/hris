@@ -1,6 +1,7 @@
 "use client";
 
-import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
+import { useTranslations } from "next-intl";
+import { dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
 
 import { useState, type FC } from "react";
 import type { Matcher } from "react-day-picker";
@@ -47,7 +48,7 @@ export const DatePicker: FC<Props> = ({
   onChange,
   id,
   disabled = false,
-  placeholder = "Pick a date",
+  placeholder,
   min,
   max,
   clearable = true,
@@ -55,6 +56,8 @@ export const DatePicker: FC<Props> = ({
   ariaLabel,
   className,
 }) => {
+  const t = useTranslations("common");
+  const formatDisplayDate = useDateFormatter();
   const [open, setOpen] = useState(false);
 
   const selected = value && isValidISO(value) ? isoToDate(value) : undefined;
@@ -90,14 +93,14 @@ export const DatePicker: FC<Props> = ({
           <Icon icon={Calendar03Icon} size="sm" className="shrink-0 text-tertiary" />
 
           <span className={cn("min-w-0 flex-1 truncate text-left", !selected && "text-tertiary")}>
-            {selected ? formatDisplayDate(selected, { style: "medium" }) : placeholder}
+            {selected ? formatDisplayDate(selected, { style: "medium" }) : placeholder ?? t("datePicker.pickDate")}
           </span>
 
           {clearable && selected && !disabled && (
             <span
               role="button"
               tabIndex={-1}
-              aria-label="Clear date"
+              aria-label={t("datePicker.clearDate")}
               onClick={(event) => {
                 event.stopPropagation();
                 onChange("");

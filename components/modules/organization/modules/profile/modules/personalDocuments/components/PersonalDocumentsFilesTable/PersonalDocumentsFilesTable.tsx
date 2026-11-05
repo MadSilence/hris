@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowDown02Icon, ArrowUp02Icon, Delete02Icon, Download01Icon, FolderTransferIcon, PencilEdit02Icon, SquareLock02Icon, StarIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
@@ -11,7 +14,7 @@ import type {
   DocumentSortField,
 } from "../../hooks/document/usePersonalDocuments/usePersonalDocuments";
 import { formatBytes } from "../../utils/formatBytes";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { getDocumentFileIcon } from "../../utils/getDocumentFileIcon";
 import { isPreviewable } from "../../utils/isPreviewable";
 
@@ -71,6 +74,10 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
   onPreview,
   getDownloadUrl,
 }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
+
   if (!documents.length) return null;
 
   return (
@@ -79,13 +86,13 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
         <Table>
           <TableHeader>
             <TableRow>
-              <SortableHead field="name" label="Name" sort={sort} onSortChange={onSortChange}/>
-              <TableHead>Category</TableHead>
-              <TableHead>Visibility</TableHead>
-              <SortableHead field="size" label="Size" sort={sort} onSortChange={onSortChange}/>
+              <SortableHead field="name" label={tCommon("fields.name")} sort={sort} onSortChange={onSortChange}/>
+              <TableHead>{t("documents.table.category")}</TableHead>
+              <TableHead>{t("documents.table.visibility")}</TableHead>
+              <SortableHead field="size" label={t("documents.table.size")} sort={sort} onSortChange={onSortChange}/>
               <SortableHead
                 field="createdAt"
-                label="Uploaded"
+                label={t("documents.table.uploaded")}
                 sort={sort}
                 onSortChange={onSortChange}
               />
@@ -135,7 +142,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                       size="sm"
                       className="size-3.5 text-tertiary"
                     />
-                    {document.visibility === "HR_ONLY" ? "HR only" : "Employee"}
+                    {document.visibility === "HR_ONLY" ? t("documents.table.hrOnly") : t("documents.table.employee")}
                   </span>
                 </TableCell>
 
@@ -147,9 +154,9 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                   <button
                     type="button"
                     onClick={() => onToggleStar(document)}
-                    aria-label={document.isStarred ? "Unstar" : "Star"}
+                    aria-label={document.isStarred ? t("documents.table.unstar") : t("documents.table.star")}
                     aria-pressed={document.isStarred}
-                    title={document.isStarred ? "Unstar" : "Star"}
+                    title={document.isStarred ? t("documents.table.unstar") : t("documents.table.star")}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-control hover:bg-mist"
                   >
                     <Icon
@@ -165,10 +172,10 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 </TableCell>
 
                 <TableCell className="text-center">
-                  <RowActionsMenu label="Document actions">
+                  <RowActionsMenu label={t("documents.table.actions")}>
                     {onPreview && isPreviewable(document.mimeType) ? (
                       <RowAction icon={<Icon icon={ViewIcon} size="sm" />} onClick={() => onPreview(document)}>
-                        Preview
+                        {tCommon("actions.preview")}
                       </RowAction>
                     ) : null}
 
@@ -179,19 +186,19 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                     <DropdownMenuItem asChild className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
                       <a href={getDownloadUrl(document.id)} download>
                         <Icon icon={Download01Icon} size="sm" className="text-tertiary" />
-                        Download
+                        {tCommon("actions.download")}
                       </a>
                     </DropdownMenuItem>
 
                     {/* No star here: the row's own star button does it, one click away. */}
                     {onRename ? (
                       <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onRename(document)}>
-                        Rename
+                        {tCommon("actions.rename")}
                       </RowAction>
                     ) : null}
                     {onMove ? (
                       <RowAction icon={<Icon icon={FolderTransferIcon} size="sm" />} onClick={() => onMove(document)}>
-                        Move
+                        {t("documents.table.move")}
                       </RowAction>
                     ) : null}
                     {onDelete ? (
@@ -199,7 +206,7 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                         icon={<Icon icon={Delete02Icon} size="sm" />}
                         onClick={() => onDelete(document)}
                       >
-                        Delete
+                        {tCommon("actions.delete")}
                       </RowActionDestructive>
                     ) : null}
                   </RowActionsMenu>

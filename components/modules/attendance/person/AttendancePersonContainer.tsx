@@ -2,6 +2,7 @@
 
 import React, { Fragment } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowLeft01Icon, UserIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -11,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar"
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter, useDisplayLocale } from "@/lib/date";
 import { formatMinutes, type AttendanceLogDay, type AttendanceTotals } from "@/models/attendance";
 import { useAttendanceCapabilities, useAttendanceLog } from "@/components/modules/attendance/hooks";
 import { formatAmounts } from "@/components/modules/attendance/lib";
@@ -22,13 +23,16 @@ import { useAttendanceView } from "@/components/modules/attendance/overview";
 type Props = { userId: string };
 
 /** Why a day is what it is — the note column, and the export's. Missing first: it is what the page is opened for. */
-export const dayNote = (day: AttendanceLogDay): { text: string; tone: "missing" | "plain" } | null => {
-  if (day.missing) return { text: "Missing", tone: "missing" };
-  if (!day.employed) return day.loggedMinutes > 0 ? { text: "Outside employment", tone: "plain" } : null;
-  if (day.holiday) return { text: `Public holiday: ${day.holiday}`, tone: "plain" };
-  if (day.onLeave) return { text: "On leave", tone: "plain" };
-  if (!day.workingDay) return { text: "Not a working day", tone: "plain" };
-  if (day.overtimeMinutes > 0) return { text: `Overtime ${formatMinutes(day.overtimeMinutes)}`, tone: "plain" };
+export const dayNote = (
+  day: AttendanceLogDay,
+  t: ReturnType<typeof useTranslations<"attendance">>,
+): { text: string; tone: "missing" | "plain" } | null => {
+  if (day.missing) return { text: t("person.notes.missing"), tone: "missing" };
+  if (!day.employed) return day.loggedMinutes > 0 ? { text: t("person.notes.outsideEmployment"), tone: "plain" } : null;
+  if (day.holiday) return { text: t("person.notes.holiday", { name: day.holiday }), tone: "plain" };
+  if (day.onLeave) return { text: t("person.notes.onLeave"), tone: "plain" };
+  if (!day.workingDay) return { text: t("person.notes.notWorkingDay"), tone: "plain" };
+  if (day.overtimeMinutes > 0) return { text: t("person.notes.overtime", { time: formatMinutes(day.overtimeMinutes) }), tone: "plain" };
   return null;
 };
 
@@ -38,13 +42,13 @@ export const daysShown = (days: AttendanceLogDay[]): AttendanceLogDay[] =>
 
 type NumericTotal = Exclude<keyof AttendanceTotals, "amounts">;
 
-const TOTALS: { key: NumericTotal; label: string; minutes: boolean }[] = [
-  { key: "expectedDays", label: "Expected days", minutes: false },
-  { key: "loggedDays", label: "Logged days", minutes: false },
-  { key: "expectedMinutes", label: "Expected hours", minutes: true },
-  { key: "loggedMinutes", label: "Logged hours", minutes: true },
-  { key: "overtimeMinutes", label: "Overtime hours", minutes: true },
-];
+const TOTALS = [
+  { key: "expectedDays", labelKey: "columns.expectedDays", minutes: false },
+  { key: "loggedDays", labelKey: "columns.loggedDays", minutes: false },
+  { key: "expectedMinutes", labelKey: "columns.expectedHours", minutes: true },
+  { key: "loggedMinutes", labelKey: "columns.loggedHours", minutes: true },
+  { key: "overtimeMinutes", labelKey: "columns.overtimeHours", minutes: true },
+] as const satisfies readonly { key: NumericTotal; labelKey: string; minutes: boolean }[];
 
 const COLUMNS = 6;
 
@@ -54,6 +58,10 @@ const COLUMNS = 6;
  * are several lines under one date. Logging happens on the person's own profile, nowhere else.
  */
 export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
+  const formatDisplayDate = useDateFormatter();
+  const locale = useDisplayLocale();
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const { view, setMonth, setRange } = useAttendanceView();
   const log = useAttendanceLog(userId, view.period);
   const capabilities = useAttendanceCapabilities(userId);
@@ -65,7 +73,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const backHref = `/attendance${view.search ? `?${view.search}` : ""}`;
   const days = log.data ? daysShown(log.data.days) : [];
-  const amount = formatAmounts(log.data?.totals.amounts);
+  const amount = formatAmounts(log.data?.totals.amounts, locale);
 
   return (
     <div className="space-y-6">
@@ -73,7 +81,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
         <div className="flex items-center gap-4">
           <Link
             href={backHref}
-            aria-label="Back to attendance"
+            aria-label={t("person.back")}
             className="no-underline grid h-10 w-10 place-items-center rounded-pill border bg-card hover:bg-subtle active:translate-y-px"
           >
             <Icon icon={ArrowLeft01Icon} size="sm" />
@@ -95,7 +103,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
           <Button asChild variant="secondary">
             <Link href={`/organization/people/${userId}/attendance`} className="no-underline">
               <Icon icon={UserIcon} size="sm" />
-              Open profile
+              {t("person.openProfile")}
             </Link>
           </Button>
         </div>
@@ -105,10 +113,10 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
         <ErrorState error={log.error} onRetry={() => void log.refetch()}/>
       ) : (
         <>
-          <dl className="flex flex-wrap gap-x-10 gap-y-3" aria-label="Period totals">
+          <dl className="flex flex-wrap gap-x-10 gap-y-3" aria-label={t("person.totals")}>
             {TOTALS.map((total) => (
               <div key={total.key}>
-                <dt className="text-hint text-tertiary">{total.label}</dt>
+                <dt className="text-hint text-tertiary">{t(total.labelKey)}</dt>
                 <dd className="mt-0.5 text-section-title tabular-nums text-primary">
                   {log.data
                     ? total.minutes ? formatMinutes(log.data.totals[total.key]) : log.data.totals[total.key]
@@ -119,7 +127,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
             {/* Only when the server sent money: a reader who may not see the rate gets no figure, not a 0. */}
             {amount && (
               <div>
-                <dt className="text-hint text-tertiary">Amount</dt>
+                <dt className="text-hint text-tertiary">{t("columns.amount")}</dt>
                 <dd className="mt-0.5 text-section-title tabular-nums text-primary">{amount}</dd>
               </div>
             )}
@@ -129,12 +137,12 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-40">Date</TableHead>
-                  <TableHead className="w-20">From</TableHead>
-                  <TableHead className="w-20">To</TableHead>
-                  <TableHead className="w-20 text-right">Hours</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-56">Note</TableHead>
+                  <TableHead className="w-40">{tCommon("fields.date")}</TableHead>
+                  <TableHead className="w-20">{t("person.from")}</TableHead>
+                  <TableHead className="w-20">{t("person.to")}</TableHead>
+                  <TableHead className="w-20 text-right">{t("person.hours")}</TableHead>
+                  <TableHead>{tCommon("fields.description")}</TableHead>
+                  <TableHead className="w-56">{t("person.note")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -150,12 +158,12 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                     ? (
                       <TableRow className="hover:bg-transparent">
                         <TableCell colSpan={COLUMNS} className="py-10 text-center text-body text-tertiary">
-                          Nothing was expected and nothing was logged in this period.
+                          {t("person.empty")}
                         </TableCell>
                       </TableRow>
                     )
                     : days.map((day) => {
-                      const note = dayNote(day);
+                      const note = dayNote(day, t);
                       const noteCell = (
                         <TableCell className={note?.tone === "missing" ? "font-medium text-status-declined-text" : "text-tertiary"}>
                           {note?.text ?? ""}

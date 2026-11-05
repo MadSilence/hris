@@ -1,30 +1,48 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@/components/desact/card";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 
-export default function HomePage() {
+const FEATURES = [
+  { id: "records", link: "/products#records" },
+  { id: "timeOff", link: "/products#time-off" },
+  { id: "workingHours", link: "/products#working-hours" },
+] as const;
+
+const SOLUTIONS = [
+  { id: "hr", link: "/solutions#hr" },
+  { id: "managers", link: "/solutions#people-managers" },
+] as const;
+
+const METRICS = ["admin", "uptime", "goLive"] as const;
+
+const STEPS = ["connect", "configure", "automate"] as const;
+
+const FAQ = ["tenant", "sso", "hosting"] as const;
+
+export default async function HomePage() {
+  const t = await getTranslations("navigation");
   return (
     <div className="flex flex-col gap-20">
 
       {/* HERO */}
       <section className="text-center flex flex-col items-center gap-6 py-10">
         <h1 className="text-greeting">
-          HRIS your team will actually enjoy
+          {t("public.home.hero.title")}
         </h1>
 
         <p className="text-section-title text-tertiary max-w-2xl">
-          Centralize employee records, documents, time off and working
-          hours—beautifully simple, tenant-ready, and fast.
+          {t("public.home.hero.lead")}
         </p>
 
         <div className="flex gap-4">
           <Button asChild>
-            <Link href="/contact">Request demo</Link>
+            <Link href="/contact">{t("public.home.requestDemo")}</Link>
           </Button>
 
           <Button asChild variant="secondary">
-            <Link href="/products">See products</Link>
+            <Link href="/products">{t("public.home.hero.seeProducts")}</Link>
           </Button>
         </div>
       </section>
@@ -32,7 +50,7 @@ export default function HomePage() {
       {/* TRUST */}
       <section className="flex flex-col items-center gap-6">
         <p className="text-body text-tertiary">
-          Trusted by teams like
+          {t("public.home.trustedBy")}
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
@@ -49,35 +67,19 @@ export default function HomePage() {
 
       {/* FEATURES */}
       <section className="grid gap-6 md:grid-cols-3">
-        {[
-          {
-            title: "Employee records",
-            body: "Single source of truth for profiles, docs, and lifecycle events—secure and searchable.",
-            link: "/products#records",
-          },
-          {
-            title: "Time off",
-            body: "Policies, approvals, accruals and carry-over, automated and audit-ready.",
-            link: "/products#time-off",
-          },
-          {
-            title: "Working hours",
-            body: "Lightweight timesheets and attendance with review and exports.",
-            link: "/products#working-hours",
-          },
-        ].map((f) => (
-          <Card key={f.title}>
+        {FEATURES.map((f) => (
+          <Card key={f.id}>
             <CardHeader>
-              <CardTitle>{f.title}</CardTitle>
+              <CardTitle>{t(`public.home.features.${f.id}.title`)}</CardTitle>
             </CardHeader>
 
             <CardContent>
-              <p>{f.body}</p>
+              <p>{t(`public.home.features.${f.id}.body`)}</p>
             </CardContent>
 
             <CardFooter>
               <Link href={f.link} className="text-body text-accent-text underline-offset-4 hover:underline">
-                Learn more →
+                {t("public.home.learnMoreArrow")}
               </Link>
             </CardFooter>
           </Card>
@@ -86,30 +88,19 @@ export default function HomePage() {
 
       {/* SOLUTIONS */}
       <section className="grid gap-6 md:grid-cols-2">
-        {[
-          {
-            title: "For HR",
-            body: "Cut admin by 40% with automation, templates, and clean workflows.",
-            link: "/solutions#hr",
-          },
-          {
-            title: "For people managers",
-            body: "Approvals, schedules, and team insights in one place.",
-            link: "/solutions#people-managers",
-          },
-        ].map((s) => (
-          <Card key={s.title}>
+        {SOLUTIONS.map((s) => (
+          <Card key={s.id}>
             <CardHeader>
-              <CardTitle>{s.title}</CardTitle>
+              <CardTitle>{t(`public.home.solutions.${s.id}.title`)}</CardTitle>
             </CardHeader>
 
             <CardContent>
-              <p>{s.body}</p>
+              <p>{t(`public.home.solutions.${s.id}.body`)}</p>
             </CardContent>
 
             <CardFooter>
               <Link href={s.link} className="text-body text-accent-text underline-offset-4 hover:underline">
-                Explore →
+                {t("public.home.exploreArrow")}
               </Link>
             </CardFooter>
           </Card>
@@ -118,16 +109,12 @@ export default function HomePage() {
 
       {/* METRICS */}
       <section className="grid gap-6 md:grid-cols-3 text-center">
-        {[
-          ["40%", "less HR admin in month one"],
-          ["99.9%", "uptime, audited"],
-          ["7 days", "to go live on average"],
-        ].map(([value, label]) => (
-          <Card key={value}>
+        {METRICS.map((id) => (
+          <Card key={id}>
             <CardContent className="flex flex-col items-center gap-2">
-              <div className="text-page-title">{value}</div>
+              <div className="text-page-title">{t(`public.home.metrics.${id}.value`)}</div>
               <div className="text-body text-tertiary">
-                {label}
+                {t(`public.home.metrics.${id}.label`)}
               </div>
             </CardContent>
           </Card>
@@ -136,20 +123,16 @@ export default function HomePage() {
 
       {/* HOW */}
       <section className="grid gap-6 md:grid-cols-3">
-        {[
-          { step: "1", title: "Connect", body: "Import employees and documents securely." },
-          { step: "2", title: "Configure", body: "Set policies, roles, and approvals per tenant." },
-          { step: "3", title: "Automate", body: "Use templates and reminders to reduce manual work." },
-        ].map((h) => (
-          <Card key={h.step}>
+        {STEPS.map((id, index) => (
+          <Card key={id}>
             <CardHeader>
               <CardTitle>
-                {h.step}. {h.title}
+                {t("public.home.steps.numbered", { step: index + 1, title: t(`public.home.steps.${id}.title`) })}
               </CardTitle>
             </CardHeader>
 
             <CardContent>
-              <p>{h.body}</p>
+              <p>{t(`public.home.steps.${id}.body`)}</p>
             </CardContent>
           </Card>
         ))}
@@ -160,11 +143,11 @@ export default function HomePage() {
         <Card>
           <CardContent className="flex flex-col gap-4">
             <blockquote className="text-section-title">
-              “noddo is the first HR system our managers actually like using.”
+              {t("public.home.testimonial.quote")}
             </blockquote>
 
             <div className="text-body text-tertiary">
-              — Marta Kowalska, People Ops, Nimbus
+              {t("public.home.testimonial.author")}
             </div>
           </CardContent>
         </Card>
@@ -172,21 +155,17 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section className="flex flex-col gap-6">
-        <h2 className="text-page-title">FAQ</h2>
+        <h2 className="text-page-title">{t("public.home.faq.title")}</h2>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {[
-            ["Can we customize per tenant?", "Yes—branding, fields, and policies can be tenant-specific."],
-            ["Do you support SSO?", "SAML/OIDC are available on Enterprise."],
-            ["Where is data hosted?", "EU or US regions—your choice. Backups and encryption by default."],
-          ].map(([title, body]) => (
-            <Card key={title}>
+          {FAQ.map((id) => (
+            <Card key={id}>
               <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle>{t(`public.home.faq.${id}.question`)}</CardTitle>
               </CardHeader>
 
               <CardContent>
-                <p>{body}</p>
+                <p>{t(`public.home.faq.${id}.answer`)}</p>
               </CardContent>
             </Card>
           ))}
@@ -197,21 +176,21 @@ export default function HomePage() {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>Ready to simplify HR?</CardTitle>
+            <CardTitle>{t("public.home.cta.title")}</CardTitle>
           </CardHeader>
 
           <CardContent>
-            <p>Get a guided demo or start a trial with sample data.</p>
+            <p>{t("public.home.cta.body")}</p>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Button asChild>
-              <Link href="/contact">Request demo</Link>
+              <Link href="/contact">{t("public.home.requestDemo")}</Link>
             </Button>
 
             <form className="flex gap-2 w-full md:w-auto">
-              <Input name="work-email" placeholder="Work email" type="email"/>
-              <Button type="button" variant="secondary">Subscribe</Button>
+              <Input name="work-email" placeholder={t("public.home.cta.emailPlaceholder")} type="email"/>
+              <Button type="button" variant="secondary">{t("public.home.cta.subscribe")}</Button>
             </form>
           </CardFooter>
         </Card>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -62,6 +63,8 @@ export function TeamSearchBar({
   teamNameById,
   canSearchPeople,
 }: Props) {
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
   const isPeople = mode === "people";
   const showResults = isPeople && query.trim().length > 0;
 
@@ -70,12 +73,12 @@ export function TeamSearchBar({
       <SearchField
         value={query}
         onChange={onQueryChange}
-        placeholder={isPeople ? "Search people…" : "Search teams…"}
+        placeholder={isPeople ? tShared("searchPeople") : t("search.placeholder")}
         modes={
           canSearchPeople
             ? [
-                { value: "units", label: "Teams" },
-                { value: "people", label: "People" },
+                { value: "units", label: t("search.unitsMode") },
+                { value: "people", label: tShared("people") },
               ]
             : undefined
         }
@@ -90,15 +93,15 @@ export function TeamSearchBar({
       {showResults && (
         <div className="absolute left-0 right-0 top-11 z-20 max-h-80 overflow-y-auto rounded-control border border-divider bg-card py-1 shadow-popover">
           {peopleLoading ? (
-            <p className="px-3 py-3 text-body text-tertiary">Searching…</p>
+            <p className="px-3 py-3 text-body text-tertiary">{tShared("searching")}</p>
           ) : peopleResults.length === 0 ? (
             <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
               <Icon icon={UserGroupIcon} className="text-disabled" />
-              <p className="text-body text-tertiary">No people match “{query}”</p>
+              <p className="text-body text-tertiary">{tShared("noPeopleMatch", { query })}</p>
             </div>
           ) : (
             peopleResults.map(({ key, person, teamId }) => {
-              const teamName = teamId ? teamNameById.get(teamId) ?? "Unknown team" : "No team";
+              const teamName = teamId ? teamNameById.get(teamId) ?? t("search.unknown") : t("person.none");
               return (
                 <button
                   key={key}

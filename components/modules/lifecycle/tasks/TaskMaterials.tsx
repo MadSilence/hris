@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Attachment01Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { Material } from "@/models/lifecycle";
@@ -14,9 +15,10 @@ export function TaskMaterials({ materials, onOpenFile }: {
   materials: Material[];
   onOpenFile: (material: Material) => void;
 }) {
+  const t = useTranslations("lifecycle");
   if (materials.length === 0) return null;
   return (
-    <ul className="mt-2 flex flex-wrap gap-2" aria-label="Materials">
+    <ul className="mt-2 flex flex-wrap gap-2" aria-label={t("materials.list")}>
       {materials.map((m, i) => (
         <li key={`${m.fileId ?? m.url}-${i}`}>
           {m.type === "LINK" && m.url ? (
@@ -36,7 +38,7 @@ export function TaskMaterials({ materials, onOpenFile }: {
               className="inline-flex items-center gap-1 rounded-tag border border-divider px-2 py-1 text-hint hover:bg-subtle"
             >
               <Icon icon={Attachment01Icon} size="sm" />
-              {m.name ?? "File"}
+              {m.name ?? t("shared.file")}
             </button>
           )}
         </li>

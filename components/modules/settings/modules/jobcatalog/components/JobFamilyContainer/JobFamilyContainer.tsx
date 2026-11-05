@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { useJobFamily } from "@/components/modules/settings/modules/jobcatalog/hooks/JobFamily/useJobFamily";
 import { useJobLevelGroups } from "@/components/modules/settings/modules/jobcatalog/hooks/JobLevelGroup/useJobLevelGroups";
@@ -40,7 +41,7 @@ import {
   useRestoreWithChildren,
   type RestoreChild,
 } from "@/components/modules/settings/shared/RestoreWithChildrenModal";
-import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
+import { fallbackErrorMessage } from "@/lib/errors/errorMessages";
 
 /** What the family dialog is currently doing, and to which family. */
 type FamilyDialog = { mode: JobFamilyModalMode; family: JobFamily | null };
@@ -54,6 +55,7 @@ type ImpactDialog =
 const NONE_TO_NULL = (levelId: string): string | null => (levelId === NO_LEVEL ? null : levelId);
 
 export default function JobFamilyContainer() {
+  const t = useTranslations("structure.jobCatalog");
   const { data, isLoading, error } = useJobFamily();
 
   const [familyDialog, setFamilyDialog] = useState<FamilyDialog | null>(null);
@@ -110,7 +112,7 @@ export default function JobFamilyContainer() {
       // The catalogue's hooks hand the envelope back rather than throwing; the flow wants a rejection.
       const result = await activateFamily.mutateAsync({ id, restoreJobIds });
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage ?? FALLBACK_ERROR_MESSAGE);
+        throw new Error(result.errorMessage ?? fallbackErrorMessage());
       }
     },
     onFinished: () => setRestoreTarget(null),
@@ -153,7 +155,7 @@ export default function JobFamilyContainer() {
       closeDialogs();
       return;
     }
-    setErrorMessage(result.errorMessage ?? "Something went wrong. Please try again.");
+    setErrorMessage(result.errorMessage ?? t("errors.generic"));
   };
 
   const submitFamily = async (values: JobFamilyFormValues) => {
@@ -259,7 +261,7 @@ export default function JobFamilyContainer() {
 
   if (error) {
     return (
-      <div className="py-10 text-body text-tertiary">Failed to load job families</div>
+      <div className="py-10 text-body text-tertiary">{t("errors.loadFailed")}</div>
     );
   }
 
@@ -284,7 +286,7 @@ export default function JobFamilyContainer() {
           basePath="/jobs"
           assignableId={assignJob.id}
           assignableName={assignJob.name}
-          noun="position"
+          kind="position"
           semantics="replace"
           invalidateKeys={[[JOB_FAMILY_QUERY_KEY]]}
         />
@@ -317,7 +319,7 @@ export default function JobFamilyContainer() {
           mode={familyDialog.mode}
           existingNames={otherFamilyNames}
           errorMessage={errorMessage}
-          initialValues={familyInitialValues(familyDialog)}
+          initialValues={familyInitialValues(familyDialog, t)}
           onConfirmAction={submitFamily}
           onRequestCloseAction={closeDialogs}
         />
@@ -333,7 +335,7 @@ export default function JobFamilyContainer() {
           isLevelsLoading={isLevelsLoading}
           takenCodes={otherJobCodes}
           errorMessage={errorMessage}
-          initialValues={jobInitialValues(jobDialog)}
+          initialValues={jobInitialValues(jobDialog, t)}
           onConfirmAction={submitJob}
           onRequestCloseAction={closeDialogs}
         />
@@ -355,9 +357,9 @@ export default function JobFamilyContainer() {
         <RestoreWithChildrenModal
           key={restoreTarget.id}
           isOpen
-          title="Unarchive job family"
+          title={t("family.unarchiveTitle")}
           name={restoreTarget.name}
-          childNoun="positions"
+          childKind="positions"
           items={restoreFlow.items}
           isLoading={restoreFlow.isPending}
           errorMessage={restoreFlow.errorMessage}
@@ -369,15 +371,20 @@ export default function JobFamilyContainer() {
   );
 }
 
-const familyInitialValues = (dialog: FamilyDialog): Partial<JobFamilyFormValues> | undefined => {
+type JobCatalogTranslator = ReturnType<typeof useTranslations<"structure.jobCatalog">>;
+
+const familyInitialValues = (
+  dialog: FamilyDialog,
+  t: JobCatalogTranslator,
+): Partial<JobFamilyFormValues> | undefined => {
   if (!dialog.family) return undefined;
 
   // A duplicate opens with a name that is free, so the inline uniqueness check passes on sight.
-  const name = dialog.mode === "duplicate" ? `${dialog.family.name} (copy)` : dialog.family.name;
+  const name = dialog.mode === "duplicate" ? t("copyName", { name: dialog.family.name }) : dialog.family.name;
   return { name, description: dialog.family.description ?? "" };
 };
 
-const jobInitialValues = (dialog: JobDialog): Partial<JobFormValues> | undefined => {
+const jobInitialValues = (dialog: JobDialog, t: JobCatalogTranslator): Partial<JobFormValues> | undefined => {
   if (dialog.mode === "create") {
     return dialog.family ? { familyId: dialog.family.id } : undefined;
   }
@@ -387,7 +394,7 @@ const jobInitialValues = (dialog: JobDialog): Partial<JobFormValues> | undefined
   return {
     // Duplicating carries everything over except the code — it is unique per company, so the copy
     // starts without one rather than with a name the user has to invent a suffix for.
-    name: dialog.mode === "duplicate" ? `${job.name} (copy)` : job.name,
+    name: dialog.mode === "duplicate" ? t("copyName", { name: job.name }) : job.name,
     familyId: job.familyId ?? "",
     levelId: job.level?.id ?? NO_LEVEL,
     code: dialog.mode === "duplicate" ? "" : job.code ?? "",
@@ -398,14 +405,14 @@ const jobInitialValues = (dialog: JobDialog): Partial<JobFormValues> | undefined
 const impactProps = (dialog: ImpactDialog) => {
   if (dialog.kind === "family") {
     return {
-      entityLabel: "job family",
+      entityLabel: "job family" as const,
       entityName: dialog.family.name,
       affectedPeople: dialog.family.assignedUsersCount,
       affectedJobs: dialog.family.jobs.length,
     };
   }
   return {
-    entityLabel: "job",
+    entityLabel: "job" as const,
     entityName: dialog.job.name,
     affectedPeople: dialog.job.assignedUsersCount,
   };

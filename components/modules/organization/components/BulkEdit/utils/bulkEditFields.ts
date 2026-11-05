@@ -3,6 +3,9 @@ import { AttributeType } from "@/models/attribute";
 import type { ResourceCode } from "@/models/access";
 import type { BulkOperation } from "@/models/bulkEdit";
 import { EMPLOYMENT_TYPES } from "@/models/user/employmentType";
+import type { useTranslations } from "next-intl";
+
+type OrganizationT = ReturnType<typeof useTranslations<"organization">>;
 
 export type EditFieldKind = "status" | "association" | "role" | "attr" | "systemScalar";
 export type EditValueSource = "status" | "attribute" | ReferenceValueSource;
@@ -36,25 +39,26 @@ export function buildEditableFields(
   fields: FieldDTO[] | undefined,
   canEdit: (resource: ResourceCode) => boolean,
   canManage: (resource: ResourceCode) => boolean,
+  t: OrganizationT,
 ): EditField[] {
   const out: EditField[] = [];
 
   if (canEdit("PEOPLE.PROFILE")) {
-    out.push({ key: "sys:status", label: "Status", kind: "status", operations: ["SET"], valueSource: "status" });
+    out.push({ key: "sys:status", label: t("bulkEdit.fields.status"), kind: "status", operations: ["SET"], valueSource: "status" });
 
     // Scalar employment/lifecycle system fields (rendered by attrType in the modal's ValueEditor).
     const dateOps: BulkOperation[] = ["SET", "CLEAR"];
-    out.push({ key: "sys:hire_date", label: "Hire date", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
-    out.push({ key: "sys:probation_end", label: "Probation end", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
-    out.push({ key: "sys:termination_date", label: "Termination date", kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({ key: "sys:hire_date", label: t("bulkEdit.fields.hireDate"), kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({ key: "sys:probation_end", label: t("bulkEdit.fields.probationEnd"), kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
+    out.push({ key: "sys:termination_date", label: t("bulkEdit.fields.terminationDate"), kind: "systemScalar", operations: dateOps, valueSource: "attribute", attrType: AttributeType.DATE });
     out.push({
       key: "sys:employment_type",
-      label: "Employment type",
+      label: t("bulkEdit.fields.employmentType"),
       kind: "systemScalar",
       operations: dateOps,
       valueSource: "attribute",
       attrType: AttributeType.SELECT,
-      options: EMPLOYMENT_TYPES.map((t) => ({ id: t.id, label: t.label })),
+      options: EMPLOYMENT_TYPES.map((type) => ({ id: type.id, label: t(type.labelKey) })),
     });
   }
 
@@ -75,7 +79,7 @@ export function buildEditableFields(
   }
 
   if (canManage("PEOPLE.PROFILE")) {
-    out.push({ key: "sys:role", label: "Role", kind: "role", operations: ["ADD", "REMOVE"], valueSource: "roles" });
+    out.push({ key: "sys:role", label: t("bulkEdit.fields.role"), kind: "role", operations: ["ADD", "REMOVE"], valueSource: "roles" });
   }
 
   // A time off policy is held, not set: Add starts it today, Remove ends it today. Sensitive, so the
@@ -84,7 +88,7 @@ export function buildEditableFields(
   if (policy && policy.level === "EDIT" && canEdit("PEOPLE.TIME_OFF_POLICIES")) {
     out.push({
       key: "sys:policy",
-      label: policy.label ?? "Time off policies",
+      label: policy.label ?? t("bulkEdit.fields.timeOffPolicies"),
       kind: "association",
       operations: ["ADD", "REMOVE"],
       valueSource: "policies",

@@ -1,10 +1,15 @@
+import type { useTranslations } from "next-intl";
+
 /**
  * "Chrome on Windows" from a User-Agent string — enough for a person to recognise their own laptop in
  * a list. Not a parser: the order of the checks is what matters (Edge and Opera say "Chrome" too,
- * Chrome says "Safari").
+ * Chrome says "Safari"). Browser and system names are brands; the words around them come from `t`.
  */
-export const describeUserAgent = (ua: string | null | undefined): string => {
-  if (!ua) return "Unknown browser";
+export const describeUserAgent = (
+  ua: string | null | undefined,
+  t: ReturnType<typeof useTranslations<"auth">>,
+): string => {
+  if (!ua) return t("sessions.userAgent.unknown");
   const browser = /Edg\//.test(ua)
     ? "Edge"
     : /OPR\//.test(ua)
@@ -15,7 +20,7 @@ export const describeUserAgent = (ua: string | null | undefined): string => {
           ? "Chrome"
           : /Safari\//.test(ua)
             ? "Safari"
-            : "A browser";
+            : null;
   const os = /Windows/.test(ua)
     ? "Windows"
     : /iPhone|iPad/.test(ua)
@@ -27,5 +32,6 @@ export const describeUserAgent = (ua: string | null | undefined): string => {
           : /Linux/.test(ua)
             ? "Linux"
             : null;
-  return os ? `${browser} on ${os}` : browser;
+  const name = browser ?? t("sessions.userAgent.aBrowser");
+  return os ? t("sessions.userAgent.browserOnOs", { browser: name, os }) : name;
 };

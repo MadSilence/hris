@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { reasonText } from "@/models/automations";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Alert02Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Notification01Icon, PlayIcon, PowerIcon, PowerOffIcon, UserSwitchIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -42,6 +43,8 @@ import {
 import { RuleStatusBadge } from "@/components/modules/automations/shared/AutomationStatusBadge";
 import { DefinitionView } from "@/components/modules/automations/shared/DefinitionView";
 import { conditionsSentence, typesInDefinition } from "@/components/modules/automations/shared/sentence";
+import { reasonText, type AutomationsT } from "@/components/modules/automations/shared/vocabulary";
+import { templateText } from "@/components/modules/automations/shared/templateText";
 import { startsReviews, useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
 import { RunLog } from "@/components/modules/automations/runs/RunLog";
 import { VersionsTab } from "@/components/modules/automations/versions/VersionsTab";
@@ -64,11 +67,11 @@ export const PREVIEW_DEBOUNCE_MS = 400;
 
 type Confirm = "archive" | "delete" | null;
 
-const activationText = (r: AutomationActivationResult, verb: "enabled" | "disabled" | "resumed") => {
+const activationText = (t: AutomationsT, r: AutomationActivationResult, verb: "enabled" | "disabled" | "resumed") => {
   if (verb === "disabled") {
-    return `Disabled. ${r.cancelledRuns} scheduled ${r.cancelledRuns === 1 ? "run was" : "runs were"} cancelled; ${r.completedRuns} finished ${r.completedRuns === 1 ? "run stays" : "runs stay"} as ${r.completedRuns === 1 ? "it is" : "they are"}.`;
+    return t("rule.activation.disabled", { cancelled: r.cancelledRuns, completed: r.completedRuns });
   }
-  return `${verb === "enabled" ? "Enabled" : "Resumed"}. ${r.plannedRuns} ${r.plannedRuns === 1 ? "run is" : "runs are"} planned.`;
+  return t(verb === "enabled" ? "rule.activation.enabled" : "rule.activation.resumed", { planned: r.plannedRuns });
 };
 
 /**
@@ -77,6 +80,10 @@ const activationText = (r: AutomationActivationResult, verb: "enabled" | "disabl
  * (research § A.10; design direction). The draft lives here and nowhere else (design § 9.1).
  */
 export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
+  const t = useTranslations("automations");
+  const language = useDisplayLanguage();
+  const tCommon = useTranslations("common");
+  const tAccess = useTranslations("access");
   const router = useRouter();
   const searchParams = useSearchParams();
   const canManage = useCanAccess("SETTINGS.AUTOMATIONS", "MANAGE");
@@ -107,13 +114,13 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       // A shipped template (D3) waits for the gallery to arrive; a starter link of before still works.
       const templateKey = searchParams.get("template");
       if (templateKey && !templates.data && !templates.error) return;
-      const fromTemplate = templateKey ? templates.data?.find((t) => t.key === templateKey) : undefined;
-      const start = (fromTemplate ? templateDraft(fromTemplate) : null)
-        ?? starterDraft(searchParams.get("starter")) ?? { name: "", description: "", definition: emptyDefinition() };
+      const fromTemplate = templateKey ? templates.data?.find((x) => x.key === templateKey) : undefined;
+      const start = (fromTemplate ? templateDraft({ ...fromTemplate, ...templateText(t, fromTemplate) }) : null)
+        ?? starterDraft(t, searchParams.get("starter")) ?? { name: "", description: "", definition: emptyDefinition() };
       setBaseline({ name: "", description: "", definition: emptyDefinition() });
       setDraft(start);
     }
-  }, [ruleId, rule.data, baseline, searchParams, templates.data, templates.error]);
+  }, [ruleId, rule.data, baseline, searchParams, templates.data, templates.error, t]);
 
   const definition = draft?.definition ?? null;
   const definitionKey = useMemo(() => JSON.stringify(definition), [definition]);
@@ -177,13 +184,13 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const gateReason = !draft
     ? null
     : nameMissing
-      ? "Give the automation a name to publish it."
+      ? t("rule.gate.noName")
       : noActions
-        ? "Add at least one action to publish."
+        ? t("rule.gate.noActions")
         : !previewFresh
-          ? "Waiting for the preview…"
+          ? t("rule.gate.waiting")
           : problems.length > 0
-            ? "Fix what the preview lists to publish."
+            ? t("rule.gate.problems")
             : null;
   const saveOnly = !isNew && nameChanged && !definitionChanged;
   const canPublish = isNew || definitionChanged ? gateReason === null : saveOnly && !nameMissing;
@@ -220,7 +227,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       setBaseline(draft);
       setPublishOpen(false);
       await invalidate();
-      showSuccess(choices.enable ? "Published and enabled." : "Published.");
+      showSuccess(choices.enable ? t("rule.toast.publishedEnabled") : t("rule.toast.published"));
       if (isNew) router.replace(`${LIST_HREF}/${id}`);
     } catch (error) {
       setPublishError(error instanceof Error ? error.message : String(error));
@@ -236,7 +243,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       unwrapAction(await renameAutomationAction({ id: ruleId, body: { name: draft.name.trim(), description: draft.description.trim() || null } }));
       setBaseline(draft);
       await invalidate();
-      showSuccess("Saved.");
+      showSuccess(t("rule.toast.saved"));
     } catch (error) {
       showError(error);
     } finally {
@@ -270,7 +277,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
   const enable = (backfill: BackfillChoice, confirmVolume = false) => runAct(async () => {
     const r = unwrapAction(await enableAutomationAction({ id: ruleId as string, body: { backfill, confirmVolume } }));
-    showSuccess(activationText(r, "enabled"));
+    showSuccess(activationText(t, r, "enabled"));
   }, true);
   // E2–E4, D4: who stands behind the rule, who else hears of it, a copy of it.
   const [ownerOpen, setOwnerOpen] = useState(false);
@@ -279,17 +286,17 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   const changeOwner = (userId: string) => runAct(async () => {
     unwrapAction(await changeAutomationOwnerAction({ id: ruleId as string, userId }));
     closeOwnerDialogs();
-    showSuccess("The owner is changed.");
+    showSuccess(t("rule.toast.ownerChanged"));
   }, true);
   const takeOver = () => runAct(async () => {
     unwrapAction(await takeOverAutomationAction(ruleId as string));
-    showSuccess("You own this automation now.");
+    showSuccess(t("rule.toast.tookOver"));
   }, false);
   const saveAlsoTell = (userIds: string[]) => runAct(async () => {
     unwrapAction(await renameAutomationAction({ id: ruleId as string,
       body: { name: rule.data?.name ?? draft?.name ?? "", description: rule.data?.description ?? null, alsoNotifyUserIds: userIds } }));
     closeOwnerDialogs();
-    showSuccess("Saved.");
+    showSuccess(t("rule.toast.saved"));
   }, true);
   const duplicate = () => runAct(async () => {
     const copy = unwrapAction(await duplicateAutomationAction(ruleId as string));
@@ -297,11 +304,11 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   }, false);
   const disable = () => runAct(async () => {
     const r = unwrapAction(await disableAutomationAction(ruleId as string));
-    showSuccess(activationText(r, "disabled"));
+    showSuccess(activationText(t, r, "disabled"));
   }, false);
   const resume = () => runAct(async () => {
     const r = unwrapAction(await resumeAutomationAction(ruleId as string));
-    showSuccess(activationText(r, "resumed"));
+    showSuccess(activationText(t, r, "resumed"));
   }, false);
   const archive = () => runAct(async () => { unwrapAction(await archiveAutomationAction(ruleId as string)); }, true);
   const unarchive = () => runAct(async () => { unwrapAction(await unarchiveAutomationAction(ruleId as string)); }, false);
@@ -335,55 +342,55 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   }
 
   const kebab = ruleId && canManage && rule.data && !systemOwned ? (
-    <RowActionsMenu label="Automation actions">
+    <RowActionsMenu label={t("rule.menu.label")}>
       {status === "DISABLED" && (
         <RowAction icon={<Icon icon={PowerIcon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setEnableOpen(true); }}>
-          Enable
+          {t("rule.menu.enable")}
         </RowAction>
       )}
       {status === "PAUSED" && (
-        <RowAction icon={<Icon icon={PlayIcon} size="sm" className="text-tertiary" />} onClick={() => void resume()}>Resume</RowAction>
+        <RowAction icon={<Icon icon={PlayIcon} size="sm" className="text-tertiary" />} onClick={() => void resume()}>{t("rule.menu.resume")}</RowAction>
       )}
       {(status === "ENABLED" || status === "PAUSED") && (
-        <RowAction icon={<Icon icon={PowerOffIcon} size="sm" className="text-tertiary" />} onClick={() => void disable()}>Disable</RowAction>
+        <RowAction icon={<Icon icon={PowerOffIcon} size="sm" className="text-tertiary" />} onClick={() => void disable()}>{t("rule.menu.disable")}</RowAction>
       )}
       {status === "ARCHIVED" ? (
-        <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>Unarchive</RowAction>
+        <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>{t("rule.menu.unarchive")}</RowAction>
       ) : (
         <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setConfirm("archive"); }}>
-          Archive
+          {tCommon("actions.archive")}
         </RowAction>
       )}
       {status !== "ARCHIVED" && (
-        <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate()}>Duplicate</RowAction>
+        <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate()}>{tCommon("actions.duplicate")}</RowAction>
       )}
       {status !== "ARCHIVED" && (
         <RowAction icon={<Icon icon={UserSwitchIcon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setOwnerOpen(true); }}>
-          Change owner
+          {t("rule.menu.changeOwner")}
         </RowAction>
       )}
       {status !== "ARCHIVED" && (
         <RowAction icon={<Icon icon={Notification01Icon} size="sm" className="text-tertiary" />} onClick={() => { setActError(null); setAlsoOpen(true); }}>
-          Also tell…
+          {t("rule.menu.alsoTell")}
         </RowAction>
       )}
       {/* A rule that has run for somebody cannot be deleted — archive it (DELETION.md rule 4). */}
       {totalRuns === 0 && (
         <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => { setActError(null); setConfirm("delete"); }}>
-          Delete
+          {tCommon("actions.delete")}
         </RowActionDestructive>
       )}
     </RowActionsMenu>
   ) : null;
 
   const primary = readOnly ? null : saveOnly ? (
-    <Button type="button" onClick={() => void saveName()} disabled={!canPublish || publishing}>Save</Button>
+    <Button type="button" onClick={() => void saveName()} disabled={!canPublish || publishing}>{tCommon("actions.save")}</Button>
   ) : (
     <Button type="button"
       onClick={() => { setPublishError(null); setPublishOpen(true); }}
       disabled={!canPublish || publishing || (!isNew && !definitionChanged)}
     >
-      Publish
+      {tCommon("actions.publish")}
     </Button>
   );
 
@@ -398,14 +405,14 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Name" htmlFor="automation-name" required>
+          <Field label={tCommon("fields.name")} htmlFor="automation-name" required>
             <Input
               id="automation-name"
               value={draft.name}
               onChange={(e) => setDraft((d) => (d ? { ...d, name: e.target.value } : d))}
             />
           </Field>
-          <Field label="Description" htmlFor="automation-description">
+          <Field label={tCommon("fields.description")} htmlFor="automation-description">
             <Input
               id="automation-description"
               value={draft.description}
@@ -421,7 +428,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
               definition={definition}
               fields={fields}
               isLoadingFields={fieldsLoading}
-              summary={conditionsSentence(definition.conditions, fields, names.targets)}
+              summary={conditionsSentence(t, tAccess, definition.conditions, fields, names.targets)}
               matchingCount={previewFresh && preview ? preview.matchingCount : null}
               onChange={setDefinition}
             />
@@ -456,7 +463,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
   return (
     <div className="space-y-6 px-8 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <SettingsPageHeader title={draft.name.trim() || (isNew ? "New automation" : "Automation")} backHref={LIST_HREF} />
+        <SettingsPageHeader title={draft.name.trim() || (isNew ? t("rule.title.new") : t("rule.title.existing"))} backHref={LIST_HREF} />
         <div className="flex items-center gap-3">
           {rule.data && <RuleStatusBadge status={status} />}
           {kebab}
@@ -466,7 +473,7 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       {systemOwned && rule.data?.binding && (
         <p className="-mt-3 m-0 text-body text-tertiary" data-test="system-owned">
-          This automation is the Holiday Calendar of {bindingSourceLabel(rule.data.binding)}. Change it there.
+          {t("rule.systemOwned", { source: bindingSourceLabel(rule.data.binding) })}
         </p>
       )}
 
@@ -480,11 +487,11 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
           data-test="author-gone">
           <span>
             {rule.data.authorActive === false
-              ? `Its owner${rule.data.author?.name ? `, ${rule.data.author.name},` : ""} has left or cannot sign in, so it no longer runs.`
-              : "Its owner may no longer do everything it does, so it is paused."}{" "}
-            Take it over to run it in your name.
+              ? t("rule.authorGone.left", { hasName: rule.data.author?.name ? "yes" : "no", name: rule.data.author?.name ?? "" })
+              : t("rule.authorGone.lacksRight")}{" "}
+            {t("rule.authorGone.hint")}
           </span>
-          <Button type="button" size="sm" variant="secondary" onClick={() => void takeOver()} disabled={acting}>Take over</Button>
+          <Button type="button" size="sm" variant="secondary" onClick={() => void takeOver()} disabled={acting}>{t("rule.authorGone.takeOver")}</Button>
         </div>
       )}
 
@@ -492,11 +499,11 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
         <div className="flex items-start gap-3 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text">
           <Icon icon={Alert02Icon} size="sm" className="mt-0.5 flex-none" />
           <div>
-            <p className="m-0 font-medium">This automation is paused</p>
+            <p className="m-0 font-medium">{t("rule.paused.title")}</p>
             <p className="m-0">
-              {reasonText(rule.data.pausedReason)}
+              {reasonText(t, rule.data.pausedReason, language)}
               {/* A pause about the author is undone by taking the rule over (the banner above), not by a fix. */}
-              {rule.data.pausedReason.startsWith("AUTHOR_") ? "" : " Fix what it points at, publish, and resume it from the menu."}
+              {rule.data.pausedReason.startsWith("AUTHOR_") ? "" : ` ${t("rule.paused.fixHint")}`}
             </p>
           </div>
         </div>
@@ -505,9 +512,9 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
       {ruleId ? (
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
-            <TabsTrigger value="rule">Rule</TabsTrigger>
-            <TabsTrigger value="runs">Run log</TabsTrigger>
-            <TabsTrigger value="versions">Versions</TabsTrigger>
+            <TabsTrigger value="rule">{t("rule.tabs.rule")}</TabsTrigger>
+            <TabsTrigger value="runs">{t("rule.tabs.runs")}</TabsTrigger>
+            <TabsTrigger value="versions">{t("rule.tabs.versions")}</TabsTrigger>
           </TabsList>
           <TabsContent value="rule" className="pt-4">{ruleTab}</TabsContent>
           <TabsContent value="runs" className="pt-4"><RunLog ruleId={ruleId} /></TabsContent>
@@ -551,9 +558,9 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmActionModal
         isOpen={confirm === "archive"}
-        title="Archive automation"
-        description="It stops running and leaves the list; scheduled runs are cancelled. What already ran stays as it is. You can unarchive it later."
-        confirmLabel="Archive"
+        title={t("rule.archive.title")}
+        description={t("rule.archive.description")}
+        confirmLabel={tCommon("actions.archive")}
         isLoading={acting}
         errorMessage={actError}
         onConfirmAction={() => archive()}
@@ -562,9 +569,9 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmActionModal
         isOpen={confirm === "delete"}
-        title="Delete automation"
-        description="It has never run for anybody, so it is removed with all its versions."
-        confirmLabel="Delete"
+        title={t("rule.delete.title")}
+        description={t("rule.delete.description")}
+        confirmLabel={tCommon("actions.delete")}
         destructive
         isLoading={acting}
         errorMessage={actError}
@@ -574,10 +581,10 @@ export function AutomationRuleContainer({ ruleId }: { ruleId: string | null }) {
 
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave without publishing?"
-        description="The changes to this automation are only in this page. Leaving now discards them."
-        cancelText="Stay"
-        confirmText="Leave"
+        title={t("rule.leave.title")}
+        description={t("rule.leave.description")}
+        cancelText={t("rule.leave.stay")}
+        confirmText={t("rule.leave.leave")}
         onCancelAction={guard.stay}
         onConfirmAction={guard.leave}
       />

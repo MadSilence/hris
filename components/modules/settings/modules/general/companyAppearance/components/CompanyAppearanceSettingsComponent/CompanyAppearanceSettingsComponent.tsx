@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Image01Icon, ImageAdd01Icon, PaintBoardIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -12,7 +13,7 @@ import { cn } from "@/lib/cn";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import PageDescription from "@/components/ui/PageDescription/PageDescription";
 import {
-  ACCENT_PRESET_LABELS,
+  ACCENT_PRESET_LABEL_KEYS,
   ACCENT_PRESETS,
   DEFAULT_ACCENT,
   deriveAccentInputs,
@@ -114,6 +115,8 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   const [imageOnDashboard, setImageOnDashboard] = useState(appearance.useImageOnDashboard);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("settings.appearance");
+  const tCommon = useTranslations("common");
 
   const dirty =
     accent !== appearance.accent ||
@@ -209,12 +212,10 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
   return (
     <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6 overflow-hidden px-12">
       <div className="flex flex-col gap-4">
-        <SettingsPageHeader title="Appearance" backHref="/settings"/>
+        <SettingsPageHeader title={t("title")} backHref="/settings"/>
 
         <PageDescription>
-          How the workspace looks to everyone in your company: your color marks what to act on —
-          buttons, links, the active page — and one uploaded image can back the sign-in screen, the
-          dashboard, or both. The preview on the right shows the result before anyone else sees it.
+          {t("description")}
         </PageDescription>
       </div>
 
@@ -225,12 +226,12 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
         <div className="-mx-1 flex min-h-0 flex-col gap-7 overflow-y-auto px-1">
           <Section
             icon={<Icon icon={PaintBoardIcon} size="sm" />}
-            title="Workspace color"
-            description="Your color marks the one thing to act on. Text, surfaces and status colors stay noddo's, whichever you pick."
+            title={t("color.title")}
+            description={t("color.description")}
           >
             {/* The ten presets of SPEC § 4.3. Each swatch is the preset's own colour — the only place a component
                 paints a HEX, because the swatch is the value being chosen. */}
-            <div className="flex flex-wrap gap-3" role="group" aria-label="Workspace colors">
+            <div className="flex flex-wrap gap-3" role="group" aria-label={t("color.presets")}>
               {(Object.keys(ACCENT_PRESETS) as AccentPreset[]).map((preset) => {
                 const selected = selectedPreset === preset;
 
@@ -239,9 +240,9 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                     key={preset}
                     type="button"
                     onClick={() => handlePresetClick(preset)}
-                    aria-label={ACCENT_PRESET_LABELS[preset]}
+                    aria-label={tCommon(ACCENT_PRESET_LABEL_KEYS[preset])}
                     aria-pressed={selected}
-                    title={ACCENT_PRESET_LABELS[preset]}
+                    title={tCommon(ACCENT_PRESET_LABEL_KEYS[preset])}
                     disabled={saving}
                     className={cn(
                       "grid size-9 place-items-center rounded-pill transition-shadow duration-(--duration-hover)",
@@ -256,7 +257,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Label htmlFor="accent-hex" className="mb-0 shrink-0">Custom color</Label>
+              <Label htmlFor="accent-hex" className="mb-0 shrink-0">{t("color.custom")}</Label>
 
               <Input
                 id="accent-hex"
@@ -271,28 +272,28 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
               {accent && !isAccentPreset(accent) && isHexColor(accent) ? (
                 <span aria-hidden className="size-9 shrink-0 rounded-control ring-1 ring-divider" style={{ backgroundColor: accent }} />
               ) : (
-                <p className="m-0 text-hint text-tertiary">Leave empty to use a preset.</p>
+                <p className="m-0 text-hint text-tertiary">{t("color.leaveEmpty")}</p>
               )}
             </div>
 
             {customHexInvalid ? (
-              <FieldError>Enter a color as #rrggbb, like #2f63c4.</FieldError>
+              <FieldError>{t("color.invalid")}</FieldError>
             ) : null}
 
-            {adjusted ? <p className="m-0 -mt-2 text-hint text-tertiary">We adjusted your color for readability.</p> : null}
+            {adjusted ? <p className="m-0 -mt-2 text-hint text-tertiary">{t("color.adjusted")}</p> : null}
           </Section>
 
           <div className="border-t border-divider"/>
 
           <Section
             icon={<Icon icon={Image01Icon} size="sm" />}
-            title="Sign in experience"
-            description="The artwork and the words people meet before they are signed in."
+            title={t("signIn.title")}
+            description={t("signIn.description")}
           >
             <div className="flex items-start gap-5">
               <button
                 type="button"
-                aria-label="Choose a background image"
+                aria-label={t("signIn.chooseImage")}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImage || removingImage}
                 className={cn(
@@ -309,23 +310,23 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={appearance.loginImageUrl}
-                      alt="Login background"
+                      alt={t("signIn.imageAlt")}
                       className="h-full w-full object-cover"
                     />
                   </>
                 ) : (
                   <span className="flex flex-col items-center gap-1.5">
                     <Icon icon={ImageAdd01Icon} className="text-tertiary" />
-                    Click to choose an image
+                    {t("signIn.clickToChoose")}
                   </span>
                 )}
               </button>
 
               <div className="flex min-w-0 flex-col items-start gap-2.5">
-                <p className="m-0 text-body font-medium">Login screen</p>
+                <p className="m-0 text-body font-medium">{t("signIn.loginScreen")}</p>
 
                 <p className="m-0 text-body text-tertiary">
-                  PNG, JPEG or WebP, up to 10 MB. The image is stored as soon as it is uploaded.
+                  {t("signIn.fileHint")}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -336,7 +337,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingImage || removingImage}
                   >
-                    {uploadingImage ? "Uploading…" : hasImage ? "Replace image" : "Upload image"}
+                    {uploadingImage ? t("signIn.uploading") : hasImage ? t("signIn.replaceImage") : t("signIn.uploadImage")}
                   </Button>
 
                   {hasImage ? (
@@ -347,7 +348,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                       onClick={() => onRemoveLoginImage()}
                       disabled={uploadingImage || removingImage}
                     >
-                      {removingImage ? "Removing…" : "Remove"}
+                      {removingImage ? t("signIn.removing") : tCommon("actions.remove")}
                     </Button>
                   ) : null}
                 </div>
@@ -357,7 +358,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
               <ToggleRow
                 id="image-on-login"
-                label="Use as login background"
+                label={t("signIn.useOnLogin")}
                 checked={imageOnLogin}
                 disabled={saving || !hasImage}
                 onChange={setImageOnLogin}
@@ -365,7 +366,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
 
               <ToggleRow
                 id="image-on-dashboard"
-                label="Use as company dashboard background"
+                label={t("signIn.useOnDashboard")}
                 checked={imageOnDashboard}
                 disabled={saving || !hasImage}
                 onChange={setImageOnDashboard}
@@ -384,7 +385,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="login-headline">Headline</Label>
+                <Label htmlFor="login-headline">{t("signIn.headline")}</Label>
 
                 <Input
                   id="login-headline"
@@ -396,7 +397,7 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="login-subheadline">Sub-heading</Label>
+                <Label htmlFor="login-subheadline">{t("signIn.subheadline")}</Label>
 
                 <Input
                   id="login-subheadline"
@@ -414,11 +415,11 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
           {dirty ? (
             <div className="mt-auto flex items-center justify-end gap-3 pt-2">
               <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
 
               <Button type="button" onClick={handleSave} disabled={saving || customHexInvalid}>
-                {saving ? "Saving…" : "Save changes"}
+                {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
               </Button>
             </div>
           ) : null}

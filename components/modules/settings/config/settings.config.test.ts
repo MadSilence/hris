@@ -12,7 +12,7 @@ const reader = (permissions: Grants): EffectiveAccess => ({
   accessHash: "h",
 });
 
-const importItem = settingsGroups.flatMap((group) => group.items).find((item) => item.label === "Import & export")!;
+const importItem = settingsGroups.flatMap((group) => group.items).find((item) => item.href === "/settings/general/import")!;
 
 /** I-B6: whoever may run one of the three import kinds finds the page, and nobody else is offered it. */
 describe("the Import & export entry", () => {
@@ -34,7 +34,8 @@ describe("the Import & export entry", () => {
   });
 
   it("is found by quick search exactly when the hub offers it", () => {
-    const pages = buildSearchPages([], reader({ "PEOPLE.TIME_OFF_POLICIES": { EDIT: ["COMPANY"] } }));
+    const labels = { label: (key: string) => key, section: (groupTitle: string) => groupTitle };
+    const pages = buildSearchPages([], reader({ "PEOPLE.TIME_OFF_POLICIES": { EDIT: ["COMPANY"] } }), labels);
     expect(pages.map((page) => page.href)).toContain("/settings/general/import");
   });
 });

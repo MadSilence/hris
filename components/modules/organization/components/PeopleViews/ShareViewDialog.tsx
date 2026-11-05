@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Building03Icon, Cancel01Icon, Shield01Icon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -44,17 +45,11 @@ import { NodRing } from "@/components/desact/nod";
 /** A grantee picked in the dialog and not shared yet. */
 type PendingGrantee = ShareGrantee & { name: string };
 
-const GRANTEE_TYPES: { value: ShareGranteeType; label: string }[] = [
-  { value: "PERSON", label: "Person" },
-  { value: "TEAM", label: "Team" },
-  { value: "DEPARTMENT", label: "Department" },
-  { value: "ROLE", label: "Role" },
-];
+type OrganizationT = ReturnType<typeof useTranslations<"organization">>;
 
-const PERMISSIONS: { value: SharePermission; label: string }[] = [
-  { value: "VIEW", label: "Can view" },
-  { value: "EDIT", label: "Can edit" },
-];
+const GRANTEE_TYPES: ShareGranteeType[] = ["PERSON", "TEAM", "DEPARTMENT", "ROLE"];
+
+const PERMISSIONS: SharePermission[] = ["VIEW", "EDIT"];
 
 const REFERENCE_SOURCE = { TEAM: "teams", DEPARTMENT: "departments", ROLE: "roles" } as const;
 
@@ -65,31 +60,27 @@ const GRANTEE_ICON: Record<ShareGranteeType, React.ReactNode> = {
   ROLE: <Icon icon={Shield01Icon} size="sm" className="text-tertiary" />,
 };
 
-const TYPE_LABEL: Record<ShareGranteeType, string> = {
-  PERSON: "Person",
-  TEAM: "Team",
-  DEPARTMENT: "Department",
-  ROLE: "Role",
-};
-
-const personName = (u: PickedUser): string =>
-  `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Unknown";
-
-const people = (n: number) => (n === 1 ? "1 person" : `${n} people`);
+const personName = (u: PickedUser, unknown: string): string =>
+  `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || unknown;
 
 /**
  * The sentences of the warning before sharing — "3 people won't see Salary". Exported for the test:
  * the wording is the feature here, since the owner decides on it.
  */
-export function previewSentences(preview: SharePreview): string[] {
+export function previewSentences(preview: SharePreview, t: OrganizationT): string[] {
   const lines: string[] = [];
   if (preview.noPeopleAccessCount > 0) {
-    lines.push(`${people(preview.noPeopleAccessCount)} can't open the People table and won't see this view at all.`);
+    lines.push(t("views.share.noPeopleAccess", { count: preview.noPeopleAccessCount }));
   }
   for (const field of preview.hiddenFields) {
     const others = field.peopleCount - field.sampleNames.length;
-    const names = field.sampleNames.join(", ") + (others > 0 ? ` and ${others} more` : "");
-    lines.push(`${people(field.peopleCount)} won't see ${field.label}${names ? ` (${names})` : ""}.`);
+    const listed = field.sampleNames.join(", ");
+    if (!listed) {
+      lines.push(t("views.share.hiddenField", { count: field.peopleCount, field: field.label }));
+      continue;
+    }
+    const names = others > 0 ? t("views.share.namesAndMore", { names: listed, others }) : listed;
+    lines.push(t("views.share.hiddenFieldNamed", { count: field.peopleCount, field: field.label, names }));
   }
   return lines;
 }
@@ -108,6 +99,8 @@ export function ShareViewDialog({
   view: PeopleView | null;
   onClose: () => void;
 }) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const viewId = view?.id ?? null;
   const [type, setType] = useState<ShareGranteeType>("PERSON");
   const [pending, setPending] = useState<PendingGrantee[]>([]);
@@ -152,29 +145,27 @@ export function ShareViewDialog({
     mutations.updateShare.mutate({ viewId, shareId: share.id, permission }, { onError: showError });
   };
 
-  const sentences = preview && pending.length ? previewSentences(preview) : [];
+  const sentences = preview && pending.length ? previewSentences(preview, t) : [];
 
   return (
     <>
       <Dialog open={view !== null} onOpenChange={(open) => !open && close()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Share “{view?.name}”</DialogTitle>
-            <DialogDescription>
-              Everyone sees this view under their own access. A column somebody may not see is hidden for them.
-            </DialogDescription>
+            <DialogTitle>{t("views.share.title", { name: view?.name ?? "" })}</DialogTitle>
+            <DialogDescription>{t("views.share.description")}</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Select value={type} onValueChange={(v) => setType(v as ShareGranteeType)}>
-                <SelectTrigger className="h-9 w-36" aria-label="Share with">
+                <SelectTrigger className="h-9 w-36" aria-label={t("views.share.shareWith")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {GRANTEE_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
+                  {GRANTEE_TYPES.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {t(`views.share.granteeType.${g}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -183,8 +174,8 @@ export function ShareViewDialog({
                 {type === "PERSON" ? (
                   <UserPickerField
                     value={null}
-                    onChange={(u) => u && add("PERSON", u.id, personName(u))}
-                    placeholder="Select a person"
+                    onChange={(u) => u && add("PERSON", u.id, personName(u, tCommon("values.unknown")))}
+                    placeholder={t("views.share.selectPerson")}
                     allowClear={false}
                   />
                 ) : (
@@ -192,7 +183,7 @@ export function ShareViewDialog({
                     options={reference.options.map((o) => ({ value: o.id, label: o.label }))}
                     value={null}
                     clearable={false}
-                    placeholder={reference.isLoading ? "Loading…" : `Select a ${TYPE_LABEL[type].toLowerCase()}`}
+                    placeholder={reference.isLoading ? tCommon("states.loading") : t("views.share.selectGrantee", { type })}
                     onChange={(id) => {
                       const option = reference.options.find((o) => o.id === id);
                       if (option) add(type, option.id, option.label);
@@ -203,14 +194,14 @@ export function ShareViewDialog({
             </div>
 
             {pending.length ? (
-              <ul className="flex flex-col gap-1" aria-label="To share">
+              <ul className="flex flex-col gap-1" aria-label={t("views.share.toShare")}>
                 {pending.map((p) => (
                   <li key={`${p.granteeType}:${p.granteeId}`} className="flex items-center gap-2 py-1">
                     {GRANTEE_ICON[p.granteeType]}
                     <span className="min-w-0 flex-1 truncate text-body">{p.name}</span>
                     <PermissionSelect
                       value={p.permission}
-                      label={`${p.name} Permission`}
+                      label={t("views.share.permissionLabel", { name: p.name })}
                       onChange={(permission) =>
                         setPending((prev) => prev.map((q) => (q === p ? { ...q, permission } : q)))
                       }
@@ -218,7 +209,7 @@ export function ShareViewDialog({
                     <Button type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Do not share with ${p.name}`}
+                      aria-label={t("views.share.doNotShare", { name: p.name })}
                       onClick={() => setPending((prev) => prev.filter((q) => q !== p))}
                     >
                       <Icon icon={Cancel01Icon} size="sm" />
@@ -231,7 +222,7 @@ export function ShareViewDialog({
             {pending.length ? (
               <div className="rounded-tag bg-subtle px-3 py-2 text-hint text-tertiary" aria-live="polite">
                 {previewLoading && !preview ? (
-                  <span>Checking who will see what…</span>
+                  <span>{t("views.share.checking")}</span>
                 ) : sentences.length ? (
                   <ul className="flex flex-col gap-1">
                     {sentences.map((s) => (
@@ -241,8 +232,8 @@ export function ShareViewDialog({
                 ) : preview ? (
                   <span>
                     {preview.recipientCount === 0
-                      ? "Nobody is in this group yet."
-                      : `${people(preview.recipientCount)} will see every column of this view.`}
+                      ? t("views.share.nobody")
+                      : t("views.share.everyColumn", { count: preview.recipientCount })}
                   </span>
                 ) : null}
               </div>
@@ -251,15 +242,15 @@ export function ShareViewDialog({
             <FormError message={mutations.share.error?.message} />
 
             <section className="flex flex-col gap-1">
-              <h3 className="text-hint font-medium text-tertiary">Shared with</h3>
+              <h3 className="text-hint font-medium text-tertiary">{t("views.share.sharedWith")}</h3>
               {sharesLoading ? (
                 <div className="flex justify-center py-1"><NodRing size="sm" /></div>
               ) : shares.length === 0 ? (
-                <p className="py-1 text-body text-tertiary">Not shared with anyone yet.</p>
+                <p className="py-1 text-body text-tertiary">{t("views.share.notShared")}</p>
               ) : (
-                <ul className="flex flex-col gap-1" aria-label="Shared with">
+                <ul className="flex flex-col gap-1" aria-label={t("views.share.sharedWith")}>
                   {shares.map((s) => {
-                    const name = s.granteeName ?? `Removed ${TYPE_LABEL[s.granteeType]}`;
+                    const name = s.granteeName ?? t("views.share.removedGrantee", { type: s.granteeType });
                     return (
                       <li key={s.id} className="flex items-center gap-2 py-1">
                         {GRANTEE_ICON[s.granteeType]}
@@ -270,11 +261,11 @@ export function ShareViewDialog({
                         </span>
                         <PermissionSelect
                           value={s.permission}
-                          label={`${name} Permission`}
+                          label={t("views.share.permissionLabel", { name })}
                           onChange={(permission) => changePermission(s, permission)}
                         />
                         <Button type="button" variant="ghost" size="sm" onClick={() => setRemoving(s)}>
-                          Remove
+                          {tCommon("actions.remove")}
                         </Button>
                       </li>
                     );
@@ -286,10 +277,10 @@ export function ShareViewDialog({
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={close}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={submit} disabled={!pending.length || mutations.share.isPending}>
-              Share
+              {t("views.share.share")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -297,9 +288,12 @@ export function ShareViewDialog({
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove access"
-        description={`${removing?.granteeName ?? "This grantee"} will no longer see “${view?.name ?? ""}”.`}
-        confirmLabel="Remove"
+        title={t("views.share.removeTitle")}
+        description={t("views.share.removeDescription", {
+          name: removing?.granteeName ?? t("views.share.thisGrantee"),
+          view: view?.name ?? "",
+        })}
+        confirmLabel={tCommon("actions.remove")}
         isLoading={mutations.unshare.isPending}
         errorMessage={mutations.unshare.error?.message}
         onCancelAction={() => {
@@ -327,6 +321,7 @@ function PermissionSelect({
   label: string;
   onChange: (permission: SharePermission) => void;
 }) {
+  const t = useTranslations("organization");
   return (
     <Select value={value} onValueChange={(v) => onChange(v as SharePermission)}>
       <SelectTrigger className="h-8 w-28 text-hint" aria-label={label}>
@@ -334,8 +329,8 @@ function PermissionSelect({
       </SelectTrigger>
       <SelectContent>
         {PERMISSIONS.map((p) => (
-          <SelectItem key={p.value} value={p.value}>
-            {p.label}
+          <SelectItem key={p} value={p}>
+            {t(`views.share.permission.${p}`)}
           </SelectItem>
         ))}
       </SelectContent>

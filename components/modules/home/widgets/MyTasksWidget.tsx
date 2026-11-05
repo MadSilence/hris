@@ -2,9 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { cn } from "@/lib/cn";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import type { Task } from "@/models/lifecycle";
 import { useMyTasks } from "@/components/modules/lifecycle/hooks";
 import { HomeCard, HomeCardLink, HomeEmpty, HomeRowsSkeleton } from "@/components/modules/home/components/HomeCard";
@@ -24,18 +25,20 @@ const byDue = (a: Task, b: Task) => {
  * task happens on `/tasks`, where its fields and documents are, and home writes nothing but its own layout.
  */
 export const MyTasksWidget: React.FC = () => {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("home");
   const query = useMyTasks(false);
 
   const open = (query.data ?? []).filter((task) => task.status === "OPEN" || task.status === "WAITING").sort(byDue);
 
   return (
-    <HomeCard title="My tasks" action={<HomeCardLink href="/tasks">See all</HomeCardLink>}>
+    <HomeCard title={t("widgets.myTasks.title")} action={<HomeCardLink href="/tasks">{t("card.seeAll")}</HomeCardLink>}>
       {query.isLoading ? (
         <HomeRowsSkeleton rows={3} avatar={false} />
       ) : query.error ? (
         <ErrorState error={query.error} compact onRetry={() => void query.refetch()} />
       ) : open.length === 0 ? (
-        <HomeEmpty>Nothing assigned to you.</HomeEmpty>
+        <HomeEmpty>{t("myTasks.empty")}</HomeEmpty>
       ) : (
         <ul className="flex flex-col gap-1">
           {open.slice(0, MY_TASKS_LIMIT).map((task) => (
@@ -44,13 +47,14 @@ export const MyTasksWidget: React.FC = () => {
                 <span className="min-w-0">
                   <span className="block truncate text-body font-medium text-primary">{task.title}</span>
                   {task.subject?.name && (
-                    <span className="block truncate text-hint text-tertiary">For {task.subject.name}</span>
+                    <span className="block truncate text-hint text-tertiary">{t("myTasks.forSubject", { name: task.subject.name })}</span>
                   )}
                 </span>
                 {task.dueDate && (
                   <span className={cn("shrink-0 text-hint", task.dueReached ? "font-medium text-danger-text" : "text-tertiary")}>
-                    {task.status === "WAITING" ? "Waiting · " : ""}
-                    {formatDisplayDate(task.dueDate, { style: "medium", hideYear: true })}
+                    {task.status === "WAITING"
+                      ? t("myTasks.waiting", { date: formatDisplayDate(task.dueDate, { style: "medium", hideYear: true }) })
+                      : formatDisplayDate(task.dueDate, { style: "medium", hideYear: true })}
                   </span>
                 )}
               </Link>

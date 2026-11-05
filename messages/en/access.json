@@ -1,0 +1,327 @@
+{
+  "resourceGroups": {
+    "settings": "Settings",
+    "people": "People",
+    "organization": "Organization",
+    "jobs": "Jobs",
+    "roles": "Roles",
+    "notifications": "Notifications"
+  },
+  "resources": {
+    "settingsGeneral": {
+      "label": "General settings",
+      "description": "Company profile, appearance and general configuration."
+    },
+    "settingsImpersonation": {
+      "label": "Impersonation",
+      "description": "Impersonate other users for support purposes."
+    },
+    "settingsIdentity": {
+      "label": "Single sign-on",
+      "description": "Set up the identity provider, its provisioning tokens and the roles its groups grant."
+    },
+    "settingsAuditLog": {
+      "label": "Logs",
+      "description": "Read the company's journal: who did what, who signed in, who was refused. View only — the page writes nothing."
+    },
+    "settingsAutomations": {
+      "label": "Automation",
+      "description": "Read automation rules and their run log (View); create, publish, enable and pause them (Manage). A rule can only do what its author may do by hand."
+    },
+    "peopleProfile": {
+      "label": "Profiles",
+      "description": "Employee profiles and personal information. Block covers blocking, unblocking and sending a password reset."
+    },
+    "peopleAttributes": {
+      "label": "Attributes",
+      "description": "Custom attribute groups and attributes configuration."
+    },
+    "peopleDocuments": {
+      "label": "Documents",
+      "description": "Employee documents and folders."
+    },
+    "peopleDocumentCategories": {
+      "label": "Document categories",
+      "description": "Document category configuration."
+    },
+    "peopleTimeOff": {
+      "label": "Time off",
+      "description": "Time off requests and balances."
+    },
+    "peopleTimeOffPolicies": {
+      "label": "Time off policies",
+      "description": "Time off policy configuration."
+    },
+    "peopleCalendar": {
+      "label": "Company calendar",
+      "description": "The company calendar board: who is away, and public holidays. Balances and reasons stay with Time off."
+    },
+    "peopleLifecycleTemplates": {
+      "label": "Preboarding & onboarding templates",
+      "description": "The task lists preboarding and onboarding are started from."
+    },
+    "peopleLifecycleProcesses": {
+      "label": "Preboarding & onboarding",
+      "description": "Running processes: start, follow, close and delete them."
+    },
+    "reviewsForm": {
+      "label": "Review forms",
+      "description": "The questionnaires review cycles ask reviewers to fill in. Edit writes them; Manage archives and deletes."
+    },
+    "reviewsCycle": {
+      "label": "Review cycles",
+      "description": "Running review cycles. View sees them and who has written what, never what was written; Manage creates, launches and runs them."
+    },
+    "reviewsResult": {
+      "label": "Review results",
+      "description": "Reading what reviewers wrote about a person, and their rating. The scope decides whose."
+    },
+    "peopleAttendance": {
+      "label": "Attendance",
+      "description": "Timesheets. View reads them; Edit records your own days and exports; Manage records or corrects somebody else's."
+    },
+    "orgDepartment": {
+      "label": "Departments",
+      "description": "Department structure and membership."
+    },
+    "orgTeam": {
+      "label": "Teams",
+      "description": "Team structure and membership."
+    },
+    "orgOffice": {
+      "label": "Offices",
+      "description": "Office locations."
+    },
+    "orgLegalEntity": {
+      "label": "Legal entities",
+      "description": "Registered legal entities."
+    },
+    "orgPublicHolidayCalendar": {
+      "label": "Public holiday calendars",
+      "description": "Public holiday calendars."
+    },
+    "orgPublicHolidayTemplate": {
+      "label": "Public holiday templates",
+      "description": "Public holiday calendar templates."
+    },
+    "jobsFamily": {
+      "label": "Job families",
+      "description": "Job family catalog."
+    },
+    "jobsLevelGroup": {
+      "label": "Job level groups",
+      "description": "Job level group catalog."
+    },
+    "jobsLevel": {
+      "label": "Job levels",
+      "description": "Job level catalog."
+    },
+    "jobsTitle": {
+      "label": "Job titles",
+      "description": "Job title catalog."
+    },
+    "rolesRole": {
+      "label": "Roles",
+      "description": "Roles and their permissions."
+    },
+    "notificationApprovals": {
+      "label": "Approvals",
+      "description": "May mute approval notifications for themselves. Off by default: a muted approver stalls other people's requests."
+    },
+    "notificationOrgChanges": {
+      "label": "Org changes",
+      "description": "May mute notifications about departments, teams and reporting changes."
+    },
+    "notificationPolicies": {
+      "label": "Policies",
+      "description": "May mute notifications about policy changes."
+    },
+    "notificationDocuments": {
+      "label": "Documents",
+      "description": "May mute notifications about documents added to their own file."
+    },
+    "notificationSystem": {
+      "label": "System messages",
+      "description": "May mute system messages. Off by default: these are the ones people must not be able to silence."
+    }
+  },
+  "audience": {
+    "operators": {
+      "eq": "Is",
+      "neq": "Is not",
+      "contains": "Contains",
+      "starts_with": "Starts with",
+      "in": "Is any of",
+      "not_in": "Is none of",
+      "has_any": "Has any of",
+      "not_has_any": "Has none of",
+      "before": "Before",
+      "after": "After",
+      "between": "Between",
+      "gt": "Greater than",
+      "gte": "≥",
+      "lt": "Less than",
+      "lte": "≤"
+    },
+    "builder": {
+      "includeInactive": "Also search non-active people",
+      "includeEmpty": "Include people with no value",
+      "removeFilter": "Remove filter",
+      "addFilter": "Add filter",
+      "selectPerson": "Select a person",
+      "value": "Value",
+      "selectValue": "Select value",
+      "from": "From",
+      "to": "To",
+      "fieldGroups": {
+        "System": "Person",
+        "Org": "Organization",
+        "Custom": "Custom fields"
+      },
+      "field": "Field",
+      "loadingFields": "Loading fields…",
+      "selectField": "Select field",
+      "searchFields": "Search fields",
+      "noFields": "No fields you can filter on",
+      "noMatchingField": "No matching field",
+      "selectedCount": "{count} selected",
+      "selectValues": "Select values",
+      "noOptions": "No options",
+      "removeOption": "Remove {label}"
+    },
+    "filter": {
+      "button": "Filter"
+    },
+    "peoplePicker": {
+      "columns": {
+        "roles": "Current roles",
+        "office": "Current office",
+        "legalEntity": "Current legal entity",
+        "department": "Current department",
+        "team": "Current teams",
+        "calendar": "Holiday calendars"
+      },
+      "clearFilters": "Clear all filters",
+      "selectAllMatching": "Select everyone who matches",
+      "user": "User",
+      "unavailable": "{name}: {reason}",
+      "loadMore": "Load more",
+      "empty": {
+        "title": "No people found",
+        "filtered": "Nobody matches the current filters or search. Try loosening them.",
+        "none": "There are no people to show yet."
+      }
+    },
+    "assign": {
+      "alreadyAssigned": "Already assigned",
+      "descriptionAdd": "This only adds the {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} — nobody is removed.",
+      "descriptionReplace": "A person can belong to one {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} only, so anyone who already has one leaves it — this is a move, not an addition.",
+      "title": "Add People to {name}",
+      "effectiveFromRequired": "Effective from *",
+      "effectiveFrom": "Effective from",
+      "effectiveTo": "Effective to",
+      "inactiveNote": "People who have left can be found this way but not assigned — they will be listed as skipped. People who have not started yet, drafts included, are assigned normally.",
+      "overCap": "You’ve selected {count}. Add up to {cap} manually, or use “select everyone who matches” for larger groups.",
+      "applying": "Applying…",
+      "createLiveRule": "Create live rule",
+      "addPeople": "Add {count, plural, one {# person} other {# people}}",
+      "checking": "Checking…",
+      "reviewPeople": "Review {count, plural, one {# person} other {# people}}",
+      "liveNote": {
+        "title": "Everyone who matches now, and anyone who matches later.",
+        "body": "Assigning by filter creates a live rule: people who start matching are assigned, and people who stop matching lose only what the rule gave them. A value somebody set by hand is left alone.",
+        "bodyTemporal": "Assigning by filter creates a live rule: people who start matching are assigned, and people who stop matching lose only what the rule gave them. A value somebody set by hand is left alone. Each person gets it from the day they start matching — today for everyone who matches now."
+      },
+      "preview": {
+        "willAssign": "{count, plural, one {# person} other {# people}} will be assigned.",
+        "willAssignSkipped": "{count, plural, one {# person} other {# people}} will be assigned, {skipped} skipped.",
+        "conflicts": "{count, plural, one {# person already has} other {# people already have}} a {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} from another live rule. That rule keeps it; this one does not overwrite it.",
+        "live": "This creates a live rule — everyone who matches now, and anyone who matches later. You can find it, change it or switch it off in Settings → Automation.",
+        "manual": "These people are assigned by hand, once. No rule takes a hand assignment away."
+      },
+      "liveResult": {
+        "created": "Live rule “{name}” created.",
+        "added": "{count, plural, one {# person} other {# people}} added to the {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} now. Anyone who matches later is added too.",
+        "addedWithLater": "{count, plural, one {# person} other {# people}} added to the {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}} now, {later} more on their own date. Anyone who matches later is added too.",
+        "openRule": "Open the rule"
+      },
+      "result": {
+        "added": "{created} of {total, plural, one {# person} other {# people}} added to the {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}}.",
+        "nothingChanged": "Nothing changed.",
+        "skipped": "{count, plural, one {# person was} other {# people were}} skipped.",
+        "failed": "{count, plural, one {# person} other {# people}} could not be added."
+      },
+      "titleKind": "Add People to {kind, select, policy {policy} calendar {calendar} team {team} department {department} position {position} role {role} legalEntity {legal entity} office {office} other {item}}"
+    },
+    "skips": {
+      "reasons": {
+        "duplicate": "already there",
+        "userArchived": "archived",
+        "userNotFound": "no longer exists",
+        "invalidTarget": "cannot be assigned here",
+        "handOverride": "set by hand to something else",
+        "ruleConflict": "another rule sets this for them",
+        "domainError": "rejected by the system"
+      },
+      "one": "{name} was not added — {reason}.",
+      "several": "{count, plural, one {# person was} other {# people were}} not added: {parts}.",
+      "countLine": "{count} {reason}"
+    },
+    "history": {
+      "verbs": {
+        "CREATED": "Assigned",
+        "SCHEDULED": "Scheduled",
+        "SKIPPED": "Skipped",
+        "FAILED": "Failed",
+        "REMOVED": "Removed"
+      },
+      "byRule": "by rule <link>{rule}</link>",
+      "byARule": "by a rule",
+      "byHandName": "by hand · {name}",
+      "byHand": "by hand",
+      "toggle": "History",
+      "emptyTitle": "No history yet",
+      "emptyDescription": "Every assignment and removal here is listed, with the rule or the person who made it.",
+      "listLabel": "Assignment history"
+    },
+    "provenance": {
+      "fromSource": "From {source}",
+      "fromRule": "From rule: {rule}",
+      "nameFromRule": "{name}: from rule {rule}",
+      "setByHandInstead": "Set by hand, in place of {calendar} from {source}.",
+      "returnedToCalendar": "Returned to {calendar} from {source}.",
+      "setByHandRule": "Set by hand — the rule “{rule}” would set something else.",
+      "returnedToRule": "Returned to the rule “{rule}”.",
+      "returnToRule": "Return to rule",
+      "setByHandInsteadDefault": "Set by hand, in place of the calendar from {source}.",
+      "returnedToCalendarDefault": "Returned to the calendar from {source}."
+    }
+  },
+  "systemFields": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "status": "Status",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "hireDate": "Hire date",
+    "employmentType": "Employment type",
+    "probationEnd": "Probation end",
+    "terminationDate": "Termination date",
+    "job": "Job",
+    "level": "Level",
+    "department": "Department",
+    "team": "Team",
+    "office": "Office",
+    "legalEntity": "Legal entity",
+    "manager": "Manager",
+    "calendar": "Holiday calendar",
+    "role": "Roles",
+    "policy": "Time off policies"
+  },
+  "fieldGroups": {
+    "account": "Account",
+    "employment": "Employment",
+    "organization": "Organization"
+  }
+}

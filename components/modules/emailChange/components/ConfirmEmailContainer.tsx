@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -19,6 +20,8 @@ type Props = {
  * did its work on a GET would be used up by the scanner before the person ever saw it.
  */
 export function ConfirmEmailContainer({ token, firstName, newEmail }: Props) {
+  const t = useTranslations("auth");
+  const email = (chunks: React.ReactNode) => <span className="font-medium text-primary">{chunks}</span>;
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,12 +42,12 @@ export function ConfirmEmailContainer({ token, firstName, newEmail }: Props) {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">Email confirmed</h1>
+        <h1 className="text-page-title">{t("emailChange.doneTitle")}</h1>
         <p className="text-body text-tertiary">
-          From now on you sign in with <span className="font-medium text-primary">{newEmail}</span>.
+          {t.rich("emailChange.doneBody", { email: newEmail, b: email })}
         </p>
         <Button asChild>
-          <a href="/login">Sign in</a>
+          <a href="/login">{t("login.submit")}</a>
         </Button>
       </div>
     );
@@ -52,14 +55,13 @@ export function ConfirmEmailContainer({ token, firstName, newEmail }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <h1 className="text-page-title">{firstName ? `Hi ${firstName}` : "Confirm your email"}</h1>
+      <h1 className="text-page-title">{firstName ? t("passwordReset.reset.greeting", { name: firstName }) : t("emailChange.title")}</h1>
       <p className="text-body text-tertiary">
-        Confirm <span className="font-medium text-primary">{newEmail}</span> as your new sign-in email. Until
-        you do, you keep signing in with your current address.
+        {t.rich("emailChange.description", { email: newEmail, b: email })}
       </p>
       <FormError message={error} />
       <Button type="button" onClick={confirm} disabled={busy} size="lg" className="w-full">
-        {busy ? "Confirming…" : "Confirm email"}
+        {busy ? t("emailChange.confirming") : t("emailChange.confirm")}
       </Button>
     </div>
   );

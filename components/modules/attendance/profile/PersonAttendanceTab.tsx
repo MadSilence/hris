@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { Delete02Icon, InformationCircleIcon, MagicWand01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -17,7 +18,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
 import { expandSpanToDays } from "@/components/modules/calendar/lib/dateRange";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
-import { dateToISO, formatDisplayDate } from "@/lib/date";
+import { dateToISO, useDateFormatter } from "@/lib/date";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { formatMinutes, type AttendanceEntry, type AttendanceLogDay } from "@/models/attendance";
@@ -35,6 +36,7 @@ type Props = { userId: string };
 type Draft = { from: string; to: string; description: string };
 
 const EMPTY: Draft = { from: "", to: "", description: "" };
+type AttendanceTranslator = ReturnType<typeof useTranslations<"attendance">>;
 const noSubscribe = () => () => {};
 
 /**
@@ -42,7 +44,11 @@ const noSubscribe = () => () => {};
  * a holiday, a day of leave or a day outside employment has no norm, so every minute on it is
  * overtime; on any other day, what goes above the norm is. Nothing is refused — the person is told.
  */
-export const beyondNormNotice = (days: AttendanceLogDay[], minutes: number | null): string | null => {
+export const beyondNormNotice = (
+  days: AttendanceLogDay[],
+  minutes: number | null,
+  t: AttendanceTranslator,
+): string | null => {
   if (days.length === 0) return null;
   const withoutNorm = days.filter((day) => day.normMinutes === 0);
   const over = minutes === null
@@ -52,17 +58,22 @@ export const beyondNormNotice = (days: AttendanceLogDay[], minutes: number | nul
   const parts: string[] = [];
   if (withoutNorm.length === 1 && days.length === 1) {
     const day = withoutNorm[0];
-    const why = day.holiday ? `a public holiday (${day.holiday})` : day.onLeave ? "a day of leave"
-      : !day.employed ? "outside employment" : "not a working day";
-    parts.push(`This day is ${why}: all time logged on it counts as overtime.`);
+    parts.push(
+      day.holiday ? t("log.notice.holiday", { name: day.holiday })
+        : day.onLeave ? t("log.notice.leave")
+          : !day.employed ? t("log.notice.outsideEmployment") : t("log.notice.notWorkingDay"),
+    );
   } else if (withoutNorm.length > 0) {
-    parts.push(`${withoutNorm.length} of the picked days have no norm — a weekend, a holiday or leave: all time logged on them counts as overtime.`);
+    parts.push(t("log.notice.daysWithoutNorm", { count: withoutNorm.length }));
   }
   if (over.length === 1 && days.length === 1) {
     const day = over[0];
-    parts.push(`This takes the day beyond its norm of ${formatMinutes(day.normMinutes)}; ${formatMinutes(day.loggedMinutes + minutes! - day.normMinutes)} counts as overtime.`);
+    parts.push(t("log.notice.beyondNorm", {
+      norm: formatMinutes(day.normMinutes),
+      overtime: formatMinutes(day.loggedMinutes + minutes! - day.normMinutes),
+    }));
   } else if (over.length > 0) {
-    parts.push(`This takes ${over.length} of the picked days beyond their norm; the time above it counts as overtime.`);
+    parts.push(t("log.notice.daysBeyondNorm", { count: over.length }));
   }
   return parts.length ? parts.join(" ") : null;
 };
@@ -90,15 +101,18 @@ const HoursBadge: FC<{ minutes: number; onBand?: boolean }> = ({ minutes, onBand
  * beyond a day's norm rather than skipping the day.
  */
 /** A duration as a button or a total says it: "3 h", "1 h 30 m", "45 m". */
-export const formatDuration = (minutes: number): string => {
+export const formatDuration = (minutes: number, t: AttendanceTranslator): string => {
   const whole = Math.max(0, Math.round(minutes));
   const h = Math.floor(whole / 60);
   const m = whole % 60;
-  if (h === 0) return `${m} m`;
-  return m === 0 ? `${h} h` : `${h} h ${m} m`;
+  if (h === 0) return t("log.duration.minutes", { m });
+  return m === 0 ? t("log.duration.hours", { h }) : t("log.duration.hoursMinutes", { h, m });
 };
 
 export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const todayISO = useMemo(() => dateToISO(new Date()), []);
   const [month, setMonth] = useState(monthOf(todayISO));
   const [range, setRange] = useState<{ start: string; end: string }>({ start: todayISO, end: todayISO });
@@ -141,7 +155,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const noticeDays = editing
     ? pickedDays.map((day) => ({ ...day, loggedMinutes: day.loggedMinutes - editing.minutes }))
     : pickedDays;
-  const notice = canLog ? beyondNormNotice(noticeDays, minutes) : null;
+  const notice = canLog ? beyondNormNotice(noticeDays, minutes, t) : null;
 
   const pick = (start: string, end: string) => {
     setRange({ start, end });
@@ -155,7 +169,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
   const submit = async () => {
     if (minutes === null) {
-      setFormError("Enter a start and an end on the same day, the end later than the start.");
+      setFormError(t("log.invalidSpan"));
       return;
     }
     setFormError(null);
@@ -166,13 +180,13 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
           entryId: editing.id,
           body: { startTime: draft.from, endTime: draft.to, description: draft.description },
         });
-        showSuccess("Time updated.");
+        showSuccess(t("log.updated"));
       } else {
         await logSpan.mutateAsync({
           userId,
           body: { dates: pickedDates, startTime: draft.from, endTime: draft.to, description: draft.description },
         });
-        showSuccess(single ? "Time logged." : `Time logged on ${pickedDates.length} days.`);
+        showSuccess(single ? t("log.logged") : t("log.loggedOnDays", { count: pickedDates.length }));
         setLastFilled(draft);
       }
       setEditing(null);
@@ -213,7 +227,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             }}
             footer={() => (
               <div className="flex items-center justify-end gap-2 text-body text-tertiary">
-                <span>Total</span>
+                <span>{t("log.total")}</span>
                 <HoursBadge minutes={log.data?.totals.loggedMinutes ?? 0}/>
               </div>
             )}
@@ -223,16 +237,16 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         {canLog && (
           <Card className="min-h-0 gap-4 border-divider p-6 xl:w-80 xl:shrink-0">
             <div className="space-y-1">
-              <h3 className="text-card-title text-primary">{editing ? "Edit time" : "Log hours"}</h3>
+              <h3 className="text-card-title text-primary">{editing ? t("log.editTitle") : t("log.logTitle")}</h3>
               <p className="flex min-h-5 items-center gap-2 text-body text-secondary">
                 {rangeLabel}
                 {!single && (
                   <span className="rounded-pill bg-mist px-2 text-hint font-semibold text-secondary">
-                    {pickedDates.length} days
+                    {tCommon("time.days", { count: pickedDates.length })}
                   </span>
                 )}
               </p>
-              {!editing && <p className="text-hint text-tertiary">Pick a day, or drag across several.</p>}
+              {!editing && <p className="text-hint text-tertiary">{t("log.pickHint")}</p>}
             </div>
 
             <form
@@ -245,7 +259,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             >
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="attendance-from">From</Label>
+                  <Label htmlFor="attendance-from">{t("person.from")}</Label>
                   <TimePicker
                     id="attendance-from"
                     value={draft.from}
@@ -254,7 +268,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="attendance-to">To</Label>
+                  <Label htmlFor="attendance-to">{t("person.to")}</Label>
                   <TimePicker
                     id="attendance-to"
                     value={draft.to}
@@ -267,20 +281,20 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               {minutes !== null && (
                 <p className="text-hint tabular-nums text-tertiary">
                   {single || editing
-                    ? `${formatDuration(minutes)} in total`
-                    : `${formatDuration(minutes)} a day · ${formatDuration(totalMinutes ?? 0)} in total`}
+                    ? t("log.inTotal", { duration: formatDuration(minutes, t) })
+                    : t("log.perDay", { perDay: formatDuration(minutes, t), total: formatDuration(totalMinutes ?? 0, t) })}
                 </p>
               )}
 
               <div className="space-y-2">
                 <Label htmlFor="attendance-description">
-                  Note <span className="font-normal text-tertiary">(optional)</span>
+                  {t("log.note")} <span className="font-normal text-tertiary">{t("log.optional")}</span>
                 </Label>
                 <Textarea
                   id="attendance-description"
                   rows={3}
                   value={draft.description}
-                  placeholder={suggestion?.description || "What did you work on?"}
+                  placeholder={suggestion?.description || t("log.notePlaceholder")}
                   onChange={(event) => setDraft((d) => ({ ...d, description: event.target.value }))}
                 />
               </div>
@@ -288,7 +302,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               {suggestion && (
                 <Button type="button" variant="secondary" size="sm" className="w-full" onClick={() => setDraft(suggestion)}>
                   <Icon icon={MagicWand01Icon} size="sm" />
-                  Quick fill
+                  {t("log.quickFill")}
                 </Button>
               )}
 
@@ -304,11 +318,11 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               <div className="flex gap-2">
                 {editing && (
                   <Button type="button" variant="secondary" className="flex-1" onClick={() => { setEditing(null); setDraft(EMPTY); setFormError(null); }}>
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </Button>
                 )}
                 <Button type="submit" className="flex-1" disabled={busy || minutes === null}>
-                  {editing ? "Save changes" : totalMinutes !== null ? `Log ${formatDuration(totalMinutes)}` : "Log hours"}
+                  {editing ? tCommon("actions.saveChanges") : totalMinutes !== null ? t("log.logDuration", { duration: formatDuration(totalMinutes, t) }) : t("log.logTitle")}
                 </Button>
               </div>
             </form>
@@ -322,11 +336,11 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              {!single && <TableHead className="w-36">Date</TableHead>}
-              <TableHead className="w-24">From</TableHead>
-              <TableHead className="w-24">To</TableHead>
-              <TableHead className="w-24">Hours</TableHead>
-              <TableHead>Note</TableHead>
+              {!single && <TableHead className="w-36">{tCommon("fields.date")}</TableHead>}
+              <TableHead className="w-24">{t("person.from")}</TableHead>
+              <TableHead className="w-24">{t("person.to")}</TableHead>
+              <TableHead className="w-24">{t("person.hours")}</TableHead>
+              <TableHead>{t("log.note")}</TableHead>
               {canLog && <TableHead className="w-12"/>}
             </TableRow>
           </TableHeader>
@@ -334,7 +348,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             {pickedEntries.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={6} className="py-6 text-center text-body text-tertiary">
-                  {single ? "Nothing logged on this day." : "Nothing logged on these days."}
+                  {single ? t("log.emptyDay") : t("log.emptyDays")}
                 </TableCell>
               </TableRow>
             ) : pickedEntries.map((entry) => (
@@ -350,10 +364,10 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
                 {canLog && (
                   <TableCell>
-                    <RowActionsMenu label="Entry actions">
-                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => startEditing(entry)}>Edit</RowAction>
+                    <RowActionsMenu label={t("log.entryActions")}>
+                      <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => startEditing(entry)}>{tCommon("actions.edit")}</RowAction>
                       <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setRemoving(entry)}>
-                        Delete
+                        {tCommon("actions.delete")}
                       </RowActionDestructive>
                     </RowActionsMenu>
                   </TableCell>
@@ -366,11 +380,16 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Delete entry"
+        title={t("log.deleteTitle")}
         description={removing
-          ? `${removing.startTime}–${removing.endTime}${removing.description ? ` · ${removing.description}` : ""} will be removed from ${inBrowser ? formatDisplayDate(removing.workDate, { style: "medium" }) : removing.workDate}.`
+          ? t("log.deleteDescription", {
+            span: `${removing.startTime}–${removing.endTime}`,
+            hasDescription: removing.description ? "yes" : "no",
+            description: removing.description ?? "",
+            date: inBrowser ? formatDisplayDate(removing.workDate, { style: "medium" }) : removing.workDate,
+          })
           : ""}
-        confirmLabel="Delete"
+        confirmLabel={tCommon("actions.delete")}
         destructive
         isLoading={remove.isPending}
         onCancelAction={() => setRemoving(null)}
@@ -383,7 +402,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
               setDraft(EMPTY);
             }
             setRemoving(null);
-            showSuccess("Entry deleted.");
+            showSuccess(t("log.deleted"));
           } catch (caught) {
             setRemoving(null);
             setFormError(refusal(caught));

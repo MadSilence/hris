@@ -2,39 +2,28 @@ import type { PeopleImportKind } from "@/api/modules/peopleImport/dto";
 
 /**
  * What each kind of import says about itself on the page (IMPORT_NEXT_DESIGN.md § 3.5). The steps are
- * shared; the words are not.
+ * shared; the words are not. Each entry holds catalogue keys of the `peopleImport` namespace.
  */
-export type ImportKindCopy = {
-  /** The card's title on the first step. */
-  title: string;
-  /** One sentence under it. */
-  description: string;
-  /** "row", as this kind names one of its rows: a person, a unit, a balance. */
-  noun: (n: number) => string;
-};
-
-const plural = (one: string, many: string) => (n: number) => `${n} ${n === 1 ? one : many}`;
-
-export const IMPORT_KINDS: Record<PeopleImportKind, ImportKindCopy> = {
+export const IMPORT_KINDS = {
   ORG_STRUCTURE: {
-    title: "Structure",
-    description:
-      "Departments and teams, with their parents, leads and codes. Units are only created: a name the company already has is an error.",
-    noun: plural("unit", "units"),
+    /** The card's title on the first step. */
+    titleKey: "kinds.orgStructure.title",
+    /** One sentence under it. */
+    descriptionKey: "kinds.orgStructure.description",
+    /** "row", as this kind names one of its rows — a plural message with `{count}`. */
+    nounKey: "kinds.orgStructure.noun",
   },
   PEOPLE_CREATE: {
-    title: "People",
-    description:
-      "Every row becomes a new person, as a draft. Nobody already here is changed: an email that already belongs to somebody is an error.",
-    noun: plural("person", "people"),
+    titleKey: "kinds.peopleCreate.title",
+    descriptionKey: "kinds.peopleCreate.description",
+    nounKey: "kinds.peopleCreate.noun",
   },
   LEAVE_BALANCES: {
-    title: "Leave balances",
-    description:
-      "Each person's balance on a date, per policy — a target, not an addition, so the same file twice changes nothing. The policy must be assigned first.",
-    noun: plural("balance", "balances"),
+    titleKey: "kinds.leaveBalances.title",
+    descriptionKey: "kinds.leaveBalances.description",
+    nounKey: "kinds.leaveBalances.noun",
   },
-};
+} as const satisfies Record<PeopleImportKind, { titleKey: string; descriptionKey: string; nounKey: string }>;
 
 /** Move-in order: the structure, then the people who fill it, then their balances. */
 export const KIND_ORDER: PeopleImportKind[] = ["ORG_STRUCTURE", "PEOPLE_CREATE", "LEAVE_BALANCES"];

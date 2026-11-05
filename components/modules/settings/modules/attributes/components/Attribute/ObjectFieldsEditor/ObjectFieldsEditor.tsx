@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -15,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/desact/select";
 import { AttributeType } from "@/models/attribute";
-import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
+import { attributeTypeLabelKey } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils";
 import {
   ObjectFieldDef,
   ObjectSubfieldType,
@@ -31,6 +32,9 @@ type Props = {
 
 /** Editor for the sub-schema of a repeatable-object attribute (its sub-fields). */
 export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) => {
+  const t = useTranslations("settings.attributes.subFields");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const patch = (index: number, next: Partial<ObjectFieldDef>) =>
     onChange(fields.map((f, i) => (i === index ? { ...f, ...next } : f)));
 
@@ -51,14 +55,14 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
 
   return (
     <div className="space-y-2">
-      <Label>Sub-fields</Label>
+      <Label>{t("title")}</Label>
       <p className="text-hint text-tertiary">
-        The fields of each record (e.g. Institution, Degree, Year).
+        {t("hint")}
       </p>
 
       {fields.length === 0 && (
         <p className="rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
-          No sub-fields yet. Add at least one.
+          {t("empty")}
         </p>
       )}
 
@@ -67,8 +71,8 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
           {/* Column headers once, not above every row — repeating them made each row a different
               height than its neighbours and forced a margin hack on the delete button. */}
           <div className="flex items-center gap-2 px-1 text-hint text-tertiary">
-            <span className="flex-1">Label</span>
-            <span className="w-36">Type</span>
+            <span className="flex-1">{t("label")}</span>
+            <span className="w-36">{tCommon("fields.type")}</span>
             <span className="w-9" aria-hidden />
           </div>
 
@@ -79,7 +83,7 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
                   className="flex-1"
                   value={field.label}
                   disabled={disabled}
-                  aria-label={`Sub-field ${index + 1} label`}
+                  aria-label={t("labelAria", { number: index + 1 })}
                   onChange={(e) => patch(index, { label: e.currentTarget.value })}
                 />
 
@@ -89,13 +93,13 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
                     disabled={disabled}
                     onValueChange={(v) => patch(index, { type: v as ObjectSubfieldType })}
                   >
-                    <SelectTrigger aria-label={`Sub-field ${index + 1} type`}>
+                    <SelectTrigger aria-label={t("typeAria", { number: index + 1 })}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {OBJECT_SUBFIELD_TYPES.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {getAttributeTypeLabel(t)}
+                      {OBJECT_SUBFIELD_TYPES.map((subType) => (
+                        <SelectItem key={subType} value={subType}>
+                          {tSettings(attributeTypeLabelKey(subType))}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -108,7 +112,7 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
                   size="icon" className="shrink-0 text-tertiary hover:text-danger-text"
                   onClick={() => removeField(index)}
                   disabled={disabled}
-                  aria-label={`Remove sub-field ${index + 1}`}
+                  aria-label={t("removeAria", { number: index + 1 })}
                 >
                   <Icon icon={Delete02Icon} size="sm" />
                 </Button>
@@ -125,7 +129,7 @@ export const ObjectFieldsEditor: FC<Props> = ({ fields, onChange, disabled }) =>
         className="flex w-full items-center gap-1.5 rounded-control border border-dashed border-field px-3 py-2 text-body text-secondary hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Icon icon={Add01Icon} size="sm" />
-        Add sub-field
+        {t("add")}
       </button>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -77,26 +78,28 @@ function sanitizeConfig(type: AttributeType, c: AttributeConfig): AttributeConfi
   };
 }
 
-const buildSchema = (existingNames: string[]) => {
+type FormTranslator = ReturnType<typeof useTranslations<"settings.attributes.form">>;
+
+const buildSchema = (existingNames: string[], t: FormTranslator) => {
   const taken = new Set(existingNames.map((n) => n.trim().toLowerCase()));
 
   return yup.object({
   name: yup
     .string()
     .trim()
-    .required("Please enter an attribute name.")
+    .required(t("nameRequired"))
     .min(2)
     .max(120)
     .nonNullable()
     .test(
       "unique",
-      "An attribute with this name already exists in this section.",
+      t("nameTaken"),
       (value) => !value || !taken.has(value.trim().toLowerCase()),
     ),
   type: yup
     .mixed<AttributeType>()
     .oneOf(ATTRIBUTE_TYPES_CREATABLE)
-    .required("Select attribute type."),
+    .required(t("typeRequired")),
   unique: yup.boolean().required(),
   sensitive: yup.boolean().required(),
   decScale: yup
@@ -104,7 +107,7 @@ const buildSchema = (existingNames: string[]) => {
     .nullable()
     .transform((v, o) => (o === "" ? null : v))
     .min(0)
-    .typeError("Decimal scale must be a number"),
+    .typeError(t("decScaleNumber")),
   dateHideYearPublic: yup.boolean().optional(),
   options: yup
     .array()
@@ -151,6 +154,9 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings.attributes.form");
+  const tCommon = useTranslations("common");
+  const validationSchema = useMemo(() => buildSchema(existingNames, t), [existingNames, t]);
   const handleFormSubmission = useCallback(
     (values: CreateAttributeFormValues) => onSubmitAction(sanitize(values)),
     [onSubmitAction],
@@ -168,7 +174,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       objectFields: [],
       config: {},
     },
-    validationSchema: buildSchema(existingNames),
+    validationSchema,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -179,15 +185,15 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
   }, [formik.dirty, onDirtyChangeAction]);
 
   useEffect(() => {
-    const t = formik.values.type;
+    const picked = formik.values.type;
 
-    if (!isOptionsType(t)) void formik.setFieldValue("options", []);
-    if (t !== AttributeType.NUMBER) void formik.setFieldValue("decScale", null);
-    if (t !== AttributeType.DATE) {
+    if (!isOptionsType(picked)) void formik.setFieldValue("options", []);
+    if (picked !== AttributeType.NUMBER) void formik.setFieldValue("decScale", null);
+    if (picked !== AttributeType.DATE) {
       void formik.setFieldValue("dateHideYearPublic", false);
     }
-    if (!isUniqueType(t)) void formik.setFieldValue("unique", false);
-    if (t !== AttributeType.OBJECT) void formik.setFieldValue("objectFields", []);
+    if (!isUniqueType(picked)) void formik.setFieldValue("unique", false);
+    if (picked !== AttributeType.OBJECT) void formik.setFieldValue("objectFields", []);
     // Reacts to the picked type only. `formik` is a new object every render, so depending on it
     // would clear these fields continuously.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,7 +224,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
       {/* Only the fields scroll — the modal keeps one size whatever type is picked. */}
       <div className="-mx-1 min-h-0 flex-1 space-y-6 overflow-y-auto px-1 py-1">
         <div className="space-y-2">
-          <RequiredLabel htmlFor="attribute-name" required>Attribute name</RequiredLabel>
+          <RequiredLabel htmlFor="attribute-name" required>{t("name")}</RequiredLabel>
           <Input
             id="attribute-name"
             value={formik.values.name}
@@ -251,7 +257,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {showOptions && (
           <div className="space-y-1.5">
-            <Label>Options</Label>
+            <Label>{t("options")}</Label>
               <OptionsEditor
               type={type}
               options={formik.values.options ?? []}
@@ -262,7 +268,7 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {isNumber && (
           <div className="space-y-1.5">
-            <Label htmlFor="attribute-dec-scale">Decimal scale</Label>
+            <Label htmlFor="attribute-dec-scale">{t("decScale")}</Label>
             <Input
               id="attribute-dec-scale"
               type="number"
@@ -283,8 +289,8 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {isDate && (
           <SettingToggle
-            label="Hide the year"
-            hint="Show only day and month (e.g. for birthdays)."
+            label={t("hideYear")}
+            hint={t("hideYearHint")}
             checked={formik.values.dateHideYearPublic ?? false}
             disabled={isLoading}
             onCheckedChange={(value) => formik.setFieldValue("dateHideYearPublic", value)}
@@ -293,8 +299,8 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
 
         {showUnique && (
           <SettingToggle
-            label="Unique value"
-            hint="No two people can have the same value."
+            label={t("unique")}
+            hint={t("uniqueHint")}
             checked={formik.values.unique}
             disabled={isLoading}
             onCheckedChange={(value) => formik.setFieldValue("unique", value)}
@@ -302,8 +308,8 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
         )}
 
         <SettingToggle
-          label="Sensitive"
-          hint="Nobody gets access automatically, and people without it see a placeholder instead of the value."
+          label={t("sensitive")}
+          hint={t("sensitiveCreateHint")}
           checked={formik.values.sensitive}
           disabled={isLoading}
           onCheckedChange={(value) => formik.setFieldValue("sensitive", value)}
@@ -334,11 +340,11 @@ export const CreateAttributeForm: FC<CreateAttributeFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Create
+          {tCommon("actions.create")}
         </Button>
       </DialogFooter>
     </form>

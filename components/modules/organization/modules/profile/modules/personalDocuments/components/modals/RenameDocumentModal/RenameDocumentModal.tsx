@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
@@ -24,6 +25,8 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState(documentName ?? "");
 
   useEffect(() => {
@@ -48,9 +51,9 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
  >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Rename document</DialogTitle>
+          <DialogTitle>{t("documents.renameDocument.title")}</DialogTitle>
           <DialogDescription>
-            Changes the display name only — the file itself is untouched.
+            {t("documents.renameDocument.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -58,7 +61,7 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="document-name" required>Name</RequiredLabel>
+            <RequiredLabel htmlFor="document-name" required>{tCommon("fields.name")}</RequiredLabel>
             <Input
               id="document-name"
               autoFocus
@@ -70,13 +73,13 @@ export const RenameDocumentModal: FC<RenameDocumentModalProps> = ({
 
           <DialogFooter className="mt-8">
             <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !canSubmit}
  >
-              Rename
+              {tCommon("actions.rename")}
             </Button>
           </DialogFooter>
         </form>

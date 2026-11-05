@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { CompanyProfileSettingsComponent } from "@/components/modules/settings/modules/general/companyProfile/components/CompanyProfileSettingsComponent";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import {
@@ -16,6 +17,7 @@ export default function CompanyProfileSettingsContainer() {
 
   const updateCompany = useUpdateCompany();
   const updateSettings = useUpdateCompanySettings();
+  const router = useRouter();
 
   const isLoading = companyLoading || settingsLoading;
 
@@ -37,7 +39,11 @@ export default function CompanyProfileSettingsContainer() {
   };
 
   const handleSaveSettings = async (body: UpdateCompanySettingsRequest) => {
-    return updateSettings.mutateAsync(body);
+    const saved = await updateSettings.mutateAsync(body);
+    // The language is decided on the server for the whole page (i18n/resolveLocale): a new one needs the
+    // server components and the catalogue rendered again, which a client-side cache update cannot do.
+    if (body.language && body.language !== settings.language) router.refresh();
+    return saved;
   };
 
   return (

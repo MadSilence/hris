@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PlayListAddIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
@@ -30,6 +31,7 @@ export const CreateAttributeModal: FC<CreateAttributeModalProps> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("settings.attributes.createModal");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -64,9 +66,9 @@ export const CreateAttributeModal: FC<CreateAttributeModalProps> = ({
                 <Icon icon={PlayListAddIcon} />
               </span>
               <div className="space-y-1">
-                <DialogTitle>Create attribute</DialogTitle>
+                <DialogTitle>{t("title")}</DialogTitle>
                 <DialogDescription>
-                  A field people fill in on their profile.
+                  {t("description")}
                 </DialogDescription>
               </div>
             </div>

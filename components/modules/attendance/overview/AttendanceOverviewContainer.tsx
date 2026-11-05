@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -30,6 +31,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * file read.
  */
 export const AttendanceOverviewContainer: React.FC = () => {
+  const t = useTranslations("attendance");
   const router = useRouter();
   const { view, setMonth, setRange, setQuery, setFilters } = useAttendanceView();
   const fields = useUserFields();
@@ -65,7 +67,7 @@ export const AttendanceOverviewContainer: React.FC = () => {
         secondary={
           <>
             <PeriodControl month={view.month} range={view.range} onMonthChange={setMonth} onRangeChange={setRange}/>
-            <Button type="button" size="icon" variant="secondary" aria-label="Export attendance" onClick={() => setExporting(true)}>
+            <Button type="button" size="icon" variant="secondary" aria-label={t("overview.export")} onClick={() => setExporting(true)}>
               <Icon icon={Download01Icon} size="sm" />
             </Button>
           </>
@@ -83,12 +85,12 @@ export const AttendanceOverviewContainer: React.FC = () => {
           onLoadMore={() => void report.fetchNextPage()}
           onOpen={(row) => router.push(`/attendance/${row.person.id}${view.search ? `?${view.search}` : ""}`)}
           empty={narrowed
-            ? <NoResults hint="Try a different search or filter."/>
+            ? <NoResults hint={t("overview.noResultsHint")}/>
             : (
               <EmptyState
                 scene="attendance"
-                title="Nobody in this period"
-                description="Nobody within your reach was employed in this period."
+                title={t("overview.emptyTitle")}
+                description={t("overview.emptyDescription")}
               />
             )}
         />

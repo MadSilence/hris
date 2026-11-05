@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/desact/skeleton";
 import { AccessAction, AccessCheck, AccessScope, ResourceCode } from "@/models/access";
 import { PermissionGate } from "./PermissionGate";
@@ -46,11 +47,14 @@ export const PageGate: React.FC<{
  * that guesses wrong reads worse than one that plainly says "something is coming" — a heading-sized
  * bar, a line of text, and a block.
  */
-const PageGateSkeleton: React.FC = () => (
+const PageGateSkeleton: React.FC = () => {
+  const t = useTranslations("common");
+  return (
   <div className="flex flex-col gap-4 p-6" aria-busy="true" aria-live="polite">
-    <span className="sr-only">Checking your access…</span>
+    <span className="sr-only">{t("access.checking")}</span>
     <Skeleton className="h-7 w-56"/>
     <Skeleton className="h-4 w-80"/>
     <Skeleton className="h-64 w-full rounded-popover"/>
   </div>
-);
+  );
+};

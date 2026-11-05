@@ -1,6 +1,8 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -27,19 +29,22 @@ const RecordFieldsEditor: FC<{
   fields: ObjectFieldDef[];
   record: ObjectRecord;
   onChange: (record: ObjectRecord) => void;
-}> = ({ fields, record, onChange }) => (
+}> = ({ fields, record, onChange }) => {
+  const t = useTranslations("organization");
+  const language = useDisplayLanguage();
+  return (
   <div className="grid gap-2 sm:grid-cols-2">
     {fields.map((f) => {
       const cur = record[f.key] == null ? "" : String(record[f.key]);
       return (
         <div key={f.key} className="space-y-1">
-          <Label className="text-hint">{f.label}</Label>
+          <Label className="text-hint">{f.labelKey ? t(f.labelKey) : f.label}</Label>
           {isManagedCatalogType(f.type) ? (
             <SearchableSelect
-              options={getCatalogOptions(f.type)}
+              options={getCatalogOptions(f.type, language)}
               value={cur || null}
               onChange={(v) => v && onChange({ ...record, [f.key]: v })}
-              placeholder="Select…"
+              placeholder={t("profile.fields.selectPlaceholder")}
               clearable={false}
             />
           ) : (
@@ -53,27 +58,32 @@ const RecordFieldsEditor: FC<{
       );
     })}
   </div>
-);
+  );
+};
 
-const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> = ({ fields, record }) => (
+const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> = ({ fields, record }) => {
+  const t = useTranslations("organization");
+  return (
   <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
     {fields.map((f) => {
       const v = record[f.key];
       return (
         <div key={f.key} className="flex gap-2 text-body">
-          <dt className="text-tertiary">{f.label}:</dt>
+          <dt className="text-tertiary">{f.labelKey ? t(f.labelKey) : f.label}:</dt>
           <dd className="text-primary">{v == null ? "" : String(v)}</dd>
         </div>
       );
     })}
   </dl>
-);
+  );
+};
 
 /* ── Repeatable OBJECT (list of records) ─────────────────────────────── */
 
 export const ObjectRecordsView: FC<{ fields: ObjectFieldDef[]; value: unknown }> = ({ fields, value }) => {
+  const tCommon = useTranslations("common");
   const records = asRecords(value);
-  if (records.length === 0) return <span className="text-tertiary">None</span>;
+  if (records.length === 0) return <span className="text-tertiary">{tCommon("values.none")}</span>;
   return (
     <div className="space-y-2">
       {records.map((rec, i) => (
@@ -90,6 +100,7 @@ export const ObjectRecordsEditor: FC<{
   value: unknown;
   onChange: (records: ObjectRecord[]) => void;
 }> = ({ fields, value, onChange }) => {
+  const tCommon = useTranslations("common");
   const records = asRecords(value);
   return (
     <div className="space-y-3">
@@ -107,14 +118,14 @@ export const ObjectRecordsEditor: FC<{
               className="flex items-center gap-1 text-hint text-tertiary hover:text-danger-text"
             >
               <Icon icon={Delete02Icon} size="sm" />
-              Remove
+              {tCommon("actions.remove")}
             </button>
           </div>
         </div>
       ))}
       <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={() => onChange([...records, {}])}>
         <Icon icon={Add01Icon} size="sm" />
-        Add
+        {tCommon("actions.add")}
       </Button>
     </div>
   );
@@ -123,9 +134,10 @@ export const ObjectRecordsEditor: FC<{
 /* ── Single-record composites (ADDRESS, MONEY) ───────────────────────── */
 
 export const SingleRecordView: FC<{ fields: ObjectFieldDef[]; value: unknown }> = ({ fields, value }) => {
+  const tCommon = useTranslations("common");
   const record = asRecords(value)[0];
   const isEmpty = !record || fields.every((f) => record[f.key] == null || record[f.key] === "");
-  if (isEmpty) return <span className="text-tertiary">Not set</span>;
+  if (isEmpty) return <span className="text-tertiary">{tCommon("values.notSet")}</span>;
   return <RecordFieldsView fields={fields} record={record} />;
 };
 

@@ -1,4 +1,6 @@
 import type { ScheduledChange } from "@/models/user/ScheduledChange";
+import type { useTranslations } from "next-intl";
+import { translatorFor } from "@/test/nextIntl";
 import { labelOfChange, pendingSteps } from "./scheduledChangeText";
 
 const change = (over: Partial<ScheduledChange>): ScheduledChange => ({
@@ -19,15 +21,17 @@ const change = (over: Partial<ScheduledChange>): ScheduledChange => ({
 });
 
 const london = { id: "london", name: "London" };
+const tCommon = translatorFor("common") as unknown as ReturnType<typeof useTranslations<"common">>;
 
 describe("pendingSteps", () => {
   it("reads nothing for a field nothing is scheduled on", () => {
-    expect(pendingSteps([change({})], "sys:department", [])).toEqual([]);
-    expect(pendingSteps(undefined, "sys:office", [london])).toEqual([]);
+    expect(pendingSteps(tCommon, [change({})], "sys:department", [])).toEqual([]);
+    expect(pendingSteps(tCommon, undefined, "sys:office", [london])).toEqual([]);
   });
 
   it("applies a start and its end in date order", () => {
     const steps = pendingSteps(
+      tCommon,
       [
         change({ id: "end", kind: "ASSIGNMENT_END", operation: "REMOVE", effectiveAt: "2027-01-01" }),
         change({}),
@@ -43,6 +47,7 @@ describe("pendingSteps", () => {
 
   it("adds to and removes from a field that holds several", () => {
     const steps = pendingSteps(
+      tCommon,
       [
         change({ fieldId: "sys:team", operation: "ADD", value: { id: "t2", name: "Design" } }),
         change({ fieldId: "sys:team", operation: "REMOVE", value: { id: "t1", name: "Sales" }, effectiveAt: "2026-12-05" }),
@@ -58,6 +63,7 @@ describe("pendingSteps", () => {
 
   it("draws no step for the removal of a value the field does not hold", () => {
     const steps = pendingSteps(
+      tCommon,
       [change({ kind: "ASSIGNMENT_END", operation: "REMOVE", value: { id: "elsewhere", name: "Berlin" } })],
       "sys:office",
       [london],
@@ -67,6 +73,7 @@ describe("pendingSteps", () => {
 
   it("names a status by its word", () => {
     const steps = pendingSteps(
+      tCommon,
       [change({ kind: "TERMINATION", fieldId: "sys:status", value: { id: "ARCHIVED", name: null } })],
       "sys:status",
       [{ id: "ACTIVE", name: "Active" }],
@@ -77,9 +84,10 @@ describe("pendingSteps", () => {
 
 describe("labelOfChange", () => {
   it("names each kind", () => {
-    expect(labelOfChange(change({}))).toBe("Office Starts: Paris");
-    expect(labelOfChange(change({ kind: "TERMINATION" }))).toBe("Employment ends");
-    expect(labelOfChange(change({ kind: "TASK_DUE", subject: "Laptop", fieldId: null, value: null }))).toBe(
+    const t = translatorFor("organization") as unknown as ReturnType<typeof useTranslations<"organization">>;
+    expect(labelOfChange(t, tCommon, change({}))).toBe("Office Starts: Paris");
+    expect(labelOfChange(t, tCommon, change({ kind: "TERMINATION" }))).toBe("Employment ends");
+    expect(labelOfChange(t, tCommon, change({ kind: "TASK_DUE", subject: "Laptop", fieldId: null, value: null }))).toBe(
       "Task due: Laptop",
     );
   });

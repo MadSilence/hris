@@ -2,14 +2,14 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { useLifecycleProcesses } from "@/components/modules/lifecycle/hooks";
-import { PROCESS_TYPE_LABELS } from "@/models/lifecycle";
 import { ProcessStatusBadge } from "./ProcessStatusBadge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
@@ -18,6 +18,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
  * nothing, and this page is where that is noticed (design § 3.1).
  */
 export function ProcessesListContainer() {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -51,19 +54,19 @@ export function ProcessesListContainer() {
           query={query}
           archivedView={showArchived}
           scene="onboarding"
-          title="No processes yet"
-          description="Start a preboarding or an onboarding from a person's profile."
+          title={t("processes.emptyTitle")}
+          description={t("processes.emptyDescription")}
         />
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Person</TableHead>
-              <TableHead>Process</TableHead>
-              <TableHead>Starts</TableHead>
-              <TableHead>Onboarding manager</TableHead>
-              <TableHead>Tasks</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>{t("processes.columnPerson")}</TableHead>
+              <TableHead>{t("processes.columnProcess")}</TableHead>
+              <TableHead>{t("processes.columnStarts")}</TableHead>
+              <TableHead>{t("processes.columnManager")}</TableHead>
+              <TableHead>{t("processes.columnTasks")}</TableHead>
+              <TableHead>{tCommon("fields.status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,7 +74,7 @@ export function ProcessesListContainer() {
               <TableRow key={p.id} className="cursor-pointer" onClick={() => router.push(`/processes/${p.id}`)}>
                 <TableCell className="font-medium">{p.target.name}</TableCell>
                 <TableCell>
-                  <div>{PROCESS_TYPE_LABELS[p.type]}</div>
+                  <div>{t(`processType.${p.type}`)}</div>
                   <div className="text-hint text-tertiary">{p.templateName}</div>
                 </TableCell>
                 <TableCell>{formatDisplayDate(p.anchorDate)}</TableCell>
@@ -79,7 +82,7 @@ export function ProcessesListContainer() {
                 <TableCell>
                   <span>{p.taskCount - p.openTaskCount} / {p.taskCount}</span>
                   {p.overdueTaskCount > 0 && (
-                    <StatusBadge status="pending" label={`${p.overdueTaskCount} due`} size="sm" className="ml-2" />
+                    <StatusBadge status="pending" label={t("processes.dueCount", { count: p.overdueTaskCount })} size="sm" className="ml-2" />
                   )}
                 </TableCell>
                 <TableCell><ProcessStatusBadge status={p.status} /></TableCell>

@@ -1,6 +1,6 @@
 import {
   ERROR_MESSAGES,
-  FALLBACK_ERROR_MESSAGE,
+  fallbackErrorMessage,
   SERVER_TEXT_CODES,
   messageForCode,
   messageForError,
@@ -48,11 +48,11 @@ describe("messageForCode", () => {
   });
 
   it("falls back for a code the dictionary does not know", () => {
-    expect(messageForCode("D99999", "Some technical wording")).toBe(FALLBACK_ERROR_MESSAGE);
+    expect(messageForCode("D99999", "Some technical wording")).toBe(fallbackErrorMessage());
   });
 
   it("falls back when there is no code at all", () => {
-    expect(messageForCode(undefined, "Some technical wording")).toBe(FALLBACK_ERROR_MESSAGE);
+    expect(messageForCode(undefined, "Some technical wording")).toBe(fallbackErrorMessage());
   });
 
   it("never leaks the backend's technical wording for an unknown code", () => {
@@ -69,7 +69,7 @@ describe("messageForError", () => {
 
   it("has wording for an unreachable backend", () => {
     expect(messageForError(new BackendUnavailableError("connect ECONNREFUSED"))).toBe(
-      ERROR_MESSAGES.E00503 ?? FALLBACK_ERROR_MESSAGE,
+      ERROR_MESSAGES.E00503 ?? fallbackErrorMessage(),
     );
   });
 
@@ -82,9 +82,9 @@ describe("messageForError", () => {
   });
 
   it("falls back when there is nothing to say", () => {
-    expect(messageForError(new Error(""))).toBe(FALLBACK_ERROR_MESSAGE);
-    expect(messageForError("boom")).toBe(FALLBACK_ERROR_MESSAGE);
-    expect(messageForError(undefined)).toBe(FALLBACK_ERROR_MESSAGE);
+    expect(messageForError(new Error(""))).toBe(fallbackErrorMessage());
+    expect(messageForError("boom")).toBe(fallbackErrorMessage());
+    expect(messageForError(undefined)).toBe(fallbackErrorMessage());
   });
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { RepeatIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { showError, showSuccess } from "@/lib/errors/errorToast";
@@ -37,6 +38,7 @@ export const ProvenanceMarker: React.FC<{
   /** The profile reads the person from its own cache; it is told to read them again. */
   onReturned?: () => void;
 }> = ({ userId, fieldId, provenance, canEdit, onReturned }) => {
+  const t = useTranslations("access");
   const type = PROVENANCE_FIELD_TYPES[fieldId];
   if (!type || !provenance) return null;
 
@@ -56,28 +58,43 @@ export const ProvenanceMarker: React.FC<{
         <p key={p.assignableId} className="m-0 flex items-center gap-1.5 text-hint text-tertiary">
           <Icon icon={RepeatIcon} size="sm" className="flex-none" />
           {p.source
-            ? <>From {bindingSourceLabel(p.source)}</>
+            ? t("audience.provenance.fromSource", { source: bindingSourceLabel(p.source) })
             : SINGLE_VALUED.has(type) || (fromRule.length === 1 && entries.length === 1)
-              ? <>From rule: {p.rule?.name}</>
-              : <>{p.assignableName}: from rule {p.rule?.name}</>}
+              ? t("audience.provenance.fromRule", { rule: p.rule?.name ?? "" })
+              : t("audience.provenance.nameFromRule", { name: p.assignableName ?? "", rule: p.rule?.name ?? "" })}
         </p>
       ))}
       {overridingBinding?.overriddenSource && canEdit && (
         <p className="m-0 flex flex-wrap items-center gap-1.5 text-hint text-tertiary">
-          Set by hand, in place of {overridingBinding.overriddenSource.calendarName ?? "the calendar"} from{" "}
-          {bindingSourceLabel(overridingBinding.overriddenSource)}.
+          {overridingBinding.overriddenSource.calendarName
+            ? t("audience.provenance.setByHandInstead", {
+                calendar: overridingBinding.overriddenSource.calendarName,
+                source: bindingSourceLabel(overridingBinding.overriddenSource),
+              })
+            : t("audience.provenance.setByHandInsteadDefault", {
+                source: bindingSourceLabel(overridingBinding.overriddenSource),
+              })}
           <ReturnToRuleButton
             userId={userId}
             assignableType={type}
             ruleName={overridingBinding.overriddenRule?.name ?? ""}
-            successMessage={`Returned to ${overridingBinding.overriddenSource.calendarName ?? "the calendar"} from ${bindingSourceLabel(overridingBinding.overriddenSource)}.`}
+            successMessage={
+              overridingBinding.overriddenSource.calendarName
+                ? t("audience.provenance.returnedToCalendar", {
+                    calendar: overridingBinding.overriddenSource.calendarName,
+                    source: bindingSourceLabel(overridingBinding.overriddenSource),
+                  })
+                : t("audience.provenance.returnedToCalendarDefault", {
+                    source: bindingSourceLabel(overridingBinding.overriddenSource),
+                  })
+            }
             onReturned={onReturned}
           />
         </p>
       )}
       {overriding && canEdit && (
         <p className="m-0 flex flex-wrap items-center gap-1.5 text-hint text-tertiary">
-          Set by hand — the rule “{overriding.overriddenRule?.name}” would set something else.
+          {t("audience.provenance.setByHandRule", { rule: overriding.overriddenRule?.name ?? "" })}
           <ReturnToRuleButton
             userId={userId}
             assignableType={type}
@@ -98,13 +115,14 @@ const ReturnToRuleButton: React.FC<{
   successMessage?: string;
   onReturned?: () => void;
 }> = ({ userId, assignableType, ruleName, successMessage, onReturned }) => {
+  const t = useTranslations("access");
   const returnToRule = useReturnToRule();
   const onReturn = async () => {
     try {
       // Single-valued, or a holiday calendar: the rule (the winning binding) chooses the value, so no id.
       await returnToRule.mutateAsync({ userId, assignableType, assignableId: null });
       onReturned?.();
-      showSuccess(successMessage ?? `Returned to the rule “${ruleName}”.`);
+      showSuccess(successMessage ?? t("audience.provenance.returnedToRule", { rule: ruleName }));
     } catch (error) {
       showError(error);
     }
@@ -116,7 +134,7 @@ const ReturnToRuleButton: React.FC<{
       disabled={returnToRule.isPending}
       className="font-medium text-primary underline-offset-2 hover:underline disabled:opacity-50"
     >
-      Return to rule
+      {t("audience.provenance.returnToRule")}
     </button>
   );
 };

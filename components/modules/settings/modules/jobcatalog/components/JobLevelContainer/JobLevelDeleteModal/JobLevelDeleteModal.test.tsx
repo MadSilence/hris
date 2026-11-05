@@ -4,7 +4,7 @@ import { JobLevelDeleteModal } from "./JobLevelDeleteModal";
 const baseProps = {
   isOpen: true,
   isLoading: false,
-  entityLabel: "level",
+  entityLabel: "level" as const,
   entityName: "L3 - Senior",
   affectedJobs: 0,
   affectedPeople: 0,

@@ -1,0 +1,381 @@
+{
+  "inbox": {
+    "title": "Inbox",
+    "unread": "{count} unread",
+    "caughtUp": "You're all caught up",
+    "markAllRead": "Mark all as read",
+    "preferences": "Notification preferences",
+    "allCategories": "All categories",
+    "star": "Star",
+    "unstar": "Unstar",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "starred": "Starred",
+      "needsAction": "Needs action"
+    },
+    "empty": {
+      "search": "No notifications match your search.",
+      "unread": "No unread notifications.",
+      "starred": "No starred notifications.",
+      "needsAction": "Nothing needs your action.",
+      "category": "Nothing in this category.",
+      "none": "No notifications yet."
+    },
+    "dateGroup": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "This week",
+      "earlier": "Earlier"
+    },
+    "timeAgo": {
+      "justNow": "just now",
+      "minutes": "{count} min ago",
+      "hours": "{count}h ago",
+      "days": "{count}d ago"
+    }
+  },
+  "categories": {
+    "APPROVALS": "Approvals",
+    "ORG_CHANGES": "Org changes",
+    "DOCUMENTS": "Documents",
+    "TASKS": "Tasks",
+    "POLICIES": "Policies",
+    "SYSTEM": "System"
+  },
+  "preferences": {
+    "mandatory": "Always on — required notifications can't be turned off.",
+    "managed": "Managed by your organization — you can't opt out of this category.",
+    "toggle": "Toggle {label}",
+    "empty": "No configurable categories yet."
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason": "Reason",
+    "approveCancellation": "Approve cancellation",
+    "decline": "Decline",
+    "outcomes": {
+      "approved": "Approved",
+      "approvedByYou": "You approved · waiting for the rest of the chain",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "cancellationApproved": "Cancellation approved",
+      "cancellationDeclined": "Cancellation declined"
+    }
+  },
+  "drift": {
+    "outcomes": {
+      "applied": "Applied",
+      "dismissed": "Dismissed",
+      "superseded": "Replaced by a newer check of the source",
+      "conflictApplied": "The source's version was taken",
+      "conflictDismissed": "Your version was kept"
+    },
+    "requestStatus": {
+      "PENDING": "pending",
+      "APPROVED": "approved",
+      "CANCELLATION_PENDING": "cancellation asked"
+    },
+    "change": {
+      "added": "New: {name}, {span}",
+      "removed": "No longer a holiday: {name}, {span}",
+      "moved": "Moved: {name}, {from} → {to}",
+      "renamed": "Renamed: {previous} → {name}",
+      "changed": "Changed: {name}, {from} → {to}"
+    },
+    "conflict": {
+      "line": "The source now says {theirs}; yours says {ours}.",
+      "day": "{name}, {span}",
+      "noHoliday": "no holiday",
+      "removedByYou": "no holiday (you removed it)",
+      "staysInForce": "Your version stays in force until someone takes the source's."
+    },
+    "result": {
+      "applied": "{count, plural, one {# change} other {# changes}} applied",
+      "recalculated": "{count, plural, one {# leave request} other {# leave requests}} recalculated",
+      "skipped": "{count, plural, one {# change} other {# changes}} skipped because the day was edited or is taken",
+      "leftUnchanged": "{count, plural, one {# request} other {# requests}} now fall entirely on holidays and were left for you to review",
+      "sentence": "{parts}."
+    },
+    "noLeave": "No leave touches the changed days.",
+    "leaveConflict": "{count, plural, one {# leave request touches} other {# leave requests touch}} these days and would be recalculated if you take the source's version:",
+    "leaveOrdinary": "{count, plural, one {# leave request touches} other {# leave requests touch}} the changed days and will be recalculated:",
+    "moreChanges": "and {count, plural, one {# more change} other {# more changes}}",
+    "observers": "{count, plural, one {# person observes} other {# people observe}} this calendar. {leaveLine}",
+    "someone": "Someone",
+    "hiddenRequests": "and {count, plural, one {# request} other {# requests}} by people whose leave you cannot see",
+    "keepOurs": "Keep ours",
+    "takeTheirs": "Take theirs",
+    "applyChanges": "Apply changes",
+    "dismiss": "Dismiss"
+  },
+  "fallback": {
+    "anEmployee": "An employee",
+    "aColleague": "A colleague",
+    "somebody": "Somebody",
+    "aPerson": "a person",
+    "APerson": "A person",
+    "aRole": "a role",
+    "ARole": "A role",
+    "aDocument": "a document",
+    "ATask": "A task",
+    "aTask": "a task",
+    "aLeavePolicy": "a leave policy",
+    "ALeavePolicy": "A leave policy",
+    "aHolidayCalendar": "a holiday calendar",
+    "AHolidayCalendar": "A holiday calendar",
+    "automation": "Automation",
+    "anAutomation": "An automation",
+    "automationMessage": "An automation sent you a message.",
+    "aSystemOwner": "a System Owner",
+    "aReviewCycle": "a review cycle",
+    "AReviewCycle": "A review cycle",
+    "yourCycle": "your cycle",
+    "aReviewer": "A reviewer",
+    "oneOfYourPeople": "One of your people"
+  },
+  "presenter": {
+    "withReason": "{message} Reason: {reason}",
+    "anAmount": "an amount",
+    "signedDays": "{sign}{count, plural, one {{amount} day} other {{amount} days}}",
+    "driftCount": {
+      "added": "{count} added",
+      "changed": "{count} changed",
+      "removed": "{count} removed"
+    },
+    "approvalRequested": {
+      "title": "Time off approval requested",
+      "message": "{requester} requested {count, plural, one {{amount} day} other {{amount} days}} · {dates}{forSomeone, select, yes { · for {onBehalfOf}} other {}}"
+    },
+    "cancellationRequested": {
+      "title": "Cancellation requested",
+      "message": "{requester} asks to cancel approved time off · {dates}{forSomeone, select, yes { · for {onBehalfOf}} other {}}."
+    },
+    "requestCancelled": {
+      "title": "Time off cancelled",
+      "message": "{requester}'s time off {dates} is cancelled."
+    },
+    "requestApproved": {
+      "title": "Time off approved",
+      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was approved{hasActor, select, yes { by {actor}} other {}}."
+    },
+    "requestRejected": {
+      "title": "Time off rejected",
+      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was rejected{hasActor, select, yes { by {actor}} other {}}."
+    },
+    "cancellationApproved": {
+      "title": "Cancellation approved",
+      "message": "Your request to cancel {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was approved{hasActor, select, yes { by {actor}} other {}}{hasRestored, select, yes {, and {restoredCount, plural, one {{restored} day} other {{restored} days}} went back to your balance} other {}}."
+    },
+    "cancellationDeclined": {
+      "title": "Cancellation declined",
+      "message": "Your request to cancel {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was declined{hasActor, select, yes { by {actor}} other {}}. The time off stands."
+    },
+    "leaveCancelled": {
+      "title": "Time off cancelled",
+      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was cancelled{hasActor, select, yes { by {actor}} other {}}{hasRestored, select, yes {, and {restoredCount, plural, one {{restored} day} other {{restored} days}} went back to your balance} other {}}."
+    },
+    "policyAssigned": {
+      "title": "Leave policy assigned",
+      "withActor": "{actor} assigned you {hasPolicy, select, yes {{policy}} other {a leave policy}}{hasFrom, select, yes { from {from}} other {}}.",
+      "withoutActor": "{hasPolicy, select, yes {{policy}} other {A leave policy}} now applies to you{hasFrom, select, yes { from {from}} other {}}."
+    },
+    "policyEnded": {
+      "title": "Leave policy ended",
+      "withActor": "{actor} ended {hasPolicy, select, yes {{policy}} other {a leave policy}} for you{hasUntil, select, yes { after {until}} other {}}.",
+      "withoutActor": "{hasPolicy, select, yes {{policy}} other {A leave policy}} no longer applies to you{hasUntil, select, yes { after {until}} other {}}."
+    },
+    "approvalsDelegated": {
+      "title": "Approvals delegated to you",
+      "message": "{delegator} delegated their leave approvals to you{hasDates, select, yes { · {dates}} other {}}{onLeave, select, yes {, while they are on leave} other {}}. You are asked beside them; whoever answers first decides."
+    },
+    "balanceAdjusted": {
+      "title": "Balance adjusted",
+      "withActor": "{actor} changed your {hasPolicy, select, yes {{policy}} other {leave}} balance by {amount}.",
+      "withoutActor": "Your {hasPolicy, select, yes {{policy}} other {leave}} balance changed by {amount}."
+    },
+    "requestRepriced": {
+      "title": "Time off re-priced",
+      "message": "The holidays under your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} changed, so it now costs {count, plural, one {{amount} day} other {{amount} days}}{hasPrevious, select, yes { instead of {previousCount, plural, one {{previous} day} other {{previous} days}}} other {}}."
+    },
+    "holidayConflict": {
+      "title": "Your holiday edits differ from the source",
+      "message": "The source of {calendar}{hasYear, select, yes { ({year})} other {}} changed {hasCounts, select, yes {days you edited: {counts}} other {days you edited}}. {outcome}",
+      "applied": "The source's version was taken.",
+      "dismissed": "Your version was kept.",
+      "superseded": "A newer check replaced it.",
+      "open": "Your version stays in force until someone takes the source's."
+    },
+    "holidayDrift": {
+      "title": "Holidays changed at the source",
+      "message": "{calendar}{hasYear, select, yes { ({year})} other {}} differs from its source{hasCounts, select, yes {: {counts}} other {}}. {outcome}",
+      "applied": "It has been applied.",
+      "dismissed": "It was dismissed; nothing changed.",
+      "superseded": "A newer check replaced it.",
+      "open": "Nothing changes until someone applies it."
+    },
+    "roleAssigned": {
+      "title": "Role assigned",
+      "message": "You were given {hasRole, select, yes {the {role} role} other {a role}}{hasActor, select, yes { by {actor}} other {}}."
+    },
+    "roleRemoved": {
+      "title": "Role removed",
+      "message": "{hasRole, select, yes {The {role} role} other {A role}} was taken from you{hasActor, select, yes { by {actor}} other {}}."
+    },
+    "roleHoldersChanged": {
+      "title": "Role holders changed",
+      "added": "{who} gave {role} to {hasPerson, select, yes {{person}} other {{count, plural, one {# person} other {# people}}}}.",
+      "removed": "{who} took {role} from {hasPerson, select, yes {{person}} other {{count, plural, one {# person} other {# people}}}}."
+    },
+    "managerChanged": {
+      "title": "Manager changed",
+      "setWithActor": "{actor} made {manager} your manager.",
+      "setWithoutActor": "Your manager is now {manager}.",
+      "removedWithActor": "{actor} removed your manager.",
+      "removedWithoutActor": "You no longer have a manager."
+    },
+    "orgUnit": {
+      "assignedTitle": "Added to a {kind, select, team {Team} other {Department}}",
+      "unassignedTitle": "Removed from a {kind, select, team {Team} other {Department}}",
+      "assignedWithActor": "{actor} added you to {hasUnit, select, yes {the {unit} {kind, select, team {team} other {department}}} other {a {kind, select, team {team} other {department}}}}.",
+      "assignedWithoutActor": "You are now in {hasUnit, select, yes {the {unit} {kind, select, team {team} other {department}}} other {a {kind, select, team {team} other {department}}}}.",
+      "unassignedWithActor": "{actor} removed you from {hasUnit, select, yes {the {unit} {kind, select, team {team} other {department}}} other {a {kind, select, team {team} other {department}}}}.",
+      "unassignedWithoutActor": "You were removed from {hasUnit, select, yes {the {unit} {kind, select, team {team} other {department}}} other {a {kind, select, team {team} other {department}}}}."
+    },
+    "positionChanged": {
+      "title": "Position changed",
+      "clearedWithActor": "{actor} cleared your position.",
+      "clearedWithoutActor": "Your position was cleared.",
+      "setWithActor": "{actor} changed your position to {job}.",
+      "setWithoutActor": "Your position is now {job}."
+    },
+    "documentAdded": {
+      "title": "Document added",
+      "message": "{who} added {file} to your file."
+    },
+    "taskDue": {
+      "title": "A task is due",
+      "message": "\"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} is due today."
+    },
+    "taskOverdue": {
+      "title": "A task is overdue",
+      "message": "\"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} was due {hasDue, select, yes {{due}} other {three days ago}}.{hasAssignee, select, yes { {assignee} has not done it yet.} other {}}"
+    },
+    "taskCommented": {
+      "title": "A new comment",
+      "message": "{author} commented on \"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}}."
+    },
+    "tasksAssigned": {
+      "oneTitle": "A task for you",
+      "title": "{count, plural, one {A task for you} other {Tasks for you}}",
+      "assigned": "\"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} is yours now.{hasDue, select, yes { It is due {due}.} other {}}",
+      "opened": "\"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} is ready: what it waited for is done.{hasDue, select, yes { It is due {due}.} other {}}",
+      "started": "{target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} started, and {count, plural, one {1 task is} other {# tasks are}} yours.{hasDue, select, yes { The first is due {due}.} other {}}"
+    },
+    "stepFailed": {
+      "title": "A {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} step failed",
+      "message": "{target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} stopped: a scheduled step could not be done, and what came after it was not started."
+    },
+    "automationTask": {
+      "title": "A task for you",
+      "message": "{task}{hasPerson, select, yes { for {person}} other {}} — set by the automation {hasRule, select, yes {{rule}} other {of your company}}.{hasDue, select, yes { Due {due}.} other {}}"
+    },
+    "automationRunFailed": {
+      "title": "Automation failed",
+      "message": "{rule} could not finish for {person}{hasError, select, yes {: {error}.} other {.}} Open its run log to retry."
+    },
+    "automationPaused": {
+      "title": "Automation paused",
+      "message": "{rule} was paused: something it uses is gone.{hasReason, select, yes { {reason}} other {}} Fix it and resume the rule."
+    },
+    "invitationFailed": {
+      "title": "Invitation not sent",
+      "message": "The invitation scheduled for {target} could not be sent. Open their profile to invite them again."
+    },
+    "roleAccessChanged": {
+      "title": "Role access changed",
+      "withActor": "{actor} changed the {what, select, fieldAccess {field access} other {permissions}} of {role}.",
+      "withoutActor": "The {what, select, fieldAccess {field access} other {permissions}} of {role} changed."
+    },
+    "accountLocked": {
+      "title": "Account locked",
+      "message": "{name}'s account was locked after too many failed sign-in attempts. Send them a password reset to unlock it."
+    },
+    "securityChanged": {
+      "title": "Sign-in security changed",
+      "scimBlockRefused": "The identity provider tried to block {whom}. A System Owner is never blocked that way.",
+      "mfaReset": "{who} reset {whom}'s two-step sign-in.",
+      "mfaPolicyChanged": "{who} changed who must use two-step sign-in.",
+      "identityConnectionUpdated": "{who} changed single sign-on.",
+      "scimTokenIssued": "{who} issued a provisioning token.",
+      "idpGroupRolesChanged": "{who} changed the roles an identity provider group grants.",
+      "other": "{who} changed sign-in security."
+    },
+    "reviewCycleLaunched": {
+      "title": "Reviews to write",
+      "message": "{cycle} has started and asks you for reviews.{hasDue, select, yes { The first is due {due}.} other {}}"
+    },
+    "reviewAssigned": {
+      "title": "A review for you",
+      "message": "You are asked to write a {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} UPWARD {upward review} other {review}}{hasSubject, select, yes { of {subject}} other {}} in {cycle}."
+    },
+    "reviewDueSoon": {
+      "title": "Review due soon",
+      "message": "Your {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} UPWARD {upward review} other {review}}{hasSubject, select, yes { of {subject}} other {}} in {cycle} is due{hasDue, select, yes { on {due}} other { in two days}}."
+    },
+    "reviewDue": {
+      "title": "Review due today",
+      "message": "Your {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} UPWARD {upward review} other {review}}{hasSubject, select, yes { of {subject}} other {}} in {cycle} is due today."
+    },
+    "reviewReminder": {
+      "title": "Your review is waiting",
+      "message": "You are reminded to write your {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} UPWARD {upward review} other {review}} in {cycle}."
+    },
+    "reviewOverdue": {
+      "title": "Review overdue",
+      "message": "{reviewer} has not written the {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} UPWARD {upward review} other {review}} of {subject} in {cycle}, due {due}."
+    },
+    "reviewDeclined": {
+      "title": "Peer review declined",
+      "message": "{reviewer} declined to review {subject} in {cycle}. You may ask somebody else."
+    },
+    "reviewSelfSubmitted": {
+      "title": "Self review in",
+      "message": "{subject} submitted their self review in {cycle}."
+    },
+    "reviewShared": {
+      "title": "Your review is ready",
+      "message": "Your review in {cycle} has been shared with you."
+    },
+    "reviewAmended": {
+      "title": "Your review was updated",
+      "message": "Your manager updated your review in {cycle}. Read the new version and acknowledge it again."
+    },
+    "reviewAcknowledged": {
+      "title": "Review acknowledged",
+      "message": "{subject} read their review in {cycle}{commented, select, yes { and left a comment} other {}}."
+    },
+    "reviewPeersToApprove": {
+      "title": "Peers to approve",
+      "message": "{subject} nominated their peers in {cycle}. Approve them, or change the list first."
+    },
+    "reviewPeersApproved": {
+      "title": "Your peers were approved",
+      "auto": "Nobody changed your nomination in {cycle} by the approval date, so your peers stood and were asked.",
+      "manual": "Your peers in {cycle} were approved and asked for their reviews."
+    },
+    "reviewToApprove": {
+      "title": "A review to approve",
+      "message": "The manager review of {subject} in {cycle} waits for your approval."
+    },
+    "reviewApproved": {
+      "title": "Your review was approved",
+      "message": "Your review of {subject} in {cycle} was approved."
+    },
+    "reviewSentBack": {
+      "title": "Your review was sent back",
+      "message": "Your review of {subject} in {cycle} was sent back with a comment. Change it and submit it again."
+    }
+  }
+}

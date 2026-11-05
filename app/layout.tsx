@@ -6,13 +6,19 @@ import AppProviders from "@/components/providers/AppProviders/AppProviders";
 import { workspaceAccent } from "@/components/providers/WorkspaceAccent";
 import { accentAttributes } from "@/lib/theme/accent";
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
+import { LocaleBridge } from "@/components/providers/LocaleBridge";
 
 /** A page names itself; the product's name follows (SPEC § 2: "Acme · noddo" inside a workspace). */
-export const metadata: Metadata = {
-  title: { default: "noddo", template: "%s · noddo" },
-  applicationName: "noddo",
-  description: "HR on templates — for teams of every size.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("navigation");
+  return {
+    title: { default: "noddo", template: "%s · noddo" },
+    applicationName: "noddo",
+    description: t("meta.description"),
+  };
+}
 
 
 type AppRootLayoutProps = {
@@ -26,10 +32,12 @@ type AppRootLayoutProps = {
 const AppRootLayout: React.FC<AppRootLayoutProps> = async ({ children }) => {
   const env = await getPublicEnv();
   const accent = accentAttributes(await workspaceAccent());
+  // The reader's language (I18N_DESIGN.md § 5) — `lang` tells the browser and assistive tech what it is reading.
+  const locale = await getLocale();
 
   return (
     <html
-      lang="en"
+      lang={locale}
       data-theme="light"
       data-accent={accent["data-accent"]}
       style={accent.style as React.CSSProperties | undefined}
@@ -37,7 +45,11 @@ const AppRootLayout: React.FC<AppRootLayoutProps> = async ({ children }) => {
       suppressHydrationWarning
     >
     <body>
-    <AppProviders env={env}>{children}</AppProviders>
+    {/* Inherits the locale and the catalogue from `i18n/request.ts`. */}
+    <NextIntlClientProvider>
+      <LocaleBridge/>
+      <AppProviders env={env}>{children}</AppProviders>
+    </NextIntlClientProvider>
     </body>
     </html>
   );

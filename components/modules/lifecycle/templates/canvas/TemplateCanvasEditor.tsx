@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Archive02Icon, ArchiveArrowUpIcon, ArrowLeft01Icon, LeftToRightListBulletIcon, Tick02Icon, TimelineIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { NodRing } from "@/components/desact/nod";
@@ -26,7 +27,7 @@ import {
   unarchiveTemplateAction,
 } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { useInvalidateLifecycle, useLifecycleTemplate } from "@/components/modules/lifecycle/hooks";
-import { PROCESS_TYPE_LABELS, type ProcessType, type TaskKind } from "@/models/lifecycle";
+import type { ProcessType, TaskKind } from "@/models/lifecycle";
 import {
   addWait,
   assigneeOfLane,
@@ -66,14 +67,11 @@ const AUTOSAVE_DELAY_MS = 800;
 type SaveState = "saved" | "saving" | "blocked" | "failed";
 
 /** What a template of each type is, and how its timeline is worked — the line between the header and the canvas. */
-const INTRO: Record<ProcessType, string> = {
-  PREBOARDING: "The tasks a preboarding starts with, for somebody who has not signed in yet — their own tasks happen on one page behind a link.",
-  ONBOARDING: "The tasks an onboarding starts with, once the new person has signed in — theirs appear in their Tasks.",
-  OFFBOARDING: "The tasks an offboarding starts with, counted from the last working day — handing over, returning equipment, the exit interview.",
-};
-const HOW_TO = "Click a day in a person's row to add a task there; drag a task to move it in time or give it to somebody else; "
-  + "drag from a task's right edge to another task to make that one wait for it. Add Person puts somebody named on the timeline. "
-  + "Changes are saved as you make them, and processes already started keep their own copy.";
+const INTRO = {
+  PREBOARDING: "editor.introPreboarding",
+  ONBOARDING: "editor.introOnboarding",
+  OFFBOARDING: "editor.introOffboarding",
+} as const satisfies Record<ProcessType, string>;
 
 const listHref = (type: ProcessType) => `/settings/automation/${type.toLowerCase()}`;
 
@@ -90,6 +88,8 @@ const listHref = (type: ProcessType) => `/settings/automation/${type.toLowerCase
  * list view is the same draft grouped by phase, and the only view on a small screen.
  */
 export function TemplateCanvasEditor({ type, templateId }: Props) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const canEdit = useCanAccess("PEOPLE.LIFECYCLE_TEMPLATES", "EDIT");
   const canManage = useCanAccess("PEOPLE.LIFECYCLE_TEMPLATES", "MANAGE");
   const { data: template, isLoading, error } = useLifecycleTemplate(templateId);
@@ -136,8 +136,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const guard = useUnsavedChangesGuard(dirty);
 
   const items = useMemo(() => draft?.items ?? [], [draft]);
-  const lanes = useMemo(() => deriveLanes(items, extraLanes, type), [items, extraLanes, type]);
-  const axis = useMemo(() => buildAxis(items, type), [items, type]);
+  const lanes = useMemo(() => deriveLanes(items, t, extraLanes, type), [items, t, extraLanes, type]);
+  const axis = useMemo(() => buildAxis(items, t, type), [items, t, type]);
   const layout = useMemo(() => layoutTemplate(items, lanes, axis), [items, lanes, axis]);
   const selected = items.find((i) => i.key === selectedKey) ?? null;
 
@@ -158,8 +158,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     const lane = laneById(laneId);
     const sameLane = laneIdOf(item) === lane.id;
     patchItem(key, { ...timing, ...(sameLane ? {} : assigneeOfLane(lane)) });
-    setNotice(`${item.title || "Untitled task"} moved to ${dayLabel(timing, type)}, ${lane.label}.`);
-  }, [items, laneById, patchItem, type]);
+    setNotice(t("editor.moved", { title: item.title || t("shared.untitledTask"), day: dayLabel(timing, t, type), lane: lane.label }));
+  }, [items, laneById, patchItem, type, t]);
 
   const selectBlock = useCallback((key: string | null) => {
     setSelectedKey(key);
@@ -176,7 +176,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const connect = useCallback((dependentKey: string, predecessorKey: string) => {
     const result = addWait(items, dependentKey, predecessorKey);
     if (result.refused) {
-      const message = "That arrow would make the tasks wait for each other in a circle, so it was not added.";
+      const message = t("editor.circleRefused");
       setNotice(message);
       setRefusal(message);
       return;
@@ -184,8 +184,11 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     setItems(() => result.items);
     const dependent = items.find((i) => i.key === dependentKey);
     const predecessor = items.find((i) => i.key === predecessorKey);
-    setNotice(`${dependent?.title || "The task"} now waits for ${predecessor?.title || "the other task"}.`);
-  }, [items, setItems]);
+    setNotice(t("editor.nowWaits", {
+      dependent: dependent?.title || t("editor.theTask"),
+      predecessor: predecessor?.title || t("editor.theOtherTask"),
+    }));
+  }, [items, setItems, t]);
 
   const addTask = useCallback((laneId: string, timing: Pick<DraftItem, "dueKind" | "offsetDays">, title: string, kind: TaskKind) => {
     const lane = laneById(laneId);
@@ -219,7 +222,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         const [predecessor, dependent] = selectedEdgeId.split("->");
         setItems((list) => removeWait(list, dependent, predecessor));
         setSelectedEdgeId(null);
-        setNotice("The arrow was removed.");
+        setNotice(t("editor.arrowRemoved"));
       } else if (selectedKey && !readOnly) {
         setConfirmRemove(selectedKey);
       }
@@ -233,7 +236,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       const next = lanes[Math.min(lanes.length - 1, Math.max(0, index + command.lanes))];
       if (next && next.id !== laneIdOf(selected)) moveItem(selected.key, selected, next.id);
     }
-  }, [selectedEdgeId, selectedKey, selected, readOnly, lanes, moveItem, selectBlock, setItems]);
+  }, [selectedEdgeId, selectedKey, selected, readOnly, lanes, moveItem, selectBlock, setItems, t]);
 
   /**
    * One save of the draft as it was when the save began. The draft is not replaced by the answer: the template
@@ -248,7 +251,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       const res = await saveTemplateAction({ id: templateId, body: draftToWrite(type, sent, version) });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
         setSaveState("failed");
-        setSaveError(res.errorMessage ?? "Something went wrong.");
+        setSaveError(res.errorMessage ?? t("shared.somethingWentWrong"));
         return;
       }
       setBaseline(sent);
@@ -259,13 +262,13 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     } finally {
       saving.current = false;
     }
-  }, [templateId, type, version, invalidate]);
+  }, [templateId, type, version, invalidate, t]);
 
   // Saves itself a moment after the last change. A draft the server would refuse waits, saying why; a failed
   // save is tried again on the next change, not in a loop.
   useEffect(() => {
     if (!draft || !baseline || readOnly || sameDraft(draft, baseline)) return;
-    const problems = draftProblems(draft);
+    const problems = draftProblems(draft, t);
     if (problems.length) {
       setSaveState("blocked");
       setSaveError(problems.join(" "));
@@ -275,13 +278,13 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     setSaveState((state) => (state === "blocked" ? "saved" : state));
     const timer = setTimeout(() => void save(draft), AUTOSAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [draft, baseline, readOnly, save]);
+  }, [draft, baseline, readOnly, save, t]);
 
   const archive = async () => {
     setArchiveError(null);
     const res = await archiveTemplateAction(templateId);
     if (res.status !== ActionStatus.SUCCESS) {
-      setArchiveError(res.errorMessage ?? "Something went wrong.");
+      setArchiveError(res.errorMessage ?? t("shared.somethingWentWrong"));
       return;
     }
     setConfirmArchive(false);
@@ -316,7 +319,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
   const quickAddLane = quickAdd ? laneById(quickAdd.laneId) : null;
   const addPerson = (u: { id: string; firstName?: string | null; lastName?: string | null; email?: string | null }) => {
-    const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || "Named person";
+    const label = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email || t("canvas.namedPerson");
     setExtraLanes((l) => [...l, { id: `USER:${u.id}`, assigneeKind: "SPECIFIC_USER", userId: u.id, label, problem: null }]);
   };
   const quickAddColumn = quickAdd ? axis.columns.find((c) => c.id === quickAdd.columnId) ?? null : null;
@@ -330,30 +333,30 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       <header className="flex flex-wrap items-center gap-3 px-8">
         <Link
           href={listHref(type)}
-          aria-label={`Back to ${PROCESS_TYPE_LABELS[type]} Templates`}
+          aria-label={t("editor.backTo", { type })}
           className="no-underline grid h-10 w-10 shrink-0 place-items-center rounded-pill border bg-card hover:bg-subtle"
         >
           <Icon icon={ArrowLeft01Icon} size="sm" />
         </Link>
         <div className="min-w-0 flex-1">
           <Input
-            aria-label="Template name"
+            aria-label={t("editor.templateName")}
             value={draft.name}
             disabled={readOnly}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             className="h-10 max-w-xl border-transparent bg-transparent px-2 text-page-title text-primary shadow-none hover:border-divider focus-visible:border-field"
           />
           <div className="flex items-center gap-2 px-2 text-hint text-tertiary">
-            <span>{PROCESS_TYPE_LABELS[type]} Template</span>
+            <span>{t("editor.typeTemplate", { type })}</span>
             <span aria-hidden>·</span>
-            <span>{items.length === 1 ? "1 task" : `${items.length} tasks`}</span>
+            <span>{t("shared.taskCount", { count: items.length })}</span>
             {archived && <StatusBadge status="archived" />}
             {!readOnly && <SaveStatus state={dirty && saveState === "saved" ? "saving" : saveState} />}
           </div>
         </div>
 
         {!narrow && (
-          <div className="flex rounded-control border border-divider bg-card p-0.5" role="group" aria-label="View">
+          <div className="flex rounded-control border border-divider bg-card p-0.5" role="group" aria-label={t("editor.view")}>
             {(["canvas", "list"] as EditorView[]).map((v) => (
               <button
                 key={v}
@@ -366,7 +369,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
                 )}
               >
                 {v === "canvas" ? <Icon icon={TimelineIcon} size="sm" /> : <Icon icon={LeftToRightListBulletIcon} size="sm" />}
-                {v === "canvas" ? "Timeline" : "List"}
+                {v === "canvas" ? t("editor.timeline") : t("editor.list")}
               </button>
             ))}
           </div>
@@ -374,18 +377,18 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
         <Button type="button" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
           <Icon icon={ViewIcon} size="sm" />
-          Preview
+          {tCommon("actions.preview")}
         </Button>
 
         {canManage && (
-          <RowActionsMenu label="Template actions">
+          <RowActionsMenu label={t("shared.templateActions")}>
             {archived ? (
               <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>
-                Unarchive
+                {t("shared.unarchive")}
               </RowAction>
             ) : (
               <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => { setArchiveError(null); setConfirmArchive(true); }}>
-                Archive
+                {tCommon("actions.archive")}
               </RowAction>
             )}
           </RowActionsMenu>
@@ -393,8 +396,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       </header>
 
       <div className="space-y-1 px-8 pb-4">
-        <p className="text-body text-tertiary/90">{INTRO[type]}</p>
-        {!readOnly && <p className="text-body text-tertiary">{HOW_TO}</p>}
+        <p className="text-body text-tertiary/90">{t(INTRO[type])}</p>
+        {!readOnly && <p className="text-body text-tertiary">{t("editor.howTo")}</p>}
       </div>
 
       {((saveState === "failed" && saveError) || notice || refusal || archived) && (
@@ -403,7 +406,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
               missing; only a save the server refused is an error. */}
           {saveState === "failed" && <FormError message={saveError} />}
           {archived && (
-            <p className="text-body text-tertiary">An archived template cannot be changed or used. Unarchive it to edit it.</p>
+            <p className="text-body text-tertiary">{t("editor.archivedNote")}</p>
           )}
           {notice && view === "list" && <p role="status" className="text-body text-tertiary">{notice}</p>}
           {refusal && view === "canvas" && <p className="text-body text-status-pending-text">{refusal}</p>}
@@ -463,14 +466,11 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <ConfirmActionModal
         isOpen={removing !== null}
-        title="Remove task"
-        confirmLabel="Remove"
+        title={t("shared.removeTask")}
+        confirmLabel={tCommon("actions.remove")}
         destructive
         description={
-          <>
-            <strong>{removing?.title || "This task"}</strong> leaves the template, with its arrows. Processes already
-            started keep their own copy.
-          </>
+          t.rich("editor.removeBody", { title: removing?.title || t("editor.thisTask"), b: (chunks) => <strong>{chunks}</strong> })
         }
         onCancelAction={() => setConfirmRemove(null)}
         onConfirmAction={() => {
@@ -482,15 +482,14 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <ConfirmActionModal
         isOpen={confirmArchive}
-        title="Archive template"
-        confirmLabel="Archive"
+        title={t("shared.archiveTemplate")}
+        confirmLabel={tCommon("actions.archive")}
         errorMessage={archiveError}
         description={
-          <>
-            <strong>{template?.name}</strong> can no longer be used to start a process. Processes already started
-            from it keep their own copy. You can unarchive it later.
-            {dirty ? " Changes not saved yet are not kept." : ""}
-          </>
+          t.rich(dirty ? "editor.archiveBodyDirty" : "shared.archiveTemplateBody", {
+            name: template?.name ?? "",
+            b: (chunks) => <strong>{chunks}</strong>,
+          })
         }
         onCancelAction={() => setConfirmArchive(false)}
         onConfirmAction={archive}
@@ -498,7 +497,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <AddTaskDialog
         open={quickAdd !== null && quickAddLane !== null && quickAddTiming !== null}
-        where={quickAddLane && quickAddTiming ? `${quickAddLane.label} · ${dayLabel(quickAddTiming, type)}` : ""}
+        where={quickAddLane && quickAddTiming ? t("editor.where", { lane: quickAddLane.label, day: dayLabel(quickAddTiming, t, type) }) : ""}
         onAddAction={({ title, kind }) => {
           if (quickAdd && quickAddTiming) addTask(quickAdd.laneId, quickAddTiming, title, kind);
         }}
@@ -515,10 +514,10 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave before it is saved?"
-        description={saveError ? `The last changes could not be saved: ${saveError}` : "The last changes are still being saved."}
-        cancelText="Keep editing"
-        confirmText="Leave"
+        title={t("editor.leaveTitle")}
+        description={saveError ? t("editor.leaveFailed", { error: saveError }) : t("editor.leaveSaving")}
+        cancelText={tCommon("actions.keepEditing")}
+        confirmText={t("editor.leave")}
         onCancelAction={guard.stay}
         onConfirmAction={() => {
           guard.leave();
@@ -530,11 +529,13 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
 
 /** Saved, saving, or why not — said quietly beside the template's facts, in place of a Save button. */
 function SaveStatus({ state }: { state: SaveState }) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   if (state === "saving") {
     return (
       <span className="flex items-center gap-1" role="status">
         <NodRing size="sm" label="" />
-        Saving…
+        {tCommon("actions.saving")}
       </span>
     );
   }
@@ -542,10 +543,10 @@ function SaveStatus({ state }: { state: SaveState }) {
     return (
       <span className="flex items-center gap-1" role="status">
         <Icon icon={Tick02Icon} size="sm" />
-        Saved
+        {t("editor.saved")}
       </span>
     );
   }
   if (state === "blocked") return null;
-  return <span className="text-status-pending-text" role="status">Not saved</span>;
+  return <span className="text-status-pending-text" role="status">{t("editor.notSaved")}</span>;
 }

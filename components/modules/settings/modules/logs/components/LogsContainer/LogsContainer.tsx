@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { ListToolbar } from "@/components/ui/ListToolbar";
@@ -23,6 +24,7 @@ import type { ActivityLogFilters } from "@/models/activityLog";
  * own row, so the page that answers "what left the building" has no hole where it stands.
  */
 export const LogsContainer: React.FC = () => {
+  const tCommon = useTranslations("common");
   const [filters, setFilters] = React.useState<ActivityLogFilters>({});
   const [search, setSearch] = React.useState("");
 
@@ -54,7 +56,7 @@ export const LogsContainer: React.FC = () => {
           <Button variant="secondary" size="sm" asChild>
             <a href={`/api/activity-logs/export${exportQuery(filters)}`}>
               <Icon icon={Download01Icon} size="sm" />
-              Export
+              {tCommon("actions.export")}
             </a>
           </Button>
         }

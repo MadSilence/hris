@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/cn";
 
@@ -17,7 +18,9 @@ export type NodRingProps = Omit<React.ComponentProps<"span">, "children"> & {
 };
 
 /** One nodding ring in the accent: the loader for a wait of 0.3 to 2 seconds (SPEC § 12). */
-function NodRing({ size = "md", label = "Loading", className, ...props }: NodRingProps) {
+function NodRing({ size = "md", label: labelProp, className, ...props }: NodRingProps) {
+  const t = useTranslations("common");
+  const label = labelProp ?? t("states.loadingShort");
   const px = RING_SIZES[size];
   return (
     <span

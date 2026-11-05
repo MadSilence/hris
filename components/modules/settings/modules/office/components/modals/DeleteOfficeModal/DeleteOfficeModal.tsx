@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import {
   AlertDialog,
@@ -37,35 +38,36 @@ export const DeleteOfficeModal: React.FC<DeleteOfficeModalProps> = ({
   impactLoading,
   impactError,
 }) => {
+  const t = useTranslations("structure.offices");
+  const tCommon = useTranslations("common");
   const asked = impact !== undefined || impactLoading || impactError;
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onRequestCloseAction()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Permanently delete &quot;{office?.name ?? ""}&quot; office?
+            {t("delete.title", { name: office?.name ?? "" })}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This office will be permanently removed from the system. This action cannot be undone.
             {asked
-              ? null
+              ? t("delete.body")
               : office?.assignedUsersCount
-                ? ` ${office.assignedUsersCount} ${office.assignedUsersCount === 1 ? "person" : "people"} currently assigned to this office will lose that assignment.`
-                : " Anyone currently assigned to this office will lose that assignment."}
+                ? t("delete.bodyWithCount", { count: office.assignedUsersCount })
+                : t("delete.bodyAnyone")}
           </AlertDialogDescription>
           {asked ? (
-            <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} noun="office" />
+            <DetachedPeopleNotice impact={impact} isLoading={impactLoading} isError={impactError} kind="office" />
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>
           {/* No onClick on Cancel: AlertDialogCancel already closes the dialog, which fires
               onOpenChange — adding a handler here called onRequestCloseAction twice per click. */}
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction disabled={isLoading || impactLoading} destructive onClick={(event) => {
               event.preventDefault();
               onConfirmAction();
             }}>
-            Delete
+            {tCommon("actions.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

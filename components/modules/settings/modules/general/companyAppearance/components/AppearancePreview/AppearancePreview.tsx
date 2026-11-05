@@ -1,11 +1,12 @@
 "use client";
 
 import { FC, ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { accentAttributes } from "@/lib/theme/accent";
 import {
-  DEFAULT_LOGIN_HEADLINE,
-  DEFAULT_LOGIN_SUBHEADLINE,
+  DEFAULT_LOGIN_HEADLINE_KEY,
+  DEFAULT_LOGIN_SUBHEADLINE_KEY,
 } from "@/models/company/loginPageDefaults";
 import { cn } from "@/lib/cn";
 import { AuthCard } from "@/components/modules/auth/components/AuthScreen";
@@ -25,11 +26,6 @@ import { PoweredByNoddo } from "@/components/brand";
 const DESIGN_WIDTH = 1280;
 const DESIGN_HEIGHT = 800;
 
-export {
-  DEFAULT_LOGIN_HEADLINE,
-  DEFAULT_LOGIN_SUBHEADLINE,
-} from "@/models/company/loginPageDefaults";
-
 type Props = {
   accent: string | null;
   loginImageUrl: string | null;
@@ -43,7 +39,7 @@ type Props = {
 };
 
 type ScreenProps = {
-  /** Not drawn — the screens speak for themselves — but kept so the region is still announced. */
+  /** Not drawn — the screens speak for themselves — but kept so the region is still announced. The whole name. */
   label: string;
   children: ReactNode;
 };
@@ -85,7 +81,7 @@ const Screen: FC<ScreenProps> = ({ label, children }) => {
       : 0;
 
   return (
-    <section aria-label={`${label} preview`} className="flex min-h-0 flex-1 flex-col">
+    <section aria-label={label} className="flex min-h-0 flex-1 flex-col">
       <div ref={containerRef} className="relative min-h-0 flex-1 overflow-hidden">
         {scale > 0 ? (
           <div
@@ -107,27 +103,30 @@ const Screen: FC<ScreenProps> = ({ label, children }) => {
   );
 };
 
-const NAV_ITEMS = ["Home", "Inbox", "Search", "Organization", "Calendar"];
+/** The mock's words are catalogue keys (`settings.appearance.preview.*`), so the miniature speaks the reader's language. */
+const NAV_ITEMS = ["nav.home", "nav.inbox", "nav.search", "nav.organization", "nav.calendar"] as const;
 
-const STATS: [string, string, string][] = [
-  ["Open positions", "18", "+3 this month"],
-  ["Time to hire", "24d", "-2d vs. last quarter"],
-  ["Offer acceptance", "87%", "+5% vs. last quarter"],
-];
+const STATS = [
+  { name: "stats.openPositions.label", value: "stats.openPositions.value", delta: "stats.openPositions.delta" },
+  { name: "stats.timeToHire.label", value: "stats.timeToHire.value", delta: "stats.timeToHire.delta" },
+  { name: "stats.offerAcceptance.label", value: "stats.offerAcceptance.value", delta: "stats.offerAcceptance.delta" },
+] as const;
 
 const TREND = [38, 52, 44, 66, 58, 78, 71, 92, 84, 96];
 
-const PIPELINE: [string, number][] = [
-  ["Applied", 100],
-  ["Screening", 72],
-  ["Interview", 48],
-  ["Offer", 24],
-];
+const PIPELINE = [
+  ["pipeline.applied", 100],
+  ["pipeline.screening", 72],
+  ["pipeline.interview", 48],
+  ["pipeline.offer", 24],
+] as const;
 
 const DashboardScreen: FC<{
   companyName: string;
   backgroundUrl: string | null;
-}> = ({ companyName, backgroundUrl }) => (
+}> = ({ companyName, backgroundUrl }) => {
+  const t = useTranslations("settings.appearance.preview");
+  return (
   <div className="flex h-full w-full bg-page text-card-title text-primary">
     {/* The sidebar of SPEC § 13.6: the subtle surface, the company's tile, the active item in the muted accent. */}
     <aside className="flex w-[240px] shrink-0 flex-col gap-8 border-r border-sidebar-border bg-sidebar p-4">
@@ -154,7 +153,7 @@ const DashboardScreen: FC<{
               )}
             >
               <span className={cn("size-4 rounded-tag", active ? "bg-accent" : "bg-strong")} />
-              {item}
+              {t(item)}
             </span>
           );
         })}
@@ -186,31 +185,31 @@ const DashboardScreen: FC<{
       <div className="relative flex min-h-0 flex-1 flex-col gap-6 p-10">
         <header className="flex items-end justify-between gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="m-0 text-page-title">Dashboard</h1>
+            <h1 className="m-0 text-page-title">{t("dashboard.title")}</h1>
 
             <p className="m-0 text-tertiary">
-              Track hiring activity, team growth and open roles in one place.
+              {t("dashboard.subtitle")}
             </p>
           </div>
 
           <span className="flex h-9 items-center rounded-control bg-accent px-4 text-body font-medium text-on-accent">
-            Manage users
+            {t("dashboard.action")}
           </span>
         </header>
 
         <section className="grid grid-cols-3 gap-6">
-          {STATS.map(([label, value, delta]) => (
-            <div key={label} className="rounded-card border border-divider bg-card/70 p-5">
-              <p className="m-0 text-body text-tertiary">{label}</p>
-              <p className="m-0 mt-2 text-page-title text-secondary">{value}</p>
-              <p className="m-0 mt-1 text-hint text-tertiary">{delta}</p>
+          {STATS.map(({ name, value, delta }) => (
+            <div key={name} className="rounded-card border border-divider bg-card/70 p-5">
+              <p className="m-0 text-body text-tertiary">{t(name)}</p>
+              <p className="m-0 mt-2 text-page-title text-secondary">{t(value)}</p>
+              <p className="m-0 mt-1 text-hint text-tertiary">{t(delta)}</p>
             </div>
           ))}
         </section>
 
         <section className="grid min-h-0 flex-1 grid-cols-3 gap-6">
           <div className="col-span-2 flex flex-col rounded-card border border-divider bg-card/70 p-5">
-            <p className="m-0 font-medium">Recruitment trends</p>
+            <p className="m-0 font-medium">{t("dashboard.trends")}</p>
 
             <div className="mt-6 flex flex-1 items-end gap-3">
               {TREND.map((height, index) => (
@@ -227,12 +226,12 @@ const DashboardScreen: FC<{
           </div>
 
           <div className="flex flex-col gap-4 rounded-card border border-divider bg-card/70 p-5">
-            <p className="m-0 font-medium">Candidate pipeline</p>
+            <p className="m-0 font-medium">{t("dashboard.pipeline")}</p>
 
             {PIPELINE.map(([stage, share]) => (
               <div key={stage} className="flex flex-col gap-2">
                 <span className="flex justify-between text-body text-tertiary">
-                  {stage}
+                  {t(stage)}
                   <span className="text-secondary">{share}%</span>
                 </span>
 
@@ -249,14 +248,17 @@ const DashboardScreen: FC<{
       </div>
     </main>
   </div>
-);
+  );
+};
 
 const LoginScreen: FC<{
   backgroundUrl: string | null;
   logoUrl: string | null;
   headline: string;
   subheadline: string;
-}> = ({ backgroundUrl, logoUrl, headline, subheadline }) => (
+}> = ({ backgroundUrl, logoUrl, headline, subheadline }) => {
+  const t = useTranslations("settings.appearance.preview");
+  return (
   <div className="relative flex h-full w-full flex-col items-center overflow-hidden bg-mist">
     {backgroundUrl && (
       <>
@@ -276,7 +278,7 @@ const LoginScreen: FC<{
         </div>
 
         <div className="flex flex-col gap-5">
-          {["Email address", "Password"].map((placeholder) => (
+          {[t("login.email"), t("login.password")].map((placeholder) => (
             <span
               key={placeholder}
               className="flex h-11 items-center rounded-control border border-field px-4 text-tertiary"
@@ -286,11 +288,11 @@ const LoginScreen: FC<{
           ))}
 
           <span className="flex h-11 items-center justify-center rounded-control bg-accent font-medium text-on-accent">
-            Sign in
+            {t("login.signIn")}
           </span>
         </div>
 
-        <p className="m-0 text-center text-body text-accent-text">Forgot password?</p>
+        <p className="m-0 text-center text-body text-accent-text">{t("login.forgot")}</p>
       </AuthCard>
     </div>
 
@@ -298,7 +300,8 @@ const LoginScreen: FC<{
       <PoweredByNoddo />
     </span>
   </div>
-);
+  );
+};
 
 export const AppearancePreview: FC<Props> = ({
   accent,
@@ -311,6 +314,8 @@ export const AppearancePreview: FC<Props> = ({
   imageOnDashboard,
 }) => {
   const island = accentAttributes(accent);
+  const t = useTranslations("settings.appearance.preview");
+  const tAuth = useTranslations("auth");
 
   return (
     <div
@@ -320,19 +325,19 @@ export const AppearancePreview: FC<Props> = ({
       data-test="appearance-preview"
       className="flex min-h-0 flex-1 flex-col gap-4"
     >
-      <Screen label="Dashboard">
+      <Screen label={t("dashboardRegion")}>
         <DashboardScreen
-          companyName={companyName?.trim() || "Your company"}
+          companyName={companyName?.trim() || t("yourCompany")}
           backgroundUrl={imageOnDashboard ? loginImageUrl : null}
         />
       </Screen>
 
-      <Screen label="Sign-in screen">
+      <Screen label={t("loginRegion")}>
         <LoginScreen
           backgroundUrl={imageOnLogin ? loginImageUrl : null}
           logoUrl={logoUrl ?? null}
-          headline={headline.trim() || DEFAULT_LOGIN_HEADLINE}
-          subheadline={subheadline.trim() || DEFAULT_LOGIN_SUBHEADLINE}
+          headline={headline.trim() || tAuth(DEFAULT_LOGIN_HEADLINE_KEY)}
+          subheadline={subheadline.trim() || tAuth(DEFAULT_LOGIN_SUBHEADLINE_KEY)}
         />
       </Screen>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -28,6 +29,7 @@ export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
   onConfirmAction,
   onCancelAction,
 }) => {
+  const t = useTranslations("structure.legalEntities");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -61,9 +63,9 @@ export const CreateLegalEntityModal: FC<CreateLegalEntityModalProps> = ({
           className="overflow-hidden p-0"
         >
           <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
-            <DialogTitle>Add legal entity</DialogTitle>
+            <DialogTitle>{t("list.add")}</DialogTitle>
             <DialogDescription>
-              Add registration and address details for a company legal unit.
+              {t("create.description")}
             </DialogDescription>
           </DialogHeader>
 

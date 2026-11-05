@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Cancel01Icon, PencilEdit02Icon, Undo02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -16,16 +17,11 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { previewStartAction, startProcessAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { useInvalidateLifecycle, useLifecycleTemplates } from "@/components/modules/lifecycle/hooks";
+import { assigneeKindText, describeDue } from "@/components/modules/lifecycle/i18n";
 import {
-  ACCESS_PROBLEM_LABELS,
-  ASSIGNEE_PROBLEM_LABELS,
-  assigneeKindLabel,
-  PROCESS_TYPE_LABELS,
-  TASK_KIND_LABELS,
-  describeDue,
   type ItemOverride,
   type PlannedTask,
   type ProcessType,
@@ -54,6 +50,9 @@ type Edit = { title?: string; assignee?: PickedUser | null; removed?: boolean };
  *    who has left or has not started is flagged, and can be replaced or the task removed here.
  */
 export function StartProcessModal({ open, type, userId, fullName, lineManager, onCloseAction }: Props) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const invalidate = useInvalidateLifecycle();
   const { data: templates, isLoading: isLoadingTemplates } = useLifecycleTemplates(type, open);
@@ -84,7 +83,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     setFieldErrors({});
   }, [open, lineManager]);
 
-  const usable = useMemo(() => (templates ?? []).filter((t) => !t.archivedAt), [templates]);
+  const usable = useMemo(() => (templates ?? []).filter((template) => !template.archivedAt), [templates]);
 
   const request = (withOverrides: boolean): StartProcessRequest => ({
     type,
@@ -93,11 +92,11 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     hireDate: hireDate || null,
     email: email.trim() || null,
     items: withOverrides && preview ? preview.tasks
-      .filter((t) => edits[t.templateItemId])
-      .map((t): ItemOverride => {
-        const e = edits[t.templateItemId];
+      .filter((task) => edits[task.templateItemId])
+      .map((task): ItemOverride => {
+        const e = edits[task.templateItemId];
         return {
-          templateItemId: t.templateItemId,
+          templateItemId: task.templateItemId,
           removed: Boolean(e.removed),
           title: e.title ?? null,
           assigneeKind: e.assignee ? "SPECIFIC_USER" : null,
@@ -110,7 +109,7 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     setError(null);
     setFieldErrors({});
     if (!templateId) {
-      setFieldErrors({ templateId: "Choose a template." });
+      setFieldErrors({ templateId: t("start.chooseTemplate") });
       return;
     }
     setBusy(true);
@@ -150,11 +149,11 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     }
   };
 
-  const unresolved = (t: PlannedTask) => {
-    const e = edits[t.templateItemId];
+  const unresolved = (task: PlannedTask) => {
+    const e = edits[task.templateItemId];
     if (e?.removed) return false;
     if (e?.assignee) return false;
-    return Boolean(t.assigneeProblem) || !t.assigneeUserId;
+    return Boolean(task.assigneeProblem) || !task.assigneeUserId;
   };
   const blocking = preview?.tasks.some(unresolved) ?? false;
 
@@ -162,11 +161,11 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Start {PROCESS_TYPE_LABELS[type]}</DialogTitle>
+          <DialogTitle>{t("start.title", { type })}</DialogTitle>
           <DialogDescription>
             {step === "choose"
-              ? `For ${fullName}. You review every task before anything is created.`
-              : "Check who does what and when. Anything marked needs a decision before the process can start."}
+              ? t("start.descriptionChoose", { name: fullName })
+              : t("start.descriptionReview")}
           </DialogDescription>
         </DialogHeader>
 
@@ -174,47 +173,45 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
           {step === "choose" ? (
             <>
               <div className="space-y-1.5">
-                <RequiredLabel htmlFor="start-template" required>Template</RequiredLabel>
+                <RequiredLabel htmlFor="start-template" required>{t("start.template")}</RequiredLabel>
                 <SearchableSelect
                   id="start-template"
-                  options={usable.map((t) => ({ value: t.id, label: t.name, hint: `${t.taskCount} ${t.taskCount === 1 ? "task" : "tasks"}` }))}
+                  options={usable.map((template) => ({ value: template.id, label: template.name, hint: t("shared.taskCount", { count: template.taskCount }) }))}
                   value={templateId || null}
                   onChange={(v) => setTemplateId(v ?? "")}
-                  placeholder="Select…"
+                  placeholder={t("shared.selectPlaceholder")}
                   clearable={false}
                 />
                 {/* Only once the list has actually come back: an empty `data` while the query is in
                     flight told somebody who has templates that they have none, for as long as the
                     request took. */}
                 {!isLoadingTemplates && usable.length === 0 && (
-                  <p className="text-hint text-tertiary">
-                    There are no {PROCESS_TYPE_LABELS[type].toLowerCase()} templates yet. Add one in Settings → Preboarding &amp; Onboarding.
-                  </p>
+                  <p className="text-hint text-tertiary">{t("start.noTemplates", { type })}</p>
                 )}
                 {fieldErrors.templateId && <FieldError>{fieldErrors.templateId}</FieldError>}
               </div>
 
               <div className="space-y-1.5">
-                <RequiredLabel required>{assigneeKindLabel("ONBOARDING_MANAGER", type)}</RequiredLabel>
+                <RequiredLabel required>{assigneeKindText(t, "ONBOARDING_MANAGER", type)}</RequiredLabel>
                 <UserPickerField value={manager} onChange={setManager} />
-                <p className="text-hint text-tertiary">Follows the process through. Anybody who works here can be one.</p>
+                <p className="text-hint text-tertiary">{t("start.managerHint")}</p>
                 {fieldErrors.managerUserId && <FieldError>{fieldErrors.managerUserId}</FieldError>}
               </div>
 
               {(preview?.hireDateRequired || fieldErrors.hireDate) && (
                 <div className="space-y-1.5">
-                  <RequiredLabel htmlFor="start-hire-date" required>Hire date</RequiredLabel>
-                  <DatePicker id="start-hire-date" value={hireDate} onChange={setHireDate} ariaLabel="Hire date" />
-                  <p className="text-hint text-tertiary">Every task is dated from it. It is saved on the profile.</p>
+                  <RequiredLabel htmlFor="start-hire-date" required>{t("start.hireDate")}</RequiredLabel>
+                  <DatePicker id="start-hire-date" value={hireDate} onChange={setHireDate} ariaLabel={t("start.hireDate")} />
+                  <p className="text-hint text-tertiary">{t("start.hireDateHint")}</p>
                   {fieldErrors.hireDate && <FieldError>{fieldErrors.hireDate}</FieldError>}
                 </div>
               )}
 
               {(preview?.emailRequired || fieldErrors.email) && (
                 <div className="space-y-1.5">
-                  <RequiredLabel htmlFor="start-email" required>Email</RequiredLabel>
+                  <RequiredLabel htmlFor="start-email" required>{tCommon("fields.email")}</RequiredLabel>
                   <Input id="start-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                  <p className="text-hint text-tertiary">The preboarding link is sent here. It is saved on the profile.</p>
+                  <p className="text-hint text-tertiary">{t("start.emailHint")}</p>
                   {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
                 </div>
               )}
@@ -222,26 +219,34 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
           ) : preview && (
             <>
               <p className="text-body">
-                <span className="font-medium">{preview.templateName}</span> · {type === "OFFBOARDING" ? "last day" : "starts"}{" "}
-                {formatDisplayDate(preview.anchorDate ?? hireDate, { style: "medium" })} · {type === "OFFBOARDING" ? "offboarding" : "onboarding"} manager{" "}
-                {preview.manager?.name ?? manager?.firstName ?? "—"}
+                {t.rich("start.summary", {
+                  template: preview.templateName,
+                  leaving: type === "OFFBOARDING" ? "yes" : "no",
+                  date: formatDisplayDate(preview.anchorDate ?? hireDate, { style: "medium" }),
+                  name: preview.manager?.name ?? manager?.firstName ?? "—",
+                  b: (chunks) => <span className="font-medium">{chunks}</span>,
+                })}
               </p>
               <ul className="divide-y divide-divider rounded-control border border-divider">
-                {preview.tasks.map((t) => {
-                  const e = edits[t.templateItemId] ?? {};
-                  const problem = unresolved(t);
+                {preview.tasks.map((task) => {
+                  const e = edits[task.templateItemId] ?? {};
+                  const problem = unresolved(task);
+                  const who = e.assignee ? e.assignee.firstName ?? "" : task.assigneeName ?? t("shared.nobody");
+                  const kind = t(`taskKind.${task.kind}`);
+                  const due = describeDue(t, task.dueKind, task.offsetDays, type);
+                  const named = (text: string) => (task.assigneeName ? t("shared.namedProblem", { name: task.assigneeName, problem: text }) : text);
                   return (
-                    <li key={t.templateItemId} className={`space-y-2 px-3 py-3 ${e.removed ? "opacity-60" : ""}`} data-testid="planned-task">
+                    <li key={task.templateItemId} className={`space-y-2 px-3 py-3 ${e.removed ? "opacity-60" : ""}`} data-testid="planned-task">
                       <div className="flex items-start gap-2">
                         <div className="flex-1 space-y-1">
                           {/* The title is read as text, not only as the value of a box: the walk saw this
                               list as kinds alone (SWEEP S11). Renaming opens the box on request. */}
-                          {renaming === t.templateItemId && !e.removed ? (
+                          {renaming === task.templateItemId && !e.removed ? (
                             <Input
-                              aria-label="Task title"
+                              aria-label={t("shared.taskTitle")}
                               autoFocus
-                              value={e.title ?? t.title}
-                              onChange={(ev) => setEdits((all) => ({ ...all, [t.templateItemId]: { ...e, title: ev.target.value } }))}
+                              value={e.title ?? task.title}
+                              onChange={(ev) => setEdits((all) => ({ ...all, [task.templateItemId]: { ...e, title: ev.target.value } }))}
                               onBlur={() => setRenaming(null)}
                               onKeyDown={(ev) => {
                                 if (ev.key === "Enter") {
@@ -252,29 +257,29 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                             />
                           ) : (
                             <p className={`text-body font-medium ${e.removed ? "line-through" : ""}`}>
-                              {(e.title ?? t.title).trim() || "Untitled task"}
+                              {(e.title ?? task.title).trim() || t("shared.untitledTask")}
                             </p>
                           )}
                           <p className="text-hint text-tertiary">
-                            {TASK_KIND_LABELS[t.kind]} · {describeDue(t.dueKind, t.offsetDays, type)}
-                            {t.dueDate ? ` (${formatDisplayDate(t.dueDate, { style: "medium" })})` : ""} · done by{" "}
-                            {e.assignee ? e.assignee.firstName : t.assigneeName ?? "nobody"}
+                            {task.dueDate
+                              ? t("start.taskMetaDate", { kind, due, date: formatDisplayDate(task.dueDate, { style: "medium" }), name: who })
+                              : t("start.taskMeta", { kind, due, name: who })}
                           </p>
-                          {(t.waitsFor ?? []).filter((id) => !edits[id]?.removed).length > 0 && (
+                          {(task.waitsFor ?? []).filter((id) => !edits[id]?.removed).length > 0 && (
                             <p className="text-hint text-tertiary">
-                              Waits for{" "}
-                              {(t.waitsFor ?? []).filter((id) => !edits[id]?.removed)
-                                .map((id) => preview.tasks.find((p) => p.templateItemId === id)?.title ?? "another task").join(", ")}
-                              {" "}— its assignee is told when that is done.
+                              {t("start.waitsFor", {
+                                names: (task.waitsFor ?? []).filter((id) => !edits[id]?.removed)
+                                  .map((id) => preview.tasks.find((p) => p.templateItemId === id)?.title ?? t("shared.anotherTask")).join(", "),
+                              })}
                             </p>
                           )}
                         </div>
-                        {!e.removed && renaming !== t.templateItemId && (
+                        {!e.removed && renaming !== task.templateItemId && (
                           <Button type="button"
                             variant="ghost"
                             size="icon-sm"
-                            aria-label="Rename task"
-                            onClick={() => setRenaming(t.templateItemId)}
+                            aria-label={t("start.renameTask")}
+                            onClick={() => setRenaming(task.templateItemId)}
                           >
                             <Icon icon={PencilEdit02Icon} size="sm" />
                           </Button>
@@ -282,19 +287,18 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                         <Button type="button"
                           variant="ghost"
                           size="icon-sm"
-                          aria-label={e.removed ? "Keep task" : "Remove task"}
-                          onClick={() => setEdits((all) => ({ ...all, [t.templateItemId]: { ...e, removed: !e.removed } }))}
+                          aria-label={e.removed ? t("start.keepTask") : t("shared.removeTask")}
+                          onClick={() => setEdits((all) => ({ ...all, [task.templateItemId]: { ...e, removed: !e.removed } }))}
                         >
                           {e.removed ? <Icon icon={Undo02Icon} size="sm" /> : <Icon icon={Cancel01Icon} size="sm" />}
                         </Button>
                       </div>
                       {/* C4: said, not refused — access can be granted after the start. A new assignee is
                           checked again by the start itself. */}
-                      {!e.removed && !problem && !e.assignee && t.accessProblem && (
+                      {!e.removed && !problem && !e.assignee && task.accessProblem && (
                         <p role="status" className="flex items-center gap-1.5 text-hint text-status-pending-text">
                           <Icon icon={Alert02Icon} size="sm" />
-                          {t.assigneeName ? `${t.assigneeName}: ` : ""}
-                          {ACCESS_PROBLEM_LABELS[t.accessProblem]}. Grant it, or choose somebody who can.
+                          {named(t("start.accessProblem", { problem: t(`accessProblem.${task.accessProblem}`) }))}
                         </p>
                       )}
                       {!e.removed && (problem || e.assignee) && (
@@ -302,14 +306,13 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                           {problem && (
                             <p role="alert" className="flex items-center gap-1.5 text-hint text-status-pending-text">
                               <Icon icon={Alert02Icon} size="sm" />
-                              {t.assigneeName ? `${t.assigneeName}: ` : ""}
-                              {ASSIGNEE_PROBLEM_LABELS[t.assigneeProblem ?? "MISSING"]}. Choose somebody else or remove the task.
+                              {named(t("start.assigneeProblem", { problem: t(`assigneeProblem.${task.assigneeProblem ?? "MISSING"}`) }))}
                             </p>
                           )}
-                          <Label className="text-hint">Done by</Label>
+                          <Label className="text-hint">{t("shared.doneBy")}</Label>
                           <UserPickerField
                             value={e.assignee ?? null}
-                            onChange={(u) => setEdits((all) => ({ ...all, [t.templateItemId]: { ...e, assignee: u } }))}
+                            onChange={(u) => setEdits((all) => ({ ...all, [task.templateItemId]: { ...e, assignee: u } }))}
                           />
                         </div>
                       )}
@@ -325,9 +328,9 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
 
         <DialogFooter>
           {step === "review" && (
-            <Button type="button" variant="secondary" onClick={() => setStep("choose")} disabled={busy}>Back</Button>
+            <Button type="button" variant="secondary" onClick={() => setStep("choose")} disabled={busy}>{tCommon("actions.back")}</Button>
           )}
-          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
           {step === "choose" ? (
             <Button type="button"
               onClick={() => (preview && (hireDate || !preview.hireDateRequired) && (email.trim() || !preview.emailRequired)
@@ -335,10 +338,10 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
                 : loadPreview())}
               disabled={busy}
             >
-              {busy ? "Checking…" : "Review tasks"}
+              {busy ? t("start.checking") : t("start.reviewTasks")}
             </Button>
           ) : (
-            <Button type="button" onClick={start} disabled={busy || blocking}>{busy ? "Starting…" : "Start"}</Button>
+            <Button type="button" onClick={start} disabled={busy || blocking}>{busy ? t("start.starting") : t("start.start")}</Button>
           )}
         </DialogFooter>
       </DialogContent>

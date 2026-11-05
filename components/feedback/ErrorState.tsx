@@ -1,12 +1,13 @@
 "use client";
 
 import { Alert02Icon, Refresh01Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { Illustration } from "@/components/illustrations/Illustration";
 import type { Scene } from "@/components/illustrations/scenes";
 import { Button } from "@/components/desact/button";
 import { ApiError, ForbiddenError, NotFoundError } from "@/components/clients/exceptions";
-import { FALLBACK_ERROR_MESSAGE, messageForError } from "@/lib/errors/errorMessages";
+import { isFallbackErrorMessage, messageForError } from "@/lib/errors/errorMessages";
 
 /**
  * A fetch that failed, shown where the data was going to be.
@@ -29,16 +30,17 @@ export const ErrorState: React.FC<{
    */
   message?: string;
 }> = ({ error, title, compact = false, onRetry, message: override }) => {
+  const t = useTranslations("common");
   const message = override ?? messageForError(error);
   const apiError = error instanceof ApiError ? error : undefined;
 
   // Worth showing only when the sentence above says nothing specific: then the code is the one
   // thing support can match on. A recognised refusal explains itself and needs no reference.
-  const reference = message === FALLBACK_ERROR_MESSAGE
+  const reference = isFallbackErrorMessage(message)
     ? apiError?.requestId ?? apiError?.code
     : apiError?.requestId;
 
-  const heading = title ?? defaultHeading(error);
+  const heading = title ?? t(defaultHeading(error));
 
   return (
     <div
@@ -73,17 +75,17 @@ export const ErrorState: React.FC<{
       {!(error instanceof ForbiddenError) && (
         <Button type="button" variant="secondary" size="sm" onClick={onRetry ?? (() => window.location.reload())}>
           <Icon icon={Refresh01Icon} size="sm" />
-          Try again
+          {t("actions.retry")}
         </Button>
       )}
     </div>
   );
 };
 
-const defaultHeading = (error: unknown): string => {
-  if (error instanceof ForbiddenError) return "This is private";
-  if (error instanceof NotFoundError) return "We can't find this";
-  return "This didn't load";
+const defaultHeading = (error: unknown) => {
+  if (error instanceof ForbiddenError) return "access.private" as const;
+  if (error instanceof NotFoundError) return "errorState.notFound" as const;
+  return "errorState.didNotLoad" as const;
 };
 
 const sceneFor = (error: unknown): Scene => {

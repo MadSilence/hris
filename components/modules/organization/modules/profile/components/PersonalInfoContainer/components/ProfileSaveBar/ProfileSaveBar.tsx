@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
 
@@ -13,9 +14,6 @@ type Props = {
   onDiscard: () => void;
   onSave: () => void;
 };
-
-export const unsavedChangesLabel = (count: number) =>
-  `${count} unsaved ${count === 1 ? "change" : "changes"}`;
 
 /**
  * "3 unsaved changes · Discard · Save" — the profile's one Save (owner's decision, 2026-09-14,
@@ -33,15 +31,17 @@ export const ProfileSaveBar: React.FC<Props> = ({
   onDiscard,
   onSave,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   if (changeCount === 0 && !error) return null;
 
   return (
     <div
       role="region"
-      aria-label="Unsaved changes"
+      aria-label={t("profile.saveBar.region")}
       className="sticky bottom-0 z-10 flex items-center justify-between gap-3 rounded-control border border-divider bg-page px-4 py-3 shadow-raised"
     >
-      <span className="text-body font-medium text-primary">{unsavedChangesLabel(changeCount)}</span>
+      <span className="text-body font-medium text-primary">{t("profile.saveBar.count", { count: changeCount })}</span>
 
       <div className="flex min-w-0 items-center gap-2">
         {error && (
@@ -50,10 +50,10 @@ export const ProfileSaveBar: React.FC<Props> = ({
           </span>
         )}
         <Button type="button" variant="secondary" size="sm" onClick={onDiscard} disabled={isSaving}>
-          Discard
+          {tCommon("actions.discard")}
         </Button>
         <Button type="button" size="sm" onClick={onSave} disabled={isSaving || saveBlocked || changeCount === 0}>
-          {isSaving ? "Saving…" : "Save"}
+          {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
         </Button>
       </div>
     </div>

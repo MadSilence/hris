@@ -1,12 +1,13 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon, CallIcon, CheckListIcon, CheckmarkSquare02Icon, Clock01Icon, Coins01Icon, Globe02Icon, GridTableIcon, LanguageSkillIcon, LeftToRightListBulletIcon, Link01Icon, Location01Icon, Mail01Icon, Money03Icon, PackageIcon, TextAlignLeftIcon, TextFontIcon, UserIcon } from "@hugeicons/core-free-icons";
 
 import { Badge } from "@/components/desact/badge";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { AttributeType } from "@/models/attribute";
-import { getAttributeTypeLabel } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils/attributeTypeUtils";
+import { attributeTypeLabelKey } from "@/components/modules/settings/modules/attributes/utils/attributeTypeUtils/attributeTypeUtils";
 
 const TYPE_ICONS: Record<AttributeType, IconSvgElement> = {
   [AttributeType.TEXT]: TextFontIcon,
@@ -31,9 +32,12 @@ const TYPE_ICONS: Record<AttributeType, IconSvgElement> = {
 };
 
 /** Attribute type shown as a chip — mirrors the leave-type category chip (an icon and a word). */
-export const AttributeTypeChip: FC<{ type: AttributeType }> = ({ type }) => (
+export const AttributeTypeChip: FC<{ type: AttributeType }> = ({ type }) => {
+  const t = useTranslations("settings");
+  return (
   <Badge variant="neutral">
     <Icon icon={TYPE_ICONS[type] ?? TextFontIcon} size="sm" className="size-3.5" />
-    {getAttributeTypeLabel(type)}
+    {t(attributeTypeLabelKey(type))}
   </Badge>
-);
+  );
+};

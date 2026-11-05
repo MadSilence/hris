@@ -1,3 +1,4 @@
+import type { useTranslations } from "next-intl";
 import type {
   CreateTimeOffPolicyRequest,
   UpdateTimeOffPolicyRequest,
@@ -303,36 +304,37 @@ export type WizardStepId =
 export function validatePolicyStep(
   stepId: WizardStepId,
   v: PolicyWizardValues,
+  t: ReturnType<typeof useTranslations<"timeOff">>,
 ): string | null {
   switch (stepId) {
     case "basics": {
-      if (v.name.trim().length < 2) return "Please enter a policy name (at least 2 characters).";
+      if (v.name.trim().length < 2) return t("policyWizard.validation.name");
       return null;
     }
     case "entitlement": {
       if (!v.unlimitedQuota) {
         const q = toNumber(v.yearlyQuota);
-        if (q === null || q < 0) return "Please enter a valid yearly quota (0 or more).";
+        if (q === null || q < 0) return t("policyWizard.validation.quota");
       }
       if (v.renewalType === TimeOffPolicyRenewalType.YearlyFixedDate) {
         const d = toNumber(v.renewalFixedDay);
         const m = toNumber(v.renewalFixedMonth);
-        if (d === null || d < 1 || d > 31) return "Renewal day must be between 1 and 31.";
-        if (m === null || m < 1 || m > 12) return "Renewal month must be between 1 and 12.";
+        if (d === null || d < 1 || d > 31) return t("policyWizard.validation.renewalDay");
+        if (m === null || m < 1 || m > 12) return t("policyWizard.validation.renewalMonth");
       }
       return null;
     }
     case "carryover": {
       if (v.carryoverType === TimeOffPolicyCarryoverType.Limited) {
         const l = toNumber(v.carryoverLimit);
-        if (l === null || l < 0) return "Please enter a carryover limit (0 or more).";
+        if (l === null || l < 0) return t("policyWizard.validation.carryoverLimit");
       }
       if (
         v.carryoverType !== TimeOffPolicyCarryoverType.None &&
         v.carryoverExpiryType === TimeOffPolicyCarryoverExpiryType.AfterPeriod
       ) {
         const val = toNumber(v.carryoverExpiryValue);
-        if (val === null || val <= 0) return "Carryover expiry period must be greater than 0.";
+        if (val === null || val <= 0) return t("policyWizard.validation.carryoverExpiry");
       }
       return null;
     }
@@ -341,33 +343,33 @@ export function validatePolicyStep(
         v.reqCertificateRequirementType === TimeOffCertificateRequirementType.FromDuration &&
         toNumber(v.reqCertificateRequiredFromDuration) === null
       ) {
-        return "Please enter the duration from which a certificate is required.";
+        return t("policyWizard.validation.certificateDuration");
       }
       if (v.reqNoticeRequiredEnabled && toNumber(v.reqDefaultNoticeDays) === null) {
-        return "Please enter the default notice days.";
+        return t("policyWizard.validation.noticeDays");
       }
       if (v.reqAllowPastRequests && toNumber(v.reqPastLimitDays) === null) {
-        return "Please enter how many days back past requests are allowed.";
+        return t("policyWizard.validation.pastLimit");
       }
       return null;
     }
     case "approvals": {
       if (v.apprRequiresApproval) {
-        if (v.apprApprovers.length < 1) return "Add at least one approval step.";
+        if (v.apprApprovers.length < 1) return t("policyWizard.validation.approvalStep");
         if (
           v.apprApprovers.some(
             (a) => a.type === TimeOffPolicyApproverType.SpecificUser && !a.user,
           )
         ) {
-          return "Pick a person for each specific-user approval step.";
+          return t("policyWizard.validation.specificUser");
         }
         if (v.apprMode === "N_OF_M") {
           // The same rule the API enforces: "any 3 of these 2" is a policy nothing can ever approve,
           // which is the dead end the empty chain already had.
           const n = toNumber(v.apprRequiredCount);
-          if (n === null || n < 1) return "Enter how many approvals are needed.";
+          if (n === null || n < 1) return t("policyWizard.validation.requiredCount");
           if (n > v.apprApprovers.length) {
-            return `Only ${v.apprApprovers.length} approver${v.apprApprovers.length === 1 ? " is" : "s are"} listed, so ${n} approvals can never be collected.`;
+            return t("policyWizard.validation.tooFewApprovers", { listed: v.apprApprovers.length, needed: n });
           }
         }
       }
@@ -377,7 +379,7 @@ export function validatePolicyStep(
       if (v.eligEnabled) {
         const n = toNumber(v.eligDelayValue);
         if (n === null || n < 0) {
-          return "Please enter a non-negative waiting-period value.";
+          return t("policyWizard.validation.waitingPeriod");
         }
       }
       return null;
@@ -387,11 +389,11 @@ export function validatePolicyStep(
       if (v.entitlementGrantingMode === TimeOffPolicyEntitlementMode.Accrued) {
         const amount = toNumber(v.accrualAmount);
         if (amount !== null && amount < 0) {
-          return "Accrual amount must be non-negative.";
+          return t("policyWizard.validation.accrualAmount");
         }
         const cap = toNumber(v.accrualCap);
         if (cap !== null && cap < 0) {
-          return "Accrual cap must be non-negative.";
+          return t("policyWizard.validation.accrualCap");
         }
       }
       return null;
@@ -400,15 +402,15 @@ export function validatePolicyStep(
       for (const r of v.restrictions) {
         if (r.type === TimeOffRestrictionType.Blackout) {
           if (!r.startDate || !r.endDate) {
-            return "Each blackout needs a start and an end date.";
+            return t("policyWizard.validation.blackoutDates");
           }
           if (r.endDate < r.startDate && r.recurrence !== TimeOffRestrictionRecurrence.Yearly) {
-            return "A blackout's end date must be on or after its start date.";
+            return t("policyWizard.validation.blackoutOrder");
           }
         } else {
           const n = toNumber(r.maxUsersAway);
           if (n === null || n < 0) {
-            return "Each coverage cap needs a non-negative number of people.";
+            return t("policyWizard.validation.coverageCap");
           }
         }
       }
@@ -416,14 +418,14 @@ export function validatePolicyStep(
     }
     case "tenure": {
       const seenYears = new Set<number>();
-      for (const t of v.tenureRules) {
-        const years = toNumber(t.yearsOfService);
-        const bonus = toNumber(t.bonusDays);
+      for (const tier of v.tenureRules) {
+        const years = toNumber(tier.yearsOfService);
+        const bonus = toNumber(tier.bonusDays);
         if (years === null || years < 0 || bonus === null || bonus < 0) {
-          return "Each tenure tier needs non-negative years and bonus days.";
+          return t("policyWizard.validation.tenureValues");
         }
         if (seenYears.has(years)) {
-          return "Tenure tiers must have distinct years of service.";
+          return t("policyWizard.validation.tenureDistinct");
         }
         seenYears.add(years);
       }

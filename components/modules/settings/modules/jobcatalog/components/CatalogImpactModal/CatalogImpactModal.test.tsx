@@ -5,7 +5,7 @@ const baseProps = {
   isOpen: true,
   isLoading: false,
   action: "archive" as const,
-  entityLabel: "job",
+  entityLabel: "job" as const,
   entityName: "Backend Engineer",
   affectedPeople: 0,
   onConfirmAction: jest.fn(),

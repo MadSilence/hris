@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import {
@@ -28,6 +29,8 @@ export const RenameDocumentsFolderModal: FC<
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+
   const requestClose = () => {
     if (isLoading) return;
 
@@ -43,9 +46,9 @@ export const RenameDocumentsFolderModal: FC<
     >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Rename folder</DialogTitle>
+          <DialogTitle>{t("documents.renameFolder.title")}</DialogTitle>
           <DialogDescription>
-            Update the folder name. All documents inside will stay in place.
+            {t("documents.renameFolder.description")}
           </DialogDescription>
         </DialogHeader>
 

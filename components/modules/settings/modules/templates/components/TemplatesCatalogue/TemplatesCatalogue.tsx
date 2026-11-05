@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Badge } from "@/components/desact/badge";
@@ -9,26 +10,27 @@ import { Skeleton } from "@/components/desact/skeleton";
 import { ListToolbar } from "@/components/ui/ListToolbar";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import type { TemplateKind, TemplateSummaryDTO } from "@/api/modules/templates/dto";
 import { useTemplates } from "@/components/modules/settings/modules/templates/hooks";
 
 /** The order the owner asked for (T1): field sets first, then roles, then checklists. */
 export const TEMPLATE_KIND_ORDER: TemplateKind[] = ["FIELD_SET", "ROLE", "PROCESS", "REVIEW_FORM"];
 
-export const TEMPLATE_KIND_LABEL: Record<TemplateKind, string> = {
-  FIELD_SET: "Field sets",
-  ROLE: "Roles",
-  PROCESS: "Onboarding checklists",
-  REVIEW_FORM: "Review forms",
-};
+/** Catalogue keys (`settings` namespace) of each kind's heading. */
+export const TEMPLATE_KIND_LABEL_KEY = {
+  FIELD_SET: "templates.kind.fieldSet.label",
+  ROLE: "templates.kind.role.label",
+  PROCESS: "templates.kind.process.label",
+  REVIEW_FORM: "templates.kind.reviewForm.label",
+} as const satisfies Record<TemplateKind, string>;
 
-const KIND_DESCRIPTION: Record<TemplateKind, string> = {
-  FIELD_SET: "A section of the profile and the fields in it.",
-  ROLE: "A role with its permissions and field access.",
-  PROCESS: "A checklist for a new joiner's first days, ready for the canvas.",
-  REVIEW_FORM: "A performance review form, ready for a review cycle.",
-};
+const KIND_DESCRIPTION_KEY = {
+  FIELD_SET: "templates.kind.fieldSet.description",
+  ROLE: "templates.kind.role.description",
+  PROCESS: "templates.kind.process.description",
+  REVIEW_FORM: "templates.kind.reviewForm.description",
+} as const satisfies Record<TemplateKind, string>;
 
 export interface TemplatesCatalogueProps {
   /** Only this kind — the "Add from Library" entry on the attributes page opens the field sets. */
@@ -42,12 +44,13 @@ export interface TemplatesCatalogueProps {
 export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) => {
   const { data, isLoading, error, refetch } = useTemplates();
   const [query, setQuery] = React.useState("");
+  const t = useTranslations("settings");
 
   const visible = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     return (data ?? [])
-      .filter((t) => !kind || t.kind === kind)
-      .filter((t) => !q || t.title.toLowerCase().includes(q) || t.summary.toLowerCase().includes(q));
+      .filter((template) => !kind || template.kind === kind)
+      .filter((template) => !q || template.title.toLowerCase().includes(q) || template.summary.toLowerCase().includes(q));
   }, [data, kind, query]);
 
   const kinds = TEMPLATE_KIND_ORDER.filter((k) => !kind || k === kind);
@@ -60,26 +63,26 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
         <ErrorState error={error} compact onRetry={() => void refetch()}/>
       ) : isLoading ? (
         <CatalogueSkeleton/>
-      ) : (data ?? []).filter((t) => !kind || t.kind === kind).length === 0 ? (
+      ) : (data ?? []).filter((template) => !kind || template.kind === kind).length === 0 ? (
         <EmptyState
           scene="forms"
-          title="No templates to apply"
-          description="Templates appear here for what you may set up: roles, profile fields or onboarding checklists."
+          title={t("templates.catalogue.emptyTitle")}
+          description={t("templates.catalogue.emptyDescription")}
         />
       ) : visible.length === 0 ? (
-        <NoResults hint="Try a different name."/>
+        <NoResults hint={t("templates.catalogue.noResultsHint")}/>
       ) : (
         kinds.map((k) => {
-          const rows = visible.filter((t) => t.kind === k);
+          const rows = visible.filter((template) => template.kind === k);
           if (rows.length === 0) return null;
           return (
             <section key={k} className="space-y-2" aria-labelledby={`templates-${k}`}>
               <div>
-                <h2 id={`templates-${k}`} className="text-body font-semibold">{TEMPLATE_KIND_LABEL[k]}</h2>
-                <p className="text-body text-tertiary">{KIND_DESCRIPTION[k]}</p>
+                <h2 id={`templates-${k}`} className="text-body font-semibold">{t(TEMPLATE_KIND_LABEL_KEY[k])}</h2>
+                <p className="text-body text-tertiary">{t(KIND_DESCRIPTION_KEY[k])}</p>
               </div>
               <ul className="divide-y divide-divider rounded-control border border-divider">
-                {rows.map((t) => <TemplateRow key={t.key} template={t}/>)}
+                {rows.map((template) => <TemplateRow key={template.key} template={template}/>)}
               </ul>
             </section>
           );
@@ -90,6 +93,8 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
 };
 
 const TemplateRow: React.FC<{ template: TemplateSummaryDTO }> = ({ template }) => {
+  const t = useTranslations("settings");
+  const formatDisplayDate = useDateFormatter();
   const newer = template.appliedVersion != null && template.appliedVersion < template.version;
   return (
     <li>
@@ -100,19 +105,23 @@ const TemplateRow: React.FC<{ template: TemplateSummaryDTO }> = ({ template }) =
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-primary">{template.title}</span>
-            {template.suggested && <Badge variant="outline">Suggested</Badge>}
+            {template.suggested && <Badge variant="outline">{t("templates.suggested")}</Badge>}
             {template.appliedVersion != null && (
               <Badge variant="outline" className="border-divider bg-subtle text-secondary">
-                Applied v{template.appliedVersion}
-                {template.appliedAt ? ` · ${formatDisplayDate(template.appliedAt, { style: "medium" })}` : ""}
+                {template.appliedAt
+                  ? t("templates.catalogue.appliedAt", {
+                      version: template.appliedVersion,
+                      date: formatDisplayDate(template.appliedAt, { style: "medium" }),
+                    })
+                  : t("templates.catalogue.applied", { version: template.appliedVersion })}
               </Badge>
             )}
-            {newer && <Badge variant="outline">v{template.version} Available</Badge>}
+            {newer && <Badge variant="outline">{t("templates.catalogue.available", { version: template.version })}</Badge>}
           </div>
           <p className="text-body text-tertiary">{template.summary}</p>
         </div>
         <span className="shrink-0 text-body text-tertiary">
-          {template.itemCount} {template.itemCount === 1 ? "item" : "items"}
+          {t("templates.catalogue.items", { count: template.itemCount })}
         </span>
         <Icon icon={ArrowRight01Icon} size="sm" className="shrink-0 text-tertiary" />
       </Link>

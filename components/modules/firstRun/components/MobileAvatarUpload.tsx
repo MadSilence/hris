@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Camera01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { NodRing } from "@/components/desact/nod";
@@ -25,6 +26,7 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
   token,
   firstName,
 }) => {
+  const t = useTranslations("firstRun");
   const input = React.useRef<HTMLInputElement>(null);
   const [state, setState] = React.useState<"idle" | "uploading" | "done">("idle");
   const [problem, setProblem] = React.useState<string | null>(null);
@@ -44,7 +46,7 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
     if (res.status !== ActionStatus.SUCCESS) {
       setState("idle");
       // Shown on the page, not in a toast: on a phone a card that slides away is a card that is missed.
-      setProblem(res.errorMessage ?? "That did not work. Ask for a new code and try again.");
+      setProblem(res.errorMessage ?? t("mobileAvatar.failed"));
       return;
     }
     setState("done");
@@ -56,9 +58,9 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
         <div className="flex h-14 w-14 items-center justify-center rounded-pill bg-status-approved-bg">
           <Icon icon={Tick02Icon} size="lg" className="text-status-approved-text" />
         </div>
-        <h1 className="text-section-title text-primary">That&apos;s your photo</h1>
+        <h1 className="text-section-title text-primary">{t("mobileAvatar.done.title")}</h1>
         <p className="text-tertiary">
-          It is already on your profile. You can close this page and go back to your computer.
+          {t("mobileAvatar.done.body")}
         </p>
       </div>
     );
@@ -68,9 +70,9 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
       <div>
         <h1 className="text-section-title text-primary">
-          {firstName ? `Hi ${firstName}` : "Add your photo"}
+          {firstName ? t("mobileAvatar.greeting", { name: firstName }) : t("mobileAvatar.title")}
         </h1>
-        <p className="mt-1 text-tertiary">Take a photo for your profile.</p>
+        <p className="mt-1 text-tertiary">{t("mobileAvatar.lead")}</p>
       </div>
 
       <Button type="button"
@@ -84,7 +86,7 @@ export const MobileAvatarUpload: React.FC<{ token: string; firstName: string | n
         ) : (
           <Icon icon={Camera01Icon} />
         )}
-        {state === "uploading" ? "Uploading" : "Take a photo"}
+        {state === "uploading" ? t("mobileAvatar.uploading") : t("mobileAvatar.takePhoto")}
       </Button>
 
       {problem && <FormError message={problem} className="max-w-xs" />}

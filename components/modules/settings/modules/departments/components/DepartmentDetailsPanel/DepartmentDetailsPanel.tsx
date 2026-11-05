@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { Archive02Icon, ArchiveArrowUpIcon, Delete02Icon, InformationCircleIcon, PencilEdit02Icon, Target02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -39,23 +40,25 @@ function DepartmentIcon() {
 }
 
 function LeadSection({ department }: { department: DepartmentTreeNode }) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
   const lead = department.lead;
 
   return (
     <div>
-      <h3 className="mb-2 text-hint font-semibold text-tertiary">Department lead</h3>
+      <h3 className="mb-2 text-hint font-semibold text-tertiary">{t("labels.lead")}</h3>
 
       {lead ? (
         <UserChip
           id={lead.id}
-          name={`${lead.firstName ?? ""} ${lead.lastName ?? ""}`.trim() || "Lead"}
+          name={`${lead.firstName ?? ""} ${lead.lastName ?? ""}`.trim() || tShared("lead")}
           firstName={lead.firstName}
           lastName={lead.lastName}
           avatarUrl={lead.avatarUrl}
           className="hover:bg-subtle hover:shadow-none"
         />
       ) : (
-        <p className="text-body text-tertiary">No lead assigned.</p>
+        <p className="text-body text-tertiary">{tShared("noLead")}</p>
       )}
     </div>
   );
@@ -71,6 +74,9 @@ export function DepartmentDetailsPanel({
   onDelete,
   onRecenter,
 }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
@@ -103,33 +109,33 @@ export function DepartmentDetailsPanel({
           <button
             type="button"
             onClick={onRecenter}
-            aria-label="Center on chart"
-            title="Center on chart"
+            aria-label={tShared("centerOnChart")}
+            title={tShared("centerOnChart")}
             className="flex h-8 w-8 items-center justify-center rounded-control text-tertiary hover:bg-mist hover:text-secondary"
           >
             <Icon icon={Target02Icon} size="sm" />
           </button>
 
-          <RowActionsMenu label="Department actions">
+          <RowActionsMenu label={t("details.actions")}>
             <PermissionGate resource="ORG.DEPARTMENT" action="EDIT">
               {!isArchived && (
                 <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onEdit}>
-                  Edit
+                  {tCommon("actions.edit")}
                 </RowAction>
               )}
               {isArchived ? (
                 <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />} onClick={onActivate}>
-                  Unarchive
+                  {tShared("unarchive")}
                 </RowAction>
               ) : (
                 <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive}>
-                  Archive
+                  {tCommon("actions.archive")}
                 </RowAction>
               )}
             </PermissionGate>
             <PermissionGate resource="ORG.DEPARTMENT" action="MANAGE">
               <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={onDelete}>
-                Delete
+                {tCommon("actions.delete")}
               </RowActionDestructive>
             </PermissionGate>
           </RowActionsMenu>
@@ -141,22 +147,22 @@ export function DepartmentDetailsPanel({
         <TabsList className="flex-none">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Icon icon={InformationCircleIcon} size="sm" />
-            Overview
+            {tShared("overview")}
           </TabsTrigger>
           <TabsTrigger value="people" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
-            People
+            {tShared("people")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-5 -mx-1.5 min-h-0 flex-1 space-y-5 overflow-y-auto px-1.5">
           {/* Description */}
           <div>
-            <h3 className="mb-2 text-hint font-semibold text-tertiary">Description</h3>
+            <h3 className="mb-2 text-hint font-semibold text-tertiary">{tCommon("fields.description")}</h3>
             {department.description ? (
               <p className="text-body leading-relaxed text-secondary">{department.description}</p>
             ) : (
-              <p className="text-body text-tertiary">No description.</p>
+              <p className="text-body text-tertiary">{tShared("noDescription")}</p>
             )}
           </div>
 
@@ -165,29 +171,29 @@ export function DepartmentDetailsPanel({
 
           {/* Parent department */}
           <div>
-            <h3 className="mb-2 text-hint font-semibold text-tertiary">Parent department</h3>
-            <p className="text-body text-secondary">{parentName ?? "None (top-level)"}</p>
+            <h3 className="mb-2 text-hint font-semibold text-tertiary">{t("labels.parent")}</h3>
+            <p className="text-body text-secondary">{parentName ?? tShared("noneTopLevel")}</p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-control border border-divider p-3.5">
-              <p className="mb-1 text-hint text-tertiary">Direct people</p>
+              <p className="mb-1 text-hint text-tertiary">{tShared("directPeople")}</p>
               <p className="text-page-title leading-none text-primary">{department.memberCount}</p>
             </div>
             <div className="rounded-control border border-divider p-3.5">
-              <p className="mb-1 text-hint text-tertiary">Direct sub-departments</p>
+              <p className="mb-1 text-hint text-tertiary">{t("details.directSub")}</p>
               <p className="text-page-title leading-none text-primary">{department.directSubNodes}</p>
             </div>
             <div className="rounded-control border border-divider p-3.5">
-              <p className="mb-1 text-hint text-tertiary">Total people</p>
+              <p className="mb-1 text-hint text-tertiary">{tShared("totalPeople")}</p>
               <p className="text-page-title leading-none text-primary">{department.totalPeople}</p>
-              <p className="mt-1 text-hint leading-none text-tertiary">incl. all sub-departments</p>
+              <p className="mt-1 text-hint leading-none text-tertiary">{t("details.inclSub")}</p>
             </div>
             <div className="rounded-control border border-divider p-3.5">
-              <p className="mb-1 text-hint text-tertiary">Total sub-departments</p>
+              <p className="mb-1 text-hint text-tertiary">{t("details.totalSub")}</p>
               <p className="text-page-title leading-none text-primary">{department.totalSubNodes}</p>
-              <p className="mt-1 text-hint leading-none text-tertiary">all levels below</p>
+              <p className="mt-1 text-hint leading-none text-tertiary">{tShared("allLevelsBelow")}</p>
             </div>
           </div>
         </TabsContent>

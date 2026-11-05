@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import UsersRolesTableSkeleton from "./UsersRolesTableSkeleton";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
@@ -49,6 +50,8 @@ export default function UsersRolesTable({
   const [selectedUser, setSelectedUser] =
     React.useState<UsersSearchItemDTO | null>(null);
 
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const canAssignRoles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
 
   return (
@@ -56,9 +59,9 @@ export default function UsersRolesTable({
       <Table className="table-fixed" stickyHeader>
         <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow>
-            <TableHead className="w-1/3 pl-4">User</TableHead>
-            <TableHead className="w-1/3">Position</TableHead>
-            <TableHead className="w-1/3">Assigned roles</TableHead>
+            <TableHead className="w-1/3 pl-4">{t("roles.assigned.columns.user")}</TableHead>
+            <TableHead className="w-1/3">{t("roles.assigned.columns.position")}</TableHead>
+            <TableHead className="w-1/3">{t("roles.users.columnRoles")}</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -71,11 +74,12 @@ export default function UsersRolesTable({
                 const fullName =
                   `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() ||
                   u.email ||
-                  "Unnamed";
+                  t("roles.assigned.unnamed");
+                const rowClass = `border-divider ${canAssignRoles ? "cursor-pointer hover:bg-subtle" : ""}`;
                 return (
                   <TableRow
                     key={u.id}
-                    className={`border-divider ${canAssignRoles ? "cursor-pointer hover:bg-subtle" : ""}`}
+                    className={rowClass}
                     onClick={() => {
                       if (canAssignRoles) setSelectedUser(u);
                     }}
@@ -120,9 +124,9 @@ export default function UsersRolesTable({
                   <ListEmptyState
                     query={query}
                     scene="team-and-org"
-                    title="No people yet"
-                    description="People appear here once they are added to the organization."
-                    noResultsHint="Try a different name or email."
+                    title={t("roles.users.emptyTitle")}
+                    description={t("roles.users.emptyDescription")}
+                    noResultsHint={t("roles.users.noResultsHint")}
                   />
                 </TableCell>
               </TableRow>
@@ -133,7 +137,7 @@ export default function UsersRolesTable({
       {hasMore && (
         <div className="flex justify-center py-3">
           <Button type="button" variant="secondary" size="sm" onClick={onLoadMore} disabled={isLoadingMore}>
-            {isLoadingMore ? "Loading…" : "Load more"}
+            {isLoadingMore ? tCommon("states.loading") : t("roles.assigned.loadMore")}
           </Button>
         </div>
       )}

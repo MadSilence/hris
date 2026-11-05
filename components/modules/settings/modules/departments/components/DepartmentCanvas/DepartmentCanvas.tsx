@@ -1,6 +1,7 @@
 "use client";
 
 import "@xyflow/react/dist/style.css";
+import { useFlowAriaLabels } from "@/components/ui/Canvas";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -125,9 +126,11 @@ function DepartmentCanvasInner({
     [onToggleCollapse, dropTargetId],
   );
 
+  const flowAriaLabels = useFlowAriaLabels();
   return (
     <DepartmentCanvasProvider value={handlers}>
       <ReactFlow<OrgFlowNode>
+        ariaLabelConfig={flowAriaLabels}
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}

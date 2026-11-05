@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
@@ -45,29 +46,31 @@ export interface JobFormProps {
   onSubmitAction: (values: JobFormValues) => void | Promise<void>;
 }
 
-const buildValidationSchema = (takenCodes: string[]) => {
+type JobCatalogTranslator = ReturnType<typeof useTranslations<"structure.jobCatalog">>;
+
+const buildValidationSchema = (takenCodes: string[], t: JobCatalogTranslator) => {
   const taken = new Set(takenCodes.map((c) => c.trim().toLowerCase()));
 
   return yup.object({
     name: yup
       .string()
       .trim()
-      .required("Please enter a job name.")
-      .max(255, "Name must be 255 characters or fewer."),
-    familyId: yup.string().required("Please pick a job family."),
+      .required(t("validation.jobNameRequired"))
+      .max(255, t("validation.nameMax")),
+    familyId: yup.string().required(t("validation.familyRequired")),
     code: yup
       .string()
       .trim()
-      .max(CODE_MAX, `Code must be ${CODE_MAX} characters or fewer.`)
+      .max(CODE_MAX, t("validation.codeMax"))
       .test(
         "unique",
-        "This code is already used by another job.",
+        t("validation.codeTaken"),
         (value) => !value || !taken.has(value.trim().toLowerCase()),
       ),
     description: yup
       .string()
       .trim()
-      .max(DESCRIPTION_MAX, `Description must be ${DESCRIPTION_MAX} characters or fewer.`),
+      .max(DESCRIPTION_MAX, t("validation.descriptionMax")),
   });
 };
 
@@ -83,6 +86,9 @@ export const JobForm: FC<JobFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const handleFormSubmission = useCallback(
     (values: JobFormValues) =>
       onSubmitAction({
@@ -102,7 +108,7 @@ export const JobForm: FC<JobFormProps> = ({
       code: initialValues?.code ?? "",
       description: initialValues?.description ?? "",
     },
-    validationSchema: buildValidationSchema(takenCodes),
+    validationSchema: buildValidationSchema(takenCodes, t),
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -136,7 +142,7 @@ export const JobForm: FC<JobFormProps> = ({
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-4">
         <div className="space-y-2">
-          <RequiredLabel htmlFor="job-name" required>Name</RequiredLabel>
+          <RequiredLabel htmlFor="job-name" required>{tCommon("fields.name")}</RequiredLabel>
 
           <Input
             id="job-name"
@@ -152,14 +158,14 @@ export const JobForm: FC<JobFormProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="job-family" required>Family</RequiredLabel>
+            <RequiredLabel htmlFor="job-family" required>{t("jobForm.family")}</RequiredLabel>
 
             <SearchableSelect
               id="job-family"
               options={selectableFamilies.map((family) => ({ value: family.id, label: family.name }))}
               value={formik.values.familyId || null}
               onChange={(value) => formik.setFieldValue("familyId", value ?? "")}
-              placeholder="Pick a family"
+              placeholder={t("jobForm.pickFamily")}
               disabled={isLoading}
               aria-invalid={!!formik.errors.familyId}
               clearable={false}
@@ -171,19 +177,19 @@ export const JobForm: FC<JobFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="job-level">Level</Label>
+            <Label htmlFor="job-level">{t("columns.level")}</Label>
 
             <SearchableSelect
               id="job-level"
               options={[
-                { value: NO_LEVEL, label: "None" },
+                { value: NO_LEVEL, label: tCommon("values.none") },
                 ...levelGroups.flatMap((group) =>
                   group.levels.map((level) => ({ value: level.id, label: level.name, group: group.name })),
                 ),
               ]}
               value={formik.values.levelId || null}
               onChange={(value) => formik.setFieldValue("levelId", value ?? NO_LEVEL)}
-              placeholder={isLevelsLoading ? "Loading…" : "None"}
+              placeholder={isLevelsLoading ? tCommon("states.loading") : tCommon("values.none")}
               disabled={isLoading || isLevelsLoading}
               clearable={false}
             />
@@ -191,7 +197,7 @@ export const JobForm: FC<JobFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="job-code">Code</Label>
+          <Label htmlFor="job-code">{tShared("code")}</Label>
 
           <Input
             id="job-code"
@@ -206,7 +212,7 @@ export const JobForm: FC<JobFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="job-description">Description</Label>
+          <Label htmlFor="job-description">{tCommon("fields.description")}</Label>
 
           <Textarea
             id="job-description"
@@ -220,14 +226,14 @@ export const JobForm: FC<JobFormProps> = ({
 
           <div className="flex items-center justify-between">
             <FieldError>{formik.errors.description ?? ""}</FieldError>
-            <p className="text-hint text-tertiary">{remaining} characters left</p>
+            <p className="text-hint text-tertiary">{t("charactersLeft", { count: remaining })}</p>
           </div>
         </div>
       </div>
 
       <DialogFooter className="mt-6 border-t border-divider pt-4">
         <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>

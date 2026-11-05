@@ -1,6 +1,7 @@
 import {
-  DEFAULT_SCALE,
+  defaultScale,
   REVIEW_KINDS,
+  type ReviewsT,
   type Cycle,
   type CycleWrite,
   type ReviewApprovalMode,
@@ -66,12 +67,12 @@ const emptyKinds = (): Record<ReviewKind, KindDraft> =>
   ({ SELF: emptyKind(false), MANAGER: emptyKind(false), PEER: emptyKind(false), UPWARD: emptyKind(false) });
 
 /** A new cycle: self and manager reviews on, peers off, the default scale, the manager shares. */
-export const newCycleDraft = (): CycleDraft => ({
+export const newCycleDraft = (t: ReviewsT): CycleDraft => ({
   name: "",
   description: "",
   filters: [],
   eligibleHiredBefore: "",
-  scale: DEFAULT_SCALE,
+  scale: defaultScale(t),
   sharingMode: "MANAGER_SHARES",
   releaseDate: "",
   kinds: { ...emptyKinds(), SELF: emptyKind(true), MANAGER: emptyKind(true) },
@@ -80,8 +81,8 @@ export const newCycleDraft = (): CycleDraft => ({
   approverName: null,
 });
 
-export function cycleDraftOf(c: Cycle): CycleDraft {
-  const draft = newCycleDraft();
+export function cycleDraftOf(c: Cycle, t: ReviewsT): CycleDraft {
+  const draft = newCycleDraft(t);
   const kinds = emptyKinds();
   for (const k of c.kinds) {
     kinds[k.kind] = {
@@ -104,7 +105,7 @@ export function cycleDraftOf(c: Cycle): CycleDraft {
     description: c.description ?? "",
     filters: c.segment?.filters ?? [],
     eligibleHiredBefore: c.eligibleHiredBefore ?? "",
-    scale: c.scale.length ? c.scale : DEFAULT_SCALE,
+    scale: c.scale.length ? c.scale : draft.scale,
     sharingMode: c.sharingMode,
     releaseDate: c.releaseDate ?? "",
     kinds,
@@ -154,34 +155,34 @@ export const sameCycleDraft = (a: CycleDraft, b: CycleDraft) =>
   JSON.stringify(toCycleWrite(a, null)) === JSON.stringify(toCycleWrite(b, null));
 
 /** What stops a save before it is sent — the backend checks the same and has the last word. */
-export function draftProblems(d: CycleDraft): string[] {
+export function draftProblems(d: CycleDraft, t: ReviewsT): string[] {
   const problems: string[] = [];
-  if (!d.name.trim()) problems.push("Give the cycle a name.");
+  if (!d.name.trim()) problems.push(t("builder.problem.name"));
   for (const k of REVIEW_KINDS) {
     const kd = d.kinds[k];
-    if (kd.enabled && kd.opensOn && kd.dueOn && kd.dueOn < kd.opensOn) problems.push("A review is due before it opens.");
+    if (kd.enabled && kd.opensOn && kd.dueOn && kd.dueOn < kd.opensOn) problems.push(t("builder.problem.dueBeforeOpens"));
   }
-  if (d.scale.some((p) => !p.label.trim())) problems.push("Every point of the rating scale needs a label.");
+  if (d.scale.some((p) => !p.label.trim())) problems.push(t("builder.problem.scaleLabel"));
   const peer = d.kinds.PEER;
   if (peer.enabled && (peer.peerMin < 1 || peer.peerMax < peer.peerMin)) {
-    problems.push("Peers per person: at least one, and the least no more than the most.");
+    problems.push(t("builder.problem.peerRange"));
   }
   const upward = d.kinds.UPWARD;
   const thresholdOff = (t: number) => t < ANONYMITY_THRESHOLD_MIN || t > ANONYMITY_THRESHOLD_MAX;
   if ((peer.enabled && peer.anonymous && thresholdOff(peer.anonymityThreshold))
     || (upward.enabled && thresholdOff(upward.anonymityThreshold))) {
-    problems.push(`The anonymity threshold runs from ${ANONYMITY_THRESHOLD_MIN} to ${ANONYMITY_THRESHOLD_MAX}.`);
+    problems.push(t("builder.problem.threshold", { min: ANONYMITY_THRESHOLD_MIN, max: ANONYMITY_THRESHOLD_MAX }));
   }
   if (peer.enabled && peer.peerMode === "SUBJECT_NOMINATES") {
     if (peer.nominationDueOn && peer.approvalDueOn && peer.approvalDueOn < peer.nominationDueOn) {
-      problems.push("Peers are approved before they are nominated.");
+      problems.push(t("builder.problem.approvedBeforeNominated"));
     }
     if (peer.approvalDueOn && peer.dueOn && peer.dueOn < peer.approvalDueOn) {
-      problems.push("The peer review is due before its peers are approved.");
+      problems.push(t("builder.problem.dueBeforeApproved"));
     }
   }
   if (d.approvalMode !== "NONE" && !d.kinds.MANAGER.enabled) {
-    problems.push("An approval of the manager review needs a manager review.");
+    problems.push(t("builder.problem.approvalNeedsManager"));
   }
   return Array.from(new Set(problems));
 }

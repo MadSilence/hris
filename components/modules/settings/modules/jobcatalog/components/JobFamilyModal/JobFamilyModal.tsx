@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Copy01Icon, HierarchySquare02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import {
   Dialog,
@@ -37,23 +38,23 @@ type Props = {
  * fields prefilled — the copy is the same shape as an original, so a separate dialog would be the
  * same form under a different title.
  */
-const COPY: Record<JobFamilyModalMode, { title: string; description: string; submit: string }> = {
+const COPY = {
   create: {
-    title: "Add job family",
-    description: "Group related positions under one family.",
-    submit: "Add",
+    titleKey: "familyModal.create.title",
+    descriptionKey: "familyModal.create.description",
+    submitKey: "actions.add",
   },
   edit: {
-    title: "Edit job family",
-    description: "Rename the family or update what it covers.",
-    submit: "Save",
+    titleKey: "familyModal.edit.title",
+    descriptionKey: "familyModal.edit.description",
+    submitKey: "actions.save",
   },
   duplicate: {
-    title: "Duplicate job family",
-    description: "Copies the family and every position in it. Job codes are not copied.",
-    submit: "Duplicate",
+    titleKey: "familyModal.duplicate.title",
+    descriptionKey: "familyModal.duplicate.description",
+    submitKey: "actions.duplicate",
   },
-};
+} as const satisfies Record<JobFamilyModalMode, { titleKey: string; descriptionKey: string; submitKey: string }>;
 
 const ICON: Record<JobFamilyModalMode, IconSvgElement> = {
   create: HierarchySquare02Icon,
@@ -71,6 +72,8 @@ export const JobFamilyModal: FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tCommon = useTranslations("common");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -108,8 +111,8 @@ export const JobFamilyModal: FC<Props> = ({
                 <Icon icon={shownIcon} />
               </span>
               <div className="space-y-1">
-                <DialogTitle>{copy.title}</DialogTitle>
-                <DialogDescription>{copy.description}</DialogDescription>
+                <DialogTitle>{t(copy.titleKey)}</DialogTitle>
+                <DialogDescription>{t(copy.descriptionKey)}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -122,7 +125,7 @@ export const JobFamilyModal: FC<Props> = ({
 
           <JobFamilyForm
             isLoading={isLoading}
-            submitLabel={copy.submit}
+            submitLabel={tCommon(copy.submitKey)}
             initialValues={initialValues}
             existingNames={existingNames}
             onCancelAction={requestClose}

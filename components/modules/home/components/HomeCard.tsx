@@ -2,6 +2,7 @@
 
 import React, { useId } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/desact/card";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
@@ -59,8 +60,9 @@ export const HomeEmpty: React.FC<{ children: React.ReactNode }> = ({ children })
 const initialsOf = (first?: string | null, last?: string | null) =>
   `${(first ?? "").trim().charAt(0)}${(last ?? "").trim().charAt(0)}`.toUpperCase() || "?";
 
+/** The person's name, or "" when they have none — the row then says `home.card.unnamed`. */
 export const fullName = (first?: string | null, last?: string | null) =>
-  [first, last].filter((part) => part && part.trim()).join(" ") || "Unnamed";
+  [first, last].filter((part) => part && part.trim()).join(" ");
 
 /** A person on a line: face, name, and what the card has to say about them. */
 export const HomePersonRow: React.FC<{
@@ -71,6 +73,7 @@ export const HomePersonRow: React.FC<{
   aside?: React.ReactNode;
   href?: string | null;
 }> = ({ firstName, lastName, avatarUrl, detail, aside, href }) => {
+  const t = useTranslations("home");
   const body = (
     <>
       <Avatar className="h-8 w-8 shrink-0">
@@ -78,7 +81,7 @@ export const HomePersonRow: React.FC<{
         <AvatarFallback className="bg-mist text-hint text-secondary">{initialsOf(firstName, lastName)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-body font-medium text-primary">{fullName(firstName, lastName)}</p>
+        <p className="truncate text-body font-medium text-primary">{fullName(firstName, lastName) || t("card.unnamed")}</p>
         {detail && <div className="truncate text-hint text-tertiary">{detail}</div>}
       </div>
       {aside}

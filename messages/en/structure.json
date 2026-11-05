@@ -1,0 +1,582 @@
+{
+  "shared": {
+    "addMember": "Add member",
+    "adding": "Adding…",
+    "allLevelsBelow": "all levels below",
+    "archiving": "Archiving…",
+    "assignHint": "Assign people to see them here.",
+    "blocks": "Blocks",
+    "centerOnChart": "Center on chart",
+    "chart": "Chart",
+    "code": "Code",
+    "collapse": "Collapse",
+    "collapsePanel": "Collapse the panel",
+    "company": "Company",
+    "details": "Details",
+    "directPeople": "Direct people",
+    "errorOccurred": "An error occurred.",
+    "expandPanel": "Expand the panel",
+    "headCount": "{here} here",
+    "headCountWithTotal": "{here} here · {total} total",
+    "lead": "Lead",
+    "limited": "Only the people your access covers are listed.",
+    "loadingMore": "Loading more…",
+    "makeTopLevel": "Make top-level",
+    "makeTopLevelTitle": "Make top-level?",
+    "members": "Members",
+    "more": "+{count} more",
+    "moveSummary": "{people, plural, one {# person} other {# people}} — everything inside moves with it.",
+    "moving": "Moving…",
+    "nameRequired": "Name is required",
+    "noDescription": "No description.",
+    "noLead": "No lead assigned.",
+    "noPeopleHere": "No people here yet.",
+    "noPeopleMatch": "No people match “{query}”",
+    "nodePeople": "<b>{count}</b> {count, plural, one {Person} other {People}}",
+    "nodeSubs": "<b>{count}</b> {count, plural, one {Sub} other {Subs}}",
+    "nodeSubsAll": "<b>{count}</b> Subs",
+    "noneTopLevel": "None (top-level)",
+    "noneVisible": "{count, plural, one {# person} other {# people}}, none you can see",
+    "openProfile": "Open profile",
+    "overview": "Overview",
+    "people": "People",
+    "promoteToParent": "Promote to parent level",
+    "promoteToParentNamed": "Promote to parent level ({parent})",
+    "removeNamed": "Remove {name}",
+    "searchPeople": "Search people…",
+    "searchPerson": "Search for a person",
+    "searching": "Searching…",
+    "showArchived": "Show archived",
+    "topLevel": "Top level",
+    "totalPeople": "Total people",
+    "tryDifferent": "Try a different name or email.",
+    "unarchive": "Unarchive",
+    "unassigned": "Unassigned",
+    "unassignedPeople": "Unassigned people"
+  },
+  "teams": {
+    "page": {
+      "title": "Teams",
+      "description": "Teams group people around projects and responsibilities, and one person can be on several. Switch between the structure chart and blocks of people, search by team or by person, and turn on Edit to move teams and people around."
+    },
+    "companyPanel": {
+      "topLevel": "Top-level teams",
+      "all": "All teams",
+      "hint": "Select a team on the chart to view and edit its details. Use the expand controls on each card to reveal sub-teams."
+    },
+    "labels": {
+      "subUnits": "Sub-teams",
+      "subMembers": "Members of Sub-teams",
+      "promoteSubMembers": "Promote all sub-team users to parent level ({parent})",
+      "parent": "Parent team",
+      "lead": "Team lead"
+    },
+    "archive": {
+      "title": "Archive “{name}”",
+      "intro": "Archiving hides this team from active views. Choose how to handle its sub-teams and members.",
+      "archiveAllSub": "Archive all sub-teams",
+      "promoteAllSub": "Promote all sub-teams to parent level",
+      "unassignMembers": "Unassign users from this team",
+      "unassignSubMembers": "Unassign users from all sub-teams"
+    },
+    "delete": {
+      "title": "Delete “{name}”",
+      "intro": "This action cannot be undone. Choose how to handle existing sub-teams and members.",
+      "deleteAllSub": "Delete all sub-teams",
+      "unassign": "Unassign (remove from team)",
+      "unassignSub": "Unassign from all sub-teams"
+    },
+    "create": {
+      "title": "Create team"
+    },
+    "edit": {
+      "title": "Edit {name}"
+    },
+    "move": {
+      "title": "Move team?",
+      "confirm": "Move team",
+      "summaryWithSubs": "{people, plural, one {# person} other {# people}} · {subs, plural, one {# sub-team} other {# sub-teams}} — everything inside moves with it."
+    },
+    "movePerson": {
+      "removeTitle": "Remove {person} from {source}?",
+      "removeTitleNoSource": "Remove {person} from the team?",
+      "removeBody": "{person} will be removed from {source}. Other team memberships stay as they are.",
+      "removeBodyNoSource": "{person} will be removed from this team. Other team memberships stay as they are.",
+      "moveTo": "Move to {target}",
+      "moveHint": "Removes {person} from {source} and adds them to {target}.",
+      "moveHintNoSource": "Adds {person} to {target}.",
+      "addTo": "Add to {target} as well",
+      "addHint": "Keeps every current team; {person} ends up on both."
+    },
+    "expandSub": "Expand {count, plural, one {# sub-team} other {# sub-teams}}",
+    "expandTop": "Expand {count, plural, one {# team} other {# teams}}",
+    "companyBlock": {
+      "summary": "<b>{people}</b> {people, plural, one {person} other {people}} · <b>{units}</b> {units, plural, one {team} other {teams}}"
+    },
+    "details": {
+      "actions": "Team actions",
+      "directSub": "Direct sub-teams",
+      "inclSub": "incl. all sub-teams",
+      "totalSub": "Total sub-teams"
+    },
+    "people": {
+      "empty": "No people in this team yet",
+      "includeSub": "Show also from sub-teams",
+      "removeTitle": "Remove from team",
+      "removeBody": "{name} will no longer be in this team. They keep their account and everything else.",
+      "removeBodyAnonymous": "This person will no longer be in this team. They keep their account and everything else."
+    },
+    "person": {
+      "units": "Teams",
+      "none": "No team"
+    },
+    "search": {
+      "placeholder": "Search teams…",
+      "unitsMode": "Teams",
+      "unknown": "Unknown team"
+    },
+    "unassigned": {
+      "allPlaced": "Everyone is on a team",
+      "allPlacedHint": "People without one would show up here.",
+      "count": "{count, plural, one {# person is} other {# people are}} not on any team."
+    },
+    "container": {
+      "loading": "Loading teams…",
+      "loadFailed": "Failed to load teams.",
+      "empty": "No teams yet.",
+      "createFirst": "Create your first team",
+      "blocksHint": "Drag a person onto another team to move them. Drop them on the Unassigned tab to take them out.",
+      "chartHint": "Drag a team onto another to move it. Drop it on the company card to make it top-level.",
+      "noMatch": "No teams match “{query}”",
+      "export": "Export a team",
+      "unarchiveTitle": "Unarchive team"
+    },
+    "errors": {
+      "activate": "Failed to activate team",
+      "archive": "Failed to archive team",
+      "create": "Failed to create team",
+      "delete": "Failed to delete team",
+      "move": "Failed to move the team",
+      "update": "Failed to update team",
+      "removePerson": "Failed to remove the person",
+      "addPerson": "Failed to add the person to the team",
+      "movePartly": "Added to the new team, but removing them from the old one failed. Check both teams."
+    }
+  },
+  "departments": {
+    "page": {
+      "title": "Departments",
+      "description": "Two views of the same structure: a chart of how departments nest, and blocks showing who sits where. Search by department or by person, and turn on Edit to move departments and people around."
+    },
+    "companyPanel": {
+      "topLevel": "Top-level departments",
+      "all": "All departments",
+      "hint": "Select a department on the chart to view and edit its details. Use the expand controls on each card to reveal sub-departments."
+    },
+    "labels": {
+      "subUnits": "Sub-departments",
+      "subMembers": "Members of Sub-departments",
+      "promoteSubMembers": "Promote all sub-department users to parent level ({parent})",
+      "parent": "Parent department",
+      "lead": "Department lead"
+    },
+    "archive": {
+      "title": "Archive “{name}”",
+      "intro": "Archiving hides this department from active views. Choose how to handle its sub-departments and members.",
+      "archiveAllSub": "Archive all sub-departments",
+      "promoteAllSub": "Promote all sub-departments to parent level",
+      "unassignMembers": "Unassign users from this department",
+      "unassignSubMembers": "Unassign users from all sub-departments"
+    },
+    "delete": {
+      "title": "Delete “{name}”",
+      "intro": "This action cannot be undone. Choose how to handle existing children and members.",
+      "deleteAllSub": "Delete all sub-departments",
+      "unassign": "Unassign (remove from department)",
+      "unassignSub": "Unassign from all sub-departments"
+    },
+    "create": {
+      "title": "Create department"
+    },
+    "edit": {
+      "title": "Edit {name}"
+    },
+    "move": {
+      "title": "Move department?",
+      "confirm": "Move department",
+      "summaryWithSubs": "{people, plural, one {# person} other {# people}} · {subs, plural, one {# sub-department} other {# sub-departments}} — everything inside moves with it."
+    },
+    "movePerson": {
+      "removeTitle": "Remove {person} from the department?",
+      "moveTitle": "Move {person}?",
+      "removeBody": "{person} will no longer belong to any department.",
+      "moveBody": "A person can belong to one department only, so {person} will be removed from {source}.",
+      "assignBody": "{person} will be assigned to {target}.",
+      "confirm": "Move here"
+    },
+    "expandSub": "Expand {count, plural, one {# sub-department} other {# sub-departments}}",
+    "expandTop": "Expand {count, plural, one {# department} other {# departments}}",
+    "companyBlock": {
+      "summary": "<b>{people}</b> {people, plural, one {person} other {people}} · <b>{units}</b> {units, plural, one {department} other {departments}}"
+    },
+    "details": {
+      "actions": "Department actions",
+      "directSub": "Direct sub-departments",
+      "inclSub": "incl. all sub-departments",
+      "totalSub": "Total sub-departments"
+    },
+    "people": {
+      "empty": "No people in this department yet",
+      "includeSub": "Show also from sub-departments",
+      "removeTitle": "Remove from department",
+      "removeBody": "{name} will no longer be in this department. They keep their account and everything else.",
+      "removeBodyAnonymous": "This person will no longer be in this department. They keep their account and everything else."
+    },
+    "person": {
+      "units": "Department",
+      "none": "No department"
+    },
+    "search": {
+      "placeholder": "Search departments…",
+      "unitsMode": "Departments",
+      "unknown": "Unknown department"
+    },
+    "unassigned": {
+      "allPlaced": "Everyone has a department",
+      "allPlacedHint": "People without one would show up here.",
+      "count": "{count, plural, one {# person is} other {# people are}} not in any department."
+    },
+    "container": {
+      "loading": "Loading departments…",
+      "loadFailed": "Failed to load departments.",
+      "empty": "No departments yet.",
+      "createFirst": "Create your first department",
+      "blocksHint": "Drag a person onto another department to move them. Drop them on the Unassigned tab to take them out.",
+      "chartHint": "Drag a department onto another to move it. Drop it on the company card to make it top-level.",
+      "noMatch": "No departments match “{query}”",
+      "export": "Export a department",
+      "unarchiveTitle": "Unarchive department"
+    },
+    "errors": {
+      "activate": "Failed to activate department",
+      "archive": "Failed to archive department",
+      "create": "Failed to create department",
+      "delete": "Failed to delete department",
+      "move": "Failed to move the department",
+      "update": "Failed to update department",
+      "removePerson": "Failed to remove the person",
+      "movePerson": "Failed to move the person"
+    }
+  },
+  "places": {
+    "generalInformation": "General information",
+    "assignedUsers": "Assigned users",
+    "general": "General",
+    "address": "Address",
+    "country": "Country",
+    "city": "City",
+    "street": "Street",
+    "building": "Building",
+    "postCode": "Post code",
+    "notFound": "Not found",
+    "unarchive": "Unarchive",
+    "archiving": "Archiving…",
+    "archiveTitle": "Archive \"{name}\"?",
+    "exportNamed": "Export {name}",
+    "validation": {
+      "countryRequired": "Please enter a country.",
+      "cityRequired": "Please enter a city.",
+      "streetRequired": "Please enter a street.",
+      "buildingRequired": "Please enter a building number.",
+      "postCodeRequired": "Please enter a post code.",
+      "descriptionMax": "Description must be at most 1000 characters.",
+      "countryMax": "Country must be at most 120 characters.",
+      "cityMax": "City must be at most 120 characters.",
+      "streetMax": "Street must be at most 200 characters.",
+      "buildingMax": "Building must be at most 50 characters.",
+      "postCodeMax": "Post code must be at most 50 characters."
+    }
+  },
+  "offices": {
+    "page": {
+      "title": "Offices",
+      "description": "Offices represent the physical or remote locations where your company operates. Each office contains details such as address, country, timezone, and employee distribution."
+    },
+    "phone": "Phone",
+    "remote": "Remote",
+    "remoteHint": "People here work from anywhere in the office's country",
+    "details": {
+      "notFound": "Office not found",
+      "intro": "Contact and address details for this office.",
+      "contact": "Contact",
+      "export": "Export office",
+      "exportDescription": "Export this office's details and its assigned users.",
+      "exportIncluded": "Two sheets — General Information (name, description, email, phone, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+    },
+    "assigned": {
+      "description": "Everyone assigned to this office, managed in one place."
+    },
+    "list": {
+      "export": "Export offices",
+      "add": "Add office",
+      "emptyTitle": "No offices yet",
+      "emptyDescription": "An office is a place people work from. Add the first one to start assigning people to it.",
+      "noResultsHint": "Try a different name, country or address.",
+      "archivedDescription": "Archived offices will appear here.",
+      "rowActions": "Office actions",
+      "exportDescription": "Export all offices with their address, assigned people, and creation details.",
+      "exportIncluded": "Included: name, description, email, phone, address, assigned people, created by, created at."
+    },
+    "archive": {
+      "description": "Archived offices are hidden from the active list and can't be edited or assigned to, but you can unarchive them at any time.",
+      "assignedNote": "{count, plural, one {# person is} other {# people are}} assigned to this office. Archiving keeps them assigned; unarchiving brings everything back as it was."
+    },
+    "delete": {
+      "title": "Permanently delete \"{name}\" office?",
+      "body": "This office will be permanently removed from the system. This action cannot be undone.",
+      "bodyWithCount": "This office will be permanently removed from the system. This action cannot be undone. {count, plural, one {# person} other {# people}} currently assigned to this office will lose that assignment.",
+      "bodyAnyone": "This office will be permanently removed from the system. This action cannot be undone. Anyone currently assigned to this office will lose that assignment."
+    },
+    "create": {
+      "title": "Create office",
+      "description": "Add office details and address information.",
+      "detailsTitle": "Office details",
+      "detailsHint": "Basic information about this office location.",
+      "addressHintRemote": "A remote office needs only its country; the rest of the address is optional.",
+      "addressHint": "Physical location of the office.",
+      "nameRequired": "Please enter an office name."
+    }
+  },
+  "legalEntities": {
+    "page": {
+      "title": "Legal entities",
+      "description": "Legal Entities define the official registered companies within your organization. Each entity includes important compliance details such as registration number, tax ID, and address."
+    },
+    "registrationNumber": "Registration number",
+    "taxId": "Tax ID",
+    "details": {
+      "intro": "Registration, tax, and address details for this legal entity.",
+      "export": "Export legal entity",
+      "exportDescription": "Export this legal entity's details and its assigned users.",
+      "exportIncluded": "Two sheets — General Information (name, description, registration number, tax ID, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+    },
+    "assigned": {
+      "description": "Everyone assigned to this legal entity, managed in one place."
+    },
+    "list": {
+      "export": "Export legal entities",
+      "add": "Add legal entity",
+      "emptyTitle": "No legal entities yet",
+      "emptyDescription": "A legal entity is the company people are employed by. Add the first one to start assigning people to it.",
+      "noResultsHint": "Try a different name, country or registration number.",
+      "archivedDescription": "Archived legal entities will appear here.",
+      "rowActions": "Legal entity actions",
+      "exportDescription": "Export all legal entities with their address, assigned people, and creation details.",
+      "exportIncluded": "Included: name, description, registration number, tax ID, address, assigned people, created by, created at."
+    },
+    "archive": {
+      "description": "Archived legal entities are hidden from the active list and can't be edited or assigned to, but you can unarchive them at any time.",
+      "assignedNote": "{count, plural, one {# person is} other {# people are}} assigned to this legal entity. Archiving keeps them assigned; unarchiving brings everything back as it was."
+    },
+    "delete": {
+      "title": "Permanently delete \"{name}\" legal entity?",
+      "body": "This legal entity will be permanently removed from the system. This action cannot be undone.",
+      "bodyWithCount": "This legal entity will be permanently removed from the system. This action cannot be undone. {count, plural, one {# person} other {# people}} currently assigned to it will lose that assignment.",
+      "bodyAnyone": "This legal entity will be permanently removed from the system. This action cannot be undone. Anyone currently assigned to it will lose that assignment."
+    },
+    "create": {
+      "description": "Add registration and address details for a company legal unit.",
+      "detailsTitle": "Legal entity details",
+      "detailsHint": "Basic registration information used in company documents.",
+      "addressHint": "Location details for this legal entity."
+    },
+    "validation": {
+      "nameRequired": "Please enter a legal entity name.",
+      "nameMin": "Legal entity name must be at least 2 characters.",
+      "nameMax": "Legal entity name must be at most 200 characters.",
+      "registrationRequired": "Please enter a registration number.",
+      "registrationMax": "Registration number must be at most 120 characters.",
+      "taxIdRequired": "Please enter a tax ID.",
+      "taxIdMax": "Tax ID must be at most 120 characters."
+    }
+  },
+  "jobCatalog": {
+    "page": {
+      "title": "Job catalog",
+      "description": "Build your organization's job structure. Group positions into job families, assign each job a level, and keep a single consistent catalog that roles, compensation, and reporting can rely on."
+    },
+    "toolbar": {
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all",
+      "export": "Export job catalog",
+      "addFamily": "Add job family"
+    },
+    "columns": {
+      "assignedPeople": "Assigned people",
+      "level": "Level"
+    },
+    "empty": {
+      "title": "No job families yet",
+      "description": "A job family groups related positions. Add the first one to start building the catalog.",
+      "noResultsHint": "Try a different family, position or code.",
+      "archivedDescription": "Archived job families will appear here."
+    },
+    "export": {
+      "description": "Export every job family with its positions.",
+      "included": "Includes family, name, code, level, status, assigned people and description.",
+      "failed": "Export failed."
+    },
+    "family": {
+      "actions": "Family actions",
+      "doneEditing": "Done editing family",
+      "edit": "Edit family",
+      "noPositions": "No positions in this family yet",
+      "addJob": "Add job",
+      "unarchiveTitle": "Unarchive job family"
+    },
+    "job": {
+      "active": "Active",
+      "actions": "Position actions",
+      "assign": "Assign people"
+    },
+    "copyName": "{name} (copy)",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "loadFailed": "Failed to load job families"
+    },
+    "impact": {
+      "job": {
+        "archiveTitle": "Archive job",
+        "deleteTitle": "Delete job",
+        "archiveLead": "Job <b>{name}</b> will be moved to archive. It stays in the catalogue, marked archived, and can no longer be assigned.",
+        "deleteLead": "This action cannot be undone. Job <b>{name}</b> will be permanently deleted."
+      },
+      "family": {
+        "archiveTitle": "Archive job family",
+        "deleteTitle": "Delete job family",
+        "archiveLead": "Job family <b>{name}</b> will be moved to archive. It stays in the catalogue, marked archived, and can no longer be assigned.",
+        "deleteLead": "This action cannot be undone. Job family <b>{name}</b> will be permanently deleted."
+      },
+      "warning": "Warning",
+      "jobsDeleted": "<b>{count}</b> {count, plural, one {position} other {positions}} in this family will be deleted too.",
+      "jobsArchived": "<b>{count}</b> {count, plural, one {position} other {positions}} in this family will be archived too.",
+      "peopleLose": "<b>{count, plural, one {# person} other {# people}}</b> will lose their position. Their profile will show no job until you assign a new one.",
+      "nobody": "Nobody currently holds this position.",
+      "history": "The change is recorded in each person's job history."
+    },
+    "charactersLeft": "{count, plural, one {# character left} other {# characters left}}",
+    "validation": {
+      "familyNameRequired": "Please enter a family name.",
+      "familyNameTaken": "A job family with this name already exists.",
+      "nameMax": "Name must be 255 characters or fewer.",
+      "descriptionMax": "Description must be 300 characters or fewer.",
+      "jobNameRequired": "Please enter a job name.",
+      "familyRequired": "Please pick a job family.",
+      "codeMax": "Code must be 64 characters or fewer.",
+      "codeTaken": "This code is already used by another job."
+    },
+    "jobForm": {
+      "family": "Family",
+      "pickFamily": "Pick a family"
+    },
+    "familyModal": {
+      "create": {
+        "title": "Add job family",
+        "description": "Group related positions under one family."
+      },
+      "edit": {
+        "title": "Edit job family",
+        "description": "Rename the family or update what it covers."
+      },
+      "duplicate": {
+        "title": "Duplicate job family",
+        "description": "Copies the family and every position in it. Job codes are not copied."
+      }
+    },
+    "jobModal": {
+      "create": {
+        "title": "Add job",
+        "description": "A position is a family, a name and (optionally) a level."
+      },
+      "edit": {
+        "title": "Edit job",
+        "description": "Change what this position is called or where it sits."
+      },
+      "duplicate": {
+        "title": "Duplicate job",
+        "description": "Everything is copied except the code, which must stay unique."
+      }
+    }
+  },
+  "jobLevels": {
+    "page": {
+      "title": "Job levels",
+      "description": "Define the levels a job can sit at, grouped the way your organization thinks about seniority."
+    },
+    "addTrack": "Add track",
+    "addLevel": "Add level",
+    "heading": "Job Level Groups <muted>({count})</muted>",
+    "intro": "Group job levels into career tracks and define the progression employees move through within each.",
+    "empty": {
+      "title": "No career tracks yet",
+      "description": "A track groups job levels into the progression somebody moves through. Add the first one to start placing jobs on it.",
+      "noResultsHint": "Try a different track or level name."
+    },
+    "card": {
+      "trackActions": "Track actions",
+      "employees": "{count, plural, one {Employee} other {Employees}}",
+      "positions": "{count, plural, one {Position} other {Positions}}",
+      "noLevels": "No levels yet",
+      "moreLevels": "+{count} more levels",
+      "manage": "Manage group",
+      "moveUp": "Move level up",
+      "moveDown": "Move level down",
+      "levelActions": "Level actions"
+    },
+    "delete": {
+      "level": {
+        "title": "Delete level",
+        "lead": "This action cannot be undone. Level <b>{name}</b> will be permanently deleted."
+      },
+      "group": {
+        "title": "Delete group",
+        "lead": "This action cannot be undone. Group <b>{name}</b> will be permanently deleted."
+      },
+      "warning": "Warning",
+      "levelsToo": "<b>{count}</b> {count, plural, one {level} other {levels}} in this group will be deleted too.",
+      "jobsLose": "<b>{jobs, plural, one {# position} other {# positions}}</b> will lose their level and keep everything else.",
+      "jobsLoseWithPeople": "<b>{jobs, plural, one {# position} other {# positions}}</b> will lose their level and keep everything else. <b>{people}</b> {people, plural, one {person holds} other {people hold}} one of them — nobody loses their job.",
+      "noPositions": "No positions use this level.",
+      "refusalNote": "Two positions that differ only by level cannot both survive losing it — the delete is refused if that would happen."
+    },
+    "nameModal": {
+      "addGroup": {
+        "title": "Add job group",
+        "description": "A career track employees progress through."
+      },
+      "renameGroup": {
+        "title": "Rename job group",
+        "description": "The track keeps its levels and their order."
+      },
+      "addLevel": {
+        "description": "A new rung at the bottom of {group}."
+      },
+      "renameLevel": {
+        "title": "Rename level",
+        "description": "Positions using this level follow the new name."
+      },
+      "groupPlaceholder": "e.g., Individual Contributor",
+      "levelPlaceholder": "e.g., L3 - Senior"
+    },
+    "validation": {
+      "nameRequired": "Please enter a name.",
+      "nameMax": "Name must be 255 characters or fewer.",
+      "nameTaken": "This name is already taken."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "reorder": "Could not reorder levels.",
+      "loadFailed": "Failed to load job levels"
+    }
+  }
+}

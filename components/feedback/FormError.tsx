@@ -1,7 +1,7 @@
 "use client";
 
 import { InlineAlert } from "@/components/desact/alert";
-import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
+import { isFallbackErrorMessage } from "@/lib/errors/errorMessages";
 
 /**
  * A refusal shown inside the form it belongs to.
@@ -32,4 +32,4 @@ export const FormError: React.FC<{
 
 /** The reference is only worth the space when the sentence above it says nothing specific. */
 export const referenceFor = (message?: string | null, requestId?: string, code?: string) =>
-  message === FALLBACK_ERROR_MESSAGE ? requestId ?? code : requestId;
+  isFallbackErrorMessage(message) ? requestId ?? code : requestId;

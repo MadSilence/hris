@@ -1,0 +1,276 @@
+{
+  "actions": {
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "add": "Add",
+    "remove": "Remove",
+    "create": "Create",
+    "done": "Done",
+    "apply": "Apply",
+    "search": "Search",
+    "retry": "Try again",
+    "confirm": "Confirm",
+    "archive": "Archive",
+    "restore": "Restore",
+    "discard": "Discard",
+    "keepEditing": "Keep editing",
+    "clear": "Clear",
+    "reset": "Reset",
+    "submit": "Submit",
+    "copy": "Copy",
+    "upload": "Upload",
+    "download": "Download",
+    "export": "Export",
+    "import": "Import",
+    "view": "View",
+    "open": "Open",
+    "select": "Select",
+    "preview": "Preview",
+    "publish": "Publish",
+    "send": "Send",
+    "duplicate": "Duplicate",
+    "rename": "Rename",
+    "manage": "Manage",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "learnMore": "Learn more",
+    "undo": "Undo",
+    "moreActions": "More actions",
+    "goBack": "Go back",
+    "goHome": "Go to home"
+  },
+  "fields": {
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "actions": "Actions",
+    "type": "Type",
+    "email": "Email",
+    "date": "Date",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "notes": "Notes",
+    "optional": "Optional",
+    "required": "Required",
+    "personName": "Name"
+  },
+  "values": {
+    "yes": "Yes",
+    "no": "No",
+    "none": "None",
+    "all": "All",
+    "today": "Today",
+    "unknown": "Unknown",
+    "notSet": "Not set",
+    "entries": "{count, plural, one {# entry} other {# entries}}"
+  },
+  "states": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet",
+    "noResults": "No results",
+    "copied": "Copied",
+    "loadingShort": "Loading"
+  },
+  "people": {
+    "count": "{count, plural, one {# person} other {# people}}"
+  },
+  "time": {
+    "days": "{count, plural, one {# day} other {# days}}",
+    "hours": "{count, plural, one {# hour} other {# hours}}",
+    "minutes": "{count, plural, one {# minute} other {# minutes}}"
+  },
+  "language": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "status": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "scheduled": "Scheduled",
+    "declined": "Declined",
+    "info": "Info",
+    "draft": "Draft",
+    "inactive": "Inactive",
+    "archived": "Archived",
+    "active": "Active"
+  },
+  "userStatus": {
+    "prospective": "Not started",
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "accountStatus": {
+    "draft": "Draft",
+    "invited": "Invited",
+    "active": "Registered",
+    "blocked": "Blocked"
+  },
+  "access": {
+    "private": "This is private",
+    "pagePrivate": "This page is private",
+    "askAdmin": "Ask an admin for access.",
+    "checking": "Checking your access…",
+    "permissionsDidNotLoad": "Permissions did not load"
+  },
+  "errorState": {
+    "notFound": "We can't find this",
+    "didNotLoad": "This didn't load",
+    "errorId": "Error ID {reference}"
+  },
+  "emptyState": {
+    "nothingArchived": "Nothing archived",
+    "archivedDescription": "Archived records will appear here.",
+    "noResultsHint": "Try a different search."
+  },
+  "toggles": {
+    "archived": "Archived ({count})",
+    "drafts": "Drafts ({count})"
+  },
+  "brand": {
+    "poweredBy": "powered by"
+  },
+  "sidebar": {
+    "title": "Navigation",
+    "description": "The app's pages",
+    "collapse": "Collapse navigation",
+    "expand": "Expand navigation",
+    "toggle": "Toggle navigation"
+  },
+  "stepper": {
+    "progress": "Progress",
+    "stepDone": "{label}, done",
+    "stepOf": "Step {current} of {total} · {label}"
+  },
+  "datePicker": {
+    "pickDate": "Pick a date",
+    "pickRange": "Pick a range",
+    "clearDate": "Clear date",
+    "clearRange": "Clear range"
+  },
+  "timePicker": {
+    "hour": "Hour",
+    "minute": "Minute"
+  },
+  "searchableSelect": {
+    "empty": "Nothing matches that."
+  },
+  "searchField": {
+    "placeholder": "Search…",
+    "searchIn": "Search in",
+    "noResults": "0 results",
+    "matchOf": "{current} of {total}",
+    "previousMatch": "Previous match",
+    "nextMatch": "Next match",
+    "clear": "Clear search"
+  },
+  "tagColor": {
+    "color": "Color",
+    "optionColor": "{option}: {color}",
+    "pick": "Pick a color",
+    "pickDescription": "Used for this option's tag.",
+    "names": {
+      "gray": "Gray",
+      "berry": "Berry",
+      "plum": "Plum",
+      "indigo": "Indigo",
+      "ocean": "Ocean",
+      "teal": "Teal",
+      "cocoa": "Cocoa",
+      "bronze": "Bronze"
+    }
+  },
+  "weekdays": {
+    "short": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "accent": {
+    "names": {
+      "wine": "Wine",
+      "brick": "Brick",
+      "terracotta": "Terracotta",
+      "sun": "Sun",
+      "forest": "Forest",
+      "teal": "Teal",
+      "denim": "Denim",
+      "iris": "Iris",
+      "raspberry": "Raspberry",
+      "graphite": "Graphite"
+    }
+  },
+  "confirmCancel": {
+    "title": "Discard changes?",
+    "description": "You have unsaved changes. Are you sure you want to close this modal?"
+  },
+  "commandDialog": {
+    "description": "Search for people, pages and actions"
+  },
+  "validation": {
+    "invalid": "Is invalid",
+    "required": "This field is required",
+    "oneOf": "Must be one of the following values: {values}",
+    "notOneOf": "Must not be one of the following values: {values}",
+    "notNumber": "Must be a number",
+    "notDate": "Must be a valid date",
+    "string": {
+      "length": "Must be exactly {length, plural, one {# character} other {# characters}}",
+      "min": "Must be at least {min, plural, one {# character} other {# characters}}",
+      "max": "Must be at most {max, plural, one {# character} other {# characters}}",
+      "matches": "Is not in the expected format",
+      "email": "Must be a valid email",
+      "url": "Must be a valid URL",
+      "uuid": "Must be a valid UUID"
+    },
+    "number": {
+      "min": "Must be greater than or equal to {min}",
+      "max": "Must be less than or equal to {max}",
+      "lessThan": "Must be less than {less}",
+      "moreThan": "Must be greater than {more}",
+      "positive": "Must be a positive number",
+      "negative": "Must be a negative number",
+      "integer": "Must be an integer"
+    },
+    "date": {
+      "min": "Must be later than {min}",
+      "max": "Must be earlier than {max}"
+    },
+    "array": {
+      "length": "Must have {length, plural, one {# item} other {# items}}",
+      "min": "Must have at least {min, plural, one {# item} other {# items}}",
+      "max": "Must have at most {max, plural, one {# item} other {# items}}"
+    }
+  },
+  "toast": {
+    "region": "Notifications",
+    "close": "Close"
+  },
+  "flow": {
+    "controls": "Canvas controls",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitView": "Fit to screen",
+    "interactive": "Lock or unlock the canvas",
+    "minimap": "Mini map",
+    "handle": "Connection point",
+    "nodeDescription": "Press Enter or Space to select an item. Press Delete to remove it and Escape to cancel.",
+    "nodeDescriptionKeyboard": "Press Enter or Space to select an item, then move it with the arrow keys. Press Delete to remove it and Escape to cancel.",
+    "nodeMoved": "Moved the item {direction}. New position: x {x}, y {y}",
+    "edgeDescription": "Press Enter or Space to select a link, then Delete to remove it or Escape to cancel."
+  }
+}

@@ -4,6 +4,7 @@
 import * as React from "react";
 import { FormError } from "@/components/feedback/FormError";
 import { FC, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +58,8 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
@@ -152,9 +155,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
         <DialogContent hideClose className="overflow-hidden p-0 sm:max-w-2xl">
           <div className="px-8 pt-8">
             <DialogHeader>
-              <DialogTitle>Profile picture</DialogTitle>
+              <DialogTitle>{t("profile.avatar.title")}</DialogTitle>
               <DialogDescription>
-                Upload a new avatar or remove the current profile picture.
+                {t("profile.avatar.description")}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -173,10 +176,10 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
                   <p className="text-body font-medium">
-                    {selectedFile ? "New avatar" : "Current avatar"}
+                    {selectedFile ? t("profile.avatar.new") : t("profile.avatar.current")}
                   </p>
                   <p className="mt-2 max-w-md text-body leading-6 text-tertiary">
-                    Recommended: square image, at least 400×400px. PNG, JPG or WEBP works best.
+                    {t("profile.avatar.recommendation")}
                   </p>
                 </div>
 
@@ -199,7 +202,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                           variant="ghost"
                           disabled={isLoading}
                           onClick={handleClearSelection}
-                          aria-label="Clear selected image"
+                          aria-label={t("profile.avatar.clearSelection")}
                         >
                           <Icon icon={Cancel01Icon} size="sm" />
                         </Button>
@@ -232,10 +235,10 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
 
                 <span className="min-w-0 text-left">
                   <span className="block text-body font-medium">
-                    {hasCurrentAvatar ? "Replace photo" : "Upload photo"}
+                    {hasCurrentAvatar ? t("profile.avatar.replace") : t("profile.avatar.upload")}
                   </span>
                   <span className="mt-1 block text-hint text-tertiary">
-                    Choose an image from your device.
+                    {t("profile.avatar.uploadHint")}
                   </span>
                 </span>
               </Button>
@@ -252,9 +255,9 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                 </span>
 
                 <span className="min-w-0 text-left">
-                  <span className="block text-body font-medium">Remove photo</span>
+                  <span className="block text-body font-medium">{t("profile.avatar.remove")}</span>
                   <span className="mt-1 block text-hint text-tertiary">
-                    Use initials instead of an avatar.
+                    {t("profile.avatar.removeHint")}
                   </span>
                 </span>
               </Button>
@@ -277,14 +280,14 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                 disabled={isLoading}
                 onClick={requestClose}
               >
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button
                 type="button"
                 disabled={isLoading || !canSave}
                 onClick={handleUploadConfirm}
               >
-                {isLoading ? "Saving…" : "Save changes"}
+                {isLoading ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
               </Button>
             </DialogFooter>
           </div>
@@ -321,6 +324,8 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
   onRequestCloseAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   return (
     <AlertDialog
       open={isOpen}
@@ -334,13 +339,14 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Icon icon={UserBlock01Icon} />
-            Remove avatar
+            {t("profile.avatar.removeTitle")}
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            This action will remove the profile picture for{" "}
-            <strong>{fullName ?? "this user"}</strong>. The profile will use
-            initials instead.
+            {t.rich("profile.avatar.removeDescription", {
+              name: fullName ?? t("profile.avatar.thisUser"),
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -348,9 +354,9 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
           <div className="flex items-start gap-3">
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
             <div>
-              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("profile.avatar.warning")}</h4>
               <p className="text-body text-secondary">
-                The current avatar will be permanently removed.
+                {t("profile.avatar.warningText")}
               </p>
             </div>
           </div>
@@ -359,7 +365,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
         <FormError message={errorMessage} />
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
             // AlertDialogAction closes its dialog on click by default, which threw the failure away
@@ -370,7 +376,7 @@ const DeleteUserAvatarModal: FC<DeleteUserAvatarModalProps> = ({
             }}
             destructive
           >
-            Remove avatar
+            {t("profile.avatar.removeTitle")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

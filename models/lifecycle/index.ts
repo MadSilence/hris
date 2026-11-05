@@ -345,105 +345,28 @@ export type PreboardingPage = {
   }[];
 };
 
-export const PROCESS_TYPE_LABELS: Record<ProcessType, string> = {
-  PREBOARDING: "Preboarding",
-  ONBOARDING: "Onboarding",
-  OFFBOARDING: "Offboarding",
-};
-
-export const TASK_KIND_LABELS: Record<TaskKind, string> = {
-  TODO: "To-do",
-  FILL_FIELDS: "Fill in fields",
-  DOCUMENT: "Upload document",
-  ACKNOWLEDGE: "Acknowledge",
-  QUESTIONNAIRE: "Questionnaire",
-  REVIEW: "Review",
-  NOMINATE_PEERS: "Nominate peers",
-  APPROVE_PEERS: "Approve peers",
-  APPROVE_REVIEW: "Approve review",
-  APPROVE_AUTOMATION: "Approve",
-};
-
-/** One line each, for choosing a kind: what the person is asked to do, and what closes it. */
-export const TASK_KIND_DESCRIPTIONS: Record<TaskKind, string> = {
-  TODO: "Something to do and tick off. Can ask for a file to be attached.",
-  FILL_FIELDS: "Fields of the profile to fill in. Closes when every one holds a value.",
-  DOCUMENT: "A file to upload into the person's documents. Closes when it arrives.",
-  ACKNOWLEDGE: "A file or a link to read and confirm. Only the person it is for can confirm.",
-  QUESTIONNAIRE: "Questions to answer. The answers are kept on the person's Forms tab.",
-  REVIEW: "A performance review to write. Closes when it is submitted.",
-  NOMINATE_PEERS: "Colleagues to nominate for a performance review. Closes when the nomination is sent.",
-  APPROVE_PEERS: "Peers somebody nominated, to approve. Closes when they are approved.",
-  APPROVE_REVIEW: "A manager review to approve before it is shared. Closes when approved or sent back.",
-  APPROVE_AUTOMATION: "An automation waits for this approval. Closes when approved or declined.",
-};
+/** Every task kind, in the order a picker lists them. */
+export const TASK_KINDS: TaskKind[] = [
+  "TODO",
+  "FILL_FIELDS",
+  "DOCUMENT",
+  "ACKNOWLEDGE",
+  "QUESTIONNAIRE",
+  "REVIEW",
+  "NOMINATE_PEERS",
+  "APPROVE_PEERS",
+  "APPROVE_REVIEW",
+  "APPROVE_AUTOMATION",
+];
 
 /** The kinds a template or process editor offers — every kind but a review's and its steps'. */
-export const EDITABLE_TASK_KINDS = (Object.keys(TASK_KIND_LABELS) as TaskKind[]).filter(
+export const EDITABLE_TASK_KINDS = TASK_KINDS.filter(
   (k): k is EditableTaskKind => !isReviewTaskKind(k) && k !== "APPROVE_AUTOMATION",
 );
-
-export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  SHORT_TEXT: "Short text",
-  LONG_TEXT: "Long text",
-  NUMBER: "Number",
-  DATE: "Date",
-  YES_NO: "Yes or no",
-  SINGLE_CHOICE: "One choice",
-  MULTIPLE_CHOICE: "Several choices",
-};
-
-export const ACCESS_PROBLEM_LABELS: Record<AccessProblem, string> = {
-  CANNOT_EDIT_FIELDS: "Cannot edit these fields",
-  CANNOT_UPLOAD: "Cannot upload this person's documents",
-};
 
 /** A to-do that names a category requires a file of it, which closes it. */
 export const requiresFile = (task: { kind: TaskKind; category?: Ref | null; categoryName?: string | null }) =>
   task.kind === "TODO" && Boolean(task.category ?? task.categoryName);
 
 /** What a template may name — LINE_MANAGER is an automation's, never offered here. */
-export const ASSIGNEE_KIND_LABELS: Record<TemplateAssigneeKind, string> = {
-  TARGET: "The new person",
-  ONBOARDING_MANAGER: "Onboarding manager",
-  SPECIFIC_USER: "Specific person",
-};
-
-export const PROCESS_STATUS_LABELS: Record<ProcessStatus, string> = {
-  PLANNED: "Planned",
-  IN_PROGRESS: "In progress",
-  COMPLETED: "Completed",
-  PARTIALLY_FAILED: "Partially failed",
-  CANCELLED: "Cancelled",
-};
-
-export const ASSIGNEE_PROBLEM_LABELS: Record<AssigneeProblem, string> = {
-  MISSING: "Nobody is assigned",
-  LEFT: "Has left the company",
-  NOT_STARTED_DRAFT: "Not an employee yet",
-};
-
-/**
- * "7 days before start", "On the start day", "3 days after start", "By the start day" — or, for an offboarding,
- * counted from the last working day: "By the last day", "2 days after the last day".
- */
-export const describeDue = (dueKind: DueKind, offsetDays: number | null | undefined, type?: ProcessType | null): string => {
-  const leaving = type === "OFFBOARDING";
-  if (dueKind === "BEFORE_START") return leaving ? "By the last day" : "By the start day";
-  const n = offsetDays ?? 0;
-  if (n === 0) return leaving ? "On the last day" : "On the start day";
-  const days = Math.abs(n) === 1 ? "1 day" : `${Math.abs(n)} days`;
-  if (leaving) return n < 0 ? `${days} before the last day` : `${days} after the last day`;
-  return n < 0 ? `${days} before start` : `${days} after start`;
-};
-
-/**
- * An assignee kind as an offboarding says it: the leaver, and the manager who runs it — the same role the
- * product calls the onboarding manager everywhere else.
- */
-export const assigneeKindLabel = (kind: TemplateAssigneeKind, type?: ProcessType | null): string => {
-  if (type !== "OFFBOARDING") return ASSIGNEE_KIND_LABELS[kind];
-  if (kind === "TARGET") return "The leaver";
-  if (kind === "ONBOARDING_MANAGER") return "Offboarding manager";
-  return ASSIGNEE_KIND_LABELS[kind];
-};
+export const ASSIGNEE_KINDS: TemplateAssigneeKind[] = ["TARGET", "ONBOARDING_MANAGER", "SPECIFIC_USER"];

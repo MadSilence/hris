@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -16,18 +17,11 @@ import {
   isMissingViewAccess,
   RolePermissionsDraft,
   RoleScopeFilters,
-  SCOPE_CHOICE_LABELS,
+  ACCESS_ACTION_LABEL_KEYS,
+  SCOPE_CHOICE_LABEL_KEYS,
   ScopeChoice,
   scopesToChoice,
 } from "@/components/modules/settings/modules/roles/utils/rolePermissionsPayload";
-
-const ACTION_LABELS: Record<AccessAction, string> = {
-  VIEW: "View",
-  EDIT: "Edit",
-  MANAGE: "Manage",
-  // Offered by People → Profiles only; every other row shows the cell as unsupported.
-  BLOCK: "Block",
-};
 
 // Shared column template so the sticky header and every row line up. One column per ACCESS_ACTIONS.
 const GRID = "grid grid-cols-[minmax(0,1fr)_170px_170px_170px_170px] items-center gap-4";
@@ -64,6 +58,8 @@ export default function RolePermissionsView({
   scopeFilters,
   onEditFilters,
 }: RolePermissionsViewProps) {
+  const tAccess = useTranslations("access");
+  const t = useTranslations("settings");
   const needle = query.trim().toLowerCase();
 
   const visibleGroups = React.useMemo(() => {
@@ -73,11 +69,11 @@ export default function RolePermissionsView({
       .map((group) => ({
         ...group,
         resources: group.resources.filter((resource) =>
-          resource.label.toLowerCase().includes(needle),
+          tAccess(`resources.${resource.messageKey}.label`).toLowerCase().includes(needle),
         ),
       }))
       .filter((group) => group.resources.length > 0);
-  }, [needle]);
+  }, [needle, tAccess]);
 
   // While searching, force matching groups open; otherwise use the controlled state.
   const accordionValue = needle ? visibleGroups.map((group) => group.id) : openGroups;
@@ -87,9 +83,9 @@ export default function RolePermissionsView({
       <div
         className={`${GRID} sticky top-0 z-10 bg-card px-1 pb-3 pt-1 text-body font-medium text-primary`}
       >
-        <div>Resource</div>
+        <div>{t("roles.permissions.columnResource")}</div>
         {ACCESS_ACTIONS.map((action) => (
-          <div key={action}>{ACTION_LABELS[action]}</div>
+          <div key={action}>{t(ACCESS_ACTION_LABEL_KEYS[action])}</div>
         ))}
       </div>
 
@@ -108,7 +104,7 @@ export default function RolePermissionsView({
         {visibleGroups.map((group) => (
           <AccordionItem key={group.id} value={group.id} className="border-b-0">
             <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
-              {group.label}
+              {tAccess(`resourceGroups.${group.id}`)}
             </AccordionTrigger>
 
             <AccordionContent>
@@ -123,13 +119,13 @@ export default function RolePermissionsView({
                       className={`${GRID} border-b border-divider px-1 py-2 last:border-b-0`}
                     >
                       <div className="min-w-0">
-                        <p className="text-body font-medium">{resource.label}</p>
-                        <p className="text-hint text-tertiary">{resource.description}</p>
+                        <p className="text-body font-medium">{tAccess(`resources.${resource.messageKey}.label`)}</p>
+                        <p className="text-hint text-tertiary">{tAccess(`resources.${resource.messageKey}.description`)}</p>
 
                         {missingView && (
                           <p className="mt-1 flex items-center gap-1.5 text-hint text-status-pending-text">
                             <Icon icon={Alert02Icon} size="sm" />
-                            Without view access this role cannot open the related pages.
+                            {t("roles.permissions.missingView")}
                           </p>
                         )}
                       </div>
@@ -170,7 +166,7 @@ export default function RolePermissionsView({
                               <SelectContent>
                                 {choices.map((choice) => (
                                   <SelectItem key={choice} value={choice}>
-                                    {SCOPE_CHOICE_LABELS[choice]}
+                                    {t(SCOPE_CHOICE_LABEL_KEYS[choice])}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -188,8 +184,8 @@ export default function RolePermissionsView({
                                 }`}
                               >
                                 {conditions === 0
-                                  ? "Set conditions"
-                                  : `${conditions} ${conditions === 1 ? "condition" : "conditions"}`}
+                                  ? t("roles.permissions.setConditions")
+                                  : t("roles.permissions.conditions", { count: conditions })}
                               </button>
                             )}
                           </div>
@@ -205,7 +201,7 @@ export default function RolePermissionsView({
 
         {visibleGroups.length === 0 && (
           <p className="px-1 py-6 text-body text-tertiary">
-            No permissions match “{query.trim()}”.
+            {t("roles.permissions.noMatch", { query: query.trim() })}
           </p>
         )}
       </Accordion>

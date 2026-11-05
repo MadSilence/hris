@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact/useTimeOffAssignmentImpact";
@@ -12,13 +13,16 @@ type Props = {
 
 const NAMES_SHOWN = 5;
 
-const names = (people: { firstName?: string | null; lastName?: string | null }[]): string => {
+const names = (
+  people: { firstName?: string | null; lastName?: string | null }[],
+  t: ReturnType<typeof useTranslations<"timeOff">>,
+): string => {
   const shown = people
     .slice(0, NAMES_SHOWN)
     .map((p) => `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim())
     .filter(Boolean);
   const rest = people.length - shown.length;
-  return rest > 0 ? `${shown.join(", ")} and ${rest} more` : shown.join(", ");
+  return rest > 0 ? t("policies.assignmentWarning.namesMore", { names: shown.join(", "), rest }) : shown.join(", ");
 };
 
 /**
@@ -30,6 +34,7 @@ const names = (people: { firstName?: string | null; lastName?: string | null }[]
  * reads before pressing Add.
  */
 export const PolicyAssignmentWarning: React.FC<Props> = ({ policyId, userIds }) => {
+  const t = useTranslations("timeOff");
   const { data: impact } = useTimeOffAssignmentImpact({ policyId, userIds });
   if (!impact) return null;
 
@@ -43,15 +48,20 @@ export const PolicyAssignmentWarning: React.FC<Props> = ({ policyId, userIds }) 
       <div className="space-y-1">
         {noApprover.length > 0 ? (
           <p className="m-0">
-            {noApprover.length} of {impact.selected} selected {impact.selected === 1 ? "person has" : "people have"} nobody
-            the approval chain can reach — usually no manager — so their requests could not be approved:{" "}
-            {names(noApprover)}.
+            {t("policies.assignmentWarning.noApprover", {
+              count: noApprover.length,
+              selected: impact.selected,
+              names: names(noApprover, t),
+            })}
           </p>
         ) : null}
         {noHireDate.length > 0 ? (
           <p className="m-0">
-            {noHireDate.length} of {impact.selected} selected {impact.selected === 1 ? "person has" : "people have"} no hire
-            date, and this policy renews on the hire anniversary, so they will not be assigned: {names(noHireDate)}.
+            {t("policies.assignmentWarning.noHireDate", {
+              count: noHireDate.length,
+              selected: impact.selected,
+              names: names(noHireDate, t),
+            })}
           </p>
         ) : null}
       </div>

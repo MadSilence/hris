@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { formatMinutes, type AttendanceReportRow } from "@/models/attendance";
 import { formatAmounts } from "@/components/modules/attendance/lib";
+import type { Messages } from "@/i18n/messages";
+import { useDisplayLocale } from "@/lib/date";
 
 type Props = {
   rows: AttendanceReportRow[];
@@ -21,21 +24,29 @@ type Props = {
 export const personName = (p: AttendanceReportRow["person"]) =>
   `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || p.email || "";
 
-type AttendanceColumn = { key: string; label: string; value: (r: AttendanceReportRow) => string };
+type AttendanceColumn = {
+  key: string;
+  /** The heading, a key of the `attendance` catalogue. */
+  labelKey: AttendanceColumnLabelKey;
+  /** `locale` is the page's (`useDisplayLocale()`) — money is written in it. */
+  value: (r: AttendanceReportRow, locale?: string) => string;
+};
+
+export type AttendanceColumnLabelKey = `columns.${keyof Messages["attendance"]["columns"]}`;
 
 /** The five numbers, in order — the table prints them, and the export preview prints them inside the file's own columns. */
 export const ATTENDANCE_COLUMNS: readonly AttendanceColumn[] = [
-  { key: "expectedDays", label: "Expected days", value: (r) => String(r.totals.expectedDays) },
-  { key: "loggedDays", label: "Logged days", value: (r) => String(r.totals.loggedDays) },
-  { key: "expectedHours", label: "Expected hours", value: (r) => formatMinutes(r.totals.expectedMinutes) },
-  { key: "loggedHours", label: "Logged hours", value: (r) => formatMinutes(r.totals.loggedMinutes) },
-  { key: "overtimeHours", label: "Overtime hours", value: (r) => formatMinutes(r.totals.overtimeMinutes) },
+  { key: "expectedDays", labelKey: "columns.expectedDays", value: (r) => String(r.totals.expectedDays) },
+  { key: "loggedDays", labelKey: "columns.loggedDays", value: (r) => String(r.totals.loggedDays) },
+  { key: "expectedHours", labelKey: "columns.expectedHours", value: (r) => formatMinutes(r.totals.expectedMinutes) },
+  { key: "loggedHours", labelKey: "columns.loggedHours", value: (r) => formatMinutes(r.totals.loggedMinutes) },
+  { key: "overtimeHours", labelKey: "columns.overtimeHours", value: (r) => formatMinutes(r.totals.overtimeMinutes) },
 ];
 
 const AMOUNT_COLUMN: AttendanceColumn = {
   key: "amount",
-  label: "Amount",
-  value: (r) => formatAmounts(r.totals.amounts) ?? "",
+  labelKey: "columns.amount",
+  value: (r, locale) => formatAmounts(r.totals.amounts, locale) ?? "",
 };
 
 /**
@@ -59,8 +70,10 @@ export const AttendanceTable: React.FC<Props> = ({
   onOpen,
   empty,
 }) => {
+  const t = useTranslations("attendance");
   const sentinel = useRef<HTMLDivElement | null>(null);
   const columns = attendanceColumns(rows);
+  const locale = useDisplayLocale();
 
   useEffect(() => {
     const node = sentinel.current;
@@ -77,9 +90,9 @@ export const AttendanceTable: React.FC<Props> = ({
       <Table className="table-fixed">
         <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow>
-            <TableHead className="w-[32%]">Name</TableHead>
+            <TableHead className="w-[32%]">{t("columns.name")}</TableHead>
             {columns.map((column) => (
-              <TableHead key={column.key} className="text-right">{column.label}</TableHead>
+              <TableHead key={column.key} className="text-right">{t(column.labelKey)}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -119,7 +132,7 @@ export const AttendanceTable: React.FC<Props> = ({
                     />
                   </TableCell>
                   {columns.map((column) => (
-                    <TableCell key={column.key} className="text-right tabular-nums">{column.value(row)}</TableCell>
+                    <TableCell key={column.key} className="text-right tabular-nums">{column.value(row, locale)}</TableCell>
                   ))}
                 </TableRow>
               ))}
@@ -127,7 +140,7 @@ export const AttendanceTable: React.FC<Props> = ({
       </Table>
       {hasNextPage && (
         <div ref={sentinel} className="py-3 text-center text-body text-tertiary">
-          {isFetchingNextPage ? "Loading more…" : ""}
+          {isFetchingNextPage ? t("overview.loadingMore") : ""}
         </div>
       )}
     </div>

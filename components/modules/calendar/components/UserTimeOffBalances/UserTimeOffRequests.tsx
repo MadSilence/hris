@@ -2,8 +2,9 @@
 
 import { Skeleton } from "@/components/desact/skeleton";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { FC, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CalendarRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -45,13 +46,13 @@ const STATUS_TONE: Record<TimeOffRequestStatus, StatusTone> = {
   [TimeOffRequestStatus.Cancelled]: "archived",
 };
 
-const STATUS_LABEL: Record<TimeOffRequestStatus, string> = {
-  [TimeOffRequestStatus.Pending]: "Pending",
-  [TimeOffRequestStatus.Approved]: "Approved",
-  [TimeOffRequestStatus.CancellationPending]: "Cancellation requested",
-  [TimeOffRequestStatus.Rejected]: "Rejected",
-  [TimeOffRequestStatus.Cancelled]: "Cancelled",
-};
+const STATUS_LABEL = {
+  [TimeOffRequestStatus.Pending]: "requests.status.pending",
+  [TimeOffRequestStatus.Approved]: "requests.status.approved",
+  [TimeOffRequestStatus.CancellationPending]: "requests.status.cancellationPending",
+  [TimeOffRequestStatus.Rejected]: "requests.status.rejected",
+  [TimeOffRequestStatus.Cancelled]: "requests.status.cancelled",
+} as const satisfies Record<TimeOffRequestStatus, string>;
 
 const canCancel = (status: TimeOffRequestStatus) =>
   status === TimeOffRequestStatus.Pending || status === TimeOffRequestStatus.Approved;
@@ -70,7 +71,7 @@ const needsCancellationReason = (status: TimeOffRequestStatus, isOwnRequest: boo
  * difference between "it did nothing" and "somebody has to look at it".
  */
 const cancelLabel = (status: TimeOffRequestStatus, isOwnRequest: boolean) =>
-  isOwnRequest && status === TimeOffRequestStatus.Approved ? "Request cancellation" : "Cancel";
+  isOwnRequest && status === TimeOffRequestStatus.Approved ? "requests.requestCancellation" : "requests.cancel";
 
 /** The current year and the four around it — enough for the history anybody actually looks at. */
 const YEAR_OPTIONS = (() => {
@@ -82,6 +83,9 @@ const YEAR_OPTIONS = (() => {
 const byStartDesc = (a: TimeOffRequest, b: TimeOffRequest) => b.startDate.localeCompare(a.startDate);
 
 export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   // Filtered on the server: the list is unbounded, and the reason to filter it is that it is long.
   // The endpoint took no parameters at all and the screen had no controls.
   const [yearFilter, setYearFilter] = useState<string>("ALL");
@@ -118,8 +122,9 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
 
   const policyName = useMemo(() => {
     const map = new Map((policies ?? []).map((p) => [p.id, p.name]));
-    return (id: string) => map.get(id) ?? "Time off";
-  }, [policies]);
+    const fallback = t("balances.fallbackName");
+    return (id: string) => map.get(id) ?? fallback;
+  }, [policies, t]);
 
   const rows = useMemo(() => [...(requests ?? [])].sort(byStartDesc), [requests]);
 
@@ -136,7 +141,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
       setCancellingId(null);
       setCancelReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to cancel the request.");
+      setError(e instanceof Error ? e.message : t("requests.errors.cancel"));
     }
   };
 
@@ -170,7 +175,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
       });
       setEditingId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to edit the request.");
+      setError(e instanceof Error ? e.message : t("requests.errors.edit"));
     }
   };
 
@@ -185,7 +190,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
       setError(
         e instanceof Error
           ? e.message
-          : "Failed to answer the cancellation request.",
+          : t("requests.errors.answerCancellation"),
       );
     }
   };
@@ -195,7 +200,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
     try {
       await approveMutation.mutateAsync({ requestId: request.id });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to approve the request.");
+      setError(e instanceof Error ? e.message : t("requests.errors.approve"));
     }
   };
 
@@ -211,7 +216,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
       setRejectingId(null);
       setRejectReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to reject the request.");
+      setError(e instanceof Error ? e.message : t("requests.errors.reject"));
     }
   };
 
@@ -243,7 +248,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">Any year</SelectItem>
+            <SelectItem value="ALL">{t("requests.anyYear")}</SelectItem>
             {YEAR_OPTIONS.map((y) => (
               <SelectItem key={y} value={String(y)}>
                 {y}
@@ -257,10 +262,10 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">Any status</SelectItem>
+            <SelectItem value="ALL">{t("requests.anyStatus")}</SelectItem>
             {Object.values(TimeOffRequestStatus).map((s) => (
               <SelectItem key={s} value={s}>
-                {STATUS_LABEL[s]}
+                {t(STATUS_LABEL[s])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -273,8 +278,8 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
         <div className="flex items-center gap-3 rounded-card border border-dashed border-divider px-4 py-6 text-body text-tertiary">
           <Icon icon={CalendarRemove01Icon} className="text-tertiary" />
           {filtered
-            ? "No requests match these filters."
-            : "No time off requests yet."}
+            ? t("requests.emptyFiltered")
+            : t("requests.empty")}
         </div>
       ) : (
       <div className="divide-y divide-divider rounded-control border border-divider">
@@ -297,11 +302,15 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     <p className="truncate text-body font-medium text-primary">
                       {policyName(request.policyId)}
                     </p>
-                    <StatusBadge status={STATUS_TONE[request.status]} label={STATUS_LABEL[request.status]} size="sm" />
+                    <StatusBadge status={STATUS_TONE[request.status]} label={t(STATUS_LABEL[request.status])} size="sm" />
                   </div>
                   <p className="mt-0.5 text-hint text-tertiary">
-                    {formatDisplayDate(request.startDate)} → {formatDisplayDate(request.endDate)} ·{" "}
-                    {formatDayAmount(request.requestedAmount)} d
+                    {t("requests.line", {
+                      start: formatDisplayDate(request.startDate),
+                      end: formatDisplayDate(request.endDate),
+                      amount: formatDayAmount(request.requestedAmount),
+                      unit: t("units.daysShort"),
+                    })}
                     {request.reason ? <span> · {request.reason}</span> : null}
                   </p>
 
@@ -309,13 +318,16 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       rejection read as a bare red badge and the requester had to go and ask. */}
                   {request.status === TimeOffRequestStatus.Rejected && request.rejectionReason && (
                     <p className="mt-1 text-hint text-status-declined-text">
-                      <span className="font-medium">Reason:</span> {request.rejectionReason}
+                      {t.rich("requests.rejectionReason", {
+                        reason: request.rejectionReason,
+                        b: (chunks) => <span className="font-medium">{chunks}</span>,
+                      })}
                     </p>
                   )}
 
                   {request.status === TimeOffRequestStatus.CancellationPending && (
                     <p className="mt-1 text-hint text-status-pending-text">
-                      Waiting for the approver to confirm the cancellation
+                      {t("requests.awaitingCancellation")}
                       {request.cancellationReason ? ` · ${request.cancellationReason}` : ""}
                     </p>
                   )}
@@ -330,7 +342,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         onClick={() => handleApprove(request)}
                         disabled={isDeciding}
                       >
-                        Approve
+                        {t("requests.approve")}
                       </Button>
                       <Button type="button"
                         variant="ghost"
@@ -342,7 +354,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         }}
                         disabled={isDeciding}
                       >
-                        Reject
+                        {t("requests.reject")}
                       </Button>
                     </>
                   )}
@@ -362,7 +374,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         onClick={() => handleCancellationDecision(request, "CONFIRM")}
                         disabled={isDeciding}
                       >
-                        Confirm cancellation
+                        {t("requests.confirmCancellation")}
                       </Button>
                       <Button type="button"
                         variant="ghost"
@@ -371,7 +383,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                         onClick={() => handleCancellationDecision(request, "DECLINE")}
                         disabled={isDeciding}
                       >
-                        Keep the absence
+                        {t("requests.keepAbsence")}
                       </Button>
                     </>
                   )}
@@ -384,7 +396,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       onClick={() => startEditing(request)}
                       disabled={editMutation.isPending}
                     >
-                      Edit dates
+                      {t("requests.editDates")}
                     </Button>
                   )}
 
@@ -396,7 +408,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                       onClick={() => handleCancel(request)}
                       disabled={cancelMutation.isPending}
                     >
-                      {cancelLabel(request.status, !canDecide)}
+                      {t(cancelLabel(request.status, !canDecide))}
                     </Button>
                   )}
                 </div>
@@ -409,7 +421,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onChange={setEditStart}
                     disabled={editMutation.isPending}
                   />
-                  <span className="text-hint text-tertiary">to</span>
+                  <span className="text-hint text-tertiary">{t("requests.to")}</span>
                   <DatePicker
                     value={editEnd}
                     onChange={setEditEnd}
@@ -420,7 +432,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => submitEdit(request)}
                     disabled={editMutation.isPending || !editStart || !editEnd}
                   >
-                    Save
+                    {tCommon("actions.save")}
                   </Button>
                   <Button type="button"
                     variant="secondary"
@@ -428,14 +440,14 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => setEditingId(null)}
                     disabled={editMutation.isPending}
                   >
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </Button>
                 </div>
               )}
 
               {isCancelling && (
                 <div className="mt-3 flex flex-col gap-1.5">
-                  <RequiredLabel htmlFor={`cancel-reason-${request.id}`} required>Reason</RequiredLabel>
+                  <RequiredLabel htmlFor={`cancel-reason-${request.id}`} required>{t("requests.reason")}</RequiredLabel>
                   <div className="flex items-center gap-2">
                   <Input
                     id={`cancel-reason-${request.id}`}
@@ -449,7 +461,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => submitCancel(request, cancelReason.trim())}
                     disabled={cancelMutation.isPending || !cancelReason.trim()}
                   >
-                    Request cancellation
+                    {t("requests.requestCancellation")}
                   </Button>
                   <Button type="button"
                     variant="secondary"
@@ -457,7 +469,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => setCancellingId(null)}
                     disabled={cancelMutation.isPending}
                   >
-                    Back
+                    {tCommon("actions.back")}
                   </Button>
                   </div>
                 </div>
@@ -467,7 +479,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                 <div className="mt-3 flex flex-col gap-1.5">
                   {/* Confirm stays disabled until this is filled: say so, rather than leaving an
                       unexplained box beside a dead button. */}
-                  <RequiredLabel htmlFor={`reject-reason-${request.id}`} required>Reason</RequiredLabel>
+                  <RequiredLabel htmlFor={`reject-reason-${request.id}`} required>{t("requests.reason")}</RequiredLabel>
                   <div className="flex items-center gap-2">
                   <Input
                     id={`reject-reason-${request.id}`}
@@ -481,7 +493,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => handleReject(request)}
                     disabled={isDeciding || !rejectReason.trim()}
                   >
-                    Confirm
+                    {tCommon("actions.confirm")}
                   </Button>
                   <Button type="button"
                     variant="secondary"
@@ -489,7 +501,7 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
                     onClick={() => setRejectingId(null)}
                     disabled={isDeciding}
                   >
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </Button>
                   </div>
                 </div>

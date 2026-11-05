@@ -1,9 +1,10 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import AuthScreen from "@/components/modules/auth/components/AuthScreen";
 import LoginContainer from "@/components/modules/auth/components/LoginContainer/LoginContainer";
 import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
-import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
+import { DEFAULT_LOGIN_HEADLINE_KEY, DEFAULT_LOGIN_SUBHEADLINE_KEY } from "@/models/company/loginPageDefaults";
 import type { PublicSso } from "@/api/modules/sso/ssoService";
 
 type Props = {
@@ -34,8 +35,9 @@ type Props = {
 export default function CompanyLoginScreen({
   appearance, passwordChanged, changeCompanyHref, returnTo, sso, initialMfa, ssoFailed,
 }: Props) {
-  const headline = appearance.loginHeadline?.trim() || DEFAULT_LOGIN_HEADLINE;
-  const subheadline = appearance.loginSubheadline?.trim() || DEFAULT_LOGIN_SUBHEADLINE;
+  const t = useTranslations("auth");
+  const headline = appearance.loginHeadline?.trim() || t(DEFAULT_LOGIN_HEADLINE_KEY);
+  const subheadline = appearance.loginSubheadline?.trim() || t(DEFAULT_LOGIN_SUBHEADLINE_KEY);
   const backgroundUrl = appearance.loginImageUrl;
 
   return (

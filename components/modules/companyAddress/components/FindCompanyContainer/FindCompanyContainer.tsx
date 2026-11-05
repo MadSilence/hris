@@ -1,6 +1,7 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
@@ -15,15 +16,12 @@ import { FieldError } from "@/components/desact/field-error";
 
 type Values = { email: string };
 
-export const FIND_COMPANY_SENT_MESSAGE =
-  "If that email can sign in to any company, we have sent it the addresses. Check your inbox.";
-
-const schema = yup.object({
+const buildSchema = (t: ReturnType<typeof useTranslations<"auth">>) => yup.object({
   email: yup
     .string()
     .trim()
-    .required("Please enter your email.")
-    .email("Enter a valid email address.")
+    .required(t("login.validation.emailRequired"))
+    .email(t("login.validation.emailInvalid"))
     .nonNullable(),
 });
 
@@ -35,6 +33,8 @@ const schema = yup.object({
  * never got an answer is reported as a failure, as on "Forgot password".
  */
 export function FindCompanyContainer() {
+  const t = useTranslations("auth");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,11 +67,11 @@ export function FindCompanyContainer() {
       <AuthScreen className="flex-1">
         <div className="w-full space-y-8 text-center">
           <div className="space-y-3">
-            <h1 className="text-greeting">Check your email</h1>
-            <p className="text-body text-tertiary" role="status">{FIND_COMPANY_SENT_MESSAGE}</p>
+            <h1 className="text-greeting">{t("passwordReset.forgot.sentTitle")}</h1>
+            <p className="text-body text-tertiary" role="status">{t("companyAddress.find.sentBody")}</p>
           </div>
           <Button size="lg" asChild variant="secondary" className="w-full">
-            <Link href="/login">Back to sign in</Link>
+            <Link href="/login">{t("passwordReset.backToSignIn")}</Link>
           </Button>
         </div>
       </AuthScreen>
@@ -82,15 +82,15 @@ export function FindCompanyContainer() {
     <AuthScreen className="flex-1">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-greeting">Find your company</h1>
+          <h1 className="text-greeting">{t("companyAddress.find.title")}</h1>
           <p className="text-body text-tertiary">
-            Enter the email address you sign in with, and we will email you the addresses of your companies.
+            {t("companyAddress.find.description")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="find-company-email">Email address</Label>
+            <Label htmlFor="find-company-email">{t("login.emailLabel")}</Label>
             <Input
               id="find-company-email"
               name="email"
@@ -110,11 +110,11 @@ export function FindCompanyContainer() {
           <FormError message={error} />
 
           <Button size="lg" type="submit" disabled={busy} className="w-full">
-            {busy ? "Sending…" : "Email me my addresses"}
+            {busy ? t("passwordReset.forgot.sending") : t("companyAddress.find.submit")}
           </Button>
 
           <p className="text-center text-body text-tertiary">
-            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">Back to sign in</Link>
+            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">{t("passwordReset.backToSignIn")}</Link>
           </p>
         </form>
       </div>

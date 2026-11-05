@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PreferenceHorizontalIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -11,10 +12,10 @@ import { useAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
 import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter, useDisplayLocale } from "@/lib/date";
 import { availableWidgets } from "@/components/modules/home/widgets";
 import { useSaveHomeLayout } from "@/components/modules/home/hooks";
-import { HOME_GROUPS, HOME_GROUP_LABELS, arrangeHome, widgetsOf } from "@/components/modules/home/layout";
+import { HOME_GROUPS, HOME_GROUP_LABEL_KEYS, arrangeHome, widgetsOf } from "@/components/modules/home/layout";
 import { greetingFor, hourInZone, isoDateInZone, weekdayOf } from "@/components/modules/home/utils/zonedTime";
 import { CustomizeHome } from "./CustomizeHome";
 
@@ -28,6 +29,9 @@ const noSubscribe = () => () => {};
  * 2026-10-29) — the same answer as the attendance tab's date.
  */
 const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
+  const formatDisplayDate = useDateFormatter();
+  const locale = useDisplayLocale();
+  const t = useTranslations("home");
   const { user } = useCurrentUser();
   const settings = useUserSettings();
   const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
@@ -44,16 +48,15 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
     <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
       <div className="flex flex-col gap-1">
         <h1 className="text-page-title text-primary">
-          {inBrowser ? greetingFor(hour) : "Welcome"}
-          {name ? `, ${name}` : ""}
+          {t("greeting.line", { part: inBrowser ? greetingFor(hour) : "welcome", hasName: name ? "yes" : "no", name: name ?? "" })}
         </h1>
         <p className="text-body text-tertiary">
-          {inBrowser ? `${weekdayOf(today)}, ${formatDisplayDate(today, { style: "medium" })}` : "\u00a0"}
+          {inBrowser ? `${weekdayOf(today, locale)}, ${formatDisplayDate(today, { style: "medium" })}` : "\u00a0"}
           {count > 0 && (
             <>
               {" · "}
               <Link href="/inbox?filter=unread" className="font-medium text-accent-text underline-offset-4 hover:underline">
-                Unread: {count}
+                {t("greeting.unread", { count })}
               </Link>
             </>
           )}
@@ -62,7 +65,7 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
       {onCustomize && (
         <Button type="button" variant="secondary" size="sm" className="gap-1.5 self-start md:self-auto" onClick={onCustomize}>
           <Icon icon={PreferenceHorizontalIcon} size="sm" />
-          Customize
+          {t("greeting.customize")}
         </Button>
       )}
     </section>
@@ -76,6 +79,7 @@ const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
  * and sits in its own error boundary, so one widget never takes the page down with it.
  */
 export const HomeContainer: React.FC = () => {
+  const t = useTranslations("home");
   const { access, loading } = useAccess();
   const settings = useUserSettings();
   const save = useSaveHomeLayout();
@@ -100,7 +104,7 @@ export const HomeContainer: React.FC = () => {
   if (customizing) {
     return (
       <div className="flex max-w-3xl flex-col gap-6">
-        <h1 className="text-page-title text-primary">Customize home</h1>
+        <h1 className="text-page-title text-primary">{t("customize.title")}</h1>
         <CustomizeHome
           available={available}
           stored={stored}
@@ -124,16 +128,16 @@ export const HomeContainer: React.FC = () => {
 
       {shown.length === 0 ? (
         <div className="rounded-card border border-dashed border-divider px-4 py-12 text-center">
-          <p className="text-body text-tertiary">Every widget is hidden.</p>
-          <Button type="button" variant="link" onClick={() => setCustomizing(true)}>Customize home</Button>
+          <p className="text-body text-tertiary">{t("customize.allHidden")}</p>
+          <Button type="button" variant="link" onClick={() => setCustomizing(true)}>{t("customize.title")}</Button>
         </div>
       ) : (
         HOME_GROUPS.map((group) => {
           const entries = widgetsOf(shown, group);
           if (entries.length === 0) return null;
           return (
-            <section key={group} className="flex flex-col gap-3" aria-label={HOME_GROUP_LABELS[group]}>
-              <h2 className="text-hint font-semibold text-tertiary">{HOME_GROUP_LABELS[group]}</h2>
+            <section key={group} className="flex flex-col gap-3" aria-label={t(HOME_GROUP_LABEL_KEYS[group])}>
+              <h2 className="text-hint font-semibold text-tertiary">{t(HOME_GROUP_LABEL_KEYS[group])}</h2>
               <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {entries.map(({ widget }) => (
                   <ErrorBoundary key={widget.id}>

@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+/** The request config `next-intl` reads the locale and catalogue from (technical_design/I18N_DESIGN.md § 3). */
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   distDir: ".next-dev",
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

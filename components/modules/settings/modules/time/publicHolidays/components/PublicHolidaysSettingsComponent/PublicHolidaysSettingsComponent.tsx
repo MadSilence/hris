@@ -2,13 +2,14 @@
 
 import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePublicHolidayCalendars";
 import { usePublicHolidayCalendarDeleteImpact } from "../../hooks/usePublicHolidayCalendarDeleteImpact";
-import { FC, useMemo, useRef, useState } from "react";
+import { FC, type ReactNode, useMemo, useRef, useState } from "react";
 import { FormError } from "@/components/feedback/FormError";
 // Five of these dialogs printed a sentence they wrote themselves — "Failed to archive the calendar."
 // — over a refusal that already said why (in use, already archived, last of its kind). The rule is
 // the dictionary by `code`; the module does not get its own vocabulary.
 import { messageForError } from "@/lib/errors/errorMessages";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, CloudDownloadIcon, Copy01Icon, Delete02Icon, Download01Icon, FileAddIcon, PowerIcon, PowerOffIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -95,6 +96,9 @@ function formatCountryRegion(calendar: PublicHolidayCalendar) {
 }
 
 export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoading }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
+  const strong = (chunks: ReactNode) => <strong>{chunks}</strong>;
   const router = useRouter();
   const canManage = useCanManagePublicHolidayCalendars();
 
@@ -178,7 +182,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
   const handleCreateManually = () => router.push("/settings/time/public-holidays/new");
 
   const openDuplicate = (c: PublicHolidayCalendar) => {
-    setDuplicateName(`${c.name} (copy)`);
+    setDuplicateName(t("publicHolidays.list.copyName", { name: c.name }));
     setDuplicateTarget(c);
   };
 
@@ -244,7 +248,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <DropdownMenuTrigger asChild>
         <Button type="button" className="gap-1.5">
           <Icon icon={Add01Icon} size="sm" />
-          Add calendar
+          {t("publicHolidays.list.addCalendar")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40 rounded-control p-1">
@@ -253,14 +257,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer"
         >
           <Icon icon={CloudDownloadIcon} size="sm" className="text-tertiary" />
-          From template
+          {t("publicHolidays.list.fromTemplate")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={handleCreateManually}
           className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer"
         >
           <Icon icon={FileAddIcon} size="sm" className="text-tertiary" />
-          Manually
+          {t("publicHolidays.list.manually")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -271,14 +275,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
         <div className="shrink-0 px-8 pt-2">
           <div className="space-y-2">
-            <SettingsPageHeader title="Public holidays" backHref="/settings" />
+            <SettingsPageHeader title={t("publicHolidays.list.title")} backHref="/settings" />
             <PageDescription className="text-body text-tertiary/90">
-              Manage public holiday calendars and assign them to employees, locations or groups.
+              {t("publicHolidays.list.description")}
             </PageDescription>
           </div>
 
           <div className="mt-5 rounded-control bg-subtle/60 px-4 py-4">
-            <HolidayCalendarBindingSection kind="COMPANY_DEFAULT" refId={null} placeName="the company" />
+            <HolidayCalendarBindingSection kind="COMPANY_DEFAULT" refId={null} placeName={t("binding.theCompany")} />
           </div>
 
           <ListToolbar
@@ -290,7 +294,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                 <Button type="button"
                   size="icon"
                   variant="secondary"
-                  aria-label="Export calendars"
+                  aria-label={t("publicHolidays.list.exportAria")}
                   onClick={() => setIsExportOpen(true)}
                 >
                   <Icon icon={Download01Icon} size="sm" />
@@ -305,8 +309,8 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           {!isLoading && !hasCalendars ? (
             <ListEmptyState
               scene="calendar"
-              title="No public holiday calendars yet"
-              description="Add a manual calendar or choose a template to start using public holidays in time off calculations."
+              title={t("publicHolidays.list.emptyTitle")}
+              description={t("publicHolidays.list.emptyDescription")}
               action={addCalendarMenu}
               className="min-h-72 flex-1"
             />
@@ -315,11 +319,11 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               <table className="w-full caption-bottom text-body table-fixed">
                 <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                   <TableRow>
-                    <TableHead className="pl-4">Calendar</TableHead>
-                    <TableHead>Country / Region</TableHead>
-                    <TableHead>Days</TableHead>
-                    <TableHead>Years</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="pl-4">{t("publicHolidays.list.colCalendar")}</TableHead>
+                    <TableHead>{t("publicHolidays.list.colCountryRegion")}</TableHead>
+                    <TableHead>{t("publicHolidays.list.colDays")}</TableHead>
+                    <TableHead>{t("publicHolidays.list.colYears")}</TableHead>
+                    <TableHead>{t("publicHolidays.list.colStatus")}</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
@@ -334,10 +338,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                           query={query}
                           archivedView={showArchived}
                           scene="calendar"
-                          title="No public holiday calendars yet"
-                          description="Add a manual calendar or choose a template to start using public holidays in time off calculations."
-                          noResultsHint="Try a different calendar, country or region."
-                          archivedDescription="Archived calendars will appear here."
+                          title={t("publicHolidays.list.emptyTitle")}
+                          description={t("publicHolidays.list.emptyDescription")}
+                          noResultsHint={t("publicHolidays.list.noResultsHint")}
+                          archivedDescription={t("publicHolidays.list.archivedDescription")}
                           action={addCalendarMenu}
                         />
                       </TableCell>
@@ -378,19 +382,19 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end">
                               {canManage ? (
-                              <RowActionsMenu label="Calendar actions">
+                              <RowActionsMenu label={t("publicHolidays.list.rowActions")}>
                                 <RowAction
                                   icon={<Icon icon={Copy01Icon} size="sm" />}
                                   onClick={() => openDuplicate(calendar)}
                                 >
-                                  Duplicate
+                                  {tCommon("actions.duplicate")}
                                 </RowAction>
                                 {isArchived ? (
                                   <RowAction
                                     icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                                     onClick={() => setRestoreTarget(calendar)}
                                   >
-                                    Unarchive
+                                    {t("publicHolidays.list.unarchive")}
                                   </RowAction>
                                 ) : (
                                   <>
@@ -399,21 +403,21 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                                         icon={<Icon icon={PowerOffIcon} size="sm" />}
                                         onClick={() => setDeactivateTarget(calendar)}
                                       >
-                                        Deactivate
+                                        {t("publicHolidays.list.deactivate")}
                                       </RowAction>
                                     ) : (
                                       <RowAction
                                         icon={<Icon icon={PowerIcon} size="sm" />}
                                         onClick={() => handleActivate(calendar)}
                                       >
-                                        Activate
+                                        {t("publicHolidays.list.activate")}
                                       </RowAction>
                                     )}
                                     <RowAction
                                       icon={<Icon icon={Archive02Icon} size="sm" />}
                                       onClick={() => setArchiveTarget(calendar)}
                                     >
-                                      Archive
+                                      {tCommon("actions.archive")}
                                     </RowAction>
                                   </>
                                 )}
@@ -421,7 +425,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                                   icon={<Icon icon={Delete02Icon} size="sm" />}
                                   onClick={() => setDeleteTarget(calendar)}
                                 >
-                                  Delete
+                                  {tCommon("actions.delete")}
                                 </RowActionDestructive>
                               </RowActionsMenu>
                               ) : null}
@@ -445,11 +449,11 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title="Export holiday calendars"
+        title={t("publicHolidays.list.exportTitle")}
         rowCount={calendars.length}
-        rowNoun="calendars"
-        description="Export all holiday calendars with their day counts and creation details."
-        includedText="Included: name, country, region, days, year, status, created by, created at."
+        rowKind="calendars"
+        description={t("publicHolidays.list.exportDescription")}
+        includedText={t("publicHolidays.list.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />
@@ -458,10 +462,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!duplicateTarget} onOpenChange={(v) => !v && setDuplicateTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Duplicate calendar</DialogTitle>
+            <DialogTitle>{t("publicHolidays.list.duplicate.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <RequiredLabel htmlFor="duplicate-calendar-name" required>New calendar name</RequiredLabel>
+            <RequiredLabel htmlFor="duplicate-calendar-name" required>{t("publicHolidays.list.duplicate.name")}</RequiredLabel>
             <Input
               id="duplicate-calendar-name"
               value={duplicateName}
@@ -469,7 +473,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               autoFocus
             />
             <p className="text-hint text-tertiary">
-              Creates an inactive copy with all holiday days from &ldquo;{duplicateTarget?.name}&rdquo;.
+              {t("publicHolidays.list.duplicate.hint", { name: duplicateTarget?.name ?? "" })}
             </p>
             {duplicate.isError && (
               <FormError message={duplicate.error ? messageForError(duplicate.error) : null} />
@@ -477,10 +481,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           </div>
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => setDuplicateTarget(null)} disabled={duplicate.isPending}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={confirmDuplicate} disabled={duplicate.isPending || !duplicateName.trim()}>
-              {duplicate.isPending ? "Duplicating…" : "Duplicate"}
+              {duplicate.isPending ? t("publicHolidays.list.duplicate.pending") : tCommon("actions.duplicate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -490,21 +494,18 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!archiveTarget} onOpenChange={(v) => !v && setArchiveTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Archive &ldquo;{dialogName("archive", archiveTarget)}&rdquo;</DialogTitle>
+            <DialogTitle>{t("publicHolidays.list.archive.title", { name: dialogName("archive", archiveTarget) })}</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-body text-secondary">
-            An archived calendar <strong>stops applying to everyone assigned to it</strong> — its days
-            no longer count as holidays for them — and it cannot be assigned to anybody new. The
-            assignments themselves are kept, so restoring brings the calendar back with the same
-            people still on it.
+            {t.rich("publicHolidays.list.archive.body", { b: strong })}
             <FormError message={archive.error ? messageForError(archive.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => setArchiveTarget(null)} disabled={archive.isPending}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={confirmArchive} disabled={archive.isPending}>
-              {archive.isPending ? "Archiving…" : "Archive"}
+              {archive.isPending ? t("publicHolidays.list.archive.pending") : tCommon("actions.archive")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -514,20 +515,18 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!restoreTarget} onOpenChange={(v) => !v && setRestoreTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Unarchive &ldquo;{dialogName("restore", restoreTarget)}&rdquo;</DialogTitle>
+            <DialogTitle>{t("publicHolidays.list.restore.title", { name: dialogName("restore", restoreTarget) })}</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-body text-secondary">
-            This brings the calendar back <strong>as inactive</strong>, which is deliberate rather than
-            a half-finished restore: nothing starts applying to anybody until you activate it. Its
-            holiday days and the people assigned to it are both kept.
+            {t.rich("publicHolidays.list.restore.body", { b: strong })}
             <FormError message={restore.error ? messageForError(restore.error) : null} className="mt-2" />
           </div>
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => setRestoreTarget(null)} disabled={restore.isPending}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={confirmRestore} disabled={restore.isPending}>
-              {restore.isPending ? "Unarchiving…" : "Unarchive"}
+              {restore.isPending ? t("publicHolidays.list.restore.pending") : t("publicHolidays.list.unarchive")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -537,12 +536,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!deactivateTarget} onOpenChange={(v) => !v && setDeactivateTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Deactivate &ldquo;{dialogName("deactivate", deactivateTarget)}&rdquo;</DialogTitle>
+            <DialogTitle>{t("publicHolidays.list.deactivateDialog.title", { name: dialogName("deactivate", deactivateTarget) })}</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-body text-secondary">
-            An inactive calendar stops applying: the people assigned to it keep the assignment, but
-            its days no longer count as holidays, so new leave requests over those dates will be one
-            day longer. Assignments and holiday days are kept — activate it again at any time.
+            {t("publicHolidays.list.deactivateDialog.body")}
             {deactivate.isError && (
               <FormError message={deactivate.error ? messageForError(deactivate.error) : null} className="mt-2" />
             )}
@@ -553,10 +550,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
               onClick={() => setDeactivateTarget(null)}
               disabled={deactivate.isPending}
             >
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={confirmDeactivate} disabled={deactivate.isPending}>
-              {deactivate.isPending ? "Deactivating…" : "Deactivate"}
+              {deactivate.isPending ? t("publicHolidays.list.deactivateDialog.pending") : t("publicHolidays.list.deactivate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -566,31 +563,29 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete &ldquo;{dialogName("delete", deleteTarget)}&rdquo;</DialogTitle>
+            <DialogTitle>{t("publicHolidays.list.delete.title", { name: dialogName("delete", deleteTarget) })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2 text-body text-secondary">
             <p className="m-0">
-              This permanently deletes the calendar. It cannot be undone — to take it out of use and
-              keep everything, archive it instead.
+              {t("publicHolidays.list.delete.body")}
             </p>
             {deleteImpact.isLoading ? (
-              <p className="m-0 text-tertiary">Checking what depends on this calendar…</p>
+              <p className="m-0 text-tertiary">{t("publicHolidays.list.delete.checking")}</p>
             ) : deleteImpact.isError ? (
               <p className="m-0 text-tertiary">
-                What depends on this calendar could not be checked.
+                {t("publicHolidays.list.delete.checkFailed")}
               </p>
             ) : deleteImpact.data ? (
               <ul className="m-0 list-disc space-y-1 pl-5">
                 <li>
-                  {deleteImpact.data.peopleAssigned} {deleteImpact.data.peopleAssigned === 1 ? "person loses" : "people lose"} this
-                  calendar. Leave already approved is not recalculated.
+                  {t("publicHolidays.list.delete.people", { count: deleteImpact.data.peopleAssigned })}
                 </li>
                 <li>
-                  {deleteImpact.data.holidayDays} holiday {deleteImpact.data.holidayDays === 1 ? "day is" : "days are"} deleted with it.
+                  {t("publicHolidays.list.delete.days", { count: deleteImpact.data.holidayDays })}
                 </li>
                 {deleteImpact.data.feedLinks > 0 ? (
                   <li>
-                    {deleteImpact.data.feedLinks} subscription {deleteImpact.data.feedLinks === 1 ? "link stops" : "links stop"} working.
+                    {t("publicHolidays.list.delete.links", { count: deleteImpact.data.feedLinks })}
                   </li>
                 ) : null}
               </ul>
@@ -599,10 +594,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
           </div>
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => setDeleteTarget(null)} disabled={remove.isPending}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" variant="destructive" onClick={confirmDelete} disabled={remove.isPending || deleteImpact.isLoading}>
-              {remove.isPending ? "Deleting…" : "Delete"}
+              {remove.isPending ? tCommon("actions.deleting") : tCommon("actions.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, ReactNode, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { useUserPublicHolidays } from "@/components/modules/calendar/hooks/useUserPublicHolidays";
 import { expandSpanToDays } from "@/components/modules/calendar/lib/dateRange";
@@ -43,6 +44,7 @@ export const UserCalendarContainer: FC<Props> = ({
   onMonthChange,
   footer,
 }) => {
+  const t = useTranslations("calendar");
   const { data: holidays, isLoading: holidaysLoading } = useUserPublicHolidays({ userId });
   const { data: requests, isLoading: requestsLoading } = useTimeOffRequestsByUser({ userId });
   const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
@@ -63,6 +65,7 @@ export const UserCalendarContainer: FC<Props> = ({
     [holidays],
   );
 
+  const fallbackName = t("balances.fallbackName");
   const timeOffEvents = useMemo<CalendarTimeOffEvent[]>(() => {
     const policyName = new Map((policies ?? []).map((p) => [p.id, p.name]));
     const policyColor = new Map((policies ?? []).map((p) => [p.id, p.leaveTypeColor ?? null]));
@@ -70,13 +73,13 @@ export const UserCalendarContainer: FC<Props> = ({
       .filter((r) => timeOffStatuses.includes(r.status))
       .map((r) => ({
         id: r.id,
-        label: policyName.get(r.policyId) ?? "Time off",
+        label: policyName.get(r.policyId) ?? fallbackName,
         startDate: r.startDate,
         endDate: r.endDate,
         tone: r.status === TimeOffRequestStatus.Approved ? "approved" : "pending",
         color: policyColor.get(r.policyId) ?? null,
       }));
-  }, [requests, policies, timeOffStatuses]);
+  }, [requests, policies, timeOffStatuses, fallbackName]);
 
   return (
     <UserCalendar

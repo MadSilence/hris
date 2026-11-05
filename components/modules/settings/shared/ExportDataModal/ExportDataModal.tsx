@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } 
 import {
   ExportDataForm,
   ExportDataFormValues,
+  type ExportRowKind,
 } from "@/components/modules/settings/shared/ExportDataModal/ExportDataForm";
 
 export interface ExportDataModalProps {
@@ -16,7 +17,7 @@ export interface ExportDataModalProps {
   includedText: string;
   /** Passed straight through — see `ExportDataFormProps.rowCount`. */
   rowCount?: number;
-  rowNoun?: string;
+  rowKind?: ExportRowKind;
   /** Kept in the dialog rather than the console — a failed download is otherwise silent. */
   errorMessage?: string | null;
   onCancelAction: () => void;
@@ -30,7 +31,7 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
   description,
   includedText,
   rowCount,
-  rowNoun,
+  rowKind,
   errorMessage,
   onCancelAction,
   onConfirmAction,
@@ -60,7 +61,7 @@ export const ExportDataModal: FC<ExportDataModalProps> = ({
           isLoading={isLoading}
           includedText={includedText}
           rowCount={rowCount}
-          rowNoun={rowNoun}
+          rowKind={rowKind}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
         />

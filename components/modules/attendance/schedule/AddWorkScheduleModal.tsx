@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/components/desact/button";
@@ -39,18 +40,19 @@ type Props = {
   onSubmitAction: (body: WorkScheduleWriteRequest) => Promise<string | null>;
 };
 
-const hoursField = yup
-  .string()
-  .required("Enter the hours, or 0 for a day off.")
-  .test("hours", "Enter the hours as 7:30 or 7.5, between 0 and 24.", (value) => {
-    const minutes = parseDuration(value ?? "");
-    return minutes !== null && minutes >= 0 && minutes <= 24 * 60;
+const buildSchema = (t: ReturnType<typeof useTranslations<"attendance">>) => {
+  const hoursField = yup
+    .string()
+    .required(t("schedule.modal.hoursRequired"))
+    .test("hours", t("schedule.modal.hoursInvalid"), (value) => {
+      const minutes = parseDuration(value ?? "");
+      return minutes !== null && minutes >= 0 && minutes <= 24 * 60;
+    });
+  return yup.object({
+    effectiveFrom: yup.string().required(t("schedule.modal.fromRequired")),
+    ...Object.fromEntries(WEEKDAY_FIELDS.map((field) => [field.key, hoursField])),
   });
-
-const schema = yup.object({
-  effectiveFrom: yup.string().required("Choose the date the schedule starts."),
-  ...Object.fromEntries(WEEKDAY_FIELDS.map((field) => [field.key, hoursField])),
-});
+};
 
 const initialValues = (current: WorkSchedule | null): FormValues => {
   const base = { effectiveFrom: "" } as FormValues;
@@ -67,6 +69,9 @@ const initialValues = (current: WorkSchedule | null): FormValues => {
  * it — a correction is a new schedule from the date it should have started.
  */
 export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onCloseAction, onSubmitAction }) => {
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const [serverError, setServerError] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
@@ -106,11 +111,8 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
       <Dialog open={isOpen} onOpenChange={(open) => { if (!open) requestClose(); }}>
         <DialogContent hideClose className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Add work schedule</DialogTitle>
-            <DialogDescription>
-              Hours per weekday from a date on. Zero means the person does not work that day, and leave is
-              not charged for it. Earlier schedules stay as they were.
-            </DialogDescription>
+            <DialogTitle>{t("schedule.add")}</DialogTitle>
+            <DialogDescription>{t("schedule.modal.description")}</DialogDescription>
           </DialogHeader>
 
           <form
@@ -124,7 +126,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
             <FormError message={serverError}/>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="work-schedule-from" required>Effective from</RequiredLabel>
+              <RequiredLabel htmlFor="work-schedule-from" required>{t("schedule.effectiveFrom")}</RequiredLabel>
               <DatePicker
                 id="work-schedule-from"
                 value={formik.values.effectiveFrom}
@@ -140,7 +142,7 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
             <div className="grid grid-cols-7 gap-2">
               {WEEKDAY_FIELDS.map((field) => (
                 <div key={field.key} className="space-y-1">
-                  <Label htmlFor={`work-schedule-${field.key}`} className="text-hint">{field.label}</Label>
+                  <Label htmlFor={`work-schedule-${field.key}`} className="text-hint">{tCommon(field.labelKey)}</Label>
                   <Input
                     id={`work-schedule-${field.key}`}
                     inputMode="decimal"
@@ -156,16 +158,16 @@ export const AddWorkScheduleModal: React.FC<Props> = ({ isOpen, current, onClose
               <FieldError>{WEEKDAY_FIELDS.map((field) => formik.errors[field.key]).find(Boolean)}</FieldError>
             )}
             <p className="text-body text-tertiary">
-              {formatMinutes(weeklyTotal)} a week
+              {t("schedule.modal.perWeek", { hours: formatMinutes(weeklyTotal) })}
             </p>
 
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={requestClose} disabled={formik.isSubmitting}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button type="submit" disabled={formik.isSubmitting}
  >
-                Add
+                {tCommon("actions.add")}
               </Button>
             </DialogFooter>
           </form>

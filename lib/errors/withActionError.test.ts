@@ -1,6 +1,6 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { toActionError, withActionError } from "@/lib/errors/withActionError";
-import { FALLBACK_ERROR_MESSAGE } from "@/lib/errors/errorMessages";
+import { fallbackErrorMessage } from "@/lib/errors/errorMessages";
 import {
   BackendUnavailableError,
   ConflictError,
@@ -17,8 +17,8 @@ describe("toActionError", () => {
     jest.restoreAllMocks();
   });
 
-  it("turns a domain refusal into the dictionary text plus its code", () => {
-    const result = toActionError(
+  it("turns a domain refusal into the dictionary text plus its code", async () => {
+    const result = await toActionError(
       new ConflictError("Document folder is not empty", { code: "D00017", status: 409 }),
     );
 
@@ -31,33 +31,33 @@ describe("toActionError", () => {
     });
   });
 
-  it("passes fieldErrors through so the message can sit next to its field", () => {
+  it("passes fieldErrors through so the message can sit next to its field", async () => {
     const fieldErrors = { "holidays[3]": 'Overlaps "Christmas"' };
-    const result = toActionError(
+    const result = await toActionError(
       new ValidationError("Validation error.", { code: "V00001", status: 422, fieldErrors }),
     );
 
     expect(result.fieldErrors).toEqual(fieldErrors);
   });
 
-  it("carries the request id for a failure nobody expected", () => {
-    const result = toActionError(
+  it("carries the request id for a failure nobody expected", async () => {
+    const result = await toActionError(
       new ServerError("Unspecified error", { code: "E00000", status: 500, requestId: "req-7" }),
     );
 
     expect(result.requestId).toBe("req-7");
   });
 
-  it("carries no request id when the backend was never reached", () => {
-    const result = toActionError(new BackendUnavailableError("connect ECONNREFUSED"));
+  it("carries no request id when the backend was never reached", async () => {
+    const result = await toActionError(new BackendUnavailableError("connect ECONNREFUSED"));
 
     expect(result.requestId).toBeUndefined();
   });
 
-  it("falls back for an error that never came from the API", () => {
-    const result = toActionError(new Error("boom"));
+  it("falls back for an error that never came from the API", async () => {
+    const result = await toActionError(new Error("boom"));
 
-    expect(result).toEqual({ status: ActionStatus.ERROR, errorMessage: FALLBACK_ERROR_MESSAGE });
+    expect(result).toEqual({ status: ActionStatus.ERROR, errorMessage: fallbackErrorMessage() });
   });
 });
 
@@ -105,33 +105,33 @@ describe("the field-bound message", () => {
   const boundError = (code: string, message: string) =>
     new ConflictError(message, { status: 409, code, fieldErrors: { name: message } });
 
-  it("puts the dictionary's words under the field, not the backend's", () => {
-    const result = toActionError(boundError("JF00001", "Provided job family name already exists"));
+  it("puts the dictionary's words under the field, not the backend's", async () => {
+    const result = await toActionError(boundError("JF00001", "Provided job family name already exists"));
 
     expect(result.fieldErrors).toEqual({
       name: "A job family with this name already exists.",
     });
   });
 
-  it("leaves a map the backend built deliberately alone", () => {
+  it("leaves a map the backend built deliberately alone", async () => {
     const error = new ConflictError("Overlapping dates", {
       status: 409,
       code: "PH00003",
       fieldErrors: { "2026-01-01": "Overlaps New Year", "2026-05-01": "Overlaps Labour Day" },
     });
 
-    expect(toActionError(error).fieldErrors).toEqual({
+    expect((await toActionError(error)).fieldErrors).toEqual({
       "2026-01-01": "Overlaps New Year",
       "2026-05-01": "Overlaps Labour Day",
     });
   });
 
-  it("leaves bean validation alone — it has no code to look up", () => {
+  it("leaves bean validation alone — it has no code to look up", async () => {
     const error = new ValidationError("must not be blank", {
       status: 422,
       fieldErrors: { building: "must not be blank" },
     });
 
-    expect(toActionError(error).fieldErrors).toEqual({ building: "must not be blank" });
+    expect((await toActionError(error)).fieldErrors).toEqual({ building: "must not be blank" });
   });
 });

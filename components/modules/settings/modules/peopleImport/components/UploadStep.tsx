@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Upload01Icon, Xls01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -22,6 +23,7 @@ const MAX_MB = 5;
  * finds its departments only once the structure is in, and a balance needs its person.
  */
 export const UploadStep: React.FC = () => {
+  const t = useTranslations("peopleImport");
   const input = useRef<HTMLInputElement>(null);
   const kinds = useImportKinds();
   const upload = useUploadPeopleImport();
@@ -46,7 +48,7 @@ export const UploadStep: React.FC = () => {
     if (!file || !kind) return;
     setError(null);
     if (file.size > MAX_MB * 1024 * 1024) {
-      setError(`The file is larger than ${MAX_MB} MB.`);
+      setError(t("upload.tooLarge", { maxMb: MAX_MB }));
       return;
     }
     upload.mutate({ file, kind }, { onError: (e) => setError(messageForError(e)) });
@@ -60,16 +62,12 @@ export const UploadStep: React.FC = () => {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div className="space-y-2 text-body text-secondary">
-        <p>
-          Bring a company in from spreadsheets: its structure first, then its people, then their leave balances.
-          Nothing is written until a file has no errors — the check lists every problem in every row, and you can
-          fix a row right there or download the file back with an <strong>Errors</strong> column.
-        </p>
+        <p>{t.rich("upload.intro", { b: (chunks) => <strong>{chunks}</strong> })}</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-body font-medium text-primary">What are you importing?</p>
-        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="What are you importing">
+        <p className="text-body font-medium text-primary">{t("upload.whatTitle")}</p>
+        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t("upload.whatAria")}>
           {offered.map((k) => (
             <button
               key={k}
@@ -82,38 +80,38 @@ export const UploadStep: React.FC = () => {
                 kind === k ? "border-accent bg-subtle" : "border-divider hover:bg-subtle",
               )}
             >
-              <span className="block font-medium text-primary">{IMPORT_KINDS[k].title}</span>
-              <span className="mt-1 block text-tertiary">{IMPORT_KINDS[k].description}</span>
+              <span className="block font-medium text-primary">{t(IMPORT_KINDS[k].titleKey)}</span>
+              <span className="mt-1 block text-tertiary">{t(IMPORT_KINDS[k].descriptionKey)}</span>
             </button>
           ))}
         </div>
         {offered.length === 0 && (
-          <p className="text-body text-tertiary">You do not have permission to import anything.</p>
+          <p className="text-body text-tertiary">{t("upload.noPermission")}</p>
         )}
       </div>
 
       {kind && (
         <>
           <div className="rounded-card border border-divider p-5">
-            <p className="text-body font-medium text-primary">1. Start from the template</p>
+            <p className="text-body font-medium text-primary">{t("upload.templateTitle")}</p>
             <p className="mt-1 text-body text-tertiary">
-              One column per field you may fill, with lists to pick from and an Instructions sheet.
+              {t("upload.templateHint")}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button type="button" variant="secondary" size="sm" className="gap-1.5" onClick={() => template("xlsx")}>
                 <Icon icon={Xls01Icon} size="sm" />
-                Download XLSX template
+                {t("upload.downloadXlsx")}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={() => template("csv")}>
-                CSV template
+                {t("upload.csvTemplate")}
               </Button>
             </div>
           </div>
 
           <div className="rounded-card border border-dashed border-field p-5">
-            <p className="text-body font-medium text-primary">2. Upload the file</p>
+            <p className="text-body font-medium text-primary">{t("upload.uploadTitle")}</p>
             <p className="mt-1 text-body text-tertiary">
-              CSV (UTF-8) or XLSX, up to {MAX_MB} MB and 2,000 rows. Only the first sheet is read.
+              {t("upload.uploadHint", { maxMb: MAX_MB })}
             </p>
             <FormError message={error} />
             <input
@@ -121,7 +119,7 @@ export const UploadStep: React.FC = () => {
               type="file"
               accept=".csv,.xlsx"
               className="hidden"
-              aria-label="Import file"
+              aria-label={t("upload.fileAria")}
               onChange={(e) => {
                 onFile(e.target.files?.[0]);
                 e.target.value = "";
@@ -129,7 +127,7 @@ export const UploadStep: React.FC = () => {
             />
             <Button type="button" className="mt-3 gap-1.5" disabled={upload.isPending} onClick={() => input.current?.click()}>
               <Icon icon={Upload01Icon} size="sm" />
-              {upload.isPending ? "Reading the file…" : "Choose file"}
+              {upload.isPending ? t("upload.reading") : t("upload.chooseFile")}
             </Button>
           </div>
         </>

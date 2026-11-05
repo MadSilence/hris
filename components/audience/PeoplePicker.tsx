@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Delete02Icon, FilterHorizontalIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -25,17 +26,22 @@ import { useDebouncedValue } from "@/components/modules/organization/modules/pro
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { rolesOf, type Segment, type UserRefDTO } from "@/models/segment/Segment";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { cn } from "@/lib/cn";
+import type { Messages } from "@/i18n/messages";
+
+/** A column's title, from `access` → `audience.peoplePicker.columns`. */
+export type PeopleColumnHeaderKey = keyof Messages["access"]["audience"]["peoplePicker"]["columns"];
 
 export type PeopleColumn = {
   key: string;
-  header: string;
+  headerKey: PeopleColumnHeaderKey;
   include?: string;
   render: (user: UserRefDTO) => React.ReactNode;
 };
 
 export const rolesColumn: PeopleColumn = {
   key: "roles",
-  header: "Current roles",
+  headerKey: "roles",
   include: "roles",
   render: (u) => {
     const roles = rolesOf(u);
@@ -56,9 +62,9 @@ type OrgRef = { id: string; name: string };
 const orgRefOf = (u: UserRefDTO, key: string): OrgRef | null =>
   (u.extras?.[key] as OrgRef | undefined) ?? null;
 
-const orgRefColumn = (key: string, header: string): PeopleColumn => ({
+const orgRefColumn = (key: string, headerKey: PeopleColumnHeaderKey): PeopleColumn => ({
   key,
-  header,
+  headerKey,
   include: key,
   render: (u) => {
     const ref = orgRefOf(u, key);
@@ -72,16 +78,16 @@ const orgRefColumn = (key: string, header: string): PeopleColumn => ({
   },
 });
 
-export const officeColumn: PeopleColumn = orgRefColumn("office", "Current office");
-export const legalEntityColumn: PeopleColumn = orgRefColumn("legalEntity", "Current legal entity");
-export const departmentColumn: PeopleColumn = orgRefColumn("department", "Current department");
+export const officeColumn: PeopleColumn = orgRefColumn("office", "office");
+export const legalEntityColumn: PeopleColumn = orgRefColumn("legalEntity", "legalEntity");
+export const departmentColumn: PeopleColumn = orgRefColumn("department", "department");
 
 const orgRefsOf = (u: UserRefDTO, key: string): OrgRef[] =>
   (u.extras?.[key] as OrgRef[] | undefined) ?? [];
 
 export const teamColumn: PeopleColumn = {
   key: "team",
-  header: "Current teams",
+  headerKey: "team",
   include: "team",
   render: (u) => {
     const teams = orgRefsOf(u, "team");
@@ -100,7 +106,7 @@ export const teamColumn: PeopleColumn = {
 
 export const calendarColumn: PeopleColumn = {
   key: "calendar",
-  header: "Holiday calendars",
+  headerKey: "calendar",
   include: "calendar",
   render: (u) => {
     const calendars = orgRefsOf(u, "calendar");
@@ -172,6 +178,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   onIncludeInactiveChange,
   unavailableReason,
 }) => {
+  const t = useTranslations("access");
+  const tCommon = useTranslations("common");
   const [query, setQuery] = React.useState("");
   const q = useDebouncedValue(query.trim(), 300);
 
@@ -238,7 +246,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             <PopoverTrigger asChild>
               <Button type="button" variant="secondary" className="gap-1.5">
                 <Icon icon={FilterHorizontalIcon} size="sm" />
-                Filter
+                {t("audience.filter.button")}
                 {filterCount > 0 && (
                   <Badge variant="neutral" className="ml-1 h-5 min-w-5 justify-center px-1 font-normal">
                     {filterCount}
@@ -258,10 +266,10 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               />
               <div className="mt-3 flex items-center justify-end gap-2 border-t border-divider pt-3">
                 <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
-                  Reset
+                  {tCommon("actions.reset")}
                 </Button>
                 <Button type="button" size="sm" onClick={applyFilters}>
-                  Apply
+                  {tCommon("actions.apply")}
                 </Button>
               </div>
             </PopoverContent>
@@ -271,7 +279,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             <Button type="button"
               variant="ghost"
               size="icon" className="text-danger-text hover:text-status-declined-text"
-              aria-label="Clear all filters"
+              aria-label={t("audience.peoplePicker.clearFilters")}
               onClick={clearAll}
             >
               <Icon icon={Delete02Icon} size="sm" />
@@ -292,14 +300,14 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                   <Checkbox
                     checked={Boolean(allMatchingSelected)}
                     onCheckedChange={(v) => onToggleAllMatching?.(Boolean(v))}
-                    aria-label="Select everyone who matches"
-                    title="Select everyone who matches"
+                    aria-label={t("audience.peoplePicker.selectAllMatching")}
+                    title={t("audience.peoplePicker.selectAllMatching")}
                     disabled={!onToggleAllMatching || total === 0}
                   />
                 </TableHead>
-                <TableHead>User</TableHead>
+                <TableHead>{t("audience.peoplePicker.user")}</TableHead>
                 {columns.map((c) => (
-                  <TableHead key={c.key}>{c.header}</TableHead>
+                  <TableHead key={c.key}>{t(`audience.peoplePicker.columns.${c.headerKey}`)}</TableHead>
                 ))}
               </TableRow>
             </TableHeader>
@@ -308,7 +316,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               {resolve.isLoading && matched.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={colCount} className="py-6 text-center text-body text-tertiary">
-                    Loading…
+                    {tCommon("states.loading")}
                   </TableCell>
                 </TableRow>
               )}
@@ -318,9 +326,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 return (
                 <TableRow
                   key={u.id}
-                  className={`border-divider [&_td]:py-2 ${
-                    unavailable ? "text-tertiary" : "cursor-pointer hover:bg-subtle"
-                  }`}
+                  className={cn("border-divider [&_td]:py-2", unavailable ? "text-tertiary" : "cursor-pointer hover:bg-subtle")}
                   onClick={unavailable ? undefined : () => onToggle(u)}
                 >
                   <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
@@ -328,7 +334,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                       checked={!unavailable && isSelected(u)}
                       disabled={Boolean(unavailable)}
                       onCheckedChange={() => onToggle(u)}
-                      aria-label={unavailable ? `${fullName(u)}: ${unavailable}` : undefined}
+                      aria-label={
+                        unavailable
+                          ? t("audience.peoplePicker.unavailable", { name: fullName(u), reason: unavailable })
+                          : undefined
+                      }
                     />
                   </TableCell>
 
@@ -363,7 +373,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                       onClick={() => resolve.fetchNextPage()}
                       disabled={resolve.isFetchingNextPage}
                     >
-                      {resolve.isFetchingNextPage ? "Loading…" : "Load more"}
+                      {resolve.isFetchingNextPage ? tCommon("states.loading") : t("audience.peoplePicker.loadMore")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -378,16 +388,17 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   );
 };
 
-const EmptyState: React.FC<{ hasFilters: boolean }> = ({ hasFilters }) => (
+const EmptyState: React.FC<{ hasFilters: boolean }> = ({ hasFilters }) => {
+  const t = useTranslations("access");
+  return (
   <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
     <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
       <Icon icon={UserGroupIcon} size="lg" />
     </div>
-    <p className="text-body font-medium">No people found</p>
+    <p className="text-body font-medium">{t("audience.peoplePicker.empty.title")}</p>
     <p className="max-w-[280px] text-hint text-tertiary">
-      {hasFilters
-        ? "Nobody matches the current filters or search. Try loosening them."
-        : "There are no people to show yet."}
+      {hasFilters ? t("audience.peoplePicker.empty.filtered") : t("audience.peoplePicker.empty.none")}
     </p>
   </div>
-);
+  );
+};

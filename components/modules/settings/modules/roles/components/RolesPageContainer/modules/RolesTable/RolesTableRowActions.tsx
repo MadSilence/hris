@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -26,24 +27,26 @@ export default function RolesTableRowActions({
   locked = false,
   archived = false,
 }: RolesTableRowActionsProps) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   return (
-    <RowActionsMenu label="Role actions">
+    <RowActionsMenu label={t("roles.table.rowActions")}>
       <PermissionGate resource="ROLES.ROLE" action="EDIT">
         <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onRename} disabled={locked}>
-          Rename
+          {tCommon("actions.rename")}
         </RowAction>
 
         <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={onDuplicate}>
-          Duplicate
+          {tCommon("actions.duplicate")}
         </RowAction>
 
         {archived ? (
           <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />} onClick={onRestore}>
-            Unarchive
+            {t("roles.table.unarchive")}
           </RowAction>
         ) : (
           <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive} disabled={locked}>
-            Archive
+            {tCommon("actions.archive")}
           </RowAction>
         )}
       </PermissionGate>
@@ -54,7 +57,7 @@ export default function RolesTableRowActions({
           onClick={onDelete}
           disabled={locked}
         >
-          Delete
+          {tCommon("actions.delete")}
         </RowActionDestructive>
       </PermissionGate>
     </RowActionsMenu>

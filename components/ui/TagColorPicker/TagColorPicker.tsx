@@ -3,6 +3,8 @@
 import * as React from "react";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 
+import { useTranslations } from "next-intl";
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { Icon } from "@/components/desact/icon";
 import { cn } from "@/lib/cn";
@@ -18,10 +20,11 @@ export const TagColorSwatches: React.FC<{
   onChange: (color: TagColor) => void;
   disabled?: boolean;
   "aria-label"?: string;
-}> = ({ value, onChange, disabled, "aria-label": ariaLabel = "Color" }) => {
+}> = ({ value, onChange, disabled, "aria-label": ariaLabel }) => {
+  const t = useTranslations("common");
   const current = toTagColor(value);
   return (
-    <div role="radiogroup" aria-label={ariaLabel} className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-label={ariaLabel ?? t("tagColor.color")} className="flex flex-wrap gap-2">
       {TAG_COLORS.map((color) => {
         const selected = current === color;
         return (
@@ -44,7 +47,7 @@ export const TagColorSwatches: React.FC<{
             ) : (
               <span aria-hidden className={cn("size-1.5 rounded-pill", TAG_CLASSES[color].dot)} />
             )}
-            {TAG_COLOR_LABELS[color]}
+            {t(TAG_COLOR_LABELS[color])}
           </button>
         );
       })}
@@ -63,6 +66,7 @@ export const TagColorPicker: React.FC<{
   ariaLabel: string;
   disabled?: boolean;
 }> = ({ value, onChange, ariaLabel, disabled }) => {
+  const t = useTranslations("common");
   const [open, setOpen] = React.useState(false);
   const current = toTagColor(value);
 
@@ -72,8 +76,8 @@ export const TagColorPicker: React.FC<{
         type="button"
         className="grid size-8 shrink-0 place-items-center rounded-control transition-colors duration-(--duration-hover) hover:bg-mist disabled:cursor-not-allowed disabled:opacity-60"
         onClick={() => setOpen(true)}
-        aria-label={`${ariaLabel}: ${TAG_COLOR_LABELS[current]}`}
-        title={TAG_COLOR_LABELS[current]}
+        aria-label={t("tagColor.optionColor", { option: ariaLabel, color: t(TAG_COLOR_LABELS[current]) })}
+        title={t(TAG_COLOR_LABELS[current])}
         disabled={disabled}
       >
         <span aria-hidden className={cn("size-4 rounded-pill", TAG_CLASSES[current].bar)} />
@@ -82,8 +86,8 @@ export const TagColorPicker: React.FC<{
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent size="sm">
           <DialogHeader>
-            <DialogTitle>Pick a color</DialogTitle>
-            <DialogDescription>Used for this option&apos;s tag.</DialogDescription>
+            <DialogTitle>{t("tagColor.pick")}</DialogTitle>
+            <DialogDescription>{t("tagColor.pickDescription")}</DialogDescription>
           </DialogHeader>
 
           <TagColorSwatches

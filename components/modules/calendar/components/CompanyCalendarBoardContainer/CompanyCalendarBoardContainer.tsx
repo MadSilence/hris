@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import {
@@ -34,7 +35,7 @@ import type { CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/cale
 import { availableGroupings, parseCalendarGrouping } from "@/components/modules/calendar/lib/grouping";
 import type { FilterDTO } from "@/models/user/fields";
 import {
-  MONTH_NAMES,
+  MONTH_KEYS,
   addDays,
   addMonths,
   eachDay,
@@ -51,6 +52,7 @@ const NO_COLLAPSED: ReadonlySet<string> = new Set();
 type Density = "month" | "week";
 
 export const CompanyCalendarBoardContainer: FC = () => {
+  const t = useTranslations("calendar");
   const [density, setDensity] = useState<Density>("month");
   const [anchor, setAnchor] = useState(() => new Date());
   const [query, setQuery] = useState("");
@@ -222,8 +224,17 @@ export const CompanyCalendarBoardContainer: FC = () => {
 
   const periodLabel =
     density === "week"
-      ? `${MONTH_NAMES[from.getMonth()].slice(0, 3)} ${from.getDate()} – ${MONTH_NAMES[to.getMonth()].slice(0, 3)} ${to.getDate()}, ${to.getFullYear()}`
-      : `${MONTH_NAMES[anchor.getMonth()]} ${anchor.getFullYear()}`;
+      ? t("period.week", {
+          fromMonth: t(`months.short.${MONTH_KEYS[from.getMonth()]}`),
+          fromDay: String(from.getDate()),
+          toMonth: t(`months.short.${MONTH_KEYS[to.getMonth()]}`),
+          toDay: String(to.getDate()),
+          year: String(to.getFullYear()),
+        })
+      : t("period.month", {
+          month: t(`months.long.${MONTH_KEYS[anchor.getMonth()]}`),
+          year: String(anchor.getFullYear()),
+        });
 
   const failed = grouping === null ? peopleFailed || marksFailed || absencesFailed : groupsFailed;
   const failure =

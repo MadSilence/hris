@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
+import { useTranslations } from "next-intl";
 
 import type { User } from "@/models/user/User";
 import { isReferenceField, type FieldDTO, type ReferenceValueSource } from "@/models/user/fields";
@@ -22,8 +23,8 @@ import {
 } from "@/components/modules/settings/modules/roles/components/RolesPageContainer/modules/UsersRolesTable/modals/AssignRolesModal";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { formatDisplayDate } from "@/lib/date";
-import { NONE_LABEL, NONE_VALUE } from "@/models/select";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
+import { NONE_LABEL_KEY, NONE_VALUE } from "@/models/select";
 import {
   ProfileSectionCard,
 } from "@/components/modules/organization/modules/profile/components/PersonalInfoContainer/components/ProfileSectionCard";
@@ -55,7 +56,7 @@ export const PROFILE_HIDDEN_SYSTEM_FIELDS = new Set([
 const NONE = NONE_VALUE;
 
 /** The same date as a person reads it. One formatter, no locale here — see `lib/date.ts`. */
-const formatDate = (iso?: string | null) => (iso ? formatDisplayDate(iso) : null);
+const formatDate = (iso: string | null | undefined, formatDisplayDate: DateFormatter) => (iso ? formatDisplayDate(iso) : null);
 
 type Props = {
   user: User;
@@ -107,6 +108,8 @@ export const SystemFieldGroup: React.FC<Props> = ({
   scheduledChanges,
   provenance,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const { mutate } = useSWRConfig();
   const visible = fields.filter((f) => !PROFILE_HIDDEN_SYSTEM_FIELDS.has(f.id));
   if (visible.length === 0) return null;
@@ -118,7 +121,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
       case "sys:first_name":
         return (
           <Input
-            aria-label="First name"
+            aria-label={t("profile.system.firstName")}
             value={d.firstName}
             // Read the value now: React nulls `currentTarget` once the handler returns, and the
             // functional setState body executes after that.
@@ -128,7 +131,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
       case "sys:last_name":
         return (
           <Input
-            aria-label="Last name"
+            aria-label={t("profile.system.lastName")}
             value={d.lastName}
             onChange={(e) => set({ lastName: e.target.value })}
           />
@@ -137,7 +140,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
         return (
           <Input
             type="email"
-            aria-label="Email"
+            aria-label={tCommon("fields.email")}
             value={d.email}
             onChange={(e) => set({ email: e.target.value })}
           />
@@ -146,7 +149,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
         return (
           <DatePicker
             value={d.hireDate}
-            ariaLabel="Hire date"
+            ariaLabel={t("profile.system.hireDate")}
             onChange={(value) => set({ hireDate: value })}
           />
         );
@@ -154,7 +157,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
         return (
           <DatePicker
             value={d.probationEnd}
-            ariaLabel="Probation end"
+            ariaLabel={t("profile.system.probationEnd")}
             onChange={(value) => set({ probationEnd: value })}
           />
         );
@@ -212,7 +215,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
               <div className="text-body text-primary">
                 {editing && draft ? editorFor(field.id, draft) : (
                   <>
-                    <PendingValue steps={pendingSteps(scheduledChanges, field.id, currentValuesOf(user, field.id))}>
+                    <PendingValue steps={pendingSteps(tCommon, scheduledChanges, field.id, currentValuesOf(user, field.id))}>
                       <SystemFieldValue user={user} field={field} />
                     </PendingValue>
                     <ProvenanceMarker
@@ -226,7 +229,7 @@ export const SystemFieldGroup: React.FC<Props> = ({
                 )}
                 {source ? (
                   <p className="m-0 mt-1 text-hint text-tertiary">
-                    Follows {source.label}. Change the {source.label.toLowerCase()} to change it.
+                    {t("profile.system.derivedFrom", { field: source.label, fieldLower: source.label.toLowerCase() })}
                   </p>
                 ) : null}
               </div>
@@ -244,24 +247,28 @@ const ReferenceSelect: React.FC<{
   value: string;
   onChange: (value: string) => void;
 }> = ({ source, value, onChange }) => {
+  const tCommon = useTranslations("common");
   const { options, isLoading } = useReferenceOptions(source);
 
   return (
     <SearchableSelect
       options={[
-        { value: NONE, label: NONE_LABEL },
+        { value: NONE, label: tCommon(NONE_LABEL_KEY) },
         ...options.map((option) => ({ value: option.id, label: option.label })),
       ]}
       value={value || null}
       onChange={(v) => onChange(v ?? NONE)}
-      placeholder={isLoading ? "Loading…" : "Select"}
+      placeholder={isLoading ? tCommon("states.loading") : tCommon("actions.select")}
       disabled={isLoading}
       clearable={false}
     />
   );
 };
 
-const NotSet = () => <span className="text-tertiary">Not set</span>;
+const NotSet = () => {
+  const tCommon = useTranslations("common");
+  return <span className="text-tertiary">{tCommon("values.notSet")}</span>;
+};
 
 const RefChips: React.FC<{ values?: { id: string; name: string }[] }> = ({ values }) =>
   values?.length ? (
@@ -280,6 +287,7 @@ const RefChips: React.FC<{ values?: { id: string; name: string }[] }> = ({ value
  * person as well as in settings. Gated on PROFILE MANAGE — Java enforces it regardless.
  */
 const RolesCell: React.FC<{ user: User }> = ({ user }) => {
+  const tCommon = useTranslations("common");
   const { mutate } = useSWRConfig();
   const [isOpen, setIsOpen] = useState(false);
   // Read when the modal opens, not with the page: an employee viewing a profile may not list roles,
@@ -293,7 +301,7 @@ const RolesCell: React.FC<{ user: User }> = ({ user }) => {
 
       <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
         <Button type="button" variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
-          Manage
+          {tCommon("actions.manage")}
         </Button>
       </PermissionGate>
 
@@ -322,6 +330,8 @@ const RolesCell: React.FC<{ user: User }> = ({ user }) => {
 
 /** Reads a system field's value off the user object. The one place that knows the mapping. */
 const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, field }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
   switch (field.id) {
     case "sys:first_name":
       return <>{user.firstName || <NotSet />}</>;
@@ -330,13 +340,13 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
     case "sys:email":
       return <>{user.email || <NotSet />}</>;
     case "sys:hire_date":
-      return <>{formatDate(user.hireDate) ?? <NotSet />}</>;
+      return <>{formatDate(user.hireDate, formatDisplayDate) ?? <NotSet />}</>;
     case "sys:employment_type":
-      return <>{formatEmploymentType(user.employmentType) ?? <NotSet />}</>;
+      return <>{formatEmploymentType(t, user.employmentType) ?? <NotSet />}</>;
     case "sys:probation_end":
-      return <>{formatDate(user.probationEnd) ?? <NotSet />}</>;
+      return <>{formatDate(user.probationEnd, formatDisplayDate) ?? <NotSet />}</>;
     case "sys:termination_date":
-      return <>{formatDate(user.terminationDate) ?? <NotSet />}</>;
+      return <>{formatDate(user.terminationDate, formatDisplayDate) ?? <NotSet />}</>;
     case "sys:job":
       return <>{user.jobName || <NotSet />}</>;
     // Not in FIELDS_WITH_AN_EDITOR on purpose: the grade follows the position, so it changes by

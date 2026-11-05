@@ -3,6 +3,7 @@
 import { messageForError } from "@/lib/errors/errorMessages";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader } from "@/components/desact/card";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Button } from "@/components/desact/button";
@@ -24,6 +25,7 @@ import {
   scopeFiltersFromPermissions,
   scopesToChoice,
 } from "@/components/modules/settings/modules/roles/utils/rolePermissionsPayload";
+import { ACCESS_ACTION_LABEL_KEYS } from "@/components/modules/settings/modules/roles/utils/rolePermissionsPayload";
 import RolePermissionsView from "./RolePermissionsView";
 import { RolePermissionsSummaryModal } from "./RolePermissionsSummaryModal";
 import { ScopeFilterModal } from "./ScopeFilterModal";
@@ -40,6 +42,9 @@ function PermissionsSkeleton() {
 }
 
 export default function RolePermissionsContainer({ roleId }: { roleId: string }) {
+  const tAccess = useTranslations("access");
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const { data, isLoading, error, save, saving, saveError } = useRolePermissions(roleId);
   const { data: roles, isLoading: rolesLoading } = useRoles();
 
@@ -138,9 +143,9 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
       <CardHeader className="px-0 py-0">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-section-title">Permissions</h2>
+            <h2 className="text-section-title">{t("roles.permissions.title")}</h2>
             <p className="text-body text-tertiary">
-              Set the access level for each resource.
+              {t("roles.permissions.subtitle")}
             </p>
           </div>
 
@@ -149,16 +154,16 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
 
             <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-secondary" onClick={toggleAllGroups}>
               {allExpanded ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-              {allExpanded ? "Collapse all" : "Expand all"}
+              {allExpanded ? t("roles.review.collapseAll") : t("roles.review.expandAll")}
             </Button>
 
             {showFooter && (
               <>
                 <Button type="button" variant="secondary" onClick={() => setDraft(serverDraft)} disabled={saving}>
-                  Reset
+                  {tCommon("actions.reset")}
                 </Button>
                 <Button type="button" onClick={() => setReviewOpen(true)} disabled={saving}>
-                  Review &amp; Save
+                  {t("roles.review.reviewAndSave")}
                 </Button>
               </>
             )}
@@ -170,7 +175,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
         {isLoading ? (
           <PermissionsSkeleton/>
         ) : error ? (
-          <ErrorState error={error} title="Permissions did not load" compact/>
+          <ErrorState error={error} title={t("roles.permissions.loadFailed")} compact/>
         ) : (
           <RolePermissionsView
             draft={draft}
@@ -181,9 +186,9 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
             onOpenGroupsChange={setOpenGroups}
             readOnlyReason={
               isSystemRole
-                ? "This is a system role. It always has full access, and its permissions cannot be changed."
+                ? t("roles.permissions.systemRole")
                 : !canEdit
-                  ? "You do not have permission to change role permissions."
+                  ? t("roles.permissions.noPermission")
                   : undefined
             }
             onChangeAction={handleChange}
@@ -196,7 +201,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
       {editingCell && (
         <ScopeFilterModal
           isOpen
-          grantLabel={grantLabel(editingCell.resource, editingCell.action)}
+          grantLabel={grantLabel(tAccess, t, editingCell.resource, editingCell.action)}
           value={scopeFilters[editingCell.resource]?.[editingCell.action]}
           onCancelAction={() => setEditingCell(null)}
           onConfirmAction={(segment) => {
@@ -225,7 +230,13 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
 }
 
 /** "People profiles · View", not the codes "PEOPLE.PROFILE · VIEW" (SWEEP_QUESTIONS S13). */
-function grantLabel(resource: ResourceCode, action: AccessAction): string {
-  const label = RESOURCE_GROUPS.flatMap((g) => g.resources).find((r) => r.code === resource)?.label ?? resource;
-  return `${label} · ${action.charAt(0)}${action.slice(1).toLowerCase()}`;
+function grantLabel(
+  tAccess: ReturnType<typeof useTranslations<"access">>,
+  t: ReturnType<typeof useTranslations<"settings">>,
+  resource: ResourceCode,
+  action: AccessAction,
+): string {
+  const definition = RESOURCE_GROUPS.flatMap((g) => g.resources).find((r) => r.code === resource);
+  const label = definition ? tAccess(`resources.${definition.messageKey}.label`) : resource;
+  return t("roles.permissions.grantLabel", { resource: label, action: t(ACCESS_ACTION_LABEL_KEYS[action]) });
 }

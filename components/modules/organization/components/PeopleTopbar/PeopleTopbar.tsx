@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Add01Icon, FilterHorizontalIcon, LayoutThreeColumnIcon, PencilEdit02Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -65,6 +66,8 @@ export default function PeopleTopbar({
   drafts,
   sort,
 }: PeopleTopbarProps) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<FilterDTO[]>(filters);
   const [seed, setSeed] = useState(0);
@@ -89,7 +92,7 @@ export default function PeopleTopbar({
           <PopoverTrigger asChild>
             <Button type="button" variant="secondary" size="sm" className="gap-1.5">
               <Icon icon={LayoutThreeColumnIcon} size="sm" />
-              Columns
+              {t("topbar.columns")}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-auto p-2">
@@ -105,17 +108,17 @@ export default function PeopleTopbar({
           <PopoverTrigger asChild>
             <Button type="button" variant="secondary" size="sm" className="gap-1.5">
               <Icon icon={FilterHorizontalIcon} size="sm" />
-              Filter
+              {t("topbar.filter")}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
             <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
             <div className="mt-3 flex items-center justify-end gap-2">
               <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
-                Reset
+                {tCommon("actions.reset")}
               </Button>
               <Button type="button" size="sm" onClick={applyFilters}>
-                Apply
+                {tCommon("actions.apply")}
               </Button>
             </div>
           </PopoverContent>
@@ -138,7 +141,7 @@ export default function PeopleTopbar({
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
             <Button type="button" size="sm" className="gap-1.5" onClick={() => onEditSelectedAction?.()}>
               <Icon icon={PencilEdit02Icon} size="sm" />
-              Edit
+              {tCommon("actions.edit")}
             </Button>
           </PermissionGate>
         ) : null}
@@ -171,7 +174,7 @@ export default function PeopleTopbar({
             <Button asChild variant="secondary" className="gap-1.5">
               <Link href="/settings/general/import">
                 <Icon icon={Upload01Icon} size="sm" />
-                Import
+                {tCommon("actions.import")}
               </Link>
             </Button>
           </PermissionGate>
@@ -181,7 +184,7 @@ export default function PeopleTopbar({
           <PermissionGate resource="PEOPLE.PROFILE" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onAddPersonAction}>
               <Icon icon={Add01Icon} size="sm" />
-              Add person
+              {t("addPerson.title")}
             </Button>
           </PermissionGate>
         ) : null}

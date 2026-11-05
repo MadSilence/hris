@@ -3,6 +3,7 @@
 import React, { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SentIcon, UserAdd01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
@@ -16,44 +17,37 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
   id: string;
-  label: string;
+  labelKey: `lifecycleSettings.${"preboarding" | "onboarding" | "offboarding"}.label`;
   href: string;
   icon: IconSvgElement;
   resource: ResourceCode;
-  title: string;
-  description: string;
+  descriptionKey: `lifecycleSettings.${"preboarding" | "onboarding" | "offboarding"}.description`;
 };
 
 const tabs: Tab[] = [
   {
     id: "preboarding",
-    label: "Preboarding",
+    labelKey: "lifecycleSettings.preboarding.label",
     href: "/settings/automation/preboarding",
     icon: SentIcon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
-    title: "Preboarding",
-    description:
-      "The task lists a preboarding starts with. Preboarding is for somebody who has not signed in yet, and happens on one page behind a link.",
+    descriptionKey: "lifecycleSettings.preboarding.description",
   },
   {
     id: "onboarding",
-    label: "Onboarding",
+    labelKey: "lifecycleSettings.onboarding.label",
     href: "/settings/automation/onboarding",
     icon: UserAdd01Icon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
-    title: "Onboarding",
-    description:
-      "The task lists an onboarding starts with. Onboarding happens inside the app, once the new person has signed in.",
+    descriptionKey: "lifecycleSettings.onboarding.description",
   },
   {
     id: "offboarding",
-    label: "Offboarding",
+    labelKey: "lifecycleSettings.offboarding.label",
     href: "/settings/automation/offboarding",
     icon: UserRemove01Icon,
     resource: "PEOPLE.LIFECYCLE_TEMPLATES",
-    title: "Offboarding",
-    description:
-      "The task lists an offboarding starts with, counted from the last working day — handing over work, returning equipment, the exit interview.",
+    descriptionKey: "lifecycleSettings.offboarding.description",
   },
 ];
 
@@ -64,6 +58,7 @@ const tabs: Tab[] = [
  * Entities & Offices is laid out. Each tab is its own route, so a link can land on one.
  */
 export default function LifecycleSettingsLayout({ children }: { children: ReactNode }) {
+  const t = useTranslations("automations");
   const pathname = usePathname();
   const { access } = useAccess();
 
@@ -88,10 +83,10 @@ export default function LifecycleSettingsLayout({ children }: { children: ReactN
     >
       <div className="space-y-6">
         <div className="px-8 space-y-4">
-          <SettingsPageHeader title={activeTab.title} backHref="/settings"/>
+          <SettingsPageHeader title={t(activeTab.labelKey)} backHref="/settings"/>
 
           <PageDescription className="text-body text-tertiary/90">
-            {activeTab.description}
+            {t(activeTab.descriptionKey)}
           </PageDescription>
         </div>
 
@@ -105,7 +100,7 @@ export default function LifecycleSettingsLayout({ children }: { children: ReactN
                   <TabsTrigger key={tab.id} value={tab.id} asChild className="flex items-center gap-2">
                     <Link href={tab.href} className="no-underline">
                       <Icon icon={shownIcon} size="sm" />
-                      {tab.label}
+                      {t(tab.labelKey)}
                     </Link>
                   </TabsTrigger>
                 );

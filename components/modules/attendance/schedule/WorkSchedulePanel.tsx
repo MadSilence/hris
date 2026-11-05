@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -11,7 +12,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { messageForError } from "@/lib/errors/errorMessages";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { formatMinutes, WEEKDAY_FIELDS, type WorkSchedule, type WorkScheduleWriteRequest } from "@/models/attendance";
 import { AttendanceActionError, useAddWorkSchedule, useWorkSchedules } from "@/components/modules/attendance/hooks";
 import { AddWorkScheduleModal } from "./AddWorkScheduleModal";
@@ -38,6 +39,9 @@ const weeklyHours = (schedule: WorkSchedule) =>
  * action: add a schedule from a date. Somebody with no schedule works the company week.
  */
 export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) => {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const { data: schedules, isLoading, error, refetch } = useWorkSchedules(userId);
   const addSchedule = useAddWorkSchedule();
   const [adding, setAdding] = useState(false);
@@ -45,7 +49,7 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
   const submit = async (body: WorkScheduleWriteRequest): Promise<string | null> => {
     try {
       await addSchedule.mutateAsync({ userId, body });
-      showSuccess("Work schedule added.");
+      showSuccess(t("schedule.added"));
       return null;
     } catch (caught) {
       return caught instanceof AttendanceActionError
@@ -60,16 +64,13 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
     <section className="space-y-3" aria-labelledby="work-schedule-heading">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 id="work-schedule-heading" className="text-section-title">Work schedule</h2>
-          <p className="text-body text-tertiary">
-            Hours per weekday. Days with no hours are not charged as leave. A schedule is never edited — a
-            change is a new schedule from the date it starts.
-          </p>
+          <h2 id="work-schedule-heading" className="text-section-title">{t("schedule.title")}</h2>
+          <p className="text-body text-tertiary">{t("schedule.description")}</p>
         </div>
         {canEdit && (
           <Button type="button" onClick={() => setAdding(true)} >
             <Icon icon={Add01Icon} size="sm" />
-            Add work schedule
+            {t("schedule.add")}
           </Button>
         )}
       </div>
@@ -79,19 +80,19 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
       ) : !isLoading && (schedules ?? []).length === 0 ? (
         <EmptyState
           scene="attendance"
-          title="Works the company week"
-          description="No personal schedule. The company's working days apply, each at the company's working-day length."
+          title={t("schedule.emptyTitle")}
+          description={t("schedule.emptyDescription")}
           onCreate={canEdit ? () => setAdding(true) : undefined}
-          createLabel={canEdit ? "Add work schedule" : undefined}
+          createLabel={canEdit ? t("schedule.add") : undefined}
         />
       ) : (
         <div className="rounded-control border border-divider bg-card">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Effective from</TableHead>
-                {WEEKDAY_FIELDS.map((field) => <TableHead key={field.key}>{field.label}</TableHead>)}
-                <TableHead>Weekly hours</TableHead>
+                <TableHead>{t("schedule.effectiveFrom")}</TableHead>
+                {WEEKDAY_FIELDS.map((field) => <TableHead key={field.key}>{tCommon(field.labelKey)}</TableHead>)}
+                <TableHead>{t("schedule.weeklyHours")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,7 +108,7 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
                   <TableRow key={schedule.id}>
                     <TableCell className="whitespace-nowrap">
                       {formatDisplayDate(schedule.effectiveFrom, { style: "medium" })}
-                      {current?.id === schedule.id && <StatusBadge status="active" label="In force" className="ml-2"/>}
+                      {current?.id === schedule.id && <StatusBadge status="active" label={t("schedule.inForce")} className="ml-2"/>}
                     </TableCell>
                     {WEEKDAY_FIELDS.map((field) => (
                       <TableCell key={field.key} className="tabular-nums">{formatMinutes(Number(schedule[field.key]) * 60)}</TableCell>

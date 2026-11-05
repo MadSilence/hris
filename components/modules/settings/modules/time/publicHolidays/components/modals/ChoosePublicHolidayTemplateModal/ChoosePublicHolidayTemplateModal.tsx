@@ -4,6 +4,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import * as React from "react";
 import { FC, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon, Globe02Icon, LanguageSkillIcon, Location01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -47,6 +48,8 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
   isOpen,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const router = useRouter();
 
   const {
@@ -107,9 +110,9 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
       <DialogContent hideClose className="overflow-hidden p-0 sm:max-w-2xl">
         <div className="px-8 pt-8">
           <DialogHeader>
-            <DialogTitle>Choose public holiday template</DialogTitle>
+            <DialogTitle>{t("publicHolidays.chooseTemplate.title")}</DialogTitle>
             <DialogDescription>
-              Select a template to preview holidays before creating a company calendar.
+              {t("publicHolidays.chooseTemplate.description")}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -117,7 +120,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
         <div className="space-y-6 px-8 py-7">
           <div className="space-y-2">
             <p className="text-body font-medium text-primary">
-              Template
+              {t("publicHolidays.chooseTemplate.template")}
             </p>
 
             {isLoading ? (
@@ -133,7 +136,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
 
             {!isLoading && templates.length === 0 ? (
               <p className="text-hint text-tertiary">
-                No public holiday templates are available yet.
+                {t("publicHolidays.chooseTemplate.noTemplates")}
               </p>
             ) : null}
           </div>
@@ -144,7 +147,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
             */}
           {selectedTemplate && (isRegionsFetching || regions.length > 0) ? (
             <div className="space-y-2">
-              <Label htmlFor="template-region">Region</Label>
+              <Label htmlFor="template-region">{t("publicHolidays.chooseTemplate.region")}</Label>
 
               {isRegionsFetching ? (
                 <Skeleton className="h-9 w-full"/>
@@ -152,7 +155,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
                 <SearchableSelect
                   id="template-region"
                   options={[
-                    { value: NATIONAL, label: "National holidays only" },
+                    { value: NATIONAL, label: t("publicHolidays.chooseTemplate.nationalOnly") },
                     ...regions.map((region) => ({ value: region.code, label: `${region.name} (${region.code})` })),
                   ]}
                   value={selectedRegion || null}
@@ -162,7 +165,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               )}
 
               <p className="text-hint text-tertiary">
-                A region adds the days that apply only there on top of the national ones.
+                {t("publicHolidays.chooseTemplate.regionHint")}
               </p>
             </div>
           ) : null}
@@ -180,7 +183,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               disabled={isLoading}
               onClick={requestClose}
             >
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
 
             <Button
@@ -188,7 +191,7 @@ export const ChoosePublicHolidayTemplateModal: FC<Props> = ({
               disabled={isLoading || !selectedTemplate}
               onClick={handleGoToPreview}
             >
-              Use this template
+              {t("publicHolidays.chooseTemplate.useTemplate")}
             </Button>
           </DialogFooter>
         </div>
@@ -202,15 +205,16 @@ type TemplateSummaryProps = {
 };
 
 const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
+  const t = useTranslations("timeOff");
   if (!template) {
     return (
       <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
         <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
 
-        <p className="text-body font-medium">Select a template</p>
+        <p className="text-body font-medium">{t("publicHolidays.chooseTemplate.selectTemplate")}</p>
 
         <p className="mt-1 text-hint text-tertiary">
-          Template details will appear here.
+          {t("publicHolidays.chooseTemplate.detailsHere")}
         </p>
       </div>
     );
@@ -230,9 +234,9 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
 
           {template.regional ? (
             // A kind, not a status: the tag palette (SPEC § 4.7).
-            <TagChip color="plum">Regional</TagChip>
+            <TagChip color="plum">{t("publicHolidays.chooseTemplate.regional")}</TagChip>
           ) : (
-            <TagChip color="ocean">National</TagChip>
+            <TagChip color="ocean">{t("publicHolidays.chooseTemplate.national")}</TagChip>
           )}
         </div>
 
@@ -248,30 +252,30 @@ const TemplateSummary: FC<TemplateSummaryProps> = ({ template }) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <SummaryRow
           icon={<Icon icon={Globe02Icon} size="sm" />}
-          label="Country"
+          label={t("publicHolidays.chooseTemplate.country")}
           value={`${template.countryName} (${template.countryCode})`}
         />
 
         <SummaryRow
           icon={<Icon icon={Location01Icon} size="sm" />}
-          label="Region"
+          label={t("publicHolidays.chooseTemplate.region")}
           value={
             template.regionName && template.regionCode
               ? `${template.regionName} (${template.regionCode})`
-              : "National"
+              : t("publicHolidays.chooseTemplate.national")
           }
         />
 
         <SummaryRow
           icon={<Icon icon={LanguageSkillIcon} size="sm" />}
-          label="Language"
+          label={t("publicHolidays.chooseTemplate.language")}
           value={template.languageCode.toUpperCase()}
         />
 
         <SummaryRow
           icon={<Icon icon={Calendar03Icon} size="sm" />}
-          label="Supported years"
-          value={formatSupportedYears(template)}
+          label={t("publicHolidays.chooseTemplate.supportedYears")}
+          value={formatSupportedYears(template, t)}
         />
       </div>
     </div>
@@ -299,21 +303,24 @@ const SummaryRow: FC<SummaryRowProps> = ({ icon, label, value }) => {
   );
 };
 
-function formatSupportedYears(template: PublicHolidayTemplate) {
+function formatSupportedYears(
+  template: PublicHolidayTemplate,
+  t: ReturnType<typeof useTranslations<"timeOff">>,
+) {
   const from = template.supportedYearFrom;
   const to = template.supportedYearTo;
 
   if (from && to) {
-    return `${from} - ${to}`;
+    return t("publicHolidays.chooseTemplate.yearsRange", { from, to });
   }
 
   if (from) {
-    return `From ${from}`;
+    return t("publicHolidays.chooseTemplate.yearsFrom", { from });
   }
 
   if (to) {
-    return `Until ${to}`;
+    return t("publicHolidays.chooseTemplate.yearsUntil", { to });
   }
 
-  return "Any supported year";
+  return t("publicHolidays.chooseTemplate.anyYear");
 }

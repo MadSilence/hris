@@ -1,13 +1,9 @@
-import { OPERATOR_LABELS, type AudienceOperator } from "@/components/audience/fieldCatalog";
+import { operatorLabel, type AudienceOperator } from "@/components/audience/fieldCatalog";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
 import type { FieldDTO, FilterDTO, ReferenceValueSource } from "@/models/user/fields";
 import type { Segment } from "@/models/segment/Segment";
-import {
-  actionSentence,
-  triggerSentence,
-  type AssignableType,
-  type AutomationCatalog,
-  type AutomationDefinition,
-} from "@/models/automations";
+import type { AssignableType, AutomationCatalog, AutomationDefinition } from "@/models/automations";
+import { actionSentence, triggerSentence, type AutomationsT } from "./vocabulary";
 
 const SOURCE_TYPE: Partial<Record<ReferenceValueSource, AssignableType>> = {
   roles: "ROLE",
@@ -48,29 +44,37 @@ const valueName = (field: FieldDTO | undefined, raw: string, targets: Map<string
   return option ? option.label ?? option.value : raw;
 };
 
-const filterText = (f: FilterDTO, fields: FieldDTO[] | undefined, targets: Map<string, string>): string => {
+const filterText = (t: AutomationsT, tAccess: AccessTranslator, f: FilterDTO, fields: FieldDTO[] | undefined, targets: Map<string, string>): string => {
   const field = fieldOf(fields, f.field);
   const label = field?.label ?? f.field;
-  const op = (OPERATOR_LABELS[f.op as AudienceOperator] ?? f.op).toLowerCase();
+  const op = operatorLabel(tAccess, f.op as AudienceOperator).toLowerCase();
   const values = f.values?.length ? f.values : f.value ? [f.value] : [];
   const shown = values.map((v) => valueName(field, v, targets)).join(", ");
-  const range = f.op === "between" && f.valueTo ? ` and ${f.valueTo}` : "";
-  return `${label} ${op} ${shown}${range}`.trim();
+  const text = f.op === "between" && f.valueTo
+    ? t("sentence.conditions.filterRange", { field: label, op, values: shown, to: f.valueTo })
+    : t("sentence.conditions.filter", { field: label, op, values: shown });
+  return text.trim();
 };
 
 /** "everyone", or "people whose Office is Berlin and Department is any of Sales, Support". */
 export const conditionsSentence = (
+  t: AutomationsT,
+  tAccess: AccessTranslator,
   segment: Segment | null | undefined,
   fields: FieldDTO[] | undefined,
   targets: Map<string, string>,
 ): string => {
   const filters = segment?.filters ?? [];
-  if (filters.length === 0) return "everyone";
-  return `people whose ${filters.map((f) => filterText(f, fields, targets)).join(" and ")}`;
+  if (filters.length === 0) return t("sentence.conditions.everyone");
+  const joined = filters.map((f) => filterText(t, tAccess, f, fields, targets))
+    .reduce((left, right) => t("sentence.conditions.and", { left, right }));
+  return t("sentence.conditions.whose", { filters: joined });
 };
 
 /** The whole rule as the list reads it: "When someone is hired · for everyone → Email the person: Welcome". */
 export const ruleSentence = (
+  t: AutomationsT,
+  tAccess: AccessTranslator,
   definition: AutomationDefinition | null | undefined,
   options: {
     catalog?: AutomationCatalog;
@@ -80,10 +84,11 @@ export const ruleSentence = (
   },
 ): { when: string; forWhom: string; does: string } => {
   if (!definition) return { when: "", forWhom: "", does: "" };
-  const when = triggerSentence(definition.trigger, options.catalog ?? {});
-  const forWhom = conditionsSentence(definition.conditions, options.fields, options.targets);
+  const when = triggerSentence(t, definition.trigger, options.catalog ?? {});
+  const forWhom = conditionsSentence(t, tAccess, definition.conditions, options.fields, options.targets);
   const does = definition.actions.length
-    ? definition.actions.map((a) => actionSentence(a, { targets: options.targets, roles: options.roles })).join(", then ")
-    : "nothing yet";
+    ? definition.actions.map((a) => actionSentence(t, a, { targets: options.targets, roles: options.roles }))
+      .reduce((left, right) => t("sentence.rule.then", { left, right }))
+    : t("sentence.rule.nothingYet");
   return { when, forWhom, does };
 };

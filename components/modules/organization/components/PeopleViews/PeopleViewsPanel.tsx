@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, ArrowLeft01Icon, ArrowRight01Icon, Bookmark01Icon, Copy01Icon, Delete02Icon, Link01Icon, PencilEdit02Icon, Share01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -69,6 +70,8 @@ export default function PeopleViewsPanel({
   onCopyLink,
   onSaveActiveCopy,
 }: PeopleViewsPanelProps) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [dialog, setDialog] = useState<NameDialogState>(null);
   const [name, setName] = useState("");
   const [sharing, setSharing] = useState<PeopleView | null>(null);
@@ -98,7 +101,7 @@ export default function PeopleViewsPanel({
   if (collapsed) {
     return (
       <div className="flex flex-none flex-col items-center gap-2 border-l border-divider pl-2 pt-1">
-        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Expand views panel">
+        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label={t("views.panel.expand")}>
           <Icon icon={ArrowLeft01Icon} size="sm" />
         </Button>
         <Icon icon={Bookmark01Icon} size="sm" className="text-tertiary" />
@@ -109,16 +112,16 @@ export default function PeopleViewsPanel({
   return (
     <div className="flex w-60 flex-none flex-col gap-3 border-l border-divider pl-3">
       <div className="flex items-center justify-between">
-        <span className="text-body font-semibold text-primary">Saved views</span>
-        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label="Collapse views panel">
+        <span className="text-body font-semibold text-primary">{t("views.panel.title")}</span>
+        <Button type="button" variant="ghost" size="icon" onClick={onToggleCollapsed} aria-label={t("views.panel.collapse")}>
           <Icon icon={ArrowRight01Icon} size="sm" />
         </Button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
-        <section className="flex flex-col gap-0.5" aria-label="My views">
-          <SectionLabel>My views</SectionLabel>
-          <ViewRow label="Default" active={activeViewId === null} onClick={onApplyDefault} />
+        <section className="flex flex-col gap-0.5" aria-label={t("views.panel.myViews")}>
+          <SectionLabel>{t("views.panel.myViews")}</SectionLabel>
+          <ViewRow label={t("views.panel.default")}active={activeViewId === null} onClick={onApplyDefault} />
 
           {isLoading ? (
             <div className="flex justify-center px-2 py-2"><NodRing size="sm" /></div>
@@ -131,21 +134,21 @@ export default function PeopleViewsPanel({
                 dirty={activeViewId === view.id && dirty}
                 onClick={() => onApplyView(view)}
                 menu={
-                  <RowActionsMenu label={`${view.name} Actions`}>
+                  <RowActionsMenu label={t("views.panel.rowActions", { name: view.name })}>
                     <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => openRename(view)}>
-                      Rename
+                      {tCommon("actions.rename")}
                     </RowAction>
                     <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicate(view)}>
-                      Duplicate
+                      {tCommon("actions.duplicate")}
                     </RowAction>
                     <RowAction icon={<Icon icon={Share01Icon} size="sm" />} onClick={() => setSharing(view)}>
-                      Share
+                      {t("views.panel.share")}
                     </RowAction>
                     <RowActionDestructive
                       icon={<Icon icon={Delete02Icon} size="sm" />}
                       onClick={() => onDelete(view)}
                     >
-                      Delete
+                      {tCommon("actions.delete")}
                     </RowActionDestructive>
                   </RowActionsMenu>
                 }
@@ -155,20 +158,23 @@ export default function PeopleViewsPanel({
         </section>
 
         {sharedViews.length ? (
-          <section className="flex flex-col gap-0.5" aria-label="Shared with me">
-            <SectionLabel>Shared with me</SectionLabel>
+          <section className="flex flex-col gap-0.5" aria-label={t("views.panel.sharedWithMe")}>
+            <SectionLabel>{t("views.panel.sharedWithMe")}</SectionLabel>
             {sharedViews.map((view) => (
               <ViewRow
                 key={view.id}
                 label={view.name}
-                detail={`${view.ownerName ?? "Someone"} · ${view.access === "EDIT" ? "Can edit" : "Can view"}`}
+                detail={t("views.panel.sharedDetail", {
+                  owner: view.ownerName ?? t("views.panel.someone"),
+                  access: view.access === "EDIT" ? "EDIT" : "VIEW",
+                })}
                 active={activeViewId === view.id}
                 dirty={activeViewId === view.id && dirty}
                 onClick={() => onApplyView(view)}
                 menu={
-                  <RowActionsMenu label={`${view.name} Actions`}>
+                  <RowActionsMenu label={t("views.panel.rowActions", { name: view.name })}>
                     <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicate(view)}>
-                      Save a copy
+                      {t("views.panel.saveCopy")}
                     </RowAction>
                   </RowActionsMenu>
                 }
@@ -182,43 +188,44 @@ export default function PeopleViewsPanel({
         {activeView !== null && dirty && canSaveActive ? (
           <Button type="button" size="sm" variant="secondary" onClick={onUpdateActive} disabled={busy} className="justify-start gap-2">
             <Icon icon={Tick02Icon} size="sm" />
-            Save changes
+            {tCommon("actions.saveChanges")}
           </Button>
         ) : null}
         {activeView !== null && !canSaveActive ? (
           <Button type="button" size="sm" variant="secondary" onClick={onSaveActiveCopy} disabled={busy} className="justify-start gap-2">
             <Icon icon={Copy01Icon} size="sm" />
-            Save a copy
+            {t("views.panel.saveCopy")}
           </Button>
         ) : null}
         <Button type="button" size="sm" variant="secondary" onClick={openSaveAs} disabled={busy} className="justify-start gap-2">
           <Icon icon={Add01Icon} size="sm" />
-          Save as new view
+          {t("views.panel.saveAsNew")}
         </Button>
         <Button type="button" size="sm" variant="ghost" onClick={onCopyLink} className="justify-start gap-2">
           <Icon icon={Link01Icon} size="sm" />
-          Copy link
+          {t("views.panel.copyLink")}
         </Button>
       </div>
 
       <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{dialog?.kind === "rename" ? "Rename view" : "Save view"}</DialogTitle>
+            <DialogTitle>{dialog?.kind === "rename" ? t("views.panel.renameTitle") : t("views.panel.saveTitle")}</DialogTitle>
           </DialogHeader>
           <Input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
+            // i18n-exempt: a key name, not text
             onKeyDown={(e) => e.key === "Enter" && submitDialog()}
             className="h-9"
           />
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setDialog(null)}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button type="button" onClick={submitDialog} disabled={!name.trim()}>
-              {dialog?.kind === "rename" ? "Rename" : "Save"}
+              {dialog?.kind === "rename" ? tCommon("actions.rename") : tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -249,6 +256,7 @@ function ViewRow({
   onClick: () => void;
   menu?: React.ReactNode;
 }) {
+  const t = useTranslations("organization");
   return (
     <div
       className={`group flex items-center gap-1 rounded-control pl-2 pr-1 ${
@@ -266,7 +274,7 @@ function ViewRow({
         </span>
         {dirty ? (
           <Badge variant="neutral" className="ml-auto h-4 shrink-0 px-1 text-hint font-normal">
-            edited
+            {t("views.panel.edited")}
           </Badge>
         ) : null}
       </button>

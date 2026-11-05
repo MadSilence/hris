@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Textarea } from "@/components/desact/textarea";
@@ -12,7 +13,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter, useDisplayLanguage } from "@/lib/date";
 import { showSuccess } from "@/lib/errors/errorToast";
 import {
   declineReviewAction,
@@ -23,7 +24,7 @@ import { useInvalidateReviews, useReviewAssignment } from "@/components/modules/
 import { AnswersView, answerText } from "@/components/modules/reviews/shared/AnswersView";
 import { HeldBackNote } from "@/components/modules/reviews/shared/HeldBackNote";
 import { AssignmentStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
-import { REVIEW_KIND_LABELS, replaceMentions, type AnswerInput, type Writing } from "@/models/reviews";
+import { REVIEW_KIND_KEYS, replaceMentions, type AnswerInput, type Writing } from "@/models/reviews";
 import { AnswerField, type AnswerState } from "./AnswerField";
 import { FieldError } from "@/components/desact/field-error";
 import { InlineAlert } from "@/components/desact/alert";
@@ -47,6 +48,10 @@ const empty = (v: AnswerState["value"]) =>
  * Submit. A manager also reads what is already in — the self review and the peers — beside their own form.
  */
 export function WriteReviewContainer({ assignmentId }: { assignmentId: string }) {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const language = useDisplayLanguage();
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const review = useReviewAssignment(assignmentId);
   const invalidate = useInvalidateReviews();
@@ -103,56 +108,58 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
       if (timer.current) clearTimeout(timer.current);
       const res = await submitReviewAction({ id: w.id, answers: payload() });
       if (res.status !== ActionStatus.SUCCESS) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("error.generic"));
         return;
       }
       setConfirmSubmit(false);
       setAmending(false);
       await invalidate();
-      showSuccess(w.canAmend ? "Review updated and shared again." : "Review submitted.");
+      showSuccess(w.canAmend ? t("write.updatedToast") : t("write.submittedToast"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const subjectLine = w.kind === "SELF" ? "About yourself" : `About ${w.subject.name}`;
+  const subjectLine = w.kind === "SELF" ? t("mine.about.yourself") : t("mine.about.person", { name: w.subject.name });
+  const facts = [
+    subjectLine,
+    w.cycleName,
+    w.dueOn ? t("write.due", { date: formatDisplayDate(w.dueOn, { style: "medium" }) }) : null,
+    w.anonymous ? t("write.anonymous") : null,
+  ].filter(Boolean).join(" · ");
   const hasContext = w.context.length > 0 || w.peersHeldBack > 0 || w.upwardHeldBack > 0;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-16">
       <StickyPageBar className="space-y-2">
         <div className="flex flex-wrap items-center gap-3">
-          <SettingsPageHeader title={REVIEW_KIND_LABELS[w.kind]} backHref="/reviews/me" className="min-w-0 flex-1" />
+          <SettingsPageHeader title={t(REVIEW_KIND_KEYS[w.kind])} backHref="/reviews/me" className="min-w-0 flex-1" />
           <AssignmentStatusBadge status={w.status} />
           <div className="flex flex-wrap items-center gap-2">
             {writable && w.status === "OPEN" && (
               <span className="text-hint text-tertiary" aria-live="polite">
-                {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Draft saved" : "Saved as you type"}
+                {saveState === "saving" ? tCommon("actions.saving") : saveState === "saved" ? t("write.draftSaved") : t("write.savedAsYouType")}
               </span>
             )}
-            {w.canDecline && <Button type="button" variant="ghost" onClick={() => setDeclining(true)}>Decline</Button>}
-            {w.canAmend && !amending && <Button type="button" variant="secondary" onClick={() => setAmending(true)}>Edit</Button>}
+            {w.canDecline && <Button type="button" variant="ghost" onClick={() => setDeclining(true)}>{t("write.decline")}</Button>}
+            {w.canAmend && !amending && <Button type="button" variant="secondary" onClick={() => setAmending(true)}>{tCommon("actions.edit")}</Button>}
             {writable && (
               <Button type="button" disabled={submitting}
                 onClick={() => {
                   if (missing.length > 0) { setShowMissing(true); return; }
                   setConfirmSubmit(true);
                 }}>
-                {w.canAmend ? "Update and share again" : "Submit"}
+                {w.canAmend ? t("write.updateAndShareAgain") : tCommon("actions.submit")}
               </Button>
             )}
           </div>
         </div>
-        <p className="text-body text-tertiary">
-          {subjectLine} · {w.cycleName}
-          {w.dueOn ? ` · due ${formatDisplayDate(w.dueOn, { style: "medium" })}` : ""}
-          {w.anonymous ? " · Your name is not shown with this review, to anybody." : ""}
-        </p>
+        <p className="text-body text-tertiary">{facts}</p>
         {writable && asks.length > 0 && (
           <div className="flex items-center gap-3 pt-1">
             <div
               role="progressbar"
-              aria-label="Answered"
+              aria-label={t("write.answeredLabel")}
               aria-valuemin={0}
               aria-valuemax={asks.length}
               aria-valuenow={answered}
@@ -162,8 +169,8 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
             </div>
             <span className={showMissing && missing.length > 0 ? "text-hint text-danger-text" : "text-hint text-tertiary"}>
               {showMissing && missing.length > 0
-                ? missing.length === 1 ? "One required question is not answered" : `${missing.length} required questions are not answered`
-                : `${answered} of ${asks.length} answered`}
+                ? t("write.missing", { count: missing.length })
+                : t("write.answered", { answered, total: asks.length })}
             </span>
           </div>
         )}
@@ -171,7 +178,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
       <FormError message={error} />
       {w.sentBackComment && (
         <div data-test="sent-back">
-          <InlineAlert tone="pending" title="Sent back for changes">
+          <InlineAlert tone="pending" title={t("write.sentBack")}>
             <p className="whitespace-pre-line">{w.sentBackComment}</p>
           </InlineAlert>
         </div>
@@ -181,7 +188,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
         <div className="space-y-6">
           {w.form?.description && (
             <p className="whitespace-pre-line rounded-card border border-divider bg-subtle/50 px-5 py-3 text-body text-primary">
-              {replaceMentions(w.form.description, w.mentions)}
+              {replaceMentions(w.form.description, w.mentions, t)}
             </p>
           )}
 
@@ -193,8 +200,8 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
                   if (q.type === "SECTION") {
                     return (
                       <li key={q.id} className="space-y-1 border-t border-divider pt-5 first:border-t-0 first:pt-0">
-                        <h2 className="text-body font-semibold text-primary">{replaceMentions(q.label, w.mentions)}</h2>
-                        {q.description && <p className="whitespace-pre-line text-body text-tertiary">{replaceMentions(q.description, w.mentions)}</p>}
+                        <h2 className="text-body font-semibold text-primary">{replaceMentions(q.label, w.mentions, t)}</h2>
+                        {q.description && <p className="whitespace-pre-line text-body text-tertiary">{replaceMentions(q.description, w.mentions, t)}</p>}
                       </li>
                     );
                   }
@@ -203,13 +210,13 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
                   return (
                     <li key={q.id} className="space-y-2">
                       <RequiredLabel htmlFor={`answer-${q.id}`} required={Boolean(q.required)} className="text-body font-medium text-primary">
-                        {n}. {replaceMentions(q.label, w.mentions)}
+                        {t("preview.numbered", { number: n, label: replaceMentions(q.label, w.mentions, t) })}
                       </RequiredLabel>
-                      {q.description && <p className="whitespace-pre-line text-hint text-tertiary">{replaceMentions(q.description, w.mentions)}</p>}
+                      {q.description && <p className="whitespace-pre-line text-hint text-tertiary">{replaceMentions(q.description, w.mentions, t)}</p>}
                       <AnswerField question={q} scale={w.scale} value={answers[q.id] ?? { value: null, comment: "" }}
                         disabled={submitting} invalid={invalid}
                         onChange={(next) => { setAnswers((a) => ({ ...a, [q.id]: next })); setTouched(true); }} />
-                      {invalid && <FieldError>Answer this question.</FieldError>}
+                      {invalid && <FieldError>{t("write.answerThis")}</FieldError>}
                     </li>
                   );
                 });
@@ -220,13 +227,15 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
               {w.status === "SUBMITTED" ? (
                 <>
                   <p className="text-body text-tertiary">
-                    Submitted {w.submittedAt ? formatDisplayDate(w.submittedAt, { style: "medium" }) : ""}.
+                    {w.submittedAt
+                      ? t("write.submittedOn", { date: formatDisplayDate(w.submittedAt, { style: "medium" }) })
+                      : t("write.submittedNoDate")}
                   </p>
                   <dl className="space-y-3">
                     {w.submitted.map((a) => (
                       <div key={a.questionId}>
-                        <dt className="text-body font-medium text-primary">{replaceMentions(a.label, w.mentions)}</dt>
-                        <dd className="whitespace-pre-line text-body text-primary">{answerText(a, w.scale)}</dd>
+                        <dt className="text-body font-medium text-primary">{replaceMentions(a.label, w.mentions, t)}</dt>
+                        <dd className="whitespace-pre-line text-body text-primary">{answerText(a, w.scale, tCommon, language)}</dd>
                         {a.comment && <dd className="whitespace-pre-line text-body text-tertiary">{a.comment}</dd>}
                       </div>
                     ))}
@@ -234,8 +243,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
                 </>
               ) : (
                 <p className="text-body text-tertiary">
-                  {w.cycleStatus !== "ACTIVE" ? "This cycle is closed; the review can no longer be written."
-                    : "This review is no longer yours to write."}
+                  {w.cycleStatus !== "ACTIVE" ? t("write.cycleClosed") : t("write.notYours")}
                 </p>
               )}
             </section>
@@ -245,7 +253,7 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
 
         {hasContext && (
           <aside className="space-y-4">
-            <h2 className="text-body font-medium text-tertiary">Already in</h2>
+            <h2 className="text-body font-medium text-tertiary">{t("write.alreadyIn")}</h2>
             {w.context.map((b) => <AnswersView key={b.assignmentId} block={b} scale={w.scale} mentions={w.mentions} />)}
             <HeldBackNote count={w.peersHeldBack} threshold={w.anonymityThreshold} />
             <HeldBackNote count={w.upwardHeldBack} threshold={w.upwardThreshold} kind="upward" />
@@ -255,8 +263,8 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
 
       <ConfirmDialog
         open={confirmSubmit}
-        title={w.canAmend ? "Update review" : "Submit review"}
-        confirmLabel={w.canAmend ? "Update and share" : "Submit"}
+        title={w.canAmend ? t("write.confirm.updateTitle") : t("write.confirm.submitTitle")}
+        confirmLabel={w.canAmend ? t("write.confirm.updateAndShare") : tCommon("actions.submit")}
         onCancelAction={() => setConfirmSubmit(false)}
         onConfirmAction={async () => {
           await submit();
@@ -265,30 +273,30 @@ export function WriteReviewContainer({ assignmentId }: { assignmentId: string })
       >
         <p>
           {w.canAmend
-            ? `${w.subject.name} has already read this review; they see the new version, marked as updated, and are asked to acknowledge it again.`
+            ? t("write.confirm.amend", { name: w.subject.name })
             : w.kind === "MANAGER"
-              ? `Once submitted, the review changes only after it is shared, as an update ${w.subject.name.split(" ")[0]} sees.`
-              : "Once submitted, the review can no longer be changed."}
+              ? t("write.confirm.manager", { name: w.subject.name.split(" ")[0] })
+              : t("write.confirm.final")}
         </p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={declining}
-        title="Decline peer review"
-        confirmLabel="Decline"
+        title={t("write.declineDialog.title")}
+        confirmLabel={t("write.decline")}
         destructive
         onCancelAction={() => setDeclining(false)}
         onConfirmAction={async () => {
           const res = await declineReviewAction({ id: w.id, reason: declineReason.trim() || null });
-          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
+          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("error.generic");
           setDeclining(false);
           await invalidate();
           router.push("/reviews/me");
           return null;
         }}
       >
-        <p>Whoever runs the cycle is told, and may ask somebody else.</p>
-        <Textarea rows={3} aria-label="Reason" value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} />
+        <p>{t("write.declineDialog.body")}</p>
+        <Textarea rows={3} aria-label={t("write.declineDialog.reason")} value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} />
       </ConfirmDialog>
     </div>
   );

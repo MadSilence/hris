@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { AccessAction, ResourceCode } from "@/models/access";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
@@ -61,7 +62,7 @@ export const ListEmptyState: React.FC<{
   title,
   description,
   noResultsHint,
-  archivedDescription = "Archived records will appear here.",
+  archivedDescription,
   onCreate,
   createLabel,
   createAccess,
@@ -69,6 +70,7 @@ export const ListEmptyState: React.FC<{
   fill,
   className,
 }) => {
+  const t = useTranslations("common");
   if (query?.trim()) {
     return <NoResults hint={noResultsHint} fill={fill} className={className} />;
   }
@@ -78,8 +80,8 @@ export const ListEmptyState: React.FC<{
     return (
       <EmptyState
         scene={scene}
-        title="Nothing archived"
-        description={archivedDescription}
+        title={t("emptyState.nothingArchived")}
+        description={archivedDescription ?? t("emptyState.archivedDescription")}
         fill={fill}
         className={className}
       />

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
@@ -14,15 +15,12 @@ import { FieldError } from "@/components/desact/field-error";
 
 type Values = { email: string };
 
-export const FORGOT_PASSWORD_SENT_MESSAGE =
-  "If an account exists for that address, we have sent a link to set a new password. It works for one hour.";
-
-const schema = yup.object({
+const buildSchema = (t: ReturnType<typeof useTranslations<"auth">>) => yup.object({
   email: yup
     .string()
     .trim()
-    .required("Please enter your email.")
-    .email("Enter a valid email address.")
+    .required(t("login.validation.emailRequired"))
+    .email(t("login.validation.emailInvalid"))
     .nonNullable(),
 });
 
@@ -35,6 +33,8 @@ const schema = yup.object({
  * failure, because claiming a link was sent when nothing was asked would be a lie of a different kind.
  */
 export function ForgotPasswordContainer() {
+  const t = useTranslations("auth");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,10 +65,10 @@ export function ForgotPasswordContainer() {
   if (sent) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">Check your email</h1>
-        <p className="text-body text-tertiary" role="status">{FORGOT_PASSWORD_SENT_MESSAGE}</p>
+        <h1 className="text-page-title">{t("passwordReset.forgot.sentTitle")}</h1>
+        <p className="text-body text-tertiary" role="status">{t("passwordReset.forgot.sentBody")}</p>
         <Button asChild variant="secondary">
-          <Link href="/login">Back to sign in</Link>
+          <Link href="/login">{t("passwordReset.backToSignIn")}</Link>
         </Button>
       </div>
     );
@@ -78,15 +78,15 @@ export function ForgotPasswordContainer() {
     <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-page-title">Forgot your password?</h1>
+          <h1 className="text-page-title">{t("passwordReset.forgot.title")}</h1>
           <p className="text-body text-tertiary">
-            Enter the email address you sign in with, and we will send you a link to set a new password.
+            {t("passwordReset.forgot.description")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="forgot-email" required>Email address</RequiredLabel>
+            <RequiredLabel htmlFor="forgot-email" required>{t("login.emailLabel")}</RequiredLabel>
             <Input
               id="forgot-email"
               name="email"
@@ -105,11 +105,11 @@ export function ForgotPasswordContainer() {
           <FormError message={error} />
 
           <Button type="submit" disabled={busy} size="lg" className="w-full">
-            {busy ? "Sending…" : "Send link"}
+            {busy ? t("passwordReset.forgot.sending") : t("passwordReset.forgot.send")}
           </Button>
 
           <p className="text-center text-body text-tertiary">
-            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">Back to sign in</Link>
+            <Link href="/login" className="text-accent-text underline-offset-4 hover:underline">{t("passwordReset.backToSignIn")}</Link>
           </p>
         </form>
       </div>

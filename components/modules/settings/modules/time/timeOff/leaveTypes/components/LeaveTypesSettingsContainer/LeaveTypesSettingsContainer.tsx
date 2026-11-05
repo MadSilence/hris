@@ -4,6 +4,7 @@ import { showError } from "@/lib/errors/errorToast";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { LeaveTypesSettingsComponent } from "../LeaveTypesSettingsComponent";
 import { CreateLeaveTypeModal } from "../modals/CreateLeaveTypeModal";
@@ -22,6 +23,8 @@ import { ForbiddenError } from "@/components/clients/exceptions";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 
 export default function LeaveTypesSettingsContainer() {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { data: leaveTypes, isLoading, error } = useLeaveTypes();
 
@@ -117,9 +120,9 @@ export default function LeaveTypesSettingsContainer() {
 
       <ConfirmActionModal
         isOpen={archiveTarget !== null}
-        title={`Archive "${archiveTarget?.name ?? ""}"`}
-        description="An archived leave type cannot be used for new requests. Existing requests keep it, and you can unarchive it at any time."
-        confirmLabel="Archive"
+        title={t("leaveTypes.archive.title", { name: archiveTarget?.name ?? "" })}
+        description={t("leaveTypes.archive.description")}
+        confirmLabel={tCommon("actions.archive")}
         isLoading={archiveMutation.isPending}
         onConfirmAction={confirmArchive}
         onCancelAction={() => setArchiveTarget(null)}

@@ -1,11 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, type FC } from "react";
 import type { DateRange } from "react-day-picker";
 import { Calendar02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
-import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
+import { dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
 import { Calendar } from "@/components/desact/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { cn } from "@/lib/cn";
@@ -44,12 +45,14 @@ export const DateRangePicker: FC<Props> = ({
   onChange,
   id,
   disabled = false,
-  placeholder = "Pick a range",
+  placeholder,
   maxDays,
   clearable = true,
   ariaLabel,
   className,
 }) => {
+  const t = useTranslations("common");
+  const formatDisplayDate = useDateFormatter();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DateRange | undefined>(undefined);
 
@@ -106,14 +109,14 @@ export const DateRangePicker: FC<Props> = ({
           <span className={cn("min-w-0 flex-1 truncate text-left", !value && "text-tertiary")}>
             {value
               ? `${formatDisplayDate(value.start, { style: "medium" })} – ${formatDisplayDate(value.end, { style: "medium" })}`
-              : placeholder}
+              : placeholder ?? t("datePicker.pickRange")}
           </span>
 
           {clearable && value && !disabled && (
             <span
               role="button"
               tabIndex={-1}
-              aria-label="Clear range"
+              aria-label={t("datePicker.clearRange")}
               onClick={(event) => {
                 event.stopPropagation();
                 onChange(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { FALLBACK_ERROR_MESSAGE, messageForError } from "@/lib/errors/errorMessages";
+import { fallbackErrorMessage, isFallbackErrorMessage, messageForError } from "@/lib/errors/errorMessages";
 import type { ActionResult } from "@/lib/errors/withActionError";
 
 /**
@@ -17,7 +17,7 @@ import type { ActionResult } from "@/lib/errors/withActionError";
  * can be copied.
  */
 const show = (message: string, reference?: string) => {
-  const unexpected = message === FALLBACK_ERROR_MESSAGE;
+  const unexpected = isFallbackErrorMessage(message);
 
   toast.error(message, {
     description: reference,
@@ -28,7 +28,7 @@ const show = (message: string, reference?: string) => {
 
 /** For the result of a server action. */
 export const showActionError = (result: Pick<ActionResult, "errorMessage" | "requestId">) =>
-  show(result.errorMessage ?? FALLBACK_ERROR_MESSAGE, result.requestId);
+  show(result.errorMessage ?? fallbackErrorMessage(), result.requestId);
 
 /** For an error caught on the client — a mutation hook, a drag handler. */
 export const showError = (error: unknown) => show(messageForError(error), referenceOf(error));

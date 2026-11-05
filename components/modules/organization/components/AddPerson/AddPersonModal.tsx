@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/desact/dialog";
@@ -24,12 +25,15 @@ type Props = {
 
 type Values = { firstName: string; lastName: string; email: string; hireDate: string };
 
-const validationSchema = Yup.object({
-  firstName: Yup.string().trim().required("Enter a first name."),
-  lastName: Yup.string().trim().required("Enter a last name."),
-  email: Yup.string().trim().email("Enter a valid email address."),
-  hireDate: Yup.string(),
-});
+type OrganizationT = ReturnType<typeof useTranslations<"organization">>;
+
+const buildSchema = (t: OrganizationT) =>
+  Yup.object({
+    firstName: Yup.string().trim().required(t("addPerson.validation.firstName")),
+    lastName: Yup.string().trim().required(t("addPerson.validation.lastName")),
+    email: Yup.string().trim().email(t("addPerson.validation.email")),
+    hireDate: Yup.string(),
+  });
 
 /**
  * Adds a person from two fields.
@@ -43,6 +47,9 @@ const validationSchema = Yup.object({
  */
 export function AddPersonModal({ open, onCloseAction }: Props) {
   const router = useRouter();
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const validationSchema = React.useMemo(() => buildSchema(t), [t]);
   const [error, setError] = useState<string | null>(null);
 
   const formik = useFormik<Values>({
@@ -87,16 +94,16 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
     <Dialog open={open} onOpenChange={(v) => { if (!v && !busy) onCloseAction(); }}>
       <DialogContent onKeyDown={handleKeyDown} className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add person</DialogTitle>
+          <DialogTitle>{t("addPerson.title")}</DialogTitle>
           <DialogDescription>
-            A name is enough. The person is added as a draft and invited when you decide to.
+            {t("addPerson.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="person-first-name" required>First name</RequiredLabel>
+              <RequiredLabel htmlFor="person-first-name" required>{t("addPerson.firstName")}</RequiredLabel>
               <Input
                 id="person-first-name"
                 name="firstName"
@@ -110,7 +117,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
               )}
             </div>
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="person-last-name" required>Last name</RequiredLabel>
+              <RequiredLabel htmlFor="person-last-name" required>{t("addPerson.lastName")}</RequiredLabel>
               <Input
                 id="person-last-name"
                 name="lastName"
@@ -126,7 +133,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="person-email">Email</Label>
+            <Label htmlFor="person-email">{tCommon("fields.email")}</Label>
             <Input
               id="person-email"
               name="email"
@@ -142,13 +149,13 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="person-hire-date">Hire date</Label>
+            <Label htmlFor="person-hire-date">{t("addPerson.hireDate")}</Label>
             <DatePicker
               id="person-hire-date"
               value={formik.values.hireDate}
               onChange={(v) => formik.setFieldValue("hireDate", v)}
               disabled={busy}
-              ariaLabel="Hire date"
+              ariaLabel={t("addPerson.hireDate")}
             />
           </div>
 
@@ -157,10 +164,10 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
-            {busy ? "Adding…" : "Add"}
+            {busy ? t("addPerson.adding") : tCommon("actions.add")}
           </Button>
         </DialogFooter>
       </DialogContent>

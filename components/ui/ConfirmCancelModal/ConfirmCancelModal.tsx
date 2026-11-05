@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,13 +25,14 @@ type ConfirmCancelModalProps = {
 
 export const ConfirmCancelModal: FC<ConfirmCancelModalProps> = ({
   isOpen,
-  title = "Discard changes?",
-  description = "You have unsaved changes. Are you sure you want to close this modal?",
-  cancelText = "Keep editing",
-  confirmText = "Discard",
+  title,
+  description,
+  cancelText,
+  confirmText,
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("common");
   return (
     <AlertDialog
       open={isOpen}
@@ -40,18 +42,18 @@ export const ConfirmCancelModal: FC<ConfirmCancelModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle>{title ?? t("confirmCancel.title")}</AlertDialogTitle>
+          <AlertDialogDescription>{description ?? t("confirmCancel.description")}</AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel>{cancelText ?? t("actions.keepEditing")}</AlertDialogCancel>
 
           <AlertDialogAction
             destructive
             onClick={onConfirmAction}
           >
-            {confirmText}
+            {confirmText ?? t("actions.discard")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

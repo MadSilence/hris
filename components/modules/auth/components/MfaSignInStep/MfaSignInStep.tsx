@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
 import { Checkbox } from "@/components/desact/checkbox";
@@ -24,6 +25,8 @@ export const MfaSignInStep: React.FC<{
   /** Back to the password, when the challenge has died. */
   onRestart: () => void;
 }> = ({ mode, returnTo, onRestart }) => {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const auth = useAuthService();
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -78,12 +81,11 @@ export const MfaSignInStep: React.FC<{
   if (codesLeft != null) {
     return (
       <div className="w-full space-y-6 text-center">
-        <h1 className="text-page-title">Signed in with a backup code</h1>
+        <h1 className="text-page-title">{t("mfaSignIn.backupUsed.title")}</h1>
         <p className="text-body text-tertiary">
-          {codesLeft === 1 ? "1 backup code is left." : `${codesLeft} backup codes are left.`} If you have lost your phone,
-          set up a new one in My Preferences → Two-Step Sign-In.
+          {t("mfaSignIn.backupUsed.body", { count: codesLeft })}
         </p>
-        <Button type="button" size="lg" className="w-full" onClick={open}>Continue</Button>
+        <Button type="button" size="lg" className="w-full" onClick={open}>{tCommon("actions.continue")}</Button>
       </div>
     );
   }
@@ -92,11 +94,11 @@ export const MfaSignInStep: React.FC<{
     return (
       <div className="w-full space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-page-title">Set up two-step sign-in</h1>
-          <p className="text-body text-tertiary">Your company asks for a second step when you sign in.</p>
+          <h1 className="text-page-title">{t("mfaSignIn.enrol.title")}</h1>
+          <p className="text-body text-tertiary">{t("mfaSignIn.enrol.description")}</p>
         </div>
         {codes ? (
-          <BackupCodesSheet codes={codes} onDone={open} doneLabel="Continue" />
+          <BackupCodesSheet codes={codes} onDone={open} doneLabel={tCommon("actions.continue")} />
         ) : enrolment ? (
           <TotpEnrolment
             otpauthUri={enrolment.otpauthUri}
@@ -110,7 +112,7 @@ export const MfaSignInStep: React.FC<{
             <FormError message={error} />
             {error && (
               <Button type="button" variant="secondary" className="w-full" onClick={onRestart}>
-                Sign in again
+                {t("mfaSignIn.signInAgain")}
               </Button>
             )}
           </>
@@ -122,20 +124,20 @@ export const MfaSignInStep: React.FC<{
   return (
     <div className="w-full space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-page-title">Two-step sign-in</h1>
+        <h1 className="text-page-title">{t("mfaSignIn.challenge.title")}</h1>
         <p className="text-body text-tertiary">
-          {useBackup ? "Enter one of your backup codes." : "Enter the six-digit code from your authenticator app."}
+          {useBackup ? t("mfaSignIn.challenge.backupPrompt") : t("mfaSignIn.challenge.appPrompt")}
         </p>
       </div>
       <form className="space-y-5" onSubmit={submit} noValidate>
         <CodeField id="mfa-code" value={code} onChange={setCode} backup={useBackup} disabled={busy} autoFocus />
         <div className="flex items-center gap-2">
           <Checkbox id="mfa-remember" checked={remember} onCheckedChange={(v) => setRemember(Boolean(v))} disabled={busy} />
-          <Label htmlFor="mfa-remember">Remember this device</Label>
+          <Label htmlFor="mfa-remember">{t("mfaSignIn.challenge.rememberDevice")}</Label>
         </div>
         <FormError message={error} />
         <Button type="submit" size="lg" className="w-full" disabled={busy || !code.trim()}>
-          {busy ? "Checking…" : "Sign in"}
+          {busy ? t("mfaSignIn.challenge.checking") : t("login.submit")}
         </Button>
       </form>
       <div className="flex justify-between text-body">
@@ -148,10 +150,10 @@ export const MfaSignInStep: React.FC<{
             setError(null);
           }}
         >
-          {useBackup ? "Use the app instead" : "Use a backup code"}
+          {useBackup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
         </button>
         <button type="button" className="text-secondary underline" onClick={onRestart}>
-          Start over
+          {t("mfaSignIn.challenge.startOver")}
         </button>
       </div>
     </div>

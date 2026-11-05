@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import { Notification01Icon, Shield01Icon, UserGroupIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -21,6 +22,7 @@ export interface RoleDetailsViewProps {
 }
 
 export default function RoleDetailsView({ roleId, roleName, isDefaultRole = false, isSystemOwnerRole = false, isArchived = false, isLoading = false }: RoleDetailsViewProps) {
+  const t = useTranslations("settings");
   // Counts loaded rows — the backend has no total yet, so this grows as pages load.
   const { items: assignedUsers, isLoading: assignedLoading } = useRoleUsers(roleId, null);
   const assignedCount = assignedLoading ? undefined : assignedUsers.length;
@@ -32,22 +34,22 @@ export default function RoleDetailsView({ roleId, roleName, isDefaultRole = fals
         <TabsList>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
-            Assigned users
+            {t("roles.detail.tabs.assigned")}
             {assignedCount != null && (
               <span className="text-tertiary">({assignedCount})</span>
             )}
           </TabsTrigger>
           <TabsTrigger value="permissions" className="flex items-center gap-2">
             <Icon icon={Shield01Icon} size="sm" />
-            Permissions
+            {t("roles.detail.tabs.permissions")}
           </TabsTrigger>
           <TabsTrigger value="field-access" className="flex items-center gap-2">
             <Icon icon={ViewIcon} size="sm" />
-            Field access
+            {t("roles.detail.tabs.fieldAccess")}
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Icon icon={Notification01Icon} size="sm" />
-            Notifications
+            {t("roles.detail.tabs.notifications")}
           </TabsTrigger>
         </TabsList>
 

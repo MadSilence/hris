@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
@@ -35,6 +36,8 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+
   const requestClose = () => {
     if (isLoading) return;
 
@@ -50,9 +53,9 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
     >
       <DialogContent hideClose className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add document</DialogTitle>
+          <DialogTitle>{t("documents.upload.title")}</DialogTitle>
           <DialogDescription>
-            Upload a document and place it into a folder.
+            {t("documents.upload.description")}
           </DialogDescription>
         </DialogHeader>
 

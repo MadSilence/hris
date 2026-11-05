@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/desact/dialog";
@@ -11,7 +12,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { saveTemplateAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
-import { PROCESS_TYPE_LABELS, type ProcessType, type Template } from "@/models/lifecycle";
+import type { ProcessType, Template } from "@/models/lifecycle";
 import { FieldError } from "@/components/desact/field-error";
 
 type Props = {
@@ -24,6 +25,8 @@ type Props = {
 
 /** A name, and the template exists — its tasks are laid out on the canvas it opens on. */
 export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: Props) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +56,7 @@ export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: 
     e.preventDefault();
     setError(null);
     if (!name.trim()) {
-      setNameError("Enter a name.");
+      setNameError(t("addTemplate.enterName"));
       return;
     }
     setBusy(true);
@@ -61,7 +64,7 @@ export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: 
       const res = await saveTemplateAction({ id: null, body: { type, name: name.trim(), description: null, items: [] } });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
         if (res.fieldErrors?.name) setNameError(res.fieldErrors.name);
-        else setError(res.errorMessage ?? "Something went wrong.");
+        else setError(res.errorMessage ?? t("shared.somethingWentWrong"));
         return;
       }
       onAddedAction(res.data);
@@ -76,13 +79,11 @@ export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: 
         <DialogContent className="sm:max-w-md">
           <form onSubmit={submit} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Add {PROCESS_TYPE_LABELS[type]} Template</DialogTitle>
-              <DialogDescription>
-                Name it here; its tasks are laid out on a timeline from the start day, which opens next.
-              </DialogDescription>
+              <DialogTitle>{t("addTemplate.title", { type })}</DialogTitle>
+              <DialogDescription>{t("addTemplate.description")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="new-template-name" required>Name</RequiredLabel>
+              <RequiredLabel htmlFor="new-template-name" required>{tCommon("fields.name")}</RequiredLabel>
               <Input
                 id="new-template-name"
                 value={name}
@@ -94,8 +95,8 @@ export function AddTemplateDialog({ open, type, onCloseAction, onAddedAction }: 
             </div>
             <FormError message={error} />
             <DialogFooter>
-              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>Cancel</Button>
-              <Button type="submit" disabled={busy}>{busy ? "Adding…" : "Add"}</Button>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
+              <Button type="submit" disabled={busy}>{busy ? t("addTemplate.adding") : tCommon("actions.add")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

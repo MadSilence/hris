@@ -1,8 +1,10 @@
 "use client";
 
 import "@xyflow/react/dist/style.css";
+import { useFlowAriaLabels } from "@/components/ui/Canvas";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   MarkerType,
   ReactFlow,
@@ -58,13 +60,13 @@ const LANE_TAIL = 48;
 
 export type ZoomPreset = "beforeStart" | "firstWeek" | "ninetyDays" | "fit";
 
-/** In the words of the domain, not percentages (research § B.3). */
-export const ZOOM_PRESETS: { id: ZoomPreset; label: string; from: number; to: number }[] = [
-  { id: "beforeStart", label: "Before start", from: -14, to: 0 },
+/** In the words of the domain, not percentages (research § B.3): the days each preset shows. */
+export const ZOOM_PRESETS: { id: ZoomPreset; from: number; to: number }[] = [
+  { id: "beforeStart", from: -14, to: 0 },
   // A few days either side of Day 1, at a zoom where a block and a person's name read in full.
-  { id: "firstWeek", label: "First week", from: -2, to: 6 },
-  { id: "ninetyDays", label: "90 Days", from: 0, to: 90 },
-  { id: "fit", label: "Fit", from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY },
+  { id: "firstWeek", from: -2, to: 6 },
+  { id: "ninetyDays", from: 0, to: 90 },
+  { id: "fit", from: Number.NEGATIVE_INFINITY, to: Number.POSITIVE_INFINITY },
 ];
 
 export type CanvasProps = {
@@ -132,6 +134,7 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
   onAdd: CanvasProps["onAddInLaneAction"];
   onAddPerson?: CanvasProps["onAddPersonAction"];
 }) {
+  const t = useTranslations("lifecycle");
   const { y, zoom } = useViewport();
   const [picking, setPicking] = useState(false);
   return (
@@ -154,7 +157,7 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
             {lane.problem && (
               <span className="flex items-center gap-1 text-hint text-status-pending-text">
                 <Icon icon={Alert02Icon} size="sm" />
-                {lane.problem === "MISSING" ? "Nobody chosen" : lane.problem === "LEFT" ? "Has left" : "Not started"}
+                {lane.problem === "MISSING" ? t("canvas.nobodyChosen") : lane.problem === "LEFT" ? t("canvas.laneLeft") : t("canvas.laneNotStarted")}
               </span>
             )}
           </span>
@@ -163,7 +166,7 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
               variant="ghost"
               size="icon"
               className="h-7 w-7 shrink-0"
-              aria-label={`Add task for ${lane.label}`}
+              aria-label={t("canvas.addTaskFor", { lane: lane.label })}
               onClick={() => onAdd(lane.id, { left: LANE_HEADER_W + 8, top: RULER_H + Math.max(0, y + lane.top * zoom) })}
             >
               <Icon icon={Add01Icon} size="sm" />
@@ -177,14 +180,12 @@ function LaneHeaders({ layout, readOnly, onAdd, onAddPerson }: {
             <PopoverTrigger asChild>
               <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-secondary">
                 <Icon icon={UserAdd01Icon} size="sm" />
-                Add person
+                {t("canvas.addPerson")}
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80 space-y-2">
-              <p className="text-body font-medium">Add a person to the timeline</p>
-              <p className="text-hint text-tertiary">
-                Somebody named — HR, IT, a buddy. A named person makes the template depend on them.
-              </p>
+              <p className="text-body font-medium">{t("canvas.addPersonTitle")}</p>
+              <p className="text-hint text-tertiary">{t("canvas.addPersonHint")}</p>
               <UserPickerField
                 value={null}
                 onChange={(u) => {
@@ -205,6 +206,7 @@ function TemplateCanvasInner({
   type, items, layout, readOnly, selectedKey, selectedEdgeId, onSelectBlockAction, onFocusBlockAction, onSelectEdgeAction, onMoveAction,
   onConnectAction, onCellClickAction, onAddInLaneAction, onCommandAction, announcement, onAddPersonAction,
 }: CanvasProps) {
+  const t = useTranslations("lifecycle");
   const { fitBounds, getViewport, setViewport } = useReactFlow();
   const store = useStoreApi();
   const paneRef = useRef<HTMLDivElement>(null);
@@ -330,7 +332,7 @@ function TemplateCanvasInner({
   const moveText = (item: DraftItem, node: Node) => {
     const { column, lane } = dropTarget(layout, node.position);
     const timing = timingForColumn(column, item);
-    return { timing, lane, text: `${dayLabel(timing, type)} · ${lane.label}` };
+    return { timing, lane, text: t("canvas.dayLane", { day: dayLabel(timing, t, type), lane: lane.label }) };
   };
 
   const onNodeDrag: OnNodeDrag<Node> = (_e, node) => {
@@ -368,6 +370,7 @@ function TemplateCanvasInner({
     else onCommandAction(command);
   };
 
+  const flowAriaLabels = useFlowAriaLabels();
   return (
     <div
       className="relative grid h-full min-h-[420px] overflow-hidden bg-card"
@@ -380,6 +383,7 @@ function TemplateCanvasInner({
       <LaneHeaders layout={layout} readOnly={readOnly} onAdd={onAddInLaneAction} onAddPerson={onAddPersonAction} />
       <div ref={paneRef} className="relative min-h-0" onWheelCapture={onWheelCapture}>
         <ReactFlow
+        ariaLabelConfig={flowAriaLabels}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
@@ -402,6 +406,7 @@ function TemplateCanvasInner({
           deleteKeyCode={null}
           // Two-finger scroll pans; pinch or Ctrl/Cmd + scroll zooms (research § B.3).
           panOnScroll
+          // i18n-exempt: key names, not text
           zoomActivationKeyCode={["Meta", "Control"]}
           // Nothing above the first lane, and below it only what the pane cannot show: panned, the people left a
           // gap under the ruler they are read against.

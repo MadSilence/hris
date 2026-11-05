@@ -1,16 +1,16 @@
 import type { SearchItem, SearchKind } from "@/models/search";
 
-/** Group headings, sentence case (`ui/NAMING.md` § 1). */
-export const SEARCH_KIND_LABELS: Record<SearchKind, string> = {
-  PEOPLE: "People",
-  DEPARTMENT: "Departments",
-  TEAM: "Teams",
-  OFFICE: "Offices",
-  LEGAL_ENTITY: "Legal entities",
-  JOB: "Jobs",
-  TIME_OFF_POLICY: "Time off policies",
-  ROLE: "Roles",
-};
+/** Group headings, sentence case (`ui/NAMING.md` § 1) — keys of the `search` catalogue. */
+export const SEARCH_KIND_LABELS = {
+  PEOPLE: "kinds.people",
+  DEPARTMENT: "kinds.departments",
+  TEAM: "kinds.teams",
+  OFFICE: "kinds.offices",
+  LEGAL_ENTITY: "kinds.legalEntities",
+  JOB: "kinds.jobs",
+  TIME_OFF_POLICY: "kinds.timeOffPolicies",
+  ROLE: "kinds.roles",
+} as const satisfies Record<SearchKind, string>;
 
 /**
  * Where a hit opens. Departments, teams and jobs have no page of their own — they open on their

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -68,6 +69,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
   errors = {},
   disabled = false,
 }) => {
+  const t = useTranslations("timeOff");
   const handleAdd = () => {
     onChange([
       ...holidays,
@@ -104,12 +106,12 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
           {/* The caller owns the scroll container, so the header can stick to its top. */}
           <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
             <TableRow>
-              <TableHead className="w-44">Date</TableHead>
-              <TableHead className="w-44">End date</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-32">Length</TableHead>
+              <TableHead className="w-44">{t("publicHolidays.days.date")}</TableHead>
+              <TableHead className="w-44">{t("publicHolidays.days.endDate")}</TableHead>
+              <TableHead>{t("publicHolidays.days.name")}</TableHead>
+              <TableHead className="w-32">{t("publicHolidays.days.length")}</TableHead>
               <TableHead className="w-12">
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{t("publicHolidays.days.actions")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -126,8 +128,8 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       onChange={(next) => handleChange(holiday.localId, "holidayDate", next)}
                       disabled={disabled}
                       clearable={false}
-                      placeholder="Pick a date"
-                      ariaLabel="Date"
+                      placeholder={t("publicHolidays.days.pickDate")}
+                      ariaLabel={t("publicHolidays.days.date")}
                       invalid={!!rowErrors?.holidayDate}
                       className={QUIET_FIELD}
                     />
@@ -140,7 +142,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       min={holiday.holidayDate || undefined}
                       onChange={(next) => handleChange(holiday.localId, "endDate", next)}
                       disabled={disabled}
-                      ariaLabel="End date"
+                      ariaLabel={t("publicHolidays.days.endDate")}
                       invalid={!!rowErrors?.endDate}
                       className={QUIET_FIELD}
                     />
@@ -154,7 +156,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                         handleChange(holiday.localId, "name", e.currentTarget.value)
                       }
                       disabled={disabled}
-                      aria-label="Holiday name"
+                      aria-label={t("publicHolidays.days.holidayName")}
                       aria-invalid={!!rowErrors?.name}
                       className={QUIET_FIELD}
                     />
@@ -167,12 +169,12 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       onValueChange={(next) => handleChange(holiday.localId, "dayPart", next)}
                       disabled={disabled}
                     >
-                      <SelectTrigger aria-label="Length" className={QUIET_FIELD}>
+                      <SelectTrigger aria-label={t("publicHolidays.days.length")} className={QUIET_FIELD}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={PublicHolidayDayPart.FullDay}>Full day</SelectItem>
-                        <SelectItem value={PublicHolidayDayPart.HalfDay}>Half day</SelectItem>
+                        <SelectItem value={PublicHolidayDayPart.FullDay}>{t("publicHolidays.days.fullDay")}</SelectItem>
+                        <SelectItem value={PublicHolidayDayPart.HalfDay}>{t("publicHolidays.days.halfDay")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -184,7 +186,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
                       size="icon"
                       disabled={disabled}
                       onClick={() => handleRemove(holiday.localId)}
-                      aria-label="Remove holiday"
+                      aria-label={t("publicHolidays.days.remove")}
                       className="text-tertiary hover:text-danger-text"
                     >
                       <Icon icon={Delete02Icon} size="sm" />
@@ -206,7 +208,7 @@ export const PublicHolidayDaysEditor: FC<Props> = ({
         className="mt-2"
       >
         <Icon icon={Add01Icon} size="sm" />
-        Add holiday day
+        {t("publicHolidays.days.add")}
       </Button>
     </div>
   );

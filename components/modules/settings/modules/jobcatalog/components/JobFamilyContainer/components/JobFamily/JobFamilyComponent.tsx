@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Download01Icon, PencilEdit02Icon, Tick02Icon, UnfoldLessIcon, UnfoldMoreIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -70,6 +71,9 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
   focusFamilyId,
   onFocusFamilyHandled,
 }) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   // Stable identity: the fallback [] would otherwise be a new array on every render.
   const all = useMemo(() => jobFamilies ?? [], [jobFamilies]);
 
@@ -135,7 +139,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
       await triggerExportDownload("/api/job-family/export", format);
       setIsExportOpen(false);
     } catch (error) {
-      setExportError(error instanceof Error ? error.message : "Export failed.");
+      setExportError(error instanceof Error ? error.message : t("export.failed"));
     }
   };
 
@@ -154,7 +158,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
               disabled={families.length === 0}
             >
               {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-              {allOpen ? "Collapse all" : "Expand all"}
+              {allOpen ? t("toolbar.collapseAll") : t("toolbar.expandAll")}
             </Button>
 
           <Button type="button"
@@ -164,7 +168,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
               setExportError(null);
               setIsExportOpen(true);
             }}
-            aria-label="Export job catalog"
+            aria-label={t("toolbar.export")}
           >
             <Icon icon={Download01Icon} size="sm" />
           </Button>
@@ -174,7 +178,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           <PermissionGate resource="JOBS.FAMILY" action="EDIT">
             <Button type="button" className="gap-1.5" onClick={onCreateFamily}>
               <Icon icon={Add01Icon} size="sm" />
-              Add job family
+              {t("toolbar.addFamily")}
             </Button>
           </PermissionGate>
         }
@@ -182,11 +186,11 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
 
       <div className="-mx-1 max-h-[calc(100svh-380px)] overflow-y-auto px-1">
         <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
-          <div>Name</div>
-          <div>Assigned people</div>
-          <div>Code</div>
-          <div>Status</div>
-          <div>Level</div>
+          <div>{tCommon("fields.name")}</div>
+          <div>{t("columns.assignedPeople")}</div>
+          <div>{tShared("code")}</div>
+          <div>{tCommon("fields.status")}</div>
+          <div>{t("columns.level")}</div>
           <div/>
         </div>
 
@@ -198,12 +202,12 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
               query={query}
               archivedView={showArchived}
               scene="goals-and-growth"
-              title="No job families yet"
-              description="A job family groups related positions. Add the first one to start building the catalog."
-              noResultsHint="Try a different family, position or code."
-              archivedDescription="Archived job families will appear here."
+              title={t("empty.title")}
+              description={t("empty.description")}
+              noResultsHint={t("empty.noResultsHint")}
+              archivedDescription={t("empty.archivedDescription")}
               onCreate={onCreateFamily}
-              createLabel="Add job family"
+              createLabel={t("toolbar.addFamily")}
               createAccess={{ resource: "JOBS.FAMILY" }}
             />
           )}
@@ -244,9 +248,9 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title="Export job catalog"
-        description="Export every job family with its positions."
-        includedText="Includes family, name, code, level, status, assigned people and description."
+        title={t("toolbar.export")}
+        description={t("export.description")}
+        includedText={t("export.included")}
         errorMessage={exportError}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
@@ -293,7 +297,11 @@ const FamilySection: FC<FamilySectionProps> = ({
   onActivateJob,
   onAssignJob,
   onDeleteJob,
-}) => (
+}) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
+  return (
   <AccordionItem value={family.id} data-family-id={family.id} className="border-b-0">
     <div className="relative">
       <AccordionTrigger
@@ -320,27 +328,27 @@ const FamilySection: FC<FamilySectionProps> = ({
         <div className="absolute right-[54px] top-1/2 flex -translate-y-1/2 items-center">
           {editing ? (
             <>
-              <RowActionsMenu label="Family actions" stopPropagation>
+              <RowActionsMenu label={t("family.actions")} stopPropagation>
                 <PermissionGate resource="JOBS.FAMILY" action="EDIT">
                   <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditFamily(family)}>
-                    Edit
+                    {tCommon("actions.edit")}
                   </RowAction>
                   <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicateFamily(family)}>
-                    Duplicate
+                    {tCommon("actions.duplicate")}
                   </RowAction>
                   {family.archived ? (
                     <RowAction
                       icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                       onClick={() => onActivateFamily(family)}
                     >
-                      Unarchive
+                      {tShared("unarchive")}
                     </RowAction>
                   ) : (
                     <RowAction
                       icon={<Icon icon={Archive02Icon} size="sm" />}
                       onClick={() => onArchiveFamily(family)}
                     >
-                      Archive
+                      {tCommon("actions.archive")}
                     </RowAction>
                   )}
                 </PermissionGate>
@@ -350,7 +358,7 @@ const FamilySection: FC<FamilySectionProps> = ({
                     icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => onDeleteFamily(family)}
                   >
-                    Delete
+                    {tCommon("actions.delete")}
                   </RowActionDestructive>
                 </PermissionGate>
               </RowActionsMenu>
@@ -359,8 +367,8 @@ const FamilySection: FC<FamilySectionProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-secondary hover:bg-mist"
-                aria-label="Done editing family"
-                title="Done"
+                aria-label={t("family.doneEditing")}
+                title={tCommon("actions.done")}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleEditing();
@@ -374,8 +382,8 @@ const FamilySection: FC<FamilySectionProps> = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-secondary hover:bg-mist"
-              aria-label="Edit family"
-              title="Edit family"
+              aria-label={t("family.edit")}
+              title={t("family.edit")}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleEditing();
@@ -392,7 +400,7 @@ const FamilySection: FC<FamilySectionProps> = ({
       <div className="pb-2">
         {family.jobs.length === 0 && !editing && (
           <div className="mt-2 flex w-full items-center justify-center rounded-control border border-dashed border-field bg-subtle/60 px-3 py-2 text-body text-secondary">
-            No positions in this family yet
+            {t("family.noPositions")}
           </div>
         )}
 
@@ -420,14 +428,15 @@ const FamilySection: FC<FamilySectionProps> = ({
               onClick={() => onCreateJob(family)}
             >
               <Icon icon={Add01Icon} size="sm" />
-              Add job
+              {t("family.addJob")}
             </button>
           </PermissionGate>
         )}
       </div>
     </AccordionContent>
   </AccordionItem>
-);
+  );
+};
 
 // --- Job row ---------------------------------------------------------------
 
@@ -450,7 +459,11 @@ const JobRow: FC<JobRowProps> = ({
   onActivateJob,
   onAssignJob,
   onDeleteJob,
-}) => (
+}) => {
+  const t = useTranslations("structure.jobCatalog");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
+  return (
   <div className={notLast ? "border-b border-divider" : ""}>
     {/* Archived positions stay in the list, dimmed — hiding them would make the catalogue lie
         about what used to exist. */}
@@ -471,7 +484,7 @@ const JobRow: FC<JobRowProps> = ({
         {job.archived ? (
           <StatusBadge status="archived" className="font-normal" />
         ) : (
-          <span className="text-body text-tertiary">Active</span>
+          <span className="text-body text-tertiary">{t("job.active")}</span>
         )}
       </div>
 
@@ -485,13 +498,13 @@ const JobRow: FC<JobRowProps> = ({
               { resource: "JOBS.TITLE", action: "MANAGE" },
             ]}
           >
-            <RowActionsMenu label="Position actions">
+            <RowActionsMenu label={t("job.actions")}>
               <PermissionGate resource="JOBS.TITLE" action="EDIT">
                 <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={() => onEditJob(job)}>
-                  Edit
+                  {tCommon("actions.edit")}
                 </RowAction>
                 <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => onDuplicateJob(job)}>
-                  Duplicate
+                  {tCommon("actions.duplicate")}
                 </RowAction>
 
                 {/*
@@ -505,7 +518,7 @@ const JobRow: FC<JobRowProps> = ({
                 */}
                 {!job.archived && (
                   <RowAction icon={<Icon icon={UserGroupIcon} size="sm" />} onClick={() => onAssignJob(job)}>
-                    Assign people
+                    {t("job.assign")}
                   </RowAction>
                 )}
 
@@ -514,11 +527,11 @@ const JobRow: FC<JobRowProps> = ({
                     icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                     onClick={() => onActivateJob(job)}
                   >
-                    Unarchive
+                    {tShared("unarchive")}
                   </RowAction>
                 ) : (
                   <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => onArchiveJob(job)}>
-                    Archive
+                    {tCommon("actions.archive")}
                   </RowAction>
                 )}
               </PermissionGate>
@@ -528,7 +541,7 @@ const JobRow: FC<JobRowProps> = ({
                   icon={<Icon icon={Delete02Icon} size="sm" />}
                   onClick={() => onDeleteJob(job)}
                 >
-                  Delete
+                  {tCommon("actions.delete")}
                 </RowActionDestructive>
               </PermissionGate>
             </RowActionsMenu>
@@ -537,4 +550,5 @@ const JobRow: FC<JobRowProps> = ({
       </div>
     </div>
   </div>
-);
+  );
+};

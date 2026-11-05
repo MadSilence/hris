@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
@@ -30,7 +31,9 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
   onCancelAction,
   onConfirmAction,
 }) => {
-  const initial = sourceName ? `${sourceName} (copy)` : "";
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
+  const initial = sourceName ? t("policies.duplicate.copyName", { name: sourceName }) : "";
   const [name, setName] = useState(initial);
 
   useEffect(() => {
@@ -54,15 +57,15 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
  >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Duplicate policy</DialogTitle>
-          <DialogDescription>The copy starts as a draft with every setting of the original.</DialogDescription>
+          <DialogTitle>{t("policies.duplicate.title")}</DialogTitle>
+          <DialogDescription>{t("policies.duplicate.description")}</DialogDescription>
         </DialogHeader>
 
         <FormError message={errorMessage} />
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="duplicate-policy-name" required>Name</RequiredLabel>
+            <RequiredLabel htmlFor="duplicate-policy-name" required>{t("policies.duplicate.name")}</RequiredLabel>
             <Input
               id="duplicate-policy-name"
               autoFocus
@@ -74,13 +77,13 @@ export const DuplicateTimeOffPolicyModal: FC<DuplicateTimeOffPolicyModalProps> =
 
           <DialogFooter className="mt-8">
             <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !trimmed}
  >
-              Duplicate
+              {tCommon("actions.duplicate")}
             </Button>
           </DialogFooter>
         </form>

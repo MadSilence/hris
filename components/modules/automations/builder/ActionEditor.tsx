@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -10,20 +11,17 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useReferenceOptions } from "@/components/hooks/useReferenceOptions";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
-import {
-  ASSIGNABLE_LABELS,
-  RECIPIENT_LABELS,
-  type ActionSpec,
-  type AssignableType,
-  type AutomationCatalog,
-  type RecipientKind,
-  type RecipientSpec,
-  type TriggerSpec,
-  type WaitUntil,
-  type OnTimeout,
-  ON_TIMEOUT_LABELS,
-  actionSentence,
+import type {
+  ActionSpec,
+  AssignableType,
+  AutomationCatalog,
+  RecipientKind,
+  RecipientSpec,
+  TriggerSpec,
+  WaitUntil,
+  OnTimeout,
 } from "@/models/automations";
+import { actionSentence, type AutomationsT } from "@/components/modules/automations/shared/vocabulary";
 import type { FieldDTO } from "@/models/user/fields";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { emptySegment } from "@/models/segment/Segment";
@@ -69,6 +67,8 @@ export function OffsetField({
   onChange: (days: number | null) => void;
   allowEmpty?: boolean;
 }) {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const empty = value == null;
   const days = value ?? 0;
   const side: Side | "NONE" = empty && allowEmpty ? "NONE" : sideOf(days);
@@ -86,7 +86,7 @@ export function OffsetField({
             type="number"
             min={0}
             className="w-20"
-            aria-label={`${label} (days)`}
+            aria-label={t("actionEditor.offsetDays", { label })}
             value={String(Math.abs(days))}
             onChange={(e) => onChange(side === "BEFORE" ? -toInt(e.target.value) : toInt(e.target.value))}
           />
@@ -94,10 +94,10 @@ export function OffsetField({
         <Select value={side} onValueChange={(v) => setSide(v as Side | "NONE")}>
           <SelectTrigger className="w-48" aria-label={label}><SelectValue /></SelectTrigger>
           <SelectContent>
-            {allowEmpty && <SelectItem value="NONE">None</SelectItem>}
-            <SelectItem value="BEFORE">Days before</SelectItem>
-            <SelectItem value="ON">On the day</SelectItem>
-            <SelectItem value="AFTER">Days after</SelectItem>
+            {allowEmpty && <SelectItem value="NONE">{tCommon("values.none")}</SelectItem>}
+            <SelectItem value="BEFORE">{t("actionEditor.offset.BEFORE")}</SelectItem>
+            <SelectItem value="ON">{t("actionEditor.offset.ON")}</SelectItem>
+            <SelectItem value="AFTER">{t("actionEditor.offset.AFTER")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -115,13 +115,14 @@ function NamedPersonPicker({ userId, onChange }: { userId: string | null | undef
 }
 
 function RoleSelect({ roleId, onChange }: { roleId: string | null | undefined; onChange: (id: string | null) => void }) {
+  const tCommon = useTranslations("common");
   const { options, isLoading } = useReferenceOptions("roles");
   return (
     <SearchableSelect
       options={options.map((o) => ({ value: o.id, label: o.label }))}
       value={roleId ?? null}
       onChange={onChange}
-      placeholder={isLoading ? "Loading…" : "Select"}
+      placeholder={isLoading ? tCommon("states.loading") : tCommon("actions.select")}
       className="w-56"
     />
   );
@@ -138,12 +139,13 @@ function RecipientRow({
   onChange: (next: RecipientSpec) => void;
   onRemove?: () => void;
 }) {
+  const t = useTranslations("automations");
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select value={recipient.kind} onValueChange={(v) => onChange({ kind: v as RecipientKind })}>
-        <SelectTrigger className="w-60" aria-label="Recipient"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-60" aria-label={t("actionEditor.recipient")}><SelectValue /></SelectTrigger>
         <SelectContent>
-          {kinds.map((k) => <SelectItem key={k} value={k}>{RECIPIENT_LABELS[k]}</SelectItem>)}
+          {kinds.map((k) => <SelectItem key={k} value={k}>{t(`recipient.label.${k}`)}</SelectItem>)}
         </SelectContent>
       </Select>
       {recipient.kind === "ROLE" && (
@@ -155,7 +157,7 @@ function RecipientRow({
         </div>
       )}
       {onRemove && (
-        <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove recipient" onClick={onRemove}>
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("actionEditor.removeRecipient")} onClick={onRemove}>
           <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       )}
@@ -172,8 +174,9 @@ function RecipientsField({
   kinds: RecipientKind[];
   onChange: (next: RecipientSpec[]) => void;
 }) {
+  const t = useTranslations("automations");
   return (
-    <Field label="To" required>
+    <Field label={t("actionEditor.to")} required>
       <div className="space-y-2">
         {recipients.map((r, i) => (
           <RecipientRow
@@ -192,7 +195,7 @@ function RecipientsField({
           onClick={() => onChange([...recipients, { kind: kinds[0] ?? "PERSON" }])}
         >
           <Icon icon={Add01Icon} size="sm" />
-          Add recipient
+          {t("actionEditor.addRecipient")}
         </Button>
       </div>
     </Field>
@@ -210,6 +213,7 @@ function TargetPicker({
   onChange: (id: string | null) => void;
   label: string;
 }) {
+  const tCommon = useTranslations("common");
   const { options, isLoading } = useAssignableOptions(type);
   return (
     <Field label={label} required>
@@ -218,7 +222,7 @@ function TargetPicker({
         value={value ?? null}
         onChange={onChange}
         disabled={!type}
-        placeholder={isLoading ? "Loading…" : "Select"}
+        placeholder={isLoading ? tCommon("states.loading") : tCommon("actions.select")}
         className="w-full sm:w-96"
       />
     </Field>
@@ -226,30 +230,32 @@ function TargetPicker({
 }
 
 /** The fields a wait can watch (C2): the person's dates and links; a company field comes from the field list. */
-const WAITABLE_FIELDS: { value: string; label: string }[] = [
-  { value: "sys:hire_date", label: "Hire date" },
-  { value: "sys:probation_end", label: "Probation end" },
-  { value: "sys:termination_date", label: "Last working day" },
-  { value: "sys:manager", label: "Manager" },
-  { value: "sys:job", label: "Position" },
-  { value: "sys:office", label: "Office" },
-  { value: "sys:legal_entity", label: "Legal entity" },
-  { value: "sys:department", label: "Department" },
+const waitableFields = (t: AutomationsT): { value: string; label: string }[] => [
+  { value: "sys:hire_date", label: t("changeableField.hireDate") },
+  { value: "sys:probation_end", label: t("changeableField.probationEnd") },
+  { value: "sys:termination_date", label: t("dateField.LAST_WORKING_DAY") },
+  { value: "sys:manager", label: t("changeableField.manager") },
+  { value: "sys:job", label: t("changeableField.job") },
+  { value: "sys:office", label: t("changeableField.office") },
+  { value: "sys:legal_entity", label: t("changeableField.legalEntity") },
+  { value: "sys:department", label: t("changeableField.department") },
 ];
+const ON_TIMEOUTS: OnTimeout[] = ["CONTINUE", "STOP", "STOP_AND_TELL"];
 
 /** C2: a wait and an approval always have a longest wait, and say what happens then. */
 function HoldingLimits({ action, prefix, set }: { action: ActionSpec; prefix: string; set: (p: Partial<ActionSpec>) => void }) {
+  const t = useTranslations("automations");
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <Field label="At most (days)" htmlFor={`${prefix}-max`} className="w-32" required>
+      <Field label={t("actionEditor.atMost")} htmlFor={`${prefix}-max`} className="w-32" required>
         <Input id={`${prefix}-max`} type="number" min={1} max={365} value={String(action.maxDays ?? "")}
           onChange={(e) => set({ maxDays: e.target.value === "" ? null : toInt(e.target.value) })} />
       </Field>
-      <Field label="Then" className="w-64">
+      <Field label={t("actionEditor.then")} className="w-64">
         <Select value={action.onTimeout ?? "STOP_AND_TELL"} onValueChange={(v) => set({ onTimeout: v as OnTimeout })}>
-          <SelectTrigger aria-label="Then"><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label={t("actionEditor.then")}><SelectValue /></SelectTrigger>
           <SelectContent>
-            {(Object.keys(ON_TIMEOUT_LABELS) as OnTimeout[]).map((k) => <SelectItem key={k} value={k}>{ON_TIMEOUT_LABELS[k]}</SelectItem>)}
+            {ON_TIMEOUTS.map((k) => <SelectItem key={k} value={k}>{t(`onTimeout.${k}`)}</SelectItem>)}
           </SelectContent>
         </Select>
       </Field>
@@ -264,12 +270,13 @@ function OnlyIf({ action, fields, isLoadingFields, set }: {
   isLoadingFields: boolean;
   set: (p: Partial<ActionSpec>) => void;
 }) {
+  const t = useTranslations("automations");
   const on = action.condition != null;
   return (
     <div className="space-y-2 border-t border-divider pt-3">
       <label className="flex cursor-pointer items-center gap-2 text-body text-primary">
         <input type="checkbox" checked={on} onChange={(e) => set({ condition: e.target.checked ? emptySegment() : null })} />
-        Only if…
+        {t("actionEditor.onlyIf")}
       </label>
       {on && action.condition && (
         <>
@@ -279,7 +286,7 @@ function OnlyIf({ action, fields, isLoadingFields, set }: {
             value={action.condition.filters}
             onChange={(filters) => set({ condition: { ...action.condition!, filters } })}
           />
-          <p className="m-0 text-hint text-tertiary">Checked on the day this step runs. When it does not hold, this step is skipped and the rest goes on.</p>
+          <p className="m-0 text-hint text-tertiary">{t("actionEditor.onlyIfHint")}</p>
         </>
       )}
     </div>
@@ -291,6 +298,8 @@ function OnlyIf({ action, fields, isLoadingFields, set }: {
  * direction: the object stays in view). Each type reads only its own fields.
  */
 export function ActionEditor({ action, index, catalog, trigger, actions = [], fields, isLoadingFields = false, onChange }: Props) {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const set = (patch: Partial<ActionSpec>) => onChange({ ...action, ...patch });
   const event = trigger?.type === "EVENT" ? catalog.events?.find((e) => e.value === trigger.event) : undefined;
   const kinds: RecipientKind[] = [...(catalog.recipientKinds[action.type] ?? ["PERSON", "MANAGER", "USER"]),
@@ -304,7 +313,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
     <div className="space-y-4">
       <OffsetField
         id={`${prefix}-offset`}
-        label="When"
+        label={t("clause.when")}
         value={action.offsetDays ?? 0}
         onChange={(days) => set({ offsetDays: days ?? 0 })}
       />
@@ -321,7 +330,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
         <>
           <PlaceholderTextField
             id={`${prefix}-subject`}
-            label="Subject"
+            label={t("actionEditor.subject")}
             required
             value={action.subject ?? ""}
             onChange={(subject) => set({ subject })}
@@ -329,7 +338,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           />
           <PlaceholderTextField
             id={`${prefix}-body`}
-            label="Message"
+            label={t("actionEditor.message")}
             required
             multiline
             value={action.body ?? ""}
@@ -342,7 +351,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
       {action.type === "NOTIFY" && (
         <PlaceholderTextField
           id={`${prefix}-text`}
-          label="Message"
+          label={t("actionEditor.message")}
           required
           multiline
           value={action.text ?? ""}
@@ -353,7 +362,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
 
       {action.type === "CREATE_TASK" && (
         <>
-          <Field label="Assignee" required>
+          <Field label={t("actionEditor.assignee")} required>
             <RecipientRow
               recipient={action.assignee ?? { kind: kinds[0] ?? "MANAGER" }}
               kinds={kinds}
@@ -362,7 +371,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           </Field>
           <PlaceholderTextField
             id={`${prefix}-title`}
-            label="Title"
+            label={t("actionEditor.title")}
             required
             value={action.title ?? ""}
             onChange={(title) => set({ title })}
@@ -370,7 +379,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           />
           <PlaceholderTextField
             id={`${prefix}-description`}
-            label="Description"
+            label={tCommon("fields.description")}
             multiline
             value={action.description ?? ""}
             onChange={(description) => set({ description })}
@@ -378,7 +387,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           />
           <OffsetField
             id={`${prefix}-due`}
-            label="Due"
+            label={t("actionEditor.due")}
             allowEmpty
             value={action.dueOffsetDays}
             onChange={(dueOffsetDays) => set({ dueOffsetDays })}
@@ -388,14 +397,14 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
 
       {(action.type === "ASSIGN" || action.type === "UNASSIGN") && (
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="What" required className="w-56">
+          <Field label={t("actionEditor.what")} required className="w-56">
             <Select
               value={action.assignableType ?? ""}
               onValueChange={(v) => set({ assignableType: v as AssignableType, assignableId: null })}
             >
-              <SelectTrigger aria-label="What"><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectTrigger aria-label={t("actionEditor.what")}><SelectValue placeholder={tCommon("actions.select")} /></SelectTrigger>
               <SelectContent>
-                {assignTypes.map((t) => <SelectItem key={t} value={t}>{ASSIGNABLE_LABELS[t]}</SelectItem>)}
+                {assignTypes.map((type) => <SelectItem key={type} value={type}>{t(`assignable.${type}`)}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
@@ -404,7 +413,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
               type={action.assignableType}
               value={action.assignableId}
               onChange={(assignableId) => set({ assignableId })}
-              label={action.assignableType ? ASSIGNABLE_LABELS[action.assignableType] : "Target"}
+              label={action.assignableType ? t(`assignable.${action.assignableType}`) : t("actionEditor.target")}
             />
           </div>
         </div>
@@ -415,7 +424,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           type="TIME_OFF_POLICY"
           value={action.policyId}
           onChange={(policyId) => set({ policyId })}
-          label="Policy"
+          label={t("actionEditor.policy")}
         />
       )}
 
@@ -424,29 +433,31 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
       {action.type === "WAIT_UNTIL" && (
         <>
           <div className="flex flex-wrap items-end gap-3">
-            <Field label="Until" required className="w-56">
+            <Field label={t("actionEditor.until")} required className="w-56">
               <Select value={action.until ?? "TASK_DONE"} onValueChange={(v) => set({ until: v as WaitUntil, taskStep: null, field: null })}>
-                <SelectTrigger aria-label="Until"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label={t("actionEditor.until")}><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="TASK_DONE">A task of this rule is done</SelectItem>
-                  <SelectItem value="FIELD_FILLED">A field is filled</SelectItem>
+                  <SelectItem value="TASK_DONE">{t("actionEditor.untilTask")}</SelectItem>
+                  <SelectItem value="FIELD_FILLED">{t("actionEditor.untilField")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
             {(action.until ?? "TASK_DONE") === "TASK_DONE" ? (
-              <Field label="Task" required className="min-w-64 flex-1">
+              <Field label={t("actionEditor.task")} required className="min-w-64 flex-1">
                 <Select value={action.taskStep == null ? "" : String(action.taskStep)} onValueChange={(v) => set({ taskStep: Number(v) })}>
-                  <SelectTrigger aria-label="Task"><SelectValue placeholder={taskSteps.length ? "Select" : "Add a task before this wait"} /></SelectTrigger>
+                  <SelectTrigger aria-label={t("actionEditor.task")}><SelectValue placeholder={taskSteps.length ? tCommon("actions.select") : t("actionEditor.addTaskFirst")} /></SelectTrigger>
                   <SelectContent>
-                    {taskSteps.map(({ a, i }) => <SelectItem key={i} value={String(i)}>{`${i + 1}. ${actionSentence(a)}`}</SelectItem>)}
+                    {taskSteps.map(({ a, i }) => (
+                      <SelectItem key={i} value={String(i)}>{t("actionEditor.taskOption", { step: i + 1, sentence: actionSentence(t, a) })}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
             ) : (
-              <Field label="Field" required className="min-w-64 flex-1">
+              <Field label={t("when.field")} required className="min-w-64 flex-1">
                 <SearchableSelect
-                  aria-label="Field"
-                  options={WAITABLE_FIELDS.concat((fields ?? []).filter((f) => f.key?.startsWith("attr:"))
+                  aria-label={t("when.field")}
+                  options={waitableFields(t).concat((fields ?? []).filter((f) => f.key?.startsWith("attr:"))
                     .map((f) => ({ value: f.key, label: f.label ?? f.key })))}
                   value={action.field ?? null}
                   onChange={(v) => set({ field: v })}
@@ -460,7 +471,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
 
       {action.type === "REQUEST_APPROVAL" && (
         <>
-          <Field label="Who approves" required>
+          <Field label={t("actionEditor.whoApproves")} required>
             <RecipientRow
               recipient={action.assignee ?? { kind: "MANAGER" }}
               kinds={kinds}
@@ -469,7 +480,7 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           </Field>
           <PlaceholderTextField
             id={`${prefix}-approval-title`}
-            label="What is asked"
+            label={t("actionEditor.whatAsked")}
             required
             value={action.title ?? ""}
             onChange={(title) => set({ title })}
@@ -477,15 +488,13 @@ export function ActionEditor({ action, index, catalog, trigger, actions = [], fi
           />
           <PlaceholderTextField
             id={`${prefix}-approval-description`}
-            label="Description"
+            label={tCommon("fields.description")}
             multiline
             value={action.description ?? ""}
             onChange={(description) => set({ description })}
             placeholders={placeholders}
           />
-          <p className="m-0 text-hint text-tertiary">
-            The approver gets a task with Approve and Decline. The steps after this one wait for the answer; a decline stops them.
-          </p>
+          <p className="m-0 text-hint text-tertiary">{t("actionEditor.approvalHint")}</p>
           <HoldingLimits action={action} prefix={prefix} set={set} />
         </>
       )}

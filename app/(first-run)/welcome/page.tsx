@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { WelcomeContainer } from "@/components/modules/firstRun/components/WelcomeContainer";
 import { hrisFirstRunService } from "@/api/modules/firstRun/services";
 
-export const metadata = { title: "Welcome" };
+export async function generateMetadata() {
+  const t = await getTranslations("firstRun");
+  return { title: t("welcome.metaTitle") };
+}
 
 type Props = { searchParams: Promise<{ again?: string }> };
 

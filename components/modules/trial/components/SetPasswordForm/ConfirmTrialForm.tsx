@@ -1,6 +1,7 @@
 "use client";
 
-import React, { FormEvent, useCallback } from "react";
+import React, { FormEvent, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Input } from "@/components/desact/input";
@@ -23,43 +24,39 @@ export interface SetPasswordFormProps {
   signInAddress?: SignInAddress;
 }
 
-export enum PasswordMessages {
-  Required = "Please enter a password.",
-  TooShort = "Use at least 8 characters.",
-  Weak = "Use upper & lower case letters, a number and a symbol.",
-  ConfirmRequired = "Please confirm your password.",
-  Mismatch = "Passwords don’t match.",
-}
+/** The `auth` translator, for the schemas built outside a component. */
+export type AuthTranslator = ReturnType<typeof useTranslations<"auth">>;
 
 export function isStrongPassword(value: string) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
 /** The password rule every set-a-password screen uses — signup and invitation alike. */
-export const passwordSchema = yup.object({
+export const buildPasswordSchema = (t: AuthTranslator) => yup.object({
   password: yup
     .string()
-    .required(PasswordMessages.Required)
-    .min(8, PasswordMessages.TooShort)
-    .test("strong-password", PasswordMessages.Weak, (value) =>
+    .required(t("password.validation.required"))
+    .min(8, t("password.validation.tooShort"))
+    .test("strong-password", t("password.validation.weak"), (value) =>
       isStrongPassword(value ?? ""),
     )
     .nonNullable(),
 
   confirmPassword: yup
     .string()
-    .required(PasswordMessages.ConfirmRequired)
-    .oneOf([yup.ref("password")], PasswordMessages.Mismatch)
+    .required(t("password.validation.confirmRequired"))
+    .oneOf([yup.ref("password")], t("password.validation.mismatch"))
     .nonNullable(),
 });
 
 function ConfirmHeader() {
+  const t = useTranslations("auth");
   return (
     <div className="space-y-3 text-center">
-      <h1 className="text-greeting">Set your password</h1>
+      <h1 className="text-greeting">{t("trial.setPassword.title")}</h1>
 
       <p className="mx-auto max-w-xl text-body text-tertiary">
-        Create a strong password for your noddo account.
+        {t("trial.setPassword.description")}
       </p>
     </div>
   );
@@ -72,29 +69,32 @@ export type SignInAddress = {
 };
 
 function ConfirmSuccessBlock({ signInAddress }: { signInAddress?: SignInAddress }) {
+  const t = useTranslations("auth");
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 text-center">
-      <h1 className="text-greeting">Password set</h1>
+      <h1 className="text-greeting">{t("trial.setPassword.successTitle")}</h1>
 
       <p className="text-body text-tertiary">
-        Your password has been created. You can now sign in and continue setting
-        up your company.
+        {t("trial.setPassword.successBody")}
       </p>
 
       {signInAddress ? (
         <p className="text-body text-tertiary">
-          Your company signs in at{" "}
-          <strong className="font-medium text-primary">{signInAddress.label}</strong>
-          {" "}— keep that address.
+          {t.rich("trial.setPassword.signsInAt", {
+            address: signInAddress.label,
+            b: (chunks) => <strong className="font-medium text-primary">{chunks}</strong>,
+          })}
         </p>
       ) : null}
 
       <p className="text-body text-tertiary">
-        Head over to your company&apos;s{" "}
-        <a href={signInAddress?.href ?? "/login"} className="text-accent-text underline-offset-4 hover:underline">
-          login page
-        </a>{" "}
-        to get started.
+        {t.rich("trial.setPassword.goToLogin", {
+          link: (chunks) => (
+            <a href={signInAddress?.href ?? "/login"} className="text-accent-text underline-offset-4 hover:underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     </div>
   );
@@ -107,6 +107,9 @@ export default function ConfirmTrialForm({
   isSuccess,
   signInAddress,
 }: SetPasswordFormProps) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const passwordSchema = useMemo(() => buildPasswordSchema(t), [t]);
   const handleFormSubmission = useCallback(
     async (values: PasswordValues) => {
       await onSubmitAction(values);
@@ -150,9 +153,9 @@ export default function ConfirmTrialForm({
       <div className="w-full space-y-8">
         <ConfirmHeader/>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        <form method="post" onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="confirm-password" required>Password</RequiredLabel>
+            <RequiredLabel htmlFor="confirm-password" required>{t("login.passwordLabel")}</RequiredLabel>
 
             <Input
               id="confirm-password"
@@ -172,7 +175,7 @@ export default function ConfirmTrialForm({
           </div>
 
           <div className="space-y-2">
-            <RequiredLabel htmlFor="confirm-password-repeat" required>Confirm password</RequiredLabel>
+            <RequiredLabel htmlFor="confirm-password-repeat" required>{t("password.confirmLabel")}</RequiredLabel>
 
             <Input
               id="confirm-password-repeat"
@@ -192,14 +195,13 @@ export default function ConfirmTrialForm({
           </div>
 
           <p className="text-body text-tertiary">
-            Use at least 8 characters with upper &amp; lower case letters, a
-            number, and a symbol.
+            {t("password.rule")}
           </p>
 
           <FormError message={apiError} />
 
           <Button size="lg" type="submit" disabled={busy} className="w-full">
-            {busy ? "Saving…" : "Set password"}
+            {busy ? tCommon("actions.saving") : t("password.submit")}
           </Button>
         </form>
       </div>

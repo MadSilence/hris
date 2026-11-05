@@ -1,3 +1,7 @@
+import { useLocale } from "next-intl";
+
+import { languageOf } from "@/i18n/locales";
+
 /**
  * Перевод между `Date` и строкой `yyyy-MM-dd` — тем видом, в котором дата ходит по API.
  *
@@ -35,9 +39,15 @@ type DisplayPreferences = {
   /** IANA zone, or null to use the browser's — which is what it always was. */
   timeZone: string | null;
   dateFormat: DisplayDateFormat;
+  /**
+   * The language the application speaks (`i18n/locales`), set by `LocaleBridge`; null until it is, which is
+   * the browser's own locale — what every date did before there was a language. It decides the *words* of a
+   * date (a month's name), never its order: the order is `dateFormat`'s (I18N_DESIGN.md § 2, rule 6).
+   */
+  language: string | null;
 };
 
-const DEFAULT_PREFERENCES: DisplayPreferences = { timeZone: null, dateFormat: "SYSTEM" };
+const DEFAULT_PREFERENCES: DisplayPreferences = { timeZone: null, dateFormat: "SYSTEM", language: null };
 
 let preferences: DisplayPreferences = DEFAULT_PREFERENCES;
 
@@ -66,6 +76,58 @@ const LOCALE_FOR: Record<Exclude<DisplayDateFormat, "SYSTEM">, string> = {
 };
 
 /**
+ * The locale "the system's format" means once the application has a language: the browser's own when it
+ * speaks the same language (an `en-GB` browser keeps 12/03/2026 in English), otherwise the application's —
+ * a Russian page in an `en-US` browser writes Russian month names. Null before the language is known.
+ */
+/**
+ * The application's language: what `LocaleBridge` set, or — before it has run — the page's own `<html lang>`,
+ * which the server wrote before any script. Hydration does not render the tree in document order, so a
+ * component can format a date before the bridge has; reading the attribute makes the order irrelevant
+ * (found on the i18n walk of 2026-11-05: "Выходит на работу Nov 12, 2026" on a Russian profile).
+ */
+const appLanguage = (explicit?: string): string | null => {
+  if (explicit) return explicit.toLowerCase().split("-")[0];
+  if (preferences.language) return preferences.language;
+  if (typeof document === "undefined") return null;
+  const lang = document.documentElement.lang?.toLowerCase().split("-")[0];
+  return lang || null;
+};
+
+const systemLocale = (explicit?: string): string | undefined => {
+  const language = appLanguage(explicit);
+  if (!language) return undefined;
+  const browser = typeof navigator === "undefined" ? [] : navigator.languages ?? [navigator.language];
+  return browser.find((tag) => tag?.toLowerCase().split("-")[0] === language) ?? language;
+};
+
+/**
+ * The locale numbers, money and names are written in — {@link systemLocale}, exported for the formatters that
+ * live outside this file (`Intl.NumberFormat`, `Intl.DisplayNames`, `toLocaleString`). No component may name a
+ * locale of its own (DECISIONS.md § "Dates are formatted in one place"); it asks here. Undefined before the
+ * language is known, which is the browser's own — what every one of them did before.
+ *
+ * <p>Pass `language` wherever the caller knows it — always during render (`useDisplayLocale()`), because on the
+ * server neither `LocaleBridge` nor `<html lang>` exists and the fallback is Node's own English.
+ */
+export const displayLocale = (language?: string): string | undefined => systemLocale(language);
+
+/** The locale a chosen format's month names are written in: English's regional twin, or the language itself. */
+const wordsLocale = (chosen: Exclude<DisplayDateFormat, "SYSTEM">, explicit?: string): string => {
+  const language = appLanguage(explicit);
+  return language && language !== "en" ? language : LOCALE_FOR[chosen];
+};
+
+export type DisplayDateOptions = {
+  hideYear?: boolean;
+  locale?: string;
+  style?: "numeric" | "medium";
+  language?: string;
+};
+
+export type DateFormatter = (value: string | Date | null | undefined, options?: DisplayDateOptions) => string;
+
+/**
  * A date as a person reads it.
  *
  * **The one place a display format is chosen.** No component may name a locale of its own: a locale
@@ -83,11 +145,14 @@ const LOCALE_FOR: Record<Exclude<DisplayDateFormat, "SYSTEM">, string> = {
  * `hideYear` serves the attribute option of the same name (birthdays, anniversaries). `style` keeps
  * the two shapes the product already uses — `numeric` (12.03.2026) in dense tables and profile rows,
  * `medium` (12 Mar 2026) where a date is read rather than scanned.
+ *
+ * `language` is the application's language (`"ru"`). **Pass it during render** — through
+ * {@link useDateFormatter} in a client component, `languageOf(await getLocale())` in a server one: on the server
+ * there is no `LocaleBridge` and no `<html lang>` to fall back on, and a module variable there would be shared
+ * by every request. Without it the language comes from those two, which is right only for code that runs in
+ * the browser outside React (an event handler, an export built on click).
  */
-export const formatDisplayDate = (
-  value: string | Date | null | undefined,
-  options?: { hideYear?: boolean; locale?: string; style?: "numeric" | "medium" }
-): string => {
+export const formatDisplayDate: DateFormatter = (value, options) => {
   if (value == null || value === "") return "";
 
   // A bare `yyyy-MM-dd` is a calendar date, not an instant: parsing it through `new Date` reads it
@@ -103,7 +168,7 @@ export const formatDisplayDate = (
   // An explicit locale from the caller still wins: it is the escape hatch for a screen that has a
   // reason, and there is exactly one such caller today.
   if (options?.locale || chosen === "SYSTEM") {
-    return new Intl.DateTimeFormat(options?.locale, {
+    return new Intl.DateTimeFormat(options?.locale ?? systemLocale(options?.language), {
       day: "2-digit",
       month: options?.style === "medium" ? "short" : "2-digit",
       ...(options?.hideYear ? {} : { year: "numeric" }),
@@ -112,7 +177,7 @@ export const formatDisplayDate = (
   }
 
   if (options?.style === "medium") {
-    return new Intl.DateTimeFormat(LOCALE_FOR[chosen], {
+    return new Intl.DateTimeFormat(wordsLocale(chosen, options?.language), {
       day: "2-digit",
       month: "short",
       ...(options?.hideYear ? {} : { year: "numeric" }),
@@ -123,6 +188,33 @@ export const formatDisplayDate = (
   const parts = numericParts(date, zone);
   return numericPattern(chosen, parts, options?.hideYear === true);
 };
+
+/** One bound formatter per language, so the hook hands back the same function on every render. */
+const boundFormatters = new Map<string, DateFormatter>();
+
+/** {@link formatDisplayDate} bound to a language — for a helper that is handed one instead of a hook. */
+export const dateFormatterFor = (language: string): DateFormatter => {
+  let bound = boundFormatters.get(language);
+  if (!bound) {
+    bound = (value, options) => formatDisplayDate(value, { ...options, language: options?.language ?? language });
+    boundFormatters.set(language, bound);
+  }
+  return bound;
+};
+
+/**
+ * {@link formatDisplayDate} in the page's language — what every component formats a date with during render.
+ * The language comes from `next-intl`'s `useLocale`, which the server knows per request, so the HTML the
+ * server writes is already in the reader's language (a Russian page no longer says "Nov 12, 2026"). The
+ * function is stable for a language, safe in a dependency list.
+ */
+export const useDateFormatter = (): DateFormatter => dateFormatterFor(languageOf(useLocale()));
+
+/** The page's language as a code, for {@link displayLocale} and for helpers that take one. */
+export const useDisplayLanguage = (): string => languageOf(useLocale());
+
+/** {@link displayLocale} in the page's language — for `Intl.NumberFormat` and friends during render. */
+export const useDisplayLocale = (): string | undefined => displayLocale(useDisplayLanguage());
 
 /** Day, month and year as the reader's zone sees them — the pieces the numeric styles assemble. */
 const numericParts = (date: Date, zone: string | undefined): { day: string; month: string; year: string } => {

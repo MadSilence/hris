@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ActionStatus } from "@/components/models/ActionStatus";
@@ -24,6 +25,8 @@ export type MovePersonInput = {
  * person; only the drop onto Unassigned needs an explicit unassign.
  */
 export const useMovePersonToDepartment = () => {
+  const t = useTranslations("structure.departments");
+  const tAccess = useTranslations("access");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -34,12 +37,12 @@ export const useMovePersonToDepartment = () => {
           targetPayload: { userIds: [userId] },
         });
         if (result.status === ActionStatus.ERROR) {
-          throw new Error(result.errorMessage ?? "Failed to move the person");
+          throw new Error(result.errorMessage ?? t("errors.movePerson"));
         }
 
         // The engine answers 200 while quietly assigning nobody — an archived person, someone
         // already there. Without this the dialog closed on "success" and the chip never moved.
-        const skipped = assignmentSkippedEverything(result.data);
+        const skipped = assignmentSkippedEverything(result.data, tAccess);
         if (skipped) throw new Error(skipped);
 
         return;
@@ -48,7 +51,7 @@ export const useMovePersonToDepartment = () => {
       if (!sourceDepartmentId) return;
       const result = await unassignUserAction(BASE_PATH, sourceDepartmentId, userId);
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage ?? "Failed to remove the person");
+        throw new Error(result.errorMessage ?? t("errors.removePerson"));
       }
     },
     onSuccess: () => {

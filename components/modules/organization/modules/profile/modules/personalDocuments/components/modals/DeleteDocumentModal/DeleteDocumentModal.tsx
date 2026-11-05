@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -31,6 +32,9 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
   onRequestCloseAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+
   return (
     <AlertDialog
       open={isOpen}
@@ -40,18 +44,20 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete document</AlertDialogTitle>
+          <AlertDialogTitle>{t("documents.deleteDocument.title")}</AlertDialogTitle>
 
           <AlertDialogDescription>
-            <strong>{documentName ?? "Untitled document"}</strong> will be moved to the trash, where
-            it can be restored until the retention period ends.
+            {t.rich("documents.deleteDocument.description", {
+              name: documentName ?? t("documents.deleteDocument.untitled"),
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <FormError message={errorMessage} />
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
             // AlertDialogAction closes the dialog on click by default, which threw away the
@@ -62,7 +68,7 @@ export const DeleteDocumentModal: FC<DeleteDocumentModalProps> = ({
             }}
             destructive
           >
-            Delete document
+            {t("documents.deleteDocument.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

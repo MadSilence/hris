@@ -1,8 +1,9 @@
 "use client";
 
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import { useCanManagePublicHolidayCalendars } from "../../hooks/useCanManagePublicHolidayCalendars";
 import { FC, useCallback, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon, CalendarAdd01Icon, Cancel01Icon, Download01Icon, PencilEdit02Icon, RssIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -17,7 +18,6 @@ import {
 } from "@/components/desact/table";
 import SettingsPageHeader from "@/components/layout/SettingsPageHeader/SettingsPageHeader";
 import { CountryFlag } from "@/components/ui/CountryFlag";
-import { isoToDate } from "@/components/ui/DatePicker";
 
 import {
   PublicHolidayCalendarSourceType,
@@ -85,9 +85,8 @@ const calendarStatus = (status: PublicHolidayCalendarStatus): EntityStatus => {
 };
 
 /** Matches how the editor's date fields read a day back to you. */
-function formatHolidayDate(iso: string): string {
-  const date = isoToDate(iso);
-  return Number.isNaN(date.getTime()) ? iso : format(date, "MMM d, yyyy");
+function formatHolidayDate(iso: string, formatDisplayDate: DateFormatter): string {
+  return formatDisplayDate(iso, { style: "medium" });
 }
 
 function holidaysToDraft(holidays: PublicHoliday[]): DraftHoliday[] {
@@ -109,6 +108,9 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   onYearChange,
   isHolidaysLoading,
 }) => {
+  const t = useTranslations("timeOff");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const invalidate = useInvalidatePublicHolidaysQuery();
   const canManage = useCanManagePublicHolidayCalendars();
 
@@ -177,15 +179,14 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
   const handleRevert = async (override: PublicHolidayOverride) => {
     setRevertMessage("");
     const name =
-      holidays.find((h) => h.id === override.holidayId)?.name ?? override.providerName ?? "The day";
+      holidays.find((h) => h.id === override.holidayId)?.name ?? override.providerName ?? t("publicHolidays.details.theDay");
     try {
       const result = await revertOverride.mutateAsync({ overrideId: override.id });
       const repriced = result?.recalculatedRequests ?? 0;
       setRevertMessage(
-        `${name} is the provider's version again.` +
-          (repriced > 0
-            ? ` ${repriced} leave ${repriced === 1 ? "request was" : "requests were"} recalculated.`
-            : ""),
+        repriced > 0
+          ? t("publicHolidays.details.revertedRepriced", { name, count: repriced })
+          : t("publicHolidays.details.reverted", { name }),
       );
     } catch (error) {
       showError(error);
@@ -208,11 +209,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
       setFillMessage(
         result.applied
-          ? `Loaded ${result.daysWritten} ${result.daysWritten === 1 ? "day" : "days"} for ${year}.`
-          : `${year} already has days — nothing was changed.`,
+          ? t("publicHolidays.details.loaded", { count: result.daysWritten, year: String(year) })
+          : t("publicHolidays.details.alreadyHasDays", { year: String(year) }),
       );
     } catch {
-      setFillMessage("Could not load that year. Please try again.");
+      setFillMessage(t("publicHolidays.details.loadFailed"));
     }
   };
 
@@ -239,14 +240,14 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     let valid = true;
 
     if (!editedName.trim()) {
-      setNameError("Name is required.");
+      setNameError(t("publicHolidays.days.nameRequired"));
       valid = false;
     } else {
       setNameError("");
     }
 
     if (editedHolidays.length === 0) {
-      setGeneralError("Please add at least one holiday day.");
+      setGeneralError(t("publicHolidays.newCalendar.atLeastOne"));
       valid = false;
     } else {
       setGeneralError("");
@@ -255,24 +256,24 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     const rowErrors: DraftHolidayErrors = {};
     // Covers duplicate start dates too, and unlike a date-by-date check it also catches a span
     // swallowing a day that starts elsewhere.
-    const overlaps = findDraftOverlaps(editedHolidays);
+    const overlaps = findDraftOverlaps(editedHolidays, t);
 
     for (const h of editedHolidays) {
       const rowErr: { name?: string; holidayDate?: string; endDate?: string } = {};
 
       if (!h.name.trim()) {
-        rowErr.name = "Name is required.";
+        rowErr.name = t("publicHolidays.days.nameRequired");
         valid = false;
       }
       if (!h.holidayDate) {
-        rowErr.holidayDate = "Date is required.";
+        rowErr.holidayDate = t("publicHolidays.days.dateRequired");
         valid = false;
       } else if (overlaps[h.localId]) {
         rowErr.holidayDate = overlaps[h.localId];
         valid = false;
       }
       if (h.endDate && h.holidayDate && h.endDate < h.holidayDate) {
-        rowErr.endDate = "End must be on or after the start.";
+        rowErr.endDate = t("publicHolidays.days.endBeforeStart");
         valid = false;
       }
       if (rowErr.name || rowErr.holidayDate || rowErr.endDate) rowErrors[h.localId] = rowErr;
@@ -280,7 +281,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
     setHolidayErrors(rowErrors);
     return valid;
-  }, [editedName, editedHolidays]);
+  }, [editedName, editedHolidays, t]);
 
   const handleSave = async () => {
     if (!validate()) return;
@@ -319,7 +320,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
         // This result used to be ignored, so a refused rename went on to save the year and the
         // editor closed as if everything had landed. A refusal — E00409 included — keeps it open.
         if (metaResult.status === ActionStatus.ERROR) {
-          setSaveError(metaResult.errorMessage || "Something went wrong while saving. Please try again.");
+          setSaveError(metaResult.errorMessage || t("publicHolidays.details.saveFailed"));
           return;
         }
         version = metaResult.data?.version ?? version;
@@ -348,14 +349,14 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
         // The backend points at the row it refused — a collision with the neighbouring year is
         // something the editor cannot see on its own, since it only holds one year.
         setHolidayErrors(mapServerFieldErrors(result.fieldErrors, editedHolidays));
-        setSaveError(result.errorMessage || "Something went wrong while saving. Please try again.");
+        setSaveError(result.errorMessage || t("publicHolidays.details.saveFailed"));
         return;
       }
 
       invalidate();
       setIsEditing(false);
     } catch {
-      setSaveError("Something went wrong while saving. Please try again.");
+      setSaveError(t("publicHolidays.details.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -398,8 +399,8 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
             <Button type="button"
               size="icon"
               variant="secondary"
-              aria-label="Subscribe in your calendar app"
-              title="Subscribe in your calendar app"
+              aria-label={t("publicHolidays.details.subscribe")}
+              title={t("publicHolidays.details.subscribe")}
               onClick={() => setIsSubscribeOpen(true)}
             >
               <Icon icon={RssIcon} size="sm" />
@@ -408,7 +409,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               <Button type="button"
                 size="icon"
                 variant="secondary"
-                aria-label="Export calendar"
+                aria-label={t("publicHolidays.details.export")}
                 onClick={() => setIsExportOpen(true)}
               >
                 <Icon icon={Download01Icon} size="sm" />
@@ -418,8 +419,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
           </div>
         </div>
         <p className="max-w-2xl text-body text-tertiary">
-          This is the holiday-days section for this calendar — review and edit the days below, and
-          manage who this calendar is assigned to.
+          {t("publicHolidays.details.intro")}
         </p>
       </div>
 
@@ -427,11 +427,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
         <TabsList className="flex-none">
           <TabsTrigger value="holidays" className="flex items-center gap-2">
             <Icon icon={Calendar03Icon} size="sm" />
-            Holidays
+            {t("publicHolidays.details.tabHolidays")}
           </TabsTrigger>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <Icon icon={UserGroupIcon} size="sm" />
-            Assigned people
+            {t("publicHolidays.details.tabAssigned")}
           </TabsTrigger>
         </TabsList>
 
@@ -439,7 +439,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
           {isEditing ? (
             <div className="flex h-full min-h-0 flex-col gap-5">
               <div className="flex flex-none items-center justify-between gap-4">
-                <h3 className="text-body font-semibold text-primary">Edit calendar</h3>
+                <h3 className="text-body font-semibold text-primary">{t("publicHolidays.details.editTitle")}</h3>
                 <div className="flex gap-2">
                   <Button type="button"
                     variant="secondary"
@@ -448,10 +448,10 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     onClick={cancelEditMode}
                   >
                     <Icon icon={Cancel01Icon} size="sm" />
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </Button>
                   <Button type="button" disabled={!isEditFormValid || isSaving} onClick={handleSave}>
-                    {isSaving ? "Saving…" : "Save"}
+                    {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
                   </Button>
                 </div>
               </div>
@@ -478,14 +478,13 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               <div className="flex flex-none items-end justify-between gap-4">
                 <div>
                   <h2 className="mb-1 text-body font-semibold text-primary">
-                    Holiday days
+                    {t("publicHolidays.newCalendar.holidayDays")}
                   </h2>
                   <p className="text-body text-tertiary">
-                    Add all public holiday days for this calendar.
+                    {t("publicHolidays.newCalendar.holidayDaysHint")}
                     {editedHolidays.length > 0 && (
                       <span className="ml-2 font-medium text-primary">
-                        {totalDraftDays(editedHolidays)}{" "}
-                        {totalDraftDays(editedHolidays) === 1 ? "day" : "days"} added
+                        {t("publicHolidays.newCalendar.daysAdded", { count: totalDraftDays(editedHolidays) })}
                       </span>
                     )}
                   </p>
@@ -512,10 +511,13 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
               {/* Info block */}
               <div className="flex-none space-y-1 pb-1 pt-2">
                 <h2 className="text-section-title text-primary">
-                  <span className="font-normal text-tertiary">{holidays.length}</span> Holidays
+                  {t.rich("publicHolidays.details.count", {
+                    count: holidays.length,
+                    muted: (chunks) => <span className="font-normal text-tertiary">{chunks}</span>,
+                  })}
                 </h2>
                 <p className="text-body text-tertiary">
-                  Public holiday days included in this calendar.
+                  {t("publicHolidays.details.countHint")}
                 </p>
               </div>
 
@@ -542,7 +544,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                       onClick={handleFillYear}
                     >
                       <Icon icon={CalendarAdd01Icon} size="sm" />
-                      {fillYear.isPending ? "Loading…" : `Load ${year}`}
+                      {fillYear.isPending ? tCommon("states.loading") : t("publicHolidays.details.loadYear", { year: String(year) })}
                     </Button>
                   )}
                 </div>
@@ -550,7 +552,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                 {canManage ? (
                   <Button type="button" className="gap-1.5" onClick={enterEditMode}>
                     <Icon icon={PencilEdit02Icon} size="sm" />
-                    Edit
+                    {tCommon("actions.edit")}
                   </Button>
                 ) : null}
               </div>
@@ -564,7 +566,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
               {isHolidaysLoading ? (
                 <div className="min-h-0 flex-1 pr-1 text-body text-tertiary">
-                  Loading {year}…
+                  {t("publicHolidays.details.loadingYear", { year: String(year) })}
                 </div>
               ) : visibleHolidays.length > 0 ? (
                 <div className="min-h-0 flex-1 overflow-y-auto pr-1">
@@ -572,11 +574,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   <table className="w-full caption-bottom table-fixed text-body">
                     <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                       <TableRow>
-                        <TableHead className="w-44">Date</TableHead>
-                        <TableHead className="w-44">End date</TableHead>
-                        <TableHead>Name</TableHead>
+                        <TableHead className="w-44">{t("publicHolidays.days.date")}</TableHead>
+                        <TableHead className="w-44">{t("publicHolidays.days.endDate")}</TableHead>
+                        <TableHead>{t("publicHolidays.days.name")}</TableHead>
                         <TableHead className="w-12">
-                          <span className="sr-only">Actions</span>
+                          <span className="sr-only">{t("publicHolidays.days.actions")}</span>
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -589,20 +591,20 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                         return (
                           <TableRow key={holiday.id} className="border-divider [&_td]:py-2">
                             <TableCell className="text-tertiary">
-                              {formatHolidayDate(holiday.holidayDate)}
+                              {formatHolidayDate(holiday.holidayDate, formatDisplayDate)}
                               {holiday.observedDate &&
                                 holiday.observedDate !== holiday.holidayDate && (
                                   <span className="ml-2 text-hint text-tertiary">
-                                    observed {formatHolidayDate(holiday.observedDate)}
+                                    {t("publicHolidays.details.observed", { date: formatHolidayDate(holiday.observedDate, formatDisplayDate) })}
                                   </span>
                                 )}
                             </TableCell>
                             <TableCell className="text-tertiary">
                               {isSpan ? (
                                 <span className="flex items-baseline gap-2">
-                                  {formatHolidayDate(holiday.endDate)}
+                                  {formatHolidayDate(holiday.endDate, formatDisplayDate)}
                                   <span className="text-hint text-tertiary">
-                                    {holidaySpanDays(holiday.holidayDate, holiday.endDate)} days
+                                    {t("publicHolidays.details.spanDays", { count: holidaySpanDays(holiday.holidayDate, holiday.endDate) })}
                                   </span>
                                 </span>
                               ) : (
@@ -613,7 +615,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                               {holiday.name}
                               {holiday.dayPart === PublicHolidayDayPart.HalfDay && (
                                 <span className="ml-2 rounded-tag bg-mist px-1.5 py-0.5 text-hint font-normal text-secondary">
-                                  Half day
+                                  {t("publicHolidays.details.halfDay")}
                                 </span>
                               )}
                               {override && <PublicHolidayEditedMarker override={override} />}
@@ -637,14 +639,14 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                 <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
                   <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
                   <p className="text-body font-medium text-primary">
-                    No holidays match your search
+                    {t("publicHolidays.details.noMatch")}
                   </p>
-                  <p className="mt-1 text-body text-tertiary">Try a different name or date.</p>
+                  <p className="mt-1 text-body text-tertiary">{t("publicHolidays.details.noMatchHint")}</p>
                 </div>
               ) : !canManage ? (
                 <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">
                   <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
-                  <p className="text-body font-medium text-primary">No holidays for {year}</p>
+                  <p className="text-body font-medium text-primary">{t("publicHolidays.details.noneForYear", { year: String(year) })}</p>
                 </div>
               ) : (
                 <button
@@ -653,11 +655,11 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                   className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed border-field px-6 py-10 text-center transition-colors hover:border-strong hover:bg-subtle"
                 >
                   <Icon icon={Calendar03Icon} size="lg" className="mb-3 text-tertiary" />
-                  <p className="text-body font-medium text-primary">Click to start editing</p>
+                  <p className="text-body font-medium text-primary">{t("publicHolidays.details.startEditing")}</p>
                   <p className="mt-1 text-body text-tertiary">
                     {canFillYear
-                      ? `Add holiday days for ${year}, or load them from the source above.`
-                      : `Add holiday days for ${year} to this calendar.`}
+                      ? t("publicHolidays.details.addOrLoad", { year: String(year) })
+                      : t("publicHolidays.details.addForYear", { year: String(year) })}
                   </p>
                 </button>
               )}
@@ -690,9 +692,9 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title={`Export ${calendar.name}`}
-        description="Export this calendar's details, its holiday days, and its assigned users."
-        includedText="Three sheets — General Information (name, country, region, days, status, created by, created at), Holidays (name, dates, year) and Assigned Users (first name, last name, email, position)."
+        title={t("publicHolidays.details.exportTitle", { name: calendar.name })}
+        description={t("publicHolidays.details.exportDescription")}
+        includedText={t("publicHolidays.details.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

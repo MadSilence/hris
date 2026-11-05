@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   AttributeOption,
   AttributeOptionUpsert,
@@ -70,6 +71,9 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
   isPreset = false,
   isSaving = false,
 }) => {
+  const t = useTranslations("settings.attributes.form");
+  const tEdit = useTranslations("settings.attributes.editForm");
+  const tCommon = useTranslations("common");
   // The type is fixed at creation — changing it would have to migrate every stored value between
   // storage columns, so the editor shows it read-only (the backend has no `type` on its update
   // request either, so the old picker silently did nothing).
@@ -220,7 +224,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="-mx-1 min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1">
       <div className="space-y-1.5">
-        <RequiredLabel htmlFor="attr-name" required>Name</RequiredLabel>
+        <RequiredLabel htmlFor="attr-name" required>{tCommon("fields.name")}</RequiredLabel>
         <Input
           id="attr-name"
           value={name}
@@ -228,23 +232,23 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
           onChange={(e) => setName(e.currentTarget.value)}
         />
         {!name.trim() && (
-          <FieldError>A name is required.</FieldError>
+          <FieldError>{tEdit("nameRequired")}</FieldError>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <RequiredLabel required>Type</RequiredLabel>
+        <RequiredLabel required>{tCommon("fields.type")}</RequiredLabel>
         <div className="flex items-center gap-2">
           <AttributeTypeChip type={type} />
           <span className="text-hint text-tertiary">
-            Can&apos;t be changed after the attribute is created.
+            {tEdit("typeLocked")}
           </span>
         </div>
       </div>
 
       {groupOptions.length > 0 && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-group">Group</Label>
+          <Label htmlFor="attr-group">{tEdit("group")}</Label>
           <SearchableSelect
             id="attr-group"
             options={groupOptions.map((g) => ({ value: g.id, label: g.name }))}
@@ -255,7 +259,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
           />
           {groupId !== attribute.groupId && (
             <p className="text-hint text-tertiary">
-              Moving the attribute places it at the end of the target group.
+              {tEdit("moveHint")}
             </p>
           )}
         </div>
@@ -263,7 +267,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {needsOptions && (
         <div className="space-y-1.5">
-          <Label>Options</Label>
+          <Label>{t("options")}</Label>
           <OptionsEditor
             disabled={isPreset}
             type={type}
@@ -279,8 +283,8 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {type === AttributeType.DATE && (
         <SettingToggle
-          label="Hide the year"
-          hint="Show only day and month (e.g. for birthdays)."
+          label={t("hideYear")}
+          hint={t("hideYearHint")}
           checked={hideYear}
           onCheckedChange={setHideYear}
           disabled={isPreset}
@@ -289,8 +293,8 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {isUniqueType(type) && (
         <SettingToggle
-          label="Unique value"
-          hint="No two people can have the same value."
+          label={t("unique")}
+          hint={t("uniqueHint")}
           checked={uniqueId}
           onCheckedChange={setUniqueId}
           disabled={isPreset}
@@ -298,8 +302,8 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
       )}
 
       <SettingToggle
-        label="Sensitive"
-        hint="People without access to this field see a placeholder instead of the value."
+        label={t("sensitive")}
+        hint={t("sensitiveHint")}
         checked={sensitive}
         onCheckedChange={setSensitive}
         disabled={isPreset}
@@ -307,7 +311,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       {type === AttributeType.NUMBER && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-dec-scale">Decimal scale</Label>
+          <Label htmlFor="attr-dec-scale">{t("decScale")}</Label>
           <Input
             id="attr-dec-scale"
             type="number"
@@ -320,8 +324,7 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
             }}
           />
           <p className="text-hint text-tertiary">
-            Chooses how new values are stored (decimal vs whole numbers). Values saved earlier keep
-            their current form.
+            {tEdit("decScaleHint")}
           </p>
         </div>
       )}
@@ -337,10 +340,10 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
 
       <div className="mt-6 flex justify-end gap-2 border-t border-divider pt-4">
         <Button type="button" variant="secondary" onClick={cancel} disabled={isSaving}>
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
         <Button type="button" onClick={save} disabled={isPreset || !name.trim() || isSaving}>
-          Save
+          {tCommon("actions.save")}
         </Button>
       </div>
     </div>

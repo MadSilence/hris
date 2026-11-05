@@ -17,6 +17,8 @@ export type PublicCompanyAppearanceDTO = {
   loginSubheadline: string | null;
   loginImageUrl: string | null;
   logoUrl: string | null;
+  /** The company's language code; null on an address no company holds. */
+  language: string | null;
 };
 
 /** Null clears a field back to the shipped default. The login image has its own endpoints. */

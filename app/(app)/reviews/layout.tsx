@@ -3,6 +3,7 @@
 import React, { ReactNode, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { DashboardSquare01Icon, FileTextIcon, UserCheck01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 
@@ -11,38 +12,30 @@ import { canAccess, ResourceCode } from "@/models/access";
 import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
-  id: string;
-  label: string;
+  id: "overview" | "me" | "forms";
   href: string;
   icon: IconSvgElement;
   /** Undefined: everybody — everybody may have reviews to write or to read. */
   resource?: ResourceCode;
-  description: string;
 };
 
 const tabs: Tab[] = [
   {
     id: "overview",
-    label: "Overview",
     href: "/reviews",
     icon: DashboardSquare01Icon,
     resource: "REVIEWS.CYCLE",
-    description: "Every review cycle, and who has written what.",
   },
   {
     id: "me",
-    label: "My reviews",
     href: "/reviews/me",
     icon: UserCheck01Icon,
-    description: "The reviews you are asked to write, the ones shared with you, and your people's.",
   },
   {
     id: "forms",
-    label: "Forms",
     href: "/reviews/forms",
     icon: FileTextIcon,
     resource: "REVIEWS.FORM",
-    description: "The questionnaires a review cycle asks its reviewers to fill in.",
   },
 ];
 
@@ -54,6 +47,7 @@ const tabs: Tab[] = [
  * screen to itself, and each page gates itself.
  */
 export default function ReviewsLayout({ children }: { children: ReactNode }) {
+  const t = useTranslations("reviews");
   const pathname = usePathname();
   const { access } = useAccess();
 
@@ -68,8 +62,8 @@ export default function ReviewsLayout({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-page-title text-primary">Reviews</h1>
-        <p className="mt-1 text-body text-tertiary">{activeTab.description}</p>
+        <h1 className="text-page-title text-primary">{t("layout.title")}</h1>
+        <p className="mt-1 text-body text-tertiary">{t(`layout.tabs.${activeTab.id}.description`)}</p>
       </div>
 
       {visibleTabs.length > 1 && (
@@ -81,7 +75,7 @@ export default function ReviewsLayout({ children }: { children: ReactNode }) {
                 <TabsTrigger key={tab.id} value={tab.id} asChild className="flex items-center gap-2">
                   <Link href={tab.href} className="no-underline">
                     <Icon icon={shownIcon} size="sm" />
-                    {tab.label}
+                    {t(`layout.tabs.${tab.id}.label`)}
                   </Link>
                 </TabsTrigger>
               );

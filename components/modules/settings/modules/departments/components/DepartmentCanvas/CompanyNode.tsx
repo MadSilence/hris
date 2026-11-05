@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUp01Icon, Building03Icon } from "@hugeicons/core-free-icons";
@@ -28,6 +29,8 @@ const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
   const { name, logo, memberCount, departmentCount, collapsed, selected, dimmed } = data;
   const { onToggleCollapse, dropTargetId } = useDepartmentCanvas();
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
 
   const hasChildren = departmentCount > 0;
 
@@ -73,13 +76,8 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
           selected ? "border-accent-ring" : "border-divider",
         )}
       >
-        <span>
-          <span className="font-semibold text-secondary">{memberCount}</span>{" "}
-          {memberCount === 1 ? "Person" : "People"}
-        </span>
-        <span>
-          <span className="font-semibold text-secondary">{departmentCount}</span> Subs
-        </span>
+        <span>{tShared.rich("nodePeople", { count: memberCount, b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span> })}</span>
+        <span>{tShared.rich("nodeSubsAll", { count: departmentCount, b: (chunks) => <span className="font-semibold text-secondary">{chunks}</span> })}</span>
       </div>
 
       <Handle type="source" position={Position.Bottom} className={hiddenHandle} isConnectable={false} />
@@ -92,8 +90,8 @@ export function CompanyNode({ data }: NodeProps<CompanyFlowNode>) {
             onToggleCollapse(COMPANY_NODE_ID);
           }}
           className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
-          aria-label={collapsed ? `Expand ${departmentCount} departments` : "Collapse"}
-          title={collapsed ? `Expand ${departmentCount} departments` : "Collapse"}
+          aria-label={collapsed ? t("expandTop", { count: departmentCount }) : tShared("collapse")}
+          title={collapsed ? t("expandTop", { count: departmentCount }) : tShared("collapse")}
         >
           {collapsed ? (
             <span className="text-hint font-semibold leading-none">{departmentCount}</span>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact";
-import { dateToISO, formatDisplayDate, isoToDate } from "@/lib/date";
+import { type DateFormatter, dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
 
 import { FC, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon, ShieldCheckIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -39,7 +40,7 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const prettyISO = (iso: string) => formatDisplayDate(iso, { style: "medium" });
+const prettyISO = (iso: string, formatDisplayDate: DateFormatter) => formatDisplayDate(iso, { style: "medium" });
 
 /**
  * Assigning a policy from the person's card rather than from the policy's own settings page. The
@@ -53,6 +54,9 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
   balances,
   onCloseAction,
 }) => {
+  const t = useTranslations("calendar");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const createMutation = useCreateTimeOffPolicyAssignment();
   const invalidateBalances = useInvalidateEmployeeTimeOffBalancesQuery();
 
@@ -90,15 +94,18 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
   const quotaLabel = selected
     ? selected.unlimitedQuota
-      ? "Unlimited"
+      ? t("balances.unlimited")
       : selected.yearlyQuota !== null
-        ? `${selected.yearlyQuota} ${selected.unit === TimeOffPolicyUnit.Hours ? "h" : "d"} / year`
+        ? t("assign.quotaPerYear", {
+            amount: String(selected.yearlyQuota),
+            unit: selected.unit === TimeOffPolicyUnit.Hours ? t("units.hoursShort") : t("units.daysShort"),
+          })
  : ""
  : "";
 
   const handleSubmit = async () => {
     if (!policyId) {
-      setError("Pick a policy to assign.");
+      setError(t("assign.pickPolicy"));
       return;
     }
     setError(null);
@@ -112,7 +119,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
       invalidateBalances();
       onCloseAction();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to assign the policy.");
+      setError(e instanceof Error ? e.message : t("assign.failed"));
     }
   };
 
@@ -125,9 +132,9 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               <Icon icon={ShieldCheckIcon} />
             </div>
             <div>
-              <DialogTitle className="text-section-title">Assign a time-off policy</DialogTitle>
+              <DialogTitle className="text-section-title">{t("assign.title")}</DialogTitle>
               <DialogDescription>
-                The opening balance is granted right away.
+                {t("assign.description")}
               </DialogDescription>
             </div>
           </div>
@@ -137,18 +144,18 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
           {available.length === 0 ? (
             <p className="rounded-card border border-dashed border-divider px-4 py-8 text-center text-body text-tertiary">
               {policies.length === 0
-                ? "No time-off policies exist yet."
-                : "This person is already on every active policy."}
+                ? t("assign.noPolicies")
+                : t("assign.allAssigned")}
             </p>
           ) : (
             <>
               <div className="space-y-1.5">
-                <RequiredLabel className="text-hint" required>Policy</RequiredLabel>
+                <RequiredLabel className="text-hint" required>{t("assign.policy")}</RequiredLabel>
                 <SearchableSelect
                   options={available.map((p) => ({ value: p.id, label: p.name }))}
                   value={policyId || null}
                   onChange={(v) => setPolicyId(v ?? "")}
-                  placeholder="Select a policy"
+                  placeholder={t("assign.selectPolicy")}
                   disabled={createMutation.isPending}
                   clearable={false}
                 />
@@ -156,22 +163,18 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
               {noHireDate && (
                 <InlineAlert tone="declined">
-                  This policy renews on the hire anniversary and this person has no hire date, so the
-                  balance would never renew. Set a hire date first — the assignment will be refused
-                  until then.
+                  {t("assign.noHireDate")}
                 </InlineAlert>
               )}
 
               {chainWontResolve && !noHireDate && (
                 <InlineAlert tone="pending">
-                  This policy&apos;s approval chain has nobody to sign for this person — it asks for a
-                  manager, and none is set. The assignment will work; their requests will be refused
-                  until somebody can approve them.
+                  {t("assign.noApprover")}
                 </InlineAlert>
               )}
 
               <div className="space-y-1.5">
-                <Label className="text-hint">Effective from</Label>
+                <Label className="text-hint">{t("assign.effectiveFrom")}</Label>
                 <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
                   <PopoverTrigger asChild>
                     <Button
@@ -181,7 +184,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
                       className={cn("w-full justify-start font-normal")}
                     >
                       <Icon icon={Calendar03Icon} size="sm" />
-                      {prettyISO(effectiveFrom)}
+                      {prettyISO(effectiveFrom, formatDisplayDate)}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -201,7 +204,7 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
               </div>
 
               <div className="flex items-center justify-between rounded-card border border-divider bg-subtle/40 px-4 py-3 text-body">
-                <span className="text-tertiary">Yearly entitlement</span>
+                <span className="text-tertiary">{t("assign.yearlyEntitlement")}</span>
                 <span className="font-medium text-primary">{quotaLabel}</span>
               </div>
             </>
@@ -212,13 +215,13 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
         <div className="flex justify-end gap-2 border-t border-divider px-6 py-4">
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={createMutation.isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button"
             onClick={handleSubmit}
             disabled={!policyId || createMutation.isPending || available.length === 0}
           >
-            {createMutation.isPending ? "Assigning…" : "Assign policy"}
+            {createMutation.isPending ? t("assign.assigning") : t("assign.submit")}
           </Button>
         </div>
       </DialogContent>

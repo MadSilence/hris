@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
@@ -34,6 +35,7 @@ export const RenameAttributeGroupModal: FC<
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("settings.attributes.editSection");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -71,9 +73,9 @@ export const RenameAttributeGroupModal: FC<
                 <Icon icon={PencilEdit02Icon} />
               </span>
               <div className="space-y-1">
-                <DialogTitle>Edit section</DialogTitle>
+                <DialogTitle>{t("title")}</DialogTitle>
                 <DialogDescription>
-                  Update the section name and the description shown under it.
+                  {t("description")}
                 </DialogDescription>
               </div>
             </div>

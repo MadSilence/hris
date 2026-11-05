@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BankIcon, Building03Icon } from "@hugeicons/core-free-icons";
@@ -16,34 +17,30 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 
 type Tab = {
   id: string;
-  label: string;
+  /** The tab's title labels both the tab and the page. */
+  titleKey: "legalEntities.page.title" | "offices.page.title";
+  descriptionKey: "legalEntities.page.description" | "offices.page.description";
   href: string;
   icon: IconSvgElement;
   resource: ResourceCode;
-  title: string;
-  description: string;
 };
 
 const tabs: Tab[] = [
   {
     id: "legal-entities",
-    label: "Legal entities",
+    titleKey: "legalEntities.page.title",
+    descriptionKey: "legalEntities.page.description",
     href: "/settings/general/legal-entities",
     icon: BankIcon,
     resource: "ORG.LEGAL_ENTITY",
-    title: "Legal entities",
-    description:
-      "Legal Entities define the official registered companies within your organization. Each entity includes important compliance details such as registration number, tax ID, and address.",
   },
   {
     id: "offices",
-    label: "Offices",
+    titleKey: "offices.page.title",
+    descriptionKey: "offices.page.description",
     href: "/settings/general/offices",
     icon: Building03Icon,
     resource: "ORG.OFFICE",
-    title: "Offices",
-    description:
-      "Offices represent the physical or remote locations where your company operates. Each office contains details such as address, country, timezone, and employee distribution.",
   },
 ];
 
@@ -52,6 +49,7 @@ export default function LegalEntitiesAndOfficesLayout({
 }: {
   children: ReactNode;
 }) {
+  const t = useTranslations("structure");
   const pathname = usePathname();
   const { access } = useAccess();
 
@@ -79,10 +77,10 @@ export default function LegalEntitiesAndOfficesLayout({
     >
       <div className="space-y-6">
         <div className="px-8 space-y-4">
-          <SettingsPageHeader title={activeTab.title} backHref="/settings"/>
+          <SettingsPageHeader title={t(activeTab.titleKey)} backHref="/settings"/>
 
           <PageDescription className="text-body text-tertiary/90">
-            {activeTab.description}
+            {t(activeTab.descriptionKey)}
           </PageDescription>
         </div>
 
@@ -101,7 +99,7 @@ export default function LegalEntitiesAndOfficesLayout({
                   >
                     <Link href={tab.href} className="no-underline">
                       <Icon icon={shownIcon} size="sm" />
-                      {tab.label}
+                      {t(tab.titleKey)}
                     </Link>
                   </TabsTrigger>
                 );

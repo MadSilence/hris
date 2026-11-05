@@ -184,9 +184,9 @@ describe("diffRolePermissions", () => {
     const changes = diffRolePermissions(before, after);
 
     expect(changes).toEqual([
-      { resourceCode: "PEOPLE.PROFILE", resourceLabel: "Profiles", action: "VIEW", from: "SELF", to: "COMPANY" },
-      { resourceCode: "ORG.DEPARTMENT", resourceLabel: "Departments", action: "EDIT", from: "COMPANY", to: "NONE" },
-      { resourceCode: "ORG.TEAM", resourceLabel: "Teams", action: "MANAGE", from: "NONE", to: "COMPANY" },
+      { resourceCode: "PEOPLE.PROFILE", resourceMessageKey: "peopleProfile", action: "VIEW", from: "SELF", to: "COMPANY" },
+      { resourceCode: "ORG.DEPARTMENT", resourceMessageKey: "orgDepartment", action: "EDIT", from: "COMPANY", to: "NONE" },
+      { resourceCode: "ORG.TEAM", resourceMessageKey: "orgTeam", action: "MANAGE", from: "NONE", to: "COMPANY" },
     ]);
   });
 });

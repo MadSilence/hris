@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
 import { Textarea } from "@/components/desact/textarea";
@@ -41,13 +42,15 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
   const isDate = type === AttributeType.DATE;
   const isMulti = type === AttributeType.MULTI_SELECT;
   const hasDefault = hasDefaultValueSupport(type);
+  const t = useTranslations("settings.attributes.config");
+  const tCommon = useTranslations("common");
 
   const defaultInputType = isNumber ? "number" : isDate ? "date" : "text";
 
   return (
     <div className="space-y-4">
       <p className="text-hint font-semibold text-tertiary">
-        Validation &amp; rules
+        {t("validationTitle")}
       </p>
 
       {/*
@@ -59,15 +62,15 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
         * and an outstanding-items screen.
         */}
       <SettingToggle
-        label="Cannot be cleared"
-        hint="Once this field has a value, it cannot be emptied again. It does not have to be filled in."
+        label={t("cannotBeCleared")}
+        hint={t("cannotBeClearedHint")}
         checked={!!value.required}
         onCheckedChange={(v) => onChange({ required: v })}
         disabled={disabled}
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="attr-cfg-description">Description</Label>
+        <Label htmlFor="attr-cfg-description">{tCommon("fields.description")}</Label>
         <Textarea
           id="attr-cfg-description"
           value={value.description ?? ""}
@@ -79,7 +82,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
 
       {hasDefault && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-cfg-default">Default value</Label>
+          <Label htmlFor="attr-cfg-default">{t("defaultValue")}</Label>
           <Input
             id="attr-cfg-default"
             type={defaultInputType}
@@ -94,7 +97,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
         <>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="attr-cfg-min">Min</Label>
+              <Label htmlFor="attr-cfg-min">{t("min")}</Label>
               <Input
                 type="number"
                 id="attr-cfg-min"
@@ -104,7 +107,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="attr-cfg-max">Max</Label>
+              <Label htmlFor="attr-cfg-max">{t("max")}</Label>
               <Input
                 type="number"
                 id="attr-cfg-max"
@@ -115,7 +118,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             </div>
           </div>
           <SettingToggle
-            label="Only positive numbers"
+            label={t("onlyPositive")}
             checked={!!value.onlyPositive}
             onCheckedChange={(v) => onChange({ onlyPositive: v })}
             disabled={disabled}
@@ -126,7 +129,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {(isText || isLongText) && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-length">Min length</Label>
+            <Label htmlFor="attr-cfg-min-length">{t("minLength")}</Label>
             <Input
               type="number"
               id="attr-cfg-min-length"
@@ -136,7 +139,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-length">Max length</Label>
+            <Label htmlFor="attr-cfg-max-length">{t("maxLength")}</Label>
             <Input
               type="number"
               id="attr-cfg-max-length"
@@ -150,7 +153,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
 
       {isText && (
         <div className="space-y-1.5">
-          <Label htmlFor="attr-cfg-regex">Pattern (Regex)</Label>
+          <Label htmlFor="attr-cfg-regex">{t("pattern")}</Label>
           <Input
             id="attr-cfg-regex"
             value={value.regex ?? ""}
@@ -159,7 +162,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
           />
           {type === AttributeType.PHONE && (
             <p className="text-hint text-tertiary">
-              Phone numbers are always checked for 7–15 digits. A pattern adds a stricter format on top.
+              {t("phoneHint")}
             </p>
           )}
         </div>
@@ -168,7 +171,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {isDate && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-date">Earliest</Label>
+            <Label htmlFor="attr-cfg-min-date">{t("earliest")}</Label>
             <DatePicker
               id="attr-cfg-min-date"
               value={value.minDate ?? ""}
@@ -177,7 +180,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-date">Latest</Label>
+            <Label htmlFor="attr-cfg-max-date">{t("latest")}</Label>
             <DatePicker
               id="attr-cfg-max-date"
               value={value.maxDate ?? ""}
@@ -192,7 +195,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
       {isMulti && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-min-select">Min selected</Label>
+            <Label htmlFor="attr-cfg-min-select">{t("minSelected")}</Label>
             <Input
               type="number"
               id="attr-cfg-min-select"
@@ -202,7 +205,7 @@ export const AttributeConfigFields: React.FC<Props> = ({ type, value, onChange, 
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="attr-cfg-max-select">Max selected</Label>
+            <Label htmlFor="attr-cfg-max-select">{t("maxSelected")}</Label>
             <Input
               type="number"
               id="attr-cfg-max-select"

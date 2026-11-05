@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import QRCode from "qrcode";
+import { useTranslations } from "next-intl";
 import { QrCodeIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { NodRing } from "@/components/desact/nod";
@@ -40,6 +41,7 @@ export const AvatarWithQr: React.FC<{
   /** Called when a photo arrives, from either path, so the page can refresh what it shows. */
   onUploadedAction: () => void;
 }> = ({ userId, fullName, avatarUrl, onUploadedAction }) => {
+  const t = useTranslations("firstRun");
   const fileInput = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
   const [qr, setQr] = React.useState<{ dataUrl: string; expiresAt: number } | null>(null);
@@ -129,18 +131,18 @@ export const AvatarWithQr: React.FC<{
       {qr ? (
         <div className="flex flex-col items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL drawn in this browser */}
-          <img src={qr.dataUrl} alt="Scan to upload a photo from your phone" className="rounded-control border border-divider" />
+          <img src={qr.dataUrl} alt={t("avatar.qrAlt")} className="rounded-control border border-divider" />
           <p className="max-w-[14rem] text-center text-hint text-tertiary">
-            Scan it with your phone&apos;s camera. The code works once, for the next few minutes.
+            {t("avatar.qrHint")}
           </p>
           <Button key="hide-qr" type="button" variant="ghost" size="sm" onClick={() => setQr(null)}>
-            Hide code
+            {t("avatar.hideCode")}
           </Button>
         </div>
       ) : (
         <Button key="show-qr" type="button" variant="secondary" size="sm" className="gap-1.5" onClick={showQr} disabled={issuing}>
           {issuing ? <NodRing size="sm" label="" /> : <Icon icon={QrCodeIcon} size="sm" />}
-          Use my phone
+          {t("avatar.usePhone")}
         </Button>
       )}
 
@@ -153,7 +155,7 @@ export const AvatarWithQr: React.FC<{
         disabled={uploading}
       >
         {uploading ? <NodRing size="sm" label="" /> : <Icon icon={Upload01Icon} size="sm" />}
-        Upload from this computer
+        {t("avatar.uploadFromComputer")}
       </Button>
 
       <input

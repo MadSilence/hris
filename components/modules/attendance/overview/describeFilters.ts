@@ -1,4 +1,6 @@
-import { OPERATOR_LABELS } from "@/components/audience/fieldCatalog";
+import { operatorLabel } from "@/components/audience/fieldCatalog";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
+import type { useTranslations } from "next-intl";
 import { isReferenceField, type FieldDTO, type FilterDTO } from "@/models/user/fields";
 
 /**
@@ -10,11 +12,13 @@ import { isReferenceField, type FieldDTO, type FilterDTO } from "@/models/user/f
 export const describeFilter = (
   filter: FilterDTO,
   fields: FieldDTO[],
+  t: ReturnType<typeof useTranslations<"attendance">>,
+  tAccess: AccessTranslator,
   referenceNames?: ReadonlyMap<string, string>,
 ): string => {
   const field = fields.find((f) => f.id === filter.field);
   const label = field?.label ?? filter.field;
-  const op = (OPERATOR_LABELS[filter.op] ?? filter.op).toLowerCase();
+  const op = operatorLabel(tAccess, filter.op).toLowerCase();
   const isReference = !!field && isReferenceField(field);
 
   const optionLabel = (value: string) => {
@@ -27,14 +31,14 @@ export const describeFilter = (
   if (filter.values?.length) {
     if (isReference) {
       const names = named(filter.values);
-      return names ? `${label} ${op} ${names.join(", ")}` : `${label} ${op} ${filter.values.length} selected`;
+      return names ? `${label} ${op} ${names.join(", ")}` : `${label} ${op} ${t("filters.selected", { count: filter.values.length })}`;
     }
     return `${label} ${op} ${filter.values.map(optionLabel).join(", ")}`;
   }
   if (filter.op === "between") return `${label} ${op} ${filter.value ?? ""} – ${filter.valueTo ?? ""}`;
   if (isReference && filter.value) {
     const names = named([filter.value]);
-    return names ? `${label} ${op} ${names[0]}` : `${label} ${op} 1 selected`;
+    return names ? `${label} ${op} ${names[0]}` : `${label} ${op} ${t("filters.selected", { count: 1 })}`;
   }
   return `${label} ${op} ${filter.value ? optionLabel(filter.value) : ""}`.trim();
 };

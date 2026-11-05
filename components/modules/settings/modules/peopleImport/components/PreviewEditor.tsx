@@ -1,6 +1,8 @@
 "use client";
 
+import { useDisplayLocale } from "@/lib/date";
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Delete02Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -31,6 +33,9 @@ const key = (rowNumber: number, column: number) => `${rowNumber}:${column}`;
  * Nothing is written to the company here — only the import's own rows.
  */
 export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
+  const t = useTranslations("peopleImport");
+  const locale = useDisplayLocale();
+  const tCommon = useTranslations("common");
   const [showAll, setShowAll] = useState(false);
   const rows = usePeopleImportRows(anImport.id, !showAll);
   const edit = useEditPeopleImportRows();
@@ -94,12 +99,14 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-body font-medium text-primary">
-            {anImport.errorRowCount} {anImport.errorRowCount === 1 ? "row has" : "rows have"} errors. Nothing is
-            imported until there are none — fix them here, or in the file.
+            {t("preview.errorRows", { count: anImport.errorRowCount })}
           </p>
           {anImport.lastEditedByName && anImport.lastEditedAt && (
             <p className="text-hint text-tertiary">
-              Last edited by {anImport.lastEditedByName} · {new Date(anImport.lastEditedAt).toLocaleString()}
+              {t("preview.lastEdited", {
+                name: anImport.lastEditedByName,
+                when: new Date(anImport.lastEditedAt).toLocaleString(locale),
+              })}
             </p>
           )}
         </div>
@@ -107,11 +114,11 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
           {unknownLeads.length > 0 && (
             <Button type="button" variant="secondary" size="sm" disabled={edit.isPending}
               onClick={() => send(unknownLeads, [])}>
-              Clear unknown leads
+              {t("preview.clearUnknownLeads")}
             </Button>
           )}
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
-            {showAll ? "Show rows with errors" : "Show all rows"}
+            {showAll ? t("preview.showErrorRows") : t("preview.showAllRows")}
           </Button>
           <Button type="button"
             variant="secondary"
@@ -120,7 +127,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
             onClick={() => void triggerExportDownload(`/api/people-imports/${anImport.id}/error-file`, "xlsx").catch(() => undefined)}
           >
             <Icon icon={Download01Icon} size="sm" />
-            Download file with errors
+            {t("preview.downloadErrors")}
           </Button>
         </div>
       </div>
@@ -129,17 +136,18 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
         <Table className="text-body">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-14">Row</TableHead>
+              <TableHead className="w-14">{t("preview.row")}</TableHead>
               {columns.map((c) => <TableHead key={c} className="min-w-40">{anImport.headers[c]}</TableHead>)}
-              <TableHead className="min-w-48">Row errors</TableHead>
-              <TableHead className="w-12"><span className="sr-only">Remove</span></TableHead>
+              <TableHead className="min-w-48">{t("preview.rowErrors")}</TableHead>
+              <TableHead className="w-12"><span className="sr-only">{tCommon("actions.remove")}</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {list.map((row) => {
               const gone = removed.has(row.rowNumber);
+              const rowClass = gone ? "align-top opacity-40" : "align-top hover:bg-transparent";
               return (
-                <TableRow key={row.rowNumber} className={gone ? "align-top opacity-40" : "align-top hover:bg-transparent"}>
+                <TableRow key={row.rowNumber} className={rowClass}>
                   <TableCell className="tabular-nums text-tertiary">{row.rowNumber}</TableCell>
                   {columns.map((c) => {
                     const k = key(row.rowNumber, c);
@@ -148,7 +156,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                       <TableCell key={c}>
                         <Input
                           className={cellErrors.length > 0 ? "h-8 border-status-declined-fill" : "h-8"}
-                          aria-label={`${anImport.headers[c]}, row ${row.rowNumber}`}
+                          aria-label={t("preview.cellAria", { header: anImport.headers[c], row: row.rowNumber })}
                           aria-invalid={cellErrors.length > 0}
                           maxLength={1000}
                           disabled={gone || edit.isPending}
@@ -165,7 +173,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                     <ul className="space-y-1 text-hint text-status-declined-text">
                       {rowLevel(row.errors).map((e, i) => (
                         <li key={i}>
-                          {e.columnHeader && <span className="font-medium">{e.columnHeader}: </span>}
+                          {e.columnHeader && <span className="font-medium">{t("checkErrors.columnPrefix", { header: e.columnHeader })}</span>}
                           {messageForCode(e.code, undefined, e.params)}
                         </li>
                       ))}
@@ -173,7 +181,7 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
                   </TableCell>
                   <TableCell>
                     <Button type="button" variant="ghost" size="icon-sm"
-                      aria-label={gone ? `Keep row ${row.rowNumber}` : `Remove row ${row.rowNumber}`}
+                      aria-label={gone ? t("preview.keepRow", { row: row.rowNumber }) : t("preview.removeRow", { row: row.rowNumber })}
                       disabled={edit.isPending}
                       onClick={() => setRemoved((s) => {
                         const next = new Set(s);
@@ -195,12 +203,12 @@ export const PreviewEditor: React.FC<Props> = ({ anImport }) => {
       <FormError message={error} />
       <div className="flex flex-wrap gap-2">
         <Button type="button" disabled={changes === 0 || edit.isPending} onClick={onSave}>
-          {edit.isPending ? "Checking every row…" : "Save and check"}
+          {edit.isPending ? t("preview.checking") : t("preview.saveAndCheck")}
         </Button>
         {changes > 0 && (
           <Button type="button" variant="ghost" disabled={edit.isPending}
             onClick={() => { setDrafts({}); setRemoved(new Set()); }}>
-            Undo changes
+            {t("preview.undoChanges")}
           </Button>
         )}
       </div>

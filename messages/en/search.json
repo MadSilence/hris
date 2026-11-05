@@ -1,0 +1,23 @@
+{
+  "kinds": {
+    "people": "People",
+    "departments": "Departments",
+    "teams": "Teams",
+    "offices": "Offices",
+    "legalEntities": "Legal entities",
+    "jobs": "Jobs",
+    "timeOffPolicies": "Time off policies",
+    "roles": "Roles"
+  },
+  "pages": {
+    "goTo": "Go to",
+    "heading": "Pages",
+    "settingsSection": "Settings · {group}"
+  },
+  "dialog": {
+    "title": "Search",
+    "description": "Search people, teams, offices, jobs, policies and pages.",
+    "searching": "Searching…",
+    "noResultsHint": "Try a different name."
+  }
+}

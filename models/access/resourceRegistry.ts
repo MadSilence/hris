@@ -1,18 +1,23 @@
 import { AccessAction } from "./AccessAction";
 import { AccessScope } from "./AccessScope";
 import { ResourceCode } from "./ResourceCode";
+import type { Messages } from "@/i18n/messages";
+
+/**
+ * The words of a resource live in the `access` catalogue: `resources.<messageKey>.label` and
+ * `.description`, and a group's title is `resourceGroups.<id>` — the registry holds no English.
+ */
+export type ResourceMessageKey = keyof Messages["access"]["resources"];
 
 export type ResourceDefinition = {
   code: ResourceCode;
-  label: string;
-  description: string;
+  messageKey: ResourceMessageKey;
   supportedActions: AccessAction[];
   supportedScopes: AccessScope[];
 };
 
 export type ResourceGroup = {
   id: "settings" | "people" | "organization" | "jobs" | "roles" | "notifications";
-  label: string;
   resources: ResourceDefinition[];
 };
 
@@ -40,43 +45,35 @@ const PERSONAL_SCOPES: AccessScope[] = [
 export const RESOURCE_GROUPS: ResourceGroup[] = [
   {
     id: "settings",
-    label: "Settings",
     resources: [
       {
         code: "SETTINGS.GENERAL",
-        label: "General settings",
-        description: "Company profile, appearance and general configuration.",
+        messageKey: "settingsGeneral",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "SETTINGS.IMPERSONATION",
-        label: "Impersonation",
-        description: "Impersonate other users for support purposes.",
+        messageKey: "settingsImpersonation",
         supportedActions: ["MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         // ENTERPRISE_ACCESS_DESIGN.md § 4.5 (A9): who decides who can sign in as whom.
         code: "SETTINGS.IDENTITY",
-        label: "Single sign-on",
-        description: "Set up the identity provider, its provisioning tokens and the roles its groups grant.",
+        messageKey: "settingsIdentity",
         supportedActions: ["MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "SETTINGS.AUDIT_LOG",
-        label: "Logs",
-        description:
-          "Read the company's journal: who did what, who signed in, who was refused. View only — the page writes nothing.",
+        messageKey: "settingsAuditLog",
         supportedActions: ["VIEW"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "SETTINGS.AUTOMATIONS",
-        label: "Automation",
-        description:
-          "Read automation rules and their run log (View); create, publish, enable and pause them (Manage). A rule can only do what its author may do by hand.",
+        messageKey: "settingsAutomations",
         supportedActions: ["VIEW", "MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
@@ -84,97 +81,82 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
   },
   {
     id: "people",
-    label: "People",
     resources: [
       {
         code: "PEOPLE.PROFILE",
-        label: "Profiles",
-        description: "Employee profiles and personal information. Block covers blocking, unblocking and sending a password reset.",
+        messageKey: "peopleProfile",
         supportedActions: PEOPLE_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "PEOPLE.ATTRIBUTES",
-        label: "Attributes",
-        description: "Custom attribute groups and attributes configuration.",
+        messageKey: "peopleAttributes",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "PEOPLE.DOCUMENTS",
-        label: "Documents",
-        description: "Employee documents and folders.",
+        messageKey: "peopleDocuments",
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "PEOPLE.DOCUMENT_CATEGORIES",
-        label: "Document categories",
-        description: "Document category configuration.",
+        messageKey: "peopleDocumentCategories",
         supportedActions: ["MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "PEOPLE.TIME_OFF",
-        label: "Time off",
-        description: "Time off requests and balances.",
+        messageKey: "peopleTimeOff",
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "PEOPLE.TIME_OFF_POLICIES",
-        label: "Time off policies",
-        description: "Time off policy configuration.",
+        messageKey: "peopleTimeOffPolicies",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "PEOPLE.CALENDAR",
-        label: "Company calendar",
-        description: "The company calendar board: who is away, and public holidays. Balances and reasons stay with Time off.",
+        messageKey: "peopleCalendar",
         supportedActions: ["VIEW"],
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "PEOPLE.LIFECYCLE_TEMPLATES",
-        label: "Preboarding & onboarding templates",
-        description: "The task lists preboarding and onboarding are started from.",
+        messageKey: "peopleLifecycleTemplates",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "PEOPLE.LIFECYCLE_PROCESSES",
-        label: "Preboarding & onboarding",
-        description: "Running processes: start, follow, close and delete them.",
+        messageKey: "peopleLifecycleProcesses",
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "REVIEWS.FORM",
-        label: "Review forms",
-        description: "The questionnaires review cycles ask reviewers to fill in. Edit writes them; Manage archives and deletes.",
+        messageKey: "reviewsForm",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "REVIEWS.CYCLE",
-        label: "Review cycles",
-        description: "Running review cycles. View sees them and who has written what, never what was written; Manage creates, launches and runs them.",
+        messageKey: "reviewsCycle",
         supportedActions: ["VIEW", "MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "REVIEWS.RESULT",
-        label: "Review results",
-        description: "Reading what reviewers wrote about a person, and their rating. The scope decides whose.",
+        messageKey: "reviewsResult",
         supportedActions: ["VIEW"],
         supportedScopes: PERSONAL_SCOPES,
       },
       {
         code: "PEOPLE.ATTENDANCE",
-        label: "Attendance",
-        description:
-          "Timesheets. View reads them; Edit records your own days and exports; Manage records or corrects somebody else's.",
+        messageKey: "peopleAttendance",
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
@@ -182,47 +164,40 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
   },
   {
     id: "organization",
-    label: "Organization",
     resources: [
       {
         code: "ORG.DEPARTMENT",
-        label: "Departments",
-        description: "Department structure and membership.",
+        messageKey: "orgDepartment",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "ORG.TEAM",
-        label: "Teams",
-        description: "Team structure and membership.",
+        messageKey: "orgTeam",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "ORG.OFFICE",
-        label: "Offices",
-        description: "Office locations.",
+        messageKey: "orgOffice",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "ORG.LEGAL_ENTITY",
-        label: "Legal entities",
-        description: "Registered legal entities.",
+        messageKey: "orgLegalEntity",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "ORG.PUBLIC_HOLIDAY_CALENDAR",
-        label: "Public holiday calendars",
-        description: "Public holiday calendars.",
+        messageKey: "orgPublicHolidayCalendar",
         supportedActions: ["VIEW", "MANAGE"],
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "ORG.PUBLIC_HOLIDAY_TEMPLATE",
-        label: "Public holiday templates",
-        description: "Public holiday calendar templates.",
+        messageKey: "orgPublicHolidayTemplate",
         supportedActions: ["VIEW"],
         supportedScopes: COMPANY_ONLY,
       },
@@ -230,33 +205,28 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
   },
   {
     id: "jobs",
-    label: "Jobs",
     resources: [
       {
         code: "JOBS.FAMILY",
-        label: "Job families",
-        description: "Job family catalog.",
+        messageKey: "jobsFamily",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "JOBS.LEVEL_GROUP",
-        label: "Job level groups",
-        description: "Job level group catalog.",
+        messageKey: "jobsLevelGroup",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "JOBS.LEVEL",
-        label: "Job levels",
-        description: "Job level catalog.",
+        messageKey: "jobsLevel",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "JOBS.TITLE",
-        label: "Job titles",
-        description: "Job title catalog.",
+        messageKey: "jobsTitle",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
@@ -264,12 +234,10 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
   },
   {
     id: "roles",
-    label: "Roles",
     resources: [
       {
         code: "ROLES.ROLE",
-        label: "Roles",
-        description: "Roles and their permissions.",
+        messageKey: "rolesRole",
         supportedActions: ALL_ACTIONS,
         supportedScopes: COMPANY_ONLY,
       },
@@ -277,42 +245,34 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
   },
   {
     id: "notifications",
-    label: "Notifications",
     resources: [
       {
         code: "NOTIFICATION.APPROVALS",
-        label: "Approvals",
-        description:
-          "May mute approval notifications for themselves. Off by default: a muted approver stalls other people's requests.",
+        messageKey: "notificationApprovals",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "NOTIFICATION.ORG_CHANGES",
-        label: "Org changes",
-        description: "May mute notifications about departments, teams and reporting changes.",
+        messageKey: "notificationOrgChanges",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "NOTIFICATION.POLICIES",
-        label: "Policies",
-        description: "May mute notifications about policy changes.",
+        messageKey: "notificationPolicies",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "NOTIFICATION.DOCUMENTS",
-        label: "Documents",
-        description: "May mute notifications about documents added to their own file.",
+        messageKey: "notificationDocuments",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },
       {
         code: "NOTIFICATION.SYSTEM",
-        label: "System messages",
-        description:
-          "May mute system messages. Off by default: these are the ones people must not be able to silence.",
+        messageKey: "notificationSystem",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },

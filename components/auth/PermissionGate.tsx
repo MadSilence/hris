@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { AccessAction, AccessCheck, AccessScope, canAccess, ResourceCode } from "@/models/access";
 import { useAccess } from "./useAccess";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -34,6 +35,7 @@ export const PermissionGate: React.FC<Props> = ({
   unavailableFallback,
 }) => {
   const { access, loading, unavailable, error } = useAccess();
+  const t = useTranslations("common");
 
   if (loading) {
     return <>{loadingFallback}</>;
@@ -48,7 +50,7 @@ export const PermissionGate: React.FC<Props> = ({
           client-side refetch keeps hitting the poisoned cache and the button does nothing, which the
           smoke run of 2026-08-27 caught. Reloading gets a fresh process-side attempt.
         */}
-        {unavailableFallback ?? <ErrorState error={error} title="Permissions did not load" />}
+        {unavailableFallback ?? <ErrorState error={error} title={t("access.permissionsDidNotLoad")} />}
       </>
     );
   }

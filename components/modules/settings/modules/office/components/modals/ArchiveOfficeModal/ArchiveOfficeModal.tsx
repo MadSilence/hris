@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Archive02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -30,6 +31,9 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
   const count = office?.assignedUsersCount ?? 0;
 
   return (
@@ -38,27 +42,25 @@ export const ArchiveOfficeModal: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon icon={Archive02Icon} />
-            Archive &quot;{office?.name ?? ""}&quot;?
+            {tPlaces("archiveTitle", { name: office?.name ?? "" })}
           </DialogTitle>
           <DialogDescription>
-            Archived offices are hidden from the active list and can&apos;t be edited or assigned to, but you can
-            unarchive them at any time.
+            {t("archive.description")}
           </DialogDescription>
         </DialogHeader>
 
         {count > 0 && (
           <p className="text-body text-tertiary">
-            {count} {count === 1 ? "person is" : "people are"} assigned to this office.
-            {" "}Archiving keeps them assigned; unarchiving brings everything back as it was.
+            {t("archive.assignedNote", { count })}
           </p>
         )}
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={() => !isLoading && onRequestCloseAction()} disabled={isLoading}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={() => !isLoading && onConfirmAction("KEEP")} disabled={isLoading}>
-            {isLoading ? "Archiving…" : "Archive"}
+            {isLoading ? tPlaces("archiving") : tCommon("actions.archive")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Download01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -41,6 +42,8 @@ type Props = {
  * styles. It carries nothing the reader cannot already see, so it asks for nothing.
  */
 export const CompanyCalendarExport: FC<Props> = ({ from, to, q, filters }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,8 +81,8 @@ export const CompanyCalendarExport: FC<Props> = ({ from, to, q, filters }) => {
         type="button"
         variant="secondary"
         size="icon" className="print:hidden"
-        aria-label="Print the calendar"
-        title="Print"
+        aria-label={t("export.printAria")}
+        title={t("export.print")}
         onClick={() => window.print()}
       >
         <Icon icon={PrinterIcon} size="sm" />
@@ -89,8 +92,8 @@ export const CompanyCalendarExport: FC<Props> = ({ from, to, q, filters }) => {
           type="button"
           variant="secondary"
           size="icon" className="print:hidden"
-          aria-label="Export the calendar"
-          title="Export"
+          aria-label={t("export.exportAria")}
+          title={tCommon("actions.export")}
           onClick={() => setOpen(true)}
         >
           <Icon icon={Download01Icon} size="sm" />
@@ -98,16 +101,15 @@ export const CompanyCalendarExport: FC<Props> = ({ from, to, q, filters }) => {
         <Dialog open={open} onOpenChange={(next) => !next && close()}>
           <DialogContent hideClose className="sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>Export calendar</DialogTitle>
+              <DialogTitle>{t("export.title")}</DialogTitle>
               <DialogDescription>
-                The people in the current view, one column per day of the period shown. Leave appears as you see
-                it on the board.
+                {t("export.description")}
               </DialogDescription>
             </DialogHeader>
             <FormError message={errorMessage} />
             <ExportDataForm
               isLoading={busy}
-              includedText={`Included: ${from} – ${to}, with public holidays and time off.`}
+              includedText={t("export.included", { from, to })}
               onCancelAction={close}
               onSubmitAction={onConfirm}
             />

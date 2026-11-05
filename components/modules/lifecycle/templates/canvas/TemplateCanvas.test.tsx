@@ -2,7 +2,12 @@ import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TemplateCanvas, type CanvasProps } from "./TemplateCanvas";
 import { deriveLanes, type DraftItem } from "./draft";
-import { layoutTemplate } from "./timeAxis";
+import { buildAxis, layoutTemplate } from "./timeAxis";
+import { translatorFor } from "@/test/nextIntl";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
+
+// The English catalogue, through the real ICU formatter.
+const t = translatorFor("lifecycle") as unknown as LifecycleT;
 
 // React Flow measures with ResizeObserver (jest.setup) and reads node transforms through DOMMatrixReadOnly,
 // which jsdom has neither of.
@@ -38,7 +43,7 @@ const render_ = (over: Partial<CanvasProps> = {}) => {
   ];
   const props: CanvasProps = {
     items,
-    layout: layoutTemplate(items, deriveLanes(items)),
+    layout: layoutTemplate(items, deriveLanes(items, t), buildAxis(items, t)),
     readOnly: false,
     selectedKey: null,
     selectedEdgeId: null,

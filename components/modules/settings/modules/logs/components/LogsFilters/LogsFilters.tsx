@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -34,6 +35,8 @@ export const LogsFilters: React.FC<{
   value: ActivityLogFilters;
   onChange: (next: ActivityLogFilters) => void;
 }> = ({ catalog, value, onChange }) => {
+  const t = useTranslations("settings.logs.filters");
+  const tCommon = useTranslations("common");
   const set = (patch: Partial<ActivityLogFilters>) => onChange({ ...value, ...patch });
 
   const actionsByModule = React.useMemo(() => {
@@ -58,13 +61,13 @@ export const LogsFilters: React.FC<{
       <DatePicker
         value={value.from?.slice(0, 10) ?? ""}
         onChange={(date) => set({ from: date ? `${date}T00:00:00` : undefined })}
-        placeholder="From"
+        placeholder={t("from")}
         className="w-[9.5rem]"
       />
       <DatePicker
         value={value.to?.slice(0, 10) ?? ""}
         onChange={(date) => set({ to: date ? `${date}T23:59:59` : undefined })}
-        placeholder="To"
+        placeholder={t("to")}
         className="w-[9.5rem]"
       />
 
@@ -73,10 +76,10 @@ export const LogsFilters: React.FC<{
         onValueChange={(next) => set({ module: next === ANY ? undefined : next, action: undefined })}
       >
         <SelectTrigger className="w-[11rem]">
-          <SelectValue placeholder="Module"/>
+          <SelectValue placeholder={t("module")}/>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ANY}>All modules</SelectItem>
+          <SelectItem value={ANY}>{t("allModules")}</SelectItem>
           {(catalog?.modules ?? []).map((module) => (
             <SelectItem key={module.code} value={module.code}>
               {module.label}
@@ -90,10 +93,10 @@ export const LogsFilters: React.FC<{
         onValueChange={(next) => set({ action: next === ANY ? undefined : next })}
       >
         <SelectTrigger className="w-[15rem]">
-          <SelectValue placeholder="Action"/>
+          <SelectValue placeholder={t("action")}/>
         </SelectTrigger>
         <SelectContent className="max-h-80">
-          <SelectItem value={ANY}>All actions</SelectItem>
+          <SelectItem value={ANY}>{t("allActions")}</SelectItem>
           {[...actionsByModule.entries()]
             .filter(([module]) => !value.module || module === value.module)
             .map(([module, actions]) => (
@@ -114,11 +117,11 @@ export const LogsFilters: React.FC<{
         onValueChange={(next) => set({ verb: next === ANY ? undefined : next })}
       >
         <SelectTrigger className="w-[11rem]">
-          <SelectValue placeholder="Kind"/>
+          <SelectValue placeholder={t("kind")}/>
         </SelectTrigger>
         <SelectContent className="max-h-80">
           {/* The question the page is opened for on a bad day: every deletion, anywhere. */}
-          <SelectItem value={ANY}>Anything done</SelectItem>
+          <SelectItem value={ANY}>{t("anyKind")}</SelectItem>
           {(catalog?.verbs ?? []).map((verb) => (
             <SelectItem key={verb.code} value={verb.code}>
               {verb.label}
@@ -132,13 +135,13 @@ export const LogsFilters: React.FC<{
         onValueChange={(next) => set({ actorType: next === ANY ? undefined : next })}
       >
         <SelectTrigger className="w-[10rem]">
-          <SelectValue placeholder="Done by"/>
+          <SelectValue placeholder={t("doneBy")}/>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ANY}>Anyone</SelectItem>
-          <SelectItem value="USER">A person</SelectItem>
-          <SelectItem value="SYSTEM">The system</SelectItem>
-          <SelectItem value="INTEGRATION">An integration</SelectItem>
+          <SelectItem value={ANY}>{t("anyone")}</SelectItem>
+          <SelectItem value="USER">{t("actorUser")}</SelectItem>
+          <SelectItem value="SYSTEM">{t("actorSystem")}</SelectItem>
+          <SelectItem value="INTEGRATION">{t("actorIntegration")}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -151,7 +154,7 @@ export const LogsFilters: React.FC<{
           }
         >
           <Icon icon={Cancel01Icon} size="sm" />
-          Clear
+          {tCommon("actions.clear")}
         </Button>
       )}
     </div>

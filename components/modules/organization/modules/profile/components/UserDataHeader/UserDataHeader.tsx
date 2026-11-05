@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { DeleteProfileModal } from "./modals/DeleteProfileModal";
 import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
@@ -12,7 +13,7 @@ import {
   formatUserStatus,
   isProspectiveStatus,
 } from "@/models/user/status";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/desact/button";
@@ -65,7 +66,12 @@ export type UserDataHeaderProps = {
   user?: User;
 };
 
+type OrgTranslator = ReturnType<typeof useTranslations<"organization">>;
+
 export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const { data: userFetched } = useUser(userId);
   const user = userFetched ?? userProp;
   // The profile's SWR cache is its own (`UserProvider` sets `provider: () => new Map()`), so the
@@ -196,7 +202,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // Identity always arrives; the email may be withheld by field access, so it cannot be the last
   // resort. An unnamed person is a data problem, not a permission one.
   const fullName =
-    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "Unnamed";
+    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || t("profile.header.unnamed");
   const isOwnProfile = currentUserId === user.id;
   const isArchived = (user.status ?? "").toUpperCase() === "ARCHIVED";
   /*
@@ -249,11 +255,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
     (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || mayOffboard || !isOwnProfile));
 
   const teamFact = user.teams && user.teams.length > 0
-    ? { label: user.teams.length === 1 ? "Team" : "Teams", value: user.teams.map((t) => t.name).join(", ") }
+    ? { label: t("profile.header.teams", { count: user.teams.length }), value: user.teams.map((team) => team.name).join(", ") }
     : user.department?.name
-      ? { label: "Department", value: user.department.name }
+      ? { label: t("profile.header.department"), value: user.department.name }
       : null;
-  const tenure = tenureOf(user.hireDate);
+  const tenure = tenureOf(t, user.hireDate);
 
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
@@ -275,7 +281,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
           >
             <button
               type="button"
-              aria-label="Change photo"
+              aria-label={t("profile.header.changePhoto")}
               disabled={isAvatarLoading}
               onClick={() => setIsAvatarModalOpen(true)}
               className="group relative shrink-0 rounded-pill"
@@ -301,8 +307,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 <h1 className="text-section-title text-primary">{fullName}</h1>
                 {user.status && (
                   <PendingValue
-                    steps={pendingSteps(scheduledChanges, "sys:status", [
-                      { id: user.status, name: formatUserStatus(user.status) },
+                    steps={pendingSteps(tCommon, scheduledChanges, "sys:status", [
+                      { id: user.status, name: formatUserStatus(tCommon, user.status) },
                     ])}
                   >
                     <UserStatusBadge status={user.status}/>
@@ -310,14 +316,14 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 )}
                 {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
                 <AccountStatusBadge accountStatus={user.accountStatus}/>
-                {isLocked && <StatusBadge status="inactive" label="Locked"/>}
+                {isLocked && <StatusBadge status="inactive" label={t("profile.header.locked")}/>}
               </div>
               {user.jobName && <p className="mt-1 truncate text-body text-secondary">{user.jobName}</p>}
               {user.email && <p className="truncate text-hint text-tertiary">{user.email}</p>}
             </div>
 
             {user.manager && (
-              <HeaderFact label="Manager">
+              <HeaderFact label={t("profile.header.manager")}>
                 <Link href={`/organization/people/${user.manager.id}`} className="inline-flex items-center gap-1.5 text-primary no-underline hover:underline">
                   <Avatar className="size-5">
                     <AvatarFallback name={user.manager.name} className="text-hint">{initialsOf(user.manager.name).slice(0, 1)}</AvatarFallback>
@@ -327,7 +333,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               </HeaderFact>
             )}
             {teamFact && <HeaderFact label={teamFact.label}>{teamFact.value}</HeaderFact>}
-            {tenure && <HeaderFact label="With us">{tenure}</HeaderFact>}
+            {tenure && <HeaderFact label={t("profile.header.withUs")}>{tenure}</HeaderFact>}
           </div>
 
           {/*
@@ -340,8 +346,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 <Button type="button"
                   variant="secondary"
                   size="icon"
-                  aria-label="Login as user"
-                  title="Login as user"
+                  aria-label={t("profile.header.loginAs")}
+                  title={t("profile.header.loginAs")}
                   disabled={startImpersonation.isPending}
                   onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
                 >
@@ -358,7 +364,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                   onClick={() => setIsInviteOpen(true)}
                 >
                   <Icon icon={Mail01Icon} size="sm" />
-                  {isInvited ? "Resend invitation" : "Invite"}
+                  {isInvited ? t("profile.header.resendInvitation") : t("profile.header.invite")}
                 </Button>
               </PermissionGate>
             )}
@@ -368,18 +374,18 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               only BLOCK — a security officer, say — still gets the menu, with only its access items.
             */}
             {hasPersonActions && (
-              <RowActionsMenu label="Person actions">
+              <RowActionsMenu label={t("profile.header.personActions")}>
                 {/* The chart opens with this person picked and centred (`?person=`). Shown whenever the menu is. */}
                 <RowAction
                   icon={<Icon icon={HierarchySquare02Icon} size="sm" />}
                   onClick={() => router.push(`/organization/chart?person=${encodeURIComponent(user.id)}`)}
                 >
-                  View in org chart
+                  {t("profile.header.viewInOrgChart")}
                 </RowAction>
                 {/* In the kebab like every other action on a profile — the own one is no exception. */}
                 {mayChangeOwnPassword && (
                   <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setIsChangePasswordOpen(true)}>
-                    Change password
+                    {t("profile.header.changePassword")}
                   </RowAction>
                 )}
                 {canManageProfiles && user.inviteScheduledFor && (
@@ -394,27 +400,27 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                       }
                     }}
                   >
-                    Cancel scheduled invitation
+                    {t("profile.header.cancelScheduledInvitation")}
                   </RowAction>
                 )}
                 {canManageProfiles && mayPreboard && (
                   <RowAction icon={<Icon icon={DoorIcon} size="sm" />} onClick={() => setStartType("PREBOARDING")}>
-                    Start preboarding
+                    {t("profile.header.startPreboarding")}
                   </RowAction>
                 )}
                 {canManageProfiles && mayOnboard && (
                   <RowAction icon={<Icon icon={Rocket01Icon} size="sm" />} onClick={() => setStartType("ONBOARDING")}>
-                    Start onboarding
+                    {t("profile.header.startOnboarding")}
                   </RowAction>
                 )}
                 {canManageProfiles && mayOffboard && (
                   <RowAction icon={<Icon icon={DoorLockIcon} size="sm" />} onClick={() => setStartType("OFFBOARDING")}>
-                    Start offboarding
+                    {t("profile.header.startOffboarding")}
                   </RowAction>
                 )}
                 {maySendReset && (
                   <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setAccountAccess("RESET")}>
-                    {isLocked ? "Send password reset to unlock" : "Send password reset"}
+                    {isLocked ? t("profile.header.sendResetToUnlock") : t("profile.header.sendReset")}
                   </RowAction>
                 )}
                 {mayExportPersonalData && (
@@ -422,27 +428,27 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     icon={<Icon icon={Download01Icon} size="sm" />}
                     onClick={() => void exportPersonalData(user.id).catch((error: unknown) => showError(error))}
                   >
-                    Export personal data
+                    {t("profile.header.exportPersonalData")}
                   </RowAction>
                 )}
                 {mayEndSessions && (
                   <RowAction icon={<Icon icon={ShieldOffIcon} size="sm" />} onClick={() => setAccountAccess("RESET_MFA")}>
-                    Reset two-step sign-in
+                    {t("profile.header.resetMfa")}
                   </RowAction>
                 )}
                 {mayEndSessions && (
                   <RowAction icon={<Icon icon={Logout01Icon} size="sm" />} onClick={() => setAccountAccess("END_SESSIONS")}>
-                    End all sessions
+                    {t("profile.header.endSessions")}
                   </RowAction>
                 )}
                 {mayBlock && (
                   <RowAction icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setAccountAccess("BLOCK")}>
-                    Block account
+                    {t("profile.header.block")}
                   </RowAction>
                 )}
                 {mayUnblock && (
                   <RowAction icon={<Icon icon={SquareUnlock02Icon} size="sm" />} onClick={() => setAccountAccess("UNBLOCK")}>
-                    Unblock account
+                    {t("profile.header.unblock")}
                   </RowAction>
                 )}
                 {mayTerminate && (
@@ -452,10 +458,10 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     disabled={isTerminated || isTerminationPending}
                   >
                     {isTerminated
-                      ? "Already terminated"
+                      ? t("profile.header.alreadyTerminated")
                       : isTerminationPending
-                        ? `Leaving ${formatDisplayDate(String(user.terminationDate))}`
-                        : "Terminate employment"}
+                        ? t("profile.header.leaving", { date: formatDisplayDate(String(user.terminationDate)) })
+                        : t("profile.header.terminate")}
                   </RowAction>
                 )}
                 {canManageProfiles && !isOwnProfile && (
@@ -463,7 +469,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     icon={<Icon icon={Delete02Icon} size="sm" />}
                     onClick={() => setIsDeleteOpen(true)}
                   >
-                    Delete profile
+                    {t("profile.header.deleteProfile")}
                   </RowActionDestructive>
                 )}
               </RowActionsMenu>
@@ -566,7 +572,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               // with no "→ Archived from …" until a reload (walk of 2026-10-26).
               await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
             } else {
-              setLifecycleError(res.errorMessage ?? "Failed to terminate employment.");
+              setLifecycleError(res.errorMessage ?? t("profile.header.terminateFailed"));
             }
           } finally {
             setIsLifecycleBusy(false);
@@ -598,7 +604,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               setIsDeleteOpen(false);
               router.push("/organization/people");
             } else {
-              setLifecycleError(res.errorMessage ?? "Failed to delete the profile.");
+              setLifecycleError(res.errorMessage ?? t("profile.header.deleteFailed"));
             }
           } finally {
             setIsLifecycleBusy(false);
@@ -614,25 +620,27 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
  * start, and where their invitation is. Nothing for somebody already working and registered.
  */
 function LifecycleNote({ user }: { user: User }) {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
   const parts: string[] = [];
 
   if (isProspectiveStatus(user.status)) {
     parts.push(user.hireDate
-      ? `Starts ${formatDisplayDate(user.hireDate, { style: "medium" })}`
-      : "No start date yet");
+      ? t("profile.lifecycleNote.starts", { date: formatDisplayDate(user.hireDate, { style: "medium" }) })
+      : t("profile.lifecycleNote.noStartDate"));
   }
   if (user.inviteScheduledFor) {
-    parts.push(`Invitation goes out ${formatDisplayDate(user.inviteScheduledFor, { style: "medium" })}`);
+    parts.push(t("profile.lifecycleNote.invitationGoesOut", { date: formatDisplayDate(user.inviteScheduledFor, { style: "medium" }) }));
   } else if (user.accountStatus === "INVITED" && user.inviteSentAt) {
-    parts.push(`Invited ${formatDisplayDate(user.inviteSentAt, { style: "medium" })}, not registered yet`);
+    parts.push(t("profile.lifecycleNote.invited", { date: formatDisplayDate(user.inviteSentAt, { style: "medium" }) }));
   } else if (user.accountStatus === "DRAFT") {
-    parts.push("Not invited");
+    parts.push(t("profile.lifecycleNote.notInvited"));
   }
   if (user.accountLocked) {
-    parts.push("Locked after too many failed sign-ins — send a password reset to unlock");
+    parts.push(t("profile.lifecycleNote.locked"));
   }
   if (user.pendingEmail) {
-    parts.push(`New email ${user.pendingEmail} waits for confirmation — the link was sent to it`);
+    parts.push(t("profile.lifecycleNote.pendingEmail", { email: user.pendingEmail }));
   }
 
   if (parts.length === 0) return null;
@@ -669,7 +677,7 @@ function ProfileAvatar({ url, fullName }: { url: string | null; fullName: string
  * Time with the company, the way the header says it: "3 weeks", "7 months", "2 y 7 m", "2 years". Nothing
  * before the first day — somebody who has not started has no tenure.
  */
-export function tenureOf(hireDate: string | null | undefined, today: Date = new Date()): string | null {
+export function tenureOf(t: OrgTranslator, hireDate: string | null | undefined, today: Date = new Date()): string | null {
   if (!hireDate) return null;
   const [y, m, d] = hireDate.slice(0, 10).split("-").map(Number);
   const start = new Date(y, m - 1, d);
@@ -678,13 +686,13 @@ export function tenureOf(hireDate: string | null | undefined, today: Date = new 
   if (today.getDate() < start.getDate()) months -= 1;
   if (months < 1) {
     const weeks = Math.max(1, Math.floor((today.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000)));
-    return weeks === 1 ? "1 week" : `${weeks} weeks`;
+    return t("profile.tenure.weeks", { count: weeks });
   }
-  if (months < 12) return months === 1 ? "1 month" : `${months} months`;
+  if (months < 12) return t("profile.tenure.months", { count: months });
   const years = Math.floor(months / 12);
   const rest = months % 12;
-  if (rest === 0) return years === 1 ? "1 year" : `${years} years`;
-  return `${years} y ${rest} m`;
+  if (rest === 0) return t("profile.tenure.years", { count: years });
+  return t("profile.tenure.yearsMonths", { years, months: rest });
 }
 
 function initialsOf(name: string) {

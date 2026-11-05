@@ -1,4 +1,4 @@
-import { REVIEW_KIND_LABELS, type Cycle } from "@/models/reviews";
+import { REVIEW_KIND_KEYS, type Cycle, type ReviewsT } from "@/models/reviews";
 
 /** "Repeat" moves every date of a cycle by one to this many months (REVIEWS_PLAN.md 11.1; the backend's bound too). */
 export const MAX_REPEAT_MONTHS = 36;
@@ -31,19 +31,19 @@ export type ShiftedDate = { label: string; from: string; to: string };
  * Every date of a cycle and where "Repeat" would move it, in the order the builder shows them — what the Repeat
  * dialog previews before anything is written. A date the cycle does not have is left out.
  */
-export function shiftedCycleDates(cycle: Cycle, months: number): ShiftedDate[] {
+export function shiftedCycleDates(cycle: Cycle, months: number, t: ReviewsT): ShiftedDate[] {
   const out: ShiftedDate[] = [];
   const add = (label: string, iso: string | null) => {
     if (iso) out.push({ label, from: iso, to: shiftIsoDate(iso, months) });
   };
-  add("Hired on or before", cycle.eligibleHiredBefore);
+  add(t("copies.date.hiredBefore"), cycle.eligibleHiredBefore);
   for (const k of cycle.kinds) {
-    const name = REVIEW_KIND_LABELS[k.kind];
-    add(`${name} opens`, k.opensOn);
-    add(`${name} due`, k.dueOn);
-    add("Peers nominated by", k.nominationDueOn);
-    add("Peers approved by", k.approvalDueOn);
+    const name = t(REVIEW_KIND_KEYS[k.kind]);
+    add(t("copies.date.opens", { name }), k.opensOn);
+    add(t("copies.date.due", { name }), k.dueOn);
+    add(t("copies.date.nominatedBy"), k.nominationDueOn);
+    add(t("copies.date.approvedBy"), k.approvalDueOn);
   }
-  if (cycle.sharingMode === "RELEASED_ON_DATE") add("Results released", cycle.releaseDate);
+  if (cycle.sharingMode === "RELEASED_ON_DATE") add(t("copies.date.released"), cycle.releaseDate);
   return out;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { FC } from "react";
+import { useTranslations } from "next-intl";
 
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
@@ -18,13 +19,13 @@ import {
 import { FieldError } from "@/components/desact/field-error";
 
 /** Wording aimed at an admin, not at the enum. */
-const SUBSTITUTION_LABELS: Record<PublicHolidayCalendarWeekendSubstitution, string> = {
-  [PublicHolidayCalendarWeekendSubstitution.None]: "No substitution — the day is lost",
-  [PublicHolidayCalendarWeekendSubstitution.NextWorkingDay]: "Move to the next working day",
-  [PublicHolidayCalendarWeekendSubstitution.PreviousWorkingDay]: "Move to the previous working day",
-  [PublicHolidayCalendarWeekendSubstitution.NearestWorkingDay]: "Move to the nearest working day",
-  [PublicHolidayCalendarWeekendSubstitution.ManualCompensation]: "Owe a day, choose the date by hand",
-};
+const SUBSTITUTION_LABELS = {
+  [PublicHolidayCalendarWeekendSubstitution.None]: "publicHolidays.fields.substitutionOptions.none",
+  [PublicHolidayCalendarWeekendSubstitution.NextWorkingDay]: "publicHolidays.fields.substitutionOptions.next",
+  [PublicHolidayCalendarWeekendSubstitution.PreviousWorkingDay]: "publicHolidays.fields.substitutionOptions.previous",
+  [PublicHolidayCalendarWeekendSubstitution.NearestWorkingDay]: "publicHolidays.fields.substitutionOptions.nearest",
+  [PublicHolidayCalendarWeekendSubstitution.ManualCompensation]: "publicHolidays.fields.substitutionOptions.manual",
+} as const satisfies Record<PublicHolidayCalendarWeekendSubstitution, string>;
 
 type Props = {
   idPrefix: string;
@@ -64,10 +65,12 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
   weekendSubstitution,
   onWeekendSubstitutionChange,
   disabled = false,
-}) => (
+}) => {
+  const t = useTranslations("timeOff");
+  return (
   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div className="space-y-2">
-      <Label htmlFor={`${idPrefix}-name`}>Name</Label>
+      <Label htmlFor={`${idPrefix}-name`}>{t("publicHolidays.fields.name")}</Label>
       <div className="flex items-center gap-2">
         <span className="flex h-9 w-9 flex-none items-center justify-center rounded-control border border-divider bg-subtle">
           <CountryFlag countryCode={countryCode} title={countryName} />
@@ -84,7 +87,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
     </div>
 
     <div className="space-y-2">
-      <Label htmlFor={`${idPrefix}-country`}>Country</Label>
+      <Label htmlFor={`${idPrefix}-country`}>{t("publicHolidays.fields.country")}</Label>
       <Input
         id={`${idPrefix}-country`}
         value={countryCode}
@@ -96,7 +99,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
     </div>
 
     <div className="space-y-2">
-      <Label htmlFor={`${idPrefix}-region`}>Region</Label>
+      <Label htmlFor={`${idPrefix}-region`}>{t("publicHolidays.fields.region")}</Label>
       <Input
         id={`${idPrefix}-region`}
         value={regionCode}
@@ -107,7 +110,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
 
     {weekendSubstitution !== undefined && onWeekendSubstitutionChange ? (
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-substitution`}>Holiday on a Non-working Day</Label>
+        <Label htmlFor={`${idPrefix}-substitution`}>{t("publicHolidays.fields.substitution")}</Label>
         <Select
           value={weekendSubstitution}
           onValueChange={(next) =>
@@ -121,7 +124,7 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
           <SelectContent>
             {Object.values(PublicHolidayCalendarWeekendSubstitution).map((value) => (
               <SelectItem key={value} value={value}>
-                {SUBSTITUTION_LABELS[value]}
+                {t(SUBSTITUTION_LABELS[value])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -129,4 +132,5 @@ export const PublicHolidayCalendarFields: FC<Props> = ({
       </div>
     ) : null}
   </div>
-);
+  );
+};

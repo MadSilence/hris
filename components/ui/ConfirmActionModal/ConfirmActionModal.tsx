@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -53,7 +54,9 @@ export const ConfirmActionModal: React.FC<{
   onConfirmAction,
   onCancelAction,
   children,
-}) => (
+}) => {
+  const t = useTranslations("common");
+  return (
   <AlertDialog
     open={isOpen}
     onOpenChange={(open) => {
@@ -72,7 +75,7 @@ export const ConfirmActionModal: React.FC<{
       <FormError message={errorMessage} />
 
       <AlertDialogFooter>
-        <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+        <AlertDialogCancel disabled={isLoading}>{t("actions.cancel")}</AlertDialogCancel>
         <AlertDialogAction
           disabled={isLoading}
           // Kept mounted while the mutation runs; the caller closes it on success.
@@ -87,4 +90,5 @@ export const ConfirmActionModal: React.FC<{
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
-);
+  );
+};

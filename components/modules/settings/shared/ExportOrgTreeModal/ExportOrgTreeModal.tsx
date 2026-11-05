@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FileTextIcon, Xls01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -17,7 +18,8 @@ import {
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FormError } from "@/components/feedback/FormError";
 
-type Noun = "department" | "team";
+/** What the tree is made of. Each kind has its own sentences in the catalogue, in every language. */
+export type ExportOrgTreeKind = "department" | "team";
 
 /** One selectable export target. `depth` is 0 for a root node and only drives the indentation. */
 export type ExportOrgTreeNode = {
@@ -32,7 +34,7 @@ export type ExportOrgTreeNode = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  noun: Noun;
+  kind: ExportOrgTreeKind;
   /** Everything that can be exported, in tree order. */
   nodes: ExportOrgTreeNode[];
   /** Pre-selected target — usually whatever the canvas has selected. */
@@ -41,10 +43,13 @@ type Props = {
 };
 
 export function ExportOrgTreeModal({
-  isOpen, onClose, noun, nodes, defaultNodeId, buildExportUrl,
+  isOpen, onClose, kind, nodes, defaultNodeId, buildExportUrl,
 }: Props) {
-  const subLabel = noun === "department" ? "sub-departments" : "sub-teams";
-  const nounLabel = noun === "department" ? "Department" : "Team";
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  /** The sentences differ by kind in every language, so each kind has its own messages. */
+  const n = (key: "title" | "description" | "label" | "placeholder" | "includeSub" | "includeSubHint" | "noSub") =>
+    t(`shared.exportOrgTree.${kind}.${key}`);
 
   const [nodeId, setNodeId] = useState<string>("");
   const [format, setFormat] = useState<ExportDataFormat>("xlsx");
@@ -98,7 +103,7 @@ export function ExportOrgTreeModal({
       });
       onClose();
     } catch (e) {
-      setError((e as Error)?.message ?? "Export failed. Please try again.");
+      setError((e as Error)?.message ?? t("shared.exportOrgTree.failed"));
     } finally {
       setIsLoading(false);
     }
@@ -108,22 +113,22 @@ export function ExportOrgTreeModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
       <DialogContent hideClose className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Export {noun}</DialogTitle>
+          <DialogTitle>{n("title")}</DialogTitle>
           <DialogDescription>
-            Pick a {noun} and download it as a spreadsheet.
+            {n("description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           {/* Target */}
           <div className="space-y-1.5">
-            <Label htmlFor="export-node">{nounLabel}</Label>
+            <Label htmlFor="export-node">{n("label")}</Label>
             <SearchableSelect
               id="export-node"
               options={nodes.map((node) => ({ value: node.id, label: node.name, depth: node.depth }))}
               value={nodeId || null}
               onChange={(v) => setNodeId(v ?? "")}
-              placeholder={`Select a ${noun}`}
+              placeholder={n("placeholder")}
               disabled={nodes.length === 0}
               clearable={false}
             />
@@ -131,23 +136,23 @@ export function ExportOrgTreeModal({
 
           {/* Format */}
           <div className="space-y-3">
-            <div className="text-body font-medium">Format</div>
+            <div className="text-body font-medium">{t("shared.exportFormat.format")}</div>
             <div className="grid grid-cols-2 gap-3">
               <FormatCard
                 active={format === "csv"}
                 onClick={() => setFormat("csv")}
                 icon={<Icon icon={FileTextIcon} size="sm" className="text-secondary" />}
                 title="CSV"
-                badge="Lightweight"
-                hint="Best for simple imports and quick viewing."
+                badge={t("shared.exportFormat.csvBadge")}
+                hint={t("shared.exportFormat.csvHint")}
               />
               <FormatCard
                 active={format === "xlsx"}
                 onClick={() => setFormat("xlsx")}
                 icon={<Icon icon={Xls01Icon} size="sm" className="text-secondary" />}
                 title="XLSX"
-                badge="Recommended"
-                hint="Better for structured data and multiple sheets."
+                badge={t("shared.exportFormat.xlsxBadge")}
+                hint={t("shared.exportFormat.xlsxHint")}
               />
             </div>
           </div>
@@ -155,22 +160,18 @@ export function ExportOrgTreeModal({
           {/* Options */}
           <div className="space-y-3">
             <OptionRow
-              title={`Include all ${subLabel}`}
-              hint={
-                hasSubNodes
-                  ? `Adds every ${noun} below this one to the Structure sheet.`
-                  : `This ${noun} has no ${subLabel}.`
-              }
+              title={n("includeSub")}
+              hint={hasSubNodes ? n("includeSubHint") : n("noSub")}
               checked={includeSubNodes && hasSubNodes}
               disabled={!hasSubNodes}
               onChange={setIncludeSubNodes}
             />
             <OptionRow
-              title="Include assigned people"
+              title={t("shared.exportOrgTree.includePeople")}
               hint={
                 peopleAvailable
-                  ? "Adds a People sheet with everyone assigned in scope."
-                  : "No people assigned in the selected scope."
+                  ? t("shared.exportOrgTree.includePeopleHint")
+                  : t("shared.exportOrgTree.noPeople")
               }
               checked={includePeople && peopleAvailable}
               disabled={!peopleAvailable}
@@ -183,14 +184,14 @@ export function ExportOrgTreeModal({
 
         <DialogFooter className="mt-6">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="button"
             onClick={handleExport}
             disabled={isLoading || !selected}
  >
-            {isLoading ? "Exporting…" : "Export"}
+            {isLoading ? t("shared.exportOrgTree.exporting") : tCommon("actions.export")}
           </Button>
         </DialogFooter>
       </DialogContent>

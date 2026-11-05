@@ -13,6 +13,8 @@ import {
   Remove01Icon,
 } from "@hugeicons/core-free-icons";
 
+import { useTranslations } from "next-intl";
+
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { cn } from "@/lib/cn";
 import { formatAccountStatus, formatUserStatus, isActiveStatus, isProspectiveStatus } from "@/models/user/status";
@@ -54,77 +56,79 @@ export type StatusTone =
 
 export type EntityStatus = "active" | "inactive" | "draft" | "archived";
 
-type StatusStyle = { label: string; icon: IconSvgElement; className: string; iconClassName: string };
+type StatusLabelKey = `status.${"approved" | "pending" | "inProgress" | "scheduled" | "declined" | "info" | "draft" | "inactive" | "archived" | "active"}`;
+
+type StatusStyle = { labelKey: StatusLabelKey; icon: IconSvgElement; className: string; iconClassName: string };
 
 /* Written out in full so Tailwind finds every class in the source. */
 const STYLES: Record<StatusTone, StatusStyle> = {
   approved: {
-    label: "Approved",
+    labelKey: "status.approved",
     icon: CheckmarkCircle02Icon,
     className: "bg-status-approved-bg text-status-approved-text",
     iconClassName: "text-status-approved-icon",
   },
   pending: {
-    label: "Pending",
+    labelKey: "status.pending",
     icon: HourglassIcon,
     className: "bg-status-pending-bg text-status-pending-text",
     iconClassName: "text-status-pending-icon",
   },
   "in-progress": {
-    label: "In progress",
+    labelKey: "status.inProgress",
     icon: Loading03Icon,
     className: "bg-status-in-progress-bg text-status-in-progress-text",
     iconClassName: "text-status-in-progress-icon",
   },
   scheduled: {
-    label: "Scheduled",
+    labelKey: "status.scheduled",
     icon: Calendar03Icon,
     className: "bg-status-scheduled-bg text-status-scheduled-text",
     iconClassName: "text-status-scheduled-icon",
   },
   declined: {
-    label: "Declined",
+    labelKey: "status.declined",
     icon: CancelCircleIcon,
     className: "bg-status-declined-bg text-status-declined-text",
     iconClassName: "text-status-declined-icon",
   },
   info: {
-    label: "Info",
+    labelKey: "status.info",
     icon: HelpCircleIcon,
     className: "bg-status-info-bg text-status-info-text",
     iconClassName: "text-status-info-icon",
   },
   draft: {
-    label: "Draft",
+    labelKey: "status.draft",
     icon: PencilEdit02Icon,
     className: "border border-dashed border-status-draft-border bg-status-draft-bg text-status-draft-text",
     iconClassName: "text-status-draft-icon",
   },
   inactive: {
-    label: "Inactive",
+    labelKey: "status.inactive",
     icon: Remove01Icon,
     className: "bg-status-inactive-bg text-status-inactive-text",
     iconClassName: "text-status-inactive-icon",
   },
   archived: {
-    label: "Archived",
+    labelKey: "status.archived",
     icon: Archive02Icon,
     className: "bg-status-archived-bg text-status-archived-text",
     iconClassName: "text-status-archived-icon",
   },
 };
 
-const ENTITY_TONES: Record<EntityStatus, { tone: StatusTone; label: string }> = {
-  active: { tone: "approved", label: "Active" },
-  inactive: { tone: "inactive", label: "Inactive" },
-  draft: { tone: "draft", label: "Draft" },
-  archived: { tone: "archived", label: "Archived" },
+const ENTITY_TONES: Record<EntityStatus, { tone: StatusTone; labelKey: StatusLabelKey }> = {
+  active: { tone: "approved", labelKey: "status.active" },
+  inactive: { tone: "inactive", labelKey: "status.inactive" },
+  draft: { tone: "draft", labelKey: "status.draft" },
+  archived: { tone: "archived", labelKey: "status.archived" },
 };
 
-const resolve = (status: StatusTone | EntityStatus): { tone: StatusTone; label: string } =>
+const resolve = (status: StatusTone | EntityStatus): { tone: StatusTone; labelKey: StatusLabelKey } =>
   status in ENTITY_TONES
     ? ENTITY_TONES[status as EntityStatus]
-    : { tone: status as StatusTone, label: STYLES[status as StatusTone].label };
+    : { tone: status as StatusTone, labelKey: STYLES[status as StatusTone].labelKey };
 
 export const StatusBadge: React.FC<{
   status: StatusTone | EntityStatus;
@@ -134,6 +138,7 @@ export const StatusBadge: React.FC<{
   size?: "sm" | "md";
   className?: string;
 }> = ({ status, label, size = "md", className }) => {
+  const t = useTranslations("common");
   const resolved = resolve(status);
   const style = STYLES[resolved.tone];
 
@@ -149,7 +154,7 @@ export const StatusBadge: React.FC<{
       )}
     >
       <Icon icon={style.icon} size="sm" className={cn("size-3.5", style.iconClassName)} />
-      {label ?? resolved.label}
+      {label ?? t(resolved.labelKey)}
     </span>
   );
 };
@@ -159,10 +164,11 @@ export const StatusBadge: React.FC<{
  * an active person is Approved, a person who has left is Inactive.
  */
 export const UserStatusBadge: React.FC<{ status?: string | null; size?: "sm" | "md" }> = ({ status, size }) => {
+  const tCommon = useTranslations("common");
   if (!status) return null;
 
   const tone: StatusTone = isActiveStatus(status) ? "approved" : isProspectiveStatus(status) ? "scheduled" : "inactive";
-  return <StatusBadge status={tone} label={formatUserStatus(status)} size={size} />;
+  return <StatusBadge status={tone} label={formatUserStatus(tCommon, status)} size={size} />;
 };
 
 /**
@@ -177,10 +183,11 @@ export const UserStatusBadge: React.FC<{ status?: string | null; size?: "sm" | "
  * is Declined.
  */
 export const AccountStatusBadge: React.FC<{ accountStatus?: string | null; size?: "sm" | "md" }> = ({ accountStatus, size }) => {
+  const tCommon = useTranslations("common");
   const code = (accountStatus ?? "").toUpperCase();
   const tone: StatusTone | null =
     code === "DRAFT" ? "draft" : code === "INVITED" ? "pending" : code === "BLOCKED" ? "declined" : null;
   if (!tone) return null;
 
-  return <StatusBadge status={tone} label={formatAccountStatus(code)} size={size} />;
+  return <StatusBadge status={tone} label={formatAccountStatus(tCommon, code)} size={size} />;
 };

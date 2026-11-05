@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Add01Icon, ArrowDown01Icon, FileAddIcon, Layout01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -20,11 +21,11 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { useReviewCycles, useReviewCycleTemplates } from "@/components/modules/reviews/hooks";
 import { useCycleCopies } from "@/components/modules/reviews/cycles/CycleCopyActions";
 import { CycleStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
-import { REVIEW_KIND_LABELS, type CycleSummary } from "@/models/reviews";
+import { REVIEW_KIND_KEYS, type CycleSummary } from "@/models/reviews";
 
 export const cycleHref = (id: string) => `/reviews/cycles/${id}`;
 
@@ -34,6 +35,7 @@ export const cycleHref = (id: string) => `/reviews/cycles/${id}`;
  * sent to My Reviews.
  */
 export function ReviewsOverviewContainer() {
+  const t = useTranslations("reviews");
   const router = useRouter();
   const { access, loading } = useAccess();
   const canView = canAccess({ access, resource: "REVIEWS.CYCLE", action: "VIEW" });
@@ -85,11 +87,11 @@ export function ReviewsOverviewContainer() {
           query={query}
           archivedView={showClosed}
           scene="reviews-and-one-on-ones"
-          title="No review cycles yet"
-          description="A cycle asks a group of people to review themselves and each other, and their managers to review them, on dates you set."
-          archivedDescription="No closed review cycles."
+          title={t("overview.empty.title")}
+          description={t("overview.empty.description")}
+          archivedDescription={t("overview.empty.archived")}
           onCreate={() => router.push("/reviews/cycles/new")}
-          createLabel="Add cycle"
+          createLabel={t("overview.addCycle")}
           createAccess={{ resource: "REVIEWS.CYCLE", action: "MANAGE" }}
         />
       ) : (
@@ -100,13 +102,13 @@ export function ReviewsOverviewContainer() {
 
       {!showClosed && !query.trim() && (templates.data ?? []).length > 0 && (
         <section className="space-y-2 pt-4" aria-labelledby="review-templates">
-          <h2 id="review-templates" className="text-body font-medium text-primary">Templates</h2>
+          <h2 id="review-templates" className="text-body font-medium text-primary">{t("overview.templates.title")}</h2>
           <p className="text-hint text-tertiary">
-            Never launched themselves: a cycle is added from one, or an automation starts one for a person.
+            {t("overview.templates.description")}
           </p>
           <ul className="space-y-2">
-            {(templates.data ?? []).map((t) => (
-              <CycleRow key={t.id} cycle={t} onOpen={() => router.push(cycleHref(t.id))} />
+            {(templates.data ?? []).map((tpl) => (
+              <CycleRow key={tpl.id} cycle={tpl} onOpen={() => router.push(cycleHref(tpl.id))} />
             ))}
           </ul>
         </section>
@@ -125,11 +127,12 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
   onBlank: () => void;
   onTemplate: (id: string) => void;
 }) {
+  const t = useTranslations("reviews");
   if (templates.length === 0) {
     return (
       <Button type="button" className="gap-1.5" onClick={onBlank}>
         <Icon icon={Add01Icon} size="sm" />
-        Add cycle
+        {t("overview.addCycle")}
       </Button>
     );
   }
@@ -138,21 +141,21 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
       <DropdownMenuTrigger asChild>
         <Button type="button" className="gap-1.5" disabled={busy}>
           <Icon icon={Add01Icon} size="sm" />
-          Add cycle
+          {t("overview.addCycle")}
           <Icon icon={ArrowDown01Icon} size="sm" className="opacity-70" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 rounded-control p-1">
         <DropdownMenuItem onClick={onBlank} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
           <Icon icon={FileAddIcon} size="sm" className="text-tertiary" />
-          Blank cycle
+          {t("overview.blankCycle")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="px-2.5 py-1 text-hint font-normal text-tertiary">From a template</DropdownMenuLabel>
-        {templates.map((t) => (
-          <DropdownMenuItem key={t.id} onClick={() => onTemplate(t.id)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+        <DropdownMenuLabel className="px-2.5 py-1 text-hint font-normal text-tertiary">{t("overview.fromTemplate")}</DropdownMenuLabel>
+        {templates.map((tpl) => (
+          <DropdownMenuItem key={tpl.id} onClick={() => onTemplate(tpl.id)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
             <Icon icon={Layout01Icon} size="sm" className="text-tertiary" />
-            <span className="truncate">{t.name}</span>
+            <span className="truncate">{tpl.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -161,13 +164,16 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
 }
 
 function CycleRow({ cycle: c, onOpen }: { cycle: CycleSummary; onOpen: () => void }) {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const percent = c.assignments === 0 ? 0 : Math.round((c.submitted / c.assignments) * 100);
   const facts = [
-    c.kinds.map((k) => REVIEW_KIND_LABELS[k]).join(", ") || "No reviews chosen",
-    c.status === "DRAFT" ? null : `${c.participants === 1 ? "1 person" : `${c.participants} people`}`,
-    c.nextDueOn ? `Next due ${formatDisplayDate(c.nextDueOn, { style: "medium" })}` : null,
-    c.status === "CLOSED" && c.closedAt ? `Closed ${formatDisplayDate(c.closedAt, { style: "medium" })}` : null,
-    c.ownerName ? `Run by ${c.ownerName}` : null,
+    c.kinds.map((k) => t(REVIEW_KIND_KEYS[k])).join(", ") || t("overview.row.noKinds"),
+    c.status === "DRAFT" ? null : tCommon("people.count", { count: c.participants }),
+    c.nextDueOn ? t("overview.row.nextDue", { date: formatDisplayDate(c.nextDueOn, { style: "medium" }) }) : null,
+    c.status === "CLOSED" && c.closedAt ? t("overview.row.closed", { date: formatDisplayDate(c.closedAt, { style: "medium" }) }) : null,
+    c.ownerName ? t("overview.row.runBy", { name: c.ownerName }) : null,
   ].filter(Boolean).join(" · ");
 
   return (
@@ -183,15 +189,15 @@ function CycleRow({ cycle: c, onOpen }: { cycle: CycleSummary; onOpen: () => voi
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium text-primary">{c.name}</span>
-          {c.template ? <StatusBadge status="draft" label="Template" /> : <CycleStatusBadge status={c.status} />}
+          {c.template ? <StatusBadge status="draft" label={t("overview.row.template")} /> : <CycleStatusBadge status={c.status} />}
         </div>
         <div className="mt-0.5 truncate text-hint text-tertiary">{facts}</div>
       </div>
       {c.status !== "DRAFT" && (
         <div className="w-full shrink-0 sm:w-56">
           <div className="flex justify-between text-hint text-tertiary">
-            <span>{c.submitted} of {c.assignments} submitted</span>
-            {c.overdue > 0 && <span className="text-status-pending-text">{c.overdue} overdue</span>}
+            <span>{t("overview.row.submitted", { submitted: c.submitted, total: c.assignments })}</span>
+            {c.overdue > 0 && <span className="text-status-pending-text">{t("overview.row.overdue", { count: c.overdue })}</span>}
           </div>
           <div className="mt-1 h-1.5 overflow-hidden rounded-pill bg-mist" aria-hidden>
             <div className="h-full rounded-pill bg-accent" style={{ width: `${percent}%` }} />

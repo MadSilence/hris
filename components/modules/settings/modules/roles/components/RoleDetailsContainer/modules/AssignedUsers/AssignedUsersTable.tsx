@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/desact/card";
 import { Archive02Icon } from "@hugeicons/core-free-icons";
@@ -44,6 +45,7 @@ export default function AssignedUsersTable({
   onExport,
   onRemoveUser,
 }: AssignedUsersTableProps) {
+  const t = useTranslations("settings");
   const [exportOpen, setExportOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   /** Who held the role, by which rule or by hand, and when: the table's second view. */
@@ -55,9 +57,8 @@ export default function AssignedUsersTable({
         {/* Archiving took the role from everybody (WALK_QUESTIONS § 22), so the list below is empty;
             say why rather than letting someone try to assign people to it. */}
         {isArchived && (
-          <Banner icon={Archive02Icon} title="This role is archived">
-            Archiving took it from everyone who held it, and it cannot be assigned. Unarchive it to
-            start using it again.
+          <Banner icon={Archive02Icon} title={t("roles.assigned.archivedTitle")}>
+            {t("roles.assigned.archivedBody")}
           </Banner>
         )}
 
@@ -65,7 +66,7 @@ export default function AssignedUsersTable({
           <AssignedUsersTableHeader
             query={query}
             onQueryChange={onQueryChange}
-            assignDisabledReason={isArchived ? "An archived role cannot be assigned" : undefined}
+            assignDisabledReason={isArchived ? t("roles.assigned.archivedCannotAssign") : undefined}
             onAssignClick={() => setAssignOpen(true)}
             onExportClick={() => setExportOpen(true)}
             showHistory={showHistory}
@@ -88,8 +89,8 @@ export default function AssignedUsersTable({
               isSystemOwnerRole={isSystemOwnerRole}
               emptyText={
                 isArchived
-                  ? "Nobody holds this archived role."
-                  : "No users yet — use Assign to give this role to someone."
+                  ? t("roles.assigned.emptyArchived")
+                  : t("roles.assigned.empty")
               }
             />
           )}
@@ -106,7 +107,7 @@ export default function AssignedUsersTable({
       <ExportAssignedUsersModal
         isOpen={exportOpen}
         isLoading={false}
-        roleName={roleName ?? "Role"}
+        roleName={roleName ?? t("pages.roleDetail.fallbackName")}
         onCancelAction={() => setExportOpen(false)}
         onConfirmAction={(values) => {
           onExport(values);

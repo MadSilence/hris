@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { Illustration } from "@/components/illustrations/Illustration";
 import type { Scene } from "@/components/illustrations/scenes";
@@ -26,6 +27,7 @@ export function ErrorPage({
   reference?: string;
   fullScreen?: boolean;
 }) {
+  const t = useTranslations("common");
   return (
     <main
       className={
@@ -43,7 +45,7 @@ export function ErrorPage({
         <div className="flex flex-wrap justify-center gap-3">{actions}</div>
         {reference && (
           <p className="font-mono text-hint text-tertiary" data-testid="error-reference">
-            Error ID {reference}
+            {t("errorState.errorId", { reference })}
           </p>
         )}
       </div>

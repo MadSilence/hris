@@ -3,6 +3,7 @@
 import { Illustration } from "@/components/illustrations/Illustration";
 import { Progress } from "@/components/desact/progress";
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckmarkCircle02Icon, CircleIcon, Message01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -11,7 +12,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
 import { showError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import {
   preboardingAnswerAction,
   preboardingCommentAction,
@@ -20,7 +21,8 @@ import {
   preboardingDocumentAction,
   preboardingFieldsAction,
 } from "@/components/modules/lifecycle/actions/preboardingActions";
-import { TASK_KIND_LABELS, describeDue, requiresFile, type Material, type PreboardingPage } from "@/models/lifecycle";
+import { requiresFile, type Material, type PreboardingPage } from "@/models/lifecycle";
+import { describeDue } from "@/components/modules/lifecycle/i18n";
 import { TaskFieldInput } from "@/components/modules/lifecycle/tasks/TaskFieldInput";
 import { FilePickButton } from "@/components/modules/lifecycle/shared/FilePickButton";
 import { TaskMaterials, saveBlob } from "@/components/modules/lifecycle/tasks/TaskMaterials";
@@ -33,7 +35,7 @@ type PageTask = PreboardingPage["tasks"][number];
  * A material file, through the page's own route: the token travels in the body, never in the address, and
  * the backend hands out only a file one of the joiner's own tasks names.
  */
-const openFile = (token: string) => async (material: Material) => {
+const openFile = (token: string, unavailable: string) => async (material: Material) => {
   if (!material.fileId) return;
   try {
     // Raw fetch on purpose: the page has no session, so InternalApiClient's renewal has nothing to renew.
@@ -42,7 +44,7 @@ const openFile = (token: string) => async (material: Material) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
     });
-    if (!res.ok) throw new Error("This file is not available any more.");
+    if (!res.ok) throw new Error(unavailable);
     saveBlob(await res.blob(), material.name ?? "file");
   } catch (e) {
     showError(e);
@@ -64,23 +66,27 @@ export function PreboardingPageContainer({ token, initialPage, preview, onOpenFi
   /** How a material file opens when there is no token to fetch it with — the preview's own route. */
   onOpenFile?: (material: Material) => void;
 }) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
   const [page, setPage] = useState(initialPage);
-  const open = page.tasks.filter((t) => t.status === "OPEN").length;
+  const open = page.tasks.filter((task) => task.status === "OPEN").length;
+  const company = page.companyName;
+  const date = page.startDate ? formatDisplayDate(page.startDate, { style: "medium" }) : null;
+  const intro = company && date ? t("preboarding.introCompanyDate", { company, date })
+    : company ? t("preboarding.introCompany", { company })
+      : date ? t("preboarding.introDate", { date }) : t("preboarding.intro");
 
   return (
     <div className="w-full space-y-8 py-8">
       <header className="flex flex-col items-center gap-3 text-center">
         <Illustration scene={open === 0 ? "all-caught-up" : "onboarding"} />
-        <h1 className="text-greeting">{page.firstName ? `Welcome, ${page.firstName}` : "Welcome"}</h1>
-        <p className="text-body text-secondary">
-          {page.companyName ? `A few things to do before you start at ${page.companyName}` : "A few things to do before you start"}
-          {page.startDate ? ` on ${formatDisplayDate(page.startDate, { style: "medium" })}` : ""}.
-        </p>
+        <h1 className="text-greeting">{page.firstName ? t("preboarding.welcomeName", { name: page.firstName }) : t("preboarding.welcome")}</h1>
+        <p className="text-body text-secondary">{intro}</p>
         {page.tasks.length > 0 && (
           <div className="flex w-full max-w-xs flex-col gap-1.5">
-            <Progress value={((page.tasks.length - open) / page.tasks.length) * 100} aria-label="Tasks done" />
+            <Progress value={((page.tasks.length - open) / page.tasks.length) * 100} aria-label={t("preboarding.progressLabel")} />
             <p className="text-hint text-tertiary">
-              {open === 0 ? "You're all done. Thank you." : `${page.tasks.length - open} of ${page.tasks.length} done. This link stays valid, so you can come back.`}
+              {open === 0 ? t("preboarding.allDone") : t("preboarding.progress", { done: page.tasks.length - open, total: page.tasks.length })}
             </p>
           </div>
         )}
@@ -91,20 +97,25 @@ export function PreboardingPageContainer({ token, initialPage, preview, onOpenFi
           <li key={task.id} className="space-y-3 rounded-card border border-divider bg-card p-4 shadow-card" data-testid="preboarding-task">
             <div className="flex items-start gap-3">
               {task.status === "DONE"
-                ? <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label="Done" />
-                : <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label="To do" />}
+                ? <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label={t("shared.done")} />
+                : <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label={t("preboarding.toDo")} />}
               <div className="flex-1">
                 {/* The icon alone did not read as done in the walk (SWEEP S11): a finished task says so. */}
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className={`text-body font-medium leading-6 ${task.status === "DONE" ? "text-tertiary" : ""}`}>{task.title}</h2>
-                  {task.status === "DONE" && <StatusBadge status="active" label="Done" />}
+                  {task.status === "DONE" && <StatusBadge status="active" label={t("shared.done")} />}
                 </div>
                 <p className="text-hint text-tertiary">
-                  {TASK_KIND_LABELS[task.kind]} · {describeDue(task.dueKind, null)}
-                  {task.dueDate ? ` · by ${formatDisplayDate(task.dueDate, { style: "medium" })}` : ""}
+                  {task.dueDate
+                    ? t("preboarding.metaDate", {
+                      kind: t(`taskKind.${task.kind}`),
+                      due: describeDue(t, task.dueKind, null),
+                      date: formatDisplayDate(task.dueDate, { style: "medium" }),
+                    })
+                    : t("preboarding.meta", { kind: t(`taskKind.${task.kind}`), due: describeDue(t, task.dueKind, null) })}
                 </p>
                 {task.description && <p className="mt-1 whitespace-pre-wrap text-body text-tertiary">{task.description}</p>}
-                <TaskMaterials materials={task.materials ?? []} onOpenFile={onOpenFile ?? openFile(token)} />
+                <TaskMaterials materials={task.materials ?? []} onOpenFile={onOpenFile ?? openFile(token, t("preboarding.fileUnavailable"))} />
               </div>
             </div>
             {task.status === "OPEN" && (
@@ -121,6 +132,8 @@ export function PreboardingPageContainer({ token, initialPage, preview, onOpenFi
 function TaskBody({ token, task, onPageAction, preview }: {
   token: string; task: PageTask; onPageAction: (p: PreboardingPage) => void; preview?: boolean;
 }) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -141,7 +154,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
               onPageAction(res.data);
               return null;
             }
-            return res.errorMessage ?? "The answers could not be sent.";
+            return res.errorMessage ?? t("shared.answersNotSent");
           }}
         />
       </div>
@@ -160,7 +173,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
             try { finish(await preboardingCompleteAction({ token, taskId: task.id })); } finally { setBusy(false); }
           }}
         >
-          {task.kind === "ACKNOWLEDGE" ? "I have read it" : "Mark done"}
+          {task.kind === "ACKNOWLEDGE" ? t("shared.iHaveReadIt") : t("shared.markDone")}
         </Button>
         <FormError message={error} />
       </div>
@@ -171,7 +184,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
   if (task.kind === "DOCUMENT" || task.kind === "TODO") {
     return (
       <div className="space-y-2 pl-8">
-        {task.categoryName && <Label htmlFor={`${task.id}-file`}>File: {task.categoryName}</Label>}
+        {task.categoryName && <Label htmlFor={`${task.id}-file`}>{t("preboarding.fileOf", { category: task.categoryName })}</Label>}
         <FilePickButton id={`${task.id}-file`} file={file} disabled={busy} onPickAction={setFile} />
         <Button type="button"
           size="sm"
@@ -187,7 +200,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
             try { finish(await preboardingDocumentAction(form)); } finally { setBusy(false); }
           }}
         >
-          {task.kind === "TODO" ? "Attach and mark done" : "Upload"}
+          {task.kind === "TODO" ? t("shared.attachAndMarkDone") : tCommon("actions.upload")}
         </Button>
         <FormError message={error} />
       </div>
@@ -209,7 +222,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
           try { finish(await preboardingFieldsAction({ token, taskId: task.id, values })); } finally { setBusy(false); }
         }}
       >
-        Save
+        {tCommon("actions.save")}
       </Button>
       <FormError message={error} />
     </div>
@@ -218,6 +231,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
 
 /** The comments of one task — the preboarding's messages (C3): the joiner asks, whoever runs it answers. */
 function PageComments({ token, task }: { token: string; task: PageTask }) {
+  const t = useTranslations("lifecycle");
   const [open, setOpen] = useState(false);
   return (
     <div className="pl-8">
@@ -228,7 +242,7 @@ function PageComments({ token, task }: { token: string; task: PageTask }) {
         onClick={() => setOpen((o) => !o)}
       >
         <Icon icon={Message01Icon} size="sm" />
-        {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Ask a question"}
+        {task.commentCount > 0 ? t("shared.commentsCount", { count: task.commentCount }) : t("preboarding.askQuestion")}
       </button>
       {open && (
         <TaskComments

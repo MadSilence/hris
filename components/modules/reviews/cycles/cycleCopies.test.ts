@@ -1,5 +1,8 @@
-import type { Cycle } from "@/models/reviews";
+import { translatorFor } from "@/test/nextIntl";
+import type { Cycle, ReviewsT } from "@/models/reviews";
 import { shiftIsoDate, shiftedCycleDates, validRepeatMonths } from "./cycleCopies";
+
+const t = translatorFor("reviews") as unknown as ReviewsT;
 
 const cycle = (patch: Partial<Cycle> = {}): Cycle => ({
   id: "c1",
@@ -44,7 +47,7 @@ describe("repeating a cycle", () => {
   });
 
   it("previews every date the cycle has and where it moves, and nothing it does not have", () => {
-    expect(shiftedCycleDates(cycle(), 6)).toEqual([
+    expect(shiftedCycleDates(cycle(), 6, t)).toEqual([
       { label: "Hired on or before", from: "2026-01-31", to: "2026-07-31" },
       { label: "Self review opens", from: "2026-01-31", to: "2026-07-31" },
       { label: "Self review due", from: "2026-02-14", to: "2026-08-14" },
@@ -56,7 +59,7 @@ describe("repeating a cycle", () => {
   });
 
   it("leaves out the release date of a cycle the manager shares", () => {
-    const dates = shiftedCycleDates(cycle({ sharingMode: "MANAGER_SHARES" }), 3);
+    const dates = shiftedCycleDates(cycle({ sharingMode: "MANAGER_SHARES" }), 3, t);
     expect(dates.map((d) => d.label)).not.toContain("Results released");
   });
 

@@ -1,17 +1,19 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import { useQuestionnaires } from "@/components/modules/lifecycle/hooks";
-import { PROCESS_TYPE_LABELS, type QuestionnaireResponse } from "@/models/lifecycle";
+import type { QuestionnaireResponse } from "@/models/lifecycle";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
 
-const answerText = (a: QuestionnaireResponse["answers"][number]): string => {
+const answerText = (a: QuestionnaireResponse["answers"][number], t: LifecycleT, yes: string, no: string, formatDisplayDate: DateFormatter): string => {
   const v = a.value;
-  if (v === null || v === undefined || v === "") return "Not answered";
-  if (a.type === "YES_NO") return v === true ? "Yes" : "No";
+  if (v === null || v === undefined || v === "") return t("forms.notAnswered");
+  if (a.type === "YES_NO") return v === true ? yes : no;
   if (a.type === "DATE" && typeof v === "string") return formatDisplayDate(v, { style: "medium" });
   if (Array.isArray(v)) return v.join(", ");
   return String(v);
@@ -23,6 +25,9 @@ const answerText = (a: QuestionnaireResponse["answers"][number]): string => {
  * all; the person themself reads what they answered — the backend decides which.
  */
 export function PersonFormsTab({ userId }: { userId: string }) {
+  const t = useTranslations("lifecycle");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const { data, isLoading, error } = useQuestionnaires(userId);
 
   if (error) return <ErrorState error={error} />;
@@ -34,8 +39,8 @@ export function PersonFormsTab({ userId }: { userId: string }) {
       <EmptyState
         fill
         scene="forms"
-        title="No forms yet"
-        description="Questionnaires answered in a preboarding, an onboarding or an offboarding appear here."
+        title={t("forms.emptyTitle")}
+        description={t("forms.emptyDescription")}
       />
     );
   }
@@ -47,16 +52,16 @@ export function PersonFormsTab({ userId }: { userId: string }) {
           <h3 id={`form-${r.id}`} className="font-medium text-primary">{r.title}</h3>
           <p className="text-hint text-tertiary">
             {[
-              r.processType ? PROCESS_TYPE_LABELS[r.processType] : null,
-              `Answered ${formatDisplayDate(r.submittedAt, { style: "medium" })}`,
-              r.submittedBy?.name ? `by ${r.submittedBy.name}` : null,
+              r.processType ? t(`processType.${r.processType}`) : null,
+              t("forms.answered", { date: formatDisplayDate(r.submittedAt, { style: "medium" }) }),
+              r.submittedBy?.name ? t("forms.by", { name: r.submittedBy.name }) : null,
             ].filter(Boolean).join(" · ")}
           </p>
           <dl className="mt-3 space-y-2">
             {r.answers.map((a) => (
               <div key={a.questionId}>
                 <dt className="text-hint text-tertiary">{a.label}</dt>
-                <dd className="whitespace-pre-wrap text-body">{answerText(a)}</dd>
+                <dd className="whitespace-pre-wrap text-body">{answerText(a, t, tCommon("values.yes"), tCommon("values.no"), formatDisplayDate)}</dd>
               </div>
             ))}
           </dl>

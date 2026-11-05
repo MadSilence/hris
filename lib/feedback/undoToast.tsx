@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Undo02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { showError } from "@/lib/errors/errorToast";
@@ -64,7 +65,9 @@ const UndoCard: React.FC<{
   message: string;
   durationMs: number;
   onUndo: () => void;
-}> = ({ message, durationMs, onUndo }) => (
+}> = ({ message, durationMs, onUndo }) => {
+  const t = useTranslations("common");
+  return (
   <div
     role="status"
     className="relative w-[356px] overflow-hidden rounded-control border border-divider bg-card shadow-popover"
@@ -78,7 +81,7 @@ const UndoCard: React.FC<{
         className="flex flex-none items-center gap-1.5 rounded-control px-2 py-1 text-body font-medium text-secondary transition hover:bg-subtle"
       >
         <Icon icon={Undo02Icon} size="sm" />
-        Undo
+        {t("actions.undo")}
       </button>
     </div>
 
@@ -95,4 +98,5 @@ const UndoCard: React.FC<{
 
     <style>{`@keyframes undo-drain { from { width: 100%; } to { width: 0%; } }`}</style>
   </div>
-);
+  );
+};

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Cancel01Icon, UserAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
@@ -49,6 +50,9 @@ export function TeamPeopleTab({
   initialQuery,
   highlightUserId,
 }: Props) {
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const [query, setQuery] = useState(initialQuery ?? "");
 
@@ -114,7 +118,7 @@ export function TeamPeopleTab({
       basePath={BASE_PATH}
       assignableId={teamId}
       assignableName={teamName}
-      noun="team"
+      kind="team"
       semantics="add"
       invalidateKeys={[[TEAMS_QUERY_KEY], assignedUsersQueryKey(BASE_PATH, teamId)]}
     />
@@ -144,13 +148,13 @@ export function TeamPeopleTab({
             // A roster is people data: the reader sees the team and its size, not people outside
             // their access (decided 2026-10-27).
             <>
-              <p className="text-body font-medium text-primary">{total} {total === 1 ? "person" : "people"}, none you can see</p>
-              <p className="mt-1 text-body text-tertiary">Only the people your access covers are listed.</p>
+              <p className="text-body font-medium text-primary">{tShared("noneVisible", { count: total })}</p>
+              <p className="mt-1 text-body text-tertiary">{tShared("limited")}</p>
             </>
           ) : (
             <>
-              <p className="text-body font-medium text-primary">No people in this team yet</p>
-              <p className="mt-1 text-body text-tertiary">Assign people to see them here.</p>
+              <p className="text-body font-medium text-primary">{t("people.empty")}</p>
+              <p className="mt-1 text-body text-tertiary">{tShared("assignHint")}</p>
             </>
           )}
         </div>
@@ -158,7 +162,7 @@ export function TeamPeopleTab({
           {!isArchived && (
             <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="mt-1 gap-1.5">
               <Icon icon={UserAdd01Icon} size="sm" />
-              Add member
+              {tShared("addMember")}
             </Button>
           )}
         </PermissionGate>
@@ -178,7 +182,7 @@ export function TeamPeopleTab({
           {!isArchived && (
             <Button type="button" size="sm" onClick={() => setAssignOpen(true)} className="flex-none gap-1.5">
               <Icon icon={UserAdd01Icon} size="sm" />
-              Add member
+              {tShared("addMember")}
             </Button>
           )}
         </PermissionGate>
@@ -190,12 +194,12 @@ export function TeamPeopleTab({
             checked={includeSubNodes}
             onCheckedChange={(v) => setIncludeSubNodes(v === true)}
           />
-          Show also from sub-teams
+          {t("people.includeSub")}
         </label>
       )}
 
       {limited && !error ? (
-        <p className="flex-none text-hint text-tertiary">Only the people your access covers are listed.</p>
+        <p className="flex-none text-hint text-tertiary">{tShared("limited")}</p>
       ) : null}
 
       {/* List (the only scroll area) */}
@@ -217,9 +221,9 @@ export function TeamPeopleTab({
           <ListEmptyState
             query={query}
             scene="team-and-org"
-            title={`No people in this ${'team'} yet`}
-            description="Assign people to see them here."
-            noResultsHint="Try a different name or email."
+            title={t("people.empty")}
+            description={tShared("assignHint")}
+            noResultsHint={tShared("tryDifferent")}
           />
         ) : (
           <div className="flex flex-col">
@@ -244,7 +248,7 @@ export function TeamPeopleTab({
                       type="button"
                       onClick={() => setRemoveTarget(member)}
                       disabled={removingId === member.id}
-                      aria-label={`Remove ${member.firstName ?? member.email}`}
+                      aria-label={tShared("removeNamed", { name: member.firstName ?? member.email })}
                       className="flex h-7 w-7 flex-none items-center justify-center rounded-tag text-tertiary transition hover:bg-mist hover:text-danger-text disabled:opacity-50"
                     >
                       <Icon icon={Cancel01Icon} size="sm" />
@@ -254,7 +258,7 @@ export function TeamPeopleTab({
               </div>
             ))}
             {isFetchingNextPage && (
-              <p className="py-2 text-center text-hint text-tertiary">Loading more…</p>
+              <p className="py-2 text-center text-hint text-tertiary">{tShared("loadingMore")}</p>
             )}
           </div>
         )}
@@ -264,9 +268,15 @@ export function TeamPeopleTab({
 
       <ConfirmActionModal
         isOpen={removeTarget !== null}
-        title="Remove from team"
-        description={`${removeTarget ? `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email : "This person"} will no longer be in this team. They keep their account and everything else.`}
-        confirmLabel="Remove"
+        title={t("people.removeTitle")}
+        description={
+          removeTarget
+            ? t("people.removeBody", {
+                name: `${removeTarget.firstName ?? ""} ${removeTarget.lastName ?? ""}`.trim() || removeTarget.email,
+              })
+            : t("people.removeBodyAnonymous")
+        }
+        confirmLabel={tCommon("actions.remove")}
         destructive
         isLoading={removingId === removeTarget?.id}
         onConfirmAction={confirmRemove}

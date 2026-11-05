@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { Scene } from "@/components/illustrations";
@@ -9,12 +10,12 @@ import { cn } from "@/lib/cn";
 import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { useMyReviews } from "@/components/modules/reviews/hooks";
 import { AssignmentStatusBadge, PacketStatusBadge } from "@/components/modules/reviews/shared/ReviewBadges";
 import {
-  REVIEW_KIND_LABELS,
-  REVIEW_STEP_LABELS,
+  REVIEW_KIND_KEYS,
+  REVIEW_STEP_KEYS,
   stepHref,
   type MyAssignment,
   type StepRow,
@@ -27,6 +28,8 @@ import {
  * peers to nominate or approve, manager reviews to approve (REVIEWS_PLAN.md 10.2–10.3).
  */
 export function MyReviewsContainer() {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
   const mine = useMyReviews();
   if (mine.error) return <ErrorState error={mine.error} />;
   if (!mine.data) return <Skeleton className="h-64 w-full rounded-popover" aria-busy="true" />;
@@ -37,8 +40,8 @@ export function MyReviewsContainer() {
     return (
       <EmptyState
         scene="reviews-and-one-on-ones"
-        title="No reviews for you yet"
-        description="When a review cycle asks you to write a review, it appears here and in your Tasks. Reviews shared with you appear here too."
+        title={t("mine.empty.title")}
+        description={t("mine.empty.description")}
       />
     );
   }
@@ -46,34 +49,34 @@ export function MyReviewsContainer() {
   return (
     <div className="space-y-8">
       {steps.length > 0 && (
-        <Section title="To do">
+        <Section title={t("mine.toDo")}>
           {steps.map((s) => <StepLine key={`${s.kind}-${s.participantId}`} s={s} />)}
         </Section>
       )}
 
       <Section
-        title="To write"
+        title={t("mine.toWrite.title")}
         empty={{
           scene: "all-caught-up",
-          title: "All caught up",
-          description: "Nothing to write right now. A new review appears here and in your Tasks.",
+          title: t("mine.toWrite.emptyTitle"),
+          description: t("mine.toWrite.emptyDescription"),
         }}
       >
         {toWrite.map((a) => <AssignmentLine key={a.id} a={a} />)}
       </Section>
 
       {team.length > 0 && (
-        <Section title="My team">
+        <Section title={t("mine.team")}>
           {team.map((r) => <TeamLine key={r.participantId} r={r} />)}
         </Section>
       )}
 
       <Section
-        title="About me"
+        title={t("mine.aboutMe.title")}
         empty={{
           scene: "reviews-and-one-on-ones",
-          title: "Nothing shared with you yet",
-          description: "Once your review is shared with you, you read it and acknowledge it here.",
+          title: t("mine.aboutMe.emptyTitle"),
+          description: t("mine.aboutMe.emptyDescription"),
         }}
       >
         {aboutMe.map((p) => (
@@ -83,11 +86,15 @@ export function MyReviewsContainer() {
               <span className="font-medium text-primary">{p.cycleName}</span>
               <PacketStatusBadge status={p.status} />
               {p.finalRating != null && (
-                <span className="text-body text-tertiary">Rating {p.finalRating}{p.finalRatingLabel ? ` · ${p.finalRatingLabel}` : ""}</span>
+                <span className="text-body text-tertiary">
+                  {p.finalRatingLabel
+                    ? t("packetLine.ratingWithLabel", { rating: p.finalRating, label: p.finalRatingLabel })
+                    : t("packetLine.rating", { rating: p.finalRating })}
+                </span>
               )}
               <span className="ml-auto text-hint text-tertiary">
-                {p.acknowledgedAt ? `Acknowledged ${formatDisplayDate(p.acknowledgedAt, { style: "medium" })}`
-                  : p.sharedAt ? `Shared ${formatDisplayDate(p.sharedAt, { style: "medium" })} — waiting for you to acknowledge` : ""}
+                {p.acknowledgedAt ? t("mine.aboutMe.acknowledged", { date: formatDisplayDate(p.acknowledgedAt, { style: "medium" }) })
+                  : p.sharedAt ? t("mine.aboutMe.sharedWaiting", { date: formatDisplayDate(p.sharedAt, { style: "medium" }) }) : ""}
               </span>
             </Link>
           </li>
@@ -95,7 +102,7 @@ export function MyReviewsContainer() {
       </Section>
 
       {written.length > 0 && (
-        <Section title="Written">
+        <Section title={t("mine.written")}>
           {written.map((a) => <AssignmentLine key={a.id} a={a} />)}
         </Section>
       )}
@@ -124,17 +131,18 @@ function Section({ title, empty, children }: { title: string; empty?: SectionEmp
 }
 
 function StepLine({ s }: { s: StepRow }) {
-  const about = s.kind === "NOMINATE_PEERS" ? "For your review" : `For ${s.subject.name}`;
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const about = s.kind === "NOMINATE_PEERS" ? t("mine.step.forYou") : t("mine.step.forPerson", { name: s.subject.name });
   return (
     <li>
       <Link href={stepHref(s.kind, s.participantId)}
         className="flex flex-wrap items-center gap-3 rounded-card border border-divider bg-card px-5 py-3 no-underline hover:border-divider hover:bg-subtle/40">
-        <span className="font-medium text-primary">{REVIEW_STEP_LABELS[s.kind]}</span>
+        <span className="font-medium text-primary">{t(REVIEW_STEP_KEYS[s.kind])}</span>
         <span className="text-body text-primary">{about}</span>
         {s.overdue && <AssignmentStatusBadge status="OPEN" overdue />}
         <span className="ml-auto text-hint text-tertiary">
-          {s.cycleName}
-          {s.dueOn ? ` · due ${formatDisplayDate(s.dueOn, { style: "medium" })}` : ""}
+          {s.dueOn ? t("mine.cycleDue", { cycle: s.cycleName, date: formatDisplayDate(s.dueOn, { style: "medium" }) }) : s.cycleName}
         </span>
       </Link>
     </li>
@@ -142,18 +150,24 @@ function StepLine({ s }: { s: StepRow }) {
 }
 
 function AssignmentLine({ a }: { a: MyAssignment }) {
-  const about = a.kind === "SELF" ? "About yourself" : a.kind === "UPWARD" ? `Your manager, ${a.subject.name}` : `About ${a.subject.name}`;
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const about = a.kind === "SELF" ? t("mine.about.yourself")
+    : a.kind === "UPWARD" ? t("mine.about.yourManager", { name: a.subject.name })
+      : t("mine.about.person", { name: a.subject.name });
   return (
     <li>
       <Link href={`/reviews/write/${a.id}`}
         className="flex flex-wrap items-center gap-3 rounded-card border border-divider bg-card px-5 py-3 no-underline hover:border-divider hover:bg-subtle/40">
-        <span className="font-medium text-primary">{REVIEW_KIND_LABELS[a.kind]}</span>
+        <span className="font-medium text-primary">{t(REVIEW_KIND_KEYS[a.kind])}</span>
         <span className="text-body text-primary">{about}</span>
         <AssignmentStatusBadge status={a.status} overdue={a.overdue} />
         <span className="ml-auto text-hint text-tertiary">
-          {a.cycleName}
-          {a.status === "OPEN" && a.dueOn ? ` · due ${formatDisplayDate(a.dueOn, { style: "medium" })}` : ""}
-          {a.status === "SUBMITTED" && a.submittedAt ? ` · submitted ${formatDisplayDate(a.submittedAt, { style: "medium" })}` : ""}
+          {a.status === "OPEN" && a.dueOn
+            ? t("mine.cycleDue", { cycle: a.cycleName, date: formatDisplayDate(a.dueOn, { style: "medium" }) })
+            : a.status === "SUBMITTED" && a.submittedAt
+              ? t("mine.cycleSubmitted", { cycle: a.cycleName, date: formatDisplayDate(a.submittedAt, { style: "medium" }) })
+              : a.cycleName}
         </span>
       </Link>
     </li>
@@ -161,25 +175,27 @@ function AssignmentLine({ a }: { a: MyAssignment }) {
 }
 
 function TeamLine({ r }: { r: TeamRow }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const ready = r.managerStatus === "SUBMITTED" && !r.shared && r.sharingMode === "MANAGER_SHARES" && r.cycleStatus === "ACTIVE";
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-card border border-divider bg-card px-5 py-3">
       <span className="font-medium text-primary">{r.subject.name}</span>
       <span className="text-hint text-tertiary">{r.cycleName}</span>
       <span className="flex flex-wrap items-center gap-3 text-hint text-tertiary">
-        {r.selfStatus && <Progress label="Self" done={r.selfStatus === "SUBMITTED"} />}
+        {r.selfStatus && <Progress label={t("mine.progress.self")} done={r.selfStatus === "SUBMITTED"} />}
         {r.peersTotal > 0 && (
-          <Progress label={`Peers ${r.peersSubmitted}/${r.peersTotal}`} done={r.peersSubmitted === r.peersTotal} />
+          <Progress label={t("mine.progress.peers", { submitted: r.peersSubmitted, total: r.peersTotal })} done={r.peersSubmitted === r.peersTotal} />
         )}
-        {r.managerStatus && <Progress label="Yours" done={r.managerStatus === "SUBMITTED"} />}
+        {r.managerStatus && <Progress label={t("mine.progress.yours")} done={r.managerStatus === "SUBMITTED"} />}
       </span>
       <PacketStatusBadge status={r.packetStatus} />
       <div className="ml-auto flex items-center gap-3 text-body">
         {r.managerStatus === "OPEN" && r.managerAssignmentId && (
-          <Link href={`/reviews/write/${r.managerAssignmentId}`} className="text-accent-text underline-offset-4 hover:underline">Write your review</Link>
+          <Link href={`/reviews/write/${r.managerAssignmentId}`} className="text-accent-text underline-offset-4 hover:underline">{t("mine.writeYourReview")}</Link>
         )}
         <Link href={`/reviews/packets/${r.participantId}`} className="text-accent-text underline-offset-4 hover:underline">
-          {ready ? "Review and share" : "Open"}
+          {ready ? t("mine.reviewAndShare") : tCommon("actions.open")}
         </Link>
       </div>
     </li>
@@ -188,8 +204,9 @@ function TeamLine({ r }: { r: TeamRow }) {
 
 /** One review of a team member's packet: a filled mark once it is in, a hollow ring while it is not. */
 function Progress({ label, done }: { label: string; done: boolean }) {
+  const t = useTranslations("reviews");
   return (
-    <span className="inline-flex items-center gap-1.5" title={done ? `${label}: in` : `${label}: not yet`}>
+    <span className="inline-flex items-center gap-1.5" title={done ? t("mine.progress.in", { label }) : t("mine.progress.notYet", { label })}>
       <span className={cn(
         "grid h-3.5 w-3.5 place-items-center rounded-pill",
         done ? "bg-status-approved-fill text-on-accent" : "border border-field",

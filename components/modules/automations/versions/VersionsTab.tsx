@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Skeleton } from "@/components/desact/skeleton";
@@ -16,6 +18,8 @@ import { DefinitionView } from "@/components/modules/automations/shared/Definiti
  * one is read here exactly as it ran. The run log names the version each run followed.
  */
 export function VersionsTab({ ruleId, currentVersionNo }: { ruleId: string; currentVersionNo: number }) {
+  const t = useTranslations("automations");
+  const language = useDisplayLanguage();
   const versions = useAutomationVersions(ruleId);
   const [open, setOpen] = useState<number | null>(null);
 
@@ -25,7 +29,7 @@ export function VersionsTab({ ruleId, currentVersionNo }: { ruleId: string; curr
   }
   const list = versions.data ?? [];
   if (list.length === 0) {
-    return <EmptyState scene="automations" title="No versions yet" description="Each publish adds a version here." />;
+    return <EmptyState scene="automations" title={t("versions.emptyTitle")} description={t("versions.emptyDescription")} />;
   }
 
   return (
@@ -41,10 +45,10 @@ export function VersionsTab({ ruleId, currentVersionNo }: { ruleId: string; curr
               aria-expanded={isOpen}
             >
               {isOpen ? <Icon icon={ArrowDown01Icon} size="sm" className="text-tertiary" /> : <Icon icon={ArrowRight01Icon} size="sm" className="text-tertiary" />}
-              <span className="font-medium text-primary">Version {v.versionNo}</span>
-              {v.versionNo === currentVersionNo && <Badge variant="outline">Current</Badge>}
+              <span className="font-medium text-primary">{t("versions.version", { version: v.versionNo })}</span>
+              {v.versionNo === currentVersionNo && <Badge variant="outline">{t("versions.current")}</Badge>}
               <span className="ml-auto text-body text-tertiary">
-                {[v.createdBy?.name, formatMoment(v.createdAt)].filter(Boolean).join(" · ")}
+                {[v.createdBy?.name, formatMoment(v.createdAt, language)].filter(Boolean).join(" · ")}
               </span>
             </button>
             {isOpen && <div className="mt-3 pl-7"><DefinitionView definition={v.definition} /></div>}

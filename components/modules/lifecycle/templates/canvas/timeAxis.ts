@@ -11,6 +11,7 @@
  */
 import { laneIdOf, shortDay, type DraftItem, type Lane, type LaneId } from "./draft";
 import type { ProcessType } from "@/models/lifecycle";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
 
 export const DAY_W = 128;
 export const WEEK_W = 168;
@@ -61,8 +62,8 @@ export type Axis = { columns: Column[]; width: number };
 type Timing = Pick<DraftItem, "dueKind" | "offsetDays">;
 
 /** The axis for these tasks: at least −14 … +90, and wider when a task lies outside. */
-export const buildAxis = (items: Timing[], type?: ProcessType): Axis => {
-  const day = (offset: number) => shortDay(offset, type);
+export const buildAxis = (items: Timing[], t: LifecycleT, type?: ProcessType): Axis => {
+  const day = (offset: number) => shortDay(offset, t, type);
   const offsets = items.filter((i) => i.dueKind === "OFFSET").map((i) => i.offsetDays ?? 0);
   const min = Math.min(-DAYS_EACH_SIDE, ...offsets);
   const max = Math.max(WEEKS_UNTIL, ...offsets);
@@ -72,11 +73,11 @@ export const buildAxis = (items: Timing[], type?: ProcessType): Axis => {
   const weeksBefore = Math.ceil((-DAYS_EACH_SIDE - min) / 7);
   for (let k = weeksBefore; k >= 1; k--) {
     const start = -DAYS_EACH_SIDE - 7 * k;
-    spans.push({ id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W, label: day(start), caption: `to ${day(start + 6)}` });
+    spans.push({ id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W, label: day(start), caption: t("canvas.weekTo", { day: day(start + 6) }) });
   }
   for (let d = -DAYS_EACH_SIDE; d <= DAYS_EACH_SIDE; d++) {
     if (d === 0) {
-      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: type === "OFFBOARDING" ? "By last day" : "Before start", caption: null });
+      spans.push({ id: "before-start", kind: "beforeStart", start: null, end: null, width: BEFORE_START_W, label: type === "OFFBOARDING" ? t("canvas.byLastDayColumn") : t("phase.BEFORE_START"), caption: null });
     }
     spans.push({ id: `d${d}`, kind: "day", start: d, end: d, width: DAY_W, label: day(d), caption: null });
   }
@@ -85,13 +86,13 @@ export const buildAxis = (items: Timing[], type?: ProcessType): Axis => {
     if (start <= WEEKS_UNTIL) {
       spans.push({
         id: `w${start}`, kind: "week", start, end: start + 6, width: WEEK_W,
-        label: `Week ${Math.floor(start / 7) + 1}`, caption: day(start),
+        label: t("canvas.week", { number: Math.floor(start / 7) + 1 }), caption: day(start),
       });
       start += 7;
     } else {
       spans.push({
         id: `m${start}`, kind: "month", start, end: start + 29, width: MONTH_W,
-        label: `Month ${Math.floor(start / 30) + 1}`, caption: day(start),
+        label: t("canvas.month", { number: Math.floor(start / 30) + 1 }), caption: day(start),
       });
       start += 30;
     }
@@ -159,7 +160,7 @@ export type Layout = {
  * Where every block goes. Several tasks in one cell stack downwards and the lane grows to hold them —
  * blocks never overlap (research § B.3, "Lanes").
  */
-export const layoutTemplate = (items: DraftItem[], lanes: Lane[], axis: Axis = buildAxis(items)): Layout => {
+export const layoutTemplate = (items: DraftItem[], lanes: Lane[], axis: Axis): Layout => {
   const cells = new Map<string, DraftItem[]>();
   items.forEach((item) => {
     const cell = `${laneIdOf(item)}|${columnOf(axis, item).id}`;

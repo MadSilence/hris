@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { Checkbox } from "@/components/desact/checkbox";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
@@ -32,8 +33,9 @@ export const canFillInPlace = (fields: { type: string | null }[]) =>
 export function TaskFieldInput({ field, value, onChange, disabled }: {
   field: TaskField; value: unknown; onChange: (v: unknown) => void; disabled: boolean;
 }) {
+  const t = useTranslations("lifecycle");
   const id = `field-${field.id}`;
-  const name = field.name ?? "Field";
+  const name = field.name ?? t("shared.field");
   const label = (
     <RequiredLabel htmlFor={id} required={field.isRequired}>
       {name}{field.isFilled ? " ✓" : ""}
@@ -50,7 +52,7 @@ export function TaskFieldInput({ field, value, onChange, disabled }: {
             options={field.options.map((o) => ({ value: o.id, label: o.label }))}
             value={typeof value === "string" && value ? value : null}
             onChange={(v) => v && onChange(v)}
-            placeholder="Select…"
+            placeholder={t("shared.selectPlaceholder")}
             disabled={disabled}
             clearable={false}
           />

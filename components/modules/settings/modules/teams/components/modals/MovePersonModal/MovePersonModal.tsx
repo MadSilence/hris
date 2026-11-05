@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { FormError } from "@/components/feedback/FormError";
 
@@ -45,6 +46,8 @@ export function MovePersonModal({
   errorMessage,
   onConfirm,
 }: Props) {
+  const t = useTranslations("structure.teams");
+  const tCommon = useTranslations("common");
   const isRemoval = targetName === null;
 
   return (
@@ -53,7 +56,9 @@ export function MovePersonModal({
         <DialogHeader>
           <DialogTitle>
             {isRemoval
-              ? `Remove ${personName} from ${sourceName ?? "the team"}?`
+              ? sourceName
+                ? t("movePerson.removeTitle", { person: personName, source: sourceName })
+                : t("movePerson.removeTitleNoSource", { person: personName })
               : `${personName} → ${targetName}`}
           </DialogTitle>
         </DialogHeader>
@@ -61,8 +66,9 @@ export function MovePersonModal({
         <div className="space-y-4 py-2">
           {isRemoval ? (
             <p className="text-body text-secondary">
-              {personName} will be removed from {sourceName ?? "this team"}. Other team memberships
-              stay as they are.
+              {sourceName
+                ? t("movePerson.removeBody", { person: personName, source: sourceName })
+                : t("movePerson.removeBodyNoSource", { person: personName })}
             </p>
           ) : (
             <RadioGroup value={mode} onValueChange={(v) => onModeChange(v as TeamMoveMode)}>
@@ -70,12 +76,12 @@ export function MovePersonModal({
                 <RadioGroupItem value="move" id="move-person-move" className="mt-0.5" />
                 <div>
                   <Label htmlFor="move-person-move" className="cursor-pointer">
-                    Move to {targetName}
+                    {t("movePerson.moveTo", { target: targetName ?? "" })}
                   </Label>
                   <p className="mt-0.5 text-hint text-tertiary">
                     {sourceName
-                      ? `Removes ${personName} from ${sourceName} and adds them to ${targetName}.`
-                      : `Adds ${personName} to ${targetName}.`}
+                      ? t("movePerson.moveHint", { person: personName, source: sourceName, target: targetName ?? "" })
+                      : t("movePerson.moveHintNoSource", { person: personName, target: targetName ?? "" })}
                   </p>
                 </div>
               </div>
@@ -84,10 +90,10 @@ export function MovePersonModal({
                 <RadioGroupItem value="add" id="move-person-add" className="mt-0.5" />
                 <div>
                   <Label htmlFor="move-person-add" className="cursor-pointer">
-                    Add to {targetName} as well
+                    {t("movePerson.addTo", { target: targetName ?? "" })}
                   </Label>
                   <p className="mt-0.5 text-hint text-tertiary">
-                    Keeps every current team; {personName} ends up on both.
+                    {t("movePerson.addHint", { person: personName })}
                   </p>
                 </div>
               </div>
@@ -99,10 +105,10 @@ export function MovePersonModal({
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={onConfirm} disabled={isPending}>
-            {isPending ? "Saving…" : isRemoval ? "Remove" : "Confirm"}
+            {isPending ? tCommon("actions.saving") : isRemoval ? tCommon("actions.remove") : tCommon("actions.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

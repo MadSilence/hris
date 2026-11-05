@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -32,7 +33,9 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
   onRequestCloseAction,
   group,
 }) => {
-  const groupName = group?.name ?? "Untitled section";
+  const t = useTranslations("settings.attributes.deleteSection");
+  const tCommon = useTranslations("common");
+  const groupName = group?.name ?? t("untitled");
 
   const {
     data: impact,
@@ -54,10 +57,9 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
               <Icon icon={Delete02Icon} />
             </span>
             <div className="space-y-1">
-              <AlertDialogTitle>Delete section</AlertDialogTitle>
+              <AlertDialogTitle>{t("title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. Section <strong>{groupName}</strong>{" "}
-                will be permanently deleted.
+                {t.rich("description", { name: groupName, b: (chunks) => <strong>{chunks}</strong> })}
               </AlertDialogDescription>
             </div>
           </div>
@@ -68,7 +70,7 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
             <Icon icon={Alert02Icon} className="mt-0.5 text-secondary" />
 
             <div>
-              <h4 className="mb-1 font-medium text-primary">Warning</h4>
+              <h4 className="mb-1 font-medium text-primary">{t("warning")}</h4>
 
               <div className="space-y-1 text-body text-secondary">
                 {/*
@@ -76,51 +78,41 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
                   to load, and genuinely empty \u2014 and told the reader the same vague sentence for all
                   three. Split, following `DeleteRoleModal`.
                 */}
-                {isImpactLoading && <p>Checking what this section contains\u2026</p>}
+                {isImpactLoading && <p>{t("impactLoading")}</p>}
 
                 {!isImpactLoading && !impact && !!impactError && (
                   <p>
-                    {messageForError(impactError)} Until then, what this section contains is
-                    unknown.
+                    {t("impactFailed", { error: messageForError(impactError) })}
                   </p>
                 )}
 
                 {!isImpactLoading && impact && impact.attributeCount > 0 && (
                   <p>
-                    <strong>{impact.attributeCount}</strong> attribute
-                    {impact.attributeCount === 1 ? "" : "s"} in this section will
-                    also be deleted
-                    {impact.valueCount > 0 && (
-                      <>
-                        , removing <strong>{impact.valueCount}</strong> value
-                        {impact.valueCount === 1 ? "" : "s"} from{" "}
-                        <strong>{impact.peopleCount}</strong>{" "}
-                        {impact.peopleCount === 1 ? "person" : "people"}
-                      </>
-                    )}
-                    .
+                    {t.rich(impact.valueCount > 0 ? "impactWithValues" : "impact", {
+                      attributeCount: impact.attributeCount,
+                      valueCount: impact.valueCount,
+                      peopleCount: impact.peopleCount,
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })}
                   </p>
                 )}
 
                 {!isImpactLoading && impact && impact.attributeCount === 0 && (
-                  <p>This section is empty \u2014 no attributes will be deleted with it.</p>
+                  <p>{t("empty")}</p>
                 )}
 
                 {/* Nothing asked yet, and nothing to report: the sentence this block always had. */}
                 {!isImpactLoading && !impact && !impactError && (
-                  <p>All attributes assigned to this section will also be deleted.</p>
+                  <p>{t("attributesDeleted")}</p>
                 )}
-                <p>
-                  Saved views or filters referencing them will be updated. This
-                  cannot be undone.
-                </p>
+                <p>{t("viewsUpdated")}</p>
               </div>
             </div>
           </div>
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
 
           {/* Disabled only while the question is still open \u2014 see `DeleteAttributeModal`. */}
           <AlertDialogAction
@@ -131,7 +123,7 @@ export const DeleteGroupModal: FC<DeleteGroupModalProps> = ({
             }}
             destructive
           >
-            Delete section
+            {t("title")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

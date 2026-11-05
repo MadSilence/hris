@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -31,11 +32,11 @@ const writeChecks = (kind: HolidayCalendarBindingKind): AccessCheck[] => {
   return checks;
 };
 
-const FALLBACK: Record<HolidayCalendarBindingKind, string> = {
-  OFFICE: "People here get their legal entity's calendar, or the company default.",
-  LEGAL_ENTITY: "People here get their office's calendar, or the company default.",
-  COMPANY_DEFAULT: "People get only their office's or legal entity's calendar, or one of their own.",
-};
+const FALLBACK = {
+  OFFICE: "binding.section.fallback.office",
+  LEGAL_ENTITY: "binding.section.fallback.legalEntity",
+  COMPANY_DEFAULT: "binding.section.fallback.companyDefault",
+} as const satisfies Record<HolidayCalendarBindingKind, string>;
 
 /**
  * The Holiday Calendar field of an office, a legal entity or the company (PUBLIC_HOLIDAYS.md § "Who gets
@@ -43,6 +44,8 @@ const FALLBACK: Record<HolidayCalendarBindingKind, string> = {
  * whose run log is one click away.
  */
 export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, placeName, readOnly = false }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
   const binding = useHolidayCalendarBinding(kind, refId);
   const current = binding.data;
@@ -54,16 +57,16 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Icon icon={Calendar03Icon} />
-            <h2 className="text-body font-semibold">Holiday calendar</h2>
+            <h2 className="text-body font-semibold">{t("binding.section.title")}</h2>
           </div>
           <p className="m-0 text-body text-tertiary">
-            Which public holidays the people who work here get, unless they have a calendar of their own.
+            {t("binding.section.description")}
           </p>
         </div>
         {!readOnly && (
           <PermissionGate allOf={writeChecks(kind)}>
             <Button type="button" variant="secondary" onClick={() => setIsOpen(true)} disabled={binding.isLoading}>
-              {current?.calendarId ? "Change" : "Set calendar"}
+              {current?.calendarId ? t("binding.section.change") : t("binding.section.set")}
             </Button>
           </PermissionGate>
         )}
@@ -77,7 +80,7 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
         <div className="space-y-1">
           <p className="m-0 text-body font-medium text-primary">{current.calendarName}</p>
           <p className="m-0 text-hint text-tertiary">
-            {inheriting === 1 ? "1 person inherits it" : `${inheriting} people inherit it`}
+            {t("binding.section.inherits", { count: inheriting })}
             {current.ruleId && (
               <>
                 {" · "}
@@ -85,19 +88,19 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
                   href={`/settings/automation/automations/${current.ruleId}`}
                   className="text-accent-text underline-offset-4 hover:underline"
                 >
-                  Run log
+                  {t("binding.section.runLog")}
                 </Link>
               </>
             )}
           </p>
           {current.ruleStatus === "PAUSED" && (
-            <FieldError>Paused: this calendar is no longer available. Choose a calendar again to apply it.</FieldError>
+            <FieldError>{t("binding.section.paused")}</FieldError>
           )}
         </div>
       ) : (
         <div className="space-y-1">
-          <p className="m-0 text-body text-primary">None</p>
-          <p className="m-0 text-hint text-tertiary">{FALLBACK[kind]}</p>
+          <p className="m-0 text-body text-primary">{tCommon("values.none")}</p>
+          <p className="m-0 text-hint text-tertiary">{t(FALLBACK[kind])}</p>
         </div>
       )}
 

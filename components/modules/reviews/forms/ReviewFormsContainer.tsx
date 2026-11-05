@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -14,7 +15,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { showActionError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import {
   archiveReviewFormAction,
@@ -34,6 +35,9 @@ export const reviewFormHref = (id: string) => `/reviews/forms/${id}`;
  * A quiet list — the name, how many questions, when it changed — each opening its editor.
  */
 export function ReviewFormsContainer() {
+  const t = useTranslations("reviews");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -53,7 +57,7 @@ export function ReviewFormsContainer() {
 
   const run = async (result: Promise<{ status: ActionStatus; errorMessage?: string }>) => {
     const res = await result;
-    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
+    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("error.generic");
     await invalidate();
     return null;
   };
@@ -80,7 +84,7 @@ export function ReviewFormsContainer() {
             {/* Blank, or one of the library's self, manager and peer forms (REVIEWS_PLAN.md 9.3) — the dialog asks. */}
             <Button type="button" className="gap-1.5" onClick={() => setAdding(true)}>
               <Icon icon={Add01Icon} size="sm" />
-              Add form
+              {t("forms.addForm")}
             </Button>
           </PermissionGate>
         }
@@ -102,10 +106,10 @@ export function ReviewFormsContainer() {
           query={query}
           archivedView={showArchived}
           scene="forms"
-          title="No review forms yet"
-          description="A form is the set of questions a reviewer answers — about themselves, a colleague, a report or their manager."
+          title={t("forms.empty.title")}
+          description={t("forms.empty.description")}
           onCreate={() => setAdding(true)}
-          createLabel="Add form"
+          createLabel={t("forms.addForm")}
           createAccess={{ resource: "REVIEWS.FORM", action: "EDIT" }}
         />
       ) : (
@@ -127,21 +131,21 @@ export function ReviewFormsContainer() {
                   {f.archivedAt && <StatusBadge status="archived" />}
                 </div>
                 <div className="mt-0.5 truncate text-hint text-tertiary">
-                  {f.questionCount === 1 ? "1 question" : `${f.questionCount} questions`} · Updated {formatDisplayDate(f.updatedAt)}
+                  {t("forms.row.facts", { count: f.questionCount, date: formatDisplayDate(f.updatedAt) })}
                   {f.description && <> · <MentionText text={f.description} /></>}
                 </div>
               </div>
               {(canEdit || canManage) && (
                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                  <RowActionsMenu label="Form actions">
+                  <RowActionsMenu label={t("forms.row.actions")}>
                     {canEdit && !f.archivedAt && (
                       <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => open(f)}>
-                        Edit
+                        {tCommon("actions.edit")}
                       </RowAction>
                     )}
                     {canEdit && (
                       <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate(f)}>
-                        Duplicate
+                        {tCommon("actions.duplicate")}
                       </RowAction>
                     )}
                     {canManage && (f.archivedAt ? (
@@ -152,16 +156,16 @@ export function ReviewFormsContainer() {
                           if (problem) showActionError({ errorMessage: problem });
                         }}
                       >
-                        Unarchive
+                        {t("forms.row.unarchive")}
                       </RowAction>
                     ) : (
                       <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setConfirm({ kind: "archive", form: f })}>
-                        Archive
+                        {tCommon("actions.archive")}
                       </RowAction>
                     ))}
                     {canManage && (
                       <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setConfirm({ kind: "delete", form: f })}>
-                        Delete
+                        {tCommon("actions.delete")}
                       </RowActionDestructive>
                     )}
                   </RowActionsMenu>
@@ -185,8 +189,8 @@ export function ReviewFormsContainer() {
 
       <ConfirmDialog
         open={confirm?.kind === "archive"}
-        title="Archive form"
-        confirmLabel="Archive"
+        title={t("forms.archiveDialog.title")}
+        confirmLabel={tCommon("actions.archive")}
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
           const problem = confirm ? await run(archiveReviewFormAction(confirm.form.id)) : null;
@@ -195,15 +199,14 @@ export function ReviewFormsContainer() {
         }}
       >
         <p>
-          <strong>{confirm?.form.name}</strong> can no longer be chosen for a review cycle. You can unarchive
-          it later.
+          {t.rich("forms.archiveDialog.body", { name: confirm?.form.name ?? "", b: (c) => <strong>{c}</strong> })}
         </p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={confirm?.kind === "delete"}
-        title="Delete form"
-        confirmLabel="Delete"
+        title={t("forms.deleteDialog.title")}
+        confirmLabel={tCommon("actions.delete")}
         destructive
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -213,7 +216,7 @@ export function ReviewFormsContainer() {
         }}
       >
         <p>
-          <strong>{confirm?.form.name}</strong> and its questions are removed. This cannot be undone.
+          {t.rich("forms.deleteDialog.body", { name: confirm?.form.name ?? "", b: (c) => <strong>{c}</strong> })}
         </p>
       </ConfirmDialog>
     </div>

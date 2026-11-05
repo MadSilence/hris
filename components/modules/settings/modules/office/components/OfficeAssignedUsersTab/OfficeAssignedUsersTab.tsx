@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import {
@@ -17,6 +18,8 @@ import type { Office } from "@/models/office";
 const BASE_PATH = "/offices";
 
 export default function OfficeAssignedUsersTab({ office }: { office: Office }) {
+  const t = useTranslations("structure.offices");
+  const tPlaces = useTranslations("structure.places");
   const [query, setQuery] = useState("");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const debounced = useDebouncedValue(query.trim(), 300);
@@ -37,7 +40,7 @@ export default function OfficeAssignedUsersTab({ office }: { office: Office }) {
   return (
     <>
       <AssignedUsersPanel
-        description="Everyone assigned to this office, managed in one place."
+        description={t("assigned.description")}
         manageResource="ORG.OFFICE"
         query={query}
         onQueryChange={setQuery}
@@ -55,16 +58,16 @@ export default function OfficeAssignedUsersTab({ office }: { office: Office }) {
           basePath: BASE_PATH,
           assignableId: office.id,
           assignableName: office.name,
-          noun: "office",
+          kind: "office",
           invalidateKeys: [assignedUsersQueryKey(BASE_PATH, office.id)],
         }}
       />
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title={`Export ${office.name}`}
-        description="Export this office's details and its assigned users."
-        includedText="Two sheets — General Information (name, description, email, phone, address, assigned people, created by, created at) and Assigned Users (first name, last name, email, position)."
+        title={tPlaces("exportNamed", { name: office.name })}
+        description={t("details.exportDescription")}
+        includedText={t("details.exportIncluded")}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}
       />

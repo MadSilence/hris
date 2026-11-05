@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Alert02Icon, CancelCircleIcon, CheckmarkCircle02Icon, CircleIcon, HourglassIcon, Message01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -12,7 +13,7 @@ import { FormError } from "@/components/feedback/FormError";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { showError } from "@/lib/errors/errorToast";
 import { documentService } from "@/components/modules/organization/modules/profile/modules/personalDocuments/services/documentService";
@@ -20,8 +21,6 @@ import { updateUserAttributesAction } from "@/components/modules/organization/mo
 import { addTaskCommentAction, answerQuestionnaireAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import {
-  PROCESS_TYPE_LABELS,
-  TASK_KIND_LABELS,
   requiresFile,
   type Material,
   type Task,
@@ -105,6 +104,8 @@ function TaskRow({
   busy: boolean;
   preview?: boolean;
 }) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
   const [commentsOpen, setCommentsOpen] = useState(false);
   const kindIcon = TASK_KIND_ICON[task.kind];
   const done = task.status === "DONE";
@@ -114,51 +115,53 @@ function TaskRow({
   // Decision 10: until what it waits for is done, the task is not its assignee's yet — said in words,
   // with the names, rather than drawn as an ordinary open task.
   const waiting = task.status === "WAITING";
-  const waitingFor = (task.waitingFor ?? []).map((t) => t.name ?? "another task").join(", ");
+  const waitingFor = (task.waitingFor ?? []).map((w) => w.name ?? t("shared.anotherTask")).join(", ");
   const live = open || waiting;
 
   return (
     <li className="flex items-start gap-3 px-4 py-3" data-testid="task-row">
       {done ? (
-        <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label="Done" />
+        <Icon icon={CheckmarkCircle02Icon} className="mt-0.5 text-status-approved-icon" label={t("shared.done")} />
       ) : waiting ? (
-        <Icon icon={HourglassIcon} className="mt-0.5 text-tertiary" label="Waiting" />
+        <Icon icon={HourglassIcon} className="mt-0.5 text-tertiary" label={t("taskList.waiting")} />
       ) : (
-        <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label={cancelled ? "Cancelled" : "Open"} />
+        <Icon icon={CircleIcon} className="mt-0.5 text-tertiary" label={cancelled ? t("taskList.cancelled") : t("taskList.open")} />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className={`font-medium ${cancelled ? "line-through text-tertiary" : waiting ? "text-tertiary" : ""}`}>{task.title}</span>
           <Badge variant="outline">
             <Icon icon={kindIcon} size="sm" className="size-3.5" />
-            {TASK_KIND_LABELS[task.kind]}
+            {t(`taskKind.${task.kind}`)}
           </Badge>
-          {task.processType && <Badge variant="outline">{PROCESS_TYPE_LABELS[task.processType]}</Badge>}
-          {overdue && <StatusBadge status="pending" label="Due" size="sm" />}
-          {cancelled && <Badge variant="outline">Cancelled</Badge>}
+          {task.processType && <Badge variant="outline">{t(`processType.${task.processType}`)}</Badge>}
+          {overdue && <StatusBadge status="pending" label={t("taskList.due")} size="sm" />}
+          {cancelled && <Badge variant="outline">{t("taskList.cancelled")}</Badge>}
           {waiting && (
             <Badge variant="outline" className="gap-1 text-tertiary">
               <Icon icon={HourglassIcon} size="sm" />
-              {waitingFor ? `Waiting for ${waitingFor}` : "Waiting"}
+              {waitingFor ? t("taskList.waitingFor", { names: waitingFor }) : t("taskList.waiting")}
             </Badge>
           )}
         </div>
         {task.description && <p className="mt-1 whitespace-pre-wrap text-body text-tertiary">{task.description}</p>}
         <p className="mt-1 text-hint text-tertiary">
           {[
-            task.dueDate ? `${waiting ? "Planned for" : "Due"} ${formatDisplayDate(task.dueDate, { style: "medium" })}` : null,
-            showSubject && task.subject ? `About ${task.subject.name ?? ""}` : null,
-            showAssignee ? `Done by ${task.assignee?.name ?? "nobody"}` : null,
-            done && task.completedAt ? `Done ${formatDisplayDate(task.completedAt, { style: "medium" })}` : null,
+            task.dueDate
+              ? t(waiting ? "taskList.plannedFor" : "taskList.dueOn", { date: formatDisplayDate(task.dueDate, { style: "medium" }) })
+              : null,
+            showSubject && task.subject ? t("taskList.about", { name: task.subject.name ?? "" }) : null,
+            showAssignee ? t("taskList.doneBy", { name: task.assignee?.name ?? t("shared.nobody") }) : null,
+            done && task.completedAt ? t("taskList.doneOn", { date: formatDisplayDate(task.completedAt, { style: "medium" }) }) : null,
           ].filter(Boolean).join(" · ")}
         </p>
         {task.kind === "FILL_FIELDS" && task.fields && (
           <p className="mt-1 text-hint text-tertiary">
-            {task.fields.map((f) => `${f.name ?? "Field"}${f.filled ? " ✓" : ""}`).join(", ")}
+            {task.fields.map((f) => `${f.name ?? t("shared.field")}${f.filled ? " ✓" : ""}`).join(", ")}
           </p>
         )}
         {(task.kind === "DOCUMENT" || requiresFile(task)) && task.category && (
-          <p className="mt-1 text-hint text-tertiary">A file in {task.category.name ?? "the named category"}</p>
+          <p className="mt-1 text-hint text-tertiary">{t("taskList.fileIn", { category: task.category.name ?? t("taskList.namedCategory") })}</p>
         )}
         <TaskMaterials materials={task.materials ?? []} onOpenFile={openFile} />
 
@@ -168,17 +171,17 @@ function TaskRow({
         )}
         {done && task.kind === "APPROVE_REVIEW" && mine && (
           <Link href={`/reviews/steps/by-task/${task.id}`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
-            See the review
+            {t("taskList.seeReview")}
           </Link>
         )}
         {done && task.kind === "REVIEW" && mine && (
           <Link href={`/reviews/write/by-task/${task.id}`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
-            See the review
+            {t("taskList.seeReview")}
           </Link>
         )}
         {done && task.kind === "QUESTIONNAIRE" && (
           <Link href={`/organization/people/${task.subject.id}/forms`} className="mt-2 block w-fit text-hint text-accent-text underline-offset-4 hover:underline">
-            See the answers
+            {t("taskList.seeAnswers")}
           </Link>
         )}
 
@@ -189,7 +192,7 @@ function TaskRow({
           onClick={() => setCommentsOpen((o) => !o)}
         >
           <Icon icon={Message01Icon} size="sm" />
-          {task.commentCount > 0 ? `Comments (${task.commentCount})` : "Comment"}
+          {task.commentCount > 0 ? t("shared.commentsCount", { count: task.commentCount }) : t("taskList.comment")}
         </button>}
         {commentsOpen && (
           <TaskComments
@@ -203,15 +206,15 @@ function TaskRow({
         )}
       </div>
       {live && !preview && (onEditAction || onCancelAction) && (
-        <RowActionsMenu label="Task actions" className="w-48">
+        <RowActionsMenu label={t("taskList.actions")} className="w-48">
           {onEditAction && (
             <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" className="text-tertiary" />} onClick={() => onEditAction(task)}>
-              Edit task
+              {t("taskList.editTask")}
             </RowAction>
           )}
           {onCancelAction && (
             <RowActionDestructive icon={<Icon icon={CancelCircleIcon} size="sm" />} onClick={() => onCancelAction(task)}>
-              Cancel task
+              {t("shared.cancelTask")}
             </RowActionDestructive>
           )}
         </RowActionsMenu>
@@ -230,6 +233,8 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   onCompleteAction?: Props["onCompleteAction"];
   onChangedAction?: Props["onChangedAction"];
 }) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const [file, setFile] = useState<File | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [working, setWorking] = useState(false);
@@ -261,7 +266,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     return (
       <div className="mt-3">
         <Button asChild size="sm" variant="secondary">
-          <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">Write the review</Link>
+          <Link href={`/reviews/write/by-task/${task.id}`} className="no-underline">{t("taskList.writeReview")}</Link>
         </Button>
       </div>
     );
@@ -272,14 +277,14 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     if (!mine || preview) return null;
     const decide = (approve: boolean) => run(async () => {
       const result = await decideAutomationApprovalAction({ taskId: task.id, approve });
-      if (result.status === ActionStatus.ERROR) throw new Error(result.errorMessage ?? "The decision was not saved.");
+      if (result.status === ActionStatus.ERROR) throw new Error(result.errorMessage ?? t("taskList.decisionNotSaved"));
       await onChangedAction?.();
     });
     return (
       <div className="mt-3 space-y-2">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="approve" size="sm" onClick={() => void decide(true)} disabled={disabled}>Approve</Button>
-          <Button type="button" size="sm" variant="secondary" onClick={() => void decide(false)} disabled={disabled}>Decline</Button>
+          <Button type="button" variant="approve" size="sm" onClick={() => void decide(true)} disabled={disabled}>{t("taskList.approve")}</Button>
+          <Button type="button" size="sm" variant="secondary" onClick={() => void decide(false)} disabled={disabled}>{t("taskList.decline")}</Button>
         </div>
         <FormError message={error} />
       </div>
@@ -289,7 +294,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   // The steps of a review are done on their own pages, and close there (REVIEWS_PLAN.md 10.2–10.3).
   if (task.kind === "NOMINATE_PEERS" || task.kind === "APPROVE_PEERS" || task.kind === "APPROVE_REVIEW") {
     if (!mine || preview) return null;
-    const label = task.kind === "NOMINATE_PEERS" ? "Nominate peers" : task.kind === "APPROVE_PEERS" ? "Approve peers" : "Open the review";
+    const label = task.kind === "NOMINATE_PEERS" ? t("taskList.nominatePeers") : task.kind === "APPROVE_PEERS" ? t("taskList.approvePeers") : t("taskList.openReview");
     return (
       <div className="mt-3">
         <Button asChild size="sm" variant="secondary">
@@ -310,7 +315,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
             await onCompleteAction(task, doc.id);
           })}
         >
-          Attach and mark done
+          {t("shared.attachAndMarkDone")}
         </Button>
         <FormError message={error} />
       </div>
@@ -320,13 +325,13 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   if (task.kind === "TODO" || task.kind === "ACKNOWLEDGE") {
     // An acknowledgement is only its assignee's to give; somebody else sees it waiting for them.
     if (task.kind === "ACKNOWLEDGE" && !mine) {
-      return <p className="mt-2 text-hint text-tertiary">Waiting for {task.assignee?.name ?? "its assignee"} to confirm they have read it.</p>;
+      return <p className="mt-2 text-hint text-tertiary">{t("taskList.waitingRead", { name: task.assignee?.name ?? t("shared.itsAssignee") })}</p>;
     }
     if (!onCompleteAction || !canComplete) return null;
     return (
       <div className="mt-3">
         <Button type="button" size="sm" variant="secondary" disabled={act} onClick={() => run(async () => { await onCompleteAction(task); })}>
-          {task.kind === "ACKNOWLEDGE" ? "I have read it" : "Mark done"}
+          {task.kind === "ACKNOWLEDGE" ? t("shared.iHaveReadIt") : t("shared.markDone")}
         </Button>
         <FormError message={error} />
       </div>
@@ -345,7 +350,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
             else await onChangedAction?.();
           })}
         >
-          Upload
+          {tCommon("actions.upload")}
         </Button>
         <FormError message={error} />
       </div>
@@ -357,7 +362,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     if (!canFillInPlace(fields)) {
       return (
         <Button size="sm" variant="secondary" className="mt-3" asChild>
-          <Link href={`/organization/people/${task.subject.id}/personal`}>Fill in on the profile</Link>
+          <Link href={`/organization/people/${task.subject.id}/personal`}>{t("taskList.fillOnProfile")}</Link>
         </Button>
       );
     }
@@ -382,7 +387,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
             await onChangedAction?.();
           })}
         >
-          Save
+          {tCommon("actions.save")}
         </Button>
         <FormError message={error} />
       </div>
@@ -391,14 +396,14 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
 
   // A questionnaire: only its assignee answers, once.
   if (!mine) {
-    return <p className="mt-2 text-hint text-tertiary">Waiting for {task.assignee?.name ?? "its assignee"} to answer.</p>;
+    return <p className="mt-2 text-hint text-tertiary">{t("taskList.waitingAnswer", { name: task.assignee?.name ?? t("shared.itsAssignee") })}</p>;
   }
   return answering ? (
     <div className="mt-3">
       <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} sendDisabled={preview}
         onSubmit={async (answers) => {
           const res = await answerQuestionnaireAction({ id: task.id, answers });
-          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "The answers could not be sent.";
+          if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("shared.answersNotSent");
           await onChangedAction?.();
           return null;
         }}
@@ -406,7 +411,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     </div>
   ) : (
     <Button type="button" size="sm" variant="secondary" className="mt-3" onClick={() => setAnswering(true)}>
-      Answer
+      {t("taskList.answer")}
     </Button>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { Add01Icon, Delete02Icon, PencilEdit02Icon, SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -45,6 +46,8 @@ const messageOf = (error: unknown): string | null =>
   error instanceof Error ? error.message : null;
 
 export const DocumentCategoriesContainer: FC = () => {
+  const t = useTranslations("settings.documentCategories");
+  const tCommon = useTranslations("common");
   const { data: categories, isLoading } = useDocumentCategories();
   const save = useSaveDocumentCategory();
   const remove = useDeleteDocumentCategory();
@@ -77,7 +80,7 @@ export const DocumentCategoriesContainer: FC = () => {
             onClick={() => setIsCreateOpen(true)}
  >
             <Icon icon={Add01Icon} size="sm" />
-            Add category
+            {t("add")}
           </Button>
         }
       />
@@ -88,11 +91,11 @@ export const DocumentCategoriesContainer: FC = () => {
         <ListEmptyState
           query={query}
           scene="documents"
-          title="No categories yet"
-          description="Until a category exists documents cannot be labelled, and the category picker stays hidden on upload."
-          noResultsHint="Try a different category name."
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+          noResultsHint={t("noResultsHint")}
           onCreate={() => setIsCreateOpen(true)}
-          createLabel="Add category"
+          createLabel={t("add")}
         />
       ) : (
         <div className="divide-y divide-divider rounded-control border border-divider">
@@ -104,10 +107,10 @@ export const DocumentCategoriesContainer: FC = () => {
                     {category.name}
                   </span>
                   {category.isSystem && (
-                    <Badge variant="neutral" className="font-normal">System</Badge>
+                    <Badge variant="neutral" className="font-normal">{t("system")}</Badge>
                   )}
                   {!category.isActive && (
-                    <Badge variant="outline" className="font-normal">Inactive</Badge>
+                    <Badge variant="outline" className="font-normal">{t("inactive")}</Badge>
                   )}
                 </div>
                 {category.description && (
@@ -120,7 +123,7 @@ export const DocumentCategoriesContainer: FC = () => {
               {category.isSystem ? (
                 <span
                   className="text-disabled"
-                  title="System categories can't be edited or deleted"
+                  title={t("systemLocked")}
  >
                   <Icon icon={SquareLock02Icon} size="sm" />
                 </span>
@@ -129,7 +132,7 @@ export const DocumentCategoriesContainer: FC = () => {
                   <Button type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Edit ${category.name}`}
+                    aria-label={t("editAria", { name: category.name })}
                     onClick={() => setEditing(category)}
  >
                     <Icon icon={PencilEdit02Icon} size="sm" />
@@ -137,7 +140,7 @@ export const DocumentCategoriesContainer: FC = () => {
                   <Button type="button"
                     variant="ghost"
                     size="icon-sm" className="text-tertiary hover:text-danger-text"
-                    aria-label={`Delete ${category.name}`}
+                    aria-label={t("deleteAria", { name: category.name })}
                     onClick={() => setToDelete(category)}
  >
                     <Icon icon={Delete02Icon} size="sm" />
@@ -183,10 +186,9 @@ export const DocumentCategoriesContainer: FC = () => {
  >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete category</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              <strong>{toDelete?.name}</strong> will be removed. Documents already labelled with it
-              keep the file but lose the label.
+              {t.rich("deleteDescription", { name: toDelete?.name ?? "", b: (chunks) => <strong>{chunks}</strong> })}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -195,7 +197,7 @@ export const DocumentCategoriesContainer: FC = () => {
           )}
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={remove.isPending}>{tCommon("actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={remove.isPending}
               destructive
@@ -210,7 +212,7 @@ export const DocumentCategoriesContainer: FC = () => {
                 }
               }}
  >
-              Delete
+              {tCommon("actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -229,6 +231,8 @@ const CategoryFormModal: FC<{
   onCancelAction: () => void;
   onSubmitAction: (values: FormValues) => void;
 }> = ({ isOpen, category, isLoading, errorMessage, onCancelAction, onSubmitAction }) => {
+  const t = useTranslations("settings.documentCategories");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -254,9 +258,9 @@ const CategoryFormModal: FC<{
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onCancelAction()}>
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{category ? "Edit category" : "New category"}</DialogTitle>
+          <DialogTitle>{category ? t("editTitle") : t("newTitle")}</DialogTitle>
           <DialogDescription>
-            Categories label a person&apos;s documents — contracts, certificates, payslips.
+            {t("formDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -264,7 +268,7 @@ const CategoryFormModal: FC<{
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="category-name" required>Name</RequiredLabel>
+            <RequiredLabel htmlFor="category-name" required>{tCommon("fields.name")}</RequiredLabel>
             <Input
               id="category-name"
               autoFocus
@@ -275,7 +279,7 @@ const CategoryFormModal: FC<{
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category-description">Description</Label>
+            <Label htmlFor="category-description">{tCommon("fields.description")}</Label>
             <Input
               id="category-description"
               value={description}
@@ -286,9 +290,9 @@ const CategoryFormModal: FC<{
 
           <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
             <div>
-              <Label htmlFor="category-active" className="text-body">Active</Label>
+              <Label htmlFor="category-active" className="text-body">{t("active")}</Label>
               <p className="text-hint text-tertiary">
-                Inactive categories stay on existing documents but are not offered on upload.
+                {t("activeHint")}
               </p>
             </div>
             <Switch
@@ -301,13 +305,13 @@ const CategoryFormModal: FC<{
 
           <DialogFooter>
             <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !name.trim()}
  >
-              {isLoading ? "Saving…" : "Save"}
+              {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </form>

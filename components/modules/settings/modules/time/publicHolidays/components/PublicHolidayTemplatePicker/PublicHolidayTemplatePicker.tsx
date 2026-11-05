@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type FC } from "react";
 import { Search01Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 
 import {
@@ -43,9 +44,10 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
   value,
   onChange,
   disabled = false,
-  placeholder = "Choose from a template",
+  placeholder,
   id,
 }) => {
+  const t = useTranslations("timeOff");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const listId = useId();
@@ -156,7 +158,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
             /* Closed, the field is a label for the current choice — only the open state is typable. */
             readOnly={!open}
             value={open ? query : selected ? templateDisplayName(selected) : ""}
-            placeholder={open ? "Search templates" : placeholder}
+            placeholder={open ? t("publicHolidays.picker.search") : (placeholder ?? t("publicHolidays.picker.placeholder"))}
             onChange={(event) => setQuery(event.currentTarget.value)}
             /*
              * Opening on focus is wrong: a dialog autofocuses its first field, so the list flashed
@@ -181,7 +183,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
             type="button"
             tabIndex={-1}
             disabled={disabled}
-            aria-label={open ? "Close template list" : "Open template list"}
+            aria-label={open ? t("publicHolidays.picker.closeList") : t("publicHolidays.picker.openList")}
             /* Keeps the click from stealing focus off the field before the toggle runs. */
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
@@ -213,7 +215,7 @@ export const PublicHolidayTemplatePicker: FC<Props> = ({
       >
         {filtered.length === 0 ? (
           <p className="px-2 py-6 text-center text-body text-tertiary">
-            No templates found
+            {t("publicHolidays.picker.none")}
           </p>
         ) : (
           filtered.map((template) => {

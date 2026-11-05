@@ -3,6 +3,8 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { Delete02Icon, Notification01Icon, Settings01Icon, StarIcon, TickDouble02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -28,7 +30,7 @@ import { NotificationActions } from "@/components/modules/notifications/componen
 import { SearchBox } from "@/components/ui/SearchBox";
 import {
   INBOX_FILTERS,
-  INBOX_FILTER_LABELS,
+  INBOX_FILTER_LABEL_KEYS,
   matchesInboxFilter,
   needsAction,
   parseInboxFilter,
@@ -44,7 +46,10 @@ const NotificationRow: FC<{
   onDelete: (n: Notification) => void;
   busy: boolean;
 }> = ({ notification, onOpen, onToggleStar, onDelete, busy }) => {
-  const { title, message, icon, href } = presentNotification(notification);
+  const t = useTranslations("notifications");
+  const language = useDisplayLanguage();
+  const tCommon = useTranslations("common");
+  const { title, message, icon, href } = presentNotification(notification, t, language);
   const clickable = href !== null || !notification.read;
 
   return (
@@ -69,10 +74,10 @@ const NotificationRow: FC<{
         </div>
         {message && <p className="mt-0.5 text-body text-tertiary">{message}</p>}
         <div className="mt-1 flex items-center gap-2">
-          <p className="text-hint text-tertiary">{timeAgo(notification.createdAt)}</p>
+          <p className="text-hint text-tertiary">{timeAgo(notification.createdAt, t, language)}</p>
           {notification.category && (
             <span className="rounded-pill bg-mist px-2 py-0.5 text-hint font-medium text-secondary">
-              {categoryLabel(notification.category)}
+              {categoryLabel(notification.category, t)}
             </span>
           )}
         </div>
@@ -83,7 +88,7 @@ const NotificationRow: FC<{
         <Button type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label={notification.starred ? "Unstar" : "Star"}
+          aria-label={notification.starred ? t("inbox.unstar") : t("inbox.star")}
           disabled={busy}
           onClick={() => onToggleStar(notification)}
         >
@@ -92,7 +97,7 @@ const NotificationRow: FC<{
         <Button type="button"
           variant="ghost"
           size="icon-sm" className="text-tertiary hover:text-danger-text"
-          aria-label="Delete"
+          aria-label={tCommon("actions.delete")}
           disabled={busy}
           onClick={() => onDelete(notification)}
         >
@@ -104,6 +109,8 @@ const NotificationRow: FC<{
 };
 
 export const NotificationsInbox: FC = () => {
+  const t = useTranslations("notifications");
+  const language = useDisplayLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -166,16 +173,16 @@ export const NotificationsInbox: FC = () => {
     const needle = query.trim().toLowerCase();
     if (needle) {
       rows = rows.filter((n) => {
-        const { title, message } = presentNotification(n);
+        const { title, message } = presentNotification(n, t, language);
         return (
           title.toLowerCase().includes(needle) ||
           (message ?? "").toLowerCase().includes(needle) ||
-          categoryLabel(n.category).toLowerCase().includes(needle)
+          categoryLabel(n.category, t).toLowerCase().includes(needle)
         );
       });
     }
     return rows;
-  }, [all, status, category, query]);
+  }, [all, status, category, query, t, language]);
 
   // Group the visible rows into date sections, preserving the (newest-first) server order within each.
   const groups = useMemo(() => {
@@ -193,7 +200,7 @@ export const NotificationsInbox: FC = () => {
     if (!n.read) {
       markRead.mutate(n.id);
     }
-    const { href } = presentNotification(n);
+    const { href } = presentNotification(n, t);
     if (href) {
       router.push(href);
     }
@@ -203,29 +210,29 @@ export const NotificationsInbox: FC = () => {
 
   const emptyText =
     query.trim()
-      ? "No notifications match your search."
+      ? t("inbox.empty.search")
       : status === "unread"
-      ? "No unread notifications."
+      ? t("inbox.empty.unread")
       : status === "starred"
-        ? "No starred notifications."
+        ? t("inbox.empty.starred")
       : status === "needs-action"
-        ? "Nothing needs your action."
+        ? t("inbox.empty.needsAction")
         : category !== ALL_CATEGORIES
-          ? "Nothing in this category."
-          : "No notifications yet.";
+          ? t("inbox.empty.category")
+          : t("inbox.empty.none");
 
   return (
     <div className="mx-auto flex h-[calc(100svh-6rem)] w-full max-w-5xl flex-col gap-4 overflow-hidden">
       <div className="shrink-0 space-y-4">
       <section className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-page-title text-primary">Inbox</h1>
+          <h1 className="text-page-title text-primary">{t("inbox.title")}</h1>
           {/* Nothing is known before the first answer, so the line says nothing rather than "caught up". */}
           {isLoading ? (
             <div aria-hidden className="mt-2 h-4 w-28 shimmer rounded-tag bg-mist" />
           ) : (
             <p className="mt-1 text-body text-tertiary">
-              {counts.unread > 0 ? `${counts.unread} unread` : "You're all caught up"}
+              {counts.unread > 0 ? t("inbox.unread", { count: counts.unread }) : t("inbox.caughtUp")}
             </p>
           )}
         </div>
@@ -237,9 +244,9 @@ export const NotificationsInbox: FC = () => {
             disabled={markAllRead.isPending || counts.unread === 0}
           >
             <Icon icon={TickDouble02Icon} size="sm" />
-            Mark all as read
+            {t("inbox.markAllRead")}
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Notification preferences" asChild>
+          <Button variant="ghost" size="icon-sm" aria-label={t("inbox.preferences")} asChild>
             <Link href="/preferences">
               <Icon icon={Settings01Icon} size="sm" className="text-tertiary" />
             </Link>
@@ -262,7 +269,7 @@ export const NotificationsInbox: FC = () => {
                 status === f ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
               )}
             >
-              {INBOX_FILTER_LABELS[f]}
+              {t(INBOX_FILTER_LABEL_KEYS[f])}
               <span
                 className={cn(
                   "rounded-pill px-1.5 text-hint",
@@ -289,7 +296,7 @@ export const NotificationsInbox: FC = () => {
                     : "border-divider text-tertiary hover:bg-subtle",
                 )}
               >
-                {c === ALL_CATEGORIES ? "All categories" : categoryLabel(c)}
+                {c === ALL_CATEGORIES ? t("inbox.allCategories") : categoryLabel(c, t)}
               </button>
             ))}
           </div>
@@ -314,7 +321,7 @@ export const NotificationsInbox: FC = () => {
           {groups.map(({ group, items }) => (
             <div key={group.key} className="flex flex-col gap-2">
               <p className="px-1 text-hint font-semibold text-tertiary">
-                {group.label}
+                {t(`inbox.dateGroup.${group.key}`)}
               </p>
               {items.map((n) => (
                 <NotificationRow

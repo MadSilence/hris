@@ -19,6 +19,11 @@ import {
   WEEK_W,
 } from "./timeAxis";
 import { deriveLanes, type DraftItem } from "./draft";
+import { translatorFor } from "@/test/nextIntl";
+import type { LifecycleT } from "@/components/modules/lifecycle/i18n";
+
+// The English catalogue, through the real ICU formatter.
+const t = translatorFor("lifecycle") as unknown as LifecycleT;
 
 const item = (over: Partial<DraftItem>): DraftItem => ({
   key: over.key ?? "k",
@@ -40,7 +45,7 @@ const item = (over: Partial<DraftItem>): DraftItem => ({
 });
 
 describe("the piecewise time axis", () => {
-  const axis = buildAxis([]);
+  const axis = buildAxis([], t);
 
   it("is a day per column around the start, Before start just left of Day 1, then weeks to day 90", () => {
     const ids = axis.columns.map((c) => c.id);
@@ -57,7 +62,7 @@ describe("the piecewise time axis", () => {
   });
 
   it("widens for a template that reaches past either end", () => {
-    const wide = buildAxis([item({ offsetDays: -30 }), item({ offsetDays: 150 })]);
+    const wide = buildAxis([item({ offsetDays: -30 }), item({ offsetDays: 150 })], t);
     expect(wide.columns[0]).toMatchObject({ kind: "week", start: -35, end: -29 });
     expect(columnOf(wide, { dueKind: "OFFSET", offsetDays: -30 }).kind).toBe("week");
     const month = columnOf(wide, { dueKind: "OFFSET", offsetDays: 150 });
@@ -107,8 +112,8 @@ describe("lanes and blocks", () => {
     item({ key: "c", offsetDays: 2, assigneeKind: "ONBOARDING_MANAGER" }),
     item({ key: "d", offsetDays: 1, assigneeKind: "SPECIFIC_USER", assigneeUserId: "u1", assigneeName: "Linus" }),
   ];
-  const lanes = deriveLanes(items);
-  const layout = layoutTemplate(items, lanes);
+  const lanes = deriveLanes(items, t);
+  const layout = layoutTemplate(items, lanes, buildAxis(items, t));
 
   it("stacks tasks that share a cell and grows the lane to hold them, never overlapping", () => {
     const a = layout.positions.get("a")!;
@@ -126,7 +131,7 @@ describe("lanes and blocks", () => {
     const long = blockHeight({ title: "First week check-in with a long title to see wrapping" });
     expect(long).toBeGreaterThan(BLOCK_H);
     const many = [item({ key: "x", title: "First week check-in with a long title to see wrapping" }), item({ key: "y", title: "Short" })];
-    const placed = layoutTemplate(many, deriveLanes(many));
+    const placed = layoutTemplate(many, deriveLanes(many, t), buildAxis(many, t));
     expect(placed.positions.get("y")!.y - placed.positions.get("x")!.y).toBe(long + STACK_GAP);
   });
 

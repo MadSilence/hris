@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Attachment01Icon, Cancel01Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -34,6 +35,7 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
   required?: boolean;
   onChange: (materials: Material[]) => void;
 }) {
+  const t = useTranslations("lifecycle");
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,7 +44,7 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
   const addLink = () => {
     const address = url.trim();
     if (!isWebAddress(address)) {
-      setError("A link must be a web address, starting with https:// or http://.");
+      setError(t("materials.linkInvalid"));
       return;
     }
     onChange([...materials, { type: "LINK", url: address, name: name.trim() || null }]);
@@ -61,7 +63,7 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
       if (res.status === ActionStatus.SUCCESS && res.data) {
         onChange([...materials, { type: "FILE", fileId: res.data.id, name: res.data.name }]);
       } else {
-        setError(res.errorMessage ?? "The file could not be uploaded.");
+        setError(res.errorMessage ?? t("materials.uploadFailed"));
       }
     } finally {
       setBusy(false);
@@ -70,20 +72,18 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-body font-medium">Material{required ? " *" : ""}</legend>
+      <legend className="text-body font-medium">{required ? t("materials.legendRequired") : t("materials.legend")}</legend>
       <p className="text-hint text-tertiary">
-        {required
-          ? "What the person confirms they have read: a file or a link."
-          : "Files and links for whoever does the task."}
+        {required ? t("materials.hintRequired") : t("materials.hint")}
       </p>
       {materials.length > 0 && (
         <ul className="space-y-1">
           {materials.map((m, i) => (
             <li key={`${m.fileId ?? m.url}-${i}`} className="flex items-center gap-2 text-body">
               {m.type === "LINK" ? <Icon icon={LinkSquare02Icon} size="sm" className="shrink-0" /> : <Icon icon={Attachment01Icon} size="sm" className="shrink-0" />}
-              <span className="min-w-0 flex-1 truncate">{m.name ?? m.url ?? "File"}</span>
+              <span className="min-w-0 flex-1 truncate">{m.name ?? m.url ?? t("shared.file")}</span>
               {!disabled && (
-                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" aria-label={`Remove ${m.name ?? "material"}`}
+                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" aria-label={t("materials.remove", { name: m.name ?? t("materials.material") })}
                   onClick={() => onChange(materials.filter((_, j) => j !== i))}>
                   <Icon icon={Cancel01Icon} size="sm" />
                 </Button>
@@ -95,14 +95,14 @@ export function MaterialsEditor({ idPrefix, materials, disabled, required, onCha
       {!disabled && (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor={`${idPrefix}-link`} className="text-hint">Link</Label>
+            <Label htmlFor={`${idPrefix}-link`} className="text-hint">{t("materials.link")}</Label>
             <Input id={`${idPrefix}-link`} placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy} />
-            <Input aria-label="Link name" placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} disabled={busy} />
-            <Button type="button" size="sm" variant="secondary" disabled={busy || !url.trim()} onClick={addLink}>Add link</Button>
+            <Input aria-label={t("materials.linkName")} placeholder={t("materials.namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} disabled={busy} />
+            <Button type="button" size="sm" variant="secondary" disabled={busy || !url.trim()} onClick={addLink}>{t("materials.addLink")}</Button>
           </div>
           <div className="space-y-1">
-            <Label htmlFor={`${idPrefix}-file`} className="text-hint">File</Label>
-            <FilePickButton id={`${idPrefix}-file`} label="Attach file" disabled={busy}
+            <Label htmlFor={`${idPrefix}-file`} className="text-hint">{t("shared.file")}</Label>
+            <FilePickButton id={`${idPrefix}-file`} label={t("materials.attachFile")} disabled={busy}
               onPickAction={(file) => { if (file) void addFile(file); }} />
           </div>
         </div>

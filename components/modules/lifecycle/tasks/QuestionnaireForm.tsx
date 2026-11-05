@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { Textarea } from "@/components/desact/textarea";
@@ -23,6 +24,8 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
   sendDisabled?: boolean;
   onSubmit: (answers: Record<string, unknown>) => Promise<string | null>;
 }) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +35,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
 
   const submit = async () => {
     if (missing.length > 0) {
-      setError(`Answer every required question: ${missing.map((q) => q.label).join(", ")}.`);
+      setError(t("questionnaire.answerRequired", { questions: missing.map((q) => q.label).join(", ") }));
       return;
     }
     setBusy(true);
@@ -81,8 +84,8 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
                 {label}
                 <RadioGroup id={id} className="flex gap-4" value={value === true ? "yes" : value === false ? "no" : ""}
                   onValueChange={(v) => set(q.id, v === "yes")} disabled={busy}>
-                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />Yes</label>
-                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />No</label>
+                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />{tCommon("values.yes")}</label>
+                  <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />{tCommon("values.no")}</label>
                 </RadioGroup>
               </div>
             );
@@ -122,7 +125,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
             );
         }
       })}
-      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>Send answers</Button>
+      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>{t("questionnaire.send")}</Button>
       <FormError message={error} />
     </div>
   );

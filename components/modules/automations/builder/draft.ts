@@ -6,6 +6,10 @@ import type {
   AutomationTriggerType,
   TriggerSpec,
 } from "@/models/automations";
+import type { AutomationsT } from "@/components/modules/automations/shared/vocabulary";
+
+/** A placeholder token for a message argument: `{firstName}` stays `{firstName}` in every language. */
+const token = (name: string) => `{${name}}`;
 
 /**
  * The builder's draft lives in the page — there are no server drafts (AUTOMATIONS_DESIGN.md § 9.1).
@@ -66,15 +70,13 @@ export type StarterId = "welcome-email" | "manager-day-one" | "office-calendar" 
 /**
  * Four ready-made starting points from the research catalogue (§ A.10 "Templates"). Each opens the
  * builder filled in and saves nothing — what is missing (the office, the calendar, the HR role) is
- * left for the author, and the preview says so.
+ * left for the author, and the preview says so. The words are the reader's language; the placeholders stay tokens.
  */
-export const STARTERS: { id: StarterId; title: string; hint: string; draft: () => Draft }[] = [
+export const STARTERS: { id: StarterId; draft: (t: AutomationsT) => Draft }[] = [
   {
     id: "welcome-email",
-    title: "Welcome email before the first day",
-    hint: "Emails the new person three days before they start.",
-    draft: () => ({
-      name: "Welcome email",
+    draft: (t) => ({
+      name: t("starter.welcomeEmail.name"),
       description: "",
       definition: {
         ...emptyDefinition(),
@@ -85,18 +87,18 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
           type: "SEND_EMAIL",
           offsetDays: 0,
           recipients: [{ kind: "PERSON" }],
-          subject: "Welcome to {companyName}, {firstName}",
-          body: "Hi {firstName},\n\nWe are looking forward to seeing you on {startDate}.\n\n{managerName}",
+          subject: t("starter.welcomeEmail.subject", { companyName: token("companyName"), firstName: token("firstName") }),
+          body: t("starter.welcomeEmail.body", {
+            firstName: token("firstName"), startDate: token("startDate"), managerName: token("managerName"),
+          }),
         }],
       },
     }),
   },
   {
     id: "manager-day-one",
-    title: "A task for the manager on day one",
-    hint: "Gives the manager a task on the new person's first day.",
-    draft: () => ({
-      name: "First day with the manager",
+    draft: (t) => ({
+      name: t("starter.managerDayOne.name"),
       description: "",
       definition: {
         ...emptyDefinition(),
@@ -105,8 +107,8 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
           type: "CREATE_TASK",
           offsetDays: 0,
           assignee: { kind: "MANAGER" },
-          title: "Welcome {firstName} on their first day",
-          description: "Show {firstName} around and introduce them to the team.",
+          title: t("starter.managerDayOne.taskTitle", { firstName: token("firstName") }),
+          description: t("starter.managerDayOne.taskDescription", { firstName: token("firstName") }),
           dueOffsetDays: 0,
         }],
       },
@@ -114,10 +116,8 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
   },
   {
     id: "office-calendar",
-    title: "Holiday calendar by office",
-    hint: "Everyone in an office gets its holiday calendar, and keeps following it.",
-    draft: () => ({
-      name: "Holiday calendar by office",
+    draft: (t) => ({
+      name: t("starter.officeCalendar.name"),
       description: "",
       definition: {
         ...emptyDefinition(),
@@ -128,10 +128,8 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
   },
   {
     id: "termination-hr",
-    title: "Tell HR about a termination",
-    hint: "Notifies a role the day a termination is recorded.",
-    draft: () => ({
-      name: "Termination recorded",
+    draft: (t) => ({
+      name: t("starter.terminationHr.name"),
       description: "",
       definition: {
         ...emptyDefinition(),
@@ -140,15 +138,15 @@ export const STARTERS: { id: StarterId; title: string; hint: string; draft: () =
           type: "NOTIFY",
           offsetDays: 0,
           recipients: [{ kind: "ROLE", roleId: null }],
-          text: "{fullName}'s termination was recorded. Their last working day is {lastWorkingDay}.",
+          text: t("starter.terminationHr.text", { fullName: token("fullName"), lastWorkingDay: token("lastWorkingDay") }),
         }],
       },
     }),
   },
 ];
 
-export const starterDraft = (id: string | null | undefined): Draft | null =>
-  STARTERS.find((s) => s.id === id)?.draft() ?? null;
+export const starterDraft = (t: AutomationsT, id: string | null | undefined): Draft | null =>
+  STARTERS.find((s) => s.id === id)?.draft(t) ?? null;
 
 /** A shipped template (D3) as a draft: its definition, with an empty audience when it has none. */
 export const templateDraft = (t: { name: string; description: string; definition: AutomationDefinition }): Draft => ({

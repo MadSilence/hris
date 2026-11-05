@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -15,10 +16,10 @@ import type { AttributeGroup } from "@/models/attribute";
 import {
   ACTION_ORDER,
   EMPTY_CELL,
-  FIELD_ACTION_LABELS,
+  FIELD_ACTION_LABEL_KEYS,
   FIELD_ACTIONS,
   FIELD_SCOPES,
-  FIELD_SCOPE_LABELS,
+  FIELD_SCOPE_LABEL_KEYS,
   FieldAccessDraft,
   FieldActionLevel,
   FieldScope,
@@ -42,18 +43,19 @@ function dotClass(current: FieldActionLevel, server: FieldActionLevel): string {
 }
 
 // Friendly labels + colored chips per attribute type (like the status/role chips elsewhere).
-const TYPE_LABELS: Record<string, string> = {
-  TEXT: "Text",
-  EMAIL: "Email",
-  URL: "URL",
-  STATUS: "Status",
-  NUMBER: "Number",
-  DATE: "Date",
-  CHECKBOX: "Checkbox",
-  SELECT: "Select",
-  MULTI_SELECT: "Multi select",
-  PERSON: "Person",
-};
+const TYPE_LABEL_KEYS = {
+  TEXT: "roles.fieldAccess.type.text",
+  EMAIL: "roles.fieldAccess.type.email",
+  URL: "roles.fieldAccess.type.url",
+  STATUS: "roles.fieldAccess.type.status",
+  NUMBER: "roles.fieldAccess.type.number",
+  DATE: "roles.fieldAccess.type.date",
+  CHECKBOX: "roles.fieldAccess.type.checkbox",
+  SELECT: "roles.fieldAccess.type.select",
+  MULTI_SELECT: "roles.fieldAccess.type.multiSelect",
+  PERSON: "roles.fieldAccess.type.person",
+} as const;
+const isKnownType = (key: string): key is keyof typeof TYPE_LABEL_KEYS => key in TYPE_LABEL_KEYS;
 
 // One tag colour per field type — a category, not a status, so it takes the tag palette (SPEC § 4.7).
 const TYPE_TAG: Record<string, TagColor> = {
@@ -70,14 +72,16 @@ const TYPE_TAG: Record<string, TagColor> = {
 };
 
 const TypeChip: React.FC<{ type?: string | null }> = ({ type }) => {
+  const t = useTranslations("settings");
   const key = type ?? "";
   return (
     <TagChip color={TYPE_TAG[key] ?? "gray"}>
-      {TYPE_LABELS[key] ?? key}
+      {isKnownType(key) ? t(TYPE_LABEL_KEYS[key]) : key}
     </TagChip>
   );
 };
 
+/** `label` is empty for the two built-in groups (system, ungrouped): their names come from the catalogue where they render. */
 export type FieldGroup = { id: string; label: string; fields: FieldDTO[] };
 
 export function buildFieldGroups(
@@ -101,7 +105,7 @@ export function buildFieldGroups(
   for (const field of fields) {
     const mapped = field.isSystem ? undefined : groupByFieldId.get(field.id);
     const key = field.isSystem ? SYSTEM_GROUP_ID : (mapped?.id ?? UNGROUPED_ID);
-    const label = field.isSystem ? "System fields" : (mapped?.label ?? "Base attributes");
+    const label = field.isSystem ? "" : (mapped?.label ?? "");
     // Base attributes (ungrouped) pinned to the very top; system fields next; then named groups.
     const order = field.isSystem ? -1 : (mapped?.order ?? -2);
 
@@ -123,6 +127,7 @@ const ActionSelect: React.FC<{
   floor?: FieldActionLevel;
   onChange: (level: FieldActionLevel) => void;
 }> = ({ value, server, disabled, floor = "NONE", onChange }) => {
+  const t = useTranslations("settings");
   const floorOrd = ACTION_ORDER[floor];
   return (
     <Select value={value} onValueChange={(v) => onChange(v as FieldActionLevel)} disabled={disabled}>
@@ -142,17 +147,17 @@ const ActionSelect: React.FC<{
               disabled={blocked}
               title={
                 blocked
-                  ? `Whole company is set to "${FIELD_ACTION_LABELS[floor]}". Lower it there to allow less access here.`
+                  ? t("roles.fieldAccess.floorBlocked", { level: t(FIELD_ACTION_LABEL_KEYS[floor]) })
                   : undefined
               }
             >
-              {FIELD_ACTION_LABELS[level]}
+              {t(FIELD_ACTION_LABEL_KEYS[level])}
             </SelectItem>
           );
         })}
         {floorOrd > 0 && (
           <p className="mt-1 border-t border-divider px-2 pt-1.5 text-hint text-tertiary">
-            Options below “{FIELD_ACTION_LABELS[floor]}” are set by Whole company access.
+            {t("roles.fieldAccess.floorNote", { level: t(FIELD_ACTION_LABEL_KEYS[floor]) })}
           </p>
         )}
       </SelectContent>
@@ -183,6 +188,7 @@ export default function FieldAccessView({
   onOpenGroupsChange,
   onChangeAction,
 }: FieldAccessViewProps) {
+  const t = useTranslations("settings");
   const needle = query.trim().toLowerCase();
 
   const visibleGroups = React.useMemo(() => {
@@ -202,10 +208,10 @@ export default function FieldAccessView({
   return (
     <div>
       <div className={`${GRID} sticky top-0 z-10 bg-card px-1 pb-3 pt-1 text-body font-medium text-primary`}>
-        <div>Field</div>
-        <div>Type</div>
+        <div>{t("roles.fieldAccess.columnField")}</div>
+        <div>{t("roles.fieldAccess.columnType")}</div>
         {FIELD_SCOPES.map((scope) => (
-          <div key={scope}>{FIELD_SCOPE_LABELS[scope]}</div>
+          <div key={scope}>{t(FIELD_SCOPE_LABEL_KEYS[scope])}</div>
         ))}
       </div>
 
@@ -224,7 +230,11 @@ export default function FieldAccessView({
         {visibleGroups.map((group) => (
           <AccordionItem key={group.id} value={group.id} className="border-b-0">
             <AccordionTrigger className="rounded-control bg-subtle px-3 py-2.5 text-body font-semibold text-secondary hover:no-underline">
-              {group.label}
+              {group.id === SYSTEM_GROUP_ID
+                ? t("roles.fieldAccess.systemFields")
+                : group.id === UNGROUPED_ID
+                  ? t("roles.fieldAccess.baseAttributes")
+                  : group.label}
             </AccordionTrigger>
 
             <AccordionContent>
@@ -246,9 +256,9 @@ export default function FieldAccessView({
                             variant="neutral"
                             size="sm"
                             className="ml-2 align-middle"
-                            title="Sensitive: access is never granted automatically; without it people see a placeholder"
+                            title={t("roles.fieldAccess.sensitiveTitle")}
                           >
-                            Sensitive
+                            {t("roles.fieldAccess.sensitive")}
                           </Badge>
                         )}
                       </p>
@@ -261,7 +271,7 @@ export default function FieldAccessView({
                           <span aria-hidden />
                           <span className="flex items-center justify-start gap-1.5 text-body text-tertiary opacity-60">
                             <Icon icon={SquareLock02Icon} size="sm" />
-                            Always visible
+                            {t("roles.fieldAccess.alwaysVisible")}
                           </span>
                         </>
                       ) : (
@@ -286,7 +296,7 @@ export default function FieldAccessView({
 
         {visibleGroups.length === 0 && (
           <p className="px-1 py-6 text-body text-tertiary">
-            No fields match “{query.trim()}”.
+            {t("roles.fieldAccess.noMatch", { query: query.trim() })}
           </p>
         )}
       </Accordion>

@@ -1,4 +1,4 @@
-import { mentionAt, placeholdersFor, templateDraft } from "./draft";
+import { insertPlaceholder, mentionAt, placeholdersFor, templateDraft } from "./draft";
 
 describe("the builder's draft helpers", () => {
   it("finds the @ the caret sits after, and nothing inside a placeholder or an address", () => {
@@ -19,5 +19,16 @@ describe("the builder's draft helpers", () => {
     expect(d.name).toBe("Birthday");
     expect(d.definition.conditions.filters).toEqual([]);
     expect(d.definition.latePolicy).toBe("RUN_LATE");
+  });
+});
+
+describe("insertPlaceholder", () => {
+  it("puts the token at the caret and moves the caret after it", () => {
+    expect(insertPlaceholder("Hi ,", "firstName", 3, 3)).toEqual({ text: "Hi {firstName},", caret: 14 });
+  });
+
+  it("replaces a selection, and appends when there is no caret", () => {
+    expect(insertPlaceholder("Hi NAME", "firstName", 3, 7)).toEqual({ text: "Hi {firstName}", caret: 14 });
+    expect(insertPlaceholder("Hi ", "firstName", null, null).text).toBe("Hi {firstName}");
   });
 });

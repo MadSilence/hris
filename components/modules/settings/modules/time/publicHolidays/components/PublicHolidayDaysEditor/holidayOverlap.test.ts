@@ -1,5 +1,8 @@
 import { findDraftOverlaps } from "./holidayOverlap";
 import type { DraftHoliday } from "./PublicHolidayDaysEditor";
+import { translatorFor } from "@/test/nextIntl";
+
+const t = translatorFor("timeOff") as unknown as Parameters<typeof findDraftOverlaps>[1];
 
 const draft = (
   localId: string,
@@ -13,7 +16,7 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("a", "Summer closure", "2026-08-10", "2026-08-14"),
       draft("b", "Company day", "2026-08-12"),
-    ]);
+    ], t);
 
     expect(Object.keys(errors)).toEqual(["b"]);
     expect(errors.b).toContain("Summer closure");
@@ -23,7 +26,7 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("a", "Labour Day", "2026-05-01"),
       draft("b", "May Day", "2026-05-01"),
-    ]);
+    ], t);
 
     expect(errors).toHaveProperty("b");
   });
@@ -32,7 +35,7 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("a", "Summer closure", "2026-08-10", "2026-08-14"),
       draft("b", "Company day", "2026-08-15"),
-    ]);
+    ], t);
 
     expect(errors).toEqual({});
   });
@@ -41,7 +44,7 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("a", "New Year", "2026-01-01"),
       draft("b", "Second day", "2026-01-02"),
-    ]);
+    ], t);
 
     expect(errors).toEqual({});
   });
@@ -51,7 +54,7 @@ describe("findDraftOverlaps", () => {
       draft("a", "Summer closure", "2026-08-10", "2026-08-20"),
       draft("b", "Day one", "2026-08-12"),
       draft("c", "Day two", "2026-08-18"),
-    ]);
+    ], t);
 
     expect(Object.keys(errors).sort()).toEqual(["b", "c"]);
   });
@@ -60,13 +63,13 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("b", "Company day", "2026-08-12"),
       draft("a", "Summer closure", "2026-08-10", "2026-08-14"),
-    ]);
+    ], t);
 
     expect(Object.keys(errors)).toEqual(["b"]);
   });
 
   it("ignores rows without a date, which have their own error", () => {
-    const errors = findDraftOverlaps([draft("a", "", ""), draft("b", "New Year", "2026-01-01")]);
+    const errors = findDraftOverlaps([draft("a", "", ""), draft("b", "New Year", "2026-01-01")], t);
 
     expect(errors).toEqual({});
   });
@@ -75,7 +78,7 @@ describe("findDraftOverlaps", () => {
     const errors = findDraftOverlaps([
       draft("a", "Broken", "2026-08-10", "2026-08-01"),
       draft("b", "Company day", "2026-08-05"),
-    ]);
+    ], t);
 
     expect(errors).toEqual({});
   });

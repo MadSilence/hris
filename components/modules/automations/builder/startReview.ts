@@ -1,5 +1,9 @@
 import type { ActionSpec, ReviewWindowSpec } from "@/models/automations";
-import { REVIEW_KIND_LABELS, REVIEW_KINDS, type Cycle, type ReviewKind } from "@/models/reviews";
+import { REVIEW_KINDS, type Cycle, type ReviewKind } from "@/models/reviews";
+import type { AutomationsT } from "@/components/modules/automations/shared/vocabulary";
+
+/** The words a problem is told in: the automations catalogue, and a review kind's name (the reviews catalogue's). */
+export type StartReviewWords = { t: AutomationsT; kindLabel: (kind: ReviewKind) => string };
 
 /** How long a review stays open when a template is first chosen: due two weeks after it opens. */
 export const DEFAULT_WINDOW_DAYS = 14;
@@ -22,38 +26,38 @@ export function withWindow(windows: ReviewWindowSpec[] | null | undefined, kind:
   return REVIEW_KINDS.flatMap((k) => next.filter((w) => w.kind === k));
 }
 
-const label = (kind: ReviewKind) => REVIEW_KIND_LABELS[kind].toLowerCase();
-
 /**
  * What stops a "Start a Review" action, in words, before the preview asks the server — which checks the same and has
  * the last word. With the template loaded, its kinds, nominated peers and release date are checked too.
  */
-export function startReviewProblems(action: ActionSpec, template?: Cycle | null): string[] {
+export function startReviewProblems(action: ActionSpec, template: Cycle | null | undefined, words: StartReviewWords): string[] {
+  const { t } = words;
+  const label = (kind: ReviewKind) => words.kindLabel(kind).toLowerCase();
   const problems: string[] = [];
-  if (!action.templateCycleId) return ["Choose the review template."];
+  if (!action.templateCycleId) return [t("startReview.problem.chooseTemplate")];
   const windows = action.reviewWindows ?? [];
   for (const w of windows) {
-    if (w.dueOffsetDays == null) problems.push(`Say when the ${label(w.kind)} is due.`);
+    if (w.dueOffsetDays == null) problems.push(t("startReview.problem.noDue", { kind: label(w.kind) }));
     else if (w.opensOffsetDays != null && w.dueOffsetDays < w.opensOffsetDays) {
-      problems.push(`The ${label(w.kind)} is due before it opens.`);
+      problems.push(t("startReview.problem.dueBeforeOpens", { kind: label(w.kind) }));
     }
     if (w.nominationOffsetDays != null && w.approvalOffsetDays != null && w.approvalOffsetDays < w.nominationOffsetDays) {
-      problems.push("Peers are approved before they are nominated.");
+      problems.push(t("startReview.problem.peersOrder"));
     }
   }
   if (template) {
     for (const k of template.kinds) {
       const w = windows.find((x) => x.kind === k.kind);
-      if (!w) problems.push(`Set the window of the ${label(k.kind)}.`);
+      if (!w) problems.push(t("startReview.problem.setWindow", { kind: label(k.kind) }));
       else if (k.peerMode === "SUBJECT_NOMINATES" && (w.nominationOffsetDays == null || w.approvalOffsetDays == null)) {
-        problems.push("Say when peers are nominated and approved.");
+        problems.push(t("startReview.problem.peerDates"));
       }
     }
     for (const w of windows) {
-      if (!template.kinds.some((k) => k.kind === w.kind)) problems.push(`The template asks no ${label(w.kind)}.`);
+      if (!template.kinds.some((k) => k.kind === w.kind)) problems.push(t("startReview.problem.notInTemplate", { kind: label(w.kind) }));
     }
     if (template.sharingMode === "RELEASED_ON_DATE" && action.releaseOffsetDays == null) {
-      problems.push("The template releases its results on a date: say when.");
+      problems.push(t("startReview.problem.releaseDate"));
     }
   }
   return Array.from(new Set(problems));

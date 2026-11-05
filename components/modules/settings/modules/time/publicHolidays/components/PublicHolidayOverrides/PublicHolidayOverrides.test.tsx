@@ -9,6 +9,9 @@ import {
   RemovedProviderDays,
   describeProviderVersion,
 } from "./PublicHolidayOverrides";
+import { translatorFor } from "@/test/nextIntl";
+
+const t = translatorFor("timeOff") as unknown as Parameters<typeof describeProviderVersion>[1];
 
 const override = (patch: Partial<PublicHolidayOverride> = {}): PublicHolidayOverride => ({
   id: "o-1",
@@ -33,7 +36,7 @@ describe("PublicHolidayEditedMarker", () => {
   });
 
   it("says so when the provider no longer lists the day", () => {
-    expect(describeProviderVersion(override({ providerPresent: false, providerName: null }))).toBe(
+    expect(describeProviderVersion(override({ providerPresent: false, providerName: null }), t)).toBe(
       "The provider no longer lists this day.",
     );
   });

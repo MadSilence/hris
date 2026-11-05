@@ -1,0 +1,143 @@
+{
+  "page": {
+    "title": "Attendance",
+    "description": "Time logged against what was expected, per person. Expected days leave out weekends, public holidays and approved leave; overtime is time beyond a day's norm, and every minute on a day without one."
+  },
+  "columns": {
+    "name": "Name",
+    "expectedDays": "Expected days",
+    "loggedDays": "Logged days",
+    "expectedHours": "Expected hours",
+    "loggedHours": "Logged hours",
+    "overtimeHours": "Overtime hours",
+    "amount": "Amount",
+    "currency": "Currency",
+    "email": "Email",
+    "status": "Status"
+  },
+  "overview": {
+    "export": "Export attendance",
+    "noResultsHint": "Try a different search or filter.",
+    "emptyTitle": "Nobody in this period",
+    "emptyDescription": "Nobody within your reach was employed in this period.",
+    "loadingMore": "Loading more…"
+  },
+  "period": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "customRange": "Custom range"
+  },
+  "export": {
+    "title": "Export attendance",
+    "description": "The people in the current view, over the current period. Two sheets: a summary, one row a person, and every logged entry.",
+    "period": "Period",
+    "search": "Search",
+    "filters": "Filters",
+    "noFilters": "None — everyone in your reach",
+    "more": "and {count} more",
+    "includedWithMoney": "Included: the summary — name, email, status, the five numbers and the amount owed with its currency — and every logged entry with its date, times, hours, description, a note on days without a norm, and the rate it was logged at.",
+    "included": "Included: the summary — name, email, status and the five numbers — and every logged entry with its date, times, hours, description and a note on days without a norm.",
+    "fileStatus": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived",
+      "PROSPECTIVE": "Prospective"
+    }
+  },
+  "filters": {
+    "selected": "{count} selected"
+  },
+  "person": {
+    "back": "Back to attendance",
+    "openProfile": "Open profile",
+    "totals": "Period totals",
+    "from": "From",
+    "to": "To",
+    "hours": "Hours",
+    "note": "Note",
+    "empty": "Nothing was expected and nothing was logged in this period.",
+    "notes": {
+      "missing": "Missing",
+      "outsideEmployment": "Outside employment",
+      "holiday": "Public holiday: {name}",
+      "onLeave": "On leave",
+      "notWorkingDay": "Not a working day",
+      "overtime": "Overtime {time}"
+    }
+  },
+  "log": {
+    "notice": {
+      "holiday": "This day is a public holiday ({name}): all time logged on it counts as overtime.",
+      "leave": "This day is a day of leave: all time logged on it counts as overtime.",
+      "outsideEmployment": "This day is outside employment: all time logged on it counts as overtime.",
+      "notWorkingDay": "This day is not a working day: all time logged on it counts as overtime.",
+      "daysWithoutNorm": "{count} of the picked days have no norm — a weekend, a holiday or leave: all time logged on them counts as overtime.",
+      "beyondNorm": "This takes the day beyond its norm of {norm}; {overtime} counts as overtime.",
+      "daysBeyondNorm": "This takes {count} of the picked days beyond their norm; the time above it counts as overtime."
+    },
+    "duration": {
+      "minutes": "{m} m",
+      "hours": "{h} h",
+      "hoursMinutes": "{h} h {m} m"
+    },
+    "invalidSpan": "Enter a start and an end on the same day, the end later than the start.",
+    "updated": "Time updated.",
+    "logged": "Time logged.",
+    "loggedOnDays": "Time logged on {count, plural, one {# day} other {# days}}.",
+    "total": "Total",
+    "editTitle": "Edit time",
+    "logTitle": "Log hours",
+    "pickHint": "Pick a day, or drag across several.",
+    "inTotal": "{duration} in total",
+    "perDay": "{perDay} a day · {total} in total",
+    "note": "Note",
+    "optional": "(optional)",
+    "notePlaceholder": "What did you work on?",
+    "quickFill": "Quick fill",
+    "logDuration": "Log {duration}",
+    "emptyDay": "Nothing logged on this day.",
+    "emptyDays": "Nothing logged on these days.",
+    "entryActions": "Entry actions",
+    "deleteTitle": "Delete entry",
+    "deleteDescription": "{span}{hasDescription, select, yes { · {description}} other {}} will be removed from {date}.",
+    "deleted": "Entry deleted."
+  },
+  "schedule": {
+    "title": "Work schedule",
+    "description": "Hours per weekday. Days with no hours are not charged as leave. A schedule is never edited — a change is a new schedule from the date it starts.",
+    "add": "Add work schedule",
+    "added": "Work schedule added.",
+    "emptyTitle": "Works the company week",
+    "emptyDescription": "No personal schedule. The company's working days apply, each at the company's working-day length.",
+    "effectiveFrom": "Effective from",
+    "weeklyHours": "Weekly hours",
+    "inForce": "In force",
+    "modal": {
+      "description": "Hours per weekday from a date on. Zero means the person does not work that day, and leave is not charged for it. Earlier schedules stay as they were.",
+      "perWeek": "{hours} a week",
+      "hoursRequired": "Enter the hours, or 0 for a day off.",
+      "hoursInvalid": "Enter the hours as 7:30 or 7.5, between 0 and 24.",
+      "fromRequired": "Choose the date the schedule starts."
+    },
+    "settings": {
+      "person": "Person",
+      "chooseTitle": "Choose a person",
+      "chooseDescription": "Their work schedules appear here: the hours per weekday, and the date each one starts.",
+      "unavailableTitle": "Not available to you",
+      "unavailableDescription": "Your access does not include this person's employment details."
+    }
+  },
+  "rate": {
+    "title": "Hourly rate",
+    "description": "The money field Attendance prices logged time from. A person's rate is copied into each entry when the time is logged, so a later change never re-prices a day already logged. Amounts are shown only to people who may see this field.",
+    "field": "Hourly rate field",
+    "hidden": "A field you cannot see",
+    "saved": "Hourly rate field saved."
+  },
+  "workday": {
+    "title": "Working day",
+    "description": "How long a company working day is. Attendance expects it of everybody without a personal schedule; anything logged beyond it is overtime.",
+    "length": "Length",
+    "invalid": "Enter the length of a working day as 8:00 or 7.5, up to 24:00.",
+    "saved": "Working day saved."
+  }
+}

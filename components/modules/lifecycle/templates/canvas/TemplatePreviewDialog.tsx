@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/desact/dialog";
@@ -8,7 +9,7 @@ import { useAttributeGroups } from "@/components/modules/settings/modules/attrib
 import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { showError } from "@/lib/errors/errorToast";
-import { dateToISO, formatDisplayDate } from "@/lib/date";
+import { dateToISO, useDateFormatter } from "@/lib/date";
 import { PreboardingPageContainer } from "@/components/modules/lifecycle/preboarding/PreboardingPageContainer";
 import { TaskList } from "@/components/modules/lifecycle/tasks/TaskList";
 import { saveBlob } from "@/components/modules/lifecycle/tasks/TaskMaterials";
@@ -49,8 +50,12 @@ const openFile = async (material: Material) => {
  * two weeks ahead, and every task shows as open (a task that waits is not shown to them until it opens).
  */
 export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }: Props) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("lifecycle");
   const { data: groups } = useAttributeGroups();
   const { data: categories } = useDocumentCategories();
+  const untitled = t("shared.untitledTask");
+  const sampleName = t("preview.sampleName");
 
   const anchor = useMemo(() => {
     const d = new Date();
@@ -69,7 +74,7 @@ export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }
     const a = attributes.get(id);
     return {
       id,
-      name: a?.name ?? "Field",
+      name: a?.name ?? t("shared.field"),
       type: a ? String(a.type) : "TEXT",
       isRequired: Boolean(a?.required),
       isFilled: false,
@@ -78,13 +83,13 @@ export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }
   });
 
   const page: PreboardingPage = {
-    firstName: "Alex",
+    firstName: sampleName,
     companyName: null,
     startDate: anchor,
     tasks: own.map((i) => ({
       id: i.key,
       kind: i.kind,
-      title: i.title || "Untitled task",
+      title: i.title || untitled,
       description: i.description || null,
       status: "OPEN",
       dueKind: i.dueKind,
@@ -100,15 +105,15 @@ export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }
   const tasks: Task[] = own.map((i) => ({
     id: i.key,
     kind: i.kind,
-    title: i.title || "Untitled task",
+    title: i.title || untitled,
     description: i.description || null,
     status: "OPEN",
     dueKind: i.dueKind,
     dueDate: dueOf(i),
     dueReached: false,
-    subject: { id: "preview", name: "Alex" },
+    subject: { id: "preview", name: sampleName },
     assigneeKind: "TARGET",
-    assignee: { id: "preview", name: "Alex" },
+    assignee: { id: "preview", name: sampleName },
     processId: null,
     processType: type,
     fields: i.kind === "FILL_FIELDS"
@@ -122,27 +127,18 @@ export function TemplatePreviewDialog({ open, type, name, items, onCloseAction }
     commentCount: 0,
   }));
 
-  const counted = type === "OFFBOARDING" ? "last working day" : "start day";
-
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onCloseAction(); }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Preview · {name || "Untitled template"}</DialogTitle>
+          <DialogTitle>{t("preview.title", { name: name || t("preview.untitledTemplate") })}</DialogTitle>
           <DialogDescription>
-            {type === "PREBOARDING"
-              ? "The page the new person opens from their link, before they have an account."
-              : "The person's Tasks, as they will see them in the app."}{" "}
-            Dates count from an example {counted}, {formatDisplayDate(anchor, { style: "medium" })}. Fields and
-            questions can be tried; nothing is sent.
+            {t("preview.description", { type, date: formatDisplayDate(anchor, { style: "medium" }) })}
           </DialogDescription>
         </DialogHeader>
 
         {own.length === 0 ? (
-          <p className="py-10 text-center text-body text-tertiary">
-            Nothing here is the person&apos;s to do: every task is for somebody else. Add one in their row of the
-            timeline.
-          </p>
+          <p className="py-10 text-center text-body text-tertiary">{t("preview.nothingForPerson")}</p>
         ) : type === "PREBOARDING" ? (
           <div className="rounded-popover bg-subtle/50 px-4" data-test="template-preview">
             <PreboardingPageContainer key={JSON.stringify(page)} token="" initialPage={page} preview onOpenFile={(m) => void openFile(m)} />

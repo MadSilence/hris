@@ -1,5 +1,19 @@
 import { type EffectiveAccess } from "@/models/access";
-import { canSeeSettingsItem, settingsGroups } from "@/components/modules/settings/config/settings.config";
+import {
+  canSeeSettingsItem,
+  settingsGroups,
+  type SettingsMenuGroupKey,
+  type SettingsMenuItemKey,
+} from "@/components/modules/settings/config/settings.config";
+
+/**
+ * How the settings pages are named in the reader's language: the menu's own words (`settings` catalogue) and
+ * the subtitle that says which area a page is in.
+ */
+export type SearchPageLabels = {
+  label: (key: SettingsMenuItemKey | SettingsMenuGroupKey) => string;
+  section: (groupTitle: string) => string;
+};
 
 /** A destination in the app, offered by name. */
 export type SearchPage = {
@@ -36,11 +50,12 @@ const SYNONYMS: Record<string, string[]> = {
 export const buildSearchPages = (
   appPages: SearchPage[],
   access: EffectiveAccess | null | undefined,
+  labels: SearchPageLabels,
 ): SearchPage[] => {
   const settingsPages = settingsGroups.flatMap((group) =>
     group.items
       .filter((item) => Boolean(item.resources?.length || item.grants?.length) && canSeeSettingsItem(access, item))
-      .map((item) => ({ label: item.label, href: item.href, section: `Settings · ${group.title}` })),
+      .map((item) => ({ label: labels.label(item.labelKey), href: item.href, section: labels.section(labels.label(group.titleKey)) })),
   );
   return [...appPages, ...settingsPages];
 };

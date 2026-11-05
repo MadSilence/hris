@@ -1,23 +1,18 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { NodRing } from "@/components/desact/nod";
 import { FormError } from "@/components/feedback/FormError";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { messageForCode } from "@/lib/errors/errorMessages";
 import { skipReasonText } from "@/components/audience/assignment/assignmentSkips";
-import {
-  ACTION_LABELS,
-  ASSIGNABLE_LABELS,
-  type AssignmentSkipReason,
-  type AutomationPreview,
-  type AutomationProblem,
-} from "@/models/automations";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
+import type { AssignmentSkipReason, AutomationPreview, AutomationProblem } from "@/models/automations";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
-
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+import type { AutomationsT } from "@/components/modules/automations/shared/vocabulary";
 
 /** A problem as the dictionary words it. The detail after the colon is the `{0}` of the template. */
 export const problemText = (p: AutomationProblem): string => {
@@ -27,10 +22,14 @@ export const problemText = (p: AutomationProblem): string => {
   return messageForCode(p.code, p.message, detail ? [detail] : undefined);
 };
 
-export const skippedLine = (skipped: Partial<Record<AssignmentSkipReason, number>>): string | null => {
+export const skippedLine = (
+  t: AutomationsT,
+  tAccess: AccessTranslator,
+  skipped: Partial<Record<AssignmentSkipReason, number>>,
+): string | null => {
   const parts = Object.entries(skipped)
     .filter(([, n]) => (n ?? 0) > 0)
-    .map(([reason, n]) => `${n} ${skipReasonText(reason as AssignmentSkipReason)}`);
+    .map(([reason, n]) => t("preview.skippedPart", { count: n ?? 0, reason: skipReasonText(reason as AssignmentSkipReason, tAccess) }));
   return parts.length ? parts.join(", ") : null;
 };
 
@@ -67,14 +66,18 @@ export function PreviewPanel({
   onSampleChange: (personId: string) => void;
   targetName: (id: string) => string | undefined;
 }) {
+  const formatDisplayDate = useDateFormatter();
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
+  const tAccess = useTranslations("access");
   return (
-    <aside aria-label="Preview" className="space-y-6 rounded-popover bg-subtle/50 p-5">
+    <aside aria-label={t("preview.title")} className="space-y-6 rounded-popover bg-subtle/50 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="m-0 text-body font-semibold text-primary">Preview</h2>
+        <h2 className="m-0 text-body font-semibold text-primary">{t("preview.title")}</h2>
         {(isPending || stale) && (
           <span className="flex items-center gap-1.5 text-hint text-tertiary">
             <NodRing size="sm" label="" />
-            Updating
+            {t("preview.updating")}
           </span>
         )}
       </div>
@@ -82,14 +85,14 @@ export function PreviewPanel({
       <FormError message={error} />
 
       {!preview ? (
-        !error && <p className="m-0 text-body text-tertiary">The preview appears as soon as the rule has a trigger.</p>
+        !error && <p className="m-0 text-body text-tertiary">{t("preview.noTrigger")}</p>
       ) : (
         <>
           {preview.problems.length > 0 && (
             <div className="space-y-1 rounded-control bg-status-pending-bg px-4 py-3 text-body text-status-pending-text" data-test="preview-problems">
               <p className="m-0 flex items-center gap-2 font-medium">
                 <Icon icon={Alert02Icon} size="sm" />
-                Not ready to publish
+                {t("preview.notReady")}
               </p>
               <ul className="m-0 list-disc space-y-0.5 pl-5">
                 {preview.problems.map((p, i) => <li key={`${p.path}-${i}`}>{problemText(p)}</li>)}
@@ -97,37 +100,34 @@ export function PreviewPanel({
             </div>
           )}
 
-          <Section title="Who matches now">
+          <Section title={t("preview.whoMatches")}>
             <p className="m-0 text-page-title text-primary" data-test="preview-matching">
-              {plural(preview.matchingCount, "person", "people")}
+              {tCommon("people.count", { count: preview.matchingCount })}
             </p>
             {preview.matching.length > 0 && (
               <p className="m-0 text-body text-tertiary">
                 {preview.matching.slice(0, 8).map((p) => p.name).filter(Boolean).join(", ")}
-                {preview.matchingCount > 8 ? `, and ${preview.matchingCount - 8} more` : ""}
+                {preview.matchingCount > 8 ? t("preview.andMore", { count: preview.matchingCount - 8 }) : ""}
               </p>
             )}
             {preview.messagesPerFiring > 1 && (
               <p className={`m-0 text-body ${preview.messagesPerFiring > preview.volumeThreshold ? "text-status-pending-text" : "text-tertiary"}`}
                 data-test="preview-volume">
-                One firing sends about {preview.messagesPerFiring} notifications and emails.
+                {t("preview.volume", { count: preview.messagesPerFiring })}
               </p>
             )}
             {preview.pastMomentCount > 0 && (
               <p className="m-0 text-body text-tertiary" data-test="preview-past">
-                {plural(preview.pastMomentCount, "person is", "people are")} already past the moment — they are
-                left out unless you choose otherwise when enabling.
+                {t("preview.pastMoment", { count: preview.pastMomentCount })}
               </p>
             )}
           </Section>
 
-          <Section title="Next 30 days">
+          <Section title={t("preview.next30")}>
             {preview.eventDriven ? (
-              <p className="m-0 text-body text-tertiary">
-                This trigger waits for something to happen, so nothing can be dated ahead.
-              </p>
+              <p className="m-0 text-body text-tertiary">{t("preview.eventDriven")}</p>
             ) : preview.upcoming.length === 0 ? (
-              <p className="m-0 text-body text-tertiary">Nothing is due in the next 30 days.</p>
+              <p className="m-0 text-body text-tertiary">{t("preview.nothingDue")}</p>
             ) : (
               <ul className="m-0 list-none space-y-1.5 p-0 text-body">
                 {preview.upcoming.slice(0, 12).map((u, i) => (
@@ -135,23 +135,23 @@ export function PreviewPanel({
                     <span className="w-24 flex-none tabular-nums text-tertiary">{formatDisplayDate(u.date, { style: "medium" })}</span>
                     <span className="min-w-0">
                       <span className="text-primary">{u.person.name}</span>
-                      <span className="text-tertiary"> · {u.summary || ACTION_LABELS[u.actionType]}</span>
-                      {u.late && <span className="ml-1 text-hint text-status-pending-text">Late</span>}
+                      <span className="text-tertiary"> · {u.summary || t(`action.label.${u.actionType}`)}</span>
+                      {u.late && <span className="ml-1 text-hint text-status-pending-text">{t("preview.late")}</span>}
                     </span>
                   </li>
                 ))}
                 {preview.upcoming.length > 12 && (
-                  <li className="text-hint text-tertiary">and {preview.upcoming.length - 12} more</li>
+                  <li className="text-hint text-tertiary">{t("preview.moreItems", { count: preview.upcoming.length - 12 })}</li>
                 )}
               </ul>
             )}
           </Section>
 
           {preview.samples.length > 0 && (
-            <Section title="Sample">
+            <Section title={t("preview.sample")}>
               {preview.matching.length > 0 && (
                 <SearchableSelect
-                  aria-label="Sample person"
+                  aria-label={t("preview.samplePerson")}
                   className="h-8 bg-card text-body"
                   options={preview.matching.map((p) => ({ value: p.id, label: p.name ?? p.id }))}
                   value={samplePersonId ?? preview.samples[0]?.person.id ?? null}
@@ -163,14 +163,14 @@ export function PreviewPanel({
                 {preview.samples.map((s) => (
                   <article key={s.position} className="space-y-1 rounded-control bg-card p-3 text-body" data-test="preview-sample">
                     <p className="m-0 text-hint text-tertiary">
-                      {ACTION_LABELS[s.actionType]}
-                      {s.recipients.length > 0 ? ` · to ${s.recipients.map((r) => r.name).join(", ")}` : ""}
+                      {t(`action.label.${s.actionType}`)}
+                      {s.recipients.length > 0 ? ` · ${t("preview.sampleTo", { names: s.recipients.map((r) => r.name).join(", ") })}` : ""}
                     </p>
                     {s.subject && <p className="m-0 font-medium text-primary">{s.subject}</p>}
                     {s.text && <p className="m-0 whitespace-pre-line text-primary">{s.text}</p>}
                     {s.missingPlaceholders.length > 0 && (
                       <p className="m-0 text-hint text-status-pending-text">
-                        No value for {s.missingPlaceholders.map((m) => `{${m}}`).join(", ")} — this step would fail for {s.person.name}.
+                        {t("preview.noValue", { tokens: s.missingPlaceholders.map((m) => `{${m}}`).join(", "), name: s.person.name ?? "" })}
                       </p>
                     )}
                   </article>
@@ -180,16 +180,16 @@ export function PreviewPanel({
           )}
 
           {preview.assignments.length > 0 && (
-            <Section title="Assignments">
+            <Section title={t("preview.assignments")}>
               <ul className="m-0 list-none space-y-2 p-0 text-body">
                 {preview.assignments.map((a) => {
                   const skipped = Object.values(a.skippedByReason).reduce((n, x) => n + (x ?? 0), 0);
-                  const why = skippedLine(a.skippedByReason);
+                  const why = skippedLine(t, tAccess, a.skippedByReason);
+                  const line = { kind: t(`assignable.${a.assignableType}`), target: targetName(a.assignableId) ?? "", count: a.willAssign };
                   return (
                     <li key={a.position} data-test="preview-assignment">
                       <span className="text-primary">
-                        {ASSIGNABLE_LABELS[a.assignableType]} {targetName(a.assignableId) ?? ""}: {a.willAssign} will be assigned
-                        {skipped > 0 ? `, ${skipped} skipped` : ""}
+                        {skipped > 0 ? t("preview.assignmentLineSkipped", { ...line, skipped }) : t("preview.assignmentLine", line)}
                       </span>
                       {why && <span className="block text-hint text-tertiary">{why}</span>}
                     </li>
@@ -200,12 +200,15 @@ export function PreviewPanel({
           )}
 
           {preview.conflicts.length > 0 && (
-            <Section title="Conflicts">
+            <Section title={t("preview.conflicts")}>
               <ul className="m-0 list-none space-y-1 p-0 text-body text-status-pending-text">
                 {preview.conflicts.slice(0, 10).map((c, i) => (
                   <li key={`${c.person.id}-${i}`}>
-                    {c.person.name}: {c.otherRule?.name ? `“${c.otherRule.name}”` : "another rule"} already sets the{" "}
-                    {ASSIGNABLE_LABELS[c.assignableType].toLowerCase()} — the later rule does not overwrite it.
+                    {t("preview.conflictLine", {
+                      person: c.person.name ?? "",
+                      rule: c.otherRule?.name ? t("preview.quotedRule", { name: c.otherRule.name }) : t("preview.anotherRule"),
+                      kind: t(`assignable.${c.assignableType}`).toLowerCase(),
+                    })}
                   </li>
                 ))}
               </ul>

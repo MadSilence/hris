@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { useQuery } from "@tanstack/react-query";
 import { UserRemove01Icon } from "@hugeicons/core-free-icons";
@@ -38,15 +39,15 @@ import {
   type LeaverReassignmentChoice,
 } from "./LeaverDecisionsStep";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { dateToISO, formatDisplayDate } from "@/lib/date";
+import { dateToISO, useDateFormatter } from "@/lib/date";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { InlineAlert } from "@/components/desact/alert";
 
-const REASONS: { id: TerminationReason; label: string }[] = [
-  { id: "VOLUNTARY", label: "Voluntary — the person resigned" },
-  { id: "INVOLUNTARY", label: "Involuntary — let go by the company" },
-  { id: "END_OF_CONTRACT", label: "End of contract" },
-];
+const REASONS = [
+  { id: "VOLUNTARY", labelKey: "profile.terminate.reasons.voluntary" },
+  { id: "INVOLUNTARY", labelKey: "profile.terminate.reasons.involuntary" },
+  { id: "END_OF_CONTRACT", labelKey: "profile.terminate.reasons.endOfContract" },
+] as const satisfies readonly { id: TerminationReason; labelKey: string }[];
 
 /**
  * Today, in the reader's own day.
@@ -93,6 +94,9 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
   onCancelAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const { internalApiClient } = useAppDataContext();
 
   const [lastWorkingDay, setLastWorkingDay] = useState(today);
@@ -146,9 +150,9 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
               <Icon icon={UserRemove01Icon} />
             </span>
             <div>
-              <DialogTitle>Terminate employment</DialogTitle>
+              <DialogTitle>{t("profile.header.terminate")}</DialogTitle>
               <DialogDescription>
-                {fullName} will be archived and lose access.
+                {t("profile.terminate.description", { name: fullName })}
               </DialogDescription>
             </div>
           </div>
@@ -159,7 +163,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="last-working-day" required>Last working day</RequiredLabel>
+              <RequiredLabel htmlFor="last-working-day" required>{t("profile.scheduled.lastWorkingDay")}</RequiredLabel>
               <DatePicker
                 id="last-working-day"
                 value={lastWorkingDay}
@@ -169,7 +173,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Reason</Label>
+              <Label>{t("profile.access.reason")}</Label>
               <Select
                 value={reason}
                 onValueChange={(v) => setReason(v as TerminationReason)}
@@ -180,7 +184,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {REASONS.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+                    <SelectItem key={r.id} value={r.id}>{t(r.labelKey)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -189,9 +193,9 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
 
           <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
             <div>
-              <Label htmlFor="rehire-eligible" className="text-body">Eligible for rehire</Label>
+              <Label htmlFor="rehire-eligible" className="text-body">{t("profile.terminate.rehire")}</Label>
               <p className="text-hint text-tertiary">
-                The first thing anyone asks when this person applies again.
+                {t("profile.terminate.rehireHint")}
               </p>
             </div>
             <Switch
@@ -203,7 +207,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="termination-note">Note</Label>
+            <Label htmlFor="termination-note">{t("profile.terminate.note")}</Label>
             <Textarea
               id="termination-note"
               rows={2}
@@ -224,9 +228,9 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
           )}
 
           <InlineAlert tone="pending">
-            <p className="mb-1.5 text-body font-medium text-status-pending-text">What this will do</p>
+            <p className="mb-1.5 text-body font-medium text-status-pending-text">{t("profile.terminate.impactTitle")}</p>
             {impactLoading ? (
-              <p className="text-body text-status-pending-text">Checking…</p>
+              <p className="text-body text-status-pending-text">{t("profile.terminate.checking")}</p>
             ) : (
               <ul className="space-y-1 text-body text-status-pending-text">
                 {/* The change lands on the day after the last working day (WALK_QUESTIONS § 14); until
@@ -234,37 +238,33 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
                     which is why a last day of today still reads "the end of today", not "now". */}
                 {impact?.effectiveOn && impact.effectiveOn >= today() ? (
                   <li>
-                    Nothing changes until the end of <strong>{formatDisplayDate(impact.effectiveOn)}</strong>.
-                    Then the status becomes Archived and the person loses access.
+                    {t.rich("profile.terminate.impact.until", {
+                      date: formatDisplayDate(impact.effectiveOn),
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })}
                   </li>
                 ) : (
-                  <li>Status becomes Archived and the person loses access.</li>
+                  <li>{t("profile.terminate.impact.now")}</li>
                 )}
-                <li>{impact?.rolesToRevoke ?? 0} role(s) revoked.</li>
+                <li>{t("profile.terminate.impact.roles", { count: impact?.rolesToRevoke ?? 0 })}</li>
+                <li>{t("profile.terminate.impact.policies", { count: impact?.policyAssignmentsToEnd ?? 0 })}</li>
                 <li>
-                  {impact?.policyAssignmentsToEnd ?? 0} time-off policy assignment(s) ended.
-                  Remaining balances are kept for the final settlement, not cleared.
-                </li>
-                <li>
-                  {impact?.directReportsToReassign ?? 0} direct report(s) move to{" "}
-                  {impact?.reportsMoveTo ? (
-                    <strong>{impact.reportsMoveTo.name}</strong>
-                  ) : (
-                    <strong>no manager</strong>
-                  )}
-                  .
+                  {impact?.reportsMoveTo
+                    ? t.rich("profile.terminate.impact.reports", {
+                      count: impact?.directReportsToReassign ?? 0,
+                      manager: impact.reportsMoveTo.name,
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })
+                    : t.rich("profile.terminate.impact.reportsNoManager", {
+                      count: impact?.directReportsToReassign ?? 0,
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })}
                 </li>
                 {(impact?.requestsAwaitingTheirDecision ?? 0) > 0 ? (
-                  <li>
-                    {impact?.requestsAwaitingTheirDecision} request(s) are waiting for this person to decide.
-                    They are handed on as chosen above, or to their policy&apos;s fallback role.
-                  </li>
+                  <li>{t("profile.terminate.impact.requests", { count: impact?.requestsAwaitingTheirDecision ?? 0 })}</li>
                 ) : null}
                 {(impact?.approvedLeaveAfterLastDay ?? 0) > 0 ? (
-                  <li>
-                    {impact?.approvedLeaveAfterLastDay} approved absence(s) run past the last working day.
-                    They are cancelled, or cut at that day, and the days go back to the balance.
-                  </li>
+                  <li>{t("profile.terminate.impact.absences", { count: impact?.approvedLeaveAfterLastDay ?? 0 })}</li>
                 ) : null}
               </ul>
             )}
@@ -272,14 +272,14 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
 
           <DialogFooter>
             <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
-              Cancel
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !lastWorkingDay}
               variant="destructive-confirm"
             >
-              {isLoading ? "Terminating…" : "Terminate"}
+              {isLoading ? t("profile.terminate.terminating") : t("profile.terminate.confirm")}
             </Button>
           </DialogFooter>
         </form>

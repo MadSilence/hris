@@ -3,6 +3,17 @@ import type {
   AssignmentSkipReason,
   AssignmentSkippedUser,
 } from "@/api/modules/assignments/dto/AssignmentDTO";
+import type { AccessTranslator } from "@/components/audience/accessTranslator";
+
+const REASON_KEY = {
+  DUPLICATE: "duplicate",
+  USER_ARCHIVED: "userArchived",
+  USER_NOT_FOUND: "userNotFound",
+  INVALID_TARGET: "invalidTarget",
+  HAND_OVERRIDE: "handOverride",
+  RULE_CONFLICT: "ruleConflict",
+  DOMAIN_ERROR: "domainError",
+} as const satisfies Record<AssignmentSkipReason, string>;
 
 /**
  * Why the assignment engine passed someone over, in words.
@@ -12,24 +23,8 @@ import type {
  * while nothing had happened: drag an archived colleague onto a team, confirm, watch the chip stay
  * exactly where it was.
  */
-export function skipReasonText(reason: AssignmentSkipReason): string {
-  switch (reason) {
-    case "DUPLICATE":
-      return "already there";
-    case "USER_ARCHIVED":
-      return "archived";
-    case "USER_NOT_FOUND":
-      return "no longer exists";
-    case "INVALID_TARGET":
-      return "cannot be assigned here";
-    case "HAND_OVERRIDE":
-      return "set by hand to something else";
-    case "RULE_CONFLICT":
-      return "another rule sets this for them";
-    case "DOMAIN_ERROR":
-    default:
-      return "rejected by the system";
-  }
+export function skipReasonText(reason: AssignmentSkipReason, t: AccessTranslator): string {
+  return t(`audience.skips.reasons.${REASON_KEY[reason] ?? "domainError"}`);
 }
 
 function personName(user: AssignmentSkippedUser): string {
@@ -44,12 +39,15 @@ function personName(user: AssignmentSkippedUser): string {
  * happen" has to be specific. Several get counted per reason, because a bulk assign that lists
  * thirty names is not a message anyone reads.
  */
-export function describeSkips(skipped: AssignmentSkippedUser[]): string | null {
+export function describeSkips(
+  skipped: AssignmentSkippedUser[],
+  t: AccessTranslator,
+): string | null {
   if (!skipped || skipped.length === 0) return null;
 
   if (skipped.length === 1) {
     const [user] = skipped;
-    return `${personName(user)} was not added — ${skipReasonText(user.reason)}.`;
+    return t("audience.skips.one", { name: personName(user), reason: skipReasonText(user.reason, t) });
   }
 
   const byReason = new Map<AssignmentSkipReason, number>();
@@ -57,8 +55,10 @@ export function describeSkips(skipped: AssignmentSkippedUser[]): string | null {
     byReason.set(user.reason, (byReason.get(user.reason) ?? 0) + 1);
   }
 
-  const parts = [...byReason.entries()].map(([reason, count]) => `${count} ${skipReasonText(reason)}`);
-  return `${skipped.length} people were not added: ${parts.join(", ")}.`;
+  const parts = [...byReason.entries()].map(([reason, count]) =>
+    t("audience.skips.countLine", { count, reason: skipReasonText(reason, t) }),
+  );
+  return t("audience.skips.several", { count: skipped.length, parts: parts.join(", ") });
 }
 
 /**
@@ -67,11 +67,14 @@ export function describeSkips(skipped: AssignmentSkippedUser[]): string | null {
  * Only a completely empty result counts as a failure: a bulk apply that added nine of ten people did
  * work, and the note about the tenth belongs next to the result, not in place of it.
  */
-export function assignmentSkippedEverything(result: AssignmentApplyDTO | undefined): string | null {
+export function assignmentSkippedEverything(
+  result: AssignmentApplyDTO | undefined,
+  t: AccessTranslator,
+): string | null {
   if (!result) return null;
   if (result.created.length > 0) return null;
 
-  return describeSkips(result.skipped);
+  return describeSkips(result.skipped, t);
 }
 
 /**
@@ -80,12 +83,16 @@ export function assignmentSkippedEverything(result: AssignmentApplyDTO | undefin
  */
 export function skipCountLines(
   counts: Partial<Record<AssignmentSkipReason, number>> | null | undefined,
+  t: AccessTranslator,
 ): { reason: AssignmentSkipReason; count: number; text: string }[] {
   return Object.entries(counts ?? {})
     .map(([reason, count]) => ({ reason: reason as AssignmentSkipReason, count: count ?? 0 }))
     .filter((line) => line.count > 0)
     .sort((a, b) => b.count - a.count)
-    .map((line) => ({ ...line, text: `${line.count} ${skipReasonText(line.reason)}` }));
+    .map((line) => ({
+      ...line,
+      text: t("audience.skips.countLine", { count: line.count, reason: skipReasonText(line.reason, t) }),
+    }));
 }
 
 /** The same counts, built from a per-person list when the response carries no tally of its own. */

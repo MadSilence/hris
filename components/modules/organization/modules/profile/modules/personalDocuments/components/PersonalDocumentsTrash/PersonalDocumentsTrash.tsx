@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowTurnBackwardIcon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -20,7 +21,7 @@ import {
   useInvalidateDocumentsContentQuery,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useDocumentsContent";
 import { formatBytes } from "../../utils/formatBytes";
-import { formatDisplayDate } from "@/lib/date";
+import { useDateFormatter } from "@/lib/date";
 import { getDocumentFileIcon } from "../../utils/getDocumentFileIcon";
 import {
   PurgeDocumentModal,
@@ -41,6 +42,9 @@ const messageOf = (error: unknown): string | null =>
  * what makes "Delete" recoverable and why purging is a separate, explicit action.
  */
 export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
+  const t = useTranslations("organization");
+  const formatDisplayDate = useDateFormatter();
+  const tCommon = useTranslations("common");
   const { internalApiClient } = useAppDataContext();
   const queryClient = useQueryClient();
   const invalidateDocuments = useInvalidateDocumentsContentQuery();
@@ -59,7 +63,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     mutationFn: async (documentId: string) => {
       const result = await restoreDocumentAction({ userId, documentId });
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage || "Failed to restore");
+        throw new Error(result.errorMessage || t("documents.trash.restoreFailed"));
       }
       return result;
     },
@@ -70,7 +74,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     mutationFn: async (documentId: string) => {
       const result = await purgeDocumentAction({ userId, documentId });
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(result.errorMessage || "Failed to delete permanently");
+        throw new Error(result.errorMessage || t("documents.trash.purgeFailed"));
       }
       return result;
     },
@@ -96,7 +100,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
   }
 
   if (error) {
-    return <ErrorState error={error} title="Trash unavailable" compact/>;
+    return <ErrorState error={error} title={t("documents.trash.unavailable")} compact/>;
   }
 
   const rows = data ?? [];
@@ -105,8 +109,8 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     return (
       <PersonalDocumentsEmptyState
         icon={<Icon icon={Delete02Icon} size="lg" />}
-        title="Nothing in the trash"
-        description="Deleted documents wait here until they are restored or permanently removed."
+        title={t("documents.trash.emptyTitle")}
+        description={t("documents.trash.emptyDescription")}
       />
     );
   }
@@ -125,7 +129,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
             <div className="min-w-0 flex-1">
               <p className="truncate text-body font-medium">{document.name}</p>
               <p className="text-hint text-tertiary">
-                {formatBytes(document.sizeBytes)} · uploaded {formatDisplayDate(document.createdAt)}
+                {t("documents.trash.meta", { size: formatBytes(document.sizeBytes), date: formatDisplayDate(document.createdAt) })}
               </p>
             </div>
 
@@ -136,7 +140,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               onClick={() => restore.mutate(document.id)}
             >
               <Icon icon={ArrowTurnBackwardIcon} size="sm" />
-              Restore
+              {tCommon("actions.restore")}
             </Button>
 
             <Button type="button"
@@ -150,7 +154,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
               }}
             >
               <Icon icon={Delete02Icon} size="sm" />
-              Delete forever
+              {t("documents.trash.deleteForever")}
             </Button>
           </div>
         ))}

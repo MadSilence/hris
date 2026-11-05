@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Heading01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -32,7 +33,7 @@ import {
   unarchiveReviewFormAction,
 } from "@/components/modules/reviews/actions/reviewFormActions";
 import { useInvalidateReviewForms, useReviewForm } from "@/components/modules/reviews/hooks";
-import { REVIEW_QUESTION_TYPE_LABELS, type ReviewForm, type ReviewQuestionType } from "@/models/reviews";
+import { REVIEW_QUESTION_TYPE_KEYS, type ReviewForm, type ReviewQuestionType } from "@/models/reviews";
 import { copyOf, draftOf, markOverall, move, newQuestion, problemsOf, sameDraft, toWrite, type Draft } from "./draft";
 import { QuestionCard } from "./QuestionCard";
 import { MentionField } from "./MentionField";
@@ -48,6 +49,8 @@ const FORMS_HREF = "/reviews/forms";
  * Read-only for somebody without EDIT, and for an archived form until it is unarchived.
  */
 export function ReviewFormEditorContainer({ formId }: { formId: string }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const form = useReviewForm(formId);
   const invalidate = useInvalidateReviewForms();
@@ -84,7 +87,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
   const readOnly = !canEdit || archived;
   const dirty = Boolean(draft && baseline && !sameDraft(draft, baseline));
   const guard = useUnsavedChangesGuard(dirty && !readOnly);
-  const problems = useMemo(() => (draft ? problemsOf(draft.questions) : {}), [draft]);
+  const problems = useMemo(() => (draft ? problemsOf(draft.questions, t) : {}), [draft, t]);
   const problemCount = Object.keys(problems).length;
 
   if (form.error) return <div className="mx-auto max-w-4xl"><ErrorState error={form.error} /></div>;
@@ -105,9 +108,9 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
   const gateReason = !dirty
     ? null
     : !draft.name.trim()
-      ? "Give the form a name to save it."
+      ? t("editor.gate.name")
       : showProblems && problemCount > 0
-        ? problemCount === 1 ? "One question is not finished yet." : `${problemCount} questions are not finished yet.`
+        ? t("editor.gate.unfinished", { count: problemCount })
         : null;
 
   const save = async () => {
@@ -123,13 +126,13 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
       const res = await saveReviewFormAction({ id: formId, body: toWrite(draft, version) });
       if (res.status !== ActionStatus.SUCCESS || !res.data) {
         if (res.fieldErrors?.name) setNameError(res.fieldErrors.name);
-        else setSaveError(res.errorMessage ?? "Something went wrong.");
+        else setSaveError(res.errorMessage ?? t("error.generic"));
         return;
       }
       adopt(res.data);
       setShowProblems(false);
       await invalidate();
-      showSuccess("Form saved.");
+      showSuccess(t("editor.saved"));
     } finally {
       setSaving(false);
     }
@@ -137,7 +140,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
   const runAction = async (result: Promise<{ status: ActionStatus; errorMessage?: string }>) => {
     const res = await result;
-    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? "Something went wrong.";
+    if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("error.generic");
     await invalidate();
     return null;
   };
@@ -169,28 +172,28 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
           <div className="flex items-center gap-2">
             {!readOnly && (
               <Button type="button" onClick={() => void save()} disabled={!dirty || saving || !draft.name.trim()}>
-                {saving ? "Saving…" : "Save"}
+                {saving ? tCommon("actions.saving") : tCommon("actions.save")}
               </Button>
             )}
             {(canEdit || canManage) && (
-              <RowActionsMenu label="Form actions">
+              <RowActionsMenu label={t("forms.row.actions")}>
                 {canEdit && (
                   <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} onClick={() => void duplicate()}>
-                    Duplicate
+                    {tCommon("actions.duplicate")}
                   </RowAction>
                 )}
                 {canManage && (archived ? (
                   <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" className="text-tertiary" />} onClick={() => void unarchive()}>
-                    Unarchive
+                    {t("forms.row.unarchive")}
                   </RowAction>
                 ) : (
                   <RowAction icon={<Icon icon={Archive02Icon} size="sm" className="text-tertiary" />} onClick={() => setConfirm("archive")}>
-                    Archive
+                    {tCommon("actions.archive")}
                   </RowAction>
                 ))}
                 {canManage && (
                   <RowActionDestructive icon={<Icon icon={Delete02Icon} size="sm" />} onClick={() => setConfirm("delete")}>
-                    Delete
+                    {tCommon("actions.delete")}
                   </RowActionDestructive>
                 )}
               </RowActionsMenu>
@@ -200,18 +203,17 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <TabsList>
-            <TabsTrigger value="questions">Questions</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="questions">{t("editor.tabs.questions")}</TabsTrigger>
+            <TabsTrigger value="preview">{tCommon("actions.preview")}</TabsTrigger>
           </TabsList>
           {!readOnly && (gateReason || dirty) && (
-            <p className="text-hint text-tertiary">{gateReason ?? "You have unsaved changes."}</p>
+            <p className="text-hint text-tertiary">{gateReason ?? t("editor.unsaved")}</p>
           )}
         </div>
       </StickyPageBar>
       {archived && (
         <p className="rounded-card border border-divider bg-subtle/60 px-4 py-3 text-body text-primary">
-          This form is archived and cannot be changed or chosen for a review cycle.
-          {canManage && " Unarchive it to edit it."}
+          {canManage ? t("editor.archivedManage") : t("editor.archived")}
         </p>
       )}
       <FormError message={saveError} />
@@ -219,7 +221,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         <TabsContent value="questions" className="mt-0 space-y-4">
           <section className="space-y-4 rounded-card border border-divider bg-card p-5">
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="review-form-name" required>Name</RequiredLabel>
+              <RequiredLabel htmlFor="review-form-name" required>{tCommon("fields.name")}</RequiredLabel>
               <Input
                 id="review-form-name"
                 value={draft.name}
@@ -230,7 +232,7 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
               {nameError && <FieldError>{nameError}</FieldError>}
             </div>
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="review-form-description">Introduction</RequiredLabel>
+              <RequiredLabel htmlFor="review-form-description">{t("editor.introduction")}</RequiredLabel>
               <MentionField
                 id="review-form-description"
                 multiline
@@ -240,19 +242,18 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
                 onChange={(description) => patch({ description })}
               />
               <p className="text-hint text-tertiary">
-                Shown to the reviewer above the questions. Here and in every question, type @ to name the person
-                reviewed (@subject, @subjectFullName), their manager (@manager) or the cycle (@cycle).
+                {t("editor.introductionHint")}
               </p>
             </div>
           </section>
 
           {draft.questions.length === 0 ? (
             <div className="rounded-card border border-dashed border-divider px-6 py-10 text-center">
-              <p className="text-body font-medium text-primary">No questions yet</p>
+              <p className="text-body font-medium text-primary">{t("editor.empty.title")}</p>
               <p className="mx-auto mt-1 max-w-md text-body text-tertiary">
                 {readOnly
-                  ? "Nobody has added a question to this form."
-                  : "Add the questions a reviewer answers. Group them under sections, and type @ where a name belongs: @subject for the person reviewed, @manager for their manager, @cycle for the cycle."}
+                  ? t("editor.empty.readOnly")
+                  : t("editor.empty.description")}
               </p>
             </div>
           ) : (
@@ -282,18 +283,18 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="secondary" className="gap-1.5">
                     <Icon icon={Add01Icon} size="sm" />
-                    Add question
+                    {t("editor.addQuestion")}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  {(Object.keys(REVIEW_QUESTION_TYPE_LABELS) as (keyof typeof REVIEW_QUESTION_TYPE_LABELS)[]).map((t) => (
-                    <DropdownMenuItem key={t} onSelect={() => add(t)}>{REVIEW_QUESTION_TYPE_LABELS[t]}</DropdownMenuItem>
+                  {(Object.keys(REVIEW_QUESTION_TYPE_KEYS) as (keyof typeof REVIEW_QUESTION_TYPE_KEYS)[]).map((type) => (
+                    <DropdownMenuItem key={type} onSelect={() => add(type)}>{t(REVIEW_QUESTION_TYPE_KEYS[type])}</DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button type="button" variant="ghost" className="gap-1.5 text-secondary" onClick={() => add("SECTION")}>
                 <Icon icon={Heading01Icon} size="sm" />
-                Add section
+                {t("editor.addSection")}
               </Button>
             </div>
           )}
@@ -305,8 +306,8 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
 
       <ConfirmDialog
         open={confirm === "archive"}
-        title="Archive form"
-        confirmLabel="Archive"
+        title={t("forms.archiveDialog.title")}
+        confirmLabel={tCommon("actions.archive")}
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
           // Unsaved changes are dropped first, so the archived form is shown as it is saved.
@@ -317,15 +318,17 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         }}
       >
         <p>
-          <strong>{form.data.name}</strong> can no longer be chosen for a review cycle.
-          {dirty && " Unsaved changes on this page are discarded."} You can unarchive it later.
+          {t.rich(dirty ? "editor.archiveBodyDirty" : "forms.archiveDialog.body", {
+            name: form.data.name,
+            b: (c) => <strong>{c}</strong>,
+          })}
         </p>
       </ConfirmDialog>
 
       <ConfirmDialog
         open={confirm === "delete"}
-        title="Delete form"
-        confirmLabel="Delete"
+        title={t("forms.deleteDialog.title")}
+        confirmLabel={tCommon("actions.delete")}
         destructive
         onCancelAction={() => setConfirm(null)}
         onConfirmAction={async () => {
@@ -338,16 +341,16 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
         }}
       >
         <p>
-          <strong>{form.data.name}</strong> and its questions are removed. This cannot be undone.
+          {t.rich("forms.deleteDialog.body", { name: form.data.name, b: (c) => <strong>{c}</strong> })}
         </p>
       </ConfirmDialog>
 
       <ConfirmCancelModal
         isOpen={guard.pendingHref !== null}
-        title="Leave without saving?"
-        description="The changes to this form are only on this page. Leaving now discards them."
-        cancelText="Stay"
-        confirmText="Leave"
+        title={t("editor.leave.title")}
+        description={t("editor.leave.description")}
+        cancelText={t("editor.leave.stay")}
+        confirmText={t("editor.leave.leave")}
         onCancelAction={guard.stay}
         onConfirmAction={guard.leave}
       />

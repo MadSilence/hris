@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { UserEdit01Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { FilterChip } from "@/components/ui/FilterChip";
 
@@ -24,6 +25,7 @@ export const DraftsToggle: React.FC<{
   showingDrafts: boolean;
   onChange: (showDrafts: boolean) => void;
 }> = ({ count, showingDrafts, onChange }) => {
+  const t = useTranslations("common");
   React.useEffect(() => {
     if (count === 0 && showingDrafts) onChange(false);
   }, [count, showingDrafts, onChange]);
@@ -33,7 +35,7 @@ export const DraftsToggle: React.FC<{
   return (
     <FilterChip selected={showingDrafts} onClick={() => onChange(!showingDrafts)}>
       {!showingDrafts && <Icon icon={UserEdit01Icon} size="sm" />}
-      Drafts ({count})
+      {t("toggles.drafts", { count })}
     </FilterChip>
   );
 };

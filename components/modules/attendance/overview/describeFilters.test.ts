@@ -1,4 +1,10 @@
-import { describeFilter } from "./describeFilters";
+import { translatorFor } from "@/test/nextIntl";
+import { describeFilter as describe_ } from "./describeFilters";
+
+const t = translatorFor("attendance") as unknown as Parameters<typeof describe_>[2];
+const tAccess = translatorFor("access") as unknown as Parameters<typeof describe_>[3];
+const describeFilter = (...[filter, fields, names]: [Parameters<typeof describe_>[0], Parameters<typeof describe_>[1], Parameters<typeof describe_>[4]?]) =>
+  describe_(filter, fields, t, tAccess, names);
 import type { FieldDTO } from "@/models/user/fields";
 import { AttributeType } from "@/models/attribute";
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 import { Button } from "@/components/desact/button";
@@ -37,38 +38,41 @@ export interface CreateLegalEntityFormProps {
   ) => void | Promise<void>;
 }
 
-const createSchema = yup.object({
+type LegalEntitiesTranslator = ReturnType<typeof useTranslations<"structure.legalEntities">>;
+type PlacesTranslator = ReturnType<typeof useTranslations<"structure.places">>;
+
+const buildCreateSchema = (t: LegalEntitiesTranslator, tPlaces: PlacesTranslator) => yup.object({
   name: yup
     .string()
     .trim()
-    .required("Please enter a legal entity name.")
-    .min(2, "Legal entity name must be at least 2 characters.")
-    .max(200, "Legal entity name must be at most 200 characters."),
+    .required(t("validation.nameRequired"))
+    .min(2, t("validation.nameMin"))
+    .max(200, t("validation.nameMax")),
   description: yup
     .string()
     .trim()
-    .max(1000, "Description must be at most 1000 characters.")
+    .max(1000, tPlaces("validation.descriptionMax"))
     .optional(),
   registrationNumber: yup
     .string()
     .trim()
-    .required("Please enter a registration number.")
-    .max(120, "Registration number must be at most 120 characters."),
+    .required(t("validation.registrationRequired"))
+    .max(120, t("validation.registrationMax")),
   taxId: yup
     .string()
     .trim()
-    .required("Please enter a tax ID.")
-    .max(120, "Tax ID must be at most 120 characters."),
+    .required(t("validation.taxIdRequired"))
+    .max(120, t("validation.taxIdMax")),
   country: yup
     .string()
     .trim()
-    .required("Please enter a country.")
-    .max(120, "Country must be at most 120 characters."),
+    .required(tPlaces("validation.countryRequired"))
+    .max(120, tPlaces("validation.countryMax")),
   city: yup
     .string()
     .trim()
-    .required("Please enter a city.")
-    .max(120, "City must be at most 120 characters."),
+    .required(tPlaces("validation.cityRequired"))
+    .max(120, tPlaces("validation.cityMax")),
   // Required because the backend requires them: `LegalEntityCreateRequest` marks the whole
   // registered address `@NotBlank`. They used to be optional here and labelled "Optional", so a
   // submit without a building number came back as "check the highlighted fields" with nothing
@@ -76,18 +80,18 @@ const createSchema = yup.object({
   street: yup
     .string()
     .trim()
-    .required("Please enter a street.")
-    .max(200, "Street must be at most 200 characters."),
+    .required(tPlaces("validation.streetRequired"))
+    .max(200, tPlaces("validation.streetMax")),
   building: yup
     .string()
     .trim()
-    .required("Please enter a building number.")
-    .max(50, "Building must be at most 50 characters."),
+    .required(tPlaces("validation.buildingRequired"))
+    .max(50, tPlaces("validation.buildingMax")),
   postCode: yup
     .string()
     .trim()
-    .required("Please enter a post code.")
-    .max(50, "Post code must be at most 50 characters."),
+    .required(tPlaces("validation.postCodeRequired"))
+    .max(50, tPlaces("validation.postCodeMax")),
 });
 
 function sanitize(
@@ -115,6 +119,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("structure.legalEntities");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
+  const createSchema = useMemo(() => buildCreateSchema(t, tPlaces), [t, tPlaces]);
+
   const handleFormSubmission = useCallback(
     (values: CreateLegalEntityFormValues) => onSubmitAction(sanitize(values)),
     [onSubmitAction],
@@ -172,15 +181,15 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
       <div className="max-h-[65vh] overflow-y-auto px-6 py-5 pr-8">
         <div className="space-y-5">
           <div className="mb-4">
-            <h3 className="text-body font-semibold">Legal entity details</h3>
+            <h3 className="text-body font-semibold">{t("create.detailsTitle")}</h3>
             <p className="mt-1 text-body text-tertiary">
-              Basic registration information used in company documents.
+              {t("create.detailsHint")}
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <RequiredLabel htmlFor="legal-entity-name" required>Name</RequiredLabel>
+              <RequiredLabel htmlFor="legal-entity-name" required>{tCommon("fields.name")}</RequiredLabel>
               <Input
                 id="legal-entity-name"
                 value={formik.values.name}
@@ -197,7 +206,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="legal-entity-description">Description</Label>
+              <Label htmlFor="legal-entity-description">{tCommon("fields.description")}</Label>
               <Input
                 id="legal-entity-description"
                 value={formik.values.description}
@@ -215,7 +224,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <RequiredLabel htmlFor="legal-entity-registration-number" required>
-                  Registration number
+                  {t("registrationNumber")}
                 </RequiredLabel>
                 <Input
                   id="legal-entity-registration-number"
@@ -236,7 +245,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="legal-entity-tax-id" required>Tax ID</RequiredLabel>
+                <RequiredLabel htmlFor="legal-entity-tax-id" required>{t("taxId")}</RequiredLabel>
                 <Input
                   id="legal-entity-tax-id"
                   value={formik.values.taxId}
@@ -255,16 +264,16 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
           </div>
 
           <div className="mb-4">
-            <h3 className="text-body font-semibold">Address</h3>
+            <h3 className="text-body font-semibold">{tPlaces("address")}</h3>
             <p className="mt-1 text-body text-tertiary">
-              Location details for this legal entity.
+              {t("create.addressHint")}
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="legal-entity-country" required>Country</RequiredLabel>
+                <RequiredLabel htmlFor="legal-entity-country" required>{tPlaces("country")}</RequiredLabel>
                 <Input
                   id="legal-entity-country"
                   value={formik.values.country}
@@ -281,7 +290,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="legal-entity-city" required>City</RequiredLabel>
+                <RequiredLabel htmlFor="legal-entity-city" required>{tPlaces("city")}</RequiredLabel>
                 <Input
                   id="legal-entity-city"
                   value={formik.values.city}
@@ -300,7 +309,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="legal-entity-street" required>Street</RequiredLabel>
+                <RequiredLabel htmlFor="legal-entity-street" required>{tPlaces("street")}</RequiredLabel>
                 <Input
                   id="legal-entity-street"
                   value={formik.values.street}
@@ -317,7 +326,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="legal-entity-building" required>Building</RequiredLabel>
+                <RequiredLabel htmlFor="legal-entity-building" required>{tPlaces("building")}</RequiredLabel>
                 <Input
                   id="legal-entity-building"
                   value={formik.values.building}
@@ -335,7 +344,7 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <RequiredLabel htmlFor="legal-entity-post-code" required>Post code</RequiredLabel>
+              <RequiredLabel htmlFor="legal-entity-post-code" required>{tPlaces("postCode")}</RequiredLabel>
               <Input
                 id="legal-entity-post-code"
                 value={formik.values.postCode}
@@ -363,11 +372,11 @@ export const CreateLegalEntityForm: FC<CreateLegalEntityFormProps> = ({
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading}>
-          Create
+          {tCommon("actions.create")}
         </Button>
       </DialogFooter>
     </form>

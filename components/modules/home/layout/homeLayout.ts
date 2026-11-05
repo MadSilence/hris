@@ -4,12 +4,13 @@ import type { HomeWidgetPlacement } from "@/models/home";
 export const HOME_GROUPS = ["PERSONAL", "COMPANY", "HR", "UTILITIES"] as const;
 export type HomeGroup = (typeof HOME_GROUPS)[number];
 
-export const HOME_GROUP_LABELS: Record<HomeGroup, string> = {
-  PERSONAL: "For you",
-  COMPANY: "Company",
-  HR: "HR",
-  UTILITIES: "Utilities",
-};
+/** Each group's heading, a key of the `home` catalogue. */
+export const HOME_GROUP_LABEL_KEYS = {
+  PERSONAL: "groups.PERSONAL",
+  COMPANY: "groups.COMPANY",
+  HR: "groups.HR",
+  UTILITIES: "groups.UTILITIES",
+} as const satisfies Record<HomeGroup, string>;
 
 /** What the arrangement needs to know about a widget: its id, its group, and where it stands by default. */
 export type ArrangeableWidget = { id: string; group: HomeGroup };

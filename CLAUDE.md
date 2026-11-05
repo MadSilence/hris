@@ -184,8 +184,9 @@ export async function archiveOfficeAction(input: ArchiveOfficeActionInput): Prom
 
 - The envelope it returns is the old one plus `code`, `fieldErrors` and `requestId`. The extra
   fields are optional, so a caller that only reads `status` and `errorMessage` keeps working.
-- **Never write a user-facing sentence in an action.** `errorMessage` is filled from
-  `lib/errors/errorMessages` by the backend's error code; the backend's own `message` is technical
+- **Never write a user-facing sentence in an action.** `errorMessage` is filled from the `errors`
+  catalogue (`messages/<locale>/errors.json`, read by `lib/errors/errorMessages`) by the backend's error code,
+  in the request's language — which is why `toActionError` is async; the backend's own `message` is technical
   and is not shown. Adding an error: `(claude)/technical_documentation/ERRORS.md` → "Как заводится новая ошибка".
 
 ---
@@ -200,6 +201,27 @@ The following areas are incomplete or inconsistent. Do not use them as reference
 - **A file and a folder with the same name shadow each other.** `models/userTable.ts` won over
   `models/userTable/` (both declared `ColumnItem`); the folder was unreachable and is gone. TypeScript
   resolves the file first and says nothing.
+
+---
+
+# Words on a screen (i18n)
+
+Every user-visible string comes from a catalogue — `messages/<locale>/<area>.json`, English the source,
+Russian beside it (`(claude)/technical_design/I18N_DESIGN.md`):
+
+- **No word in a component.** `useTranslations("area")` in a client component, `await getTranslations("area")`
+  in a server one; config arrays and schemas hold keys or take `t`. Keys are typed — an unknown key fails `tsc`.
+- **ICU only**: named arguments, `{count, plural, …}` for every count (Russian has four forms), `t.rich` for
+  bold and links. Never glue a sentence from pieces.
+- **A new key goes into `en` and `ru` together.** `test/catalogues.test.ts` parses every message and compares
+  the arguments; `test/i18nLiterals/` is the ratchet — a file may not gain literal text, and
+  `npm run i18n:baseline` tightens it after extraction.
+- **Dates and numbers** go through `lib/date.ts`, never through a message — during render through the page's language:
+  `useDateFormatter()` / `useDisplayLocale()` in a client component, `language: languageOf(await getLocale())` in a
+  server one. The bare `formatDisplayDate` / `displayLocale()` guess the language from the browser and are for event
+  handlers only: on the server they write English into a Russian page.
+- **Company content is never translated** — a policy's name is data. Tests read English through the real
+  catalogue (`test/nextIntl.tsx`); no provider needed. The pseudo-locale is the cookie `hris_pseudo_locale=1`.
 
 ---
 
@@ -373,7 +395,8 @@ existing naming conventions.
   not produce an image it does not store; and `@xyflow/react` (React Flow), for the org chart, the
   department and team canvases and the lifecycle template canvas
   (`components/modules/lifecycle/templates/canvas`). Positions on the template canvas are derived from
-  the tasks, never stored.
+  the tasks, never stored. `next-intl` (2026-11-04) for the message catalogues, and
+  `@formatjs/icu-messageformat-parser` (dev) for the test that parses them.
 - Do not break existing UI patterns
 - Do not bypass `InternalApiClient` with raw `fetch` in feature modules
 - Always match existing architecture in `components/modules/`

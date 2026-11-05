@@ -5,11 +5,11 @@ export type PerformanceBand = "LOW" | "MID" | "HIGH";
 
 export const PERFORMANCE_BANDS: PerformanceBand[] = ["HIGH", "MID", "LOW"];
 
-export const PERFORMANCE_BAND_LABELS: Record<PerformanceBand, string> = {
-  HIGH: "High performance",
-  MID: "Mid performance",
-  LOW: "Low performance",
-};
+export const PERFORMANCE_BAND_KEYS = {
+  HIGH: "band.high",
+  MID: "band.mid",
+  LOW: "band.low",
+} as const satisfies Record<PerformanceBand, string>;
 
 /**
  * Which third of the scale a rating falls in. The points are placed evenly from 0 (the lowest) to 1 (the highest):

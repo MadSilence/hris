@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateLegalEntityModal } from "../modals/CreateLegalEntityModal";
@@ -42,6 +43,9 @@ export const LegalEntityComponent: React.FC<Props> = ({
   initialEntities,
   isLoading,
 }) => {
+  const t = useTranslations("structure.legalEntities");
+  const tPlaces = useTranslations("structure.places");
+  const tCommon = useTranslations("common");
   const [isCreateLegalEntityModalOpen, setIsCreateLegalEntityModalOpen] =
     useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -165,7 +169,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
               <Button type="button"
                 size="icon"
                 variant="secondary"
-                aria-label="Export legal entities"
+                aria-label={t("list.export")}
                 onClick={() => setIsExportModalOpen(true)}
               >
                 <Icon icon={Download01Icon} size="sm" />
@@ -176,7 +180,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
             <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
               <Button type="button" onClick={openCreate} className="gap-1.5">
                 <Icon icon={Add01Icon} size="sm" />
-                Add legal entity
+                {t("list.add")}
               </Button>
             </PermissionGate>
           }
@@ -191,25 +195,25 @@ export const LegalEntityComponent: React.FC<Props> = ({
             query={query}
             archivedView={showArchived}
             scene="company-hub"
-            title="No legal entities yet"
-            description="A legal entity is the company people are employed by. Add the first one to start assigning people to it."
-            noResultsHint="Try a different name, country or registration number."
-            archivedDescription="Archived legal entities will appear here."
+            title={t("list.emptyTitle")}
+            description={t("list.emptyDescription")}
+            noResultsHint={t("list.noResultsHint")}
+            archivedDescription={t("list.archivedDescription")}
             onCreate={openCreate}
-            createLabel="Add legal entity"
+            createLabel={t("list.add")}
             createAccess={{ resource: "ORG.LEGAL_ENTITY" }}
           />
         ) : (
           <Table className="table-fixed">
             <TableHeader className="[&_tr]:border-divider [&_tr]:border-t-0">
               <TableRow>
-                <TableHead className="w-[22%]">Name</TableHead>
-                <TableHead className="w-[13%]">Country</TableHead>
-                <TableHead className="w-[13%]">Assigned users</TableHead>
-                <TableHead className="w-[27%]">Address</TableHead>
-                <TableHead className="w-[12.5%]">Registration number</TableHead>
-                <TableHead className="w-[12.5%]">Tax ID</TableHead>
-                <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
+                <TableHead className="w-[22%]">{tCommon("fields.name")}</TableHead>
+                <TableHead className="w-[13%]">{tPlaces("country")}</TableHead>
+                <TableHead className="w-[13%]">{tPlaces("assignedUsers")}</TableHead>
+                <TableHead className="w-[27%]">{tPlaces("address")}</TableHead>
+                <TableHead className="w-[12.5%]">{t("registrationNumber")}</TableHead>
+                <TableHead className="w-[12.5%]">{t("taxId")}</TableHead>
+                <TableHead className="w-12"><span className="sr-only">{tCommon("fields.actions")}</span></TableHead>
               </TableRow>
             </TableHeader>
 
@@ -253,18 +257,18 @@ export const LegalEntityComponent: React.FC<Props> = ({
 
                   <TableCell className="text-right">
                     <PermissionGate resource="ORG.LEGAL_ENTITY" action="EDIT">
-                      <RowActionsMenu label="Legal entity actions" stopPropagation>
+                      <RowActionsMenu label={t("list.rowActions")} stopPropagation>
                         {e.archived ? (
                           <RowAction
                             icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                             onClick={() => handleRestore(e)}
                             disabled={restoreAction.isPending}
                           >
-                            Unarchive
+                            {tPlaces("unarchive")}
                           </RowAction>
                         ) : (
                           <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={() => setArchiving(e)}>
-                            Archive
+                            {tCommon("actions.archive")}
                           </RowAction>
                         )}
                       </RowActionsMenu>
@@ -309,11 +313,11 @@ export const LegalEntityComponent: React.FC<Props> = ({
 
       <ExportDataModal
         isOpen={isExportModalOpen}
-        title="Export legal entities"
+        title={t("list.export")}
         rowCount={initialEntities.length}
-        rowNoun="legal entities"
-        description="Export all legal entities with their address, assigned people, and creation details."
-        includedText="Included: name, description, registration number, tax ID, address, assigned people, created by, created at."
+        rowKind="legalEntities"
+        description={t("list.exportDescription")}
+        includedText={t("list.exportIncluded")}
         onCancelAction={() => setIsExportModalOpen(false)}
         onConfirmAction={handleExport}
       />

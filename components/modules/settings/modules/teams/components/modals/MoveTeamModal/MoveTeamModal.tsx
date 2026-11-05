@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { FormError } from "@/components/feedback/FormError";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
@@ -39,6 +40,9 @@ export function MoveTeamModal({
   errorMessage,
   onConfirm,
 }: Props) {
+  const t = useTranslations("structure.teams");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const subCount = team.totalSubNodes;
   const peopleCount = team.totalPeople;
 
@@ -46,7 +50,7 @@ export function MoveTeamModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v && !isPending) onClose(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{target ? "Move team?" : "Make top-level?"}</DialogTitle>
+          <DialogTitle>{target ? t("move.title") : tShared("makeTopLevelTitle")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -56,14 +60,14 @@ export function MoveTeamModal({
             </span>
             <Icon icon={ArrowRight02Icon} size="sm" className="flex-none text-tertiary" />
             <span className="min-w-0 flex-1 truncate text-right text-body font-medium text-primary">
-              {target ? target.name : "Top level"}
+              {target ? target.name : tShared("topLevel")}
             </span>
           </div>
 
           <p className="text-body text-secondary">
-            {peopleCount} {peopleCount === 1 ? "person" : "people"}
-            {subCount > 0 && ` · ${subCount} sub-${subCount === 1 ? "team" : "teams"}`}
-            {" — everything inside moves with it."}
+            {subCount > 0
+              ? t("move.summaryWithSubs", { people: peopleCount, subs: subCount })
+              : tShared("moveSummary", { people: peopleCount })}
           </p>
 
           <FormError message={errorMessage} />
@@ -71,10 +75,10 @@ export function MoveTeamModal({
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" onClick={onConfirm} disabled={isPending}>
-            {isPending ? "Moving…" : target ? "Move team" : "Make top-level"}
+            {isPending ? tShared("moving") : target ? t("move.confirm") : tShared("makeTopLevel")}
           </Button>
         </DialogFooter>
       </DialogContent>

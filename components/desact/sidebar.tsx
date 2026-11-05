@@ -4,6 +4,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { useIsMobile } from "./use-mobile";
 import { Button } from "./button";
@@ -108,6 +109,7 @@ function SidebarProvider({
 
 function Sidebar({ className, children, ...props }: React.ComponentProps<"div">) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const t = useTranslations("common");
 
   if (isMobile) {
     return (
@@ -118,8 +120,8 @@ function Sidebar({ className, children, ...props }: React.ComponentProps<"div">)
           className="w-(--sidebar-width) gap-0 rounded-none bg-sidebar p-0 text-sidebar-text [&>button]:hidden"
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Navigation</SheetTitle>
-            <SheetDescription>The app&apos;s pages</SheetDescription>
+            <SheetTitle>{t("sidebar.title")}</SheetTitle>
+            <SheetDescription>{t("sidebar.description")}</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -152,13 +154,14 @@ function Sidebar({ className, children, ...props }: React.ComponentProps<"div">)
 
 function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar, state } = useSidebar();
+  const t = useTranslations("common");
   return (
     <Button
       type="button"
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon-sm"
-      aria-label={state === "expanded" ? "Collapse navigation" : "Expand navigation"}
+      aria-label={state === "expanded" ? t("sidebar.collapse") : t("sidebar.expand")}
       className={cn("text-sidebar-icon", className)}
       onClick={(event) => {
         onClick?.(event);
@@ -173,14 +176,15 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const { toggleSidebar } = useSidebar();
+  const t = useTranslations("common");
   return (
     <button
       type="button"
       data-slot="sidebar-rail"
-      aria-label="Toggle navigation"
+      aria-label={t("sidebar.toggle")}
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle navigation"
+      title={t("sidebar.toggle")}
       className={cn(
         "absolute inset-y-0 -right-2 z-20 hidden w-4 cursor-w-resize sm:flex",
         "after:absolute after:inset-y-0 after:left-1/2 after:w-px hover:after:bg-strong",

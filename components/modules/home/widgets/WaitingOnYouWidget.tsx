@@ -2,12 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/desact/skeleton";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
-import { formatDisplayDate } from "@/lib/date";
-import { formatDayAmount, type TimeOffDecisionContext, type TimeOffRequest } from "@/models/timeOff";
+import { type DateFormatter, useDateFormatter } from "@/lib/date";
+import { dayAmountArgs, type TimeOffDecisionContext, type TimeOffRequest } from "@/models/timeOff";
 import { useTimeOffRequestsAwaitingMe } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsAwaitingMe";
 import { timeOffDecisionQueryKey } from "@/components/modules/timeOffDecision";
 import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/utils/inboxFilters";
@@ -16,7 +17,7 @@ import { HomeCard, HomeCardLink, HomeRowsSkeleton } from "@/components/modules/h
 /** The newest five (sitting 2, H5); the rest are in the inbox under *Needs Action*. */
 export const WAITING_ON_YOU_LIMIT = 5;
 
-const dates = (r: TimeOffRequest) =>
+const dates = (r: TimeOffRequest, formatDisplayDate: DateFormatter) =>
   r.startDate === r.endDate
     ? formatDisplayDate(r.startDate, { style: "medium" })
     : `${formatDisplayDate(r.startDate, { style: "medium" })} – ${formatDisplayDate(r.endDate, { style: "medium" })}`;
@@ -27,6 +28,7 @@ const dates = (r: TimeOffRequest) =>
  * reader. It shares that page's cache key, so opening the request afterwards is instant.
  */
 const RequesterName: React.FC<{ requestId: string }> = ({ requestId }) => {
+  const t = useTranslations("home");
   const { internalApiClient } = useAppDataContext();
   const context = useQuery<TimeOffDecisionContext>({
     queryKey: timeOffDecisionQueryKey(requestId),
@@ -34,7 +36,7 @@ const RequesterName: React.FC<{ requestId: string }> = ({ requestId }) => {
     staleTime: 30_000,
   });
   if (context.isLoading) return <Skeleton className="inline-block h-3.5 w-24 align-middle" />;
-  return <>{context.data?.requesterName ?? "A request"}</>;
+  return <>{context.data?.requesterName ?? t("waitingOnYou.aRequest")}</>;
 };
 
 /**
@@ -42,18 +44,21 @@ const RequesterName: React.FC<{ requestId: string }> = ({ requestId }) => {
  * waits: a "nothing to decide" card on every employee's home is noise (HOME_AND_SEARCH.md § 2).
  */
 export const WaitingOnYouWidget: React.FC = () => {
+  const t = useTranslations("home");
+  const formatDisplayDate = useDateFormatter();
+  const tTimeOff = useTranslations("timeOff");
   const query = useTimeOffRequestsAwaitingMe();
 
   if (query.isLoading) {
     return (
-      <HomeCard title="Waiting on you">
+      <HomeCard title={t("widgets.waitingOnYou.title")}>
         <HomeRowsSkeleton rows={2} avatar={false} />
       </HomeCard>
     );
   }
   if (query.error || !query.data) {
     return (
-      <HomeCard title="Waiting on you">
+      <HomeCard title={t("widgets.waitingOnYou.title")}>
         <ErrorState error={query.error} compact onRetry={() => void query.refetch()} />
       </HomeCard>
     );
@@ -66,22 +71,26 @@ export const WaitingOnYouWidget: React.FC = () => {
 
   return (
     <HomeCard
-      title="Waiting on you"
-      action={<HomeCardLink href={NEEDS_ACTION_INBOX_HREF}>See all ({query.data.length})</HomeCardLink>}
+      title={t("widgets.waitingOnYou.title")}
+      action={<HomeCardLink href={NEEDS_ACTION_INBOX_HREF}>{t("card.seeAllCount", { count: query.data.length })}</HomeCardLink>}
     >
       <ul className="flex flex-col gap-1">
         {newest.map((request) => (
           <li key={request.id}>
             <Link href={`/time-off/requests/${request.id}`} className="-mx-2 flex flex-col rounded-control px-2 py-1.5 hover:bg-subtle">
               <span className="truncate text-body font-medium text-primary">
-                <RequesterName requestId={request.id} />
-                <span className="font-normal text-tertiary">
-                  {request.status === "CANCELLATION_PENDING" ? " asks to cancel time off" : " requests time off"}
-                </span>
+                {t.rich(request.status === "CANCELLATION_PENDING" ? "waitingOnYou.asksToCancel" : "waitingOnYou.requests", {
+                  name: () => <RequesterName requestId={request.id} />,
+                  rest: (chunks) => <span className="font-normal text-tertiary">{chunks}</span>,
+                })}
               </span>
               <span className="truncate text-hint text-tertiary">
-                {dates(request)} · {formatDayAmount(request.requestedAmount)} {request.requestedAmount === 1 ? "day" : "days"}
-                {request.awaitingOnBehalfOfName ? ` · for ${request.awaitingOnBehalfOfName}` : ""}
+                {t("waitingOnYou.detail", {
+                  dates: dates(request, formatDisplayDate),
+                  days: tTimeOff("amount.days", dayAmountArgs(request.requestedAmount)),
+                  forSomeone: request.awaitingOnBehalfOfName ? "yes" : "no",
+                  name: request.awaitingOnBehalfOfName ?? "",
+                })}
               </span>
             </Link>
           </li>

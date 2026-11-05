@@ -1,6 +1,7 @@
 "use client";
 
 import "@xyflow/react/dist/style.css";
+import { useFlowAriaLabels } from "@/components/ui/Canvas";
 
 import React, { useMemo } from "react";
 import {
@@ -62,10 +63,12 @@ function DepartmentBlocksInner({
 
   const value = useMemo(() => handlers, [handlers]);
 
+  const flowAriaLabels = useFlowAriaLabels();
   return (
     <DepartmentBlocksProvider value={value}>
       {banner}
       <ReactFlow
+        ariaLabelConfig={flowAriaLabels}
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}

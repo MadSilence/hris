@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useDisplayLanguage } from "@/lib/date";
 import { useRouter } from "next/navigation";
 import { Add01Icon, FlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -18,9 +20,9 @@ import { ruleSentence, typesInDefinition } from "@/components/modules/automation
 import { startsReviews, useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { TemplateGallery } from "./TemplateGallery";
-import { formatMoment, reasonText, type AssignableType, type AutomationRuleSummary } from "@/models/automations";
+import { formatMoment, type AssignableType, type AutomationRuleSummary } from "@/models/automations";
+import { reasonText } from "@/components/modules/automations/shared/vocabulary";
 
-const COLUMNS = ["Automation", "Status", "Last run", "Runs"] as const;
 const NEW_HREF = "/settings/automation/automations/new";
 
 const totalRuns = (r: AutomationRuleSummary) =>
@@ -32,6 +34,10 @@ const totalRuns = (r: AutomationRuleSummary) =>
  * (research § A.10). A live rule the assignment modal created is listed here too, as any other.
  */
 export function AutomationsListContainer() {
+  const t = useTranslations("automations");
+  const tCommon = useTranslations("common");
+  const tAccess = useTranslations("access");
+  const language = useDisplayLanguage();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -53,13 +59,13 @@ export function AutomationsListContainer() {
 
   const rows = useMemo(() => source.map((rule) => ({
     rule,
-    sentence: ruleSentence(rule.definition, { fields, targets: names.targets, roles: names.roles }),
+    sentence: ruleSentence(t, tAccess, rule.definition, { fields, targets: names.targets, roles: names.roles }),
   })).filter(({ rule, sentence }) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return [rule.name, rule.description ?? "", sentence.when, sentence.forWhom, sentence.does]
       .some((text) => text.toLowerCase().includes(q));
-  }), [source, fields, names, query]);
+  }), [source, fields, names, query, t, tAccess]);
 
   const openTemplate = (key: string) => router.push(`${NEW_HREF}?template=${encodeURIComponent(key)}`);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -67,10 +73,10 @@ export function AutomationsListContainer() {
   const newButton = (
     <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
       <div className="flex items-center gap-2">
-        <Button type="button" variant="secondary" onClick={() => setGalleryOpen(true)}>From a template</Button>
+        <Button type="button" variant="secondary" onClick={() => setGalleryOpen(true)}>{t("list.fromTemplate")}</Button>
         <Button type="button" className="gap-1.5" onClick={() => router.push(NEW_HREF)}>
           <Icon icon={Add01Icon} size="sm" />
-          New automation
+          {t("list.new")}
         </Button>
       </div>
     </PermissionGate>
@@ -97,15 +103,18 @@ export function AutomationsListContainer() {
             query={query}
             archivedView={showArchived}
             scene="automations"
-            title="No automations yet"
-            description="An automation does something on its own when something happens to a person."
-            noResultsHint="Try a different name, trigger or action."
+            title={t("list.emptyTitle")}
+            description={t("list.emptyDescription")}
+            noResultsHint={t("list.noResultsHint")}
           />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                {COLUMNS.map((c) => <TableHead key={c} className={c === "Runs" ? "text-right" : undefined}>{c}</TableHead>)}
+                <TableHead>{t("list.columns.automation")}</TableHead>
+                <TableHead>{tCommon("fields.status")}</TableHead>
+                <TableHead>{t("list.columns.lastRun")}</TableHead>
+                <TableHead className="text-right">{t("list.columns.runs")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,15 +141,15 @@ export function AutomationsListContainer() {
                       <div className="truncate font-medium text-primary">{rule.name}</div>
                       {rule.definition ? (
                         <div className="mt-0.5 truncate text-body text-tertiary" data-test="rule-sentence">
-                          {sentence.when} · for {sentence.forWhom} → {sentence.does}
+                          {t("sentence.rule.row", { when: sentence.when, forWhom: sentence.forWhom, does: sentence.does })}
                         </div>
                       ) : null}
                       {rule.status === "PAUSED" && rule.pausedReason ? (
-                        <div className="mt-0.5 truncate text-hint text-status-pending-text">{reasonText(rule.pausedReason)}</div>
+                        <div className="mt-0.5 truncate text-hint text-status-pending-text">{reasonText(t, rule.pausedReason, language)}</div>
                       ) : null}
                     </TableCell>
                     <TableCell className="w-32"><RuleStatusBadge status={rule.status} /></TableCell>
-                    <TableCell className="w-44 text-body text-tertiary">{formatMoment(rule.lastRunAt)}</TableCell>
+                    <TableCell className="w-44 text-body text-tertiary">{formatMoment(rule.lastRunAt, language)}</TableCell>
                     <TableCell className="w-20 text-right tabular-nums">{totalRuns(rule)}</TableCell>
                   </TableRow>
                 ))}
@@ -152,8 +161,8 @@ export function AutomationsListContainer() {
       <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Start from a template</DialogTitle>
-            <DialogDescription>It opens filled in; nothing is saved until you publish.</DialogDescription>
+            <DialogTitle>{t("list.galleryTitle")}</DialogTitle>
+            <DialogDescription>{t("list.galleryDescription")}</DialogDescription>
           </DialogHeader>
           {galleryOpen && <TemplateGallery onPick={openTemplate} />}
         </DialogContent>
@@ -167,21 +176,19 @@ export function AutomationsListContainer() {
  * ready-made starting points — each opens the builder filled in, nothing is saved until Publish.
  */
 function FirstAutomation({ onStart, onBlank }: { onStart: (key: string) => void; onBlank: () => void }) {
+  const t = useTranslations("automations");
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 py-16 text-center">
       <div className="rounded-card bg-subtle p-4 text-secondary"><Icon icon={FlashIcon} size="lg" /></div>
       <div className="space-y-2">
-        <h3 className="text-section-title text-primary">Automate the first rule</h3>
-        <p className="text-body text-tertiary">
-          An automation does something on its own when something happens to a person — a welcome email
-          before their first day, a task for their manager, the right holiday calendar for their office.
-        </p>
+        <h3 className="text-section-title text-primary">{t("list.firstTitle")}</h3>
+        <p className="text-body text-tertiary">{t("list.firstDescription")}</p>
       </div>
       <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
         <TemplateGallery onPick={onStart} />
         <Button type="button" className="gap-1.5" onClick={onBlank}>
           <Icon icon={Add01Icon} size="sm" />
-          New automation
+          {t("list.new")}
         </Button>
       </PermissionGate>
     </div>

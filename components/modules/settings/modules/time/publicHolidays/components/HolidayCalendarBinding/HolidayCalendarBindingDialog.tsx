@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import {
   Dialog,
@@ -49,6 +50,8 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
   placeName,
   current,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const calendarList = usePublicHolidayCalendars();
   // An archived calendar takes nobody new; an inactive one may be bound and activated later.
   const calendars = useMemo(
@@ -81,7 +84,7 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
   const onApply = async () => {
     try {
       await apply.mutateAsync({ kind, refId, calendarId });
-      showSuccess(calendarId ? "Holiday calendar set." : "Holiday calendar removed.");
+      showSuccess(calendarId ? t("binding.dialog.set") : t("binding.dialog.removed"));
       onRequestCloseAction();
     } catch {
       // Shown in the dialog, which stays open with the choice made.
@@ -94,33 +97,35 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon icon={Calendar03Icon} />
-            Holiday Calendar for {placeName}
+            {t("binding.dialog.title", { place: placeName })}
           </DialogTitle>
           <DialogDescription>
-            Everybody who works here gets this calendar, unless they have one of their own or a more specific
-            place gives them another: the office comes before the legal entity, the legal entity before the
-            company default. A change applies from today, and leave before today keeps its price.
+            {t("binding.dialog.description")}
           </DialogDescription>
         </DialogHeader>
 
         <FormError message={error ? messageForError(error) : null} />
 
         {preview.data === undefined ? (
-          <div className="max-h-72 space-y-2 overflow-y-auto" role="radiogroup" aria-label="Holiday calendar">
+          <div className="max-h-72 space-y-2 overflow-y-auto" role="radiogroup" aria-label={t("binding.dialog.choiceAria")}>
             {calendars.map((c) => (
               <Choice key={c.id} label={c.name} selected={choice === c.id} onSelect={() => setChoice(c.id)} />
             ))}
-            <Choice label="None" selected={choice === NONE} onSelect={() => setChoice(NONE)} muted />
+            <Choice label={tCommon("values.none")} selected={choice === NONE} onSelect={() => setChoice(NONE)} muted />
           </div>
         ) : (
           <div className="space-y-2" data-test="binding-preview">
-            {previewLines(preview.data, current?.calendarName ?? null).map((line) => (
+            {previewLines(preview.data, current?.calendarName ?? null, t).map((line) => (
               <p key={line} className="m-0 text-body text-primary">{line}</p>
             ))}
             {preview.data.keepOwnPeople.length > 0 && (
               <p className="m-0 text-hint text-tertiary">
-                Keeping their own: {preview.data.keepOwnPeople.map((p) => p.name ?? "Unnamed").join(", ")}
-                {preview.data.keepOwn > preview.data.keepOwnPeople.length ? ", …" : ""}
+                {t(
+                  preview.data.keepOwn > preview.data.keepOwnPeople.length
+                    ? "binding.dialog.keepingOwnMore"
+                    : "binding.dialog.keepingOwn",
+                  { names: preview.data.keepOwnPeople.map((p) => p.name ?? t("binding.dialog.unnamed")).join(", ") },
+                )}
               </p>
             )}
           </div>
@@ -130,19 +135,19 @@ export const HolidayCalendarBindingDialog: React.FC<Props> = ({
           {preview.data === undefined ? (
             <>
               <Button type="button" variant="secondary" onClick={onRequestCloseAction} disabled={busy}>
-                Cancel
+                {tCommon("actions.cancel")}
               </Button>
               <Button type="button" onClick={onReview} disabled={busy || unchanged}>
-                {preview.isPending ? "Reviewing…" : "Review"}
+                {preview.isPending ? t("binding.dialog.reviewing") : t("binding.dialog.review")}
               </Button>
             </>
           ) : (
             <>
               <Button type="button" variant="secondary" onClick={resetPreview} disabled={busy}>
-                Back
+                {tCommon("actions.back")}
               </Button>
               <Button type="button" onClick={() => void onApply()} disabled={busy}>
-                {apply.isPending ? "Applying…" : "Apply"}
+                {apply.isPending ? t("binding.dialog.applying") : tCommon("actions.apply")}
               </Button>
             </>
           )}

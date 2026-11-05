@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import {
   AlertDialog,
@@ -31,24 +32,22 @@ export interface DeleteDocumentsFolderModalProps {
   onConfirmAction: (strategy: DocumentFolderDeleteStrategy) => void;
 }
 
-const countLine = (documents: number, folders: number): string | null => {
-  const parts: string[] = [];
-  if (documents > 0) {
-    parts.push(`${documents} ${documents === 1 ? "document" : "documents"}`);
-  }
-  if (folders > 0) {
-    parts.push(`${folders} ${folders === 1 ? "folder" : "folders"}`);
-  }
-  return parts.length ? parts.join(" and ") : null;
+type Translator = ReturnType<typeof useTranslations<"organization">>;
+
+const countLine = (t: Translator, documents: number, folders: number): string | null => {
+  if (documents > 0 && folders > 0) return t("documents.deleteFolder.countBoth", { documents, folders });
+  if (documents > 0) return t("documents.deleteFolder.countDocuments", { count: documents });
+  if (folders > 0) return t("documents.deleteFolder.countFolders", { count: folders });
+  return null;
 };
 
 /** What the folder holds directly — what "keep the contents" lifts one level up. */
-const directContents = (impact: DocumentFolderDeleteImpactDTO) =>
-  countLine(impact.documents, impact.subfolders);
+const directContents = (t: Translator, impact: DocumentFolderDeleteImpactDTO) =>
+  countLine(t, impact.documents, impact.subfolders);
 
 /** Everything beneath it at any depth — what "delete the contents too" actually takes. */
-const subtreeContents = (impact: DocumentFolderDeleteImpactDTO) =>
-  countLine(impact.documentsInSubtree, impact.subfoldersInSubtree);
+const subtreeContents = (t: Translator, impact: DocumentFolderDeleteImpactDTO) =>
+  countLine(t, impact.documentsInSubtree, impact.subfoldersInSubtree);
 
 /**
  * Deleting a folder, with a choice about what is inside it.
@@ -73,6 +72,8 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
   onRequestCloseAction,
   onConfirmAction,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
   const [strategy, setStrategy] = useState<DocumentFolderDeleteStrategy>("MOVE_TO_PARENT");
 
   // Every opening starts from the safe option, whatever the last one chose.
@@ -80,8 +81,10 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
     if (isOpen) setStrategy("MOVE_TO_PARENT");
   }, [isOpen]);
 
-  const contents = impact ? directContents(impact) : null;
-  const deepContents = impact ? subtreeContents(impact) : null;
+  const contents = impact ? directContents(t, impact) : null;
+  const deepContents = impact ? subtreeContents(t, impact) : null;
+  const name = folderName ?? t("documents.deleteFolder.untitled");
+  const bold = (chunks: ReactNode) => <strong>{chunks}</strong>;
   // Nested folders are the only reason the two answers differ; without them, saying so twice is noise.
   const goesDeeper = Boolean(impact && impact.subfoldersInSubtree > 0);
 
@@ -94,15 +97,14 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete folder</AlertDialogTitle>
+          <AlertDialogTitle>{t("documents.deleteFolder.title")}</AlertDialogTitle>
 
           <AlertDialogDescription>
-            <strong>{folderName ?? "Untitled folder"}</strong>{" "}
             {isImpactLoading
-              ? "— checking what is inside…"
+              ? t.rich("documents.deleteFolder.checking", { name, b: bold })
               : contents
-                ? `holds ${contents}.`
-                : "is empty."}
+                ? t.rich("documents.deleteFolder.holds", { name, contents, b: bold })
+                : t.rich("documents.deleteFolder.empty", { name, b: bold })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -118,11 +120,11 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
                 disabled={isLoading}
               />
               <span className="text-body">
-                <span className="font-medium">Keep the contents</span>
+                <span className="font-medium">{t("documents.deleteFolder.keepTitle")}</span>
                 <span className="block text-tertiary">
                   {contents
-                    ? `${contents} move one level up and stay where they can be found.`
-                    : "Everything inside moves one level up and stays where it can be found."}
+                    ? t("documents.deleteFolder.keepWithCount", { contents })
+                    : t("documents.deleteFolder.keepFallback")}
                 </span>
               </span>
             </label>
@@ -137,11 +139,13 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
                 disabled={isLoading}
               />
               <span className="text-body">
-                <span className="font-medium">Delete the contents too</span>
+                <span className="font-medium">{t("documents.deleteFolder.trashTitle")}</span>
                 <span className="block text-tertiary">
                   {deepContents
-                    ? `${deepContents}${goesDeeper ? ", including everything nested inside them," : ""} go to the trash, where they can be restored until the retention period ends.`
-                    : "Documents go to the trash, where they can be restored until the retention period ends."}
+                    ? goesDeeper
+                      ? t("documents.deleteFolder.trashWithCountNested", { contents: deepContents })
+                      : t("documents.deleteFolder.trashWithCount", { contents: deepContents })
+                    : t("documents.deleteFolder.trashFallback")}
                 </span>
               </span>
             </label>
@@ -151,7 +155,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
         <FormError message={errorMessage} />
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{tCommon("actions.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading || isImpactLoading}
             // AlertDialogAction closes the dialog on click by default, which threw away the
@@ -162,7 +166,7 @@ export const DeleteDocumentsFolderModal: FC<DeleteDocumentsFolderModalProps> = (
             }}
             destructive
           >
-            Delete folder
+            {t("documents.deleteFolder.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

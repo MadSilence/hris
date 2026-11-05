@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/desact/button";
 import { Add01Icon, Download01Icon } from "@hugeicons/core-free-icons";
@@ -29,6 +30,7 @@ export default function RolesPageHeader({
   createRoleErrorMessage,
   templates = [],
 }: RolesPageHeaderProps) {
+  const t = useTranslations("settings");
   const [addOpen, setAddOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
 
@@ -38,7 +40,7 @@ export default function RolesPageHeader({
         <PermissionGate resource="ROLES.ROLE" action="EDIT">
           <Button type="button" onClick={() => setAddOpen(true)} className="gap-1.5">
             <Icon icon={Add01Icon} size="sm" />
-            Add role
+            {t("roles.page.addRole")}
           </Button>
         </PermissionGate>
 
@@ -46,7 +48,7 @@ export default function RolesPageHeader({
           size="icon"
           variant="secondary"
           onClick={() => setExportOpen(true)}
-          aria-label="Export roles"
+          aria-label={t("roles.page.exportRoles")}
         >
           <Icon icon={Download01Icon} size="sm" />
         </Button>

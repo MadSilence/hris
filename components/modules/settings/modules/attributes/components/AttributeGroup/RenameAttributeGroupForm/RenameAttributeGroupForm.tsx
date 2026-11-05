@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useEffect } from "react";
+import { FC, FormEvent, useCallback, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
 
@@ -30,18 +31,20 @@ export type RenameAttributeGroupFormValues = {
   description: string;
 };
 
-const renameAttributeGroupFormValidationSchema = yup.object({
+type SectionFormTranslator = ReturnType<typeof useTranslations<"settings.attributes.sectionForm">>;
+
+const buildRenameSchema = (t: SectionFormTranslator) => yup.object({
   name: yup
     .string()
     .trim()
-    .required("Please enter a section name.")
-    .min(3, "Name must be at least 3 characters long.")
-    .max(120, "Name must be 120 characters or fewer.")
-    .nonNullable("Please enter a section name."),
+    .required(t("nameRequired"))
+    .min(3, t("nameMin", { min: 3 }))
+    .max(120, t("nameMax", { max: 120 }))
+    .nonNullable(t("nameRequired")),
   description: yup
     .string()
     .trim()
-    .max(1000, "Description must be 1000 characters or fewer."),
+    .max(1000, t("descriptionMax", { max: 1000 })),
 });
 
 export const RenameAttributeGroupForm: FC<
@@ -54,6 +57,9 @@ export const RenameAttributeGroupForm: FC<
   onDirtyChangeAction,
   onSubmitAction,
 }) => {
+  const t = useTranslations("settings.attributes.sectionForm");
+  const tCommon = useTranslations("common");
+  const validationSchema = useMemo(() => buildRenameSchema(t), [t]);
   const startDescription = initialDescription ?? "";
 
   const handleFormSubmission = useCallback(
@@ -70,7 +76,7 @@ export const RenameAttributeGroupForm: FC<
       name: initialName,
       description: startDescription,
     },
-    validationSchema: renameAttributeGroupFormValidationSchema,
+    validationSchema,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: handleFormSubmission,
@@ -103,7 +109,7 @@ export const RenameAttributeGroupForm: FC<
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-2">
-        <RequiredLabel htmlFor="attribute-group-name" required>Name your section</RequiredLabel>
+        <RequiredLabel htmlFor="attribute-group-name" required>{t("name")}</RequiredLabel>
 
         <Input
           id="attribute-group-name"
@@ -120,7 +126,7 @@ export const RenameAttributeGroupForm: FC<
       </div>
 
       <div className="mt-4 space-y-2">
-        <RequiredLabel htmlFor="attribute-group-description">Description</RequiredLabel>
+        <RequiredLabel htmlFor="attribute-group-description">{tCommon("fields.description")}</RequiredLabel>
 
         <Textarea
           id="attribute-group-description"
@@ -143,11 +149,11 @@ export const RenameAttributeGroupForm: FC<
           disabled={isLoading}
           onClick={onCancelAction}
         >
-          Cancel
+          {tCommon("actions.cancel")}
         </Button>
 
         <Button type="submit" disabled={isLoading || isUnchanged}>
-          Save
+          {tCommon("actions.save")}
         </Button>
       </DialogFooter>
     </form>

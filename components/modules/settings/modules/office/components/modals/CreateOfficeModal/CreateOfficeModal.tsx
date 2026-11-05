@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FC, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
@@ -28,6 +29,7 @@ export const CreateOfficeModal: FC<Props> = ({
   onConfirmAction,
   onRequestCloseAction,
 }) => {
+  const t = useTranslations("structure.offices");
   const [isDirty, setIsDirty] = useState(false);
   const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
@@ -61,9 +63,9 @@ export const CreateOfficeModal: FC<Props> = ({
           className="overflow-hidden p-0"
         >
           <DialogHeader className="border-b border-divider bg-subtle/40 px-6 py-5">
-            <DialogTitle>Create office</DialogTitle>
+            <DialogTitle>{t("create.title")}</DialogTitle>
             <DialogDescription>
-              Add office details and address information.
+              {t("create.description")}
             </DialogDescription>
           </DialogHeader>
 

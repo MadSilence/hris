@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { NodRing } from "@/components/desact/nod";
 
 import { Button } from "@/components/desact/button";
@@ -46,6 +47,8 @@ export const PersonalPreferencesForm: React.FC<{
   formId?: string;
 }> = ({ hideSubmit = false, onSavedAction, formId }) => {
   const queryClient = useQueryClient();
+  const t = useTranslations("firstRun");
+  const tCommon = useTranslations("common");
   const { data, isLoading } = useUserSettings();
 
   const [timeZone, setTimeZone] = React.useState<string | null>(null);
@@ -68,8 +71,8 @@ export const PersonalPreferencesForm: React.FC<{
       {
         value: FOLLOW_COMPANY,
         label: companyZone
-          ? `Same as the company (UTC${offsetOf(companyZone).text})`
-          : "Same as the company",
+          ? t("preferences.timeZone.followCompanyWithOffset", { offset: offsetOf(companyZone).text })
+          : t("preferences.timeZone.followCompany"),
         keywords: companyZone ?? "",
       },
       // A short list of real zones written as offsets — see `lib/timeZones` for why the value stays
@@ -78,10 +81,10 @@ export const PersonalPreferencesForm: React.FC<{
         value: choice.zone,
         label: choice.label,
         keywords: choice.keywords,
-        hint: choice.zone === browserZone ? "this device" : undefined,
+        hint: choice.zone === browserZone ? t("preferences.timeZone.thisDevice") : undefined,
       })),
     ];
-  }, [data?.companyTimeZone, timeZone]);
+  }, [data?.companyTimeZone, timeZone, t]);
 
   const save = async (event?: React.FormEvent) => {
     event?.preventDefault();
@@ -108,7 +111,7 @@ export const PersonalPreferencesForm: React.FC<{
   return (
     <form id={formId} onSubmit={save} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <RequiredLabel htmlFor="settings-timezone">Time zone</RequiredLabel>
+        <RequiredLabel htmlFor="settings-timezone">{t("preferences.timeZone.label")}</RequiredLabel>
         {/*
           Searchable, not a plain Select: there are four hundred zones, and a reader who knows they
           are in Warsaw should type it rather than scroll past Africa.
@@ -122,13 +125,12 @@ export const PersonalPreferencesForm: React.FC<{
           disabled={isLoading}
         />
         <p className="text-hint text-tertiary">
-          When something happened is shown in this zone. Dates in the calendar sense — a hire date, a
-          day of leave — are the same day for everybody and do not move.
+          {t("preferences.timeZone.hint")}
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <RequiredLabel htmlFor="settings-date-format">Date format</RequiredLabel>
+        <RequiredLabel htmlFor="settings-date-format">{t("preferences.dateFormat.label")}</RequiredLabel>
         <Select
           value={dateFormat}
           onValueChange={(v) => setDateFormat(v as DisplayDateFormat)}
@@ -138,10 +140,10 @@ export const PersonalPreferencesForm: React.FC<{
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="SYSTEM">Same as this device</SelectItem>
-            <SelectItem value="DMY">{sample(today, "DMY")} — day first</SelectItem>
-            <SelectItem value="MDY">{sample(today, "MDY")} — month first</SelectItem>
-            <SelectItem value="YMD">{sample(today, "YMD")} — year first</SelectItem>
+            <SelectItem value="SYSTEM">{t("preferences.dateFormat.system")}</SelectItem>
+            <SelectItem value="DMY">{t("preferences.dateFormat.dayFirst", { sample: sample(today, "DMY") })}</SelectItem>
+            <SelectItem value="MDY">{t("preferences.dateFormat.monthFirst", { sample: sample(today, "MDY") })}</SelectItem>
+            <SelectItem value="YMD">{t("preferences.dateFormat.yearFirst", { sample: sample(today, "YMD") })}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -150,7 +152,7 @@ export const PersonalPreferencesForm: React.FC<{
         <div className="flex justify-end">
           <Button type="submit" disabled={saving || isLoading}>
             {saving && <NodRing size="sm" label="" />}
-            Save
+            {tCommon("actions.save")}
           </Button>
         </div>
       )}

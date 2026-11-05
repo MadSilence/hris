@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Checkbox } from "@/components/desact/checkbox";
 import { FormError } from "@/components/feedback/FormError";
@@ -16,13 +17,12 @@ import {
 
 type Props = { anImport: PeopleImportDTO };
 
-const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
-
 /**
  * Step 4 (design § 3): what is about to happen, in the product's own words, and the one choice left —
  * whether everybody with an email is invited once the import is done (decision 5).
  */
 export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
+  const t = useTranslations("peopleImport");
   const [error, setError] = useState<string | null>(null);
   const update = useUpdatePeopleImport();
   const apply = useApplyPeopleImport();
@@ -49,24 +49,18 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div className="rounded-card border border-divider p-5">
-        <p className="text-body font-medium text-primary">{anImport.fileName} has no errors.</p>
+        <p className="text-body font-medium text-primary">{t("confirm.noErrors", { fileName: anImport.fileName })}</p>
         {anImport.kind !== "PEOPLE_CREATE" && <KindSummary anImport={anImport} />}
         {anImport.kind === "PEOPLE_CREATE" && (
         <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-secondary">
-          <li><strong>{people(anImport.rowCount)}</strong> will be created, each as a draft profile.</li>
+          <li>{t.rich("confirm.willBeCreated", { count: anImport.rowCount, b: (chunks) => <strong>{chunks}</strong> })}</li>
           {anImport.startLaterCount > 0 && (
-            <li>
-              {people(anImport.startLaterCount)} {anImport.startLaterCount === 1 ? "has" : "have"} a hire date after today,
-              so they are <strong>Not started</strong> until then.
-            </li>
+            <li>{t.rich("confirm.startLater", { count: anImport.startLaterCount, b: (chunks) => <strong>{chunks}</strong> })}</li>
           )}
           {anImport.withoutEmailCount > 0 && (
-            <li>
-              {people(anImport.withoutEmailCount)} {anImport.withoutEmailCount === 1 ? "has" : "have"} no email: they
-              cannot be invited, and uploading this file again would create them again.
-            </li>
+            <li>{t("confirm.withoutEmail", { count: anImport.withoutEmailCount })}</li>
           )}
-          <li>Nobody is notified. Onboarding does not start by itself.</li>
+          <li>{t("confirm.nobodyNotified")}</li>
         </ul>
         )}
       </div>
@@ -77,12 +71,12 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
             checked={anImport.inviteAfter}
             disabled={busy}
             onCheckedChange={(checked) => onInvite(checked === true)}
-            aria-label="Invite everybody with an email once the import is done"
+            aria-label={t("confirm.inviteLabel")}
           />
           <span>
-            <span className="font-medium text-primary">Invite everybody with an email once the import is done</span>
+            <span className="font-medium text-primary">{t("confirm.inviteLabel")}</span>
             <span className="block text-tertiary">
-              {people(withEmail)} will get an invitation to sign in — only after every row has been created.
+              {t("confirm.inviteHint", { count: withEmail })}
             </span>
           </span>
         </label>
@@ -92,15 +86,17 @@ export const ConfirmStep: React.FC<Props> = ({ anImport }) => {
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={onApply} disabled={busy}>
-          {apply.isPending ? "Starting…" : `Import ${IMPORT_KINDS[anImport.kind].noun(anImport.rowCount)}`}
+          {apply.isPending
+            ? t("confirm.starting")
+            : t("confirm.importNoun", { noun: t(IMPORT_KINDS[anImport.kind].nounKey, { count: anImport.rowCount }) })}
         </Button>
-        <Button type="button" variant="secondary" onClick={onBack} disabled={busy}>Change mapping</Button>
+        <Button type="button" variant="secondary" onClick={onBack} disabled={busy}>{t("confirm.changeMapping")}</Button>
         <Button type="button"
           variant="ghost"
           disabled={busy}
           onClick={() => discard.mutate(anImport.id, { onError: (e) => setError(messageForError(e)) })}
         >
-          Discard import
+          {t("confirm.discard")}
         </Button>
       </div>
     </div>
@@ -111,16 +107,14 @@ const count = (n: number | undefined) => n ?? 0;
 
 /** What a structure or balances file will do — the kind's own numbers from the check. */
 const KindSummary: React.FC<Props> = ({ anImport }) => {
+  const t = useTranslations("peopleImport");
   if (anImport.kind === "ORG_STRUCTURE") {
     const departments = count(anImport.summary.departments);
     const teams = count(anImport.summary.teams);
     return (
       <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-secondary">
-        <li>
-          <strong>{departments} {departments === 1 ? "department" : "departments"}</strong> and{" "}
-          <strong>{teams} {teams === 1 ? "team" : "teams"}</strong> will be created, parents first, all at once.
-        </li>
-        <li>Nobody is placed in them yet: the people import does that.</li>
+        <li>{t.rich("confirm.structureCreated", { departments, teams, b: (chunks) => <strong>{chunks}</strong> })}</li>
+        <li>{t("confirm.structureNobodyPlaced")}</li>
       </ul>
     );
   }
@@ -129,9 +123,9 @@ const KindSummary: React.FC<Props> = ({ anImport }) => {
   return (
     <div className="mt-3 flex flex-col gap-3">
       <ul className="list-disc space-y-1 pl-5 text-body text-secondary">
-        <li><strong>{toSet} {toSet === 1 ? "balance" : "balances"}</strong> will be set, all at once.</li>
-        {unchanged > 0 && <li>{unchanged} {unchanged === 1 ? "is" : "are"} already at the target and will not change.</li>}
-        <li>Each balance is set as of its date. Leave already booked for later dates is subtracted on its own.</li>
+        <li>{t.rich("confirm.balancesSet", { count: toSet, b: (chunks) => <strong>{chunks}</strong> })}</li>
+        {unchanged > 0 && <li>{t("confirm.balancesUnchanged", { count: unchanged })}</li>}
+        <li>{t("confirm.balancesAsOf")}</li>
       </ul>
       <BalancePreview importId={anImport.id} />
     </div>

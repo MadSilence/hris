@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import { Textarea } from "@/components/desact/textarea";
 import { Checkbox } from "@/components/desact/checkbox";
@@ -20,6 +21,8 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
   invalid?: boolean;
   onChange: (next: AnswerState) => void;
 }) {
+  const t = useTranslations("reviews");
+  const tCommon = useTranslations("common");
   const id = `answer-${q.id}`;
   const set = (v: AnswerValue) => onChange({ ...value, value: v });
 
@@ -44,7 +47,7 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
               );
             })}
           </div>
-          <Textarea rows={2} aria-label={`Comment on ${q.label}`} value={value.comment} disabled={disabled}
+          <Textarea rows={2} aria-label={t("write.commentOn", { question: q.label })} value={value.comment} disabled={disabled}
             onChange={(e) => onChange({ ...value, comment: e.target.value })} />
         </div>
       );
@@ -66,8 +69,8 @@ export function AnswerField({ question: q, scale, value, disabled, invalid, onCh
         <RadioGroup aria-label={q.label} disabled={disabled}
           value={value.value === true ? "yes" : value.value === false ? "no" : ""}
           onValueChange={(v) => set(v === "yes")} className="flex gap-6">
-          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />Yes</label>
-          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />No</label>
+          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="yes" />{tCommon("values.yes")}</label>
+          <label className="flex items-center gap-2 text-body"><RadioGroupItem value="no" />{tCommon("values.no")}</label>
         </RadioGroup>
       );
     case "SINGLE_CHOICE":

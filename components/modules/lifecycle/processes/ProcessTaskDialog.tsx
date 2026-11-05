@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
@@ -19,11 +20,10 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { UserPickerField, type PickedUser } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { addProcessTaskAction, updateProcessTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { TaskKindConfigFields } from "@/components/modules/lifecycle/templates/canvas/TaskKindConfigFields";
+import { assigneeKindText } from "@/components/modules/lifecycle/i18n";
 import {
-  ASSIGNEE_KIND_LABELS,
+  ASSIGNEE_KINDS,
   EDITABLE_TASK_KINDS,
-  TASK_KIND_LABELS,
-  assigneeKindLabel,
   type Material,
   type Process,
   type Question,
@@ -74,6 +74,8 @@ const formOf = (process: Process, task: Task | null): Form => ({
  * with the others. A new task follows the template's rules; a changed one keeps its kind and what it asks for.
  */
 export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedAction }: Props) {
+  const t = useTranslations("lifecycle");
+  const tCommon = useTranslations("common");
   const adding = task === null;
   const [form, setForm] = useState<Form>(() => formOf(process, task));
   const [initial, setInitial] = useState<Form>(form);
@@ -104,8 +106,8 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!form.title.trim()) return setError("Give the task a title.");
-    if (form.assigneeKind === "SPECIFIC_USER" && !form.assignee) return setError("Choose who does it.");
+    if (!form.title.trim()) return setError(t("processTask.giveTitle"));
+    if (form.assigneeKind === "SPECIFIC_USER" && !form.assignee) return setError(t("processTask.chooseAssignee"));
     setBusy(true);
     try {
       const assigneeUserId = form.assigneeKind === "SPECIFIC_USER" ? form.assignee?.id ?? null : null;
@@ -139,7 +141,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
           },
         });
       if (res.status !== ActionStatus.SUCCESS) {
-        setError(res.errorMessage ?? "Something went wrong.");
+        setError(res.errorMessage ?? t("shared.somethingWentWrong"));
         return;
       }
       await onSavedAction();
@@ -154,20 +156,18 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <form onSubmit={submit} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{adding ? "Add task" : "Edit task"}</DialogTitle>
+              <DialogTitle>{adding ? t("shared.addTask") : t("processTask.editTask")}</DialogTitle>
               <DialogDescription>
-                {adding
-                  ? "Its person hears about it at once. It is dated from this process, so moving the process's date moves it too."
-                  : "A new assignee hears about it; what the task asks for stays as it is."}
+                {adding ? t("processTask.addDescription") : t("processTask.editDescription")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-1.5">
-              <RequiredLabel htmlFor="process-task-title" required>Title</RequiredLabel>
+              <RequiredLabel htmlFor="process-task-title" required>{t("shared.title")}</RequiredLabel>
               <Input id="process-task-title" value={form.title} disabled={busy} onChange={(e) => patch({ title: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="process-task-description">Description</Label>
+              <Label htmlFor="process-task-description">{tCommon("fields.description")}</Label>
               <Textarea id="process-task-description" value={form.description} disabled={busy}
                 onChange={(e) => patch({ description: e.target.value })} />
             </div>
@@ -175,13 +175,13 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
             {adding && (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="process-task-kind">Kind</Label>
+                  <Label htmlFor="process-task-kind">{t("shared.kind")}</Label>
                   <Select value={form.kind} disabled={busy}
                     onValueChange={(v) => patch({ kind: v as TaskKind, categoryId: null, attributeIds: [], questions: [] })}>
                     <SelectTrigger id="process-task-kind"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {EDITABLE_TASK_KINDS.map((k) => (
-                        <SelectItem key={k} value={k}>{TASK_KIND_LABELS[k]}</SelectItem>
+                        <SelectItem key={k} value={k}>{t(`taskKind.${k}`)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -201,18 +201,18 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="process-task-due">Due</Label>
-              <DatePicker id="process-task-due" value={form.dueDate} onChange={(v) => patch({ dueDate: v })} disabled={busy} ariaLabel="Due" />
+              <Label htmlFor="process-task-due">{t("processTask.due")}</Label>
+              <DatePicker id="process-task-due" value={form.dueDate} onChange={(v) => patch({ dueDate: v })} disabled={busy} ariaLabel={t("processTask.due")} />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="process-task-assignee">Done by</Label>
+              <Label htmlFor="process-task-assignee">{t("shared.doneBy")}</Label>
               <Select value={form.assigneeKind} disabled={busy}
                 onValueChange={(v) => patch({ assigneeKind: v as TemplateAssigneeKind })}>
                 <SelectTrigger id="process-task-assignee"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(ASSIGNEE_KIND_LABELS) as TemplateAssigneeKind[]).map((k) => (
-                    <SelectItem key={k} value={k}>{assigneeKindLabel(k, process.type)}</SelectItem>
+                  {ASSIGNEE_KINDS.map((k) => (
+                    <SelectItem key={k} value={k}>{assigneeKindText(t, k, process.type)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -223,8 +223,8 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
 
             <FormError message={error} />
             <DialogFooter>
-              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>Cancel</Button>
-              <Button type="submit" disabled={busy}>{busy ? "Saving…" : adding ? "Add task" : "Save"}</Button>
+              <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
+              <Button type="submit" disabled={busy}>{busy ? tCommon("actions.saving") : adding ? t("shared.addTask") : tCommon("actions.save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

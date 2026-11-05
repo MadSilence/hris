@@ -2,6 +2,7 @@
 
 import { FC, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import {
   Dialog,
@@ -35,6 +36,8 @@ type Props = {
  * comes back into the dialog like any other.
  */
 export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const { userId: me } = useCurrentUser();
   const { data: balances, isLoading, isError, error, refetch } = useEmployeeTimeOffBalancesByUser({
@@ -57,17 +60,17 @@ export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
       <Dialog open onOpenChange={(open) => !open && onClose()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request time off</DialogTitle>
+            <DialogTitle>{t("request.title")}</DialogTitle>
             <DialogDescription>
               {isError
-                ? `Time off for ${request.name} could not be loaded.`
-                : `${request.name} has no time-off policy assigned, so there is nothing to request against.`}
+                ? t("boardRequest.loadFailed", { name: request.name })
+                : t("boardRequest.noPolicy", { name: request.name })}
             </DialogDescription>
           </DialogHeader>
           {isError ? <ErrorState compact error={error} onRetry={() => void refetch()} /> : null}
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={onClose}>
-              Close
+              {tCommon("actions.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

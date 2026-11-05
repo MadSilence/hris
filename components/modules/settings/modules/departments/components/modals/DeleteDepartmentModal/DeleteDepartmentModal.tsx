@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -29,6 +30,9 @@ function sumDescendantMembers(node: DepartmentTreeNode): number {
 }
 
 export function DeleteDepartmentModal({ open, onClose, department, allDepartments, onDeleted }: Props) {
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
   const deleteDepartment = useDeleteDepartment();
   const [childrenStrategy, setChildrenStrategy] = useState<DepartmentChildrenStrategy>("PROMOTE");
   const [membersStrategy, setMembersStrategy] = useState<DepartmentMembersStrategy>("UNASSIGN");
@@ -67,15 +71,15 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Delete &ldquo;{department.name}&rdquo;</DialogTitle>
+          <DialogTitle>{t("delete.title", { name: department.name })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2 text-body text-secondary">
-          <p>This action cannot be undone. Choose how to handle existing children and members.</p>
+          <p>{t("delete.intro")}</p>
 
           {hasChildren && (
             <div className="space-y-2">
-              <Label>Sub-departments</Label>
+              <Label>{t("labels.subUnits")}</Label>
               <RadioGroup
                 value={childrenStrategy}
                 onValueChange={(v) => setChildrenStrategy(v as DepartmentChildrenStrategy)}
@@ -83,13 +87,13 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="PROMOTE" id="cs-promote" />
                   <Label htmlFor="cs-promote" className="mb-0 cursor-pointer font-normal">
-                    Promote to parent level
+                    {tShared("promoteToParent")}
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="DELETE_CASCADE" id="cs-cascade" />
                   <Label htmlFor="cs-cascade" className="mb-0 cursor-pointer font-normal">
-                    Delete all sub-departments
+                    {t("delete.deleteAllSub")}
                   </Label>
                 </div>
               </RadioGroup>
@@ -97,7 +101,7 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
           )}
 
           <div className="space-y-2">
-            <Label>Members</Label>
+            <Label>{tShared("members")}</Label>
             <RadioGroup
               value={effectiveMembersStrategy}
               onValueChange={(v) => setMembersStrategy(v as DepartmentMembersStrategy)}
@@ -105,14 +109,14 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="UNASSIGN" id="ms-unassign" />
                 <Label htmlFor="ms-unassign" className="mb-0 cursor-pointer font-normal">
-                  Unassign (remove from department)
+                  {t("delete.unassign")}
                 </Label>
               </div>
               {parent && (
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="MOVE_TO" id="ms-move" />
                   <Label htmlFor="ms-move" className="mb-0 cursor-pointer font-normal">
-                    Promote to parent level ({parent.name})
+                    {tShared("promoteToParentNamed", { parent: parent.name })}
                   </Label>
                 </div>
               )}
@@ -121,7 +125,7 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
 
           {cascading && subMembersCount > 0 && (
             <div className="space-y-2">
-              <Label>Members of Sub-departments</Label>
+              <Label>{t("labels.subMembers")}</Label>
               <RadioGroup
                 value={effectiveSubMembersStrategy}
                 onValueChange={(v) => setSubMembersStrategy(v as DepartmentMembersStrategy)}
@@ -129,14 +133,14 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="UNASSIGN" id="sms-unassign" />
                   <Label htmlFor="sms-unassign" className="mb-0 cursor-pointer font-normal">
-                    Unassign from all sub-departments
+                    {t("delete.unassignSub")}
                   </Label>
                 </div>
                 {parent && (
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="MOVE_TO" id="sms-move" />
                     <Label htmlFor="sms-move" className="mb-0 cursor-pointer font-normal">
-                      Promote all sub-department users to parent level ({parent.name})
+                      {t("labels.promoteSubMembers", { parent: parent.name })}
                     </Label>
                   </div>
                 )}
@@ -145,16 +149,16 @@ export function DeleteDepartmentModal({ open, onClose, department, allDepartment
           )}
 
           {deleteDepartment.isError && (
-            <FormError message={(deleteDepartment.error as Error)?.message ?? "An error occurred."} />
+            <FormError message={(deleteDepartment.error as Error)?.message ?? tShared("errorOccurred")} />
           )}
         </div>
 
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose} disabled={deleteDepartment.isPending}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleteDepartment.isPending}>
-            {deleteDepartment.isPending ? "Deleting…" : "Delete"}
+            {deleteDepartment.isPending ? tCommon("actions.deleting") : tCommon("actions.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

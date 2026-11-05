@@ -33,6 +33,8 @@ import {
 import { timeZoneChoices } from "@/lib/timeZones";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FieldError } from "@/components/desact/field-error";
+import { useTranslations } from "next-intl";
+import { LOCALES, type Language } from "@/i18n/locales";
 import { FormError } from "@/components/feedback/FormError";
 
 type Saved = { version?: number } | undefined;
@@ -51,20 +53,19 @@ type Props = {
   onLogoChanged?: () => Promise<unknown> | void;
 };
 
-const DAYS: { value: string; label: string }[] = [
-  { value: "MONDAY", label: "Mon" },
-  { value: "TUESDAY", label: "Tue" },
-  { value: "WEDNESDAY", label: "Wed" },
-  { value: "THURSDAY", label: "Thu" },
-  { value: "FRIDAY", label: "Fri" },
-  { value: "SATURDAY", label: "Sat" },
-  { value: "SUNDAY", label: "Sun" },
-];
+/** The week, with the catalogue keys of each day's short (the toggles) and full (the week-start menu) name. */
+const DAYS = [
+  { value: "MONDAY", short: "days.monday.short", long: "days.monday.long" },
+  { value: "TUESDAY", short: "days.tuesday.short", long: "days.tuesday.long" },
+  { value: "WEDNESDAY", short: "days.wednesday.short", long: "days.wednesday.long" },
+  { value: "THURSDAY", short: "days.thursday.short", long: "days.thursday.long" },
+  { value: "FRIDAY", short: "days.friday.short", long: "days.friday.long" },
+  { value: "SATURDAY", short: "days.saturday.short", long: "days.saturday.long" },
+  { value: "SUNDAY", short: "days.sunday.short", long: "days.sunday.long" },
+] as const;
 
 const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
-
-const titleCase = (day: string) => day.charAt(0) + day.slice(1).toLowerCase();
 
 const Section: FC<{
   icon: ReactNode;
@@ -110,6 +111,8 @@ const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
   const web = useAppDataContext().envConfig?.web;
   const address = web ? companyHost(subdomain, web) : subdomain;
   const [copied, setCopied] = useState(false);
+  const t = useTranslations("settings.company");
+  const tCommon = useTranslations("common");
 
   const copy = async () => {
     try {
@@ -122,13 +125,13 @@ const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
 
   return (
     <div className="grid gap-2">
-      <Label className="mb-0">Sign-in address</Label>
+      <Label className="mb-0">{t("signInAddress")}</Label>
 
       <div className="flex h-9 min-w-0 items-center justify-between gap-2">
         <span data-test="company-sign-in-address" className="truncate text-body text-primary">{address}</span>
 
         <Button type="button" variant="secondary" size="sm" onClick={copy}>
-          {copied ? "Copied" : "Copy"}
+          {copied ? tCommon("states.copied") : tCommon("actions.copy")}
         </Button>
       </div>
     </div>
@@ -146,6 +149,8 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const t = useTranslations("settings.company");
+  const tCommon = useTranslations("common");
 
   const upload = async (file: File) => {
     setBusy(true);
@@ -180,11 +185,9 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="m-0 text-body font-medium">Logo</p>
+      <p className="m-0 text-body font-medium">{t("logo.title")}</p>
       <p className="m-0 text-body text-tertiary">
-        {hasLogo
-          ? "Shown in the sidebar and at the top of the org chart."
-          : "Until one is uploaded, the initials stand in for it."}
+        {hasLogo ? t("logo.shown") : t("logo.initials")}
       </p>
       <div className="flex gap-2">
         <input
@@ -198,11 +201,11 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
           }}
         />
         <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? "Working…" : hasLogo ? "Replace" : "Upload logo"}
+          {busy ? t("logo.working") : hasLogo ? t("logo.replace") : t("logo.upload")}
         </Button>
         {hasLogo ? (
           <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => void remove()}>
-            Remove
+            {tCommon("actions.remove")}
           </Button>
         ) : null}
       </div>
@@ -243,6 +246,9 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
   );
   const [workingDays, setWorkingDays] = useState<Set<string>>(new Set(settings.workingDays));
   const [weekStartDay, setWeekStartDay] = useState(settings.weekStartDay);
+  const [language, setLanguage] = useState(settings.language);
+  const t = useTranslations("settings.company");
+  const tCommon = useTranslations("common");
 
   const saving = savingProfile || savingSettings;
 
@@ -254,6 +260,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
   const settingsDirty =
     timezone !== settings.timezone ||
     weekStartDay !== settings.weekStartDay ||
+    language !== settings.language ||
     [...workingDays].sort().join(",") !== [...settings.workingDays].sort().join(",");
 
   const dirty = profileDirty || settingsDirty;
@@ -303,6 +310,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
     setTimezone(settings.timezone);
     setWorkingDays(new Set(settings.workingDays));
     setWeekStartDay(settings.weekStartDay);
+    setLanguage(settings.language);
   };
 
   /**
@@ -329,6 +337,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
         timezone,
         workingDays: orderedWorkingDays,
         weekStartDay,
+        language,
         version: settingsVersion,
       });
       if (saved?.version !== undefined) setSettingsVersion(saved.version);
@@ -338,12 +347,10 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
   return (
     <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6 overflow-hidden px-12">
       <div className="flex flex-col gap-4">
-        <SettingsPageHeader title="Company" backHref="/settings"/>
+        <SettingsPageHeader title={t("title")} backHref="/settings"/>
 
         <PageDescription>
-          Who your company is inside the workspace and how it keeps time. The name and description
-          travel with every profile, document and export; the working week drives calendars, time-off
-          balances and every date the app calculates for you.
+          {t("description")}
         </PageDescription>
       </div>
 
@@ -353,11 +360,11 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
       <div className="-mx-1 grid min-h-0 flex-1 grid-cols-2 gap-16 overflow-y-auto px-1">
         <Section
           icon={<Icon icon={Building03Icon} size="sm" />}
-          title="Company identity"
-          description="How the company is named and introduced across the workspace."
+          title={t("identity.title")}
+          description={t("identity.description")}
         >
           <div className="grid grid-cols-2 gap-4">
-            <Field id="company-name" label="Company name">
+            <Field id="company-name" label={t("identity.name")}>
               <Input
                 id="company-name"
                 value={name}
@@ -371,10 +378,10 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </div>
 
           {nameMissing ? (
-            <FieldError>A company name is required.</FieldError>
+            <FieldError>{t("identity.nameRequired")}</FieldError>
           ) : null}
 
-          <Field id="company-website" label="Website">
+          <Field id="company-website" label={t("identity.website")}>
             <div className="relative">
               <Icon icon={Globe02Icon} size="sm" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tertiary" />
 
@@ -388,7 +395,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
             </div>
           </Field>
 
-          <Field id="company-description" label="Description">
+          <Field id="company-description" label={tCommon("fields.description")}>
             <Textarea
               id="company-description"
               value={description}
@@ -410,22 +417,40 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
 
         <Section
           icon={<Icon icon={Clock01Icon} size="sm" />}
-          title="Localization &amp; time"
-          description="The clock and the working week every calculated date is measured against."
+          title={t("time.title")}
+          description={t("time.description")}
         >
-          <Field id="company-timezone" label="Timezone">
+          <Field id="company-timezone" label={t("time.timezone")}>
             <SearchableSelect
               id="company-timezone"
               options={timezoneOptions}
               value={timezone || null}
               onChange={(v) => v && setTimezone(v)}
-              placeholder="Select a timezone"
+              placeholder={t("time.timezonePlaceholder")}
               disabled={saving}
               clearable={false}
             />
           </Field>
 
-          <Field id="company-week-start" label="Week starts on" className="max-w-xs">
+          <Field id="company-language" label={t("language.label")} className="max-w-xs">
+            <Select value={language} onValueChange={setLanguage} disabled={saving}>
+              <SelectTrigger id="company-language" className="w-full">
+                <SelectValue/>
+              </SelectTrigger>
+
+              <SelectContent>
+                {LOCALES.map((code: Language) => (
+                  <SelectItem key={code} value={code}>
+                    {tCommon(`language.${code}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <p className="text-hint text-secondary">{t("language.hint")}</p>
+          </Field>
+
+          <Field id="company-week-start" label={t("time.weekStart")} className="max-w-xs">
             <Select value={weekStartDay} onValueChange={setWeekStartDay} disabled={saving}>
               <SelectTrigger id="company-week-start" className="w-full">
                 <SelectValue/>
@@ -434,7 +459,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
               <SelectContent>
                 {DAYS.map((day) => (
                   <SelectItem key={day.value} value={day.value}>
-                    {titleCase(day.value)}
+                    {t(day.long)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -442,7 +467,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           </Field>
 
           <div className="grid gap-2">
-            <Label className="mb-0">Working days</Label>
+            <Label className="mb-0">{t("time.workingDays")}</Label>
 
             <div className="flex flex-wrap gap-2">
               {DAYS.map((day) => {
@@ -462,14 +487,14 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
                         : "bg-subtle text-secondary hover:bg-mist",
                     )}
                   >
-                    {day.label}
+                    {t(day.short)}
                   </button>
                 );
               })}
             </div>
 
             {noWorkingDays ? (
-              <FieldError>Select at least one working day.</FieldError>
+              <FieldError>{t("time.noWorkingDays")}</FieldError>
             ) : null}
           </div>
         </Section>
@@ -481,7 +506,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
       {dirty ? (
         <div className="flex items-center justify-end gap-3">
           <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
 
           <Button
@@ -489,7 +514,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
             onClick={handleSave}
             disabled={saving || nameMissing || noWorkingDays}
           >
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
           </Button>
         </div>
       ) : null}

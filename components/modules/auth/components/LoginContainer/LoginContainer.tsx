@@ -9,8 +9,7 @@ import { APP_HOME } from "@/lib/companyAddress";
 import type { PublicSso } from "@/api/modules/sso/ssoService";
 import { Button } from "@/components/desact/button";
 import { InlineAlert } from "@/components/desact/alert";
-
-export const PASSWORD_CHANGED_NOTICE = "Your password was changed. Sign in with the new one.";
+import { useTranslations } from "next-intl";
 
 type LoginContainerProps = {
   /** Set when the person arrives here straight after changing their password, which signed them out. */
@@ -28,9 +27,8 @@ type LoginContainerProps = {
   ssoFailed?: boolean;
 };
 
-const PROVIDER_NAME: Record<string, string> = { OKTA: "Okta", ENTRA: "Microsoft", OTHER: "Single sign-on" };
-
-export const SSO_FAILED_NOTICE = "We could not sign you in with your identity provider. Please try again, or check your company address.";
+/** The providers named by brand; any other is called "single sign-on", which is words (`login.ssoGenericProvider`). */
+const PROVIDER_NAME: Record<string, string> = { OKTA: "Okta", ENTRA: "Microsoft" };
 
 const LoginContainer: React.FC<LoginContainerProps> = ({
   passwordChanged = false,
@@ -42,6 +40,7 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
   initialMfa,
   ssoFailed = false,
 }) => {
+  const t = useTranslations("auth");
   const loginAction = useLoginAction();
   // A correct password that needs a second step: the challenge is a cookie; this says which step it is.
   const [mfa, setMfa] = React.useState<"CHALLENGE" | "ENROL" | null>(initialMfa ?? null);
@@ -103,7 +102,9 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
   // primary action inside the product, and signing in through somebody else's page is not one.
   const ssoButton = ssoOn ? (
     <Button asChild variant="secondary" size="lg" className="w-full">
-      <a href={ssoHref}>Sign in with {PROVIDER_NAME[sso?.provider ?? "OTHER"]}</a>
+      <a href={ssoHref}>
+        {t("login.ssoButton", { provider: PROVIDER_NAME[sso?.provider ?? "OTHER"] ?? t("login.ssoGenericProvider") })}
+      </a>
     </Button>
   ) : null;
 
@@ -115,11 +116,11 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
           {subheadline && <p className="text-body text-secondary">{subheadline}</p>}
         </div>
         {ssoFailed && (
-          <InlineAlert tone="declined">{SSO_FAILED_NOTICE}</InlineAlert>
+          <InlineAlert tone="declined">{t("login.ssoFailed")}</InlineAlert>
         )}
         {ssoButton}
         <Button type="button" variant="link" className="mx-auto flex" onClick={() => setShowPassword(true)}>
-          System owner? Sign in with a password
+          {t("login.passwordFallback")}
         </Button>
       </div>
     );
@@ -130,7 +131,7 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
     {ssoButton && (
       <div className="space-y-3">
         {ssoFailed && (
-          <InlineAlert tone="declined">{SSO_FAILED_NOTICE}</InlineAlert>
+          <InlineAlert tone="declined">{t("login.ssoFailed")}</InlineAlert>
         )}
       </div>
     )}
@@ -145,7 +146,7 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
         wrong password (`AUTH00001`) went the same way, in the server's wording rather than ours.
       */
       apiError={loginAction.error ? messageForError(loginAction.error) : undefined}
-      notice={passwordChanged ? PASSWORD_CHANGED_NOTICE : undefined}
+      notice={passwordChanged ? t("login.passwordChanged") : undefined}
       headline={headline}
       subheadline={subheadline}
       changeCompanyHref={changeCompanyHref}
@@ -154,7 +155,7 @@ const LoginContainer: React.FC<LoginContainerProps> = ({
       <div className="space-y-3">
         <div className="flex items-center gap-3 text-hint text-tertiary">
           <span className="h-px flex-1 bg-divider" />
-          or
+          {t("login.or")}
           <span className="h-px flex-1 bg-divider" />
         </div>
         {ssoButton}

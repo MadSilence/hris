@@ -1,3 +1,4 @@
+import { displayLocale } from "@/lib/date";
 import { AttributeType } from "@/models/attribute/AttributeType";
 
 /** Managed option-sets: SELECT-like attributes whose choices come from a system catalog
@@ -28,9 +29,14 @@ const LANGUAGE_CODES =
     " ",
   );
 
-function displayName(type: "region" | "language" | "currency", code: string): string | null {
+/**
+ * The stored value is the English name — it is what profiles already hold and what filters compare — and only
+ * the label is in the reader's language (I18N_DESIGN.md § 9: company data is not translated, the product's
+ * own names are).
+ */
+function displayName(type: "region" | "language" | "currency", code: string, locale = "en"): string | null {
   try {
-    return new Intl.DisplayNames(["en"], { type }).of(code) ?? null;
+    return new Intl.DisplayNames([locale], { type }).of(code) ?? null;
   } catch {
     return null;
   }
@@ -57,22 +63,25 @@ function dedupeSort(options: CatalogOption[]): CatalogOption[] {
   return out.sort((a, b) => a.label.localeCompare(b.label));
 }
 
-const cache = new Map<AttributeType, CatalogOption[]>();
+const labelLocale = (language?: string): string => displayLocale(language) ?? "en";
 
-function buildOptions(type: AttributeType): CatalogOption[] {
+/** Per type and per language: the labels follow the reader's language, the values never move. */
+const cache = new Map<string, CatalogOption[]>();
+
+function buildOptions(type: AttributeType, language?: string): CatalogOption[] {
   switch (type) {
     case AttributeType.COUNTRY:
       return dedupeSort(
         COUNTRY_CODES.map((c) => {
           const name = displayName("region", c) ?? c;
-          return { value: name, label: name };
+          return { value: name, label: displayName("region", c, labelLocale(language)) ?? name };
         }),
       );
     case AttributeType.LANGUAGE:
       return dedupeSort(
         LANGUAGE_CODES.map((c) => {
           const name = displayName("language", c) ?? c;
-          return { value: name, label: name };
+          return { value: name, label: displayName("language", c, labelLocale(language)) ?? name };
         }),
       );
     case AttributeType.TIMEZONE: {
@@ -95,12 +104,16 @@ function buildOptions(type: AttributeType): CatalogOption[] {
   }
 }
 
-/** Options for a managed catalog type (cached). Empty for non-managed types. */
-export function getCatalogOptions(type: AttributeType): CatalogOption[] {
+/**
+ * Options for a managed catalog type (cached). Empty for non-managed types. `language` is the page's
+ * (`useDisplayLanguage()`) — pass it during render, so the server writes the same labels as the browser.
+ */
+export function getCatalogOptions(type: AttributeType, language?: string): CatalogOption[] {
   if (!isManagedCatalogType(type)) return [];
-  const cached = cache.get(type);
+  const key = `${type}:${labelLocale(language)}`;
+  const cached = cache.get(key);
   if (cached) return cached;
-  const built = buildOptions(type);
-  cache.set(type, built);
+  const built = buildOptions(type, language);
+  cache.set(key, built);
   return built;
 }

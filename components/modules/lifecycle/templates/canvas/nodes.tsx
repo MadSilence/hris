@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   BaseEdge,
   getBezierPath,
@@ -15,7 +16,7 @@ import {
 import { Add01Icon, Alert02Icon, HourglassIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { cn } from "@/lib/cn";
-import { TASK_KIND_LABELS, type ProcessType } from "@/models/lifecycle";
+import type { ProcessType } from "@/models/lifecycle";
 import { dayLabel, type DraftItem } from "./draft";
 import { BLOCK_H, BLOCK_W, dayOneColumn, type Layout } from "./timeAxis";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
@@ -45,10 +46,12 @@ const COMPACT_BELOW = 0.6;
  * the lane's colour as its left edge, a soft shadow that lifts on hover and while dragged.
  */
 export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
+  const t = useTranslations("lifecycle");
   const compact = useStore((s) => s.transform[2] < COMPACT_BELOW);
   const { item } = data;
   const kindIcon = TASK_KIND_ICON[item.kind];
-  const title = item.title || "Untitled task";
+  const title = item.title || t("shared.untitledTask");
+  const day = dayLabel(item, t, data.type);
   const warn = item.assigneeKind === "SPECIFIC_USER" && (item.assigneeProblem !== null || !item.assigneeUserId);
 
   return (
@@ -57,7 +60,9 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       tabIndex={0}
       data-test="task-block"
       aria-pressed={data.selected}
-      aria-label={`${title}, ${dayLabel(item, data.type)}, ${data.laneLabel}${item.waitsFor.length ? `, waits for ${item.waitsFor.length} task${item.waitsFor.length === 1 ? "" : "s"}` : ""}`}
+      aria-label={item.waitsFor.length
+        ? t("canvas.blockLabelWaits", { title, day, lane: data.laneLabel, count: item.waitsFor.length })
+        : t("canvas.blockLabel", { title, day, lane: data.laneLabel })}
       title={title}
       onFocus={() => data.onFocusAction(item.key)}
       className={cn(
@@ -76,18 +81,18 @@ export function TaskBlockNode({ data, dragging }: NodeProps<TaskFlowNode>) {
       {!compact && (
         <span className="flex items-center gap-1.5 text-hint leading-4 text-tertiary">
           <span className={cn("grid h-4 w-4 shrink-0 place-items-center rounded-tag", data.chip ?? "bg-mist text-secondary")}>
-            <Icon icon={kindIcon} size="sm" className="size-3.5" label={TASK_KIND_LABELS[item.kind]} />
+            <Icon icon={kindIcon} size="sm" className="size-3.5" label={t(`taskKind.${item.kind}`)} />
           </span>
-          <span className="truncate">{dayLabel(item, data.type)}</span>
-          {item.waitsFor.length > 0 && <Icon icon={HourglassIcon} size="sm" className="shrink-0" label="Waits for another task" />}
-          {warn && <Icon icon={Alert02Icon} size="sm" className="shrink-0 text-status-pending-text" label="Needs a person who can take it" />}
+          <span className="truncate">{day}</span>
+          {item.waitsFor.length > 0 && <Icon icon={HourglassIcon} size="sm" className="shrink-0" label={t("canvas.waitsForAnother")} />}
+          {warn && <Icon icon={Alert02Icon} size="sm" className="shrink-0 text-status-pending-text" label={t("shared.needsPerson")} />}
         </span>
       )}
       {!data.readOnly && (
         <Handle
           type="source"
           position={Position.Right}
-          aria-label="Drag to the task that waits for this one"
+          aria-label={t("canvas.dragToConnect")}
           className="!h-2.5 !w-2.5 !border-strong !bg-card opacity-60 group-hover:opacity-100"
         />
       )}
@@ -133,6 +138,7 @@ export function GridNode({ data }: NodeProps<GridFlowNode>) {
       {!data.readOnly && layout.lanes.map((lane) => layout.axis.columns.map((c) => (
         <div
           key={`${lane.id}|${c.id}`}
+          // i18n-exempt: a test id
           data-test={`cell-${lane.id}-${c.id}`}
           className="group absolute flex items-center justify-center"
           style={{ left: c.x, top: lane.top, width: c.width, height: lane.height }}

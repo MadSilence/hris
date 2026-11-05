@@ -3,6 +3,7 @@
 import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import PeopleTable from "@/components/modules/organization/components/PeopleTable/PeopleTable";
 import PeopleTopbar from "@/components/modules/organization/components/PeopleTopbar/PeopleTopbar";
@@ -58,8 +59,8 @@ const LAST_NAME_FIELD_ID = "sys:last_name";
 
 const isColumnOffered = (f: FieldDTO): boolean => f.id !== LAST_NAME_FIELD_ID;
 
-const columnLabel = (f: FieldDTO): string =>
-  f.id === NAME_COLUMN_ID ? "Name" : f.label ?? f.key ?? f.id;
+const columnLabel = (f: FieldDTO, nameLabel: string): string =>
+  f.id === NAME_COLUMN_ID ? nameLabel : f.label ?? f.key ?? f.id;
 
 // A column shows the value for everyone in the list, so it needs COMPANY-scope visibility.
 // Non-configurable system fields (identity) bypass field access entirely — see FieldRegistry.
@@ -67,6 +68,9 @@ const isColumnVisible = (f: FieldDTO): boolean =>
   (f.isSystem && f.configurable === false) || (f.viewScopes ?? []).includes("COMPANY");
 
 const PeopleTableContainer: React.FC = () => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const nameLabel = tCommon("fields.personName");
   const [addPersonOpen, setAddPersonOpen] = useState(false);
   // First name, not last: the table shows one Name column and it sorts by first name, so a default
   // of last_name left the list in an order no header could explain or undo.
@@ -122,7 +126,7 @@ const PeopleTableContainer: React.FC = () => {
     const visible = fieldsData.filter(isColumnVisible).filter(isColumnOffered);
     const toColumn = (f: FieldDTO): ColumnItem => ({
       id: f.id,
-      label: columnLabel(f),
+      label: columnLabel(f, nameLabel),
       checked: DEFAULT_ON.has(f.id) || f.id === NAME_COLUMN_ID,
       group: f.isSystem ? "system" : "other",
     });
@@ -133,12 +137,12 @@ const PeopleTableContainer: React.FC = () => {
       const visibleById = new Map(visible.map((f) => [f.id, f]));
       const kept = prev
         .filter((c) => visibleById.has(c.id))
-        .map((c) => ({ ...c, label: columnLabel(visibleById.get(c.id)!) }));
+        .map((c) => ({ ...c, label: columnLabel(visibleById.get(c.id)!, nameLabel) }));
       const known = new Set(kept.map((c) => c.id));
       const added = visible.filter((f) => !known.has(f.id)).map(toColumn);
       return [...kept, ...added];
     });
-  }, [fieldsData]);
+  }, [fieldsData, nameLabel]);
 
   const onColumnsChange = useCallback((next: ColumnItem[]) => {
     setColumns(next);
@@ -208,8 +212,8 @@ const PeopleTableContainer: React.FC = () => {
 
   useEffect(() => {
     if (!notice) return;
-    const t = setTimeout(() => setNotice(null), 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setNotice(null), 4000);
+    return () => clearTimeout(timer);
   }, [notice]);
 
   const currentPayload = useMemo(
@@ -232,7 +236,7 @@ const PeopleTableContainer: React.FC = () => {
       setSort(applied.sort);
       setNotice(
         applied.dropped + hiddenByServer > 0
-          ? "Some fields in this view aren't available to you and were hidden."
+          ? t("table.notice.fieldsHidden")
           : null,
       );
       return {
@@ -241,7 +245,7 @@ const PeopleTableContainer: React.FC = () => {
         sort: applied.sort,
       };
     },
-    [fieldsData],
+    [fieldsData, t],
   );
 
   const onApplyView = useCallback(
@@ -307,10 +311,10 @@ const PeopleTableContainer: React.FC = () => {
           setActiveView((prev) =>
             prev?.id === view.id ? { id: created.id, name: created.name, payload: prev.payload } : prev,
           );
-          setNotice(`Saved “${created.name}” to My Views.`);
+          setNotice(t("table.notice.savedCopy", { name: created.name }));
         },
       }),
-    [viewMutations.duplicate],
+    [viewMutations.duplicate, t],
   );
 
   /**
@@ -330,11 +334,11 @@ const PeopleTableContainer: React.FC = () => {
       {
         onSuccess: (created) => {
           setActiveView({ id: created.id, name: created.name, payload });
-          setNotice(`Saved “${created.name}” to My Views.`);
+          setNotice(t("table.notice.savedCopy", { name: created.name }));
         },
       },
     );
-  }, [activeView, currentPayload, dirty, onDuplicate, viewMutations.create, views]);
+  }, [activeView, currentPayload, dirty, onDuplicate, t, viewMutations.create, views]);
 
   // Delete always confirms (ACTIONS_AND_MENUS.md) — a view can be shared, and its people lose it too.
   const [deletingView, setDeletingView] = useState<PeopleView | null>(null);
@@ -352,8 +356,8 @@ const PeopleTableContainer: React.FC = () => {
 
   const onCopyLink = useCallback(() => {
     void navigator.clipboard?.writeText(window.location.href).catch(() => {});
-    setNotice("Link copied. Whoever opens it sees this table under their own access.");
-  }, []);
+    setNotice(t("table.notice.linkCopied"));
+  }, [t]);
 
   // The table's state lives in the address (`tableUrlState.ts`): read once when the field catalogue
   // has arrived — through `applyConfig`, so a column the reader may not see is dropped like any view's —
@@ -419,7 +423,7 @@ const PeopleTableContainer: React.FC = () => {
             <button
               type="button"
               onClick={() => setNotice(null)}
-              aria-label="Dismiss"
+              aria-label={t("table.dismiss")}
               className="shrink-0 text-tertiary hover:text-primary"
             >
               ×
@@ -450,7 +454,7 @@ const PeopleTableContainer: React.FC = () => {
           <div className="flex items-center gap-2 rounded-tag border border-divider bg-subtle px-3 py-1.5 text-hint text-tertiary">
             {allMatching ? (
               <>
-                <span>All {matchingCount} {matchingCount === 1 ? "person" : "people"} matching are selected.</span>
+                <span>{t("table.selection.allMatching", { count: matchingCount ?? 0 })}</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -459,18 +463,18 @@ const PeopleTableContainer: React.FC = () => {
                   }}
                   className="font-medium text-primary underline-offset-2 hover:underline"
                 >
-                  Clear selection
+                  {t("table.selection.clear")}
                 </button>
               </>
             ) : (
               <>
-                <span>All {selectedIds.size} loaded {selectedIds.size === 1 ? "person is" : "people are"} selected.</span>
+                <span>{t("table.selection.allLoaded", { count: selectedIds.size })}</span>
                 <button
                   type="button"
                   onClick={() => setAllMatching(true)}
                   className="font-medium text-primary underline-offset-2 hover:underline"
                 >
-                  Select All {matchingCount} Matching
+                  {t("table.selection.selectAllMatching", { count: matchingCount ?? 0 })}
                 </button>
               </>
             )}
@@ -525,11 +529,9 @@ const PeopleTableContainer: React.FC = () => {
 
       <ConfirmActionModal
         isOpen={deletingView !== null}
-        title="Delete view"
-        description={deletingView
-          ? `“${deletingView.name}” will be deleted. Anyone it is shared with loses it too.`
-          : ""}
-        confirmLabel="Delete"
+        title={t("table.deleteView.title")}
+        description={deletingView ? t("table.deleteView.description", { name: deletingView.name }) : ""}
+        confirmLabel={tCommon("actions.delete")}
         destructive
         isLoading={viewMutations.remove.isPending}
         errorMessage={viewMutations.remove.error ? messageForError(viewMutations.remove.error) : null}

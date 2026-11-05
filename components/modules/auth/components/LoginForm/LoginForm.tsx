@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback } from "react";
+import { FormEvent, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { setNestedObjectValues, useFormik } from "formik";
 import * as yup from "yup";
@@ -10,7 +10,8 @@ import { Label } from "@/components/desact/label";
 import { FieldError } from "@/components/desact/field-error";
 import { FormError } from "@/components/feedback/FormError";
 import { InlineAlert } from "@/components/desact/alert";
-import { DEFAULT_LOGIN_HEADLINE, DEFAULT_LOGIN_SUBHEADLINE } from "@/models/company/loginPageDefaults";
+import { useTranslations } from "next-intl";
+import { DEFAULT_LOGIN_HEADLINE_KEY, DEFAULT_LOGIN_SUBHEADLINE_KEY } from "@/models/company/loginPageDefaults";
 
 export type LoginFormValues = {
   email: string;
@@ -30,25 +31,20 @@ export interface LoginFormProps {
   changeCompanyHref?: string;
 }
 
-export enum LoginFormMessages {
-  EmailRequired = "Please enter your email.",
-  InvalidEmail = "Enter a valid email address.",
-  PasswordRequired = "Please enter your password.",
-  PasswordTooShort = "Password must be at least 8 characters.",
-}
+type AuthTranslator = ReturnType<typeof useTranslations<"auth">>;
 
-const schema = yup.object({
+const buildSchema = (t: AuthTranslator) => yup.object({
   email: yup
     .string()
     .trim()
-    .required(LoginFormMessages.EmailRequired)
-    .email(LoginFormMessages.InvalidEmail)
+    .required(t("login.validation.emailRequired"))
+    .email(t("login.validation.emailInvalid"))
     .nonNullable(),
 
   password: yup
     .string()
-    .required(LoginFormMessages.PasswordRequired)
-    .min(8, LoginFormMessages.PasswordTooShort)
+    .required(t("login.validation.passwordRequired"))
+    .min(8, t("login.validation.passwordTooShort"))
     .nonNullable(),
 });
 
@@ -65,10 +61,12 @@ export default function LoginForm({
   isLoading = false,
   apiError,
   notice,
-  headline = DEFAULT_LOGIN_HEADLINE,
-  subheadline = DEFAULT_LOGIN_SUBHEADLINE,
+  headline,
+  subheadline,
   changeCompanyHref,
 }: LoginFormProps) {
+  const t = useTranslations("auth");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const handleFormSubmission = useCallback(
     async (values: LoginFormValues) => {
       await onSubmitAction(sanitize(values));
@@ -107,18 +105,23 @@ export default function LoginForm({
     <div className="w-full">
       <div className="w-full space-y-8">
         <div className="space-y-3 text-center">
-          <h1 className="text-page-title">{headline}</h1>
+          <h1 className="text-page-title">{headline ?? t(DEFAULT_LOGIN_HEADLINE_KEY)}</h1>
 
           <p className="text-body text-secondary">
-            {subheadline}
+            {subheadline ?? t(DEFAULT_LOGIN_SUBHEADLINE_KEY)}
           </p>
         </div>
 
         {notice && <InlineAlert tone="approved">{notice}</InlineAlert>}
 
-        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {/*
+          `method="post"`: a click that lands before the page hydrates submits natively, and the browser's
+          default GET put the email and the password into the address bar, the history and the server's
+          access log (found on the i18n walk of 2026-11-05). Every form holding a secret says post.
+        */}
+        <form method="post" onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email address</Label>
+            <Label htmlFor="login-email">{t("login.emailLabel")}</Label>
 
             <Input
               id="login-email"
@@ -138,7 +141,7 @@ export default function LoginForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
+            <Label htmlFor="login-password">{t("login.passwordLabel")}</Label>
 
             <Input
               id="login-password"
@@ -160,7 +163,7 @@ export default function LoginForm({
           <FormError message={apiError} />
 
           <Button type="submit" size="lg" loading={busy} className="w-full">
-            {busy ? "Signing in…" : "Sign in"}
+            {busy ? t("login.submitting") : t("login.submit")}
           </Button>
 
         </form>
@@ -168,16 +171,19 @@ export default function LoginForm({
         <div className="space-y-2 text-center text-body text-tertiary">
           <p>
             <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">
-              Forgot password?
+              {t("login.forgotPassword")}
             </Link>
           </p>
 
           {changeCompanyHref ? (
             <p>
-              Not your company?{" "}
-              <a href={changeCompanyHref} className="text-accent-text underline-offset-4 hover:underline">
-                Sign in to another one
-              </a>
+              {t.rich("login.notYourCompany", {
+                link: (chunks) => (
+                  <a href={changeCompanyHref} className="text-accent-text underline-offset-4 hover:underline">
+                    {chunks}
+                  </a>
+                ),
+              })}
             </p>
           ) : null}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Sidebar, { NavItem } from "@/components/layout/Sidebar/Sidebar";
 import {
   Calendar03Icon,
@@ -36,6 +37,7 @@ import { QuickSearchDialog, useQuickSearchShortcut, type SearchPage } from "@/co
 import { StepUpDialog } from "@/components/modules/mfa/stepUp";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
+  const t = useTranslations("navigation");
   const [collapsed, setCollapsed] = useState(false);
   const { access } = useAccess();
 
@@ -88,14 +90,14 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const seesSettings = settingsGroups.some((group) => group.items.some((item) => canSeeSettingsItem(access, item)));
 
   const allTopItems: (NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction })[] = [
-    { label: "Home", href: "/dashboard", icon: Home01Icon },
-    { label: "Inbox", href: "/inbox", icon: InboxIcon, badge: unreadCount ?? 0 },
+    { label: t("menu.home"), href: "/dashboard", icon: Home01Icon },
+    { label: t("menu.inbox"), href: "/inbox", icon: InboxIcon, badge: unreadCount ?? 0 },
     // Beside the inbox: where tasks assigned to me land, a preboarding's included once the person
     // registers (LIFECYCLE_PROCESSES.md § 5.3). Everyone has one.
-    { label: "Tasks", href: "/tasks", icon: CheckListIcon },
-    { label: "Organization", href: "/organization/people", icon: UserGroupIcon, resources: ["PEOPLE.PROFILE"] },
+    { label: t("menu.tasks"), href: "/tasks", icon: CheckListIcon },
+    { label: t("menu.organization"), href: "/organization/people", icon: UserGroupIcon, resources: ["PEOPLE.PROFILE"] },
     {
-      label: "Calendar",
+      label: t("menu.calendar"),
       href: "/calendar",
       icon: Calendar03Icon,
       resources: ["PEOPLE.CALENDAR"],
@@ -105,15 +107,15 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     },
     // The company's attendance, for those who manage it (MANAGE). Everybody logs their own time on
     // their profile; the overview is not theirs to see.
-    { label: "Attendance", href: "/attendance", icon: Clock01Icon, resources: ["PEOPLE.ATTENDANCE"], action: "MANAGE" },
-    { label: "Processes", href: "/processes", icon: WorkflowSquare03Icon, resources: ["PEOPLE.LIFECYCLE_PROCESSES"] },
+    { label: t("menu.attendance"), href: "/attendance", icon: Clock01Icon, resources: ["PEOPLE.ATTENDANCE"], action: "MANAGE" },
+    { label: t("menu.processes"), href: "/processes", icon: WorkflowSquare03Icon, resources: ["PEOPLE.LIFECYCLE_PROCESSES"] },
     // Performance reviews (REVIEWS_DESIGN.md § 12.1): everybody's — anybody may have a review to write or to read.
     // Overview sends somebody who does not run cycles on to My Reviews.
-    { label: "Reviews", href: "/reviews", icon: StarIcon },
+    { label: t("menu.reviews"), href: "/reviews", icon: StarIcon },
   ];
 
   const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = seesSettings
-    ? [{ label: "Settings", href: "/settings", icon: Settings01Icon }]
+    ? [{ label: t("menu.settings"), href: "/settings", icon: Settings01Icon }]
     : [];
 
   const filterItem = (item: NavItem & { resources?: ResourceCode[]; widerThanSelf?: boolean; action?: AccessAction }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { Search01Icon } from "@hugeicons/core-free-icons";
@@ -23,16 +24,17 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 }
 
 function CommandDialog({
-  title = "Search",
-  description = "Search for people, pages and actions",
+  title,
+  description,
   children,
   ...props
 }: React.ComponentProps<typeof Dialog> & { title?: string; description?: string }) {
+  const t = useTranslations("common");
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
+        <DialogTitle>{title ?? t("actions.search")}</DialogTitle>
+        <DialogDescription>{description ?? t("commandDialog.description")}</DialogDescription>
       </DialogHeader>
       <DialogContent hideClose size="md" className="top-[15%] translate-y-0 gap-0 overflow-hidden p-0">
         <Command className="**:data-[slot=command-input-wrapper]:h-12">{children}</Command>

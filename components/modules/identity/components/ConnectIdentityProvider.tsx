@@ -1,20 +1,24 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { FormError } from "@/components/feedback/FormError";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { withStepUp } from "@/components/modules/mfa/stepUp";
 
-const NAME: Record<string, string> = { OKTA: "Okta", ENTRA: "Microsoft", OTHER: "your identity provider" };
+/** The provider as the messages choose between them (`{provider, select, …}`); anything else is "other". */
+const providerArg = (provider: string | null): string => (provider === "OKTA" || provider === "ENTRA" ? provider : "OTHER");
 
 /**
  * Connect — the person links their own account to the company's identity provider (R1.3). The one way a
  * System Owner is ever linked: never by email. Asks "confirm it is you" first, then goes to the IdP and back.
  */
 export const ConnectIdentityProvider: React.FC<{ provider: string | null; connected?: boolean }> = ({ provider, connected }) => {
+  const t = useTranslations("settings");
   const { internalApiClient } = useAppDataContext();
+  const args = { provider: providerArg(provider) };
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
@@ -33,13 +37,11 @@ export const ConnectIdentityProvider: React.FC<{ provider: string | null; connec
   return (
     <div className="space-y-2">
       <p className="text-body text-tertiary">
-        {connected
-          ? `Your account is connected to ${NAME[provider ?? "OTHER"]}.`
-          : `Sign in with ${NAME[provider ?? "OTHER"]} as well as your password. A System Owner connects here, never by email.`}
+        {connected ? t("identity.connect.connected", args) : t("identity.connect.hint", args)}
       </p>
       <FormError message={error} />
       <Button type="button" variant="secondary" onClick={connect} disabled={busy}>
-        {busy ? "Connecting…" : `Connect ${NAME[provider ?? "OTHER"]}`}
+        {busy ? t("identity.connect.connecting") : t("identity.connect.button", args)}
       </Button>
     </div>
   );

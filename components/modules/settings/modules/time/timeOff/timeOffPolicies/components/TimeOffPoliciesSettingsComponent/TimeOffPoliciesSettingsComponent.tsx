@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, Archive02Icon, ArchiveArrowUpIcon, Copy01Icon, Delete02Icon, Download01Icon, PlayIcon, ViewIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -64,6 +65,8 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   onDeleteAction,
   onDuplicateAction,
 }) => {
+  const t = useTranslations("timeOff");
+  const tCommon = useTranslations("common");
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -76,7 +79,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
       setIsExportOpen(false);
     } catch (error) {
       // In the dialog, not the console: a failed download is otherwise completely silent.
-      setExportError(error instanceof Error ? error.message : "Export failed.");
+      setExportError(error instanceof Error ? error.message : t("policies.list.exportFailed"));
     }
   };
 
@@ -109,7 +112,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   const addPolicyButton = (
     <Button type="button" className="gap-1.5" onClick={onCreateAction}>
       <Icon icon={Add01Icon} size="sm" />
-      Add policy
+      {t("policies.list.add")}
     </Button>
   );
 
@@ -117,18 +120,17 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
     <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
-          <SettingsPageHeader title={title ?? "Time off"} backHref={backHref ?? "/settings"} />
+          <SettingsPageHeader title={title ?? t("policies.list.title")} backHref={backHref ?? "/settings"} />
           <PageDescription className="text-body text-tertiary/90">
-            Define leave types and quota rules for your organization. Use the table below to review,
-            search and navigate to specific policies.
+            {t("policies.list.description")}
           </PageDescription>
         </div>
 
         {/* Info block */}
         <div className="space-y-1 pb-1 pt-5">
-          <h2 className="text-section-title text-primary">Leave policies</h2>
+          <h2 className="text-section-title text-primary">{t("policies.list.heading")}</h2>
           <p className="text-body text-tertiary">
-            Every leave policy in your company. Archived ones are behind the toggle.
+            {t("policies.list.headingHint")}
           </p>
         </div>
 
@@ -140,7 +142,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
             <Button type="button"
               size="icon"
               variant="secondary"
-              aria-label="Export policies"
+              aria-label={t("policies.list.exportAria")}
               onClick={() => setIsExportOpen(true)}
             >
               <Icon icon={Download01Icon} size="sm" />
@@ -154,10 +156,10 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
         {!isLoading && !hasPolicies ? (
           <ListEmptyState
             scene="time-off"
-            title="No time off policies yet"
-            description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
+            title={t("policies.list.emptyTitle")}
+            description={t("policies.list.emptyDescription")}
             onCreate={onCreateAction}
-            createLabel="Add policy"
+            createLabel={t("policies.list.add")}
             className="min-h-72 flex-1"
           />
         ) : (
@@ -165,10 +167,10 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
             <table className="w-full caption-bottom text-body table-fixed">
               <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
                 <TableRow>
-                  <TableHead className="pl-4">Policy</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead>Pay type</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="pl-4">{t("policies.list.colPolicy")}</TableHead>
+                  <TableHead>{t("policies.list.colUnit")}</TableHead>
+                  <TableHead>{t("policies.list.colPayType")}</TableHead>
+                  <TableHead>{t("policies.list.colStatus")}</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
@@ -183,12 +185,12 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                         query={query}
                         archivedView={showArchived}
                         scene="time-off"
-                        title="No time off policies yet"
-                        description="A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off."
-                        noResultsHint="Try a different policy name or unit."
-                        archivedDescription="Archived policies will appear here."
+                        title={t("policies.list.emptyTitle")}
+                        description={t("policies.list.emptyDescription")}
+                        noResultsHint={t("policies.list.noResultsHint")}
+                        archivedDescription={t("policies.list.archivedDescription")}
                         onCreate={onCreateAction}
-                        createLabel="Add policy"
+                        createLabel={t("policies.list.add")}
                       />
                     </TableCell>
                   </TableRow>
@@ -205,22 +207,22 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                           <span className="font-medium text-primary">{policy.name}</span>
                         </TableCell>
                         <TableCell className="text-tertiary">
-                          {policy.unit === "DAYS" ? "Days" : "Hours"}
+                          {policy.unit === "DAYS" ? t("policies.overview.days") : t("policies.overview.hours")}
                         </TableCell>
                         <TableCell className="text-tertiary">
-                          {policy.paid ? "Paid" : "Unpaid"}
+                          {policy.paid ? t("policies.overview.paid") : t("policies.overview.unpaid")}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={status}/>
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end">
-                            <RowActionsMenu label="Policy actions">
+                            <RowActionsMenu label={t("policies.list.rowActions")}>
                               <RowAction
                                 icon={<Icon icon={ViewIcon} size="sm" />}
                                 onClick={() => onOpenAction(policy)}
                               >
-                                Open
+                                {tCommon("actions.open")}
                               </RowAction>
 
                               {/* A policy is nine sections and a wizard; copying one was the
@@ -229,7 +231,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                                 icon={<Icon icon={Copy01Icon} size="sm" />}
                                 onClick={() => onDuplicateAction(policy)}
                               >
-                                Duplicate
+                                {tCommon("actions.duplicate")}
                               </RowAction>
 
                               {policy.status === TimeOffPolicyStatus.Draft && (
@@ -237,7 +239,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                                   icon={<Icon icon={PlayIcon} size="sm" />}
                                   onClick={() => onActivateAction(policy)}
                                 >
-                                  Activate
+                                  {t("policies.detail.activate")}
                                 </RowAction>
                               )}
 
@@ -246,7 +248,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                                   icon={<Icon icon={Archive02Icon} size="sm" />}
                                   onClick={() => onArchiveAction(policy)}
                                 >
-                                  Archive
+                                  {tCommon("actions.archive")}
                                 </RowAction>
                               )}
 
@@ -265,7 +267,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                                   icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />}
                                   onClick={() => onUnarchiveAction(policy)}
                                 >
-                                  Unarchive
+                                  {t("policies.list.unarchive")}
                                 </RowAction>
                               )}
 
@@ -274,7 +276,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                                   icon={<Icon icon={Delete02Icon} size="sm" />}
                                   onClick={() => onDeleteAction(policy)}
                                 >
-                                  Delete
+                                  {tCommon("actions.delete")}
                                 </RowActionDestructive>
                               )}
                             </RowActionsMenu>
@@ -292,9 +294,9 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
 
       <ExportDataModal
         isOpen={isExportOpen}
-        title="Export time-off policies"
-        description="Export the policy catalogue, archived policies included."
-        includedText="Includes leave type, name, status, unit, pay type, quota, granting mode, renewal, carryover and how many people hold each one."
+        title={t("policies.list.exportTitle")}
+        description={t("policies.list.exportDescription")}
+        includedText={t("policies.list.exportIncluded")}
         errorMessage={exportError}
         onCancelAction={() => setIsExportOpen(false)}
         onConfirmAction={handleExport}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { CompanyAppearanceSettingsComponent } from "@/components/modules/settings/modules/general/companyAppearance/components/CompanyAppearanceSettingsComponent";
 import {
@@ -18,6 +19,7 @@ const errorMessageOf = (error: unknown) => (error instanceof Error ? error.messa
 export default function CompanyAppearanceSettingsContainer() {
   const { data: appearance, isLoading, error } = useCompanyAppearance();
   const { company } = useCompanyData();
+  const t = useTranslations("settings.appearance");
 
   const updateAppearance = useUpdateCompanyAppearance();
   const uploadLoginImage = useUploadLoginImage();
@@ -34,7 +36,7 @@ export default function CompanyAppearanceSettingsContainer() {
 
   if (!appearance) {
     return (
-      <FormError message={errorMessageOf(error) ?? "Failed to load appearance settings."} />
+      <FormError message={errorMessageOf(error) ?? t("loadFailed")} />
     );
   }
 

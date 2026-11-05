@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUp01Icon, Folder01Icon } from "@hugeicons/core-free-icons";
@@ -61,6 +62,9 @@ const hiddenHandle = "!h-1.5 !w-1.5 !min-w-0 !border-0 !bg-transparent";
 export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>) {
   const { department, people, childCount, expanded, selected, matched, dimmed, height } = data;
   const ctx = useDepartmentBlocks();
+  const t = useTranslations("structure.departments");
+  const tShared = useTranslations("structure.shared");
+  const tCommon = useTranslations("common");
 
   const isArchived = department.status === "ARCHIVED";
   const visible = expanded ? people : people.slice(0, VISIBLE_CHIPS);
@@ -102,14 +106,15 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
         </button>
 
         <span className="flex-none whitespace-nowrap text-hint text-tertiary">
-          {department.memberCount} here
-          {department.totalPeople !== department.memberCount && ` · ${department.totalPeople} total`}
+          {department.totalPeople !== department.memberCount
+            ? tShared("headCountWithTotal", { here: department.memberCount, total: department.totalPeople })
+            : tShared("headCount", { here: department.memberCount })}
         </span>
       </header>
 
       <div className="min-h-0 flex-1 px-3 pb-3">
         {people.length === 0 ? (
-          <p className="text-hint text-tertiary">No people here yet.</p>
+          <p className="text-hint text-tertiary">{tShared("noPeopleHere")}</p>
         ) : (
           <div
             className="grid"
@@ -134,7 +139,7 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
                   selected={ctx.selectedPersonId === person.id}
                   matched={ctx.matchedPersonIds.has(person.id)}
                   archived={person.status !== "ACTIVE"}
-                  badge={department.leadId === person.id ? "Lead" : undefined}
+                  badge={department.leadId === person.id ? tShared("lead") : undefined}
                   onClick={() => ctx.onSelectPerson(person)}
                   className="nodrag"
                   style={{ height: CARD_H }}
@@ -154,7 +159,7 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
             style={{ height: MORE_ROW_H }}
             className="nodrag flex items-center text-hint text-tertiary underline-offset-2 hover:text-primary hover:underline"
           >
-            {expanded ? "Show less" : `+${hidden} more`}
+            {expanded ? tCommon("actions.showLess") : tShared("more", { count: hidden })}
           </button>
         )}
       </div>
@@ -169,8 +174,8 @@ export function DepartmentBlockNode({ data }: NodeProps<DepartmentBlockFlowNode>
             ctx.onToggleCollapse(department.id);
           }}
           className="nodrag absolute -bottom-3 left-1/2 z-10 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-pill border border-divider bg-card px-1.5 text-tertiary shadow-card transition-colors hover:border-field hover:text-primary"
-          aria-label={branchCollapsed ? `Expand ${childCount} sub-departments` : "Collapse"}
-          title={branchCollapsed ? `Expand ${childCount} sub-departments` : "Collapse"}
+          aria-label={branchCollapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
+          title={branchCollapsed ? t("expandSub", { count: childCount }) : tShared("collapse")}
         >
           {branchCollapsed ? (
             <span className="text-hint font-semibold leading-none">{childCount}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Add01Icon, FolderAddIcon, StarIcon, Upload01Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -35,6 +36,9 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
   onCreateFolder,
   canEdit = true,
 }) => {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+
   return (
     // Search leads the row — it is what the reader reaches for first — and the primary action is
     // pushed to the far end, next to Trash. The row used to open with the word "Documents" above a
@@ -45,9 +49,9 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
       <Button type="button"
         variant="secondary"
         size="icon"
-        aria-label="Show starred only"
+        aria-label={t("documents.toolbar.starredOnly")}
         aria-pressed={starredOnly}
-        title="Show starred only"
+        title={t("documents.toolbar.starredOnly")}
         onClick={() => onStarredOnlyChange(!starredOnly)}
         className={cn(starredOnly && "border-field bg-subtle")}
  >
@@ -58,9 +62,9 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
         <Button type="button"
           variant="secondary"
           size="icon"
-          aria-label="Show HR-only documents"
+          aria-label={t("documents.toolbar.hrOnly")}
           aria-pressed={hrOnly}
-          title="Show HR-only documents"
+          title={t("documents.toolbar.hrOnly")}
           onClick={() => onHrOnlyChange(!hrOnly)}
           className={cn(hrOnly && "border-field bg-subtle")}
  >
@@ -73,19 +77,19 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
           <DropdownMenuTrigger asChild>
             <Button type="button" className="ml-auto">
               <Icon icon={Add01Icon} size="sm" />
-              Add
+              {tCommon("actions.add")}
             </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={onCreateFolder} className="cursor-pointer">
               <Icon icon={FolderAddIcon} size="sm" />
-              Add folder
+              {t("documents.toolbar.addFolder")}
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onUploadFromLocal} className="cursor-pointer">
               <Icon icon={Upload01Icon} size="sm" />
-              Upload documents
+              {t("documents.toolbar.uploadDocuments")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

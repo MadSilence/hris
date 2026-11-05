@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import {
   Dialog,
@@ -26,6 +27,8 @@ import { registerStepUpDialog } from "./stepUp";
  * the operation that asked is replayed by whoever called `requestStepUp`.
  */
 export const StepUpDialog: React.FC = () => {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = React.useState(false);
   const resolver = React.useRef<((proved: boolean) => void) | null>(null);
   const status = useMfaStatus(open);
@@ -68,25 +71,25 @@ export const StepUpDialog: React.FC = () => {
   return (
     <Dialog open={open} onOpenChange={(next) => !next && !busy && finish(false)}>
       <DialogContent className="sm:max-w-md">
-        <form onSubmit={submit} className="space-y-4">
+        <form method="post" onSubmit={submit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Confirm it Is you</DialogTitle>
+            <DialogTitle>{t("stepUp.title")}</DialogTitle>
             <DialogDescription>
               {enrolled
-                ? "This needs a fresh code from your authenticator app."
-                : "This needs your password once more."}
+                ? t("stepUp.needsCode")
+                : t("stepUp.needsPassword")}
             </DialogDescription>
           </DialogHeader>
           {status.isLoading ? null : enrolled ? (
             <>
               <CodeField id="step-up-code" value={value} onChange={setValue} backup={backup} disabled={busy} autoFocus />
               <button type="button" className="text-body text-secondary underline" onClick={() => { setBackup((v) => !v); setValue(""); }}>
-                {backup ? "Use the app instead" : "Use a backup code"}
+                {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
               </button>
             </>
           ) : (
             <div className="space-y-2">
-              <RequiredLabel htmlFor="step-up-password" required>Password</RequiredLabel>
+              <RequiredLabel htmlFor="step-up-password" required>{t("login.passwordLabel")}</RequiredLabel>
               <Input
                 id="step-up-password"
                 type="password"
@@ -100,8 +103,8 @@ export const StepUpDialog: React.FC = () => {
           )}
           <FormError message={error} />
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>Cancel</Button>
-            <Button type="submit" disabled={busy || !value.trim()}>{busy ? "Confirming…" : "Confirm"}</Button>
+            <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>{tCommon("actions.cancel")}</Button>
+            <Button type="submit" disabled={busy || !value.trim()}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

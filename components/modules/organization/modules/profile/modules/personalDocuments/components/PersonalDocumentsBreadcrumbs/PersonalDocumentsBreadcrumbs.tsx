@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import type { BreadcrumbItem } from "@/components/modules/organization/modules/profile/modules/personalDocuments/types/personalDocuments.types";
@@ -12,6 +15,8 @@ export const PersonalDocumentsBreadcrumbs: React.FC<PersonalDocumentsBreadcrumbs
   items,
   onNavigate,
 }) => {
+  const t = useTranslations("organization");
+
   return (
     <div className="flex flex-wrap items-center gap-1 text-body">
       {items.map((item, index) => {
@@ -29,7 +34,8 @@ export const PersonalDocumentsBreadcrumbs: React.FC<PersonalDocumentsBreadcrumbs
                   : "text-tertiary transition-colors hover:text-primary"
               }
             >
-              {item.name}
+              {/* The root is the tab itself, named in the reader's language; every other hop is a folder's name. */}
+              {item.id === null ? t("documents.root") : item.name}
             </button>
             {!isLast && <Icon icon={ArrowRight01Icon} size="sm" className="text-tertiary" />}
           </React.Fragment>

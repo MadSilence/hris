@@ -1,6 +1,8 @@
 "use client";
 
+import { displayLocale, useDisplayLocale } from "@/lib/date";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
@@ -39,6 +41,8 @@ export const LogsTable: React.FC<{
   onLoadMore: () => void;
   query: string;
 }> = ({ items, isLoading, isLoadingMore, hasMore, onLoadMore, query }) => {
+  const t = useTranslations("settings.logs.table");
+  const locale = useDisplayLocale();
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
   const scroller = React.useRef<HTMLDivElement | null>(null);
   const sentinel = React.useRef<HTMLDivElement | null>(null);
@@ -83,11 +87,11 @@ export const LogsTable: React.FC<{
       <Table stickyHeader>
         <TableHeader className="sticky top-0 z-10 bg-page">
           <TableRow>
-            <TableHead className="w-[9rem]">When</TableHead>
-            <TableHead className="w-[14rem]">Who</TableHead>
-            <TableHead>What</TableHead>
-            <TableHead className="w-[16rem]">On what</TableHead>
-            <TableHead className="w-[14rem]">About whom</TableHead>
+            <TableHead className="w-[9rem]">{t("when")}</TableHead>
+            <TableHead className="w-[14rem]">{t("who")}</TableHead>
+            <TableHead>{t("what")}</TableHead>
+            <TableHead className="w-[16rem]">{t("onWhat")}</TableHead>
+            <TableHead className="w-[14rem]">{t("aboutWhom")}</TableHead>
             <TableHead className="w-10"/>
           </TableRow>
         </TableHeader>
@@ -115,7 +119,7 @@ export const LogsTable: React.FC<{
                     aria-expanded={open}
                   >
                     <TableCell className="whitespace-nowrap text-body text-tertiary">
-                      {formatWhen(row.createdAt)}
+                      {formatWhen(row.createdAt, locale)}
                     </TableCell>
 
                     <TableCell>
@@ -141,7 +145,7 @@ export const LogsTable: React.FC<{
 
                     <TableCell>
                       {row.targetUserId || row.targetUserName ? (
-                        <UserChip id={row.targetUserId} name={row.targetUserName ?? "Deleted person"}/>
+                        <UserChip id={row.targetUserId} name={row.targetUserName ?? t("deletedPerson")}/>
                       ) : (
                         <span className="text-body text-tertiary">—</span>
                       )}
@@ -174,9 +178,9 @@ export const LogsTable: React.FC<{
                 <ListEmptyState
                   query={query}
                   scene="notes"
-                  title="Nothing recorded yet"
-                  description="Everything people do in this company shows up here."
-                  noResultsHint="Try a different name, period or module."
+                  title={t("emptyTitle")}
+                  description={t("emptyDescription")}
+                  noResultsHint={t("noResultsHint")}
                 />
               </TableCell>
             </TableRow>
@@ -195,25 +199,28 @@ export const LogsTable: React.FC<{
 };
 
 const Actor: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
+  const t = useTranslations("settings.logs.table");
   if (row.actorType === "SYSTEM" && !row.actorName) {
-    return <span className="text-body text-tertiary">{row.source ?? "System"}</span>;
+    return <span className="text-body text-tertiary">{row.source ?? t("system")}</span>;
   }
 
   return (
     <div className="min-w-0">
-      <UserChip id={row.actorUserId} name={row.actorName ?? "Deleted person"}/>
+      <UserChip id={row.actorUserId} name={row.actorName ?? t("deletedPerson")}/>
       {/* Decided by a person, applied by a process — the same shape impersonation uses. */}
       {row.source && (
-        <div className="pl-8 text-hint text-tertiary">applied by {row.source}</div>
+        <div className="pl-8 text-hint text-tertiary">{t("appliedBy", { source: row.source })}</div>
       )}
       {row.impersonatedBy && (
-        <div className="pl-8 text-hint text-status-pending-text">while acting as somebody else</div>
+        <div className="pl-8 text-hint text-status-pending-text">{t("impersonated")}</div>
       )}
     </div>
   );
 };
 
 const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
+  const t = useTranslations("settings.logs.detail");
+  const tCommon = useTranslations("common");
   const metadata = (row.metadata ?? {}) as Record<string, unknown>;
   const changes = metadata.changes as Record<string, unknown> | undefined;
   const rest = Object.fromEntries(
@@ -225,24 +232,24 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
       {changes && Object.keys(changes).length > 0 && <ChangesDiff changes={changes}/>}
 
       <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-hint text-tertiary md:grid-cols-4">
-        <Fact label="Action" value={row.action}/>
-        <Fact label="Actor role" value={row.actorRole}/>
-        <Fact label="Actor type" value={row.actorType}/>
-        <Fact label="Object type" value={row.objectType}/>
-        <Fact label="IP address" value={row.ipAddress}/>
-        <Fact label="Reference" value={row.traceId}/>
-        <Fact label="Object id" value={row.objectId}/>
-        <Fact label="Device" value={row.userAgent}/>
+        <Fact label={t("action")} value={row.action}/>
+        <Fact label={t("actorRole")} value={row.actorRole}/>
+        <Fact label={t("actorType")} value={row.actorType}/>
+        <Fact label={t("objectType")} value={row.objectType}/>
+        <Fact label={t("ipAddress")} value={row.ipAddress}/>
+        <Fact label={t("reference")} value={row.traceId}/>
+        <Fact label={t("objectId")} value={row.objectId}/>
+        <Fact label={t("device")} value={row.userAgent}/>
       </dl>
 
       {row.mentions && row.mentions.length > 0 && (
         <dl className="grid grid-cols-1 gap-x-8 gap-y-1 text-hint sm:grid-cols-2">
           {row.mentions.map((m) => (
             <div key={m.key} className="min-w-0">
-              <dt className="text-hint text-tertiary/70">{mentionLabel(m.key)}</dt>
+              <dt className="text-hint text-tertiary/70">{mentionLabel(m.key, t)}</dt>
               <dd className="truncate text-primary" title={m.id}>
-                {m.name ?? "Unknown"}
-                {m.gone && <span className="text-tertiary"> · deleted since</span>}
+                {m.name ?? tCommon("values.unknown")}
+                {m.gone && <span className="text-tertiary"> · {t("deletedSince")}</span>}
               </dd>
             </div>
           ))}
@@ -251,7 +258,7 @@ const RowDetail: React.FC<{ row: ActivityLogEntry }> = ({ row }) => {
 
       {Object.keys(rest).length > 0 && (
         <details className="text-hint">
-          <summary className="cursor-pointer text-tertiary">Everything else the row carries</summary>
+          <summary className="cursor-pointer text-tertiary">{t("rest")}</summary>
           <pre className="mt-2 overflow-auto rounded-tag bg-page p-3 text-hint leading-relaxed">
             {JSON.stringify(rest, null, 2)}
           </pre>
@@ -272,31 +279,37 @@ const Fact: React.FC<{ label: string; value: string | null }> = ({ label, value 
   ) : null;
 
 /** What a mention's id key is, for a reader: `managerIdFrom` → "Manager (before)". */
-const MENTION_LABELS: Record<string, string> = {
-  policyId: "Policy",
-  categoryId: "Document category",
-  folderId: "Folder",
-  oldFolderId: "Folder (before)",
-  newFolderId: "Folder (after)",
-  levelId: "Level",
-  familyId: "Job family",
-  groupId: "Level group",
-  calendarId: "Holiday calendar",
-  leadId: "Lead",
-  managerIdFrom: "Manager (before)",
-  managerIdTo: "Manager (after)",
-  newManagerId: "New manager",
-  parentId: "Parent",
-  oldParentId: "Parent (before)",
-  assignableId: "Assigned to",
+const MENTION_LABELS = {
+  policyId: "mentions.policyId",
+  categoryId: "mentions.categoryId",
+  folderId: "mentions.folderId",
+  oldFolderId: "mentions.oldFolderId",
+  newFolderId: "mentions.newFolderId",
+  levelId: "mentions.levelId",
+  familyId: "mentions.familyId",
+  groupId: "mentions.groupId",
+  calendarId: "mentions.calendarId",
+  leadId: "mentions.leadId",
+  managerIdFrom: "mentions.managerIdFrom",
+  managerIdTo: "mentions.managerIdTo",
+  newManagerId: "mentions.newManagerId",
+  parentId: "mentions.parentId",
+  oldParentId: "mentions.oldParentId",
+  assignableId: "mentions.assignableId",
   // The grantee of a shared saved view, one key per kind (PeopleViewActivityEvent).
-  granteeUserId: "Shared with",
-  teamId: "Team",
-  departmentId: "Department",
-  roleId: "Role",
-};
+  granteeUserId: "mentions.granteeUserId",
+  teamId: "mentions.teamId",
+  departmentId: "mentions.departmentId",
+  roleId: "mentions.roleId",
+} as const;
 
-const mentionLabel = (key: string): string => MENTION_LABELS[key] ?? humanise(key.replace(/Id/, ""));
+type DetailTranslator = ReturnType<typeof useTranslations<"settings.logs.detail">>;
+
+const mentionLabel = (key: string, t: DetailTranslator): string => {
+  const labelKey: (typeof MENTION_LABELS)[keyof typeof MENTION_LABELS] | undefined =
+    MENTION_LABELS[key as keyof typeof MENTION_LABELS];
+  return labelKey ? t(labelKey) : humanise(key.replace(/Id/, ""));
+};
 
 const humanise = (code: string | null): string => {
   if (!code) return "—";
@@ -305,10 +318,10 @@ const humanise = (code: string | null): string => {
 };
 
 /** The company's own clock is the backend's job; this only has to be readable and stable. */
-const formatWhen = (iso: string): string => {
+const formatWhen = (iso: string, locale?: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale ?? displayLocale(), {
     day: "2-digit",
     month: "short",
     hour: "2-digit",

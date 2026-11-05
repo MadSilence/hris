@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
@@ -11,7 +12,7 @@ import type { HomeWidgetPlacement } from "@/models/home";
 import type { HomeWidgetDefinition } from "@/components/modules/home/widgets";
 import {
   HOME_GROUPS,
-  HOME_GROUP_LABELS,
+  HOME_GROUP_LABEL_KEYS,
   arrangeHome,
   moveWidget,
   setWidgetHidden,
@@ -35,6 +36,8 @@ export const CustomizeHome: React.FC<{
   onSave: (placements: HomeWidgetPlacement[]) => Promise<void>;
   onCancel: () => void;
 }> = ({ available, stored, saving, onSave, onCancel }) => {
+  const t = useTranslations("home");
+  const tCommon = useTranslations("common");
   const [draft, setDraft] = useState<ArrangedWidget<HomeWidgetDefinition>[]>(() => arrangeHome(available, stored));
   const [error, setError] = useState<string | null>(null);
 
@@ -48,29 +51,29 @@ export const CustomizeHome: React.FC<{
   };
 
   return (
-    <div className="flex flex-col gap-6" aria-label="Customize home" role="form">
-      <p className="text-body text-tertiary">
-        Choose what your home shows and in what order. Only you see this arrangement.
-      </p>
+    <div className="flex flex-col gap-6" aria-label={t("customize.title")} role="form">
+      <p className="text-body text-tertiary">{t("customize.intro")}</p>
 
       {HOME_GROUPS.map((group) => {
         const entries = widgetsOf(draft, group);
         if (entries.length === 0) return null;
         return (
           <section key={group} className="flex flex-col gap-2">
-            <h2 className="text-hint font-semibold text-tertiary">{HOME_GROUP_LABELS[group]}</h2>
+            <h2 className="text-hint font-semibold text-tertiary">{t(HOME_GROUP_LABEL_KEYS[group])}</h2>
             <ul className="flex flex-col divide-y divide-divider rounded-control border border-divider bg-card">
-              {entries.map(({ widget, hidden }, index) => (
+              {entries.map(({ widget, hidden }, index) => {
+                const title = t(widget.titleKey);
+                return (
                 <li key={widget.id} className="flex items-center gap-3 px-4 py-3" data-testid={`customize-${widget.id}`}>
                   <div className="min-w-0 flex-1">
-                    <p className="text-body font-medium text-primary">{widget.title}</p>
-                    <p className="text-hint text-tertiary">{widget.description}</p>
+                    <p className="text-body font-medium text-primary">{title}</p>
+                    <p className="text-hint text-tertiary">{t(widget.descriptionKey)}</p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Move ${widget.title} Up`}
+                    aria-label={t("customize.moveUp", { title })}
                     disabled={index === 0 || saving}
                     onClick={() => setDraft((current) => moveWidget(current, widget.id, "up"))}
                   >
@@ -80,7 +83,7 @@ export const CustomizeHome: React.FC<{
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Move ${widget.title} Down`}
+                    aria-label={t("customize.moveDown", { title })}
                     disabled={index === entries.length - 1 || saving}
                     onClick={() => setDraft((current) => moveWidget(current, widget.id, "down"))}
                   >
@@ -89,11 +92,12 @@ export const CustomizeHome: React.FC<{
                   <Switch
                     checked={!hidden}
                     disabled={saving}
-                    aria-label={`Show ${widget.title}`}
+                    aria-label={t("customize.show", { title })}
                     onCheckedChange={(shown) => setDraft((current) => setWidgetHidden(current, widget.id, !shown))}
                   />
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
         );
@@ -103,14 +107,14 @@ export const CustomizeHome: React.FC<{
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Button type="button" variant="ghost" disabled={saving} onClick={() => void save([])}>
-          Reset to default
+          {t("customize.reset")}
         </Button>
         <div className="flex gap-2">
           <Button type="button" variant="secondary" disabled={saving} onClick={onCancel}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button type="button" disabled={saving} onClick={() => void save(toPlacements(draft, stored))}>
-            Done
+            {tCommon("actions.done")}
           </Button>
         </div>
       </div>
