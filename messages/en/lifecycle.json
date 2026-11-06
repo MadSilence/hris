@@ -116,7 +116,7 @@
   },
   "pages": {
     "processesTitle": "Processes",
-    "processesDescription": "Preboarding and onboarding under way.",
+    "processesDescription": "Preboarding, onboarding and offboarding under way.",
     "tasksTitle": "Tasks",
     "tasksDescription": "What is assigned to you."
   },
@@ -142,7 +142,7 @@
   },
   "processes": {
     "emptyTitle": "No processes yet",
-    "emptyDescription": "Start a preboarding or an onboarding from a person's profile.",
+    "emptyDescription": "Start a preboarding, an onboarding or an offboarding from a person's profile.",
     "columnPerson": "Person",
     "columnProcess": "Process",
     "columnStarts": "Starts",
@@ -160,7 +160,7 @@
     "noLink": "No active preboarding link",
     "markComplete": "Mark as complete",
     "actions": "Process actions",
-    "changeManager": "{leaving, select, yes {Change Offboarding manager} other {Change Onboarding manager}}",
+    "changeManager": "{leaving, select, yes {Change offboarding manager} other {Change onboarding manager}}",
     "sendNewLink": "Send a new link",
     "newLinkSent": "A new preboarding link was sent.",
     "revokeLink": "Revoke link",
@@ -291,7 +291,7 @@
     "addOption": "Option"
   },
   "start": {
-    "title": "{type, select, PREBOARDING {Start Preboarding} ONBOARDING {Start Onboarding} other {Start Offboarding}}",
+    "title": "{type, select, PREBOARDING {Start preboarding} ONBOARDING {Start onboarding} other {Start offboarding}}",
     "descriptionChoose": "For {name}. You review every task before anything is created.",
     "descriptionReview": "Check who does what and when. Anything marked needs a decision before the process can start.",
     "template": "Template",
@@ -325,7 +325,7 @@
     "deleteBody": "<b>{name}</b> is removed. A template that has already started a process cannot be deleted — archive it instead."
   },
   "addTemplate": {
-    "title": "{type, select, PREBOARDING {Add Preboarding Template} ONBOARDING {Add Onboarding Template} other {Add Offboarding Template}}",
+    "title": "{type, select, PREBOARDING {Add preboarding template} ONBOARDING {Add onboarding template} other {Add offboarding template}}",
     "description": "Name it here; its tasks are laid out on a timeline from the start day, which opens next.",
     "enterName": "Enter a name.",
     "adding": "Adding…"
@@ -362,7 +362,8 @@
     "chooseCategory": "{title}: choose the category of the file it requires.",
     "attachMaterial": "{title}: attach a file or a link to acknowledge.",
     "addQuestion": "{title}: add a question.",
-    "emptyQuestion": "{title}: a question has no text."
+    "emptyQuestion": "{title}: a question has no text.",
+    "addOptions": "{title}: a choice needs at least two options."
   },
   "kindConfig": {
     "fields": "Fields",

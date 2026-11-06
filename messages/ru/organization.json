@@ -406,7 +406,7 @@
       "confirm": "Удалить папку"
     },
     "moveDocument": {
-      "title": "Переместить документ",
+      "title": "{count, plural, one {Переместить документ} other {Переместить документы}}",
       "description": "Переместите <b>{name}</b> в другую папку.",
       "thisDocument": "этот документ",
       "destination": "Папка назначения",

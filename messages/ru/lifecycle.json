@@ -116,7 +116,7 @@
   },
   "pages": {
     "processesTitle": "Процессы",
-    "processesDescription": "Идущие пребординги и онбординги.",
+    "processesDescription": "Идущие пребординги, онбординги и оффбординги.",
     "tasksTitle": "Задачи",
     "tasksDescription": "То, что назначено вам."
   },
@@ -142,7 +142,7 @@
   },
   "processes": {
     "emptyTitle": "Процессов пока нет",
-    "emptyDescription": "Запустите пребординг или онбординг из профиля сотрудника.",
+    "emptyDescription": "Запустите пребординг, онбординг или оффбординг из профиля сотрудника.",
     "columnPerson": "Сотрудник",
     "columnProcess": "Процесс",
     "columnStarts": "Начало",
@@ -362,7 +362,8 @@
     "chooseCategory": "{title}: выберите категорию требуемого файла.",
     "attachMaterial": "{title}: приложите файл или ссылку для ознакомления.",
     "addQuestion": "{title}: добавьте вопрос.",
-    "emptyQuestion": "{title}: у одного из вопросов нет текста."
+    "emptyQuestion": "{title}: у одного из вопросов нет текста.",
+    "addOptions": "{title}: у вопроса с выбором должно быть не меньше двух вариантов."
   },
   "kindConfig": {
     "fields": "Поля",

@@ -512,6 +512,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
       <MoveDocumentModal
         isOpen={batchMoveOpen}
         documentName={t("documents.moveDocument.nDocuments", { count: selectedIds.length })}
+        count={selectedIds.length}
         folders={folderOptions}
         onCancelAction={() => setBatchMoveOpen(false)}
         onConfirmAction={({ folderId }) => {

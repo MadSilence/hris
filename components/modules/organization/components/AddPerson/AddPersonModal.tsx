@@ -111,6 +111,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={busy}
+                aria-invalid={Boolean(formik.touched.firstName && formik.errors.firstName)}
               />
               {formik.touched.firstName && formik.errors.firstName && (
                 <FieldError>{formik.errors.firstName}</FieldError>
@@ -125,6 +126,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={busy}
+                aria-invalid={Boolean(formik.touched.lastName && formik.errors.lastName)}
               />
               {formik.touched.lastName && formik.errors.lastName && (
                 <FieldError>{formik.errors.lastName}</FieldError>
@@ -142,6 +144,7 @@ export function AddPersonModal({ open, onCloseAction }: Props) {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={busy}
+              aria-invalid={Boolean(formik.touched.email && formik.errors.email)}
             />
             {formik.touched.email && formik.errors.email && (
               <FieldError>{formik.errors.email}</FieldError>

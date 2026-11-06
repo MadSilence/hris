@@ -50,7 +50,8 @@ describe("ProfileSaveBar", () => {
     expect(screen.getByRole("button", { name: "Discard" })).toBeEnabled();
 
     rerender(<ProfileSaveBar changeCount={2} isSaving onDiscard={jest.fn()} onSave={jest.fn()}/>);
-    expect(screen.getByRole("button", { name: "Saving…" })).toBeDisabled();
+    // Busy, not greyed: the kit's loading state nods a ring and ignores a second click (SPEC § 12).
+    expect(screen.getByRole("button", { name: "Saving…" })).toHaveAttribute("aria-busy", "true");
     expect(screen.getByRole("button", { name: "Discard" })).toBeDisabled();
   });
 

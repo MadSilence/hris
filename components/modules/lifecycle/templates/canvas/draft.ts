@@ -251,6 +251,11 @@ export const phaseOf = (i: Pick<DraftItem, "dueKind" | "offsetDays">): Phase => 
   return "LATER";
 };
 
+/** A choice needs two distinct options that are not blank — the backend's rule (LC00004), so the save is held, not refused. */
+const tooFewOptions = (q: { type: string; options?: string[] | null }) =>
+  (q.type === "SINGLE_CHOICE" || q.type === "MULTIPLE_CHOICE")
+  && new Set((q.options ?? []).map((o) => o.trim()).filter(Boolean)).size < 2;
+
 /** Nothing a save would refuse at once: every task has a title, every named task names somebody. */
 export const draftProblems = (draft: TemplateDraft, t: LifecycleT): string[] => {
   const problems: string[] = [];
@@ -264,6 +269,7 @@ export const draftProblems = (draft: TemplateDraft, t: LifecycleT): string[] => 
     else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(t("draftProblems.attachMaterial", { title }));
     else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(t("draftProblems.addQuestion", { title }));
     else if (i.kind === "QUESTIONNAIRE" && i.questions.some((q) => !q.label.trim())) problems.push(t("draftProblems.emptyQuestion", { title }));
+    else if (i.kind === "QUESTIONNAIRE" && i.questions.some(tooFewOptions)) problems.push(t("draftProblems.addOptions", { title }));
   });
   return problems;
 };

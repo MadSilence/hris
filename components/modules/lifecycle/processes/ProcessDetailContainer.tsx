@@ -200,8 +200,8 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
                     count: process.anchorDrift.changes.length,
                     list: process.anchorDrift.changes.map((c) => t("processDetail.driftChange", {
                       title: c.title,
-                      from: formatDisplayDate(c.from ?? ""),
-                      to: formatDisplayDate(c.to ?? ""),
+                      from: formatDisplayDate(c.from ?? "", { style: "medium" }),
+                      to: formatDisplayDate(c.to ?? "", { style: "medium" }),
                     })).join(", "),
                   })}
               </p>

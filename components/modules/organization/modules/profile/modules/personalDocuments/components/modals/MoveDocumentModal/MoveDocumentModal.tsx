@@ -14,6 +14,8 @@ export interface MoveDocumentModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   documentName?: string;
+  /** How many documents move — the title says "documents" for more than one. */
+  count?: number;
   folders: MoveDocumentFolderOption[];
   currentFolderId?: string;
   /** Kept in the dialog rather than the console — a rejected move is otherwise silent. */
@@ -26,6 +28,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
   isOpen,
   isLoading = false,
   documentName,
+  count = 1,
   folders,
   currentFolderId,
   errorMessage,
@@ -49,7 +52,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
     >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("documents.moveDocument.title")}</DialogTitle>
+          <DialogTitle>{t("documents.moveDocument.title", { count })}</DialogTitle>
           <DialogDescription>
             {t.rich("documents.moveDocument.description", {
               name: documentName ?? t("documents.moveDocument.thisDocument"),

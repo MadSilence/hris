@@ -406,7 +406,7 @@
       "confirm": "Delete folder"
     },
     "moveDocument": {
-      "title": "Move document",
+      "title": "{count, plural, one {Move document} other {Move documents}}",
       "description": "Move <b>{name}</b> to another folder.",
       "thisDocument": "this document",
       "destination": "Destination folder",

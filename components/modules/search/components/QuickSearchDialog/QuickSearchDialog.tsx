@@ -194,7 +194,8 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent hideClose className="overflow-hidden p-0 sm:max-w-xl">
+      {/* SPEC § 16: the command palette is a 560 px dialog near the top, not centred — it grows downwards as results come. */}
+      <DialogContent hideClose className="top-[12vh] translate-y-0 overflow-hidden p-0 sm:max-w-[560px]">
         <DialogTitle className="sr-only">{t("dialog.title")}</DialogTitle>
         <DialogDescription className="sr-only">
           {t("dialog.description")}

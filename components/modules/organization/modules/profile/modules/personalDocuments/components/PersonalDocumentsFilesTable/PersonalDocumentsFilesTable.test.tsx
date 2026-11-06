@@ -31,3 +31,25 @@ describe("PersonalDocumentsFilesTable — the star", () => {
     expect(onToggleStar).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
   });
 });
+
+/** Enter opened the preview, then — the preview's Close button holding focus — the same key's default action shut it. */
+describe("PersonalDocumentsFilesTable — Enter on a row", () => {
+  it("opens the preview and swallows the key, so it does not reach the preview's first button", () => {
+    const onPreview = jest.fn();
+    render(
+      <PersonalDocumentsFilesTable
+        documents={[partialMock<DocumentDTO>({ id: "p", name: "contract.pdf", sizeBytes: 10, createdAt: "2026-10-30T12:00:00", mimeType: "application/pdf" })]}
+        sort={{ field: "name", dir: "asc" }}
+        onSortChange={jest.fn()}
+        onToggleStar={jest.fn()}
+        onPreview={onPreview}
+        getDownloadUrl={(id) => `/d/${id}`}
+      />,
+    );
+
+    const row = screen.getByText("contract.pdf").closest("tr") as HTMLTableRowElement;
+    const notCancelled = fireEvent.keyDown(row, { key: "Enter" });
+    expect(onPreview).toHaveBeenCalledWith(expect.objectContaining({ id: "p" }));
+    expect(notCancelled).toBe(false);
+  });
+});

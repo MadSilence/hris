@@ -151,6 +151,9 @@ export const PersonalDocumentsFilesTable: React.FC<PersonalDocumentsFilesTablePr
                 }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && event.target === event.currentTarget && onPreview && isPreviewable(document.mimeType)) {
+                    // The preview takes focus onto its Close button; left alone, this same Enter then clicks it and the
+                    // preview shuts the moment it opens (walk of 2026-11-06).
+                    event.preventDefault();
                     onPreview(document);
                   }
                 }}

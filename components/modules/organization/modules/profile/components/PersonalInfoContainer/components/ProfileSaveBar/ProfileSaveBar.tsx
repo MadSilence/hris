@@ -49,7 +49,7 @@ export const ProfileSaveBar: React.FC<Props> = ({
         <Button type="button" variant="secondary" size="sm" onClick={onDiscard} disabled={isSaving}>
           {tCommon("actions.discard")}
         </Button>
-        <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
+        <Button type="button" size="sm" onClick={onSave} loading={isSaving}>
           {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
         </Button>
       </div>

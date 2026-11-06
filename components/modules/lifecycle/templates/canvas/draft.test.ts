@@ -157,6 +157,15 @@ describe("what a task carries (DECISIONS.md § \"Lifecycle tasks\")", () => {
       .toContain("Ask: add a question.");
   });
 
+  it("holds a choice with fewer than two distinct options instead of sending it to be refused", () => {
+    const ask = (options: string[]) => draftProblems(draft([item("q", {
+      kind: "QUESTIONNAIRE", title: "Size", questions: [{ id: "q1", label: "Size?", type: "SINGLE_CHOICE", options }],
+    })]), t);
+    expect(ask(["S"])).toContain("Size: a choice needs at least two options.");
+    expect(ask(["S", " ", "S "])).toContain("Size: a choice needs at least two options.");
+    expect(ask(["S", "M"])).toEqual([]);
+  });
+
   it("counts an offboarding from the last working day, and calls its people what they are", () => {
     expect(dayLabel({ dueKind: "OFFSET", offsetDays: 0 }, t, "OFFBOARDING")).toBe("Last day");
     expect(dayLabel({ dueKind: "BEFORE_START", offsetDays: null }, t, "OFFBOARDING")).toBe("By the last day");
