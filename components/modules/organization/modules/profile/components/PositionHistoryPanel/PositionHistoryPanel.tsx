@@ -83,7 +83,8 @@ export const PositionHistoryPanel: React.FC<Props> = ({ userId, user, className 
       return (
         <EmptyState
           className="my-4"
-          scene="notes"
+          compact
+          scene="career-s"
           title={t("profile.positionHistory.emptyTitle")}
           description={t("profile.positionHistory.emptyDescription")}
         />

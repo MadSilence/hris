@@ -12,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "i18n:baseline": "node test/i18nLiterals/scan.js"
+    "i18n:baseline": "node test/i18nLiterals/scan.js",
+    "illustrations": "node components/illustrations/generate.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

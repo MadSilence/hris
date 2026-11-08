@@ -70,12 +70,12 @@
   },
   "automations": {
     "empty": "Автоматизаций пока нет.",
-    "enabled": "Включены",
-    "scheduledRuns": "Запланировано запусков",
-    "failedRuns": "Неудачных запусков",
+    "active": "Активны",
+    "waitingRuns": "Запусков ждут",
+    "failedLastRuns": "Последний запуск не удался",
     "allGood": "Ничто не требует внимания.",
     "paused": "Приостановлена",
-    "failed": "Сбоев: {count}"
+    "lastRunFailed": "Последний запуск не удался"
   },
   "celebrations": {
     "birthday": "День рождения",

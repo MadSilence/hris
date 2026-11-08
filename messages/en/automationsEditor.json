@@ -1,0 +1,254 @@
+{
+  "header": {
+    "close": "Close",
+    "rename": "Rename {name}",
+    "testRun": "Test run",
+    "saveDraft": "Save draft",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
+    "saveChanges": "Save changes",
+    "edit": "Edit",
+    "loading": "Loading the automation"
+  },
+  "tools": {
+    "label": "Tools",
+    "close": "Close",
+    "ai": {
+      "title": "noddo AI",
+      "hint": "Describe a change, noddo drafts it."
+    },
+    "add": {
+      "title": "Add a step",
+      "hint": "Drag a step onto the canvas."
+    },
+    "who": {
+      "title": "Who it runs for",
+      "hint": "Pick the teams, offices or countries this automation works for."
+    },
+    "runs": {
+      "title": "Run history",
+      "hint": "Every time it ran, and what happened."
+    },
+    "versions": {
+      "title": "Versions",
+      "hint": "What changed, and runs still on an old version."
+    },
+    "trigger": {
+      "title": "What starts it"
+    }
+  },
+  "addStep": {
+    "search": "Search",
+    "hint": "Drag a step onto the canvas, or click it to add after the selected step.",
+    "noMatchTitle": "No steps match",
+    "noMatchHint": "Try another word.",
+    "drop": "Drop a step here",
+    "allSteps": "All steps",
+    "quickAdd": "Add a step here"
+  },
+  "canvas": {
+    "label": "The automation's steps",
+    "keyboardHint": "Enter opens a step. Alt and the up or down arrow move it. Shift and F10 open its menu. Delete removes it.",
+    "when": "When",
+    "startsWhen": "Starts when",
+    "chooseTrigger": "Choose what starts it",
+    "chooseTriggerHint": "Pick an event with <plus></plus> on the left",
+    "or": "or",
+    "describeToAi": "Describe it to noddo AI",
+    "nextStepTitle": "What should happen next?",
+    "nextStepAction": "Add the first step",
+    "emptyPath": "Add a step",
+    "approved": "Approved",
+    "declined": "Declined",
+    "otherwise": "Anyone else",
+    "pathUnnamed": "Path {letter}",
+    "skipped": "Skipped",
+    "edited": "· edited",
+    "failedInRun": "Failed in this run",
+    "notStartedYet": "Not started yet",
+    "notConnected": "Not connected yet",
+    "changedByAi": "Changed by AI · {what}",
+    "addingStep": "Adding a step…",
+    "cardLabel": "Step {number}: {kind}, {title}",
+    "whenLabel": "When: {title}",
+    "moved": "{title} is now step {number}.",
+    "removed": "{title} removed.",
+    "runState": {
+      "done": "Done",
+      "waiting": "Waiting",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    },
+    "zoom": {
+      "label": "Zoom",
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "fit": "Fit to view",
+      "value": "{value}%"
+    }
+  },
+  "sentence": {
+    "label": "In short",
+    "showAll": "Show all",
+    "showLess": "Show less"
+  },
+  "needs": {
+    "trigger": "Choose what starts it",
+    "assignee": "Choose who it's for",
+    "approver": "Choose who approves",
+    "recipients": "Choose who gets it",
+    "subject": "Add a subject",
+    "body": "Add a message",
+    "text": "Add a message",
+    "title": "Add a title",
+    "assignable": "Choose what to give",
+    "policy": "Choose a policy",
+    "form": "Choose a review form",
+    "question": "Add a question",
+    "paths": "Add a path",
+    "task": "Choose the task to wait for",
+    "field": "Choose a field",
+    "documents": "Choose the documents",
+    "survey": "Choose a survey",
+    "other": "Add the missing details"
+  },
+  "settings": {
+    "step": "Step {number}",
+    "stepWithType": "Step {number} · {type}",
+    "trigger": "What starts it",
+    "close": "Close step settings",
+    "menu": "Step actions",
+    "duplicate": "Duplicate step",
+    "skip": "Skip for now",
+    "unskip": "Don't skip",
+    "remove": "Remove step",
+    "removed": "Step removed"
+  },
+  "whoSeesWhat": {
+    "title": "Who sees what",
+    "example": "Example · nothing is sent",
+    "collapse": "Hide the example",
+    "expand": "Show the example",
+    "inbox": "In {name}'s inbox",
+    "email": "In {name}'s email",
+    "tasks": "In {name}'s tasks",
+    "timeOff": "In {name}'s time off",
+    "profile": "On {name}'s profile",
+    "withRole": "{place} · {role}",
+    "someone": "someone",
+    "emailFooter": "Sent by noddo on behalf of {company}",
+    "due": "Due {date}",
+    "approve": "Approve",
+    "decline": "Decline",
+    "pending": "Pending",
+    "nothingSent": "Nothing is sent at this step.",
+    "waitingForDetails": "Who sees what shows up once the step has what it needs.",
+    "role": {
+      "PERSON": "who it's about",
+      "MANAGER": "the manager",
+      "MANAGERS_MANAGER": "the manager's manager",
+      "DEPARTMENT_HEAD": "the department head",
+      "ONBOARDING_MANAGER": "the onboarding manager",
+      "ROLE": "a role",
+      "USER": "a person",
+      "APPROVER": "the approver"
+    }
+  },
+  "banners": {
+    "live": "This automation is on. Changes apply to runs that start after you save.",
+    "system": "noddo keeps this automation. You can see it, not change it.",
+    "version": "You're looking at v{number} from {date}.",
+    "backToCurrent": "Back to the current version",
+    "needsDetails": "{count, plural, one {# step needs details before you can turn this on.} other {# steps need details before you can turn this on.}}",
+    "needsDetailsToSave": "{count, plural, one {# step needs details before you can save.} other {# steps need details before you can save.}}",
+    "showNext": "Show next"
+  },
+  "nameDialog": {
+    "title": "Name your automation",
+    "icon": "Icon",
+    "iconOption": "Icon {number}",
+    "iconHint": "We picked one from what starts it. Change it if you like.",
+    "name": "Name",
+    "counter": "{count}/{max}",
+    "suggested": "Suggested from the steps.",
+    "nameRequired": "Give it a name.",
+    "description": "Description",
+    "preview": "How it looks in the list",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveDraft": "Save draft"
+  },
+  "unsavedDialog": {
+    "title": "Save your changes?",
+    "body": "You changed {name}. Save the changes before you leave.",
+    "keepEditing": "Keep editing",
+    "saveAndLeave": "Save and leave"
+  },
+  "turnOnDialog": {
+    "title": "Turn on {name}?",
+    "runsForEveryone": "It runs for everyone.",
+    "runsFor": "{count, plural, one {It runs for # person.} other {It runs for # people.}}",
+    "runsForIn": "{count, plural, one {It runs for # person in {places}.} other {It runs for # people in {places}.}}",
+    "startsWithRequests": "It starts with new requests. Requests sent before today aren't affected.",
+    "startsFromToday": "It starts from today. Nothing from before today is affected.",
+    "hears": "{who} will get requests and notifications from it.",
+    "hearsNobody": "Nobody gets a message from it.",
+    "notConnected": "{count, plural, one {# step isn't connected yet, so runs skip it: {steps}.} other {# steps aren't connected yet, so runs skip them: {steps}.}}",
+    "whoQuestion": "Who should it run for?",
+    "onlyNewRequests": "Only new requests",
+    "onlyNewCases": "Only new cases",
+    "onlyNewHint": "From now on.",
+    "alsoWaitingRequests": "{count, plural, one {Also the # request already waiting} other {Also the # requests already waiting}}",
+    "alsoWaitingCases": "{count, plural, one {Also the # case already waiting} other {Also the # cases already waiting}}",
+    "alsoWaitingHint": "Sent before today and not yet decided. They start right away.",
+    "volume": "This sends <b>{count, plural, one {# message} other {# messages}}</b> right away.",
+    "volumeConfirm": "I understand, send them",
+    "testFirst": "Test run first",
+    "cancel": "Cancel",
+    "confirm": "Turn on",
+    "failed": "We couldn't turn it on. Try again.",
+    "volumeEach": "Each time it runs it sends <b>{count, plural, one {# message} other {# messages}}</b>."
+  },
+  "runsGoingDialog": {
+    "title": "Save changes to {name}?",
+    "body": "{count, plural, one {# run is still going. What should happen to it?} other {# runs are still going. What should happen to them?}}",
+    "keep": "Keep them as they are",
+    "keepHint": "They finish with the steps they started with. New runs use the changes.",
+    "move": "Move them to the changes",
+    "moveHint": "Their next steps follow the new version.",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "failed": "We couldn't save your changes. Try again."
+  },
+  "toasts": {
+    "draftSaved": "Draft saved",
+    "changesSaved": "Changes saved",
+    "turnedOn": "Automation turned on",
+    "turnedOff": "Automation turned off",
+    "saveFailed": "We couldn't save your changes. Try again.",
+    "retry": "Retry"
+  },
+  "loadError": {
+    "title": "We couldn't load this automation",
+    "body": "It keeps running as it was.",
+    "retry": "Try again",
+    "back": "Back to automations"
+  },
+  "ai": {
+    "title": "noddo AI",
+    "intro": "Describe a change, noddo drafts it.",
+    "you": "You",
+    "notConnected": "noddo AI isn't connected yet. Start from a template or from scratch — your text is kept.",
+    "draftedLabel": "Drafted by AI — review before turning on",
+    "changed": "{count, plural, one {Changed # step} other {Changed # steps}}",
+    "undo": "Undo",
+    "error": "We couldn't make this change. Your automation is safe and nothing changed.",
+    "draftError": "We couldn't draft it. Your text is still here.",
+    "tryAgain": "Try again"
+  },
+  "volumeDialog": {
+    "title": "Save changes to {name}?",
+    "description": "Each time it runs it sends <b>{count, plural, one {# message} other {# messages}}</b>. Save the changes anyway?",
+    "confirm": "Save changes"
+  }
+}

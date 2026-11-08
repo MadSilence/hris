@@ -80,7 +80,7 @@ export function PreboardingPageContainer({ token, initialPage, preview, onOpenFi
   return (
     <div className="w-full space-y-8 py-8">
       <header className="flex flex-col items-center gap-3 text-center">
-        <Illustration scene={open === 0 ? "all-caught-up" : "onboarding"} />
+        <Illustration scene="welcome" />
         <h1 className="text-greeting">{page.firstName ? t("preboarding.welcomeName", { name: page.firstName }) : t("preboarding.welcome")}</h1>
         <p className="text-body text-secondary">{intro}</p>
         {page.tasks.length > 0 && (

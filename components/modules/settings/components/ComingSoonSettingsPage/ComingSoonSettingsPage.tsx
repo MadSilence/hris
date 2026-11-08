@@ -28,7 +28,7 @@ export const ComingSoonSettingsPage: React.FC<Props> = ({ title, withHeader = tr
   <div className="flex flex-col gap-6 px-8">
     {withHeader ? <SettingsPageHeader title={title} backHref="/settings" /> : null}
     <EmptyState
-      scene="company-hub"
+      scene="coming-soon"
       title={t("comingSoon.title", { title })}
       description={t("comingSoon.description")}
     />

@@ -69,6 +69,7 @@ import {
 } from "@/components/modules/settings/shared/ExportOrgTreeModal";
 import type { TeamPerson, TeamTreeNode } from "@/models/teams";
 import type { TeamPersonHit } from "@/components/modules/settings/modules/teams/components/TeamSearchBar/TeamSearchBar";
+import { Illustration } from "@/components/illustrations";
 
 /** Mirrors MAX_DEPTH on the backend: a deeper drop is refused before the request is made. */
 const MAX_DEPTH = 10;
@@ -523,6 +524,7 @@ export default function TeamsContainer() {
     if (tree.length === 0) {
       return (
         <CanvasMessage>
+          <Illustration scene="team-and-org" className="mb-4" />
           <span>{t("container.empty")}</span>
           <PermissionGate resource="ORG.TEAM" action="EDIT">
             <Button type="button" size="sm" onClick={() => setCreateParentId(null)} className="mt-3 gap-1.5">

@@ -74,6 +74,14 @@ const ownProfile = (userId: unknown): string | null =>
 const reviewKind = (kind: unknown): string =>
   kind === "SELF" || kind === "MANAGER" || kind === "PEER" || kind === "UPWARD" ? kind : "other";
 
+/** An automation in the editor (`/automations/<id>`), with a run's window open when there is one. */
+const automationHref = (ruleId: string, query?: { run: string }): string =>
+  query ? `/automations/${ruleId}?run=${encodeURIComponent(query.run)}` : `/automations/${ruleId}`;
+
+/** The `{reason, select, …}` argument of a pause: one of the four codes, else `other`. */
+const pauseReason = (reason: unknown): string =>
+  reason === "MANUAL" || reason === "OWNER_LEFT" || reason === "OWNER_LACKS_RIGHT" || reason === "TARGET_GONE" ? reason : "other";
+
 /** A formatted due date, with its select. */
 const dueOn = (value: unknown, language?: string) => ({ hasDue: has(value), due: str(value) ? formatDisplayDate(str(value), { language }) : "" });
 
@@ -494,7 +502,8 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
       };
     }
     // Automations (AUTOMATIONS_DESIGN.md § 4–6). A rule's own message is the author's text, rendered
-    // for this person by the engine; the other three are about the rule, and are told to its author.
+    // for this person by the engine; the failures, the pause and a wait that ran out are about the automation, and go to
+    // its owner (or whom the step names); an approval reminder goes to the approver.
     case "AUTOMATION_MESSAGE": {
       return {
         title: str(p.ruleName) || t("fallback.automation"),
@@ -519,32 +528,62 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
       };
     }
     case "AUTOMATION_RUN_FAILED": {
+      // "{Automation} couldn't finish for {Name}." — opens the run, where its failed step says why.
       const ruleId = str(p.automationRuleId);
-      const error = str(p.error).trim();
+      const runId = str(p.runId);
       return {
         title: t("presenter.automationRunFailed.title"),
         message: t("presenter.automationRunFailed.message", {
           rule: str(p.ruleName) || t("fallback.anAutomation"),
           person: str(p.personName) || t("fallback.aPerson"),
-          hasError: has(error),
-          error: error.replace(/\.$/, ""),
         }),
         icon: Alert02Icon,
-        href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
+        href: ruleId ? automationHref(ruleId, runId ? { run: runId } : undefined) : null,
       };
     }
     case "AUTOMATION_RULE_PAUSED": {
+      // The reason is a code (MANUAL, OWNER_LEFT, OWNER_LACKS_RIGHT, TARGET_GONE); `detail` is the engine's and not shown.
       const ruleId = str(p.automationRuleId);
-      const reason = str(p.reason).trim();
       return {
         title: t("presenter.automationPaused.title"),
         message: t("presenter.automationPaused.message", {
           rule: str(p.ruleName) || t("fallback.anAutomation"),
-          hasReason: has(reason),
-          reason,
+          reason: pauseReason(p.reason),
         }),
         icon: Alert02Icon,
-        href: ruleId ? `/settings/automation/automations/${ruleId}` : null,
+        href: ruleId ? automationHref(ruleId) : null,
+      };
+    }
+    case "AUTOMATION_WAIT_TIMED_OUT": {
+      // A wait set to "Stop and tell someone" ran out: the people it names are told.
+      const ruleId = str(p.automationRuleId);
+      const runId = str(p.runId);
+      const days = Number(p.maxDays);
+      const hasDays = str(p.maxDays) !== "" && Number.isFinite(days) && days > 0;
+      return {
+        title: t("presenter.automationWaitTimedOut.title"),
+        message: t("presenter.automationWaitTimedOut.message", {
+          rule: str(p.ruleName) || t("fallback.anAutomation"),
+          person: str(p.personName) || t("fallback.aPerson"),
+          what: str(p.until) === "TASK_DONE" || str(p.until) === "FIELD_FILLED" ? str(p.until) : "other",
+          hasDays: yesNo(hasDays),
+          days: hasDays ? days : 0,
+        }),
+        icon: Alert02Icon,
+        href: ruleId ? automationHref(ruleId, runId ? { run: runId } : undefined) : null,
+      };
+    }
+    case "AUTOMATION_APPROVAL_REMINDER": {
+      // "Remind them every day" on an approval nobody has answered yet: the approver is reminded.
+      return {
+        title: t("presenter.automationApprovalReminder.title"),
+        message: t("presenter.automationApprovalReminder.message", {
+          task: str(p.taskTitle) || t("fallback.ATask"),
+          hasPerson: has(p.personName),
+          person: str(p.personName),
+        }),
+        icon: CheckListIcon,
+        href: "/tasks",
       };
     }
     case "INVITATION_FAILED": {

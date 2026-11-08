@@ -123,7 +123,7 @@ export default function UsersRolesTable({
                   */}
                   <ListEmptyState
                     query={query}
-                    scene="team-and-org"
+                    scene="people"
                     title={t("roles.users.emptyTitle")}
                     description={t("roles.users.emptyDescription")}
                     noResultsHint={t("roles.users.noResultsHint")}

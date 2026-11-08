@@ -249,7 +249,7 @@ export default function AssignedUsersPanel({
         <div style={emptyStyle}>
           <ListEmptyState
             query={searching ? q : ""}
-            scene="team-and-org"
+            scene="people"
             title={limited && (total ?? 0) > 0 ? t("shared.assignedPanel.emptyHiddenTitle") : t("shared.assignedPanel.emptyTitle")}
             description={limited && (total ?? 0) > 0
               ? t("shared.assignedPanel.emptyHiddenDescription")

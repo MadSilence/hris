@@ -1,16 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
+import { withQuery, type SearchParams } from "../redirectQuery";
 
-import React, { Suspense } from "react";
-import { PageGate } from "@/components/auth/PageGate";
-import { AutomationRuleContainer } from "@/components/modules/automations/builder/AutomationRuleContainer";
-
-// `useSearchParams` (the ready-made starting point) needs a Suspense boundary under the App Router.
-const NewAutomationPage: React.FC = () => (
-  <PageGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
-    <Suspense fallback={null}>
-      <AutomationRuleContainer ruleId={null}/>
-    </Suspense>
-  </PageGate>
-);
-
-export default NewAutomationPage;
+/** The old address of a new automation. */
+export default async function OldNewAutomationPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  redirect(withQuery("/automations/new", await searchParams));
+}

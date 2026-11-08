@@ -1,6 +1,6 @@
 "use client";
 
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { ActionResult } from "@/lib/errors/withActionError";
@@ -8,24 +8,25 @@ import type {
   AssignableType,
   AssignmentHistoryItem,
   AssignmentProvenance,
+  Automation,
   AutomationCatalog,
-  AutomationPreview,
-  AutomationPreviewRequest,
-  AutomationRule,
-  AutomationRuleSummary,
+  AutomationCheck,
   AutomationRun,
-  AutomationRunStatus,
+  AutomationSummary,
   AutomationTemplate,
   AutomationVersion,
+  CheckAutomationRequest,
   LiveAssignmentCreated,
   LiveAssignmentPreview,
   LiveAssignmentRequest,
   Page,
   ReturnToRuleRequest,
+  RunQuery,
+  RunSlice,
 } from "@/models/automations";
 import {
+  checkAutomationAction,
   createLiveRuleAction,
-  previewAutomationAction,
   previewLiveRuleAction,
   returnToRuleAction,
 } from "@/components/modules/automations/actions/automationActions";
@@ -34,20 +35,31 @@ import { assignmentProvenanceQueryKeys, automationQueryKeys } from "./automation
 /** An ERROR envelope becomes a rejected promise — what react-query needs. The text is already the dictionary's. */
 export const unwrapAction = <T,>(result: ActionResult<T>): T => {
   if (result.status === ActionStatus.ERROR) {
-    throw new Error(result.errorMessage ?? "The request failed.");
+    const error = new Error(result.errorMessage ?? "The request failed.") as Error & { code?: string };
+    error.code = result.code;
+    throw error;
   }
   return result.data as T;
 };
 
-export const useAutomations = (includeArchived: boolean) => {
+/** The cards; `archived` is the archive alone. */
+export const useAutomations = (archived = false) => {
   const { internalApiClient } = useAppDataContext();
-  return useQuery<AutomationRuleSummary[]>({
-    queryKey: automationQueryKeys.list(includeArchived),
-    queryFn: () => internalApiClient.get<AutomationRuleSummary[]>(`/automations${includeArchived ? "?includeArchived=true" : ""}`),
+  return useQuery<AutomationSummary[]>({
+    queryKey: automationQueryKeys.list(archived),
+    queryFn: () => internalApiClient.get<AutomationSummary[]>(`/automations${archived ? "?archived=true" : ""}`),
   });
 };
 
-/** The shipped starting points (D3). Static per release — kept for the session. */
+export const useArchivedAutomationsCount = () => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<number>({
+    queryKey: automationQueryKeys.archivedCount,
+    queryFn: () => internalApiClient.get<number>("/automations/archived-count"),
+  });
+};
+
+/** The shipped templates. Static per release — kept for the session. */
 export const useAutomationTemplates = (enabled = true) => {
   const { internalApiClient } = useAppDataContext();
   return useQuery<AutomationTemplate[]>({
@@ -58,7 +70,7 @@ export const useAutomationTemplates = (enabled = true) => {
   });
 };
 
-/** The builder's vocabulary. Needs MANAGE — a reader who may only view the rule does not ask for it. */
+/** The editor's vocabulary: steps, fields, roles, forms, templates. */
 export const useAutomationCatalog = (enabled = true) => {
   const { internalApiClient } = useAppDataContext();
   return useQuery<AutomationCatalog>({
@@ -71,41 +83,58 @@ export const useAutomationCatalog = (enabled = true) => {
 
 export const useAutomation = (id: string | null) => {
   const { internalApiClient } = useAppDataContext();
-  return useQuery<AutomationRule>({
-    queryKey: automationQueryKeys.rule(id ?? ""),
-    queryFn: () => internalApiClient.get<AutomationRule>(`/automations/${id}`),
+  return useQuery<Automation>({
+    queryKey: automationQueryKeys.automation(id ?? ""),
+    queryFn: () => internalApiClient.get<Automation>(`/automations/${id}`),
     enabled: Boolean(id),
   });
 };
 
-export const useAutomationVersions = (id: string | null) => {
+export const useAutomationVersions = (id: string | null, enabled = true) => {
   const { internalApiClient } = useAppDataContext();
   return useQuery<AutomationVersion[]>({
     queryKey: automationQueryKeys.versions(id ?? ""),
     queryFn: () => internalApiClient.get<AutomationVersion[]>(`/automations/${id}/versions`),
-    enabled: Boolean(id),
+    enabled: enabled && Boolean(id),
   });
 };
 
-export const useAutomationRuns = (id: string, status: AutomationRunStatus | null, page = 0, size = 50) => {
+/** Activity and a run history: an endless list behind a cursor, with the chips' counts on every slice. */
+export const useAutomationRuns = (query: Omit<RunQuery, "cursor">, enabled = true) => {
   const { internalApiClient } = useAppDataContext();
-  const q = new URLSearchParams({ page: String(page), size: String(size) });
-  if (status) q.set("status", status);
-  return useQuery<Page<AutomationRun>>({
-    queryKey: automationQueryKeys.runs(id, status, page),
-    queryFn: () => internalApiClient.get<Page<AutomationRun>>(`/automations/${id}/runs?${q.toString()}`),
-    placeholderData: keepPreviousData,
+  return useInfiniteQuery<RunSlice, Error, { pages: RunSlice[] }, ReturnType<typeof automationQueryKeys.runs>, string | null>({
+    queryKey: automationQueryKeys.runs(query),
+    queryFn: ({ pageParam }) =>
+      internalApiClient.post<RunSlice>("/automations/runs/search", { ...query, cursor: pageParam } as Record<string, unknown>),
+    initialPageParam: null,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled,
+  });
+};
+
+export const useAutomationRun = (runId: string | null) => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<AutomationRun>({
+    queryKey: automationQueryKeys.run(runId ?? ""),
+    queryFn: () => internalApiClient.get<AutomationRun>(`/automations/runs/${runId}`),
+    enabled: Boolean(runId),
   });
 };
 
 export const usePersonAutomationRuns = (personId: string, enabled = true) => {
   const { internalApiClient } = useAppDataContext();
-  return useQuery<Page<AutomationRun>>({
+  return useQuery<AutomationRun[]>({
     queryKey: automationQueryKeys.personRuns(personId),
-    queryFn: () => internalApiClient.get<Page<AutomationRun>>(`/automations/runs?personId=${personId}&size=20`),
+    queryFn: () => internalApiClient.get<AutomationRun[]>(`/automations/people/${personId}/runs?size=20`),
     enabled: enabled && Boolean(personId),
   });
 };
+
+/** Missing details, the turn-on dialog's numbers and Who sees what: writes nothing, a mutation only in transport. */
+export const useAutomationCheck = () =>
+  useMutation<AutomationCheck, Error, CheckAutomationRequest>({
+    mutationFn: async (request) => unwrapAction(await checkAutomationAction(request)),
+  });
 
 export const useAssignmentHistory = (assignableType: AssignableType, assignableId: string, enabled = true) => {
   const { internalApiClient } = useAppDataContext();
@@ -127,12 +156,6 @@ export const useAssignmentProvenance = (userId: string, enabled = true) => {
     enabled: enabled && Boolean(userId),
   });
 };
-
-/** The builder's preview: writes nothing, so it is a mutation only in transport. */
-export const useAutomationPreview = () =>
-  useMutation<AutomationPreview, Error, AutomationPreviewRequest>({
-    mutationFn: async (request) => unwrapAction(await previewAutomationAction(request)),
-  });
 
 export const useLiveRulePreview = () =>
   useMutation<LiveAssignmentPreview, Error, LiveAssignmentRequest>({
@@ -164,4 +187,16 @@ export const useReturnToRule = () => {
 export const useInvalidateAutomations = () => {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: automationQueryKeys.root });
+};
+
+/**
+ * One automation mutation: the action's envelope unwrapped, and every automation read refreshed after it.
+ * Errors surface to the caller (`showError` / an `InlineAlert` in the dialog), never here.
+ */
+export const useAutomationMutation = <TInput, TOutput>(action: (input: TInput) => Promise<ActionResult<TOutput>>) => {
+  const invalidate = useInvalidateAutomations();
+  return useMutation<TOutput, Error, TInput>({
+    mutationFn: async (input) => unwrapAction(await action(input)),
+    onSuccess: () => invalidate(),
+  });
 };

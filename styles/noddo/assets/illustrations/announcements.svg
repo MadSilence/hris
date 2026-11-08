@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none">
+  <path data-role="baseline" d="M30 136 H210" style="fill:none;stroke:var(--illustration-baseline, #EAEAEC)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="rotate(-14 110 80)">
+  <rect data-role="ink" x="54" y="60" width="34" height="32" rx="10" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="ink" d="M88 67 Q88 63 92 62 L134 42 A8 8 0 0 1 145 49 V103 A8 8 0 0 1 134 110 L92 90 Q88 89 88 85" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle data-role="ring" cx="170" cy="76" r="10" stroke="currentColor" style="fill:none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="support" d="M190 58 A26 26 0 0 1 190 94" style="fill:none;stroke:var(--illustration-support, #C9C9CE)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

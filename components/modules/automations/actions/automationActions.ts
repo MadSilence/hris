@@ -1,30 +1,35 @@
 "use server";
 
 // Every export is an explicit `async function`: Next refuses anything else in a "use server" file.
-// The preview is here although it writes nothing — it is a POST, because it carries the draft.
+// The check, the test cases and the test run are here although they write nothing — they are POSTs, because they
+// carry the definition being edited.
 
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { hrisApiAutomationsService } from "@/api/modules/automations/services";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
 import type {
   AssignmentProvenance,
-  AutomationActivationResult,
-  AutomationPreview,
-  AutomationPreviewRequest,
-  AutomationRule,
+  Automation,
+  AutomationActivation,
+  AutomationCheck,
   AutomationDefinition,
   AutomationRun,
-  AutomationSimulation,
-  AutomationTestResult,
+  CheckAutomationRequest,
   CreateAutomationRequest,
-  EnableAutomationRequest,
+  DraftAutomationRequest,
   LiveAssignmentCreated,
   LiveAssignmentPreview,
   LiveAssignmentRequest,
-  PublishAutomationRequest,
-  PublishAutomationResult,
   RenameAutomationRequest,
   ReturnToRuleRequest,
+  SaveAutomationRequest,
+  SaveAutomationResult,
+  TestCase,
+  TestRun,
+  TestRunRequest,
+  TestSendRequest,
+  TestSent,
+  TurnOnRequest,
 } from "@/models/automations";
 
 async function run<T>(context: string, body: () => Promise<T>): Promise<ActionResult<T>> {
@@ -35,64 +40,90 @@ async function run<T>(context: string, body: () => Promise<T>): Promise<ActionRe
   }
 }
 
-export async function createAutomationAction(input: CreateAutomationRequest): Promise<ActionResult<AutomationRule>> {
+// ── an automation's life ────────────────────────────────────────────────────────────────────
+
+export async function createAutomationAction(input: CreateAutomationRequest): Promise<ActionResult<Automation>> {
   return run("createAutomationAction", () => hrisApiAutomationsService.create(input));
 }
-export async function renameAutomationAction(input: { id: string; body: RenameAutomationRequest }): Promise<ActionResult<AutomationRule>> {
-  return run("renameAutomationAction", () => hrisApiAutomationsService.rename(input.id, input.body));
+export async function saveAutomationDraftAction(input: { id: string; request: DraftAutomationRequest }): Promise<ActionResult<Automation>> {
+  return run("saveAutomationDraftAction", () => hrisApiAutomationsService.saveDraft(input.id, input.request));
 }
-export async function publishAutomationAction(input: { id: string; body: PublishAutomationRequest }): Promise<ActionResult<PublishAutomationResult>> {
-  return run("publishAutomationAction", () => hrisApiAutomationsService.publish(input.id, input.body));
+export async function renameAutomationAction(input: { id: string; request: RenameAutomationRequest }): Promise<ActionResult<Automation>> {
+  return run("renameAutomationAction", () => hrisApiAutomationsService.rename(input.id, input.request));
 }
-export async function previewAutomationAction(input: AutomationPreviewRequest): Promise<ActionResult<AutomationPreview>> {
-  return run("previewAutomationAction", () => hrisApiAutomationsService.preview(input));
+export async function saveAutomationAction(input: { id: string; request: SaveAutomationRequest }): Promise<ActionResult<SaveAutomationResult>> {
+  return run("saveAutomationAction", () => hrisApiAutomationsService.save(input.id, input.request));
 }
-export async function enableAutomationAction(input: { id: string; body: EnableAutomationRequest }): Promise<ActionResult<AutomationActivationResult>> {
-  return run("enableAutomationAction", () => hrisApiAutomationsService.enable(input.id, input.body));
+export async function turnOnAutomationAction(input: { id: string; request: TurnOnRequest }): Promise<ActionResult<AutomationActivation>> {
+  return run("turnOnAutomationAction", () => hrisApiAutomationsService.turnOn(input.id, input.request));
 }
-export async function disableAutomationAction(id: string): Promise<ActionResult<AutomationActivationResult>> {
-  return run("disableAutomationAction", () => hrisApiAutomationsService.disable(id));
+export async function turnOffAutomationAction(id: string): Promise<ActionResult<AutomationActivation>> {
+  return run("turnOffAutomationAction", () => hrisApiAutomationsService.turnOff(id));
 }
-export async function resumeAutomationAction(id: string): Promise<ActionResult<AutomationActivationResult>> {
-  return run("resumeAutomationAction", () => hrisApiAutomationsService.resume(id));
+export async function undoTurnOnAutomationAction(id: string): Promise<ActionResult<AutomationActivation>> {
+  return run("undoTurnOnAutomationAction", () => hrisApiAutomationsService.undoTurnOn(id));
 }
-export async function archiveAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
+export async function archiveAutomationAction(id: string): Promise<ActionResult<Automation>> {
   return run("archiveAutomationAction", () => hrisApiAutomationsService.archive(id));
 }
-export async function unarchiveAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
+export async function unarchiveAutomationAction(id: string): Promise<ActionResult<Automation>> {
   return run("unarchiveAutomationAction", () => hrisApiAutomationsService.unarchive(id));
 }
 export async function deleteAutomationAction(id: string): Promise<ActionResult<void>> {
   return run("deleteAutomationAction", () => hrisApiAutomationsService.delete(id));
 }
+export async function duplicateAutomationAction(id: string): Promise<ActionResult<Automation>> {
+  return run("duplicateAutomationAction", () => hrisApiAutomationsService.duplicate(id));
+}
+export async function changeAutomationOwnerAction(input: { id: string; userId: string }): Promise<ActionResult<Automation>> {
+  return run("changeAutomationOwnerAction", () => hrisApiAutomationsService.changeOwner(input.id, input.userId));
+}
+export async function takeOverAutomationAction(input: { id: string; turnOnNow: boolean }): Promise<ActionResult<Automation>> {
+  return run("takeOverAutomationAction", () => hrisApiAutomationsService.takeOver(input.id, input.turnOnNow));
+}
+
+// ── checking and the test run ───────────────────────────────────────────────────────────────
+
+export async function checkAutomationAction(input: CheckAutomationRequest): Promise<ActionResult<AutomationCheck>> {
+  return run("checkAutomationAction", () => hrisApiAutomationsService.check(input));
+}
+export async function automationTestCasesAction(definition: AutomationDefinition): Promise<ActionResult<TestCase[]>> {
+  return run("automationTestCasesAction", () => hrisApiAutomationsService.testCases(definition));
+}
+export async function automationTestRunAction(input: TestRunRequest): Promise<ActionResult<TestRun>> {
+  return run("automationTestRunAction", () => hrisApiAutomationsService.testRun(input));
+}
+export async function automationTestSendAction(input: TestSendRequest): Promise<ActionResult<TestSent>> {
+  return run("automationTestSendAction", () => hrisApiAutomationsService.testSend(input));
+}
+export async function deleteAutomationTestItemsAction(automationId: string | null): Promise<ActionResult<{ deleted: number }>> {
+  return run("deleteAutomationTestItemsAction", () => hrisApiAutomationsService.deleteTestItems(automationId));
+}
+
+// ── runs ────────────────────────────────────────────────────────────────────────────────────
+
 export async function retryAutomationRunAction(runId: string): Promise<ActionResult<AutomationRun>> {
   return run("retryAutomationRunAction", () => hrisApiAutomationsService.retryRun(runId));
 }
 export async function cancelAutomationRunAction(runId: string): Promise<ActionResult<AutomationRun>> {
   return run("cancelAutomationRunAction", () => hrisApiAutomationsService.cancelRun(runId));
 }
-
-// Trying a rule — a POST, because it carries the draft (D1, D2).
-export async function testAutomationAction(input: { definition: AutomationDefinition; personId: string; actionIndex?: number | null }): Promise<ActionResult<AutomationTestResult>> {
-  return run("testAutomationAction", () => hrisApiAutomationsService.test(input));
+export async function restoreAutomationRunAction(runId: string): Promise<ActionResult<AutomationRun>> {
+  return run("restoreAutomationRunAction", () => hrisApiAutomationsService.restoreRun(runId));
 }
-export async function simulateAutomationAction(input: { definition: AutomationDefinition; personId: string }): Promise<ActionResult<AutomationSimulation>> {
-  return run("simulateAutomationAction", () => hrisApiAutomationsService.simulate(input));
+export async function skipAutomationStepAction(input: { runId: string; stepId: string }): Promise<ActionResult<AutomationRun>> {
+  return run("skipAutomationStepAction", () => hrisApiAutomationsService.skipStep(input.runId, input.stepId));
 }
-export async function duplicateAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
-  return run("duplicateAutomationAction", () => hrisApiAutomationsService.duplicate(id));
-}
-export async function changeAutomationOwnerAction(input: { id: string; userId: string }): Promise<ActionResult<AutomationRule>> {
-  return run("changeAutomationOwnerAction", () => hrisApiAutomationsService.changeOwner(input.id, input.userId));
-}
-export async function takeOverAutomationAction(id: string): Promise<ActionResult<AutomationRule>> {
-  return run("takeOverAutomationAction", () => hrisApiAutomationsService.takeOver(id));
+export async function reassignAutomationStepAction(input: { runId: string; stepId: string; userId: string }): Promise<ActionResult<AutomationRun>> {
+  return run("reassignAutomationStepAction", () =>
+    hrisApiAutomationsService.reassignStep(input.runId, input.stepId, input.userId));
 }
 export async function decideAutomationApprovalAction(input: { taskId: string; approve: boolean; comment?: string | null }): Promise<ActionResult<void>> {
   return run("decideAutomationApprovalAction", () => hrisApiAutomationsService.decideApproval(input.taskId, input.approve, input.comment));
 }
 
-// Live assignment rules — the assignment modal's segment mode.
+// ── live assignment rules — the assignment modal's segment mode ─────────────────────────────
+
 export async function previewLiveRuleAction(input: LiveAssignmentRequest): Promise<ActionResult<LiveAssignmentPreview>> {
   return run("previewLiveRuleAction", () => hrisApiAutomationsService.liveRulePreview(input));
 }

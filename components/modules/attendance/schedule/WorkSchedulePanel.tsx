@@ -79,7 +79,8 @@ export const WorkSchedulePanel: React.FC<Props> = ({ userId, today, canEdit }) =
         <ErrorState error={error} compact onRetry={() => void refetch()}/>
       ) : !isLoading && (schedules ?? []).length === 0 ? (
         <EmptyState
-          scene="attendance"
+          compact
+          scene="attendance-s"
           title={t("schedule.emptyTitle")}
           description={t("schedule.emptyDescription")}
           onCreate={canEdit ? () => setAdding(true) : undefined}

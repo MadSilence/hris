@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New automation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@600&amp;display=swap">
+<style>
+body{margin:0}
+:root{--accent:#6E1630;--on-accent:#FFFFFF;--accent-text:#6E1630;--accent-subtle:#F6F1F3;--accent-muted:#E9DCE0;--accent-ring:#B78B98;--t1:#0B0B0C;--t2:#45454A;--t3:#6B6B70;--t4:#9C9CA3;--subtle:#F7F7F8;--mist:#F3F3F5;--div:#EAEAEC;--field:#DADADF;--strong:#B4B4BA}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.s{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+a{color:#6E1630}a:hover{color:#531124}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;position:relative;display:flex;font-family:Inter,sans-serif;font-size:14px;line-height:20px;color:var(--t1);background:#FFFFFF;overflow:hidden">
+
+  <nav style="width:240px;flex:none;background:var(--subtle);border-right:1px solid var(--div);padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px">
+    <div style="display:flex;align-items:center;gap:8px;padding:0 8px 16px">
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:600">A</div>
+      <span style="font-weight:500">Acme</span>
+    </div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>Inbox</div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c1.6.6 2.6 2.2 3 5"/></svg>People</div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Time off</div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Documents</div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;border-radius:8px;background:var(--accent-muted);color:var(--accent-text);font-weight:500"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Automations</div>
+    <div style="flex:1"></div>
+    <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--t2);font-weight:500"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>Settings</div>
+    <div style="border-top:1px solid var(--div);margin-top:8px;padding:12px 8px 0;display:flex;align-items:center;gap:8px">
+      <div style="width:28px;height:28px;border-radius:999px;background:#ECE6EF;color:#441F56;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500">UT</div>
+      <div style="display:flex;flex-direction:column"><span style="font-weight:500">Ulia Tykoon</span><span style="font-size:12px;line-height:16px;color:var(--t3)">HR Admin</span></div>
+    </div>
+  </nav>
+
+  <main style="flex:1;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h1 style="margin:0;font-family:'Inter Tight',sans-serif;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-0.02em">Automations</h1>
+      <button style="height:36px;padding:0 14px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:500 14px/20px Inter,sans-serif">Add automation</button>
+    </div>
+    <div style="border:1px solid var(--div);border-radius:16px;box-shadow:0 1px 2px rgba(11,11,12,.05);overflow:hidden">
+      <div style="height:36px;display:grid;grid-template-columns:2fr 2fr 1fr 1fr;align-items:center;padding:0 16px;font-size:12px;line-height:16px;font-weight:500;color:var(--t3);border-bottom:1px solid var(--div)"><span>Name</span><span>Starts when</span><span>Status</span><span>Last run</span></div>
+      <div style="height:44px;display:grid;grid-template-columns:2fr 2fr 1fr 1fr;align-items:center;padding:0 16px;border-bottom:1px solid var(--div)"><span>New hire: first week</span><span style="color:var(--t2)">7&nbsp;days before start date</span><span><span style="display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:#E6F4EC;color:#135C3A;font-size:12px;font-weight:600"><svg class="s" style="width:14px;height:14px;color:#1E7A4F" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span></span><span style="color:var(--t2)">3&nbsp;Nov 2026</span></div>
+      <div style="height:44px;display:grid;grid-template-columns:2fr 2fr 1fr 1fr;align-items:center;padding:0 16px"><span>Long time off heads-up</span><span style="color:var(--t2)">Time off is requested</span><span><span style="display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;border:1px dashed #9C9CA3;color:#45454A;font-size:12px;font-weight:600">Draft</span></span><span style="color:var(--t3)">—</span></div>
+    </div>
+  </main>
+
+  <div style="position:absolute;inset:0;background:rgba(11,11,12,.4);display:flex;align-items:center;justify-content:center">
+    <section style="width:960px;height:820px;background:#FFFFFF;border-radius:20px;box-shadow:0 8px 32px rgba(11,11,12,.14);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between">
+        <h2 style="margin:0;font-family:'Inter Tight',sans-serif;font-size:18px;line-height:26px;font-weight:600;letter-spacing:-0.01em">New automation</h2>
+        <button aria-label="Close" style="width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--t2);display:flex;align-items:center;justify-content:center"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+
+      <div style="padding:16px 24px 0;display:flex;flex-direction:column;gap:8px">
+        <label for="desc" style="font-size:13px;line-height:18px;font-weight:500">Describe what should happen</label>
+        <div style="border:1px solid var(--accent);box-shadow:0 0 0 3px var(--accent-muted);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px">
+          <textarea id="desc" style="border:0;outline:0;resize:none;height:44px;font:400 14px/20px Inter,sans-serif;color:var(--t1);padding:0">When someone's probation ends in 14&nbsp;days, remind their manager to book a review and tell HR</textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12px;line-height:16px;color:var(--t3)">noddo AI drafts the steps. You check them before turning it on.</span>
+            <button style="height:32px;padding:0 12px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font:500 13px/18px Inter,sans-serif;display:flex;align-items:center;gap:8px"><svg class="s" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Draft with AI</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:24px 24px 0;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="font-size:15px;line-height:22px;font-weight:600">Or start from a template</span><span style="flex:1;height:1px;background:var(--div)"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button style="height:32px;padding:0 12px;border:0;border-radius:999px;background:var(--t1);color:#FFFFFF;font:500 13px/18px Inter,sans-serif">All</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">Onboarding</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">People</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">Celebrations</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">Compliance</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">Time off</button>
+          <button style="height:32px;padding:0 12px;border:1px solid var(--field);border-radius:999px;background:#FFFFFF;color:var(--t1);font:500 13px/18px Inter,sans-serif">Offboarding</button>
+        </div>
+      </div>
+
+      <div style="padding:16px 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-content:start;flex:1;overflow:auto">
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Onboarding</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Welcome email before the first day</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>7&nbsp;days before the hire date</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 8 8 5 8-5"/></svg>Email the new teammate</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Onboarding</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">A task for the manager on the first day</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>On the hire date</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Task for their manager</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Onboarding</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Onboarding completed</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>An onboarding process is completed</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell HR</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">People</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Confirm the end of probation</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>14&nbsp;days before probation ends</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>Approval from their manager</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">People</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Moved to another department</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Department changes</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell the new department head</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">People</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Holiday calendar by office</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Joins an office</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5M18 8v6M15 11h6"/></svg>Assign the office's holiday calendar</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Celebrations</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Work anniversary</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Every year on the hire date</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell their team</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Celebrations</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Birthday</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Every year on their birthday</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell their team</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Compliance</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">A document about to expire</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>30&nbsp;days before a document expires</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Task for HR</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Compliance</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">A monthly reminder to check one's details</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Every month on the 1st</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 8 8 5 8-5"/></svg>Email to check their details</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Time off</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">A long leave approved</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Time off over 10&nbsp;days is approved</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell HR and their manager</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Offboarding</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Tell HR about a termination</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>A termination is scheduled</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Tell HR</span>
+          </div>
+        </div>
+        <div style="border:1px solid var(--div);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(11,11,12,.05)">
+          <span style="font-size:12px;line-height:16px;color:var(--t3)">Offboarding</span>
+          <span style="font-size:15px;line-height:22px;font-weight:600;margin-top:-6px">Collect equipment on the last day</span>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px;color:var(--t2)">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>On the last working day</span>
+            <span style="display:flex;align-items:center;gap:8px"><svg class="s" style="color:var(--t3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Task to collect equipment</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:16px 24px;border-top:1px solid var(--div);display:flex;justify-content:flex-end">
+        <button style="height:36px;padding:0 14px;border:1px solid var(--field);border-radius:8px;background:#FFFFFF;color:var(--t1);font:500 14px/20px Inter,sans-serif">Start from scratch</button>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

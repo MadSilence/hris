@@ -24,7 +24,7 @@ export const historySource = (item: AssignmentHistoryItem, t: AccessTranslator):
       ? t.rich("audience.history.byRule", {
           rule: rule.name ?? "",
           link: (chunks) => (
-            <Link href={`/settings/automation/automations/${rule.id}`} className="text-primary no-underline hover:underline">
+            <Link href={`/automations/${rule.id}`} className="text-primary no-underline hover:underline">
               {chunks}
             </Link>
           ),
@@ -94,7 +94,7 @@ export const AssignmentHistoryList: React.FC<{ assignableType: AssignableType; a
     return (
       <EmptyState
         className={className}
-        scene="notes"
+        scene="history"
         title={t("audience.history.emptyTitle")}
         description={t("audience.history.emptyDescription")}
       />

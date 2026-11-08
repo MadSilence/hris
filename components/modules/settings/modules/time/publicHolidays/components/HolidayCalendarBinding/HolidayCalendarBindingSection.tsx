@@ -85,7 +85,7 @@ export const HolidayCalendarBindingSection: React.FC<Props> = ({ kind, refId, pl
               <>
                 {" · "}
                 <Link
-                  href={`/settings/automation/automations/${current.ruleId}`}
+                  href={`/automations/${current.ruleId}`}
                   className="text-accent-text underline-offset-4 hover:underline"
                 >
                   {t("binding.section.runLog")}

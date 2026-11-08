@@ -16,6 +16,7 @@ import {
 } from "@/components/desact/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { cn } from "@/lib/cn";
+import { Illustration } from "@/components/illustrations";
 
 export type SearchableOption = {
   value: string;
@@ -164,7 +165,12 @@ export const SearchableSelect: React.FC<{
         <Command>
           <CommandInput placeholder={t("actions.search")} />
           <CommandList onScroll={showScrollbarWhileScrolling} className={AUTOHIDE_SCROLLBAR}>
-            <CommandEmpty>{emptyLabel ?? t("searchableSelect.empty")}</CommandEmpty>
+            <CommandEmpty>
+              <div className="flex flex-col items-center gap-2">
+                <Illustration scene="no-results-s" size="s" />
+                {emptyLabel ?? t("searchableSelect.empty")}
+              </div>
+            </CommandEmpty>
             {groupOptions(options).map(([group, items]) => (
               <CommandGroup key={group} heading={group || undefined}>
                 {items.map((option) => (

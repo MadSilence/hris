@@ -194,7 +194,7 @@ export const LegalEntityComponent: React.FC<Props> = ({
           <ListEmptyState
             query={query}
             archivedView={showArchived}
-            scene="company-hub"
+            scene="legal-entity"
             title={t("list.emptyTitle")}
             description={t("list.emptyDescription")}
             noResultsHint={t("list.noResultsHint")}

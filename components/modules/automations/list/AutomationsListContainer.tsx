@@ -1,196 +1,461 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
-import { useDisplayLanguage } from "@/lib/date";
+import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Add01Icon, FlashIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
+import { Add01Icon, GridViewIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/desact/button";
+import { Checkbox } from "@/components/desact/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/desact/dropdown-menu";
+import { Icon } from "@/components/desact/icon";
 import { Skeleton } from "@/components/desact/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
-import { ListToolbar } from "@/components/ui/ListToolbar";
-import { ListEmptyState } from "@/components/feedback/ListEmptyState";
+import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { PermissionGate } from "@/components/auth/PermissionGate";
-import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
-import { useAutomations } from "@/components/modules/automations/hooks";
-import { RuleStatusBadge } from "@/components/modules/automations/shared/AutomationStatusBadge";
-import { ruleSentence, typesInDefinition } from "@/components/modules/automations/shared/sentence";
-import { startsReviews, useAutomationNames } from "@/components/modules/automations/shared/useAutomationNames";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/desact/dialog";
-import { TemplateGallery } from "./TemplateGallery";
-import { formatMoment, type AssignableType, type AutomationRuleSummary } from "@/models/automations";
-import { reasonText } from "@/components/modules/automations/shared/vocabulary";
+import { FilterChip } from "@/components/ui/FilterChip";
+import { ListToolbar } from "@/components/ui/ListToolbar";
+import { showUndoToast } from "@/lib/feedback/undoToast";
+import { showError, showSuccess } from "@/lib/errors/errorToast";
+import { isFallbackErrorMessage } from "@/lib/errors/errorMessages";
+import {
+  changeAutomationOwnerAction,
+  deleteAutomationAction,
+  duplicateAutomationAction,
+  archiveAutomationAction,
+  takeOverAutomationAction,
+  turnOffAutomationAction,
+  turnOnAutomationAction,
+  unarchiveAutomationAction,
+} from "@/components/modules/automations/actions/automationActions";
+import {
+  useArchivedAutomationsCount,
+  useAutomationMutation,
+  useAutomations,
+} from "@/components/modules/automations/hooks";
+import { AiPromptField } from "@/components/modules/automations/shared";
+import type { AutomationSummary } from "@/models/automations";
+import { AutomationCard, type CardAction } from "./AutomationCard";
+import { ChangeOwnerDialog } from "./dialogs/ChangeOwnerDialog";
+import { ListConfirmDialog } from "./dialogs/ListConfirmDialog";
+import {
+  automationsHref,
+  EMPTY_FILTERS,
+  filterAutomations,
+  isFiltered,
+  STATUS_CHIPS,
+  triggerKeysOf,
+  type ListFilters,
+  type TriggerKey,
+} from "./listModel";
 
-const NEW_HREF = "/settings/automation/automations/new";
+type ConfirmKind = "duplicate" | "archive" | "delete" | "changeOwner" | "makeMeOwner";
+type Confirm = { kind: ConfirmKind; automation: AutomationSummary } | null;
 
-const totalRuns = (r: AutomationRuleSummary) =>
-  r.runs.scheduled + r.runs.inProgress + r.runs.done + r.runs.skipped + r.runs.failed + r.runs.cancelled;
+/** The sentence a dialog shows when an action is refused: the backend's own when it says something, else the spec's. */
+const refusal = (error: unknown, fallback: string): string => {
+  const message = error instanceof Error ? error.message : "";
+  return message && !isFallbackErrorMessage(message) ? message : fallback;
+};
 
 /**
- * Settings → Automation → Automations. Each row reads as the rule's own sentence — "When someone is
- * hired · for everyone → Email the person" — so the list is readable without opening anything
- * (research § A.10). A live rule the assignment modal created is listed here too, as any other.
+ * The Automations tab (`automations-list`, E1–E7, H3, H5, H6, O1, O2, W3): the toolbar, the grid of cards, every
+ * state, and the dialogs and toasts of the card's actions. Opening an automation, editing it and turning it on happen
+ * in the editor; this list only routes there.
  */
-export function AutomationsListContainer() {
-  const t = useTranslations("automations");
-  const tCommon = useTranslations("common");
-  const tAccess = useTranslations("access");
-  const language = useDisplayLanguage();
+export const AutomationsListContainer: React.FC<{
+  canManage: boolean;
+  /** Opens New automation; `templates` — "Pick a template" — opens it at the templates. */
+  onOpenNew: (templates: boolean) => void;
+}> = ({ canManage, onOpenNew }) => {
+  const t = useTranslations("automationsList");
+  const tShared = useTranslations("automations");
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [showArchived, setShowArchived] = useState(false);
-  // The archived count comes from the wider list: the toggle is not rendered when nothing is archived.
-  const everything = useAutomations(true);
-  const { data: fields } = useUserFields();
 
-  const all = useMemo(() => everything.data ?? [], [everything.data]);
-  const archivedCount = all.filter((r) => r.status === "ARCHIVED").length;
-  const source = all.filter((r) => (showArchived ? r.status === "ARCHIVED" : r.status !== "ARCHIVED"));
+  const [filters, setFilters] = React.useState<ListFilters>(EMPTY_FILTERS);
+  const [showArchived, setShowArchived] = React.useState(false);
+  const [firstId, setFirstId] = React.useState<string | null>(null);
+  const [confirm, setConfirm] = React.useState<Confirm>(null);
+  const [confirmError, setConfirmError] = React.useState<string | null>(null);
+  const [turnOnNow, setTurnOnNow] = React.useState(false);
+  const [prompt, setPrompt] = React.useState("");
 
-  const types = useMemo(() => {
-    const set = new Set<AssignableType>();
-    for (const r of all) typesInDefinition(r.definition, fields).forEach((t) => set.add(t));
-    return set;
-  }, [all, fields]);
-  const names = useAutomationNames(types, all.some((r) => r.definition?.actions.some((a) => a.recipients?.some((x) => x.kind === "ROLE"))),
-    all.some((r) => startsReviews(r.definition)));
+  const query = useAutomations(showArchived);
+  const archivedCount = useArchivedAutomationsCount();
 
-  const rows = useMemo(() => source.map((rule) => ({
-    rule,
-    sentence: ruleSentence(t, tAccess, rule.definition, { fields, targets: names.targets, roles: names.roles }),
-  })).filter(({ rule, sentence }) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return [rule.name, rule.description ?? "", sentence.when, sentence.forWhom, sentence.does]
-      .some((text) => text.toLowerCase().includes(q));
-  }), [source, fields, names, query, t, tAccess]);
+  const duplicate = useAutomationMutation(duplicateAutomationAction);
+  const archive = useAutomationMutation(archiveAutomationAction);
+  const unarchive = useAutomationMutation(unarchiveAutomationAction);
+  const remove = useAutomationMutation(deleteAutomationAction);
+  const turnOff = useAutomationMutation(turnOffAutomationAction);
+  const turnOn = useAutomationMutation(turnOnAutomationAction);
+  const changeOwner = useAutomationMutation(changeAutomationOwnerAction);
+  const takeOver = useAutomationMutation(takeOverAutomationAction);
 
-  const openTemplate = (key: string) => router.push(`${NEW_HREF}?template=${encodeURIComponent(key)}`);
-  const [galleryOpen, setGalleryOpen] = useState(false);
+  const automations = React.useMemo(() => query.data ?? [], [query.data]);
+  const shown = React.useMemo(() => filterAutomations(automations, filters, firstId), [automations, filters, firstId]);
+  const triggerKeys = React.useMemo(() => triggerKeysOf(automations), [automations]);
 
-  const newButton = (
-    <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
-      <div className="flex items-center gap-2">
-        <Button type="button" variant="secondary" onClick={() => setGalleryOpen(true)}>{t("list.fromTemplate")}</Button>
-        <Button type="button" className="gap-1.5" onClick={() => router.push(NEW_HREF)}>
-          <Icon icon={Add01Icon} size="sm" />
-          {t("list.new")}
-        </Button>
-      </div>
-    </PermissionGate>
+  const open = (kind: ConfirmKind, automation: AutomationSummary) => {
+    setConfirmError(null);
+    setTurnOnNow(false);
+    setConfirm({ kind, automation });
+  };
+  const close = () => {
+    setConfirm(null);
+    setConfirmError(null);
+  };
+
+  const onAction = (action: CardAction, automation: AutomationSummary) => {
+    switch (action) {
+      case "edit":
+        return router.push(automationsHref.edit(automation.id));
+      case "turnOn":
+        return router.push(automationsHref.turnOn(automation.id));
+      case "runHistory":
+        return router.push(automationsHref.activity(automation.id));
+      case "seeWhy":
+        return router.push(automationsHref.seeWhy(automation.id, automation.lastRun?.runId));
+      case "fixStep":
+        return router.push(automationsHref.fixStep(automation.id, automation.pause?.stepId ?? null));
+      case "turnOff":
+        return turnOff.mutate(automation.id, {
+          onSuccess: () =>
+            showUndoToast({
+              message: t("toast.turnedOff"),
+              onUndo: () => turnOn.mutateAsync({ id: automation.id, request: { backfill: "NONE", confirmVolume: true } }),
+            }),
+          onError: (error) => showError(error),
+        });
+      case "unarchive":
+        return unarchive.mutate(automation.id, {
+          onSuccess: () => showSuccess(t("toast.unarchived")),
+          onError: (error) => showError(error),
+        });
+      case "duplicate":
+      case "archive":
+      case "delete":
+      case "changeOwner":
+        return open(action, automation);
+      case "makeMeOwner":
+        return open("makeMeOwner", automation);
+    }
+  };
+
+  const confirmDuplicate = async (automation: AutomationSummary) => {
+    try {
+      const copy = await duplicate.mutateAsync(automation.id);
+      setFirstId(copy.id);
+      close();
+      showSuccess(t("toast.duplicated"));
+    } catch (error) {
+      setConfirmError(refusal(error, t("duplicate.error")));
+    }
+  };
+
+  const confirmArchive = async (automation: AutomationSummary) => {
+    try {
+      await archive.mutateAsync(automation.id);
+      close();
+      showUndoToast({ message: t("toast.archived"), onUndo: () => unarchive.mutateAsync(automation.id) });
+    } catch (error) {
+      setConfirmError(refusal(error, t("archive.error")));
+    }
+  };
+
+  const confirmDelete = async (automation: AutomationSummary) => {
+    try {
+      await remove.mutateAsync(automation.id);
+      close();
+      showSuccess(t("toast.deleted"));
+    } catch (error) {
+      setConfirmError(refusal(error, t("delete.error")));
+    }
+  };
+
+  const confirmTakeOver = async (automation: AutomationSummary) => {
+    try {
+      await takeOver.mutateAsync({ id: automation.id, turnOnNow });
+      close();
+      showSuccess(t("toast.youOwn"));
+    } catch (error) {
+      setConfirmError(refusal(error, tShared("reason.UNKNOWN")));
+    }
+  };
+
+  // ── states ────────────────────────────────────────────────────────────────────────────────
+
+  if (query.isLoading) return <ListSkeleton />;
+
+  if (query.error) {
+    return (
+      <ErrorState
+        error={query.error}
+        title={t("error.title")}
+        message={t("error.description")}
+        onRetry={() => void query.refetch()}
+      />
+    );
+  }
+
+  const empty = (
+      <EmptyState
+        scene="automations"
+        title={t("empty.title")}
+        description={canManage ? t("empty.description") : ""}
+        className="py-16"
+        action={
+          canManage ? (
+            <div className="flex w-full max-w-[672px] flex-col items-center gap-4">
+              <AiPromptField
+                value={prompt}
+                onChange={setPrompt}
+                onSubmit={(value) => router.push(automationsHref.newWithAi(value))}
+                variant="page"
+                className="text-left"
+              />
+              <div className="flex flex-wrap justify-center gap-2">
+                {/* Pill buttons, here only (`automations-list` → Changes to SPEC, 1). */}
+                <Button type="button" variant="secondary" size="sm" className="rounded-pill" onClick={() => onOpenNew(true)}>
+                  <Icon icon={GridViewIcon} size="sm" />
+                  {t("empty.pickTemplate")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-pill"
+                  onClick={() => router.push(automationsHref.newFromScratch)}
+                >
+                  <Icon icon={Add01Icon} size="sm" />
+                  {t("empty.fromScratch")}
+                </Button>
+              </div>
+            </div>
+          ) : null
+        }
+      />
   );
 
-  const nothingYet = !everything.isLoading && !everything.error && all.length === 0;
+  // E2: nothing at all — no toolbar, because there is nothing to search. With something archived the toolbar stays,
+  // so the archive can still be reached.
+  if (!showArchived && automations.length === 0 && !(archivedCount.data ?? 0)) return empty;
+
+  const searchOnly = filters.q.trim() !== "" && filters.chip === "ALL" && filters.startsWhen === null;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <ListToolbar
-        search={{ value: query, onChange: setQuery }}
-        archived={archivedCount > 0 ? { count: archivedCount, showing: showArchived, onChange: setShowArchived } : undefined}
-        primary={newButton}
+        search={{ value: filters.q, onChange: (q) => setFilters((current) => ({ ...current, q })) }}
+        filter={
+          <div className="flex items-center gap-2">
+            {!showArchived &&
+              STATUS_CHIPS.map((chip) => (
+                <FilterChip
+                  key={chip}
+                  selected={filters.chip === chip}
+                  onClick={() => setFilters((current) => ({ ...current, chip }))}
+                >
+                  {t(`toolbar.chips.${chip}`)}
+                </FilterChip>
+              ))}
+            <StartsWhenFilter
+              keys={triggerKeys}
+              value={filters.startsWhen}
+              onChange={(startsWhen) => setFilters((current) => ({ ...current, startsWhen }))}
+            />
+          </div>
+        }
+        archived={{
+          count: archivedCount.data ?? 0,
+          showing: showArchived,
+          onChange: (next) => {
+            setShowArchived(next);
+            setFilters((current) => ({ ...current, chip: "ALL" }));
+          },
+        }}
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {everything.error ? (
-          <ErrorState error={everything.error} />
-        ) : nothingYet ? (
-          <FirstAutomation onStart={openTemplate} onBlank={() => router.push(NEW_HREF)} />
-        ) : !everything.isLoading && rows.length === 0 ? (
-          <ListEmptyState
-            fill
-            query={query}
-            archivedView={showArchived}
-            scene="automations"
-            title={t("list.emptyTitle")}
-            description={t("list.emptyDescription")}
-            noResultsHint={t("list.noResultsHint")}
-          />
+      {shown.length === 0 ? (
+        !showArchived && automations.length === 0 && !isFiltered(filters) ? (
+          empty
+        ) : showArchived && !isFiltered(filters) ? (
+          <EmptyState scene="archive" title={t("emptyArchive.title")} description={t("emptyArchive.description")} />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("list.columns.automation")}</TableHead>
-                <TableHead>{tCommon("fields.status")}</TableHead>
-                <TableHead>{t("list.columns.lastRun")}</TableHead>
-                <TableHead className="text-right">{t("list.columns.runs")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {everything.isLoading
-                ? [0, 1, 2].map((i) => (
-                  <TableRow key={`skeleton-${i}`}>
-                    <TableCell><Skeleton className="h-4 w-48" /><Skeleton className="mt-2 h-3 w-80" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16 rounded-pill" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="ml-auto h-4 w-8" /></TableCell>
-                  </TableRow>
-                ))
-                : rows.map(({ rule, sentence }) => (
-                  <TableRow
-                    key={rule.id}
-                    className="cursor-pointer"
-                    tabIndex={0}
-                    onClick={() => router.push(`/settings/automation/automations/${rule.id}`)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") router.push(`/settings/automation/automations/${rule.id}`);
-                    }}
-                  >
-                    <TableCell className="max-w-0 py-3">
-                      <div className="truncate font-medium text-primary">{rule.name}</div>
-                      {rule.definition ? (
-                        <div className="mt-0.5 truncate text-body text-tertiary" data-test="rule-sentence">
-                          {t("sentence.rule.row", { when: sentence.when, forWhom: sentence.forWhom, does: sentence.does })}
-                        </div>
-                      ) : null}
-                      {rule.status === "PAUSED" && rule.pausedReason ? (
-                        <div className="mt-0.5 truncate text-hint text-status-pending-text">{reasonText(t, rule.pausedReason, language)}</div>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="w-32"><RuleStatusBadge status={rule.status} /></TableCell>
-                    <TableCell className="w-44 text-body text-tertiary">{formatMoment(rule.lastRunAt, language)}</TableCell>
-                    <TableCell className="w-20 text-right tabular-nums">{totalRuns(rule)}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+          <NoResults
+            scene={searchOnly ? "no-results-s" : "no-match-s"}
+            title={t("noResults.title")}
+            hint={t("noResults.hint")}
+            action={
+              <Button type="button" variant="secondary" size="sm" onClick={() => setFilters(EMPTY_FILTERS)}>
+                {t("noResults.clear")}
+              </Button>
+            }
+          />
+        )
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {shown.map((automation) => (
+            <li key={automation.id}>
+              <AutomationCard automation={automation} canManage={canManage} onAction={onAction} />
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("list.galleryTitle")}</DialogTitle>
-            <DialogDescription>{t("list.galleryDescription")}</DialogDescription>
-          </DialogHeader>
-          {galleryOpen && <TemplateGallery onPick={openTemplate} />}
-        </DialogContent>
-      </Dialog>
+      <ListConfirmDialog
+        open={confirm?.kind === "duplicate"}
+        title={t("duplicate.title", { name: confirm?.automation.name ?? "" })}
+        confirmLabel={t("duplicate.confirm")}
+        busyLabel={t("duplicate.busy")}
+        busy={duplicate.isPending}
+        error={confirmError}
+        onConfirm={() => confirm && void confirmDuplicate(confirm.automation)}
+        onCancel={close}
+      >
+        <p>{t("duplicate.description")}</p>
+      </ListConfirmDialog>
+
+      <ListConfirmDialog
+        open={confirm?.kind === "archive"}
+        tone="archive"
+        title={t("archive.title", { name: confirm?.automation.name ?? "" })}
+        confirmLabel={t("archive.confirm")}
+        busyLabel={t("archive.busy")}
+        busy={archive.isPending}
+        error={confirmError}
+        onConfirm={() => confirm && void confirmArchive(confirm.automation)}
+        onCancel={close}
+      >
+        <p>{t("archive.stops", { waiting: confirm?.automation.waiting ?? 0 })}</p>
+        <p>{t("archive.history")}</p>
+      </ListConfirmDialog>
+
+      <ListConfirmDialog
+        open={confirm?.kind === "delete"}
+        tone="destructive"
+        title={t("delete.title", { name: confirm?.automation.name ?? "" })}
+        confirmLabel={t("delete.confirm")}
+        busyLabel={t("delete.busy")}
+        busy={remove.isPending}
+        error={confirmError}
+        onConfirm={() => confirm && void confirmDelete(confirm.automation)}
+        onCancel={close}
+      >
+        <p>{t("delete.description")}</p>
+      </ListConfirmDialog>
+
+      <ListConfirmDialog
+        open={confirm?.kind === "makeMeOwner"}
+        title={t("makeMeOwner.title", { name: confirm?.automation.name ?? "" })}
+        confirmLabel={t("makeMeOwner.confirm")}
+        busyLabel={t("makeMeOwner.busy")}
+        busy={takeOver.isPending}
+        error={confirmError}
+        onConfirm={() => confirm && void confirmTakeOver(confirm.automation)}
+        onCancel={close}
+        extra={
+          <label className="flex items-center gap-2 text-body text-primary">
+            <Checkbox checked={turnOnNow} onCheckedChange={(checked) => setTurnOnNow(checked === true)} />
+            {t("makeMeOwner.turnOnNow")}
+          </label>
+        }
+      >
+        {confirm?.automation.pause?.reason === "OWNER_LEFT" || confirm?.automation.pause?.reason === "OWNER_LACKS_RIGHT" ? (
+          <p>
+            {t(`makeMeOwner.${confirm.automation.pause.reason}`, {
+              owner: confirm.automation.owner?.name ?? t("card.someone"),
+            })}
+          </p>
+        ) : null}
+        <p>{t("makeMeOwner.fromYou")}</p>
+      </ListConfirmDialog>
+
+      <ChangeOwnerDialog
+        automation={confirm?.kind === "changeOwner" ? confirm.automation : null}
+        busy={changeOwner.isPending}
+        error={confirmError}
+        onCancel={close}
+        onConfirm={(owner) => {
+          if (!confirm) return;
+          changeOwner.mutate(
+            { id: confirm.automation.id, userId: owner.id },
+            {
+              onSuccess: () => {
+                close();
+                showSuccess(t("toast.ownerChanged", { name: owner.name }));
+              },
+              onError: (error) => setConfirmError(refusal(error, tShared("reason.UNKNOWN"))),
+            },
+          );
+        }}
+      />
     </div>
   );
-}
+};
 
-/**
- * The first-day screen: one sentence of what this place is for, the one action that fills it, and four
- * ready-made starting points — each opens the builder filled in, nothing is saved until Publish.
- */
-function FirstAutomation({ onStart, onBlank }: { onStart: (key: string) => void; onBlank: () => void }) {
-  const t = useTranslations("automations");
+/** "Starts when": a menu of the triggers the listed automations start from, single choice. */
+const StartsWhenFilter: React.FC<{
+  keys: TriggerKey[];
+  value: TriggerKey | null;
+  onChange: (value: TriggerKey | null) => void;
+}> = ({ keys, value, onChange }) => {
+  const t = useTranslations("automationsList");
+  const tShared = useTranslations("automations");
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 py-16 text-center">
-      <div className="rounded-card bg-subtle p-4 text-secondary"><Icon icon={FlashIcon} size="lg" /></div>
-      <div className="space-y-2">
-        <h3 className="text-section-title text-primary">{t("list.firstTitle")}</h3>
-        <p className="text-body text-tertiary">{t("list.firstDescription")}</p>
-      </div>
-      <PermissionGate resource="SETTINGS.AUTOMATIONS" action="MANAGE">
-        <TemplateGallery onPick={onStart} />
-        <Button type="button" className="gap-1.5" onClick={onBlank}>
-          <Icon icon={Add01Icon} size="sm" />
-          {t("list.new")}
-        </Button>
-      </PermissionGate>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <FilterChip withArrow selected={value !== null}>
+          {value ? t("toolbar.startsWhenPicked", { trigger: tShared(`trigger.${value}`) }) : t("toolbar.startsWhen")}
+        </FilterChip>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-56 p-1">
+        <DropdownMenuItem className="gap-2.5 rounded-control px-2.5 py-1.5" onClick={() => onChange(null)}>
+          <Icon icon={Tick02Icon} size="sm" className={value === null ? "text-primary" : "invisible"} />
+          {t("toolbar.startsWhenAny")}
+        </DropdownMenuItem>
+        {keys.length > 0 && <DropdownMenuSeparator className="my-1 bg-mist" />}
+        {keys.map((key) => (
+          <DropdownMenuItem key={key} className="gap-2.5 rounded-control px-2.5 py-1.5" onClick={() => onChange(key)}>
+            <Icon icon={Tick02Icon} size="sm" className={value === key ? "text-primary" : "invisible"} />
+            {tShared(`trigger.${key}`)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-}
+};
+
+/** E3: the toolbar's shapes, then six cards in the grid's shape. */
+const ListSkeleton: React.FC = () => (
+  <div className="flex flex-col gap-5" aria-busy="true">
+    <div className="flex items-center gap-3">
+      <Skeleton className="h-9 w-[260px] rounded-control" />
+      {[0, 1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-8 w-16 rounded-pill" />
+      ))}
+      <Skeleton className="h-8 w-28 rounded-pill" />
+    </div>
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <li key={i} className="flex h-[212px] flex-col gap-3 rounded-card border border-divider bg-card p-4">
+          <Skeleton className="h-6 w-16 rounded-pill" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-9 rounded-control" />
+            <Skeleton className="h-5 w-2/3" />
+          </div>
+          <Skeleton className="h-4 w-1/2" />
+          <div className="mt-auto flex items-center justify-between border-t border-divider pt-3">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="size-6 rounded-pill" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+);

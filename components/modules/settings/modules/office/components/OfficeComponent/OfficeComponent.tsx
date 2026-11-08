@@ -192,7 +192,7 @@ export const OfficeComponent: FC<Props> = ({
         <ListEmptyState
           query={query}
           archivedView={showArchived}
-          scene="company-hub"
+          scene="office"
           title={t("list.emptyTitle")}
           description={t("list.emptyDescription")}
           noResultsHint={t("list.noResultsHint")}

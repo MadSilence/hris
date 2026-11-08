@@ -92,7 +92,7 @@ export const JobLevel: React.FC<JobLevelProps> = ({
       ) : visible.length === 0 ? (
         <ListEmptyState
           query={query}
-          scene="goals-and-growth"
+          scene="career"
           title={t("empty.title")}
           description={t("empty.description")}
           noResultsHint={t("empty.noResultsHint")}

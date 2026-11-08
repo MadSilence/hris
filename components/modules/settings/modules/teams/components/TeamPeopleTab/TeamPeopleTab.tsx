@@ -220,7 +220,7 @@ export function TeamPeopleTab({
         ) : items.length === 0 ? (
           <ListEmptyState
             query={query}
-            scene="team-and-org"
+            scene="people"
             title={t("people.empty")}
             description={tShared("assignHint")}
             noResultsHint={tShared("tryDifferent")}

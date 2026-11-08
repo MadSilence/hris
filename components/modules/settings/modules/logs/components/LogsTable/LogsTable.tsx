@@ -177,7 +177,7 @@ export const LogsTable: React.FC<{
                 {/* Nothing to create from a journal: it is written by the rest of the product. */}
                 <ListEmptyState
                   query={query}
-                  scene="notes"
+                  scene="history"
                   title={t("emptyTitle")}
                   description={t("emptyDescription")}
                   noResultsHint={t("noResultsHint")}

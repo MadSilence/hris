@@ -2,11 +2,12 @@
 
 import { FC } from "react";
 import { useTranslations } from "next-intl";
-import { NotificationOff01Icon, SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Switch } from "@/components/desact/switch";
 import type { NotificationPreference } from "@/models/notifications";
+import { Illustration } from "@/components/illustrations";
 import {
   useNotificationPreferences,
   useSetNotificationPreference,
@@ -70,7 +71,7 @@ export const NotificationPreferences: FC = () => {
         </div>
       ) : !preferences || preferences.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
-          <Icon icon={NotificationOff01Icon} size="lg" className="text-disabled" />
+          <Illustration scene="notifications" />
           <p className="text-body text-tertiary">{t("preferences.empty")}</p>
         </div>
       ) : (

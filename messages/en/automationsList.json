@@ -1,0 +1,201 @@
+{
+  "page": {
+    "title": "Automations",
+    "description": "Routine HR work that runs by itself.",
+    "add": "Add automation",
+    "viewOnly": "You can view automations, not change them",
+    "tabs": {
+      "automations": "Automations",
+      "activity": "Activity"
+    }
+  },
+  "toolbar": {
+    "chips": {
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "DRAFT": "Drafts"
+    },
+    "startsWhen": "Starts when",
+    "startsWhenPicked": "Starts when: {trigger}",
+    "startsWhenAny": "Anything"
+  },
+  "when": {
+    "today": "today, {time}",
+    "yesterday": "yesterday, {time}",
+    "Today": "Today, {time}",
+    "Yesterday": "Yesterday, {time}"
+  },
+  "card": {
+    "lastRun": "Last run {when} · {runs, plural, one {# run} other {# runs}}{waiting, plural, =0 {} other { · # waiting}}",
+    "notRunYet": "No runs yet{waiting, plural, =0 {} other { · # waiting}}",
+    "lastRunFailed": "Last run failed on {date}",
+    "seeWhy": "See why",
+    "draft": "Edited {days, plural, =0 {today} =1 {yesterday} other {# days ago}} · not turned on yet",
+    "draftUndated": "Not turned on yet",
+    "archived": "Archived {date}{hasName, select, yes { by {name}} other {}} · {runs, plural, one {# run} other {# runs}}",
+    "owner": "Owner",
+    "noOwner": "No owner",
+    "actions": "Actions for {name}",
+    "someone": "Someone",
+    "ownerLabel": "Owner: {name}"
+  },
+  "menu": {
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "turnOff": "Turn off",
+    "turnOn": "Turn on",
+    "runHistory": "Run history",
+    "changeOwner": "Change owner",
+    "archive": "Archive",
+    "delete": "Delete",
+    "unarchive": "Unarchive"
+  },
+  "duplicate": {
+    "title": "Duplicate {name}?",
+    "description": "The copy is a draft. It doesn't run until you turn it on.",
+    "confirm": "Duplicate",
+    "busy": "Duplicating…",
+    "error": "We couldn't duplicate it. Try again."
+  },
+  "archive": {
+    "title": "Archive {name}?",
+    "stops": "It stops right away and moves to Archived.{waiting, plural, =0 {} one { # request waiting on a manager stays as it is, but no more steps run for it.} other { # requests waiting on a manager stay as they are, but no more steps run for them.}}",
+    "history": "Its run history stays. You can unarchive it later.",
+    "confirm": "Archive",
+    "busy": "Archiving…",
+    "error": "We couldn't archive it. Try again."
+  },
+  "delete": {
+    "title": "Delete {name}?",
+    "description": "It was never turned on, so nothing ran. You can't undo this.",
+    "confirm": "Delete automation",
+    "busy": "Deleting…",
+    "error": "We couldn't delete it. Try again."
+  },
+  "changeOwner": {
+    "title": "Who should own {name}?",
+    "description": "Its emails, tasks and requests will come from the new owner. They also hear when it fails or is paused.",
+    "ownerNow": "Owner now",
+    "label": "New owner",
+    "hint": "Only people who can manage automations.",
+    "group": "People who can manage automations",
+    "searchPlaceholder": "Search",
+    "noResults": "No one matches",
+    "remove": "Remove {name}",
+    "note": "Runs already going finish as they are. New runs come from {firstName}.",
+    "confirm": "Change owner",
+    "busy": "Changing owner…"
+  },
+  "makeMeOwner": {
+    "title": "Become the owner of {name}?",
+    "OWNER_LEFT": "{owner}, its owner, has left the company, so it needs a new owner.",
+    "OWNER_LACKS_RIGHT": "{owner}, its owner, can't manage automations any more, so it needs a new owner.",
+    "fromYou": "Its emails, tasks and requests will come from you, so it can do only what you can.",
+    "turnOnNow": "Turn it on now",
+    "confirm": "Make me the owner",
+    "busy": "Making you the owner…"
+  },
+  "toast": {
+    "ownerChanged": "{name} owns it now",
+    "duplicated": "Automation duplicated",
+    "turnedOff": "Automation turned off",
+    "archived": "Automation archived",
+    "unarchived": "Automation unarchived",
+    "youOwn": "You're the owner now",
+    "deleted": "Automation deleted"
+  },
+  "empty": {
+    "title": "No automations yet",
+    "description": "Tell noddo what should happen.\nWe'll draft the steps.",
+    "pickTemplate": "Pick a template",
+    "fromScratch": "Start from scratch"
+  },
+  "noResults": {
+    "title": "No automations match these filters",
+    "hint": "Try another word or clear the filters.",
+    "clear": "Clear filters"
+  },
+  "emptyArchive": {
+    "title": "Nothing archived",
+    "description": "Automations you archive wait here, with their run history."
+  },
+  "error": {
+    "title": "We couldn't load automations",
+    "description": "Your automations keep running."
+  },
+  "ai": {
+    "label": "Describe what should happen",
+    "example": "When someone's probation ends in 14 days, remind their manager to book a review",
+    "exampleLong": "When someone's probation ends in 14 days, remind their manager to book a review and tell HR",
+    "hintPage": "You check every step before it turns on.",
+    "hintDialog": "noddo AI drafts the steps. You check them before turning it on.",
+    "submit": "Draft with AI",
+    "busy": "Drafting…",
+    "notConnected": "noddo AI isn't connected yet. Start from a template or from scratch — your text is kept."
+  },
+  "newDialog": {
+    "title": "New automation",
+    "section": "Or start from a template",
+    "categories": {
+      "all": "All",
+      "Onboarding": "Onboarding",
+      "People": "People",
+      "Celebrations": "Celebrations",
+      "Compliance": "Compliance",
+      "Time off": "Time off",
+      "Offboarding": "Offboarding"
+    },
+    "templatesError": "We couldn't load the templates",
+    "fromScratch": "Start from scratch"
+  },
+  "activity": {
+    "filters": "Filters",
+    "filtersCount": "Filters {count}",
+    "allAutomations": "All automations",
+    "automationLabel": "Automation:",
+    "clearAutomation": "Show every automation",
+    "searchAutomations": "Search",
+    "noAutomationMatches": "No automation matches",
+    "openInEditor": "Open in editor",
+    "chips": {
+      "ALL": "All",
+      "FAILED": "Needs attention",
+      "WAITING": "Waiting",
+      "NEXT_7_DAYS": "Next 7 days"
+    },
+    "columns": {
+      "person": "Person",
+      "automation": "Automation",
+      "when": "When",
+      "status": "Status"
+    },
+    "seeWhy": "See why",
+    "hidden": "Plus {count, plural, one {# run} other {# runs}} you can't see.",
+    "about": {
+      "leave": "{type}, {range}",
+      "leaveDays": "{type}, {days, plural, one {# day} other {# days}}",
+      "dated": "{trigger}, {date}"
+    },
+    "empty": {
+      "title": "Nothing has run yet",
+      "description": "Runs show up here once an automation is on.",
+      "action": "Go to automations"
+    },
+    "noResults": {
+      "title": "No runs match",
+      "hint": "Try another name or clear the filters.",
+      "clear": "Clear filters"
+    },
+    "zero": {
+      "FAILED": "Nothing needs attention",
+      "WAITING": "Nothing is waiting",
+      "NEXT_7_DAYS": "Nothing planned for the next 7 days"
+    },
+    "error": {
+      "title": "We couldn't load the activity",
+      "description": "Your automations keep running."
+    },
+    "closeRun": "Close the run"
+  }
+}

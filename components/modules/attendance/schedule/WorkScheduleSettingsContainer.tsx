@@ -37,7 +37,7 @@ export const WorkScheduleSettingsContainer: React.FC = () => {
         <ErrorState error={capabilities.error} compact onRetry={() => void capabilities.refetch()}/>
       ) : capabilities.data && !capabilities.data.canViewSchedule ? (
         <EmptyState
-          scene="attendance"
+          scene="policies"
           title={t("schedule.settings.unavailableTitle")}
           description={t("schedule.settings.unavailableDescription")}
         />

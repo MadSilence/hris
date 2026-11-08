@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none">
+  <path data-role="baseline" d="M30 136 H210" style="fill:none;stroke:var(--illustration-baseline, #EAEAEC)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="ink" d="M56 26 H184 A10 10 0 0 1 194 36 V88 A10 10 0 0 1 184 98 H96 L79 114 Q72 120 72 111 V98 H56 A10 10 0 0 1 46 88 V36 A10 10 0 0 1 56 26 Z" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle data-role="support" cx="92" cy="62" r="10" style="fill:none;stroke:var(--illustration-support, #C9C9CE)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle data-role="support" cx="120" cy="62" r="10" style="fill:none;stroke:var(--illustration-support, #C9C9CE)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle data-role="ring" cx="148" cy="62" r="10" stroke="currentColor" style="fill:none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

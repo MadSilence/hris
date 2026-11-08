@@ -293,15 +293,16 @@ See `icons.md` for the full list (96 icons in 8 groups, React import names) and 
 
 ## 10. Illustrations
 
-Files: `assets/illustrations/*.svg` (36 SVGs: 30 scenes + size and on-Wine variants). Canvas 240×150. Ring elements use `stroke="currentColor"`; Ink, gray, baseline and white knock-outs read CSS variables with fallbacks (`--illustration-ink`, `--illustration-support`, `--illustration-support-light`, `--illustration-baseline`, `--illustration-knockout`), so the same files work in the dark theme when inlined.
+Files: `assets/illustrations/*.svg` (59 SVGs: 46 scenes + size and on-Wine variants), and `assets/illustrations/404/` (the 404 page's own drawing, moving and still). Canvas 240×150. Ring elements use `stroke="currentColor"`; Ink, gray, baseline and white knock-outs read CSS variables with fallbacks (`--illustration-ink`, `--illustration-support`, `--illustration-support-light`, `--illustration-baseline`, `--illustration-knockout`), so the same files work in the dark theme when inlined.
 
 - MUST: one object drawn in Ink, exactly one ring element in the accent (the person or the "answer"), gray support lines, one baseline. No faces, fills, gradients, shadows or perspective.
+- MUST NOT have sharp corners, in every illustration in the product and the package. Every corner of a shape is rounded with a small curve (about 4–6 units on the 240×150 canvas) on top of the round line joins; positions and stroke widths do not change. Allowed to stay: simple line ends, checkmarks, and a tear or zigzag that is the point of the drawing (the torn page).
 - MUST: the ring takes the workspace accent in every scene, including success. No green in illustrations.
 - MUST inline the SVG (or use it as a React component) and set `color: var(--accent)` on it; as an `<img>` the ring renders black.
 - On Wine or Ink backgrounds: Ink → white, ring → Rose, gray → Wine 500 (`onboarding-on-wine.svg` shows the recipe).
 - Sizes: S 96 px (panels, dropdowns, module headers; drop support lines), M 160–256 px (empty pages and tabs, default), L 320–480 px (onboarding, success, website). Strokes scale; never thinner than 2 px on screen.
 - MUST NOT show an illustration alone: illustration → title → short text → action(s), centred.
-- Illustrations are static (the nod belongs to loaders and Approve only).
+- Illustrations are static (the nod belongs to loaders and Approve only). The 404 page is not an empty-state illustration and is the one exception: its drawing (480 px, 5 px lines) plays once on load — five balls fall, bounce, roll apart and stay — and is still under `prefers-reduced-motion: reduce`.
 - Photography (marketing only): real people at real work, daylight, cool neutral grade; no stock handshakes or thumbs-up.
 
 Scene index:
@@ -314,23 +315,25 @@ Scene index:
 | offboarding | last day, handover, exit checklist |
 | time-off (+ `-s`, `-m`, `-l`) | no upcoming leave, balance page |
 | sick-day | sick leave request |
-| reviews-and-one-on-ones | review cycle, feedback inbox |
+| reviews-and-one-on-ones (+ `-s`) | review cycle, feedback inbox |
 | hiring | no open roles, candidate pipeline |
 | payroll | payslips, compensation, expenses |
 | team-and-org | org chart, empty team, invites |
 | calendar | holidays, events, nothing scheduled |
 | all-caught-up | empty inbox, nothing to approve |
-| no-results (+ `-s`) | search/filters with nothing found; **404** |
+| no-results (+ `-s`) | a search with nothing found |
+| no-match (+ `-s`) | a filter that left nothing |
+| 404/404-balls (animated, static) | the **404** page — a page design of its own, see "Illustrations are static" |
 | something-broke | errors, offline, failed sync; **500** |
 | policies | handbook, compliance; **403** (no access) |
 | all-approved (+ `-l`) | success screens, setup complete |
-| goals-and-growth | OKRs, career paths, promotions |
-| attendance | clock-ins, shifts, timesheets |
+| goals-and-growth | OKRs, goals |
+| attendance (+ `-s`) | clock-ins, shifts, timesheets |
 | analytics | reports, dashboards |
-| company-hub | company info, offices, handbook |
+| company-hub | company info, the setup wizard |
 | automations | triggers, rules, scheduled actions |
 | notes | 1:1 notes, private notes |
-| forms | requests, surveys, custom forms |
+| forms (+ `-s`) | requests, surveys, custom forms |
 | announcements | company news, updates |
 | benefits | perks, allowances, insurance |
 | equipment | laptops, devices, assets |
@@ -339,6 +342,21 @@ Scene index:
 | celebrations | birthdays, work anniversaries |
 | integrations | Slack, calendars, payroll, SSO |
 | onboarding-on-wine | onboarding on a Wine/Ink background |
+| coming-soon | every "coming soon" placeholder |
+| archive | the archived view of any list |
+| trash | a trash, deleted files |
+| history (+ `-s`) | logs, versions, ledgers, change history |
+| career (+ `-s`) | career tracks, position history |
+| templates | template catalogues |
+| office | offices, locations |
+| tasks | to-do lists, task templates |
+| people (+ `-s`) | people lists, assigned people |
+| review-cycle | review cycle participants |
+| nomination | peer nomination |
+| welcome | preboarding, the new hire's page |
+| legal-entity | legal entities |
+| job-families | job families, groups |
+| notifications | notification settings |
 
 ---
 
@@ -376,7 +394,7 @@ The nod: the ring moves down 7/40 of the x-height with a +2/40 overshoot, settle
 - MUST keep the sidebar and top bar during in-app page loads; only the content area loads.
 - MUST NOT block the whole screen for a single save; load in place. The only full-screen loaders are splash A and B.
 - Button in progress: label becomes "Saving…" / "Approving…", the ring nods, width stays fixed, a second click is ignored.
-- Error pages (404, 500, 403): M illustration, short title, one line of max 6 words, one primary + one secondary action. Never a dead end. 500 shows an error ID in small mono text. Examples: "We can't find this page / The link may be broken. [Go to home] [Search]"; "Something broke on our side / Your work is saved. Try again. [Try again] [Status page]"; "This page is private / Ask an admin for access. [Request access] [Go back]".
+- Error pages (404, 500, 403): M illustration (404: its own drawing, § 10), short title, one line of max 6 words, one primary + one secondary action. Never a dead end. 500 shows an error ID in small mono text. Examples: "We can't find this page / The link may be broken. [Go to home] [Search]"; "Something broke on our side / Your work is saved. Try again. [Try again] [Status page]"; "This page is private / Ask an admin for access. [Request access] [Go back]".
 - Field error: red border, alert icon and text under the field that says how to fix it ("Add the domain, like lena@company.com"). The error replaces the hint.
 - Offline banner: Mist background, gray icon, Ink text ("You're offline. Changes will sync when you're back."). Never yellow or red.
 - Empty state: illustration → title → at most 2 sentences of up to 8 words, each on its own line → one action (optionally one secondary). Centred.

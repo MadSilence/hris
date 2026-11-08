@@ -3,40 +3,39 @@ import type {
   AssignableType,
   AssignmentHistoryItem,
   AssignmentProvenance,
-  AutomationActivationResult,
+  Automation,
+  AutomationActivation,
   AutomationCatalog,
-  AutomationPreview,
-  AutomationPreviewRequest,
-  AutomationRule,
-  AutomationRuleSummary,
+  AutomationCheck,
+  AutomationDefinition,
   AutomationRun,
-  AutomationRunStatus,
-  AutomationSimulation,
+  AutomationSummary,
   AutomationTemplate,
-  AutomationTestResult,
   AutomationVersion,
+  CheckAutomationRequest,
   CreateAutomationRequest,
-  EnableAutomationRequest,
+  DraftAutomationRequest,
   LiveAssignmentCreated,
   LiveAssignmentPreview,
   LiveAssignmentRequest,
   Page,
-  PublishAutomationRequest,
-  PublishAutomationResult,
+  PersonRef,
   RenameAutomationRequest,
   ReturnToRuleRequest,
+  RunQuery,
+  RunSlice,
+  SaveAutomationRequest,
+  SaveAutomationResult,
+  TestCase,
+  TestRun,
+  TestRunRequest,
+  TestSendRequest,
+  TestSent,
+  TurnOnRequest,
 } from "@/models/automations";
 
 type Body = Record<string, unknown>;
-type AutomationDefinitionBody = import("@/models/automations").AutomationDefinition;
 const body = <T,>(value: T) => value as unknown as Body;
-
-export type AutomationRunsQuery = {
-  status?: AutomationRunStatus | null;
-  personId?: string | null;
-  page?: number;
-  size?: number;
-};
 
 const query = (params: Record<string, string | number | boolean | null | undefined>): string => {
   const q = new URLSearchParams();
@@ -47,57 +46,94 @@ const query = (params: Record<string, string | number | boolean | null | undefin
   return s ? `?${s}` : "";
 };
 
-/** Backend URLs for Settings → Automation and the live assignment rules. No logic (AUTOMATIONS_DESIGN.md § 8). */
+/** Backend URLs for Automations and the live assignment rules. No logic. */
 export class HrisApiAutomationsClient {
   catalog() {
     return hrisApiClient.get<AutomationCatalog>("/automations/catalog");
   }
-  list(includeArchived: boolean) {
-    return hrisApiClient.get<AutomationRuleSummary[]>(`/automations${query({ includeArchived })}`);
+  templates() {
+    return hrisApiClient.get<AutomationTemplate[]>("/automations/templates");
+  }
+  list(archived: boolean) {
+    return hrisApiClient.get<AutomationSummary[]>(`/automations${query({ archived })}`);
+  }
+  archivedCount() {
+    return hrisApiClient.get<number>("/automations/archived-count");
+  }
+  ownerCandidates(q: string | null) {
+    return hrisApiClient.get<PersonRef[]>(`/automations/owner-candidates${query({ q })}`);
   }
   get(id: string) {
-    return hrisApiClient.get<AutomationRule>(`/automations/${id}`);
+    return hrisApiClient.get<Automation>(`/automations/${id}`);
   }
   versions(id: string) {
     return hrisApiClient.get<AutomationVersion[]>(`/automations/${id}/versions`);
   }
+  check(request: CheckAutomationRequest) {
+    return hrisApiClient.post<AutomationCheck>("/automations/check", body(request));
+  }
+
   create(request: CreateAutomationRequest) {
-    return hrisApiClient.post<AutomationRule>("/automations", body(request));
+    return hrisApiClient.post<Automation>("/automations", body(request));
+  }
+  saveDraft(id: string, request: DraftAutomationRequest) {
+    return hrisApiClient.put<Automation>(`/automations/${id}/draft`, body(request));
   }
   rename(id: string, request: RenameAutomationRequest) {
-    return hrisApiClient.patch<AutomationRule>(`/automations/${id}`, body(request));
+    return hrisApiClient.patch<Automation>(`/automations/${id}`, body(request));
   }
-  publish(id: string, request: PublishAutomationRequest) {
-    return hrisApiClient.post<PublishAutomationResult>(`/automations/${id}/versions`, body(request));
+  save(id: string, request: SaveAutomationRequest) {
+    return hrisApiClient.post<SaveAutomationResult>(`/automations/${id}/versions`, body(request));
   }
-  preview(request: AutomationPreviewRequest) {
-    return hrisApiClient.post<AutomationPreview>("/automations/preview", body(request));
+  turnOn(id: string, request: TurnOnRequest) {
+    return hrisApiClient.post<AutomationActivation>(`/automations/${id}/turn-on`, body(request));
   }
-  enable(id: string, request: EnableAutomationRequest) {
-    return hrisApiClient.post<AutomationActivationResult>(`/automations/${id}/enable`, body(request));
+  turnOff(id: string) {
+    return hrisApiClient.post<AutomationActivation>(`/automations/${id}/turn-off`);
   }
-  disable(id: string) {
-    return hrisApiClient.post<AutomationActivationResult>(`/automations/${id}/disable`);
-  }
-  resume(id: string) {
-    return hrisApiClient.post<AutomationActivationResult>(`/automations/${id}/resume`);
+  undoTurnOn(id: string) {
+    return hrisApiClient.post<AutomationActivation>(`/automations/${id}/undo-turn-on`);
   }
   archive(id: string) {
-    return hrisApiClient.post<AutomationRule>(`/automations/${id}/archive`);
+    return hrisApiClient.post<Automation>(`/automations/${id}/archive`);
   }
   unarchive(id: string) {
-    return hrisApiClient.post<AutomationRule>(`/automations/${id}/unarchive`);
+    return hrisApiClient.post<Automation>(`/automations/${id}/unarchive`);
   }
   delete(id: string) {
     return hrisApiClient.delete<void>(`/automations/${id}`);
   }
-  runs(id: string, q: AutomationRunsQuery) {
-    return hrisApiClient.get<Page<AutomationRun>>(
-      `/automations/${id}/runs${query({ status: q.status, personId: q.personId, page: q.page, size: q.size })}`,
-    );
+  duplicate(id: string) {
+    return hrisApiClient.post<Automation>(`/automations/${id}/duplicate`);
+  }
+  changeOwner(id: string, userId: string) {
+    return hrisApiClient.post<Automation>(`/automations/${id}/owner`, body({ userId }));
+  }
+  takeOver(id: string, turnOnNow: boolean) {
+    return hrisApiClient.post<Automation>(`/automations/${id}/take-over`, body({ turnOnNow }));
+  }
+
+  testCases(definition: AutomationDefinition) {
+    return hrisApiClient.post<TestCase[]>("/automations/test-cases", body({ definition }));
+  }
+  testRun(request: TestRunRequest) {
+    return hrisApiClient.post<TestRun>("/automations/test-run", body(request));
+  }
+  testSend(request: TestSendRequest) {
+    return hrisApiClient.post<TestSent>("/automations/test-run/send", body(request));
+  }
+  deleteTestItems(automationId: string | null) {
+    return hrisApiClient.delete<{ deleted: number }>(`/automations/test-items${query({ automationId })}`);
+  }
+
+  runs(request: RunQuery) {
+    return hrisApiClient.post<RunSlice>("/automations/runs/search", body(request));
+  }
+  run(runId: string) {
+    return hrisApiClient.get<AutomationRun>(`/automations/runs/${runId}`);
   }
   personRuns(personId: string, page = 0, size = 20) {
-    return hrisApiClient.get<Page<AutomationRun>>(`/automations/runs${query({ personId, page, size })}`);
+    return hrisApiClient.get<AutomationRun[]>(`/automations/people/${personId}/runs${query({ page, size })}`);
   }
   retryRun(runId: string) {
     return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/retry`);
@@ -105,32 +141,21 @@ export class HrisApiAutomationsClient {
   cancelRun(runId: string) {
     return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/cancel`);
   }
+  restoreRun(runId: string) {
+    return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/restore`);
+  }
+  skipStep(runId: string, stepId: string) {
+    return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/steps/${stepId}/skip`);
+  }
+  reassignStep(runId: string, stepId: string, userId: string) {
+    return hrisApiClient.post<AutomationRun>(`/automations/runs/${runId}/steps/${stepId}/assignee`, body({ userId }));
+  }
 
-  // trying a rule, copying it, its owner (second round: D1–D4, E2, E3)
-  test(request: { definition: AutomationDefinitionBody; personId: string; actionIndex?: number | null }) {
-    return hrisApiClient.post<AutomationTestResult>("/automations/test", body(request));
-  }
-  simulate(request: { definition: AutomationDefinitionBody; personId: string }) {
-    return hrisApiClient.post<AutomationSimulation>("/automations/simulate", body(request));
-  }
-  templates() {
-    return hrisApiClient.get<AutomationTemplate[]>("/automations/templates");
-  }
-  duplicate(id: string) {
-    return hrisApiClient.post<AutomationRule>(`/automations/${id}/duplicate`);
-  }
-  changeOwner(id: string, userId: string) {
-    return hrisApiClient.post<AutomationRule>(`/automations/${id}/owner`, body({ userId }));
-  }
-  takeOver(id: string) {
-    return hrisApiClient.post<AutomationRule>(`/automations/${id}/take-over`);
-  }
-  // an automation's approval, decided by its approver from the task (C3)
   decideApproval(taskId: string, approve: boolean, comment?: string | null) {
     return hrisApiClient.post<void>(`/automations/approvals/${taskId}/${approve ? "approve" : "decline"}`, body({ comment }));
   }
 
-  // live assignment rules — checked against the target's own module right, not SETTINGS.AUTOMATIONS
+  // ── live assignment rules ─────────────────────────────────────────────────────────────────
   liveRulePreview(request: LiveAssignmentRequest) {
     return hrisApiClient.post<LiveAssignmentPreview>("/assignments/live-rules/preview", body(request));
   }

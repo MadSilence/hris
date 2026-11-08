@@ -20,14 +20,20 @@ import type { Scene } from "@/components/illustrations";
  * Getting the order wrong is silent: every branch renders something plausible.
  *
  * The order is not arbitrary. **Search is checked first**, because a query that matches nothing is
- * true whether or not the underlying list is empty, and it is the more useful thing to say.
+ * true whether or not the underlying list is empty, and it is the more useful thing to say. A filter
+ * that left nothing comes next, for the same reason — and gets the funnel rather than the magnifier.
  */
 export const ListEmptyState: React.FC<{
   /** The current search text. Anything non-blank selects the no-results screen. */
   query?: string;
-  /** True while the list is showing the archived view. */
+  /**
+   * True when a filter (not the search box) is narrowing the list. A filter that leaves nothing is its own
+   * screen — the funnel, `no-match-s` — with the list's own title and sentence, and no create action.
+   */
+  filtered?: boolean;
+  /** True while the list is showing the archived view — the archive box, whatever the list's own scene. */
   archivedView?: boolean;
-  /** The ring illustration of the nothing-yet and the archive screens. */
+  /** The ring illustration of the nothing-yet screen. */
   scene: Scene;
   /** The nothing-yet heading: "No legal entities yet". */
   title: string;
@@ -57,6 +63,7 @@ export const ListEmptyState: React.FC<{
   className?: string;
 }> = ({
   query,
+  filtered,
   archivedView,
   scene,
   title,
@@ -75,11 +82,15 @@ export const ListEmptyState: React.FC<{
     return <NoResults hint={noResultsHint} fill={fill} className={className} />;
   }
 
+  if (filtered) {
+    return <NoResults scene="no-match-s" title={title} hint={description} fill={fill} className={className} />;
+  }
+
   // No create action here on purpose: the archive is filled by archiving, never by creating.
   if (archivedView) {
     return (
       <EmptyState
-        scene={scene}
+        scene="archive"
         title={t("emptyState.nothingArchived")}
         description={archivedDescription ?? t("emptyState.archivedDescription")}
         fill={fill}

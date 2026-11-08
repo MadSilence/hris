@@ -1,13 +1,15 @@
-import type { AssignableType, AutomationRunStatus } from "@/models/automations";
+import type { AssignableType, RunQuery } from "@/models/automations";
 
 export const automationQueryKeys = {
   root: ["AUTOMATIONS"] as const,
-  list: (includeArchived: boolean) => ["AUTOMATIONS", "LIST", includeArchived] as const,
+  list: (archived: boolean) => ["AUTOMATIONS", "LIST", archived] as const,
+  archivedCount: ["AUTOMATIONS", "ARCHIVED_COUNT"] as const,
   catalog: ["AUTOMATIONS", "CATALOG"] as const,
   templates: ["AUTOMATIONS", "TEMPLATES"] as const,
-  rule: (id: string) => ["AUTOMATIONS", "RULE", id] as const,
+  automation: (id: string) => ["AUTOMATIONS", "ONE", id] as const,
   versions: (id: string) => ["AUTOMATIONS", "VERSIONS", id] as const,
-  runs: (id: string, status: AutomationRunStatus | null, page: number) => ["AUTOMATIONS", "RUNS", id, status, page] as const,
+  runs: (query: Omit<RunQuery, "cursor">) => ["AUTOMATIONS", "RUNS", query] as const,
+  run: (runId: string) => ["AUTOMATIONS", "RUN", runId] as const,
   personRuns: (personId: string) => ["AUTOMATIONS", "PERSON_RUNS", personId] as const,
 };
 

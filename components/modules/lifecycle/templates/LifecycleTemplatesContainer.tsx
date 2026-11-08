@@ -25,13 +25,17 @@ import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDial
 import { AddTemplateDialog } from "./AddTemplateDialog";
 import { TemplateSparkline } from "./TemplateSparkline";
 import type { ProcessType, TemplateSummary } from "@/models/lifecycle";
+import type { Scene } from "@/components/illustrations";
 
 type Props = {
   /** Which process's templates — each is its own tab and route in Settings. */
   type: ProcessType;
 };
 
-export const templateHref = (type: ProcessType, id: string) =>
+/** The empty list's picture, by process: the rocket before the first day, the open door on it, the door behind on the last. */
+const TEMPLATE_SCENES = { PREBOARDING: "welcome", ONBOARDING: "onboarding", OFFBOARDING: "offboarding" } as const satisfies Record<ProcessType, Scene>;
+
+export const templateHref =(type: ProcessType, id: string) =>
   `/settings/automation/${type.toLowerCase()}/${id}`;
 
 /**
@@ -96,7 +100,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
         <ListEmptyState
           query={query}
           archivedView={showArchived}
-          scene="onboarding"
+          scene={TEMPLATE_SCENES[type]}
           title={t("templates.emptyTitle", { type })}
           // "an onboarding", "a preboarding": the article follows the word, and a template literal
           // that always wrote "a" produced "a onboarding" on one of the two tabs — the message selects it.

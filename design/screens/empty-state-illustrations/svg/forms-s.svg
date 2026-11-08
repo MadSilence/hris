@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <rect data-role="ink" x="66" y="24" width="108" height="108" rx="14" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <circle data-role="ring" cx="120" cy="24" r="11" stroke-width="7" stroke="currentColor" style="fill:var(--illustration-knockout, #FFFFFF)"/>
+  <rect data-role="ink-fill" x="84" y="52" width="18" height="18" rx="5" style="fill:var(--illustration-ink, #0B0B0C)"/>
+  <path data-role="knockout" d="M88 61 L92 65 L98 57" stroke-width="3" style="stroke:var(--illustration-knockout, #FFFFFF);fill:none"/>
+</svg>

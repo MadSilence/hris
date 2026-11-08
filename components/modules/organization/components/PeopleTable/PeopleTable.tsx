@@ -15,6 +15,7 @@ import { FieldMeta } from "@/components/modules/organization/components/PeopleTo
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
 import { AccountStatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
 import { sortKeyForColumn } from "@/components/modules/organization/components/PeopleTable/peopleSort";
+import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 type SortDir = "asc" | "desc";
 type SortState = { fieldId: string; dir: SortDir } | null;
@@ -44,6 +45,9 @@ type PeopleTableProps = {
   onToggleAllOnPage?: (ids: string[], checked: boolean) => void;
   fieldsMeta?: FieldMeta[];
   visibleColumns: ColumnItem[];
+  /** The search box's text and whether a filter is on — they decide which empty screen an empty page is. */
+  query?: string;
+  filtered?: boolean;
 };
 
 // Was `toISOString().slice(0,10)`, which converts to UTC and therefore showed Created/Updated as a
@@ -61,6 +65,8 @@ export default function PeopleTable({
   selectedIds = new Set(),
   onToggleOne,
   onToggleAllOnPage,
+  query,
+  filtered,
   fieldsMeta,
   visibleColumns,
 }: PeopleTableProps) {
@@ -313,7 +319,7 @@ export default function PeopleTable({
           {data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={visibleColumns.length + 1}>
-                <EmptyState />
+                <PeopleEmptyState query={query} filtered={filtered} />
               </TableCell>
             </TableRow>
           ) : null}
@@ -355,13 +361,17 @@ export default function PeopleTable({
 }
 
 
-const EmptyState: React.FC = () => {
+/** Nobody yet, the search missed, or a filter left nobody — the shared ladder decides which. */
+const PeopleEmptyState: React.FC<{ query?: string; filtered?: boolean }> = ({ query, filtered }) => {
   const t = useTranslations("organization");
   return (
-    <div className="flex flex-col items-center gap-2 py-10 text-center">
-      <div className="font-medium">{t("table.empty.title")}</div>
-      <div className="text-body text-tertiary">{t("table.empty.description")}</div>
-    </div>
+    <ListEmptyState
+      query={query}
+      filtered={filtered}
+      scene="people"
+      title={t("table.empty.title")}
+      description={t("table.empty.description")}
+    />
   );
 };
 

@@ -20,7 +20,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
-import { useUnsavedChangesGuard } from "@/components/modules/automations/builder/useUnsavedChangesGuard";
+import { useUnsavedChangesGuard } from "@/components/hooks/useUnsavedChangesGuard";
 import {
   archiveTemplateAction,
   saveTemplateAction,

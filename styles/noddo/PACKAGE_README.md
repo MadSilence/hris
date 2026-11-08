@@ -45,7 +45,7 @@ const { adjusted } = applyAccent(document.documentElement, '#B5E61D'); // custom
 | `examples/components.html` | self-contained reference page (only Google Fonts is external) |
 | `assets/logo/` | outlined wordmarks (ink, white, mono-ink, mono-white, plus `_heavy` for widths under 120px), marks, app icons, favicons; `source/` holds the stroke construction |
 | `assets/icons/` | custom nod icon and the Approve ring |
-| `assets/illustrations/` | 36 ring illustrations (30 scenes + size and on-Wine variants), ring = `currentColor` |
+| `assets/illustrations/` | 59 ring illustrations (46 scenes + size and on-Wine variants), ring = `currentColor`; `404/` the 404 page's drawing |
 | `icons.md` | Hugeicons list by group with React import names |
 | `fonts.md` | Inter, Inter Tight, JetBrains Mono: packages, subsets, URLs |
 

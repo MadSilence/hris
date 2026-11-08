@@ -53,7 +53,7 @@ export function ProcessesListContainer() {
           fill
           query={query}
           archivedView={showArchived}
-          scene="onboarding"
+          scene="automations"
           title={t("processes.emptyTitle")}
           description={t("processes.emptyDescription")}
         />

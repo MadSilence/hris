@@ -15,6 +15,7 @@ import { SearchBox } from "@/components/ui/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { NodRing } from "@/components/desact/nod";
+import { Illustration } from "@/components/illustrations";
 
 export type PickedUser = {
   id: string;
@@ -154,7 +155,10 @@ export function UserPickerField({
           {isLoading ? (
             <div className="flex justify-center px-2 py-6"><NodRing size="md" /></div>
           ) : items.length === 0 ? (
-            <p className="px-2 py-6 text-center text-body text-tertiary">{t("shared.userPicker.empty")}</p>
+            <div className="flex flex-col items-center gap-2 px-2 py-6 text-center text-body text-tertiary">
+              <Illustration scene="no-results-s" size="s" />
+              {t("shared.userPicker.empty")}
+            </div>
           ) : (
             items.map((u) => {
               const isSelected = value?.id === u.id;

@@ -501,6 +501,8 @@ const PeopleTableContainer: React.FC = () => {
           onToggleAllOnPage={toggleAllOnPage}
           fieldsMeta={fieldsData ?? []}
           visibleColumns={visibleColumns}
+          query={debouncedQ}
+          filtered={filters.length > 0}
         />
       </div>
 

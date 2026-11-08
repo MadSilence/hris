@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <path data-role="baseline" d="M30 136 H210" stroke-width="3" style="stroke:var(--illustration-baseline, #EAEAEC);fill:none"/>
+  <g data-role="ink" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C)"><path d="M100 104 H140 Q145 104 144 109 L140 127 Q139 132 134 132 H106 Q101 132 100 127 L96 109 Q95 104 100 104 Z"/><path d="M120 104 V70"/><path d="M120 92 C108 92 100 84 98 74 C110 74 118 82 120 92"/><path d="M120 84 C132 84 140 76 142 66 C130 66 122 74 120 84"/></g>
+  <circle data-role="ring" cx="120" cy="52" r="12" stroke-width="7" stroke="currentColor" style="fill:none"/>
+  <path data-role="support" d="M86 52 H78 M154 52 H162 M120 31 V25" stroke-width="4" style="stroke:var(--illustration-support, #C9C9CE);fill:none"/>
+</svg>

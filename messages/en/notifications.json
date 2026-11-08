@@ -283,11 +283,19 @@
     },
     "automationRunFailed": {
       "title": "Automation failed",
-      "message": "{rule} could not finish for {person}{hasError, select, yes {: {error}.} other {.}} Open its run log to retry."
+      "message": "{rule} couldn't finish for {person}."
     },
     "automationPaused": {
       "title": "Automation paused",
-      "message": "{rule} was paused: something it uses is gone.{hasReason, select, yes { {reason}} other {}} Fix it and resume the rule."
+      "message": "{rule} is paused: {reason, select, OWNER_LEFT {its owner left the company} OWNER_LACKS_RIGHT {its owner can't manage automations any more} TARGET_GONE {a step points to something that's gone} MANUAL {it was turned off by hand} other {it can't run}}."
+    },
+    "automationWaitTimedOut": {
+      "title": "Automation stopped waiting",
+      "message": "{rule} stopped waiting for {person}: {what, select, TASK_DONE {the task wasn't done} FIELD_FILLED {the field wasn't filled in} other {what it waited for didn't happen}}{hasDays, select, yes { in {days, plural, one {# day} other {# days}}} other { on time}}."
+    },
+    "automationApprovalReminder": {
+      "title": "An approval is waiting for you",
+      "message": "{task}{hasPerson, select, yes { for {person}} other {}} still waits for your answer."
     },
     "invitationFailed": {
       "title": "Invitation not sent",

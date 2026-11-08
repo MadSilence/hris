@@ -1,44 +1,61 @@
-import { hrisApiAutomationsClient, type AutomationRunsQuery } from "@/api/modules/automations/clients/hrisApiAutomationsClient";
+import { hrisApiAutomationsClient } from "@/api/modules/automations/clients/hrisApiAutomationsClient";
 import type {
   AssignableType,
   AutomationDefinition,
-  AutomationPreviewRequest,
+  CheckAutomationRequest,
   CreateAutomationRequest,
-  EnableAutomationRequest,
+  DraftAutomationRequest,
   LiveAssignmentRequest,
-  PublishAutomationRequest,
   RenameAutomationRequest,
   ReturnToRuleRequest,
+  RunQuery,
+  SaveAutomationRequest,
+  TestRunRequest,
+  TestSendRequest,
+  TurnOnRequest,
 } from "@/models/automations";
 
 /** The seam for automations and live assignment rules: every transport — route handler, action, RSC — calls this. */
 export class HrisApiAutomationsService {
   catalog = () => hrisApiAutomationsClient.catalog();
-  list = (includeArchived: boolean) => hrisApiAutomationsClient.list(includeArchived);
+  templates = () => hrisApiAutomationsClient.templates();
+  list = (archived: boolean) => hrisApiAutomationsClient.list(archived);
+  archivedCount = () => hrisApiAutomationsClient.archivedCount();
+  ownerCandidates = (q: string | null) => hrisApiAutomationsClient.ownerCandidates(q);
   get = (id: string) => hrisApiAutomationsClient.get(id);
   versions = (id: string) => hrisApiAutomationsClient.versions(id);
+  check = (request: CheckAutomationRequest) => hrisApiAutomationsClient.check(request);
+
   create = (request: CreateAutomationRequest) => hrisApiAutomationsClient.create(request);
+  saveDraft = (id: string, request: DraftAutomationRequest) => hrisApiAutomationsClient.saveDraft(id, request);
   rename = (id: string, request: RenameAutomationRequest) => hrisApiAutomationsClient.rename(id, request);
-  publish = (id: string, request: PublishAutomationRequest) => hrisApiAutomationsClient.publish(id, request);
-  preview = (request: AutomationPreviewRequest) => hrisApiAutomationsClient.preview(request);
-  enable = (id: string, request: EnableAutomationRequest) => hrisApiAutomationsClient.enable(id, request);
-  disable = (id: string) => hrisApiAutomationsClient.disable(id);
-  resume = (id: string) => hrisApiAutomationsClient.resume(id);
+  save = (id: string, request: SaveAutomationRequest) => hrisApiAutomationsClient.save(id, request);
+  turnOn = (id: string, request: TurnOnRequest) => hrisApiAutomationsClient.turnOn(id, request);
+  turnOff = (id: string) => hrisApiAutomationsClient.turnOff(id);
+  undoTurnOn = (id: string) => hrisApiAutomationsClient.undoTurnOn(id);
   archive = (id: string) => hrisApiAutomationsClient.archive(id);
   unarchive = (id: string) => hrisApiAutomationsClient.unarchive(id);
   delete = (id: string) => hrisApiAutomationsClient.delete(id);
-  runs = (id: string, query: AutomationRunsQuery) => hrisApiAutomationsClient.runs(id, query);
+  duplicate = (id: string) => hrisApiAutomationsClient.duplicate(id);
+  changeOwner = (id: string, userId: string) => hrisApiAutomationsClient.changeOwner(id, userId);
+  takeOver = (id: string, turnOnNow: boolean) => hrisApiAutomationsClient.takeOver(id, turnOnNow);
+
+  testCases = (definition: AutomationDefinition) => hrisApiAutomationsClient.testCases(definition);
+  testRun = (request: TestRunRequest) => hrisApiAutomationsClient.testRun(request);
+  testSend = (request: TestSendRequest) => hrisApiAutomationsClient.testSend(request);
+  deleteTestItems = (automationId: string | null) => hrisApiAutomationsClient.deleteTestItems(automationId);
+
+  runs = (request: RunQuery) => hrisApiAutomationsClient.runs(request);
+  run = (runId: string) => hrisApiAutomationsClient.run(runId);
   personRuns = (personId: string, page?: number, size?: number) =>
     hrisApiAutomationsClient.personRuns(personId, page, size);
   retryRun = (runId: string) => hrisApiAutomationsClient.retryRun(runId);
   cancelRun = (runId: string) => hrisApiAutomationsClient.cancelRun(runId);
-  test = (request: { definition: AutomationDefinition; personId: string; actionIndex?: number | null }) =>
-    hrisApiAutomationsClient.test(request);
-  simulate = (request: { definition: AutomationDefinition; personId: string }) => hrisApiAutomationsClient.simulate(request);
-  templates = () => hrisApiAutomationsClient.templates();
-  duplicate = (id: string) => hrisApiAutomationsClient.duplicate(id);
-  changeOwner = (id: string, userId: string) => hrisApiAutomationsClient.changeOwner(id, userId);
-  takeOver = (id: string) => hrisApiAutomationsClient.takeOver(id);
+  restoreRun = (runId: string) => hrisApiAutomationsClient.restoreRun(runId);
+  skipStep = (runId: string, stepId: string) => hrisApiAutomationsClient.skipStep(runId, stepId);
+  reassignStep = (runId: string, stepId: string, userId: string) =>
+    hrisApiAutomationsClient.reassignStep(runId, stepId, userId);
+
   decideApproval = (taskId: string, approve: boolean, comment?: string | null) =>
     hrisApiAutomationsClient.decideApproval(taskId, approve, comment);
 

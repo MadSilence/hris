@@ -2,8 +2,6 @@
 
 import { FC, ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { UserGroupIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
 import type {
   CompanyCalendarAbsence,
   CompanyCalendarCapacity,
@@ -12,6 +10,7 @@ import type {
 } from "@/models/calendar";
 import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
 import { WEEKDAY_KEYS, toISO } from "@/components/modules/calendar/lib/dateRange";
+import { Illustration } from "@/components/illustrations";
 import {
   BoardPickContext,
   CompanyCalendarRow,
@@ -228,9 +227,7 @@ export const CompanyCalendarBoard: FC<Props> = ({
 
       {showEmpty ? (
         <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
-            <Icon icon={UserGroupIcon} size="lg" />
-          </div>
+          <Illustration scene="calendar" className="mb-2" />
           <p className="text-body font-medium text-primary">{t("board.emptyTitle")}</p>
           <p className="max-w-sm text-body text-tertiary">{t("board.emptyDescription")}</p>
         </div>

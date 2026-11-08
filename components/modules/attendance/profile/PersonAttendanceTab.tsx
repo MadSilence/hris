@@ -32,6 +32,7 @@ import {
   useRemoveAttendance,
 } from "@/components/modules/attendance/hooks";
 import { monthOf, monthPeriod, spanMinutes } from "@/components/modules/attendance/lib";
+import { Illustration } from "@/components/illustrations";
 
 type Props = { userId: string };
 type Draft = { from: string; to: string; description: string };
@@ -385,7 +386,10 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             {pickedEntries.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={6} className="py-6 text-center text-body text-tertiary">
-                  {single ? t("log.emptyDay") : t("log.emptyDays")}
+                  <div className="flex flex-col items-center gap-2">
+                    <Illustration scene="attendance-s" size="s" />
+                    {single ? t("log.emptyDay") : t("log.emptyDays")}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : pickedEntries.map((entry) => (

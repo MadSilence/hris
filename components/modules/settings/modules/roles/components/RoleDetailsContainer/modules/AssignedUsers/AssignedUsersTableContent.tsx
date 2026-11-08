@@ -11,6 +11,7 @@ import { type DateFormatter, useDateFormatter } from "@/lib/date";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { UserStatusBadge } from "@/components/ui/StatusBadge";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { Illustration } from "@/components/illustrations";
 
 export interface AssignedUsersTableContentProps {
   rows: UsersSearchItemDTO[];
@@ -143,7 +144,10 @@ export default function AssignedUsersTableContent({
           {!isLoading && !hasData && (
             <TableRow>
               <TableCell colSpan={6}>
-                <div className="py-6 text-center text-body text-tertiary">{emptyText ?? t("roles.assigned.emptyDefault")}</div>
+                <div className="flex flex-col items-center gap-2 py-6 text-center text-body text-tertiary">
+                  <Illustration scene="people-s" size="s" />
+                  {emptyText ?? t("roles.assigned.emptyDefault")}
+                </div>
               </TableCell>
             </TableRow>
           )}

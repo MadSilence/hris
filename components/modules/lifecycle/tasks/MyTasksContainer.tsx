@@ -40,7 +40,7 @@ export function MyTasksContainer() {
       ) : (data ?? []).length === 0 ? (
         <EmptyState
           fill
-          scene="all-caught-up"
+          scene="tasks"
           title={t("myTasks.emptyTitle")}
           description={t("myTasks.emptyDescription")}
         />

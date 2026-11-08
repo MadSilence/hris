@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Delete02Icon, FilterHorizontalIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, FilterHorizontalIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
   TableBody,
@@ -28,6 +28,7 @@ import { rolesOf, type Segment, type UserRefDTO } from "@/models/segment/Segment
 import { SearchBox } from "@/components/ui/SearchBox";
 import { cn } from "@/lib/cn";
 import type { Messages } from "@/i18n/messages";
+import { Illustration } from "@/components/illustrations";
 
 /** A column's title, from `access` → `audience.peoplePicker.columns`. */
 export type PeopleColumnHeaderKey = keyof Messages["access"]["audience"]["peoplePicker"]["columns"];
@@ -392,9 +393,7 @@ const EmptyState: React.FC<{ hasFilters: boolean }> = ({ hasFilters }) => {
   const t = useTranslations("access");
   return (
   <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-    <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-subtle text-tertiary">
-      <Icon icon={UserGroupIcon} size="lg" />
-    </div>
+    <Illustration scene={hasFilters ? "no-match-s" : "no-results-s"} size="s" />
     <p className="text-body font-medium">{t("audience.peoplePicker.empty.title")}</p>
     <p className="max-w-[280px] text-hint text-tertiary">
       {hasFilters ? t("audience.peoplePicker.empty.filtered") : t("audience.peoplePicker.empty.none")}

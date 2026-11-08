@@ -31,7 +31,7 @@ import { useCanAccess } from "@/components/auth/useAccess";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
-import { useUnsavedChangesGuard } from "@/components/modules/automations/builder/useUnsavedChangesGuard";
+import { useUnsavedChangesGuard } from "@/components/hooks/useUnsavedChangesGuard";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import { deleteCycleAction, saveCycleAction } from "@/components/modules/reviews/actions/reviewCycleActions";
 import { useInvalidateReviews, useReviewForms } from "@/components/modules/reviews/hooks";

@@ -2,12 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import React from "react";
-import { UserGroupIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
 
 import { SearchField } from "@/components/ui/SearchField";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import type { TeamPerson } from "@/models/teams";
+import { Illustration } from "@/components/illustrations";
 
 export type TeamSearchMode = "units" | "people";
 
@@ -96,7 +95,7 @@ export function TeamSearchBar({
             <p className="px-3 py-3 text-body text-tertiary">{tShared("searching")}</p>
           ) : peopleResults.length === 0 ? (
             <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
-              <Icon icon={UserGroupIcon} className="text-disabled" />
+              <Illustration scene="no-results-s" size="s" />
               <p className="text-body text-tertiary">{tShared("noPeopleMatch", { query })}</p>
             </div>
           ) : (

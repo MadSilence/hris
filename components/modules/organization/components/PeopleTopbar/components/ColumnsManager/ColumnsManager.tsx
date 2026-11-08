@@ -12,6 +12,7 @@ import { Badge } from "@/components/desact/badge";
 import { ReorderableList } from "@/components/utils/ReorderableList/ReorderableList";
 import type { SortableApi } from "@/components/utils/SortableRow";
 import type { ColumnItem } from "@/models/userTable";
+import { Illustration } from "@/components/illustrations";
 import {
   reorderChecked,
   toggleColumn,
@@ -146,7 +147,10 @@ export const ColumnsManager: React.FC<ColumnsManagerProps> = ({ columns, onChang
         ) : null}
 
         {nothingFound ? (
-          <div className="px-2 py-6 text-center text-body text-tertiary">{t("columns.noneFound")}</div>
+          <div className="flex flex-col items-center gap-2 px-2 py-6 text-center text-body text-tertiary">
+            <Illustration scene="no-results-s" size="s" />
+            {t("columns.noneFound")}
+          </div>
         ) : null}
       </div>
     </div>

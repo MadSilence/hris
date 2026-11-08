@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <path data-role="ink" d="M68 30 H172 Q182 30 175 37 L137 77 Q134 80 134 85 V107 Q134 112 129 114 L113 121 Q106 124 106 117 V85 Q106 80 103 77 L65 37 Q58 30 68 30 Z" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <circle data-role="ring" cx="120" cy="50" r="10" stroke-width="7" stroke="currentColor" style="fill:none"/>
+</svg>

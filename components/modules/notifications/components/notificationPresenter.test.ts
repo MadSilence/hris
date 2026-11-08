@@ -59,6 +59,8 @@ const REGISTERED_TYPES = [
   "AUTOMATION_TASK_ASSIGNED",
   "AUTOMATION_RUN_FAILED",
   "AUTOMATION_RULE_PAUSED",
+  "AUTOMATION_WAIT_TIMED_OUT",
+  "AUTOMATION_APPROVAL_REMINDER",
   "REVIEW_CYCLE_LAUNCHED",
   "REVIEW_ASSIGNED",
   "REVIEW_DUE",
@@ -301,24 +303,66 @@ describe("approvals for somebody else", () => {
       expect(view.href).toBe("/tasks");
     });
 
-    it("tells the author which run failed and why, and links to the rule", () => {
+    it("tells the owner which run failed and opens that run in the editor", () => {
       const view = presentNotification(
-        notification({ type: "AUTOMATION_RUN_FAILED", params: { automationRuleId: "r1", ruleName: "Welcome", personName: "Anna", error: "MISSING_PLACEHOLDER: managerName" } }),
+        notification({ type: "AUTOMATION_RUN_FAILED", params: { automationRuleId: "r1", runId: "run-7", ruleName: "Welcome", personName: "Anna", error: "MISSING_PLACEHOLDER: managerName" } }),
       );
 
       expect(view.title).toBe("Automation failed");
-      expect(view.message).toBe("Welcome could not finish for Anna: MISSING_PLACEHOLDER: managerName. Open its run log to retry.");
-      expect(view.href).toBe("/settings/automation/automations/r1");
+      expect(view.message).toBe("Welcome couldn't finish for Anna.");
+      expect(view.href).toBe("/automations/r1?run=run-7");
     });
 
-    it("says a rule was paused and why", () => {
+    it("opens the automation when the failed run is not named", () => {
       const view = presentNotification(
-        notification({ type: "AUTOMATION_RULE_PAUSED", params: { automationRuleId: "r1", ruleName: "Berlin calendar", reason: "The calendar was archived." } }),
+        notification({ type: "AUTOMATION_RUN_FAILED", params: { automationRuleId: "r1", ruleName: "Welcome", personName: "Anna" } }),
+      );
+
+      expect(view.href).toBe("/automations/r1");
+    });
+
+    it.each([
+      ["OWNER_LEFT", "Berlin calendar is paused: its owner left the company."],
+      ["OWNER_LACKS_RIGHT", "Berlin calendar is paused: its owner can't manage automations any more."],
+      ["TARGET_GONE", "Berlin calendar is paused: a step points to something that's gone."],
+      ["MANUAL", "Berlin calendar is paused: it was turned off by hand."],
+      ["SOMETHING_NEW", "Berlin calendar is paused: it can't run."],
+    ])("says why an automation is paused (%s)", (reason, sentence) => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_RULE_PAUSED", params: { automationRuleId: "r1", ruleName: "Berlin calendar", reason, detail: "calendar 42 archived" } }),
       );
 
       expect(view.title).toBe("Automation paused");
-      expect(view.message).toBe("Berlin calendar was paused: something it uses is gone. The calendar was archived. Fix it and resume the rule.");
-      expect(view.href).toBe("/settings/automation/automations/r1");
+      expect(view.message).toBe(sentence);
+      expect(view.href).toBe("/automations/r1");
+    });
+
+    it("says a wait ran out, what was not done and in how many days", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_WAIT_TIMED_OUT", params: { automationRuleId: "r1", ruleName: "Laptop return", personName: "Anna", until: "TASK_DONE", maxDays: 5 } }),
+      );
+
+      expect(view.title).toBe("Automation stopped waiting");
+      expect(view.message).toBe("Laptop return stopped waiting for Anna: the task wasn't done in 5 days.");
+      expect(view.href).toBe("/automations/r1");
+    });
+
+    it("says a wait ran out without the days when they are not sent", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_WAIT_TIMED_OUT", params: { automationRuleId: "r1", ruleName: "Laptop return", personName: "Anna", until: "FIELD_FILLED" } }),
+      );
+
+      expect(view.message).toBe("Laptop return stopped waiting for Anna: the field wasn't filled in on time.");
+    });
+
+    it("reminds the approver of an approval still waiting", () => {
+      const view = presentNotification(
+        notification({ type: "AUTOMATION_APPROVAL_REMINDER", params: { taskTitle: "Approve 12 days off", personName: "Tom", ruleName: "Long time off", taskId: "t1" } }),
+      );
+
+      expect(view.title).toBe("An approval is waiting for you");
+      expect(view.message).toBe("Approve 12 days off for Tom still waits for your answer.");
+      expect(view.href).toBe("/tasks");
     });
   });
 });

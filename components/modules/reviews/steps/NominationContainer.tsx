@@ -138,7 +138,7 @@ function NominationView({ n }: { n: Nomination }) {
 
       <div className="space-y-2 rounded-card border border-divider bg-card p-5">
         {picked.length === 0 && (
-          <EmptyState compact scene="team-and-org" title={t("nomination.empty.title")}
+          <EmptyState compact scene="nomination" title={t("nomination.empty.title")}
             description={n.canNominate ? t("nomination.empty.nominate") : acting ? t("nomination.empty.approve") : t("nomination.empty.view")} />
         )}
         {picked.map((p) => (

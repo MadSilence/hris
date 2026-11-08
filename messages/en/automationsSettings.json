@@ -1,0 +1,576 @@
+{
+  "triggerList": {
+    "title": "What starts it",
+    "search": "Search events",
+    "noResults": "No events match"
+  },
+  "common": {
+    "custom": "Custom",
+    "daysUnit": "{count, plural, one {day} other {days}}",
+    "howManyDays": "How many days",
+    "beforeOrAfter": "Before or after",
+    "before": "Before",
+    "after": "After",
+    "onTheDay": "On the day",
+    "noFieldsMatch": "No fields match",
+    "noResults": "Nothing matches",
+    "loadError": "We couldn't load the list",
+    "retry": "Try again"
+  },
+  "date": {
+    "label": "Date",
+    "pick": "Pick a field",
+    "theDate": "The date",
+    "aboutPerson": "About the person",
+    "companyFields": "Your company's fields",
+    "when": "When",
+    "everyYear": "Every year",
+    "everyYearHint": "Turn on for birthdays and work anniversaries.",
+    "passed": "If the date has already passed",
+    "runLate": "Run it late",
+    "runLateHint": "For people whose date passed before this was turned on, or while it was paused.",
+    "skip": "Skip it",
+    "lateWindow": "Run late for up to",
+    "runsOnce": "Runs once: {date}"
+  },
+  "fieldChange": {
+    "field": "Field",
+    "pickField": "Pick a field",
+    "aboutPerson": "About the person",
+    "from": "From",
+    "to": "To",
+    "any": "Any {field}",
+    "customFromHint": "A company's own field records only its new value, so this starts on what it changes to.",
+    "later": "If the change starts later",
+    "when": {
+      "EFFECTIVE": "On the day the change starts",
+      "RECORDED": "As soon as the change is saved"
+    },
+    "whenHint": {
+      "EFFECTIVE": "Someone moves to Vilnius from 1 Dec: it runs on 1 Dec.",
+      "RECORDED": "It runs today, when the move is entered."
+    }
+  },
+  "event": {
+    "timeOffIs": "Time off is",
+    "timeOff": {
+      "TIME_OFF_REQUESTED": "Requested",
+      "TIME_OFF_APPROVED": "Approved",
+      "TIME_OFF_REJECTED": "Declined",
+      "TIME_OFF_CANCELLED": "Cancelled"
+    },
+    "onlyWhen": "Only when",
+    "countFrom": "Count step days from",
+    "anchor": {
+      "EVENT": "Request",
+      "LEAVE_START": "First day",
+      "LEAVE_END": "Last day"
+    },
+    "anchorHint": {
+      "EVENT": "Steps with “days before / after” count them from the day it was requested.",
+      "LEAVE_START": "Steps with “days before / after” count them from the first day off.",
+      "LEAVE_END": "Steps with “days before / after” count them from the last day off."
+    }
+  },
+  "process": {
+    "label": "Process",
+    "pick": "Pick a process",
+    "anyOnboarding": "Any onboarding",
+    "anyOffboarding": "Any offboarding",
+    "templates": "Templates"
+  },
+  "processType": {
+    "PREBOARDING": "Preboarding",
+    "ONBOARDING": "Onboarding",
+    "OFFBOARDING": "Offboarding"
+  },
+  "schedule": {
+    "every": "Every",
+    "frequency": {
+      "DAILY": "Day",
+      "WEEKLY": "Week",
+      "MONTHLY": "Month",
+      "QUARTERLY": "Quarter",
+      "YEARLY": "Year"
+    },
+    "on": "On",
+    "dayOfMonth": "A day of the month",
+    "weekday": "A weekday",
+    "whichWeek": "Which week",
+    "week": {
+      "1": "First",
+      "2": "Second",
+      "3": "Third",
+      "4": "Fourth",
+      "0": "Last"
+    },
+    "lastDay": "Last day",
+    "shortMonthHint": "For months with fewer days, it runs on the last day.",
+    "monthOfQuarter": "Month of the quarter",
+    "quarterMonth": {
+      "1": "First",
+      "2": "Second",
+      "3": "Third"
+    },
+    "quarterHint": "Runs on {dates}.",
+    "quarterLastHint": "Runs on the last day of {months}.",
+    "month": "Month",
+    "yearHint": "No year: it repeats every year. 29 February runs on 28 February in other years.",
+    "at": "At",
+    "timeZone": "Time zone",
+    "zone": {
+      "PERSON": "Each person's time zone",
+      "COMPANY": "Company time zone",
+      "PICK": "Pick a time zone"
+    },
+    "zoneHint": {
+      "PERSON": "Each person gets it at this time where they are.",
+      "COMPANY": "Everyone at the same moment.",
+      "PICK": "Any city or UTC offset."
+    },
+    "pickZone": "Time zone",
+    "noZones": "No time zones match"
+  },
+  "joins": {
+    "line": "It starts when someone begins to match Who it runs for: <who></who>.",
+    "change": "Change it in Who it runs for.",
+    "stops": "When someone stops matching",
+    "takeBack": "Take back what this automation gave",
+    "takeBackHint": "Removes what this automation assigned and takes back what it granted. Things set by hand stay.",
+    "keep": "Leave everything as it is"
+  },
+  "noSettings": {
+    "PERSON_HIRED": "It runs for each new person, on their hire date.",
+    "TERMINATION_SCHEDULED": "It runs when someone's termination is scheduled.",
+    "LAST_WORKING_DAY_ARRIVES": "It runs on each person's last working day."
+  },
+  "conditions": {
+    "add": "Add a condition",
+    "addGroup": "Add a group",
+    "joiner": "And or or",
+    "and": "And",
+    "or": "Or",
+    "andLower": "and",
+    "orLower": "or",
+    "field": "Field",
+    "operator": "Comparison",
+    "value": "Value",
+    "from": "From",
+    "to": "To",
+    "is": "is",
+    "pickField": "Pick a field",
+    "pickOperator": "Pick a comparison",
+    "pickValue": "Pick a value",
+    "noValues": "No values match",
+    "remove": "Remove the condition",
+    "groups": {
+      "job": "Job",
+      "person": "Person",
+      "company": "Your company's fields"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "aPerson": "A person",
+    "none": "No conditions",
+    "range": "{from} to {to}",
+    "orList": "{head} or {last}",
+    "sentence": "{op} <b>{value}</b>",
+    "line": "{field} {op} {value}"
+  },
+  "operator": {
+    "eq": "is",
+    "neq": "is not",
+    "contains": "contains",
+    "starts_with": "starts with",
+    "in": "is any of",
+    "not_in": "is none of",
+    "has_any": "has any of",
+    "not_has_any": "has none of",
+    "before": "is before",
+    "after": "is after",
+    "between": "is between",
+    "gt": "is more than",
+    "gte": "is at least",
+    "lt": "is less than",
+    "lte": "is at most"
+  },
+  "eventOperator": {
+    "eq": "is",
+    "neq": "is not",
+    "in": "is any of",
+    "gt": "more than",
+    "gte": "at least",
+    "lt": "less than",
+    "lte": "at most"
+  },
+  "who": {
+    "title": "Who it runs for",
+    "everyone": "Everyone",
+    "some": "Only some people",
+    "match": "{count, plural, one {# person matches} other {# people match}}",
+    "seeWho": "See who",
+    "andMore": "{count, plural, one {and # more} other {and # more}}",
+    "newJoin": "New teammates who match join automatically."
+  },
+  "people": {
+    "roles": "Roles",
+    "peopleAZ": "People A–Z",
+    "people": "People",
+    "noOne": "No one matches",
+    "remove": "Remove",
+    "removeNamed": "Remove {name}",
+    "hint": {
+      "person": "Who the automation runs for",
+      "relative": "Changes with each person",
+      "role": "A role in your company",
+      "approver": "Who decides on the time off"
+    }
+  },
+  "tokens": {
+    "fields": "Fields",
+    "insert": "Insert a field",
+    "typeAt": "Type @ to insert a field."
+  },
+  "notify": {
+    "who": "Who gets it",
+    "message": "Message"
+  },
+  "email": {
+    "to": "To",
+    "subject": "Subject",
+    "message": "Message"
+  },
+  "task": {
+    "title": "Title",
+    "description": "Description",
+    "assignee": "Assignee",
+    "assigneeHint": "If there's no one to assign, the step fails and the run tells you why.",
+    "due": "Due",
+    "afterCreated": "after it's created"
+  },
+  "approval": {
+    "who": "Who approves",
+    "noAnswer": "If there's no answer in",
+    "then": "then",
+    "thenLabel": "What happens then",
+    "ifNoAnswer": {
+      "ASK_THEIR_MANAGER": "Ask their manager",
+      "STOP": "Stop the run",
+      "DECLINE": "Treat it as declined"
+    },
+    "remind": "Remind them every day"
+  },
+  "review": {
+    "form": "Review form",
+    "pickForm": "Pick a form",
+    "noForms": "No forms match",
+    "reviewer": "Reviewer",
+    "due": "Due",
+    "afterStarts": "after it starts"
+  },
+  "sign": {
+    "documents": "Documents",
+    "documentsHint": "Type a document's name and press Enter.",
+    "who": "Who signs"
+  },
+  "survey": {
+    "name": "Survey",
+    "who": "Who gets it"
+  },
+  "notConnected": {
+    "documents": "Not connected yet: a run skips this step until documents are connected.",
+    "surveys": "Not connected yet: a run skips this step until surveys are connected."
+  },
+  "wait": {
+    "until": "Wait until",
+    "taskDone": "A task from this run is done",
+    "noTask": "Add a “Create a task” step before this one.",
+    "task": "Task",
+    "pickTask": "Pick a task",
+    "taskOption": "{number} · {title}",
+    "untitledTask": "Untitled task",
+    "fieldFilled": "A field is filled",
+    "field": "Field",
+    "pickField": "Pick a field",
+    "fields": {
+      "hireDate": "Hire date",
+      "probationEnd": "End of probation",
+      "terminationDate": "Termination date",
+      "manager": "Manager",
+      "job": "Job title",
+      "office": "Office",
+      "legalEntity": "Legal entity",
+      "department": "Department"
+    },
+    "atMost": "Wait at most",
+    "notDone": "If it's not done by then",
+    "notFilled": "If it's not filled by then",
+    "timeout": {
+      "CONTINUE": "Go on with the next steps",
+      "STOP": "Stop",
+      "STOP_AND_TELL": "Stop and tell someone"
+    },
+    "tell": "Tell"
+  },
+  "assign": {
+    "action": "Action",
+    "assign": "Assign",
+    "unassign": "Unassign",
+    "what": "What",
+    "pickWhat": "Pick what",
+    "which": "Which",
+    "pickWhich": "Pick one",
+    "changesWithPerson": "Changes with each person",
+    "calendarsAZ": "Calendars A–Z",
+    "noCalendars": "No calendars match",
+    "note": "If they already have it, the step is skipped. Only what this automation assigned can be taken back by it.",
+    "noteCalendar": "If they already have this calendar, the step is skipped. Only what this automation assigned can be taken back by it."
+  },
+  "policy": {
+    "label": "Policy",
+    "pick": "Pick a policy",
+    "az": "Policies A–Z",
+    "noPolicies": "No policies match",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "unlimited": "No limit",
+    "note": "If they already have this policy, the step is skipped."
+  },
+  "split": {
+    "question": "Question",
+    "questionHint": "The label on the card, like “Which office are they in?”",
+    "paths": "Paths",
+    "pathName": "Name of path {n}",
+    "removePath": "Remove {name}",
+    "addPath": "Add a path",
+    "anyoneElse": "Anyone else",
+    "anyoneElseHint": "Everyone the paths above don't take.",
+    "unnamed": "Untitled path"
+  },
+  "when": {
+    "label": "When",
+    "rightAway": "Right away",
+    "later": "Later",
+    "countedFrom": "Counted from",
+    "previousStep": "The step before",
+    "at": "At",
+    "personZone": "each person's time zone"
+  },
+  "onlyIf": {
+    "label": "Only if"
+  },
+  "read": {
+    "getsIt": "Gets it",
+    "getsEmail": "Gets the email",
+    "getsTask": "Gets the task",
+    "approves": "Approves",
+    "reviews": "Reviews",
+    "signs": "Signs",
+    "waitsUntil": "Waits until",
+    "dueIn": "Due in {days, plural, one {# day} other {# days}}",
+    "afterCreated": "After it's created",
+    "afterStarts": "After it starts",
+    "noAnswerIn": "No answer in {days, plural, one {# day} other {# days}}",
+    "atTime": "At {at}, each person's time zone",
+    "forEveryone": "For everyone",
+    "noConditions": "No conditions",
+    "always": "Any time off",
+    "nobody": "No one yet",
+    "runLate": "Run it late, for up to {days, plural, one {# day} other {# days}}"
+  },
+  "problems": {
+    "generic": "Check this field.",
+    "removed": "This field was removed. Pick another.",
+    "unknownField": "This uses a field that doesn't exist: {fields}.",
+    "unsupported": "An automation can't do this. Pick something else.",
+    "assignee": {
+      "task": "Choose who does it, like “Their manager”.",
+      "approval": "Choose who approves, like “Their manager”.",
+      "review": "Choose who reviews, like “Their manager”.",
+      "sign": "Choose who signs."
+    },
+    "step": {
+      "recipients": "Choose who gets it.",
+      "text": "Write the message.",
+      "subject": "Add a subject.",
+      "body": "Write the email.",
+      "title": "Give the task a title.",
+      "description": "Check the description.",
+      "dueDays": "Due 1 to 365 days after it starts.",
+      "assignableId": "Choose what to assign.",
+      "assignableType": "Choose what to assign.",
+      "policyId": "Choose the policy.",
+      "formId": "Choose the review form.",
+      "until": "Choose what it waits for.",
+      "field": "Choose the field it waits for.",
+      "taskStepId": "Choose a task step before this one.",
+      "maxDays": "Wait at most 1 to 365 days.",
+      "onTimeout": "Choose what happens when it waits too long.",
+      "tell": "Choose who is told.",
+      "question": "Ask the question.",
+      "paths": "Name every path and say who takes it.",
+      "documents": "Add the documents.",
+      "survey": "Name the survey.",
+      "when": "Check when it runs.",
+      "action": "When someone stops matching, the automation takes back what it gave by itself."
+    },
+    "trigger": {
+      "field": "Choose one.",
+      "attributeId": "Choose a date field.",
+      "date": "Pick the date.",
+      "everyYear": "A picked date runs once.",
+      "days": "Say how many days.",
+      "from": "Check the value.",
+      "to": "Check the value.",
+      "event": "Choose the event.",
+      "eventConditions": "Check the conditions.",
+      "anchor": "Only time off has days to count from.",
+      "process": "Choose the process.",
+      "frequency": "Choose how often.",
+      "at": "Type a time as hours and minutes, like 09:00.",
+      "timeZone": "Choose a time zone.",
+      "weekdays": "Choose the days of the week.",
+      "weekOfMonth": "Choose which week.",
+      "monthOfPeriod": "Choose the month.",
+      "dayOfMonth": "Choose a day, or the last day."
+    }
+  },
+  "words": {
+    "noTrigger": "Choose what starts it",
+    "anyValue": "any {field}",
+    "aDate": "a date",
+    "aField": "a field",
+    "aPerson": "a person",
+    "aRole": "a role",
+    "aPolicy": "a policy",
+    "aProcess": "a process",
+    "someone": "someone",
+    "something": "something",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "previousStep": "the step before",
+    "recipient": {
+      "PERSON": "the person",
+      "MANAGER": "their manager",
+      "MANAGERS_MANAGER": "their manager's manager",
+      "DEPARTMENT_HEAD": "the department head",
+      "ONBOARDING_MANAGER": "the onboarding manager",
+      "APPROVER": "the approver",
+      "OWNER": "the owner"
+    },
+    "dateNoun": {
+      "HIRE_DATE": "the hire date",
+      "PROBATION_END": "the end of probation",
+      "LAST_WORKING_DAY": "the last working day",
+      "DATE_OF_BIRTH": "their birthday"
+    },
+    "relative": "{days, plural, one {# day} other {# days}} {dir, select, BEFORE {before} other {after}} {date}",
+    "onTheDate": "on {date}",
+    "onDate": "On {date}",
+    "fieldChanges": "{field} changes",
+    "joins": "Someone joins {group}",
+    "timing": "{days, plural, one {# day} other {# days}} {dir, select, BEFORE {before} other {after}} {from}",
+    "process": {
+      "ANY_ONBOARDING": "An onboarding is completed",
+      "ANY_OFFBOARDING": "An offboarding is completed",
+      "TEMPLATE": "{name} is completed"
+    },
+    "schedule": {
+      "daily": "Every day, {at}",
+      "weekly": "Every {days}, {at}",
+      "monthly": "{day, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of every month, {at}",
+      "monthlyLast": "Last day of every month, {at}",
+      "monthlyWeekday": "{week, select, 1 {First} 2 {Second} 3 {Third} 4 {Fourth} other {Last}} {weekday} of every month, {at}",
+      "quarterly": "{day, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} day of {month, select, 1 {each quarter} 2 {the second month of each quarter} other {the third month of each quarter}}, {at}",
+      "quarterlyLast": "Last day of {month, select, 1 {the first month} 2 {the second month} other {the third month}} of each quarter, {at}",
+      "yearly": "Every year on {date}, {at}"
+    },
+    "sub": {
+      "everyPersonOnce": "Every person, once",
+      "everyYear": "Every year",
+      "once": "Once",
+      "fromTo": "From {from} to {to}",
+      "schedule": "Once for each person it runs for",
+      "joins": "They start matching who it runs for",
+      "anyTimeOff": "Any time off",
+      "ANY_ONBOARDING": "Any onboarding process",
+      "ANY_OFFBOARDING": "Any offboarding process",
+      "PERSON_HIRED": "On the hire date",
+      "TERMINATION_SCHEDULED": "When it's scheduled",
+      "LAST_WORKING_DAY_ARRIVES": "On their last working day"
+    },
+    "step": {
+      "tell": "Tell {who}",
+      "to": "To {who}",
+      "for": "For {who}",
+      "by": "By {who}",
+      "signedBy": "Signed by {who}",
+      "dueIn": "due in {days, plural, one {# day} other {# days}}",
+      "approves": "{who} approves",
+      "noAnswer": "No answer in {days, plural, one {# day} other {# days}}: {then}",
+      "taskDone": "The task is done",
+      "filled": "{field} is filled",
+      "atMost": "at most {days, plural, one {# day} other {# days}}, then {then}",
+      "assign": "Assign",
+      "unassign": "Take back",
+      "takeBack": "take back {thing}",
+      "paths": "{count, plural, one {# path} other {# paths}}",
+      "onlyIf": "only if {conditions}"
+    },
+    "noAnswer": {
+      "ASK_THEIR_MANAGER": "ask their manager",
+      "STOP": "stop the run",
+      "DECLINE": "treat it as declined"
+    },
+    "timeout": {
+      "CONTINUE": "go on",
+      "STOP": "stop",
+      "STOP_AND_TELL": "stop and tell {who}"
+    },
+    "phrase": {
+      "notify": "tells {who}",
+      "email": "emails {who}",
+      "task": "gives {who} a task",
+      "taskNobody": "creates a task",
+      "approval": "asks {who} to approve",
+      "waitTask": "waits until the task is done",
+      "waitField": "waits until {field} is filled",
+      "assign": "assigns {thing}",
+      "unassign": "takes back {thing}",
+      "policy": "grants {policy}",
+      "review": "starts a review",
+      "sign": "asks for a signature",
+      "survey": "sends a survey",
+      "split": "splits the flow"
+    },
+    "sentence": {
+      "when": "When ",
+      "for": " for people where ",
+      "noddo": ", noddo ",
+      "then": ", then ",
+      "andLast": " and ",
+      "end": ".",
+      "somethingHappens": "something happens",
+      "doesTheSteps": "does the steps",
+      "dateBefore": "{date} is {days, plural, one {# day} other {# days}} away",
+      "dateAfter": "{days, plural, one {# day has} other {# days have}} passed since {date}",
+      "dateOn": "{date} comes",
+      "fixed": "it's {date}",
+      "fieldChanges": "someone's {field} changes",
+      "joins": "someone joins {group}",
+      "joinsAny": "someone starts matching who it runs for",
+      "timeOff": {
+        "TIME_OFF_REQUESTED": "time off is requested",
+        "TIME_OFF_APPROVED": "time off is approved",
+        "TIME_OFF_REJECTED": "time off is declined",
+        "TIME_OFF_CANCELLED": "time off is cancelled"
+      },
+      "process": {
+        "ANY_ONBOARDING": "an onboarding is completed",
+        "ANY_OFFBOARDING": "an offboarding is completed",
+        "TEMPLATE": "{name} is completed"
+      },
+      "PERSON_HIRED": "someone is hired",
+      "TERMINATION_SCHEDULED": "a termination is scheduled",
+      "LAST_WORKING_DAY_ARRIVES": "a last working day comes"
+    }
+  }
+}

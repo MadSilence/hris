@@ -70,12 +70,12 @@
   },
   "automations": {
     "empty": "No automations yet.",
-    "enabled": "Enabled",
-    "scheduledRuns": "Scheduled runs",
-    "failedRuns": "Failed runs",
+    "active": "Active",
+    "waitingRuns": "Runs waiting",
+    "failedLastRuns": "Last runs failed",
     "allGood": "Nothing needs a look.",
     "paused": "Paused",
-    "failed": "{count} failed"
+    "lastRunFailed": "Last run failed"
   },
   "celebrations": {
     "birthday": "Birthday",

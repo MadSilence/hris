@@ -92,7 +92,7 @@ describe("HolidayCalendarBindingSection", () => {
 
     expect(await screen.findByText("Germany 2026")).toBeInTheDocument();
     expect(screen.getByText(/12 people inherit it/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Run log" })).toHaveAttribute("href", "/settings/automation/automations/rule-1");
+    expect(screen.getByRole("link", { name: "Run log" })).toHaveAttribute("href", "/automations/rule-1");
     expect(screen.getByRole("button", { name: "Change" })).toBeInTheDocument();
     expect(holidayCalendarBindingsService.get).toHaveBeenCalledWith("OFFICE", "berlin");
   });

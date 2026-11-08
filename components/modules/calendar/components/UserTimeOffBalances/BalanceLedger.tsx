@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { useEmployeeTimeOffBalanceTransactions } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalanceTransactions";
 import { TimeOffBalanceTransactionType } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
+import { Illustration } from "@/components/illustrations";
 
 type Props = {
   balanceId: string;
@@ -71,7 +72,12 @@ export const BalanceLedger: FC<Props> = ({ balanceId, periodEnd }) => {
   );
 
   if (rows.length === 0) {
-    return <p className="py-6 text-center text-body text-tertiary">{tr("ledger.empty")}</p>;
+    return (
+      <div className="flex flex-col items-center gap-3 py-6 text-center">
+        <Illustration scene="history" />
+        <p className="text-body text-tertiary">{tr("ledger.empty")}</p>
+      </div>
+    );
   }
 
   return (

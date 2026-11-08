@@ -137,7 +137,7 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
   if (rows.length === 0) {
     return (
       <PersonalDocumentsEmptyState
-        icon={<Icon icon={Delete02Icon} size="lg" />}
+        scene="trash"
         title={t("documents.trash.emptyTitle")}
         description={t("documents.trash.emptyDescription")}
       />

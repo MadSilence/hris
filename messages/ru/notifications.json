@@ -283,11 +283,19 @@
     },
     "automationRunFailed": {
       "title": "Сбой автоматизации",
-      "message": "{rule} не удалось завершить для: {person}{hasError, select, yes {: {error}.} other {.}} Откройте журнал запусков, чтобы повторить."
+      "message": "«{rule}» не удалось завершить для: {person}."
     },
     "automationPaused": {
       "title": "Автоматизация приостановлена",
-      "message": "{rule} приостановлена: то, что она использует, удалено.{hasReason, select, yes { {reason}} other {}} Исправьте это и возобновите правило."
+      "message": "«{rule}» приостановлена: {reason, select, OWNER_LEFT {её владелец ушёл из компании} OWNER_LACKS_RIGHT {её владелец больше не может управлять автоматизациями} TARGET_GONE {шаг ссылается на то, чего больше нет} MANUAL {её выключили вручную} other {она не может работать}}."
+    },
+    "automationWaitTimedOut": {
+      "title": "Автоматизация перестала ждать",
+      "message": "«{rule}» перестала ждать для: {person} — {what, select, TASK_DONE {задача} FIELD_FILLED {поле} other {то, чего она ждала,}} не {what, select, TASK_DONE {выполнена} FIELD_FILLED {заполнено} other {случилось}}{hasDays, select, yes { за {days, plural, one {# день} few {# дня} many {# дней} other {# дня}}} other { вовремя}}."
+    },
+    "automationApprovalReminder": {
+      "title": "Согласование ждёт вас",
+      "message": "{task}{hasPerson, select, yes { — для: {person}} other {}} всё ещё ждёт вашего ответа."
     },
     "invitationFailed": {
       "title": "Приглашение не отправлено",

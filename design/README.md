@@ -26,6 +26,7 @@ A disagreement is a question in `QUESTIONS.md`, not an edit on the other side's 
 | `HANDOFF.md` | **The protocol** — how a design arrives, how it is built, how it comes back for review | both |
 | `SCREEN_SPEC_TEMPLATE.md` | The shape of a screen's spec | — |
 | `screens/<name>/` | One folder per screen or flow: `spec.md`, plus exported prototypes and images | the designers write the spec; the code side adds "Built" |
+| `briefs/` | **The owner's input before a screen is drawn** — what the product already does behind it, what is decided, ideas, the states to draw. `SCREENS_BRIEF.md`: the stub screens, Automations, the lifecycle processes | the code side, from the owner's answers |
 | `QUESTIONS.md` | Open questions, both directions | both |
 | `CHANGELOG.md` | What changed in the code that a designer should know — a new component, a changed rule, a deviation from SPEC | the code side |
 

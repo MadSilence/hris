@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <path data-role="baseline" d="M30 136 H210" stroke-width="3" style="stroke:var(--illustration-baseline, #EAEAEC);fill:none"/>
+  <path data-role="ink" d="M116 20 Q120 18 124 20 L162 34 Q168 36 168 42 V72 C168 100 148 116 124 126 Q120 128 116 126 C92 116 72 100 72 72 V42 Q72 36 78 34 Z" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <circle data-role="ring" cx="120" cy="72" r="14" stroke-width="7" stroke="currentColor" style="fill:none"/>
+</svg>

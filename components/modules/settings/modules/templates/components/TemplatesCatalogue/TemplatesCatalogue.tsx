@@ -65,7 +65,7 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
         <CatalogueSkeleton/>
       ) : (data ?? []).filter((template) => !kind || template.kind === kind).length === 0 ? (
         <EmptyState
-          scene="forms"
+          scene="templates"
           title={t("templates.catalogue.emptyTitle")}
           description={t("templates.catalogue.emptyDescription")}
         />

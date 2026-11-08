@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none">
+  <path data-role="baseline" d="M30 136 H210" style="fill:none;stroke:var(--illustration-baseline, #EAEAEC)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect data-role="ink" x="62" y="20" width="84" height="110" rx="10" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="support" d="M78 46 H130 M78 62 H130" style="fill:none;stroke:var(--illustration-support, #C9C9CE)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="ink" d="M78 100 C86 86 94 82 96 94 C98 104 104 98 108 94" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="support" d="M78 112 H130" style="fill:none;stroke:var(--illustration-support, #C9C9CE)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle data-role="ring" cx="124" cy="96" r="5.5" stroke="currentColor" style="fill:none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path data-role="ink" d="M169 108 L194 47 Q196 43 200 45 L205 47 Q209 49 207 53 L182 114 Q181 117 178 119 L171 122 Q166 124 166 119 Z" style="fill:none;stroke:var(--illustration-ink, #0B0B0C)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

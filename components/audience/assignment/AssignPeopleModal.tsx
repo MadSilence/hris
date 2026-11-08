@@ -540,7 +540,7 @@ const LiveResultView: React.FC<{ result: LiveAssignmentCreated; kind: AssignTarg
         </ul>
       )}
       <PermissionGate resource="SETTINGS.AUTOMATIONS" action="VIEW">
-        <Link href={`/settings/automation/automations/${result.ruleId}`} className="text-body">
+        <Link href={`/automations/${result.ruleId}`} className="text-body">
           {t("audience.assign.liveResult.openRule")}
         </Link>
       </PermissionGate>

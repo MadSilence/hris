@@ -89,14 +89,16 @@ export const NoResults: React.FC<{
   title?: string;
   /** A way out — "Clear filters". */
   action?: React.ReactNode;
+  /** `no-results-s` for a search that missed; `no-match-s`, the funnel, for a filter that left nothing. */
+  scene?: Extract<Scene, "no-results-s" | "no-match-s">;
   /** See {@link EmptyState}'s `fill`. */
   fill?: boolean;
   className?: string;
-}> = ({ hint, title, action, fill, className }) => {
+}> = ({ hint, title, action, scene = "no-results-s", fill, className }) => {
   const t = useTranslations("common");
   return (
   <div className={cn("flex w-full flex-col items-center justify-center gap-3 px-6 py-8 text-center", fill && "h-full", className)}>
-    <Illustration scene="no-results-s" size="s" />
+    <Illustration scene={scene} size="s" />
     <div className="flex flex-col gap-1">
       <p className="text-body font-medium text-primary">{title ?? t("states.noResults")}</p>
       <p className="mx-auto max-w-sm text-body text-tertiary">{hint ?? t("emptyState.noResultsHint")}</p>

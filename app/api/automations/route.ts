@@ -4,5 +4,5 @@ import { hrisApiAutomationsService } from "@/api/modules/automations/services";
 
 export const GET = apiRequestWrapper(async (req: Request) => {
   const params = new URL(req.url).searchParams;
-  return NextResponse.json(await hrisApiAutomationsService.list(params.get("includeArchived") === "true"));
+  return NextResponse.json(await hrisApiAutomationsService.list(params.get("archived") === "true"));
 });

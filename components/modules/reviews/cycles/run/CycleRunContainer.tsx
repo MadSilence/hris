@@ -153,7 +153,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
         <TabsContent value="people" className="mt-4">
           {data.people.length === 0 ? (
-            <EmptyState compact scene="team-and-org" title={t("run.people.emptyTitle")}
+            <EmptyState compact scene="review-cycle" title={t("run.people.emptyTitle")}
               description={t("run.people.emptyDescription")} />
           ) : (
           <ul className="space-y-2">
@@ -179,7 +179,7 @@ export function CycleRunContainer({ cycleId }: { cycleId: string }) {
 
         <TabsContent value="reviewers" className="mt-4">
           {data.reviewers.length === 0 ? (
-            <EmptyState compact scene="team-and-org" title={t("run.reviewers.emptyTitle")}
+            <EmptyState compact scene="all-caught-up" title={t("run.reviewers.emptyTitle")}
               description={t("run.reviewers.emptyDescription")} />
           ) : (
           <div className="overflow-x-auto rounded-popover border border-divider bg-card">

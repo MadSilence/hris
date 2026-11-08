@@ -7,6 +7,7 @@ import {
   Calendar03Icon,
   CheckListIcon,
   Clock01Icon,
+  FlashIcon,
   Home01Icon,
   InboxIcon,
   Settings01Icon,
@@ -35,11 +36,19 @@ import UserSettingsProvider from "@/components/providers/UserSettingsProvider";
 import { useWelcome } from "@/components/modules/firstRun/hooks";
 import { QuickSearchDialog, useQuickSearchShortcut, type SearchPage } from "@/components/modules/search";
 import { StepUpDialog } from "@/components/modules/mfa/stepUp";
+import { AppFrameProvider, useAppFrameMode } from "@/components/layout/AppFrame";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const t = useTranslations("navigation");
   const [collapsed, setCollapsed] = useState(false);
   const { access } = useAccess();
+  // A canvas page (the automation editor) folds the sidebar to 64 px; hovering opens it over the page. A manual
+  // unfold there lasts while the page is open and is not remembered (AppFrame).
+  const canvas = useAppFrameMode() === "canvas";
+  const [canvasUnfolded, setCanvasUnfolded] = useState(false);
+  useEffect(() => {
+    if (!canvas) setCanvasUnfolded(false);
+  }, [canvas]);
 
   const { user } = useCurrentUser();
   const { company } = useCompanyData();
@@ -112,6 +121,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     // Performance reviews (REVIEWS_DESIGN.md § 12.1): everybody's — anybody may have a review to write or to read.
     // Overview sends somebody who does not run cycles on to My Reviews.
     { label: t("menu.reviews"), href: "/reviews", icon: StarIcon },
+    // Automations left Settings for the main navigation (AUTOMATIONS_REDESIGN_PLAN batch 8); the right keeps its
+    // code (K11). Viewers see the list without actions.
+    { label: t("menu.automations"), href: "/automations", icon: FlashIcon, resources: ["SETTINGS.AUTOMATIONS"] },
   ];
 
   const allBottomItems: (NavItem & { resources?: ResourceCode[] })[] = seesSettings
@@ -149,8 +161,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   return (
     <div className="grid min-h-dvh grid-cols-[auto_minmax(0,1fr)] bg-page print:block print:min-h-0">
       <Sidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((current) => !current)}
+        collapsed={canvas ? !canvasUnfolded : collapsed}
+        onToggle={() => (canvas ? setCanvasUnfolded((current) => !current) : setCollapsed((current) => !current))}
+        peekOnHover={canvas && !canvasUnfolded}
         topItems={top}
         bottomItems={bottom}
         profile={profile}
@@ -174,7 +187,19 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       {/* Printing a page (the company calendar's Print): the page alone, grown to its content. */}
       <div className="flex h-dvh min-w-0 flex-col print:h-auto">
         <ImpersonationBanner/>
-        <main className="min-w-0 flex-1 overflow-auto print:overflow-visible">{children}</main>
+        <main className={canvas ? "min-h-0 min-w-0 flex-1 overflow-hidden" : "min-w-0 flex-1 overflow-auto print:overflow-visible"}>
+          {/* Page padding (SPEC § 6): 32 px, 24 below a 1280 px viewport; none on a canvas page. One element either
+              way, so switching the mode never remounts the page. */}
+          <div
+            className={
+              canvas
+                ? "h-full"
+                : "px-(--page-padding-narrow) py-(--page-padding-narrow) xl:px-(--page-padding) xl:py-(--page-padding)"
+            }
+          >
+            {children}
+          </div>
+        </main>
       </div>
 
       {/* "Confirm it is you" — one dialog for every sensitive operation (MFA_DESIGN.md § 3.5). */}
@@ -199,12 +224,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <CompanyDataProvider>
         <ImpersonationProvider>
           <UserSettingsProvider>
-            <LayoutContent>
-              {/* Page padding (SPEC § 6): 32 px, 24 below a 1280 px viewport. */}
-              <div className="px-(--page-padding-narrow) py-(--page-padding-narrow) xl:px-(--page-padding) xl:py-(--page-padding)">
-                {children}
-              </div>
-            </LayoutContent>
+            <AppFrameProvider>
+              <LayoutContent>{children}</LayoutContent>
+            </AppFrameProvider>
           </UserSettingsProvider>
         </ImpersonationProvider>
       </CompanyDataProvider>

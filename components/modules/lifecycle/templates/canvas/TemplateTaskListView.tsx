@@ -48,7 +48,7 @@ export function TemplateTaskListView({ type, items, lanes, selectedKey, readOnly
     return (
       <div className="h-full" data-test="template-list-view">
         <EmptyState
-          scene="onboarding"
+          scene="tasks"
           title={t("listView.emptyTitle")}
           description={t("listView.emptyDescription")}
           onCreate={readOnly ? undefined : onAddAction}

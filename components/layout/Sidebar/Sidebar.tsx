@@ -66,6 +66,11 @@ type SidebarProps = {
    * work.
    */
   showFinishProfile?: boolean;
+  /**
+   * Folded on a canvas page (AppFrame `canvas`): hovering opens the full sidebar *over* the page without pushing it,
+   * and leaving it folds it again. The column the page sees stays 64 px.
+   */
+  peekOnHover?: boolean;
 };
 
 const initialsOf = (name: string) =>
@@ -103,17 +108,23 @@ const AppSidebar: FC<SidebarProps> = ({
   onSignOut,
   onChangePassword,
   showFinishProfile = false,
+  peekOnHover = false,
 }) => {
   const t = useTranslations("navigation");
   const pathname = usePathname();
   const router = useRouter();
   const searchShortcut = useSearchShortcutLabel();
+  const [peeking, setPeeking] = useState(false);
+  useEffect(() => {
+    if (!peekOnHover) setPeeking(false);
+  }, [peekOnHover]);
+  const folded = collapsed && !peeking;
 
   const profileHref = profile.id ? `/organization/people/${profile.id}/personal` : "/organization/people";
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen === collapsed) {
+    if (nextOpen === folded) {
       onToggle?.();
     }
   };
@@ -129,7 +140,7 @@ const AppSidebar: FC<SidebarProps> = ({
             <Icon icon={item.icon} />
             <span>{item.label}</span>
             {badge > 0 &&
-              (collapsed ? (
+              (folded ? (
                 <span aria-hidden className="absolute top-1.5 right-1.5 size-2 rounded-pill bg-sidebar-counter" />
               ) : (
                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-pill bg-sidebar-counter px-1.5 text-hint font-medium text-sidebar-counter-text tabular-nums">
@@ -145,8 +156,14 @@ const AppSidebar: FC<SidebarProps> = ({
   const companyName = company?.name ?? "";
 
   return (
-    <SidebarProvider open={!collapsed} onOpenChange={handleOpenChange}>
-      <Sidebar>
+    // Peeking, the column keeps its folded width: the open sidebar is fixed and lies over the page.
+    <div className={peekOnHover ? "w-(--sidebar-collapsed) shrink-0 overflow-hidden" : "contents"}>
+    <SidebarProvider open={!folded} onOpenChange={handleOpenChange}>
+      <Sidebar
+        onMouseEnter={peekOnHover ? () => setPeeking(true) : undefined}
+        onMouseLeave={peekOnHover ? () => setPeeking(false) : undefined}
+        className={peeking ? "z-30 shadow-popover" : undefined}
+      >
         <SidebarRail />
 
         <SidebarHeader className="pb-1">
@@ -197,7 +214,7 @@ const AppSidebar: FC<SidebarProps> = ({
         </SidebarContent>
 
         <SidebarFooter className="gap-3">
-          {collapsed && <SidebarTrigger className="mx-auto" />}
+          {folded && <SidebarTrigger className="mx-auto" />}
           <SidebarMenu>{bottomItems.map(renderItem)}</SidebarMenu>
 
           {/* No noddo wordmark here (the owner, 2026-11-05) — an exception to SPEC §§ 2 and 13.6, which put one above the
@@ -267,6 +284,7 @@ const AppSidebar: FC<SidebarProps> = ({
         </SidebarFooter>
       </Sidebar>
     </SidebarProvider>
+    </div>
   );
 };
 

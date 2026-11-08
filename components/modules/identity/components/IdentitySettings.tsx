@@ -36,6 +36,7 @@ import {
 } from "@/components/modules/identity/actions";
 import { useIdentityConnection, useIdpGroups, useInvalidateIdentity, useScimTokens } from "@/components/modules/identity/hooks";
 import { withStepUpAction } from "@/components/modules/mfa/stepUp";
+import { Illustration } from "@/components/illustrations";
 
 const MODE_LABEL_KEY = {
   OFF: "identity.mode.off",
@@ -451,7 +452,10 @@ const GroupsPanel: React.FC = () => {
       ) : groups.error ? (
         <ErrorState error={groups.error} />
       ) : (groups.data ?? []).length === 0 ? (
-        <p className="text-body text-tertiary">{t("identity.groups.empty")}</p>
+        <div className="flex flex-col items-center gap-3 py-6 text-center">
+          <Illustration scene="job-families" />
+          <p className="text-body text-tertiary">{t("identity.groups.empty")}</p>
+        </div>
       ) : (
         <ul className="divide-y divide-divider rounded-control border border-divider">
           {(groups.data ?? []).map((g) => (

@@ -1,18 +1,18 @@
 /**
- * Settings → Automation, and the assignment modal's live rules.
- * Design and API: (claude)/technical_design/AUTOMATIONS_DESIGN.md § 8.
- * Mirrors hris-api `features/automations/dto/AutomationDTOs` and `features/automations/model/*`.
+ * Automations (the redesign, (claude)/development_plan/AUTOMATIONS_REDESIGN_PLAN.md), and the assignment modal's live
+ * rules. Mirrors hris-api `features/automations/dto/AutomationDTOs` and `features/automations/model/*`.
+ * The screens are specified in `design/screens/automations-*`.
  */
-import type { ReviewKind } from "@/models/reviews";
 import type { Segment } from "@/models/segment/Segment";
 import type { HolidayCalendarBindingRef } from "@/models/publicHolidays/binding";
-import type { CodedMessage } from "@/models/misc";
 
 // ── vocabulary ────────────────────────────────────────────────────────────────────────────────
 
-export type AutomationRuleStatus = "DISABLED" | "ENABLED" | "PAUSED" | "ARCHIVED";
-/** SYSTEM: a holiday calendar binding's rule — read-only here, changed through the place's Holiday Calendar field. */
-export type AutomationRuleOrigin = "BUILDER" | "ASSIGNMENT" | "SYSTEM";
+/** DRAFT: never turned on. PAUSED: turned off by hand, or by the system (see `AutomationPause`). */
+export type AutomationStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "ARCHIVED";
+export type AutomationPauseReason = "MANUAL" | "OWNER_LEFT" | "OWNER_LACKS_RIGHT" | "TARGET_GONE";
+/** SYSTEM: a holiday calendar binding's — read only, changed through the place's Holiday Calendar field. */
+export type AutomationOrigin = "BUILDER" | "ASSIGNMENT" | "SYSTEM";
 export type AutomationTriggerType =
   | "PERSON_HIRED"
   | "TERMINATION_SCHEDULED"
@@ -20,11 +20,9 @@ export type AutomationTriggerType =
   | "DATE_OFFSET"
   | "JOINS_SEGMENT"
   | "FIELD_CHANGED"
-  /** Something happened in another module — time off, a process completing, a review. */
   | "EVENT"
-  /** On a schedule, once per period for each person of the segment. */
   | "SCHEDULE";
-export type AutomationActionType =
+export type AutomationStepType =
   | "NOTIFY"
   | "SEND_EMAIL"
   | "CREATE_TASK"
@@ -32,14 +30,15 @@ export type AutomationActionType =
   | "UNASSIGN"
   | "GRANT_TIME_OFF_POLICY"
   | "START_REVIEW"
-  /** Holds the rest of the run until a task of it is done or a field is filled, at most so many days. */
   | "WAIT_UNTIL"
-  /** Asks somebody to approve; the rest waits for the answer, and a refusal stops it. */
-  | "REQUEST_APPROVAL";
+  | "REQUEST_APPROVAL"
+  | "SPLIT"
+  | "SIGN_DOCUMENT"
+  | "SEND_SURVEY";
 export type AutomationLatePolicy = "RUN_LATE" | "SKIP";
-export type AutomationRunStatus = "SCHEDULED" | "IN_PROGRESS" | "DONE" | "SKIPPED" | "FAILED" | "CANCELLED";
+export type AutomationRunStatus = "SCHEDULED" | "IN_PROGRESS" | "WAITING" | "DONE" | "SKIPPED" | "FAILED" | "CANCELLED";
 export type AutomationStepStatus = "SCHEDULED" | "DONE" | "SKIPPED" | "FAILED" | "CANCELLED" | "STOPPED" | "WAITING";
-export type DateField = "HIRE_DATE" | "PROBATION_END" | "LAST_WORKING_DAY" | "DATE_OF_BIRTH" | "ATTRIBUTE";
+export type DateField = "HIRE_DATE" | "PROBATION_END" | "LAST_WORKING_DAY" | "DATE_OF_BIRTH" | "ATTRIBUTE" | "FIXED";
 export type TriggerDirection = "BEFORE" | "ON" | "AFTER";
 export type RecipientKind =
   | "PERSON"
@@ -47,31 +46,26 @@ export type RecipientKind =
   | "ONBOARDING_MANAGER"
   | "ROLE"
   | "USER"
-  /** The head of the person's department. */
   | "DEPARTMENT_HEAD"
-  /** Their manager's manager. */
   | "MANAGERS_MANAGER"
-  /** A time off event: whoever decides or decided the request. */
-  | "APPROVER"
-  /** A review event: whoever wrote the review (never an anonymous one). */
-  | "REVIEWER";
+  | "APPROVER";
 export type AutomationEvent =
   | "TIME_OFF_REQUESTED"
   | "TIME_OFF_APPROVED"
   | "TIME_OFF_REJECTED"
   | "TIME_OFF_CANCELLED"
-  | "PROCESS_COMPLETED"
-  | "REVIEW_SUBMITTED"
-  | "REVIEW_SHARED";
-/** What an event's offsets count from. */
+  | "PROCESS_COMPLETED";
 export type EventAnchor = "EVENT" | "LEAVE_START" | "LEAVE_END";
-/** A change dated ahead: the day it takes effect (default), or the day it is recorded. */
 export type ChangeTiming = "EFFECTIVE" | "RECORDED";
-export type ScheduleFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY";
+export type ScheduleFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "YEARLY";
+export type OnLeave = "TAKE_BACK" | "KEEP";
 export type WaitUntil = "TASK_DONE" | "FIELD_FILLED";
 export type OnTimeout = "CONTINUE" | "STOP" | "STOP_AND_TELL";
+export type NoAnswer = "ASK_THEIR_MANAGER" | "STOP" | "DECLINE";
+export type CalendarRelation = "OFFICE_CALENDAR" | "COUNTRY_CALENDAR" | "LEGAL_ENTITY_CALENDAR";
+export type TimingMode = "RIGHT_AWAY" | "LATER";
+export type TimingDirection = "BEFORE" | "AFTER";
 
-/** A condition on an event's own fields: all / any / not over comparisons. */
 export type EventCondition = {
   kind: "ALL" | "ANY" | "NOT" | "MATCH";
   children?: EventCondition[] | null;
@@ -98,9 +92,9 @@ export type AssignmentSkipReason =
   | "INVALID_TARGET"
   | "HAND_OVERRIDE"
   | "RULE_CONFLICT";
-/** KEEP: runs in flight stay on their version. MOVE: every run that has not started is re-planned. */
+/** KEEP: runs going stay on their version. MOVE: every run that has not started follows the changes. */
 export type InFlightChoice = "KEEP" | "MOVE";
-/** NONE: forward only (the default). ALL: also everybody whose moment already passed. */
+/** NONE: only new cases (the default). ALL: also those already there or waiting. */
 export type BackfillChoice = "NONE" | "ALL";
 
 /** The placeholders a text may use, as `{name}`. The catalogue sends the same list. */
@@ -118,420 +112,262 @@ export const AUTOMATION_PLACEHOLDERS = [
 ] as const;
 export type AutomationPlaceholder = (typeof AUTOMATION_PLACEHOLDERS)[number];
 
-/**
- * Reasons a run or a step carries. Free text on the wire — a failure carries the engine's error, a
- * late run `LATE_DATA: planned for 2026-10-14` — so these are the known prefixes, not a closed set.
- */
-export const AUTOMATION_REASONS = [
-  "FORWARD_ONLY",
-  "LATE_DATA",
-  "MOMENT_PASSED",
-  "NO_LONGER_MATCHES",
-  "ANCHOR_CLEARED",
-  "RULE_DISABLED",
-  "RULE_PAUSED",
-  "PERSON_LEFT",
-  "CANCELLED_BY_HAND",
-  "TERMINATION_CANCELLED",
-  "NO_RECIPIENT",
-  "NO_ONBOARDING_MANAGER",
-  "NOT_ASSIGNED",
-  "HAND_OVERRIDE",
-  "RULE_CONFLICT",
-  "DUPLICATE",
-  "OUTRANKED",
-  "MISSING_PLACEHOLDER",
-  "STRUCTURAL",
-  "CONDITION_NOT_MET",
-  "OBJECT_CLOSED",
-  "MISSED",
-  "TIMED_OUT",
-  "DECLINED",
-  "NO_APPROVER",
-  "AUTHOR_LEFT",
-  "AUTHOR_LACKS_RIGHT",
-] as const;
-
 // ── the definition ────────────────────────────────────────────────────────────────────────────
 
 export type TriggerSpec = {
   type: AutomationTriggerType;
-  /** DATE_OFFSET: a DateField. FIELD_CHANGED: hireDate | probationEnd | firstName | lastName | email | manager | job | attr:<id>. */
   field?: string | null;
-  /** DATE_OFFSET on ATTRIBUTE: the DATE attribute. */
   attributeId?: string | null;
+  /** "Pick a date": one date with a year (`field: "FIXED"`). */
+  date?: string | null;
   direction?: TriggerDirection | null;
-  /** Calendar days, never negative — the direction says which way. */
   days?: number | null;
   everyYear?: boolean | null;
-  /** FIELD_CHANGED only; not supported for custom fields. For a team: removed from / added to. */
   from?: string | null;
   to?: string | null;
-  /** FIELD_CHANGED: a change dated ahead fires on its day (default) or when recorded. */
   when?: ChangeTiming | null;
-  /** EVENT */
   event?: AutomationEvent | null;
   eventConditions?: EventCondition | null;
   anchor?: EventAnchor | null;
-  /** SCHEDULE */
+  /** A process event: `ANY_ONBOARDING`, `ANY_OFFBOARDING` or a template's id. */
+  process?: string | null;
   frequency?: ScheduleFrequency | null;
-  /** SCHEDULE weekly: 1 (Monday) … 7 (Sunday). */
-  weekday?: number | null;
-  /** SCHEDULE monthly and quarterly: 1 … 28, or 0 for the last day. */
+  weekdays?: number[] | null;
+  /** Monthly "on a weekday": 1–4, or 0 for the last. */
+  weekOfMonth?: number | null;
   dayOfMonth?: number | null;
+  /** Quarterly: 1–3, the month of the quarter. Yearly: 1–12. */
+  monthOfPeriod?: number | null;
+  at?: string | null;
+  /** `PERSON` (each person's own, the default), `COMPANY`, or an IANA zone. */
+  timeZone?: string | null;
+  onLeave?: OnLeave | null;
 };
 
-export type RecipientSpec = {
-  kind: RecipientKind;
-  userId?: string | null;
-  roleId?: string | null;
+export type RecipientSpec = { kind: RecipientKind; userId?: string | null; roleId?: string | null };
+
+export type Timing = {
+  mode: TimingMode;
+  days?: number | null;
+  direction?: TimingDirection | null;
+  /** `PREVIOUS_STEP` (the default), a DateField name, or `ATTRIBUTE:<id>`. */
+  countedFrom?: string | null;
+  at?: string | null;
 };
 
-/** One action. Each type reads its own fields; the rest are omitted. */
-export type ActionSpec = {
-  type: AutomationActionType;
-  /** Calendar days from the trigger's moment; negative is before it. */
-  offsetDays?: number | null;
-  /** NOTIFY, SEND_EMAIL */
+export type SplitPath = { id: string; name: string; condition?: Segment | null; steps: StepSpec[] };
+
+/** One step of the tree. Each type reads its own fields. */
+export type StepSpec = {
+  id: string;
+  type: AutomationStepType;
+  when?: Timing | null;
+  skipped?: boolean | null;
+  condition?: Segment | null;
   recipients?: RecipientSpec[] | null;
-  /** NOTIFY */
   text?: string | null;
-  /** SEND_EMAIL */
   subject?: string | null;
-  /** SEND_EMAIL — plain text, newlines kept. */
   body?: string | null;
-  /** CREATE_TASK */
   assignee?: RecipientSpec | null;
   title?: string | null;
   description?: string | null;
-  /** CREATE_TASK: due on the moment plus this; null = no due date. */
-  dueOffsetDays?: number | null;
-  /** ASSIGN, UNASSIGN — never TIME_OFF_POLICY (that is GRANT_TIME_OFF_POLICY). */
+  dueDays?: number | null;
   assignableType?: AssignableType | null;
   assignableId?: string | null;
-  /** GRANT_TIME_OFF_POLICY */
+  relation?: CalendarRelation | null;
   policyId?: string | null;
-  /** START_REVIEW: the review cycle template a one-person review is started from (REVIEWS_PLAN.md 11.3). */
-  templateCycleId?: string | null;
-  /** START_REVIEW: each kind of the template's window, in calendar days from the moment. */
-  reviewWindows?: ReviewWindowSpec[] | null;
-  /** START_REVIEW, a template that releases its results on a date: that date, in days from the moment. */
-  releaseOffsetDays?: number | null;
-  /** Any action: "only if" — a segment the person must match when the step runs. */
-  condition?: Segment | null;
-  /** WAIT_UNTIL */
+  formId?: string | null;
   until?: WaitUntil | null;
-  /** WAIT_UNTIL on TASK_DONE: the position of a CREATE_TASK action before it. */
-  taskStep?: number | null;
-  /** WAIT_UNTIL on FIELD_FILLED: sys:<field> or attr:<id>. */
+  taskStepId?: string | null;
   field?: string | null;
-  /** WAIT_UNTIL, REQUEST_APPROVAL: the longest it waits. */
   maxDays?: number | null;
   onTimeout?: OnTimeout | null;
-};
-
-/** One kind of review of a START_REVIEW action, counted in days from the moment as a task's due offset is. */
-export type ReviewWindowSpec = {
-  kind: ReviewKind;
-  opensOffsetDays?: number | null;
-  dueOffsetDays?: number | null;
-  /** Peers the person nominates only. */
-  nominationOffsetDays?: number | null;
-  approvalOffsetDays?: number | null;
+  tell?: RecipientSpec[] | null;
+  ifNoAnswer?: NoAnswer | null;
+  remindDaily?: boolean | null;
+  approved?: StepSpec[] | null;
+  declined?: StepSpec[] | null;
+  question?: string | null;
+  paths?: SplitPath[] | null;
+  otherwise?: SplitPath | null;
+  documents?: string[] | null;
+  survey?: string | null;
 };
 
 export type AutomationDefinition = {
-  trigger: TriggerSpec;
+  trigger: TriggerSpec | null;
   conditions: Segment;
-  actions: ActionSpec[];
-  latePolicy?: AutomationLatePolicy;
-  /** How far back "late" reaches; null = the default (the catalogue's defaultLateWindowDays). */
+  steps: StepSpec[];
+  latePolicy?: AutomationLatePolicy | null;
   lateWindowDays?: number | null;
 };
 
-// ── rules ─────────────────────────────────────────────────────────────────────────────────────
+// ── automations ───────────────────────────────────────────────────────────────────────────────
 
-export type PersonRef = { id: string; name: string | null };
-
-export type RunCounts = {
-  scheduled: number;
-  inProgress: number;
-  done: number;
-  skipped: number;
-  failed: number;
-  cancelled: number;
+export type PersonRef = { id: string | null; name: string | null };
+export type PersonCard = {
+  id: string;
+  name: string | null;
+  avatarUrl: string | null;
+  jobTitle: string | null;
+  office: string | null;
 };
 
-export type AutomationRuleSummary = {
+export type AutomationPause = {
+  reason: AutomationPauseReason;
+  by: PersonRef | null;
+  at: string | null;
+  detail: string | null;
+  stepId: string | null;
+};
+
+export type AutomationSummary = {
   id: string;
   name: string;
   description: string | null;
-  status: AutomationRuleStatus;
-  origin: AutomationRuleOrigin;
-  triggerType: AutomationTriggerType | null;
+  icon: string | null;
+  status: AutomationStatus;
+  origin: AutomationOrigin;
+  trigger: TriggerSpec | null;
   versionNo: number;
-  author: PersonRef | null;
-  pausedReason: string | null;
-  enabledAt: string | null;
-  updatedAt: string;
-  runs: RunCounts;
-  /** The current version's definition, so the list can read each rule as one sentence. */
-  definition?: AutomationDefinition | null;
-  /** When a run of this rule last finished; null when none has. */
-  lastRunAt?: string | null;
-  /** A holiday calendar binding's rule: what it is of. */
+  owner: PersonRef | null;
+  pause: AutomationPause | null;
+  lastRun: { runId: string | null; at: string | null; failed: boolean } | null;
+  runs: number;
+  waiting: number;
+  updatedAt: string | null;
+  archivedAt: string | null;
+  archivedBy: PersonRef | null;
   binding?: HolidayCalendarBindingRef | null;
 };
 
-export type AutomationRule = {
+export type Automation = {
   id: string;
   name: string;
   description: string | null;
-  status: AutomationRuleStatus;
-  origin: AutomationRuleOrigin;
-  pausedReason: string | null;
-  pausedAt: string | null;
-  author: PersonRef | null;
+  icon: string | null;
+  status: AutomationStatus;
+  origin: AutomationOrigin;
+  pause: AutomationPause | null;
+  owner: PersonRef | null;
+  ownerActive: boolean;
   versionNo: number;
   definition: AutomationDefinition | null;
-  enabledAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
   archivedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  runs: RunCounts;
-  /** A holiday calendar binding's rule: what it is of. */
+  runs: number;
+  runsGoing: number;
   binding?: HolidayCalendarBindingRef | null;
-  /** Told of a failure or a pause besides the author. */
-  alsoNotify?: PersonRef[];
-  /** False when the author has left or cannot sign in — the rule needs somebody to take it over. */
-  authorActive?: boolean;
 };
 
 export type AutomationVersion = {
   versionNo: number;
-  definition: AutomationDefinition;
-  createdAt: string;
+  current: boolean;
+  /** JSON: `{ trigger, whoItRunsFor, added, removed, changed }`; null on the first version. */
+  summary: string | null;
+  createdAt: string | null;
   createdBy: PersonRef | null;
+  runsOnIt: number;
+  definition: AutomationDefinition;
 };
 
-export type CreateAutomationRequest = { name: string; description?: string | null; definition: AutomationDefinition };
-export type RenameAutomationRequest = { name: string; description?: string | null; alsoNotifyUserIds?: string[] | null };
-export type PublishAutomationRequest = {
+export type CreateAutomationRequest = {
+  name: string;
+  description?: string | null;
+  icon?: string | null;
+  definition: AutomationDefinition;
+};
+export type DraftAutomationRequest = CreateAutomationRequest;
+export type RenameAutomationRequest = { name: string; description?: string | null; icon?: string | null };
+export type SaveAutomationRequest = {
   definition: AutomationDefinition;
   inFlight?: InFlightChoice;
-  /** The version the editor was opened on; a newer one refuses the publish (AU00007). */
   expectedVersionNo?: number | null;
-  /** One firing sends more than the preview's threshold of messages, and the author means it. */
   confirmVolume?: boolean | null;
 };
-export type PublishAutomationResult = { rule: AutomationRule; movedRuns: number; keptRuns: number };
-export type EnableAutomationRequest = { backfill?: BackfillChoice; confirmVolume?: boolean | null };
-export type AutomationActivationResult = {
-  rule: AutomationRule;
-  plannedRuns: number;
-  consideredRuns: number;
-  cancelledRuns: number;
-  /** Runs that already finished and stay as they are — "done, cannot be undone". */
-  completedRuns: number;
-};
+export type SaveAutomationResult = { automation: Automation; movedRuns: number; keptRuns: number };
+export type TurnOnRequest = { backfill?: BackfillChoice; confirmVolume?: boolean | null };
+export type AutomationActivation = { automation: Automation; plannedRuns: number; cancelledRuns: number };
 
-// ── preview ───────────────────────────────────────────────────────────────────────────────────
+// ── checking ──────────────────────────────────────────────────────────────────────────────────
 
-export type AutomationPreviewRequest = {
-  ruleId?: string | null;
+export type CheckAutomationRequest = {
+  automationId?: string | null;
   definition: AutomationDefinition;
   samplePersonId?: string | null;
 };
-
-export type UpcomingFiring = {
-  date: string;
-  person: PersonRef;
-  position: number;
-  actionType: AutomationActionType;
-  summary: string;
-  late: boolean;
-};
-
-export type RenderedSample = {
-  position: number;
-  actionType: AutomationActionType;
-  person: PersonRef;
+export type AutomationProblem = { stepId: string | null; field: string | null; code: string; message: string };
+export type StepExample = {
+  stepId: string;
+  actionType: AutomationStepType;
+  person: PersonRef | null;
   recipients: PersonRef[];
-  /** SEND_EMAIL: the subject. CREATE_TASK: the title. */
-  subject: string | null;
-  /** NOTIFY: the text. SEND_EMAIL: the body. CREATE_TASK: the description. */
+  title: string | null;
   text: string | null;
+  dueDate: string | null;
+  assigns: string | null;
   missingPlaceholders: string[];
 };
-
-export type AssignmentPreviewItem = {
-  person: PersonRef;
-  outcome: "ASSIGN" | "SKIP";
-  reason: AssignmentSkipReason | null;
-  conflictRule: PersonRef | null;
-};
-
-export type AssignmentImpact = {
-  position: number;
-  assignableType: AssignableType;
-  assignableId: string;
-  willAssign: number;
-  skippedByReason: Partial<Record<AssignmentSkipReason, number>>;
-  items: AssignmentPreviewItem[];
-};
-
-export type AssignmentConflict = {
-  person: PersonRef;
-  assignableType: AssignableType;
-  value: string;
-  otherRule: PersonRef | null;
-  otherValue: string | null;
-};
-
-export type InFlightImpact = {
-  scheduledRuns: number;
-  inProgressRuns: number;
-  completedRuns: number;
-  wouldCancel: number;
-  wouldAdd: number;
-  /** Runs held by a wait or an approval — they stay on their version either way. */
-  waitingRuns: number;
-};
-
-export type AutomationProblem = { path: string; code: string; message: string };
-
-export type AutomationPreview = {
+export type AutomationCheck = {
   matchingCount: number;
   matching: PersonRef[];
-  /** Whom backfill ALL would add — the "people already here" question. */
-  pastMomentCount: number;
-  backfillCandidates: PersonRef[];
-  /** Every step dated within the next 30 days. */
-  upcoming: UpcomingFiring[];
-  /** Nothing can be dated ahead (termination recorded, a field changed). */
-  eventDriven: boolean;
-  samples: RenderedSample[];
-  assignments: AssignmentImpact[];
-  conflicts: AssignmentConflict[];
-  /** Only when ruleId was given — the publish dialog's counts. */
-  inFlight: InFlightImpact | null;
-  /** The same checks publish refuses on. */
-  problems: AutomationProblem[];
-  /** The notifications and emails one firing sends; above volumeThreshold publishing asks to confirm. */
+  places: string[];
+  waitingCases: number;
   messagesPerFiring: number;
   volumeThreshold: number;
+  audiences: string[];
+  runsGoing: number;
+  examples: StepExample[];
+  problems: AutomationProblem[];
 };
 
-// ── runs ──────────────────────────────────────────────────────────────────────────────────────
+// ── the test run ──────────────────────────────────────────────────────────────────────────────
 
-export type AutomationRunStep = {
+export type TestCase = {
   id: string;
-  position: number;
-  actionType: AutomationActionType;
-  summary: string;
-  offsetDays: number;
-  plannedDate: string | null;
-  effectiveDate: string | null;
-  status: AutomationStepStatus;
-  reason: string | null;
-  ranLate: boolean;
-  /** taskId, taskTitle, assigneeUserId, recipientUserIds, subject, text, assignableType, assignableId, assignmentRecordId, conflictRuleId */
-  result: Record<string, unknown>;
-  finishedAt: string | null;
-};
-
-export type AutomationRun = {
-  id: string;
-  ruleId: string;
-  ruleName: string | null;
-  versionNo: number;
-  person: PersonRef | null;
-  occurrenceKey: string;
-  triggerType: AutomationTriggerType;
-  anchorDate: string | null;
-  triggerDate: string | null;
-  status: AutomationRunStatus;
-  reason: string | null;
-  ranLate: boolean;
-  backfill: boolean;
-  createdAt: string;
-  finishedAt: string | null;
-  steps: AutomationRunStep[];
-};
-
-export type Page<T> = {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-  /** The run log: runs about people the reader may not see — counted, never listed. */
-  outsideScope?: number;
-};
-
-// ── catalogue ─────────────────────────────────────────────────────────────────────────────────
-
-export type CatalogOption = { value: string; label: string };
-
-/** What the builder may offer this author: actions they could not perform by hand are absent. */
-export type AutomationCatalog = {
-  triggers: AutomationTriggerType[];
-  dateFields: CatalogOption[];
-  dateAttributes: CatalogOption[];
-  changeableFields: CatalogOption[];
-  actions: AutomationActionType[];
-  assignableTypes: AssignableType[];
-  placeholders: string[];
-  recipientKinds: Partial<Record<AutomationActionType, RecipientKind[]>>;
-  defaultLateWindowDays: number;
-  events: AutomationEventOption[];
-};
-
-/** One event an EVENT trigger may listen to, with what it offers. */
-export type AutomationEventOption = {
-  value: AutomationEvent;
+  person: PersonRef;
   label: string;
-  family: "TIME_OFF" | "PROCESS" | "REVIEW";
-  /** type: TEXT, NUMBER, or the comma-separated values it can take. */
-  fields: { name: string; label: string; type: string }[];
-  placeholders: string[];
-  countsFromLeave: boolean;
-  recipientKinds: RecipientKind[];
+  startDate: string | null;
+  endDate: string | null;
+  example: boolean;
 };
-
-// ── trying a rule, templates ──────────────────────────────────────────────────────────────────
-
-export type AutomationTestItem = {
-  position: number;
-  actionType: AutomationActionType;
-  outcome: "EMAILED" | "NOTIFIED" | "NOT_CREATED" | "NOT_SENT" | "NO_EMAIL";
-  text: string | null;
+export type ApprovalPick = "APPROVES" | "DECLINES" | "NO_ANSWER";
+export type TestRunRequest = {
+  automationId?: string | null;
+  definition: AutomationDefinition;
+  caseId: string;
+  decisions?: Record<string, ApprovalPick>;
+};
+export type TestRunOutcome =
+  | "WOULD_SEND"
+  | "WOULD_CREATE"
+  | "WOULD_ASSIGN"
+  | "WOULD_WAIT"
+  | "DECIDED"
+  | "PATH"
+  | "SKIPPED_PATH"
+  | "SKIPPED_CONDITION"
+  | "SKIPPED_FOR_NOW"
+  | "NOT_CONNECTED"
+  | "NO_RECIPIENT"
+  | "MISSING_DETAILS";
+export type TestRunStep = {
+  stepId: string;
+  actionType: AutomationStepType;
+  outcome: TestRunOutcome;
+  title: string | null;
+  recipients: PersonRef[];
+  detail: string | null;
+  date: string | null;
+  path: string | null;
+  pathName: string | null;
+  sendable: boolean;
   missingPlaceholders: string[];
 };
-export type AutomationTestResult = { person: PersonRef; items: AutomationTestItem[] };
-
-export type SimulatedStep = {
-  position: number;
-  actionType: AutomationActionType;
-  summary: string;
-  date: string | null;
-  late: boolean;
-  conditionMet: boolean | null;
-  note: string | null;
-  /** `summary` as a code: the action type, its parts as params (`AutomationViews#summaryCode`). */
-  summaryCode?: CodedMessage | null;
-  /** `note` as a code (`AutomationSimulationNotice` STEP_*), null when there is no note. */
-  noteCode?: CodedMessage | null;
-};
-export type AutomationSimulation = {
-  person: PersonRef;
-  matches: boolean;
-  moment: string | null;
-  steps: SimulatedStep[];
-  notes: string[];
-  /** `notes` as codes (`AutomationSimulationNotice`), one each, in the same order. */
-  noteCodes?: CodedMessage[];
-};
+export type TestRun = { testCase: TestCase; triggerLine: string; steps: TestRunStep[]; testItems: number };
+export type TestSendRequest = { automationId?: string | null; definition: AutomationDefinition; caseId: string; stepId: string };
+export type TestSent = { stepId: string; outcome: "SENT" | "EMAILED" | "CREATED" | "NO_EMAIL"; testItems: number };
 
 export type AutomationTemplate = {
   key: string;
@@ -541,7 +377,127 @@ export type AutomationTemplate = {
   definition: AutomationDefinition;
 };
 
+// ── runs ──────────────────────────────────────────────────────────────────────────────────────
+
+export type AutomationRunStep = {
+  id: string;
+  stepId: string;
+  position: number;
+  path: string;
+  actionType: AutomationStepType;
+  plannedDate: string | null;
+  effectiveDate: string | null;
+  runAt: string | null;
+  status: AutomationStepStatus;
+  reason: string | null;
+  ranLate: boolean;
+  result: Record<string, unknown>;
+  finishedAt: string | null;
+};
+
+export type AutomationRun = {
+  id: string;
+  ruleId: string;
+  ruleName: string | null;
+  ruleIcon: string | null;
+  versionNo: number;
+  person: PersonCard | null;
+  occurrenceKey: string;
+  triggerType: AutomationTriggerType;
+  anchorDate: string | null;
+  triggerDate: string | null;
+  about: Record<string, unknown>;
+  status: AutomationRunStatus;
+  reason: string | null;
+  ranLate: boolean;
+  daysLate: number;
+  createdAt: string | null;
+  finishedAt: string | null;
+  nextDate: string | null;
+  steps: AutomationRunStep[] | null;
+};
+
+export type RunCounts = {
+  all: number;
+  failed: number;
+  waiting: number;
+  scheduled: number;
+  done: number;
+  inProgress: number;
+  skipped: number;
+  cancelled: number;
+  next7Days: number;
+};
+
+export type RunChip = "ALL" | "FAILED" | "WAITING" | "SCHEDULED" | "DONE" | "NEXT_7_DAYS";
+export type RunQuery = {
+  automationId?: string | null;
+  chip?: RunChip;
+  q?: string | null;
+  segment?: Segment | null;
+  cursor?: string | null;
+  size?: number;
+  /** Activity: the chips count what the search and the Filters show, also for one automation (V8b). */
+  countsFollowSearch?: boolean;
+};
+export type RunSlice = { content: AutomationRun[]; nextCursor: string | null; counts: RunCounts; outsideScope: number };
+
+/** A page, as Spring sends it — the assignment history. */
+export type Page<T> = {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+};
+
+// ── catalogue ─────────────────────────────────────────────────────────────────────────────────
+
+export type CatalogOption = { value: string; label: string | null };
+export type RoleOption = { id: string; name: string };
+
+export type AutomationEventOption = {
+  value: AutomationEvent;
+  family: "TIME_OFF" | "PROCESS";
+  fields: { name: string; type: string }[];
+  placeholders: string[];
+  countsFromLeave: boolean;
+  recipientKinds: RecipientKind[];
+};
+
+export type AutomationCatalog = {
+  triggers: AutomationTriggerType[];
+  dateFields: CatalogOption[];
+  dateAttributes: CatalogOption[];
+  changeableFields: CatalogOption[];
+  actions: AutomationStepType[];
+  assignableTypes: AssignableType[];
+  placeholders: string[];
+  recipientKinds: RecipientKind[];
+  roles: RoleOption[];
+  relations: CalendarRelation[];
+  defaultLateWindowDays: number;
+  events: AutomationEventOption[];
+  processTemplates: CatalogOption[];
+  reviewForms: CatalogOption[];
+};
+
 // ── live assignment rules (the assignment modal) ──────────────────────────────────────────────
+
+export type AssignmentPreviewItem = {
+  person: PersonRef | null;
+  outcome: "ASSIGN" | "SKIP";
+  reason: AssignmentSkipReason | null;
+  conflictRule: PersonRef | null;
+};
+
+export type AssignmentConflict = {
+  person: PersonRef | null;
+  assignableType: AssignableType;
+  value: string;
+  otherRule: PersonRef | null;
+  otherValue: string | null;
+};
 
 export type LiveAssignmentRequest = {
   assignableType: AssignableType;

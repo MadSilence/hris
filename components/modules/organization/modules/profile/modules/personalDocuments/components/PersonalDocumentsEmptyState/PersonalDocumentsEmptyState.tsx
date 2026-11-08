@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { FolderOpenIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
+import { Illustration, type Scene } from "@/components/illustrations";
 
 type Props = {
   /** Defaults describe an empty folder; the trash passes its own wording. */
   title?: string;
   description?: string;
-  icon?: React.ReactNode;
+  /** The folder's picture by default; the trash passes its bin. */
+  scene?: Extract<Scene, "documents" | "trash">;
 };
 
 /**
@@ -22,15 +22,13 @@ type Props = {
 export const PersonalDocumentsEmptyState: React.FC<Props> = ({
   title,
   description,
-  icon,
+  scene = "documents",
 }) => {
   const t = useTranslations("organization");
 
   return (
     <div className="flex h-full min-h-[260px] flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider bg-subtle/40 p-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-pill bg-mist text-tertiary">
-        {icon ?? <Icon icon={FolderOpenIcon} size="lg" />}
-      </div>
+      <Illustration scene={scene} />
 
       <h3 className="text-body font-medium text-primary">{title ?? t("documents.emptyState.title")}</h3>
 

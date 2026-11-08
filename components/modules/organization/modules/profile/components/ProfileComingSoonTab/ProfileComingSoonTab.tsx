@@ -22,7 +22,7 @@ export const ProfileComingSoonTab: React.FC<Props> = ({ tab }) => {
   return (
     <EmptyState
       fill
-      scene="company-hub"
+      scene="coming-soon"
       title={t("profile.comingSoon.title", { tab: t(`profile.tabs.${tab}`) })}
       description={t("profile.comingSoon.description")}
     />

@@ -16,6 +16,7 @@ import { OrgChartCanvas } from "@/components/modules/organization/orgChart/compo
 import { UserDetailPanel } from "@/components/modules/organization/orgChart/components/UserDetailPanel/UserDetailPanel";
 import { useAccess } from "@/components/auth/useAccess";
 import { canAccess } from "@/models/access";
+import { Illustration } from "@/components/illustrations";
 
 export default function OrgChartContainer() {
   const t = useTranslations("organization");
@@ -109,7 +110,10 @@ export default function OrgChartContainer() {
         ) : error ? (
           <CanvasMessage tone="error">{t("orgChart.loadFailed")}</CanvasMessage>
         ) : forest.roots.length === 0 ? (
-          <CanvasMessage>{t("orgChart.empty")}</CanvasMessage>
+          <CanvasMessage>
+            <Illustration scene="team-and-org" className="mb-4" />
+            <span>{t("orgChart.empty")}</span>
+          </CanvasMessage>
         ) : (
           <OrgChartCanvas
             roots={forest.roots}

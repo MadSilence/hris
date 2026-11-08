@@ -124,9 +124,8 @@ export const settingsGroups: SettingsMenuGroup[] = [
     id: "automation",
     titleKey: "menu.groups.automation",
     icon: <Icon icon={WorkflowSquare03Icon} />,
+    // Automations themselves left for the main navigation (`/automations`, AUTOMATIONS_REDESIGN_PLAN batch 8).
     items: [
-      { labelKey: "menu.items.automations", href: "/settings/automation/automations", resources: ["SETTINGS.AUTOMATIONS"] },
-      { labelKey: "menu.items.workflows", href: "/settings/automation/workflows", resources: ["SETTINGS.GENERAL"] },
       {
         labelKey: "menu.items.lifecycle",
         href: "/settings/automation/preboarding",

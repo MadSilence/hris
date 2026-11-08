@@ -13,6 +13,7 @@ import {
   type ExportDataFormValues,
 } from "@/components/modules/settings/shared/ExportDataModal";
 import { useCycleResults } from "@/components/modules/reviews/hooks";
+import { Illustration } from "@/components/illustrations";
 import {
   REVIEW_KIND_KEYS,
   formatAverage,
@@ -137,7 +138,10 @@ export function CycleResultsTab({ cycleId, cycleName, canExport }: { cycleId: st
 
           <Section title={t("results.byManager")} hint={t("results.byManagerHint")}>
             {r.byManager.length === 0 ? (
-              <p className="py-4 text-body text-tertiary">{t("results.noManagerRatings")}</p>
+              <div className="flex flex-col items-center gap-2 py-4 text-center">
+                <Illustration scene="reviews-and-one-on-ones-s" size="s" />
+                <p className="text-body text-tertiary">{t("results.noManagerRatings")}</p>
+              </div>
             ) : (
             <table className="w-full text-body">
               <thead className="text-left text-hint text-tertiary">

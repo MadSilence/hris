@@ -1,19 +1,14 @@
-"use client";
+import { redirect } from "next/navigation";
+import { withQuery, type SearchParams } from "../redirectQuery";
 
-import React, { Suspense } from "react";
-import { useParams } from "next/navigation";
-import { PageGate } from "@/components/auth/PageGate";
-import { AutomationRuleContainer } from "@/components/modules/automations/builder/AutomationRuleContainer";
-
-const AutomationPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  return (
-    <PageGate resource="SETTINGS.AUTOMATIONS" action="VIEW">
-      <Suspense fallback={null}>
-        <AutomationRuleContainer ruleId={id}/>
-      </Suspense>
-    </PageGate>
-  );
-};
-
-export default AutomationPage;
+/** The old address of one automation — links in emails sent before the move still point here. */
+export default async function OldAutomationPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<SearchParams>;
+}) {
+  const { id } = await params;
+  redirect(withQuery(`/automations/${encodeURIComponent(id)}`, await searchParams));
+}

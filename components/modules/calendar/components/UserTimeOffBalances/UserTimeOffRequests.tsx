@@ -5,8 +5,6 @@ import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { useDateFormatter } from "@/lib/date";
 import { FC, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CalendarRemove01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
 
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { useCancelTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useCancelTimeOffRequest";
@@ -35,6 +33,7 @@ import { DecideAnywayControls } from "@/components/modules/timeOffDecision";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
 import { FieldError } from "@/components/desact/field-error";
+import { Illustration } from "@/components/illustrations";
 
 type Props = { userId: string };
 
@@ -283,12 +282,17 @@ export const UserTimeOffRequests: FC<Props> = ({ userId }) => {
       {error && <FormError message={error} />}
 
       {rows.length === 0 ? (
-        <div className="flex items-center gap-3 rounded-card border border-dashed border-divider px-4 py-6 text-body text-tertiary">
-          <Icon icon={CalendarRemove01Icon} className="text-tertiary" />
-          {filtered
-            ? t("requests.emptyFiltered")
-            : t("requests.empty")}
-        </div>
+        // No picture on time off for now; a filter that left nothing gets the funnel.
+        filtered ? (
+          <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-divider px-4 py-6 text-center text-body text-tertiary">
+            <Illustration scene="no-match-s" size="s" />
+            {t("requests.emptyFiltered")}
+          </div>
+        ) : (
+          <div className="rounded-card border border-dashed border-divider px-4 py-6 text-body text-tertiary">
+            {t("requests.empty")}
+          </div>
+        )
       ) : (
       <div className="divide-y divide-divider rounded-control border border-divider">
         {rows.map((request) => {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <path data-role="baseline" d="M30 136 H210" stroke-width="3" style="stroke:var(--illustration-baseline, #EAEAEC);fill:none"/>
+  <g transform="rotate(20 120 66)">
+  <path data-role="support" d="M112 110 L110 120 M120 110 V124 M128 110 L130 120" stroke-width="4" style="stroke:var(--illustration-support, #C9C9CE);fill:none"/>
+  <path data-role="ink" d="M116 19 Q120 15 124 19 C139 34 146 56 144 98 Q144 102 140 102 H100 Q96 102 96 98 C94 56 101 34 116 19 Z M96 76 Q80 86 80 100 Q80 108 88 104 L96 99 M144 76 Q160 86 160 100 Q160 108 152 104 L144 99" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <circle data-role="ring" cx="120" cy="54" r="12" stroke-width="7" stroke="currentColor" style="fill:none"/>
+  </g>
+</svg>

@@ -34,7 +34,7 @@ describe("AssignmentHistoryList", () => {
     const rows = screen.getAllByRole("listitem");
     expect(rows[0]).toHaveTextContent("Bob Meyer · Removed by hand · Ada Admin");
     expect(rows[1]).toHaveTextContent("Bob Meyer · Assigned by rule Berlin office");
-    expect(screen.getByRole("link", { name: "Berlin office" })).toHaveAttribute("href", "/settings/automation/automations/r1");
+    expect(screen.getByRole("link", { name: "Berlin office" })).toHaveAttribute("href", "/automations/r1");
     expect(useAssignmentHistory).toHaveBeenCalledWith("PUBLIC_HOLIDAY_CALENDAR", "cal-de");
   });
 

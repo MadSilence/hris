@@ -23,7 +23,7 @@ import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui
 import { useCanAccess } from "@/components/auth/useAccess";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { useUnsavedChangesGuard } from "@/components/modules/automations/builder/useUnsavedChangesGuard";
+import { useUnsavedChangesGuard } from "@/components/hooks/useUnsavedChangesGuard";
 import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDialog";
 import {
   archiveReviewFormAction,
@@ -39,6 +39,7 @@ import { QuestionCard } from "./QuestionCard";
 import { MentionField } from "./MentionField";
 import { FormPreview } from "./FormPreview";
 import { FieldError } from "@/components/desact/field-error";
+import { Illustration } from "@/components/illustrations";
 
 const FORMS_HREF = "/reviews/forms";
 
@@ -255,7 +256,8 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
           </section>
 
           {draft.questions.length === 0 ? (
-            <div className="rounded-card border border-dashed border-divider px-6 py-10 text-center">
+            <div className="flex flex-col items-center rounded-card border border-dashed border-divider px-6 py-10 text-center">
+              <Illustration scene="forms-s" size="s" className="mb-3" />
               <p className="text-body font-medium text-primary">{t("editor.empty.title")}</p>
               <p className="mx-auto mt-1 max-w-md text-body text-tertiary">
                 {readOnly

@@ -2,8 +2,7 @@
   "comingSoon": {
     "approvals": "Approvals",
     "integrations": "Integrations",
-    "notifications": "Notifications",
-    "workflows": "Workflows"
+    "notifications": "Notifications"
   },
   "lifecycleSettings": {
     "preboarding": {
@@ -19,42 +18,135 @@
       "description": "The task lists an offboarding starts with, counted from the last working day — handing over work, returning equipment, the exit interview."
     }
   },
-  "listPage": {
-    "title": "Automations",
-    "description": "Rules that do something on their own when something happens to a person — an email before the first day, a task for the manager, the holiday calendar of their office. Assigning by a filter in the assignment window makes a rule here too."
+  "status": {
+    "DRAFT": "Draft",
+    "ACTIVE": "Active",
+    "PAUSED": "Paused",
+    "ARCHIVED": "Archived"
+  },
+  "runStatus": {
+    "SCHEDULED": "Scheduled",
+    "IN_PROGRESS": "In progress",
+    "WAITING": "Waiting",
+    "DONE": "Done",
+    "SKIPPED": "Skipped",
+    "FAILED": "Failed",
+    "CANCELLED": "Cancelled"
+  },
+  "stepStatus": {
+    "SCHEDULED": "Not started yet",
+    "DONE": "Done",
+    "SKIPPED": "Skipped",
+    "FAILED": "Failed",
+    "CANCELLED": "Cancelled",
+    "STOPPED": "Not started",
+    "WAITING": "Waiting"
+  },
+  "stepType": {
+    "CREATE_TASK": "Create a task",
+    "REQUEST_APPROVAL": "Ask for approval",
+    "START_REVIEW": "Start a review",
+    "SIGN_DOCUMENT": "Ask to sign a document",
+    "SEND_SURVEY": "Send a survey",
+    "NOTIFY": "Send a notification",
+    "SEND_EMAIL": "Send an email",
+    "ASSIGN": "Assign or unassign",
+    "UNASSIGN": "Assign or unassign",
+    "GRANT_TIME_OFF_POLICY": "Grant a time-off policy",
+    "WAIT_UNTIL": "Wait until",
+    "SPLIT": "Split by a condition"
+  },
+  "stepGroup": {
+    "ask": "Ask people",
+    "tell": "Tell people",
+    "change": "Change records",
+    "flow": "Shape the flow"
   },
   "trigger": {
-    "label": {
-      "PERSON_HIRED": "Someone is hired",
-      "DATE_OFFSET": "A date comes round",
-      "JOINS_SEGMENT": "Someone starts matching",
-      "FIELD_CHANGED": "A field changes",
-      "TERMINATION_SCHEDULED": "A termination is recorded",
-      "LAST_WORKING_DAY_ARRIVES": "The last working day arrives",
-      "EVENT": "Something happens",
-      "SCHEDULE": "On a schedule"
-    },
-    "hint": {
-      "PERSON_HIRED": "Counts from the hire date, as soon as there is one.",
-      "DATE_OFFSET": "Some days before, on or after a date on the profile — once, or every year.",
-      "JOINS_SEGMENT": "The day somebody first matches the conditions below.",
-      "FIELD_CHANGED": "Every time the field changes, optionally from one value to another.",
-      "TERMINATION_SCHEDULED": "The day a termination is recorded.",
-      "LAST_WORKING_DAY_ARRIVES": "Counts from the person's last working day.",
-      "EVENT": "Time off requested or decided, a process completed, a review submitted or shared.",
-      "SCHEDULE": "Every day, week, month or quarter, for everybody who matches."
-    }
+    "PERSON_HIRED": "Someone is hired",
+    "TERMINATION_SCHEDULED": "A termination is scheduled",
+    "LAST_WORKING_DAY_ARRIVES": "A last working day comes",
+    "JOINS_SEGMENT": "Someone joins a group",
+    "FIELD_CHANGED": "A field changes",
+    "DATE_OFFSET": "A related date comes up",
+    "SCHEDULE": "Schedule",
+    "TIME_OFF_REQUESTED": "Time off is requested",
+    "TIME_OFF_APPROVED": "Time off is approved",
+    "TIME_OFF_REJECTED": "Time off is declined",
+    "TIME_OFF_CANCELLED": "Time off is cancelled",
+    "PROCESS_COMPLETED": "A process is completed",
+    "FIXED_DATE": "Pick a date"
   },
-  "event": {
-    "label": {
-      "TIME_OFF_REQUESTED": "Time off is requested",
-      "TIME_OFF_APPROVED": "Time off is approved",
-      "TIME_OFF_REJECTED": "Time off is rejected",
-      "TIME_OFF_CANCELLED": "Time off is cancelled",
-      "PROCESS_COMPLETED": "A process is completed",
-      "REVIEW_SUBMITTED": "A review is submitted",
-      "REVIEW_SHARED": "A review is shared with the person"
-    }
+  "triggerGroup": {
+    "people": "People",
+    "dates": "Dates",
+    "timeOff": "Time off",
+    "processes": "Processes"
+  },
+  "recipient": {
+    "PERSON": "The person",
+    "MANAGER": "Their manager",
+    "MANAGERS_MANAGER": "Their manager's manager",
+    "DEPARTMENT_HEAD": "Department head",
+    "ONBOARDING_MANAGER": "Onboarding manager",
+    "ROLE": "A role",
+    "USER": "A person",
+    "APPROVER": "The approver"
+  },
+  "dateField": {
+    "HIRE_DATE": "Hire date",
+    "PROBATION_END": "End of probation",
+    "LAST_WORKING_DAY": "Last working day",
+    "DATE_OF_BIRTH": "Date of birth",
+    "ATTRIBUTE": "A date field",
+    "FIXED": "Pick a date"
+  },
+  "changeableField": {
+    "hireDate": "Hire date",
+    "probationEnd": "End of probation",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "manager": "Manager",
+    "job": "Job title",
+    "department": "Department",
+    "office": "Office",
+    "legalEntity": "Legal entity",
+    "team": "Team",
+    "status": "Status"
+  },
+  "assignable": {
+    "ROLE": "Role",
+    "TIME_OFF_POLICY": "Time-off policy",
+    "TEAM": "Team",
+    "DEPARTMENT": "Department",
+    "LEGAL_ENTITY": "Legal entity",
+    "OFFICE": "Office",
+    "JOB": "Job title",
+    "PUBLIC_HOLIDAY_CALENDAR": "Holiday calendar"
+  },
+  "relation": {
+    "OFFICE_CALENDAR": "Their office's calendar",
+    "COUNTRY_CALENDAR": "Their country's calendar",
+    "LEGAL_ENTITY_CALENDAR": "Their legal entity's calendar"
+  },
+  "placeholder": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "fullName": "Full name",
+    "startDate": "Hire date",
+    "lastWorkingDay": "Last working day",
+    "managerName": "Manager",
+    "companyName": "Company",
+    "jobTitle": "Job title",
+    "office": "Office",
+    "department": "Department",
+    "leaveType": "Leave type",
+    "leaveStart": "First day off",
+    "leaveEnd": "Last day off",
+    "leaveDays": "Days off",
+    "processName": "Process",
+    "processType": "Process type"
   },
   "eventField": {
     "leaveType": "Leave type",
@@ -63,693 +155,64 @@
     "startsInDays": "Starts in (days)",
     "processType": "Process type",
     "template": "Template",
-    "kind": "Review kind",
-    "cycle": "Cycle"
+    "daysToComplete": "Days to complete"
   },
-  "weekday": {
-    "1": "Monday",
-    "2": "Tuesday",
-    "3": "Wednesday",
-    "4": "Thursday",
-    "5": "Friday",
-    "6": "Saturday",
-    "7": "Sunday"
+  "weekdayShort": {
+    "1": "Mo",
+    "2": "Tu",
+    "3": "We",
+    "4": "Th",
+    "5": "Fr",
+    "6": "Sa",
+    "7": "Su"
   },
-  "onTimeout": {
-    "CONTINUE": "Go on with the rest",
-    "STOP": "Stop the rest",
-    "STOP_AND_TELL": "Stop the rest and tell me"
-  },
-  "action": {
-    "label": {
-      "SEND_EMAIL": "Send email",
-      "NOTIFY": "Send notification",
-      "CREATE_TASK": "Create task",
-      "ASSIGN": "Assign",
-      "UNASSIGN": "Unassign",
-      "GRANT_TIME_OFF_POLICY": "Grant time off policy",
-      "START_REVIEW": "Start a review",
-      "WAIT_UNTIL": "Wait until",
-      "REQUEST_APPROVAL": "Ask for approval"
-    }
-  },
-  "recipient": {
-    "label": {
-      "PERSON": "The person",
-      "MANAGER": "Their manager",
-      "ONBOARDING_MANAGER": "Their onboarding manager",
-      "ROLE": "Everyone with a role",
-      "USER": "A named person",
-      "DEPARTMENT_HEAD": "The head of their department",
-      "MANAGERS_MANAGER": "Their manager's manager",
-      "APPROVER": "The approver",
-      "REVIEWER": "The reviewer"
-    },
-    "word": {
-      "PERSON": "the person",
-      "MANAGER": "their manager",
-      "ONBOARDING_MANAGER": "their onboarding manager",
-      "ROLE": "everyone with a role",
-      "roleNamed": "everyone with {role}",
-      "USER": "a named person",
-      "DEPARTMENT_HEAD": "the head of their department",
-      "MANAGERS_MANAGER": "their manager's manager",
-      "APPROVER": "the approver",
-      "REVIEWER": "the reviewer",
-      "somebody": "somebody"
-    },
-    "nobodyYet": "nobody yet",
-    "list": "{head} and {last}"
-  },
-  "assignable": {
-    "ROLE": "Role",
-    "TIME_OFF_POLICY": "Time off policy",
-    "TEAM": "Team",
-    "DEPARTMENT": "Department",
-    "LEGAL_ENTITY": "Legal entity",
-    "OFFICE": "Office",
-    "JOB": "Position",
-    "PUBLIC_HOLIDAY_CALENDAR": "Holiday calendar"
-  },
-  "placeholder": {
-    "firstName": "First name",
-    "lastName": "Last name",
-    "fullName": "Full name",
-    "startDate": "Start date",
-    "lastWorkingDay": "Last working day",
-    "managerName": "Manager name",
-    "companyName": "Company name",
-    "jobTitle": "Job title",
-    "office": "Office",
-    "department": "Department",
-    "leaveType": "Leave type",
-    "leaveStart": "Leave starts",
-    "leaveEnd": "Leave ends",
-    "leaveDays": "Leave days",
-    "processName": "Process name",
-    "processType": "Process type",
-    "reviewKind": "Review kind",
-    "cycleName": "Review cycle"
-  },
-  "ruleStatus": {
-    "ENABLED": "Enabled",
-    "DISABLED": "Disabled",
-    "PAUSED": "Paused",
-    "ARCHIVED": "Archived"
-  },
-  "runStatus": {
-    "SCHEDULED": "Scheduled",
-    "IN_PROGRESS": "In progress",
-    "DONE": "Done",
-    "SKIPPED": "Skipped",
-    "FAILED": "Failed",
-    "CANCELLED": "Cancelled"
-  },
-  "stepStatus": {
-    "SCHEDULED": "Scheduled",
-    "DONE": "Done",
-    "SKIPPED": "Skipped",
-    "FAILED": "Failed",
-    "CANCELLED": "Cancelled",
-    "STOPPED": "Stopped",
-    "WAITING": "Waiting"
-  },
-  "dateField": {
-    "HIRE_DATE": "Hire date",
-    "PROBATION_END": "Probation end",
-    "LAST_WORKING_DAY": "Last working day",
-    "DATE_OF_BIRTH": "Date of birth",
-    "ATTRIBUTE": "A date field"
-  },
-  "changeableField": {
-    "hireDate": "Hire date",
-    "probationEnd": "Probation end",
-    "firstName": "First name",
-    "lastName": "Last name",
-    "email": "Email",
-    "manager": "Manager",
-    "job": "Position",
-    "department": "Department",
-    "office": "Office",
-    "legalEntity": "Legal entity",
-    "team": "Team",
-    "status": "Status"
-  },
-  "sentence": {
-    "trigger": {
-      "none": "When nothing is chosen yet",
-      "PERSON_HIRED": "When someone is hired",
-      "TERMINATION_SCHEDULED": "When a termination is recorded",
-      "LAST_WORKING_DAY_ARRIVES": "On the last working day",
-      "JOINS_SEGMENT": "When someone starts matching",
-      "other": "When something happens",
-      "someField": "a field",
-      "fieldChanged": "When {field} changes{hasFrom, select, yes { from {from}} other {}}{hasTo, select, yes { to {to}} other {}}{recorded, select, yes {, when it is recorded} other {}}",
-      "somethingHappens": "something happens",
-      "event": "When {what}",
-      "eventOn": "When {what}, on {anchor, select, LEAVE_START {the first day of the leave} other {the last day of the leave}}",
-      "eventOffset": "When {what}, {days, plural, one {# day} other {# days}} {direction, select, AFTER {after} other {before}} {anchor, select, LEAVE_START {the first day of the leave} other {the last day of the leave}}"
-    },
-    "schedule": {
-      "daily": "Every day",
-      "weekly": {
-        "1": "Every Monday",
-        "2": "Every Tuesday",
-        "3": "Every Wednesday",
-        "4": "Every Thursday",
-        "5": "Every Friday",
-        "6": "Every Saturday",
-        "7": "Every Sunday"
-      },
-      "everyWeek": "Every week",
-      "monthlyLast": "On the last day of every month",
-      "monthly": "On day {day} of every month",
-      "quarterlyLast": "On the last day of every quarter's first month",
-      "quarterly": "On day {day} of every quarter",
-      "other": "On a schedule"
-    },
-    "dateOffset": {
-      "someDateField": "a date field",
-      "someDate": "a date",
-      "on": "On the {field}",
-      "offset": "{days, plural, one {# day} other {# days}} {direction, select, AFTER {after} other {before}} the {field}",
-      "everyYear": "{when}, every year"
-    },
-    "offset": {
-      "onTheDay": "on the day",
-      "days": "{days, plural, one {# day} other {# days}} {direction, select, after {after} other {before}}"
-    },
-    "action": {
-      "email": "Email {recipients}{hasSubject, select, yes {: {subject}} other {}}",
-      "notify": "Notify {recipients}{hasText, select, yes {: {text}} other {}}",
-      "task": "Task for {assignee}{hasTitle, select, yes {: {title}} other {}}",
-      "assign": "Assign {target}",
-      "unassign": "Unassign {target}",
-      "grant": "Grant {target}",
-      "targetNamed": "{kind} {name}",
-      "something": "something",
-      "startReview": "Start a review: {template}",
-      "someReviewTemplate": "a review template",
-      "waitTaskDone": "Wait until task {step} is done, at most {days, plural, one {# day} other {# days}}",
-      "waitFieldFilled": "Wait until a field is filled, at most {days, plural, one {# day} other {# days}}",
-      "waitOther": "Wait until something, at most {days, plural, one {# day} other {# days}}",
-      "approval": "Ask {who} to approve{hasTitle, select, yes {: {title}} other {}}",
-      "other": "Do something"
-    },
-    "conditions": {
-      "everyone": "everyone",
-      "whose": "people whose {filters}",
-      "and": "{left} and {right}",
-      "filter": "{field} {op} {values}",
-      "filterRange": "{field} {op} {values} and {to}"
-    },
-    "rule": {
-      "nothingYet": "nothing yet",
-      "then": "{left}, then {right}",
-      "row": "{when} · for {forWhom} → {does}"
-    }
+  "pause": {
+    "OWNER_LEFT": "{name} left the company, so it can't run.",
+    "OWNER_LACKS_RIGHT": "{name} can't manage automations any more, so it can't run.",
+    "TARGET_GONE": "A step points to something that's gone, so it can't run.",
+    "MANUAL": "Turned off by {name} on {date}.",
+    "makeMeOwner": "Make me the owner",
+    "fixStep": "Fix the step",
+    "turnOn": "Turn on"
   },
   "reason": {
-    "FORWARD_ONLY": "Not run: the rule was enabled for people from then on, and this moment had passed",
-    "LATE_DATA": "The date arrived late",
-    "MOMENT_PASSED": "Not run: the moment had already passed",
-    "NO_LONGER_MATCHES": "Skipped: no longer matches the conditions",
-    "ANCHOR_CLEARED": "Cancelled: the date it counted from was cleared",
-    "RULE_DISABLED": "Cancelled: the rule was disabled",
-    "RULE_PAUSED": "Cancelled: the rule was paused",
-    "PERSON_LEFT": "Cancelled: the person left",
-    "CANCELLED_BY_HAND": "Cancelled by hand",
-    "TERMINATION_CANCELLED": "Cancelled: the termination was cancelled",
-    "NO_RECIPIENT": "Skipped: nobody to send it to",
-    "NO_ONBOARDING_MANAGER": "Skipped: no onboarding manager",
-    "NOT_ASSIGNED": "Skipped: nothing of this rule's to take back",
-    "HAND_OVERRIDE": "Skipped: set by hand to something else",
-    "RULE_CONFLICT": "Skipped: another rule sets this",
-    "DUPLICATE": "Skipped: already had it",
-    "OUTRANKED": "Skipped: a more specific place gives this person their holiday calendar",
-    "MISSING_PLACEHOLDER": "Failed: a placeholder has no value",
-    "STRUCTURAL": "Failed: something the rule uses is gone",
-    "CONDITION_NOT_MET": "Skipped: its \"only if\" did not hold",
-    "OBJECT_CLOSED": "Cancelled: the leave it counted from was cancelled or rejected",
-    "MISSED": "Missed: the engine did not run on that day",
-    "TIMED_OUT": "Waited as long as it may",
-    "DECLINED": "Declined",
-    "NO_APPROVER": "Failed: nobody to approve it",
-    "AUTHOR_LEFT": "Paused",
-    "AUTHOR_LACKS_RIGHT": "Paused"
+    "FORWARD_ONLY": "It wasn't run: it was turned on for new cases only, and this one had passed.",
+    "LATE_DATA": "It ran late: the date it counts from was entered after the day had passed.",
+    "MOMENT_PASSED": "It wasn't run: its day had already passed.",
+    "NO_LONGER_MATCHES": "It was skipped: the person no longer matches who it runs for.",
+    "ANCHOR_CLEARED": "It was cancelled: the date it counted from was cleared.",
+    "RULE_TURNED_OFF": "It was cancelled: the automation was turned off.",
+    "RULE_ARCHIVED": "It was cancelled: the automation was archived.",
+    "RULE_PAUSED": "It was cancelled: the automation was paused.",
+    "PERSON_LEFT": "It was cancelled: the person left.",
+    "CANCELLED_BY_HAND": "It was cancelled by hand.",
+    "TERMINATION_CANCELLED": "It was cancelled: the termination was cancelled.",
+    "NO_RECIPIENT": "It was skipped: there was nobody to send it to.",
+    "NO_ONBOARDING_MANAGER": "It was skipped: the person has no onboarding manager.",
+    "NO_ASSIGNEE": "We couldn't create the task: there is nobody to give it to.",
+    "NO_TARGET": "It was skipped: this person has no such calendar.",
+    "NOT_ASSIGNED": "It was skipped: this automation had not given it, so it can't take it back.",
+    "HAND_OVERRIDE": "It was skipped: it was set by hand to something else.",
+    "RULE_CONFLICT": "It was skipped: another automation sets this.",
+    "DUPLICATE": "It was skipped: they already have it.",
+    "OUTRANKED": "It was skipped: a more specific place gives this person their holiday calendar.",
+    "MISSING_PLACEHOLDER": "It failed: a field it uses has no value for this person.",
+    "STRUCTURAL": "It failed: something it uses is gone.",
+    "CONDITION_NOT_MET": "It was skipped: its “Only if” didn't hold for this person.",
+    "OBJECT_CLOSED": "It was cancelled: the time off it counted from was cancelled or declined.",
+    "MISSED": "It didn't run on its day; only the latest one ran.",
+    "TIMED_OUT": "It waited as long as it may.",
+    "DECLINED": "It was declined.",
+    "NO_APPROVER": "It failed: there is nobody to approve it.",
+    "AUTHOR_LEFT": "It failed: its owner left, so the automation is paused.",
+    "AUTHOR_LACKS_RIGHT": "It failed: its owner can no longer do this, so the automation is paused.",
+    "NOT_THIS_PATH": "It was skipped: the run took another path.",
+    "NOT_REACHED": "It was skipped: the step before it didn't run.",
+    "SKIPPED_FOR_NOW": "It was skipped: it is set to “Skip for now”.",
+    "SKIPPED_BY_HAND": "It was skipped by hand.",
+    "NO_DATE": "It was skipped: the person has no date to count it from.",
+    "NOT_CONNECTED": "This step isn't connected yet, so it was skipped.",
+    "UNKNOWN": "Something went wrong."
   },
-  "reasonDetail": {
-    "lateData": "Ran late: planned for {date}",
-    "missingPlaceholder": "Failed: {token} has no value",
-    "withDetail": "{reason} — {detail}"
-  },
-  "clause": {
-    "when": "When",
-    "forWhom": "For whom",
-    "do": "Do"
-  },
-  "definition": {
-    "skippedIfPast": "skipped if the date is already past"
-  },
-  "rule": {
-    "activation": {
-      "disabled": "Disabled. {cancelled, plural, one {# scheduled run was cancelled} other {# scheduled runs were cancelled}}; {completed, plural, one {# finished run stays as it is} other {# finished runs stay as they are}}.",
-      "enabled": "Enabled. {planned, plural, one {# run is} other {# runs are}} planned.",
-      "resumed": "Resumed. {planned, plural, one {# run is} other {# runs are}} planned."
-    },
-    "gate": {
-      "noName": "Give the automation a name to publish it.",
-      "noActions": "Add at least one action to publish.",
-      "waiting": "Waiting for the preview…",
-      "problems": "Fix what the preview lists to publish."
-    },
-    "toast": {
-      "published": "Published.",
-      "publishedEnabled": "Published and enabled.",
-      "saved": "Saved.",
-      "ownerChanged": "The owner is changed.",
-      "tookOver": "You own this automation now."
-    },
-    "menu": {
-      "label": "Automation actions",
-      "enable": "Enable",
-      "resume": "Resume",
-      "disable": "Disable",
-      "unarchive": "Unarchive",
-      "changeOwner": "Change owner",
-      "alsoTell": "Also tell…"
-    },
-    "title": {
-      "new": "New automation",
-      "existing": "Automation"
-    },
-    "systemOwned": "This automation is the Holiday Calendar of {source}. Change it there.",
-    "authorGone": {
-      "left": "Its owner{hasName, select, yes {, {name},} other {}} has left or cannot sign in, so it no longer runs.",
-      "lacksRight": "Its owner may no longer do everything it does, so it is paused.",
-      "hint": "Take it over to run it in your name.",
-      "takeOver": "Take over"
-    },
-    "paused": {
-      "title": "This automation is paused",
-      "fixHint": "Fix what it points at, publish, and resume it from the menu."
-    },
-    "tabs": {
-      "rule": "Rule",
-      "runs": "Run log",
-      "versions": "Versions"
-    },
-    "archive": {
-      "title": "Archive automation",
-      "description": "It stops running and leaves the list; scheduled runs are cancelled. What already ran stays as it is. You can unarchive it later."
-    },
-    "delete": {
-      "title": "Delete automation",
-      "description": "It has never run for anybody, so it is removed with all its versions."
-    },
-    "leave": {
-      "title": "Leave without publishing?",
-      "description": "The changes to this automation are only in this page. Leaving now discards them.",
-      "stay": "Stay",
-      "leave": "Leave"
-    }
-  },
-  "when": {
-    "trigger": "Trigger",
-    "days": "Days",
-    "direction": "Direction",
-    "directions": {
-      "BEFORE": "Before",
-      "ON": "On",
-      "AFTER": "After"
-    },
-    "groupBuiltIn": "Built in",
-    "groupCompany": "Company fields",
-    "everyYear": "Every year",
-    "field": "Field",
-    "from": "From",
-    "to": "To",
-    "changeFires": "A change dated ahead fires",
-    "fireEffective": "On the day it takes effect",
-    "fireRecorded": "On the day it is recorded",
-    "changeHint": "Once, when the change happens. To give or keep something while a person is in a department or an office, use \"Someone starts matching\" instead — it also takes it back when they leave.",
-    "event": "Event",
-    "countFrom": "Count from",
-    "anchor": {
-      "EVENT": "The event itself",
-      "LEAVE_START": "The first day of the leave",
-      "LEAVE_END": "The last day of the leave"
-    },
-    "onlyWhen": "Only when the event",
-    "leaveMoves": "A leave moved later moves these steps with it; a leave cancelled or rejected cancels them.",
-    "howOften": "How often",
-    "frequency": {
-      "DAILY": "Every day",
-      "WEEKLY": "Every week",
-      "MONTHLY": "Every month",
-      "QUARTERLY": "Every quarter"
-    },
-    "on": "On",
-    "weekday": "Weekday",
-    "onDay": "On day",
-    "dayOfMonth": "Day of the month",
-    "lastDay": "The last day",
-    "scheduleHint": "In the company's time zone, for every person who matches on that day. A day the engine missed is caught up once, late.",
-    "latePast": "If the date is already past",
-    "runLate": "Run late",
-    "runLateHint": "Do it today, and say in the run log that it ran late.",
-    "skip": "Skip",
-    "skipHint": "Leave it out — a dated email sent days late can be worse than none.",
-    "lateWindow": "How late is too late (Days)",
-    "lateWindowHint": "Older than this is skipped either way, so an import does not send a welcome to everyone. Default {days}."
-  },
-  "forWhom": {
-    "matching": "{count, plural, one {# person matches} other {# people match}} now",
-    "hint": "With no conditions the rule is for everyone. The conditions are checked when a run is planned and again just before each step."
-  },
-  "do": {
-    "summary": "{count, plural, one {# action} other {# actions}}, in this order",
-    "nothingYet": "Nothing yet",
-    "empty": "Add what should happen — an email, a task, an assignment.",
-    "stepMenu": "Actions for step {step}",
-    "moveUp": "Move up",
-    "moveDown": "Move down",
-    "add": "Add action",
-    "removeTitle": "Remove action",
-    "removeDescription": "This action is taken out of the draft. Nothing changes until you publish."
-  },
-  "actionEditor": {
-    "offset": {
-      "BEFORE": "Days before",
-      "ON": "On the day",
-      "AFTER": "Days after"
-    },
-    "offsetDays": "{label} (days)",
-    "recipient": "Recipient",
-    "removeRecipient": "Remove recipient",
-    "to": "To",
-    "addRecipient": "Add recipient",
-    "atMost": "At most (days)",
-    "then": "Then",
-    "onlyIf": "Only if…",
-    "onlyIfHint": "Checked on the day this step runs. When it does not hold, this step is skipped and the rest goes on.",
-    "subject": "Subject",
-    "message": "Message",
-    "assignee": "Assignee",
-    "title": "Title",
-    "due": "Due",
-    "what": "What",
-    "target": "Target",
-    "policy": "Policy",
-    "until": "Until",
-    "untilTask": "A task of this rule is done",
-    "untilField": "A field is filled",
-    "task": "Task",
-    "addTaskFirst": "Add a task before this wait",
-    "taskOption": "{step}. {sentence}",
-    "whoApproves": "Who approves",
-    "whatAsked": "What is asked",
-    "approvalHint": "The approver gets a task with Approve and Decline. The steps after this one wait for the answer; a decline stops them."
-  },
-  "eventCondition": {
-    "op": {
-      "eq": "is",
-      "neq": "is not",
-      "in": "is one of",
-      "gt": "more than",
-      "gte": "at least",
-      "lt": "less than",
-      "lte": "at most"
-    },
-    "match": "Match",
-    "group": "A group, matching",
-    "all": "all of",
-    "any": "any of",
-    "addToGroup": "Add to the group",
-    "addCondition": "Add condition",
-    "addGroup": "Add group",
-    "empty": "Every such event, whatever its details.",
-    "comparison": "Comparison",
-    "value": "Value",
-    "removeCondition": "Remove condition"
-  },
-  "owner": {
-    "changeDescription": "The automation runs in the new owner's name from now on, and they are told when it fails or pauses.",
-    "changing": "Changing…",
-    "alsoTitle": "Also tell",
-    "alsoDescription": "When a run fails, a wait times out or the automation pauses, these people are told too.",
-    "removePerson": "Remove {name}",
-    "pickOwner": "Pick the new owner."
-  },
-  "placeholderField": {
-    "listLabel": "Fields for {label}",
-    "hint": "Type @ to insert a field — the first name, a date, the leave."
-  },
-  "preview": {
-    "title": "Preview",
-    "updating": "Updating",
-    "noTrigger": "The preview appears as soon as the rule has a trigger.",
-    "notReady": "Not ready to publish",
-    "whoMatches": "Who matches now",
-    "andMore": ", and {count} more",
-    "volume": "One firing sends about {count} notifications and emails.",
-    "pastMoment": "{count, plural, one {# person is} other {# people are}} already past the moment — they are left out unless you choose otherwise when enabling.",
-    "next30": "Next 30 days",
-    "eventDriven": "This trigger waits for something to happen, so nothing can be dated ahead.",
-    "nothingDue": "Nothing is due in the next 30 days.",
-    "late": "Late",
-    "moreItems": "and {count} more",
-    "sample": "Sample",
-    "samplePerson": "Sample person",
-    "sampleTo": "to {names}",
-    "noValue": "No value for {tokens} — this step would fail for {name}.",
-    "assignments": "Assignments",
-    "assignmentLine": "{kind} {target}: {count} will be assigned",
-    "assignmentLineSkipped": "{kind} {target}: {count} will be assigned, {skipped} skipped",
-    "skippedPart": "{count} {reason}",
-    "conflicts": "Conflicts",
-    "conflictLine": "{person}: {rule} already sets the {kind} — the later rule does not overwrite it.",
-    "anotherRule": "another rule",
-    "quotedRule": "“{name}”"
-  },
-  "publish": {
-    "none": {
-      "title": "Only people from now on",
-      "detail": "Whoever reaches the moment from today. Anybody already past it is left as they are."
-    },
-    "all": {
-      "title": "Also people who already match",
-      "detail": "Also everybody whose moment has already passed — their steps run today.",
-      "detailCount": "Also {count, plural, one {# person} other {# people}} whose moment has already passed — their steps run today."
-    },
-    "volumeLabel": "Confirm the number of messages",
-    "volumeConfirm": "One firing sends about {count} notifications and emails at once. I mean it.",
-    "titleNew": "Publish automation",
-    "titleVersion": "Publish version {version}",
-    "descNew": "The rule is saved as version 1.",
-    "descNewMatching": "The rule is saved as version 1. {count, plural, one {# person matches} other {# people match}} it now.",
-    "descExisting": "A published version is never edited — this becomes the version every new run follows.",
-    "underWay": "{count, plural, one {# run is} other {# runs are}} under way",
-    "keepTitle": "Keep in-flight on the current version",
-    "keepDetail": "{count, plural, one {# scheduled run finishes} other {# scheduled runs finish}} as version {version} said. Only new firings use the new version.",
-    "moveTitle": "Move everyone to the new version",
-    "moveDetail": "Runs not started yet are planned again: {cancelled} cancelled, {added} added. {partDone, plural, one {# run already part-done stays} other {# runs already part-done stay}} on version {version}.",
-    "completed": "{count, plural, one {# completed run is} other {# completed runs are}} unaffected either way — what was sent or assigned is never rewritten.",
-    "enableNow": "Enable it now",
-    "staysDisabled": "It stays disabled; enable it from the menu when you are ready.",
-    "waiting": "{count, plural, one {# run is} other {# runs are}} waiting for a task, a field or an approval — they stay on version {version} either way.",
-    "publishing": "Publishing…",
-    "enableTitle": "Enable automation",
-    "enableDescription": "From now on the rule runs on its own. Who should it cover?",
-    "enabling": "Enabling…"
-  },
-  "startReview": {
-    "template": "Review template",
-    "noTemplates": "No review templates yet. Save a cycle as a template in <link>Reviews</link> first.",
-    "opens": "Opens",
-    "nominatedBy": "Peers nominated by",
-    "approvedBy": "Peers approved by",
-    "released": "Results released",
-    "hint": "Days count from the moment the rule fires, like a task's due date. The review is started and launched for the person on the step's day; if the cycle cannot launch, the run log says why.",
-    "missing": "What is missing",
-    "problem": {
-      "chooseTemplate": "Choose the review template.",
-      "noDue": "Say when the {kind} is due.",
-      "dueBeforeOpens": "The {kind} is due before it opens.",
-      "peersOrder": "Peers are approved before they are nominated.",
-      "setWindow": "Set the window of the {kind}.",
-      "peerDates": "Say when peers are nominated and approved.",
-      "notInTemplate": "The template asks no {kind}.",
-      "releaseDate": "The template releases its results on a date: say when."
-    }
-  },
-  "tryIt": {
-    "outcome": {
-      "EMAILED": "Emailed to you",
-      "NOTIFIED": "Notified you",
-      "NOT_CREATED": "A task — not created in a test",
-      "NOT_SENT": "Changes data — not done in a test",
-      "NO_EMAIL": "Not emailed: you have no address"
-    },
-    "title": "Try it",
-    "forPerson": "For {name}. Nothing runs, nobody else is told.",
-    "samplePerson": "the sample person",
-    "choose": "Choose a sample person in the preview.",
-    "sending": "Sending…",
-    "sendTest": "Send a test to me",
-    "simulating": "Simulating…",
-    "simulate": "Simulate",
-    "noValue": "No value for {names}",
-    "late": "(late)",
-    "note": {
-      "doesNotMatch": "This person does not match the rule's conditions today, so it would not run for them.",
-      "noAnchorDate": "This person has no date for the rule to count from.",
-      "momentPassed": "The moment has passed: the late policy decides what runs.",
-      "scheduleIncomplete": "The schedule is incomplete and never fires.",
-      "eventCountedToday": "Counted as if the event happened today.",
-      "eventCountedTodayLeaveDates": "Counted as if the event happened today; a leave's own dates move these days.",
-      "stepSkipped": "Skipped: its \"only if\" does not hold for this person today",
-      "stepAfterWait": "Runs once the wait before it lets the run go on",
-      "stepWaitsForApproval": "Waits for the approval, at most {maxDays, plural, one {# day} other {# days}}; a refusal stops the rest",
-      "stepWaits": "Waits, at most {maxDays, plural, one {# day} other {# days}}, then {onTimeout, select, CONTINUE {goes on with the rest} STOP {stops the rest} STOP_AND_TELL {stops the rest and tells you} other {goes on with the rest}}"
-    }
-  },
-  "starter": {
-    "welcomeEmail": {
-      "name": "Welcome email",
-      "subject": "Welcome to {companyName}, {firstName}",
-      "body": "Hi {firstName},\n\nWe are looking forward to seeing you on {startDate}.\n\n{managerName}"
-    },
-    "managerDayOne": {
-      "name": "First day with the manager",
-      "taskTitle": "Welcome {firstName} on their first day",
-      "taskDescription": "Show {firstName} around and introduce them to the team."
-    },
-    "officeCalendar": {
-      "name": "Holiday calendar by office"
-    },
-    "terminationHr": {
-      "name": "Termination recorded",
-      "text": "{fullName}'s termination was recorded. Their last working day is {lastWorkingDay}."
-    }
-  },
-  "template": {
-    "welcomeEmail": {
-      "name": "Welcome email before the first day",
-      "description": "Three days before the start date, an email to the new person. Skipped for somebody whose start has passed."
-    },
-    "managerFirstDay": {
-      "name": "A task for the manager on the first day",
-      "description": "On the start date, the manager gets a task to welcome the new person."
-    },
-    "probationReview": {
-      "name": "Confirm the end of probation",
-      "description": "Two weeks before probation ends, the manager is asked to approve it; HR is told when they do."
-    },
-    "workAnniversary": {
-      "name": "Work anniversary",
-      "description": "Every year on the start date, the manager is reminded."
-    },
-    "birthday": {
-      "name": "Birthday",
-      "description": "Every year on the birthday, the manager is reminded."
-    },
-    "documentExpiry": {
-      "name": "A document about to expire",
-      "description": "Thirty days before a date field — a visa, a certificate — the person and their manager are told. Choose the date field."
-    },
-    "longLeave": {
-      "name": "A long leave approved",
-      "description": "When ten days or more of leave are approved, the manager's manager is told."
-    },
-    "onboardingDone": {
-      "name": "Onboarding completed",
-      "description": "When an onboarding completes, the manager is told."
-    },
-    "terminationHr": {
-      "name": "Tell HR about a termination",
-      "description": "When a termination is recorded, everybody of a role is told. Choose the role."
-    },
-    "lastDayEquipment": {
-      "name": "Collect equipment on the last day",
-      "description": "On the last working day, the manager gets a task to collect the equipment."
-    },
-    "departmentMove": {
-      "name": "Moved to another department",
-      "description": "When somebody's department changes, their manager and the department's head are told."
-    },
-    "monthlyDetails": {
-      "name": "A monthly reminder to check one's details",
-      "description": "On the first day of each month, everybody is reminded to check their personal details."
-    },
-    "calendarByOffice": {
-      "name": "Holiday calendar by office",
-      "description": "Everybody of an office gets its holiday calendar, and keeps following it. Choose the office and the calendar."
-    }
-  },
-  "templateCategory": {
-    "onboarding": "Onboarding",
-    "people": "People",
-    "celebrations": "Celebrations",
-    "compliance": "Compliance",
-    "timeOff": "Time off",
-    "offboarding": "Offboarding"
-  },
-  "list": {
-    "columns": {
-      "automation": "Automation",
-      "lastRun": "Last run",
-      "runs": "Runs"
-    },
-    "fromTemplate": "From a template",
-    "new": "New automation",
-    "emptyTitle": "No automations yet",
-    "emptyDescription": "An automation does something on its own when something happens to a person.",
-    "noResultsHint": "Try a different name, trigger or action.",
-    "galleryTitle": "Start from a template",
-    "galleryDescription": "It opens filled in; nothing is saved until you publish.",
-    "firstTitle": "Automate the first rule",
-    "firstDescription": "An automation does something on its own when something happens to a person — a welcome email before their first day, a task for their manager, the right holiday calendar for their office."
-  },
-  "versions": {
-    "emptyTitle": "No versions yet",
-    "emptyDescription": "Each publish adds a version here.",
-    "version": "Version {version}",
-    "current": "Current"
-  },
-  "runs": {
-    "ranLate": "Ran late",
-    "backfill": "Added when the rule was enabled",
-    "retried": "The failed steps were planned again for today.",
-    "cancelled": "The run was cancelled.",
-    "retry": "Retry",
-    "cancelRun": "Cancel",
-    "steps": "Steps",
-    "plannedFor": "Planned for {date}",
-    "allStatuses": "All statuses",
-    "total": "{count, plural, one {# run} other {# runs}}",
-    "outsideScope": ", and {count} about people outside your access",
-    "emptyFor": {
-      "SCHEDULED": "No scheduled runs",
-      "IN_PROGRESS": "No in progress runs",
-      "DONE": "No done runs",
-      "SKIPPED": "No skipped runs",
-      "FAILED": "No failed runs",
-      "CANCELLED": "No cancelled runs"
-    },
-    "emptyTitle": "No runs yet",
-    "tryAnotherStatus": "Try another status.",
-    "emptyDescription": "Every time the rule fires for somebody, the run is listed here with what each step did.",
-    "columns": {
-      "person": "Person",
-      "version": "Version",
-      "reason": "Reason",
-      "started": "Started",
-      "finished": "Finished"
-    },
-    "previous": "Previous",
-    "personEmptyTitle": "No automation runs",
-    "personEmptyDescription": "When an automation does something for this person, it is listed here with what each step did.",
-    "openRule": "Open rule"
-  }
+  "unnamed": "Untitled automation"
 }

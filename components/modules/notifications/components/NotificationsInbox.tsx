@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useDisplayLanguage } from "@/lib/date";
-import { Delete02Icon, Notification01Icon, Settings01Icon, StarIcon, TickDouble02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, Settings01Icon, StarIcon, TickDouble02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -28,6 +28,7 @@ import {
 } from "@/components/modules/notifications/components/notificationPresenter";
 import { NotificationActions } from "@/components/modules/notifications/components/NotificationActions";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { Illustration } from "@/components/illustrations";
 import {
   INBOX_FILTERS,
   INBOX_FILTER_LABEL_KEYS,
@@ -313,7 +314,7 @@ export const NotificationsInbox: FC = () => {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
-          <Icon icon={Notification01Icon} size="lg" className="text-disabled" />
+          {query.trim() ? <Illustration scene="no-results-s" size="s" /> : <Illustration scene="all-caught-up" />}
           <p className="text-body text-tertiary">{emptyText}</p>
         </div>
       ) : (

@@ -3,7 +3,7 @@
 import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Cancel01Icon, UserAdd01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -20,6 +20,7 @@ import { getTimeOffPolicyAssignmentsQueryKey } from "@/components/modules/settin
 import { TimeOffPolicyAssignmentStatus } from "@/api/modules/timeOff/timeOffPolicyAssignments/dto/TimeOffPolicyAssignmentStatus";
 import type { TimeOffPolicyAssignment } from "@/models/timeOff";
 import { FieldError } from "@/components/desact/field-error";
+import { Illustration } from "@/components/illustrations";
 
 type Props = {
   policyId: string;
@@ -179,9 +180,7 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
     return (
       <>
         <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-12 text-center">
-          <div className="mb-4 rounded-card bg-subtle p-4">
-            <Icon icon={UserGroupIcon} size="lg" className="text-secondary" />
-          </div>
+          <Illustration scene="people-s" size="s" className="mb-4" />
           <h3 className="text-body font-semibold text-primary">{t("policies.assignments.emptyTitle")}</h3>
           <p className="mt-2 max-w-md text-body text-tertiary">
             {t("policies.assignments.emptyHint")}

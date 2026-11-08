@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { ErrorPage } from "@/components/feedback/ErrorPage";
+import { NotFoundDrawing } from "@/components/illustrations";
 import { GoBackButton } from "@/components/feedback/GoBackButton";
 
 export default function NotFound() {
@@ -10,7 +11,7 @@ export default function NotFound() {
   return (
     <ErrorPage
       fullScreen
-      scene="no-results"
+      drawing={<NotFoundDrawing />}
       title={t("errorPages.notFoundTitle")}
       line={t("errorPages.notFoundLine")}
       actions={

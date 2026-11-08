@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+  <circle data-role="ink" cx="120" cy="72" r="46" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <path data-role="ink" d="M120 72 V54 M120 72 L134 80" stroke-width="7" style="stroke:var(--illustration-ink, #0B0B0C);fill:none"/>
+  <circle data-role="ring" cx="120" cy="38" r="5" stroke-width="5" stroke="currentColor" style="fill:none"/>
+</svg>

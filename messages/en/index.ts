@@ -19,6 +19,10 @@ import organization from "./organization.json";
 import access from "./access.json";
 import lifecycle from "./lifecycle.json";
 import automations from "./automations.json";
+import automationsList from "./automationsList.json";
+import automationsEditor from "./automationsEditor.json";
+import automationsSettings from "./automationsSettings.json";
+import automationsRuns from "./automationsRuns.json";
 import reviews from "./reviews.json";
 import settings from "./settings.json";
 import peopleImport from "./peopleImport.json";
@@ -40,6 +44,10 @@ const en = {
   access,
   lifecycle,
   automations,
+  automationsList,
+  automationsEditor,
+  automationsSettings,
+  automationsRuns,
   reviews,
   settings,
   peopleImport,

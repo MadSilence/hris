@@ -201,7 +201,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
             <ListEmptyState
               query={query}
               archivedView={showArchived}
-              scene="goals-and-growth"
+              scene="job-families"
               title={t("empty.title")}
               description={t("empty.description")}
               noResultsHint={t("empty.noResultsHint")}
