@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import NavbarLink from "../../ui/NavbarLink/NavbarLink";
-import { Button } from "@/components/desact/button";
 import { NoddoWordmark } from "@/components/brand";
 
 const LINKS = [
@@ -17,7 +16,7 @@ export default function Navbar() {
   const t = useTranslations("navigation");
   return (
     <header className="sticky top-0 z-40 border-b border-divider bg-card/85 backdrop-blur-md">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[auto_1fr] items-center gap-4 px-4 py-3">
         <Link href="/" aria-label={t("public.nav.home")} className="inline-flex items-center">
           <NoddoWordmark tone="ink" height={24} />
         </Link>
@@ -29,16 +28,6 @@ export default function Navbar() {
             </NavbarLink>
           ))}
         </nav>
-
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost">
-            <Link href="/login">{t("public.nav.signIn")}</Link>
-          </Button>
-
-          <Button asChild>
-            <Link href="/trial">{t("public.nav.startTrial")}</Link>
-          </Button>
-        </div>
       </div>
     </header>
   );

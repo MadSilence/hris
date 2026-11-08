@@ -80,6 +80,7 @@
   "C00002": "You need to accept the terms to continue.",
   "C00003": "A company with this name already exists.",
   "C00004": "Company name is required",
+  "C00005": "Registration is closed here. Ask your administrator for an invitation.",
   "CL00001": "Company logo upload request is invalid",
   "CL00002": "Company logo file is empty",
   "CL00003": "Company logo file name is missing",
