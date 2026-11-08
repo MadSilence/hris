@@ -21,8 +21,9 @@ export function middleware(request: NextRequest) {
 
   switch (route.type) {
     case "redirect":
-      // Always a path on this same host, which is exactly what Next keeps a redirect as.
-      return NextResponse.redirect(new URL(route.to, request.url));
+      // Always a path on this same host. Behind a proxy `request.url` names the server's own address
+      // (localhost:3000), so the origin is built from the host the browser asked for.
+      return NextResponse.redirect(new URL(route.to, publicOrigin(request)));
     case "rewrite": {
       const url = request.nextUrl.clone();
       url.pathname = route.pathname;
@@ -32,6 +33,11 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
   }
 }
+
+const publicOrigin = (request: NextRequest): string => {
+  const host = requestHost(request.headers);
+  return host ? `${process.env.APP_SCHEME || "http"}://${host}` : request.url;
+};
 
 export const config = {
   // Everything but Next's own assets and files with an extension (icons, fonts, images).
