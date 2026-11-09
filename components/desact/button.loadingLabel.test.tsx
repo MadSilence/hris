@@ -4,7 +4,7 @@ import { Button } from "./button";
 
 describe("Button loadingLabel", () => {
   it("names the button by its idle label and keeps the saving label laid out but hidden", () => {
-    render(<Button loadingLabel="Saving…">Save</Button>);
+    render(<Button type="button" loadingLabel="Saving…">Save</Button>);
 
     const button = screen.getByRole("button", { name: "Save" });
     const hidden = screen.getByText("Saving…");
@@ -14,7 +14,7 @@ describe("Button loadingLabel", () => {
   });
 
   it("swaps to the saving label with the ring while loading", () => {
-    render(<Button loading loadingLabel="Saving…">Save</Button>);
+    render(<Button type="button" loading loadingLabel="Saving…">Save</Button>);
 
     const button = screen.getByRole("button", { name: "Saving…" });
     expect(button).toHaveAttribute("aria-busy", "true");
@@ -22,7 +22,7 @@ describe("Button loadingLabel", () => {
   });
 
   it("renders no extra markup without a loading label", () => {
-    render(<Button>Save</Button>);
+    render(<Button type="button">Save</Button>);
 
     expect(screen.getByRole("button", { name: "Save" }).children).toHaveLength(0);
   });
