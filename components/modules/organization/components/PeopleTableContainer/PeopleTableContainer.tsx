@@ -502,6 +502,7 @@ const PeopleTableContainer: React.FC = () => {
           fieldsMeta={fieldsData ?? []}
           visibleColumns={visibleColumns}
           query={debouncedQ}
+          onClearSearch={() => onQueryChange("")}
           filtered={filters.length > 0}
         />
       </div>

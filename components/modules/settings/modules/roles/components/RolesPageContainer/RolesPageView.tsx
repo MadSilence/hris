@@ -140,6 +140,7 @@ export default function RolesPageView({
             roleRows={roleRows}
             rolesLoading={rolesLoading}
             query={query}
+            onClearSearch={() => onQueryChange("")}
             showArchived={showArchived}
             onRenameRole={onRenameRole}
             onDuplicateRole={onDuplicateRole}
@@ -156,6 +157,7 @@ export default function RolesPageView({
             userRows={userRows}
             usersLoading={usersLoading}
             query={query}
+            onClearSearch={() => onQueryChange("")}
             // Archived roles come through too: the form hides the ones nobody holds and keeps the
             // ones a person still has, so they can at least be taken off.
             allRoles={allRoles ?? roleRows ?? []}

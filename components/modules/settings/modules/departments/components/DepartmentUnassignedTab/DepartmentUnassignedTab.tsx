@@ -82,7 +82,7 @@ export function DepartmentUnassignedTab({
 
       <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
         {filtered.length === 0 ? (
-          <NoResults hint={tShared("tryDifferent")}/>
+          <NoResults hint={tShared("tryDifferent")} onClearSearch={query.trim() ? () => setQuery("") : undefined}/>
         ) : (
           filtered.map((person) =>
             renderPersonChip ? (

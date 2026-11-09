@@ -76,6 +76,21 @@ export const EmptyState: React.FC<{
   </div>
 );
 
+/** The one way out of a search that matched nothing (SPEC § 12). */
+export const ClearSearchButton: React.FC<{
+  onClick: () => void;
+  /** `link` for a no-match line of text; the block's button otherwise. */
+  variant?: "secondary" | "link";
+  className?: string;
+}> = ({ onClick, variant = "secondary", className }) => {
+  const t = useTranslations("common");
+  return (
+    <Button type="button" variant={variant} size="sm" className={className} onClick={onClick}>
+      {t("searchField.clear")}
+    </Button>
+  );
+};
+
 /**
  * The search matched nothing (SPEC § 13.5: "No one matches these filters", the S illustration).
  *
@@ -89,12 +104,14 @@ export const NoResults: React.FC<{
   title?: string;
   /** A way out — "Clear filters". */
   action?: React.ReactNode;
+  /** Renders Clear search as the way out, when no `action` is given. */
+  onClearSearch?: () => void;
   /** `no-results-s` for a search that missed; `no-match-s`, the funnel, for a filter that left nothing. */
   scene?: Extract<Scene, "no-results-s" | "no-match-s">;
   /** See {@link EmptyState}'s `fill`. */
   fill?: boolean;
   className?: string;
-}> = ({ hint, title, action, scene = "no-results-s", fill, className }) => {
+}> = ({ hint, title, action, onClearSearch, scene = "no-results-s", fill, className }) => {
   const t = useTranslations("common");
   return (
   <div className={cn("flex w-full flex-col items-center justify-center gap-3 px-6 py-8 text-center", fill && "h-full", className)}>
@@ -103,7 +120,7 @@ export const NoResults: React.FC<{
       <p className="text-body font-medium text-primary">{title ?? t("states.noResults")}</p>
       <p className="mx-auto max-w-sm text-body text-tertiary">{hint ?? t("emptyState.noResultsHint")}</p>
     </div>
-    {action}
+    {action ?? (onClearSearch && <ClearSearchButton onClick={onClearSearch} />)}
   </div>
   );
 };

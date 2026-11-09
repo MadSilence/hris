@@ -200,8 +200,8 @@ export default function ConfirmTrialForm({
 
           <FormError message={apiError} />
 
-          <Button size="lg" type="submit" disabled={busy} className="w-full">
-            {busy ? tCommon("actions.saving") : t("password.submit")}
+          <Button size="lg" type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")} className="w-full">
+            {t("password.submit")}
           </Button>
         </form>
       </div>

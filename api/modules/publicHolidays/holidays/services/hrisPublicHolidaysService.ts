@@ -6,9 +6,9 @@ import type {
 import { PublicHoliday, PublicHolidayOverride } from "@/models/publicHolidays/holiday";
 
 /**
- * Дни праздников читаются списком и пишутся целым годом. Поштучных create/update/rename/delete
- * здесь нет намеренно: редактор года сохраняет всё одним запросом (`PUBLIC_HOLIDAYS_DESIGN.md`,
- * фаза 0 шаг 5), а старый путь из N последовательных запросов удалён клинапом 2026-08-25.
+ * Holiday days are read as a list and written a whole year at a time. There is deliberately no per-day
+ * create/update/rename/delete: the year editor saves everything in one request, and the old path of
+ * N sequential requests was removed.
  *
  * Overrides — the company's edits of the provider's days — are read beside the days and taken back one
  * at a time ("Revert to Provider"); they are made by saving the year, never here.

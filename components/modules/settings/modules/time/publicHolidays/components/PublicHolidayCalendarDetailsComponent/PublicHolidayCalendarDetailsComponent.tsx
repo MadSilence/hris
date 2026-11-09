@@ -62,6 +62,7 @@ import {
   ExportDataFormValues,
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
+import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
@@ -444,8 +445,8 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     <Icon icon={Cancel01Icon} size="sm" />
                     {tCommon("actions.cancel")}
                   </Button>
-                  <Button type="button" disabled={isSaving} onClick={handleSave}>
-                    {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
+                  <Button type="button" disabled={isSaving} loading={isSaving} loadingLabel={tCommon("actions.saving")} onClick={handleSave}>
+                    {tCommon("actions.save")}
                   </Button>
                 </div>
               </div>
@@ -636,6 +637,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     {t("publicHolidays.details.noMatch")}
                   </p>
                   <p className="mt-1 text-body text-tertiary">{t("publicHolidays.details.noMatchHint")}</p>
+                  <ClearSearchButton className="mt-3" onClick={() => setHolidaySearch("")} />
                 </div>
               ) : !canManage ? (
                 <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">

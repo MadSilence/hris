@@ -245,7 +245,7 @@ export function EditDatesDialog({ cycle, open, onCloseAction, onDoneAction }: {
         <FormError message={error} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-          <Button type="button" onClick={() => void save()} disabled={busy}>{busy ? tCommon("actions.saving") : tCommon("actions.save")}</Button>
+          <Button type="button" onClick={() => void save()} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{tCommon("actions.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

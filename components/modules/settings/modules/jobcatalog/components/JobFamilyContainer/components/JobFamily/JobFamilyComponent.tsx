@@ -200,6 +200,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           {!isLoading && families.length === 0 && (
             <ListEmptyState
               query={query}
+              onClearSearch={() => setQuery("")}
               archivedView={showArchived}
               scene="job-families"
               title={t("empty.title")}

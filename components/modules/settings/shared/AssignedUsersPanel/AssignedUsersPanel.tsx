@@ -249,6 +249,7 @@ export default function AssignedUsersPanel({
         <div style={emptyStyle}>
           <ListEmptyState
             query={searching ? q : ""}
+            onClearSearch={() => setQuery("")}
             scene="people"
             title={limited && (total ?? 0) > 0 ? t("shared.assignedPanel.emptyHiddenTitle") : t("shared.assignedPanel.emptyTitle")}
             description={limited && (total ?? 0) > 0

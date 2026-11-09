@@ -80,6 +80,11 @@ const REGISTERED_TYPES = [
 ];
 
 describe("presentNotification", () => {
+  it("names the field when one field's access changed", () => {
+    const view = presentNotification(notification({ type: "ROLE_ACCESS_CHANGED", params: { what: "FIELD_ACCESS", roleName: "Manager", actorName: "Ann", fieldName: "Hire date" } }));
+    expect(view.message).toBe("Ann changed the access to Hire date on Manager.");
+  });
+
   it.each(REGISTERED_TYPES)("%s has its own text, not the humanised code", (type) => {
     const view = presentNotification(notification({ type, params: {} }));
 

@@ -140,6 +140,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                     <TableCell colSpan={4}>
                       <ListEmptyState
                         query={query}
+                        onClearSearch={() => setQuery("")}
                         archivedView={showArchived}
                         scene="time-off"
                         title={t("leaveTypes.list.emptyTitle")}

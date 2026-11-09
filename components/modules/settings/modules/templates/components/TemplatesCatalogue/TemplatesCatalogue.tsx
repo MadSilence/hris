@@ -70,7 +70,7 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
           description={t("templates.catalogue.emptyDescription")}
         />
       ) : visible.length === 0 ? (
-        <NoResults hint={t("templates.catalogue.noResultsHint")}/>
+        <NoResults hint={t("templates.catalogue.noResultsHint")} onClearSearch={() => setQuery("")}/>
       ) : (
         kinds.map((k) => {
           const rows = visible.filter((template) => template.kind === k);

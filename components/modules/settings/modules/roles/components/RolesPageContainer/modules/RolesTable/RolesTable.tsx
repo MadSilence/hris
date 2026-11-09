@@ -29,6 +29,7 @@ export interface RolesTableProps {
   rolesLoading: boolean;
   /** The search text, so the empty screen can tell a miss from an empty list. */
   query?: string;
+  onClearSearch?: () => void;
   showArchived?: boolean;
   buildRoleHref?: (roleId: string) => string;
   /** `version` is the role's version when the dialog opened — a stale one is refused (E00409). */
@@ -48,6 +49,7 @@ export default function RolesTable({
   roleRows,
   rolesLoading,
   query,
+  onClearSearch,
   showArchived = false,
   buildRoleHref = (id) => `/settings/people/roles/${id}`,
   onRenameRole,
@@ -217,6 +219,7 @@ export default function RolesTable({
               <TableCell colSpan={5}>
                 <ListEmptyState
                   query={query}
+                  onClearSearch={onClearSearch}
                   archivedView={showArchived}
                   scene="policies"
                   title={t("roles.table.emptyTitle")}

@@ -183,6 +183,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                     <TableCell colSpan={5}>
                       <ListEmptyState
                         query={query}
+                        onClearSearch={() => setQuery("")}
                         archivedView={showArchived}
                         scene="time-off"
                         title={t("policies.list.emptyTitle")}

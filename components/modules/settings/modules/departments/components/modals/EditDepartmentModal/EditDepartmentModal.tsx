@@ -164,8 +164,8 @@ export function EditDepartmentModal({ open, onClose, department, parentOptions }
           <Button type="button" variant="secondary" onClick={onClose} disabled={busy}>
             {tCommon("actions.cancel")}
           </Button>
-          <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy}>
-            {busy ? tCommon("actions.saving") : tCommon("actions.save")}
+          <Button type="button" onClick={() => formik.handleSubmit()} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>
+            {tCommon("actions.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

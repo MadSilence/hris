@@ -130,8 +130,8 @@ export function InviteAcceptContainer({ token, firstName, email, companyName }: 
 
           <FormError message={error} />
 
-          <Button type="submit" disabled={busy} size="lg" className="w-full">
-            {busy ? tCommon("actions.saving") : t("password.submit")}
+          <Button type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")} size="lg" className="w-full">
+            {t("password.submit")}
           </Button>
         </form>
       </div>

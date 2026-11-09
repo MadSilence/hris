@@ -72,8 +72,8 @@ export const FieldAccessSummaryModal: FC<FieldAccessSummaryModalProps> = ({
           <Button type="button" variant="secondary" onClick={onCancelAction} disabled={isSaving}>
             {tCommon("actions.cancel")}
           </Button>
-          <Button type="button" onClick={onConfirmAction} disabled={isSaving}>
-            {isSaving ? tCommon("actions.saving") : tCommon("actions.save")}
+          <Button type="button" onClick={onConfirmAction} disabled={isSaving} loading={isSaving} loadingLabel={tCommon("actions.saving")}>
+            {tCommon("actions.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

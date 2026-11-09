@@ -207,8 +207,8 @@ export const WelcomeContainer: React.FC = () => {
         </Button>
 
         {step === 0 ? (
-          <Button key="next" type="button" onClick={saveStepOne} loading={busy}>
-            {busy ? tCommon("actions.saving") : tCommon("actions.continue")}
+          <Button key="next" type="button" onClick={saveStepOne} loading={busy} loadingLabel={tCommon("actions.saving")}>
+            {tCommon("actions.continue")}
           </Button>
         ) : (
           <Button key="finish" type="submit" form="welcome-preferences">

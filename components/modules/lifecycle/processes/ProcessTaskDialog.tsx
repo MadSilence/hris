@@ -224,7 +224,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
             <FormError message={error} />
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={requestClose} disabled={busy}>{tCommon("actions.cancel")}</Button>
-              <Button type="submit" disabled={busy}>{busy ? tCommon("actions.saving") : adding ? t("shared.addTask") : tCommon("actions.save")}</Button>
+              <Button type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{adding ? t("shared.addTask") : tCommon("actions.save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

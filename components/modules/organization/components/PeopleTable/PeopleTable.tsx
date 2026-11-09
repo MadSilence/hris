@@ -47,6 +47,7 @@ type PeopleTableProps = {
   visibleColumns: ColumnItem[];
   /** The search box's text and whether a filter is on — they decide which empty screen an empty page is. */
   query?: string;
+  onClearSearch?: () => void;
   filtered?: boolean;
 };
 
@@ -66,6 +67,7 @@ export default function PeopleTable({
   onToggleOne,
   onToggleAllOnPage,
   query,
+  onClearSearch,
   filtered,
   fieldsMeta,
   visibleColumns,
@@ -319,7 +321,7 @@ export default function PeopleTable({
           {data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={visibleColumns.length + 1}>
-                <PeopleEmptyState query={query} filtered={filtered} />
+                <PeopleEmptyState query={query} onClearSearch={onClearSearch} filtered={filtered} />
               </TableCell>
             </TableRow>
           ) : null}
@@ -362,11 +364,16 @@ export default function PeopleTable({
 
 
 /** Nobody yet, the search missed, or a filter left nobody — the shared ladder decides which. */
-const PeopleEmptyState: React.FC<{ query?: string; filtered?: boolean }> = ({ query, filtered }) => {
+const PeopleEmptyState: React.FC<{ query?: string; onClearSearch?: () => void; filtered?: boolean }> = ({
+  query,
+  onClearSearch,
+  filtered,
+}) => {
   const t = useTranslations("organization");
   return (
     <ListEmptyState
       query={query}
+      onClearSearch={onClearSearch}
       filtered={filtered}
       scene="people"
       title={t("table.empty.title")}

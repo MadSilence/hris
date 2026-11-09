@@ -172,6 +172,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
                   : undefined
             }
             query={query}
+            onClearSearch={() => setQuery("")}
             openGroups={openGroups}
             onOpenGroupsChange={setOpenGroups}
             onChangeAction={handleChange}

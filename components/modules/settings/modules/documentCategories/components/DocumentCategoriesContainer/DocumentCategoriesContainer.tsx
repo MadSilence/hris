@@ -91,6 +91,7 @@ export const DocumentCategoriesContainer: FC = () => {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
+          onClearSearch={() => setQuery("")}
           scene="documents"
           title={t("emptyTitle")}
           description={t("emptyDescription")}
@@ -316,8 +317,10 @@ const CategoryFormModal: FC<{
             <Button
               type="submit"
               disabled={isLoading}
+              loading={isLoading}
+              loadingLabel={tCommon("actions.saving")}
  >
-              {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
+              {tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </form>

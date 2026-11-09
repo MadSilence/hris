@@ -182,6 +182,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
             serverDraft={serverDraft}
             readOnly={readOnly}
             query={query}
+            onClearSearch={() => setQuery("")}
             openGroups={openGroups}
             onOpenGroupsChange={setOpenGroups}
             readOnlyReason={

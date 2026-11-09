@@ -149,8 +149,10 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
           {!readOnly && (
             <div className="flex items-center gap-2">
               <Button type="button" variant="secondary" onClick={() => void save()}
-                disabled={saving}>
-                {saving ? tCommon("actions.saving") : isTemplate ? t("builder.saveTemplate") : t("builder.saveDraft")}
+                disabled={saving}
+                loading={saving}
+                loadingLabel={tCommon("actions.saving")}>
+                {isTemplate ? t("builder.saveTemplate") : t("builder.saveDraft")}
               </Button>
               {cycle && !isTemplate && (
                 <Button type="button" className="gap-1.5" onClick={() => setLaunching(true)} disabled={dirty || saving}>

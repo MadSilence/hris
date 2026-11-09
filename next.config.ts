@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           { key: "X-Content-Type-Options", value: "nosniff" },
+          // Browsers ignore it over plain http, so local development is unaffected.
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
           // Not `no-referrer`: it turns the Origin of a form POST into `null`, which Server Actions refuse.
           // `same-origin` still keeps the token in /invite and /reset-password URLs off other sites.
           { key: "Referrer-Policy", value: "same-origin" },

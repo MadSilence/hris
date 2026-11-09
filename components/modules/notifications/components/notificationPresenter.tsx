@@ -603,11 +603,17 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         role: str(p.roleName) || t("fallback.ARole"),
       };
       const who = str(p.actorName);
+      const field = str(p.fieldName);
+      const namesField = field
+        ? (who
+          ? t("presenter.roleAccessChanged.fieldWithActor", { field, role: args.role, actor: who })
+          : t("presenter.roleAccessChanged.fieldWithoutActor", { field, role: args.role }))
+        : null;
       return {
         title: t("presenter.roleAccessChanged.title"),
-        message: who
+        message: namesField ?? (who
           ? t("presenter.roleAccessChanged.withActor", { ...args, actor: who })
-          : t("presenter.roleAccessChanged.withoutActor", args),
+          : t("presenter.roleAccessChanged.withoutActor", args)),
         icon: Alert02Icon,
         href: roleId ? `/settings/people/roles/${roleId}` : null,
       };

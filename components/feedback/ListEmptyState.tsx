@@ -26,6 +26,8 @@ import type { Scene } from "@/components/illustrations";
 export const ListEmptyState: React.FC<{
   /** The current search text. Anything non-blank selects the no-results screen. */
   query?: string;
+  /** Empties the search box — the no-results screen's one action. */
+  onClearSearch?: () => void;
   /**
    * True when a filter (not the search box) is narrowing the list. A filter that leaves nothing is its own
    * screen — the funnel, `no-match-s` — with the list's own title and sentence, and no create action.
@@ -63,6 +65,7 @@ export const ListEmptyState: React.FC<{
   className?: string;
 }> = ({
   query,
+  onClearSearch,
   filtered,
   archivedView,
   scene,
@@ -79,7 +82,7 @@ export const ListEmptyState: React.FC<{
 }) => {
   const t = useTranslations("common");
   if (query?.trim()) {
-    return <NoResults hint={noResultsHint} fill={fill} className={className} />;
+    return <NoResults hint={noResultsHint} onClearSearch={onClearSearch} fill={fill} className={className} />;
   }
 
   if (filtered) {

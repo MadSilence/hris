@@ -40,7 +40,8 @@ export const LogsTable: React.FC<{
   hasMore: boolean;
   onLoadMore: () => void;
   query: string;
-}> = ({ items, isLoading, isLoadingMore, hasMore, onLoadMore, query }) => {
+  onClearSearch?: () => void;
+}> = ({ items, isLoading, isLoadingMore, hasMore, onLoadMore, query, onClearSearch }) => {
   const t = useTranslations("settings.logs.table");
   const locale = useDisplayLocale();
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
@@ -177,6 +178,7 @@ export const LogsTable: React.FC<{
                 {/* Nothing to create from a journal: it is written by the rest of the product. */}
                 <ListEmptyState
                   query={query}
+                  onClearSearch={onClearSearch}
                   scene="history"
                   title={t("emptyTitle")}
                   description={t("emptyDescription")}

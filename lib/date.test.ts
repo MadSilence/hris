@@ -96,7 +96,7 @@ describe("formatDisplayDate", () => {
 /**
  * The server's position: no `LocaleBridge` has run and no `<html lang>` says anything — on the server neither
  * exists, and the module variable is never set there because it is shared by every request. A date rendered
- * there learns its language only from the caller (the walk's "Выходит на работу Nov 12, 2026" on a Russian page).
+ * there learns its language only from the caller (the walk saw an English date in a Russian sentence).
  */
 describe("formatDisplayDate with an explicit language", () => {
   beforeEach(() => {

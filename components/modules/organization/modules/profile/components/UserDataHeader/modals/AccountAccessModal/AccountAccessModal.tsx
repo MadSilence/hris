@@ -11,13 +11,14 @@ import {
   blockUserAction,
   sendPasswordResetAction,
   unblockUserAction,
+  unlockUserAction,
 } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
 import { endAllSessionsOfUserAction } from "@/components/modules/sessions/actions";
 import { withStepUpAction } from "@/components/modules/mfa/stepUp";
 import { resetUserMfaAction } from "@/components/modules/mfa/actions";
 import { Checkbox } from "@/components/desact/checkbox";
 
-export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA";
+export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "UNLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA";
 
 type Props = {
   /** Which confirmation is open; null when none is. */
@@ -69,6 +70,18 @@ export function AccountAccessModal({
           showSuccess(accountLocked
             ? t("profile.access.resetSentUnlock", { name: fullName })
             : t("profile.access.resetSent", { name: fullName }));
+        } else {
+          showActionError(res);
+        }
+        return;
+      }
+
+      if (kind === "UNLOCK") {
+        const res = await withStepUpAction(() => unlockUserAction({ userId }));
+        onCloseAction();
+        if (res.status === ActionStatus.SUCCESS) {
+          showSuccess(t("profile.access.unlocked", { name: fullName }));
+          await onChangedAction();
         } else {
           showActionError(res);
         }
@@ -170,6 +183,11 @@ const COPY: Record<AccountAccessKind, (t: OrgTranslator, name: string, locked: b
     title: t("profile.header.unblock"),
     description: t("profile.access.unblockDescription", { name }),
     confirmLabel: t("profile.access.unblockConfirm"),
+  }),
+  UNLOCK: (t, name) => ({
+    title: t("profile.header.unlock"),
+    description: t("profile.access.unlockDescription", { name }),
+    confirmLabel: t("profile.access.unlockConfirm"),
   }),
   RESET: (t, name, locked) => ({
     title: locked ? t("profile.header.sendResetToUnlock") : t("profile.header.sendReset"),

@@ -224,6 +224,11 @@ export class HrisApiUsersClient {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/password-reset`);
   }
 
+  /** Lifts a sign-in lock or a temporary restriction; the password stays. */
+  public async unlock(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/unlock`);
+  }
+
   public async updateUserAttributes(
     id: string,
     values: Record<string, unknown>

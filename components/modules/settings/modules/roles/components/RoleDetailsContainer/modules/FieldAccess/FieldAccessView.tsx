@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -172,6 +173,7 @@ export interface FieldAccessViewProps {
   readOnly: boolean;
   readOnlyReason?: string;
   query: string;
+  onClearSearch?: () => void;
   openGroups: string[];
   onOpenGroupsChange: (value: string[]) => void;
   onChangeAction: (fieldId: string, scope: FieldScope, level: FieldActionLevel) => void;
@@ -184,6 +186,7 @@ export default function FieldAccessView({
   readOnly,
   readOnlyReason,
   query,
+  onClearSearch,
   openGroups,
   onOpenGroupsChange,
   onChangeAction,
@@ -297,6 +300,8 @@ export default function FieldAccessView({
         {visibleGroups.length === 0 && (
           <p className="px-1 py-6 text-body text-tertiary">
             {t("roles.fieldAccess.noMatch", { query: query.trim() })}
+            {onClearSearch && " "}
+            {onClearSearch && <ClearSearchButton variant="link" onClick={onClearSearch} />}
           </p>
         )}
       </Accordion>

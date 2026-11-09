@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { fallbackErrorMessage, isFallbackErrorMessage, messageForError } from "@/lib/errors/errorMessages";
+import { fallbackErrorMessage, isFallbackErrorMessage, messageForCode, messageForError } from "@/lib/errors/errorMessages";
 import type { ActionResult } from "@/lib/errors/withActionError";
 
 /**
@@ -17,7 +17,8 @@ import type { ActionResult } from "@/lib/errors/withActionError";
  * can be copied.
  */
 const show = (message: string, reference?: string) => {
-  const unexpected = isFallbackErrorMessage(message);
+  // A server out of reach is as unexpected as it gets, and the person has to read what failed.
+  const unexpected = isFallbackErrorMessage(message) || message === messageForCode("E00503");
 
   toast.error(message, {
     description: reference,

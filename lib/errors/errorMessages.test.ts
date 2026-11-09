@@ -5,6 +5,8 @@ import {
   messageForCode,
   messageForError,
 } from "@/lib/errors/errorMessages";
+import { setBrowserCatalogue } from "@/i18n/catalogue";
+import { messagesFor } from "@/i18n/messages";
 import { BackendUnavailableError, ConflictError } from "@/components/clients/exceptions";
 
 describe("messageForCode", () => {
@@ -57,6 +59,21 @@ describe("messageForCode", () => {
 
   it("never leaks the backend's technical wording for an unknown code", () => {
     expect(messageForCode("NOPE", "NullPointerException at line 42")).not.toContain("NullPointer");
+  });
+});
+
+describe("counts in an error", () => {
+  it("agree with their number, in both languages", () => {
+    expect(messageForCode("AV0015", undefined, ["Skills", "1"], "en")).toContain("at least 1 option for");
+    expect(messageForCode("AV0015", undefined, ["Skills", "3"], "en")).toContain("at least 3 options for");
+    setBrowserCatalogue(messagesFor("ru"));
+    expect(messageForCode("BE0007", undefined, ["5", "2"], "ru")).toContain("5 сотрудников");
+    expect(messageForCode("BE0007", undefined, ["2", "1"], "ru")).toContain("2 сотрудников");
+    setBrowserCatalogue(messagesFor("en"));
+  });
+
+  it("leave a parameter outside a plural unformatted", () => {
+    expect(messageForCode("AT00007", undefined, ["2026", "1"], "en")).toContain("“2026” is used by 1 person");
   });
 });
 

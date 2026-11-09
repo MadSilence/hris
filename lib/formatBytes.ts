@@ -1,8 +1,8 @@
 /**
- * Размер файла в человекочитаемом виде: `900 B`, `1.5 KB`, `12 MB`.
+ * A file size in human-readable form: `900 B`, `1.5 KB`, `12 MB`.
  *
- * Точность плавающая: до 10 единиц показывается один знак после запятой, дальше — целое, потому что
- * «12.3 MB» и «12 MB» несут одинаково полезную информацию, а второе короче. Байты всегда целые.
+ * Floating precision: below 10 units one decimal is shown, above that a whole number, because
+ * "12.3 MB" and "12 MB" are equally useful and the second is shorter. Bytes are always whole.
  */
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";

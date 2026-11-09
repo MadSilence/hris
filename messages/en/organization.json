@@ -142,6 +142,8 @@
       "startPreboarding": "Start preboarding",
       "startOnboarding": "Start onboarding",
       "startOffboarding": "Start offboarding",
+      "unlock": "Unlock account",
+      "signInPaused": "Sign-in paused",
       "sendResetToUnlock": "Send password reset to unlock",
       "sendReset": "Send password reset",
       "exportPersonalData": "Export personal data",
@@ -162,7 +164,7 @@
       "invitationGoesOut": "Invitation goes out {date}",
       "invited": "Invited {date}, not registered yet",
       "notInvited": "Not invited",
-      "locked": "Locked after too many failed sign-ins — send a password reset to unlock",
+      "locked": "Locked after too many failed sign-ins — unlock the account, or send a password reset",
       "pendingEmail": "New email {email} waits for confirmation — the link was sent to it"
     },
     "tenure": {
@@ -182,6 +184,9 @@
       "blockDescription": "{name} will be signed out everywhere and will not be able to sign in until the account is unblocked.",
       "blockConfirm": "Block",
       "unblockDescription": "{name} will be able to sign in again.",
+      "unlockDescription": "{name} can sign in again with their current password. If you suspect somebody else tried to get in, send a password reset instead.",
+      "unlockConfirm": "Unlock",
+      "unlocked": "{name} can sign in again.",
       "unblockConfirm": "Unblock",
       "resetLockedDescription": "{name}'s account is locked after too many failed sign-ins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.",
       "resetDescription": "{name} will get an email with a link to set a new password. The link works for one hour.",

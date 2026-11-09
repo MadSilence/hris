@@ -85,6 +85,7 @@ export function ReviewsOverviewContainer() {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
+          onClearSearch={() => setQuery("")}
           archivedView={showClosed}
           scene="reviews-and-one-on-ones"
           title={t("overview.empty.title")}

@@ -85,7 +85,7 @@ export const AttendanceOverviewContainer: React.FC = () => {
           onLoadMore={() => void report.fetchNextPage()}
           onOpen={(row) => router.push(`/attendance/${row.person.id}${view.search ? `?${view.search}` : ""}`)}
           empty={narrowed
-            ? <NoResults hint={t("overview.noResultsHint")}/>
+            ? <NoResults hint={t("overview.noResultsHint")} onClearSearch={search.trim() ? () => setSearch("") : undefined}/>
             : (
               <EmptyState
                 scene="attendance"

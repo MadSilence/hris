@@ -514,9 +514,9 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
           <Button
             type="button"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving} loading={saving} loadingLabel={tCommon("actions.saving")}
           >
-            {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
+            {tCommon("actions.saveChanges")}
           </Button>
         </div>
       ) : null}

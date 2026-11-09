@@ -340,6 +340,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                       <TableCell colSpan={6}>
                         <ListEmptyState
                           query={query}
+                          onClearSearch={() => setQuery("")}
                           archivedView={showArchived}
                           scene="calendar"
                           title={t("publicHolidays.list.emptyTitle")}

@@ -69,6 +69,7 @@ export const LogsContainer: React.FC = () => {
         hasMore={Boolean(logs.hasNextPage)}
         onLoadMore={() => void logs.fetchNextPage()}
         query={search}
+        onClearSearch={() => setSearch("")}
       />
     </div>
   );

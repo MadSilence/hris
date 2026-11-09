@@ -2,7 +2,7 @@ import { createTranslator } from "next-intl";
 
 import { ApiError } from "@/components/clients/exceptions";
 import { type AppLocale, DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
-import { messagesFor } from "@/i18n/messages";
+import { catalogueFor } from "@/i18n/catalogue";
 import enErrors from "@/messages/en/errors.json";
 
 /**
@@ -16,7 +16,7 @@ import enErrors from "@/messages/en/errors.json";
  * The catalogue will always lag behind the backend: someone adds a code in Java and forgets the
  * entry. That is expected, not a fault — see `messageForCode` for what happens then.
  *
- * Adding an error: `DECISIONS.md` -> "Как заводится новая ошибка" — the English text goes into
+ * Adding an error: `technical_documentation/ERRORS.md` — the English text goes into
  * `messages/en/errors.json`, keyed by the code; `{0}`, `{1}` … are the backend's `params`, in order.
  */
 export const ERROR_MESSAGES: Readonly<Record<string, string>> = Object.fromEntries(
@@ -58,7 +58,7 @@ const translators = new Map<AppLocale, ReturnType<typeof translatorFor>>();
 function translatorFor(locale: AppLocale) {
   return createTranslator({
     locale,
-    messages: messagesFor(locale),
+    messages: catalogueFor(locale),
     namespace: "errors",
     // A missing parameter is not an exception here: the text below is built by hand instead.
     onError: () => {},
@@ -66,7 +66,7 @@ function translatorFor(locale: AppLocale) {
 }
 
 const errorsIn = (locale: AppLocale): Record<string, string> =>
-  messagesFor(locale).errors as unknown as Record<string, string>;
+  catalogueFor(locale).errors as unknown as Record<string, string>;
 
 /** Shown when the code has no entry and the server sent nothing usable — in the reader's language. */
 export const fallbackErrorMessage = (locale: AppLocale = clientLocale): string => errorsIn(locale).fallback;
@@ -110,15 +110,19 @@ export const messageForCode = (
  */
 const format = (locale: AppLocale, code: string, params?: string[]): string => {
   const template = errorsIn(locale)[code];
-  const values = Object.fromEntries((params ?? []).map((value, index) => [String(index), value]));
-  const wanted = [...template.matchAll(/\{(\d+)\}/g)].map((match) => Number(match[1]));
+  // The backend sends every parameter as a string, and an ICU plural needs a number. Only a plural's: a plain
+  // `{0}` given a number would be formatted, and a year would read "2,026".
+  const plurals = new Set([...template.matchAll(/\{(\d+),\s*plural/g)].map((match) => Number(match[1])));
+  const values = Object.fromEntries((params ?? []).map((value, index) =>
+    [String(index), plurals.has(index) && /^-?\d+$/.test(value) ? Number(value) : value]));
+  const wanted = [...template.matchAll(/\{(\d+)[,}]/g)].map((match) => Number(match[1]));
   if (wanted.every((index) => params?.[index] !== undefined)) {
     let translator = translators.get(locale);
     if (!translator) {
       translator = translatorFor(locale);
       translators.set(locale, translator);
     }
-    return (translator as unknown as (key: string, values: Record<string, string>) => string)(code, values);
+    return (translator as unknown as (key: string, values: Record<string, string | number>) => string)(code, values);
   }
   return template.replace(/\{(\d+)\}/g, (whole, index) => params?.[Number(index)] ?? whole);
 };

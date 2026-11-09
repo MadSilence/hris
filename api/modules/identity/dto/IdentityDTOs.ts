@@ -14,6 +14,10 @@ export type IdentityConnectionDTO = {
   ssoMode: "OFF" | "OPTIONAL" | "REQUIRED";
   ssoSessionHours: number;
   scimEnabled: boolean;
+  /** The provider's own second factor stands in for ours. */
+  trustIdpMfa: boolean;
+  /** Only a System Owner may change which provider is trusted. */
+  mayChangeProvider: boolean;
   redirectUri: string;
   samlAcsUrl: string;
   samlEntityId: string;
@@ -35,6 +39,7 @@ export type IdentityConnectionUpdate = Partial<{
   ssoMode: string;
   ssoSessionHours: number;
   scimEnabled: boolean;
+  trustIdpMfa: boolean;
   version: number | null;
 }>;
 

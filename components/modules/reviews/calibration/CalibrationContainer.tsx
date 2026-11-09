@@ -324,8 +324,8 @@ function AdjustRatingDialog({ session, row, onCloseAction, onDoneAction }: {
           <FormError message={error} />
           <DialogFooter className="mt-4">
             <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy}>
-              {busy ? tCommon("actions.saving") : tCommon("actions.save")}
+            <Button type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>
+              {tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </form>

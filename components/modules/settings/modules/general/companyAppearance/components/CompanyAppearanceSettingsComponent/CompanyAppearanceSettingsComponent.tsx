@@ -420,8 +420,8 @@ export const CompanyAppearanceSettingsComponent: FC<Props> = ({
                 {tCommon("actions.cancel")}
               </Button>
 
-              <Button type="button" onClick={handleSave} disabled={saving}>
-                {saving ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
+              <Button type="button" onClick={handleSave} disabled={saving} loading={saving} loadingLabel={tCommon("actions.saving")}>
+                {tCommon("actions.saveChanges")}
               </Button>
             </div>
           ) : null}

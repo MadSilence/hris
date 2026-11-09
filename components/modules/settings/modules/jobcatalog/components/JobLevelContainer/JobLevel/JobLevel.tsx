@@ -92,6 +92,7 @@ export const JobLevel: React.FC<JobLevelProps> = ({
       ) : visible.length === 0 ? (
         <ListEmptyState
           query={query}
+          onClearSearch={() => setQuery("")}
           scene="career"
           title={t("empty.title")}
           description={t("empty.description")}

@@ -399,7 +399,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                 ) : undefined}
               />
             ) : isEmpty && isFiltered ? (
-              <NoResults title={t("documents.container.noMatchTitle")} hint={t("documents.container.noMatchHint")} />
+              <NoResults title={t("documents.container.noMatchTitle")} hint={t("documents.container.noMatchHint")} onClearSearch={search.trim() ? () => setSearch("") : undefined} />
             ) : isEmpty ? (
               <PersonalDocumentsEmptyState title={t("documents.container.emptyFolderTitle")} description={t("documents.container.emptyFolderDescription")} />
             ) : (

@@ -2,7 +2,7 @@ import { createTranslator } from "next-intl";
 import * as yup from "yup";
 
 import { type AppLocale, DEFAULT_LOCALE, languageOf } from "@/i18n/locales";
-import { messagesFor } from "@/i18n/messages";
+import { catalogueFor } from "@/i18n/catalogue";
 import { formatDisplayDate } from "@/lib/date";
 
 /**
@@ -27,7 +27,7 @@ export const setValidationLocale = (locale: AppLocale): void => {
 const translators = new Map<AppLocale, ReturnType<typeof translatorFor>>();
 
 function translatorFor(locale: AppLocale) {
-  return createTranslator({ locale, messages: messagesFor(locale), namespace: "common" });
+  return createTranslator({ locale, messages: catalogueFor(locale), namespace: "common" });
 }
 
 const t = () => {

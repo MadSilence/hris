@@ -304,7 +304,9 @@
     "roleAccessChanged": {
       "title": "Изменился доступ роли",
       "withActor": "{actor} изменил(а) {what, select, fieldAccess {доступ к полям} other {права}} роли «{role}».",
-      "withoutActor": "{what, select, fieldAccess {Доступ к полям} other {Права}} роли «{role}» изменились."
+      "withoutActor": "{what, select, fieldAccess {Доступ к полям} other {Права}} роли «{role}» изменились.",
+      "fieldWithActor": "{actor} изменил(а) доступ к полю «{field}» у роли «{role}».",
+      "fieldWithoutActor": "Доступ к полю «{field}» у роли «{role}» изменился."
     },
     "accountLocked": {
       "title": "Учётная запись заблокирована",

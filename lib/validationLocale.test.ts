@@ -1,5 +1,7 @@
 import * as yup from "yup";
 
+import { setBrowserCatalogue } from "@/i18n/catalogue";
+import { messagesFor } from "@/i18n/messages";
 import { setValidationLocale } from "@/lib/validationLocale";
 
 const errorOf = (schema: yup.AnySchema, value: unknown): string => {
@@ -22,8 +24,11 @@ describe("yup's default messages", () => {
 
   it("follow a language chosen after the schema was built", () => {
     const schema = yup.string().max(3);
+    // What `LocaleBridge` does on a Russian page: the page's catalogue and its language.
+    setBrowserCatalogue(messagesFor("ru"));
     setValidationLocale("ru");
     expect(errorOf(schema, "abcde")).toBe("Не более 3 символов");
+    setBrowserCatalogue(messagesFor("en"));
   });
 
   it("leave a rule's own message alone", () => {

@@ -247,12 +247,14 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // while impersonating: the export is the actor's act, and Java refuses it inside an impersonation anyway.
   const mayExportPersonalData = !impersonating && (user.capabilities?.["PEOPLE.PROFILE"] ?? []).includes("EDIT");
   const isLocked = Boolean(user.accountLocked);
+  const isRestricted = Boolean(user.loginRestricted);
+  const mayUnlock = mayControlAccess && (isLocked || isRestricted);
   // Your own password, on your own profile — and not while impersonating. The screen says "own
   // profile" because the session is that person, but the human at the keyboard is somebody else, and
   // the dialog would ask for a password they do not have and must not set.
   const mayChangeOwnPassword = isOwnProfile && !impersonating;
   const hasPersonActions =
-    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || maySendReset || mayEndSessions || mayExportPersonalData ||
+    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || mayUnlock || maySendReset || mayEndSessions || mayExportPersonalData ||
     (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || mayOffboard || !isOwnProfile));
 
   const teamFact = user.teams && user.teams.length > 0
@@ -318,6 +320,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
                 <AccountStatusBadge accountStatus={user.accountStatus}/>
                 {isLocked && <StatusBadge status="inactive" label={t("profile.header.locked")}/>}
+                {!isLocked && isRestricted && <StatusBadge status="inactive" label={t("profile.header.signInPaused")}/>}
               </div>
               {user.jobName && <p className="mt-1 truncate text-body text-secondary">{user.jobName}</p>}
               {user.email && <p className="truncate text-hint text-tertiary">{user.email}</p>}
@@ -417,6 +420,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 {canManageProfiles && mayOffboard && (
                   <RowAction icon={<Icon icon={DoorLockIcon} size="sm" />} onClick={() => setStartType("OFFBOARDING")}>
                     {t("profile.header.startOffboarding")}
+                  </RowAction>
+                )}
+                {mayUnlock && (
+                  <RowAction icon={<Icon icon={SquareUnlock02Icon} size="sm" />} onClick={() => setAccountAccess("UNLOCK")}>
+                    {t("profile.header.unlock")}
                   </RowAction>
                 )}
                 {maySendReset && (

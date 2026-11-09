@@ -79,8 +79,8 @@ export function MovePersonModal({
           <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
             {tCommon("actions.cancel")}
           </Button>
-          <Button type="button" onClick={onConfirm} disabled={isPending}>
-            {isPending ? tCommon("actions.saving") : isRemoval ? tCommon("actions.remove") : t("movePerson.confirm")}
+          <Button type="button" onClick={onConfirm} disabled={isPending} loading={isPending} loadingLabel={tCommon("actions.saving")}>
+            {isRemoval ? tCommon("actions.remove") : t("movePerson.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

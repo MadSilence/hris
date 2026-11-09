@@ -25,6 +25,7 @@ export type User = {
    * Only a password reset sent from the profile lifts it. Profile only.
    */
   accountLocked?: boolean;
+  loginRestricted?: boolean;
   /** The version the record was read at; an edit sends it back. */
   version?: number;
   /** When the last invitation went out. Profile only. */

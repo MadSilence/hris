@@ -99,6 +99,7 @@ export function LifecycleTemplatesContainer({ type }: Props) {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
+          onClearSearch={() => setQuery("")}
           archivedView={showArchived}
           scene={TEMPLATE_SCENES[type]}
           title={t("templates.emptyTitle", { type })}

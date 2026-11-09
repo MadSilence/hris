@@ -304,7 +304,9 @@
     "roleAccessChanged": {
       "title": "Role access changed",
       "withActor": "{actor} changed the {what, select, fieldAccess {field access} other {permissions}} of {role}.",
-      "withoutActor": "The {what, select, fieldAccess {field access} other {permissions}} of {role} changed."
+      "withoutActor": "The {what, select, fieldAccess {field access} other {permissions}} of {role} changed.",
+      "fieldWithActor": "{actor} changed the access to {field} on {role}.",
+      "fieldWithoutActor": "The access to {field} on {role} changed."
     },
     "accountLocked": {
       "title": "Account locked",

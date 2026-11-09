@@ -3,22 +3,22 @@ import { useLocale } from "next-intl";
 import { languageOf } from "@/i18n/locales";
 
 /**
- * Перевод между `Date` и строкой `yyyy-MM-dd` — тем видом, в котором дата ходит по API.
+ * Conversion between a `Date` and a `yyyy-MM-dd` string, the form a date takes over the API.
  *
- * Оба направления работают в **локальном** времени, и это принципиально: `new Date("2026-01-01")`
- * парсится как полночь UTC, а `toISOString()` переводит обратно в UTC — на любой зоне западнее
- * Гринвича дата съезжает на день. Поэтому дата собирается и разбирается покомпонентно.
+ * Both directions work in **local** time, on purpose: `new Date("2026-01-01")` parses as UTC
+ * midnight and `toISOString()` converts back to UTC, so in any zone west of Greenwich the date
+ * shifts by a day. That is why a date is assembled and taken apart by its components.
  */
 export const pad = (n: number) => String(n).padStart(2, "0");
 
-/** `Date` → `yyyy-MM-dd`, по локальным компонентам, без сдвига через UTC. */
+/** `Date` → `yyyy-MM-dd`, from local components, with no shift through UTC. */
 export const dateToISO = (date: Date): string =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-/** `yyyy-MM-dd` → локальная полночь. */
+/** `yyyy-MM-dd` → local midnight. */
 export const isoToDate = (iso: string): Date => new Date(`${iso}T00:00:00`);
 
-/** `yyyy-MM-dd` из отдельных чисел (месяц — как в `Date`, с нуля). */
+/** `yyyy-MM-dd` from separate numbers (the month as in `Date`, zero-based). */
 export const partsToISO = (year: number, monthIndex: number, day: number): string =>
   `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
 
@@ -84,7 +84,7 @@ const LOCALE_FOR: Record<Exclude<DisplayDateFormat, "SYSTEM">, string> = {
  * The application's language: what `LocaleBridge` set, or — before it has run — the page's own `<html lang>`,
  * which the server wrote before any script. Hydration does not render the tree in document order, so a
  * component can format a date before the bridge has; reading the attribute makes the order irrelevant
- * (found on the i18n walk of 2026-11-05: "Выходит на работу Nov 12, 2026" on a Russian profile).
+ * (found on the i18n walk: a Russian profile showed a Russian sentence with an English date).
  */
 const appLanguage = (explicit?: string): string | null => {
   if (explicit) return explicit.toLowerCase().split("-")[0];

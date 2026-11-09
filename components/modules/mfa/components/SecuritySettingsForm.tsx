@@ -129,7 +129,7 @@ export const SecuritySettingsForm: React.FC = () => {
 
       <FormError message={error} />
       <div className="flex gap-2">
-        <Button type="button" onClick={save} disabled={busy}>{busy ? tCommon("actions.saving") : tCommon("actions.save")}</Button>
+        <Button type="button" onClick={save} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{tCommon("actions.save")}</Button>
         {dirty && (
           <Button type="button" variant="secondary" onClick={() => setDraft({})} disabled={busy}>{tCommon("actions.cancel")}</Button>
         )}

@@ -183,6 +183,9 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const previewManual = useAssignmentPreview(basePath, assignableId);
   const applyManual = useApplyAssignment(basePath, assignableId, invalidateKeys);
   const previewLive = useLiveRulePreview();
+  const countLive = useLiveRulePreview();
+  const countLiveRule = countLive.mutateAsync;
+  const [ruleCount, setRuleCount] = React.useState<number | null>(null);
   const createLive = useCreateLiveRule();
 
   const reset = React.useCallback(() => {
@@ -241,7 +244,10 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
   const onMetaChange = React.useCallback((meta: { total: number }) => setTotal(meta.total), []);
 
   const live = mode === "all";
-  const willAffect = live ? Math.max(total - excluded.size, 0) : manual.size;
+  const matching = live ? Math.max(total - excluded.size, 0) : manual.size;
+  // A live rule's own number, so the button and the review agree (WALK_QUESTIONS.md § 21). The picker's total
+  // leaves out people the rule still matches, and counts nothing it would skip.
+  const willAffect = live ? (ruleCount ?? matching) : manual.size;
   const overCap = !live && manual.size > MANUAL_CAP;
   // A live rule assigns each person from the day they start matching, so it takes no dates.
   const needsDate = temporal && !live && !effectiveFrom;
@@ -258,6 +264,23 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
     includeInactive,
     drafts: includeInactive ? "INCLUDE" : "EXCLUDE",
   });
+  const countKey = mode === "all" && step === "pick"
+    ? JSON.stringify({ filters, excluded: [...excluded], includeInactive })
+    : null;
+  React.useEffect(() => {
+    setRuleCount(null);
+    if (!countKey || !assignableType) return;
+    let current = true;
+    const timer = setTimeout(() => {
+      countLiveRule({ assignableType, assignableId, segment: liveSegment() })
+        .then((preview) => { if (current) setRuleCount(preview.willAssign); })
+        // The picker's number stands; the review step reports a real failure.
+        .catch(() => undefined);
+    }, 300);
+    return () => { current = false; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- countKey is the segment
+  }, [countKey, assignableType, assignableId, countLiveRule]);
+
   const manualRequest = () => ({
     targetType: "USER" as const,
     targetPayload: { userIds: [...manual] },
@@ -272,7 +295,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
 
   const handlePreview = async () => {
     setTried(true);
-    if (willAffect === 0 || overCap || needsDate) return;
+    if (matching === 0 || overCap || needsDate) return;
     try {
       if (live) {
         if (!assignableType) return;
@@ -389,7 +412,7 @@ export const AssignPeopleModal: React.FC<AssignPeopleModalProps> = ({
                 onIncludeInactiveChange={setIncludeInactive}
                 unavailableReason={currentHolderIds && !canExcludeByField ? unavailableReason : undefined}
               />
-              <FieldError>{tried && willAffect === 0 ? t("audience.assign.pickSomeone") : null}</FieldError>
+              <FieldError>{tried && matching === 0 ? t("audience.assign.pickSomeone") : null}</FieldError>
 
               {/*
                 The checkbox widens the *search* in two directions, and the engine treats the two

@@ -179,8 +179,8 @@ export function ReviewFormEditorContainer({ formId }: { formId: string }) {
           {archived && <StatusBadge status="archived" />}
           <div className="flex items-center gap-2">
             {!readOnly && (
-              <Button type="button" onClick={() => void save()} disabled={saving}>
-                {saving ? tCommon("actions.saving") : tCommon("actions.save")}
+              <Button type="button" onClick={() => void save()} disabled={saving} loading={saving} loadingLabel={tCommon("actions.saving")}>
+                {tCommon("actions.save")}
               </Button>
             )}
             {(canEdit || canManage) && (

@@ -100,7 +100,9 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
     samlIdpCertificates: "",
     ssoMode: c.ssoMode,
     ssoSessionHours: c.ssoSessionHours,
+    trustIdpMfa: c.trustIdpMfa,
   });
+  const locked = !c.mayChangeProvider;
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -114,6 +116,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       ssoMode: draft.ssoMode,
       ssoSessionHours: draft.ssoSessionHours,
       version: c.version,
+      ...(c.mayChangeProvider ? { trustIdpMfa: draft.trustIdpMfa } : {}),
       ...(draft.protocol === "OIDC"
         ? { issuer: draft.issuer, clientId: draft.clientId, ...(draft.clientSecret ? { clientSecret: draft.clientSecret } : {}) }
         : {
@@ -149,10 +152,11 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
         <h2 className="text-section-title text-primary">{t("identity.sso.title")}</h2>
         <StatusBadge status={c.ssoMode === "OFF" ? "inactive" : "active"} label={t(MODE_BADGE_KEY[c.ssoMode])} />
       </div>
+      {locked && <p className="text-hint text-tertiary">{t("identity.sso.ownerOnlyHint")}</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="idp-provider">{t("identity.sso.provider")}</Label>
-          <Select value={draft.provider} onValueChange={(v) => set("provider", v as typeof draft.provider)}>
+          <Select disabled={locked} value={draft.provider} onValueChange={(v) => set("provider", v as typeof draft.provider)}>
             <SelectTrigger id="idp-provider"><SelectValue /></SelectTrigger>
             <SelectContent>
               {/* i18n-exempt: brand name */}
@@ -165,7 +169,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="idp-protocol">{t("identity.sso.protocol")}</Label>
-          <Select value={draft.protocol} onValueChange={(v) => set("protocol", v as typeof draft.protocol)}>
+          <Select disabled={locked} value={draft.protocol} onValueChange={(v) => set("protocol", v as typeof draft.protocol)}>
             <SelectTrigger id="idp-protocol"><SelectValue /></SelectTrigger>
             <SelectContent>
               {/* i18n-exempt: protocol name */}
@@ -181,7 +185,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <CopyField label={t("identity.sso.redirectUri")} value={c.redirectUri} />
           <div className="space-y-2">
             <Label htmlFor="idp-issuer">{t("identity.sso.issuer")}</Label>
-            <Input id="idp-issuer" value={draft.issuer} onChange={(e) => set("issuer", e.currentTarget.value)} />
+            <Input id="idp-issuer" disabled={locked} value={draft.issuer} onChange={(e) => set("issuer", e.currentTarget.value)} />
             <p className="text-hint text-tertiary">
               {draft.provider === "ENTRA" ? t("identity.sso.issuerHintEntra") : t("identity.sso.issuerHintOkta")}
             </p>
@@ -210,7 +214,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <CopyField label={t("identity.sso.acsUrl")} value={c.samlAcsUrl} />
           <div className="space-y-2">
             <Label htmlFor="idp-metadata">{t("identity.sso.metadataUrl")}</Label>
-            <Input id="idp-metadata" value={draft.samlMetadataUrl} onChange={(e) => set("samlMetadataUrl", e.currentTarget.value)} />
+            <Input id="idp-metadata" disabled={locked} value={draft.samlMetadataUrl} onChange={(e) => set("samlMetadataUrl", e.currentTarget.value)} />
             <p className="text-hint text-tertiary">{t("identity.sso.metadataHint")}</p>
           </div>
           {!draft.samlMetadataUrl && (
@@ -218,16 +222,16 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="idp-entity">{t("identity.sso.idpEntityId")}</Label>
-                  <Input id="idp-entity" value={draft.samlIdpEntityId} onChange={(e) => set("samlIdpEntityId", e.currentTarget.value)} />
+                  <Input id="idp-entity" disabled={locked} value={draft.samlIdpEntityId} onChange={(e) => set("samlIdpEntityId", e.currentTarget.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="idp-sso">{t("identity.sso.idpSsoUrl")}</Label>
-                  <Input id="idp-sso" value={draft.samlIdpSsoUrl} onChange={(e) => set("samlIdpSsoUrl", e.currentTarget.value)} />
+                  <Input id="idp-sso" disabled={locked} value={draft.samlIdpSsoUrl} onChange={(e) => set("samlIdpSsoUrl", e.currentTarget.value)} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="idp-certs">{t("identity.sso.certificates")}</Label>
-                <Textarea id="idp-certs" rows={4} value={draft.samlIdpCertificates} onChange={(e) => set("samlIdpCertificates", e.currentTarget.value)} />
+                <Textarea id="idp-certs" disabled={locked} rows={4} value={draft.samlIdpCertificates} onChange={(e) => set("samlIdpCertificates", e.currentTarget.value)} />
                 <p className="text-hint text-tertiary">
                   {c.samlCertificatesSet ? t("identity.sso.certificatesSet") : t("identity.sso.certificatesHint")}
                 </p>
@@ -236,6 +240,14 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           )}
         </div>
       )}
+
+      <div className="flex items-start gap-2">
+        <Checkbox id="idp-trust-mfa" disabled={locked} checked={draft.trustIdpMfa} onCheckedChange={(v) => set("trustIdpMfa", Boolean(v))} />
+        <div className="space-y-0.5">
+          <Label htmlFor="idp-trust-mfa" className="font-normal">{t("identity.sso.trustIdpMfa")}</Label>
+          <p className="text-hint text-tertiary">{t("identity.sso.trustIdpMfaHint")}</p>
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -269,7 +281,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
 
       <FormError message={error} />
       <div className="flex gap-2">
-        <Button type="button" onClick={save} disabled={busy}>{busy ? tCommon("actions.saving") : tCommon("actions.save")}</Button>
+        <Button type="button" onClick={save} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{tCommon("actions.save")}</Button>
         {c.configured && <Button type="button" variant="secondary" onClick={test}>{t("identity.sso.test")}</Button>}
       </div>
     </section>
@@ -507,7 +519,7 @@ const GroupsPanel: React.FC = () => {
           <FormError message={error} />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setEditing(null)} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="button" onClick={save} disabled={busy}>{busy ? tCommon("actions.saving") : tCommon("actions.save")}</Button>
+            <Button type="button" onClick={save} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{tCommon("actions.save")}</Button>
           </div>
         </DialogContent>
       </Dialog>

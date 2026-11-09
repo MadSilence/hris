@@ -1,8 +1,10 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useMessages } from "next-intl";
 
+import { setBrowserCatalogue } from "@/i18n/catalogue";
 import { languageOf } from "@/i18n/locales";
+import type { Messages } from "@/i18n/messages";
 import { setDisplayPreferences } from "@/lib/date";
 import { setErrorLocale } from "@/lib/errors/errorMessages";
 import { setValidationLocale } from "@/lib/validationLocale";
@@ -20,6 +22,7 @@ import { setValidationLocale } from "@/lib/validationLocale";
  */
 export const LocaleBridge: React.FC = () => {
   const locale = useLocale();
+  setBrowserCatalogue(useMessages() as Messages);
   setDisplayPreferences({ language: languageOf(locale) });
   setErrorLocale(locale);
   setValidationLocale(locale);

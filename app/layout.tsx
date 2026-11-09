@@ -30,10 +30,9 @@ type AppRootLayoutProps = {
  * the server so the first frame already wears it; the dark theme's tokens exist but no switch is offered yet.
  */
 const AppRootLayout: React.FC<AppRootLayoutProps> = async ({ children }) => {
-  const env = await getPublicEnv();
-  const accent = accentAttributes(await workspaceAccent());
-  // The reader's language (I18N.md § 5) — `lang` tells the browser and assistive tech what it is reading.
-  const locale = await getLocale();
+  // `locale`: the reader's language (I18N.md § 5) — `lang` tells the browser and assistive tech what it is reading.
+  const [env, workspace, locale] = await Promise.all([getPublicEnv(), workspaceAccent(), getLocale()]);
+  const accent = accentAttributes(workspace);
 
   return (
     <html

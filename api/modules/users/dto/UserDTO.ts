@@ -9,6 +9,7 @@ export type UserDTO = {
   accountStatus?: string;
   /** Locked after too many failed sign-ins. Only a password reset sent from the profile lifts it. */
   accountLocked?: boolean;
+  loginRestricted?: boolean;
   /** Sent back by an edit so a save based on a stale read is refused (E00409). */
   version?: number;
   inviteSentAt?: string | null;

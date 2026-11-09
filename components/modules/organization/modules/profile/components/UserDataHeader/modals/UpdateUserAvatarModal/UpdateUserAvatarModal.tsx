@@ -290,10 +290,10 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
               </Button>
               <Button
                 type="button"
-                disabled={isLoading}
+                disabled={isLoading} loading={isLoading} loadingLabel={tCommon("actions.saving")}
                 onClick={handleUploadConfirm}
               >
-                {isLoading ? tCommon("actions.saving") : tCommon("actions.saveChanges")}
+                {tCommon("actions.saveChanges")}
               </Button>
             </DialogFooter>
           </div>
@@ -418,8 +418,8 @@ function shortenFileName(fileName: string, maxLength = 24) {
 }
 
 /**
- * Размер выбранного аватара. Намеренно НЕ `lib/formatBytes`: тот покажет «347 B», а здесь нижняя
- * граница — «1 KB», чтобы подпись под превью не прыгала между единицами. Разошлось осознанно.
+ * The size of the chosen avatar. Deliberately NOT `lib/formatBytes`: that one would show "347 B", while
+ * here the floor is "1 KB", so the caption under the preview does not jump between units.
  */
 function formatFileSize(size: number) {
   if (size < 1024 * 1024) {

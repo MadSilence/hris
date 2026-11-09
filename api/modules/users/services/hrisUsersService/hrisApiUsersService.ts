@@ -95,6 +95,10 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.unblock(id, reason);
   }
 
+  public async unlock(id: string): Promise<void> {
+    return hrisApiUsersClient.unlock(id);
+  }
+
   public async sendPasswordReset(id: string): Promise<void> {
     return hrisApiUsersClient.sendPasswordReset(id);
   }

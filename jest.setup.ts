@@ -1,7 +1,12 @@
 import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from "util";
 
 import "@testing-library/jest-dom";
+import { setBrowserCatalogue } from "@/i18n/catalogue";
+import { messagesFor } from "@/i18n/messages";
 import { configure } from "@testing-library/react";
+
+// In the app `LocaleBridge` supplies this; a test renders no bridge.
+setBrowserCatalogue(messagesFor("en"));
 
 // jsdom does not provide these; some code under test (and undici) needs them.
 if (typeof TextEncoder === "undefined") {

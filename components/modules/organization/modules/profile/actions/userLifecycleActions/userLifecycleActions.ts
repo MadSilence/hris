@@ -60,6 +60,15 @@ export async function sendPasswordResetAction(submission: { userId: string }): P
   }
 }
 
+/** Lifts a sign-in lock or a temporary restriction without touching the password. */
+export async function unlockUserAction(submission: { userId: string }): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisApiUsersService.unlock(submission.userId) };
+  } catch (error) {
+    return toActionError(error, "unlockUserAction");
+  }
+}
+
 export type LifecycleActionOutput = {
   status: ActionStatus;
   errorMessage?: string;

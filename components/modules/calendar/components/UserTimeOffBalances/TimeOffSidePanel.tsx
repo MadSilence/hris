@@ -6,6 +6,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { SearchField } from "@/components/ui/SearchField";
+import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
@@ -143,7 +144,11 @@ const AllPoliciesDialog: FC<{ standings: PolicyStanding[]; onClose: () => void }
         <SearchField value={query} onChange={setQuery} placeholder={t("sidePanel.searchPolicies")} />
         <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto">
           {groups.length === 0 ? (
-            <p className="text-body text-tertiary">{t("sidePanel.noMatch", { query })}</p>
+            <p className="text-body text-tertiary">
+              {t("sidePanel.noMatch", { query })}
+              {query.trim() && " "}
+              {query.trim() && <ClearSearchButton variant="link" onClick={() => setQuery("")} />}
+            </p>
           ) : (
             groups.map((g) => (
               <section key={g.key}>

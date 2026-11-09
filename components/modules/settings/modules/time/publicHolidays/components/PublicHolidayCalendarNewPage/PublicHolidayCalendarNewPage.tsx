@@ -260,8 +260,8 @@ export function PublicHolidayCalendarNewPage() {
             title={t("publicHolidays.newCalendar.title")}
             backHref="/settings/time/public-holidays"
           />
-          <Button type="button" onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? tCommon("actions.saving") : tCommon("actions.save")}
+          <Button type="button" onClick={handleSubmit} disabled={isLoading} loading={isLoading} loadingLabel={tCommon("actions.saving")}>
+            {tCommon("actions.save")}
           </Button>
         </div>
 

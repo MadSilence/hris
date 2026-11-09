@@ -17,8 +17,9 @@ import { ApproveRing, NodRing } from "./nod";
  *   link                 inside text, "View all"
  *
  * Heights 32 / 36 / 44; an icon button is square and always carries an accessible name and a tooltip.
- * `loading` swaps the content for one nodding ring and the "-ing…" label, keeps the width and ignores a
- * second click.
+ * `loading` shows one nodding ring and ignores a second click. Given `loadingLabel` ("Saving…") the button
+ * also swaps its label by itself and keeps its width: both labels, ring included, sit in one grid cell from the
+ * start, the one not showing invisible and hidden from assistive technology, so nothing moves.
  */
 const buttonVariants = cva(
   [
@@ -59,18 +60,23 @@ const buttonVariants = cva(
   },
 );
 
+const STACKED_LABEL = "col-start-1 row-start-1 inline-flex items-center justify-center gap-2";
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  /** The action is under way: the label should already read "Saving…", "Approving…". */
+  /** The action is under way. Without `loadingLabel` the label should already read "Saving…", "Approving…". */
   loading?: boolean;
+  /** What the button reads while `loading` ("Saving…"). Reserves the wider of the two labels; ignored with `asChild`. */
+  loadingLabel?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, children, onClick, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, loading = false, loadingLabel, children, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const approve = variant === "approve";
+    const stacked = !asChild && loadingLabel !== undefined;
 
     return (
       <Comp
@@ -83,9 +89,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={loading ? undefined : onClick}
         {...props}
  >
-        {loading && !approve && <NodRing size="sm" label="" className="text-current" />}
+        {loading && !approve && !stacked && <NodRing size="sm" label="" className="text-current" />}
         {approve && <ApproveRing />}
-        <Slottable>{children}</Slottable>
+        {stacked ? (
+          <span className="inline-grid place-items-center">
+            <span aria-hidden={loading || undefined} className={cn(STACKED_LABEL, loading && "invisible")}>
+              {children}
+            </span>
+            <span aria-hidden={!loading || undefined} className={cn(STACKED_LABEL, !loading && "invisible")}>
+              {!approve && <NodRing size="sm" label="" className="text-current" />}
+              {loadingLabel}
+            </span>
+          </span>
+        ) : (
+          <Slottable>{children}</Slottable>
+        )}
       </Comp>
     );
   },
