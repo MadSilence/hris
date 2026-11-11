@@ -1,4 +1,4 @@
-import type { HomeWidgetPlacement } from "@/models/home";
+import type { HomeHeaderStyle, HomeWidgetPlacement } from "@/models/home";
 
 /** One person's own preferences. Mirrors `UserSettingsDTO` on the backend. */
 export type UserDateFormat = "SYSTEM" | "DMY" | "MDY" | "YMD";
@@ -20,6 +20,12 @@ export type UserSettingsDTO = {
   delegateApprovalsOnLeave: boolean;
   /** How this person arranged their home, in their order; empty is the default arrangement. */
   homeLayout: HomeWidgetPlacement[];
+  /** Home's header: the accent band or plain white. */
+  homeHeader: HomeHeaderStyle;
+  /** The cards of Home's deck this person skipped, the last skipped last. */
+  homeSkipped: string[];
+  /** Whether Home shows this person's birthday (day and month, never the year); on unless switched off. */
+  showBirthdayOnHome: boolean;
 };
 
 export type UpdateUserSettingsRequest = {
@@ -32,4 +38,8 @@ export type UpdateUserSettingsRequest = {
   delegateApprovalsOnLeave?: boolean;
   /** The whole arrangement of home; an empty list goes back to the default. */
   homeLayout?: HomeWidgetPlacement[];
+  homeHeader?: HomeHeaderStyle;
+  /** The deck's whole skip order; an empty list forgets every skip. */
+  homeSkipped?: string[];
+  showBirthdayOnHome?: boolean;
 };

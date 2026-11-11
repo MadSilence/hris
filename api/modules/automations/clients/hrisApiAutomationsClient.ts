@@ -1,4 +1,5 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
+import type { AutomationsWeek } from "@/models/home";
 import type {
   AssignableType,
   AssignmentHistoryItem,
@@ -131,6 +132,10 @@ export class HrisApiAutomationsClient {
   }
   run(runId: string) {
     return hrisApiClient.get<AutomationRun>(`/automations/runs/${runId}`);
+  }
+  /** Home's Automations widget (the home redesign, Q-6). */
+  runWeek() {
+    return hrisApiClient.get<AutomationsWeek>("/automations/runs/week");
   }
   personRuns(personId: string, page = 0, size = 20) {
     return hrisApiClient.get<AutomationRun[]>(`/automations/people/${personId}/runs${query({ page, size })}`);

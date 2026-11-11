@@ -25,10 +25,8 @@ import { ImpersonationBanner } from "@/components/modules/auth/impersonation/com
 import ImpersonationProvider, {
   useImpersonationContext,
 } from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
-import { useLogoutAction } from "@/components/modules/auth/hooks/useLogoutAction";
+import { useSignOut } from "@/components/modules/auth/hooks/useSignOut";
 import { ChangePasswordModal } from "@/components/modules/auth/components/ChangePasswordModal";
-import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
-import { signOutNavigation } from "@/components/modules/auth/signOutNavigation";
 import CompanyDataProvider, { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
 import { ForbiddenError } from "@/components/clients/exceptions";
@@ -55,24 +53,12 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const { data: unreadCount } = useUnreadNotificationsCount();
   const { data: welcome } = useWelcome();
   const { isImpersonating } = useImpersonationContext();
-  const logout = useLogoutAction();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const openSearch = useCallback(() => setIsSearchOpen(true), []);
   useQuickSearchShortcut(openSearch);
 
-  // A full navigation to `/login` on this same host — the company's own login. Leaves for it even if
-  // clearing the cookies failed: staying would only 401. The remembered company is kept on purpose.
-  const handleSignOut = async () => {
-    try {
-      await logout.mutateAsync();
-    } catch {
-      // nothing useful to add: the next sign-in replaces the cookies anyway
-    } finally {
-      clearPermissionsStorage();
-      signOutNavigation.toLogin();
-    }
-  };
+  const handleSignOut = useSignOut();
 
   // Non-GET calls through InternalApiClient still announce a refusal this way (reads do not — a
   // failed read belongs to the region that did not load); only the client can dispatch it

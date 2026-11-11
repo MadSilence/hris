@@ -1,0 +1,889 @@
+# Home: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+
+## HF01-home-bold
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## HF02-home-light
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## HF03-home-bold-full
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Edit home
+
+## HF04-home-light-full
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Edit home
+
+## HF05-long-name
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Maria-Magdalena
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## HF06-narrow
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## A01-ai-focus
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Who’s out Friday?
+- My balance
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## A02-ai-long
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Book Friday 13 and Monday 16 November off as personal days, and let Lena know I won’t be at the design review
+- Shift + Enter for a new line
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## P01-profile-menu
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Ulia Tykoon
+- HR generalist · People
+- My documents
+- 2 to sign
+- My attendance
+- Edit home
+- Personal settings
+- Log out
+
+## E01-edit-entry
+
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Edit home
+
+## G01-greetings
+
+- Local time 05:00–11:59
+- Tuesday, 10 November
+- Good morning, Ulia
+- Local time 12:00–16:59
+- Good afternoon, Ulia
+- Local time 17:00–04:59
+- Good evening, Ulia
+- The greeting follows the person’s own time zone from their profile (or the browser if empty) and changes live without a reload. The date is the local date in the person’s language format. Only the first name is used.

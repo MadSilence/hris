@@ -1,0 +1,829 @@
+# Home widgets: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+
+## LW00-system
+
+- Widget library
+- How a widget is built
+- One grid, three sizes, one card. Every widget below follows this.
+- Large
+- Medium
+- Small
+- Grid
+- 4 columns of 254, gap 24, rows of 160 (page content 1088 at 1440). A widget snaps to whole cells.
+- Sizes
+- Small 1×1 (254 × 160) · Medium 1×2 (254 × 344) · Large 2×2 (532 × 344). Not every widget has every size.
+- Card
+- White, radius 28, padding 24 (Small 20), no border, shadow 0 1px 2px 6% + 0 8px 24px 8% (neutral). → Changes to SPEC: radius and shadow differ from § 13.9.
+- Type
+- Title Inter Tight 20/26 500. Big number Inter Tight 400, 44 (Small) to 96 (Medium countdown). Body 14/20, hints 12/16. → Changes to SPEC: title and numbers bigger than § 5.
+- Buttons
+- Primary in the accent, radius 12, height 40 (36 / 32 inside rows). Approve always with the nod ring.
+- States
+- Loading: skeleton after 2 s. Empty: S illustration (96) + title + one line + max one action. Error: neutral, “Try again”. No access: the widget is not offered in the panel and not shown.
+- Colour
+- Only the accent is themed. Statuses always icon + word (SPEC § 4.5). Avatars on soft tag colours, never the accent.
+- Copy
+- English, sentence case. Every word on the cards goes into the spec.
+
+## LW01-waiting
+
+- For me
+- Waiting on you
+- Requests that wait for your answer: time off, expenses, documents. Answer right here.
+- Who sees it
+- People who approve something (managers, HR, finance). Hidden for people with nothing to approve and no approver role.
+- Data
+- Inbox: approvals assigned to the person, oldest first.
+- Click
+- Click a request → its page. “Inbox” → Inbox.
+- Sizes
+- Small · Medium · Large
+- Notes
+- L is the default on a new home. Approve on the card nods once after success (SPEC § 11). Skip moves the request to the back of the deck.
+- requests
+- Small
+- Inbox
+- need your answer
+- Lena Novak
+- 3 days vacation · 12–14 Nov
+- Tomas Petrauskas
+- Expense · €84.20
+- Ana Silva
+- Sick day · today
+- Review 3 requests
+- Medium
+- 1 of 3
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- All caught up
+- Nothing waits for your answer.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load requests
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+
+## LW01b-cards
+
+- For me · Waiting on you
+- Every kind of card
+- One card shape for everything that reaches you. What changes: who or what it is from, the main line, and the buttons.
+- Order in the deck:
+- Decide first (oldest first), then Do (by due date), then Read (newest first).
+- Every card:
+- ← Skip moves it to the back (this is “later”, so cards never have a separate Later button). Click anywhere else opens its page.
+- Read cards
+- leave the deck on “Mark as read”; they stay in Inbox. Counter “1 of 9” counts all three kinds.
+- Buttons:
+- no “Open”: the card itself opens on click. One primary at most (Approve with the nod ring); Decline and the rest secondary. Read-only cards have no primary.
+- Decide
+- Someone waits for your yes or no.
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Rūta Jonaitė
+- Product designer
+- Time off request
+- Approve · Decline
+- Mon 23 → Wed 25 Nov
+- 3 working days
+- 12.5 days left after
+- Time off request · nobody else out
+- No overlap: the line shows days and the balance left
+- Tomas Petrauskas
+- sent an expense · Vilnius
+- Yesterday
+- €84.20
+- Receipt attached
+- Client lunch with Acme, 3 people
+- Expense
+- Ana Silva
+- fixed her hours
+- 3h ago
+- Mon 9 Nov · 09:02 → 18:10
+- Forgot to clock out. Was 09:02 → —
+- Attendance correction
+- Do
+- Something only you can do. It leaves the deck when it is done.
+- Remote work policy
+- from HR · to sign
+- Today
+- Sign by Fri, 13 Nov
+- 4 pages
+- Takes about 3 minutes
+- Sign
+- Document to sign
+- Sign (opens the signing view)
+- Q4 review
+- your self-review
+- Mon
+- Due in 3 days
+- 5 questions
+- Your manager sees it after you send
+- Start
+- Review to fill in
+- Start (Skip = later)
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Due today, 10:00
+- Assigned by Inga (HR)
+- Mark done
+- Task
+- Mark done (Undo in a toast)
+- Inga from HR
+- asks you to add
+- Emergency contact
+- Your profile is missing it
+- Add now
+- Missing data
+- Add now (Skip = later)
+- Travel policy
+- was updated
+- 2d ago
+- Read and confirm
+- What changed: hotel limits, per diem
+- I’ve read it
+- Policy to confirm
+- Read
+- Just so you know. Mark as read and it is gone from the deck.
+- Your time off
+- was approved by Jonas
+- 1h ago
+- Fri, 4 Dec
+- Approved
+- Mark as read
+- Your request was answered
+- posted an announcement
+- Office closed on 24 Dec
+- Enjoy the long weekend.
+- Announcement
+- Automation
+- didn’t run
+- Time off approval
+- The approver has left the company.
+- Fix it
+- Something failed (HR)
+- Fix it · Mark as read
+
+## LW01c-approve-motion
+
+- For me · Waiting on you
+- Approve, in motion
+- What happens between the click and the next card. Plays on a loop (6 s). Only the nod moves; everything else fades or shifts (SPEC § 11). With reduced motion: no nod, the ring stays down, the card just fades.
+- Waiting on you
+- Inbox
+- 1 of 3
+- 2 of 3
+- Tomas Petrauskas
+- sent an expense · Vilnius
+- Yesterday
+- €84.20
+- Receipt attached
+- Client lunch with Acme, 3 people
+- ← Skip
+- Decline
+- Approve
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- Approving…
+- Time off approved
+- Undo
+- 0.0 s
+- Waiting
+- the card rests, the ring sits up
+- 0.7 s
+- Hover
+- button darkens (accent-hover, 100 ms), the ring dips
+- 1.3 s
+- Press
+- button pressed (accent-strong), the request is sent
+- 1.5 s
+- label changes, the ring nods (loader, 1.1 s loop), width stays the same
+- 2.4 s
+- Done
+- one nod on Approve (600 ms) — the only “yes” motion
+- 3.0 s
+- Card leaves to the right
+- done = right: slides right, tilts, fades (240 ms). Skip = left: the card goes left and back under the deck
+- 3.2 s
+- Next card
+- the deck moves forward (300 ms), counter 2 of 3. Behind the front card: one card per request left, 2 at most (3 left → 2 behind, 2 left → 1, 1 left → none, 10 left → still 2)
+- 3.3 s
+- Toast
+- “Time off approved · Undo” (200 ms), stays 5 s
+
+## LW01d-skip-motion
+
+- For me · Waiting on you
+- Skip, in motion
+- Skip moves the card to the back of the deck. Done goes right, skip goes left. Plays on a loop (6 s). With reduced motion: the card just fades and the next one appears.
+- Waiting on you
+- Inbox
+- 1 of 3
+- Tomas Petrauskas
+- sent an expense · Vilnius
+- Yesterday
+- €84.20
+- Receipt attached
+- Client lunch with Acme, 3 people
+- ← Skip
+- Decline
+- Approve
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- 0.0 s
+- Waiting
+- the card rests
+- 0.7 s
+- Hover “← Skip”
+- the label darkens to ink (100 ms); no background, it stays a quiet text button
+- 1.4 s
+- Click
+- nothing is sent, nothing is decided
+- 1.5 s
+- Card leaves to the left
+- skip = left: slides left and tilts the other way (−5°), 300 ms, no pause
+- 1.8 s
+- Goes under the deck
+- it drops behind and becomes the back card (pink), its text fades out, 330 ms. The next card moves forward at the same time
+- 2.1 s
+- Next card
+- counter stays “1 of 3”: nothing was answered, the skipped one is still waiting, just last now
+- No toast
+- skip changes only the order, so there is nothing to undo
+
+## LW02-timeoff
+
+- For me
+- Time off
+- Your balance, what is booked and pending, and a quick way to ask for more.
+- Who sees it
+- Everyone with a time-off policy. Without a policy the widget shows the empty state.
+- Data
+- Time off: balances by type, requests of the person.
+- Click
+- “My time off” → the My time off page. “Request time off” → the request dialog (L 800).
+- Sizes
+- Small · Medium · Large
+- Notes
+- The main type (first in the policy, usually vacation) is the big number; the other types are a quiet list under a line. Small shows only the main type. Only what is left is shown, never “of N” or a total. A type without a limit says “No limit”. Upcoming: one line per request, just the dates and the status (no type, no day count). Medium shows the nearest request and a “+N” counter if there are more; Large shows up to 3, then “+N more”. Both open My time off. “Request time off” is in every size.
+- My time off
+- vacation days
+- Request time off
+- Small
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Medium
+- Coming up
+- Fri, 4 Dec
+- Approved
+- 8 Jan
+- +2 more
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Time off, simplified for S size: a sun ring on the horizon
+- No time-off policy yet
+- Ask HR to add you to one.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load time off
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- 16–20 Feb
+- All in My time off
+- +2 opened
+- the other requests in a small list; click one → its page
+
+## LW03-next
+
+- For me
+- Next time off
+- A quiet countdown to your next day off: your approved time off or a public holiday, whichever comes first.
+- Who sees it
+- Everyone with a time-off policy.
+- Data
+- Time off: the person’s next approved request (pending ones are not counted) and public holidays from the holiday calendar of their work location. The nearest wins.
+- Click
+- Click → the request.
+- Sizes
+- Small · Medium
+- Notes
+- The line under the number names the type from the policy, lower case: “days to your vacation / personal day / parental leave”; a public holiday uses its name (“days to Christmas”); a name too long to fit falls back to “days to your time off”. Medium shows the whole range as a quiet line under the title, no background (calendar icon, first – last day · days), also across months: Wed 31 Dec – Thu 15 Jan. Small shows the start date on a calendar leaf. Under 1 day: “Tomorrow”. On the day: “Enjoy your time off” and the widget hides the number.
+- Dec
+- days to vacation
+- Small
+- Approved
+- Fri 4 – Mon 7 Dec · 2 days
+- days to your vacation
+- Medium
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Calendar with one date circled by a ring
+- No time off booked
+- Plan your next break.
+- Request time off
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load time off
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Holiday
+- 24 – 26 Dec · 3 days
+- days to Christmas
+- Next is a public holiday
+- the holiday came before your own time off
+
+## LW04-mytime
+
+- For me
+- My time
+- Today’s worked time with Break and Finish, and in L the last 7 days.
+- Who sees it
+- Only when the Attendance module is on and the person tracks time.
+- Data
+- Attendance: today’s entries and the last 7 days.
+- Click
+- The title with a small ↗ opens My attendance (the whole title is the link). Break and Finish act right here.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Never empty: before the day starts it shows 0:00 and “Start the day” as the main button. On a break the main button says “Back to work” and the dial pauses in gray.
+- Started 09:02
+- of 8h
+- 3 breaks · 55m
+- Small
+- of 8h today
+- Finish the day
+- 3 breaks
+- Medium
+- last 7 days
+- Wed
+- Thu
+- Fri
+- Sat
+- Sun
+- Mon
+- Tue
+- 3 breaks · 55m today
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Not started
+- Start the day
+- Not started yet
+- 0:00, Start the day is the main button
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load your time
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Break · 12m
+- on a break
+- 4 breaks
+- On a break
+- the dial pauses, play brings you back
+- Hover 3 breaks
+- a light tooltip lists each break
+- · 2 breaks
+- Hover a day
+- the exact time worked that day
+
+## LW05-whosout
+
+- My team
+- Who’s out
+- Who is away today or this week: your team first, everyone with one switch.
+- Who sees it
+- Everyone. People without a team see Everyone by default.
+- Data
+- Time off and public holidays; approved and pending (pending dashed). Leave type follows the company’s privacy setting (“Away” if types are hidden).
+- Click
+- Click a person → their profile. “Calendar” → team calendar.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Scope: My team / Everyone. Medium and Large show the switch; Small has no room, so it names the scope in the top right (“My team”) and follows the last choice made in Medium or Large. The type of leave is shown only if the company allows it; otherwise “Away”. Sick days never show a reason. Leave that goes on past this week runs off the right edge of the card (no round end, fades out, →) and says when the person is back. When few people are out this week, the bottom of the card lists Upcoming leave (name, type, dates; as many as fit); with nothing upcoming it says “No leave scheduled”. With many people (Everyone) the list scrolls inside the card under the fixed row of days; the card never grows. Hover any bar: a light tooltip with the full name, type and dates (needed for one-day bars where the name is cut).
+- out today
+- Small
+- Calendar
+- Everyone
+- Rūta Jonaitė
+- Vacation
+- back Thu
+- Lena Novak
+- back Mon
+- Marius Vaitkus
+- Parental leave
+- back 4 Jan
+- Tomas P.
+- Sick day
+- today
+- Medium
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Everyone is in today
+- No one on your team is away.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load who’s out
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Tomas Petrauskas
+- Sick day · Tue, 10 Nov
+- Hover a short bar
+- full name, type and dates
+- Ana · vacation
+- Marta · trip
+- Jonas
+- Inga · vacation
+- Everyone, many people
+- the days stay on top, the people scroll inside the card; the card keeps its size
+- Upcoming
+- Lena
+- vacation
+- Mon 16 – Wed 18 Nov
+- personal day
+- Fri 4 Dec
+- Only one person out
+- the free space shows upcoming leave
+- No leave scheduled
+- Only one out, nothing upcoming
+- “No leave scheduled” under Upcoming
+
+## LW06-week
+
+- Company
+- This week
+- Birthdays, work anniversaries and new joiners this week.
+- Who sees it
+- Everyone. Birthdays only of people who chose to show them.
+- Data
+- People: birthdays (if shared), start dates.
+- Click
+- Click a person → their profile. No buttons.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Today first (with confetti), then the rest of the week by date. No buttons: the card only tells, a click on a person opens their profile. Several today: faces + “+N” and “5 celebrations today” (all birthdays: “5 birthdays today”). Nothing today: no confetti, “Later this week” right away. Large (option B): today big on the left (one person: avatar 64 + sentence; 2 people (3 in Large): the count and each person on a line with what they celebrate; 4 or more: faces + “5 celebrations today”, hover “+N” for a tooltip with everyone today; nobody: “Nothing to celebrate today”), a hairline, then “Later this week” on the right: person, what, day in accent; more than 4 scroll inside with a fade. Many: Small says “+N more this week” with a hover list; Medium scrolls inside, the card never grows. Nothing this week: Small one quiet line; Medium and Large illustration. Names wrap to 3 lines max, list rows cut with …. Birthday year is never shown. Every Medium: today on top, a divider, then “Later this week”. In Medium and Large, today’s people (when listed by name) sit on a light accent tint (accent subtle #F6F1F3, radius 12); the week’s rows have no background. New joiners: “joins” (never “joined” or “joined today”). Days in lists are in the accent colour. Confetti: the main shapes (big ring, small dots, stick) take the company accent colour and change with it; the small ring stays ink and the triangle stays a light tint of the accent.
+- One celebration today
+- today on top, the rest of the week below
+- Marta’s birthday is today
+- +3 more this week
+- Small
+- Later this week
+- Tomas
+- · 5 years
+- Thu
+- Ana
+- · joins
+- Fri
+- Jonas
+- · birthday
+- Sat
+- Medium
+- 5 years
+- Thu 12
+- joins
+- Fri 13
+- birthday
+- Sat 14
+- Large
+- Five today, five more later
+- “5 celebrations today” (all birthdays: “5 birthdays today”). Today always comes first, then “Later this week”. Small: faces + “+5 more this week”, hover it for the list; Medium: “Today” with faces (hover for names), then “Later this week” as a list that scrolls inside; Large (option B): today big on the left — faces + “5 celebrations today”, hover “+2” for everyone today; the week as a list on the right
+- 5 celebrations today
+- +5 more this week
+- Today
+- 5 celebrations
+- Rūta
+- · 2 years
+- Mon
+- Inga
+- 2 years
+- Mon 16
+- Tomas · 5 years
+- Ana · joins
+- Jonas · birthday
+- Rūta · 2 years
+- Inga · birthday
+- Marta · birthday
+- Lena · 3 years
+- Tomas · birthday
+- Jonas · 5 years
+- Two today
+- Small and Medium name up to 2 people today, each with what they celebrate; from 3 it’s faces + the count, so the week still fits. Large names up to 3
+- Marta
+- Lena
+- 3 years
+- 2 celebrations today
+- · 3 years
+- Three today, three kinds
+- Small and Medium: faces + “3 celebrations today” (hover the faces for names), the week below. Large: each one on its own line, the week on the right
+- 3 celebrations today
+- 3 celebrations
+- Nothing today, some later this week
+- no confetti; the nearest one first
+- Nothing today · coming up this week
+- Nothing to celebrate today
+- Coming up this week
+- Many this week
+- Small: “+6 more this week”, hover lists them; Medium and Large: the list scrolls inside with a fade, the card never grows
+- +6 more this week
+- Karolis
+- Tue
+- Lina
+- Paulius
+- Eglė
+- Karolis · joins
+- Nothing this week
+- Small: one quiet line; Medium and Large: illustration, title, one line
+- Nothing to celebrate this week.
+- Celebrations: a party popper bursting confetti with an accent ring
+- Nothing to celebrate this week
+- Birthdays, work anniversaries and new joiners will show up here.
+- Long names
+- The sentence stays at the bottom and takes up to 3 lines, then …. List rows cut with …, hover for the full name
+- Konstantinas Aleksandravičius’s birthday is today
+- Maria-Magdalena Šimkūnaitė
+- · 10 years
+- 10 years
+- Maria-Magdalena Šimkūnaitė · 10 years
+- Loading and error
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load celebrations
+- Check your connection.
+- Try again
+
+## LW07-tosign
+
+- For me
+- To sign
+- Documents waiting for your signature, with the due date. Sign without leaving home.
+- Who sees it
+- Everyone who has a document to sign. With nothing to sign the widget shows the empty state.
+- Data
+- Documents: signature requests for the person.
+- Click
+- “Sign” → signing view. Click a row → the document.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Overdue: the due line turns into Declined/Error status “Overdue”. Only pending documents: once signed, a document leaves the widget (it stays in All documents).
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- Small
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Medium
+- From HR
+- From Legal
+- Equipment handover
+- From IT
+- Due Mon, 23 Nov
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Nothing to sign
+- All your documents are signed.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load documents
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Travel policy 2027
+- Due Wed, 25 Nov
+- Data processing addendum
+- Due Fri, 27 Nov
+- Bonus letter 2026
+- Due Mon, 30 Nov
+- Code of conduct
+- Due Tue, 1 Dec
+- Many · Medium
+- the list scrolls inside, the card never grows
+- From Finance
+- Many · Large
+- 7 to sign: the list scrolls inside with a fade
+
+## LW08-tasks
+
+- For me
+- My tasks
+- Tasks assigned to you by processes (onboarding, offboarding, reviews) and by people.
+- Who sees it
+- Everyone.
+- Data
+- Tasks: assigned to the person, open first, by due date.
+- Click
+- Click the circle → done (with Undo). Click a task → its process.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Task checkboxes are round (SPEC § 13.11). Overdue = the due date has passed and the task is still open; on the right it says “Overdue” in Error text with the due day under it (“Mon”) and stays on top until done. Done: a task you tick stays crossed out until the end of that day (so Undo is easy), then leaves the widget; it is still in All tasks.
+- to do
+- 1 due today
+- Small
+- See all
+- Set up Ana’s laptop
+- Today · Onboarding
+- Book the welcome lunch
+- Thu · Onboarding
+- Collect Eglė’s badge
+- Offboarding
+- Overdue
+- Mon
+- Read the travel policy
+- Done · Documents
+- Medium
+- Today
+- Onboarding · Ana Silva
+- Offboarding · Eglė M.
+- This week
+- Thu
+- Review Q4 goals
+- Reviews
+- Fri
+- 4 open · 1 overdue · 6 done this week
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- All caught up
+- Nothing is assigned to you.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load tasks
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+
+## LW09-processes
+
+- Company
+- Processes
+- Onboarding, offboarding and preboarding in progress: who is where, and what is late.
+- Who sees it
+- HR and admins; managers see only processes of their reports.
+- Data
+- Processes: running instances, steps done / total, overdue steps.
+- Click
+- Click a person → their process. “All processes” → Processes.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Bar colour = process type (onboarding accent, offboarding gray, preboarding Scheduled teal). Overdue in Pending amber text, never red.
+- in progress
+- 1 overdue
+- Small
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Medium
+- All processes
+- Preboarding · 16 Nov
+- 2 onboarding
+- 1 starts next week
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- Onboarding: a ring person stepping toward an open door with a welcome mat
+- Nothing in progress
+- Onboarding and offboarding show up here once they start.
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load processes
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Tomas Petrauskas
+- Rūta Jonaitė
+- Lina Butkutė
+- Preboarding · 23 Nov
+- Paulius Vaitkus
+- Offboarding
+- Many · Medium
+- the list scrolls inside, the card never grows
+- 3 onboarding
+- 2 start soon
+- Many · Large
+- the list scrolls and fades out above the status chips; the chips stay at the bottom
+
+## LW10-automations
+
+- Company
+- Automations
+- What noddo did for you this week, and what needs a fix, with the reason.
+- Who sees it
+- HR and admins only.
+- Data
+- Automations: runs of the last 7 days, failures with their reason, the next scheduled run.
+- Click
+- “Fix it” → the failed run. Click the chart → Automations.
+- Sizes
+- Small · Medium · Large
+- Notes
+- Red only on the failed status and its icon (SPEC § 4.6); the card itself stays white. All good: a Pine “All ran fine” instead of the red block.
+- See all
+- runs
+- 1 failed
+- Small
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Medium
+- This week · 128 runs
+- Today
+- Probation reminder
+- Mon, 16 Nov · 09:00
+- Large
+- States
+- Loading
+- over 2 s: skeleton; under 2 s: nothing
+- No automations yet
+- Let noddo do the routine work.
+- Create automation
+- Empty
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load automations
+- Check your connection.
+- Try again
+- Error
+- the page stays; only this card
+- Today · 36 runs
+- Ran fine
+- Failed
+- Skipped
+- Hover a day
+- tooltip: runs that day — ran fine, failed, skipped
+- All ran fine
+- No failures this week.
+- All good · Medium
+- no failures: a green “All ran fine” instead of the red block
+- All good · Large
+- same, and no red dot in the chart

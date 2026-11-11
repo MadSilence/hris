@@ -57,7 +57,6 @@ export const settingsGroups: SettingsMenuGroup[] = [
     items: [
       { labelKey: "menu.items.company", href: "/settings/general/company", resources: ["SETTINGS.GENERAL"] },
       { labelKey: "menu.items.appearance", href: "/settings/general/customisation", resources: ["SETTINGS.GENERAL"] },
-      { labelKey: "menu.items.home", href: "/settings/general/dashboard", resources: ["SETTINGS.GENERAL"] },
       {
         labelKey: "menu.items.legalEntitiesOffices",
         href: "/settings/general/legal-entities",

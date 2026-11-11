@@ -4,6 +4,16 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-11** — **Home built from the handoff** (`screens/home`, `home-edit`, `home-widgets`, all `built`; what
+  differs is each spec's "Built"). The owner left out **My time** and **To sign**, made the AI box a stub and the
+  birthday a person's own choice (`QUESTIONS.md` Q-7). Deviations from SPEC follow each spec's "Changes to SPEC" and
+  are tokens in `styles/globals.css`, for Home only: `rounded-widget` 28, `rounded-ai-box` 18, `rounded-tint` 12,
+  `shadow-widget`, `shadow-deck`, `text-home-greeting`, `text-widget-title`, `text-deck-line`, `text-hero-s/m/l/xl/xxl`,
+  the band and its ring. New components to carry into the package: **`WidgetCard`**, **`WidgetGrid`**,
+  **`HomeHeader`** (band, greeting, My profile), **`AiBox`**, **`DecisionCard`** and its deck, **`EditHome`** with
+  the widget catalogue row. The settings page Settings → General → Home is gone. Q-3 to Q-6 are answered as you
+  recommended: sizes in the same layout list, the header beside it, the skip order per person on the server, one
+  read for the automations week.
 - **2026-11-06** — **Automations built from the handoff** (`screens/automations-*`, all eight `built`). New shared
   components to carry into the package: **`SegmentedControl`** (`components/ui/SegmentedControl` — built from the
   frames: 32 high, radius 8, the picked segment white on Mist at level 1; `QUESTIONS.md` Q-1), the canvas

@@ -12,3 +12,11 @@ Recommended: the designers add it to the package as drawn; the code's values are
 With branches there is nothing after an approval but its two paths. The owner settled that "Go on" follows the **Declined** path (nothing is granted without a yes). "Go on" now reads like approval.
 Recommended: "Treat it as declined". The code uses that until the designers answer.
 **Blocks:** nothing
+
+## Q-7 — What the owner cut from the home handoff · home, home-edit, home-widgets · from code · 2026-11-11
+The owner answered the places where the design asked owner rules to give way (`(claude)/DECISIONS.md` § "The home redesign"). Three change what is drawn:
+- **My time is not built** — a running clock is clock-in, which the product does not do. It leaves the panel (For me counts one fewer), the employee default and HF01–HF04.
+- **To sign waits for e-signing**, which is not planned; the same for the deck's *Do · document* card and "My documents · {n} to sign" in the profile menu.
+- **The birthday choice moves to the person**: a switch in their own preferences, on by default, instead of Settings → General → Home. It is not drawn.
+Recommended: the designers fill the space My time leaves in the defaults and the finished frames, and draw the preferences switch; the code builds the rest meanwhile from the specs as they are, leaving those two widgets out.
+**Blocks:** nothing

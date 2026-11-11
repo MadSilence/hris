@@ -699,7 +699,6 @@
     "items": {
       "company": "Company",
       "appearance": "Appearance",
-      "home": "Home",
       "legalEntitiesOffices": "Legal entities & offices",
       "departments": "Departments",
       "teams": "Teams",
@@ -731,15 +730,6 @@
   "comingSoon": {
     "title": "{title} is not available yet",
     "description": "This part of settings is planned and has not been built. Nothing here changes how the product works today."
-  },
-  "home": {
-    "description": "What everybody's home can show. Each person chooses and arranges their own widgets; the company decides where the data behind them comes from.",
-    "birthday": {
-      "title": "Birthday field",
-      "saved": "Birthday field saved.",
-      "description": "The date field home's Celebrations reads birthdays from, shown as day and month only. A birthday is listed only to people whose role may see this field for everyone — set that in <link>Employee Roles & Access</link>, under field access. By default nobody but the person sees their own.",
-      "hidden": "A field you cannot see"
-    }
   },
   "templates": {
     "description": "Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would create in your company, adjust it, and apply it as a copy you can change afterwards.",
@@ -1013,6 +1003,12 @@
     "tabs": {
       "import": "Import",
       "export": "Export"
+    }
+  },
+  "homePreferences": {
+    "birthday": {
+      "label": "Show my birthday on Home",
+      "description": "Your colleagues see the day and month on their Home, never the year. On unless you switch it off."
     }
   }
 }

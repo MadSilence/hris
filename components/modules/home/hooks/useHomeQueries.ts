@@ -6,7 +6,8 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { updateUserSettingsAction } from "@/components/modules/firstRun/actions";
 import { USER_SETTINGS_QK } from "@/components/modules/firstRun/hooks";
 import type { UserSettingsDTO } from "@/api/modules/firstRun/dto";
-import type { Celebrations, HomeWidgetPlacement, WhosOut, WhosOutAudience, WhosOutRange } from "@/models/home";
+import type { UpdateUserSettingsRequest } from "@/api/modules/firstRun/dto";
+import type { AutomationsWeek, Celebrations, WhosOut, WhosOutAudience, WhosOutRange } from "@/models/home";
 import type { UserPublicHoliday } from "@/models/publicHolidays/userHoliday";
 
 export const homeQueryKeys = {
@@ -14,6 +15,18 @@ export const homeQueryKeys = {
   whosOut: (range: WhosOutRange, audience: WhosOutAudience) => ["HOME", "WHOS_OUT", range, audience] as const,
   celebrations: (upcoming: boolean) => ["HOME", "CELEBRATIONS", upcoming] as const,
   holidays: (userId: string) => ["HOME", "HOLIDAYS", userId] as const,
+  automationsWeek: ["HOME", "AUTOMATIONS_WEEK"] as const,
+};
+
+/** Home's Automations widget: the last seven days, today's failures and the next step (the home redesign, Q-6). */
+export const useAutomationsWeek = (enabled = true) => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<AutomationsWeek>({
+    queryKey: homeQueryKeys.automationsWeek,
+    queryFn: () => internalApiClient.get<AutomationsWeek>("/automations/runs/week"),
+    enabled,
+    staleTime: 60_000,
+  });
 };
 
 /** Each widget has its own query, so it loads and fails on its own. `enabled` is false for a widget not drawn. */
@@ -52,14 +65,14 @@ export const useMyPublicHolidays = (userId: string | undefined) => {
 };
 
 /**
- * Saves the reader's arrangement of home (H2) with their other preferences. The cache is written with the
- * answer, so the page shows the new arrangement without a second read.
+ * Saves the reader's own Home preferences — the arrangement with its sizes, the header, the deck's skip order — with
+ * their other preferences. The cache is written with the answer, so the page shows the new state without a second read.
  */
-export const useSaveHomeLayout = () => {
+export const useSaveHomeSettings = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (homeLayout: HomeWidgetPlacement[]) => {
-      const result = await updateUserSettingsAction({ homeLayout });
+    mutationFn: async (request: Pick<UpdateUserSettingsRequest, "homeLayout" | "homeHeader" | "homeSkipped">) => {
+      const result = await updateUserSettingsAction(request);
       if (result.status === ActionStatus.ERROR || !result.data) {
         throw new Error(result.errorMessage || "Failed to save your home");
       }

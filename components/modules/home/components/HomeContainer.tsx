@@ -1,154 +1,117 @@
 "use client";
 
-import React, { useMemo, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { PreferenceHorizontalIcon } from "@hugeicons/core-free-icons";
+import { DashboardSquare01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-import { Button } from "@/components/desact/button";
-import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorBoundary } from "@/components/feedback/ErrorBoundary";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { useAccess } from "@/components/auth/useAccess";
-import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
-import { useUnreadNotificationsCount } from "@/components/modules/notifications/hooks/useUnreadNotificationsCount";
-import { useDateFormatter, useDisplayLocale } from "@/lib/date";
-import { availableWidgets } from "@/components/modules/home/widgets";
-import { useSaveHomeLayout } from "@/components/modules/home/hooks";
-import { HOME_GROUPS, HOME_GROUP_LABEL_KEYS, arrangeHome, widgetsOf } from "@/components/modules/home/layout";
-import { greetingFor, hourInZone, isoDateInZone, weekdayOf } from "@/components/modules/home/utils/zonedTime";
-import { CustomizeHome } from "./CustomizeHome";
-
-const noSubscribe = () => () => {};
+import { cn } from "@/lib/cn";
+import type { HomeHeaderStyle } from "@/models/home";
+import { availableWidgets, homeRoleOf } from "@/components/modules/home/widgets";
+import { arrangeHome } from "@/components/modules/home/layout";
+import { flushWrites } from "@/components/modules/home/deferred";
+import { EditHome } from "@/components/modules/home/edit";
+import { WidgetCell, WidgetGrid } from "./WidgetGrid";
+import { Greeting, HomeBand, ProfileMenu } from "./HomeHeader";
+import { AiBox } from "./AiBox";
+import { HomeRequestTimeOffProvider } from "./HomeRequestTimeOff";
 
 /**
- * "Good morning, Anna", the company's today, and what is unread. The page's heading is the greeting (H1).
+ * Home (`hris/design/screens/home`, the redesign of 2026-11-11): the header band with the greeting, the AI box and My
+ * profile; then one free grid of widgets, each at its size, in the person's order; Edit home at the end. **No page
+ * gate** — `/403` sends a refused reader here, so a gate would loop (`HOME_AND_SEARCH.md` § 10). Each widget is offered
+ * only to a reader who may see it, loads and fails on its own, and sits in its own error boundary.
  *
- * Drawn in the browser only: the hour is the reader's clock and `formatDisplayDate` follows the reader's own
- * date format there and the defaults on the server, so a server-rendered greeting failed to hydrate (walk of
- * 2026-10-29) — the same answer as the attendance tab's date.
- */
-const Greeting: React.FC<{ onCustomize?: () => void }> = ({ onCustomize }) => {
-  const formatDisplayDate = useDateFormatter();
-  const locale = useDisplayLocale();
-  const t = useTranslations("home");
-  const { user } = useCurrentUser();
-  const settings = useUserSettings();
-  const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
-  const unread = useUnreadNotificationsCount();
-  const now = new Date();
-  const companyZone = settings.data?.companyTimeZone ?? null;
-  // The greeting follows the reader's own clock; the date is the company's, which is what "today" means here.
-  const hour = hourInZone(now, settings.data?.timeZone ?? companyZone);
-  const today = isoDateInZone(now, companyZone);
-  const name = user?.firstName?.trim();
-  const count = unread.data ?? 0;
-
-  return (
-    <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-page-title text-primary">
-          {t("greeting.line", { part: inBrowser ? greetingFor(hour) : "welcome", hasName: name ? "yes" : "no", name: name ?? "" })}
-        </h1>
-        <p className="text-body text-tertiary">
-          {inBrowser ? `${weekdayOf(today, locale)}, ${formatDisplayDate(today, { style: "medium" })}` : "\u00a0"}
-          {count > 0 && (
-            <>
-              {" · "}
-              <Link href="/inbox?filter=unread" className="font-medium text-accent-text underline-offset-4 hover:underline">
-                {t("greeting.unread", { count })}
-              </Link>
-            </>
-          )}
-        </p>
-      </div>
-      {onCustomize && (
-        <Button type="button" variant="secondary" size="sm" className="gap-1.5 self-start md:self-auto" onClick={onCustomize}>
-          <Icon icon={PreferenceHorizontalIcon} size="sm" />
-          {t("greeting.customize")}
-        </Button>
-      )}
-    </section>
-  );
-};
-
-/**
- * Home (`HOME_AND_SEARCH.md` §§ 1–3, as the owner answered it in sitting 2): a catalogue of widgets in
- * groups, each person arranging their own. **No page gate** — `/403` sends a refused reader here, so a gate
- * would loop (`HOME_AND_SEARCH.md` § 10, trap 4). Each widget is offered only to a reader who may see it, loads and fails on its own,
- * and sits in its own error boundary, so one widget never takes the page down with it.
+ * <p>The header needs only the session and draws at once; a failed settings read still leaves a home — the role's
+ * default, and no Edit home to save into.
  */
 export const HomeContainer: React.FC = () => {
   const t = useTranslations("home");
   const { access, loading } = useAccess();
   const settings = useUserSettings();
-  const save = useSaveHomeLayout();
-  const [customizing, setCustomizing] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  // A held Approve or task done leaves when Home is left (DECISIONS.md § "The home redesign").
+  useEffect(() => () => flushWrites(), []);
 
   const available = useMemo(() => availableWidgets(access), [access]);
+  const role = homeRoleOf(access);
   const stored = useMemo(() => settings.data?.homeLayout ?? [], [settings.data?.homeLayout]);
-  const arranged = useMemo(() => arrangeHome(available, stored), [available, stored]);
+  const placed = useMemo(() => arrangeHome(available, stored, role), [available, stored, role]);
+  const header: HomeHeaderStyle = settings.data?.homeHeader === "LIGHT" ? "LIGHT" : "COLOUR";
+  const canEdit = !settings.error && !settings.isLoading;
+  const openEdit = canEdit ? () => setEditing(true) : undefined;
 
-  // Until the reader's access and arrangement are known, nothing is drawn in a place it might not keep.
-  if (loading || settings.isLoading) {
+  if (editing) {
     return (
-      <div className="flex flex-col gap-8">
-        <Greeting />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden>
-          {[0, 1, 2].map((i) => <Skeleton key={i} className="h-40 w-full" />)}
-        </div>
-      </div>
+      <HomeRequestTimeOffProvider>
+        <EditHome available={available} start={placed} header={header} role={role} stored={stored} onClose={() => setEditing(false)} />
+      </HomeRequestTimeOffProvider>
     );
   }
 
-  if (customizing) {
-    return (
-      <div className="flex max-w-3xl flex-col gap-6">
-        <h1 className="text-page-title text-primary">{t("customize.title")}</h1>
-        <CustomizeHome
-          available={available}
-          stored={stored}
-          saving={save.isPending}
-          onCancel={() => setCustomizing(false)}
-          onSave={async (placements) => {
-            await save.mutateAsync(placements);
-            setCustomizing(false);
-          }}
-        />
-      </div>
-    );
-  }
-
-  const shown = arranged.filter((entry) => !entry.hidden);
+  const ready = !loading && !settings.isLoading;
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* A failed settings read still leaves a home: the default arrangement, and no Customize to save into. */}
-      <Greeting onCustomize={settings.error ? undefined : () => setCustomizing(true)} />
+    <HomeRequestTimeOffProvider>
+      {/* The band runs under the page's own padding, edge to edge; Home's own padding is 56 (48 at 1280). */}
+      <div className="relative -mx-(--page-padding-narrow) -mt-(--page-padding-narrow) xl:-mx-(--page-padding) xl:-mt-(--page-padding)">
+        <HomeBand style={header} />
+        <div className="relative mx-auto flex max-w-[1200px] flex-col px-14 pt-14 pb-14 max-[1281px]:px-12 max-[1281px]:pt-12">
+          <div className="flex justify-end">
+            <ProfileMenu style={header} onEditHome={openEdit} />
+          </div>
+          <div className="mt-7 flex items-end justify-between gap-10 max-[1281px]:flex-col max-[1281px]:items-start max-[1281px]:gap-6">
+            <Greeting style={header} />
+            <AiBox onEditHome={openEdit} />
+          </div>
 
-      {shown.length === 0 ? (
-        <div className="rounded-card border border-dashed border-divider px-4 py-12 text-center">
-          <p className="text-body text-tertiary">{t("customize.allHidden")}</p>
-          <Button type="button" variant="link" onClick={() => setCustomizing(true)}>{t("customize.title")}</Button>
-        </div>
-      ) : (
-        HOME_GROUPS.map((group) => {
-          const entries = widgetsOf(shown, group);
-          if (entries.length === 0) return null;
-          return (
-            <section key={group} className="flex flex-col gap-3" aria-label={t(HOME_GROUP_LABEL_KEYS[group])}>
-              <h2 className="text-hint font-semibold text-tertiary">{t(HOME_GROUP_LABEL_KEYS[group])}</h2>
-              <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {entries.map(({ widget }) => (
-                  <ErrorBoundary key={widget.id}>
-                    <widget.Component />
-                  </ErrorBoundary>
-                ))}
+          <div className="mt-10">
+            {!ready ? (
+              <div aria-hidden className="h-[344px]" />
+            ) : placed.length === 0 ? (
+              <div className="rounded-widget bg-card shadow-widget">
+                <EmptyState
+                  scene="all-caught-up"
+                  title={t("empty.title")}
+                  description={t("empty.description")}
+                  onCreate={openEdit}
+                  createLabel={t("empty.action")}
+                />
               </div>
-            </section>
-          );
-        })
-      )}
-    </div>
+            ) : (
+              <WidgetGrid>
+                {placed.map(({ widget, size }) => (
+                  <WidgetCell key={widget.id} size={size}>
+                    <ErrorBoundary>
+                      <widget.Component size={size} />
+                    </ErrorBoundary>
+                  </WidgetCell>
+                ))}
+              </WidgetGrid>
+            )}
+          </div>
+
+          {openEdit && placed.length > 0 && (
+            <div className="mt-8 flex max-w-[1088px] justify-end">
+              <button
+                type="button"
+                onClick={openEdit}
+                className={cn(
+                  "inline-flex h-11 items-center gap-2 rounded-pill border border-accent-muted bg-card px-5 text-card-title font-medium text-primary",
+                  "transition-colors hover:border-accent-ring hover:bg-subtle",
+                )}
+              >
+                <Icon icon={DashboardSquare01Icon} size="md" />
+                {t("header.editHome")}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </HomeRequestTimeOffProvider>
   );
 };

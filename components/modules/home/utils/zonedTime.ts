@@ -40,7 +40,7 @@ export const weekdayOf = (iso: string, locale?: string): string =>
 
 /** The part of the day a greeting names — the `part` of `home.greeting.line`. */
 export const greetingFor = (hour: number): "morning" | "afternoon" | "evening" =>
-  hour < 5 ? "evening" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  hour < 5 ? "evening" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
 
 /** A stored zone that has left the tz database must not break the page. */
 const safeZone = (zone: string): string | undefined => {

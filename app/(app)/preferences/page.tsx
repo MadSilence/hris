@@ -3,6 +3,7 @@ import { PersonalPreferencesForm } from "@/components/modules/firstRun/component
 import { NotificationPreferences } from "@/components/modules/notifications/components/NotificationPreferences";
 import { PageDescription } from "@/components/ui/PageDescription/PageDescription";
 import { DelegateApprovalsSection } from "@/components/modules/delegations/components";
+import { BirthdayOnHomeSection } from "@/components/modules/home/preferences";
 import { MySessionsSection } from "@/components/modules/sessions/components";
 import { TwoStepSection } from "@/components/modules/mfa/components";
 import { ConnectIdentityProvider } from "@/components/modules/identity/components";
@@ -45,6 +46,11 @@ export default async function PreferencesPage({ searchParams }: Props) {
       <section className="max-w-xl space-y-4">
         <h2 className="text-section-title text-primary">{t("preferences.delegate")}</h2>
         <DelegateApprovalsSection />
+      </section>
+
+      <section className="max-w-xl space-y-4">
+        <h2 className="text-section-title text-primary">{t("preferences.home")}</h2>
+        <BirthdayOnHomeSection />
       </section>
 
       <section className="space-y-4">

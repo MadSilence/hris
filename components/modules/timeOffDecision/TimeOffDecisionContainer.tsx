@@ -48,7 +48,11 @@ const range = (r: Pick<TimeOffRequest, "startDate" | "endDate">, formatDisplayDa
  * leads. The approver it waits on may read this without any role over the requester; the backend
  * derives that from the request and drops it once they have answered.
  */
-export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requestId }) => {
+export const TimeOffDecisionContainer: React.FC<{
+  requestId: string;
+  /** Opened from Home's Decline (`?decline=1`): the reason field is open and focused at once. */
+  startDeclining?: boolean;
+}> = ({ requestId, startDeclining = false }) => {
   const t = useTranslations("timeOff");
   const formatDisplayDate = useDateFormatter();
   const tCommon = useTranslations("common");
@@ -64,7 +68,7 @@ export const TimeOffDecisionContainer: React.FC<{ requestId: string }> = ({ requ
   const approve = useApproveTimeOffRequest();
   const reject = useRejectTimeOffRequest();
   const decideCancellation = useDecideCancellation();
-  const [rejecting, setRejecting] = useState(false);
+  const [rejecting, setRejecting] = useState(startDeclining);
   const [reason, setReason] = useState("");
   const [rejectTried, setRejectTried] = useState(false);
   const [error, setError] = useState<string | null>(null);

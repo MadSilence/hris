@@ -47,6 +47,7 @@ export class HrisApiAutomationsService {
 
   runs = (request: RunQuery) => hrisApiAutomationsClient.runs(request);
   run = (runId: string) => hrisApiAutomationsClient.run(runId);
+  runWeek = () => hrisApiAutomationsClient.runWeek();
   personRuns = (personId: string, page?: number, size?: number) =>
     hrisApiAutomationsClient.personRuns(personId, page, size);
   retryRun = (runId: string) => hrisApiAutomationsClient.retryRun(runId);

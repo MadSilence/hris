@@ -1,147 +1,316 @@
 {
-  "groups": {
-    "PERSONAL": "Для вас",
-    "COMPANY": "Компания",
-    "HR": "HR",
-    "UTILITIES": "Инструменты"
+  "greeting": {
+    "line": "{part, select, morning {Доброе утро} afternoon {Добрый день} evening {Добрый вечер} other {Добро пожаловать}}{hasName, select, yes {, {name}} other {}}"
+  },
+  "header": {
+    "myProfile": "Мой профиль",
+    "editHome": "Настроить главную"
+  },
+  "profileMenu": {
+    "label": "Меню моего профиля",
+    "jobLine": "{hasJob, select, yes {{job}} other {}}{both, select, yes { · } other {}}{hasTeam, select, yes {{team}} other {}}",
+    "myProfile": "Мой профиль",
+    "myTimeOff": "Мои отсутствия",
+    "myDocuments": "Мои документы",
+    "myAttendance": "Мой учёт времени",
+    "editHome": "Настроить главную",
+    "personalSettings": "Личные настройки",
+    "logOut": "Выйти"
+  },
+  "ai": {
+    "label": "Спросите, найдите или поручите noddo",
+    "placeholder": "Спросите, найдите или поручите noddo",
+    "chips": {
+      "requestTimeOff": "Запросить отпуск",
+      "whosOutFriday": "Кто отсутствует в пятницу?",
+      "myBalance": "Мой остаток"
+    },
+    "hint": "Shift + Enter — новая строка",
+    "send": "Отправить",
+    "groups": {
+      "people": "Люди",
+      "do": "Действия",
+      "ask": "Спросить noddo"
+    },
+    "askRow": "Спросить noddo: «{text}»",
+    "noResults": "По запросу «{text}» ничего не найдено",
+    "actions": {
+      "requestTimeOff": "Запросить отпуск",
+      "whosOut": "Кто отсутствует",
+      "myTimeOff": "Мои отсутствия",
+      "myTasks": "Мои задачи",
+      "inbox": "Входящие",
+      "editHome": "Настроить главную"
+    },
+    "notYet": "Ассистент noddo скоро появится. Ничего не отправлено."
+  },
+  "empty": {
+    "title": "Главная пуста",
+    "description": "Добавьте нужные виджеты.",
+    "action": "Настроить главную"
   },
   "widgets": {
     "waitingOnYou": {
-      "title": "Ждут вашего решения",
-      "description": "Заявки на отпуск, которые ждут вашего решения. Виджет виден, только пока что-то ждёт."
+      "title": "Ждут вашего ответа",
+      "description": "Заявки, которые ждут вашего ответа"
     },
-    "myTasks": {
-      "title": "Мои задачи",
-      "description": "Открытые задачи, назначенные вам."
+    "timeOff": {
+      "title": "Отсутствия",
+      "description": "Ваш остаток, что запланировано и ждёт решения"
     },
-    "myTimeOff": {
-      "title": "Мои отсутствия",
-      "description": "Остатки по вашим политикам и ближайший отпуск."
+    "nextTimeOff": {
+      "title": "Следующий отдых",
+      "description": "Тихий отсчёт до вашего следующего выходного"
     },
     "whosOut": {
       "title": "Кто отсутствует",
-      "description": "Кто отсутствует сегодня или на этой неделе — в вашей команде или во всей компании."
+      "description": "Кого нет сегодня или на этой неделе"
     },
-    "celebrations": {
-      "title": "Праздники коллег",
-      "description": "Дни рождения, годовщины работы и новые сотрудники."
+    "thisWeek": {
+      "title": "На этой неделе",
+      "description": "Дни рождения, годовщины работы и новые сотрудники"
     },
-    "upcomingHolidays": {
-      "title": "Ближайшие праздники",
-      "description": "Ваши ближайшие праздничные дни."
+    "myTasks": {
+      "title": "Мои задачи",
+      "description": "Задачи из процессов и от коллег, по сроку"
     },
     "processes": {
-      "title": "Текущие процессы",
-      "description": "Онбординг и пребординг в работе."
+      "title": "Процессы",
+      "description": "Онбординг, оффбординг и пребординг в работе"
     },
     "automations": {
       "title": "Автоматизации",
-      "description": "Как работают автоматизации компании и какие требуют внимания."
-    },
-    "quickActions": {
-      "title": "Быстрые действия",
-      "description": "Подать заявку на отсутствие или учесть время в один клик."
-    },
-    "companyTime": {
-      "title": "Время компании",
-      "description": "Местное время компании."
+      "description": "Что noddo сделал за неделю и что нужно исправить"
     }
   },
-  "greeting": {
-    "line": "{part, select, morning {Доброе утро} afternoon {Добрый день} evening {Добрый вечер} other {Добро пожаловать}}{hasName, select, yes {, {name}} other {}}",
-    "unread": "Непрочитанных: {count}",
-    "customize": "Настроить"
-  },
-  "customize": {
-    "title": "Настройка главной",
-    "intro": "Выберите, что показывать на главной и в каком порядке. Эту раскладку видите только вы.",
-    "moveUp": "Переместить «{title}» выше",
-    "moveDown": "Переместить «{title}» ниже",
-    "show": "Показывать «{title}»",
-    "reset": "Сбросить по умолчанию",
-    "allHidden": "Все виджеты скрыты."
+  "sizes": {
+    "S": "Маленький",
+    "M": "Средний",
+    "L": "Большой",
+    "smallOnly": "Только маленький",
+    "label": "Размер: {size}"
   },
   "card": {
     "seeAll": "Все",
-    "seeAllCount": "Все ({count})",
-    "unnamed": "Без имени",
+    "unnamed": "Кто-то",
     "today": "Сегодня",
-    "when": "Когда"
+    "checkConnection": "Проверьте подключение.",
+    "tryAgain": "Повторить",
+    "undo": "Отменить",
+    "couldNotLoad": "{thing, select, requests {Не удалось загрузить заявки} timeOff {Не удалось загрузить отсутствия} whosOut {Не удалось загрузить, кто отсутствует} celebrations {Не удалось загрузить праздники} tasks {Не удалось загрузить задачи} processes {Не удалось загрузить процессы} automations {Не удалось загрузить автоматизации} other {Не удалось загрузить}}"
   },
-  "automations": {
-    "empty": "Автоматизаций пока нет.",
-    "active": "Активны",
-    "waitingRuns": "Запусков ждут",
-    "failedLastRuns": "Последний запуск не удался",
-    "allGood": "Ничто не требует внимания.",
-    "paused": "Приостановлена",
-    "lastRunFailed": "Последний запуск не удался"
+  "edit": {
+    "title": "Настроить главную",
+    "line": "Пробуйте смело. Ничего не изменится, пока вы не нажмёте «Сохранить».",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "saving": "Сохраняем…",
+    "header": "Шапка",
+    "colour": "Цветная",
+    "light": "Светлая",
+    "reset": "Вернуть по умолчанию",
+    "panelTitle": "Виджеты",
+    "close": "Закрыть",
+    "search": "Найти виджет",
+    "all": "Все",
+    "categories": {
+      "FOR_ME": "Для меня",
+      "MY_TEAM": "Моя команда",
+      "COMPANY": "Компания"
+    },
+    "chip": "{label} {count}",
+    "hint": "Выберите размер и перетащите виджет на главную или нажмите +",
+    "onYourHome": "Уже на главной",
+    "found": "{count, plural, one {# виджет} few {# виджета} many {# виджетов} other {# виджета}}",
+    "noResultsTitle": "Нет виджетов по запросу «{text}»",
+    "noResultsLine": "Попробуйте другое слово.",
+    "clearSearch": "Очистить поиск",
+    "errorTitle": "Не удалось загрузить виджеты",
+    "errorLine": "Ваша главная в порядке. Попробуйте ещё раз.",
+    "tryAgain": "Повторить",
+    "dropHere": "Перетащите виджеты сюда",
+    "removeFromHome": "Убрать с главной",
+    "drag": "Перетащить «{name}»",
+    "remove": "Убрать «{name}»",
+    "add": "Добавить «{name}»",
+    "discardTitle": "Отменить изменения?",
+    "discardLine": "Главная останется как была.",
+    "keepEditing": "Продолжить",
+    "discard": "Отменить изменения",
+    "toasts": {
+      "added": "«{name}» добавлен",
+      "removed": "«{name}» убран",
+      "reset": "Главная возвращена к виду по умолчанию",
+      "saved": "Главная сохранена",
+      "saveFailed": "Не удалось сохранить главную",
+      "retry": "Повторить"
+    }
   },
-  "celebrations": {
-    "birthday": "День рождения",
-    "anniversary": "{count, plural, one {# год в компании} few {# года в компании} many {# лет в компании} other {# года в компании}}",
-    "joins": "Выходит на работу",
-    "showUpcoming": "Ближайшие",
-    "emptyWeek": "На этой неделе праздников нет.",
-    "emptyToday": "Сегодня праздников нет.",
-    "birthdaysOff": "Дни рождения выключены: поле дня рождения не выбрано.",
-    "chooseOne": "Выбрать",
-    "birthdaysHidden": "Дни рождения от вас скрыты: {hasField, select, yes {поле «{field}»} other {поле дня рождения}} не видно вашей роли для всех сотрудников. Откройте его в доступе к полям, чтобы дни рождения появились здесь.",
-    "openRoles": "Открыть роли"
+  "waitingOnYou": {
+    "inbox": "Входящие",
+    "requests": "{count, plural, one {заявка} few {заявки} many {заявок} other {заявки}}",
+    "needAnswer": "{count, plural, one {<b>#</b> ждёт вашего ответа} few {<b>#</b> ждут вашего ответа} many {<b>#</b> ждут вашего ответа} other {<b>#</b> ждут вашего ответа}}",
+    "review": "{count, plural, one {Рассмотреть # заявку} few {Рассмотреть # заявки} many {Рассмотреть # заявок} other {Рассмотреть # заявки}}",
+    "counter": "{at} из {count}",
+    "skip": "Пропустить",
+    "approve": "Одобрить",
+    "approving": "Одобряем…",
+    "decline": "Отклонить",
+    "markDone": "Готово",
+    "start": "Начать",
+    "fixIt": "Исправить",
+    "markAsRead": "Прочитано",
+    "emptyTitle": "Всё разобрано",
+    "emptyLine": "Ничего не ждёт вашего ответа.",
+    "wantsTimeOff": "просит {days}",
+    "wantsToCancel": "просит отменить {days}",
+    "alsoOut": "{name} тоже отсутствует {date}",
+    "alsoOutTeam": "{name} из «{team}» тоже отсутствует {date}",
+    "leftAfter": "останется {left}",
+    "automationWaits": "Автоматизация ждёт вашего ответа",
+    "taskFrom": "{hasProcess, select, yes {{process}} other {}}{hasProcess, select, yes {{hasPerson, select, yes { · } other {}}} other {}}{hasPerson, select, yes {{person}} other {}}",
+    "taskDue": "{hasDate, select, yes {Срок: {date}} other {Без срока}}",
+    "taskOverdue": "Просрочено · срок был {date}",
+    "runFailed": "Автоматизация не сработала",
+    "runLine": "{hasPerson, select, yes {О сотруднике {person}. } other {}}{reason}",
+    "rowLine": "{type} · {days} · {dates}",
+    "kinds": {
+      "timeOff": "Отпуск",
+      "cancellation": "Отмена отпуска",
+      "automation": "Одобрение автоматизации",
+      "task": "Задача",
+      "review": "Ревью",
+      "failedRun": "Сбой автоматизации"
+    },
+    "toasts": {
+      "approved": "Отпуск одобрен",
+      "cancellationApproved": "Отмена одобрена",
+      "automationApproved": "Ответ отправлен",
+      "taskDone": "Задача выполнена"
+    }
   },
-  "clock": {
-    "yourTime": "Ваше время: {time} · {zone}"
+  "timeOff": {
+    "link": "Мои отсутствия",
+    "label": "Отсутствия",
+    "days": "{amount} {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
+    "mainWord": "{unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}} · {name}",
+    "left": "{amount} {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
+    "noLimit": "Без ограничений",
+    "comingUp": "Впереди",
+    "more": "+{count}",
+    "moreLong": "Ещё {count}",
+    "allInMyTimeOff": "Все в «Мои отсутствия»",
+    "pending": "Ждёт решения",
+    "approved": "Одобрено",
+    "requestTimeOff": "Запросить отпуск",
+    "emptyTitle": "Политики отсутствий пока нет",
+    "emptyLine": "Попросите HR подключить вас к ней."
   },
-  "myTimeOff": {
-    "requestTimeOff": "Подать заявку на отсутствие",
-    "empty": "К вам пока не применяется ни одна политика отсутствий.",
-    "policyFallback": "Отсутствие",
-    "left": "Осталось <b>{amount}</b> {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
-    "comingUp": "Скоро",
-    "approved": "Согласовано",
-    "waiting": "Ждёт согласования"
+  "nextTimeOff": {
+    "approved": "Одобрено",
+    "holiday": "Праздник",
+    "daysTo": "{count, plural, one {день до: {what}} few {дня до: {what}} many {дней до: {what}} other {дня до: {what}}}",
+    "yourType": "{type}",
+    "yourTimeOff": "отдыха",
+    "tomorrow": "Завтра",
+    "enjoy": "Хорошего отдыха",
+    "span": "{dates} · {days}",
+    "emptyTitle": "Отдых не запланирован",
+    "emptyLine": "Запланируйте следующий перерыв.",
+    "requestTimeOff": "Запросить отпуск"
+  },
+  "whosOut": {
+    "calendar": "Календарь",
+    "myTeam": "Моя команда",
+    "everyone": "Все",
+    "whose": "Чьи отсутствия",
+    "outToday": "{count, plural, one {отсутствует сегодня} few {отсутствуют сегодня} many {отсутствуют сегодня} other {отсутствуют сегодня}}",
+    "away": "Отсутствует",
+    "back": "вернётся {date}",
+    "typeLine": "{type} · {back}",
+    "tooltip": "{type} · {dates}",
+    "upcoming": "Впереди",
+    "noLeave": "Отсутствий не запланировано",
+    "emptyTitle": "Сегодня все на месте",
+    "emptyLine": "Никто из вашей команды не отсутствует.",
+    "emptyLineEveryone": "Никто не отсутствует.",
+    "pending": "Ждёт решения",
+    "lane": "{name} · {type}{runsOff, select, yes {, вернётся {back}} other {}}"
+  },
+  "thisWeek": {
+    "birthdayToday": "У {name} сегодня день рождения",
+    "joinsToday": "{name} выходит сегодня",
+    "anniversaryToday": "{name}: {count, plural, one {# год} few {# года} many {# лет} other {# года}} в компании сегодня",
+    "celebrationsToday": "{count, plural, one {# праздник сегодня} few {# праздника сегодня} many {# праздников сегодня} other {# праздника сегодня}}",
+    "birthdaysToday": "{count, plural, one {# день рождения сегодня} few {# дня рождения сегодня} many {# дней рождения сегодня} other {# дня рождения сегодня}}",
+    "moreThisWeek": "Ещё {count} на этой неделе",
+    "laterThisWeek": "Позже на этой неделе",
+    "nothingToday": "Сегодня праздников нет",
+    "nothingTodayComing": "Сегодня ничего · впереди на неделе",
+    "comingUp": "Впереди на неделе →",
+    "birthday": "день рождения",
+    "years": "{count, plural, one {# год} few {# года} many {# лет} other {# года}}",
+    "joins": "выходит",
+    "emptyTitle": "На этой неделе праздников нет",
+    "emptyLine": "Здесь появятся дни рождения, годовщины работы и новые сотрудники.",
+    "nothingWeek": "На этой неделе ничего",
+    "rowWhat": " · {what}",
+    "listLine": "{name} · {what}",
+    "more": "+{count}"
   },
   "myTasks": {
-    "empty": "Вам ничего не назначено.",
-    "forSubject": "Для: {name}",
-    "waiting": "Ожидает · {date}"
+    "toDo": "к выполнению",
+    "dueToday": "{count, plural, one {# на сегодня} few {# на сегодня} many {# на сегодня} other {# на сегодня}}",
+    "today": "Сегодня",
+    "thisWeek": "На этой неделе",
+    "overdue": "Просрочено",
+    "footer": "{open} открыто · {overdue} просрочено · {done} выполнено за неделю",
+    "markDone": "Отметить «{title}» выполненной",
+    "done": "Задача выполнена",
+    "from": "{when} · {from}",
+    "emptyTitle": "Всё сделано",
+    "emptyLine": "Вам ничего не назначено."
   },
   "processes": {
-    "empty": "Нет онбординга или пребординга в работе.",
+    "all": "Все",
+    "allProcesses": "Все процессы",
+    "inProgress": "в работе",
+    "overdue": "{count, plural, one {# просрочен} few {# просрочено} many {# просрочено} other {# просрочено}}",
+    "progress": "{done}/{total}",
     "types": {
       "PREBOARDING": "Пребординг",
       "ONBOARDING": "Онбординг",
       "OFFBOARDING": "Оффбординг"
     },
-    "progress": "Выполнено {done}/{total}",
-    "overdue": "Просрочено: {count}"
+    "withOverdue": "{type} · {overdue}",
+    "startsOn": "{type} · с {date}",
+    "chips": {
+      "onboarding": "Онбординг: {count}",
+      "offboarding": "Оффбординг: {count}",
+      "startsNextWeek": "{count, plural, one {# начнётся на следующей неделе} few {# начнутся на следующей неделе} many {# начнутся на следующей неделе} other {# начнутся на следующей неделе}}",
+      "overdue": "Просрочено: {count}"
+    },
+    "emptyTitle": "Ничего не в работе",
+    "emptyLine": "Онбординг и оффбординг появятся здесь, когда начнутся."
   },
-  "quickActions": {
-    "requestTimeOff": "Подать заявку на отсутствие",
-    "logTime": "Учесть время"
-  },
-  "holidays": {
-    "empty": "Праздничных дней впереди нет.",
-    "calendarFallback": "Календарь праздников",
-    "halfDay": "Полдня"
-  },
-  "waitingOnYou": {
-    "aRequest": "Заявка",
-    "requests": "<name></name><rest> запрашивает отсутствие</rest>",
-    "asksToCancel": "<name></name><rest> просит отменить отсутствие</rest>",
-    "detail": "{dates} · {days}{forSomeone, select, yes { · вы замещаете: {name}} other {}}"
-  },
-  "whosOut": {
-    "openCalendar": "Открыть календарь",
-    "whose": "Чьи отсутствия",
-    "myTeam": "Моя команда",
-    "everyone": "Все",
-    "thisWeek": "Эта неделя",
-    "noTeam": "Вы пока не состоите ни в команде, ни в отделе.",
-    "showEveryone": "Показать всех",
-    "emptyToday": "Сегодня все на месте.",
-    "emptyWeek": "До конца недели все на месте.",
-    "away": "Отсутствует",
-    "more": "И ещё {count} в календаре."
+  "automations": {
+    "runs": "{count, plural, one {запуск} few {запуска} many {запусков} other {запуска}}",
+    "runsThisWeek": "{count, plural, one {запуск за неделю} few {запуска за неделю} many {запусков за неделю} other {запуска за неделю}}",
+    "thisWeekRuns": "За неделю · {count, plural, one {# запуск} few {# запуска} many {# запусков} other {# запуска}}",
+    "failed": "Сбоев: {count}",
+    "failedToday": "Сбоев сегодня: {count}",
+    "fixIt": "Исправить",
+    "next": "Далее",
+    "nextLine": "{name} · {date}",
+    "allFine": "Всё сработало",
+    "noFailures": "За неделю сбоев нет.",
+    "dayTooltip": "{day} · {count, plural, one {# запуск} few {# запуска} many {# запусков} other {# запуска}}",
+    "ranFine": "Успешно",
+    "failedLabel": "Сбой",
+    "skipped": "Пропущено",
+    "emptyTitle": "Автоматизаций пока нет",
+    "emptyLine": "Пусть noddo берёт на себя рутину.",
+    "create": "Создать автоматизацию",
+    "failureLine": "{name}: {reason}"
   }
 }

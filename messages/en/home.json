@@ -1,147 +1,316 @@
 {
-  "groups": {
-    "PERSONAL": "For you",
-    "COMPANY": "Company",
-    "HR": "HR",
-    "UTILITIES": "Utilities"
+  "greeting": {
+    "line": "{part, select, morning {Good morning} afternoon {Good afternoon} evening {Good evening} other {Welcome}}{hasName, select, yes {, {name}} other {}}"
+  },
+  "header": {
+    "myProfile": "My profile",
+    "editHome": "Edit home"
+  },
+  "profileMenu": {
+    "label": "My profile menu",
+    "jobLine": "{hasJob, select, yes {{job}} other {}}{both, select, yes { · } other {}}{hasTeam, select, yes {{team}} other {}}",
+    "myProfile": "My profile",
+    "myTimeOff": "My time off",
+    "myDocuments": "My documents",
+    "myAttendance": "My attendance",
+    "editHome": "Edit home",
+    "personalSettings": "Personal settings",
+    "logOut": "Log out"
+  },
+  "ai": {
+    "label": "Ask, search or tell noddo what to do",
+    "placeholder": "Ask, search or tell noddo what to do",
+    "chips": {
+      "requestTimeOff": "Request time off",
+      "whosOutFriday": "Who’s out Friday?",
+      "myBalance": "My balance"
+    },
+    "hint": "Shift + Enter for a new line",
+    "send": "Send",
+    "groups": {
+      "people": "People",
+      "do": "Do",
+      "ask": "Ask noddo"
+    },
+    "askRow": "Ask noddo: “{text}”",
+    "noResults": "Nothing found for “{text}”",
+    "actions": {
+      "requestTimeOff": "Request time off",
+      "whosOut": "Who’s out",
+      "myTimeOff": "My time off",
+      "myTasks": "My tasks",
+      "inbox": "Inbox",
+      "editHome": "Edit home"
+    },
+    "notYet": "noddo’s assistant is on its way. Nothing was sent."
+  },
+  "empty": {
+    "title": "Your home is empty",
+    "description": "Add the widgets you need.",
+    "action": "Edit home"
   },
   "widgets": {
     "waitingOnYou": {
       "title": "Waiting on you",
-      "description": "Leave requests waiting for your decision. Shown only while something waits."
+      "description": "Requests that wait for your answer"
+    },
+    "timeOff": {
+      "title": "Time off",
+      "description": "Your balance, what is booked and pending"
+    },
+    "nextTimeOff": {
+      "title": "Next time off",
+      "description": "A quiet countdown to your next day off"
+    },
+    "whosOut": {
+      "title": "Who’s out",
+      "description": "Who is away today or this week"
+    },
+    "thisWeek": {
+      "title": "This week",
+      "description": "Birthdays, work anniversaries and new joiners"
     },
     "myTasks": {
       "title": "My tasks",
-      "description": "Open tasks assigned to you."
-    },
-    "myTimeOff": {
-      "title": "My time off",
-      "description": "What is left on your policies, and your next leave."
-    },
-    "whosOut": {
-      "title": "Who's out",
-      "description": "Who is away today or this week, in your team or the whole company."
-    },
-    "celebrations": {
-      "title": "Celebrations",
-      "description": "Birthdays, work anniversaries and new joiners."
-    },
-    "upcomingHolidays": {
-      "title": "Upcoming holidays",
-      "description": "Your next public holidays."
+      "description": "Tasks from processes and people, by due date"
     },
     "processes": {
-      "title": "Processes in progress",
-      "description": "Onboarding and preboarding in flight."
+      "title": "Processes",
+      "description": "Onboarding, offboarding and preboarding in progress"
     },
     "automations": {
       "title": "Automations",
-      "description": "How the company's automations are running, and which need a look."
-    },
-    "quickActions": {
-      "title": "Quick actions",
-      "description": "Request time off or log time in one click."
-    },
-    "companyTime": {
-      "title": "Company time",
-      "description": "The company's local time."
+      "description": "What noddo did this week, and what needs a fix"
     }
   },
-  "greeting": {
-    "line": "{part, select, morning {Good morning} afternoon {Good afternoon} evening {Good evening} other {Welcome}}{hasName, select, yes {, {name}} other {}}",
-    "unread": "Unread: {count}",
-    "customize": "Customize"
-  },
-  "customize": {
-    "title": "Customize home",
-    "intro": "Choose what your home shows and in what order. Only you see this arrangement.",
-    "moveUp": "Move {title} Up",
-    "moveDown": "Move {title} Down",
-    "show": "Show {title}",
-    "reset": "Reset to default",
-    "allHidden": "Every widget is hidden."
+  "sizes": {
+    "S": "Small",
+    "M": "Medium",
+    "L": "Large",
+    "smallOnly": "Small only",
+    "label": "Size: {size}"
   },
   "card": {
     "seeAll": "See all",
-    "seeAllCount": "See all ({count})",
-    "unnamed": "Unnamed",
+    "unnamed": "Someone",
     "today": "Today",
-    "when": "When"
+    "checkConnection": "Check your connection.",
+    "tryAgain": "Try again",
+    "undo": "Undo",
+    "couldNotLoad": "{thing, select, requests {Couldn’t load requests} timeOff {Couldn’t load time off} whosOut {Couldn’t load who’s out} celebrations {Couldn’t load celebrations} tasks {Couldn’t load tasks} processes {Couldn’t load processes} automations {Couldn’t load automations} other {Couldn’t load}}"
   },
-  "automations": {
-    "empty": "No automations yet.",
-    "active": "Active",
-    "waitingRuns": "Runs waiting",
-    "failedLastRuns": "Last runs failed",
-    "allGood": "Nothing needs a look.",
-    "paused": "Paused",
-    "lastRunFailed": "Last run failed"
+  "edit": {
+    "title": "Edit home",
+    "line": "Try things out. Nothing changes until you press Save.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "header": "Header",
+    "colour": "Colour",
+    "light": "Light",
+    "reset": "Reset to default",
+    "panelTitle": "Widgets",
+    "close": "Close",
+    "search": "Search widgets",
+    "all": "All",
+    "categories": {
+      "FOR_ME": "For me",
+      "MY_TEAM": "My team",
+      "COMPANY": "Company"
+    },
+    "chip": "{label} {count}",
+    "hint": "Pick a size, then drag the widget onto your home or click +",
+    "onYourHome": "On your home",
+    "found": "{count, plural, one {# widget} other {# widgets}}",
+    "noResultsTitle": "No widgets match “{text}”",
+    "noResultsLine": "Try another word.",
+    "clearSearch": "Clear search",
+    "errorTitle": "Couldn’t load widgets",
+    "errorLine": "Your home is safe. Try again.",
+    "tryAgain": "Try again",
+    "dropHere": "Drag widgets here",
+    "removeFromHome": "Remove from home",
+    "drag": "Drag {name}",
+    "remove": "Remove {name}",
+    "add": "Add {name}",
+    "discardTitle": "Discard your changes?",
+    "discardLine": "Your home stays as it was.",
+    "keepEditing": "Keep editing",
+    "discard": "Discard changes",
+    "toasts": {
+      "added": "“{name}” added",
+      "removed": "“{name}” removed",
+      "reset": "Home reset to default",
+      "saved": "Home saved",
+      "saveFailed": "Couldn’t save your home",
+      "retry": "Retry"
+    }
   },
-  "celebrations": {
-    "birthday": "Birthday",
-    "anniversary": "{count, plural, one {# Year at the company} other {# Years at the company}}",
-    "joins": "Joins the company",
-    "showUpcoming": "Show upcoming",
-    "emptyWeek": "Nothing to celebrate this week.",
-    "emptyToday": "Nothing to celebrate today.",
-    "birthdaysOff": "Birthdays are off: no birthday field is chosen.",
-    "chooseOne": "Choose one",
-    "birthdaysHidden": "Birthdays are hidden from you: {hasField, select, yes {\"{field}\"} other {the birthday field}} is not visible to your role for everyone. Grant it in field access to show birthdays here.",
-    "openRoles": "Open roles"
+  "waitingOnYou": {
+    "inbox": "Inbox",
+    "requests": "{count, plural, one {request} other {requests}}",
+    "needAnswer": "{count, plural, one {<b>#</b> needs your answer} other {<b>#</b> need your answer}}",
+    "review": "{count, plural, one {Review # request} other {Review # requests}}",
+    "counter": "{at} of {count}",
+    "skip": "Skip",
+    "approve": "Approve",
+    "approving": "Approving…",
+    "decline": "Decline",
+    "markDone": "Mark done",
+    "start": "Start",
+    "fixIt": "Fix it",
+    "markAsRead": "Mark as read",
+    "emptyTitle": "All caught up",
+    "emptyLine": "Nothing waits for your answer.",
+    "wantsTimeOff": "wants {days}",
+    "wantsToCancel": "asks to cancel {days}",
+    "alsoOut": "{name} is out on {date} too",
+    "alsoOutTeam": "{name} from {team} is out on {date} too",
+    "leftAfter": "{left} left after",
+    "automationWaits": "An automation waits for your answer",
+    "taskFrom": "{hasProcess, select, yes {{process}} other {}}{hasProcess, select, yes {{hasPerson, select, yes { · } other {}}} other {}}{hasPerson, select, yes {{person}} other {}}",
+    "taskDue": "{hasDate, select, yes {Due {date}} other {No due date}}",
+    "taskOverdue": "Overdue · was due {date}",
+    "runFailed": "Automation didn’t run",
+    "kinds": {
+      "timeOff": "Time off",
+      "cancellation": "Cancellation",
+      "automation": "Automation approval",
+      "task": "Task",
+      "review": "Review",
+      "failedRun": "Failed automation"
+    },
+    "toasts": {
+      "approved": "Time off approved",
+      "cancellationApproved": "Cancellation approved",
+      "automationApproved": "Approval sent",
+      "taskDone": "Task done"
+    },
+    "runLine": "{hasPerson, select, yes {About {person}. } other {}}{reason}",
+    "rowLine": "{type} · {days} · {dates}"
   },
-  "clock": {
-    "yourTime": "Your time: {time} · {zone}"
-  },
-  "myTimeOff": {
-    "requestTimeOff": "Request time off",
-    "empty": "No time-off policy applies to you yet.",
-    "policyFallback": "Time off",
-    "left": "<b>{amount}</b> {unit, select, hours {{count, plural, one {hour} other {hours}}} other {{count, plural, one {day} other {days}}}} left",
+  "timeOff": {
+    "link": "My time off",
+    "label": "Time off",
+    "days": "{amount} {unit, select, hours {{count, plural, one {hour} other {hours}}} other {{count, plural, one {day} other {days}}}}",
+    "mainWord": "{unit, select, hours {{count, plural, one {{name} hour} other {{name} hours}}} other {{count, plural, one {{name} day} other {{name} days}}}}",
+    "left": "{amount} {unit, select, hours {{count, plural, one {hour left} other {hours left}}} other {{count, plural, one {day left} other {days left}}}}",
+    "noLimit": "No limit",
     "comingUp": "Coming up",
+    "more": "+{count}",
+    "moreLong": "+{count} more",
+    "allInMyTimeOff": "All in My time off",
+    "pending": "Pending",
     "approved": "Approved",
-    "waiting": "Waiting for approval"
+    "requestTimeOff": "Request time off",
+    "emptyTitle": "No time-off policy yet",
+    "emptyLine": "Ask HR to add you to one."
+  },
+  "nextTimeOff": {
+    "approved": "Approved",
+    "holiday": "Holiday",
+    "daysTo": "{count, plural, one {day to {what}} other {days to {what}}}",
+    "yourType": "your {type}",
+    "yourTimeOff": "your time off",
+    "tomorrow": "Tomorrow",
+    "enjoy": "Enjoy your time off",
+    "span": "{dates} · {days}",
+    "emptyTitle": "No time off booked",
+    "emptyLine": "Plan your next break.",
+    "requestTimeOff": "Request time off"
+  },
+  "whosOut": {
+    "calendar": "Calendar",
+    "myTeam": "My team",
+    "everyone": "Everyone",
+    "whose": "Whose absences",
+    "outToday": "{count, plural, one {out today} other {out today}}",
+    "away": "Away",
+    "back": "back {date}",
+    "typeLine": "{type} · {back}",
+    "tooltip": "{type} · {dates}",
+    "upcoming": "Upcoming",
+    "noLeave": "No leave scheduled",
+    "emptyTitle": "Everyone is in today",
+    "emptyLine": "No one on your team is away.",
+    "emptyLineEveryone": "No one is away.",
+    "pending": "Pending",
+    "lane": "{name} · {type}{runsOff, select, yes {, back {back}} other {}}"
+  },
+  "thisWeek": {
+    "birthdayToday": "{name}’s birthday is today",
+    "joinsToday": "{name} joins today",
+    "anniversaryToday": "{name}: {count, plural, one {# year} other {# years}} at the company today",
+    "celebrationsToday": "{count, plural, one {# celebration today} other {# celebrations today}}",
+    "birthdaysToday": "{count, plural, one {# birthday today} other {# birthdays today}}",
+    "moreThisWeek": "+{count} more this week",
+    "laterThisWeek": "Later this week",
+    "nothingToday": "Nothing to celebrate today",
+    "nothingTodayComing": "Nothing today · coming up this week",
+    "comingUp": "Coming up this week →",
+    "birthday": "birthday",
+    "years": "{count, plural, one {# year} other {# years}}",
+    "joins": "joins",
+    "emptyTitle": "Nothing to celebrate this week",
+    "emptyLine": "Birthdays, work anniversaries and new joiners will show up here.",
+    "nothingWeek": "Nothing this week",
+    "rowWhat": " · {what}",
+    "listLine": "{name} · {what}",
+    "more": "+{count}"
   },
   "myTasks": {
-    "empty": "Nothing assigned to you.",
-    "forSubject": "For {name}",
-    "waiting": "Waiting · {date}"
+    "toDo": "to do",
+    "dueToday": "{count, plural, one {# due today} other {# due today}}",
+    "today": "Today",
+    "thisWeek": "This week",
+    "overdue": "Overdue",
+    "footer": "{open} open · {overdue} overdue · {done} done this week",
+    "markDone": "Mark {title} done",
+    "done": "Task done",
+    "from": "{when} · {from}",
+    "emptyTitle": "All caught up",
+    "emptyLine": "Nothing is assigned to you."
   },
   "processes": {
-    "empty": "No onboarding or preboarding in progress.",
+    "all": "All",
+    "allProcesses": "All processes",
+    "inProgress": "in progress",
+    "overdue": "{count, plural, one {# overdue} other {# overdue}}",
+    "progress": "{done}/{total}",
     "types": {
       "PREBOARDING": "Preboarding",
       "ONBOARDING": "Onboarding",
       "OFFBOARDING": "Offboarding"
     },
-    "progress": "{done}/{total} done",
-    "overdue": "{count} overdue"
+    "withOverdue": "{type} · {overdue}",
+    "startsOn": "{type} · starts {date}",
+    "chips": {
+      "onboarding": "{count} onboarding",
+      "offboarding": "{count} offboarding",
+      "startsNextWeek": "{count, plural, one {# starts next week} other {# start next week}}",
+      "overdue": "{count} overdue"
+    },
+    "emptyTitle": "Nothing in progress",
+    "emptyLine": "Onboarding and offboarding show up here once they start."
   },
-  "quickActions": {
-    "requestTimeOff": "Request time off",
-    "logTime": "Log time"
-  },
-  "holidays": {
-    "empty": "No public holidays ahead.",
-    "calendarFallback": "Holiday calendar",
-    "halfDay": "Half day"
-  },
-  "waitingOnYou": {
-    "aRequest": "A request",
-    "requests": "<name></name><rest> requests time off</rest>",
-    "asksToCancel": "<name></name><rest> asks to cancel time off</rest>",
-    "detail": "{dates} · {days}{forSomeone, select, yes { · for {name}} other {}}"
-  },
-  "whosOut": {
-    "openCalendar": "Open calendar",
-    "whose": "Whose absences",
-    "myTeam": "My team",
-    "everyone": "Everyone",
-    "thisWeek": "This week",
-    "noTeam": "You are not in a team or a department yet.",
-    "showEveryone": "Show everyone",
-    "emptyToday": "Everyone's in today.",
-    "emptyWeek": "Everyone's in for the rest of the week.",
-    "away": "Away",
-    "more": "And {count} more on the calendar."
+  "automations": {
+    "runs": "{count, plural, one {run} other {runs}}",
+    "runsThisWeek": "{count, plural, one {run this week} other {runs this week}}",
+    "thisWeekRuns": "This week · {count, plural, one {# run} other {# runs}}",
+    "failed": "{count} failed",
+    "failedToday": "{count} failed today",
+    "fixIt": "Fix it",
+    "next": "Next",
+    "nextLine": "{name} · {date}",
+    "allFine": "All ran fine",
+    "noFailures": "No failures this week.",
+    "dayTooltip": "{day} · {count, plural, one {# run} other {# runs}}",
+    "ranFine": "Ran fine",
+    "failedLabel": "Failed",
+    "skipped": "Skipped",
+    "emptyTitle": "No automations yet",
+    "emptyLine": "Let noddo do the routine work.",
+    "create": "Create automation",
+    "failureLine": "{name}: {reason}"
   }
 }

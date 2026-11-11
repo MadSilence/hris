@@ -1,0 +1,1924 @@
+# Edit home: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+
+## EF01-open
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+
+## EF02-all
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Who is away today or this week
+
+## EF03-size
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- From HR
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- From Legal
+- Due Fri, 20 Nov
+- Equipment handover
+- From IT
+- Due Mon, 23 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+
+## EF04-loading
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+
+## EF05-search
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- time off
+- 2 widgets
+- Your balance, what is booked and pending
+- Small
+- Medium
+- Large
+- On your home
+- A quiet countdown to your next day off
+
+## EF06-no-results
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- payroll
+- No results illustration
+- No widgets match “payroll”
+- Try another word.
+- Clear search
+
+## EF07-error
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Something went wrong: a ring broken into two arcs
+- Couldn’t load widgets
+- Your home is safe. Try again.
+- Try again
+
+## EF08-long
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature and approval
+- Contracts, policies and letters that HR or your manager sent you to read and sign before the due date
+- Small
+- Medium
+- Large
+- Your tasks from onboarding, offboarding and reviews
+- Everything assigned to you by processes and people, with the due date and what is overdue
+- On your home
+- A quiet countdown to your next day off
+
+## EF09-drag
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+
+## EF10-added
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- On your home
+- Tasks from processes and people, by due date
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+- “To sign” added
+- Undo
+
+## EF11-widget-size
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+
+## EF12-removed-light
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- Next time off
+- Dec
+- days to vacation
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+- “Next time off” removed
+- Undo
+
+## EF13-reset
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+- Home reset to default
+- Undo
+
+## EF14-discard
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+- Discard your changes?
+- Your home stays as it was.
+- Keep editing
+- Discard changes
+
+## EF15-saving
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Saving…
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+
+## EF16-saved
+
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- Ask, search or tell noddo what to do
+- Request time off
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Home saved
+
+## EF17-light
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out
+
+## EF18-narrow
+
+- Edit home
+- Try things out. Nothing changes until you press Save.
+- Cancel
+- Save
+- Header
+- Colour
+- Light
+- Reset to default
+- Waiting on you
+- Inbox
+- 1 of 3
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- vacation days
+- Personal
+- days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- Request time off
+- My time
+- Started 09:02
+- of 8h today
+- Finish the day
+- 3 breaks
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- Tue
+- Wed
+- Thu
+- Fri
+- Rūta · vacation
+- Lena · vacation
+- Tomas
+- Marius · parental leave, back 4 Jan
+- Next time off
+- Dec
+- days to vacation
+- This week
+- Marta’s birthday is today
+- Later this week
+- · 5 years
+- Ana
+- · joins
+- Jonas
+- · birthday
+- Sat
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes
+- All
+- Ana Silva
+- Onboarding
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- Automations
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+- Widgets
+- Search widgets
+- For me
+- Company
+- Pick a size, then drag the widget onto your home or click +
+- To sign
+- All documents
+- pending
+- Remote work policy
+- Due Fri, 13 Nov
+- Sign
+- NDA update
+- Due Fri, 20 Nov
+- Documents waiting for your signature
+- Small
+- Medium
+- Large
+- Tasks from processes and people, by due date
+- On your home
+- A quiet countdown to your next day off
+- Today’s hours, breaks and clock out

@@ -237,7 +237,8 @@
     "notifications": "Notifications",
     "twoStep": "Two-step sign-in",
     "sso": "Single sign-on",
-    "sessions": "Signed-in sessions"
+    "sessions": "Signed-in sessions",
+    "home": "Home"
   },
   "meta": {
     "description": "HR on templates — for teams of every size."
