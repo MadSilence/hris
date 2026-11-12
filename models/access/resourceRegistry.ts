@@ -26,6 +26,8 @@ const ALL_ACTIONS: AccessAction[] = ["VIEW", "EDIT", "MANAGE"];
 // offers BLOCK — the circle who may end someone's sign-in, which is usually smaller than MANAGE's.
 const PEOPLE_ACTIONS: AccessAction[] = ["VIEW", "EDIT", "MANAGE", "BLOCK"];
 const MANAGE_ONLY: AccessAction[] = ["MANAGE"];
+/** Read by everyone without a right (the company hub): only writing and running it are granted. */
+const EDIT_MANAGE: AccessAction[] = ["EDIT", "MANAGE"];
 const COMPANY_ONLY: AccessScope[] = ["COMPANY"];
 // Mirrors ResourceRegistry.ALL_SCOPES on the backend — resourceRegistry.test.ts fails if they drift.
 // CUSTOM must arrive with its filters (RA00006), and filters without CUSTOM are rejected (RA00007).
@@ -160,6 +162,18 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedActions: ALL_ACTIONS,
         supportedScopes: PERSONAL_SCOPES,
       },
+      {
+        code: "REPORTS.REPORT",
+        messageKey: "reportsReport",
+        supportedActions: ALL_ACTIONS,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "HUB.CONTENT",
+        messageKey: "hubContent",
+        supportedActions: EDIT_MANAGE,
+        supportedScopes: COMPANY_ONLY,
+      },
     ],
   },
   {
@@ -267,6 +281,12 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         code: "NOTIFICATION.DOCUMENTS",
         messageKey: "notificationDocuments",
+        supportedActions: MANAGE_ONLY,
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
+        code: "NOTIFICATION.COMPANY_NEWS",
+        messageKey: "notificationCompanyNews",
         supportedActions: MANAGE_ONLY,
         supportedScopes: COMPANY_ONLY,
       },

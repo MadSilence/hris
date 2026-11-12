@@ -68,9 +68,10 @@ const RecordFieldsView: FC<{ fields: ObjectFieldDef[]; record: ObjectRecord }> =
     {fields.map((f) => {
       const v = record[f.key];
       return (
-        <div key={f.key} className="flex gap-2 text-body">
+        // Wraps inside its cell: a label and a value wider than a half column pushed the profile into a sideways scroll.
+        <div key={f.key} className="flex min-w-0 flex-wrap gap-x-2 text-body">
           <dt className="text-tertiary">{f.labelKey ? t(f.labelKey) : f.label}:</dt>
-          <dd className="text-primary">{v == null ? "" : String(v)}</dd>
+          <dd className="min-w-0 break-words text-primary">{v == null ? "" : String(v)}</dd>
         </div>
       );
     })}

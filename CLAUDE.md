@@ -399,7 +399,12 @@ existing naming conventions.
   department and team canvases and the lifecycle template canvas
   (`components/modules/lifecycle/templates/canvas`). Positions on the template canvas are derived from
   the tasks, never stored. `next-intl` (2026-11-04) for the message catalogues, and
-  `@formatjs/icu-messageformat-parser` (dev) for the test that parses them.
+  `@formatjs/icu-messageformat-parser` (dev) for the test that parses them. TipTap (2026-11-12, the owner's CH5), for
+  the company hub's editors (`components/modules/hub/document`): `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`,
+  `@tiptap/starter-kit`, `@tiptap/extension-link`, `-table`, `-highlight`, `@tiptap/extensions` (placeholder) and
+  `@tiptap/suggestion` — **MIT only**: each package's licence was checked on install, and the paid or
+  collaboration-bound pieces (drag handle, slash commands) are written in the module instead, as is the image node (a
+  hub file id, never a `src`). A body is rendered from its JSON by `HubDocumentView`, never as HTML.
 - Do not break existing UI patterns
 - Do not bypass `InternalApiClient` with raw `fetch` in feature modules
 - Always match existing architecture in `components/modules/`

@@ -10,6 +10,8 @@ export const SEARCH_KIND_LABELS = {
   JOB: "kinds.jobs",
   TIME_OFF_POLICY: "kinds.timeOffPolicies",
   ROLE: "kinds.roles",
+  HUB_PAGE: "kinds.hubPages",
+  HUB_POST: "kinds.hubPosts",
 } as const satisfies Record<SearchKind, string>;
 
 /**
@@ -34,5 +36,9 @@ export const searchItemHref = (kind: SearchKind, item: SearchItem): string | nul
       return item.parentId ? `/settings/time/leave-type/${item.parentId}/policies/${item.id}` : null;
     case "ROLE":
       return `/settings/people/roles/${item.id}`;
+    case "HUB_PAGE":
+      return `/hub/handbook/${item.id}`;
+    case "HUB_POST":
+      return `/hub/news/${item.id}`;
   }
 };

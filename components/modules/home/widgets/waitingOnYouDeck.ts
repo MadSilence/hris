@@ -1,6 +1,7 @@
 import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
 import type { AutomationsWeekRun } from "@/models/home";
+import type { AgreementRow } from "@/models/hub";
 
 /**
  * One card of *Waiting on you* (`home-widgets` § 1). Only the kinds that have a module today (DECISIONS.md § "The home
@@ -13,6 +14,8 @@ export type DeckCard =
   | { key: string; group: "DECIDE"; kind: "AUTOMATION"; task: Task }
   | { key: string; group: "DO"; kind: "TASK"; task: Task }
   | { key: string; group: "DO"; kind: "REVIEW"; task: Task }
+  /** A must-read page waiting for the reader's yes (COMPANY_HUB_DESIGN.md U3): read on its page, never agreed here. */
+  | { key: string; group: "DO"; kind: "AGREE"; agreement: AgreementRow }
   | { key: string; group: "READ"; kind: "FAILED_RUN"; run: AutomationsWeekRun };
 
 export const REVIEW_KINDS = new Set<Task["kind"]>(["REVIEW", "NOMINATE_PEERS", "APPROVE_PEERS", "APPROVE_REVIEW"]);
@@ -22,6 +25,7 @@ export const cardKey = {
   timeOff: (id: string) => `time-off:${id}`,
   task: (id: string) => `task:${id}`,
   run: (id: string) => `run:${id}`,
+  agreement: (pageId: string) => `agree:${pageId}`,
 };
 
 /** The key a held write is kept under in Home's deferred queue — one per card that can be answered on Home. */
@@ -37,6 +41,23 @@ const byDueDate = (a: Task, b: Task) => {
   return a.title.localeCompare(b.title);
 };
 
+/** A Do card's date: a task's due date, a page's agree-by. None sorts last. */
+const dueOf = (card: DeckCard): string | null =>
+  card.kind === "AGREE" ? card.agreement.dueOn : card.kind === "TASK" || card.kind === "REVIEW" ? card.task.dueDate : null;
+
+/** Two lists already in due order, merged into one; on the same day the task comes first. */
+const mergeByDue = (tasks: DeckCard[], agreements: DeckCard[]): DeckCard[] => {
+  const out: DeckCard[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < tasks.length || j < agreements.length) {
+    if (j >= agreements.length) out.push(tasks[i++]);
+    else if (i >= tasks.length) out.push(agreements[j++]);
+    else out.push((dueOf(agreements[j]) ?? "9999") < (dueOf(tasks[i]) ?? "9999") ? agreements[j++] : tasks[i++]);
+  }
+  return out;
+};
+
 /**
  * The deck in its order: Decide (oldest first), then Do (by due date), then Read (newest first) — and behind them, in
  * the order they were skipped, the cards this person skipped. A card whose answer is being held for Undo is not in it.
@@ -45,6 +66,8 @@ export const buildDeck = (input: {
   requests: TimeOffRequest[];
   tasks: Task[];
   failedRuns: AutomationsWeekRun[];
+  /** The hub's pages waiting for the reader's yes (`GET /hub/agreements`, its `waiting` list). */
+  agreements?: AgreementRow[];
   skipped: readonly string[];
   held: ReadonlySet<string>;
   /** The held keys of tasks ticked done (My tasks shares them). */
@@ -64,7 +87,7 @@ export const buildDeck = (input: {
       .sort(byDueDate)
       .map((task): DeckCard => ({ key: cardKey.task(task.id), group: "DECIDE", kind: "AUTOMATION", task })),
   ];
-  const doing: DeckCard[] = input.tasks
+  const taskCards: DeckCard[] = input.tasks
     .filter((task) => task.kind !== "APPROVE_AUTOMATION" && task.status === "OPEN" && !input.heldTask(task.id))
     .sort(byDueDate)
     .map((task): DeckCard =>
@@ -72,6 +95,10 @@ export const buildDeck = (input: {
         ? { key: cardKey.task(task.id), group: "DO", kind: "REVIEW", task }
         : { key: cardKey.task(task.id), group: "DO", kind: "TASK", task },
     );
+  const agreeCards: DeckCard[] = [...(input.agreements ?? [])]
+    .sort((a, b) => (a.dueOn ?? "9999").localeCompare(b.dueOn ?? "9999"))
+    .map((agreement): DeckCard => ({ key: cardKey.agreement(agreement.pageId), group: "DO", kind: "AGREE", agreement }));
+  const doing = mergeByDue(taskCards, agreeCards);
   const reading: DeckCard[] = input.failedRuns.map((run): DeckCard => ({ key: cardKey.run(run.id), group: "READ", kind: "FAILED_RUN", run }));
 
   const all = [...decide, ...doing, ...reading];

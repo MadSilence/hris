@@ -10,6 +10,7 @@ import {
   FlashIcon,
   Home01Icon,
   InboxIcon,
+  Megaphone01Icon,
   Settings01Icon,
   StarIcon,
   UserGroupIcon,
@@ -90,6 +91,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     // Beside the inbox: where tasks assigned to me land, a preboarding's included once the person
     // registers (LIFECYCLE_PROCESSES.md § 5.3). Everyone has one.
     { label: t("menu.tasks"), href: "/tasks", icon: CheckListIcon },
+    // The company hub (COMPANY_HUB_DESIGN.md): everybody reads it; what each person sees is each item's audience.
+    { label: t("menu.hub"), href: "/hub", icon: Megaphone01Icon },
     { label: t("menu.organization"), href: "/organization/people", icon: UserGroupIcon, resources: ["PEOPLE.PROFILE"] },
     {
       label: t("menu.calendar"),

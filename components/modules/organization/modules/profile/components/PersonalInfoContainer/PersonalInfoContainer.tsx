@@ -471,12 +471,16 @@ export const PersonalInfoContainer: React.FC<PersonalInfoContainerProps> = ({ us
       : null;
 
   return (
-    <div className="grid h-full min-h-0 w-full grid-cols-[260px_1fr] gap-7 bg-page">
-        <PersonalInfoSidebar
-          sections={sections}
-          activeId={activeId || sections[0]?.id}
-          onSelect={(id) => scrollToId(id)}
-        />
+    // Below lg the section list gives its column back: beside a 260 px list the fields were squeezed into a box that
+    // cut their values and scrolled sideways (walk of 2026-11-12, a 900 px window).
+    <div className="grid h-full min-h-0 w-full grid-cols-1 gap-7 bg-page lg:grid-cols-[260px_1fr]">
+        <div className="hidden h-full min-h-0 lg:block">
+          <PersonalInfoSidebar
+            sections={sections}
+            activeId={activeId || sections[0]?.id}
+            onSelect={(id) => scrollToId(id)}
+          />
+        </div>
 
         <PersonalInfoAttributesList
           ref={scrollContainerRef}

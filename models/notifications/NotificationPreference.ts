@@ -9,4 +9,12 @@ export interface NotificationPreference {
   enabled: boolean;
   mandatory: boolean;
   canManage: boolean;
+  /** Something in this category is ever emailed. */
+  emailAvailable: boolean;
+  emailEnabled: boolean;
+  /** Nothing emailed in it may be switched off — what asks you to act, or is about the account, always goes. */
+  emailLocked: boolean;
 }
+
+/** The two channels a person chooses per category. */
+export type NotificationChannel = "IN_APP" | "EMAIL";

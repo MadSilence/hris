@@ -156,7 +156,8 @@
       "terminate": "Terminate employment",
       "deleteProfile": "Delete profile",
       "terminateFailed": "Failed to terminate employment.",
-      "deleteFailed": "Failed to delete the profile."
+      "deleteFailed": "Failed to delete the profile.",
+      "emails": "Emails sent"
     },
     "lifecycleNote": {
       "starts": "Starts {date}",
@@ -311,6 +312,28 @@
       "moduleReview": "Review",
       "showMore": "Show {count} more",
       "showLess": "Show less"
+    },
+    "emails": {
+      "title": "Emails to {name}",
+      "description": "The last emails noddo sent this person: subjects and what happened to them, never their text.",
+      "empty": "No emails yet.",
+      "suppressed": "Emails to {address} are not delivered: {reason, select, HARD_BOUNCE {the address bounced} SOFT_BOUNCES {it bounced three times in a week} COMPLAINT {they were marked as spam} other {the address is blocked}} on {date}.",
+      "lift": "Send to this address again",
+      "lifted": "Emails go to this address again.",
+      "columns": {
+        "subject": "Subject",
+        "status": "Status",
+        "date": "Date"
+      },
+      "status": {
+        "QUEUED": "Waiting",
+        "SENT": "Sent",
+        "DELIVERED": "Delivered",
+        "FAILED": "Failed",
+        "BOUNCED": "Bounced",
+        "COMPLAINED": "Marked as spam",
+        "SUPPRESSED": "Not sent"
+      }
     }
   },
   "documents": {

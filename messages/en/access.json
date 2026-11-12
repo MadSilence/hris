@@ -80,6 +80,14 @@
       "label": "Attendance",
       "description": "Timesheets. View reads them; Edit records your own days and exports; Manage records or corrects somebody else's."
     },
+    "reportsReport": {
+      "label": "Reports",
+      "description": "The reports tool. View opens reports shared with you; Edit creates, shares and exports them; Manage publishes snapshots outside the company. What a report shows still follows access to people and their data."
+    },
+    "hubContent": {
+      "label": "Company hub",
+      "description": "News and the handbook. Everyone reads what is meant for them; Edit writes posts and pages, sees who agreed and reminds; Manage runs the hub’s settings, pins and sections."
+    },
     "orgDepartment": {
       "label": "Departments",
       "description": "Department structure and membership."
@@ -139,6 +147,10 @@
     "notificationDocuments": {
       "label": "Documents",
       "description": "May mute notifications about documents added to their own file."
+    },
+    "notificationCompanyNews": {
+      "label": "Company news",
+      "description": "May mute the company hub’s news: posts sent to them and who missed a page’s deadline."
     },
     "notificationSystem": {
       "label": "System messages",

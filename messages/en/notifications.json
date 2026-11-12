@@ -41,13 +41,28 @@
     "DOCUMENTS": "Documents",
     "TASKS": "Tasks",
     "POLICIES": "Policies",
-    "SYSTEM": "System"
+    "SYSTEM": "System",
+    "COMPANY_NEWS": "Company news"
   },
   "preferences": {
     "mandatory": "Always on — required notifications can't be turned off.",
     "managed": "Managed by your organization — you can't opt out of this category.",
     "toggle": "Toggle {label}",
-    "empty": "No configurable categories yet."
+    "empty": "No configurable categories yet.",
+    "columns": {
+      "category": "Category",
+      "inApp": "In the app",
+      "email": "By email"
+    },
+    "emailLocked": "Always emailed — it asks you to act or is about your account.",
+    "emailNone": "Not emailed",
+    "emailFollowsInbox": "Turn the app on to get emails too.",
+    "toggleEmail": "Email for {label}",
+    "digest": {
+      "label": "Daily email",
+      "description": "Updates that don’t need you right away come together in one email a day, on working days.",
+      "at": "At {hour}"
+    }
   },
   "actions": {
     "approve": "Approve",
@@ -386,6 +401,37 @@
     "reviewSentBack": {
       "title": "Your review was sent back",
       "message": "Your review of {subject} in {cycle} was sent back with a comment. Change it and submit it again."
+    },
+    "hubAgreementRequested": {
+      "title": "A page needs your yes",
+      "message": "Read “{page}” and agree to version {version}{hasDue, select, yes { by {due}} other {}}."
+    },
+    "hubAgreementDueSoon": {
+      "title": "Agree soon",
+      "message": "“{page}”: agree to version {version}{hasDue, select, yes { by {due}} other {}}."
+    },
+    "hubAgreementReminded": {
+      "title": "A reminder to agree",
+      "message": "{hasActor, select, yes {{actor} reminds you} other {A reminder}} to read “{page}” and agree to version {version}{hasDue, select, yes { by {due}} other {}}."
+    },
+    "hubAgreementMissed": {
+      "title": "A must-read deadline was missed",
+      "message": "{single, select, yes {{person} did not agree to “{page}” by the deadline.} other {{count, plural, one {# person} other {# people}} on your team missed {pageCount, plural, one {the deadline of # page} other {the deadlines of # pages}}.}}"
+    },
+    "hubPostPublished": {
+      "title": "Company news",
+      "message": "{author} posted “{title}”."
     }
+  },
+  "unsubscribe": {
+    "title": "You won't get these emails",
+    "body": "{categories} emails are off. Your inbox still shows everything.",
+    "bodyNothing": "Nothing changed: these emails ask you to act or are about your account, so they always go.",
+    "working": "Switching them off…",
+    "undo": "Undo",
+    "undone": "These emails are back on.",
+    "settings": "Email settings",
+    "invalidTitle": "This link no longer works",
+    "invalidBody": "Sign in and change what you get by email in your notification settings."
   }
 }

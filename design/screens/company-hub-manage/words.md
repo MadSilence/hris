@@ -1,0 +1,315 @@
+# Manage hub: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+## CM01-overview
+
+- Company hub
+- Manage hub
+- New post
+- New page
+- Overview
+- Posts
+- Pages
+- Settings
+- Posts this month
+- 12
+- 4 more than in October
+- Drafts
+- 5
+- 1 post scheduled for 1 Dec
+- Must-read pages open
+- 3
+- 369 of 540 agreed
+- Missed the deadline
+- 14 people
+- Information security basics
+- All posts
+- We're moving to the new Vilnius office
+- Pinned · Vilnius
+- Published
+- Year-end: office closed 24 Dec – 1 Jan
+- Everyone · goes out 1 Dec
+- Scheduled
+- New benefits for 2027
+- Only you can see it
+- Draft
+- Must-read pages
+- All pages
+- Remote work policy
+- 142 of 180 agreed
+- Due 20 Nov
+- Remind 38
+- Code of conduct
+- 61 of 180 agreed
+- Due 30 Nov
+- Remind 119
+- 166 of 180 agreed
+- Deadline was 10 Nov
+- Remind 14
+
+## CM02-posts
+
+- Company hub
+- Manage hub
+- New post
+- Overview
+- Posts
+- Pages
+- Settings
+- All · 18
+- Published · 12
+- Scheduled · 1
+- Drafts · 5
+- Search posts
+- We're moving to the new Vilnius office
+- Marta Kowalska · Vilnius · pinned
+- Published
+- 10 Nov
+- More  _(accessible name)_
+- Year-end: office closed 24 Dec – 1 Jan
+- Marta Kowalska · Everyone
+- 1 Dec, 9:00
+- 11 Nov
+- New benefits for 2027
+- Marta Kowalska · only you can see it
+- Draft
+- Today
+- Q4 kickoff: three goals for the sales team
+- Tomas Petrauskas · Sales
+- 7 Nov
+
+## CM03-pages
+
+- Company hub
+- Manage hub
+- New page
+- Overview
+- Posts
+- Pages
+- Settings
+- 10 sections · 62 pages · drag to reorder or move into another section
+- Search pages
+- Page
+- Owner
+- Must read
+- Updated
+- Policies
+- 8 pages
+- Add a page to this section  _(accessible name)_
+- Section options  _(accessible name)_
+- Remote work policy
+- MK
+- Marta
+- 142 of 180 agreed
+- 3 Nov
+- More  _(accessible name)_
+- Code of conduct
+- 61 of 180 agreed
+- 1 Nov
+- Time off rules
+- JS
+- Julia
+- —
+- 12 Oct
+- 5 more pages
+- Guides
+- 12 pages
+- Offices
+- 3 pages
+- Tools
+- 6 pages
+- 2 must-read
+- Benefits
+- 5 pages
+- New section
+
+## CM04-settings
+
+- Company hub
+- Manage hub
+- Overview
+- Posts
+- Pages
+- Settings
+- Who can post and edit pages
+- HR
+- HR team
+- TL
+- Team leads
+- Add a person or a role
+- Team leads can post only to their own team. Everyone else reads.
+- Must-read pages
+- Remind people before the deadline
+- By email and in the inbox
+- 3 days before
+- Tell the manager when someone misses it
+- The day after the deadline
+- Tell the manager  _(accessible name)_
+- New hires get must-read pages in onboarding
+- As a task in their first week
+- New hires  _(accessible name)_
+- Celebrations
+- Show celebrations  _(accessible name)_
+- Birthdays
+- Work anniversaries
+- New joiners
+- People can still hide their own birthday in their preferences.
+- News
+- Show the latest news on Home
+- In the Company news widget
+- Show news on Home  _(accessible name)_
+- Changes save automatically.
+
+## CM05-new-post
+
+- Company hub
+- Manage hub
+- New post
+- Overview
+- Posts
+- Pages
+- Settings
+- New post  _(accessible name)_
+- Close  _(accessible name)_
+- Add a cover image
+- (optional)
+- Title
+- We're moving to the new Vilnius office on 1 December
+- Text
+- Bold  _(accessible name)_
+- B
+- Heading  _(accessible name)_
+- H
+- List  _(accessible name)_
+- Link  _(accessible name)_
+- Link a handbook page
+- Desks are booked by team, and the move day is a day off for everyone in Vilnius.
+- Pack your desk into the labelled box by Friday. Laptops go home with you over the weekend.
+- Who sees it
+- Office is Vilnius
+- Add filter
+- 64 people · new hires in Vilnius see it too
+- Pin to the top
+- Pin to the top  _(accessible name)_
+- Show on Home
+- Show on Home  _(accessible name)_
+- Save draft
+- Schedule
+- Publish
+
+## CM06-page-editor
+
+- Pages
+- /
+- Policies
+- Saved 14:02 CET
+- Unpublished changes
+- Preview
+- Publish version 3
+- Change icon  _(accessible name)_
+- Remote work policy
+- Section
+- Owner
+- MK
+- Marta Kowalska
+- Who sees it
+- Everyone at Acme
+- Must read
+- Must read  _(accessible name)_
+- People read it and agree to it
+- Agree by
+- 20 Nov 2026
+- Turn it off for pages that are only for reference, like guides or office info.
+- Where you can work from
+- You can work from home or any office, any day, as long as your team knows where to find you. You can work from abroad for up to 30 days a year.
+- Type / for headings, lists, images and links to other pages
+
+## CM07-who-sees-it
+
+- Pages
+- /
+- Policies
+- Preview
+- Publish version 3
+- Remote work policy
+- Who sees this page  _(accessible name)_
+- Who sees this page
+- Close  _(accessible name)_
+- Everyone
+- Filter people
+- Choose people
+- People who match all of these
+- Office
+- is
+- Vilnius
+- Warsaw
+- Remove filter  _(accessible name)_
+- Legal entity
+- Acme UAB
+- Add filter
+- Also add
+- (optional)
+- DM
+- Daniel Meyer
+- TL
+- Role: Team lead
+- Search people or roles
+- LN
+- RB
+- AJ
+- 118 people
+- · new people who match join automatically
+- See who
+- Cancel
+- Apply
+
+## CM08-who-agreed
+
+- Manage hub
+- /
+- Pages
+- Remote work policy
+- Who agreed
+- Remote work policy · version 3 · due 20 Nov
+- Edit page
+- Remind 38 people
+- 142
+- of 180 agreed
+- 38
+- not yet · 21 agreed to version 2
+- 4
+- new hires · get it as an onboarding task
+- Not yet · 38
+- Agreed · 142
+- Department
+- Office
+- Legal entity
+- Search people
+- Export  _(accessible name)_
+- Name
+- Last agreed
+- Reminded
+- AJ
+- Andrius Jankauskas
+- Engineering
+- Vilnius
+- Version 2 · 4 Mar
+- 10 Nov
+- KW
+- Katarzyna Wiśniewska-Kowalczyk
+- Sales
+- Warsaw
+- Version 2 · 2 Mar
+- RB
+- Rūta Balčiūnaitė
+- Customer success
+- —
+- DM
+- Daniel Meyer
+- Remote
+- Version 1 · 20 Jan 2025
+- OS
+- Olena Shevchenko
+- Finance
+- 1–5 of 38

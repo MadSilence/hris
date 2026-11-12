@@ -7,7 +7,9 @@
     "legalEntities": "Юрлица",
     "jobs": "Должности",
     "timeOffPolicies": "Политики отсутствий",
-    "roles": "Роли"
+    "roles": "Роли",
+    "hubPages": "Страницы справочника",
+    "hubPosts": "Новости компании"
   },
   "pages": {
     "goTo": "Перейти",

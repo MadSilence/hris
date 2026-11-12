@@ -11,6 +11,9 @@ export const SEARCH_KINDS = [
   "JOB",
   "TIME_OFF_POLICY",
   "ROLE",
+  // The company hub (COMPANY_HUB_DESIGN.md § 9): pages and posts the reader may see; no right needed.
+  "HUB_PAGE",
+  "HUB_POST",
 ] as const;
 
 export type SearchKind = (typeof SEARCH_KINDS)[number];

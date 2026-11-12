@@ -20,3 +20,18 @@ The owner answered the places where the design asked owner rules to give way (`(
 - **The birthday choice moves to the person**: a switch in their own preferences, on by default, instead of Settings → General → Home. It is not drawn.
 Recommended: the designers fill the space My time leaves in the defaults and the finished frames, and draw the preferences switch; the code builds the rest meanwhile from the specs as they are, leaving those two widgets out.
 **Blocks:** nothing
+
+## Q-9 — Who can manage the hub · company-hub, company-hub-manage · from designers · 2026-11-12
+**Answered by the owner (CH2, CH4):** HR only in v1 — no team-lead mode yet (scoped authors come later); the right is granted in Manage hub → Settings, "Who can post and edit pages".
+
+## Q-10 — What the hub's ask box answers from · company-hub, company-hub-page · from designers · 2026-11-12
+**Answered by the owner:** as recommended — Pages and News from the hub's search over what the person may see; Ask noddo is Home's stub until the assistant exists.
+
+## Q-11 — How "What changed" is made · company-hub-page, company-hub-manage · from designers · 2026-11-12
+**Answered by the owner:** in v1 the editor writes the points in the publish dialog, with no "Drafted by AI" label; points drafted by the assistant come later, with the assistant.
+
+## Q-12 — A widget required for everyone on Home · company-hub-manage, home, home-edit · from designers · 2026-11-12
+**Answered by the owner:** deferred to the next Home round; `showOnHome` is stored on posts from the start and the toggle stays hidden.
+
+## Q-13 — What "For me" means in News · company-hub · from designers · 2026-11-12
+**Answered by the owner:** as recommended — For me is a narrowed audience that includes the reader; Everyone is everything they may see; the last choice is kept.

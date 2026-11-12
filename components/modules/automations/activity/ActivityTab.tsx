@@ -98,7 +98,8 @@ export const ActivityTab: React.FC<{
   };
 
   const toolbar = (
-    <div className="flex items-center justify-between gap-4">
+    // Wraps rather than overlaps: beside an open run the column is narrow, and "Open in editor" sat on the pill.
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div className="flex min-w-0 items-center gap-3">
         <SearchBox value={search} onChange={setSearch} />
         <Popover>

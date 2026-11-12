@@ -331,6 +331,39 @@
   --text-home-sentence-l: 24px;
   --text-home-sentence-l--line-height: 28px;
 
+  /* The company hub only (company-hub specs, Changes to SPEC; CH7): its page titles, a document's title, the two
+     column headings, reading text, and its big numbers. */
+  --text-hub-title: 32px;
+  --text-hub-title--line-height: 40px;
+  --text-hub-title--letter-spacing: -0.02em;
+  --text-hub-title--font-weight: 600;
+  --text-hub-doc-title: 36px;
+  --text-hub-doc-title--line-height: 44px;
+  --text-hub-doc-title--letter-spacing: -0.02em;
+  --text-hub-doc-title--font-weight: 600;
+  --text-hub-heading: 22px;
+  --text-hub-heading--line-height: 28px;
+  --text-hub-heading--letter-spacing: -0.01em;
+  --text-hub-heading--font-weight: 600;
+  --text-hub-reading: 15px;
+  --text-hub-reading--line-height: 26px;
+  --text-hub-stat: 36px;
+  --text-hub-stat--line-height: 36px;
+  --text-hub-stat--letter-spacing: -0.02em;
+  --text-hub-stat--font-weight: 500;
+  --text-hub-celebration: 36px;
+  --text-hub-celebration--line-height: 40px;
+  --text-hub-celebration--letter-spacing: -0.02em;
+  --text-hub-celebration--font-weight: 500;
+  --text-hub-cover: 48px;
+  --text-hub-cover--line-height: 48px;
+  --text-hub-cover--letter-spacing: -0.02em;
+  --text-hub-cover--font-weight: 500;
+  --text-hub-hero: 52px;
+  --text-hub-hero--line-height: 52px;
+  --text-hub-hero--letter-spacing: -0.02em;
+  --text-hub-hero--font-weight: 500;
+
   /* Motion (SPEC § 11) */
   --ease-standard: var(--ease-standard);
   --ease-exit: var(--ease-exit);
@@ -512,3 +545,37 @@
   to { box-shadow: 0 0 0 3px transparent; }
 }
 [data-just-added="true"] { animation: widget-added 1500ms var(--ease-standard) forwards; }
+
+/* The company hub's editors (TipTap, CH5): the rich text of a post (CM05) and a page's block editor (CM06). The
+   editor writes plain HTML, so its blocks are styled here rather than by classes; the reader's view is drawn from
+   the JSON with classes of its own (`HubDocumentView`). */
+.hub-prose > * + * { margin-top: 12px; }
+.hub-prose-page > * + * { margin-top: 16px; }
+.hub-prose h1, .hub-prose h2 {
+  font-family: var(--font-heading);
+  font-size: 18px; line-height: 26px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.hub-prose h3 { font-size: 15px; line-height: 22px; font-weight: 600; color: var(--text-primary); }
+.hub-prose ul { list-style: disc; padding-left: 24px; }
+.hub-prose ol { list-style: decimal; padding-left: 24px; }
+.hub-prose li + li { margin-top: 4px; }
+.hub-prose strong { font-weight: 600; color: var(--text-primary); }
+/* No italics in the system (SPEC § 5): the schema keeps the mark, and it is drawn upright here and in the view. */
+.hub-prose em { font-style: normal; }
+.hub-prose a { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; }
+.hub-prose mark { background: var(--accent-muted); border-radius: var(--radius-tag); padding: 0 2px; color: inherit; }
+.hub-prose blockquote { border-left: 2px solid var(--border-strong); padding-left: 16px; }
+.hub-prose hr { border: 0; border-top: 1px solid var(--border-divider); margin: 20px 0; }
+.hub-prose img.hub-image { max-width: 100%; border-radius: var(--radius-card); }
+.hub-prose table { width: 100%; border-collapse: collapse; }
+.hub-prose th, .hub-prose td { border: 1px solid var(--border-divider); padding: 8px 12px; vertical-align: top; }
+.hub-prose th { background: var(--surface-subtle); font-weight: 500; text-align: left; }
+.hub-prose .ProseMirror-selectednode { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-tag); }
+.hub-prose .is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-tertiary);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

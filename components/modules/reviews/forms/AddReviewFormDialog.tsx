@@ -87,7 +87,9 @@ export function AddReviewFormDialog({ open, onCloseAction, onAddedAction, existi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [application.data]);
 
-  const previewItem = preview.data?.parts.flatMap((p) => p.items).find((i) => i.type === "FORM") ?? null;
+  // Only while a template is chosen: the preview keeps its last answer after a switch back to Blank, and "Added here
+  // before" then opened the old form instead of creating the blank one (walk of 2026-11-12).
+  const previewItem = template ? preview.data?.parts.flatMap((p) => p.items).find((i) => i.type === "FORM") ?? null : null;
   const addedBefore = previewItem?.outcome === "EXISTING"
     ? existingForms.find((f) => f.name === previewItem.existingName) ?? null
     : null;

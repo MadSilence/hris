@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { PersonEmailsModal } from "@/components/modules/email/components";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { DeleteProfileModal } from "./modals/DeleteProfileModal";
@@ -89,6 +90,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [startType, setStartType] = useState<ProcessType | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEmailsOpen, setIsEmailsOpen] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isLifecycleBusy, setIsLifecycleBusy] = useState(false);
   const [lifecycleError, setLifecycleError] = useState<string | null>(null);
@@ -473,6 +475,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                         : t("profile.header.terminate")}
                   </RowAction>
                 )}
+                {canManageProfiles && !isOwnProfile && !isDraft && (
+                  <RowAction icon={<Icon icon={Mail01Icon} size="sm" />} onClick={() => setIsEmailsOpen(true)}>
+                    {t("profile.header.emails")}
+                  </RowAction>
+                )}
                 {canManageProfiles && !isOwnProfile && (
                   <RowActionDestructive
                     icon={<Icon icon={Delete02Icon} size="sm" />}
@@ -524,6 +531,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         accountLocked={isLocked}
         onCloseAction={() => setAccountAccess(null)}
         onChangedAction={() => refreshUser(user.id)}
+      />
+      <PersonEmailsModal
+        userId={user.id}
+        fullName={fullName}
+        open={isEmailsOpen}
+        onCloseAction={() => setIsEmailsOpen(false)}
       />
 
       <ChangePasswordModal

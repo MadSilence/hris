@@ -180,14 +180,19 @@
       "automation": "Одобрение автоматизации",
       "task": "Задача",
       "review": "Ревью",
-      "failedRun": "Сбой автоматизации"
+      "failedRun": "Сбой автоматизации",
+      "agree": "Страница для согласия"
     },
     "toasts": {
       "approved": "Отпуск одобрен",
       "cancellationApproved": "Отмена одобрена",
       "automationApproved": "Ответ отправлен",
       "taskDone": "Задача выполнена"
-    }
+    },
+    "agreeWaits": "Страница ждёт вашего согласия",
+    "agreeBy": "Согласиться до {date}",
+    "agreeOverdue": "Срок был {date}",
+    "read": "Читать"
   },
   "timeOff": {
     "link": "Мои отсутствия",

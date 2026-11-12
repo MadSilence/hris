@@ -27,6 +27,7 @@ import reviews from "./reviews.json";
 import settings from "./settings.json";
 import peopleImport from "./peopleImport.json";
 import structure from "./structure.json";
+import hub from "./hub.json";
 
 const ru: DeepPartial<typeof import("@/messages/en").default> = {
   common,
@@ -52,6 +53,7 @@ const ru: DeepPartial<typeof import("@/messages/en").default> = {
   settings,
   peopleImport,
   structure,
+  hub,
 };
 
 export default ru;

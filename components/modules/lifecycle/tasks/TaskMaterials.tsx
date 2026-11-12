@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Attachment01Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -21,7 +22,16 @@ export function TaskMaterials({ materials, onOpenFile }: {
     <ul className="mt-2 flex flex-wrap gap-2" aria-label={t("materials.list")}>
       {materials.map((m, i) => (
         <li key={`${m.fileId ?? m.url}-${i}`}>
-          {m.type === "LINK" && m.url ? (
+          {m.type === "LINK" && m.url && isInAppPath(m.url) ? (
+            // A path inside the app — the hub's onboarding task links its must-read pages this way (CH6).
+            <Link
+              href={m.url}
+              className="inline-flex items-center gap-1 rounded-tag border border-divider px-2 py-1 text-hint no-underline hover:bg-subtle"
+            >
+              <Icon icon={LinkSquare02Icon} size="sm" />
+              {m.name ?? m.url}
+            </Link>
+          ) : m.type === "LINK" && m.url ? (
             <a
               href={m.url}
               target="_blank"
@@ -46,6 +56,9 @@ export function TaskMaterials({ materials, onOpenFile }: {
     </ul>
   );
 }
+
+/** A relative path inside the app ("/hub/handbook/…"), opened in place; never "//host", which leaves the app. */
+export const isInAppPath = (url: string): boolean => url.startsWith("/") && !url.startsWith("//");
 
 /** Saves a fetched file under its own name — the shape both surfaces end in. */
 export const saveBlob = (blob: Blob, name: string) => {

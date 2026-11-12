@@ -9,6 +9,7 @@ import {
   ArrowLeft01Icon,
   Calendar03Icon,
   CancelCircleIcon,
+  FileTextIcon,
   FlashIcon,
   StarIcon,
   TaskDone01Icon,
@@ -35,6 +36,7 @@ import { lifecycleQueryKeys, useMyTasks } from "@/components/modules/lifecycle/h
 import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import { automationsHref } from "@/components/modules/automations/list";
 import { useRunWords } from "@/components/modules/automations/runs";
+import { useMyAgreements } from "@/components/modules/hub/hooks";
 import { ago } from "@/components/modules/home/utils/ago";
 import { useAutomationsWeek, useSaveHomeSettings } from "@/components/modules/home/hooks";
 import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/modules/home/deferred";
@@ -63,6 +65,7 @@ const KIND_ICON: Record<DeckCard["kind"], IconSvgElement> = {
   AUTOMATION: FlashIcon,
   TASK: TaskDone01Icon,
   REVIEW: StarIcon,
+  AGREE: FileTextIcon,
   FAILED_RUN: CancelCircleIcon,
 };
 
@@ -95,6 +98,8 @@ const useDeck = () => {
   const requests = useAwaitingMe(canSeeLeave);
   const tasks = useMyTasks(false);
   const week = useAutomationsWeek(canSeeAutomations);
+  // Pages waiting for this person's yes (U3) — everybody's: reading the hub needs no right.
+  const agreements = useMyAgreements();
   const held = usePendingWrites();
   const save = useSaveHomeSettings();
   const [skipped, setSkipped] = useState<string[]>([]);
@@ -109,11 +114,12 @@ const useDeck = () => {
         requests: requests.data ?? [],
         tasks: tasks.data ?? [],
         failedRuns: week.data?.failedToday ?? [],
+        agreements: agreements.data?.waiting ?? [],
         skipped,
         held,
         heldTask: (id) => held.has(taskDoneKey(id)),
       }),
-    [requests.data, tasks.data, week.data, skipped, held],
+    [requests.data, tasks.data, week.data, agreements.data, skipped, held],
   );
 
   const skip = (key: string) => {
@@ -191,6 +197,8 @@ const hrefOf = (card: DeckCard) => {
       return card.task.kind === "REVIEW" ? `/reviews/write/by-task/${card.task.id}` : `/reviews/steps/by-task/${card.task.id}`;
     case "FAILED_RUN":
       return automationsHref.seeWhy(card.run.ruleId, card.run.id);
+    case "AGREE":
+      return `/hub/handbook/${card.agreement.pageId}`;
     default:
       return "/tasks";
   }
@@ -328,6 +336,21 @@ const DecisionCard: React.FC<{
           <Link href={hrefOf(card)}>{t("waitingOnYou.start")}</Link>
         </Button>
       );
+  } else if (card.kind === "AGREE") {
+    // No agreeing from Home: the person has to read the page first (U3).
+    const agreement = card.agreement;
+    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.agreeWaits")}</span>;
+    main = agreement.title;
+    under = agreement.overdue ? (
+      <p className="truncate text-label text-status-declined-text">{t("waitingOnYou.agreeOverdue", { date: dates.date(agreement.dueOn) })}</p>
+    ) : agreement.dueOn ? (
+      <p className="truncate text-label text-secondary">{t("waitingOnYou.agreeBy", { date: dates.date(agreement.dueOn, { weekday: true }) })}</p>
+    ) : null;
+    actions = (
+      <Button asChild size="sm" tabIndex={tab}>
+        <Link href={hrefOf(card)}>{t("waitingOnYou.read")}</Link>
+      </Button>
+    );
   } else {
     who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.runFailed")}</span>;
     main = card.run.ruleName ?? "";
@@ -535,14 +558,22 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
   const dates = useShortDates();
   const leave = card.kind === "TIME_OFF" || card.kind === "CANCELLATION";
   const context = useDecisionContext(leave ? card.request.id : null);
-  const name = leave ? context.data?.requesterName ?? t("card.unnamed") : card.kind === "FAILED_RUN" ? card.run.ruleName ?? "" : card.task.title;
+  const name = leave
+    ? context.data?.requesterName ?? t("card.unnamed")
+    : card.kind === "FAILED_RUN"
+      ? card.run.ruleName ?? ""
+      : card.kind === "AGREE"
+        ? card.agreement.title
+        : card.task.title;
   const line = leave
     ? t("waitingOnYou.rowLine", {
         days: tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount)),
         type: t(`waitingOnYou.kinds.${card.kind === "CANCELLATION" ? "cancellation" : "timeOff"}`),
         dates: dates.range(card.request.startDate, card.request.endDate),
       })
-    : t(`waitingOnYou.kinds.${card.kind === "FAILED_RUN" ? "failedRun" : card.kind === "AUTOMATION" ? "automation" : card.kind === "REVIEW" ? "review" : "task"}`);
+    : card.kind === "AGREE"
+      ? t("waitingOnYou.kinds.agree")
+      : t(`waitingOnYou.kinds.${card.kind === "FAILED_RUN" ? "failedRun" : card.kind === "AUTOMATION" ? "automation" : card.kind === "REVIEW" ? "review" : "task"}`);
   return (
     <li>
       <Link

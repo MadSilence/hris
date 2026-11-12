@@ -1,5 +1,5 @@
 import { hrisApiNotificationsClient } from "@/api/modules/notifications/clients";
-import type { Notification, NotificationPreference } from "@/models/notifications";
+import type { Notification, NotificationChannel, NotificationPreference } from "@/models/notifications";
 
 export class HrisNotificationsService {
   public async list(): Promise<Notification[]> {
@@ -34,8 +34,8 @@ export class HrisNotificationsService {
     return hrisApiNotificationsClient.listPreferences();
   }
 
-  public async setPreference(category: string, enabled: boolean): Promise<void> {
-    return hrisApiNotificationsClient.setPreference(category, enabled);
+  public async setPreference(category: string, enabled: boolean, channel: NotificationChannel = "IN_APP"): Promise<void> {
+    return hrisApiNotificationsClient.setPreference(category, enabled, channel);
   }
 }
 

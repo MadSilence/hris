@@ -1,5 +1,6 @@
 import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
+import type { AgreementRow } from "@/models/hub";
 import { partialMock } from "@/test/types";
 import { buildDeck, cardKey, skipCard, writeKey } from "./waitingOnYouDeck";
 
@@ -48,6 +49,13 @@ describe("Waiting on you, the deck", () => {
     const deck = deckOf({ held: new Set([writeKey.timeOff("early")]), heldTask: (id) => id === "t-soon" });
     expect(deck.map((c) => c.key)).not.toContain("time-off:early");
     expect(deck.map((c) => c.key)).not.toContain("task:t-soon");
+  });
+
+  it("puts a page waiting for the reader's yes among the things to do, by its agree-by date", () => {
+    const agreement = partialMock<AgreementRow>({ pageId: "p1", title: "Travel policy", dueOn: "2026-11-14", overdue: false });
+    const deck = deckOf({ agreements: [agreement] });
+    expect(deck.filter((c) => c.group === "DO").map((c) => c.key)).toEqual(["task:t-soon", "agree:p1", "task:review", "task:t-later"]);
+    expect(deck.find((c) => c.kind === "AGREE")).toMatchObject({ key: cardKey.agreement("p1"), agreement });
   });
 
   it("skipping sends the card last and forgets keys that are no longer in the deck", () => {

@@ -826,6 +826,46 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         href: n.targetId ? `/reviews/write/${str(n.targetId)}` : "/reviews/me",
       };
     }
+    // The company hub (COMPANY_HUB_DESIGN.md § 8): a must-read page asks, reminds and is missed; a post goes out.
+    case "HUB_AGREEMENT_REQUESTED":
+    case "HUB_AGREEMENT_DUE_SOON":
+    case "HUB_AGREEMENT_REMINDED": {
+      const key =
+        n.type === "HUB_AGREEMENT_REQUESTED" ? "hubAgreementRequested" : n.type === "HUB_AGREEMENT_DUE_SOON" ? "hubAgreementDueSoon" : "hubAgreementReminded";
+      return {
+        title: t(`presenter.${key}.title`),
+        message: t(`presenter.${key}.message`, {
+          page: str(p.pageTitle),
+          version: str(p.version),
+          ...dueOn(p.dueOn, language),
+          ...by(p),
+        }),
+        icon: FileTextIcon,
+        href: str(p.pageId) ? `/hub/handbook/${str(p.pageId)}` : "/hub/to-agree",
+      };
+    }
+    case "HUB_AGREEMENT_MISSED": {
+      const count = Number(p.count) || 0;
+      return {
+        title: t("presenter.hubAgreementMissed.title"),
+        message: t("presenter.hubAgreementMissed.message", {
+          single: yesNo(count === 1 && Boolean(str(p.personName)) && Boolean(str(p.pageTitle))),
+          person: str(p.personName),
+          page: str(p.pageTitle),
+          count,
+          pageCount: Number(p.pageCount) || 1,
+        }),
+        icon: Alert02Icon,
+        href: "/hub/manage",
+      };
+    }
+    case "HUB_POST_PUBLISHED":
+      return {
+        title: t("presenter.hubPostPublished.title"),
+        message: t("presenter.hubPostPublished.message", { author: str(p.authorName) || t("fallback.aPerson"), title: str(p.postTitle) }),
+        icon: Notification01Icon,
+        href: str(p.postId) ? `/hub/news/${str(p.postId)}` : "/hub/news",
+      };
     default:
       return {
         // An unknown type shows its own code, humanised — there is no text for it to translate.
@@ -844,6 +884,7 @@ const CATEGORY_KEYS = {
   TASKS: "categories.TASKS",
   POLICIES: "categories.POLICIES",
   SYSTEM: "categories.SYSTEM",
+  COMPANY_NEWS: "categories.COMPANY_NEWS",
 } as const;
 
 /** Friendly label for a notification category (falls back to a humanized key for unknown ones). */

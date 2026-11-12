@@ -5,7 +5,7 @@ import type {
   UnreadCountDTO,
 } from "@/api/modules/notifications/dto";
 import { notificationMapper } from "@/api/modules/notifications/mappers";
-import type { Notification, NotificationPreference } from "@/models/notifications";
+import type { Notification, NotificationChannel, NotificationPreference } from "@/models/notifications";
 
 export class HrisApiNotificationsClient {
   private readonly PATH = "/notifications";
@@ -47,8 +47,8 @@ export class HrisApiNotificationsClient {
     return notificationMapper.mapPreferenceDTOs(dtos);
   }
 
-  public async setPreference(category: string, enabled: boolean): Promise<void> {
-    await hrisApiClient.put<void>(`${this.PATH}/preferences/${category}`, { enabled });
+  public async setPreference(category: string, enabled: boolean, channel: NotificationChannel = "IN_APP"): Promise<void> {
+    await hrisApiClient.put<void>(`${this.PATH}/preferences/${category}/${channel}`, { enabled });
   }
 }
 

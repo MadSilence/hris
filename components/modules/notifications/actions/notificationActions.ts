@@ -3,6 +3,7 @@
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { toActionError } from "@/lib/errors/withActionError";
 import { hrisNotificationsService } from "@/api/modules/notifications/services";
+import type { NotificationChannel } from "@/models/notifications";
 
 type ActionResult = {
   status: ActionStatus;
@@ -47,9 +48,10 @@ export async function deleteNotificationAction(id: string): Promise<ActionResult
 export async function setNotificationPreferenceAction(
   category: string,
   enabled: boolean,
+  channel: NotificationChannel = "IN_APP",
 ): Promise<ActionResult> {
   return run(
-    () => hrisNotificationsService.setPreference(category, enabled),
+    () => hrisNotificationsService.setPreference(category, enabled, channel),
     "setNotificationPreferenceAction",
   );
 }

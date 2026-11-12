@@ -178,7 +178,8 @@
       "automation": "Automation approval",
       "task": "Task",
       "review": "Review",
-      "failedRun": "Failed automation"
+      "failedRun": "Failed automation",
+      "agree": "A page to agree to"
     },
     "toasts": {
       "approved": "Time off approved",
@@ -187,7 +188,11 @@
       "taskDone": "Task done"
     },
     "runLine": "{hasPerson, select, yes {About {person}. } other {}}{reason}",
-    "rowLine": "{type} · {days} · {dates}"
+    "rowLine": "{type} · {days} · {dates}",
+    "agreeWaits": "A page needs your yes",
+    "agreeBy": "Agree by {date}",
+    "agreeOverdue": "It was due {date}",
+    "read": "Read"
   },
   "timeOff": {
     "link": "My time off",

@@ -169,4 +169,25 @@ describe("AddReviewFormDialog with a library form added before", () => {
     await waitFor(() => expect(onAdded).toHaveBeenCalledWith({ id: "form-3" }));
     expect(mutateAsync).not.toHaveBeenCalled();
   });
+
+  // The preview keeps its last answer after a switch back to Blank (react-query's previous data); the dialog then
+  // opened the old Self Review instead of creating the named blank form (walk of 2026-11-12).
+  it("creates the blank form after a look at the library's, not the old copy", async () => {
+    previewMock.mockReturnValue(partialMock<ReturnType<typeof useTemplatePreview>>({
+      data: previewOf("Self review", { outcome: "EXISTING", existingName: "Self review" }), isLoading: false,
+    }));
+    saveMock.mockResolvedValue({ status: ActionStatus.SUCCESS, data: { ...created, id: "form-new", name: "Walk blank" } });
+    const onAdded = jest.fn();
+    render(<AddReviewFormDialog open onCloseAction={jest.fn()} onAddedAction={onAdded}
+      existingForms={[{ id: "form-3", name: "Self review" }]} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Self review/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /Blank form/ }));
+    fireEvent.change(screen.getByLabelText(/Name/), { target: { value: "Walk blank" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+
+    await waitFor(() => expect(saveMock).toHaveBeenCalledWith({ id: null, body: { name: "Walk blank", description: null, questions: [] } }));
+    expect(onAdded).toHaveBeenCalledWith(expect.objectContaining({ id: "form-new" }));
+    expect(onAdded).not.toHaveBeenCalledWith({ id: "form-3" });
+  });
 });

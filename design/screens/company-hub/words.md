@@ -1,0 +1,137 @@
+# Company hub: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+## CH01-hub-home
+
+- Company hub
+- 7
+- Pages need your yes
+- Nearest by 20 Nov
+- Saved · 4
+- Ask about policies, offices, benefits — or search news
+- Ask  _(accessible name)_
+- IM
+- Happy birthday, Ieva
+- Today · Engineering
+- 5
+- years with Andrius
+- Today · Sales
+- AJ
+- RB
+- KW
+- +1
+- Welcome to the team
+- Rūta, Kasia, Ieva joined
+- News
+- For me
+- Everyone
+- All news
+- 1 Dec
+- New Vilnius office
+- Pinned
+- We're moving to the new Vilnius office on 1 December
+- Desks are booked by team. The move day is a day off for everyone in Vilnius.
+- MK
+- Marta Kowalska
+- Head of People
+- 10 Nov
+- Q4 kickoff: three goals for the sales team
+- Tomas Petrauskas · Sales
+- 7 Nov
+- Remote work policy: version 3 is out
+- Marta Kowalska · Policy update
+- 3 Nov
+- Winter party tickets are open
+- Julia Sauer · Event on 12 Dec
+- 28 Oct
+- Handbook
+- Open handbook
+- Policies
+- 8 pages ·
+- 5 to agree
+- Guides
+- 12 pages
+- Offices
+- 3 pages
+- Benefits
+- 5 pages
+- Teams
+- 9 pages
+- Tools
+- 6 pages ·
+- 2 to agree
+- 4 more sections
+- Recently updated
+- Expenses
+- Policies · 5 Nov
+- Tools we use
+- Guides · 2 Nov
+
+## CH02-all-news
+
+- Company hub
+- News
+- Search news
+- For me
+- Everyone
+- All types
+- Announcements
+- Policy updates
+- Events
+- 1 Dec
+- New Vilnius office
+- Pinned
+- We're moving to the new Vilnius office on 1 December
+- Desks are booked by team. The move day is a day off for everyone in Vilnius.
+- MK
+- Marta Kowalska
+- Head of People
+- 10 Nov
+- Saved  _(accessible name)_
+- This month
+- Q4 kickoff: three goals for the sales team
+- Tomas Petrauskas · Sales
+- 7 Nov
+- Save  _(accessible name)_
+- Remote work policy: version 3 is out
+- Marta Kowalska · Policy update
+- 3 Nov
+- October
+- Photo from the post  _(accessible name)_
+- 🎉 Winter party tickets are open
+- Julia Sauer · Event on 12 Dec
+- 28 Oct
+- Q3 results: a record quarter for renewals
+- Tomas Petrauskas · Everyone
+- 14 Oct
+
+## CH03-pages-need-your-yes
+
+- Company hub
+- Pages need your yes
+- Read each page and agree to its current version. HR sees when you agreed.
+- Waiting · 7
+- Agreed · 12
+- This week
+- 3 pages
+- Information security basics
+- Policies · version 2 · you agreed to version 1 in March
+- Overdue
+- Was 10 Nov
+- Read
+- Remote work policy
+- Policies · version 3 · 2 things changed since you agreed
+- By 20 Nov
+- Laptop and device rules
+- Tools · version 1 · new
+- By 21 Nov
+- Later
+- 4 pages
+- Code of conduct
+- Policies · version 1 · new
+- By 30 Nov
+- Anti-harassment policy
+- Policies · version 2 · 1 thing changed
+- By 5 Dec
+- Show 2 more

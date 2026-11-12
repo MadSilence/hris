@@ -28,6 +28,12 @@ export const PUBLIC_BACKEND_PREFIX_PATHS = [
   "/auth/invite/",
   // The preboarding page: somebody with no account, holding a link. Same reason.
   "/public/preboarding/",
+  // A published report snapshot: whoever holds the link, signed in or not. The token is the credential,
+  // and a session belonging to whoever is signed in on this browser has nothing to do with it.
+  "/public/reports/",
+  // An unsubscribe link from an email (EMAIL_NOTIFICATIONS_DESIGN.md § 9.2): opened from a mailbox, the
+  // signed token is the credential, and a session from this browser has nothing to do with it.
+  "/public/email/",
   // A phone uploading its owner's photo after scanning a QR code. The token is the credential, the
   // phone has no session, and a session belonging to whoever else is signed in on it must not travel.
   "/public/avatar/",

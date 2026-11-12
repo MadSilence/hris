@@ -14,6 +14,8 @@ export type TerminatePayload = {
   lastWorkingDay?: string | null;
   reason?: TerminationReason | null;
   rehireEligible?: boolean | null;
+  /** Whether the company is sorry to lose them — the regrettable split of turnover in reports. */
+  regrettable?: boolean | null;
   note?: string | null;
   /** Whom the leaver's decisions go to, per group; a null group goes to its default. */
   reassign?: LeaverReassignment | null;

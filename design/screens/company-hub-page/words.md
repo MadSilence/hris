@@ -1,0 +1,95 @@
+# Company hub: the handbook and a page: every string in the frames
+
+Pulled from the board HTML, one block per frame, in reading order, duplicates inside a frame removed. Names, dates, times and numbers are **example data**. The product copy and its rules are in `spec.md` → "Words", which wins over this list.
+
+## CP01-handbook
+
+- Company hub
+- Handbook
+- How things work at Acme · 62 pages in 10 sections
+- Ask the handbook, or search pages
+- Ask  _(accessible name)_
+- Policies
+- 8 pages ·
+- 5 to agree
+- Remote work policy
+- Code of conduct
+- Time off rules
+- 5 more
+- Guides
+- 12 pages
+- First week at Acme
+- How we run 1:1s
+- Booking a desk
+- 9 more
+- Offices
+- 3 pages
+- Vilnius — Žalgirio
+- Warsaw — Prosta
+- Working remotely
+- Benefits
+- 5 pages
+- Health insurance
+- Learning budget
+- Sports card
+- 2 more
+- Teams
+- 9 pages
+- Engineering
+- Sales
+- Customer success
+- 6 more
+- Tools
+- 6 pages ·
+- 2 to agree
+- Laptop and device rules
+- Information security basics
+- Tools we use
+- 3 more
+- Our company
+- Our story
+- How we make decisions
+- Org chart
+- Onboarding
+- 7 pages
+- Your first day
+- Accounts and access
+- Meet your buddy
+- 4 more
+- Money and expenses
+- 4 pages
+- Expenses
+- Business travel
+- Payday and payslips
+- 1 more
+- Health and safety
+- Fire safety
+- First aid
+- Sick days
+
+## CP02-policy-page
+
+- Company hub
+- /
+- Handbook
+- Policies
+- Remote work policy
+- 4 min read
+- Everyone at Acme
+- Save  _(accessible name)_
+- MK
+- Marta Kowalska
+- Version 3 · updated 3 Nov 2026
+- 2 things changed since you agreed to version 2
+- Work from abroad goes up from 14 to 30 days a year.
+- The home office allowance is paid every quarter, not once a year.
+- Where you can work from
+- You can work from home or any office, any day, as long as your team knows where to find you. Tell your manager a week ahead if you plan to work from another country.
+- You can work from abroad for up to
+- 30 days a year
+- . Longer stays need HR to check tax and insurance first.
+- Your home office
+- Acme pays a home office allowance of 150 € a quarter with your salary. You don't need receipts.
+- Agree to version 3 by 20 Nov
+- Marta will see that you agreed and when
+- I agree

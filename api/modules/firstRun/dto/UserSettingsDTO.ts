@@ -26,6 +26,8 @@ export type UserSettingsDTO = {
   homeSkipped: string[];
   /** Whether Home shows this person's birthday (day and month, never the year); on unless switched off. */
   showBirthdayOnHome: boolean;
+  /** The hour (0-23, own time zone) of the daily email digest; 8 unless chosen. */
+  digestHour: number;
 };
 
 export type UpdateUserSettingsRequest = {
@@ -42,4 +44,5 @@ export type UpdateUserSettingsRequest = {
   /** The deck's whole skip order; an empty list forgets every skip. */
   homeSkipped?: string[];
   showBirthdayOnHome?: boolean;
+  digestHour?: number;
 };

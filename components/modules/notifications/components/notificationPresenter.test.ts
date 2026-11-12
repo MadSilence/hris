@@ -77,6 +77,11 @@ const REGISTERED_TYPES = [
   "REVIEW_TO_APPROVE",
   "REVIEW_APPROVED",
   "REVIEW_SENT_BACK",
+  "HUB_AGREEMENT_REQUESTED",
+  "HUB_AGREEMENT_DUE_SOON",
+  "HUB_AGREEMENT_REMINDED",
+  "HUB_AGREEMENT_MISSED",
+  "HUB_POST_PUBLISHED",
 ];
 
 describe("presentNotification", () => {
@@ -368,6 +373,41 @@ describe("approvals for somebody else", () => {
       expect(view.title).toBe("An approval is waiting for you");
       expect(view.message).toBe("Approve 12 days off for Tom still waits for your answer.");
       expect(view.href).toBe("/tasks");
+    });
+  });
+
+  describe("the company hub", () => {
+    it("asks the reader to agree to a version and opens the page", () => {
+      const view = presentNotification(
+        notification({ type: "HUB_AGREEMENT_REQUESTED", params: { pageId: "p1", pageTitle: "Travel policy", version: 3, dueOn: "2026-11-20" } }),
+      );
+      expect(view.message).toMatch(/^Read “Travel policy” and agree to version 3 by .+.$/);
+      expect(view.href).toBe("/hub/handbook/p1");
+    });
+
+    it("names who reminded", () => {
+      const view = presentNotification(
+        notification({ type: "HUB_AGREEMENT_REMINDED", params: { pageId: "p1", pageTitle: "Travel policy", version: 3, actorName: "Ann" } }),
+      );
+      expect(view.message).toBe("Ann reminds you to read “Travel policy” and agree to version 3.");
+    });
+
+    it("tells a manager about one miss by name, or counts several", () => {
+      const one = presentNotification(
+        notification({ type: "HUB_AGREEMENT_MISSED", params: { count: 1, personName: "Bo", pageTitle: "Travel policy", pageCount: 1 } }),
+      );
+      const many = presentNotification(notification({ type: "HUB_AGREEMENT_MISSED", params: { count: 4, pageCount: 2 } }));
+      expect(one.message).toBe("Bo did not agree to “Travel policy” by the deadline.");
+      expect(many.message).toBe("4 people on your team missed the deadlines of 2 pages.");
+      expect(many.href).toBe("/hub/manage");
+    });
+
+    it("opens a published post", () => {
+      const view = presentNotification(
+        notification({ type: "HUB_POST_PUBLISHED", params: { postId: "n1", postTitle: "Winter party", authorName: "Ann" } }),
+      );
+      expect(view.message).toBe("Ann posted “Winter party”.");
+      expect(view.href).toBe("/hub/news/n1");
     });
   });
 });
