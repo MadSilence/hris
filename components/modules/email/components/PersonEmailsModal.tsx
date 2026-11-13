@@ -88,7 +88,7 @@ export function PersonEmailsModal({ userId, fullName, open, onCloseAction }: {
                       date: format(data.suppression.since),
                     })}
                   </span>
-                  <Button size="sm" variant="secondary" loading={lifting} onClick={() => void lift()}>
+                  <Button type="button" size="sm" variant="secondary" loading={lifting} onClick={() => void lift()}>
                     {t("profile.emails.lift")}
                   </Button>
                 </div>

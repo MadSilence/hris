@@ -69,7 +69,7 @@ export function UnsubscribeContainer({ token }: { token: string | null }) {
           </p>
           <div className="flex gap-2">
             {state.result.categories.length > 0 && (
-              <Button variant="secondary" onClick={() => void undo()}>{t("unsubscribe.undo")}</Button>
+              <Button type="button" variant="secondary" onClick={() => void undo()}>{t("unsubscribe.undo")}</Button>
             )}
             <Button variant="ghost" asChild>
               <a href="/preferences">{t("unsubscribe.settings")}</a>
