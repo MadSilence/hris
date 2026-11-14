@@ -48,6 +48,8 @@ export type Celebration = {
   date: string;
   /** Anniversaries only. */
   years?: number;
+  /** The person's team, first by name; absent when none or the reader may not see teams (the hub's tiles, B4). */
+  teamName?: string | null;
 };
 
 export type Celebrations = {

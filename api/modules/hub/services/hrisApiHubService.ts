@@ -1,4 +1,4 @@
-import { hrisApiHubClient } from "@/api/modules/hub/clients";
+import { hrisApiHubClient, type AgreementExportFilters } from "@/api/modules/hub/clients";
 import { resolveBackendAssetUrl } from "@/api/modules/users/mappers/userMapper/resolveBackendAssetUrl";
 import type {
   AgreementTab,
@@ -127,11 +127,14 @@ export class HrisApiHubService {
     const dto = await hrisApiHubClient.whoAgreed(id, tab);
     return { ...dto, rows: dto.rows.map((r) => ({ ...r, avatarUrl: resolveBackendAssetUrl(r.avatarUrl) })) };
   };
-  exportAgreements = (id: string, tab: AgreementTab) => hrisApiHubClient.exportAgreements(id, tab);
+  exportAgreements = (id: string, tab: AgreementTab, filters?: AgreementExportFilters) =>
+    hrisApiHubClient.exportAgreements(id, tab, filters);
   remind = (id: string, userIds: string[]) => hrisApiHubClient.remind(id, userIds);
 
   // ── files, audience, settings ──
   uploadFile = (file: File) => hrisApiHubClient.uploadFile(file);
+  audienceRoles = () => hrisApiHubClient.audienceRoles();
+
   resolveAudience = async (request: AudienceResolveRequest) => {
     const dto = await hrisApiHubClient.resolveAudience(request);
     return { ...dto, people: dto.people.map((p) => person(p) as PersonRef) };

@@ -21,6 +21,7 @@
     "newsError": "Не удалось загрузить новости",
     "birthday": "С днём рождения, {name}",
     "today": "Сегодня",
+    "todayTeam": "Сегодня · {team}",
     "anniversary": "{count, plural, one {год с {name}} few {года с {name}} many {лет с {name}} other {года с {name}}}",
     "welcome": "Добро пожаловать в команду",
     "joined": "{names} с нами",

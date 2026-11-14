@@ -380,7 +380,8 @@ export const automationWords = (d: WordsDeps) => {
         break;
     }
     const when = timing(step.when);
-    if (when) parts.push(when);
+    // A chosen time is what the author looks for on the canvas; the default 09:00 says nothing new (WALK_QUESTIONS § 32 (a)).
+    if (when) parts.push(step.when?.at && step.when.at !== "09:00" ? t("words.timingAt", { timing: when, at: step.when.at }) : when);
     const only = conditionsText(step.condition);
     if (only) parts.push(t("words.step.onlyIf", { conditions: only }));
     if (parts.length === 0) return null;

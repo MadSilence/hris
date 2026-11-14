@@ -468,6 +468,7 @@
     "fieldChanges": "Изменилось поле «{field}»",
     "joins": "Кто-то присоединяется: {group}",
     "timing": "{days, plural, one {# день} few {# дня} many {# дней} other {# дня}} {dir, select, BEFORE {до} other {после}} {from}",
+    "timingAt": "{timing}, в {at}",
     "process": {
       "ANY_ONBOARDING": "Онбординг завершён",
       "ANY_OFFBOARDING": "Офбординг завершён",

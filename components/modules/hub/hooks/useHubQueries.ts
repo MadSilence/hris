@@ -48,6 +48,7 @@ export const hubQueryKeys = {
   sectionImpact: (id: string) => ["HUB", "MANAGE", "SECTION_IMPACT", id] as const,
   settings: ["HUB", "MANAGE", "SETTINGS"] as const,
   audience: (audience: HubAudience, q: string) => ["HUB", "AUDIENCE", audience, q] as const,
+  audienceRoles: ["HUB", "AUDIENCE", "ROLES"] as const,
 };
 
 const qs = (params: Record<string, string | null | undefined>): string => {
@@ -199,6 +200,20 @@ export const useHubSettings = () => {
 };
 
 /** CM07's live count, avatars and "See who" list. */
+/**
+ * The roles an audience may name (B2): the hub's own list, so an editor who may not open Roles can still write "to the
+ * Team leads". Names only; archived roles are left out by the server.
+ */
+export const useHubAudienceRoles = (enabled = true) => {
+  const { internalApiClient } = useAppDataContext();
+  return useQuery<{ id: string; name: string }[]>({
+    queryKey: hubQueryKeys.audienceRoles,
+    queryFn: () => internalApiClient.get<{ id: string; name: string }[]>("/hub/audience/roles"),
+    enabled,
+    staleTime: 60_000,
+  });
+};
+
 export const useAudienceResolve = (audience: HubAudience, q = "", enabled = true) => {
   const { internalApiClient } = useAppDataContext();
   const term = q.trim().length >= 2 ? q.trim() : "";

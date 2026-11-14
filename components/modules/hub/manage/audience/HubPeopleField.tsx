@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { PeoplePicker } from "@/components/modules/automations/settings";
-import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
+import { useHubAudienceRoles } from "../../hooks";
 import type { HubAudience } from "@/models/hub";
 import { fromRecipients, toRecipients } from "./audienceDraft";
 
@@ -21,11 +21,12 @@ export const HubPeopleField: React.FC<{
   /** One person (a page's owner) instead of a list. */
   single?: boolean;
 }> = ({ value, onChange, ariaLabel, id, disabled, withRoles = true, single = false }) => {
-  const roles = useRoles({ enabled: withRoles });
+  // The hub's own list, not `/roles`: a hub editor need not hold the Roles right (B2).
+  const roles = useHubAudienceRoles(withRoles);
   const catalog = React.useMemo(
     () => ({
       recipientKinds: withRoles ? (["ROLE"] as const).slice() : [],
-      roles: (roles.data ?? []).filter((r) => !r.archived).map((r) => ({ id: r.id, name: r.name })),
+      roles: (roles.data ?? []).map((r) => ({ id: r.id, name: r.name })),
     }),
     [roles.data, withRoles],
   );

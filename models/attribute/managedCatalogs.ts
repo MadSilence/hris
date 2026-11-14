@@ -117,3 +117,13 @@ export function getCatalogOptions(type: AttributeType, language?: string): Catal
   cache.set(key, built);
   return built;
 }
+
+/**
+ * A stored country or language read in the reader's language (the owner, 2026-11-14 — WALK_QUESTIONS § 27 (b)): the
+ * value stays as typed, and when it is one of the catalogue's names its label is shown instead. A value that matches
+ * nothing — typed by hand, or imported — reads as it was written. No migration: the stored English name is the key.
+ */
+export function catalogLabel(type: AttributeType, value: string, language?: string): string {
+  if (type !== AttributeType.COUNTRY && type !== AttributeType.LANGUAGE) return value;
+  return getCatalogOptions(type, language).find((o) => o.value === value)?.label ?? value;
+}

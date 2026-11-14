@@ -51,6 +51,8 @@ export const StepUpDialog: React.FC = () => {
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [tried, setTried] = React.useState(false);
+  // Somebody with no password and no factor confirms with a code to their own mailbox (owner, 2026-11-14).
+  const [codeSent, setCodeSent] = React.useState(false);
 
   React.useEffect(() => {
     registerStepUpDialog((resolve) => {
@@ -58,6 +60,7 @@ export const StepUpDialog: React.FC = () => {
       setValue("");
       setBackup(false);
       setError(null);
+      setCodeSent(false);
       setOpen(true);
     });
     return () => registerStepUpDialog(null);
@@ -75,6 +78,22 @@ export const StepUpDialog: React.FC = () => {
   const hasPassword = ways.data?.hasPassword ?? true;
   const providers = enrolled ? [] : (ways.data?.accounts ?? [])
     .map((a) => a.provider).filter((p) => ways.data?.offered.includes(p));
+  // The mailbox that could reset a password proves no less than one — offered only where nothing else answers.
+  const byEmail = !status.isLoading && !ways.isLoading && !enrolled && !hasPassword;
+
+  const sendCode = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await internalApiClient.post("/auth/step-up/email-code");
+      setCodeSent(true);
+      setValue("");
+    } catch (e) {
+      setError(messageForError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const confirmWith = async (provider: "GOOGLE" | "MICROSOFT") => {
     setBusy(true);
@@ -96,6 +115,17 @@ export const StepUpDialog: React.FC = () => {
     if (!value.trim()) return;
     setBusy(true);
     setError(null);
+    if (byEmail) {
+      try {
+        await internalApiClient.post("/auth/step-up/email-code/verify", { code: value.trim() });
+        setBusy(false);
+        finish(true);
+      } catch (err) {
+        setBusy(false);
+        setError(messageForError(err));
+      }
+      return;
+    }
     const body = enrolled ? (backup ? { backupCode: value.trim() } : { code: value.trim() }) : { password: value };
     const res = await stepUpAction(body);
     setBusy(false);
@@ -112,7 +142,7 @@ export const StepUpDialog: React.FC = () => {
             <DialogDescription>
               {enrolled
                 ? t("stepUp.needsCode")
-                : hasPassword ? t("stepUp.needsPassword") : t("stepUp.needsProvider")}
+                : hasPassword ? t("stepUp.needsPassword") : codeSent ? t("stepUp.codeSent") : t("stepUp.needsEmailCode")}
             </DialogDescription>
           </DialogHeader>
           {status.isLoading ? null : enrolled ? (
@@ -125,6 +155,20 @@ export const StepUpDialog: React.FC = () => {
                 {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
               </button>
             </>
+          ) : byEmail ? (
+            codeSent ? (
+              <div>
+                <CodeField id="step-up-email-code" value={value} onChange={setValue} disabled={busy} autoFocus />
+                <FieldError>{tried && !value.trim() ? tCommon("validation.enterCode") : null}</FieldError>
+                <button type="button" className="mt-2 text-body text-secondary underline" onClick={() => void sendCode()} disabled={busy}>
+                  {t("stepUp.sendAgain")}
+                </button>
+              </div>
+            ) : (
+              <Button type="button" variant="secondary" className="w-full" disabled={busy} onClick={() => void sendCode()}>
+                {t("stepUp.sendCode")}
+              </Button>
+            )
           ) : !hasPassword ? null : (
             <div className="space-y-2">
               <RequiredLabel htmlFor="step-up-password" required>{t("login.passwordLabel")}</RequiredLabel>
@@ -152,7 +196,7 @@ export const StepUpDialog: React.FC = () => {
           <FormError message={error} />
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            {(enrolled || hasPassword) && (
+            {(enrolled || hasPassword || (byEmail && codeSent)) && (
               <Button type="submit" disabled={busy}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
             )}
           </DialogFooter>

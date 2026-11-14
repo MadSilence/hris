@@ -2,6 +2,11 @@ import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AutomationsPage } from "./AutomationsPage";
 
+// The card reads who is looking (the paused owner is told, not offered a take-over — WALK_QUESTIONS § 28).
+jest.mock("@/components/providers/CurrentUserProvider", () => ({
+  useCurrentUser: () => ({ user: { id: "viewer" } }),
+}));
+
 const replace = jest.fn();
 let search = "";
 jest.mock("next/navigation", () => ({

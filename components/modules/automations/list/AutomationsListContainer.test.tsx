@@ -8,6 +8,11 @@ import { showUndoToast } from "@/lib/feedback/undoToast";
 import { AutomationsListContainer } from "./AutomationsListContainer";
 import { summary } from "./testSummary";
 
+// The card reads who is looking (the paused owner is told, not offered a take-over — WALK_QUESTIONS § 28).
+jest.mock("@/components/providers/CurrentUserProvider", () => ({
+  useCurrentUser: () => ({ user: { id: "viewer" } }),
+}));
+
 const push = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: jest.fn() }) }));
 

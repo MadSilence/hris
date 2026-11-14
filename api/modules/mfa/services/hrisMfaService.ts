@@ -34,6 +34,14 @@ export class HrisMfaService {
     return hrisApiMfaClient.stepUp(body);
   }
 
+  public stepUpEmailCode(browserToken: string) {
+    return hrisApiMfaClient.stepUpEmailCode(browserToken);
+  }
+
+  public stepUpEmailCodeVerify(code: string, browserToken: string) {
+    return hrisApiMfaClient.stepUpEmailCodeVerify(code, browserToken);
+  }
+
   public resetUser(userId: string, verifiedOutOfBand: boolean) {
     return hrisApiMfaClient.resetUser(userId, verifiedOutOfBand);
   }

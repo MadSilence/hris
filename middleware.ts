@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { parseHost, requestHost, routeForHost } from "@/lib/companyAddress";
+import { contentSecurityPolicy, createNonce, NONCE_HEADER } from "@/lib/security";
 
 // The session's own cookies — `sessionCookies.ts`. The marker is not one: a script can remove it.
 import { SESSION_COOKIES } from "@/config/security/sessionCookieNames";
@@ -12,6 +13,10 @@ import { SESSION_COOKIES } from "@/config/security/sessionCookieNames";
  *
  * **Routing, not a security check** (`hris/CLAUDE.md` § "Security model"). It looks at whether a session
  * cookie exists, never at what it holds.
+ *
+ * It also gives every page its Content Security Policy with a fresh nonce (`lib/security`): the policy goes on
+ * the request, where Next reads the nonce and stamps its own scripts with it, and on the response, where the
+ * browser enforces it. That is transport hardening, like a header — it decides nothing about permissions.
  */
 export function middleware(request: NextRequest) {
   const rootDomain = process.env.APP_ROOT_DOMAIN || "localhost:3000";
@@ -27,12 +32,23 @@ export function middleware(request: NextRequest) {
     case "rewrite": {
       const url = request.nextUrl.clone();
       url.pathname = route.pathname;
-      return NextResponse.rewrite(url);
+      return withPolicy((headers) => NextResponse.rewrite(url, { request: { headers } }), request);
     }
     default:
-      return NextResponse.next();
+      return withPolicy((headers) => NextResponse.next({ request: { headers } }), request);
   }
 }
+
+const withPolicy = (respond: (requestHeaders: Headers) => NextResponse, request: NextRequest): NextResponse => {
+  const nonce = createNonce();
+  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development" ? "development" : "production");
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(NONCE_HEADER, nonce);
+  requestHeaders.set("Content-Security-Policy", policy);
+  const response = respond(requestHeaders);
+  response.headers.set("Content-Security-Policy", policy);
+  return response;
+};
 
 const publicOrigin = (request: NextRequest): string => {
   const host = requestHost(request.headers);

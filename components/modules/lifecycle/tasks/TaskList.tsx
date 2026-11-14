@@ -40,6 +40,11 @@ type Props = {
   showAssignee?: boolean;
   /** Show whom it is about — in the Tasks tab, where tasks are about several people. */
   showSubject?: boolean;
+  /**
+   * The reader, in the Tasks tab: a task listed there but assigned to somebody else is an approval delegated to the
+   * reader for today, and its row says for whom (owner, 2026-11-14).
+   */
+  viewerId?: string;
   /** Tick a to-do or acknowledge; a to-do that requires a file is ticked with the file it was given. */
   onCompleteAction?: (task: Task, documentId?: string | null) => void | Promise<void>;
   canComplete?: (task: Task) => boolean;
@@ -65,7 +70,7 @@ type Props = {
  * the profile's own checks; nothing here grants anything.
  */
 export function TaskList({
-  tasks, showAssignee, showSubject, onCompleteAction, canComplete, isMine, onChangedAction, onEditAction,
+  tasks, showAssignee, showSubject, viewerId, onCompleteAction, canComplete, isMine, onChangedAction, onEditAction,
   onCancelAction, busyTaskId, preview,
 }: Props) {
   return (
@@ -76,6 +81,7 @@ export function TaskList({
           task={task}
           showAssignee={showAssignee}
           showSubject={showSubject}
+          viewerId={viewerId}
           onCompleteAction={onCompleteAction}
           canComplete={canComplete?.(task) ?? true}
           mine={isMine?.(task) ?? true}
@@ -91,11 +97,12 @@ export function TaskList({
 }
 
 function TaskRow({
-  task, showAssignee, showSubject, onCompleteAction, canComplete, mine, onChangedAction, onEditAction, onCancelAction, busy, preview,
+  task, showAssignee, showSubject, viewerId, onCompleteAction, canComplete, mine, onChangedAction, onEditAction, onCancelAction, busy, preview,
 }: {
   task: Task;
   showAssignee?: boolean;
   showSubject?: boolean;
+  viewerId?: string;
   onCompleteAction?: Props["onCompleteAction"];
   canComplete: boolean;
   mine: boolean;
@@ -153,6 +160,9 @@ function TaskRow({
               : null,
             showSubject && task.subject ? t("taskList.about", { name: task.subject.name ?? "" }) : null,
             showAssignee ? t("taskList.doneBy", { name: task.assignee?.name ?? t("shared.nobody") }) : null,
+            !showAssignee && viewerId && task.assignee?.id && task.assignee.id !== viewerId
+              ? t("taskList.onBehalfOf", { name: task.assignee.name ?? "" })
+              : null,
             done && task.completedAt ? t("taskList.doneOn", { date: formatDisplayDate(task.completedAt, { style: "medium" }) }) : null,
           ].filter(Boolean).join(" · ")}
         </p>

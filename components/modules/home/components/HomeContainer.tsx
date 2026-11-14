@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { DashboardSquare01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { ErrorBoundary } from "@/components/feedback/ErrorBoundary";
-import { EmptyState } from "@/components/feedback/EmptyState";
 import { useAccess } from "@/components/auth/useAccess";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
 import { cn } from "@/lib/cn";
@@ -82,16 +81,6 @@ export const HomeContainer: React.FC = () => {
           <div className="mt-10">
             {!ready ? (
               <div aria-hidden className="h-[344px]" />
-            ) : placed.length === 0 ? (
-              <div className="rounded-widget bg-card shadow-widget">
-                <EmptyState
-                  scene="all-caught-up"
-                  title={t("empty.title")}
-                  description={t("empty.description")}
-                  onCreate={openEdit}
-                  createLabel={t("empty.action")}
-                />
-              </div>
             ) : (
               <WidgetGrid>
                 {placed.map(({ widget, size }) => (
@@ -105,7 +94,8 @@ export const HomeContainer: React.FC = () => {
             )}
           </div>
 
-          {openEdit && placed.length > 0 && (
+          {/* Never empty: Waiting on you cannot be removed and is everybody's (WALK_QUESTIONS § 35 (a)). */}
+          {openEdit && (
             <div className="mt-8 flex max-w-[1088px] justify-end">
               <button
                 type="button"

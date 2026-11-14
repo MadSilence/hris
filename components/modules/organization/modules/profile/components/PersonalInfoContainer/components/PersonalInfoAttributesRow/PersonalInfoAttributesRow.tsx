@@ -2,7 +2,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Attribute } from "@/models/attribute/Attribute";
 import { AttributeType } from "@/models/attribute/AttributeType";
-import { getCatalogOptions } from "@/models/attribute/managedCatalogs";
+import { catalogLabel, getCatalogOptions } from "@/models/attribute/managedCatalogs";
 import {
   optionValueId,
   sameOptionId,
@@ -110,6 +110,7 @@ export const PersonalInfoAttributesRow: React.FC<PersonalInfoAttributesRowProps>
 function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: unknown }) {
   const tCommon = useTranslations("common");
   const formatDisplayDate = useDateFormatter();
+  const language = useDisplayLanguage();
   const t = attribute.type;
 
   if (
@@ -216,6 +217,10 @@ function ViewValue({ attribute, rawValue }: { attribute: Attribute; rawValue: un
 
     case AttributeType.LONG_TEXT:
       return <p className="whitespace-pre-wrap break-words">{String(rawValue)}</p>;
+
+    case AttributeType.COUNTRY:
+    case AttributeType.LANGUAGE:
+      return <span>{catalogLabel(t, String(rawValue), language)}</span>;
 
     case AttributeType.TEXT:
     default:

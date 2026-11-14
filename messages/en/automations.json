@@ -169,6 +169,7 @@
   "pause": {
     "OWNER_LEFT": "{name} left the company, so it can't run.",
     "OWNER_LACKS_RIGHT": "{name} can't manage automations any more, so it can't run.",
+    "OWNER_LACKS_RIGHT_YOU": "You can't manage automations any more, so it's paused. Ask an automation admin to take it over, or get the right back.",
     "TARGET_GONE": "A step points to something that's gone, so it can't run.",
     "MANUAL": "Turned off by {name} on {date}.",
     "makeMeOwner": "Make me the owner",

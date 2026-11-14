@@ -11,6 +11,7 @@ import { showActionError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { completeMyTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { useInvalidateLifecycle, useMyTasks } from "@/components/modules/lifecycle/hooks";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
 import { TaskList } from "./TaskList";
 
 /**
@@ -23,6 +24,7 @@ export function MyTasksContainer() {
   const [busy, setBusy] = useState<string | null>(null);
   const { data, isLoading, error } = useMyTasks(includeDone);
   const invalidate = useInvalidateLifecycle();
+  const { user: viewer } = useCurrentUser();
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -48,6 +50,7 @@ export function MyTasksContainer() {
         <TaskList
           tasks={data ?? []}
           showSubject
+          viewerId={viewer?.id}
           busyTaskId={busy}
           onCompleteAction={async (task, documentId) => {
             setBusy(task.id);

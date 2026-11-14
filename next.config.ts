@@ -12,8 +12,10 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: [
+          // The Content-Security-Policy is not here: it carries a nonce made per request, so `middleware.ts` sets it
+          // (`lib/security`), `frame-ancestors 'none'` included. This header keeps the same rule for older browsers
+          // and for the files the middleware does not see.
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           // Browsers ignore it over plain http, so local development is unaffected.
           { key: "Strict-Transport-Security", value: "max-age=31536000" },

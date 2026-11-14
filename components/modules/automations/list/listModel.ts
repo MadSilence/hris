@@ -95,18 +95,25 @@ export const menuFor = (automation: AutomationSummary): MenuItem[] => {
 /** The one button a paused card carries: whose problem it is decides what fixes it. */
 export type PauseFix = "makeMeOwner" | "fixStep" | "turnOn";
 
-export const pauseFixFor = (automation: AutomationSummary): PauseFix | null => {
+export const pauseFixFor = (automation: AutomationSummary, viewerId?: string | null): PauseFix | null => {
   if (automation.status !== "PAUSED" || !automation.pause) return null;
   switch (automation.pause.reason) {
     case "OWNER_LEFT":
-    case "OWNER_LACKS_RIGHT":
       return "makeMeOwner";
+    case "OWNER_LACKS_RIGHT":
+      // The owner who lost the right is the one person the server refuses to make the owner again (OWNER_NOT_ALLOWED):
+      // a button that can only fail is worse than none (WALK_QUESTIONS § 28 (a)); the sentence says what to do.
+      return isPausedOwner(automation, viewerId) ? null : "makeMeOwner";
     case "TARGET_GONE":
       return "fixStep";
     case "MANUAL":
       return "turnOn";
   }
 };
+
+/** The reader is the owner whose missing right paused it — told so in their own words, offered no take-over. */
+export const isPausedOwner = (automation: AutomationSummary, viewerId?: string | null): boolean =>
+  automation.pause?.reason === "OWNER_LACKS_RIGHT" && !!viewerId && automation.owner?.id === viewerId;
 
 // ── where things open ─────────────────────────────────────────────────────────────────────────
 

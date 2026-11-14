@@ -1,4 +1,4 @@
-import { EMPTY_FILTERS, filterAutomations, menuFor, pauseFixFor, triggerKey, triggerKeysOf } from "./listModel";
+import { EMPTY_FILTERS, filterAutomations, isPausedOwner, menuFor, pauseFixFor, triggerKey, triggerKeysOf } from "./listModel";
 import { summary } from "./testSummary";
 
 describe("the ⋯ menu per status", () => {
@@ -35,6 +35,20 @@ describe("the paused card's one button", () => {
 
   it("is absent on a card that is not paused", () => {
     expect(pauseFixFor(summary())).toBeNull();
+  });
+
+  // WALK_QUESTIONS § 28 (a): the server refuses the owner who lost the right, so they are offered nothing.
+  it("is not offered to the owner whose missing right paused it", () => {
+    const lacking = summary({
+      status: "PAUSED",
+      owner: { id: "hudson", name: "Hudson Thompson" },
+      pause: { reason: "OWNER_LACKS_RIGHT", by: null, at: null, detail: null, stepId: null },
+    });
+
+    expect(pauseFixFor(lacking, "hudson")).toBeNull();
+    expect(isPausedOwner(lacking, "hudson")).toBe(true);
+    expect(pauseFixFor(lacking, "admin")).toBe("makeMeOwner");
+    expect(isPausedOwner(lacking, "admin")).toBe(false);
   });
 });
 

@@ -1,0 +1,22 @@
+# Weekly update pull requests for the packages and the CI actions (S16). Security alerts arrive
+# regardless of this file once Dependabot alerts are on in the repository's settings.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      radix:
+        patterns: ["@radix-ui/*"]
+      tiptap:
+        patterns: ["@tiptap/*"]
+    ignore:
+      # Majors are planned work (React 19, Next 16), not a weekly pull request.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

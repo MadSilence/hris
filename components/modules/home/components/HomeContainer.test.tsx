@@ -86,7 +86,8 @@ describe("HomeContainer", () => {
     expect(screen.getByText("Next time off body S")).toBeInTheDocument();
     expect(screen.getByText("My tasks body L")).toBeInTheDocument();
     expect(screen.getByText("This week body M")).toBeInTheDocument();
-    expect(screen.queryByText(/Waiting on you body/)).not.toBeInTheDocument();
+    // Everybody's, an employee's too (WALK_QUESTIONS § 35 (a)).
+    expect(screen.getByText("Waiting on you body L")).toBeInTheDocument();
     expect(screen.queryByText(/Processes body/)).not.toBeInTheDocument();
   });
 
@@ -102,17 +103,16 @@ describe("HomeContainer", () => {
     render(<HomeContainer />);
 
     const bodies = screen.getAllByText(/ body /).map((el) => el.textContent);
-    expect(bodies).toEqual(["Who's out body S", "My tasks body M"]);
+    // Waiting on you cannot be removed: an arrangement saved while it could be keeps it, where it stood.
+    expect(bodies).toEqual(["Who's out body S", "My tasks body M", "Waiting on you body L"]);
   });
 
-  it("says the home is empty when every widget was removed, and offers Edit home", () => {
+  it("never empties: with every other widget removed, Waiting on you stays", () => {
     given(EMPLOYEE, ["waiting-on-you", "my-time-off", "next-time-off", "my-tasks", "whos-out", "celebrations"].map((id) => ({ id, hidden: true })));
     render(<HomeContainer />);
 
-    expect(screen.getByText("Your home is empty")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Edit home" }));
-    expect(screen.getByText("Try things out. Nothing changes until you press Save.")).toBeInTheDocument();
-    expect(screen.getByText("Drag widgets here")).toBeInTheDocument();
+    expect(screen.queryByText("Your home is empty")).not.toBeInTheDocument();
+    expect(screen.getAllByText(/ body /).map((el) => el.textContent)).toEqual(["Waiting on you body L"]);
   });
 
   it("opens Edit home from the end of the page, and Cancel with no changes closes it without asking", () => {

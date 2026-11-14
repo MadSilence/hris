@@ -135,4 +135,5 @@ Every string in the frames, including example data, is in `words.md`.
     1280 the HR default still leaves one cell at the end of a row.
     Every new widget a person is given later joins at the end of their order at its default size.
   - **The empty home's action** is the empty state's primary button, as drawn in words.
+  - **Waiting on you is on everybody's default, an employee's too** (answered 2026-11-14, `WALK_QUESTIONS.md` § 35 (a)); being locked, it is shown even where an older arrangement saved it hidden, so the empty home is no longer reached.
 - **Images of the real screen:** owed — the walk of 2026-11-11 ran with the window hidden (`(claude)/testing/OWNER_VISUAL_REVIEW.md` § 21).

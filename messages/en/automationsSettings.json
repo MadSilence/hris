@@ -468,6 +468,7 @@
     "fieldChanges": "{field} changes",
     "joins": "Someone joins {group}",
     "timing": "{days, plural, one {# day} other {# days}} {dir, select, BEFORE {before} other {after}} {from}",
+    "timingAt": "{timing}, at {at}",
     "process": {
       "ANY_ONBOARDING": "An onboarding is completed",
       "ANY_OFFBOARDING": "An offboarding is completed",

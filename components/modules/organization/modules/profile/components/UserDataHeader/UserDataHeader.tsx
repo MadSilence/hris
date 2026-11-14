@@ -37,9 +37,11 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 import {
   cancelInviteAction,
+  changeUserStatusAction,
   deleteUserAction,
   terminateUserAction,
 } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { InviteUserModal } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/InviteUserModal";
 import { showActionError, showError } from "@/lib/errors/errorToast";
 import { StartProcessModal } from "@/components/modules/lifecycle/start/StartProcessModal";
@@ -87,6 +89,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // Booking someone else's leave is a time-off action, not a profile one.
 
   const [isTerminateOpen, setIsTerminateOpen] = useState(false);
+  const [isReactivateOpen, setIsReactivateOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [startType, setStartType] = useState<ProcessType | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -470,15 +473,20 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                     {t("profile.header.unblock")}
                   </RowAction>
                 )}
-                {mayTerminate && (
+                {/* A rehire is one person, not a segment (WALK_QUESTIONS § 36 (a)): an archived person comes back
+                    from their own profile, through the same status change bulk edit makes. */}
+                {mayTerminate && isTerminated && (
+                  <RowAction icon={<Icon icon={Refresh01Icon} size="sm" />} onClick={() => setIsReactivateOpen(true)}>
+                    {t("profile.header.reactivate")}
+                  </RowAction>
+                )}
+                {mayTerminate && !isTerminated && (
                   <RowAction
                     icon={<Icon icon={UserRemove01Icon} size="sm" />}
                     onClick={() => setIsTerminateOpen(true)}
-                    disabled={isTerminated || isTerminationPending}
+                    disabled={isTerminationPending}
                   >
-                    {isTerminated
-                      ? t("profile.header.alreadyTerminated")
-                      : isTerminationPending
+                    {isTerminationPending
                         ? t("profile.header.leaving", { date: formatDisplayDate(String(user.terminationDate)) })
                         : t("profile.header.terminate")}
                   </RowAction>
@@ -610,6 +618,34 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
             } else {
               setLifecycleError(res.errorMessage ?? t("profile.header.terminateFailed"));
+            }
+          } finally {
+            setIsLifecycleBusy(false);
+          }
+        }}
+      />
+
+      <ConfirmActionModal
+        isOpen={isReactivateOpen}
+        title={t("profile.reactivate.title", { name: fullName })}
+        description={t("profile.reactivate.description")}
+        confirmLabel={t("profile.reactivate.confirm")}
+        isLoading={isLifecycleBusy}
+        errorMessage={lifecycleError}
+        onCancelAction={() => {
+          setIsReactivateOpen(false);
+          setLifecycleError(null);
+        }}
+        onConfirmAction={async () => {
+          setIsLifecycleBusy(true);
+          setLifecycleError(null);
+          try {
+            const res = await changeUserStatusAction({ userId: user.id, status: "ACTIVE" });
+            if (res.status === ActionStatus.SUCCESS) {
+              setIsReactivateOpen(false);
+              await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
+            } else {
+              setLifecycleError(res.errorMessage ?? t("profile.reactivate.failed"));
             }
           } finally {
             setIsLifecycleBusy(false);

@@ -12,7 +12,13 @@ export const HOME_CATEGORY_LABEL_KEYS = {
 } as const satisfies Record<HomeCategory, string>;
 
 /** What the arrangement needs to know about a widget: its id and the sizes it comes in. */
-export type ArrangeableWidget = { id: string; sizes: readonly HomeWidgetSize[]; defaultSize: HomeWidgetSize };
+export type ArrangeableWidget = {
+  id: string;
+  sizes: readonly HomeWidgetSize[];
+  defaultSize: HomeWidgetSize;
+  /** Cannot be removed (Waiting on you): shown even where an arrangement saved before had it hidden. */
+  locked?: boolean;
+};
 
 /** A widget on the page at the size it is drawn in. */
 export type PlacedWidget<W extends ArrangeableWidget> = { widget: W; size: HomeWidgetSize };
@@ -32,10 +38,13 @@ export type HomeRole = "EMPLOYEE" | "MANAGER" | "HR";
  * order is the drawn set re-packed: each pair of rows full at four columns, the Small one last.
  */
 export const ROLE_DEFAULTS: Record<HomeRole, DefaultEntry[]> = {
+  // Waiting on you is everybody's (WALK_QUESTIONS § 35 (a)): an approver is whoever a chain names, a manager without
+  // the Manager role included, and "All caught up" is an answer too.
   EMPLOYEE: [
-    { id: "my-tasks", size: "L" },
+    { id: "waiting-on-you", size: "L" },
     { id: "my-time-off", size: "M" },
     { id: "celebrations", size: "M" },
+    { id: "my-tasks", size: "L" },
     { id: "next-time-off", size: "S" },
   ],
   MANAGER: [
@@ -93,7 +102,7 @@ export const arrangeHome = <W extends ArrangeableWidget>(
     if (named.has(placement.id)) continue;
     named.add(placement.id);
     const widget = byId.get(placement.id);
-    if (!widget || placement.hidden) continue;
+    if (!widget || (placement.hidden && !widget.locked)) continue;
     out.push({ widget, size: sizeOf(widget, placement.size) });
   }
   for (const widget of available) {

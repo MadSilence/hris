@@ -8,7 +8,9 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/compo
 import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
-import { type DateFormatter, useDateFormatter, useDisplayLocale } from "@/lib/date";
+import { type DateFormatter, useDateFormatter, useDisplayLanguage, useDisplayLocale } from "@/lib/date";
+import { AttributeType } from "@/models/attribute/AttributeType";
+import { catalogLabel } from "@/models/attribute/managedCatalogs";
 import { optionValueLabel, parseCheckboxValue } from "@/models/attribute/attributeValue";
 import { isMaskedValue, objectValueSummary } from "@/models/attribute/objectValueSummary";
 import { FieldMeta } from "@/components/modules/organization/components/PeopleTopbar";
@@ -77,6 +79,7 @@ export default function PeopleTable({
   const t = useTranslations("organization");
   const formatDisplayDate = useDateFormatter();
   const locale = useDisplayLocale();
+  const displayLanguage = useDisplayLanguage();
   const tCommon = useTranslations("common");
   const metaById = useMemo(() => {
     const map = new Map<string, FieldMeta>();
@@ -223,6 +226,11 @@ export default function PeopleTable({
       case "EMAIL":
       case "URL":
         return <span>{valueToString(val)}</span>;
+
+      // Stored as the English name; read in the reader's language when it is one (WALK_QUESTIONS § 27 (b)).
+      case "COUNTRY":
+      case "LANGUAGE":
+        return <span>{catalogLabel(meta.type as AttributeType, valueToString(val) ?? "", displayLanguage)}</span>;
 
       // An option is a pair: the id it is matched by, and the text it is read by.
       case "SELECT":

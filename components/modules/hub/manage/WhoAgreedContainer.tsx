@@ -40,6 +40,15 @@ export const filterPeople = (rows: AgreedPerson[], filters: Filters): AgreedPers
   );
 };
 
+/** The export of the tab as filtered on screen — its chips and its search travel with it (B5). */
+export const exportHref = (id: string, tab: string, filters: Filters): string => {
+  const params = new URLSearchParams({ tab });
+  if (filters.department) params.set("department", filters.department);
+  if (filters.office) params.set("office", filters.office);
+  if (filters.q.trim()) params.set("q", filters.q.trim());
+  return `/api/hub/manage/pages/${id}/agreements/export?${params.toString()}`;
+};
+
 /** A filter chip that opens the values the list holds. */
 const ValueFilter: React.FC<{ label: string; values: string[]; value: string | null; onChange: (v: string | null) => void }> = ({
   label,
@@ -199,7 +208,7 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button asChild variant="ghost" size="icon">
-                    <a href={`/api/hub/manage/pages/${id}/agreements/export?tab=${tab}`} download aria-label={t("agreed.export")}>
+                    <a href={exportHref(id, tab, filters)} download aria-label={t("agreed.export")}>
                       <Icon icon={Download04Icon} size="sm" />
                     </a>
                   </Button>

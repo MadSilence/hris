@@ -438,4 +438,7 @@ Q-9 (who manages the hub), Q-11 (What changed drafted by AI) and Q-12 (news on H
   - The editors chosen in Settings are the holders of an ordinary role, "Hub editors", also visible in Settings → Roles; a role with MANAGE set there is listed read-only.
   - *Remind* counts only people not reminded in the last 24 hours, and is disabled when there is nobody.
   - Publishing a must-read page asks for *Agree by* in the publish dialog when the page has none.
+- **Changed 2026-11-14** (the owner's B1, B2, B5): "Unpins “{title}”" shows on a new post too, from the post pinned now;
+  the people-and-roles picker reads its roles from the hub (`/hub/audience/roles`, behind the hub's own right), not
+  from Roles; *Export* on Who agreed carries the department, office and search the table shows.
 - **Images of the real screen:** not added — the walk's window was hidden.

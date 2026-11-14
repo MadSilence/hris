@@ -151,7 +151,7 @@
       "endSessions": "End all sessions",
       "block": "Block account",
       "unblock": "Unblock account",
-      "alreadyTerminated": "Already terminated",
+      "reactivate": "Reactivate",
       "leaving": "Leaving {date}",
       "terminate": "Terminate employment",
       "deleteProfile": "Delete profile",
@@ -258,6 +258,12 @@
       "more": "and {count} more",
       "reassignTo": "Reassign to…"
     },
+    "reactivate": {
+      "title": "Reactivate {name}?",
+      "description": "They become Active again and their termination record is cleared; the activity log keeps it. Their sign-in stays blocked until somebody unblocks it.",
+      "confirm": "Reactivate",
+      "failed": "Could not reactivate this person."
+    },
     "terminate": {
       "description": "{name} will be archived and lose access.",
       "reasons": {
@@ -267,6 +273,8 @@
       },
       "rehire": "Eligible for rehire",
       "rehireHint": "The first thing anyone asks when this person applies again.",
+      "regrettable": "Regrettable loss",
+      "regrettableHint": "The company is sorry to lose them — counted in the regrettable turnover rate.",
       "note": "Note",
       "impactTitle": "What this will do",
       "checking": "Checking…",

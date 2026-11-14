@@ -31,7 +31,8 @@ import {
 import type { AutomationSummary } from "@/models/automations";
 import { formatShortDate, useDisplayLanguage } from "@/lib/date";
 import { cn } from "@/lib/cn";
-import { automationsHref, menuFor, pauseFixFor, type MenuItem, type PauseFix } from "./listModel";
+import { automationsHref, isPausedOwner, menuFor, pauseFixFor, type MenuItem, type PauseFix } from "./listModel";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
 import { daysBetween, useWhen } from "./format";
 
 export type CardAction = MenuItem | PauseFix | "seeWhy";
@@ -70,7 +71,8 @@ export const AutomationCard: React.FC<{
   const t = useTranslations("automationsList");
   const tShared = useTranslations("automations");
   const words = useAutomationWords();
-  const fix = canManage ? pauseFixFor(automation) : null;
+  const { user: viewer } = useCurrentUser();
+  const fix = canManage ? pauseFixFor(automation, viewer?.id) : null;
   const menu = canManage ? menuFor(automation) : [];
   const trigger = automation.trigger;
   const startsWhen = trigger ? words.triggerLine(trigger) : "";
@@ -136,7 +138,7 @@ export const AutomationCard: React.FC<{
       ) : null}
 
       <div className="mt-auto flex flex-col gap-2 border-t border-divider pt-3">
-        {automation.status === "PAUSED" && automation.pause ? <PauseSentence automation={automation} /> : null}
+        {automation.status === "PAUSED" && automation.pause ? <PauseSentence automation={automation} viewerId={viewer?.id} /> : null}
         <div className="flex min-h-6 items-center justify-between gap-3">
           <div className="min-w-0 flex-1 pr-3">
             {fix ? (
@@ -161,14 +163,15 @@ export const AutomationCard: React.FC<{
   );
 };
 
-const PauseSentence: React.FC<{ automation: AutomationSummary }> = ({ automation }) => {
+const PauseSentence: React.FC<{ automation: AutomationSummary; viewerId?: string }> = ({ automation, viewerId }) => {
   const t = useTranslations("automations");
   const tList = useTranslations("automationsList");
   const language = useDisplayLanguage();
   const pause = automation.pause!;
   const someone = tList("card.someone");
-  const text =
-    pause.reason === "MANUAL"
+  const text = isPausedOwner(automation, viewerId)
+    ? t("pause.OWNER_LACKS_RIGHT_YOU")
+    : pause.reason === "MANUAL"
       ? t("pause.MANUAL", { name: pause.by?.name ?? someone, date: formatShortDate(pause.at, { language }) })
       : pause.reason === "TARGET_GONE"
         ? t("pause.TARGET_GONE")

@@ -21,6 +21,7 @@
     "newsError": "Couldn't load the news",
     "birthday": "Happy birthday, {name}",
     "today": "Today",
+    "todayTeam": "Today · {team}",
     "anniversary": "{count, plural, one {year with {name}} other {years with {name}}}",
     "welcome": "Welcome to the team",
     "joined": "{names} joined",

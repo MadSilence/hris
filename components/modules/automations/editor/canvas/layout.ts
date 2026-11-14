@@ -237,6 +237,12 @@ export const nearestSpot = (spots: DropSpot[], point: { x: number; y: number }, 
 };
 
 /**
+ * The smallest zoom the automatic fit goes to (WALK_QUESTIONS § 31 (a)): below it the cards cannot be read, so a wide
+ * tree stays readable and the rest is reached by scrolling. Zooming by hand still goes lower (the canvas's own floor).
+ */
+export const FIT_ZOOM_MIN = 0.75;
+
+/**
  * The viewport that fits `bounds` into the part of the pane the windows leave free, no larger than 100 %, in steps of
  * 5 % so the zoom reads as a round number.
  */

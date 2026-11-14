@@ -42,6 +42,15 @@ export class HrisApiMfaClient {
     await hrisApiClient.post<void>("/auth/step-up", { ...body });
   }
 
+  /** "Confirm it is you" by email, for somebody with no password and no factor; `browserToken` is `__Host-code`. */
+  public async stepUpEmailCode(browserToken: string): Promise<void> {
+    await hrisApiClient.post<void>("/auth/step-up/email-code", { browserToken });
+  }
+
+  public async stepUpEmailCodeVerify(code: string, browserToken: string): Promise<void> {
+    await hrisApiClient.post<void>("/auth/step-up/email-code/verify", { code, browserToken });
+  }
+
   public async resetUser(userId: string, verifiedOutOfBand: boolean): Promise<void> {
     await hrisApiClient.post<void>(`/users/${userId}/mfa/reset`, { verifiedOutOfBand });
   }

@@ -28,6 +28,7 @@ import { edgeTypes, type ConnectorFlowEdge } from "./ConnectorEdge";
 import {
   cardHeight,
   fitViewport,
+  FIT_ZOOM_MIN,
   layoutTree,
   nearestSpot,
   stepNodeId,
@@ -341,7 +342,7 @@ function CanvasInner(props: AutomationCanvasProps) {
       const pane = paneRef.current;
       if (!pane) return;
       const { layout: l, insets: i } = latest.current;
-      const viewport = fitViewport(l.bounds, { width: pane.clientWidth, height: pane.clientHeight }, i, { min: ZOOM_MIN, max: 1 });
+      const viewport = fitViewport(l.bounds, { width: pane.clientWidth, height: pane.clientHeight }, i, { min: FIT_ZOOM_MIN, max: 1 });
       void setViewport(viewport, { duration });
     },
     [setViewport],

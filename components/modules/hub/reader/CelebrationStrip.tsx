@@ -75,6 +75,8 @@ export const CelebrationStrip: React.FC<{ flags: HubCelebrations }> = ({ flags }
   }
 
   const { birthdays, anniversaries, joiners } = pickCelebrations(query.data?.items ?? [], flags, today);
+  // "Today · {team}" as drawn (CH01); a person in no team, or a reader who may not see teams, reads "Today".
+  const todayLine = (c: Celebration) => (c.teamName ? t("home.todayTeam", { team: c.teamName }) : t("home.today"));
   if (birthdays.length + anniversaries.length + joiners.length === 0) return null;
   const firstNames = joiners.map((j) => j.firstName ?? nameOf(j));
 
@@ -91,7 +93,7 @@ export const CelebrationStrip: React.FC<{ flags: HubCelebrations }> = ({ flags }
             </span>
             <span className="flex min-w-0 flex-col">
               <TruncatedTitle title={t("home.birthday", { name: c.firstName ?? nameOf(c) })} className="text-body font-semibold text-tag-berry-text" />
-              <span className="text-hint text-tag-berry-text">{t("home.today")}</span>
+              <span className="text-hint text-tag-berry-text">{todayLine(c)}</span>
             </span>
           </Tile>
         ))}
@@ -103,7 +105,7 @@ export const CelebrationStrip: React.FC<{ flags: HubCelebrations }> = ({ flags }
                 title={t("home.anniversary", { count: c.years ?? 1, name: c.firstName ?? nameOf(c) })}
                 className="text-body font-semibold text-tag-ocean-text"
               />
-              <span className="text-hint text-tag-ocean-text">{t("home.today")}</span>
+              <span className="text-hint text-tag-ocean-text">{todayLine(c)}</span>
             </span>
             <PersonAvatar person={{ name: nameOf(c), avatarUrl: c.avatarUrl }} size={40} />
           </Tile>

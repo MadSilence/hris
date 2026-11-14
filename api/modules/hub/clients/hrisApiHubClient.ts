@@ -47,6 +47,9 @@ const query = (params: Record<string, string | null | undefined>): string => {
 const body = <T extends object>(value: T): Record<string, unknown> => value as unknown as Record<string, unknown>;
 
 /** The hub's backend URLs (`/hub/**`), one method per endpoint. No logic. */
+/** CM08's filters as the export carries them; an empty one is no filter. */
+export type AgreementExportFilters = { department?: string | null; office?: string | null; q?: string | null };
+
 export class HrisApiHubClient {
   // ── reading ──
   home = (scope: FeedScope) => hrisApiClient.get<HubHomeDTO>(`/hub/home${query({ scope })}`);
@@ -107,8 +110,12 @@ export class HrisApiHubClient {
 
   // ── managing: who agreed ──
   whoAgreed = (id: string, tab: AgreementTab) => hrisApiClient.get<WhoAgreedDTO>(`/hub/manage/pages/${id}/agreements${query({ tab })}`);
-  exportAgreements = (id: string, tab: AgreementTab): Promise<Response> =>
-    hrisApiClient.fetch(`/hub/manage/pages/${id}/agreements/export${query({ tab })}`, "text/csv, */*");
+  /** The tab as the screen filters it — its Department and Office chips and its search (B5). */
+  exportAgreements = (id: string, tab: AgreementTab, filters: AgreementExportFilters = {}): Promise<Response> =>
+    hrisApiClient.fetch(
+      `/hub/manage/pages/${id}/agreements/export${query({ tab, department: filters.department, office: filters.office, q: filters.q })}`,
+      "text/csv, */*",
+    );
   remind = (id: string, userIds: string[]) => hrisApiClient.post<RemindedDTO>(`/hub/manage/pages/${id}/remind`, { userIds });
 
   // ── files, audience, settings ──
@@ -117,6 +124,9 @@ export class HrisApiHubClient {
     form.append("file", file);
     return hrisApiClient.postForm<FileUploadedDTO>("/hub/manage/files", form);
   };
+  /** The roles an audience may name, behind the hub's own right (B2). */
+  audienceRoles = () => hrisApiClient.get<{ id: string; name: string }[]>("/hub/audience/roles");
+
   resolveAudience = (request: AudienceResolveRequestDTO) =>
     hrisApiClient.post<AudienceResolvedDTO>("/hub/audience/resolve", body(request));
   settings = () => hrisApiClient.get<HubSettingsDTO>("/hub/manage/settings");

@@ -1,0 +1,69 @@
+# The web app's checks on every push and pull request (PRODUCTION_READINESS_DESIGN.md § 9, step 1).
+# Building and deploying an image waits for the hosting choice; this file proves the code only.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Types, lint, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+      - name: Types
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test -- --ci
+      # The build is a check of its own: a `"use server"` export that is not an async function, or a
+      # server-only import in a client file, passes tsc and jest and fails only here (hris/CLAUDE.md).
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  audit:
+    name: Known vulnerabilities in runtime packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # Runtime packages only, high and critical only (S16): a dev tool's advisory does not reach a user,
+      # and a moderate one is read in Dependabot's alerts rather than failing every push.
+      - run: npm audit --omit=dev --audit-level=high
+
+  secrets:
+    name: No secrets in the pushed commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The commits of this push or pull request only — see the same job in hris-api for why not the history.
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -24,7 +24,7 @@ import { dateToISO } from "@/lib/date";
 import type { AudienceResolved, PostType } from "@/models/hub";
 import { saveHubPostAction } from "../../actions";
 import { PostEditor } from "../../document";
-import { unwrapHub, useAudienceResolve, useInvalidateHub, usePostEdit } from "../../hooks";
+import { unwrapHub, useAudienceResolve, useHubHome, useInvalidateHub, usePostEdit } from "../../hooks";
 import { useCompanyName, useHubDates } from "../../shared";
 import { AudienceDialog } from "../audience";
 import { CoverField } from "./CoverField";
@@ -141,6 +141,9 @@ export const PostEditorDialog: React.FC<{ open: boolean; onOpenChange: (open: bo
 }) => {
   const t = useTranslations("hub");
   const edit = usePostEdit(open ? postId : null);
+  // A new post has no edit answer to carry "Unpins …", so the post pinned now comes from the hub's home (B1).
+  const home = useHubHome("ALL");
+  const pinnedNow = postId ? null : home.data?.pinned?.title ?? null;
   // The form asks before it lets go of something written; until it is mounted, closing is plain.
   const requestClose = React.useRef<() => void>(() => onOpenChange(false));
   React.useEffect(() => {
@@ -166,7 +169,7 @@ export const PostEditorDialog: React.FC<{ open: boolean; onOpenChange: (open: bo
               postId={postId}
               initial={edit.data ? draftFromEdit(edit.data) : emptyPostDraft()}
               status={edit.data?.status ?? null}
-              pinnedElsewhereTitle={edit.data?.pinnedElsewhereTitle ?? null}
+              pinnedElsewhereTitle={edit.data?.pinnedElsewhereTitle ?? pinnedNow}
               onClose={() => onOpenChange(false)}
               registerClose={(close) => {
                 requestClose.current = close;

@@ -57,6 +57,19 @@ describe("the words of an automation", () => {
     );
   });
 
+  // WALK_QUESTIONS § 32 (a): a chosen time is on the card; the default 09:00 is not.
+  it("adds a step's time of day when it is not the default", () => {
+    const later = (at?: string): StepSpec => ({
+      id: "s1",
+      type: "NOTIFY",
+      recipients: [{ kind: "MANAGER" }],
+      when: { mode: "LATER", days: 3, direction: "AFTER", countedFrom: "HIRE_DATE", ...(at ? { at } : {}) },
+    });
+    expect(nb(words.stepSubtitle(later("10:00")) ?? "")).toContain("3 days after the hire date, at 10:00");
+    expect(nb(words.stepSubtitle(later("09:00")) ?? "")).not.toContain("09:00");
+    expect(nb(words.stepSubtitle(later()) ?? "")).not.toContain(", at");
+  });
+
   it("names a notification by its recipients, and a wait by what it waits for", () => {
     expect(words.stepTitle({ id: "s1", type: "NOTIFY", recipients: [{ kind: "ROLE", roleId: "r-hr" }, { kind: "MANAGER" }] })).toBe(
       "Tell HR Admin and their manager",

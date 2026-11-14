@@ -10,7 +10,7 @@ import { FilterChip } from "@/components/ui/FilterChip";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import type { PostCard, PostType } from "@/models/hub";
-import { useHubPosts } from "../hooks";
+import { useHubHome, useHubPosts } from "../hooks";
 import { BackLink, HubPage, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
 import { useFeedScope } from "./HomeParts";
 import { FeedScopeSwitch } from "./HubHomeContainer";
@@ -47,7 +47,10 @@ export const NewsContainer: React.FC = () => {
   const sentinel = React.useRef<HTMLDivElement>(null);
 
   const items = React.useMemo(() => posts.data?.pages.flatMap((p) => p.items) ?? [], [posts.data]);
-  const pinned = !q && !type ? items.find((p) => p.pinned) ?? null : null;
+  // The pinned post is the company's one message to everybody: it stays on top under "For me" as well, where the list
+  // itself holds only what is written to the reader (WALK_QUESTIONS § 34 (a)). The hub's home answers it either way.
+  const home = useHubHome(scope);
+  const pinned = !q && !type ? items.find((p) => p.pinned) ?? (scope === "FOR_ME" ? home.data?.pinned ?? null : null) : null;
   const rest = pinned ? items.filter((p) => p.id !== pinned.id) : items;
   const groups = groupByMonth(rest);
   const filtered = Boolean(q) || type !== null;
@@ -96,7 +99,7 @@ export const NewsContainer: React.FC = () => {
           <LoadingBlock skeleton={<SkeletonRows count={6} height="h-20" />} />
         ) : posts.isError ? (
           <ErrorState error={posts.error} title={t("news.error")} onRetry={() => void posts.refetch()} />
-        ) : items.length === 0 ? (
+        ) : items.length === 0 && !pinned ? (
           filtered ? (
             <NoResults
               scene="no-match-s"

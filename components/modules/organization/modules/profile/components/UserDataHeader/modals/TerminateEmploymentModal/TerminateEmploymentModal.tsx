@@ -67,6 +67,8 @@ export type TerminateSubmission = {
   lastWorkingDay: string;
   reason: TerminationReason;
   rehireEligible: boolean;
+  /** The company is sorry to lose them — the regrettable split of turnover in reports (WALK_QUESTIONS § 36 (a)). */
+  regrettable: boolean;
   note: string | null;
   /** Whom the leaver's decisions go to; a null group goes to its default. */
   reassign: LeaverReassignment;
@@ -103,6 +105,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
   const [lastWorkingDay, setLastWorkingDay] = useState(today);
   const [reason, setReason] = useState<TerminationReason>("VOLUNTARY");
   const [rehireEligible, setRehireEligible] = useState(true);
+  const [regrettable, setRegrettable] = useState(false);
   const [note, setNote] = useState("");
   const [reassign, setReassign] = useState<LeaverReassignmentChoice>(NO_REASSIGNMENT);
   const [tried, setTried] = useState(false);
@@ -113,6 +116,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
     setLastWorkingDay(today());
     setReason("VOLUNTARY");
     setRehireEligible(true);
+    setRegrettable(false);
     setNote("");
     setReassign(NO_REASSIGNMENT);
   }, [isOpen]);
@@ -136,6 +140,7 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
       lastWorkingDay,
       reason,
       rehireEligible,
+      regrettable,
       note: note.trim() || null,
       reassign: {
         requestsTo: reassign.requestsTo?.id ?? null,
@@ -209,6 +214,23 @@ export const TerminateEmploymentModal: FC<TerminateEmploymentModalProps> = ({
               checked={rehireEligible}
               disabled={isLoading}
               onCheckedChange={setRehireEligible}
+            />
+          </div>
+
+          {/* Decided at the moment of leaving, by the same person (WALK_QUESTIONS § 36 (a)); without it the
+              regrettable turnover rate is always zero. */}
+          <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
+            <div>
+              <Label htmlFor="regrettable" className="text-body">{t("profile.terminate.regrettable")}</Label>
+              <p className="text-hint text-tertiary">
+                {t("profile.terminate.regrettableHint")}
+              </p>
+            </div>
+            <Switch
+              id="regrettable"
+              checked={regrettable}
+              disabled={isLoading}
+              onCheckedChange={setRegrettable}
             />
           </div>
 

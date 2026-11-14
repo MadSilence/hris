@@ -1,6 +1,6 @@
 import type { AutomationDefinition, StepSpec } from "@/models/automations";
 import { emptyDefinition, newStep } from "@/components/modules/automations/model/tree";
-import { cardHeight, fitViewport, layoutTree, nearestSpot, stepNodeId, TRIGGER_NODE_ID } from "./layout";
+import { cardHeight, FIT_ZOOM_MIN, fitViewport, layoutTree, nearestSpot, stepNodeId, TRIGGER_NODE_ID } from "./layout";
 
 const step = (id: string, over: Partial<StepSpec> = {}): StepSpec => ({ ...newStep(id, "NOTIFY"), ...over });
 const def = (steps: StepSpec[], trigger: AutomationDefinition["trigger"] = { type: "PERSON_HIRED" }): AutomationDefinition => ({
@@ -121,5 +121,14 @@ describe("fitViewport", () => {
     expect(fitted.zoom).toBe(0.9);
     // Centred across the free width.
     expect(fitted.x).toBeCloseTo(400 + (640 - 680 * 0.9) / 2);
+  });
+
+  // WALK_QUESTIONS § 31 (a): with both windows open, an approval and a three-path split once fitted at 40 % — unreadable.
+  it("stops at the editor's readable floor for a wide tree, and the rest scrolls", () => {
+    const wide = { x: 0, y: 0, width: 1700, height: 900 };
+    const free = { left: 400, right: 360, top: 100, bottom: 80 };
+
+    expect(fitViewport(wide, { width: 1400, height: 900 }, free).zoom).toBeLessThan(0.75);
+    expect(fitViewport(wide, { width: 1400, height: 900 }, free, { min: FIT_ZOOM_MIN, max: 1 }).zoom).toBe(0.75);
   });
 });

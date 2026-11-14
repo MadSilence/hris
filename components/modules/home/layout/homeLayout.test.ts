@@ -28,8 +28,16 @@ const ALL = [WAITING, TIME_OFF, NEXT, TASKS, WEEK, PROCESSES];
 const shape = (placed: { widget: ArrangeableWidget; size: string }[]) => placed.map((p) => `${p.widget.id}:${p.size}`);
 
 describe("home's arrangement", () => {
+  it("shows a widget that cannot be removed even where an older arrangement saved it hidden", () => {
+    const locked = { ...WAITING, locked: true };
+    const placed = arrangeHome([locked, TASKS], [{ id: "my-tasks", hidden: false, size: "L" }, { id: "waiting-on-you", hidden: true }], "EMPLOYEE");
+    expect(shape(placed)).toEqual(["my-tasks:L", "waiting-on-you:L"]);
+  });
+
   it("is the role's default until the person arranges it, trimmed to what they may see", () => {
-    expect(shape(arrangeHome(ALL, [], "EMPLOYEE"))).toEqual(["my-tasks:L", "my-time-off:M", "celebrations:M", "next-time-off:S"]);
+    // Waiting on you leads everybody's home (WALK_QUESTIONS § 35 (a)).
+    expect(shape(arrangeHome(ALL, [], "EMPLOYEE"))).toEqual(
+      ["waiting-on-you:L", "my-time-off:M", "celebrations:M", "my-tasks:L", "next-time-off:S"]);
     expect(shape(arrangeHome([TIME_OFF, TASKS], null, "HR"))).toEqual(["my-time-off:M", "my-tasks:L"]);
   });
 

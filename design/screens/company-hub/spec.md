@@ -303,7 +303,8 @@ Q-9 (who manages the hub), Q-10 (what the ask box answers from) and Q-13 ("For m
 
 - **Where to see it:** `/hub`, `/hub/news`, `/hub/news/{id}`, `/hub/to-agree` — `components/modules/hub/reader/` (`HubHomeContainer`, `NewsContainer`). Built 2026-11-12; walked by the assistant the same day with the window hidden — **not yet looked at by a person**.
 - **Differs from the design:**
-  - On `/hub` the pinned post stays on top under *For me* while *All news* hides it — open, `WALK_QUESTIONS.md` § 34 in `(claude)/development_plan/`.
+  - The pinned post stays on top under *For me* on both `/hub` and *All news* (answered 2026-11-14, `WALK_QUESTIONS.md` § 34 (a)).
+  - The celebration tiles read "Today · {team}" — the person's first team by name, "Today" alone when they are in none or the reader may not see teams (B4, 2026-11-14).
   - "Ask noddo" in the ask box finds pages and posts only; there is no assistant yet, so no answer row.
   - The *Company news* widget on Home (Q-12) is not built; its settings toggle is hidden.
 - **Images of the real screen:** not added — the walk's window was hidden.
