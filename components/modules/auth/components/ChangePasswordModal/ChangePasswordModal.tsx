@@ -14,25 +14,22 @@ import { FormError } from "@/components/feedback/FormError";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal/ConfirmCancelModal";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { clearPermissionsStorage } from "@/components/auth/permissionsStorage";
-import {
-  type AuthTranslator,
-  buildPasswordSchema,
-  type PasswordValues,
-} from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
+import { type AuthTranslator, newPasswordSchema } from "@/components/modules/auth/password/passwordRules";
 import { changePasswordAction } from "@/components/modules/auth/actions/changePasswordAction";
 import { useLogoutAction } from "@/components/modules/auth/hooks/useLogoutAction";
 import { FieldError } from "@/components/desact/field-error";
 
-export type ChangePasswordValues = PasswordValues & { currentPassword: string };
+export type ChangePasswordValues = { currentPassword: string; password: string };
 
-const EMPTY: ChangePasswordValues = { currentPassword: "", password: "", confirmPassword: "" };
+const EMPTY: ChangePasswordValues = { currentPassword: "", password: "" };
 
 /** The refusal for a wrong current password; the backend binds it to `currentPassword`. */
 const CURRENT_PASSWORD_WRONG = "AUTH00004";
 
-/** The new password follows the signup rule; the current one only has to be there. */
-export const buildChangePasswordSchema = (t: AuthTranslator) => buildPasswordSchema(t).shape({
+/** The new password follows the one rule (12 characters, no composition, no confirm); the current one only has to be there. */
+export const buildChangePasswordSchema = (t: AuthTranslator) => yup.object({
   currentPassword: yup.string().required(t("changePassword.validation.currentRequired")).nonNullable(),
+  password: newPasswordSchema(t),
 });
 
 /** Wrapped so tests can observe the redirect: jsdom's location is read-only. */
@@ -163,10 +160,8 @@ export function ChangePasswordModal({ open, onCloseAction }: Props) {
             <div className="space-y-4 py-4">
               {field("currentPassword", "change-password-current", t("changePassword.currentPassword"), "current-password")}
               {field("password", "change-password-new", t("changePassword.newPassword"), "new-password")}
-              {field("confirmPassword", "change-password-confirm", t("password.confirmLabel"), "new-password")}
-
               <p className="text-hint text-tertiary">
-                {t("password.rule")}
+                {t("fields.passwordHint")}
               </p>
 
               <FormError message={error} />

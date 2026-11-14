@@ -73,12 +73,14 @@ async function refreshSession(): Promise<boolean> {
  * Wrapped so tests can observe the redirect: jsdom's location is read-only.
  *
  * Carries the page along, the way the middleware does for a request with no session at all, so signing
- * in again returns to it. The login page decides whether it is a page it will follow.
+ * in again returns to it. The login page decides whether it is a page it will follow. `reason=ended` makes the
+ * login say why the person is there (sign-in-link-pages N3) — the middleware's redirect, for somebody who never had a
+ * session, says nothing.
  */
 export const sessionNavigation = {
   redirectToLogin() {
     const next = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(`/login?${new URLSearchParams({ next }).toString()}`);
+    window.location.assign(`/login?${new URLSearchParams({ next, reason: "ended" }).toString()}`);
   },
 };
 

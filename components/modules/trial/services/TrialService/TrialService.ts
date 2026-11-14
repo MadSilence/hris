@@ -1,32 +1,37 @@
 import { InternalApiClient } from "@/components/clients/apiClient";
 
-export type StartTrialPayload = {
-    email: string;
-    firstName: string;
-    lastName: string;
-    companyName: string;
-    consent: boolean;
-};
-
-export type ConfirmTrialPayload = {
-  token: string | null;
+/** The company's details after the code (sign-in-registration B2a). */
+export type RegistrationDetails = {
+  firstName: string;
+  lastName: string;
+  companyName: string;
   password: string;
-}
-
-/** The new owner, and the address their company signs in at. */
-export type ConfirmTrialResult = {
-  id: string;
-  subdomain: string;
 };
 
+/**
+ * Registration by code (sign-in-registration B1 → B2 → B2a). The cookies — the browser a code is bound to, and the
+ * draft after the right code — are the BFF's; this only says what was typed.
+ */
 export class TrialService {
-    constructor(private readonly apiClient: InternalApiClient) {}
+  constructor(private readonly apiClient: InternalApiClient) {}
 
-    public async startTrial(payload: StartTrialPayload): Promise<Response> {
-        return this.apiClient.post<Response>("/auth/register", payload);
-    }
+  /** B1, and B2's resend: a six-digit code to the address. */
+  public async sendCode(email: string): Promise<void> {
+    await this.apiClient.post("/auth/register/code", { email });
+  }
 
-    public async confirmTrial(payload: ConfirmTrialPayload): Promise<ConfirmTrialResult> {
-      return this.apiClient.post<ConfirmTrialResult>("/auth/register/confirm", payload);
-    }
+  /** B2: the code. */
+  public async verifyCode(email: string, code: string): Promise<void> {
+    await this.apiClient.post("/auth/register/verify", { email, code });
+  }
+
+  /** B3: the company from a Google or Microsoft draft — no password; answers the new company's own address. */
+  public async completeWithProvider(details: Omit<RegistrationDetails, "password">): Promise<{ next: string }> {
+    return this.apiClient.post<{ next: string }>("/auth/register/provider-complete", details);
+  }
+
+  /** B2a: the company; answers where the browser goes next — the new company's own address. */
+  public async complete(details: RegistrationDetails): Promise<{ next: string }> {
+    return this.apiClient.post<{ next: string }>("/auth/register/complete", details);
+  }
 }

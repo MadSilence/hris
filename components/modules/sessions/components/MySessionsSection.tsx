@@ -21,6 +21,10 @@ const METHOD_LABEL = {
   PASSWORD: "sessions.method.password",
   OIDC: "sessions.method.sso",
   SAML: "sessions.method.sso",
+  // A login by Google, Microsoft or an emailed code showed the bare namespace, "auth" (live walk of 2026-11-13).
+  GOOGLE: "sessions.method.google",
+  MICROSOFT: "sessions.method.microsoft",
+  EMAIL_CODE: "sessions.method.emailCode",
 } as const satisfies Record<SessionDTO["authMethod"], string>;
 
 /**

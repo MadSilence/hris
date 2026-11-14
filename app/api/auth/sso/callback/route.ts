@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { finishSignIn, ssoFailed, ssoService } from "@/api/modules/sso";
 import publicConfig from "@/config/publicConfig";
 import { SSO_STATE_COOKIE, TRUSTED_DEVICE_COOKIE } from "@/config/security/sessionCookieNames";
-import { parseHost, requestHost } from "@/lib/companyAddress";
+import { parseHost, requestHost, requestOrigin } from "@/lib/companyAddress";
 
 /**
  * The IdP sends the browser back here with `code` and `state` (and `iss`, RFC 9207). Java checks them
@@ -12,7 +12,7 @@ import { parseHost, requestHost } from "@/lib/companyAddress";
 export const GET = async (req: NextRequest) => {
   const host = parseHost(requestHost(req.headers), publicConfig.web.rootDomain);
   // `request.url` is the URL before a middleware rewrite (hris/CLAUDE.md): build redirects from the host.
-  const origin = new URL(req.url).origin;
+  const origin = requestOrigin(req.headers, publicConfig.web);
   if (host.kind !== "company") return ssoFailed(origin);
   const store = await cookies();
   const params = req.nextUrl.searchParams;

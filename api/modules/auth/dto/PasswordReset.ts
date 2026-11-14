@@ -13,6 +13,10 @@ export type CompanyAddressReminderRequest = {
 /** Who a reset link is for — enough to greet them, nothing more. */
 export type PasswordResetPeekResponse = {
   firstName: string | null;
+  /** The address the link is for (F3). */
+  email: string | null;
+  /** The person's own Google / Microsoft accounts this reset disconnects (F4). */
+  connectedProviders?: Array<"GOOGLE" | "MICROSOFT">;
   /** The account is locked and has a second factor: the page asks for a code too (M5). */
   codeRequired?: boolean;
 };

@@ -22,11 +22,10 @@ beforeEach(() => {
   jest.spyOn(passwordChangeNavigation, "toLogin").mockImplementation(() => undefined);
 });
 
-const fillAndSubmit = async (current: string, next: string, confirm: string) => {
+const fillAndSubmit = async (current: string, next: string) => {
   const user = userEvent.setup();
   if (current) await user.type(screen.getByLabelText(/^current password/i), current);
-  await user.type(screen.getByLabelText(/^new password/i), next);
-  await user.type(screen.getByLabelText(/^confirm password/i), confirm);
+  await user.type(screen.getByLabelText(/^new password/i), next);
   await user.click(screen.getByRole("button", { name: "Change password" }));
 };
 
@@ -34,7 +33,7 @@ describe("ChangePasswordModal", () => {
   it("needs the current password", async () => {
     render(<ChangePasswordModal open onCloseAction={jest.fn()} />);
 
-    await fillAndSubmit("", "Password1!", "Password1!");
+    await fillAndSubmit("", "tram lilac river");
 
     expect(await screen.findByText("Please enter your current password.")).toBeInTheDocument();
     expect(mockedChange).not.toHaveBeenCalled();
@@ -49,7 +48,7 @@ describe("ChangePasswordModal", () => {
     });
     render(<ChangePasswordModal open onCloseAction={jest.fn()} />);
 
-    await fillAndSubmit("Wrong1!!", "Password1!", "Password1!");
+    await fillAndSubmit("Wrong1!!", "tram lilac river");
 
     // Under the field (the field's own error), not in a toast that slides away.
     const field = await screen.findByText("The current password is not correct.");
@@ -61,10 +60,10 @@ describe("ChangePasswordModal", () => {
   it("sends exactly the two fields, then signs out and goes to the sign-in screen", async () => {
     render(<ChangePasswordModal open onCloseAction={jest.fn()} />);
 
-    await fillAndSubmit("OldPass1!", "Password1!", "Password1!");
+    await fillAndSubmit("OldPass1!", "tram lilac river");
 
     await waitFor(() =>
-      expect(mockedChange).toHaveBeenCalledWith({ currentPassword: "OldPass1!", newPassword: "Password1!" }),
+      expect(mockedChange).toHaveBeenCalledWith({ currentPassword: "OldPass1!", newPassword: "tram lilac river" }),
     );
     await waitFor(() => expect(passwordChangeNavigation.toLogin).toHaveBeenCalled());
     expect(logout).toHaveBeenCalled();

@@ -325,17 +325,17 @@
     },
     "accountLocked": {
       "title": "Account locked",
-      "message": "{name}'s account was locked after too many failed sign-in attempts. Send them a password reset to unlock it."
+      "message": "{name}'s account was locked after too many failed login attempts. Send them a password reset to unlock it."
     },
     "securityChanged": {
-      "title": "Sign-in security changed",
+      "title": "Login security changed",
       "scimBlockRefused": "The identity provider tried to block {whom}. A System Owner is never blocked that way.",
-      "mfaReset": "{who} reset {whom}'s two-step sign-in.",
-      "mfaPolicyChanged": "{who} changed who must use two-step sign-in.",
+      "mfaReset": "{who} reset {whom}'s two-step login.",
+      "mfaPolicyChanged": "{who} changed who must use two-step login.",
       "identityConnectionUpdated": "{who} changed single sign-on.",
       "scimTokenIssued": "{who} issued a provisioning token.",
       "idpGroupRolesChanged": "{who} changed the roles an identity provider group grants.",
-      "other": "{who} changed sign-in security."
+      "other": "{who} changed login security."
     },
     "reviewCycleLaunched": {
       "title": "Reviews to write",
@@ -432,6 +432,6 @@
     "undone": "These emails are back on.",
     "settings": "Email settings",
     "invalidTitle": "This link no longer works",
-    "invalidBody": "Sign in and change what you get by email in your notification settings."
+    "invalidBody": "Log in and change what you get by email in your notification settings."
   }
 }

@@ -39,6 +39,7 @@ const AppRootLayout: React.FC<AppRootLayoutProps> = async ({ children }) => {
       lang={locale}
       data-theme="light"
       data-accent={accent["data-accent"]}
+      data-accent-tone={accent["data-accent-tone"]}
       style={accent.style as React.CSSProperties | undefined}
       className={fontVariables}
       suppressHydrationWarning

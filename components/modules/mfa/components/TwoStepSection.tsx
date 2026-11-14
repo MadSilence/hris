@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FieldError } from "@/components/desact/field-error";
 import { useTranslations } from "next-intl";
 import { ComputerIcon, Key01Icon } from "@hugeicons/core-free-icons";
@@ -36,6 +37,7 @@ import {
   startMfaEnrolmentAction,
 } from "@/components/modules/mfa/actions";
 import { withStepUpAction } from "@/components/modules/mfa/stepUp";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { BackupCodesSheet, CodeField, TotpEnrolment } from "./MfaPieces";
 
 type Dialogs = "setup" | "disable" | "codes" | null;
@@ -179,13 +181,24 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
     }
   }, [open]);
 
+  // Somebody with no password (Google, Microsoft, the company's provider) confirms it is them by step-up instead.
+  const { internalApiClient } = useAppDataContext();
+  const ways = useQuery<{ hasPassword: boolean }>({
+    queryKey: ["ME", "SIGN_IN"],
+    queryFn: () => internalApiClient.get<{ hasPassword: boolean }>("/me/sign-in"),
+    enabled: open,
+  });
+  const noPassword = ways.data?.hasPassword === false;
+
   const start = async (e: React.FormEvent) => {
     e.preventDefault();
     setTriedSetup(true);
-    if (!password) return;
+    if (!password && !noPassword) return;
     setBusy(true);
     setError(null);
-    const res = await startMfaEnrolmentAction(password);
+    const res = noPassword
+      ? await withStepUpAction(() => startMfaEnrolmentAction(""))
+      : await startMfaEnrolmentAction(password);
     setBusy(false);
     if (res.status === ActionStatus.SUCCESS && res.data) setEnrolment(res.data);
     else setError(res.errorMessage ?? null);
@@ -206,7 +219,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
         <DialogHeader>
           <DialogTitle>{t("mfaSignIn.enrol.title")}</DialogTitle>
           <DialogDescription>
-            {codes ? t("mfa.setup.on") : enrolment ? t("mfa.setup.addAccount") : t("mfa.setup.enterPassword")}
+            {codes ? t("mfa.setup.on") : enrolment ? t("mfa.setup.addAccount") : noPassword ? t("mfa.setup.confirmFirst") : t("mfa.setup.enterPassword")}
           </DialogDescription>
         </DialogHeader>
         {codes ? (
@@ -221,7 +234,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
           </div>
         ) : (
           <form method="post" className="space-y-4" onSubmit={start}>
-            <div className="space-y-2">
+            {!noPassword && <div className="space-y-2">
               <RequiredLabel htmlFor="mfa-setup-password" required>{t("login.passwordLabel")}</RequiredLabel>
               <Input
                 id="mfa-setup-password"
@@ -233,7 +246,7 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
                 autoFocus
               />
               <FieldError>{triedSetup && !password ? tCommonSetup("validation.enterPassword") : null}</FieldError>
-            </div>
+            </div>}
             <FormError message={error} />
             <Button type="submit" className="w-full" disabled={busy}>{busy ? t("mfa.setup.continueBusy") : t("mfa.setup.continue")}</Button>
           </form>

@@ -149,14 +149,22 @@ export const EditHome: React.FC<{
   available: HomeWidgetDefinition[];
   start: Placed[];
   header: HomeHeaderStyle;
+  /** The company's default header (Appearance's background), what Reset goes back to. */
+  headerDefault?: HomeHeaderStyle;
   role: HomeRole;
   stored: HomeWidgetPlacement[];
   onClose: () => void;
-}> = ({ available, start, header: startHeader, role, stored, onClose }) => {
+}> = ({ available, start, header: startHeader, headerDefault = "COLOUR", role, stored, onClose }) => {
   const t = useTranslations("home");
   const save = useSaveHomeSettings();
   const [placed, setPlaced] = useState<Placed[]>(start);
-  const [header, setHeader] = useState<HomeHeaderStyle>(startHeader);
+  const [header, setHeaderState] = useState<HomeHeaderStyle>(startHeader);
+  /** After Reset the header follows the company again, until the person picks one (sign-in-appearance, Q-26). */
+  const [followCompany, setFollowCompany] = useState(false);
+  const setHeader = (next: HomeHeaderStyle) => {
+    setHeaderState(next);
+    setFollowCompany(false);
+  };
   const [selected, setSelected] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const [dragging, setDragging] = useState<Dragging>(null);
@@ -193,7 +201,8 @@ export const EditHome: React.FC<{
   const reset = () => {
     const before = { placed, header };
     setPlaced(defaultHome(available, role));
-    setHeader("COLOUR");
+    setHeaderState(headerDefault);
+    setFollowCompany(true);
     toast.success(t("edit.toasts.reset"), {
       action: {
         label: t("card.undo"),
@@ -208,7 +217,11 @@ export const EditHome: React.FC<{
   const doSave = () => {
     if (save.isPending) return;
     save.mutate(
-      { homeLayout: toPlacements(placed, available, stored), homeHeader: header },
+      {
+        homeLayout: toPlacements(placed, available, stored),
+        // Sent only when it changed: a save of the widgets alone must not pin the company's default as a choice.
+        ...(followCompany ? { homeHeader: "DEFAULT" as const } : header !== startHeader ? { homeHeader: header } : {}),
+      },
       {
         onSuccess: () => {
           toast.success(t("edit.toasts.saved"));

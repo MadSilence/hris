@@ -20,6 +20,16 @@ export class HrisIdentityService {
     return hrisApiClient.put<IdentityConnectionDTO, IdentityConnectionUpdate>(`${BASE}/connection`, body);
   }
 
+  /** *Remove* (E-Q9): the connection and every link it carried. */
+  public async removeConnection() {
+    await hrisApiClient.delete<void>(`${BASE}/connection`);
+  }
+
+  /** One person's link to the company's provider (E-Q9). */
+  public async unlinkPerson(userId: string) {
+    await hrisApiClient.delete<void>(`${BASE}/links/${userId}`);
+  }
+
   public test() {
     return hrisApiClient.post<TestResultDTO>(`${BASE}/connection/test`);
   }

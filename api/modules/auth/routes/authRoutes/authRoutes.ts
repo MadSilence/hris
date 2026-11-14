@@ -1,6 +1,6 @@
 import type { HrisApiAuthService } from "@/api/modules/auth/services/hrisAuthService";
 import { hrisApiAuthService } from "@/api/modules/auth/services/hrisAuthService";
-import { CompleteRegisterRequest, LoginRequest, RegisterRequest } from "@/api/modules/auth/dto";
+import { LoginRequest } from "@/api/modules/auth/dto";
 import { BadRequestError } from "@/components/clients/exceptions";
 import {
   hrisAuthSessionService,
@@ -28,28 +28,6 @@ export class AuthRoutes {
     }
 
     return hrisAuthSessionService.login(payload, trustedDeviceToken);
-  }
-
-  public async register(payload: RegisterRequest) {
-    if (
-      !payload?.consent ||
-      !payload?.email ||
-      !payload?.firstName ||
-      !payload?.lastName ||
-      !payload?.companyName
-    ) {
-      throw new BadRequestError("Validation error.");
-    }
-
-    return this.hrisApiAuthService.register(payload);
-  }
-
-  public async completeRegister(payload: CompleteRegisterRequest) {
-    if (!payload?.password || !payload?.token) {
-      throw new BadRequestError("Validation error.");
-    }
-
-    return this.hrisApiAuthService.completeRegister(payload);
   }
 }
 

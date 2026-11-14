@@ -20,8 +20,10 @@ export type UserSettingsDTO = {
   delegateApprovalsOnLeave: boolean;
   /** How this person arranged their home, in their order; empty is the default arrangement. */
   homeLayout: HomeWidgetPlacement[];
-  /** Home's header: the accent band or plain white. */
+  /** Home's header: the accent band or plain white — the person's own choice, else `homeHeaderDefault`. */
   homeHeader: HomeHeaderStyle;
+  /** The company's default for it, from Appearance's background (sign-in-appearance § "Light"). */
+  homeHeaderDefault?: HomeHeaderStyle;
   /** The cards of Home's deck this person skipped, the last skipped last. */
   homeSkipped: string[];
   /** Whether Home shows this person's birthday (day and month, never the year); on unless switched off. */
@@ -40,7 +42,8 @@ export type UpdateUserSettingsRequest = {
   delegateApprovalsOnLeave?: boolean;
   /** The whole arrangement of home; an empty list goes back to the default. */
   homeLayout?: HomeWidgetPlacement[];
-  homeHeader?: HomeHeaderStyle;
+  /** The person's own header; `DEFAULT` forgets it, and Home follows the company again. */
+  homeHeader?: HomeHeaderStyle | "DEFAULT";
   /** The deck's whole skip order; an empty list forgets every skip. */
   homeSkipped?: string[];
   showBirthdayOnHome?: boolean;

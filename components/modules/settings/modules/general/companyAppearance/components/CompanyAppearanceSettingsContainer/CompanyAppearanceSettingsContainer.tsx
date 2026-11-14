@@ -3,69 +3,104 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 
-import { CompanyAppearanceSettingsComponent } from "@/components/modules/settings/modules/general/companyAppearance/components/CompanyAppearanceSettingsComponent";
+import { AppearancePage } from "@/components/modules/settings/modules/general/companyAppearance/components/AppearancePage";
+import { acceptableLogo } from "@/components/modules/settings/modules/general/companyAppearance/components/LogoDropZone";
 import {
+  isRefusedFile,
   useCompanyAppearance,
-  useDeleteLoginImage,
+  useDeleteCompanyLogo,
   useUpdateCompanyAppearance,
-  useUploadLoginImage,
+  useUploadCompanyLogo,
 } from "@/components/modules/settings/modules/general/companyAppearance/hooks/useCompanyAppearance";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
-import type { UpdateCompanyAppearanceRequest } from "@/api/modules/company/modules/appearance/dto";
-import { FormError } from "@/components/feedback/FormError";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { companyHost } from "@/lib/companyAddress";
+import { showError } from "@/lib/errors/errorToast";
+import { ErrorState } from "@/components/feedback/ErrorState";
 
-const errorMessageOf = (error: unknown) => (error instanceof Error ? error.message : null);
+/** Loading (L6): skeletons with shimmer — the column, the ring grid, the stage window. */
+function AppearanceLoading() {
+  return (
+    <div className="flex h-[calc(100svh-6rem)] gap-14 pl-12" aria-busy="true">
+      <div className="flex w-[420px] shrink-0 flex-col gap-8 pt-14">
+        <div className="h-24 shimmer rounded-card bg-subtle" />
+        <div className="h-24 shimmer rounded-card bg-subtle" />
+        <div className="h-40 shimmer rounded-card bg-subtle" />
+      </div>
+      <div className="appearance-stage flex-1 shimmer" />
+    </div>
+  );
+}
 
 export default function CompanyAppearanceSettingsContainer() {
-  const { data: appearance, isLoading, error } = useCompanyAppearance();
-  const { company } = useCompanyData();
   const t = useTranslations("settings.appearance");
+  const { data: appearance, isLoading, error, refetch } = useCompanyAppearance();
+  const { company } = useCompanyData();
+  const web = useAppDataContext().envConfig?.web;
+  const canEdit = useCanAccess("SETTINGS.GENERAL", "EDIT");
+  const canChangeLogo = useCanAccess("SETTINGS.GENERAL", "MANAGE");
 
-  const updateAppearance = useUpdateCompanyAppearance();
-  const uploadLoginImage = useUploadLoginImage();
-  const deleteLoginImage = useDeleteLoginImage();
+  const update = useUpdateCompanyAppearance();
+  const upload = useUploadCompanyLogo();
+  const remove = useDeleteCompanyLogo();
+  const [uploading, setUploading] = React.useState<string | null>(null);
+  const [refused, setRefused] = React.useState(false);
 
-  if (isLoading || (!appearance && !error)) {
-    return (
-      <div className="grid h-[calc(100svh-6rem)] grid-cols-2 gap-10 px-12">
-        <div className="h-full shimmer rounded-popover bg-subtle"/>
-        <div className="h-full shimmer rounded-popover bg-subtle"/>
-      </div>
-    );
-  }
+  if (isLoading || (!appearance && !error)) return <AppearanceLoading />;
 
   if (!appearance) {
     return (
-      <FormError message={errorMessageOf(error) ?? t("loadFailed")} />
+      <ErrorState error={error} title={t("loadFailed.title")} message={t("loadFailed.body")} onRetry={() => void refetch()} />
     );
   }
 
-  // Hands back what was saved, so the form holds the version the save produced for its next save.
-  const handleSave = async (body: UpdateCompanyAppearanceRequest) => updateAppearance.mutateAsync(body);
+  const companyName = company?.name ?? "";
+  const subdomain = company?.subdomain ?? "";
 
-  const handleUpload = async (file: File) => {
-    await uploadLoginImage.mutateAsync(file);
+  const onUploadLogo = async (file: File) => {
+    setRefused(false);
+    if (!acceptableLogo(file)) {
+      setRefused(true);
+      throw new Error("refused");
+    }
+    setUploading(file.name);
+    try {
+      await upload.mutateAsync(file);
+    } catch (failure) {
+      if (isRefusedFile(failure)) setRefused(true);
+      else showError(failure);
+      throw failure;
+    } finally {
+      setUploading(null);
+    }
   };
 
-  const handleRemove = async () => {
-    await deleteLoginImage.mutateAsync();
+  const onRemoveLogo = async () => {
+    setRefused(false);
+    try {
+      await remove.mutateAsync();
+    } catch (failure) {
+      showError(failure);
+      throw failure;
+    }
   };
 
   return (
-    <CompanyAppearanceSettingsComponent
-      // Remounts the form when the saved state changes, so its draft restarts from the new baseline.
-      key={`${appearance.accent ?? "default"}|${appearance.loginImageUrl ?? ""}`}
+    <AppearancePage
       appearance={appearance}
-      companyName={company?.name}
-      logoUrl={company?.companyLogo}
-      onSave={handleSave}
-      onUploadLoginImage={handleUpload}
-      onRemoveLoginImage={handleRemove}
-      saving={updateAppearance.isPending}
-      uploadingImage={uploadLoginImage.isPending}
-      removingImage={deleteLoginImage.isPending}
-      saveError={errorMessageOf(updateAppearance.error)}
-      imageError={errorMessageOf(uploadLoginImage.error) ?? errorMessageOf(deleteLoginImage.error)}
+      companyName={companyName}
+      logoUrl={company?.companyLogo ?? null}
+      address={web && subdomain ? companyHost(subdomain, web) : subdomain}
+      canEdit={canEdit}
+      canChangeLogo={canChangeLogo}
+      onSave={(body) => update.mutateAsync(body)}
+      saving={update.isPending}
+      saveError={update.error}
+      onUploadLogo={onUploadLogo}
+      onRemoveLogo={onRemoveLogo}
+      uploadingLogo={uploading}
+      logoRefused={refused}
     />
   );
 }

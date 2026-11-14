@@ -1,0 +1,3170 @@
+# Words — sign-in-appearance
+
+
+## LP-Final — Presets — final
+
+- Presets — final
+- Nine on the grid, in this order, plus “Your own”. Wine is what a company starts with.
+- Wine
+- #6E1630 · white text
+- noddo’s own · the default
+- Cherry
+- #BE123C · white text
+- red
+- Tangerine
+- #C7501E · white text
+- orange · from your ref
+- Sunflower
+- #F5C518 · graphite text
+- yellow · text on it is Graphite
+- Basil
+- #2E7D32 · white text
+- green
+- Indigo
+- #4338CA · white text
+- blue
+- Ocean
+- #0369A1 · white text
+- blue, towards cyan
+- Mulberry
+- #5B2A6E · white text
+- violet
+- Black
+- #0B0B0C · white text
+- neutral · our Ink token
+- Your own
+- any #rrggbb
+- picker + colour code
+- Every preset carries white text at 4.5 : 1 or better; Sunflower is light, so on it the buttons, the login pane and Save take Graphite #2A2A2E, and links and text take the same yellow, darkened. A company colour from “Your own” is treated the same way, by contrast.
+
+## LT1-color — Login · computer · Your color
+
+- Acme
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT1-grey — Login · computer · Light
+
+- Acme
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L1-App — L1 · Inside noddo
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L1-Login — L1 · Login page
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L1-Mail — L1 · Email
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- You’re invited
+- to join Acme
+- You’ll join as anna@acme.com. Acme uses noddo for time off, approvals and everything around them.
+- Join Acme
+- The invitation works once. If you weren’t expecting it, ignore this email.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## L1-NoLogo — L1 · No logo yet
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- Drop your logo here
+- or choose a file. Until then, the first letter of Acme stands in.
+- Square PNG, JPEG or SVG, 256 × 256 px or more. Saved on upload.
+- 2
+- Pick your color
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #4A2C63
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- A
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT2-color — Login · phone · Your color
+
+- Acme
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+- powered by
+
+## LT2-grey — Login · phone · Light
+
+- Acme
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+- powered by
+
+## LT3-color — Email · moment · Your color
+
+- Acme
+- You’re invited
+- to join Acme
+- You’ll join as anna@acme.com. Acme uses noddo for time off, approvals and everything around them.
+- Join Acme
+- The invitation works once. If you weren’t expecting it, ignore this email.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## LT3-grey — Email · moment · Light
+
+- Acme
+- You’re invited
+- to join Acme
+- You’ll join as anna@acme.com. Acme uses noddo for time off, approvals and everything around them.
+- Join Acme
+- The invitation works once. If you weren’t expecting it, ignore this email.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## L2-Teal-App — L2 · Basil picked · Inside noddo
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L2-Teal-Login — L2 · Basil picked · Login page
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT4-color — Email · notice · Your color
+
+- Acme
+- Two-step login is on
+- From now on, Acme asks for a code from your authenticator app when you log in.
+- If it wasn’t you, reset your password and tell your administrator.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## LT4-grey — Email · notice · Light
+
+- Acme
+- Two-step login is on
+- From now on, Acme asks for a code from your authenticator app when you log in.
+- If it wasn’t you, reset your password and tell your administrator.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## L3-Picker — L3 · Picker open
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #2F6B8A
+- Color code
+- #2F6B8A
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L3-Invalid — L3 · Wrong code
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #2F6B8A
+- Color code
+- #2f6b8
+- Enter a color as #rrggbb, like #2f63c4.
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L3-Adjusted — L3 · Light color, adjusted
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #F2C94C
+- Text and links a little darker to stay readable
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT5-color — Home · the header · Your color
+
+- UT
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- Inbox
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- 2
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- Automations
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## LT5-grey — Home · the header · Light
+
+- UT
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- Inbox
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- 2
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- Automations
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L4-Over — L4 · Dragging a file over
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- Drop it here
+- It replaces the current logo.
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L4-Busy — L4 · Uploading
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- Uploading acme-logo-2026.svg…
+- It appears everywhere as soon as it’s in.
+- 2
+- Pick your color
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #4A2C63
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L4-Refused — L4 · Refused file
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- That file can’t be used. Upload a PNG, JPEG or SVG up to 5 MB.
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- All changes are saved.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT6-color — A logo with several colors · login · Your color
+
+- Acme
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## LT6-grey — A logo with several colors · login · Light
+
+- Acme
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L5-Busy — L5 · Saving
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Saving…
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L5-Saved — L5 · Saved
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- Saved. Everyone at Acme sees it now.
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L5-Conflict — L5 · A colleague saved in between
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- Someone else saved first. Reload to see their changes, then make yours.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L5-Failed — L5 · Couldn’t save
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- We couldn’t save your changes. Try again.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## LT7-color — A logo with several colors · Home · Your color
+
+- UT
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- Inbox
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- 2
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- Automations
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## LT7-grey — A logo with several colors · Home · Light
+
+- UT
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- Inbox
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Calendar
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- 2
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- Reviews
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- Automations
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L6-Loading — L6 · Loading
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- Inside noddo
+- Login page
+- Email
+
+## L6-Failed — L6 · Couldn’t load
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- We couldn’t load Appearance
+- Something went wrong on our side. Try again in a moment.
+- Try again
+
+## L6-ReadOnly — L6 · View only
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- Only people who can manage company settings can change Appearance.
+- 1
+- Add your logo
+- Acme’s logo
+- On the login page, in emails and in the sidebar.
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Inside noddo
+- Login page
+- Email
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L8-Close — L8 · A custom colour close to Approved
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- Your own · #0E7A54
+- Close to the color noddo uses for approvals. Statuses always show an icon and a word, so they stay readable.
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L8-Rules — When the company colour is close to a status colour
+
+- When the company colour is close to a status colour
+- Tangerine 18° and Cherry 345° sit near Declined 5°; Emerald 163° sits 11° from Approved; Cobalt 224° is on top of In progress 225° and Info 219°. Three rules keep them apart.
+- 1 · A status never takes the company colour
+- Approved is always Pine, Declined always red, Pending always amber — in every workspace. A status is an icon and a word; colour is the third signal. SPEC § 4.5.
+- Right — Emerald workspace
+- accent #047857
+- Approved
+- Pending
+- Declined
+- Request time off
+- Wrong — the status painted in the accent
+- now “approved” and “your colour” are one thing
+- 2 · Status pills stay soft
+- A light background, dark text, an icon. Solid fills only for counters and toast icons — then a pill never reads as a button, whatever the company colour is.
+- Right
+- Save
+- Wrong — solid pills beside a solid button
+- 3 · In a red workspace a dangerous action is outlined, not filled
+- Everywhere else the destructive button keeps its red fill. When the company colour is a red (Cherry, Tangerine, or a close “Your own”), it turns into a red outline so the two reds don’t blur.
+- Right — Cherry workspace
+- Delete the office?
+- Everything about Berlin goes with it. This cannot be undone.
+- Cancel
+- Delete
+- Wrong — two red fills
+- Keep
+
+## L7-Light-Login — L7 · Light · Login page
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one
+
+## L7-Light-Mail — L7 · Light · Email
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- You’re invited
+- to join Acme
+- You’ll join as anna@acme.com. Acme uses noddo for time off, approvals and everything around them.
+- Join Acme
+- The invitation works once. If you weren’t expecting it, ignore this email.
+- Sent by noddo on behalf of Acme
+- Acme · 12 Main Street, Warsaw · You get this because you have an account at Acme.
+
+## L7-Light-App — L7 · Light · Inside noddo
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #4A2C63
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- My profile
+- Tuesday, 10 November
+- Good afternoon, Ulia
+- ✦
+- Ask, search or tell noddo what to do
+- Request time off
+- ↑
+- Waiting on you
+- 1 of 3
+- LN
+- Lena Novak
+- wants 3 days of vacation
+- 2h ago
+- Thu 12 → Sat 14 Nov
+- RJ
+- Rūta from Design is out on 12 Nov too
+- ← Skip
+- Decline
+- Approve
+- Time off
+- My time off
+- 14.5
+- vacation days
+- Personal
+- 2 days left
+- Sick leave
+- No limit
+- 21–23 Dec
+- Pending
+- +2
+- My time
+- Started 09:02
+- 5:37
+- of 8h today
+- Finish the day
+- 3 breaks
+- 55m
+- Who’s out
+- My team
+- Everyone
+- Mon
+- 9
+- Tue
+- 10
+- Wed
+- 11
+- Thu
+- 12
+- Fri
+- 13
+- Rūta · vacation
+- Lena · vacation
+- TP
+- Tomas
+- MV
+- Marius · parental leave, back 4 Jan
+- →
+- Next time off
+- Dec
+- 4
+- 24
+- days to vacation
+- This week
+- MK
+- Marta’s birthday is today
+- Later this week
+- Tomas · 5 years
+- AS
+- Ana · joins
+- JK
+- Jonas · birthday
+- Sat
+- To sign
+- All documents
+- pending
+- Next due Fri, 13 Nov
+- My tasks
+- See all
+- Today
+- Set up Ana’s laptop
+- Onboarding · Ana Silva
+- 10:00
+- Collect Eglė’s badge
+- Offboarding · Eglė M.
+- Overdue
+- Book the welcome lunch
+- Review Q4 goals
+- 4 open · 1 overdue · 6 done this week
+- Processes3
+- All
+- Ana Silva
+- Onboarding
+- 4/12
+- EM
+- Eglė Mockutė
+- Offboarding · 1 overdue
+- 5/9
+- KB
+- Karolis Budrys
+- Preboarding · starts 16 Nov
+- 2/8
+- 128
+- runs this week
+- 1 failed today
+- Time off approval: the approver has left.
+- Fix it
+- Next
+- Probation reminder · Mon 09:00
+
+## L7-Light-Multi — L7 · Light · a logo with several colors
+
+- Acme
+- Search
+- ⌘K
+- Home
+- Inbox
+- Tasks
+- Organization
+- Calendar
+- Attendance
+- Processes
+- Reviews
+- Automations
+- Settings
+- UT
+- Ulia Tykoon
+- ula@acme.com
+- Make noddo
+- feel like Acme
+- Your logo and color go on the login page, in every email and all over noddo.
+- 1
+- Add your logo
+- acme-logo.svg
+- Drop a new one or choose a file.
+- Remove
+- 2
+- Pick your color
+- From your logo
+- #6E56CF
+- Wine
+- Cherry
+- Tangerine
+- Sunflower
+- Basil
+- Indigo
+- Ocean
+- Mulberry
+- Black
+- Your own
+- 3
+- Pick a background
+- Your color
+- Light
+- Save
+- You have unsaved changes.
+- Inside noddo
+- Login page
+- Email
+- Not saved yet
+- Live — this is what Acme sees
+- acme.noddo.so
+- powered by
+- Log in to Acme
+- Continue with Google
+- Continue with Microsoft
+- or
+- Email me a login code
+- Password
+- Forgot password?
+- Log in
+- Not your company?
+- Log in to another one

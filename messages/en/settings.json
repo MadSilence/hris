@@ -6,14 +6,12 @@
     },
     "title": "Company",
     "description": "Who your company is inside the workspace and how it keeps time. The name and description travel with every profile, document and export; the working week drives calendars, time-off balances and every date the app calculates for you.",
-    "signInAddress": "Sign-in address",
+    "signInAddress": "Login address",
     "logo": {
       "title": "Logo",
       "shown": "Shown in the sidebar and at the top of the org chart.",
       "initials": "Until one is uploaded, the initials stand in for it.",
-      "working": "Working…",
-      "replace": "Replace",
-      "upload": "Upload logo"
+      "changeInAppearance": "Change it in Appearance"
     },
     "identity": {
       "title": "Company identity",
@@ -127,7 +125,7 @@
       "title": "Remove user from role",
       "body": "This will remove <b>{name}</b> from this role.",
       "warning": "Warning",
-      "ownOwner": "This is you. You will lose the System Owner role and be signed out at once; another owner can give it back.",
+      "ownOwner": "This is you. You will lose the System Owner role and be logged out at once; another owner can give it back.",
       "other": "The user will lose the access granted by this role until it is assigned again."
     },
     "exportAssigned": {
@@ -829,16 +827,16 @@
     }
   },
   "loginSso": {
-    "description": "How people sign in to the company, and how long a sign-in lasts.",
-    "signInSecurity": "Sign-in security"
+    "description": "How people log in to the company, and how long a login lasts.",
+    "signInSecurity": "Login security"
   },
   "identity": {
     "copy": "Copy {label}",
     "connect": {
-      "connected": "Your account is connected to {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}}.",
-      "hint": "Sign in with {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}} as well as your password. A System Owner connects here, never by email.",
+      "connected": "Your account is connected to {provider, select, OKTA {Okta} ENTRA {Microsoft} GOOGLE {Google} MICROSOFT {Microsoft} other {your identity provider}}.",
+      "hint": "Log in with {provider, select, OKTA {Okta} ENTRA {Microsoft} GOOGLE {Google} MICROSOFT {Microsoft} other {your identity provider}} as well as your password. A System Owner connects here, never by email.",
       "connecting": "Connecting…",
-      "button": "Connect {provider, select, OKTA {Okta} ENTRA {Microsoft} other {your identity provider}}"
+      "button": "Connect {provider, select, OKTA {Okta} ENTRA {Microsoft} GOOGLE {Google} MICROSOFT {Microsoft} other {your identity provider}}"
     },
     "mode": {
       "off": "Off",
@@ -854,8 +852,8 @@
       "saved": "Single sign-on saved.",
       "title": "Single sign-on",
       "provider": "Identity provider",
-      "ownerOnlyHint": "Only a System Owner can change the provider, its address and whether its two-step sign-in is trusted.",
-      "trustIdpMfa": "Trust the provider's two-step sign-in",
+      "ownerOnlyHint": "Only a System Owner can change the provider, its address and whether its two-step login is trusted.",
+      "trustIdpMfa": "Trust the provider's two-step login",
       "trustIdpMfaHint": "People who pass the provider's second step skip ours. System Owners always answer ours.",
       "providerOther": "Other",
       "protocol": "Protocol",
@@ -870,15 +868,29 @@
       "entityId": "Entity ID — paste into the identity provider",
       "acsUrl": "Assertion consumer service URL",
       "metadataUrl": "Identity provider metadata URL",
-      "metadataHint": "Read on save for the entity ID, sign-in address and signing certificates.",
+      "metadataHint": "Read on save for the entity ID, login address and signing certificates.",
       "idpEntityId": "IdP entity ID",
-      "idpSsoUrl": "IdP sign-in URL",
+      "idpSsoUrl": "IdP login URL",
       "certificates": "Signing certificates",
       "certificatesSet": "Set. Paste new PEM certificates to replace them — two during a rotation.",
       "certificatesHint": "PEM, one or two.",
-      "requiredWarning": "Saving signs out everyone who signed in with a password, except the System Owners. Every System Owner needs two-step sign-in first.",
+      "requiredWarning": "Saving logs out everyone who logged in with a password, except the System Owners. Every System Owner needs two-step login first.",
       "sessionLasts": "A single sign-on session lasts",
-      "test": "Test connection"
+      "test": "Test connection",
+      "secretExpires": "Secret expires on",
+      "expiresHint": "We remind the System Owners 30 and 7 days before.",
+      "certificateExpires": "The certificate expires on {date}. We remind the System Owners 30 and 7 days before.",
+      "trustEmail": "Trust the email this provider sends",
+      "trustEmailHint": "For a provider that doesn't mark addresses as verified. The first login links people by this address, so turn it on only if your provider controls it.",
+      "remove": "Remove",
+      "removed": "Single sign-on is removed.",
+      "tileUrl": "Dashboard tile address",
+      "changeTitle": "Change the provider?",
+      "changeBody": "{count, plural, one {# person is} other {# people are}} linked to the current provider. The links go: everybody links again at their next login through the new one.",
+      "changeConfirm": "Change and save",
+      "removeTitle": "Remove single sign-on?",
+      "removeBody": "{count, plural, =0 {Nobody is linked yet.} one {# person's link goes with it.} other {# people's links go with it.}}{required, select, yes { People without a password get an email to set one.} other {}}",
+      "leavingRequiredWarning": "People who log in only through your provider and have no password will get an email with a link to set one."
     },
     "scim": {
       "title": "Provisioning (SCIM)",
@@ -916,86 +928,87 @@
       "grantsAdministration": "gives IT the right to appoint administrators",
       "roles": "Roles",
       "dialogTitle": "Roles for {name}",
-      "dialogDescription": "Every member is updated at once, and signed out on their next request if their access changes — you too, if you are in this group.",
+      "dialogDescription": "Every member is updated at once, and logged out on their next request if their access changes — you too, if you are in this group.",
       "neverGiven": "The System Owner and default roles are never given by a group."
+    },
+    "domain": {
+      "hint": "On Google Workspace or Microsoft 365? Connect it and your people log in with their work account — nothing to set up there. Log in with an account of your organisation.",
+      "connectGoogle": "Connect Google Workspace",
+      "connectMicrosoft": "Connect Microsoft 365",
+      "connectedGoogle": "Google Workspace · {domain}",
+      "connectedMicrosoft": "Microsoft 365 · tenant {tenant}"
     }
   },
   "appearance": {
-    "title": "Appearance",
-    "description": "How the workspace looks to everyone in your company: your color marks what to act on — buttons, links, the active page — and one uploaded image can back the sign-in screen, the dashboard, or both. The preview on the right shows the result before anyone else sees it.",
-    "loadFailed": "Failed to load appearance settings.",
+    "heading": "Make noddo<br></br><em>feel like {company}</em>",
+    "lead": "Your logo and color go on the login page, in every email and all over noddo.",
+    "readOnly": "Only people who can manage company settings can change Appearance.",
+    "loadFailed": {
+      "title": "We couldn’t load Appearance",
+      "body": "Something went wrong on our side. Try again in a moment."
+    },
+    "steps": {
+      "logo": "Add your logo",
+      "color": "Pick your color",
+      "background": "Pick a background"
+    },
+    "logo": {
+      "region": "Your logo",
+      "current": "Your logo",
+      "empty": "Drop your logo here",
+      "emptyHint": "or <choose>choose a file</choose>. Until then, the first letter of {company} stands in.",
+      "replaceHint": "Drop a new one or <choose>choose a file</choose>.",
+      "sizeHint": "Square PNG, JPEG or WebP, 256 × 256 px or more. Saved on upload.",
+      "remove": "Remove",
+      "over": "Drop it here",
+      "overHint": "It replaces the current logo.",
+      "uploading": "Uploading {file}…",
+      "uploadingHint": "It appears everywhere as soon as it’s in.",
+      "refused": "That file can’t be used. Upload a PNG, JPEG or WebP up to 5 MB."
+    },
     "color": {
-      "title": "Workspace color",
-      "description": "Your color marks the one thing to act on. Text, surfaces and status colors stay noddo's, whichever you pick.",
-      "presets": "Workspace colors",
-      "custom": "Custom color",
-      "leaveEmpty": "Leave empty to use a preset.",
+      "fromLogo": "From your logo",
+      "ours": "Our colors",
+      "yourOwn": "Your own",
+      "yourOwnPicked": "Your own · {hex}",
+      "picker": "Pick your own color",
+      "square": "Saturation and brightness",
+      "hue": "Hue",
+      "code": "Color code",
       "invalid": "Enter a color as #rrggbb, like #2f63c4.",
-      "adjusted": "We adjusted your color for readability."
+      "adjusted": "Text and links a little darker to stay readable",
+      "closeToApproved": "Close to the color noddo uses for approvals. Statuses always show an icon and a word, so they stay readable."
     },
-    "signIn": {
-      "title": "Sign in experience",
-      "description": "The artwork and the words people meet before they are signed in.",
-      "chooseImage": "Choose a background image",
-      "imageAlt": "Login background",
-      "clickToChoose": "Click to choose an image",
-      "loginScreen": "Login screen",
-      "fileHint": "PNG, JPEG or WebP, up to 10 MB. The image is stored as soon as it is uploaded.",
-      "uploading": "Uploading…",
-      "replaceImage": "Replace image",
-      "uploadImage": "Upload image",
-      "removing": "Removing…",
-      "useOnLogin": "Use as login background",
-      "useOnDashboard": "Use as company dashboard background",
-      "headline": "Headline",
-      "subheadline": "Sub-heading"
+    "background": {
+      "label": "Background",
+      "color": "Your color",
+      "light": "Light"
     },
-    "preview": {
-      "dashboardRegion": "Dashboard preview",
-      "loginRegion": "Sign-in screen preview",
-      "yourCompany": "Your company",
-      "nav": {
-        "home": "Home",
-        "inbox": "Inbox",
-        "search": "Search",
-        "organization": "Organization",
-        "calendar": "Calendar"
+    "save": "Save",
+    "status": {
+      "saved": "All changes are saved.",
+      "dirty": "You have unsaved changes.",
+      "saving": "Saving…",
+      "justSaved": "Saved. Everyone at {company} sees it now.",
+      "failed": "We couldn’t save your changes. Try again.",
+      "conflict": "Someone else saved first. <reload>Reload</reload> to see their changes, then make yours."
+    },
+    "stage": {
+      "region": "Preview",
+      "tabs": {
+        "app": "Inside noddo",
+        "login": "Login page",
+        "email": "Email"
       },
-      "dashboard": {
-        "title": "Dashboard",
-        "subtitle": "Track hiring activity, team growth and open roles in one place.",
-        "action": "Manage users",
-        "trends": "Recruitment trends",
-        "pipeline": "Candidate pipeline"
-      },
-      "stats": {
-        "openPositions": {
-          "label": "Open positions",
-          "value": "18",
-          "delta": "+3 this month"
-        },
-        "timeToHire": {
-          "label": "Time to hire",
-          "value": "24d",
-          "delta": "-2d vs. last quarter"
-        },
-        "offerAcceptance": {
-          "label": "Offer acceptance",
-          "value": "87%",
-          "delta": "+5% vs. last quarter"
-        }
-      },
-      "pipeline": {
-        "applied": "Applied",
-        "screening": "Screening",
-        "interview": "Interview",
-        "offer": "Offer"
-      },
-      "login": {
-        "email": "Email address",
-        "password": "Password",
-        "signIn": "Sign in",
-        "forgot": "Forgot password?"
+      "draft": "Not saved yet",
+      "foot": "Live — this is what {company} sees",
+      "email": {
+        "title": "You’re invited<br></br><em>to join {company}</em>",
+        "body": "You’ll join as {email}. {company} uses noddo for time off, approvals and everything around them.",
+        "action": "Join {company}",
+        "note": "The invitation works once. If you weren’t expecting it, ignore this email.",
+        "sentBy": "Sent by noddo on behalf of {company}",
+        "sampleEmail": "anna@example.com"
       }
     }
   },
@@ -1010,5 +1023,27 @@
       "label": "Show my birthday on Home",
       "description": "Your colleagues see the day and month on their Home, never the year. On unless you switch it off."
     }
+  },
+  "signIn": {
+    "password": "Password",
+    "passwordSet": "You can log in with your password.",
+    "passwordOnly": "You log in with your password. To remove it, connect another way to log in first.",
+    "noPassword": "You have no password. Set one to log in without Google or Microsoft.",
+    "setPassword": "Set a password",
+    "removePassword": "Remove password",
+    "setPasswordTitle": "Set a password",
+    "setPasswordLead": "You will be able to log in with your email and this password, as well as the accounts you connected.",
+    "cancel": "Cancel",
+    "notConnected": "Not connected",
+    "notOffered": "Your company has turned this way to log in off.",
+    "accountLine": "{email} · connected {connected}",
+    "connect": "Connect",
+    "connecting": "Connecting…",
+    "disconnect": "Disconnect",
+    "connected": "Account connected. You can now log in with it.",
+    "failed": "We couldn’t connect the account. Try again.",
+    "inUse": "This account is already connected to someone else in this company.",
+    "accountLineUsed": "{email} · connected {connected} · last used {used}",
+    "hiddenWhileActing": "Not shown while you act as somebody else."
   }
 }

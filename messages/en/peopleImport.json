@@ -130,7 +130,7 @@
     "withoutEmail": "{count, plural, one {# person has} other {# people have}} no email: they cannot be invited, and uploading this file again would create them again.",
     "nobodyNotified": "Nobody is notified. Onboarding does not start by itself.",
     "inviteLabel": "Invite everybody with an email once the import is done",
-    "inviteHint": "{count, plural, one {# person} other {# people}} will get an invitation to sign in — only after every row has been created.",
+    "inviteHint": "{count, plural, one {# person} other {# people}} will get an invitation to log in — only after every row has been created.",
     "starting": "Starting…",
     "importNoun": "Import {noun}",
     "changeMapping": "Change mapping",

@@ -13,15 +13,15 @@ const SIGNED_IN = true;
 const SIGNED_OUT = false;
 
 describe("routeForHost — the root", () => {
-  it.each(["/", "/login", "/pricing", "/trial", "/trial/confirm", "/find-company", "/about"])(
+  it.each(["/", "/login", "/pricing", "/trial", "/login/find", "/login/problem", "/about"])(
     "shows %s",
     (path) => {
       expect(routeForHost(root, path, "", SIGNED_OUT)).toEqual({ type: "next" });
     },
   );
 
-  it.each(["/dashboard", "/organization/people", "/settings/general/company", "/invite", "/reset-password",
-    "/forgot-password", "/preboarding", COMPANY_LOGIN_ROUTE, LEAVE_FOR_ROOT_ROUTE])(
+  it.each(["/dashboard", "/organization/people", "/settings/general/company", "/invite", "/login/reset",
+    "/login/forgot", "/preboarding", COMPANY_LOGIN_ROUTE, LEAVE_FOR_ROOT_ROUTE])(
     "sends %s to step 1, because it belongs to a company — with a session or without",
     (path) => {
       expect(routeForHost(root, path, "", SIGNED_OUT)).toEqual({ type: "redirect", to: "/login" });
@@ -54,11 +54,26 @@ describe("routeForHost — a company's address", () => {
     Not a redirect: Next turns a middleware Location on its own origin into a relative one, and locally
     the root is that origin — `acme.localhost:3000/pricing` answered `Location: /pricing` in a loop.
   */
-  it.each(["/pricing", "/trial/confirm", "/find-company"])("sends %s to the root through a route handler", (path) => {
+  it.each(["/pricing", "/trial", "/login/find", "/login/problem"])("sends %s to the root through a route handler", (path) => {
     const route = routeForHost(acme, path, "?token=x", SIGNED_OUT);
 
     expect(route).toEqual({ type: "rewrite", pathname: `${LEAVE_FOR_ROOT_ROUTE}${path}` });
     expect(rootDestination(`${LEAVE_FOR_ROOT_ROUTE}${path}`, "?token=x", web)).toBe(`http://localhost:3000${path}?token=x`);
+  });
+
+  it.each([
+    ["/login", COMPANY_LOGIN_ROUTE],
+    ["/login/forgot", `${COMPANY_LOGIN_ROUTE}/forgot`],
+    ["/login/reset", `${COMPANY_LOGIN_ROUTE}/reset`],
+    ["/login/second-step", `${COMPANY_LOGIN_ROUTE}/second-step`],
+    ["/login/owner", `${COMPANY_LOGIN_ROUTE}/owner`],
+  ])("renders the company's %s from its own route, signed in or out", (path, rewritten) => {
+    expect(routeForHost(acme, path, "", SIGNED_OUT)).toEqual({ type: "rewrite", pathname: rewritten });
+    expect(routeForHost(acme, path, "", SIGNED_IN)).toEqual({ type: "rewrite", pathname: rewritten });
+  });
+
+  it("gives the company's login steps one address each: the route's own name redirects to it", () => {
+    expect(routeForHost(acme, `${COMPANY_LOGIN_ROUTE}/forgot`, "?a=1", SIGNED_OUT)).toEqual({ type: "redirect", to: "/login/forgot?a=1" });
   });
 
   it.each(["/dashboard", "/organization/people", "/settings/general/company"])("shows %s to a session", (path) => {
@@ -72,7 +87,7 @@ describe("routeForHost — a company's address", () => {
     });
   });
 
-  it.each(["/invite", "/reset-password", "/forgot-password", "/confirm-email", "/preboarding"])(
+  it.each(["/invite", "/confirm-email", "/preboarding", "/link-expired"])(
     "opens %s without a session — the link in the email is the credential",
     (path) => {
       expect(routeForHost(acme, path, "?token=x", SIGNED_OUT)).toEqual({ type: "next" });
@@ -120,7 +135,7 @@ describe("safeReturnPath", () => {
     ["/leave-for-root/pricing"],
     ["/api/users/me"],
     ["/pricing"],
-    ["/reset-password?token=x"],
+    ["/login/reset?token=x"],
   ])("does not follow %j and opens the app instead", (next) => {
     expect(safeReturnPath(next)).toBe("/dashboard");
   });

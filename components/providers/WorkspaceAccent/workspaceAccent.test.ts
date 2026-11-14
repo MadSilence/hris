@@ -42,9 +42,9 @@ describe("workspaceAccent", () => {
 
   it("answers the company's accent with a session", async () => {
     cookieValue.current = "token";
-    getAppearance.mockResolvedValue({ accent: "denim" });
+    getAppearance.mockResolvedValue({ accent: "ocean" });
 
-    expect(await workspaceAccent()).toBe("denim");
+    expect(await workspaceAccent()).toBe("ocean");
   });
 
   it("answers the default when the appearance request fails on the root", async () => {

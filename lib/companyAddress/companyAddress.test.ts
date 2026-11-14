@@ -4,6 +4,7 @@ import {
   normalizeCompanyAddress,
   parseHost,
   requestHost,
+  requestOrigin,
   rootOrigin,
 } from "@/lib/companyAddress";
 
@@ -52,6 +53,7 @@ describe("parseHost", () => {
   it.each([
     ["the root itself", "localhost:3000"],
     ["www", "www.localhost:3000"],
+    ["the auth host, where providers send people back", "auth.localhost:3000"],
     ["another port", "acme.localhost:3001"],
     ["an IP address", "192.168.1.15:3000"],
     ["a deeper subdomain", "a.b.localhost:3000"],
@@ -77,4 +79,24 @@ describe("addresses", () => {
 
     expect(requestHost({ get: (name) => headers.get(name) ?? null })).toBe("acme.example.co");
   });
+});
+
+describe("requestOrigin", () => {
+  const web = { scheme: "http", rootDomain: "localhost:3000" };
+  const headers = (host: string) => ({ get: (n: string) => (n === "host" ? host : null) });
+
+  it.each([
+    ["a company's address", "acme.localhost:3000", "http://acme.localhost:3000"],
+    ["the root", "localhost:3000", "http://localhost:3000"],
+    ["the auth host", "auth.localhost:3000", "http://auth.localhost:3000"],
+  ])("answers %s as the browser typed it", (_, host, origin) => {
+    expect(requestOrigin(headers(host), web)).toBe(origin);
+  });
+
+  it.each([["another domain", "evil.example"], ["a deeper name", "a.b.localhost:3000"], ["nothing", ""]])(
+    "answers the root for %s",
+    (_, host) => {
+      expect(requestOrigin(headers(host), web)).toBe("http://localhost:3000");
+    },
+  );
 });

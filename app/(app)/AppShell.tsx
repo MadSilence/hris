@@ -23,6 +23,7 @@ import { Toaster } from "@/components/desact/sonner";
 import { showError } from "@/lib/errors/errorToast";
 import CurrentUserProvider, { useCurrentUser, } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { ImpersonationBanner } from "@/components/modules/auth/impersonation/components/ImpersonationBanner";
+import { OwnerEmailBanner } from "@/components/modules/auth/ownerEmail";
 import ImpersonationProvider, {
   useImpersonationContext,
 } from "@/components/providers/ImpersonationProvider/ImpersonationProvider";
@@ -176,6 +177,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       {/* Printing a page (the company calendar's Print): the page alone, grown to its content. */}
       <div className="flex h-dvh min-w-0 flex-col print:h-auto">
         <ImpersonationBanner/>
+        <OwnerEmailBanner/>
         <main className={canvas ? "min-h-0 min-w-0 flex-1 overflow-hidden" : "min-w-0 flex-1 overflow-auto print:overflow-visible"}>
           {/* Page padding (SPEC § 6): 32 px, 24 below a 1280 px viewport; none on a canvas page. One element either
               way, so switching the mode never remounts the page. */}

@@ -13,7 +13,8 @@ import { ApproveRing, NodRing } from "./nod";
  *   secondary            every other action, Decline, Not now, SSO
  *   ghost                toolbars, Cancel
  *   destructive          remove, terminate: secondary with red text
- *   destructive-confirm  the red fill, only inside the confirmation dialog, which then has no accent button
+ *   destructive-confirm  the red fill, only inside the confirmation dialog, which then has no accent button — a red
+ *                        outline instead in a red workspace (sign-in-appearance, rule 3)
  *   link                 inside text, "View all"
  *
  * Heights 32 / 36 / 44; an icon button is square and always carries an accessible name and a tooltip.
@@ -39,8 +40,9 @@ const buttonVariants = cva(
         ghost: "text-primary hover:bg-mist active:bg-divider",
         destructive:
           "border border-field bg-card text-danger-text hover:border-strong hover:bg-subtle active:bg-mist",
+        // `btn-destructive-confirm`: a red workspace turns it into a red outline (styles/globals.css).
         "destructive-confirm":
-          "bg-status-declined-fill text-on-accent hover:bg-status-declined-text active:bg-status-declined-text",
+          "btn-destructive-confirm bg-status-declined-fill text-on-accent hover:bg-status-declined-text active:bg-status-declined-text",
         link: "h-auto px-0 text-accent-text underline-offset-4 hover:underline",
       },
       size: {

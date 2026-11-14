@@ -4,6 +4,13 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-13** — **Appearance built** (`screens/sign-in-appearance`, `built`). The presets are the nine (Q-24);
+  the package still has the old ten, so seven of the nine are derived in code meanwhile (Q-29). **A light accent writes
+  Graphite, not Ink**, on its fill, product-wide. **A red workspace** (Cherry, Tangerine, a close "Your own") turns the
+  confirm dialog's destructive button into a red outline — `data-accent-tone="red"` beside the accent, the rule in
+  `styles/globals.css` (Q-30 says how "close" is measured). The company **background** (Your color · Light) paints the
+  login pane and sets Home's default top. New components to carry into the package: the **ring swatches** with the nod,
+  the **colour picker** (square, hue bar, Color code), the **logo drop zone**, the **preview stage**.
 - **2026-11-11** — **Home built from the handoff** (`screens/home`, `home-edit`, `home-widgets`, all `built`; what
   differs is each spec's "Built"). The owner left out **My time** and **To sign**, made the AI box a stub and the
   birthday a person's own choice (`QUESTIONS.md` Q-7). Deviations from SPEC follow each spec's "Changes to SPEC" and

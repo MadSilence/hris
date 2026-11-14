@@ -32,3 +32,28 @@ export const SSO_STATE_COOKIE = "__Host-sso";
 
 /** "Remember this device" (M1) — per host, so per company. Must match the backend's `MfaController`. */
 export const TRUSTED_DEVICE_COOKIE = "__Host-td";
+
+/**
+ * The browser a six-digit code was asked for in (SIGN_IN_IMPLEMENTATION_DESIGN.md § 2.1): a random value, only its
+ * hash on the server. A code is accepted only together with it, so a code read on a phone is typed into the computer
+ * that asked. Ten minutes, httpOnly, per host.
+ */
+export const EMAIL_CODE_COOKIE = "__Host-code";
+
+/** A registration whose code was right (B2 → B2a): the draft token, half an hour, httpOnly, the root's. */
+export const SIGNUP_DRAFT_COOKIE = "__Host-signup";
+
+/**
+ * A provider round trip's binding to the browser that started it (SIGN_IN_IMPLEMENTATION_DESIGN.md § 4.2): set on the
+ * origin by `start`, checked on the same origin by `finish`. A handoff carried to another browser opens nothing.
+ */
+export const PROVIDER_ORIGIN_COOKIE = "__Host-provider-origin";
+
+/**
+ * The page a provider's button was on, kept beside the binding: a refusal goes back there saying which provider
+ * failed. An invitation's page carries its token, so it is httpOnly like everything here.
+ */
+export const PROVIDER_BACK_COOKIE = "__Host-provider-back";
+
+/** A registration through Google or Microsoft between the round trip and B3: the draft's token, ten minutes. */
+export const SIGNUP_PROVIDER_COOKIE = "__Host-signup-provider";

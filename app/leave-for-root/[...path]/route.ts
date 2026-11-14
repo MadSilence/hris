@@ -4,7 +4,7 @@ import { LEAVE_FOR_ROOT_ROUTE, rootDestination } from "@/lib/companyAddress";
 type Context = { params: Promise<{ path: string[] }> };
 
 /**
- * A root page asked for on a company's address — `/pricing`, `/trial/confirm?token=…` — sent to the root.
+ * A root page asked for on a company's address — `/pricing`, `/trial` — sent to the root.
  * `middleware.ts` rewrites those requests to `/leave-for-root/<the path>`; see `LEAVE_FOR_ROOT_ROUTE` for
  * why this is a route handler rather than a redirect in the middleware.
  *

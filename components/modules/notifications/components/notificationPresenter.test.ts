@@ -161,7 +161,7 @@ describe("presentNotification", () => {
 
       expect(view.title).toBe("Account locked");
       expect(view.message).toBe(
-        "Ada Lovelace's account was locked after too many failed sign-in attempts. Send them a password reset to unlock it.",
+        "Ada Lovelace's account was locked after too many failed login attempts. Send them a password reset to unlock it.",
       );
       expect(view.icon).toBe(SquareLock02Icon);
       expect(view.href).toBe("/organization/people/u42/personal");

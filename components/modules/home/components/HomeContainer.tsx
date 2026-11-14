@@ -41,14 +41,24 @@ export const HomeContainer: React.FC = () => {
   const role = homeRoleOf(access);
   const stored = useMemo(() => settings.data?.homeLayout ?? [], [settings.data?.homeLayout]);
   const placed = useMemo(() => arrangeHome(available, stored, role), [available, stored, role]);
+  // The person's own header, else the company's default from Appearance — the backend has already decided which.
   const header: HomeHeaderStyle = settings.data?.homeHeader === "LIGHT" ? "LIGHT" : "COLOUR";
+  const headerDefault: HomeHeaderStyle = settings.data?.homeHeaderDefault === "LIGHT" ? "LIGHT" : "COLOUR";
   const canEdit = !settings.error && !settings.isLoading;
   const openEdit = canEdit ? () => setEditing(true) : undefined;
 
   if (editing) {
     return (
       <HomeRequestTimeOffProvider>
-        <EditHome available={available} start={placed} header={header} role={role} stored={stored} onClose={() => setEditing(false)} />
+        <EditHome
+          available={available}
+          start={placed}
+          header={header}
+          headerDefault={headerDefault}
+          role={role}
+          stored={stored}
+          onClose={() => setEditing(false)}
+        />
       </HomeRequestTimeOffProvider>
     );
   }

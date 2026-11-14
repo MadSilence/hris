@@ -1,0 +1,16 @@
+
+.l2.v3 .ftr{margin-top:auto;padding-top:20px}
+.l2.v3 .stp{margin-top:32px}
+.l2.v3 .ftr .gosv{margin-top:0;padding-top:0}
+.l2.v3 .ftr .ia{margin:0 0 16px}
+.l2.ro .seg{opacity:.5}
+.l2 .sk{display:block}
+.l2 .gosv .serr{display:flex;gap:6px;align-items:flex-start;color:var(--status-declined-text,#A12E2E);font-size:14px;line-height:20px}
+.l2 .gosv .serr svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--status-declined-icon,#C23B3B)}
+.l2 .gosv .serr u{font-weight:600;text-underline-offset:3px}
+.l2 .picked.adj span{display:flex;margin-top:4px;align-items:center;gap:4px;color:var(--status-info-text,#1F4E8C)}
+.l2 .picked.adj span svg{width:14px;height:14px;color:var(--status-info-icon,#2F63C4)}
+.l2.v3 .lft{z-index:6}
+.l2 .closew{margin-top:14px;display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:18px;color:var(--text-tertiary);max-width:420px}
+.l2 .closew svg{width:14px;height:14px;flex:none;margin-top:2px}
+.l2 .pick .sq{background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#FFFFFF,hsl(200,62%,42%))}

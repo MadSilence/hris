@@ -1,170 +1,126 @@
 "use client";
 
-import React, { FormEvent, useMemo, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { setNestedObjectValues, useFormik } from "formik";
-import { Input } from "@/components/desact/input";
-import { Button } from "@/components/desact/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+
+import { Button, buttonVariants } from "@/components/desact/button";
+import { InlineAlert } from "@/components/desact/alert";
+import { FieldError } from "@/components/desact/field-error";
 import { FormError } from "@/components/feedback/FormError";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import {
-  buildPasswordSchema,
-  type PasswordValues,
-} from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
+import { AuthHeading, AuthSplit, CodeInput, type AuthBrand } from "@/components/modules/auth/layout";
+import { PasswordField } from "@/components/modules/auth/components/PasswordField";
 import { resetPasswordAction } from "@/components/modules/passwordReset/actions/passwordResetActions";
-import { FieldError } from "@/components/desact/field-error";
-
-/** The refusal for a link that was used, expired or never existed. */
-const LINK_NOT_VALID = "AUTH00003";
-
-type Props = {
-  token: string;
-  firstName: string | null;
-  /** Locked with a second factor (M5): a password alone does not open it, so the reset asks for a code. */
-  codeRequired?: boolean;
-};
 
 /**
- * Setting a new password from the emailed link.
- *
- * The link is looked up on the server before this renders (without using it), so a used or expired
- * one never reaches a form it cannot submit. It can still go stale between the look-up and the submit,
- * which is why the refusal offers the way to a new link as well as saying so. The password rule is the
- * signup one, imported rather than copied — the same as the invitation screen.
+ * "Set a password" from the emailed link (sign-in-password F3, F4, F6, F7). One title for everybody — somebody who
+ * never had a password included — one field with the eye. F4 says the reset disconnects the person's own Google or
+ * Microsoft account (S4); F6 asks for the code of a locked account with a factor (M5). The link is used only on
+ * submit, so a mail scanner opening it burns nothing.
  */
-export function ResetPasswordContainer({ token, firstName, codeRequired = false }: Props) {
+const MIN_LENGTH = 12;
+const PROVIDER_LABEL = { GOOGLE: "Google", MICROSOFT: "Microsoft" } as const;
+
+type Props = {
+  brand: AuthBrand;
+  token: string;
+  email: string | null;
+  codeRequired: boolean;
+  connectedProviders: Array<keyof typeof PROVIDER_LABEL>;
+};
+
+export function ResetPasswordContainer({ brand, token, email, codeRequired, connectedProviders }: Props) {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
-  const passwordSchema = useMemo(() => buildPasswordSchema(t), [t]);
+  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [errors, setErrors] = useState<{ password?: string; code?: string }>({});
+  const [refusal, setRefusal] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [linkExpired, setLinkExpired] = useState(false);
 
-  const formik = useFormik<PasswordValues>({
-    initialValues: { password: "", confirmPassword: "" },
-    validationSchema: passwordSchema,
-    validateOnBlur: false,
-    validateOnChange: false,
-    onSubmit: async (values) => {
-      setError(null);
-      setLinkExpired(false);
-      const res = await resetPasswordAction({ token, password: values.password, code: codeRequired ? code.trim() : undefined });
-      if (res.status === ActionStatus.SUCCESS) {
-        setDone(true);
-        return;
-      }
-      setError(res.errorMessage ?? null);
-      setLinkExpired(res.code === LINK_NOT_VALID);
-    },
-  });
-
-  const busy = formik.isSubmitting;
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (busy) return;
-    const errors = await formik.validateForm();
-    await formik.setTouched(setNestedObjectValues(errors, true), true);
-    if (Object.keys(errors).length > 0) return;
-    await formik.submitForm();
+    const next: typeof errors = {};
+    if (!password) next.password = t("fields.newPasswordRequired");
+    else if (password.length < MIN_LENGTH) next.password = t("fields.passwordTooShort");
+    if (codeRequired && code.length < 6) next.code = t("fields.codeRequired");
+    setErrors(next);
+    if (next.password || next.code) return;
+
+    setBusy(true);
+    setRefusal(null);
+    const res = await resetPasswordAction({ token, password, code: codeRequired ? code : undefined });
+    setBusy(false);
+    if (res.status === ActionStatus.SUCCESS) {
+      setDone(true);
+      return;
+    }
+    if (res.fieldErrors?.code || res.code === "AUTH00008" || res.code === "AUTH00006") setErrors({ code: t("reset.wrongCode") });
+    else if (res.fieldErrors?.password || res.code === "AUTH00021") setErrors({ password: res.errorMessage ?? undefined });
+    else setRefusal(res.errorMessage ?? null);
   };
 
   if (done) {
     return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">{t("passwordReset.reset.doneTitle")}</h1>
-        <p className="text-body text-tertiary">
-          {t("passwordReset.reset.doneBody")}
-        </p>
-        <Button asChild>
-          <a href="/login">{t("login.submit")}</a>
-        </Button>
-      </div>
+      <AuthSplit brand={brand}>
+        <AuthHeading icon={CheckmarkCircle02Icon} tone="accent" title={t("reset.doneTitle")} lead={t("reset.doneBody")} />
+        <a href="/login?passwordChanged=1" className={buttonVariants({ size: "lg", className: "w-full" })}>{t("reset.logIn")}</a>
+      </AuthSplit>
     );
   }
 
+  const provider = connectedProviders[0];
+
   return (
-    <div className="w-full">
-      <div className="w-full space-y-8">
-        <div className="space-y-3 text-center">
-          <h1 className="text-page-title">{firstName ? t("passwordReset.reset.greeting", { name: firstName }) : t("passwordReset.reset.title")}</h1>
-          <p className="text-body text-secondary">
-            {t("passwordReset.reset.description")}
-          </p>
-        </div>
-
-        <form method="post" onSubmit={handleSubmit} noValidate className="space-y-6">
-          <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password" required>{t("changePassword.newPassword")}</RequiredLabel>
-            <Input
-              id="reset-password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              value={formik.values.password}
-              onChange={(e) => formik.setFieldValue("password", e.currentTarget.value)}
-              disabled={busy}
-              aria-invalid={Boolean(formik.errors.password)}
+    <AuthSplit brand={brand}>
+      <AuthHeading
+        title={t("reset.title")}
+        lead={email ? t.rich("reset.lead", { email, b: (c) => <b className="font-medium text-primary [overflow-wrap:anywhere]">{c}</b> }) : undefined}
+      />
+      {provider && (
+        <InlineAlert tone="pending">
+          {t("reset.disconnects", { provider: PROVIDER_LABEL[provider] })}
+          <br />
+          {t("reset.disconnectsHint")}
+        </InlineAlert>
+      )}
+      {codeRequired && (
+        <InlineAlert tone="pending">
+          {t("reset.locked")}
+          <br />
+          {t("reset.lockedHint")}
+        </InlineAlert>
+      )}
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+        <PasswordField
+          id="reset-password"
+          label={t("fields.newPassword")}
+          value={password}
+          onChange={(v) => { setPassword(v); setErrors((x) => ({ ...x, password: undefined })); }}
+          error={errors.password}
+          hint={t("fields.passwordHint")}
+          autoComplete="new-password"
+          autoFocus
+        />
+        {codeRequired && (
+          <div className="flex flex-col gap-2">
+            <span className="text-label text-primary">{t("fields.appCode")}</span>
+            <CodeInput
+              label={t("fields.appCode")}
+              value={code}
+              onChange={(v) => { setCode(v); setErrors((x) => ({ ...x, code: undefined })); }}
+              invalid={Boolean(errors.code)}
             />
-            {formik.errors.password && (
-              <FieldError>{formik.errors.password}</FieldError>
-            )}
+            <FieldError>{errors.code}</FieldError>
           </div>
-
-          <div className="space-y-2">
-            <RequiredLabel htmlFor="reset-password-repeat" required>{t("password.confirmLabel")}</RequiredLabel>
-            <Input
-              id="reset-password-repeat"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              value={formik.values.confirmPassword}
-              onChange={(e) => formik.setFieldValue("confirmPassword", e.currentTarget.value)}
-              disabled={busy}
-              aria-invalid={Boolean(formik.errors.confirmPassword)}
-            />
-            {formik.errors.confirmPassword && (
-              <FieldError>{formik.errors.confirmPassword}</FieldError>
-            )}
-          </div>
-
-          <p className="text-body text-tertiary">
-            {t("password.rule")}
-          </p>
-
-          {codeRequired && (
-            <div className="space-y-2">
-              <RequiredLabel htmlFor="reset-password-code" required>{t("passwordReset.reset.codeLabel")}</RequiredLabel>
-              <Input
-                id="reset-password-code"
-                value={code}
-                onChange={(e) => setCode(e.currentTarget.value)}
-                autoComplete="one-time-code"
-                disabled={busy}
-                className="font-mono"
-              />
-              <p className="text-body text-tertiary">
-                {t("passwordReset.reset.codeHint")}
-              </p>
-            </div>
-          )}
-
-          <FormError message={error} />
-
-          {linkExpired && (
-            <p className="text-center text-body">
-              <Link href="/forgot-password" className="text-accent-text underline-offset-4 hover:underline">{t("passwordReset.reset.requestNewLink")}</Link>
-            </p>
-          )}
-
-          <Button type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")} size="lg" className="w-full">
-            {t("password.submit")}
-          </Button>
-        </form>
-      </div>
-    </div>
+        )}
+        <FormError message={refusal} />
+        <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("busy.saving")}>
+          {t("reset.submit")}
+        </Button>
+      </form>
+    </AuthSplit>
   );
 }

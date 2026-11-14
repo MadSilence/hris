@@ -6,9 +6,15 @@ export const normalizeBackendPath = (path: string): string => {
 
 export const PUBLIC_BACKEND_EXACT_PATHS = [
   "/auth/login",
-  "/auth/register",
-  "/auth/register/confirm",
   "/auth/refresh",
+  // Registration by code, and the handoff that opens the new company's session (SIGN_IN_IMPLEMENTATION_DESIGN.md
+  // § 6.1–6.2): nobody is signed in to it yet, and a session of whoever else uses this browser must not ride along.
+  "/auth/handoff",
+  // Logging in with an emailed code (§ 6.4) and what the second step's screen reads before anything is typed.
+  "/auth/login-code",
+  "/auth/mfa/challenge",
+  // Which of Google and Microsoft registration offers.
+  "/public/shared-providers",
   // Sign-out revokes by the refresh cookie (R1.1). A Bearer that has run out would be refused by the
   // filter before the endpoint could end the session it belongs to.
   "/auth/logout",
@@ -45,6 +51,13 @@ export const PUBLIC_BACKEND_PREFIX_PATHS = [
   // Setting up a required factor inside a sign-in — the challenge is the credential.
   "/auth/mfa/enrol-at-sign-in/",
   "/auth/mfa/enrol-at-sign-in/",
+  "/auth/register/",
+  "/auth/login-code/",
+  // Google and Microsoft before there is a session (§ 4.2). `/auth/provider/person/` and `/finish` are not here:
+  // a Connect or a re-authentication needs the session that started it.
+  "/auth/provider/start",
+  "/auth/provider/begin",
+  "/auth/provider/callback",
   // Single sign-on before there is a session: the IdP's answer is the credential.
   "/auth/sso/start",
   "/auth/sso/callback",

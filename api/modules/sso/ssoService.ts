@@ -1,9 +1,18 @@
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
 import { cookieFrom, refreshTokenFrom, type SessionTokens } from "@/api/modules/auth/services/hrisAuthSessionService";
 import type { LoginResponse } from "@/api/modules/auth/dto";
+import { isSharedProvider, type SharedProvider } from "@/api/modules/provider/providerService";
 
-/** Whether a company's login page offers its identity provider, and under whose name. */
-export type PublicSso = { mode: "OFF" | "OPTIONAL" | "REQUIRED"; provider: "OKTA" | "ENTRA" | "OTHER" | null; protocol: "OIDC" | "SAML" | null };
+/**
+ * Whether a company's login page offers its identity provider, and under whose name — and which of Google and Microsoft
+ * it shows (configured here, allowed by the company, and the company's SSO not required; S6).
+ */
+export type PublicSso = {
+  mode: "OFF" | "OPTIONAL" | "REQUIRED";
+  provider: "OKTA" | "ENTRA" | "OTHER" | "GOOGLE_WORKSPACE" | "MICROSOFT_365" | null;
+  protocol: "OIDC" | "SAML" | null;
+  sharedProviders: SharedProvider[];
+};
 
 /** What the IdP's answer came to: a session, a second step, or — for Connect — only the link. */
 export type SsoOutcome =
@@ -23,10 +32,15 @@ const outcome = (data: LoginResponse, response: Response): SsoOutcome => {
 class SsoService {
   public async publicSso(subdomain: string): Promise<PublicSso> {
     try {
-      return await hrisApiClient.get<PublicSso>(`/public/company-sso/${encodeURIComponent(subdomain)}`);
+      const read = await hrisApiClient.get<PublicSso>(`/public/company-sso/${encodeURIComponent(subdomain)}`);
+      // One button per provider: the company's own Workspace or Microsoft 365 is the company button, not a second one.
+      const domain = read.provider === "GOOGLE_WORKSPACE" ? "GOOGLE" : read.provider === "MICROSOFT_365" ? "MICROSOFT" : null;
+      const sharedProviders = (read.sharedProviders ?? []).filter(isSharedProvider)
+        .filter((p) => read.mode === "OFF" || p !== domain);
+      return { ...read, sharedProviders };
     } catch {
       // A login page that cannot ask still shows the password form.
-      return { mode: "OFF", provider: null, protocol: null };
+      return { mode: "OFF", provider: null, protocol: null, sharedProviders: [] };
     }
   }
 

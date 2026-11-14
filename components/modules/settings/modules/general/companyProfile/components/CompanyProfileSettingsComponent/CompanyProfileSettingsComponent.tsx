@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Building03Icon, Clock01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
@@ -24,12 +25,6 @@ import type { CompanySettings } from "@/models/company/CompanySettings";
 import type { UpdateCompanyRequest, UpdateCompanySettingsRequest } from "@/api/modules/company/dto/CompanyDTO";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { companyHost, companyOrigin } from "@/lib/companyAddress";
-import { ActionStatus } from "@/components/models/ActionStatus";
-import { showActionError } from "@/lib/errors/errorToast";
-import {
-  deleteCompanyLogoAction,
-  uploadCompanyLogoAction,
-} from "@/components/modules/settings/modules/general/companyProfile/actions/companyLogoActions";
 import { timeZoneChoices } from "@/lib/timeZones";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { FieldError } from "@/components/desact/field-error";
@@ -49,9 +44,10 @@ type Props = {
   savingSettings: boolean;
   profileError: string | null;
   settingsError: string | null;
-  /** Re-reads the company after the logo changed, so the sidebar and this page draw the new one. */
-  onLogoChanged?: () => Promise<unknown> | void;
 };
+
+/** Where the logo is changed now (sign-in-appearance: the logo moved there from this page). */
+const APPEARANCE_HREF = "/settings/general/customisation";
 
 /** The week, with the catalogue keys of each day's short (the toggles) and full (the week-start menu) name. */
 const DAYS = [
@@ -139,49 +135,10 @@ const SignInAddress: FC<{ subdomain: string }> = ({ subdomain }) => {
 };
 
 /**
- * Upload, replace or remove the company logo. The file goes up as soon as it is chosen — a logo is
- * not part of the profile form's draft, and holding an image in a draft only to lose it on Cancel
- * would be worse than applying it at once. A refusal arrives as the card: the picker has closed.
+ * The logo, read-only: it is changed in Appearance, beside the colour it goes with (sign-in-appearance, Q-23).
  */
-const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | void }> = ({
-  hasLogo,
-  onChanged,
-}) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
+const LogoPointer: FC<{ hasLogo: boolean }> = ({ hasLogo }) => {
   const t = useTranslations("settings.company");
-  const tCommon = useTranslations("common");
-
-  const upload = async (file: File) => {
-    setBusy(true);
-    try {
-      const form = new FormData();
-      form.set("file", file);
-      const res = await uploadCompanyLogoAction(form);
-      if (res.status !== ActionStatus.SUCCESS) {
-        showActionError(res);
-        return;
-      }
-      await onChanged?.();
-    } finally {
-      setBusy(false);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  };
-
-  const remove = async () => {
-    setBusy(true);
-    try {
-      const res = await deleteCompanyLogoAction();
-      if (res.status !== ActionStatus.SUCCESS) {
-        showActionError(res);
-        return;
-      }
-      await onChanged?.();
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -189,26 +146,9 @@ const LogoControls: FC<{ hasLogo: boolean; onChanged?: () => Promise<unknown> | 
       <p className="m-0 text-body text-tertiary">
         {hasLogo ? t("logo.shown") : t("logo.initials")}
       </p>
-      <div className="flex gap-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.currentTarget.files?.[0];
-            if (file) void upload(file);
-          }}
-        />
-        <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? t("logo.working") : hasLogo ? t("logo.replace") : t("logo.upload")}
-        </Button>
-        {hasLogo ? (
-          <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => void remove()}>
-            {tCommon("actions.remove")}
-          </Button>
-        ) : null}
-      </div>
+      <Link href={APPEARANCE_HREF} className="text-body text-accent-text underline-offset-4 hover:underline">
+        {t("logo.changeInAppearance")}
+      </Link>
     </div>
   );
 };
@@ -218,7 +158,6 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
   settings,
   onSaveProfile,
   onSaveSettings,
-  onLogoChanged,
   savingProfile,
   savingSettings,
   profileError,
@@ -413,7 +352,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
               <AvatarFallback className="rounded-popover text-body">{initials(company.name)}</AvatarFallback>
             </Avatar>
 
-            <LogoControls hasLogo={!!company.companyLogo} onChanged={onLogoChanged}/>
+            <LogoPointer hasLogo={!!company.companyLogo}/>
           </div>
         </Section>
 

@@ -30,13 +30,18 @@ import type { IdentityConnectionDTO, IdpGroupDTO } from "@/api/modules/identity/
 import {
   issueScimTokenAction,
   mapIdpGroupAction,
+  removeIdentityConnectionAction,
   revokeScimTokenAction,
   saveIdentityConnectionAction,
   testIdentityConnectionAction,
 } from "@/components/modules/identity/actions";
 import { useIdentityConnection, useIdpGroups, useInvalidateIdentity, useScimTokens } from "@/components/modules/identity/hooks";
-import { withStepUpAction } from "@/components/modules/mfa/stepUp";
+import { withStepUp, withStepUpAction } from "@/components/modules/mfa/stepUp";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import { messageForError } from "@/lib/errors/errorMessages";
 import { Illustration } from "@/components/illustrations";
+import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 const MODE_LABEL_KEY = {
   OFF: "identity.mode.off",
@@ -84,12 +89,53 @@ export const IdentitySettings: React.FC = () => {
   );
 };
 
+/**
+ * *Connect Google Workspace* / *Connect Microsoft 365* (SOCIAL_SIGN_IN_DESIGN.md § 11.4): company SSO with nothing to
+ * register — a System Owner signs in there with an account of the organisation, which pins it; the mode is chosen
+ * below, Off until then. Step-up first.
+ */
+const DomainConnect: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
+  const t = useTranslations("settings");
+  const { internalApiClient } = useAppDataContext();
+  const [busy, setBusy] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const connect = async (provider: "GOOGLE" | "MICROSOFT") => {
+    setBusy(provider);
+    setError(null);
+    try {
+      const res = await withStepUp(() => internalApiClient.post<{ redirectUrl: string }>("/auth/provider/person",
+        { purpose: "DOMAIN_CONNECT", provider, returnTo: "/settings/tech/login-and-sso" }));
+      window.location.assign(res.redirectUrl);
+    } catch (e) {
+      setError(messageForError(e));
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="space-y-2 rounded-card border border-divider p-4">
+      <p className="text-body text-secondary">{t("identity.domain.hint")}</p>
+      <div className="flex flex-wrap gap-2">
+        {c.domainProviders.map((p) => (
+          <Button key={p} type="button" variant="secondary" size="sm" disabled={busy !== null} onClick={() => connect(p)}>
+            {p === "GOOGLE" ? t("identity.domain.connectGoogle") : t("identity.domain.connectMicrosoft")}
+          </Button>
+        ))}
+      </div>
+      <FormError message={error} />
+    </div>
+  );
+};
+
 const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
+  const formatDate = useDateFormatter();
   const invalidate = useInvalidateIdentity();
+  const shared = c.clientKind === "SHARED";
   const [draft, setDraft] = React.useState({
-    provider: c.provider ?? "OKTA",
+    provider: (c.provider === "GOOGLE_WORKSPACE" || c.provider === "MICROSOFT_365" ? "OKTA" : c.provider ?? "OKTA") as "OKTA" | "ENTRA" | "OTHER",
     protocol: c.protocol,
     issuer: c.issuer ?? "",
     clientId: c.clientId ?? "",
@@ -101,16 +147,47 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
     ssoMode: c.ssoMode,
     ssoSessionHours: c.ssoSessionHours,
     trustIdpMfa: c.trustIdpMfa,
+    trustEmail: c.trustEmail,
+    secretExpiresAt: c.secretExpiresAt ?? "",
   });
+  // Another provider, protocol or issuer drops every link (E-Q9): said, with the number, before it is saved.
+  const [confirmChange, setConfirmChange] = React.useState(false);
+  const [removing, setRemoving] = React.useState(false);
+  const providerChanges = c.configured && !shared && c.linkedCount > 0
+    && (draft.provider !== c.provider || draft.protocol !== c.protocol || (draft.protocol === "OIDC" && draft.issuer !== (c.issuer ?? "")));
   const locked = !c.mayChangeProvider;
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
 
+  const remove = async () => {
+    const res = await withStepUpAction(() => removeIdentityConnectionAction());
+    setRemoving(false);
+    if (res.status === ActionStatus.SUCCESS) {
+      void invalidate();
+      showSuccess(t("identity.sso.removed"));
+    } else {
+      showActionError(res);
+    }
+  };
+
   const save = async () => {
+    if (providerChanges && !confirmChange) {
+      setConfirmChange(true);
+      return;
+    }
+    setConfirmChange(false);
     setBusy(true);
     setError(null);
-    const body = {
+    // A domain through our application has nothing to type: only the mode, the session and the factor rule.
+    const body = shared ? {
+      ssoMode: draft.ssoMode,
+      ssoSessionHours: draft.ssoSessionHours,
+      version: c.version,
+      ...(c.mayChangeProvider ? { trustIdpMfa: draft.trustIdpMfa } : {}),
+    } : {
+      ...(c.mayChangeProvider ? { trustEmail: draft.trustEmail } : {}),
+      secretExpiresAt: draft.secretExpiresAt,
       provider: draft.provider,
       protocol: draft.protocol,
       ssoMode: draft.ssoMode,
@@ -153,6 +230,14 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
         <StatusBadge status={c.ssoMode === "OFF" ? "inactive" : "active"} label={t(MODE_BADGE_KEY[c.ssoMode])} />
       </div>
       {locked && <p className="text-hint text-tertiary">{t("identity.sso.ownerOnlyHint")}</p>}
+      {c.mayChangeProvider && c.domainProviders.length > 0 && <DomainConnect c={c} />}
+      {shared ? (
+        <p className="text-body text-primary">
+          {c.provider === "GOOGLE_WORKSPACE"
+            ? t("identity.domain.connectedGoogle", { domain: c.hostedDomain ?? "" })
+            : t("identity.domain.connectedMicrosoft", { tenant: c.tenantId ?? "" })}
+        </p>
+      ) : (<>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="idp-provider">{t("identity.sso.provider")}</Label>
@@ -207,6 +292,11 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               <p className="text-hint text-tertiary">{c.clientSecretSet ? t("identity.sso.secretSet") : t("identity.sso.secretNotSet")}</p>
             </div>
           </div>
+          <div className="space-y-2 sm:max-w-xs">
+            <Label htmlFor="idp-secret-expires">{t("identity.sso.secretExpires")}</Label>
+            <DatePicker id="idp-secret-expires" value={draft.secretExpiresAt} onChange={(v) => set("secretExpiresAt", v)} />
+            <p className="text-hint text-tertiary">{t("identity.sso.expiresHint")}</p>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -235,9 +325,23 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
                 <p className="text-hint text-tertiary">
                   {c.samlCertificatesSet ? t("identity.sso.certificatesSet") : t("identity.sso.certificatesHint")}
                 </p>
+                {c.samlCertificateExpiresAt && (
+                  <p className="text-hint text-tertiary">{t("identity.sso.certificateExpires", { date: formatDate(c.samlCertificateExpiresAt) })}</p>
+                )}
               </div>
             </>
           )}
+        </div>
+      )}
+      </>)}
+
+      {!shared && (
+        <div className="flex items-start gap-2">
+          <Checkbox id="idp-trust-email" disabled={locked} checked={draft.trustEmail} onCheckedChange={(v) => set("trustEmail", Boolean(v))} />
+          <div className="space-y-0.5">
+            <Label htmlFor="idp-trust-email" className="font-normal">{t("identity.sso.trustEmail")}</Label>
+            <p className="text-hint text-tertiary">{t("identity.sso.trustEmailHint")}</p>
+          </div>
         </div>
       )}
 
@@ -265,6 +369,10 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               {t("identity.sso.requiredWarning")}
             </p>
           )}
+          {/* E-Q3: leaving Required warns first — and the people without a password are mailed a link to set one. */}
+          {c.ssoMode === "REQUIRED" && draft.ssoMode !== "REQUIRED" && (
+            <p className="text-hint text-tertiary">{t("identity.sso.leavingRequiredWarning")}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="idp-hours">{t("identity.sso.sessionLasts")}</Label>
@@ -282,8 +390,30 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       <FormError message={error} />
       <div className="flex gap-2">
         <Button type="button" onClick={save} disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")}>{tCommon("actions.save")}</Button>
-        {c.configured && <Button type="button" variant="secondary" onClick={test}>{t("identity.sso.test")}</Button>}
+        {c.configured && !shared && <Button type="button" variant="secondary" onClick={test}>{t("identity.sso.test")}</Button>}
+        {c.configured && c.mayChangeProvider && (
+          <Button type="button" variant="secondary" onClick={() => setRemoving(true)}>{t("identity.sso.remove")}</Button>
+        )}
       </div>
+      {c.configured && <CopyField label={t("identity.sso.tileUrl")} value={c.tileUrl} />}
+      <ConfirmActionModal
+        isOpen={confirmChange}
+        title={t("identity.sso.changeTitle")}
+        description={t("identity.sso.changeBody", { count: c.linkedCount })}
+        confirmLabel={t("identity.sso.changeConfirm")}
+        destructive
+        onConfirmAction={save}
+        onCancelAction={() => setConfirmChange(false)}
+      />
+      <ConfirmActionModal
+        isOpen={removing}
+        title={t("identity.sso.removeTitle")}
+        description={t("identity.sso.removeBody", { count: c.linkedCount, required: c.ssoMode === "REQUIRED" ? "yes" : "no" })}
+        confirmLabel={t("identity.sso.remove")}
+        destructive
+        onConfirmAction={remove}
+        onCancelAction={() => setRemoving(false)}
+      />
     </section>
   );
 };

@@ -697,7 +697,7 @@
       "addStep": "Add approval step",
       "chainHint": "Manager steps route to each employee's manager; specific-user steps always go to the chosen person.",
       "howDecide": "How do they decide?",
-      "sequential": "In order — each one signs in turn",
+      "sequential": "In order — each one logs in turn",
       "all": "All of them, in any order",
       "nOfM": "Any number of them",
       "any": "Any",

@@ -18,7 +18,7 @@ export type HostRoute =
   | { type: "rewrite"; pathname: string };
 
 /** Pages that exist only on the root. Matched as a path or a path prefix. */
-export const ROOT_ONLY_PATHS = ["/about", "/pricing", "/products", "/solutions", "/trial", "/find-company"];
+export const ROOT_ONLY_PATHS = ["/about", "/pricing", "/products", "/solutions", "/trial", "/login/find", "/login/problem"];
 
 /**
  * Reachable on either host: the BFF, the refusal page, and the home-screen icon — the only icon whose address
@@ -48,7 +48,7 @@ export const LEAVE_FOR_ROOT_ROUTE = "/leave-for-root";
 // signed in on, carrying a one-time token. Short because it is typed into nothing and scanned from a
 // phone camera, where every character is a pixel of the code.
 // `/unsubscribe` is an email's "Stop these emails" link: the signed token is the credential (EMAIL_NOTIFICATIONS_DESIGN.md § 9.2).
-const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/reset-password", "/forgot-password", "/confirm-email", "/m", "/unsubscribe"];
+const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/confirm-email", "/m", "/unsubscribe", "/link-expired"];
 
 /** Where the app opens, and where signing in goes when nothing asked for somewhere else. */
 export const APP_HOME = "/dashboard";
@@ -76,8 +76,14 @@ export const routeForHost = (host: HostKind, pathname: string, search: string, h
   // The destination travels in the path: Next keeps a request's own query across a rewrite and drops one
   // the rewrite tries to set.
   if (matches(pathname, ROOT_ONLY_PATHS)) return { type: "rewrite", pathname: `${LEAVE_FOR_ROOT_ROUTE}${pathname}` };
-  if (pathname === "/login") return { type: "rewrite", pathname: COMPANY_LOGIN_ROUTE };
-  if (pathname === COMPANY_LOGIN_ROUTE) return { type: "redirect", to: `/login${search}` };
+  // The company's login and every step of it (`/login/forgot`, `/login/second-step`, …) live under one route of
+  // their own; `/login/find` is the root's and has already gone there above.
+  if (pathname === "/login" || pathname.startsWith("/login/")) {
+    return { type: "rewrite", pathname: `${COMPANY_LOGIN_ROUTE}${pathname.slice("/login".length)}` };
+  }
+  if (matches(pathname, [COMPANY_LOGIN_ROUTE])) {
+    return { type: "redirect", to: `/login${pathname.slice(COMPANY_LOGIN_ROUTE.length)}${search}` };
+  }
   if (matches(pathname, COMPANY_PUBLIC_PATHS)) return { type: "next" };
 
   if (!hasSession) {

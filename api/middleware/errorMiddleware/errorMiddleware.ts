@@ -61,5 +61,8 @@ const getStatusCode = (e: unknown): HttpStatusCode => {
   if (e instanceof ValidationError) return HttpStatusCode.UNPROCESSABLE_ENTITY;
   if (e instanceof BadRequestError) return HttpStatusCode.BAD_REQUEST;
   if (e instanceof BackendUnavailableError) return HttpStatusCode.SERVICE_UNAVAILABLE;
+  // A refusal for asking too often is the caller's, not ours: it stays 429 (the fifth wrong code, a resend too soon).
+  // It came through as a 500 — found on the live walk of 2026-11-13.
+  if (e instanceof ApiError && e.status === HttpStatusCode.TOO_MANY_REQUESTS) return HttpStatusCode.TOO_MANY_REQUESTS;
   return HttpStatusCode.INTERNAL_SERVER_ERROR;
 }

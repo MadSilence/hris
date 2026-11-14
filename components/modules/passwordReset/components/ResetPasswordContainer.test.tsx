@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ResetPasswordContainer } from "./ResetPasswordContainer";
@@ -8,75 +8,58 @@ import { resetPasswordAction } from "@/components/modules/passwordReset/actions/
 jest.mock("@/components/modules/passwordReset/actions/passwordResetActions");
 
 const mockedReset = resetPasswordAction as jest.MockedFunction<typeof resetPasswordAction>;
+const brand = { kind: "company" as const, name: "Acme", logoUrl: null };
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockedReset.mockResolvedValue({ status: ActionStatus.SUCCESS });
 });
 
-const fill = async (password: string, confirm: string) => {
+const setPassword = async (password: string) => {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText(/^new password/i), password);
-  await user.type(screen.getByLabelText(/^confirm password/i), confirm);
+  await user.type(screen.getByLabelText("New password"), password);
   await user.click(screen.getByRole("button", { name: "Set password" }));
 };
 
-describe("ResetPasswordContainer", () => {
-  it("greets the person the link is for", () => {
-    render(<ResetPasswordContainer token="t1" firstName="Ada" />);
+describe("ResetPasswordContainer (sign-in-password F3–F7)", () => {
+  it("says which account the link is for, and asks for one password — no confirmation", () => {
+    render(<ResetPasswordContainer brand={brand} token="t1" email="anna@acme.com" codeRequired={false} connectedProviders={[]} />);
 
-    expect(screen.getByRole("heading", { name: "Hi Ada" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Set a password" })).toBeInTheDocument();
+    expect(screen.getByText("anna@acme.com")).toBeInTheDocument();
+    expect(screen.queryByLabelText(/confirm/i)).not.toBeInTheDocument();
   });
 
-  it("asks for both fields before sending anything", async () => {
-    render(<ResetPasswordContainer token="t1" firstName="Ada" />);
+  it("refuses fewer than 12 characters before asking the server", async () => {
+    render(<ResetPasswordContainer brand={brand} token="t1" email={null} codeRequired={false} connectedProviders={[]} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Set password" }));
+    await setPassword("short-pass1");
 
-    expect(await screen.findByText("Please enter a password.")).toBeInTheDocument();
-    expect(screen.getByText("Please confirm your password.")).toBeInTheDocument();
+    expect(screen.getByText("Use at least 12 characters.")).toBeInTheDocument();
     expect(mockedReset).not.toHaveBeenCalled();
   });
 
-  it("holds the new password to the signup rule", async () => {
-    render(<ResetPasswordContainer token="t1" firstName={null} />);
+  it("sets the password with no composition rule, and says the old sessions ended", async () => {
+    render(<ResetPasswordContainer brand={brand} token="t1" email={null} codeRequired={false} connectedProviders={[]} />);
 
-    await fill("password1", "password1");
+    await setPassword("tram lilac river");
 
-    expect(await screen.findByText("Use upper & lower case letters, a number and a symbol.")).toBeInTheDocument();
-    expect(mockedReset).not.toHaveBeenCalled();
-  });
-
-  it("refuses two passwords that differ", async () => {
-    render(<ResetPasswordContainer token="t1" firstName={null} />);
-
-    await fill("Password1!", "Password2!");
-
-    expect(await screen.findByText("Passwords don’t match.")).toBeInTheDocument();
-    expect(mockedReset).not.toHaveBeenCalled();
-  });
-
-  it("sends the token with the new password, then offers to sign in", async () => {
-    render(<ResetPasswordContainer token="t1" firstName="Ada" />);
-
-    await fill("Password1!", "Password1!");
-
-    await waitFor(() => expect(mockedReset).toHaveBeenCalledWith({ token: "t1", password: "Password1!" }));
+    expect(mockedReset).toHaveBeenCalledWith({ token: "t1", password: "tram lilac river", code: undefined });
     expect(await screen.findByRole("heading", { name: "Password changed" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
   });
 
-  it("says a stale link is stale and offers a new one", async () => {
-    mockedReset.mockResolvedValue({
-      status: ActionStatus.ERROR,
-      code: "AUTH00003",
-      errorMessage: "This password reset link is no longer valid. Ask for a new one.",
-    });
-    render(<ResetPasswordContainer token="t1" firstName="Ada" />);
+  it("warns that a connected Google account is disconnected by this reset (F4)", () => {
+    render(<ResetPasswordContainer brand={brand} token="t1" email={null} codeRequired={false} connectedProviders={["GOOGLE"]} />);
 
-    await fill("Password1!", "Password1!");
+    expect(screen.getByText("Setting a password this way disconnects Google.", { exact: false })).toBeInTheDocument();
+  });
 
-    expect(await screen.findByText("This password reset link is no longer valid. Ask for a new one.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Request a new link" })).toHaveAttribute("href", "/forgot-password");
+  it("asks a locked account with a factor for its code too (F6)", async () => {
+    render(<ResetPasswordContainer brand={brand} token="t1" email={null} codeRequired connectedProviders={[]} />);
+
+    await setPassword("tram lilac river");
+
+    expect(screen.getByText("Enter the code.")).toBeInTheDocument();
+    expect(mockedReset).not.toHaveBeenCalled();
   });
 });

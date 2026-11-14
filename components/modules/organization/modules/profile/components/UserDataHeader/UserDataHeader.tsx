@@ -20,7 +20,7 @@ import { WaitingOnYou } from "@/components/modules/organization/modules/profile/
 import Link from "next/link";
 import { Button } from "@/components/desact/button";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
-import { CalendarRemove01Icon, HierarchySquare02Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { CalendarRemove01Icon, HierarchySquare02Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, Unlink01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -99,6 +99,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
   // Above the early return: hooks are counted per render.
   const canManageProfiles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
+  // One person's link to the company's provider (E-Q9): whoever manages Login & SSO. UX only — Java decides.
+  const canUnlinkSso = useCanAccess("SETTINGS.IDENTITY", "MANAGE");
   // Java lists only what this reader may act on, so a reader who may only view gets none.
   const { data: scheduledChanges } = useUserScheduledChanges(userId);
   const invalidateScheduledChanges = useInvalidateUserScheduledChanges();
@@ -207,6 +209,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const fullName =
     `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || t("profile.header.unnamed");
   const isOwnProfile = currentUserId === user.id;
+  const mayUnlinkSso = canUnlinkSso && !isOwnProfile;
   const isArchived = (user.status ?? "").toUpperCase() === "ARCHIVED";
   /*
    * A termination date is written when the termination is *scheduled*, and the effects land the day
@@ -445,6 +448,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 {mayEndSessions && (
                   <RowAction icon={<Icon icon={ShieldOffIcon} size="sm" />} onClick={() => setAccountAccess("RESET_MFA")}>
                     {t("profile.header.resetMfa")}
+                  </RowAction>
+                )}
+                {mayUnlinkSso && !isArchived && (
+                  <RowAction icon={<Icon icon={Unlink01Icon} size="sm" />} onClick={() => setAccountAccess("UNLINK_SSO")}>
+                    {t("profile.header.unlinkSso")}
                   </RowAction>
                 )}
                 {mayEndSessions && (

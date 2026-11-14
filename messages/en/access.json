@@ -22,7 +22,7 @@
     },
     "settingsAuditLog": {
       "label": "Logs",
-      "description": "Read the company's journal: who did what, who signed in, who was refused. View only — the page writes nothing."
+      "description": "Read the company's journal: who did what, who logged in, who was refused. View only — the page writes nothing."
     },
     "settingsAutomations": {
       "label": "Automation",

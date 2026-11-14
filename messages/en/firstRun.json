@@ -1,19 +1,18 @@
 {
+  "stepOf": "Step {current} of {total} · {name}",
   "setup": {
     "metaTitle": "Set up your company",
     "steps": {
       "company": "Your company",
       "dataset": "What to start with"
     },
-    "welcomeTo": "Welcome to {company}",
-    "welcome": "Welcome",
-    "datasetTitle": "What should we start you with?",
-    "companyLead": "Three questions, so the product arrives set up rather than blank. You can change any of it later.",
-    "datasetLead": "Whichever you pick, every feature is switched on. This is only about what is in it on day one.",
-    "failed": "The last attempt stopped: {detail}. Your answers are still here — try again.",
+    "title": "Let’s set up <em>{company}</em>",
+    "titleNoName": "Let’s set up your company",
+    "lead": "A few questions, so noddo arrives set up, not blank. You can change any of it later.",
     "industry": {
       "label": "What does the company do?",
-      "placeholder": "Select an industry",
+      "placeholder": "Choose an industry",
+      "required": "Choose an industry.",
       "options": {
         "software": "Software & IT",
         "professionalServices": "Professional services",
@@ -31,36 +30,50 @@
       }
     },
     "size": {
-      "label": "How many people will use it?",
-      "placeholder": "Select a size",
+      "label": "How many people are in the company?",
+      "placeholder": "Choose a size",
+      "required": "Choose a size.",
       "options": {
         "under10": "Fewer than 10",
-        "tenTo50": "10 to 50",
-        "fiftyTo200": "50 to 200",
+        "tenTo50": "10–50",
+        "fiftyTo200": "50–200",
         "over200": "More than 200"
       }
     },
     "country": {
       "label": "Where is the company based?",
-      "hintFor": "Sets your time zone to {timezone}, starts the week on {weekday, select, MONDAY {Monday} TUESDAY {Tuesday} WEDNESDAY {Wednesday} THURSDAY {Thursday} FRIDAY {Friday} SATURDAY {Saturday} SUNDAY {Sunday} other {the first working day}}, and builds that country's public holiday calendar.",
-      "hint": "Sets your time zone and working week, and builds that country's public holiday calendar."
+      "required": "Choose a country.",
+      "hintFor": "Sets your time zone to {timezone}, starts the week on {weekday, select, MONDAY {Monday} TUESDAY {Tuesday} WEDNESDAY {Wednesday} THURSDAY {Thursday} FRIDAY {Friday} SATURDAY {Saturday} SUNDAY {Sunday} other {the first working day}} and builds {country}’s public holiday calendar."
+    },
+    "language": {
+      "label": "Language",
+      "hint": "Everybody in the company sees noddo in it — screens, emails and exports."
+    },
+    "dataset": {
+      "title": "Where do we start?",
+      "lead": "Start with example data or with nothing. Every feature works either way.",
+      "required": "Choose what to start with."
     },
     "datasets": {
       "sample": {
         "title": "Example company",
-        "body": "Offices, departments, job titles, leave policies and a set of people sized to your answer — enough to see how every screen looks before you put anything real in."
+        "body": "Offices, departments, job titles, time off policies and example people. Enough to see how it works.",
+        "people": "Example people"
       },
       "empty": {
         "title": "Start empty",
-        "body": "Nothing but your own account. Everything is here — the fields, the roles, the leave types — and none of it is filled in with anybody imaginary."
-      },
-      "full": {
-        "title": "Full demo",
-        "body": "The complete demo company: fifty people whatever your size, with every feature exercised. The most to look at, and the most to clear out afterwards."
+        "body": "Just your own account. Fields, roles and time off types are ready, nothing is filled in."
       }
     },
     "submitting": "Setting up…",
     "submit": "Set up my company",
+    "failed": {
+      "starting": "The last attempt stopped before it got going. Your answers are still here — try again.",
+      "localization": "The last attempt stopped: we couldn’t set your time zone and working week. Your answers are still here — try again.",
+      "holidays": "The last attempt stopped: we couldn’t build the public holiday calendar. Your answers are still here — try again.",
+      "exampleData": "The last attempt stopped: we couldn’t create your example company. Your answers are still here — try again.",
+      "finishing": "The last attempt stopped just before the end. Your answers are still here — try again."
+    },
     "building": {
       "title": "Setting up your company",
       "lead": "This takes a few moments. You can leave this page — it will pick up where it left off.",
@@ -71,37 +84,63 @@
         "exampleData": "Creating your example company",
         "finishing": "Almost there"
       }
-    },
-    "language": {
-      "label": "Language",
-      "hint": "Everybody in the company sees noddo in it — screens, emails and exports. You can change it later in Settings."
     }
   },
   "countryPicker": {
-    "placeholder": "Select a country",
+    "placeholder": "Choose a country",
     "empty": "No country matches that."
   },
-  "avatar": {
-    "qrAlt": "Scan to upload a photo from your phone",
-    "qrHint": "Scan it with your phone's camera. The code works once, for the next few minutes.",
-    "hideCode": "Hide code",
-    "usePhone": "Use my phone",
-    "uploadFromComputer": "Upload from this computer"
+  "photo": {
+    "title": "Add your photo",
+    "lead": "Help your colleagues recognize you. You can change it any time.",
+    "drag": "Drag your photo here",
+    "drop": "Drop it here",
+    "rules": "Square, at least 400 × 400 px. PNG, JPG or WEBP.",
+    "or": "or",
+    "chooseFile": "Choose a file",
+    "fromPhone": "Upload from my phone",
+    "uploadPhoto": "Upload a photo",
+    "uploading": "Uploading…",
+    "qr": {
+      "alt": "A code to scan with your phone",
+      "title": "Scan the code with your phone",
+      "body": "You’ll pick a photo on your phone and it will appear here. The code works once, for the next 15 minutes.",
+      "chooseInstead": "Choose a file instead"
+    },
+    "arrived": {
+      "title": "Your photo is in",
+      "fromPhone": "It came from your phone. You can change it any time.",
+      "fromFile": "You can change it any time.",
+      "chooseAnother": "Choose another file"
+    },
+    "expired": {
+      "title": "The code has expired",
+      "body": "Codes work once, for 15 minutes. Press “Show a new code” and scan it again.",
+      "newCode": "Show a new code"
+    }
   },
   "mobileAvatar": {
     "title": "Add your photo",
-    "greeting": "Hi {name}",
-    "lead": "Take a photo for your profile.",
-    "uploading": "Uploading",
-    "takePhoto": "Take a photo",
-    "failed": "That did not work. Ask for a new code and try again.",
+    "greeting": "Hi, {name}",
+    "greetingNoName": "Hi",
+    "lead": "Pick a photo for your profile at {company}.",
+    "choose": "Choose a photo",
+    "fromGallery": "From your gallery.",
+    "uploading": {
+      "title": "Uploading…",
+      "body": "Keep this page open for a moment."
+    },
     "done": {
-      "title": "That's your photo",
-      "body": "It is already on your profile. You can close this page and go back to your computer."
+      "title": "That’s your photo",
+      "body": "It’s already on your profile. You can close this page and go back to your computer."
+    },
+    "failed": {
+      "title": "That didn’t work",
+      "body": "Show a new code on your computer and scan it again."
     },
     "expired": {
       "title": "This code has expired",
-      "body": "Codes last a few minutes and work once. Show a new one on your computer and scan it again."
+      "body": "Codes work once, for 15 minutes. Show a new one on your computer and scan it again."
     }
   },
   "preferences": {
@@ -118,21 +157,46 @@
       "dayFirst": "{sample} — day first",
       "monthFirst": "{sample} — month first",
       "yearFirst": "{sample} — year first"
+    },
+    "language": {
+      "label": "Language",
+      "followCompany": "Same as the company ({language})",
+      "hint": "The language you see noddo in — screens and emails."
     }
   },
   "welcome": {
     "metaTitle": "Welcome",
+    "hi": "Hi, {name}!",
+    "hiNoName": "Hi!",
+    "glad": "Glad you’re here",
+    "lead": "A few quick settings, and you’re ready to go.",
+    "start": "Let’s go",
     "steps": {
-      "aboutYou": "About you",
-      "preferences": "Your preferences"
+      "profile": "Profile",
+      "preferences": "Preferences"
     },
-    "greeting": "Welcome, {name}",
-    "preferencesTitle": "How would you like things shown?",
-    "leadWithFields": "A photo so colleagues can put a face to your name, and anything of yours that is still blank.",
-    "leadPhotoOnly": "A photo, so colleagues can put a face to your name.",
-    "preferencesLead": "Two settings, and you can change them whenever you like.",
-    "you": "You",
-    "nothingToFill": "Everything else about you lives on your profile, where you can change it any time.",
+    "connect": {
+      "title": "Log in faster next time",
+      "lead": "Connect Google or Microsoft and skip the password from now on.",
+      "leadOne": "Connect {provider} and skip the password from now on.",
+      "button": "Connect {provider}",
+      "busy": "Taking you to {provider}…",
+      "connected": "Connected as {account}.",
+      "connectedNoAccount": "Connected.",
+      "inUse": "This {provider} account is already used by someone else at {company}. Try another one, or skip.",
+      "failed": "We couldn’t connect your {provider} account. Try again, or skip.",
+      "setPassword": "Set a password instead",
+      "passwordSet": "Your password is set."
+    },
+    "about": {
+      "title": "A bit about you",
+      "lead": "A few details for your profile. All of it can wait."
+    },
+    "preferences": {
+      "title": "How should things look?",
+      "lead": "We’ve used {company}’s settings. Change them if they don’t fit you.",
+      "leadNoName": "We’ve used your company’s settings. Change them if they don’t fit you."
+    },
     "skip": "Skip",
     "finish": "Finish"
   }

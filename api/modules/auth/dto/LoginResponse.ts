@@ -6,4 +6,10 @@ export type LoginResponse = {
     challengeToken?: string;
     backupCodes?: string[];
     backupCodesLeft?: number;
+    /** After a provider's round trip: what it was for, so the BFF knows where the browser goes next. */
+    purpose?: "SIGN_IN" | "CONNECT" | "INVITE" | "SIGNUP" | "REAUTH" | "DOMAIN_CONNECT";
+    /** After a provider's round trip: the page of this app it started from, if it named one. */
+    returnTo?: string;
+    /** After a registration's round trip: B3's draft, moved into a cookie by the BFF. */
+    signupDraft?: string;
 };

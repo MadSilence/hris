@@ -1,0 +1,33 @@
+
+.l2 .bgc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.l2 .bgc .o{display:flex;align-items:center;gap:12px;height:60px;padding:0 12px 0 8px;border:1px solid var(--border-divider);border-radius:12px;font-size:14px;line-height:20px;color:var(--text-secondary);box-sizing:border-box}
+.l2 .bgc .o.on{box-shadow:0 0 0 2px var(--dr,var(--accent));border-color:transparent;color:var(--text-primary);font-weight:600}
+.l2 .bgc .th{width:64px;height:44px;border-radius:7px;display:flex;overflow:hidden;background:#FFFFFF;box-shadow:0 0 0 1px var(--border-divider);flex:none}
+.l2 .bgc .th i{width:42%;display:flex;align-items:flex-end;padding:5px;box-sizing:border-box}
+.l2 .bgc .th i span{width:12px;height:12px;background:#FFFFFF;border-radius:3px;display:flex;align-items:center;justify-content:center}
+.l2 .bgc .th i span svg{width:9px;height:9px}
+.l2 .bgc .th b{flex:1;display:flex;align-items:center;justify-content:center}
+.l2 .bgc .th b::after{content:"";width:62%;height:6px;border-radius:2px;background:var(--dr,var(--accent))}
+.l2 .stp3 h4{margin-bottom:14px}
+.l2.v3 .stp{margin-top:40px}
+.l2.v3 .lft{display:flex;flex-direction:column;height:100%;box-sizing:border-box;padding-bottom:32px}
+.l2.v3 .gosv{margin-top:auto;padding-top:24px}   /* Save is pinned to the bottom of the column (Ulia) */
+.l2 .row3{display:flex;align-items:center;justify-content:space-between}
+.l2 .row3 h4{margin:0!important}
+.l2 .seg{display:inline-flex;align-items:center;gap:2px;height:36px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:var(--surface-mist)}
+.l2 .seg span{height:30px;margin:0;flex:none;box-sizing:border-box;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:18px;font-weight:500;color:var(--text-secondary)}
+.l2 .seg span.on{background:#FFFFFF;color:var(--text-primary);font-weight:600;box-shadow:0 1px 2px rgba(11,11,12,.08),0 0 0 1px var(--border-divider)}
+.l2 .rings.lg{grid-template-rows:auto}
+.l2 .rings .r.hx:not(.on) span{display:none}
+.l2 .sep{height:1px;background:var(--border-divider);margin:16px 0}
+.l2 .bgc .th i .dots{display:flex;gap:2px;position:absolute;top:5px;left:5px}
+.l2 .bgc .th i{position:relative}
+.l2 .bgc .th i .dots u{width:5px;height:5px;border-radius:50%;border:1.5px solid;box-sizing:border-box;display:block}
+.l2 .sub4{font-size:13px;line-height:18px;color:var(--text-tertiary);margin:0 0 12px}
+.l2 .sub4.mt{margin-top:22px}
+.l2 .rings .r.hx span{font:500 11px/16px "JetBrains Mono",monospace}
+.l2 .rings .r.hx.on span{font-weight:600}
+/* emails: a 1 px border, not a shadow (mail apps drop shadows) — the band and card hold on a grey inbox */
+.lt .mailx,.lt.mbox{background:#FFFFFF}
+.lt .mx .hero,.lt .mx .slim{background:var(--gray-50)!important}
+.lt .mx .card3{border:1px solid var(--gray-200);box-shadow:none}

@@ -98,11 +98,11 @@
     "weekday": "A weekday",
     "whichWeek": "Which week",
     "week": {
+      "0": "Last",
       "1": "First",
       "2": "Second",
       "3": "Third",
-      "4": "Fourth",
-      "0": "Last"
+      "4": "Fourth"
     },
     "lastDay": "Last day",
     "shortMonthHint": "For months with fewer days, it runs on the last day.",

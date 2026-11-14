@@ -6,7 +6,7 @@ import { DelegateApprovalsSection } from "@/components/modules/delegations/compo
 import { BirthdayOnHomeSection } from "@/components/modules/home/preferences";
 import { MySessionsSection } from "@/components/modules/sessions/components";
 import { TwoStepSection } from "@/components/modules/mfa/components";
-import { ConnectIdentityProvider } from "@/components/modules/identity/components";
+import { ConnectIdentityProvider, SignInMethodsSection, type ProviderReturn } from "@/components/modules/identity/components";
 import { ssoService } from "@/api/modules/sso";
 import { currentCompanySubdomain } from "@/api/modules/companyAddress";
 
@@ -22,11 +22,14 @@ export async function generateMetadata() {
  * settings would have been a second one — two pages of "your own settings", found by two different
  * routes. `/inbox/preferences` now sends people here.
  */
-type Props = { searchParams: Promise<{ sso?: string }> };
+type Props = { searchParams: Promise<{ sso?: string; provider?: string; inUse?: string }> };
 
 export default async function PreferencesPage({ searchParams }: Props) {
   const t = await getTranslations("navigation");
-  const { sso: ssoResult } = await searchParams;
+  const { sso: ssoResult, provider, inUse } = await searchParams;
+  // Back from Google or Microsoft (`/api/auth/provider/finish`): connected, or the one sentence saying why not.
+  const returned: ProviderReturn = provider === "connected" ? "connected" : provider === "confirmed" ? "confirmed"
+    : inUse === "1" ? "inUse" : provider === "GOOGLE" || provider === "MICROSOFT" ? "failed" : null;
   const subdomain = await currentCompanySubdomain();
   const sso = subdomain ? await ssoService.publicSso(subdomain) : null;
   return (
@@ -56,6 +59,11 @@ export default async function PreferencesPage({ searchParams }: Props) {
       <section className="space-y-4">
         <h2 className="text-section-title text-primary">{t("preferences.notifications")}</h2>
         <NotificationPreferences />
+      </section>
+
+      <section className="max-w-2xl space-y-4">
+        <h2 className="text-section-title text-primary">{t("preferences.signIn")}</h2>
+        <SignInMethodsSection returned={returned} />
       </section>
 
       <section className="max-w-2xl space-y-4">

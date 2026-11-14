@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { finishSignIn, ssoFailed, ssoService } from "@/api/modules/sso";
 import publicConfig from "@/config/publicConfig";
 import { TRUSTED_DEVICE_COOKIE } from "@/config/security/sessionCookieNames";
-import { parseHost, requestHost } from "@/lib/companyAddress";
+import { parseHost, requestHost, requestOrigin } from "@/lib/companyAddress";
 
 /**
  * The SAML Assertion Consumer Service: the IdP's cross-site POST (R1.5). Bound to us by `InResponseTo`
@@ -11,7 +11,7 @@ import { parseHost, requestHost } from "@/lib/companyAddress";
  */
 export const POST = async (req: NextRequest) => {
   const host = parseHost(requestHost(req.headers), publicConfig.web.rootDomain);
-  const origin = new URL(req.url).origin;
+  const origin = requestOrigin(req.headers, publicConfig.web);
   if (host.kind !== "company") return ssoFailed(origin);
   try {
     const form = await req.formData();

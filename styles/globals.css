@@ -324,6 +324,17 @@
   --text-hero-xxl--line-height: 96px;
   --text-hero-xxl--letter-spacing: -0.03em;
   --text-hero-xxl--font-weight: 400;
+  /* The login screens only (sign-in-root § Common, approved as auth-only exceptions, not product-wide). */
+  --text-auth-title: 32px;
+  --text-auth-title--line-height: 40px;
+  --text-auth-title--letter-spacing: -0.03em;
+  --text-auth-title--font-weight: 600;
+  --text-auth-display: 40px;
+  --text-auth-display--line-height: 44px;
+  --text-auth-display--letter-spacing: -0.03em;
+  --text-auth-display--font-weight: 600;
+  --text-auth-lead: 15px;
+  --text-auth-lead--line-height: 22px;
   --text-home-sentence: 16px;
   --text-home-sentence--line-height: 22px;
   --text-home-sentence-m: 19px;
@@ -400,7 +411,9 @@
   .text-hero-xxl,
   .text-home-sentence,
   .text-home-sentence-m,
-  .text-home-sentence-l {
+  .text-home-sentence-l,
+  .text-auth-title,
+  .text-auth-display {
     font-family: var(--font-heading);
   }
 
@@ -578,4 +591,309 @@
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* ── The login screens (hris/design/screens/sign-in-*, first-run-*; sign-in-root/spec.md § Common) ──────────────
+   Approved by the owner as exceptions for the login screens only: the split layout and the phone strip, display
+   sizes, the ring grid as a brand pattern and its nod outside loaders. Product controls inside stay Desact's.
+   Desktop from 768 up: a pane 520 wide on the left, the white side with the step. Below 768: a strip on top. */
+.auth-split { display: flex; min-height: 100dvh; background: var(--surface-card); color: var(--text-primary); }
+.auth-split .auth-pane {
+  display: none; flex: none; width: 520px; padding: 56px; flex-direction: column; justify-content: space-between;
+  background: var(--accent); color: var(--on-accent); overflow: hidden;
+}
+.auth-split .auth-strip {
+  display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 8px;
+  background: var(--accent); color: var(--on-accent);
+}
+.auth-split { flex-direction: column; }
+@media (min-width: 768px) {
+  .auth-split { flex-direction: row; }
+  .auth-split .auth-pane { display: flex; }
+  .auth-split .auth-strip { display: none; }
+}
+
+/* noddo's own screens (root, registration) are always Wine, whatever the host's accent. */
+.auth-split[data-brand="noddo"] .auth-pane,
+.auth-split[data-brand="noddo"] .auth-strip { background: var(--wine-700); color: #FFFFFF; }
+
+/* The rings: resting and "hot" (the ones that nod). On Wine the on-Wine recipe (SPEC § 10); on any other colour
+   tints of it (78 % / 30 % with white); on the Light background Gray 200 with the hot rings in the accent. */
+.auth-rings circle { fill: none; stroke: color-mix(in srgb, var(--accent) 78%, #FFFFFF); }
+.auth-rings circle.hot { stroke: color-mix(in srgb, var(--accent) 30%, #FFFFFF); transform-box: fill-box; animation-duration: 24s;
+  animation-timing-function: cubic-bezier(.5, 0, .3, 1); animation-iteration-count: infinite; }
+[data-accent="wine"] .auth-rings circle,
+.auth-split[data-brand="noddo"] .auth-rings circle { stroke: var(--wine-500); }
+[data-accent="wine"] .auth-rings circle.hot,
+.auth-split[data-brand="noddo"] .auth-rings circle.hot { stroke: var(--rose); }
+.auth-split[data-background="light"] .auth-pane,
+.auth-split[data-background="light"] .auth-strip { background: var(--gray-50); color: var(--text-primary); }
+.auth-split[data-background="light"] .auth-rings circle { stroke: var(--gray-200); }
+.auth-split[data-background="light"] .auth-rings circle.hot { stroke: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .auth-rings circle.hot { animation: none !important; } }
+
+/* A red workspace (Cherry, Tangerine, a custom red: `isRedAccent` in lib/theme/accent.ts puts data-accent-tone="red"
+   beside the accent): the confirm dialog's destructive button is a red outline instead of a red fill, so the two reds
+   do not blur (sign-in-appearance § "A colour close to a status colour", rule 3). Everywhere else it keeps its fill. */
+[data-accent-tone="red"] .btn-destructive-confirm:not(:disabled) {
+  background: var(--surface-card); color: var(--status-declined-fill); box-shadow: inset 0 0 0 1px var(--status-declined-fill);
+}
+[data-accent-tone="red"] .btn-destructive-confirm:not(:disabled):hover,
+[data-accent-tone="red"] .btn-destructive-confirm:not(:disabled):active { background: var(--status-declined-bg); }
+
+/* ── Settings → Appearance (hris/design/screens/sign-in-appearance) ─────────────────────────────────────────────
+   Approved by the owner as the "selling" settings page (its spec § "Changes to SPEC"): the display heading, the
+   rings as colour swatches with the nod, the Mist stage with a quiet ring grid, the framed previews. */
+.appearance-heading { margin: 0; font: 600 44px/46px var(--font-heading); letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.appearance-step-number { width: 24px; height: 24px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 9999px; background: var(--accent-subtle); color: var(--accent-text); font-size: 13px; line-height: 18px; font-weight: 600; }
+.appearance-rings { display: grid; grid-template-columns: repeat(5, 44px); column-gap: 16px; row-gap: 6px; justify-content: start; }
+.appearance-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 64px; margin: 0 -10px;
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-secondary); font-size: 12px; line-height: 16px; }
+.appearance-swatch:disabled { cursor: default; opacity: .5; }
+.appearance-swatch:focus-visible { outline: none; }
+.appearance-swatch:focus-visible .appearance-ring { box-shadow: 0 0 0 3px var(--accent-muted); }
+.appearance-ring { width: 44px; height: 44px; border-radius: 9999px; border: 9px solid var(--ring); flex: none;
+  transition: transform 160ms cubic-bezier(.5, 0, .3, 1), box-shadow 160ms linear; }
+.appearance-ring[data-own="true"] { border: 0;
+  background: conic-gradient(#E5484D, #F5C518, #2E7D32, #0369A1, #4338CA, #BE123C, #E5484D);
+  -webkit-mask: radial-gradient(circle, transparent 12.5px, #000 13px); mask: radial-gradient(circle, transparent 12.5px, #000 13px); }
+.appearance-swatch[aria-checked="true"] .appearance-ring { transform: translateY(7px);
+  box-shadow: 0 0 0 4px var(--surface-card), 0 0 0 6.5px var(--ring); }
+.appearance-swatch[aria-checked="true"] .appearance-ring[data-own="true"] { -webkit-mask: none; mask: none;
+  background: radial-gradient(circle, var(--surface-card) 12.5px, transparent 13px),
+    conic-gradient(#E5484D, #F5C518, #2E7D32, #0369A1, #4338CA, #BE123C, #E5484D);
+  box-shadow: 0 0 0 4px var(--surface-card), 0 0 0 6.5px var(--ink); }
+.appearance-swatch-name { margin-top: 2px; padding: 0 8px; border-radius: 9999px; white-space: nowrap; }
+.appearance-swatch[aria-checked="true"] .appearance-swatch-name { margin-top: 9px; background: var(--surface-mist); color: var(--text-primary);
+  font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .appearance-ring { transition: none; } }
+.appearance-sv { position: relative; height: 150px; border-radius: 8px; cursor: crosshair; touch-action: none;
+  background: linear-gradient(to top, #000000, transparent), linear-gradient(to right, #FFFFFF, hsl(var(--hue) 100% 50%)); }
+.appearance-hue { position: relative; height: 12px; border-radius: 9999px; cursor: pointer; touch-action: none;
+  background: linear-gradient(to right, #FF0000, #FFFF00, #00FF00, #00FFFF, #0000FF, #FF00FF, #FF0000); }
+.appearance-knob { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 9999px;
+  border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px rgba(11, 11, 12, .3); pointer-events: none; }
+.appearance-hue .appearance-knob { top: 50%; }
+.appearance-stage { position: relative; overflow: hidden; background: var(--surface-mist); border-radius: 32px 0 0 32px; }
+.appearance-stage-rings circle { fill: none; stroke: #DADADF; }
+.appearance-stage-rings circle.hot { stroke: var(--accent); }
+.appearance-frame { overflow: hidden; border-radius: 14px; background: var(--surface-card); box-shadow: var(--shadow-3); }
+.appearance-frame-bar { height: 24px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface-subtle);
+  border-bottom: 1px solid var(--border-divider); font-size: 11px; line-height: 16px; color: var(--text-tertiary); }
+.appearance-frame-bar i { width: 7px; height: 7px; border-radius: 9999px; background: var(--border-strong); }
+.appearance-frame .auth-split { min-height: 0; height: 100%; }
+.appearance-phone { overflow: hidden; border: 3px solid var(--text-primary); border-radius: 26px; background: var(--surface-card); box-shadow: var(--shadow-3); }
+.appearance-phone .auth-strip { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 8px; background: var(--accent); color: var(--on-accent); }
+.appearance-phone[data-background="light"] .auth-strip { background: var(--gray-50); color: var(--text-primary); }
+.appearance-phone[data-background="light"] .auth-rings circle { stroke: var(--gray-200); }
+.appearance-phone[data-background="light"] .auth-rings circle.hot { stroke: var(--accent); }
+/* The stage is an island in the colour being tried: a saved Wine on <html> must not paint its rings Wine there. */
+.appearance-stage:not([data-accent="wine"]) .auth-split:not([data-background="light"]) .auth-rings circle,
+.appearance-stage:not([data-accent="wine"]) .appearance-phone:not([data-background="light"]) .auth-rings circle {
+  stroke: color-mix(in srgb, var(--accent) 78%, #FFFFFF); }
+.appearance-stage:not([data-accent="wine"]) .auth-split:not([data-background="light"]) .auth-rings circle.hot,
+.appearance-stage:not([data-accent="wine"]) .appearance-phone:not([data-background="light"]) .auth-rings circle.hot {
+  stroke: color-mix(in srgb, var(--accent) 30%, #FFFFFF); }
+.appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle { stroke: var(--wine-500); }
+.appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle.hot { stroke: var(--rose); }
+.appearance-mail-band { background: var(--accent); color: var(--on-accent); }
+.appearance-mail[data-background="light"] .appearance-mail-band { background: var(--gray-50); color: var(--text-primary); }
+.appearance-mail-card { background: var(--surface-card); border-radius: 12px; overflow: hidden; }
+.appearance-mail[data-background="light"] { background: var(--surface-card); }
+.appearance-mail[data-background="light"] .appearance-mail-card { border: 1px solid var(--gray-200); }
+.appearance-mail-title { margin: 0; font: 600 28px/32px var(--font-heading); letter-spacing: -0.03em; }
+.appearance-mail-title em, .appearance-heading em { font-style: normal; color: var(--appearance-tried, var(--accent-text)); }
+
+/* The pane's foot: noddo's wordmark and slogan, or the company's mark and name. */
+.auth-pane-foot { display: flex; flex-direction: column; gap: 20px; }
+.auth-slogan { margin: 0; font: 600 24px/30px var(--font-heading); letter-spacing: -0.02em; }
+.auth-slogan span { color: var(--rose); }
+.auth-company { display: flex; align-items: center; gap: 16px; }
+.auth-company-mark {
+  width: 56px; height: 56px; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border-radius: var(--radius-control); background: #FFFFFF; color: var(--accent); font: 600 28px/1 var(--font-heading);
+}
+.auth-company-mark img { max-width: 40px; max-height: 40px; object-fit: contain; }
+.auth-company-name { font: 600 40px/44px var(--font-heading); letter-spacing: -0.03em; overflow-wrap: anywhere; }
+.auth-company[data-long="true"] { align-items: flex-start; }
+.auth-company[data-long="true"] .auth-company-name { font-size: 26px; line-height: 32px; letter-spacing: -0.02em; }
+.auth-strip .auth-company { gap: 10px; }
+.auth-strip .auth-company-mark { width: 28px; height: 28px; border-radius: 6px; font-size: 15px; }
+.auth-strip .auth-company-mark img { max-width: 20px; max-height: 20px; }
+.auth-strip .auth-company-name, .auth-strip .auth-company[data-long="true"] .auth-company-name {
+  font-size: 18px; line-height: 28px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.auth-powered { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; opacity: .7; }
+
+/* The white side: the back arrow on top, the step centred in what is left, "powered by" at the foot. */
+.auth-main { flex: 1; display: flex; flex-direction: column; padding: 20px 20px 28px; position: relative; }
+.auth-main-top { min-height: 36px; display: flex; align-items: center; }
+.auth-main-mid { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px 0; }
+.auth-main-foot { display: flex; justify-content: center; padding-top: 24px; }
+.auth-split[data-long="true"] .auth-main-mid { align-items: flex-start; }
+@media (min-width: 768px) {
+  .auth-main { padding: 40px 48px; }
+  .auth-split[data-long="true"] .auth-main-mid { align-items: center; }
+}
+.auth-step { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 28px; align-items: stretch; }
+.auth-step-head { display: flex; flex-direction: column; gap: 8px; }
+@media (max-width: 767px) { .text-auth-title { font-size: 28px; line-height: 36px; } }
+
+/* The 48 px circle above a heading: grey for an error or expiry, the accent's subtle tint for "check your email". */
+.auth-icon-circle { width: 48px; height: 48px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+  background: var(--mist); color: var(--text-secondary); }
+.auth-icon-circle[data-tone="accent"] { background: var(--accent-subtle); color: var(--accent-text); }
+
+/* The 6-box code input (B2, C10, D1, D4, F6). */
+.auth-code { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 360px; }
+.auth-code input {
+  height: 52px; width: 100%; text-align: center; font: 500 22px/1 var(--font-mono); color: var(--text-primary);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface-card);
+}
+.auth-code input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 25%, transparent); }
+.auth-code[data-invalid="true"] input { border-color: var(--status-declined-border); }
+
+/* The scripted nod of the grid (24 s loop; one ring, then a pair; never more than two moving), the designers' own. */
+@keyframes rn6x4x4-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-2 { 0% {transform:translateY(0)} 15.58% {transform:translateY(0)} 17.46% {transform:translateY(7px)} 18.50% {transform:translateY(-2px)} 19.54% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 78.08% {transform:translateY(0)} 79.96% {transform:translateY(7px)} 81.00% {transform:translateY(-2px)} 82.04% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-3 { 0% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 40.58% {transform:translateY(0)} 42.46% {transform:translateY(7px)} 43.50% {transform:translateY(-2px)} 44.54% {transform:translateY(0)} 90.58% {transform:translateY(0)} 92.46% {transform:translateY(7px)} 93.50% {transform:translateY(-2px)} 94.54% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x1x2-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x1x2-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 28.08% {transform:translateY(0)} 29.96% {transform:translateY(7px)} 31.00% {transform:translateY(-2px)} 32.04% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 65.58% {transform:translateY(0)} 67.46% {transform:translateY(7px)} 68.50% {transform:translateY(-2px)} 69.54% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x3x3-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x3x3-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 78.08% {transform:translateY(0)} 79.96% {transform:translateY(7px)} 81.00% {transform:translateY(-2px)} 82.04% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x3x3-2 { 0% {transform:translateY(0)} 15.58% {transform:translateY(0)} 17.46% {transform:translateY(7px)} 18.50% {transform:translateY(-2px)} 19.54% {transform:translateY(0)} 40.58% {transform:translateY(0)} 42.46% {transform:translateY(7px)} 43.50% {transform:translateY(-2px)} 44.54% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+
+/* The first-experience base: registration (B) and the owner's setup (S). Form left, the Wine card with the orbit
+   right; noddo's own, so Wine whatever the host. */
+.auth-first { display: flex; flex-direction: column; min-height: 100dvh; background: var(--surface-card); color: var(--text-primary); }
+.auth-first-strip { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 8px; background: var(--wine-700); color: #FFFFFF; }
+.auth-first-strip .auth-rings circle { stroke: var(--wine-500); }
+.auth-first-strip .auth-rings circle.hot { stroke: var(--rose); }
+.auth-first-main { flex: 1; display: flex; flex-direction: column; padding: 20px 20px 28px; }
+.auth-first-top { min-height: 36px; display: flex; align-items: center; gap: 12px; }
+.auth-first-wordmark { display: none; }
+.auth-first-card { display: none; }
+.auth-first[data-long="true"] .auth-main-mid { align-items: flex-start; }
+@media (min-width: 1024px) {
+  .auth-first { flex-direction: row; }
+  .auth-first-strip { display: none; }
+  .auth-first-main { padding: 40px 72px; }
+  .auth-first-wordmark { display: block; }
+  .auth-first[data-long="true"] .auth-main-mid { align-items: center; }
+  .auth-first-card {
+    display: flex; flex: none; width: 600px; margin: 12px; border-radius: var(--radius-panel); padding: 56px 48px 40px;
+    flex-direction: column; align-items: center; text-align: center; background: var(--wine-700); color: #FFFFFF;
+  }
+}
+.auth-first-slogan { margin: 0; font: 600 44px/46px var(--font-heading); letter-spacing: -0.035em; }
+.auth-first-slogan span { color: var(--rose); }
+.auth-first-sub { margin: 14px 0 0; font-size: 15px; line-height: 22px; color: rgba(255, 255, 255, .78); }
+.auth-orbit { width: 100%; max-width: 500px; height: auto; margin: auto 0; overflow: visible; }
+.auth-orbit-outer, .auth-orbit-inner { fill: none; stroke: #FFFFFF; stroke-width: 1.5; stroke-dasharray: 3 6; }
+.auth-orbit-outer { stroke-opacity: .3; animation: auth-orbit-cw 20s linear infinite; }
+.auth-orbit-inner { stroke-opacity: .18; animation: auth-orbit-ccw 20s linear infinite; }
+.auth-orbit-centre { fill: none; stroke: var(--rose); stroke-width: 18; }
+.auth-orbit-ring { fill: var(--wine-700); stroke: #FFFFFF; stroke-width: 5; }
+.auth-orbit-label { font: 500 13px/18px var(--font-body, Inter), sans-serif; fill: #FFFFFF; }
+@keyframes auth-orbit-cw { to { stroke-dashoffset: -180; } }
+@keyframes auth-orbit-ccw { to { stroke-dashoffset: 180; } }
+@media (prefers-reduced-motion: reduce) { .auth-orbit-outer, .auth-orbit-inner { animation: none; } }
+.auth-display em, .text-auth-display em { font-style: normal; color: var(--accent-text); }
+
+/* The invitation's pane (sign-in-invitation): the company small on top, a 6 × 3 grid, a two-tone welcome at the foot. */
+.auth-pane[data-variant="invitation"] { justify-content: flex-start; gap: 44px; }
+.auth-pane[data-variant="invitation"] .auth-company { gap: 12px; }
+.auth-pane[data-variant="invitation"] .auth-company-mark { width: 40px; height: 40px; font-size: 20px; }
+.auth-pane[data-variant="invitation"] .auth-company-mark img { max-width: 28px; max-height: 28px; }
+.auth-pane[data-variant="invitation"] .auth-company-name { font-size: 20px; line-height: 28px; letter-spacing: -0.01em; }
+.auth-pane[data-variant="invitation"] .auth-pane-foot { margin-top: auto; gap: 24px; }
+.auth-welcome { margin: 0; font: 600 60px/60px var(--font-heading); letter-spacing: -0.04em; overflow-wrap: anywhere; }
+.auth-welcome span { color: color-mix(in srgb, var(--accent) 45%, #FFFFFF); }
+[data-accent="wine"] .auth-welcome span { color: var(--rose); }
+
+/* First run (first-run-setup, first-run-welcome, first-run-photo). The two-bar stepper (deliberately not the ring
+   Stepper of SPEC § 13.10), the choice card, the stops slider, the progress list, the photo's drop zone, and the
+   welcome's white frame with the company's logo on top and two rows of rings along the bottom. */
+.fr-bars { display: flex; flex-direction: column; gap: 10px; }
+.fr-bars-track { display: flex; gap: 6px; }
+.fr-bars-track span { width: 28px; height: 4px; border-radius: var(--radius-pill); background: var(--border-field); }
+.fr-bars-track span[data-on="true"] { background: var(--accent); }
+.fr-bars-label { font-size: 13px; line-height: 18px; color: var(--text-tertiary); }
+
+.fr-choice { border: 1px solid var(--border-field); border-radius: var(--radius-card); background: var(--surface-card); }
+.fr-choice:hover { border-color: var(--border-strong); }
+.fr-choice[data-checked="true"] { border-color: var(--accent); background: var(--accent-subtle); }
+.fr-choice-head { display: flex; width: 100%; gap: 12px; align-items: flex-start; padding: 16px; text-align: left; background: none; border: 0;
+  border-radius: var(--radius-card); cursor: pointer; }
+.fr-choice-head:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 25%, transparent); }
+.fr-choice-dot { margin-top: 3px; width: 16px; height: 16px; flex: none; border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-strong); background: var(--surface-card); display: flex; align-items: center; justify-content: center; }
+.fr-choice[data-checked="true"] .fr-choice-dot { border-color: var(--accent); }
+.fr-choice[data-checked="true"] .fr-choice-dot::after { content: ""; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--accent); }
+.fr-choice-title { display: block; font-size: 15px; line-height: 22px; font-weight: 600; color: var(--text-primary); }
+.fr-choice-body { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--text-secondary); }
+
+.fr-slider { margin: -4px 0 0; padding: 0 16px 16px 44px; display: flex; flex-direction: column; gap: 10px; }
+.fr-slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; line-height: 18px; color: var(--text-secondary); }
+.fr-slider-value { font-size: 15px; line-height: 22px; font-weight: 600; color: var(--accent-text); }
+.fr-slider-track { position: relative; height: 20px; margin: 0 10px; cursor: pointer; touch-action: none; }
+.fr-slider-track::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 4px; border-radius: var(--radius-pill); background: var(--border-field); }
+.fr-slider-fill { position: absolute; left: 0; top: 8px; height: 4px; border-radius: var(--radius-pill); background: var(--accent); }
+.fr-slider-thumb { position: absolute; top: 0; width: 20px; height: 20px; margin-left: -10px; border-radius: var(--radius-pill);
+  background: var(--surface-card); border: 2px solid var(--accent); box-shadow: var(--shadow-1); }
+.fr-slider-thumb:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 25%, transparent); }
+.fr-slider-stops { position: relative; height: 18px; margin: 0 10px; font-size: 13px; line-height: 18px; color: var(--text-tertiary); }
+.fr-slider-stops button { position: absolute; transform: translateX(-50%); background: none; border: 0; padding: 0; color: inherit; cursor: pointer; }
+.fr-slider-stops button[aria-current="true"] { color: var(--accent-text); font-weight: 600; }
+
+.fr-progress { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.fr-progress li { display: flex; align-items: center; gap: 12px; font-size: 15px; line-height: 22px; color: var(--text-tertiary); }
+.fr-progress li[data-state="done"] { color: var(--text-secondary); }
+.fr-progress li[data-state="current"] { color: var(--text-primary); font-weight: 500; }
+.fr-progress-mark { width: 20px; height: 20px; flex: none; display: flex; align-items: center; justify-content: center; }
+.fr-progress-mark[data-state="done"] { color: var(--accent); }
+.fr-progress-mark[data-state="ahead"]::after { content: ""; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--border-strong); }
+
+.fr-drop { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 24px; text-align: center;
+  border: 1.5px dashed var(--border-strong); border-radius: var(--radius-card); background: var(--surface-card); }
+.fr-drop[data-over="true"] { border-color: var(--accent); background: var(--accent-subtle); }
+.fr-drop[data-invalid="true"] { border-color: var(--status-declined-border); }
+.fr-qr { padding: 8px; border: 1px solid var(--border-divider); border-radius: var(--radius-popover); background: var(--surface-card); }
+.fr-qr img { display: block; width: 168px; height: 168px; }
+.fr-arrived { animation: fr-fade-in .4s ease-out; }
+@keyframes fr-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fr-arrived { animation: none; } }
+
+.fr-welcome { position: relative; display: flex; flex-direction: column; min-height: 100dvh; overflow: hidden;
+  background: var(--surface-card); color: var(--text-primary); }
+.fr-welcome-top { display: flex; align-items: center; justify-content: center; position: relative; padding: 24px 20px 0; }
+.fr-welcome-back { position: absolute; left: 20px; top: 24px; }
+.fr-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-control);
+  border: 1px solid var(--border-divider); background: var(--surface-card); box-shadow: var(--shadow-1);
+  font: 600 16px/1 var(--font-heading); color: var(--accent-text); }
+.fr-logo img { max-width: 26px; max-height: 26px; object-fit: contain; }
+.fr-welcome-mid { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 32px 20px 120px; }
+.fr-welcome-col { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 28px; }
+.fr-welcome-col[data-wide="true"] { max-width: 560px; }
+.fr-welcome-rings { position: absolute; left: 0; right: 0; bottom: -24px; pointer-events: none; }
+.fr-welcome-rings svg { display: block; width: 100%; height: auto; }
+.fr-welcome-rings circle { fill: none; stroke: var(--accent-muted); }
+.fr-welcome-rings circle.hot { stroke: var(--accent); transform-box: fill-box; animation-duration: 24s; animation-iteration-count: infinite; }
+@media (prefers-reduced-motion: reduce) { .fr-welcome-rings circle.hot { animation: none !important; } }
+.fr-greeting { margin: 0; font: 600 56px/54px var(--font-heading); letter-spacing: -0.04em; overflow-wrap: anywhere; }
+.fr-greeting span { display: block; color: var(--accent-text); }
+.fr-skip { align-self: center; background: none; border: 0; padding: 4px 8px; font-size: 15px; line-height: 22px; font-weight: 500;
+  color: var(--accent-text); cursor: pointer; }
+.fr-skip:hover { opacity: .8; }
+.fr-skip:disabled { cursor: default; opacity: .6; }
+@media (min-width: 768px) {
+  .fr-welcome-top { padding: 40px 48px 0; }
+  .fr-welcome-back { left: 48px; top: 44px; }
+  .fr-logo { width: 44px; height: 44px; font-size: 20px; }
+  .fr-logo img { max-width: 32px; max-height: 32px; }
+  .fr-welcome-mid { align-items: center; padding: 40px 48px 200px; }
+  .fr-welcome-rings { bottom: -36px; }
+  .fr-greeting { font-size: 112px; line-height: 104px; }
 }

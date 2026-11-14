@@ -175,4 +175,11 @@ describe("CompanyProfileSettingsComponent", () => {
 
     expect(screen.getByText("AI")).toBeInTheDocument();
   });
+
+  it("shows the logo read-only and points to Appearance, where it is changed now", () => {
+    renderComponent();
+
+    expect(screen.getByRole("link", { name: "Change it in Appearance" })).toHaveAttribute("href", "/settings/general/customisation");
+    expect(screen.queryByRole("button", { name: /upload logo|replace/i })).not.toBeInTheDocument();
+  });
 });

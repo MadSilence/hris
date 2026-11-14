@@ -1,9 +1,6 @@
 import {
-  AcceptInviteRequest,
   ChangePasswordRequest,
   CompanyAddressReminderRequest,
-  CompleteRegisterRequest,
-  CompleteRegisterResponse,
   ForgotPasswordRequest,
   InvitePeekResponse,
   LoginRequest,
@@ -11,11 +8,9 @@ import {
   PasswordResetPeekResponse,
   EmailChangePeekResponse,
   EmailChangeConfirmResponse,
-  RegisterRequest,
   ResetPasswordRequest,
 } from "@/api/modules/auth/dto";
 import { hrisApiClient } from "@/api/clients/hrisApiClient/hrisApiClient";
-import { CreateResponse } from "@/api/models/misc";
 
 class HrisApiAuthClient {
   private readonly API_AUTH_PATH: string = '/auth';
@@ -24,24 +19,9 @@ class HrisApiAuthClient {
     return hrisApiClient.post<LoginResponse>(this.API_AUTH_PATH + "/login", payload);
   }
 
-  public async register(payload: RegisterRequest): Promise<CreateResponse> {
-    return hrisApiClient.post<CreateResponse>(this.API_AUTH_PATH + "/register", payload);
-  }
-
-  public async completeRegister(payload: CompleteRegisterRequest): Promise<CompleteRegisterResponse> {
-    return await hrisApiClient.post<CompleteRegisterResponse>(this.API_AUTH_PATH + "/register/confirm", {
-      token: payload.token,
-      password: payload.password,
-    });
-  }
-
   /** A POST so the token stays out of access logs. Does not use the link. */
   public async peekInvite(token: string): Promise<InvitePeekResponse> {
     return hrisApiClient.post<InvitePeekResponse>(this.API_AUTH_PATH + "/invite/peek", { token });
-  }
-
-  public async acceptInvite(payload: AcceptInviteRequest): Promise<CreateResponse> {
-    return hrisApiClient.post<CreateResponse>(this.API_AUTH_PATH + "/invite/accept", payload);
   }
 
   // The request bodies are strict on the backend — an unknown property is a 422 — so each one is

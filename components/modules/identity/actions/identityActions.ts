@@ -21,6 +21,22 @@ export async function saveIdentityConnectionAction(body: IdentityConnectionUpdat
   }
 }
 
+export async function removeIdentityConnectionAction(): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisIdentityService.removeConnection() };
+  } catch (error) {
+    return toActionError(error, "removeIdentityConnectionAction");
+  }
+}
+
+export async function unlinkPersonFromProviderAction(userId: string): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisIdentityService.unlinkPerson(userId) };
+  } catch (error) {
+    return toActionError(error, "unlinkPersonFromProviderAction");
+  }
+}
+
 export async function testIdentityConnectionAction(): Promise<ActionResult<TestResultDTO>> {
   try {
     return { status: ActionStatus.SUCCESS, data: await hrisIdentityService.test() };

@@ -1,140 +1,134 @@
 "use client";
 
-import React, { FormEvent, useMemo, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
-import { setNestedObjectValues, useFormik } from "formik";
-import { Input } from "@/components/desact/input";
-import { Button } from "@/components/desact/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+
+import { Button, buttonVariants } from "@/components/desact/button";
+import { InlineAlert } from "@/components/desact/alert";
 import { FormError } from "@/components/feedback/FormError";
-import { ActionStatus } from "@/components/models/ActionStatus";
-import {
-  buildPasswordSchema,
-  type PasswordValues,
-} from "@/components/modules/trial/components/SetPasswordForm/ConfirmTrialForm";
-import { acceptInviteAction } from "@/components/modules/invitation/actions/acceptInviteAction";
-import { FieldError } from "@/components/desact/field-error";
+import { ApiError } from "@/components/clients/exceptions";
+import { AuthOr, AuthSplit, ProviderButton, type AuthBrand } from "@/components/modules/auth/layout";
+import { PasswordField } from "@/components/modules/auth/components/PasswordField";
+import { PASSWORD_MIN_LENGTH } from "@/components/modules/auth/password/passwordRules";
+import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
+import { messageForError } from "@/lib/errors/errorMessages";
+
+/*
+ * Joining a company from an invitation (sign-in-invitation G1–G4). The pane says "Welcome to Acme, Anna."; the white
+ * side "Join your team", the address the invitation is for, Google and Microsoft first when the company allows them,
+ * then a password. Under required company SSO there is no password: one accent button through the company's provider
+ * (G4). Joining opens the session — or the second step when the company requires one — and the welcome follows.
+ */
+
+export type SharedProvider = "GOOGLE" | "MICROSOFT";
+const PROVIDER_LABEL: Record<SharedProvider, string> = { GOOGLE: "Google", MICROSOFT: "Microsoft" };
 
 type Props = {
+  brand: Extract<AuthBrand, { kind: "company" }>;
   token: string;
   firstName: string | null;
   email: string | null;
-  companyName: string | null;
+  /** The company's provider when its SSO is required and this person keeps no password (G4). */
+  ssoProvider: string | null;
+  providers: SharedProvider[];
+  /** A provider sent the person back refused (G2) or with an account somebody else here uses (I9). */
+  failure?: { provider: SharedProvider; usedElsewhere: boolean } | null;
 };
 
-/**
- * The invited person's screen: set a password, then sign in.
- *
- * The link is looked up on the server before this renders (without using it), so an expired or used
- * link never reaches a form it cannot submit. The password rule is the signup one, imported rather
- * than copied.
- */
-export function InviteAcceptContainer({ token, firstName, email, companyName }: Props) {
+const PASSWORD_TOO_COMMON = "AUTH00021";
+
+export function InviteAcceptContainer({ brand, token, firstName, email, ssoProvider, providers, failure = null }: Props) {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
-  const passwordSchema = useMemo(() => buildPasswordSchema(t), [t]);
-  const [done, setDone] = useState(false);
+  const auth = useAuthService();
+  const [password, setPassword] = useState("");
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const company = brand.name;
 
-  const formik = useFormik<PasswordValues>({
-    initialValues: { password: "", confirmPassword: "" },
-    validationSchema: passwordSchema,
-    validateOnBlur: false,
-    validateOnChange: false,
-    onSubmit: async (values) => {
-      setError(null);
-      const res = await acceptInviteAction({ token, password: values.password });
-      if (res.status === ActionStatus.SUCCESS) setDone(true);
-      else setError(res.errorMessage ?? null);
-    },
-  });
-
-  const busy = formik.isSubmitting;
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (busy) return;
-    const errors = await formik.validateForm();
-    await formik.setTouched(setNestedObjectValues(errors, true), true);
-    if (Object.keys(errors).length > 0) return;
-    await formik.submitForm();
+    if (!password) return setFieldError(t("fields.newPasswordRequired"));
+    if (password.length < PASSWORD_MIN_LENGTH) return setFieldError(t("fields.passwordTooShort"));
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await auth.acceptInvite(token, password);
+      // A full navigation: the layout that reads the session cookie must render again from the server.
+      window.location.assign(res.next);
+    } catch (err) {
+      setBusy(false);
+      if (err instanceof ApiError && err.code === PASSWORD_TOO_COMMON) setFieldError(messageForError(err));
+      else setError(messageForError(err));
+    }
   };
 
-  if (done) {
-    return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">{t("invitation.done.title")}</h1>
-        <p className="text-body text-tertiary">
-          {email ? t("invitation.done.bodyWithEmail", { email }) : t("invitation.done.body")}
-        </p>
-        <Button asChild>
-          <a href="/login">{t("invitation.done.goToSignIn")}</a>
-        </Button>
-      </div>
-    );
-  }
+  const phoneHeading = firstName
+    ? t.rich("invite.phoneWelcome", { company, name: firstName, em: (c) => <em className="not-italic text-accent-text">{c}</em> })
+    : t("invite.phoneWelcomeNoName", { company });
+  const lead = t.rich("invite.lead", { email: email ?? "", b: (c) => <b className="font-medium text-primary [overflow-wrap:anywhere]">{c}</b> });
 
   return (
-    <div className="w-full">
-      <div className="w-full space-y-8">
-        <div className="space-y-3 text-center">
-          <h1 className="text-page-title">{firstName ? t("invitation.welcomeName", { name: firstName }) : t("invitation.welcome")}</h1>
-          <p className="text-body text-secondary">
-            {t("invitation.intro", {
-              hasCompany: companyName ? "yes" : "no",
-              company: companyName ?? "",
-              hasEmail: email ? "yes" : "no",
-              email: email ?? "",
-            })}
-          </p>
-        </div>
-
-        <form method="post" onSubmit={handleSubmit} noValidate className="space-y-6">
-          <div className="space-y-2">
-            <RequiredLabel htmlFor="invite-password" required>{t("login.passwordLabel")}</RequiredLabel>
-            <Input
-              id="invite-password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              value={formik.values.password}
-              onChange={(e) => formik.setFieldValue("password", e.currentTarget.value)}
-              disabled={busy}
-              aria-invalid={Boolean(formik.errors.password)}
-            />
-            {formik.errors.password && (
-              <FieldError>{formik.errors.password}</FieldError>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <RequiredLabel htmlFor="invite-password-repeat" required>{t("password.confirmLabel")}</RequiredLabel>
-            <Input
-              id="invite-password-repeat"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              value={formik.values.confirmPassword}
-              onChange={(e) => formik.setFieldValue("confirmPassword", e.currentTarget.value)}
-              disabled={busy}
-              aria-invalid={Boolean(formik.errors.confirmPassword)}
-            />
-            {formik.errors.confirmPassword && (
-              <FieldError>{formik.errors.confirmPassword}</FieldError>
-            )}
-          </div>
-
-          <p className="text-body text-tertiary">
-            {t("password.rule")}
-          </p>
-
-          <FormError message={error} />
-
-          <Button type="submit" disabled={busy} loading={busy} loadingLabel={tCommon("actions.saving")} size="lg" className="w-full">
-            {t("password.submit")}
-          </Button>
-        </form>
+    <AuthSplit brand={brand} welcome={{ name: firstName }} long={providers.length > 0}>
+      <div className="auth-step-head">
+        <h1 className="text-auth-title text-primary">
+          <span className="hidden md:inline">{t("invite.title")}</span>
+          <span className="md:hidden">{phoneHeading}</span>
+        </h1>
+        <p className="text-auth-lead text-secondary">
+          {lead}
+          {ssoProvider && <> {t("invite.requiredLead", { company, provider: ssoProvider })}</>}
+        </p>
       </div>
-    </div>
+
+      {failure && (
+        <InlineAlert tone="declined">
+          {failure.usedElsewhere
+            ? t("invite.usedElsewhere", { provider: PROVIDER_LABEL[failure.provider], company })
+            : t("invite.providerFailed", { provider: PROVIDER_LABEL[failure.provider] })}
+        </InlineAlert>
+      )}
+
+      {ssoProvider ? (
+        <a href="/api/auth/sso/start?next=%2Fwelcome" className={buttonVariants({ size: "lg", className: "w-full" })}>
+          {t("invite.joinWith", { provider: ssoProvider })}
+        </a>
+      ) : (
+        <>
+          {providers.length > 0 && (
+            <>
+              <div className="flex flex-col gap-3">
+                {providers.map((p) => (
+                  <ProviderButton
+                    key={p}
+                    provider={p}
+                    href={`/api/auth/provider/start?purpose=INVITE&provider=${p}&invite=${encodeURIComponent(token)}`}
+                    label={t("company.continueWith", { provider: PROVIDER_LABEL[p] })}
+                  />
+                ))}
+              </div>
+              <AuthOr />
+            </>
+          )}
+          <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+            <PasswordField
+              id="invite-password"
+              label={t("fields.createPassword")}
+              value={password}
+              onChange={(v) => { setPassword(v); setFieldError(null); }}
+              error={fieldError}
+              hint={t("fields.passwordHint")}
+              autoComplete="new-password"
+              autoFocus
+            />
+            <FormError message={error} />
+            <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("invite.joining")}>
+              {t("invite.join", { company })}
+            </Button>
+          </form>
+        </>
+      )}
+    </AuthSplit>
   );
 }

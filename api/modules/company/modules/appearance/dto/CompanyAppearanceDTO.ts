@@ -1,11 +1,10 @@
+import type { CompanyBackground } from "@/models/company/CompanyAppearance";
+
 export type CompanyAppearanceDTO = {
   accent: string | null;
-  loginImageUrl: string | null;
-  loginHeadline: string | null;
-  loginSubheadline: string | null;
-  /** Optional: a backend older than V23 does not send the placement flags at all. */
-  useImageOnLogin?: boolean;
-  useImageOnDashboard?: boolean;
+  background: CompanyBackground;
+  backgroundChosen: boolean;
+  logoColors: string[] | null;
   /** 0 for a company whose appearance row has not been written yet. */
   version?: number;
 };
@@ -13,22 +12,21 @@ export type CompanyAppearanceDTO = {
 /** `GET /public/company-appearance/{subdomain}` — read without a session; nothing but the login page. */
 export type PublicCompanyAppearanceDTO = {
   accent: string | null;
-  loginHeadline: string | null;
-  loginSubheadline: string | null;
-  loginImageUrl: string | null;
+  background: CompanyBackground | null;
+  logoColors: string[] | null;
   logoUrl: string | null;
   /** The company's language code; null on an address no company holds. */
   language: string | null;
+  /** The company's name; null on an address no company holds. */
+  name: string | null;
 };
 
-/** Null clears a field back to the shipped default. The login image has its own endpoints. */
+/** Appearance's one Save. The logo is not in it: it is uploaded and removed at once, through the company logo. */
 export type UpdateCompanyAppearanceRequest = {
   /** A preset's name or a custom `#rrggbb`; null clears it back to Wine. */
   accent: string | null;
-  loginHeadline: string | null;
-  loginSubheadline: string | null;
-  useImageOnLogin: boolean;
-  useImageOnDashboard: boolean;
+  /** Sent only when it changed; a save that carries it marks the background as chosen. */
+  background?: CompanyBackground;
   /** The version the form was opened with; a stale one is refused with E00409. */
   version?: number;
 };

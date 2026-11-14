@@ -1,0 +1,34 @@
+
+/* round 5 */
+.lx.m1 .pane{width:520px;padding:56px;justify-content:space-between}
+.lx.m1 .pane .t{font-size:64px;line-height:64px}
+.lx.m1 .pane .bot{display:flex;flex-direction:column;gap:20px}
+.lx.m1 .pane .pby{margin-top:28px}
+.lx.m2 .main{padding:40px 72px}
+.lx.m2 .pane{width:600px;margin:12px;border-radius:var(--radius-panel);padding:56px 48px 40px;align-items:center;text-align:center;justify-content:flex-start;gap:0}
+.lx.m2 .pane .t{font-size:44px;line-height:46px}
+.lx.m2 .pane .psub{margin:14px 0 0;font-size:15px;line-height:22px;color:rgba(255,255,255,.78)}
+.lx.m2 .ob{width:500px;height:440px;margin:auto 0}
+.lx.m2 .ob svg{width:100%;height:100%;display:block;overflow:visible}
+/* the orbit: the centre ring is still; only the dashed orbits turn, slowly, in opposite directions (Ulia) */
+@keyframes orbcw{to{stroke-dashoffset:-180}}
+@keyframes orbccw{to{stroke-dashoffset:180}}
+.lx .ob .orb.o1{animation:orbcw 20s linear infinite}
+.lx .ob .orb.o2{animation:orbccw 20s linear infinite}
+@media (prefers-reduced-motion:reduce){.lx .ob .orb{animation:none}}
+.lx.m2 .lab{font:500 13px/18px Inter,sans-serif;fill:#FFFFFF}
+.lx.m2 .clab{font:600 15px/20px "Inter Tight",sans-serif;fill:var(--rose)}
+.lx.m2 .wmrow svg{height:28px;width:auto;display:block}
+.lx .terms{font-size:12px;line-height:16px;color:var(--text-tertiary);margin:0}
+.lx .terms a{color:var(--text-secondary);text-decoration:underline}
+.lx.m2.phone .pane{align-items:flex-start;text-align:left;gap:16px !important}
+.lx.m2.phone .main{padding:24px 20px 28px}
+.lx.m2.phone .main .top{margin-bottom:20px}
+
+/* first-experience base (registration, invitation) */
+.lx.m2 .main .top{gap:12px;align-items:center;min-height:36px}
+.lx.m2 .rx .ttl{font-size:40px;line-height:44px;letter-spacing:-0.035em}
+.lx.m2 .rx .ttl em{font-style:normal;color:var(--accent-text)}
+.lx.m2.phone .rx .ttl{font-size:32px;line-height:36px}
+.lx.m2 .wmrow svg{height:28px;width:auto;display:block}
+.lx.m2.phone .wmrow svg{height:24px}

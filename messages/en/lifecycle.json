@@ -123,7 +123,7 @@
   "preboarding": {
     "linkIncomplete": "This link is incomplete. Open it from your email again.",
     "linkBroken": "This link doesn't work",
-    "signInHint": "If you have already set a password, sign in — your remaining tasks are in the app.",
+    "signInHint": "If you have already set a password, log in — your remaining tasks are in the app.",
     "welcomeName": "Welcome, {name}",
     "welcome": "Welcome",
     "introCompanyDate": "A few things to do before you start at {company} on {date}.",
@@ -399,8 +399,8 @@
     "waitsHint": "Until those are done, this task shows as waiting and its assignee is not told."
   },
   "editor": {
-    "introPreboarding": "The tasks a preboarding starts with, for somebody who has not signed in yet — their own tasks happen on one page behind a link.",
-    "introOnboarding": "The tasks an onboarding starts with, once the new person has signed in — theirs appear in their Tasks.",
+    "introPreboarding": "The tasks a preboarding starts with, for somebody who has not logged in yet — their own tasks happen on one page behind a link.",
+    "introOnboarding": "The tasks an onboarding starts with, once the new person has logged in — theirs appear in their Tasks.",
     "introOffboarding": "The tasks an offboarding starts with, counted from the last working day — handing over, returning equipment, the exit interview.",
     "howTo": "Click a day in a person's row to add a task there; drag a task to move it in time or give it to somebody else; drag from a task's right edge to another task to make that one wait for it. Add Person puts somebody named on the timeline. Changes are saved as you make them, and processes already started keep their own copy.",
     "moved": "{title} moved to {day}, {lane}.",

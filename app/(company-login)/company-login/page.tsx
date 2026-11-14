@@ -1,45 +1,38 @@
 import CompanyLoginScreen from "@/components/modules/auth/components/CompanyLoginScreen";
 import { ssoService } from "@/api/modules/sso";
-import { currentCompanySubdomain, publicAppearanceFor } from "@/api/modules/companyAddress";
+import { companyAuthBrand } from "@/api/modules/companyAddress";
 import publicConfig from "@/config/publicConfig";
 import { rootOrigin, safeReturnPath } from "@/lib/companyAddress";
-import { DEFAULT_PUBLIC_COMPANY_APPEARANCE } from "@/models/company/PublicCompanyAppearance";
 
 type Props = {
-  searchParams: Promise<{ passwordChanged?: string; next?: string; mfa?: string; sso?: string }>;
+  searchParams: Promise<{ passwordChanged?: string; next?: string; sso?: string; provider?: string; reason?: string; code?: string }>;
 };
 
 /**
- * `/login` on a company's own address — `middleware.ts` renders it from here, and this route has no
- * address of its own.
+ * `/login` on a company's own address — `middleware.ts` renders it from here (sign-in-company-login).
  *
- * Dynamic by nature: the page depends on the host, so it can never be built once and corrected in the
- * browser. The appearance is read here and in `workspaceAccent` through one cached read, so the colour
- * and the words in this response are the same answer.
- *
- * `next` is where the person was going when the middleware sent them here; it is checked on the server,
- * and only a page of this app on this host is followed.
+ * Dynamic by nature: the page depends on the host. The company's look is read here and in `workspaceAccent` through
+ * one cached read, so the colour and the pane are the same answer. `next` is checked on the server and only a page of
+ * this app on this host is followed. `reason=ended` is how the API client says a session ran out (N3).
  */
 export const dynamic = "force-dynamic";
 
 export default async function CompanyLoginPage({ searchParams }: Props) {
-  const { passwordChanged, next, mfa, sso: ssoResult } = await searchParams;
-  const subdomain = await currentCompanySubdomain();
-  const appearance = subdomain ? await publicAppearanceFor(subdomain) : DEFAULT_PUBLIC_COMPANY_APPEARANCE;
-  // Whether to offer the identity provider — read here, server-side, like the rest of the page (the login
-  // page is never repainted, COMPANY_ADDRESSES.md § 4).
+  const { passwordChanged, next, sso: ssoResult, provider, reason, code } = await searchParams;
+  const { brand, subdomain } = await companyAuthBrand();
   const sso = subdomain ? await ssoService.publicSso(subdomain) : null;
+  const failedProvider = provider === "GOOGLE" || provider === "MICROSOFT" ? provider : null;
 
   return (
     <CompanyLoginScreen
-      appearance={appearance}
-      passwordChanged={passwordChanged === "1"}
-      changeCompanyHref={`${rootOrigin(publicConfig.web)}/login?another=1`}
-      returnTo={safeReturnPath(next)}
+      brand={brand as Extract<typeof brand, { kind: "company" }>}
       sso={sso}
-      // After single sign-on, the second step continues here, the challenge already in its cookie.
-      initialMfa={mfa === "CHALLENGE" || mfa === "ENROL" ? mfa : undefined}
-      ssoFailed={ssoResult === "failed"}
+      providers={sso?.sharedProviders ?? []}
+      returnTo={safeReturnPath(next)}
+      notice={passwordChanged === "1" ? "passwordChanged" : reason === "ended" ? "loggedOut"
+        : code === "other-browser" ? "codeOtherBrowser" : code === "expired" ? "codeExpired" : null}
+      failure={ssoResult === "failed" ? { kind: "sso" } : failedProvider ? { kind: "provider", provider: failedProvider } : null}
+      changeCompanyHref={`${rootOrigin(publicConfig.web)}/login?another=1`}
     />
   );
 }

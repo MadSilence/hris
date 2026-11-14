@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ssoFailed, ssoService } from "@/api/modules/sso";
 import publicConfig from "@/config/publicConfig";
 import { SSO_STATE_COOKIE } from "@/config/security/sessionCookieNames";
-import { parseHost, requestHost, safeReturnPath } from "@/lib/companyAddress";
+import { parseHost, requestHost, safeReturnPath, requestOrigin } from "@/lib/companyAddress";
 
 /**
  * "Sign in with <provider>": Java builds the request to the IdP; this keeps the hash of `state` in
@@ -10,7 +10,7 @@ import { parseHost, requestHost, safeReturnPath } from "@/lib/companyAddress";
  */
 export const GET = async (req: NextRequest) => {
   const host = parseHost(requestHost(req.headers), publicConfig.web.rootDomain);
-  const origin = new URL(req.url).origin;
+  const origin = requestOrigin(req.headers, publicConfig.web);
   if (host.kind !== "company") return ssoFailed(origin);
   const returnTo = safeReturnPath(req.nextUrl.searchParams.get("next")) ?? null;
   try {

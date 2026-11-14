@@ -48,7 +48,93 @@ export const cookieFrom = (response: Response, name: string): string | undefined
  */
 export const refreshTokenFrom = (response: Response): string | undefined => cookieFrom(response, REFRESH_COOKIE);
 
+/** A registration's details form, after the code: where the company lives and the token that opens its session there. */
+export type Registered = { subdomain: string; handoffToken: string };
+
+/** B3: what a provider said about the person registering. */
+export type ProviderDraft = { provider: "GOOGLE" | "MICROSOFT"; email: string; firstName: string | null; lastName: string | null };
+
 class HrisAuthSessionService {
+  /** B1 → B2: a six-digit code to the address (sign-in-registration). `browserToken` is the `__Host-code` cookie. */
+  public async registrationCode(email: string, browserToken: string): Promise<void> {
+    await hrisApiClient.post<void>("/auth/register/code", { email, browserToken });
+  }
+
+  /** B2 → B2a: the code was right; a draft token for the details form. */
+  public async registrationVerify(email: string, code: string, browserToken: string): Promise<string> {
+    const data = await hrisApiClient.post<{ draftToken: string }>("/auth/register/verify", { email, code, browserToken });
+    return data.draftToken;
+  }
+
+  /** B2a: the company, its owner, and the handoff to its address. */
+  public async registrationComplete(body: {
+    draftToken: string;
+    firstName: string;
+    lastName: string;
+    companyName: string;
+    password: string;
+  }): Promise<Registered> {
+    return hrisApiClient.post<Registered>("/auth/register/complete", body);
+  }
+
+  /** B3's read: who the provider says this is, while the draft lives (`AUTH00025` once it has run out — B3a). */
+  public async registrationProviderDraft(draftToken: string): Promise<ProviderDraft> {
+    return hrisApiClient.post<ProviderDraft>("/auth/register/provider-draft", { draftToken });
+  }
+
+  /** B3: the company from the draft, and the handoff to its address. No password (S7). */
+  public async registrationProviderComplete(body: { draftToken: string; firstName: string; lastName: string; companyName: string }): Promise<Registered> {
+    return hrisApiClient.post<Registered>("/auth/register/provider-complete", body);
+  }
+
+  /** C10: a login code to the address, if it can log in here — the same answer either way. */
+  public async loginCodeSend(subdomain: string, email: string, browserToken: string): Promise<void> {
+    await hrisApiClient.post<void>("/auth/login-code", { subdomain, email, browserToken });
+  }
+
+  /** C10: the code typed, or (`linkToken`) the email's one-click link — then exactly what follows a password. */
+  public async loginCodeLogIn(
+    body: { subdomain: string; browserToken: string } & ({ email: string; code: string } | { linkToken: string }),
+    trustedDeviceToken?: string,
+  ): Promise<SignInResult> {
+    const path = "linkToken" in body ? "/auth/login-code/link" : "/auth/login-code/verify";
+    const { data, response } = await hrisApiClient.postWithResponse<LoginResponse>(
+      path,
+      { ...body },
+      trustedDeviceToken ? { Cookie: `${TRUSTED_DEVICE_COOKIE}=${trustedDeviceToken}` } : undefined,
+    );
+    if ((data.mfa === "CHALLENGE" || data.mfa === "ENROL") && data.challengeToken) {
+      return { kind: "mfa", mfa: data.mfa, challengeToken: data.challengeToken };
+    }
+    return { kind: "session", tokens: { accessToken: data.accessToken ?? "", refreshToken: refreshTokenFrom(response) } };
+  }
+
+  /** Accepts an invitation with a password: a session, or the second step when the company requires one (G1). */
+  public async acceptInvite(token: string, password: string, trustedDeviceToken?: string): Promise<SignInResult> {
+    const { data, response } = await hrisApiClient.postWithResponse<LoginResponse>(
+      "/auth/invite/accept",
+      { token, password },
+      trustedDeviceToken ? { Cookie: `${TRUSTED_DEVICE_COOKIE}=${trustedDeviceToken}` } : undefined,
+    );
+    if ((data.mfa === "CHALLENGE" || data.mfa === "ENROL") && data.challengeToken) {
+      return { kind: "mfa", mfa: data.mfa, challengeToken: data.challengeToken };
+    }
+    return { kind: "session", tokens: { accessToken: data.accessToken ?? "", refreshToken: refreshTokenFrom(response) } };
+  }
+
+  /** Redeems a handoff on the company's own address: a session, or the second step (SIGN_IN_IMPLEMENTATION_DESIGN.md § 6.2). */
+  public async handoff(token: string, subdomain: string, trustedDeviceToken?: string): Promise<SignInResult> {
+    const { data, response } = await hrisApiClient.postWithResponse<LoginResponse>(
+      "/auth/handoff",
+      { token, subdomain },
+      trustedDeviceToken ? { Cookie: `${TRUSTED_DEVICE_COOKIE}=${trustedDeviceToken}` } : undefined,
+    );
+    if ((data.mfa === "CHALLENGE" || data.mfa === "ENROL") && data.challengeToken) {
+      return { kind: "mfa", mfa: data.mfa, challengeToken: data.challengeToken };
+    }
+    return { kind: "session", tokens: { accessToken: data.accessToken ?? "", refreshToken: refreshTokenFrom(response) } };
+  }
+
   /**
    * Signs in with a password. The remembered-device cookie travels with it, so a device remembered at a
    * previous sign-in can skip the code (M1) — it is the backend that decides.
@@ -84,6 +170,18 @@ class HrisAuthSessionService {
   }
 
   /** The company requires a factor the person has not got: the key to scan. */
+  /**
+   * What the second step's screen shows before anything is typed: the step, and for how many days *Remember this
+   * device* would remember — 0 when it is not offered (the company does not allow it, or a System Owner).
+   */
+  public async describeMfaChallenge(challengeToken: string, subdomain: string): Promise<{ purpose: "SIGN_IN" | "ENROL_AT_SIGN_IN"; rememberDays: number }> {
+    const { data } = await hrisApiClient.postWithResponse<{ purpose: "SIGN_IN" | "ENROL_AT_SIGN_IN"; rememberDays: number }>(
+      "/auth/mfa/challenge",
+      { challengeToken, subdomain },
+    );
+    return data;
+  }
+
   public async enrolAtSignInStart(challengeToken: string, subdomain: string): Promise<{ otpauthUri: string; secret: string }> {
     const { data } = await hrisApiClient.postWithResponse<{ otpauthUri: string; secret: string }>(
       "/auth/mfa/enrol-at-sign-in/start",

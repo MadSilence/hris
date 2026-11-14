@@ -210,14 +210,14 @@
   "accent": {
     "names": {
       "wine": "Вино",
-      "brick": "Кирпич",
-      "terracotta": "Терракота",
-      "sun": "Солнце",
-      "forest": "Лес",
-      "teal": "Бирюза",
-      "denim": "Деним",
-      "iris": "Ирис",
-      "raspberry": "Малина",
+      "cherry": "Вишня",
+      "tangerine": "Мандарин",
+      "sunflower": "Подсолнух",
+      "basil": "Базилик",
+      "indigo": "Индиго",
+      "ocean": "Океан",
+      "mulberry": "Шелковица",
+      "black": "Чёрный",
       "graphite": "Графит"
     }
   },

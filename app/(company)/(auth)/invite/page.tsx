@@ -1,49 +1,61 @@
+import { getTranslations } from "next-intl/server";
+import { LinkSquare02Icon } from "@hugeicons/core-free-icons";
+
 import { hrisApiAuthService } from "@/api/modules/auth/services/hrisAuthService";
 import type { InvitePeekResponse } from "@/api/modules/auth/dto";
+import { companyAuthBrand } from "@/api/modules/companyAddress";
+import { isSharedProvider } from "@/api/modules/provider";
+import { ssoService } from "@/api/modules/sso";
 import { InviteAcceptContainer } from "@/components/modules/invitation";
-import { getTranslations } from "next-intl/server";
-import { messageForError } from "@/lib/errors/errorMessages";
+import { AuthHeading, AuthSplit } from "@/components/modules/auth/layout";
+import { buttonVariants } from "@/components/desact/button";
 
 type Props = {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; provider?: string; inUse?: string }>;
 };
 
 /**
- * Where an invitation link lands. The link is looked up here, on the server, without being used — so
- * an expired or already-used one says so instead of offering a form that cannot succeed.
+ * Where an invitation link lands (sign-in-invitation). The link is looked up here without being used, so one that does
+ * not open says why — already used, expired, withdrawn, or broken (G5) — instead of offering a form that cannot work.
  */
 export default async function InvitePage({ searchParams }: Props) {
-  const { token } = await searchParams;
+  const { token, provider, inUse } = await searchParams;
   const t = await getTranslations("auth");
+  const { brand, subdomain } = await companyAuthBrand();
+  const company = brand.kind === "company" ? brand : null;
 
   let invite: InvitePeekResponse | null = null;
-  let problem: string | null = null;
-
-  if (!token) {
-    problem = t("invitation.linkIncomplete");
-  } else {
+  if (token) {
     try {
       invite = await hrisApiAuthService.peekInvite(token);
-    } catch (error) {
-      problem = messageForError(error);
+    } catch {
+      invite = null;
     }
   }
 
-  if (!token || !invite) {
+  if (!token || !invite || invite.state !== "OPEN" || !company) {
+    const state = invite?.state ?? "BROKEN";
+    const name = invite?.companyName ?? company?.name ?? "";
+    const key = state === "USED" ? "used" : state === "EXPIRED" ? "expired" : state === "WITHDRAWN" ? "withdrawn" : "broken";
     return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">{t("invitation.brokenTitle")}</h1>
-        <p className="text-body text-tertiary">{problem}</p>
-      </div>
+      <AuthSplit brand={brand}>
+        <AuthHeading icon={LinkSquare02Icon} title={t(`invite.${key}.title`)} lead={t(`invite.${key}.body`, { company: name })} />
+        {state === "USED" && (
+          <a href="/login" className={buttonVariants({ size: "lg", className: "w-full" })}>{t("invite.used.action")}</a>
+        )}
+      </AuthSplit>
     );
   }
 
   return (
     <InviteAcceptContainer
+      brand={company}
       token={token}
       firstName={invite.firstName}
       email={invite.email}
-      companyName={invite.companyName}
+      ssoProvider={invite.ssoProvider === "OTHER" ? t("company.singleSignOn") : invite.ssoProvider}
+      providers={subdomain ? (await ssoService.publicSso(subdomain)).sharedProviders : []}
+      failure={isSharedProvider(provider) ? { provider, usedElsewhere: inUse === "1" } : null}
     />
   );
 }

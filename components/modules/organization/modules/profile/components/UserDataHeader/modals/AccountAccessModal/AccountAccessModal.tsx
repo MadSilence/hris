@@ -16,9 +16,10 @@ import {
 import { endAllSessionsOfUserAction } from "@/components/modules/sessions/actions";
 import { withStepUpAction } from "@/components/modules/mfa/stepUp";
 import { resetUserMfaAction } from "@/components/modules/mfa/actions";
+import { unlinkPersonFromProviderAction } from "@/components/modules/identity/actions";
 import { Checkbox } from "@/components/desact/checkbox";
 
-export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "UNLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA";
+export type AccountAccessKind = "BLOCK" | "UNBLOCK" | "UNLOCK" | "RESET" | "END_SESSIONS" | "RESET_MFA" | "UNLINK_SSO";
 
 type Props = {
   /** Which confirmation is open; null when none is. */
@@ -96,6 +97,14 @@ export function AccountAccessModal({
         } else {
           setError(res.errorMessage ?? null);
         }
+        return;
+      }
+
+      if (kind === "UNLINK_SSO") {
+        const res = await withStepUpAction(() => unlinkPersonFromProviderAction(userId));
+        onCloseAction();
+        if (res.status === ActionStatus.SUCCESS) showSuccess(t("profile.access.unlinked", { name: fullName }));
+        else showActionError(res);
         return;
       }
 
@@ -200,6 +209,11 @@ const COPY: Record<AccountAccessKind, (t: OrgTranslator, name: string, locked: b
     title: t("profile.header.resetMfa"),
     description: t("profile.access.mfaDescription", { name }),
     confirmLabel: t("profile.access.mfaConfirm"),
+  }),
+  UNLINK_SSO: (t, name) => ({
+    title: t("profile.header.unlinkSso"),
+    description: t("profile.access.unlinkDescription", { name }),
+    confirmLabel: t("profile.access.unlinkConfirm"),
   }),
   END_SESSIONS: (t, name) => ({
     title: t("profile.header.endSessions"),

@@ -1,0 +1,28 @@
+
+.lt-g{--lb:var(--surface-mist);--lr:var(--gray-200)}
+.lt-t{--lb:color-mix(in srgb,var(--accent) 10%,#FFFFFF);--lr:color-mix(in srgb,var(--accent) 22%,#FFFFFF)}
+/* login pane */
+.lx.cmp.lt .pane{background:var(--lb);color:var(--text-primary)}
+.lx.cmp.lt .pane .grid circle{stroke:var(--lr)}
+.lx.cmp.lt .pane .grid circle.hot{stroke:var(--accent)}
+.lx.cmp.lt .pane .cobig b{color:var(--text-primary)}
+.lx.cmp.lt .pane .cobig .mk{box-shadow:0 0 0 1px rgba(11,11,12,.08)}
+.lx.cmp.lt .pane .pby{color:var(--text-tertiary)}
+.lx.cmp.lt .pane .pby svg *{stroke:#0B0B0C}
+/* email bands */
+.lt .mx .hero,.lt .mx .slim{background:var(--lb);color:var(--text-primary)}
+.lt .mx .hero h1 span{color:var(--accent-text)!important}
+.lt .mx .co .mk{box-shadow:0 0 0 1px rgba(11,11,12,.08)}
+.lt .mx .grid circle{stroke:var(--lr)!important}
+.lt .mx .grid circle.hot{stroke:var(--accent)!important}
+.mbox{background:var(--surface-canvas);padding:32px 32px 40px;box-sizing:border-box}
+/* auth-l.css styles an old mini-app as .mini; the login's own .mini row (“Not your company?”) must not catch it */
+.lx .rx .mini{width:100%;height:auto;display:flex;grid-template-rows:none;grid-template-columns:none;align-items:center;background:none;font-family:inherit}
+/* a grey band in a grey inbox: a 1 px border holds the card (mail apps drop shadows) */
+.lt .mailx,.lt.mbox{background:#FFFFFF}
+.lt .mx .hero,.lt .mx .slim{background:var(--gray-50)!important}
+.lt .mx .card3{border:1px solid var(--gray-200);box-shadow:none}
+.lt-g0{--lb:var(--gray-50);--lr:var(--gray-200)}
+.lt-g1{--lb:var(--gray-75);--lr:var(--gray-200)}
+.lt-g2{--lb:var(--gray-100);--lr:var(--gray-200)}
+.lt-g3{--lb:var(--gray-100);--lr:var(--gray-300)}

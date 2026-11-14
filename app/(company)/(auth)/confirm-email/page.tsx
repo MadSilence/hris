@@ -3,6 +3,8 @@ import type { EmailChangePeekResponse } from "@/api/modules/auth/dto";
 import { ConfirmEmailContainer } from "@/components/modules/emailChange";
 import { getTranslations } from "next-intl/server";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { companyAuthBrand } from "@/api/modules/companyAddress";
+import { AuthSplit } from "@/components/modules/auth/layout";
 
 type Props = {
   searchParams: Promise<{ token?: string }>;
@@ -15,6 +17,7 @@ type Props = {
 export default async function ConfirmEmailPage({ searchParams }: Props) {
   const { token } = await searchParams;
   const t = await getTranslations("auth");
+  const { brand } = await companyAuthBrand();
 
   let peek: EmailChangePeekResponse | null = null;
   let problem: string | null = null;
@@ -31,12 +34,16 @@ export default async function ConfirmEmailPage({ searchParams }: Props) {
 
   if (!token || !peek) {
     return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-page-title">{t("links.brokenTitle")}</h1>
-        <p className="text-body text-tertiary">{problem}</p>
-      </div>
+      <AuthSplit brand={brand}>
+        <h1 className="text-auth-title text-primary">{t("links.brokenTitle")}</h1>
+        <p className="text-auth-lead text-secondary">{problem}</p>
+      </AuthSplit>
     );
   }
 
-  return <ConfirmEmailContainer token={token} firstName={peek.firstName} newEmail={peek.newEmail} />;
+  return (
+    <AuthSplit brand={brand}>
+      <ConfirmEmailContainer token={token} firstName={peek.firstName} newEmail={peek.newEmail} />
+    </AuthSplit>
+  );
 }

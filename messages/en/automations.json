@@ -7,11 +7,11 @@
   "lifecycleSettings": {
     "preboarding": {
       "label": "Preboarding",
-      "description": "The task lists a preboarding starts with. Preboarding is for somebody who has not signed in yet, and happens on one page behind a link."
+      "description": "The task lists a preboarding starts with. Preboarding is for somebody who has not logged in yet, and happens on one page behind a link."
     },
     "onboarding": {
       "label": "Onboarding",
-      "description": "The task lists an onboarding starts with. Onboarding happens inside the app, once the new person has signed in."
+      "description": "The task lists an onboarding starts with. Onboarding happens inside the app, once the new person has logged in."
     },
     "offboarding": {
       "label": "Offboarding",

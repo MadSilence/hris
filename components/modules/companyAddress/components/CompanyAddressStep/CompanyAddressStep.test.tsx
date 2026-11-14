@@ -5,58 +5,59 @@ import CompanyAddressStep from "@/components/modules/companyAddress/components/C
 
 const web = { scheme: "http", rootDomain: "localhost:3000" };
 
-describe("CompanyAddressStep", () => {
+describe("CompanyAddressStep (sign-in-root A1, A2)", () => {
   it("goes straight to that company's login", async () => {
     const user = userEvent.setup();
     const navigate = jest.fn();
-    render(<CompanyAddressStep web={web} rememberedSubdomain={null} navigate={navigate} />);
+    render(<CompanyAddressStep web={web} remembered={null} navigate={navigate} />);
 
-    await user.type(screen.getByLabelText(/company address/i), "Acme Corp");
-
+    await user.type(screen.getByLabelText("Company address"), "Acme Corp");
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(navigate).toHaveBeenCalledWith("http://acme-corp.localhost:3000/login");
-    // Kept on the root for the next visit: locally the address remembered after signing in cannot reach it.
+    // Kept on the root for the next visit: locally the address remembered after logging in cannot reach it.
     expect(document.cookie).toContain("last_company_typed=acme-corp");
   });
 
   it("asks for an address rather than going nowhere", async () => {
     const user = userEvent.setup();
     const navigate = jest.fn();
-    render(<CompanyAddressStep web={web} rememberedSubdomain={null} navigate={navigate} />);
+    render(<CompanyAddressStep web={web} remembered={null} navigate={navigate} />);
 
-    await user.type(screen.getByLabelText(/company address/i), "---");
+    await user.type(screen.getByLabelText("Company address"), "---");
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(navigate).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("Please enter your company address.");
+    expect(screen.getByText("Enter your company address.")).toBeInTheDocument();
   });
 
-  it("offers the remembered company and never follows it on its own", async () => {
+  it("offers the remembered company by its name and address, and goes there", async () => {
     const user = userEvent.setup();
     const navigate = jest.fn();
-    render(<CompanyAddressStep web={web} rememberedSubdomain="acme" navigate={navigate} />);
+    render(
+      <CompanyAddressStep web={web} remembered={{ subdomain: "acme", name: "Acme", logoUrl: null }} navigate={navigate} />,
+    );
 
-    expect(navigate).not.toHaveBeenCalled();
-    expect(screen.queryByLabelText(/company address/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Last time you logged in here:")).toBeInTheDocument();
+    expect(screen.getByText("Acme")).toBeInTheDocument();
+    expect(screen.getByText("acme.localhost:3000")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
 
-    await user.click(screen.getByRole("button", { name: "Continue to acme.localhost:3000" }));
     expect(navigate).toHaveBeenCalledWith("http://acme.localhost:3000/login");
   });
 
-  it("lets somebody with a remembered company choose another", async () => {
+  it("forgets nothing when another company is chosen — it only shows the field", async () => {
     const user = userEvent.setup();
-    render(<CompanyAddressStep web={web} rememberedSubdomain="acme" navigate={jest.fn()} />);
+    render(<CompanyAddressStep web={web} remembered={{ subdomain: "acme", name: null, logoUrl: null }} navigate={jest.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Use another company" }));
 
-    expect(screen.getByLabelText(/company address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Company address")).toBeInTheDocument();
   });
 
-  it("points to finding an address, and nowhere else", () => {
-    render(<CompanyAddressStep web={web} rememberedSubdomain={null} navigate={jest.fn()} />);
+  it("leads a forgotten address to Find your company", () => {
+    render(<CompanyAddressStep web={web} remembered={null} navigate={jest.fn()} />);
 
-    expect(screen.getByRole("link", { name: "Forgot company address?" })).toHaveAttribute("href", "/find-company");
-    expect(screen.queryByRole("link", { name: /free trial/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Forgot company address?" })).toHaveAttribute("href", "/login/find");
   });
 });

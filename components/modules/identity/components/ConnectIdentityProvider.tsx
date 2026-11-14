@@ -9,7 +9,9 @@ import { messageForError } from "@/lib/errors/errorMessages";
 import { withStepUp } from "@/components/modules/mfa/stepUp";
 
 /** The provider as the messages choose between them (`{provider, select, …}`); anything else is "other". */
-const providerArg = (provider: string | null): string => (provider === "OKTA" || provider === "ENTRA" ? provider : "OTHER");
+const providerArg = (provider: string | null): string =>
+  provider === "OKTA" || provider === "ENTRA" ? provider
+    : provider === "GOOGLE_WORKSPACE" ? "GOOGLE" : provider === "MICROSOFT_365" ? "MICROSOFT" : "OTHER";
 
 /**
  * Connect — the person links their own account to the company's identity provider (R1.3). The one way a
@@ -26,7 +28,11 @@ export const ConnectIdentityProvider: React.FC<{ provider: string | null; connec
     setBusy(true);
     setError(null);
     try {
-      const res = await withStepUp(() => internalApiClient.post<{ redirectUrl: string }>("/auth/sso/connect"));
+      // The company's own Workspace or Microsoft 365 goes through our application (§ 11.4); any other provider, its own.
+      const shared = provider === "GOOGLE_WORKSPACE" ? "GOOGLE" : provider === "MICROSOFT_365" ? "MICROSOFT" : null;
+      const res = await withStepUp(() => shared
+        ? internalApiClient.post<{ redirectUrl: string }>("/auth/provider/person", { purpose: "CONNECT", provider: shared, returnTo: "/preferences" })
+        : internalApiClient.post<{ redirectUrl: string }>("/auth/sso/connect"));
       window.location.assign(res.redirectUrl);
     } catch (e) {
       setError(messageForError(e));

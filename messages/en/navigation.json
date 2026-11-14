@@ -18,7 +18,7 @@
     "finishProfile": "Finish your profile",
     "myPreferences": "My preferences",
     "changePassword": "Change password",
-    "signOut": "Sign out"
+    "signOut": "Log out"
   },
   "public": {
     "nav": {
@@ -27,7 +27,7 @@
       "pricing": "Pricing",
       "about": "About",
       "home": "noddo home",
-      "signIn": "Sign in",
+      "signIn": "Log in",
       "startTrial": "Start free trial"
     },
     "footer": {
@@ -232,14 +232,15 @@
   },
   "preferences": {
     "title": "My preferences",
-    "description": "How the product reads to you, who decides for you while you are away, what it tells you about, and where you are signed in.",
+    "description": "How the product reads to you, who decides for you while you are away, what it tells you about, and where you are logged in.",
     "dates": "Dates and time",
     "delegate": "Delegate approvals",
     "notifications": "Notifications",
-    "twoStep": "Two-step sign-in",
+    "twoStep": "Two-step login",
     "sso": "Single sign-on",
-    "sessions": "Signed-in sessions",
-    "home": "Home"
+    "sessions": "Logged-in sessions",
+    "home": "Home",
+    "signIn": "Ways to log in"
   },
   "meta": {
     "description": "HR on templates — for teams of every size."

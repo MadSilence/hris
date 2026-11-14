@@ -21,6 +21,13 @@ import { useMfaStatus } from "@/components/modules/mfa/hooks";
 import { stepUpAction } from "@/components/modules/mfa/actions";
 import { CodeField } from "@/components/modules/mfa/components";
 import { registerStepUpDialog } from "./stepUp";
+import { useQuery } from "@tanstack/react-query";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
+import type { SignInOverviewDTO } from "@/api/modules/identity/services";
+import { messageForError } from "@/lib/errors/errorMessages";
+
+/** The same key the preferences section reads, so a change there is seen here. */
+const SIGN_IN_OVERVIEW_QK = ["ME", "SIGN_IN"] as const;
 
 /**
  * "Confirm it is you" (MFA_DESIGN.md § 3.5) — one dialog for every sensitive operation, mounted once in the
@@ -33,6 +40,12 @@ export const StepUpDialog: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const resolver = React.useRef<((proved: boolean) => void) | null>(null);
   const status = useMfaStatus(open);
+  const { internalApiClient } = useAppDataContext();
+  const ways = useQuery<SignInOverviewDTO>({
+    queryKey: SIGN_IN_OVERVIEW_QK,
+    queryFn: () => internalApiClient.get<SignInOverviewDTO>("/me/sign-in"),
+    enabled: open,
+  });
   const [value, setValue] = React.useState("");
   const [backup, setBackup] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -57,6 +70,24 @@ export const StepUpDialog: React.FC = () => {
   };
 
   const enrolled = status.data?.enrolled ?? false;
+  // Without a factor, a fresh sign-in at Google or Microsoft proves it too (SOCIAL_SIGN_IN_DESIGN.md § 5.5). It leaves
+  // the page, so the operation is not replayed: the person comes back and does it again.
+  const hasPassword = ways.data?.hasPassword ?? true;
+  const providers = enrolled ? [] : (ways.data?.accounts ?? [])
+    .map((a) => a.provider).filter((p) => ways.data?.offered.includes(p));
+
+  const confirmWith = async (provider: "GOOGLE" | "MICROSOFT") => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await internalApiClient.post<{ redirectUrl: string }>("/auth/provider/person",
+        { purpose: "REAUTH", provider, returnTo: `${window.location.pathname}${window.location.search}` });
+      window.location.assign(res.redirectUrl);
+    } catch (e) {
+      setError(messageForError(e));
+      setBusy(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +112,7 @@ export const StepUpDialog: React.FC = () => {
             <DialogDescription>
               {enrolled
                 ? t("stepUp.needsCode")
-                : t("stepUp.needsPassword")}
+                : hasPassword ? t("stepUp.needsPassword") : t("stepUp.needsProvider")}
             </DialogDescription>
           </DialogHeader>
           {status.isLoading ? null : enrolled ? (
@@ -94,7 +125,7 @@ export const StepUpDialog: React.FC = () => {
                 {backup ? t("mfaSignIn.challenge.useApp") : t("mfaSignIn.challenge.useBackup")}
               </button>
             </>
-          ) : (
+          ) : !hasPassword ? null : (
             <div className="space-y-2">
               <RequiredLabel htmlFor="step-up-password" required>{t("login.passwordLabel")}</RequiredLabel>
               <Input
@@ -109,10 +140,21 @@ export const StepUpDialog: React.FC = () => {
               <FieldError>{tried && !value.trim() ? tCommon("validation.enterPassword") : null}</FieldError>
             </div>
           )}
+          {providers.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {providers.map((p) => (
+                <Button key={p} type="button" variant="secondary" disabled={busy} onClick={() => confirmWith(p)}>
+                  {t("stepUp.confirmWith", { provider: p === "GOOGLE" ? "Google" : "Microsoft" })}
+                </Button>
+              ))}
+            </div>
+          )}
           <FormError message={error} />
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => finish(false)} disabled={busy}>{tCommon("actions.cancel")}</Button>
-            <Button type="submit" disabled={busy}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
+            {(enrolled || hasPassword) && (
+              <Button type="submit" disabled={busy}>{busy ? t("emailChange.confirming") : tCommon("actions.confirm")}</Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>

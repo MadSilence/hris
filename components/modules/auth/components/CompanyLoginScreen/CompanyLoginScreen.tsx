@@ -1,63 +1,22 @@
-import React from "react";
-import { useTranslations } from "next-intl";
-
-import AuthScreen from "@/components/modules/auth/components/AuthScreen";
-import LoginContainer from "@/components/modules/auth/components/LoginContainer/LoginContainer";
-import type { PublicCompanyAppearance } from "@/models/company/PublicCompanyAppearance";
-import { DEFAULT_LOGIN_HEADLINE_KEY, DEFAULT_LOGIN_SUBHEADLINE_KEY } from "@/models/company/loginPageDefaults";
+import type { AuthBrand } from "@/components/modules/auth/layout";
+import LoginContainer, { type SharedProvider } from "@/components/modules/auth/components/LoginContainer";
 import type { PublicSso } from "@/api/modules/sso/ssoService";
 
+/**
+ * A company's own login page (sign-in-company-login): the everyday base in the company's look — its colour, logo and
+ * name on the pane — and the ways in its settings allow. Server-rendered whole: nothing on it repaints after the first
+ * frame (COMPANY_ADDRESSES.md § 4). The company cannot change the heading or set a background (DECISIONS.md K1).
+ */
 type Props = {
-  appearance: PublicCompanyAppearance;
-  passwordChanged: boolean;
-  changeCompanyHref: string;
-  /** Where signing in goes, already checked on the server. */
+  brand: Extract<AuthBrand, { kind: "company" }>;
+  sso: PublicSso | null;
+  providers: SharedProvider[];
   returnTo: string;
-  /** Whether the company signs in through its identity provider, and under whose name. */
-  sso?: PublicSso | null;
-  /** A second step after single sign-on, its challenge already in its cookie. */
-  initialMfa?: "CHALLENGE" | "ENROL";
-  ssoFailed?: boolean;
+  notice: "passwordChanged" | "loggedOut" | "codeOtherBrowser" | "codeExpired" | null;
+  failure: { kind: "sso" } | { kind: "provider"; provider: SharedProvider } | null;
+  changeCompanyHref: string;
 };
 
-/**
- * A company's own login page, drawn the way the Appearance preview draws it.
- *
- * **A server component, and that is the requirement, not a detail** (`technical_documentation/
- * COMPANY_ADDRESSES.md` § 4, the login page is never repainted). Everything the company configured arrives in this HTML:
- * the headline and subheadline as text, the background as an `<img>` with its URL, the colour through
- * `workspaceAccent` on `<html>` from the same read. Nothing here fetches in the browser, so nothing can
- * change after the first frame. Only the form itself hydrates, and it already shows the right words.
- *
- * The only things that arrive later are the bytes of the picture and the logo. The picture is preloaded
- * over a Mist surface already laid out for it, and the logo's box is capped, so neither shifts anything.
- */
-export default function CompanyLoginScreen({
-  appearance, passwordChanged, changeCompanyHref, returnTo, sso, initialMfa, ssoFailed,
-}: Props) {
-  const t = useTranslations("auth");
-  const headline = appearance.loginHeadline?.trim() || t(DEFAULT_LOGIN_HEADLINE_KEY);
-  const subheadline = appearance.loginSubheadline?.trim() || t(DEFAULT_LOGIN_SUBHEADLINE_KEY);
-  const backgroundUrl = appearance.loginImageUrl;
-
-  return (
-    <AuthScreen
-      data-test="company-login"
-      backgroundUrl={backgroundUrl}
-      logoUrl={appearance.logoUrl}
-      poweredBy
-      className="min-h-screen"
-    >
-      <LoginContainer
-        passwordChanged={passwordChanged}
-        headline={headline}
-        subheadline={subheadline}
-        changeCompanyHref={changeCompanyHref}
-        returnTo={returnTo}
-        sso={sso ?? undefined}
-        initialMfa={initialMfa}
-        ssoFailed={ssoFailed}
-      />
-    </AuthScreen>
-  );
+export default function CompanyLoginScreen(props: Props) {
+  return <LoginContainer {...props} />;
 }
