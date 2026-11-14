@@ -64,6 +64,6 @@ jobs:
         with:
           fetch-depth: 0
       # The commits of this push or pull request only — see the same job in hris-api for why not the history.
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
