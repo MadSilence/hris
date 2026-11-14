@@ -31,6 +31,9 @@ jest.mock("@/components/modules/settings/modules/peopleImport/hooks", () => ({
   useDiscardPeopleImport: () => idle(),
 }));
 
+let demo = false;
+jest.mock("@/components/modules/demo", () => ({ useIsDemo: () => demo }));
+
 jest.mock("@/components/modules/settings/shared/ExportDataModal/triggerExportDownload", () => ({
   triggerExportDownload: jest.fn(),
 }));
@@ -101,6 +104,17 @@ describe("PeopleImportContainer", () => {
     show(null);
     expect(screen.getAllByRole("radio")).toHaveLength(1);
     expect(screen.getByRole("button", { name: /download xlsx template/i })).toBeInTheDocument();
+    kinds = ["ORG_STRUCTURE", "PEOPLE_CREATE", "LEAVE_BALANCES"];
+  });
+
+  // DEMO_PLAN.md 5.3: a demo imports no people; departments and balances may still be tried.
+  it("in a demo, says people are added after going live instead of offering the upload", () => {
+    demo = true;
+    kinds = ["PEOPLE_CREATE"];
+    show(null);
+    expect(screen.getByText(/A demo company imports no people/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /download xlsx template/i })).not.toBeInTheDocument();
+    demo = false;
     kinds = ["ORG_STRUCTURE", "PEOPLE_CREATE", "LEAVE_BALANCES"];
   });
 

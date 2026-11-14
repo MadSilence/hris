@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterChip } from "@/components/ui/FilterChip";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -45,6 +46,8 @@ type PeopleTopbarProps = {
    * as zero for them, and a zero count draws nothing.
    */
   drafts?: { count: number; showing: boolean; onChange: (showDrafts: boolean) => void };
+  /** A demo's *Hide samples* (DEMO_PLAN.md 4.3). Omitted outside a demo. */
+  samples?: { hiding: boolean; onChange: (hide: boolean) => void };
   /**
    * The table's sort, for the export: the file is in the order the table is. Optional so the topbar
    * does not own it; without it the export uses the table's default order.
@@ -64,8 +67,10 @@ export default function PeopleTopbar({
   onEditSelectedAction,
   onAddPersonAction,
   drafts,
+  samples,
   sort,
 }: PeopleTopbarProps) {
+  const tDemo = useTranslations("demo.sample");
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -130,6 +135,12 @@ export default function PeopleTopbar({
             showingDrafts={drafts.showing}
             onChange={drafts.onChange}
           />
+        )}
+
+        {samples && (
+          <FilterChip selected={samples.hiding} onClick={() => samples.onChange(!samples.hiding)}>
+            {tDemo("hide")}
+          </FilterChip>
         )}
 
         {/*

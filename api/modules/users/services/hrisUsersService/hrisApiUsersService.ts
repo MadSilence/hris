@@ -26,6 +26,8 @@ export type GetUsersArgs = {
 export type UsersSearchArgs = GetUsersArgs & {
   /** See `DraftVisibility` in `models/user/fields` — omitted means the employees, as before. */
   drafts?: "EXCLUDE" | "INCLUDE" | "ONLY" | null;
+  /** A demo's *Hide samples* (DEMO_PLAN.md 4.3): omitted or ALL shows everyone. */
+  samples?: "ALL" | "ONLY" | "EXCLUDE" | null;
   filters?: Array<{
     field: "first_name" | "last_name" | "email" | "status" | "created_at" | "updated_at" | "is_email_verified";
     op: "eq" | "neq" | "contains" | "starts_with" | "in" | "before" | "after" | "between";

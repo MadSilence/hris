@@ -250,6 +250,7 @@ export class HrisApiUsersClient {
       filters: args.filters ?? [],
       selectedFields: args.selectedFields ?? [],
       drafts: args.drafts ?? null,
+      samples: args.samples ?? null,
     };
 
     const res = await hrisApiClient.post<{ items: UserDTO[]; nextCursor?: string | null }>(

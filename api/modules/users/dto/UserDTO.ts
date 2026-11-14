@@ -15,6 +15,8 @@ export type UserDTO = {
   inviteSentAt?: string | null;
   inviteScheduledFor?: string | null;
   isEmailVerified: boolean;
+  /** Made by the example data, or added in a demo: deleted when the company goes live (DEMO_PLAN.md 4.3). */
+  isSample?: boolean;
   /** A new address waiting for its confirmation link; the login is still `email`. Profile only. */
   pendingEmail?: string | null;
   jobId?: string | null;

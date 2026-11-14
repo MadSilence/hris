@@ -24,6 +24,10 @@
       "label": "Logs",
       "description": "Read the company's journal: who did what, who logged in, who was refused. View only — the page writes nothing."
     },
+    "settingsBilling": {
+      "label": "Billing",
+      "description": "The company's plan: take it live from the demo or the trial, and later pay for it. Manage only."
+    },
     "settingsAutomations": {
       "label": "Automation",
       "description": "Read automation rules and their run log (View); create, publish, enable and pause them (Manage). A rule can only do what its author may do by hand."

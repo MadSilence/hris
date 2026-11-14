@@ -148,7 +148,12 @@ export const settingsGroups: SettingsMenuGroup[] = [
     icon: <Icon icon={ShieldUserIcon} />,
     items: [
       { labelKey: "menu.items.logs", href: "/settings/admin/logs", resources: ["SETTINGS.AUDIT_LOG"] },
-      { labelKey: "menu.items.subscription", href: "/settings/admin/subscription", resources: ["SETTINGS.GENERAL"] },
+      // Going live from the demo or the trial (DEMO_PLAN.md 6.6); the plan and payment join it with Stripe.
+      {
+        labelKey: "menu.items.subscription",
+        href: "/settings/admin/subscription",
+        grants: [{ resource: "SETTINGS.BILLING", action: "MANAGE" }],
+      },
       { labelKey: "menu.items.support", href: "/settings/admin/support", resources: ["SETTINGS.GENERAL"] },
     ],
   },

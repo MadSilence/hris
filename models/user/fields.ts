@@ -106,6 +106,8 @@ export type UsersSearchRequest = {
   filters?: FilterDTO[] | null;
   /** See {@link DraftVisibility}. Omitted means EXCLUDE — the employees, as before. */
   drafts?: DraftVisibility | null;
+  /** The *Sample* filter of a demo (DEMO_PLAN.md 4.3): omitted or ALL shows everyone. */
+  samples?: "ALL" | "ONLY" | "EXCLUDE" | null;
 };
 
 /**
@@ -158,6 +160,8 @@ export type UsersSearchItemDTO = {
   roles?: UserRoleDTO[];
   status?: string;
   isEmailVerified?: boolean;
+  /** Made by the example data, or added in a demo: deleted when the company goes live (DEMO_PLAN.md 4.3). */
+  isSample?: boolean;
   // Current job held by the user (users.job_id → jobs). jobName is the resolved
   // Position label; null means no job is assigned.
   jobId?: string | null;

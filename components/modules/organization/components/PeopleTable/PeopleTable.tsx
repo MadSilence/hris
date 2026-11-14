@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { Checkbox } from "@/components/desact/checkbox";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
+import { SampleBadge } from "@/components/modules/demo";
 import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
@@ -126,7 +127,7 @@ export default function PeopleTable({
       const name =
         [row.firstName, row.lastName].filter(Boolean).join(" ").trim() || row.email || "Unnamed";
 
-      return (
+      const chip = (
         <UserChip
           id={row.id}
           name={name}
@@ -135,6 +136,8 @@ export default function PeopleTable({
           lastName={row.lastName}
         />
       );
+      // A person the company's example made, or added in a demo: deleted when it goes live (DEMO_PLAN.md 4.3).
+      return row.isSample ? <div className="flex items-center gap-2">{chip}<SampleBadge /></div> : chip;
     }
 
     const sysKey = sysKeyFromId(colId);

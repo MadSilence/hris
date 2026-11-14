@@ -2,6 +2,7 @@ import {
   ApiErrorInit,
   BadRequestError,
   ConflictError,
+  NotEntitledError,
   ForbiddenError,
   NotFoundError,
   ServerError,
@@ -252,6 +253,8 @@ export class InternalApiClient {
         }
         throw forbidden;
       }
+      case 402:
+        throw new NotEntitledError(friendly, init);
       case 409:
         throw new ConflictError(friendly, init);
       case 422:

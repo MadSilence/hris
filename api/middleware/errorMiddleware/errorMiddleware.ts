@@ -10,6 +10,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
+  NotEntitledError,
   ValidationError,
 } from "@/components/clients/exceptions";
 
@@ -56,6 +57,7 @@ const getErrorResponse = (e: unknown): ErrorResponse => ({
 const getStatusCode = (e: unknown): HttpStatusCode => {
   if (e instanceof JwtUnauthorizedError || e instanceof UnauthorizedError) return HttpStatusCode.UNAUTHORIZED;
   if (e instanceof ForbiddenError) return HttpStatusCode.FORBIDDEN;
+  if (e instanceof NotEntitledError) return HttpStatusCode.PAYMENT_REQUIRED;
   if (e instanceof NotFoundError) return HttpStatusCode.NOT_FOUND;
   if (e instanceof ConflictError) return HttpStatusCode.CONFLICT;
   if (e instanceof ValidationError) return HttpStatusCode.UNPROCESSABLE_ENTITY;

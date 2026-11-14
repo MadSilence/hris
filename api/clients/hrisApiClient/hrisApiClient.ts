@@ -3,6 +3,7 @@ import {
   BackendUnavailableError,
   BadRequestError,
   ConflictError,
+  NotEntitledError,
   ForbiddenError,
   NotFoundError,
   ServerError,
@@ -297,6 +298,8 @@ export class HrisApiClient {
         throw new ForbiddenError(message, init);
       case 404:
         throw new NotFoundError(message, init);
+      case 402:
+        throw new NotEntitledError(message, init);
       case 409:
         throw new ConflictError(message, init);
       case 422:

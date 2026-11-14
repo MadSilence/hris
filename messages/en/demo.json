@@ -1,0 +1,93 @@
+{
+  "banner": {
+    "demo": "This is a demo company with sample people. {days, plural, =0 {The trial ends today.} one {# day left in the trial.} other {# days left in the trial.}}",
+    "demoNoTrial": "This is a demo company with sample people.",
+    "trial": "{days, plural, =0 {Your trial ends today.} one {# day left in your trial.} other {# days left in your trial.}}",
+    "readOnly": "Your trial has ended. Everything is here and can be exported, but nothing can be changed until the company goes live.",
+    "requested": "You asked to go live. We will activate the company shortly.",
+    "running": "Going live — removing the sample data…",
+    "failed": "Going live stopped part of the way. Open it to try again.",
+    "goLive": "Go live",
+    "open": "Open",
+    "askOwner": "Ask your account owner to go live."
+  },
+  "sample": {
+    "chip": "Sample",
+    "hide": "Hide samples",
+    "warning": "This is a sample person. Sample people are deleted when the company goes live — add your real people after that."
+  },
+  "limits": {
+    "invite": "A demo company sends no invitations. Go live first, then invite your real people.",
+    "import": "A demo company imports no people. Go live first — anybody imported now would be deleted with the samples."
+  },
+  "goLive": {
+    "title": "Go live",
+    "description": "Turn this company into your real one. What you keep stays; the sample people and everything done in the demo are deleted.",
+    "status": {
+      "trial": "Trial — {days, plural, =0 {ends today} one {# day left} other {# days left}}",
+      "readOnly": "Trial ended — read-only",
+      "active": "Active",
+      "comped": "Active"
+    },
+    "empty": {
+      "title": "Your company has no sample data",
+      "body": "Going live only needs the company to be activated. Nothing is deleted."
+    },
+    "list": {
+      "title": "What to keep",
+      "body": "We suggest keeping what you changed or what your own people use. Everything you do not keep is deleted with the samples.",
+      "keep": "Keep",
+      "delete": "Delete",
+      "reason": {
+        "EDITED": "You changed it",
+        "IN_USE": "Used by your people",
+        "SAMPLE": "From the example"
+      },
+      "kind": {
+        "OFFICE": "Offices",
+        "LEGAL_ENTITY": "Legal entities",
+        "ORG_UNIT": "Departments and teams",
+        "JOB_FAMILY": "Job families",
+        "JOB_LEVEL_GROUP": "Level groups",
+        "JOB_LEVEL": "Levels",
+        "JOB": "Positions",
+        "CALENDAR": "Holiday calendars",
+        "ROLE": "Roles",
+        "POLICY": "Time off policies",
+        "PROCESS_TEMPLATE": "Onboarding templates",
+        "AUTOMATION": "Automations"
+      },
+      "keepAll": "Keep all",
+      "deleteAll": "Delete all"
+    },
+    "goes": {
+      "title": "Deleted whatever you choose",
+      "samplePeople": "{count, plural, one {# sample person} other {# sample people}}",
+      "timeOffRequests": "{count, plural, one {# time off request} other {# time off requests}}",
+      "processes": "{count, plural, one {# onboarding or offboarding process} other {# onboarding and offboarding processes}}",
+      "documents": "{count, plural, one {# document} other {# documents}}",
+      "attendanceEntries": "{count, plural, one {# attendance entry} other {# attendance entries}}",
+      "automationRuns": "{count, plural, one {# automation run} other {# automation runs}}",
+      "reviewCycles": "{count, plural, one {# review cycle} other {# review cycles}}",
+      "journalLines": "The whole activity log ({count, plural, one {# line} other {# lines}})"
+    },
+    "request": "Request activation",
+    "confirm": {
+      "title": "Go live?",
+      "body": "Once the company is activated, the sample people and everything done in the demo are deleted for good. This cannot be undone, and there is no way back to the demo.",
+      "confirm": "Request activation",
+      "cancel": "Cancel"
+    },
+    "requestedToast": "Activation requested",
+    "state": {
+      "REQUESTED": "Waiting for activation. We will activate the company and let you know; nothing is deleted before that.",
+      "ACTIVATED": "Activated. Removing the sample data will start in a moment.",
+      "RUNNING": "Removing the sample data…",
+      "DONE": "Your company is live.",
+      "FAILED": "Going live stopped part of the way. Nothing you kept is lost."
+    },
+    "retry": "Try again",
+    "requestedBy": "Requested by {name} on {date}",
+    "notAllowed": "Only the account owner can take the company live."
+  }
+}

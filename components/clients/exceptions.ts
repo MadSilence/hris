@@ -67,6 +67,13 @@ export class UnauthorizedError extends ApiError {}
 
 export class ForbiddenError extends ApiError {}
 
+/**
+ * 402 — the company has not bought this, or its trial has ended (DEMO_PLAN.md 3.4). Not a ForbiddenError on purpose:
+ * that one sends the reader to ask for a permission, and only the company's owner can fix this, by going live. It
+ * never dispatches `hris:forbidden`; the card says what happened, by its code.
+ */
+export class NotEntitledError extends ApiError {}
+
 /** Code for a failure that never reached the backend, so the backend has no code for it. */
 export const BACKEND_UNAVAILABLE_CODE = "E00503";
 

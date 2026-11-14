@@ -74,6 +74,13 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedScopes: COMPANY_ONLY,
       },
       {
+        // DEMO_PLAN.md (P4): going live from the demo or the trial; Stripe's Billing page later.
+        code: "SETTINGS.BILLING",
+        messageKey: "settingsBilling",
+        supportedActions: ["MANAGE"],
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
         code: "SETTINGS.AUTOMATIONS",
         messageKey: "settingsAutomations",
         supportedActions: ["VIEW", "MANAGE"],

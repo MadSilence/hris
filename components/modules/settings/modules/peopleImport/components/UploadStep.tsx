@@ -14,6 +14,8 @@ import type { PeopleImportKind } from "@/api/modules/peopleImport/dto";
 import { triggerExportDownload } from "@/components/modules/settings/shared/ExportDataModal/triggerExportDownload";
 import { useImportKinds, useUploadPeopleImport } from "@/components/modules/settings/modules/peopleImport/hooks";
 import { IMPORT_KINDS, KIND_ORDER } from "./importKinds";
+import { InlineAlert } from "@/components/desact/alert";
+import { useIsDemo } from "@/components/modules/demo";
 
 const MAX_MB = 5;
 
@@ -29,6 +31,8 @@ export const UploadStep: React.FC = () => {
   const upload = useUploadPeopleImport();
   const [chosen, setChosen] = useState<PeopleImportKind | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const tDemo = useTranslations("demo.limits");
+  const isDemo = useIsDemo();
 
   if (kinds.isLoading) {
     return (
@@ -90,7 +94,10 @@ export const UploadStep: React.FC = () => {
         )}
       </div>
 
-      {kind && (
+      {/* R5.5: a demo imports no people — anybody imported would be deleted with the samples. Java refuses it too. */}
+      {kind === "PEOPLE_CREATE" && isDemo && <InlineAlert>{tDemo("import")}</InlineAlert>}
+
+      {kind && !(kind === "PEOPLE_CREATE" && isDemo) && (
         <>
           <div className="rounded-card border border-divider p-5">
             <p className="text-body font-medium text-primary">{t("upload.templateTitle")}</p>

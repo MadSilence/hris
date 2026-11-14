@@ -1,5 +1,7 @@
 "use client";
 
+import { SampleBadge, useIsDemo } from "@/components/modules/demo";
+import { InlineAlert } from "@/components/desact/alert";
 import * as React from "react";
 import { PersonEmailsModal } from "@/components/modules/email/components";
 import { useEffect, useRef, useState } from "react";
@@ -76,6 +78,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const t = useTranslations("organization");
   const formatDisplayDate = useDateFormatter();
   const tCommon = useTranslations("common");
+  const tDemo = useTranslations("demo.sample");
+  const isDemo = useIsDemo();
   const { data: userFetched } = useUser(userId);
   const user = userFetched ?? userProp;
   // The profile's SWR cache is its own (`UserProvider` sets `provider: () => new Map()`), so the
@@ -228,7 +232,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
    */
   const isDraft = user.accountStatus === "DRAFT";
   // Offered while nobody has set a password yet. The profile is the one place a draft is reachable.
-  const mayInvite = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus);
+  // A demo invites nobody (R5.5): its people are samples, and Java refuses it (BIL00010).
+  const mayInvite = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus) && !isDemo;
   const isInvited = user.accountStatus === "INVITED";
   // Preboarding is for somebody with no account; onboarding for somebody who is in the system.
   const mayPreboard = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus);
@@ -327,6 +332,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
                 )}
                 {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
                 <AccountStatusBadge accountStatus={user.accountStatus}/>
+                {user.isSample && <SampleBadge />}
                 {isLocked && <StatusBadge status="inactive" label={t("profile.header.locked")}/>}
                 {!isLocked && isRestricted && <StatusBadge status="inactive" label={t("profile.header.signInPaused")}/>}
               </div>
@@ -518,6 +524,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             onChangedAction={() => refreshUser(user.id)}
           />
         </div>
+
+        {/* A sample person is deleted when the company goes live (R5.4): said before anybody spends time on them. */}
+        {user.isSample && (
+          <InlineAlert className="mt-5">{tDemo("warning")}</InlineAlert>
+        )}
 
         {/* What the reader has to do about this person (B5). Never on your own profile: nothing waits on you there. */}
         {!isOwnProfile && (

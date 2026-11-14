@@ -156,6 +156,10 @@ the trial (`(claude)/technical_documentation/COMPANY_ADDRESSES.md`).
   boundary.** A server action running "on the server" does NOT authorize its caller.
 - Do **not** enforce privileges in the BFF layer. A second copy of the permission model drifts from
   Java. The gating pair is `PermissionGate` (UX) + Java (enforcement) — nothing in between.
+- **The commercial gate is not a third check.** `EntitlementService` / `SubscriptionWriteGuard` in Java answer "has
+  this company paid, is its trial still running" — no actor, no role, the same answer for everyone in the company — and
+  refuse with 402 (`NotEntitledError`), never 403. The demo banner and the hidden invite button are UX on top of it
+  (`(claude)/development_plan/DEMO_PLAN.md`).
 
 ---
 

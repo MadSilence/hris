@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsDemo } from "@/components/modules/demo";
 import { SelectionBar } from "@/components/ui/SelectionBar";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -85,6 +86,9 @@ const PeopleTableContainer: React.FC = () => {
    * the columns, the filters, the sort — applies to whichever segment is open.
    */
   const [showDrafts, setShowDrafts] = useState(false);
+  // A demo's directory can hide its sample people (DEMO_PLAN.md 4.3); a live company has none to hide.
+  const isDemo = useIsDemo();
+  const [hideSamples, setHideSamples] = useState(false);
   const { data: draftCount } = useDraftCount();
 
   const debouncedQ = useDebouncedValue(query.trim(), 300);
@@ -164,8 +168,9 @@ const PeopleTableContainer: React.FC = () => {
       selectedFields: selectedAttrFields.length ? selectedAttrFields : null,
       filters: filters.length ? filters : null,
       drafts: showDrafts ? "ONLY" : null,
+      samples: isDemo && hideSamples ? "EXCLUDE" : null,
     }),
-    [qForApi, sort?.fieldId, sort?.dir, selectedAttrFields, filters, showDrafts]
+    [qForApi, sort?.fieldId, sort?.dir, selectedAttrFields, filters, showDrafts, isDemo, hideSamples]
   );
 
   const {
@@ -485,6 +490,7 @@ const PeopleTableContainer: React.FC = () => {
               showing: showDrafts,
               onChange: setShowDrafts,
             }}
+            samples={isDemo ? { hiding: hideSamples, onChange: setHideSamples } : undefined}
           />
         )}
 
