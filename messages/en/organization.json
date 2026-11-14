@@ -260,7 +260,8 @@
     },
     "reactivate": {
       "title": "Reactivate {name}?",
-      "description": "They become Active again and their termination record is cleared; the activity log keeps it. Their sign-in stays blocked until somebody unblocks it.",
+      "description": "They become Active again and their termination record is cleared; the activity log keeps it.",
+      "descriptionBlocked": "They become Active again and their termination record is cleared; the activity log keeps it. Their sign-in stays blocked until somebody unblocks it.",
       "confirm": "Reactivate",
       "failed": "Could not reactivate this person."
     },

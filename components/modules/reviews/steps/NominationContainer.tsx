@@ -57,7 +57,8 @@ function NominationView({ n }: { n: Nomination }) {
   const facts = [
     n.cycleName,
     due && acting ? t("write.due", { date: medium(due) }) : null,
-    n.approver && !n.canApprove ? t("nomination.approvedBy", { name: n.approver.name }) : null,
+    // A list that stood because nobody approved it names no approver: the line below says nobody did.
+    n.approver && !n.canApprove && !n.autoApproved ? t("nomination.approvedBy", { name: n.approver.name }) : null,
   ].filter(Boolean).join(" · ");
 
   const send = async () => {

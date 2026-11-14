@@ -628,7 +628,11 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
       <ConfirmActionModal
         isOpen={isReactivateOpen}
         title={t("profile.reactivate.title", { name: fullName })}
-        description={t("profile.reactivate.description")}
+        // Termination blocks the account, so after one the sign-in stays blocked; an archived person whose account is
+        // open (a seed, an unblock since) is not told something untrue.
+        description={user.accountStatus === "BLOCKED"
+          ? t("profile.reactivate.descriptionBlocked")
+          : t("profile.reactivate.description")}
         confirmLabel={t("profile.reactivate.confirm")}
         isLoading={isLifecycleBusy}
         errorMessage={lifecycleError}
