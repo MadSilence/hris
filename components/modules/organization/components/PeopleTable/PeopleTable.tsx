@@ -172,6 +172,8 @@ export default function PeopleTable({
           return <span className="text-tertiary">{formatDate(row.probationEnd, formatDisplayDate)}</span>;
         case "termination_date":
           return <span className="text-tertiary">{formatDate(row.terminationDate, formatDisplayDate)}</span>;
+        case "date_of_birth":
+          return <span className="text-tertiary">{formatDate(row.dateOfBirth, formatDisplayDate)}</span>;
 
         // ── References to other entities ────────────────────────────────────────────────
         case "job":

@@ -15,6 +15,7 @@ const SYSTEM_FIELDS = {
   "sys:email": "fields.personEmail",
   "sys:hire_date": "fields.personHireDate",
   "sys:probation_end": "fields.personProbationEnd",
+  "sys:date_of_birth": "fields.personDateOfBirth",
   "sys:employment_type": "fields.personEmploymentType",
   "sys:manager": "fields.personManager",
   "sys:department": "fields.personDepartment",

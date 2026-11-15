@@ -24,6 +24,7 @@ export const FIELDS_WITH_AN_EDITOR = new Set([
   "sys:email",
   "sys:hire_date",
   "sys:probation_end",
+  "sys:date_of_birth",
   "sys:manager",
   "sys:job",
   "sys:office",
@@ -40,6 +41,7 @@ export type SystemDraft = {
   email: string;
   hireDate: string;
   probationEnd: string;
+  dateOfBirth: string;
   manager: PickedUser | null;
   jobId: string;
   officeId: string;
@@ -55,6 +57,7 @@ export const systemDraftOf = (user: User): SystemDraft => ({
   email: user.email ?? "",
   hireDate: toDateInput(user.hireDate),
   probationEnd: toDateInput(user.probationEnd),
+  dateOfBirth: toDateInput(user.dateOfBirth),
   manager: user.manager ? { id: user.manager.id, firstName: user.manager.name } : null,
   jobId: user.jobId ?? NONE_VALUE,
   officeId: user.office?.id ?? NONE_VALUE,
@@ -91,6 +94,10 @@ const FIELD_WRITERS: Record<
   "sys:probation_end": {
     changed: (d, i) => d.probationEnd !== i.probationEnd,
     write: (d) => ({ probationEnd: d.probationEnd }),
+  },
+  "sys:date_of_birth": {
+    changed: (d, i) => d.dateOfBirth !== i.dateOfBirth,
+    write: (d) => ({ dateOfBirth: d.dateOfBirth }),
   },
   "sys:manager": {
     changed: (d, i) => (d.manager?.id ?? null) !== (i.manager?.id ?? null),

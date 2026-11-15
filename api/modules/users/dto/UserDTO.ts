@@ -33,6 +33,8 @@ export type UserDTO = {
   employmentType?: string | null;
   probationEnd?: string | null;
   terminationDate?: string | null;
+  /** `sys:date_of_birth` — HR-only; absent when the reader may not see it. */
+  dateOfBirth?: string | null;
   lastLoginAt: string;
   avatarUrl: string | null;
   createdAt: string;

@@ -322,6 +322,7 @@
     "status": "Status",
     "createdAt": "Created",
     "updatedAt": "Updated",
+    "dateOfBirth": "Date of birth",
     "hireDate": "Hire date",
     "employmentType": "Employment type",
     "probationEnd": "Probation end",
@@ -339,6 +340,7 @@
   },
   "fieldGroups": {
     "account": "Account",
+    "personal": "Personal",
     "employment": "Employment",
     "organization": "Organization"
   }

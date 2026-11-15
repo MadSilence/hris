@@ -98,7 +98,6 @@
   "CS00004": "Invalid week start day (expected a day-of-week name)",
   "CS00005": "Enter the length of a working day between 0:01 and 24:00.",
   "CS00006": "Pick a money field for the hourly rate, or None.",
-  "CS00007": "Pick a date field for birthdays, or None.",
   "CS00008": "Choose who must use two-step login.",
   "CS00009": "A device can be remembered for 0 to 30 days.",
   "CS00010": "A session may go unused for 15 minutes to 30 days.",

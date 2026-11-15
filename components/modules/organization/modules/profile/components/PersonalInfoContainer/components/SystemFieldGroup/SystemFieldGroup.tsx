@@ -161,6 +161,14 @@ export const SystemFieldGroup: React.FC<Props> = ({
             onChange={(value) => set({ probationEnd: value })}
           />
         );
+      case "sys:date_of_birth":
+        return (
+          <DatePicker
+            value={d.dateOfBirth}
+            ariaLabel={t("profile.system.dateOfBirth")}
+            onChange={(value) => set({ dateOfBirth: value })}
+          />
+        );
       case "sys:manager":
         return (
           <UserPickerField
@@ -347,6 +355,9 @@ const SystemFieldValue: React.FC<{ user: User; field: FieldDTO }> = ({ user, fie
       return <>{formatDate(user.probationEnd, formatDisplayDate) ?? <NotSet />}</>;
     case "sys:termination_date":
       return <>{formatDate(user.terminationDate, formatDisplayDate) ?? <NotSet />}</>;
+    // The whole date, year included, to whoever may see the field (P2 of 2026-11-15).
+    case "sys:date_of_birth":
+      return <>{formatDate(user.dateOfBirth, formatDisplayDate) ?? <NotSet />}</>;
     case "sys:job":
       return <>{user.jobName || <NotSet />}</>;
     // Not in FIELDS_WITH_AN_EDITOR on purpose: the grade follows the position, so it changes by

@@ -20,7 +20,6 @@ export class HrisApiHomeService {
     const dto = await hrisApiHomeClient.celebrations(upcoming);
     return {
       ...dto,
-      birthdayFieldName: dto.birthdayFieldName ?? null,
       items: dto.items.map((item) => ({ ...item, avatarUrl: resolveBackendAssetUrl(item.avatarUrl) })),
     };
   }

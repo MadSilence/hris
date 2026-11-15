@@ -56,6 +56,7 @@
       "lastName": "Last name",
       "hireDate": "Hire date",
       "probationEnd": "Probation end",
+      "dateOfBirth": "Date of birth",
       "derivedFrom": "Follows {field}. Change the {fieldLower} to change it."
     },
     "sections": {
@@ -79,6 +80,8 @@
         "unassigned": "Cleared on the profile",
         "bulk": "Bulk edit",
         "imported": "Imported from a file",
+        "hired": "Joined",
+        "promotion": "Promotion",
         "jobArchived": "Position archived",
         "jobDeleted": "Position deleted",
         "familyArchived": "Job family archived",

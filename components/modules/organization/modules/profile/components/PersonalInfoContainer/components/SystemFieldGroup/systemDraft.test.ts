@@ -51,6 +51,16 @@ describe("systemDraft", () => {
     expect(systemPatchOf(user, draft)).toEqual({ lastName: "King" });
   });
 
+  it("sends the date of birth to an editor who holds it, and never to one who does not", () => {
+    const user = person({ dateOfBirth: "1990-04-12" });
+    expect(systemDraftOf(user).dateOfBirth).toBe("1990-04-12");
+    const draft = { ...systemDraftOf(user), dateOfBirth: "1990-04-13" };
+    expect(systemPatchOf(user, draft)).toEqual({});
+
+    const hr = person({ dateOfBirth: "1990-04-12", fieldAccess: { ...EDIT_ALL, "sys:date_of_birth": "EDIT" } });
+    expect(systemPatchOf(hr, draft)).toEqual({ dateOfBirth: "1990-04-13" });
+  });
+
   it("sends a cleared manager as null", () => {
     const user = person();
     expect(systemPatchOf(user, { ...systemDraftOf(user), manager: null })).toEqual({ managerId: null });

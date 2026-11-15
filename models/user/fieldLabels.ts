@@ -12,7 +12,7 @@ type OrganizationT = ReturnType<typeof useTranslations<"organization">>;
  * The product's own names for its system fields, in the reader's language.
  *
  * `GET /users/fields` sends the backend registry's English (`FieldRegistry`: "Hire date", the groups
- * "Account" / "Employment" / "Organization", the status and employment-type options). Those are the product's
+ * "Account" / "Personal" / "Employment" / "Organization", the status and employment-type options). Those are the product's
  * words, not the company's, so they are translated here — once, where the list is read — and every screen that
  * renders a field (the People table's columns and filters, the profile, bulk edit, views) gets them. A field the
  * map does not know, and every attribute a company created, keeps the label it came with (I18N.md § 9).
@@ -25,6 +25,7 @@ export const SYSTEM_FIELD_KEYS = {
   "sys:status": "systemFields.status",
   "sys:created_at": "systemFields.createdAt",
   "sys:updated_at": "systemFields.updatedAt",
+  "sys:date_of_birth": "systemFields.dateOfBirth",
   "sys:hire_date": "systemFields.hireDate",
   "sys:employment_type": "systemFields.employmentType",
   "sys:probation_end": "systemFields.probationEnd",
@@ -44,6 +45,7 @@ export const SYSTEM_FIELD_KEYS = {
 /** The registry's group names, as the backend sends them. */
 const FIELD_GROUP_KEYS = {
   Account: "fieldGroups.account",
+  Personal: "fieldGroups.personal",
   Employment: "fieldGroups.employment",
   Organization: "fieldGroups.organization",
 } as const;

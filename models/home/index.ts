@@ -35,8 +35,8 @@ export type WhosOut = {
 };
 
 export type CelebrationKind = "BIRTHDAY" | "ANNIVERSARY" | "NEW_JOINER";
-/** SHOWN: in the list. HIDDEN: the reader may not see the field for everyone. OFF: no field named. */
-export type CelebrationVisibility = "SHOWN" | "HIDDEN" | "OFF";
+/** SHOWN: in the list. HIDDEN: the reader may not see the field for everyone. */
+export type CelebrationVisibility = "SHOWN" | "HIDDEN";
 
 export type Celebration = {
   kind: CelebrationKind;
@@ -55,8 +55,7 @@ export type Celebration = {
 export type Celebrations = {
   from: string;
   to: string;
-  birthdays: CelebrationVisibility;
-  birthdayFieldName: string | null;
+  /** Anniversaries and joiners (`sys:hire_date`). A birthday has no flag: whether it is listed is its person's choice. */
   hireDates: CelebrationVisibility;
   items: Celebration[];
 };

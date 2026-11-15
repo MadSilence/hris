@@ -61,6 +61,7 @@ export type UpdateUserActionInput = {
   email?: string;
   hireDate?: string;
   probationEnd?: string;
+  dateOfBirth?: string;
   /** `undefined` = untouched, `null` = clear. Same convention for every association below. */
   managerId?: string | null;
   jobId?: string | null;

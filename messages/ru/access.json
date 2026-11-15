@@ -322,6 +322,7 @@
     "status": "Статус",
     "createdAt": "Создан",
     "updatedAt": "Изменён",
+    "dateOfBirth": "Дата рождения",
     "hireDate": "Дата приёма",
     "employmentType": "Тип занятости",
     "probationEnd": "Окончание испытательного срока",
@@ -339,6 +340,7 @@
   },
   "fieldGroups": {
     "account": "Учётная запись",
+    "personal": "Личное",
     "employment": "Работа",
     "organization": "Организация"
   }

@@ -28,6 +28,8 @@ export const POSITION_CHANGE_REASON_LABELS = {
   UNASSIGNED: "profile.positionHistory.reason.unassigned",
   BULK: "profile.positionHistory.reason.bulk",
   IMPORTED: "profile.positionHistory.reason.imported",
+  HIRED: "profile.positionHistory.reason.hired",
+  PROMOTION: "profile.positionHistory.reason.promotion",
   JOB_ARCHIVED: "profile.positionHistory.reason.jobArchived",
   JOB_DELETED: "profile.positionHistory.reason.jobDeleted",
   FAMILY_ARCHIVED: "profile.positionHistory.reason.familyArchived",

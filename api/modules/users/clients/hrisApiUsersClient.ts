@@ -111,6 +111,7 @@ export type UpdateUserPayload = {
   email?: string;
   hireDate?: string;
   probationEnd?: string;
+  dateOfBirth?: string;
   /** The version the profile was opened at. */
   version?: number;
 };

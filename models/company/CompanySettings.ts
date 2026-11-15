@@ -11,8 +11,6 @@ export type CompanySettings = {
   workdayStartMinutes?: number;
   /** The MONEY field Attendance prices logged time from. Null: no money in Attendance. */
   attendanceRateAttributeId?: string | null;
-  /** The DATE field home reads birthdays from. Null: no birthdays on home. */
-  birthdayAttributeId?: string | null;
   /** Sent back by the settings form. 0 while the company has no settings row yet. */
   version?: number;
 };

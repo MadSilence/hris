@@ -24,8 +24,8 @@ export const contentSecurityPolicy = (nonce: string, mode: CspMode): string => {
     // React's development build evaluates code for its error overlay and fast refresh; production never does.
     "script-src": ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(development ? ["'unsafe-eval'"] : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
-    // Avatars and logos come from the app itself; the example people's portraits are absolute URLs elsewhere
-    // (randomuser.me), and a company may later serve files from a storage host — so any https image, never a script.
+    // Avatars, logos and the example people's portraits (`public/sample-avatars/`) come from the app itself; a company
+    // may later serve files from a storage host — so any https image, never a script.
     "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:"],
     // The browser talks only to its own host (`/api/…` — hris/CLAUDE.md); development adds the reload socket.

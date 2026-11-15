@@ -22,6 +22,7 @@
     "personEmail": "Email",
     "personHireDate": "Hire date",
     "personProbationEnd": "Probation end",
+    "personDateOfBirth": "Date of birth",
     "personEmploymentType": "Employment type",
     "personManager": "Manager",
     "personDepartment": "Department",

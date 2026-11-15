@@ -19,5 +19,12 @@ export function resolveBackendAssetUrl(path?: string | null): string | null {
     return path;
   }
 
+  // A site-relative path other than `/uploads/` is the web app's own file — a sample person's portrait in
+  // `public/sample-avatars/` — and is served from this origin. Prefixing the backend broke every portrait the
+  // People table showed (walk of 2026-11-15).
+  if (path.startsWith("/") && !path.startsWith("/uploads/")) {
+    return path;
+  }
+
   return `${HRIS_API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

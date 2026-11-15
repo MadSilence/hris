@@ -56,6 +56,8 @@ export type User = {
   employmentType?: string | null;
   probationEnd?: string | null;
   terminationDate?: string | null;
+  /** `sys:date_of_birth` — the whole date, to whoever may see the field. */
+  dateOfBirth?: string | null;
   lastLoginAt: string;
   avatarUrl: string | null;
   createdAt?: string;

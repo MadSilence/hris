@@ -6,6 +6,8 @@ export type PositionChangeReason =
   | "UNASSIGNED"
   | "BULK"
   | "IMPORTED"
+  | "HIRED"
+  | "PROMOTION"
   | "JOB_ARCHIVED"
   | "JOB_DELETED"
   | "FAMILY_ARCHIVED"

@@ -21,7 +21,7 @@ const GRID =
   "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_48px] items-center gap-4";
 
 /** Display order of the registry's groups; anything unexpected sorts to the end. */
-const GROUP_ORDER = ["Account", "Employment", "Organization"];
+const GROUP_ORDER = ["Account", "Personal", "Employment", "Organization"];
 
 const SOURCE_LABELS = {
   offices: "sources.offices",

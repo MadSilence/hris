@@ -188,6 +188,8 @@ export type UsersSearchItemDTO = {
   employmentType?: string | null;
   probationEnd?: string | null;
   terminationDate?: string | null;
+  /** `sys:date_of_birth` — HR-only. */
+  dateOfBirth?: string | null;
   lastLoginAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
